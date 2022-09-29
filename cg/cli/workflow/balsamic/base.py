@@ -73,8 +73,8 @@ def config_case(
             pon_cnn=pon_cnn,
             dry_run=dry_run,
         )
-    except CgError as e:
-        LOG.error(f"Could not create config: {e}")
+    except CgError as error:
+        LOG.error(f"Could not create config: {error}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not create config: {error}")
@@ -110,11 +110,11 @@ def run(
             return
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as e:
-        LOG.error(f"Could not run analysis: {e}")
+    except CgError as error:
+        LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
-    except Exception as e:
-        LOG.error(f"Could not run analysis: {e}")
+    except Exception as error:
+        LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
 
 
@@ -132,11 +132,11 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool):
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
         analysis_api.report_deliver(case_id=case_id, dry_run=dry_run)
-    except CgError as e:
-        LOG.error(f"Could not create report file: {e}")
+    except CgError as error:
+        LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
-    except Exception as e:
-        LOG.error(f"Could not create report file: {e}")
+    except Exception as error:
+        LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
 
 
@@ -160,8 +160,8 @@ def store_housekeeper(context: CGConfig, case_id: str):
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
-    except CgError as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e}")
+    except CgError as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
@@ -212,8 +212,8 @@ def start(
             run_analysis=run_analysis,
             dry_run=dry_run,
         )
-    except DecompressionNeededError as e:
-        LOG.error(e)
+    except DecompressionNeededError as error:
+        LOG.error(error)
 
 
 @balsamic.command("start-available")
@@ -231,8 +231,8 @@ def start_available(context: click.Context, dry_run: bool = False):
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error("Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error("Unspecified error occurred: %s", error)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

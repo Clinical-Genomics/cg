@@ -103,8 +103,8 @@ def run(
 
     try:
         analysis_api.check_analysis_ongoing(case_id=case_id)
-    except CgError as e:
-        LOG.error(e)
+    except CgError as error:
+        LOG.error(error)
         raise click.Abort
     analysis_api.run_analysis(case_id=case_id, dry_run=dry_run, command_args=command_args)
 
@@ -120,8 +120,8 @@ def run(
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
         LOG.info("%s run started!", analysis_api.pipeline)
-    except CgError as e:
-        LOG.error(e)
+    except CgError as error:
+        LOG.error(error)
         raise click.Abort
 
 
@@ -171,8 +171,8 @@ def start(
             mip_dry_run=mip_dry_run,
             skip_evaluation=skip_evaluation,
         )
-    except (FlowcellsNeededError, DecompressionNeededError) as e:
-        LOG.error(e)
+    except (FlowcellsNeededError, DecompressionNeededError) as error:
+        LOG.error(error)
 
 
 @click.command("start-available")
@@ -190,8 +190,8 @@ def start_available(context: click.Context, dry_run: bool = False):
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error(f"Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred: %s", error)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort

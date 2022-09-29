@@ -166,11 +166,11 @@ def run(
         return
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-    except Exception as e:
+    except Exception as error:
         LOG.warning(
             "Trailblazer warning: Could not track analysis progress for case %s! %s",
             case_id,
-            e.__class__.__name__,
+            error.__class__.__name__,
         )
     try:
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
@@ -213,8 +213,8 @@ def start_available(context: click.Context, dry_run: bool = False):
         except CgError as error:
             LOG.error(error)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error(f"Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred: %s", error)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -288,11 +288,11 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
         unique_id: str = analysis.family.internal_id
         try:
             context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
-        except Exception as e:
+        except Exception as error:
             LOG.error(
                 "Could not upload data for %s to vogue, exception %s",
                 unique_id,
-                e.__class__.__name__,
+                error.__class__.__name__,
             )
             EXIT_CODE: int = EXIT_FAIL
 
