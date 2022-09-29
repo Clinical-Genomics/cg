@@ -33,6 +33,6 @@ class SequencingMethod(StrEnum):
     """Sequencing method types."""
 
     TGS: str = "tgs"
-    WGS: str = "wgs"
     WES: str = "wes"
-    wts: str = "wts"
+    WGS: str = "wgs"
+    WTS: str = "wts"
