@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Tuple
+import glob
 
 import click
 from cg.constants import Pipeline
@@ -64,9 +65,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj)
 
-        # hur ska man autocompleta
+        # get the first path related to a case
+        lims_project += "_*"
+        case_path = Path(glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True)[0])
 
-        return Path(self.root_dir, lims_project)
+        if case_path.exists():
+            LOG.info("Found case path %s ", case_path)
+        return case_path
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
