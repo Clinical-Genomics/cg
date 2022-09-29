@@ -20,6 +20,14 @@ def observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     status_db: Store = context.status_db
     loqusdb_api: LoqusdbAPI = context.loqusdb_api
 
+    if not status_db.family(case_id):
+        LOG.error("Case %s could not be found in StatusDB!", case_id)
+        raise click.Abort
+
+    if not loqusdb_api.case_exists(case_id):
+        LOG.error("Case %s could not be found in LoqusDB!", case_id)
+        raise click.Abort
+
     if dry_run:
         LOG.info("Dry run: this would delete all variants in LoqusDB for case: %s", case_id)
         return

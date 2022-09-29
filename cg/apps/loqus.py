@@ -124,6 +124,14 @@ class LoqusdbAPI:
             file_format=FileFormat.JSON, stream=self.process.stdout
         )
 
+    def case_exists(self, case_id: str) -> bool:
+        """Check if a case exists in LoqusDB"""
+        try:
+            self.get_case(case_id)
+            return True
+        except CaseNotFoundError:
+            return False
+
     def __repr__(self):
 
         return f"LoqusdbAPI(binary={self.loqusdb_binary}," f"config={self.loqusdb_config})"
