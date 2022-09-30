@@ -31,7 +31,7 @@ class LoqusdbAPI:
             self.loqusdb_config = config["loqusdb_wes"]["config_path"]
             self.loqusdb_binary = config["loqusdb_wes"]["binary_path"]
 
-        self.process = Process(self.loqusdb_binary, self.loqusdb_config)
+        self.process = Process(binary=self.loqusdb_binary, config=self.loqusdb_config)
 
     def load(
         self,

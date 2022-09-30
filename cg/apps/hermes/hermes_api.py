@@ -15,7 +15,7 @@ class HermesApi:
     """Class to communicate with hermes"""
 
     def __init__(self, config: dict):
-        self.process = Process(config["hermes"]["binary_path"])
+        self.process = Process(binary=config["hermes"]["binary_path"])
 
     def convert_deliverables(
         self, deliverables_file: Path, pipeline: str, analysis_type: Optional[str] = None
