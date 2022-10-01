@@ -2,7 +2,7 @@
     Module for interacting with crunchy to perform:
         1. Compressing: FASTQ to SPRING
         2. Decompressing: SPRING to FASTQ
-    along with the helper methods
+    along with the helper methods.
 """
 
 import datetime
@@ -33,20 +33,20 @@ LOG = logging.getLogger(__name__)
 
 class CrunchyAPI:
     """
-    API for crunchy
+    API for crunchy.
     """
 
     def __init__(self, config: dict):
-        self.slurm_account: str = config["crunchy"]["slurm"]["account"]
         self.conda_binary: Optional[str] = config["crunchy"]["conda_binary"] or None
         self.crunchy_env: str = config["crunchy"]["slurm"]["conda_env"]
+        self.dry_run: bool = False
         self.mail_user: str = config["crunchy"]["slurm"]["mail_user"]
         self.reference_path: str = config["crunchy"]["cram_reference"]
+        self.slurm_account: str = config["crunchy"]["slurm"]["account"]
         self.slurm_api: SlurmAPI = SlurmAPI()
-        self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
-        """Update dry run"""
+        """Update dry run."""
         LOG.info("Updating compress api")
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
@@ -55,7 +55,7 @@ class CrunchyAPI:
     # Methods to check compression status
     @staticmethod
     def is_compression_pending(compression_obj: CompressionData) -> bool:
-        """Check if compression/decompression has started but not finished"""
+        """Check if compression/decompression has started but not finished."""
         if compression_obj.pending_exists():
             LOG.info("Compression/decompression is pending for %s", compression_obj.run_name)
             return True
@@ -64,7 +64,7 @@ class CrunchyAPI:
 
     @staticmethod
     def is_fastq_compression_possible(compression_obj: CompressionData) -> bool:
-        """Check if FASTQ compression is possible
+        """Check if FASTQ compression is possible.
 
         There are three possible answers to this question:
 
@@ -90,7 +90,7 @@ class CrunchyAPI:
 
     @staticmethod
     def is_spring_decompression_possible(compression_obj: CompressionData) -> bool:
-        """Check if SPRING decompression is possible
+        """Check if SPRING decompression is possible.
 
         There are three possible answers to this question:
 
@@ -117,7 +117,7 @@ class CrunchyAPI:
 
     @staticmethod
     def is_fastq_compression_done(compression_obj: CompressionData) -> bool:
-        """Check if FASTQ compression is finished
+        """Check if FASTQ compression is finished.
 
         This is checked by controlling that the SPRING files that are produced after FASTQ
         compression exists.
@@ -130,7 +130,7 @@ class CrunchyAPI:
 
         Note:
         'updated_at' indicates at what date the SPRING archive was unarchived last.
-        If the SPRING archive has never been unarchived 'updated_at' is None
+        If the SPRING archive has never been unarchived 'updated_at' is None.
 
         """
         LOG.info("Check if FASTQ compression is finished")
@@ -202,6 +202,7 @@ class CrunchyAPI:
 
     @staticmethod
     def create_pending_file(pending_path: Path, dry_run: bool) -> None:
+        """Create a pending flag file."""
         LOG.info("Creating pending flag %s", pending_path)
         if dry_run:
             return
@@ -209,10 +210,7 @@ class CrunchyAPI:
 
     # These are the compression/decompression methods
     def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = "") -> int:
-        """
-        Compress FASTQ files into SPRING by sending to sbatch SLURM
-
-        """
+        """Compress FASTQ files into SPRING by sending to sbatch SLURM. """
         CrunchyAPI.create_pending_file(
             pending_path=compression_obj.pending_path, dry_run=self.dry_run
         )
@@ -227,39 +225,39 @@ class CrunchyAPI:
 
             commands = STAGE_FASTQ_TO_SPRING_COMMANDS.format(
                 conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
+                fastq_first=compression_obj.fastq_first,
+                fastq_second=compression_obj.fastq_second,
+                pending_path=compression_obj.pending_path,
+                spring_path=compression_obj.spring_path,
                 tmp_dir=files.get_tmp_dir(
                     prefix="spring_",
                     suffix="_compress",
                     base=compression_obj.analysis_dir.as_posix(),
                 ),
-                fastq_first=compression_obj.fastq_first,
-                fastq_second=compression_obj.fastq_second,
-                spring_path=compression_obj.spring_path,
-                pending_path=compression_obj.pending_path,
             )
             sbatch_parameters: Sbatch = Sbatch(
-                job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
                 account=self.slurm_account,
-                number_tasks=12,
-                memory=50,
-                log_dir=log_dir.as_posix(),
-                email=self.mail_user,
-                hours=24,
                 commands=commands,
+                email=self.mail_user,
                 error=error_function,
+                hours=24,
+                job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
+                log_dir=log_dir.as_posix(),
+                memory=50,
+                number_tasks=12,
             )
         else:
             commands = FASTQ_TO_SPRING_COMMANDS.format(
                 conda_env=self.crunchy_env,
+                fastq_first=compression_obj.fastq_first,
+                fastq_second=compression_obj.fastq_second,
+                pending_path=compression_obj.pending_path,
+                spring_path=compression_obj.spring_path,
                 tmp_dir=files.get_tmp_dir(
                     prefix="spring_",
                     suffix="_compress",
                     base=compression_obj.analysis_dir.as_posix(),
                 ),
-                fastq_first=compression_obj.fastq_first,
-                fastq_second=compression_obj.fastq_second,
-                spring_path=compression_obj.spring_path,
-                pending_path=compression_obj.pending_path,
             )
             sbatch_parameters: Sbatch = Sbatch(
                 account=self.slurm_account,
@@ -287,10 +285,7 @@ class CrunchyAPI:
         return sbatch_number
 
     def spring_to_fastq(self, compression_obj: CompressionData, sample_id: str = "") -> int:
-        """
-        Decompress SPRING into FASTQ by submitting sbatch script to SLURM
-
-        """
+        """Decompress SPRING into FASTQ by submitting sbatch script to SLURM."""
         CrunchyAPI.create_pending_file(
             pending_path=compression_obj.pending_path, dry_run=self.dry_run
         )
@@ -360,7 +355,7 @@ class CrunchyAPI:
 
     @staticmethod
     def check_if_update_spring(file_date: datetime.date) -> bool:
-        """Check if date is older than FASTQ_DELTA (21 days)"""
+        """Check if date is older than FASTQ_DELTA."""
         delta = file_date + datetime.timedelta(days=FASTQ_DELTA)
         now = datetime.datetime.now()
         if delta > now.date():
