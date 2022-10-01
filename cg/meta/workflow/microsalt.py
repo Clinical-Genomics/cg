@@ -46,10 +46,15 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return MicrosaltFastqHandler
 
     @property
+    def conda_binary(self) -> str:
+        return self.config.microsalt.conda_binary
+
+    @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
                 binary=self.config.microsalt.binary_path,
+                conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 environment=self.config.microsalt.conda_env,
             )
         return self._process
@@ -129,7 +134,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         organism: str = sample_obj.organism.internal_id.strip()
         comment: str = self.get_lims_comment(sample_id=sample_obj.internal_id)
-        has_comment = bool(comment)
 
         if "gonorrhoeae" in organism:
             organism = "Neisseria spp."
@@ -138,6 +142,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         if organism == "VRE":
             reference = sample_obj.organism.reference_genome
+            has_comment = bool(comment)
             if reference == "NC_017960.1":
                 organism = "Enterococcus faecium"
             elif reference == "NC_004668.1":

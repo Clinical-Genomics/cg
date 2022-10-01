@@ -7,7 +7,7 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.fastq import MicrosaltFastqHandler, MutantFastqHandler
+from cg.meta.workflow.fastq import MutantFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.workflow.mutant import MutantSampleConfig
 from cg.store import models
@@ -26,10 +26,15 @@ class MutantAnalysisAPI(AnalysisAPI):
         self.root_dir = config.mutant.root
 
     @property
+    def conda_binary(self) -> str:
+        return self.config.mutant.conda_binary
+
+    @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
                 binary=self.config.mutant.binary_path,
+                conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 environment=self.config.mutant.conda_env,
             )
         return self._process
@@ -211,8 +216,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
-        counter = 0
-        for fastq_data in sorted_files:
+        for counter, fastq_data in enumerate(sorted_files):
             fastq_path = Path(fastq_data["path"])
             fastq_name = self.fastq_handler.create_nanopore_fastq_name(
                 flowcell=fastq_data["flowcell"],
@@ -220,7 +224,6 @@ class MutantAnalysisAPI(AnalysisAPI):
                 filenr=str(counter),
                 meta=self.get_additional_naming_metadata(sample_obj),
             )
-            counter += 1
             destination_path: Path = fastq_dir / fastq_name
             read_paths.append(destination_path)
 
