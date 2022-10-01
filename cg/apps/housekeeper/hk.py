@@ -21,30 +21,30 @@ class HousekeeperAPI:
 
     def __init__(self, config: dict) -> None:
         self._store = Store(config["housekeeper"]["database"], config["housekeeper"]["root"])
-        self.root_dir = config["housekeeper"]["root"]
+        self.root_dir: str = config["housekeeper"]["root"]
 
     def __getattr__(self, name):
         LOG.warning("Called undefined %s on %s, please wrap", name, self.__class__.__name__)
         return getattr(self._store, name)
 
     def new_bundle(self, name: str, created_at: dt.datetime = None) -> models.Bundle:
-        """Create a new file bundle"""
+        """Create a new file bundle."""
         return self._store.new_bundle(name, created_at)
 
     def add_bundle(self, bundle_data) -> Tuple[models.Bundle, models.Version]:
-        """Build a new bundle version of files"""
+        """Build a new bundle version of files."""
         return self._store.add_bundle(bundle_data)
 
     def bundle(self, name: str) -> models.Bundle:
-        """Fetch a bundle"""
+        """Fetch a bundle."""
         return self._store.bundle(name)
 
     def bundles(self) -> List[models.Bundle]:
-        """Fetch bundles"""
+        """Fetch bundles."""
         return self._store.bundles()
 
     def create_new_bundle_and_version(self, name: str) -> models.Bundle:
-        """Create new bundle with version"""
+        """Create new bundle with version."""
         new_bundle: models.Bundle = self.new_bundle(name=name)
         self.add_commit(new_bundle)
         new_version: models.Version = self.new_version(created_at=new_bundle.created_at)
@@ -54,20 +54,20 @@ class HousekeeperAPI:
         return new_bundle
 
     def set_to_archive(self, file: models.File, value: bool) -> None:
-        """Sets the 'to_archive' field of a file"""
-        file.to_archive = value
+        """Sets the 'to_archive' field of a file."""
+        file.to_archive: bool = value
         self.commit()
 
     def new_file(
         self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
     ) -> models.File:
-        """Create a new file"""
+        """Create a new file."""
         if tags is None:
             tags = []
         return self._store.new_file(path, checksum, to_archive, tags)
 
     def get_file(self, file_id: int) -> Optional[models.File]:
-        """Fetch a file based on file id"""
+        """Get a file based on file id."""
         LOG.info("Fetching file %s", file_id)
         file_obj = self._store.file_(file_id)
         if not file_obj:
@@ -76,7 +76,7 @@ class HousekeeperAPI:
         return file_obj
 
     def delete_file(self, file_id: int) -> Optional[models.File]:
-        """Delete a file both from database and disk (if included)"""
+        """Delete a file both from database and disk (if included)."""
         file_obj: models.File = self.get_file(file_id)
         if not file_obj:
             LOG.info("Could not find file %s", file_id)
@@ -93,36 +93,33 @@ class HousekeeperAPI:
         return file_obj
 
     def delete_file_if_related(self, stem: str, hk_file: File):
-        """Delete a file if the full path includes the root"""
+        """Delete a file if the full path includes the root."""
         if stem in hk_file.path:
             self.delete_file(file_id=hk_file.id)
             self._store.commit()
             LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
 
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
-        """Check if there are files for a bundle, tags, and/or version"""
-        files: Optional[Iterable[File]] = self.files(bundle=bundle, tags=tags, version=version)
-        if not any(files):
-            return False
-        return True
+        """Check if there are files for a bundle, tags, and/or version."""
+        return any(self.files(bundle=bundle, tags=tags, version=version))
 
     def add_file(
         self, path, version_obj: models.Version, tags: list, to_archive: bool = False
     ) -> models.File:
-        """Add a file to the database"""
+        """Add a file to the database."""
         if isinstance(tags, str):
-            tags = [tags]
+            tags: List[str] = [tags]
         for tag_name in tags:
             if not self.tag(tag_name):
                 self.add_tag(tag_name)
 
-        new_file = self.new_file(
+        new_file: models.File = self.new_file(
             path=str(Path(path).absolute()),
             to_archive=to_archive,
             tags=[self.tag(tag_name) for tag_name in tags],
         )
 
-        new_file.version = version_obj
+        new_file.version: models.Version = version_obj
         return new_file
 
     def files(
@@ -133,16 +130,16 @@ class HousekeeperAPI:
         version: int = None,
         path: str = None,
     ) -> Query:
-        """Fetch files"""
+        """Fetch files."""
         return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
 
     @staticmethod
     def fetch_file_from_version(
         version_obj: models.Version, tags: Set[str]
     ) -> Optional[models.File]:
-        """Fetch file that includes at least all tags in 'tags'
+        """Fetch file that includes at least all tags in 'tags'.
 
-        Return None if no file could be found
+        Return None if no file could be found.
         """
         LOG.debug("Fetch files from version with tags %s", tags)
         for file_obj in version_obj.files:
@@ -154,21 +151,18 @@ class HousekeeperAPI:
         LOG.info("Could not find any files matching the tags")
 
     def rollback(self):
-        """Wrap method in Housekeeper Store"""
+        """Wrap method in Housekeeper Store."""
         return self._store.rollback()
 
     def session_no_autoflush(self):
-        """Wrap property in Housekeeper Store"""
+        """Wrap property in Housekeeper Store."""
         return self._store.session.no_autoflush
 
     def get_files(
         self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> Query:
-        """Fetch all the files in housekeeper, optionally filtered by bundle and/or tags and/or
-        version
-
-        Returns:
-            iterable(hk.Models.File)
+    ) -> Iterable[models.File]:
+        """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
+        version.
         """
         return self._store.files(bundle=bundle, tags=tags, version=version)
 
@@ -180,7 +174,7 @@ class HousekeeperAPI:
         tags: Optional[list] = None,
     ) -> List[Path]:
         """Checks if any of the files in the provided list are already added to the provided
-        bundle. Returns a list of files that have not been added"""
+        bundle. Returns a list of files that have not been added."""
         for file in self.get_files(bundle=bundle_name, tags=tags, version=last_version.id):
             if Path(file.path) in file_paths:
                 file_paths.remove(Path(file.path))
@@ -194,13 +188,12 @@ class HousekeeperAPI:
         root_dir: Path, version_obj: models.Version, file_obj: models.File
     ) -> Path:
         """Generate the path to a file that should be included.
-        If the version dir does not exist, create a new version dir in root dir
+        If the version dir does not exist, create a new version dir in root dir.
         """
-        # generate root directory
-        version_root_dir = root_dir / version_obj.relative_root_dir
+        version_root_dir: Path = Path(root_dir, version_obj.relative_root_dir)
         version_root_dir.mkdir(parents=True, exist_ok=True)
         LOG.info("Created new bundle version dir: %s", version_root_dir)
-        return version_root_dir / Path(file_obj.path).name
+        return Path(version_root_dir, Path(file_obj.path).name)
 
     def include_file(self, file_obj: models.File, version_obj: models.Version) -> models.File:
         """Call the include version function to import related assets."""
@@ -219,11 +212,11 @@ class HousekeeperAPI:
     def new_version(
         self, created_at: dt.datetime, expires_at: dt.datetime = None
     ) -> models.Version:
-        """Create a new bundle version"""
+        """Create a new bundle version."""
         return self._store.new_version(created_at, expires_at)
 
     def version(self, bundle: str, date: dt.datetime) -> models.Version:
-        """Fetch a version"""
+        """Fetch a version."""
         LOG.info("Fetch version %s from bundle %s", date, bundle)
         return self._store.version(bundle, date)
 
@@ -238,7 +231,7 @@ class HousekeeperAPI:
         )
 
     def get_latest_bundle_version(self, bundle_name: str) -> Optional[models.Version]:
-        """Fetch the latest version of a hk bundle."""
+        """Get the latest version of a Housekeeper bundle."""
         last_version: models.Version = self.last_version(bundle_name)
         if not last_version:
             LOG.warning("No bundle found for %s in housekeeper", bundle_name)
@@ -248,7 +241,7 @@ class HousekeeperAPI:
 
     def get_create_version(self, bundle: str) -> models.Version:
         """Returns the latest version of a bundle if it exists. If not creates a bundle and
-        returns its version"""
+        returns its version."""
         last_version: models.Version = self.last_version(bundle=bundle)
         if not last_version:
             LOG.info("Creating bundle for sample %s in housekeeper", bundle)
@@ -264,22 +257,22 @@ class HousekeeperAPI:
         return last_version
 
     def new_tag(self, name: str, category: str = None):
-        """Create a new tag"""
+        """Create a new tag."""
         return self._store.new_tag(name, category)
 
     def add_tag(self, name: str, category: str = None) -> models.Tag:
-        """Add a tag to the database"""
+        """Add a tag to the database."""
         tag_obj = self._store.new_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
     def tag(self, name: str) -> models.Tag:
-        """Fetch a tag"""
+        """Fetch a tag."""
         return self._store.tag(name)
 
     @staticmethod
     def get_tag_names_from_file(file: models.File) -> List[str]:
-        """Fetch tag names for a file"""
+        """Fetch tag names for a file."""
         return [tag.name for tag in file.tags]
 
     def include(self, version_obj: models.Version):
@@ -288,20 +281,20 @@ class HousekeeperAPI:
         version_obj.included_at = dt.datetime.now()
 
     def add_commit(self, *args, **kwargs):
-        """Wrap method in Housekeeper Store"""
+        """Wrap method in Housekeeper Store."""
         return self._store.add_commit(*args, **kwargs)
 
     def commit(self):
-        """Wrap method in Housekeeper Store"""
+        """Wrap method in Housekeeper Store."""
         return self._store.commit()
 
-    def get_root_dir(self):
-        """Returns the root dir of Housekeeper"""
+    def get_root_dir(self) -> str:
+        """Returns the root dir of Housekeeper."""
         return self.root_dir
 
     @staticmethod
-    def checksum(path):
-        """Calculate the checksum"""
+    def checksum(path) -> str:
+        """Calculate the checksum."""
         return hk_checksum(path)
 
     def initialise_db(self):
@@ -309,22 +302,24 @@ class HousekeeperAPI:
         self._store.create_all()
 
     def destroy_db(self):
-        """Drop all tables in the store"""
+        """Drop all tables in the store."""
         self._store.drop_all()
 
     def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
+        """Adds amd includes a file in the latest version of a case bundle."""
         version_obj: Version = self.last_version(case_id)
         if not version_obj:
-            LOG.info("Family ID: %s not found in housekeeper", case_id)
+            LOG.info("Case ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
         file_obj = self.add_file(version_obj=version_obj, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version_obj, file_obj=file_obj)
         self.commit()
 
     def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:
-        version_obj: Version = self.last_version(case_id)
+        """Find a file in the latest version of a case bundle."""
+        version_obj: models.Version = self.last_version(case_id)
         if not version_obj:
-            LOG.info("Family ID: %s not found in housekeeper", case_id)
+            LOG.info("Case ID: %s not found in housekeeper", case_id)
             raise HousekeeperVersionMissingError
         file: File = self.files(version=version_obj.id, tags=tags).first()
         return file
