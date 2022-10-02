@@ -201,9 +201,9 @@ def fixture_cg_config_object(base_config_dict: dict) -> CGConfig:
     return CGConfig(**base_config_dict)
 
 
-@pytest.fixture
-def chanjo_config_dict() -> dict:
-    """Chanjo configs."""
+@pytest.fixture(name="chanjo_config")
+def fixture_chanjo_config() -> Dict[str, Dict[str, str]]:
+    """Chanjo configs"""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
