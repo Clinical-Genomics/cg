@@ -1,9 +1,12 @@
 """Test how the api handles files"""
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import HK_FASTQ_TAGS
+from tests.mocks.hk_mock import MockHousekeeperAPI
+
+from housekeeper.store import models as hk_models
 
 
 def test_new_file(housekeeper_api, bed_file, small_helpers):
@@ -128,8 +131,8 @@ def test_get_included_path(populated_housekeeper_api, case_id):
     assert included_path == root_dir / version_obj.relative_root_dir / Path(file_obj.path).name
 
 
-def test_get_include_file(populated_housekeeper_api, case_id):
-    """Test to get the included path for a file"""
+def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id: str):
+    """Test to get the included path for a file."""
     # GIVEN a populated housekeeper api and the root dir
     root_dir = Path(populated_housekeeper_api.get_root_dir())
     version_obj = populated_housekeeper_api.last_version(case_id)
@@ -150,20 +153,20 @@ def test_get_include_file(populated_housekeeper_api, case_id):
 
 def test_check_bundle_files(
     case_id: str,
-    a_date,
-    populated_housekeeper_api,
-    hk_version_obj,
+    timestamp: datetime,
+    populated_housekeeper_api: MockHousekeeperAPI,
+    hk_version_obj: hk_models.Version,
     fastq_file: Path,
     sample_id: str,
     bed_file: Path,
 ):
-    """Test to see if the function correctly identifies a file that is present and returns a lis without it"""
+    """Test to see if the function correctly identifies a file that is present and returns a lis without it."""
     # GIVEN a housekeeper version with a file
-    version = populated_housekeeper_api.version(bundle=case_id, date=a_date)
+    version = populated_housekeeper_api.version(bundle=case_id, date=timestamp)
 
     # WHEN attempting to add two files, one existing and one new
     files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
-        file_paths=[Path(bed_file), fastq_file],
+        file_paths=[bed_file, fastq_file],
         bundle_name=case_id,
         last_version=version,
     )
@@ -172,8 +175,8 @@ def test_check_bundle_files(
     assert files_to_add == [fastq_file]
 
 
-def test_get_tag_names_from_file(populated_housekeeper_api: HousekeeperAPI):
-    """Test get tag names on a file"""
+def test_get_tag_names_from_file(populated_housekeeper_api: MockHousekeeperAPI):
+    """Test get tag names on a file."""
     # GIVEN a housekeeper api with a file
     file_obj = populated_housekeeper_api.files().first()
     assert file_obj.tags

@@ -1,50 +1,61 @@
-"""Test how the api handles bundles"""
+"""Test how the api handles bundles."""
+from typing import Dict, Any
+
 from datetime import datetime
 
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.small_helpers import SmallHelpers
 
-def test_new_bundle(housekeeper_api, small_helpers):
-    """Test to create a bundle with the housekeeper api"""
-    # GIVEN a housekeeper api without bundles
+
+def test_new_bundle(
+    case_id: str,
+    housekeeper_api: MockHousekeeperAPI,
+    small_helpers: SmallHelpers,
+    timestamp_now: datetime,
+):
+    """Test to create a bundle with the Housekeeper API."""
+    # GIVEN a Housekeeper API without bundles
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
+
     # GIVEN some bundle information
-    bundle_name = "a bundle"
-    created = datetime.now()
+
     # WHEN creating a new bundle
-    bundle_obj = housekeeper_api.new_bundle(name=bundle_name, created_at=created)
+    bundle_obj = housekeeper_api.new_bundle(name=case_id, created_at=timestamp_now)
 
     # THEN assert that the bundle object got the correct name
-    assert bundle_obj.name == bundle_name
+    assert bundle_obj.name == case_id
     # THEN assert that no bundle was added to the database
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
 
 
-def test_add_bundle(housekeeper_api, bed_file, small_helpers):
-    """Test to add a housekeeper bundle"""
+def test_add_bundle(
+    hk_bundle_data: Dict[str, Any],
+    case_id: str,
+    housekeeper_api: MockHousekeeperAPI,
+    small_helpers: SmallHelpers,
+):
+    """Test to add a Housekeeper bundle."""
     # GIVEN a empty housekeeper api
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
     # GIVEN some bundle information
-    bundle_name = "a bundle"
-    created = datetime.now()
-    bundle_data = {
-        "name": bundle_name,
-        "created": created,
-        "files": [{"path": bed_file, "archive": False, "tags": ["bed"]}],
-    }
+
     # WHEN adding the bundle
-    bundle_obj, _ = housekeeper_api.add_bundle(bundle_data)
+    bundle_obj, _ = housekeeper_api.add_bundle(hk_bundle_data)
 
     # THEN assert that no bundle was added to the database
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
     # THEN assert that the bundle object got the correct name
-    assert bundle_obj.name == bundle_name
+    assert bundle_obj.name == case_id
 
 
-def test_add_bundle_and_commit(housekeeper_api, minimal_bundle_obj, small_helpers):
+def test_add_bundle_and_commit(
+    housekeeper_api: MockHousekeeperAPI, minimal_bundle_obj, small_helpers
+):
     """Test to add a housekeeper bundle and make it persistent"""
     # GIVEN a empty housekeeper api and a bundle object
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 0
 
-    # WHEN commiting the bundle
+    # WHEN committing the bundle
     housekeeper_api.add_commit(minimal_bundle_obj)
 
     # THEN assert that a bundle was added to the database

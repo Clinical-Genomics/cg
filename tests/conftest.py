@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generator, Dict, List
+from typing import Generator, Dict, List, Any
 
 import pytest
 
@@ -33,6 +33,8 @@ from .mocks.scout import MockScoutAPI
 from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
+
+from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -550,8 +552,8 @@ def fixture_bcf_file(apps_dir: Path) -> Path:
 
 @pytest.fixture(scope="function", name="bed_file")
 def fixture_bed_file(analysis_dir) -> str:
-    """Get the path to a bed file file."""
-    return str(analysis_dir / "sample_coverage.bed")
+    """Return the path to a bed file file."""
+    return Path(analysis_dir, "sample_coverage.bed")
 
 
 # Helper fixtures
@@ -617,13 +619,13 @@ def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) -> dict:
-    """Get some bundle data for housekeeper."""
+def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: dt.datetime) -> Dict[str, Any]:
+    """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
-        "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
+        "files": [{"path": bed_file.as_posix(), "archive": False, "tags": ["bed", "sample"]}],
     }
 
 
@@ -703,7 +705,7 @@ def fixture_populated_housekeeper_api(
 @pytest.fixture(scope="function", name="hk_version_obj")
 def fixture_hk_version_obj(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
-) -> MockHousekeeperAPI:
+) -> hk_models.Version:
     """Get a housekeeper version object."""
     return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
