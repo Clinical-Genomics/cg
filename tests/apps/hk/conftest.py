@@ -1,4 +1,5 @@
 """Fixtures for the housekeeper tests"""
+from typing import Any
 
 import datetime
 
@@ -62,12 +63,10 @@ def fixture_tags() -> list:
 
 
 @pytest.fixture(name="bundle_data")
-def fixture_bundle_data(a_date, case_id, bed_file, tags) -> dict:
-    """Return a dictionary with bundle info in the correct format"""
-    _bundle_data = {
+def fixture_bundle_data(a_date, case_id, bed_file, tags) -> dict[str, Any]:
+    """Return a dictionary with bundle data."""
+    return {
         "name": case_id,
         "created": a_date,
         "files": [{"path": bed_file, "archive": False, "tags": tags}],
     }
-
-    return _bundle_data

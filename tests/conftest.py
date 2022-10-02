@@ -42,21 +42,25 @@ LOG = logging.getLogger(__name__)
 
 @pytest.fixture(name="slurm_account")
 def fixture_slurm_account() -> str:
+    """Return a SLURM account."""
     return "super_account"
 
 
 @pytest.fixture(name="user_name")
 def fixture_user_name() -> str:
+    """Return a user name."""
     return "Paul Anderson"
 
 
 @pytest.fixture(name="user_mail")
 def fixture_user_mail() -> str:
+    """Return a user email."""
     return "paul@magnolia.com"
 
 
 @pytest.fixture(name="email_adress")
 def fixture_email_adress() -> str:
+    """Return an email adress."""
     return "james.holden@scilifelab.se"
 
 
@@ -64,6 +68,12 @@ def fixture_email_adress() -> str:
 def fixture_case_id() -> str:
     """Return a case id."""
     return "yellowhog"
+
+
+@pytest.fixture(name="another_case_id")
+def fixture_another_case_id() -> str:
+    """Return another case id."""
+    return "another_case_id"
 
 
 @pytest.fixture(name="sample_id")
@@ -91,7 +101,9 @@ def fixture_customer_id() -> str:
 
 
 @pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) -> dict:
+def fixture_analysis_family_single(
+    case_id: str, family_name: str, sample_id: str, ticket: str
+) -> dict:
     """Build an example case."""
     return {
         "name": family_name,
@@ -104,7 +116,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
             {
                 "name": "proband",
                 "sex": Gender.MALE,
-                "internal_id": "ADM1",
+                "internal_id": sample_id,
                 "status": "affected",
                 "original_ticket": ticket,
                 "reads": 5000000000,
@@ -115,8 +127,8 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
 
 
 @pytest.fixture(scope="function", name="analysis_family")
-def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict:
-    """Return a dictionary with information from a analysis case"""
+def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket: str) -> dict:
+    """Return a dictionary with information from a analysis case."""
     return {
         "name": family_name,
         "internal_id": case_id,
@@ -128,7 +140,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
             {
                 "name": "child",
                 "sex": Gender.MALE,
-                "internal_id": "ADM1",
+                "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
@@ -163,7 +175,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
 
 @pytest.fixture(name="base_config_dict")
 def fixture_base_config_dict() -> dict:
-    """Returns the basic configs necessary for running CG"""
+    """Returns the basic configs necessary for running CG."""
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
@@ -258,7 +270,6 @@ def madeline_api(madeline_output) -> MockMadelineAPI:
     """madeline_api fixture."""
     _api = MockMadelineAPI()
     _api.set_outpath(madeline_output)
-
     return _api
 
 
@@ -312,8 +323,7 @@ def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
 @pytest.fixture(scope="function", name="project_dir")
 def fixture_project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
-    my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
+    yield Path(tmpdir_factory.mktemp("data"))
 
 
 @pytest.fixture(scope="function")
@@ -331,14 +341,13 @@ def fixture_non_existing_file_path(project_dir: Path) -> Path:
 @pytest.fixture(name="content")
 def fixture_content() -> str:
     """Return some content for a file."""
-    _content = (
+    return (
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
         " ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ull"
         "amco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehende"
         "rit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaec"
         "at cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
     )
-    return _content
 
 
 @pytest.fixture(name="filled_file")
@@ -445,14 +454,13 @@ def fixture_run_name() -> str:
 @pytest.fixture(scope="function", name="original_fastq_data")
 def fixture_original_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
     """Return a compression object with a path to the original fastq files."""
-
-    return CompressionData(fastq_dir / run_name)
+    return CompressionData(Path(fastq_dir, run_name))
 
 
 @pytest.fixture(scope="function", name="fastq_stub")
 def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
     """Creates a path to the base format of a fastq run."""
-    return project_dir / run_name
+    return Path(project_dir, run_name)
 
 
 @pytest.fixture(scope="function", name="compression_object")
@@ -512,26 +520,32 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
 
 @pytest.fixture(name="flowcell_full_name")
 def fixture_flowcell_full_name() -> str:
+    """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(name="flowcell_name")
 def fixture_flowcell_name() -> str:
+    """Return flow cell name."""
     return "HVKJCDRXX"
 
 
 @pytest.fixture(name="another_flow_cell_name")
 def fixture_another_flow_cell_name() -> str:
+    """Return another flow cell name."""
     return "HF57HDRXY"
 
 
-# Unknown file fixtures
+# Genotype file fixture
 
 
 @pytest.fixture(name="bcf_file")
 def fixture_bcf_file(apps_dir: Path) -> Path:
-    """Return the path to a bcf file."""
-    return apps_dir / "gt" / "yellowhog.bcf"
+    """Return the path to a BCF file."""
+    return Path(apps_dir, "gt", "yellowhog.bcf")
+
+
+# Unknown file fixtures
 
 
 @pytest.fixture(scope="function", name="bed_file")
