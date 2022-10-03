@@ -57,7 +57,7 @@ class BundleAlreadyAddedError(CgError):
 
 class CaseNotFoundError(CgError):
     """
-    Exception raised when a case is not found in loqusdb.
+    Exception raised when a case is not found in Loqusdb.
     """
 
 

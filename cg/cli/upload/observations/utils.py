@@ -16,18 +16,21 @@ from cg.models.cg_config import CGConfig
 LOG = logging.getLogger(__name__)
 
 
-def get_observations_case(context: CGConfig, case_id: str) -> models.Family:
+def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> models.Family:
     """Return a verified Loqusdb case."""
 
-    case: models.Family = context.status_db.family(case_id)
+    status = context.status_db
+    case: models.Family = status.family(case_id)
     if not case or case.data_analysis not in LOQUSDB_SUPPORTED_PIPELINES:
         LOG.error("Invalid case ID. Retrieving available cases for Loqusdb actions.")
-        cases_to_upload: Query = context.status_db.observations_to_upload()
-        if not cases_to_upload:
+        cases_to_process: Query = (
+            status.observations_to_upload() if upload else status.observations_uploaded()
+        )
+        if not cases_to_process:
             LOG.info("There are no valid cases to be processed by Loqusdb")
         else:
             LOG.info("Provide one of the following case IDs: ")
-            for case in cases_to_upload:
+            for case in cases_to_process:
                 LOG.info(f"{case.internal_id} ({case.data_analysis})")
 
         raise CaseNotFoundError
@@ -36,9 +39,9 @@ def get_observations_case(context: CGConfig, case_id: str) -> models.Family:
 
 
 def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.Family:
-    """Return a verified case ready to be uploaded to LoqusDB."""
+    """Return a verified case ready to be uploaded to Loqusdb."""
 
-    case: models.Family = get_observations_case(context, case_id)
+    case: models.Family = get_observations_case(context, case_id, upload=True)
     if not case.customer.loqus_upload:
         LOG.error(
             f"Customer {case.customer.internal_id} is not whitelisted for upload to Loqusdb. Canceling upload for "
@@ -49,6 +52,20 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
     if not LinkHelper.is_all_samples_non_tumour(case.links):
         LOG.error(f"Case {case.internal_id} has tumor samples. Cancelling its upload.")
         raise LoqusdbUploadError
+
+    return case
+
+
+def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.Family:
+    """Return a verified case ready to be deleted from Loqusdb."""
+
+    loqusdb_api: LoqusdbAPI = context.loqusdb_api
+    case: models.Family = get_observations_case(context, case_id, upload=False)
+    if not loqusdb_api.case_exists(case_id):
+        LOG.error(
+            f"Case {case.internal_id} could not be found in Loqusdb",
+        )
+        raise CaseNotFoundError
 
     return case
 

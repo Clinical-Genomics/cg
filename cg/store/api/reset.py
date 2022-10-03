@@ -13,6 +13,6 @@ class ResetHandler:
 
         case_obj = self.family(case_id)
 
-        LOG.info("Resetting loqus ID in StatusDB for case: %s", case_id)
+        LOG.info("Resetting Loqus ID in StatusDB for case: %s", case_id)
         for link in case_obj.links:
             link.sample.loqusdb_id = None
