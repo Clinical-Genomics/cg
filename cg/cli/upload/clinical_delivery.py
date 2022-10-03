@@ -96,8 +96,6 @@ def auto_fastq(context: click.Context, dry_run: bool):
                     dt.datetime.now(),
                 )
                 analysis_obj.uploaded_at = dt.datetime.now()
-                if not dry_run:
-                    status_db.commit()
             else:
                 LOG.warning(
                     "Upload to clinical-delivery for %s has already started, skipping",
@@ -106,5 +104,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
             continue
         case: models.Family = analysis_obj.family
         LOG.info("Uploading family: %s", case.internal_id)
+        analysis_obj.upload_started_at = dt.datetime.now()
         context.invoke(clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
-        status_db.commit()
+        if not dry_run:
+            status_db.commit()
