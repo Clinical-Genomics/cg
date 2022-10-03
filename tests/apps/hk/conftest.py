@@ -1,6 +1,6 @@
 """Fixtures for the housekeeper tests"""
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import datetime
 
@@ -46,7 +46,19 @@ def fixture_minimal_bundle_obj(
     return housekeeper_api.new_bundle(name=case_id, created_at=timestamp)
 
 
+@pytest.fixture(name="hk_tag")
+def fixture_hk_tag() -> str:
+    """Return a Housekeeper tag."""
+    return "bed"
+
+
 @pytest.fixture(name="tags")
-def fixture_tags() -> list:
-    """Return a list of housekeeper tags"""
+def fixture_tags() -> List[str]:
+    """Return a list of Housekeeper tags."""
     return ["bed"]
+
+
+@pytest.fixture(name="not_existing_hk_tag")
+def fixture_not_existing_hk_tag() -> str:
+    """Return a non existing Housekeeper tag."""
+    return "this_tag_should_not_exist_in_database"
