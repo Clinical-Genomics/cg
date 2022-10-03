@@ -1,6 +1,5 @@
 """Tests for reset part of the store API"""
-from cg.constants.subject import Gender
-from cg.store import Store, models
+from cg.store import Store
 
 
 def test_reset_loqusdb_observation_ids(store: Store, helpers):
