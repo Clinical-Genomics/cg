@@ -61,7 +61,7 @@ class FastqSubmitter(Submitter):
             data_analysis=Pipeline(Pipeline.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.ANALYSIS_FILES),
             name="_".join([sample_obj.name, "MAF"]),
-            panels=None,
+            panels=["OMIM-AUTO"],
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
