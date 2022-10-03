@@ -1,5 +1,7 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
+import typing
+
 import datetime as dt
 import logging
 import os
@@ -601,7 +603,7 @@ def fixture_bcf_file(apps_dir: Path) -> Path:
 
 
 @pytest.fixture(scope="function", name="bed_file")
-def fixture_bed_file(analysis_dir) -> str:
+def fixture_bed_file(analysis_dir) -> Path:
     """Return the path to a bed file."""
     return Path(analysis_dir, "sample_coverage.bed")
 
@@ -774,7 +776,7 @@ def fixture_crunchy_api():
 @pytest.fixture(scope="function", name="analysis_store")
 def fixture_analysis_store(
     base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers: StoreHelpers
-) -> Store:
+) -> Generator[Store, None, None]:
     """Setup a store instance for testing analysis API."""
     helpers.ensure_case_from_dict(
         base_store, case_info=analysis_family, app_tag=wgs_application_tag
@@ -783,7 +785,7 @@ def fixture_analysis_store(
 
 
 @pytest.fixture(scope="function", name="analysis_store_trio")
-def fixture_analysis_store_trio(analysis_store: Store) -> Store:
+def fixture_analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
     """Setup a store instance with a trio loaded for testing analysis API."""
     yield analysis_store
 
