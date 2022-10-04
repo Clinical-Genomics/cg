@@ -7,7 +7,7 @@ from cgmodels.cg.constants import Pipeline
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.cli.upload.observations.utils import get_observations_case_to_delete
-from cg.cli.workflow.commands import OPTION_LOQUSDB_SUPPORTED_PIPELINES
+from cg.cli.workflow.commands import OPTION_LOQUSDB_SUPPORTED_PIPELINES, ARGUMENT_CASE_ID
 from cg.exc import CaseNotFoundError
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command()
+@ARGUMENT_CASE_ID
 @SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_obj
@@ -24,7 +25,6 @@ def observations(context: CGConfig, case_id: str, yes: bool, dry_run: bool):
     """Delete a case from Loqusdb and reset the Loqus ID in StatusDB."""
 
     status_db: Store = context.status_db
-    loqusdb_api: LoqusdbAPI = context.loqusdb_api
     case: models.Family = get_observations_case_to_delete(context, case_id)
 
     if dry_run:
@@ -33,7 +33,7 @@ def observations(context: CGConfig, case_id: str, yes: bool, dry_run: bool):
 
     LOG.info(f"This will delete all variants in Loqusdb for case: {case.internal_id}")
     if yes or click.confirm("Do you want to continue?", abort=True):
-        loqusdb_api.delete_case(case_id=case_id)
+        context.loqusdb_api.delete_case(case_id=case_id)
         status_db.reset_loqusdb_observation_ids(case_id)
         status_db.commit()
         LOG.info(f"Removed observations for case: {case.internal_id}")
