@@ -28,7 +28,7 @@ def observations(context: CGConfig, case_id: str, yes: bool, dry_run: bool):
     case: models.Family = get_observations_case_to_delete(context, case_id)
 
     if dry_run:
-        LOG.info(f"Dry run: this would delete all variants in LoqusDB for case: {case.internal_id}")
+        LOG.info(f"Dry run: this would delete all variants in Loqusdb for case: {case.internal_id}")
         return
 
     LOG.info(f"This will delete all variants in Loqusdb for case: {case.internal_id}")
