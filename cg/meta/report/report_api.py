@@ -273,11 +273,11 @@ class ReportAPI(MetaAPI):
 
             samples.append(
                 SampleModel(
-                    name=lims_sample.get("name"),
+                    name=sample.name,
                     id=sample.internal_id,
                     ticket=sample.original_ticket,
-                    gender=lims_sample.get("sex"),
-                    source=lims_sample.get("source"),
+                    gender=sample.sex,
+                    source=lims_sample.get("source") if lims_sample else None,
                     tumour=sample.is_tumour,
                     application=self.get_sample_application_data(lims_sample),
                     methods=self.get_sample_methods_data(sample.internal_id),
@@ -289,7 +289,7 @@ class ReportAPI(MetaAPI):
 
         return samples
 
-    def get_lims_sample(self, sample_id: str) -> dict:
+    def get_lims_sample(self, sample_id: str) -> Optional[dict]:
         """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
 
         lims_sample = dict()
@@ -315,7 +315,7 @@ class ReportAPI(MetaAPI):
             limitations=application.limitations,
             accredited=application.is_accredited,
             external=application.is_external,
-        )
+        ) if application else ApplicationModel()
 
     @staticmethod
     def get_unique_applications(samples: List[SampleModel]) -> List[ApplicationModel]:
@@ -392,7 +392,7 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_data_analysis_type(self, case: models.Family) -> str:
+    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
         raise NotImplementedError

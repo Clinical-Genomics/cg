@@ -119,7 +119,7 @@
                   {% if "panelsekvensering" in case.data_analysis.type %}
                     <td>
                      {{ sample.metadata.bait_set }}
-                     {% if sample.metadata.bait_set_version != 'N/A' %}
+                     {% if sample.metadata.bait_set != 'N/A' and sample.metadata.bait_set_version != 'N/A' %}
                        (version: {{ sample.metadata.bait_set_version }})
                      {% endif %}
                    </td>
