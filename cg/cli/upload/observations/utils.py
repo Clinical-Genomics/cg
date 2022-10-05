@@ -34,7 +34,6 @@ def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> mode
                 LOG.info(f"{case.internal_id} ({case.data_analysis})")
 
         raise CaseNotFoundError
-
     return case
 
 
@@ -52,7 +51,6 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
     if not LinkHelper.is_all_samples_non_tumour(case.links):
         LOG.error(f"Case {case.internal_id} has tumor samples. Cancelling its upload.")
         raise LoqusdbUploadError
-
     return case
 
 
@@ -66,7 +64,6 @@ def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.F
             f"Case {case.internal_id} could not be found in Loqusdb",
         )
         raise CaseNotFoundError
-
     return case
 
 
