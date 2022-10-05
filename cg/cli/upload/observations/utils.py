@@ -34,7 +34,6 @@ def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> mode
                 LOG.info(f"{case.internal_id} ({case.data_analysis})")
 
         raise CaseNotFoundError
-
     return case
 
 
