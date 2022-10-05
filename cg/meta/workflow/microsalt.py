@@ -69,8 +69,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         lims_project += "_*"
         case_path = Path(glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True)[0])
 
-        if case_path.exists():
-            LOG.info("Found case path %s ", case_path)
         return case_path
 
     def get_case_fastq_path(self, case_id: str) -> Path:
