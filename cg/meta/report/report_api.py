@@ -307,15 +307,19 @@ class ReportAPI(MetaAPI):
             tag=lims_sample.get("application")
         )
 
-        return ApplicationModel(
-            tag=application.tag,
-            version=lims_sample.get("application_version"),
-            prep_category=application.prep_category,
-            description=application.description,
-            limitations=application.limitations,
-            accredited=application.is_accredited,
-            external=application.is_external,
-        ) if application else ApplicationModel()
+        return (
+            ApplicationModel(
+                tag=application.tag,
+                version=lims_sample.get("application_version"),
+                prep_category=application.prep_category,
+                description=application.description,
+                limitations=application.limitations,
+                accredited=application.is_accredited,
+                external=application.is_external,
+            )
+            if application
+            else ApplicationModel()
+        )
 
     @staticmethod
     def get_unique_applications(samples: List[SampleModel]) -> List[ApplicationModel]:
