@@ -7,13 +7,13 @@ from cg.store.status_sample_filters import (
 )
 
 
-def test_get_samples_with_loqusdb_id(helpers, store, sample_store):
+def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
     """Test sample extraction with Loqusdb ID."""
 
     # GIVEN a sample observations that has been uploaded to Loqusdb
     case = helpers.add_case(store)
-    sample = helpers.add_sample(store, loqusdb_id="uploaded_to_loqusdb")
-    sample_not_uploaded = helpers.add_sample(store, name="test")
+    sample = helpers.add_sample(store, loqusdb_id=loqusdb_id)
+    sample_not_uploaded = helpers.add_sample(store, internal_id=sample_id)
     sample_store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     sample_store.relate_sample(
         family=case, sample=sample_not_uploaded, status=PhenotypeStatus.UNKNOWN
@@ -30,13 +30,13 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store):
     assert sample_not_uploaded not in uploaded_samples
 
 
-def test_get_samples_without_loqusdb_id(helpers, store, sample_store):
+def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
     """Test sample extraction without Loqusdb ID."""
 
     # GIVEN a sample observations that has not been uploaded to Loqusdb
     case = helpers.add_case(store)
     sample = helpers.add_sample(store)
-    sample_uploaded = helpers.add_sample(store, name="test", loqusdb_id="uploaded_to_loqusdb")
+    sample_uploaded = helpers.add_sample(store, internal_id=sample_id, loqusdb_id=loqusdb_id)
     sample_store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
     sample_store.relate_sample(family=case, sample=sample_uploaded, status=PhenotypeStatus.UNKNOWN)
 

@@ -6,6 +6,7 @@ from cg.constants import Pipeline, Priority
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store, models
 from cg.store.models import Application, Family, Sample
+from tests.store_helpers import StoreHelpers
 
 
 def test_samples_to_receive_external(sample_store, helpers):
@@ -58,13 +59,13 @@ def test_samples_to_sequence(sample_store):
             assert sample.reads > 0
 
 
-def test_case_in_uploaded_observations(helpers, sample_store):
+def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Store, loqusdb_id: str):
     """Test retrieval of uploaded observations."""
 
     # GIVEN a case with observations that has been uploaded to Loqusdb
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
-    sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqusdb")
+    sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
     sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
@@ -77,7 +78,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
     assert analysis.family in uploaded_observations
 
 
-def test_case_not_in_uploaded_observations(helpers, sample_store):
+def test_case_not_in_uploaded_observations(helpers: StoreHelpers, sample_store: Store):
     """Test retrieval of uploaded observations that have not been uploaded to Loqusdb."""
 
     # GIVEN a case with observations that has not been uploaded to loqusdb
@@ -96,7 +97,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
     assert analysis.family not in uploaded_observations
 
 
-def test_case_in_observations_to_upload(helpers, sample_store):
+def test_case_in_observations_to_upload(helpers: StoreHelpers, sample_store: Store):
     """Test extraction of ready to be uploaded to Loqusdb cases."""
 
     # GIVEN a case with completed analysis and samples w/o loqusdb_id
@@ -115,13 +116,15 @@ def test_case_in_observations_to_upload(helpers, sample_store):
     assert analysis.family in observations_to_upload
 
 
-def test_case_not_in_observations_to_upload(helpers, sample_store):
+def test_case_not_in_observations_to_upload(
+    helpers: StoreHelpers, sample_store: Store, loqusdb_id: str
+):
     """Test case extraction that should not be uploaded to Loqusdb."""
 
     # GIVEN a case with completed analysis and samples w loqusdb_id
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
-    sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
+    sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
     sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
