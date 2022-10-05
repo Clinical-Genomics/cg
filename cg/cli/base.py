@@ -16,21 +16,20 @@ from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
-from .add import add as add_cmd
-from .backup import backup
-from .clean import clean
-from .compress.base import compress, decompress
-from .deliver.base import deliver as deliver_cmd
-from .demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
-from .export import export
-from .get import get
-from .import_cmd import import_cmd
-from .reset import reset_cmd
-from .status import status
-from .transfer import transfer_group
-from .upload.base import upload
-from .workflow.base import workflow as workflow_cmd
-from .generate.base import generate as generate_cmd
+from cg.cli.add import add as add_cmd
+from cg.cli.backup import backup
+from cg.cli.clean import clean
+from cg.cli.compress.base import compress, decompress
+from cg.cli.deliver.base import deliver as deliver_cmd
+from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
+from cg.cli.export import export
+from cg.cli.get import get
+from cg.cli.import_cmd import import_cmd
+from cg.cli.status import status
+from cg.cli.transfer import transfer_group
+from cg.cli.upload.base import upload
+from cg.cli.workflow.base import workflow as workflow_cmd
+from cg.cli.generate.base import generate as generate_cmd
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -97,7 +96,6 @@ base.add_command(delete)
 base.add_command(export)
 base.add_command(get)
 base.add_command(import_cmd)
-base.add_command(reset_cmd)
 base.add_command(set_cmd)
 base.add_command(status)
 base.add_command(transfer_group)
