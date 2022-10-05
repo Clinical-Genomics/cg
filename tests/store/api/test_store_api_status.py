@@ -1,10 +1,9 @@
-"""Tests the status part of the cg.store.api."""
-from datetime import datetime, timedelta
+"""Tests for store API status module."""
 
 from alchy import Query
 
 from cg.constants import Pipeline, Priority
-from cg.constants.subject import Gender
+from cg.constants.subject import PhenotypeStatus
 from cg.store import Store, models
 from cg.store.models import Application, Family, Sample
 
@@ -66,7 +65,7 @@ def test_case_in_uploaded_observations(helpers, sample_store):
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqusdb")
-    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
+    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -85,7 +84,7 @@ def test_case_not_in_uploaded_observations(helpers, sample_store):
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
+    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -104,7 +103,7 @@ def test_case_in_observations_to_upload(helpers, sample_store):
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store)
-    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
+    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is None
@@ -123,7 +122,7 @@ def test_case_not_in_observations_to_upload(helpers, sample_store):
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id="uploaded_to_loqus")
-    sample_store.relate_sample(analysis.family, sample, Gender.UNKNOWN)
+    sample_store.relate_sample(analysis.family, sample, PhenotypeStatus.UNKNOWN)
     assert analysis.family.analyses
     for link in analysis.family.links:
         assert link.sample.loqusdb_id is not None
@@ -234,7 +233,7 @@ def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yes
     )
     sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     analysis_store.relate_sample(
-        family=analysis_oldest.family, sample=sample, status=Gender.UNKNOWN
+        family=analysis_oldest.family, sample=sample, status=PhenotypeStatus.UNKNOWN
     )
 
     # WHEN calling the analyses_to_delivery_report

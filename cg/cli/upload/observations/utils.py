@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from alchy import Query
 
@@ -8,7 +9,7 @@ from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadError
 from cg.meta.upload.observations.observations_api import UploadObservationsAPI
-from cg.store import models
+from cg.store import models, Store
 
 from cg.models.cg_config import CGConfig
 
@@ -19,12 +20,12 @@ LOG = logging.getLogger(__name__)
 def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> models.Family:
     """Return a verified Loqusdb case."""
 
-    status = context.status_db
-    case: models.Family = status.family(case_id)
+    status_db: Store = context.status_db
+    case: models.Family = status_db.family(case_id)
     if not case or case.data_analysis not in LOQUSDB_SUPPORTED_PIPELINES:
         LOG.error("Invalid case ID. Retrieving available cases for Loqusdb actions.")
         cases_to_process: Query = (
-            status.observations_to_upload() if upload else status.observations_uploaded()
+            status_db.observations_to_upload() if upload else status_db.observations_uploaded()
         )
         if not cases_to_process:
             LOG.info("There are no valid cases to be processed by Loqusdb")
@@ -73,13 +74,16 @@ def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.F
 def get_observations_api(context: CGConfig, case: models.Family) -> UploadObservationsAPI:
     """Return an observations API given a specific case object."""
 
-    loqus_apis = {
+    loqus_apis: Dict[SequencingMethod, LoqusdbAPI] = {
         SequencingMethod.WGS: LoqusdbAPI(context.dict()),
         SequencingMethod.WES: LoqusdbAPI(context.dict(), analysis_type=SequencingMethod.WES),
     }
 
     analysis_list = LinkHelper.get_analysis_type_for_each_link(case.links)
-    if len(set(analysis_list)) != 1 or analysis_list[0] not in ("wes", "wgs"):
+    if len(set(analysis_list)) != 1 or analysis_list[0] not in (
+        SequencingMethod.WES,
+        SequencingMethod.WGS,
+    ):
         LOG.error(
             f"Case {case.internal_id} has an undetermined analysis type or mixed analyses. Cancelling its upload."
         )

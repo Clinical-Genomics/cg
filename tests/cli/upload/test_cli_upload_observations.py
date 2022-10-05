@@ -1,4 +1,4 @@
-"""Test cg.cli.upload.observations module."""
+"""Test CG CLI upload observations module."""
 
 import logging
 
@@ -15,7 +15,8 @@ from cg.cli.upload.observations.utils import (
     get_observations_case_to_delete,
 )
 from cg.constants import EXIT_SUCCESS
-from cg.constants.subject import Gender
+from cg.constants.sequencing import SequencingMethod
+from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError
 from cg.meta.upload.observations.observations_api import UploadObservationsAPI
 from cg.models.cg_config import CGConfig
@@ -43,13 +44,13 @@ def test_observations(
     # GIVEN a case ready to be uploaded to Loqusdb
     case: models.Family = helpers.add_case(store)
     case.customer.loqus_upload = True
-    sample: models.Sample = helpers.add_sample(store, application_type="wes")
-    store.relate_sample(family=case, sample=sample, status=Gender.UNKNOWN)
+    sample: models.Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
+    store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
 
     # WHEN trying to do a dry run upload to Loqusdb
     result = cli_runner.invoke(observations, [case.internal_id, "--dry-run"], obj=base_context)
 
-    # THEN an exception should have be thrown
+    # THEN the execution should have been successful and stop at a dry run step
     assert result.exit_code == EXIT_SUCCESS
     assert "Dry run" in caplog.text
 
@@ -127,11 +128,11 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
 
     # GIVEN a Loqusdb supported case
     case: models.Family = helpers.add_case(store)
-    sample: models.Sample = helpers.add_sample(store, application_type="wes")
-    store.relate_sample(family=case, sample=sample, status=Gender.UNKNOWN)
+    sample: models.Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
+    store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
 
     # WHEN retrieving the observation API
     observations_api: UploadObservationsAPI = get_observations_api(base_context, case)
 
-    # THEN the api should exist
+    # THEN the API should be returned
     assert observations_api

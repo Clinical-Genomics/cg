@@ -7,6 +7,7 @@ import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.constants import Pipeline
+from cg.constants.sequencing import SequencingMethod
 from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -21,7 +22,7 @@ class MockCoverage(ChanjoAPI):
 class MockLoqusAPI:
     """Mock LoqusAPI class."""
 
-    def __init__(self, analysis_type="wgs"):
+    def __init__(self, analysis_type=SequencingMethod.WGS):
         self.analysis_type = analysis_type
 
     @staticmethod
@@ -50,7 +51,7 @@ class MockLoqusAPI:
 def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
-    """Returns a dictionary in hk format with files used in upload gt process."""
+    """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
     data = {
         "name": case_id,
         "created": timestamp,
@@ -110,7 +111,7 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
 def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
     """Create mocked UploadObservationsAPI object."""
 
-    loqus_mock = MockLoqusAPI(analysis_type="wes")
+    loqus_mock = MockLoqusAPI(analysis_type=SequencingMethod.WES)
 
     _api = UploadObservationsAPI(
         status_api=analysis_store,
