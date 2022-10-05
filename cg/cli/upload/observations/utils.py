@@ -4,7 +4,6 @@ from typing import Dict
 from alchy import Query
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.cli.upload.utils import LinkHelper
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadError
@@ -12,7 +11,7 @@ from cg.meta.upload.observations.observations_api import UploadObservationsAPI
 from cg.store import models, Store
 
 from cg.models.cg_config import CGConfig
-
+from cg.store.api.link import LinkHelper
 
 LOG = logging.getLogger(__name__)
 

@@ -1,11 +1,13 @@
-"""Test cg.cli.upload module."""
+"""Test CG CLI upload module."""
 from datetime import datetime, timedelta
 
 from cg.cli.upload.base import upload
-from cg.cli.upload.utils import LinkHelper
+from cg.constants.sequencing import SequencingMethod
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from click.testing import CliRunner
+
+from cg.store.api.link import LinkHelper
 from tests.store_helpers import StoreHelpers
 
 
@@ -26,7 +28,7 @@ def test_all_samples_list_analyses(analysis_store: Store, case_id: str):
     analysis_types = LinkHelper.get_analysis_type_for_each_link(case_obj.links)
 
     # THEN all the samples should have analysis type 'wgs'
-    assert len(set(analysis_types)) == 1 and analysis_types[0] == "wgs"
+    assert len(set(analysis_types)) == 1 and analysis_types[0] == SequencingMethod.WGS
 
 
 def test_upload_started_long_time_ago_raises_exception(
