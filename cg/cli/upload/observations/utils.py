@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, List
 
 from alchy import Query
 
@@ -78,8 +78,8 @@ def get_observations_api(context: CGConfig, case: models.Family) -> UploadObserv
         SequencingMethod.WES: LoqusdbAPI(context.dict(), analysis_type=SequencingMethod.WES),
     }
 
-    analysis_list = LinkHelper.get_analysis_type_for_each_link(case.links)
-    if len(set(analysis_list)) != 1 or analysis_list[0] not in (
+    analysis_types: List[SequencingMethod] = LinkHelper.get_analysis_type_for_each_link(case.links)
+    if len(set(analysis_types)) != 1 or analysis_types[0] not in (
         SequencingMethod.WES,
         SequencingMethod.WGS,
     ):
@@ -88,7 +88,7 @@ def get_observations_api(context: CGConfig, case: models.Family) -> UploadObserv
         )
         raise LoqusdbUploadError
 
-    analysis_type = analysis_list[0]
+    analysis_type: SequencingMethod = analysis_types[0]
     return UploadObservationsAPI(
         status_api=context.status_db,
         hk_api=context.housekeeper_api,
