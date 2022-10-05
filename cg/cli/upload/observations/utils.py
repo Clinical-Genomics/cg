@@ -66,7 +66,6 @@ def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.F
             f"Case {case.internal_id} could not be found in Loqusdb",
         )
         raise CaseNotFoundError
-
     return case
 
 
