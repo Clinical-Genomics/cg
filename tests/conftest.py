@@ -1117,6 +1117,12 @@ def fixture_hk_uri() -> str:
     return "sqlite:///"
 
 
+@pytest.fixture(name="loqusdb_id")
+def fixture_loqusdb_id() -> str:
+    """Returns a Loqusdb mock ID."""
+    return "01ab23cd"
+
+
 @pytest.fixture(name="context_config")
 def fixture_context_config(
     fixture_cg_uri: str,
