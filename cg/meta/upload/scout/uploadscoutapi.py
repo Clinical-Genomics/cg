@@ -460,3 +460,7 @@ class UploadScoutAPI:
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
                     case_object.internal_id
                 )
+        if len(rna_dna_sample_case_map.values()) is None:
+            raise CgDataError(
+                f"Failed to upload files for RNA case, no DNA samples linked to subject_id: {rna_sample.subject_id}"
+            )
