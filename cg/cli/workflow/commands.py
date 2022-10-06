@@ -7,6 +7,7 @@ from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.exc import FlowcellsNeededError, DecompressionNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -28,6 +29,12 @@ ARGUMENT_CASE_ID = click.argument("case_id", required=True)
 OPTION_ANALYSIS_PARAMETERS_CONFIG = click.option(
     "--config-artic", type=str, help="Config with computational and lab related settings"
 )
+OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
+    "--pipeline",
+    type=click.Choice(LOQUSDB_SUPPORTED_PIPELINES),
+    help="Limit observations upload to a specific pipeline",
+)
+
 
 LOG = logging.getLogger(__name__)
 
