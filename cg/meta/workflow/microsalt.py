@@ -67,7 +67,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         # get the oldest path
         lims_project += "_*"
-        case_path = sorted(Path(glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True))[0])
+        case_path_list = Path(glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True))
+        case_path = sorted(case_path_list)[0]
 
         return case_path
 
