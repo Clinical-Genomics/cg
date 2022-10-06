@@ -169,7 +169,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
     if analysis_api.pipeline == Pipeline.MICROSALT:
-        case_path_list: List[Path] = analysis_api.get_case_path_list(case_id=case_id)
+        case_path_list: List[Path] = analysis_api.get_case_path(case_id=case_id)
 
         if dry_run:
             LOG.info(f"Would have deleted: {case_path_list}")
