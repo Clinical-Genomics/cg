@@ -2,7 +2,7 @@
 
 import datetime
 
-from cg.models.observations.observations_input_files import ObservationsInputFiles
+from cg.models.observations.input_files import ObservationsInputFiles
 
 
 class Analysis:

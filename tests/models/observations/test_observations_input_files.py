@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.models.observations.observations_input_files import (
+from cg.models.observations.input_files import (
     ObservationsInputFiles,
     check_observation_file_from_hk,
 )

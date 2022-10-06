@@ -9,7 +9,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.constants import FileFormat
 from cg.exc import CaseNotFoundError
 from cg.io.controller import ReadStream
-from cg.models.observations.observations_input_files import ObservationsInputFiles
+from cg.models.observations.input_files import ObservationsInputFiles
 
 
 def test_instantiate(loqus_config: dict):

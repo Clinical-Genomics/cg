@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
-from cg.constants.loqus_upload import ObservationAnalysisTag
+from cg.constants.observations import ObservationAnalysisTag
 
 
 def check_observation_file_from_hk(file_tag: str, file: Path) -> bool:
