@@ -6,7 +6,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 from cg.constants.constants import FileFormat
-from cg.exc import CaseNotFoundError
+from cg.exc import CaseNotFoundError, DeleteCaseError
 from cg.io.controller import ReadStream
 from cg.utils import Process
 
@@ -31,7 +31,7 @@ class LoqusdbAPI:
             self.loqusdb_config = config["loqusdb_wes"]["config_path"]
             self.loqusdb_binary = config["loqusdb_wes"]["binary_path"]
 
-        self.process = Process(self.loqusdb_binary, self.loqusdb_config)
+        self.process = Process(binary=self.loqusdb_binary, config=self.loqusdb_config)
 
     def load(
         self,
@@ -71,8 +71,22 @@ class LoqusdbAPI:
 
         return dict(variants=nr_variants)
 
+    def delete_case(self, case_id: str) -> None:
+        """Remove a case from LoqusDB."""
+        delete_call_parameters = ["delete", "-c", case_id]
+
+        self.process.run_command(parameters=delete_call_parameters)
+        for line in self.process.stderr_lines():
+            if f"INFO Removing case {case_id}" in line:
+                return None
+            if f"WARNING Case {case_id} does not exist" in line:
+                raise CaseNotFoundError(f"Case {case_id} not found in loqusdb")
+
+        # This should not happen. If it does, other exit messages must be handle
+        raise DeleteCaseError(f"Could not delete case {case_id}")
+
     def get_case(self, case_id: str) -> dict:
-        """Find a case in the database by case id"""
+        """Find a case in the database by case id."""
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
 
         self.process.run_command(parameters=cases_parameters)
@@ -109,6 +123,14 @@ class LoqusdbAPI:
         return ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         )
+
+    def case_exists(self, case_id: str) -> bool:
+        """Check if a case exists in LoqusDB"""
+        try:
+            self.get_case(case_id)
+            return True
+        except CaseNotFoundError:
+            return False
 
     def __repr__(self):
 
