@@ -101,8 +101,8 @@ def demultiplex_flowcell(
 
     try:
         flowcell_obj = Flowcell(flowcell_path=flowcell_directory, bcl_converter=bcl_converter)
-    except FlowcellError as e:
-        raise click.Abort from e
+    except FlowcellError as error:
+        raise click.Abort from error
 
     delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=context,

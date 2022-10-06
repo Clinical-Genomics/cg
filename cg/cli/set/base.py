@@ -288,8 +288,8 @@ def sample(
             try:
                 context.lims_api.update_sample(lims_id=sample_id, **{new_key: new_value})
                 LOG.info(f"Set LIMS/{new_key} to {new_value}")
-            except LimsDataError as err:
-                LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {err.message}")
+            except LimsDataError as error:
+                LOG.error(f"Failed to set LIMS/{new_key} to {new_value}, {error}")
 
 
 def _generate_comment(what, old_value, new_value):

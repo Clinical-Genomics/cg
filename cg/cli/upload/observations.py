@@ -95,7 +95,7 @@ def observations(
             LOG.info(
                 "%s: skipping observations upload: %s",
                 case_obj.internal_id,
-                error.message,
+                error,
             )
         except FileNotFoundError as error:
             LOG.info(
