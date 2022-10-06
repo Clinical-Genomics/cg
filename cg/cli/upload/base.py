@@ -15,7 +15,7 @@ from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.gisaid import gisaid
 from cg.cli.upload.mutacc import process_solved, processed_solved
 from cg.cli.upload.nipt import nipt
-from cg.cli.upload.observations import observations
+from cg.cli.upload.observations import observations, available_observations
 from cg.cli.upload.scout import (
     create_scout_load_config,
     scout,
@@ -116,7 +116,6 @@ upload.add_command(fohm)
 upload.add_command(genotypes)
 upload.add_command(gisaid)
 upload.add_command(nipt)
-upload.add_command(observations)
 upload.add_command(process_solved)
 upload.add_command(processed_solved)
 upload.add_command(scout)
@@ -125,5 +124,7 @@ upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_rna_fusion_report_to_scout)
 upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)
+upload.add_command(observations)
+upload.add_command(available_observations)
 upload.add_command(validate)
 upload.add_command(vogue)

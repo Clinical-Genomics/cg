@@ -7,7 +7,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
-from cg.constants.subject import Gender
+from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
@@ -421,7 +421,7 @@ class StoreHelpers:
                 store,
                 case=case_obj,
                 sample=sample_obj,
-                status=sample_data.get("status", Gender.UNKNOWN),
+                status=sample_data.get("status", PhenotypeStatus.UNKNOWN),
                 father=father,
                 mother=mother,
             )
@@ -537,7 +537,7 @@ class StoreHelpers:
         store: Store,
         sample: models.Sample,
         case: models.Family,
-        status: str = Gender.UNKNOWN,
+        status: str = PhenotypeStatus.UNKNOWN,
         father: models.Sample = None,
         mother: models.Sample = None,
     ) -> models.FamilySample:
@@ -605,7 +605,7 @@ class StoreHelpers:
         """Utility function to relate many samples to one case"""
 
         for sample in samples:
-            base_store.relate_sample(family, sample, Gender.UNKNOWN)
+            base_store.relate_sample(family, sample, PhenotypeStatus.UNKNOWN)
 
     @classmethod
     def add_case_with_samples(
