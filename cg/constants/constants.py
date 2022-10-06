@@ -9,6 +9,8 @@ VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
 MAX_ITEMS_TO_RETRIEVE = 50
 
+SCALE_TO_MILLION_READ_PAIRS = 2_000_000
+
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
 CAPTUREKIT_CANCER_OPTIONS = (

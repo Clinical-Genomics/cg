@@ -40,8 +40,8 @@ def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
         raise click.Abort
     try:
         get_sample_sheet_from_file(infile=sheet, sheet_type="S4", bcl_converter=bcl_converter)
-    except ValidationError as err:
-        LOG.warning(err)
+    except ValidationError as error:
+        LOG.warning(error)
         raise click.Abort
     LOG.info("Sample sheet looks fine")
 

@@ -13,10 +13,7 @@ def filter_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
 
 def filter_analyses_with_pipeline(analyses: Query, pipeline: Pipeline = None, **kwargs) -> Query:
     """Return analyses that have been completed."""
-    if pipeline:
-        return analyses.filter(models.Analysis.pipeline == str(pipeline))
-
-    return analyses
+    return analyses.filter(models.Analysis.pipeline == str(pipeline)) if pipeline else analyses
 
 
 def filter_completed_analyses(analyses: Query, **kwargs) -> Query:

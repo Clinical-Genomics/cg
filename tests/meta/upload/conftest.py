@@ -8,41 +8,42 @@ import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.constants import Pipeline
+from cg.constants.sequencing import SequencingMethod
 from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.meta.upload.observations import UploadObservationsAPI
+from cg.meta.upload.observations.observations_api import UploadObservationsAPI
 from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 class MockCoverage(ChanjoAPI):
-    """Mock chanjo coverage api"""
+    """Mock chanjo coverage api."""
 
 
 class MockLoqusAPI:
-    """Mock LoqusAPI class"""
+    """Mock LoqusAPI class."""
 
-    def __init__(self, analysis_type="wgs"):
+    def __init__(self, analysis_type=SequencingMethod.WGS):
         self.analysis_type = analysis_type
 
     @staticmethod
     def load(*args, **kwargs):
-        """Mock load method"""
+        """Mock load method."""
         _ = args
         _ = kwargs
         return dict(variants=12)
 
     @staticmethod
     def get_case(*args, **kwargs):
-        """Mock get_case method"""
+        """Mock get_case method."""
         _ = args
         _ = kwargs
         return {"case_id": "case_id", "_id": "123"}
 
     @staticmethod
     def get_duplicate(*args, **kwargs):
-        """Mock get_duplicate method"""
+        """Mock get_duplicate method."""
         _ = args
         _ = kwargs
         return {"case_id": "case_id"}
@@ -52,7 +53,7 @@ class MockLoqusAPI:
 def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path
 ) -> dict:
-    """Returns a dictionary in hk format with files used in upload gt process"""
+    """Returns a dictionary in Housekeeper format with files used in upload Genotype process."""
     data = {
         "name": case_id,
         "created": timestamp,
@@ -73,7 +74,7 @@ def fixture_upload_genotypes_hk_bundle(
 def fixture_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> models.Analysis:
-    """Return a analysis object with a trio"""
+    """Return a analysis object with a trio."""
     case_obj = analysis_store_trio.family(case_id)
     helpers.add_analysis(store=analysis_store_trio, case=case_obj, started_at=timestamp)
     return analysis_store_trio.family(case_id).analyses[0]
@@ -83,7 +84,7 @@ def fixture_analysis_obj(
 def fixture_upload_genotypes_api(
     real_housekeeper_api, genotype_api, upload_genotypes_hk_bundle, helpers
 ) -> UploadGenotypesAPI:
-    """Create a upload genotypes api"""
+    """Create a upload genotypes api."""
     helpers.ensure_hk_bundle(real_housekeeper_api, upload_genotypes_hk_bundle, include=True)
     _api = UploadGenotypesAPI(
         hk_api=real_housekeeper_api,
@@ -95,7 +96,7 @@ def fixture_upload_genotypes_api(
 
 @pytest.fixture(scope="function")
 def upload_observations_api(analysis_store, populated_housekeeper_api):
-    """Create mocked UploadObservationsAPI object"""
+    """Create mocked UploadObservationsAPI object."""
 
     loqus_mock = MockLoqusAPI()
 
@@ -110,9 +111,9 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
 
 @pytest.fixture(scope="function")
 def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
-    """Create mocked UploadObservationsAPI object"""
+    """Create mocked UploadObservationsAPI object."""
 
-    loqus_mock = MockLoqusAPI(analysis_type="wes")
+    loqus_mock = MockLoqusAPI(analysis_type=SequencingMethod.WES)
 
     _api = UploadObservationsAPI(
         status_api=analysis_store,
@@ -135,7 +136,7 @@ def coverage_upload_api(
 
 @pytest.fixture(scope="function")
 def analysis(analysis_store, case_id, timestamp):
-    """Fixture to mock an analysis"""
+    """Fixture to mock an analysis."""
     _analysis = analysis_store.add_analysis(pipeline=Pipeline.BALSAMIC, version="version")
     _analysis.family = analysis_store.family(case_id)
     _analysis.config_path = "dummy_path"
@@ -145,5 +146,5 @@ def analysis(analysis_store, case_id, timestamp):
 
 @pytest.fixture(name="genotype_analysis_sex")
 def fixture_genotype_analysis_sex() -> dict:
-    """Return predicted sex per sample_id"""
+    """Return predicted sex per sample_id."""
     return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}

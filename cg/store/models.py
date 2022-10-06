@@ -17,7 +17,7 @@ from cg.constants import (
     Pipeline,
 )
 
-from cg.constants.constants import CONTROL_OPTIONS
+from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 flowcell_sample = Table(
@@ -118,10 +118,14 @@ class Application(Model):
 
     @property
     def analysis_type(self):
-        if self.prep_category == "wts":
+        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING:
             return self.prep_category
 
-        return "wgs" if self.prep_category == "wgs" else "wes"
+        return (
+            PrepCategory.WHOLE_GENOME_SEQUENCING
+            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
+            else PrepCategory.WHOLE_EXOME_SEQUENCING
+        )
 
 
 class ApplicationVersion(Model):
