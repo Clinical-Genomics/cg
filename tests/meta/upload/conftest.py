@@ -11,7 +11,7 @@ from cg.constants.sequencing import SequencingMethod
 from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.meta.upload.observations.observations_api import UploadObservationsAPI
+from cg.meta.upload.observations.observations_api import ObservationsAPI
 from cg.store import Store, models
 
 
@@ -93,12 +93,12 @@ def fixture_upload_genotypes_api(
 
 
 @pytest.fixture(scope="function")
-def upload_observations_api(analysis_store, populated_housekeeper_api):
-    """Create mocked UploadObservationsAPI object."""
+def observations_api(analysis_store, populated_housekeeper_api):
+    """Create mocked ObservationsAPI object."""
 
     loqus_mock = MockLoqusAPI()
 
-    _api = UploadObservationsAPI(
+    _api = ObservationsAPI(
         status_api=analysis_store,
         hk_api=populated_housekeeper_api,
         loqus_api=loqus_mock,
@@ -108,12 +108,12 @@ def upload_observations_api(analysis_store, populated_housekeeper_api):
 
 
 @pytest.fixture(scope="function")
-def upload_observations_api_wes(analysis_store, populated_housekeeper_api):
-    """Create mocked UploadObservationsAPI object."""
+def observations_api_wes(analysis_store, populated_housekeeper_api):
+    """Create mocked ObservationsAPI object."""
 
     loqus_mock = MockLoqusAPI(analysis_type=SequencingMethod.WES)
 
-    _api = UploadObservationsAPI(
+    _api = ObservationsAPI(
         status_api=analysis_store,
         hk_api=populated_housekeeper_api,
         loqus_api=loqus_mock,

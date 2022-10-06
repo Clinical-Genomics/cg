@@ -19,7 +19,7 @@ from cg.store import Store, models
 LOG = logging.getLogger(__name__)
 
 
-class UploadObservationsAPI:
+class ObservationsAPI:
 
     """API to upload observations to LoqusDB."""
 

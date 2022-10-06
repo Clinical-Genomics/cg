@@ -7,7 +7,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadError
-from cg.meta.upload.observations.observations_api import UploadObservationsAPI
+from cg.meta.upload.observations.observations_api import ObservationsAPI
 from cg.store import models, Store
 
 from cg.models.cg_config import CGConfig
@@ -67,7 +67,7 @@ def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.F
     return case
 
 
-def get_observations_api(context: CGConfig, case: models.Family) -> UploadObservationsAPI:
+def get_observations_api(context: CGConfig, case: models.Family) -> ObservationsAPI:
     """Return an observations API given a specific case object."""
 
     loqus_apis: Dict[SequencingMethod, LoqusdbAPI] = {
@@ -86,7 +86,7 @@ def get_observations_api(context: CGConfig, case: models.Family) -> UploadObserv
         raise LoqusdbUploadError
 
     analysis_type: SequencingMethod = analysis_types[0]
-    return UploadObservationsAPI(
+    return ObservationsAPI(
         status_api=context.status_db,
         hk_api=context.housekeeper_api,
         loqus_api=loqus_apis[analysis_type],

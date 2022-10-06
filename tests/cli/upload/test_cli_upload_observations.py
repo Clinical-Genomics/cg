@@ -18,7 +18,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError
-from cg.meta.upload.observations.observations_api import UploadObservationsAPI
+from cg.meta.upload.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
@@ -132,7 +132,7 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
 
     # WHEN retrieving the observation API
-    observations_api: UploadObservationsAPI = get_observations_api(base_context, case)
+    observations_api: ObservationsAPI = get_observations_api(base_context, case)
 
     # THEN the API should be returned
     assert observations_api
