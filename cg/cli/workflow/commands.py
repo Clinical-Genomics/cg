@@ -1,9 +1,13 @@
+from typing import List
+
 import click
 import datetime as dt
 import logging
 import shutil
 
 from pathlib import Path
+
+from cgmodels.cg.constants import Pipeline
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -162,27 +166,48 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id)
-    analysis_api.verify_case_path_exists(case_id=case_id)
     analysis_api.check_analysis_ongoing(case_id=case_id)
-    analysis_path: Path = analysis_api.get_case_path(case_id)
 
-    if dry_run:
-        LOG.info(f"Would have deleted: {analysis_path}")
-        return EXIT_SUCCESS
+    if analysis_api.pipeline == Pipeline.MICROSALT:
+        case_path_list: List[Path] = analysis_api.get_case_path_list(case_id=case_id)
 
-    if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
-        if analysis_path.is_symlink():
-            LOG.warning(
-                f"Will not automatically delete symlink: {analysis_path}, delete it manually",
-            )
-            return EXIT_FAIL
+        if dry_run:
+            LOG.info(f"Would have deleted: {case_path_list}")
+            return EXIT_SUCCESS
 
-        shutil.rmtree(analysis_path, ignore_errors=True)
-        LOG.info("Cleaned %s", analysis_path)
-        analyses: list = status_db.family(case_id).analyses
-        for analysis_obj in analyses:
-            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
-            status_db.commit()
+        for analysis_path in case_path_list:
+            if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
+                if analysis_path.is_symlink():
+                    LOG.warning(
+                        f"Will not automatically delete symlink: {analysis_path}, delete it manually",
+                    )
+                    return EXIT_FAIL
+
+                shutil.rmtree(analysis_path, ignore_errors=True)
+                LOG.info("Cleaned %s", analysis_path)
+
+    else:
+        analysis_path: Path = analysis_api.get_case_path(case_id)
+        analysis_api.verify_case_path_exists(case_id=case_id)
+
+        if dry_run:
+            LOG.info(f"Would have deleted: {analysis_path}")
+            return EXIT_SUCCESS
+
+        if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
+            if analysis_path.is_symlink():
+                LOG.warning(
+                    f"Will not automatically delete symlink: {analysis_path}, delete it manually",
+                )
+                return EXIT_FAIL
+
+            shutil.rmtree(analysis_path, ignore_errors=True)
+            LOG.info("Cleaned %s", analysis_path)
+
+    analyses: list = status_db.family(case_id).analyses
+    for analysis_obj in analyses:
+        analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
+        status_db.commit()
 
 
 @click.command("past-run-dirs")

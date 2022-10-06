@@ -61,16 +61,25 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return self._process
 
     def get_case_path(self, case_id: str) -> Path:
+        """Get the latest case path"""
 
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj)
-
-        # get the oldest path
         lims_project += "_*"
         case_path_list = Path(glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True))
         case_path = sorted(case_path_list)[0]
 
         return case_path
+
+    def get_case_path_list(self, case_id: str) -> List[Path]:
+        """Get all paths related to a microSALT case"""
+
+        case_obj: models.Family = self.status_db.family(case_id)
+        lims_project: str = self.get_project(case_obj)
+        lims_project += "_*"
+        case_path_list = Path(glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True))
+
+        return case_path_list
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
