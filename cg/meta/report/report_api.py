@@ -248,8 +248,8 @@ class ReportAPI(MetaAPI):
     ) -> CaseModel:
         """Returns case associated validated attributes."""
 
-        samples = self.get_samples_data(case, analysis_metadata)
-        unique_applications = self.get_unique_applications(samples)
+        samples: List[SampleModel] = self.get_samples_data(case, analysis_metadata)
+        unique_applications: List[ApplicationModel] = self.get_unique_applications(samples)
 
         return CaseModel(
             name=case.name,
@@ -265,11 +265,11 @@ class ReportAPI(MetaAPI):
         """Extracts all the samples associated to a specific case and their attributes."""
 
         samples = list()
-        case_samples = self.status_db.family_samples(case.internal_id)
+        case_samples: List[models.FamilySample] = self.status_db.family_samples(case.internal_id)
 
         for case_sample in case_samples:
             sample: models.Sample = case_sample.sample
-            lims_sample: dict = self.get_lims_sample(sample.internal_id)
+            lims_sample: Optional[dict] = self.get_lims_sample(sample.internal_id)
 
             samples.append(
                 SampleModel(
