@@ -176,6 +176,8 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
             return EXIT_SUCCESS
 
         for analysis_path in case_path_list:
+            analysis_api.verify_case_path_exists(case_id=case_id)
+
             if yes or click.confirm(
                 f"Are you sure you want to remove all files in {analysis_path}?"
             ):
