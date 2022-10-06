@@ -176,7 +176,9 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
             return EXIT_SUCCESS
 
         for analysis_path in case_path_list:
-            if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
+            if yes or click.confirm(
+                f"Are you sure you want to remove all files in {analysis_path}?"
+            ):
                 if analysis_path.is_symlink():
                     LOG.warning(
                         f"Will not automatically delete symlink: {analysis_path}, delete it manually",
