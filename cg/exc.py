@@ -96,6 +96,12 @@ class DuplicateSampleError(CgError):
     """
 
 
+class DeleteCaseError(CgError):
+    """
+    Exception raised when a case cannot be deleted in LoqusDB.
+    """
+
+
 class EmailNotSentError(CgError):
     """Raised when email not sent"""
 

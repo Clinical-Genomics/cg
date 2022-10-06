@@ -145,3 +145,11 @@ DRY_RUN = click.option(
     default=False,
     help="Runs the command without making any changes",
 )
+
+SKIP_CONFIRMATION = click.option(
+    "-y",
+    "--yes",
+    is_flag=True,
+    default=False,
+    help="Skip confirmation",
+)
