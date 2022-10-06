@@ -278,6 +278,6 @@ def microsalt_past_run_dirs(
 ):
     """Clean up of "old" microSALT case run dirs."""
 
-    context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(context.obj)
+    context.obj.meta_apis["analysis_api"]: MicrosaltAnalysisAPI = MicrosaltAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
