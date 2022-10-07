@@ -34,8 +34,9 @@ AM_METHODS = {
     "2182": "Manual SARS-CoV-2 library preparation using Illumina COVIDseq Test",
     "2175": "Manual SARS-CoV-2 library preparation using Illumina DNA Prep",
     "1830": "NovaSeq 6000 Sequencing method",
+    "2234": "Method - Illumina Stranded mRNA Library Preparation",
 }
-METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX = 0, 1, 2
+METHOD_INDEX, METHOD_DOCUMENT_INDEX, METHOD_VERSION_INDEX, METHOD_TYPE_INDEX = 0, 1, 2, 3
 
 LOG = logging.getLogger(__name__)
 
@@ -322,20 +323,28 @@ class LimsAPI(Lims, OrderHandler):
 
     def _get_methods(self, step_names_udfs, lims_id):
         """
-        Gets the method, method number and method version for a given list of stop names
+        Gets the method, method number and method version for a given list of step names for AM documents.
+        Only method name and Atlas version is returned if Atlas documentation instead has been used.
         """
         methods = []
 
         for process_name in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
             if artifacts:
-                udf_key_number = step_names_udfs[process_name]["method_number"]
-                udf_key_version = step_names_udfs[process_name]["method_version"]
+                # Check which type of method document has been used
+                method_type = self.get_method_type(artifacts[0], step_names_udfs[process_name])
+                if method_type is "Atlas":
+                    udf_key_method_doc = step_names_udfs[process_name]["atlas_document"]
+                    udf_key_version = step_names_udfs[process_name]["atlas_version"]
+                else:
+                    udf_key_method_doc = step_names_udfs[process_name]["method_number"]
+                    udf_key_version = step_names_udfs[process_name]["method_version"]
                 methods.append(
                     (
                         artifacts[0].parent_process.date_run,
-                        self.get_method_number(artifacts[0], udf_key_number),
+                        self.get_method_document(artifacts[0], udf_key_method_doc),
                         self.get_method_version(artifacts[0], udf_key_version),
+                        method_type,
                     )
                 )
 
@@ -344,21 +353,35 @@ class LimsAPI(Lims, OrderHandler):
         if sorted_methods:
             method = sorted_methods[METHOD_INDEX]
 
-            if method[METHOD_NUMBER_INDEX] is not None:
-                method_name = AM_METHODS.get(method[METHOD_NUMBER_INDEX])
+            if method[METHOD_TYPE_INDEX] is "AM" and method[METHOD_DOCUMENT_INDEX] is not None:
+                method_name = AM_METHODS.get(method[METHOD_DOCUMENT_INDEX])
                 return (
-                    f"{method[METHOD_NUMBER_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
+                    f"{method[METHOD_DOCUMENT_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
                     f"{method_name}"
+                )
+            elif method[METHOD_TYPE_INDEX] is "Atlas" and method[METHOD_DOCUMENT_INDEX] is not None:
+                return (
+                    f"{method[METHOD_DOCUMENT_INDEX]} ({method[METHOD_VERSION_INDEX]})"
                 )
 
         return None
 
     @staticmethod
-    def get_method_number(artifact, udf_key_number):
+    def get_method_type(artifact, method_udfs):
+        """
+        Assess which type of method documentation has been used, AM or Atlas.
+        """
+        if "atlas_version" in method_udfs and artifact.parent_process.udf.get(method_udfs["atlas_version"]):
+            return "Atlas"
+        else:
+            return "AM"
+
+    @staticmethod
+    def get_method_document(artifact, udf_key_method_doc):
         """
         get method number for artifact
         """
-        return artifact.parent_process.udf.get(udf_key_number)
+        return artifact.parent_process.udf.get(udf_key_method_doc)
 
     @staticmethod
     def get_method_version(artifact, udf_key_version):
