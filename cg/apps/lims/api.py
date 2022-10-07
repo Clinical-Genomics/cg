@@ -373,8 +373,8 @@ class LimsAPI(Lims, OrderHandler):
         """
         if "atlas_version" in method_udfs and artifact.parent_process.udf.get(method_udfs["atlas_version"]):
             return "Atlas"
-        else:
-            return "AM"
+       
+       return "AM"
 
     @staticmethod
     def get_method_document(artifact, udf_key_method_doc):
