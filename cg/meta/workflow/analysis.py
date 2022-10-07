@@ -105,7 +105,7 @@ class AnalysisAPI(MetaAPI):
         priority: int = self.get_priority_for_case(case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
-    def get_case_path(self, case_id: str) -> Path:
+    def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
         """Path to case working directory"""
         raise NotImplementedError
 
