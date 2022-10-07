@@ -99,7 +99,7 @@ class UploadObservationsAPI:
         for link in analysis_obj.family.links:
             link.sample.loqusdb_id = str(case_obj["_id"])
         self.status.commit()
-        LOG.info(f"Observations uploaded for case: {case_obj.internal_id}")
+        LOG.info(f"Observations uploaded for case: {analysis_obj.family.internal_id}")
 
     @staticmethod
     def _all_samples(links: List[models.FamilySample]) -> bool:
