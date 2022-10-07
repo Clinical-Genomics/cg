@@ -169,11 +169,15 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
     if analysis_api.pipeline == Pipeline.MICROSALT:
+        print("We are insdide clea_run_dir for microsalt")
         case_path_list: List[Path] = analysis_api.get_case_path(case_id=case_id)
+        print("Case path list: " + case_path_list)
 
         if dry_run:
             LOG.info(f"Would have deleted: {case_path_list}")
             return EXIT_SUCCESS
+
+        print("Just before looping through microsalt list")
 
         for analysis_path in case_path_list:
             analysis_api.verify_case_path_exists(case_id=case_id)
