@@ -437,12 +437,9 @@ class UploadScoutAPI:
             raise CgDataError(
                 f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {nr_of_subject_id_dna_samples} "
             )
-        # TODO after filter we can remove these internal checks for code cleanup
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, list] = {}
         sample: models.Sample
-        for sample in subject_id_samples:
-            if sample.internal_id == rna_sample.internal_id:
-                continue
+        for sample in subject_id_dna_samples:
             rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: list = []
             return sample
 
@@ -461,10 +458,6 @@ class UploadScoutAPI:
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
                     case_object.internal_id
                 )
-        if len(rna_dna_sample_case_map.values()) is None:
-            raise CgDataError(
-                f"Failed to upload files for RNA case, no DNA samples linked to subject_id: {rna_sample.subject_id}"
-            )
 
     @staticmethod
     def _filter_mip_dna_balsamic(subject_id_samples: Query) -> List[Any]:
@@ -474,5 +467,4 @@ class UploadScoutAPI:
                 case_object: models.Family = sample.link.family
                 if case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
                     subject_id_dna_samples.append(sample)
-
         return subject_id_dna_samples
