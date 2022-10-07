@@ -68,6 +68,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         print("Lims project: " + lims_project)
         case_path_list: List[Path] = glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True)
+        print(f"{self.root_dir}results/{lims_project}")
         print(type(case_path_list))
         print(type(case_path_list[0]))
         return case_path_list
