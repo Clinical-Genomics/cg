@@ -63,9 +63,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_case_path(self, case_id: str) -> List[Path]:
         print("We are in get case path for microsalt")
         case_obj: models.Family = self.status_db.family(case_id)
-        lims_project: str = self.get_project(case_obj)
+        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
         lims_project += "_*"
+
         print("Lims project: " + lims_project)
+
         return [Path(case_path) for case_path in glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True)]
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
