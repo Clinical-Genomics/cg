@@ -171,7 +171,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
         print("We are insdide clea_run_dir for microsalt")
         try:
             case_path_list: List[Path] = analysis_api.get_case_path(case_id=case_id)
-            print("Case path list: " + case_path_list)
+            print(case_path_list)
 
         except FileNotFoundError:
             return EXIT_FAIL
