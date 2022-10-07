@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, Set, Dict, List
+from typing import Optional, Set, Dict, List, Any
 
 from sqlalchemy.orm import Query
 
@@ -431,12 +431,13 @@ class UploadScoutAPI:
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-        nr_of_subject_id_dna_samples: int = len(subject_id_samples.all())
-        if nr_of_subject_id_dna_samples != 2:
+        subject_id_dna_samples = self._filter_mip_dna_balsamic(subject_id_samples)
+        nr_of_subject_id_dna_samples: int = len(subject_id_dna_samples)
+        if nr_of_subject_id_dna_samples != 1:
             raise CgDataError(
                 f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {nr_of_subject_id_dna_samples} "
             )
-
+        # TODO after filter we can remove these internal checks for code cleanup
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, list] = {}
         sample: models.Sample
         for sample in subject_id_samples:
@@ -464,3 +465,14 @@ class UploadScoutAPI:
             raise CgDataError(
                 f"Failed to upload files for RNA case, no DNA samples linked to subject_id: {rna_sample.subject_id}"
             )
+
+    @staticmethod
+    def _filter_mip_dna_balsamic(subject_id_samples: Query) -> List[Any]:
+        subject_id_dna_samples: List[Any] = []
+        for sample in subject_id_samples.all():
+            for sample.link in sample.links:
+                case_object: models.Family = sample.link.family
+                if case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+                    subject_id_dna_samples.append(sample)
+
+        return subject_id_dna_samples
