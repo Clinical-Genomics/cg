@@ -1,6 +1,7 @@
 """Code for uploading observations data via CLI."""
 
 import logging
+import contextlib
 from datetime import datetime
 from typing import Optional
 
@@ -39,9 +40,8 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
     if dry_run:
         LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
         return
-
-    observations_api.process(case.analyses[0])
-    LOG.info(f"Observations uploaded for case: {case.internal_id}")
+    with contextlib.suppression(DuplicateRecordError, DuplicateSampleError):
+        observations_api.process(case.analyses[0])
 
 
 @click.command("available-observations")
