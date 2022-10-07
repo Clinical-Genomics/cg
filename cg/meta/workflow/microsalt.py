@@ -71,12 +71,18 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         print(f"{self.root_dir}/results/{lims_project}")
         print(type(case_path_list))
         print(type(case_path_list[0]))
+        print(case_path_list[0])
+
+        new_list = []
+        for path in case_path_list:
+            new_list.append(Path(path))
+
 
         if len(case_path_list) == 0:
             LOG.error("There is no case paths for case %s", case_id)
             raise FileNotFoundError
 
-        return case_path_list
+        return new_list
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
 
