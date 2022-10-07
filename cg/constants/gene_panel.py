@@ -6,6 +6,7 @@ GENOME_BUILD_38 = "GRCh38"
 MASTER_LIST = (
     "BRAIN",
     "Cardiology",
+    "CH",
     "CTD",
     "DIAB",
     "ENDO",

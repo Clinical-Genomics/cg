@@ -70,8 +70,8 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         raise click.Abort
     try:
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
-    except SyntaxError as err:
-        LOG.warning("%s", err)
+    except SyntaxError as error:
+        LOG.warning("%s", error)
         raise click.Abort
     LOG.info("Found load config %s", scout_load_config)
     if scout_load_config.track == "cancer":
@@ -108,8 +108,8 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         scout_upload_api.add_scout_config_to_hk(
             config_file_path=file_path, case_id=case_id, delete=re_upload
         )
-    except FileExistsError as err:
-        LOG.warning("%s, consider removing the file from housekeeper and try again", str(err))
+    except FileExistsError as error:
+        LOG.warning("%s, consider removing the file from housekeeper and try again", str(error))
         raise click.Abort
 
 
@@ -223,7 +223,7 @@ def upload_rna_fusion_report_to_scout(
             dry_run=dry_run, research=research, case_id=case_id, update=update
         )
     except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error.message)
+        LOG.error(error)
         return 1
     return 0
 
@@ -253,6 +253,6 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     try:
         scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
     except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error.message)
+        LOG.error(error)
         return 1
     return 0
