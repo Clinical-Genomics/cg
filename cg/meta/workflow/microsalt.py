@@ -68,7 +68,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         print("Lims project: " + lims_project)
 
-        return [Path(case_path) for case_path in glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True)]
+        return glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True)
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
 
