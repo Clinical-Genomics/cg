@@ -353,16 +353,20 @@ class LimsAPI(Lims, OrderHandler):
         if sorted_methods:
             method = sorted_methods[METHOD_INDEX]
 
-            if method[METHOD_TYPE_INDEX] == DocumentationMethod.AM and method[METHOD_DOCUMENT_INDEX] is not None:
+            if (
+                method[METHOD_TYPE_INDEX] == DocumentationMethod.AM
+                and method[METHOD_DOCUMENT_INDEX] is not None
+            ):
                 method_name = AM_METHODS.get(method[METHOD_DOCUMENT_INDEX])
                 return (
                     f"{method[METHOD_DOCUMENT_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
                     f"{method_name}"
                 )
-            elif method[METHOD_TYPE_INDEX] == DocumentationMethod.ATLAS and method[METHOD_DOCUMENT_INDEX] is not None:
-                return (
-                    f"{method[METHOD_DOCUMENT_INDEX]} ({method[METHOD_VERSION_INDEX]})"
-                )
+            elif (
+                method[METHOD_TYPE_INDEX] == DocumentationMethod.ATLAS
+                and method[METHOD_DOCUMENT_INDEX] is not None
+            ):
+                return f"{method[METHOD_DOCUMENT_INDEX]} ({method[METHOD_VERSION_INDEX]})"
 
         return None
 
@@ -371,7 +375,9 @@ class LimsAPI(Lims, OrderHandler):
         """
         Assess which type of method documentation has been used, AM or Atlas.
         """
-        if "atlas_version" in method_udfs and artifact.parent_process.udf.get(method_udfs["atlas_version"]):
+        if "atlas_version" in method_udfs and artifact.parent_process.udf.get(
+            method_udfs["atlas_version"]
+        ):
             return DocumentationMethod.ATLAS
        
         return DocumentationMethod.AM
