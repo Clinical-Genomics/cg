@@ -379,7 +379,7 @@ class LimsAPI(Lims, OrderHandler):
             method_udfs["atlas_version"]
         ):
             return DocumentationMethod.ATLAS
-       
+
         return DocumentationMethod.AM
 
     @staticmethod
