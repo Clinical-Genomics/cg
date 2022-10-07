@@ -39,7 +39,6 @@ OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
     help="Limit observations upload to a specific pipeline",
 )
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -170,8 +169,12 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 
     if analysis_api.pipeline == Pipeline.MICROSALT:
         print("We are insdide clea_run_dir for microsalt")
-        case_path_list: List[Path] = analysis_api.get_case_path(case_id=case_id)
-        print("Case path list: " + case_path_list)
+        try:
+            case_path_list: List[Path] = analysis_api.get_case_path(case_id=case_id)
+            print("Case path list: " + case_path_list)
+
+        except FileNotFoundError:
+            return EXIT_FAIL
 
         if dry_run:
             LOG.info(f"Would have deleted: {case_path_list}")
@@ -183,7 +186,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
             analysis_api.verify_case_path_exists(case_id=case_id)
 
             if yes or click.confirm(
-                f"Are you sure you want to remove all files in {analysis_path}?"
+                    f"Are you sure you want to remove all files in {analysis_path}?"
             ):
                 if analysis_path.is_symlink():
                     LOG.warning(
@@ -224,7 +227,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of old case run dirs."""
 
@@ -254,7 +257,7 @@ def past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Balsamic case run dirs."""
 
@@ -269,7 +272,7 @@ def balsamic_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def fluffy_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Fluffy case run dirs."""
 
@@ -284,7 +287,7 @@ def fluffy_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mip_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP case run dirs."""
 
@@ -299,7 +302,7 @@ def mip_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mutant_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MUTANT case run dirs."""
 
@@ -314,7 +317,7 @@ def mutant_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def microsalt_past_run_dirs(
-    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" microSALT case run dirs."""
 

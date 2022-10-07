@@ -17,7 +17,7 @@ import glob
 
 import click
 from cg.constants import Pipeline
-from cg.exc import CgDataError
+from cg.exc import CgDataError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
@@ -68,9 +68,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         print("Lims project: " + lims_project)
         case_path_list: List[Path] = glob.glob(f"{self.root_dir}results/{lims_project}", recursive=True)
-        print(f"{self.root_dir}results/{lims_project}")
+        print(f"{self.root_dir}/results/{lims_project}")
         print(type(case_path_list))
         print(type(case_path_list[0]))
+
+        if len(case_path_list) == 0:
+            LOG.error("There is no case paths for case %s", case_id)
+            raise FileNotFoundError
+
         return case_path_list
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
