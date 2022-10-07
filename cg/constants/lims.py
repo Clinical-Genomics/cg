@@ -1,3 +1,7 @@
+# LIMS constants
+
+from cg.utils.enums import StrEnum
+
 PROP2UDF = {
     "application": "Sequencing Analysis",
     "bait_set": "Bait Set",
@@ -131,3 +135,8 @@ MASTER_STEPS_UDFS = {
 }
 
 PROCESSES = {"sequenced_date": "AUTOMATED - NovaSeq Run"}
+
+
+class DocumentationMethod(StrEnum):
+    ATLAS: str = "Atlas"
+    AM: str = "AM"

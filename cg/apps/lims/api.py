@@ -10,7 +10,7 @@ from genologics.entities import Process, Project, Sample
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF
+from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -333,7 +333,7 @@ class LimsAPI(Lims, OrderHandler):
             if artifacts:
                 # Check which type of method document has been used
                 method_type = self.get_method_type(artifacts[0], step_names_udfs[process_name])
-                if method_type is "Atlas":
+                if method_type == DocumentationMethod.ATLAS:
                     udf_key_method_doc = step_names_udfs[process_name]["atlas_document"]
                     udf_key_version = step_names_udfs[process_name]["atlas_version"]
                 else:
@@ -353,13 +353,13 @@ class LimsAPI(Lims, OrderHandler):
         if sorted_methods:
             method = sorted_methods[METHOD_INDEX]
 
-            if method[METHOD_TYPE_INDEX] is "AM" and method[METHOD_DOCUMENT_INDEX] is not None:
+            if method[METHOD_TYPE_INDEX] == DocumentationMethod.AM and method[METHOD_DOCUMENT_INDEX] is not None:
                 method_name = AM_METHODS.get(method[METHOD_DOCUMENT_INDEX])
                 return (
                     f"{method[METHOD_DOCUMENT_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
                     f"{method_name}"
                 )
-            elif method[METHOD_TYPE_INDEX] is "Atlas" and method[METHOD_DOCUMENT_INDEX] is not None:
+            elif method[METHOD_TYPE_INDEX] == DocumentationMethod.ATLAS and method[METHOD_DOCUMENT_INDEX] is not None:
                 return (
                     f"{method[METHOD_DOCUMENT_INDEX]} ({method[METHOD_VERSION_INDEX]})"
                 )
@@ -372,9 +372,9 @@ class LimsAPI(Lims, OrderHandler):
         Assess which type of method documentation has been used, AM or Atlas.
         """
         if "atlas_version" in method_udfs and artifact.parent_process.udf.get(method_udfs["atlas_version"]):
-            return "Atlas"
+            return DocumentationMethod.ATLAS
        
-       return "AM"
+        return DocumentationMethod.AM
 
     @staticmethod
     def get_method_document(artifact, udf_key_method_doc):
