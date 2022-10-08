@@ -4,6 +4,8 @@ from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query, load_only
+from cg.constants.constants import PrepCategory
+from cg.constants.indexes import ListIndexes
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
@@ -65,6 +67,15 @@ class FindBusinessDataHandler(BaseHandler):
             return True
         return False
 
+    def get_application_by_case(self, case_id: str) -> models.Application:
+        """Return the application of a case."""
+
+        return (
+            self.family(case_id)
+            .links[ListIndexes.FIRST.value]
+            .sample.application_version.application
+        )
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -111,7 +122,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: [models.Customer] = None, enquiry: str = None, action: str = None
+        self, *, customers: List[models.Customer] = None, enquiry: str = None, action: str = None
     ) -> Query:
         """Fetch families."""
 
@@ -146,39 +157,6 @@ class FindBusinessDataHandler(BaseHandler):
             .filter(models.Family.internal_id == family_id)
             .all()
         )
-
-    def families_by_subject_id(
-        self,
-        customer_id: str,
-        subject_id: str,
-        data_analyses: [Pipeline] = None,
-        is_tumour: bool = None,
-    ) -> Set[models.Family]:
-        """Get all cases that have a sample for a subject_id.
-
-        Args:
-            customer_id     (str):                 Customer-id of customer owning the cases
-            subject_id      (str):                 Subject-id to search for
-            data_analyses   (list[Pipeline]):      Optional list of data_analysis values to filter on
-            is_tumour       (bool):                Optional is_tumour value to filter on
-        Returns:
-            set containing the matching cases set(models.Family)
-        """
-        cases: set[models.Family] = set()
-        samples: [models.Sample] = self.samples_by_subject_id(
-            customer_id=customer_id, subject_id=subject_id, is_tumour=is_tumour
-        )
-        sample: models.Sample
-        for sample in samples:
-            link: models.FamilySample
-            for link in sample.links:
-                case: models.Family = link.family
-
-                if data_analyses and case.data_analysis not in data_analyses:
-                    continue
-
-                cases.add(case)
-        return cases
 
     def get_cases_from_ticket(self, ticket: str) -> Query:
         return self.Family.query.filter(models.Family.tickets.contains(ticket))
@@ -318,6 +296,19 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a pool."""
         return self.Pool.get(pool_id)
 
+    def get_ready_made_library_expected_reads(self, case_id: str) -> int:
+        """Return the target reads of a ready made library case."""
+
+        application: models.Application = self.get_application_by_case(case_id)
+
+        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+
+            raise ValueError(
+                f"{case_id} is not a ready made library, found prep category: "
+                f"{application.prep_category}"
+            )
+        return application.expected_reads
+
     def sample(self, internal_id: str) -> models.Sample:
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
@@ -361,7 +352,7 @@ class FindBusinessDataHandler(BaseHandler):
         query: Query = self.Sample.query.join(models.Customer).filter(
             models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
         )
-        if is_tumour is not None:
+        if is_tumour:
             query: Query = query.filter(models.Sample.is_tumour == is_tumour)
         return query
 

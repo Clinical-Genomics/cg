@@ -69,8 +69,8 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         LOG.info("Submitted case %s to Trailblazer!", case_id)
-    except Exception as e:
-        LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", e)
+    except Exception as error:
+        LOG.warning("Unable to submit job file to Trailblazer, raised error: %s", error)
 
     analysis_api.set_statusdb_action(case_id=case_id, action="running")
 
@@ -100,8 +100,8 @@ def start(
         context.invoke(
             run, case_id=case_id, config=config, dry_run=dry_run, external_ref=external_ref
         )
-    except DecompressionNeededError as e:
-        LOG.error(e.message)
+    except DecompressionNeededError as error:
+        LOG.error(error)
 
 
 @fluffy.command("start-available")
@@ -117,10 +117,10 @@ def start_available(context: click.Context, dry_run: bool = False):
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error("Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error("Unspecified error occurred: %s", error)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
