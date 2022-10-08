@@ -19,7 +19,7 @@
 - [ ] Use stage: `us`
 - [ ] Paxa the environment: `paxa`
 - [ ] Install on stage (example for Hasta):
-    ```Shell
+    ```shell
     bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-tool-stage.sh -e S_main -t cg -b [THIS-BRANCH-NAME] -a
     ```
 
