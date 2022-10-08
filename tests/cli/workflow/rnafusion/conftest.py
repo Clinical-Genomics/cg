@@ -148,7 +148,9 @@ def fixture_rnafusion_context(
         reads=0,
         sequenced_at=dt.datetime.now(),
     )
-    helpers.add_relationship(status_db, case=case_not_enough_reads, sample=sample_rnafusion_case_not_enough_reads)
+    helpers.add_relationship(
+        status_db, case=case_not_enough_reads, sample=sample_rnafusion_case_not_enough_reads
+    )
     return cg_context
 
 

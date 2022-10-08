@@ -93,7 +93,7 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     case_id_success = "rnafusion_case_enough_reads"
 
     # GIVEN CASE ID where read counts did not pass the threshold
-    case_id_fail = "balsamic_case_tgs_paired"
+    case_id_fail = "rnafusion_case_not_enough_reads"
 
     # Ensure the config is mocked to run compound command
     Path.mkdir(
@@ -124,6 +124,8 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 
     # THEN action of the case should NOT be set to running
     assert rnafusion_context.status_db.family(case_id_fail).action is None
+
+
 #
 #
 # def test_store_available(
