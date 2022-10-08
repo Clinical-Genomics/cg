@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 from cgmodels.cg.constants import Pipeline
 
@@ -78,14 +78,14 @@ class MipDNAReportAPI(ReportAPI):
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
         return panel_gene_ids
 
-    def get_data_analysis_type(self, case: models.Family) -> str:
+    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
         case_sample = self.status_db.family_samples(case.internal_id)[0].sample
         lims_sample = self.get_lims_sample(case_sample.internal_id)
         application = self.status_db.application(tag=lims_sample.get("application"))
 
-        return application.analysis_type
+        return application.analysis_type if application else None
 
     def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case."""

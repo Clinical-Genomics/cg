@@ -1,5 +1,6 @@
 import datetime as dt
-from typing import List, Optional, Set
+import re
+from typing import List, Optional, Set, Dict
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
@@ -16,7 +17,7 @@ from cg.constants import (
     Pipeline,
 )
 
-from cg.constants.constants import CONTROL_OPTIONS
+from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 flowcell_sample = Table(
@@ -117,10 +118,14 @@ class Application(Model):
 
     @property
     def analysis_type(self):
-        if self.prep_category == "wts":
+        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING:
             return self.prep_category
 
-        return "wgs" if self.prep_category == "wgs" else "wes"
+        return (
+            PrepCategory.WHOLE_GENOME_SEQUENCING
+            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
+            else PrepCategory.WHOLE_EXOME_SEQUENCING
+        )
 
 
 class ApplicationVersion(Model):
@@ -371,6 +376,19 @@ class Family(Model, PriorityMixin):
     def get_samples_in_case(self) -> List[str]:
         """Get samples in a case."""
         return [link.sample for link in self.links]
+
+    def get_delivery_arguments(self) -> Set[str]:
+        """Translates the case data_delivery field to pipeline specific arguments."""
+        delivery_arguments: Set[str] = set()
+        requested_deliveries: List[str] = re.split("[-_]", self.data_delivery)
+        delivery_per_pipeline_map: Dict[str, str] = {
+            DataDelivery.FASTQ: Pipeline.FASTQ,
+            DataDelivery.ANALYSIS_FILES: self.data_analysis,
+        }
+        for data_delivery, pipeline in delivery_per_pipeline_map.items():
+            if data_delivery in requested_deliveries:
+                delivery_arguments.add(pipeline)
+        return delivery_arguments
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""

@@ -200,6 +200,7 @@ def crunchy_config_dict():
     """Crunchy configs."""
     return {
         "crunchy": {
+            "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
             "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
         }
@@ -519,6 +520,11 @@ def fixture_flowcell_name() -> str:
     return "HVKJCDRXX"
 
 
+@pytest.fixture(name="another_flow_cell_name")
+def fixture_another_flow_cell_name() -> str:
+    return "HF57HDRXY"
+
+
 # Unknown file fixtures
 
 
@@ -578,22 +584,22 @@ def fixture_later_timestamp() -> dt.datetime:
     return dt.datetime(2020, 6, 1)
 
 
-@pytest.fixture(scope="function", name="timestamp_today")
-def fixture_timestamp_today() -> dt.datetime:
-    """Return a time stamp of todays date in date time format."""
+@pytest.fixture(scope="function", name="timestamp_now")
+def fixture_timestamp_now() -> dt.datetime:
+    """Return a time stamp of today's date in date time format."""
     return dt.datetime.now()
 
 
 @pytest.fixture(scope="function", name="timestamp_yesterday")
-def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
-    """Return a time stamp of yesterdays date in date time format."""
-    return timestamp_today - dt.timedelta(days=1)
+def fixture_timestamp_yesterday(timestamp_now: dt.datetime) -> dt.datetime:
+    """Return a time stamp of yesterday's date in date time format."""
+    return timestamp_now - dt.timedelta(days=1)
 
 
 @pytest.fixture(scope="function", name="timestamp_in_2_weeks")
-def fixture_timestamp_in_2_weeks(timestamp_today: dt.datetime) -> dt.datetime:
+def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
     """Return a time stamp 14 days ahead in time."""
-    return timestamp_today + dt.timedelta(days=14)
+    return timestamp_now + dt.timedelta(days=14)
 
 
 @pytest.fixture(scope="function", name="hk_bundle_data")
@@ -1116,6 +1122,12 @@ def fixture_hk_uri() -> str:
     return "sqlite:///"
 
 
+@pytest.fixture(name="loqusdb_id")
+def fixture_loqusdb_id() -> str:
+    """Returns a Loqusdb mock ID."""
+    return "01ab23cd"
+
+
 @pytest.fixture(name="context_config")
 def fixture_context_config(
     fixture_cg_uri: str,
@@ -1231,12 +1243,14 @@ def fixture_context_config(
             },
         },
         "microsalt": {
-            "root": str(microsalt_dir),
-            "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_microSALT",
+            "queries_path": Path(microsalt_dir, "queries").as_posix(),
+            "root": str(microsalt_dir),
         },
         "mip-rd-dna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
             "pipeline": "analyse rd_dna",
@@ -1244,6 +1258,7 @@ def fixture_context_config(
             "script": "mip",
         },
         "mip-rd-rna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
             "pipeline": "analyse rd_rna",
@@ -1257,6 +1272,7 @@ def fixture_context_config(
         },
         "mutant": {
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
@@ -1269,6 +1285,7 @@ def fixture_context_config(
             "profile": "myprofile",
         },
         "crunchy": {
+            "conda_binary": "a_conda_binary",
             "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
             "slurm": {
                 "account": "development",
