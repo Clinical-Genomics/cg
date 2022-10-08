@@ -1,4 +1,4 @@
-"""Fixtures for the housekeeper tests"""
+"""Fixtures for the housekeeper tests."""
 from pathlib import Path
 from typing import Any, Dict, List
 

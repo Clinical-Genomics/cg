@@ -1329,7 +1329,7 @@ def fixture_context_config(
 def fixture_cg_context(
     context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
-    """Return a cg config"""
+    """Return a cg config."""
     cg_config = CGConfig(**context_config)
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api

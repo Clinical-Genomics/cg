@@ -6,7 +6,7 @@ from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 def test_calling_method_on_private_store_give_warning(housekeeper_api: MockHousekeeperAPI, caplog):
-    """Test that we get a log warning for unwrapped methods"""
+    """Test that we get a log warning for unwrapped methods."""
 
     # GIVEN an hk api and a method that is not wrapped
     caplog.set_level(logging.WARNING)
