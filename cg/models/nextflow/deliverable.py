@@ -1,20 +1,32 @@
 from pydantic import BaseModel, validator
+from cg.constants.constants import DELIVER_FILE_HEADERS
+import collections
 
 
-class NextflowSample(BaseModel):
-    """Nextflow samplesheet model
+def replace_dict_values(replace_map: dict, my_dict: dict) -> dict:
+    for str_to_replace, with_value in replace_map.items():
+        for key, value in my_dict.items():
+            if not value:
+                value = "~"
+            my_dict.update({key: value.replace(str_to_replace, with_value)})
+    return my_dict
+
+
+class NextflowDeliverable(BaseModel):
+    """Nextflow deliverable model
 
     Attributes:
-        sample: sample name, corresponds to case_id
-        fastq_r1: list of all fastq read1 files corresponding to case_id
-        fastq_r2: list of all fastq read2 files corresponding to case_id
+        deliverables: dictionary containing format, path, paht_index, step, tag and id keys
     """
 
-    sample: str
-    fastq_r1: list
-    fastq_r2: list
+    deliverables: dict
 
-    @validator("fastq_r2")
-    def fastq1_fastq2_len_match(cls, value, values: dict) -> str:
-        assert len(value) == len(values.get("fastq_r1")) or len(value) == 0
-        return "Length of fastq_r1 and fastq_r2 do not match"
+    @validator("deliverables")
+    def headers(cls, v: dict) -> str:
+        if collections.Counter(list(v.keys())) != collections.Counter(DELIVER_FILE_HEADERS):
+            raise ValueError(
+                f"Headers are not matching the standard header format: {DELIVER_FILE_HEADERS}"
+            )
+        for key, value in v.items():
+            if not value and key != "path_index":
+                raise ValueError("An entry other than path_index is empty!")
