@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -48,7 +49,6 @@ def test_store(
     rnafusion_context: CGConfig,
     real_housekeeper_api,
     mock_deliverable,
-    # mock_analysis_finish,
     caplog,
     hermes_deliverables,
     mocker,
@@ -71,61 +71,59 @@ def test_store(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    # print(HermesApi)
-    # HermesApi.create_housekeeper_bundle.return_value = CGDeliverables(**hermes_deliverables)
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
     result = cli_runner.invoke(store, [case_id], obj=rnafusion_context)
     # THEN bundle should be successfully added to HK and STATUSDB
     assert result.exit_code == EXIT_SUCCESS
-    # assert "Analysis successfully stored in Housekeeper" in caplog.text
-    # assert "Analysis successfully stored in StatusDB" in caplog.text
-    # assert rnafusion_context.status_db.family(case_id).analyses
-    # assert rnafusion_context.housekeeper_api.bundle(case_id)
+    assert "Analysis successfully stored in Housekeeper" in caplog.text
+    assert "Analysis successfully stored in StatusDB" in caplog.text
+    assert rnafusion_context.status_db.family(case_id).analyses
+    assert rnafusion_context.housekeeper_api.bundle(case_id)
 
 
 #
-# def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, caplog, mocker):
-#     """Test to ensure all parts of compound start-available command are executed given ideal conditions
-#     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
-#     caplog.set_level(logging.INFO)
-#
-#     # GIVEN CASE ID of sample where read counts pass threshold
-#     case_id_success = "balsamic_case_wgs_paired_enough_reads"
-#
-#     # GIVEN CASE ID where read counts did not pass the threshold
-#     case_id_fail = "balsamic_case_tgs_paired"
-#
-#     # Ensure the config is mocked to run compound command
-#     Path.mkdir(
-#         Path(
-#             balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)
-#         ).parent,
-#         exist_ok=True,
-#     )
-#     Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)).touch(
-#         exist_ok=True
-#     )
-#
-#     # GIVEN decompression is not needed
-#     mocker.patch.object(BalsamicAnalysisAPI, "resolve_decompression")
-#     BalsamicAnalysisAPI.resolve_decompression.return_value = None
-#
-#     # WHEN running command
-#     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
-#
-#     # THEN command exits with 1 because one of cases raised errors
-#     assert result.exit_code == 1
-#
-#     # THEN it should successfully identify the one case eligible for auto-start
-#     assert case_id_success in caplog.text
-#
-#     # THEN the ineligible case should NOT be ran
-#     assert case_id_fail not in caplog.text
-#
-#     # THEN action of the case should NOT be set to running
-#     assert balsamic_context.status_db.family(case_id_fail).action is None
+def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog, mocker):
+    """Test to ensure all parts of compound start-available command are executed given ideal conditions
+    Test that start-available picks up eligible cases and does not pick up ineligible ones"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN CASE ID of sample where read counts pass threshold
+    case_id_success = "rnafusion_case_enough_reads"
+
+    # GIVEN CASE ID where read counts did not pass the threshold
+    case_id_fail = "balsamic_case_tgs_paired"
+
+    # Ensure the config is mocked to run compound command
+    Path.mkdir(
+        Path(
+            rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)
+        ).parent,
+        exist_ok=True,
+    )
+    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)).touch(
+        exist_ok=True
+    )
+
+    # GIVEN decompression is not needed
+    mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
+    RnafusionAnalysisAPI.resolve_decompression.return_value = None
+
+    # WHEN running command
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
+
+    # THEN command exits with 1 because one of cases raised errors
+    assert result.exit_code == 1
+
+    # THEN it should successfully identify the one case eligible for auto-start
+    assert case_id_success in caplog.text
+
+    # THEN the ineligible case should NOT be ran
+    assert case_id_fail not in caplog.text
+
+    # THEN action of the case should NOT be set to running
+    assert rnafusion_context.status_db.family(case_id_fail).action is None
 #
 #
 # def test_store_available(
