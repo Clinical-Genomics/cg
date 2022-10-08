@@ -41,7 +41,7 @@ def test_data(coverage_upload_api, analysis_store, case_id):
 
 
 def test_upload(chanjo_config, populated_housekeeper_api, analysis_store, mocker, case_id):
-    """test uploading with chanjo"""
+    """test uploading with chanjo."""
     # GIVEN a coverage api and a data dictionary
     mock_upload = mocker.patch.object(ChanjoAPI, "upload")
     mock_sample = mocker.patch.object(ChanjoAPI, "sample")

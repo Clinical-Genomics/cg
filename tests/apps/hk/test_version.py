@@ -72,7 +72,7 @@ def test_add_version_existing_bundle(
     case_id: str,
     small_helpers: SmallHelpers,
 ):
-    """Test to get a version when there is a bundle and a version"""
+    """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api and a bundle with one version
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
     assert bundle_obj

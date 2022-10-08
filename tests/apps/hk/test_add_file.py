@@ -13,7 +13,7 @@ def test_add_file_with_flat_tag(
     hk_bundle_data: Dict[str, Any],
     fastq_file: Path,
 ):
-    """Test that we can call hk with one existing tag"""
+    """Test that we can call hk with one existing tag."""
 
     # GIVEN an hk api populated with a version obj
     version_obj = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
