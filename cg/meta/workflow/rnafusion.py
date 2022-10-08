@@ -252,8 +252,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         LOG.info("Reaching here C")
-        LOG.info(NextflowAnalysisAPI.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir))
-        return NextflowAnalysisAPI.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
+        LOG.info(
+            NextflowAnalysisAPI.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
+        )
+        return NextflowAnalysisAPI.get_deliverables_file_path(
+            case_id=case_id, root_dir=self.root_dir
+        )
 
     def verify_deliverables_file_exists(self, case_id: str):
         NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
@@ -306,5 +310,11 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id=case_id, root_dir=self.root_dir
             ),
         )
-        LOG.info("Writing deliverables file in "+str(NextflowAnalysisAPI.get_deliverables_file_path(
-                case_id=case_id, root_dir=self.root_dir)))
+        LOG.info(
+            "Writing deliverables file in "
+            + str(
+                NextflowAnalysisAPI.get_deliverables_file_path(
+                    case_id=case_id, root_dir=self.root_dir
+                )
+            )
+        )
