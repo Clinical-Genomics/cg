@@ -51,7 +51,7 @@ def test_store(
     # mock_analysis_finish,
     caplog,
     hermes_deliverables,
-    # mocker,
+    mocker,
 ):
     """Test to ensure all parts of store command are run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
