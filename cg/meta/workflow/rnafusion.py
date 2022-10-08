@@ -4,11 +4,10 @@ import logging
 from pathlib import Path
 from typing import List
 import pandas as pd
+import csv
 
-from cg.io.controller import WriteFile
 from cg.constants import Pipeline
 from cg.constants.constants import (
-    RNAFUSION_STRANDEDNESS_DEFAULT,
     RNAFUSION_SAMPLESHEET_HEADERS,
     NFX_SAMPLE_HEADER,
     NFX_READ1_HEADER,
@@ -21,11 +20,11 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.models.nextflow.deliverable import NextflowDeliverable, replace_dict_values
 from cg.utils import Process
 from cg import resources
 from pydantic import ValidationError
 from subprocess import CalledProcessError
-from cg.constants.constants import FileFormat
 
 
 LOG = logging.getLogger(__name__)
@@ -75,14 +74,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             RnafusionSample(
                 sample=case_id, fastq_r1=fastq_r1, fastq_r2=fastq_r2, strandedness=strandedness
             )
-        # except ValidationError:
-        #     LOG.error("ValidationError")
         except ValidationError as e:
             LOG.error(e)
             raise ValueError
 
         samples_full_list: list = []
         strandedness_full_list: list = []
+        # Complete sample and strandedness lists to the same length as fastq_r1:
         for _ in range(len(fastq_r1)):
             samples_full_list.append(case_id)
             strandedness_full_list.append(strandedness)
@@ -94,17 +92,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             RNAFUSION_STRANDEDNESS_HEADER: strandedness_full_list,
         }
         return samplesheet_content
-
-    @staticmethod
-    def create_samplesheet_csv(samplesheet_content: dict, config_path: Path) -> None:
-        """Write sample sheet csv file."""
-        with open(config_path, "w") as outfile:
-            outfile.write(",".join(RNAFUSION_SAMPLESHEET_HEADERS))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                outfile.write("\n")
-                outfile.write(
-                    ",".join([samplesheet_content[k][i] for k in RNAFUSION_SAMPLESHEET_HEADERS])
-                )
 
     def write_samplesheet(self, case_id: str, strandedness: str) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
@@ -120,8 +107,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id, fastq_r1, fastq_r2, strandedness
             )
             LOG.info(samplesheet_content)
-            self.create_samplesheet_csv(
+            NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content,
+                RNAFUSION_SAMPLESHEET_HEADERS,
                 NextflowAnalysisAPI.get_case_config_path(case_id, self.root_dir),
             )
 
@@ -169,18 +157,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             "--starfusion": starfusion,
             "--fusioncatcher": fusioncatcher,
             "--arriba": arriba,
-        }
-
-    def get_verified_arguments_nextflow(
-        self,
-        case_id: str,
-        log: Path,
-    ) -> dict:
-        """Transforms click argument related to nextflow that were left empty
-        into defaults constructed with case_id paths."""
-
-        return {
-            "-log": NextflowAnalysisAPI.get_log_path(case_id, self.pipeline, self.root_dir, log),
         }
 
     def get_pipeline_version(self, case_id: str) -> str:
@@ -255,9 +231,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
         )
         nextflow_options = self.__build_command_str(
-            self.get_verified_arguments_nextflow(
-                case_id=case_id,
-                log=log,
+            NextflowAnalysisAPI.get_verified_arguments_nextflow(
+                case_id=case_id, log=log, pipeline=self.pipeline, root_dir=self.root_dir
             )
         )
         command = ["run", self.nfcore_pipeline_path]
@@ -276,53 +251,60 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
-        """Returns a path where the rnafusion deliverables file for the case_id should be located.
+        LOG.info("Reaching here C")
+        LOG.info(NextflowAnalysisAPI.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir))
+        return NextflowAnalysisAPI.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
 
-        (Optional) Checks if deliverables file exists.
-        """
-        return Path(self.get_case_path(case_id), case_id + "_deliverables.yaml")
+    def verify_deliverables_file_exists(self, case_id: str):
+        NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
 
-    def get_template_deliverables_file_content(
-        self, rnafusion_bundle_template: Path
-    ) -> pd.DataFrame:
-        """Read deliverables file template and return content."""
-        return pd.read_csv(rnafusion_bundle_template)
+    # def replace_in_dataframe(self, dataframe: pd.DataFrame, replace_map: dict) -> pd.DataFrame:
+    #     for str_to_replace, with_value in replace_map.items():
+    #         dataframe = dataframe.replace(str_to_replace, with_value, regex=True)
+    #     return dataframe
 
-    def replace_in_dataframe(self, dataframe: pd.DataFrame, replace_map: dict) -> pd.DataFrame:
-        for str_to_replace, with_value in replace_map.item():
-            dataframe = dataframe.replace(str_to_replace, with_value, regex=True)
-        return dataframe
+    # def parse_template_deliverables_file(
+    #     self, case_id: str, deliverables_template: pd.DataFrame
+    # ) -> pd.DataFrame:
+    #     """Replace PATHTOCASE and CASEID from template deliverables file
+    #     to corresponding strings, add path_index column."""
+    #     replace_map: dict = {
+    #         "PATHTOCASE": str(NextflowAnalysisAPI.get_case_path(case_id, self.root_dir)),
+    #         "CASEID": case_id,
+    #     }
+    #
+    #     deliverables_template = self.replace_in_dataframe(deliverables_template, replace_map)
+    #
+    #     deliverables_template["path_index"] = "~"
+    #     return deliverables_template
 
-    def parse_template_deliverables_file(
-        self, case_id: str, deliverables_template: pd.DataFrame
-    ) -> pd.DataFrame:
-        """Replace PATHTOCASE and CASEID from template deliverables file
-        to corresponding strings, add path_index column."""
-        replace_map: dict = {
-            "PATHTOCASE": str(self.get_case_path(case_id)),
-            "CASEID": case_id,
-        }
-
-        deliverables_template = self.replace_in_dataframe(deliverables_template, replace_map)
-
-        deliverables_template["path_index"] = "~"
-        return deliverables_template
-
-    def convert_deliverables_dataframe(self, dataframe: pd.DataFrame) -> dict:
-        """Convert deliverables dataframe."""
-        return dataframe.to_dict(orient="records").replace("'~'", "~")
+    # def convert_deliverables_dataframe(self, dataframe: pd.DataFrame) -> dict:
+    #     """Convert deliverables dataframe."""
+    #     return dataframe.to_dict(orient="records").replace("'~'", "~")
 
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
-        deliverables_template: pd.DataFrame = self.get_template_deliverables_file(
+        deliverables_content: dict = NextflowAnalysisAPI.get_template_deliverables_file_content(
             resources.rnafusion_bundle_filenames_path
         )
-        edited_deliverables: pd.DataFrame = self.edit_template_deliverables_file(
-            case_id, deliverables_template
+        try:
+            for index, deliver_file in enumerate(deliverables_content):
+                NextflowDeliverable(deliverables=deliver_file)
+                deliverables_content[index] = replace_dict_values(
+                    NextflowAnalysisAPI.get_replace_map(case_id=case_id, root_dir=self.root_dir),
+                    deliver_file,
+                )
+        except ValidationError as e:
+            LOG.error(e)
+            raise ValueError
+        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
+        NextflowAnalysisAPI.write_deliverables_bundle(
+            deliverables_content=NextflowAnalysisAPI.add_bundle_header(
+                deliverables_content=deliverables_content
+            ),
+            file_path=NextflowAnalysisAPI.get_deliverables_file_path(
+                case_id=case_id, root_dir=self.root_dir
+            ),
         )
-        deliverables_file: dict = self.convert_deliverables_dataframe_to_dict(edited_deliverables)
-        WriteFile.write_file_from_content(
-            content=deliverables_file,
-            file_format=FileFormat.YAML,
-            file_path=self.get_deliverables_file_path(case_id),
-        )
+        LOG.info("Writing deliverables file in "+str(NextflowAnalysisAPI.get_deliverables_file_path(
+                case_id=case_id, root_dir=self.root_dir)))
