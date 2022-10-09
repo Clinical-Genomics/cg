@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.rnafusion.base import rnafusion, start, store
+from cg.cli.workflow.rnafusion.base import rnafusion, start, store, start_available
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -131,11 +131,10 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 # def test_store_available(
 #     tmpdir_factory,
 #     cli_runner: CliRunner,
-#     balsamic_context: CGConfig,
+#     rnafusion_context: CGConfig,
 #     real_housekeeper_api,
 #     mock_config,
 #     mock_deliverable,
-#     mock_analysis_finish,
 #     caplog,
 #     mocker,
 #     hermes_deliverables,
@@ -145,28 +144,28 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 #     caplog.set_level(logging.INFO)
 #
 #     # GIVEN CASE ID of sample where read counts pass threshold
-#     case_id_success = "balsamic_case_wgs_single"
+#     case_id_success = "rnafusion_case_enough_reads"
 #
 #     # GIVEN CASE ID where analysis finish is not mocked
 #     case_id_fail = "balsamic_case_wgs_paired"
 #
-#     # Ensure the config is mocked for fail case to run compound command
+    # Ensure the config is mocked for fail case to run compound command
 #     Path.mkdir(
-#         Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
+#         Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
 #         exist_ok=True,
 #     )
-#     Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).touch(
+#     Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).touch(
 #         exist_ok=True
 #     )
 #
 #     # GIVEN that HermesAPI returns a deliverables output
 #     mocker.patch.object(HermesApi, "convert_deliverables")
 #     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-#
+# #
 #     # Ensure case was successfully picked up by start-available and status set to running
-#     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
-#     balsamic_context.status_db.family(case_id_success).action = "running"
-#     balsamic_context.status_db.commit()
+#     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
+#     rnafusion_context.status_db.family(case_id_success).action = "running"
+#     rnafusion_context.status_db.commit()
 #
 #     # THEN command exits with 1 because one of the cases threw errors
 #     assert result.exit_code == 1

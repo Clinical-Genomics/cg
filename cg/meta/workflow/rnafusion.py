@@ -66,7 +66,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return self.profile
 
     def get_case_config_path(self, case_id):
-        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir),
+        return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
     @staticmethod
     def build_samplesheet_content(
