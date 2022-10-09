@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.rnafusion.base import rnafusion, start, store, start_available
+from cg.cli.workflow.rnafusion.base import rnafusion, start, store, start_available, store_available
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -93,7 +93,7 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     case_id_success = "rnafusion_case_enough_reads"
 
     # GIVEN CASE ID where read counts did not pass the threshold
-    case_id_fail = "rnafusion_case_not_enough_reads"
+    case_id_fail = "no_sample_case"
 
     # Ensure the config is mocked to run compound command
     Path.mkdir(
@@ -126,8 +126,6 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     assert rnafusion_context.status_db.family(case_id_fail).action is None
 
 
-#
-#
 # def test_store_available(
 #     tmpdir_factory,
 #     cli_runner: CliRunner,
@@ -147,9 +145,9 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 #     case_id_success = "rnafusion_case_enough_reads"
 #
 #     # GIVEN CASE ID where analysis finish is not mocked
-#     case_id_fail = "balsamic_case_wgs_paired"
+#     case_id_fail = "rnafusion_case_not_finished"
 #
-    # Ensure the config is mocked for fail case to run compound command
+#     # Ensure the config is mocked for fail case to run compound command
 #     Path.mkdir(
 #         Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
 #         exist_ok=True,
@@ -161,7 +159,7 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 #     # GIVEN that HermesAPI returns a deliverables output
 #     mocker.patch.object(HermesApi, "convert_deliverables")
 #     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-# #
+#     #
 #     # Ensure case was successfully picked up by start-available and status set to running
 #     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
 #     rnafusion_context.status_db.family(case_id_success).action = "running"
@@ -170,13 +168,13 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 #     # THEN command exits with 1 because one of the cases threw errors
 #     assert result.exit_code == 1
 #     assert case_id_success in caplog.text
-#     assert balsamic_context.status_db.family(case_id_success).action == "running"
+#     assert rnafusion_context.status_db.family(case_id_success).action == "running"
 #
-#     balsamic_context.housekeeper_api_ = real_housekeeper_api
-#     balsamic_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+#     rnafusion_context.housekeeper_api_ = real_housekeeper_api
+#     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 #
 #     # WHEN running command
-#     result = cli_runner.invoke(store_available, obj=balsamic_context)
+#     result = cli_runner.invoke(store_available, obj=rnafusion_context)
 #
 #     # THEN command exits successfully
 #     assert result.exit_code == 0
@@ -185,10 +183,10 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 #     assert case_id_success in caplog.text
 #
 #     # THEN case has analyses
-#     assert balsamic_context.status_db.family(case_id_success).analyses
+#     assert rnafusion_context.status_db.family(case_id_success).analyses
 #
 #     # THEN bundle can be found in Housekeeper
-#     assert balsamic_context.housekeeper_api.bundle(case_id_success)
+#     assert rnafusion_context.housekeeper_api.bundle(case_id_success)
 #
 #     # THEN bundle added successfully and action set to None
-#     assert balsamic_context.status_db.family(case_id_success).action is None
+#     assert rnafusion_context.status_db.family(case_id_success).action is None
