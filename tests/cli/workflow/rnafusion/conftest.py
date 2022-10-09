@@ -194,28 +194,28 @@ def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) 
     return hermes_output
 
 
-#
-# @pytest.fixture(name="malformed_hermes_deliverables")
-# def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-#     malformed_deliverable = hermes_deliverables.copy()
-#     malformed_deliverable.pop("pipeline")
-#
-#     return malformed_deliverable
-#
-#
-# @pytest.fixture(name="balsamic_hermes_process")
-# def fixture_balsamic_hermes_process(hermes_deliverables: dict, process: ProcessMock) -> ProcessMock:
-#     """Return a process mock populated with some balsamic hermes output"""
-#     process.set_stdout(
-#         text=WriteStream.write_stream_from_content(
-#             content=hermes_deliverables, file_format=FileFormat.JSON
-#         )
-#     )
-#     return process
-#
-#
-# @pytest.fixture
-# def mock_analysis_finish(balsamic_dir: Path, balsamic_case_id: str) -> None:
-#     """Create analysis_finish file for testing"""
-#     Path.mkdir(Path(balsamic_dir, balsamic_case_id, "analysis"), parents=True, exist_ok=True)
-#     Path(balsamic_dir, balsamic_case_id, "analysis", "analysis_finish").touch(exist_ok=True)
+
+@pytest.fixture(name="malformed_hermes_deliverables")
+def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+    malformed_deliverable = hermes_deliverables.copy()
+    malformed_deliverable.pop("pipeline")
+
+    return malformed_deliverable
+
+
+@pytest.fixture(name="rnafusion_hermes_process")
+def fixture_rnafusion_hermes_process(hermes_deliverables: dict, process: ProcessMock) -> ProcessMock:
+    """Return a process mock populated with some rnafusion hermes output"""
+    process.set_stdout(
+        text=WriteStream.write_stream_from_content(
+            content=hermes_deliverables, file_format=FileFormat.JSON
+        )
+    )
+    return process
+
+
+@pytest.fixture
+def mock_analysis_finish(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+    """Create analysis_finish file for testing"""
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(exist_ok=True)
