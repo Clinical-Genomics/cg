@@ -49,6 +49,7 @@ def test_store(
     rnafusion_context: CGConfig,
     real_housekeeper_api,
     mock_deliverable,
+    mock_analysis_finish,
     caplog,
     hermes_deliverables,
     mocker,
@@ -115,10 +116,6 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
-
-    # THEN action of the case should NOT be set to running
-    assert rnafusion_context.status_db.family(case_id_success).action is "running"
-
 
 # def test_store_available(
 #     tmpdir_factory,
