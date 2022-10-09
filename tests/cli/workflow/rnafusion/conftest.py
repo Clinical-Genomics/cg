@@ -135,22 +135,6 @@ def fixture_rnafusion_context(
         case=case_enough_reads,
         sample=sample_rnafusion_case_enough_reads,
     )
-    # Create textbook case without enough reads
-    case_not_enough_reads = helpers.add_case(
-        status_db,
-        internal_id="rnafusion_case_not_enough_reads",
-        name="rnafusion_case_not_enough_reads",
-        data_analysis=Pipeline.RNAFUSION,
-    )
-    sample_rnafusion_case_not_enough_reads = helpers.add_sample(
-        status_db,
-        internal_id="sample_rnafusion_case_not_enough_reads",
-        reads=0,
-        sequenced_at=dt.datetime.now(),
-    )
-    helpers.add_relationship(
-        status_db, case=case_not_enough_reads, sample=sample_rnafusion_case_not_enough_reads
-    )
     return cg_context
 
 
