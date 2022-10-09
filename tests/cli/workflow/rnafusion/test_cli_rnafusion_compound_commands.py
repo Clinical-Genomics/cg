@@ -118,67 +118,67 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     assert case_id_success in caplog.text
 
 
-# def test_store_available(
-#     tmpdir_factory,
-#     cli_runner: CliRunner,
-#     rnafusion_context: CGConfig,
-#     real_housekeeper_api,
-#     mock_config,
-#     mock_deliverable,
-#     caplog,
-#     mocker,
-#     hermes_deliverables,
-# ):
-#     """Test to ensure all parts of compound store-available command are executed given ideal conditions
-#     Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
-#     caplog.set_level(logging.INFO)
-#
-#     # GIVEN CASE ID of sample where read counts pass threshold
-#     case_id_success = "rnafusion_case_enough_reads"
-#
-#     # GIVEN CASE ID where analysis finish is not mocked
-#     case_id_fail = "rnafusion_case_not_finished"
-#
-#     # Ensure the config is mocked for fail case to run compound command
-#     Path.mkdir(
-#         Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
-#         exist_ok=True,
-#     )
-#     Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).touch(
-#         exist_ok=True
-#     )
-#
-#     # GIVEN that HermesAPI returns a deliverables output
-#     mocker.patch.object(HermesApi, "convert_deliverables")
-#     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-#     #
-#     # Ensure case was successfully picked up by start-available and status set to running
-#     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
-#     rnafusion_context.status_db.family(case_id_success).action = "running"
-#     rnafusion_context.status_db.commit()
-#
-#     # THEN command exits with 1 because one of the cases threw errors
-#     assert result.exit_code == 1
-#     assert case_id_success in caplog.text
-#     assert rnafusion_context.status_db.family(case_id_success).action == "running"
-#
-#     rnafusion_context.housekeeper_api_ = real_housekeeper_api
-#     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
-#
-#     # WHEN running command
-#     result = cli_runner.invoke(store_available, obj=rnafusion_context)
-#
-#     # THEN command exits successfully
-#     assert result.exit_code == 0
-#
-#     # THEN case id with analysis_finish gets picked up
-#     assert case_id_success in caplog.text
-#
-#     # THEN case has analyses
-#     assert rnafusion_context.status_db.family(case_id_success).analyses
-#
-#     # THEN bundle can be found in Housekeeper
-#     assert rnafusion_context.housekeeper_api.bundle(case_id_success)
-#
-#     # THEN bundle added successfully and action set to None
-#     assert rnafusion_context.status_db.family(case_id_success).action is None
+def test_store_available(
+    tmpdir_factory,
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    real_housekeeper_api,
+    mock_config,
+    mock_deliverable,
+    caplog,
+    mocker,
+    hermes_deliverables,
+):
+    """Test to ensure all parts of compound store-available command are executed given ideal conditions
+    Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN CASE ID of sample where read counts pass threshold
+    case_id_success = "rnafusion_case_enough_reads"
+
+    # GIVEN CASE ID where analysis finish is not mocked
+    case_id_fail = "rnafusion_case_not_finished"
+
+    # Ensure the config is mocked for fail case to run compound command
+    Path.mkdir(
+        Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
+        exist_ok=True,
+    )
+    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).touch(
+        exist_ok=True
+    )
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+    #
+    # Ensure case was successfully picked up by start-available and status set to running
+    result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
+    rnafusion_context.status_db.family(case_id_success).action = "running"
+    rnafusion_context.status_db.commit()
+
+    # THEN command exits with 1 because one of the cases threw errors
+    assert result.exit_code == 1
+    assert case_id_success in caplog.text
+    assert rnafusion_context.status_db.family(case_id_success).action == "running"
+
+    rnafusion_context.housekeeper_api_ = real_housekeeper_api
+    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # WHEN running command
+    result = cli_runner.invoke(store_available, obj=rnafusion_context)
+
+    # THEN command exits successfully
+    assert result.exit_code == 0
+
+    # THEN case id with analysis_finish gets picked up
+    assert case_id_success in caplog.text
+
+    # THEN case has analyses
+    assert rnafusion_context.status_db.family(case_id_success).analyses
+
+    # THEN bundle can be found in Housekeeper
+    assert rnafusion_context.housekeeper_api.bundle(case_id_success)
+
+    # THEN bundle added successfully and action set to None
+    assert rnafusion_context.status_db.family(case_id_success).action is None
