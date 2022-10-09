@@ -92,9 +92,6 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     # GIVEN CASE ID of sample where read counts pass threshold
     case_id_success = "rnafusion_case_enough_reads"
 
-    # GIVEN CASE ID where read counts did not pass the threshold
-    case_id_fail = "no_sample_case"
-
     # Ensure the config is mocked to run compound command
     Path.mkdir(
         Path(
@@ -113,17 +110,14 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     # WHEN running command
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
 
-    # THEN command exits with 1 because one of cases raised errors
-    assert result.exit_code == 1
+    # THEN command exits with 0
+    assert result.exit_code == 0
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
 
-    # THEN the ineligible case should NOT be ran
-    assert case_id_fail not in caplog.text
-
     # THEN action of the case should NOT be set to running
-    assert rnafusion_context.status_db.family(case_id_fail).action is None
+    assert rnafusion_context.status_db.family(case_id_success).action is "running"
 
 
 # def test_store_available(
