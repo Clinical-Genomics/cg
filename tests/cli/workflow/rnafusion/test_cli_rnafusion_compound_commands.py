@@ -67,7 +67,7 @@ def test_store(
     # Make sure the bundle was not present in hk
     assert not rnafusion_context.housekeeper_api.bundle(case_id)
 
-    # Make sure  analysis not already stored in status_db
+    # Make sure analysis not already stored in status_db
     assert not rnafusion_context.status_db.family(case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
@@ -116,6 +116,7 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
+
 
 # def test_store_available(
 #     tmpdir_factory,

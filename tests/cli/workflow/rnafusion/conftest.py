@@ -29,7 +29,7 @@ def rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 @pytest.fixture(name="rnafusion_case_id")
 def fixture_rnafusion_case_id() -> str:
-    return "case_rnafusion_enough_reads"
+    return "rnafusion_case_enough_reads"
 
 
 @pytest.fixture(name="rnafusion_housekeeper_dir")
