@@ -74,8 +74,8 @@ class AnalysisAPI(MetaAPI):
 
     def verify_case_path_exists(self, case_id: str) -> None:
         if not self.get_case_path(case_id=case_id).exists():
-            LOG.error("Working directory path for %s does not exist", case_id)
-            raise CgError("No working directory for %s exists", case_id)
+            LOG.error(f"No working directory for {case_id} exists")
+            raise CgError(f"No working directory for {case_id} exists")
 
     def all_flowcells_on_disk(self, case_id: str) -> bool:
         """Check if flowcells are on disk for sample before starting the analysis.
