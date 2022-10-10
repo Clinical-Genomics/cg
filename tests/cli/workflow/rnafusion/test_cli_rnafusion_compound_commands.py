@@ -7,11 +7,7 @@ from cg.cli.workflow.rnafusion.base import rnafusion, start, store, start_availa
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-
-
-EXIT_SUCCESS = 0
-EXIT_FAIL = 1
-
+from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""

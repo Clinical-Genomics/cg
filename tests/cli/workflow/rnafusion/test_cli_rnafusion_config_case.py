@@ -6,8 +6,7 @@ from cg.cli.workflow.rnafusion.base import config_case
 from click.testing import CliRunner
 
 from cg.models.cg_config import CGConfig
-
-EXIT_SUCCESS = 0
+from cg.constants import EXIT_SUCCESS
 
 LOG = logging.getLogger(__name__)
 
