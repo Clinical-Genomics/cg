@@ -42,14 +42,14 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
 
     case: models.Family = get_observations_case(context, case_id, upload=True)
     if not case.customer.loqus_upload:
-        LOG.error(
+        LOG.warning(
             f"Customer {case.customer.internal_id} is not whitelisted for upload to Loqusdb. Canceling upload for "
             f"case {case.internal_id}."
         )
         raise LoqusdbUploadError
 
     if not LinkHelper.is_all_samples_non_tumour(case.links):
-        LOG.error(f"Case {case.internal_id} has tumor samples. Cancelling its upload.")
+        LOG.warning(f"Case {case.internal_id} has tumor samples. Cancelling its upload.")
         raise LoqusdbUploadError
     return case
 

@@ -40,7 +40,7 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
     if dry_run:
         LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
         return
-    with contextlib.suppress(DuplicateRecordError, DuplicateSampleError):
+    with contextlib.suppress(DuplicateRecordError, DuplicateSampleError, LoqusdbUploadError):
         observations_api.process(case.analyses[0])
 
 
