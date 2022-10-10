@@ -92,7 +92,8 @@ class UploadObservationsAPI:
         # check if some sample has already been uploaded
         for link in analysis_obj.family.links:
             if link.sample.loqusdb_id:
-                raise DuplicateRecordError(f"{link.sample.internal_id} already in LoqusDB")
+                LOG.info(f"{link.sample.internal_id} already in LoqusDB")
+                raise DuplicateRecordError
         results = self.get_input(analysis_obj)
         self.upload(results)
         case_obj = self.loqusdb.get_case(analysis_obj.family.internal_id)
