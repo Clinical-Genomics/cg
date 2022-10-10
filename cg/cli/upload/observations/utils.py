@@ -6,7 +6,7 @@ from alchy import Query
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import CaseNotFoundError, LoqusdbUploadError
+from cg.exc import CaseNotFoundError, CustomerPermissionError, DataIntegrityError
 from cg.meta.upload.observations.observations_api import UploadObservationsAPI
 from cg.store import models, Store
 
@@ -46,11 +46,11 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
             f"Customer {case.customer.internal_id} is not whitelisted for upload to Loqusdb. Canceling upload for "
             f"case {case.internal_id}."
         )
-        raise LoqusdbUploadError
+        raise CustomerPermissionError
 
     if not LinkHelper.is_all_samples_non_tumour(case.links):
         LOG.error(f"Case {case.internal_id} has tumor samples. Cancelling its upload.")
-        raise LoqusdbUploadError
+        raise DataIntegrityError
     return case
 
 
@@ -83,7 +83,7 @@ def get_observations_api(context: CGConfig, case: models.Family) -> UploadObserv
         LOG.error(
             f"Case {case.internal_id} has an undetermined analysis type or mixed analyses. Cancelling its upload."
         )
-        raise LoqusdbUploadError
+        raise DataIntegrityError
 
     analysis_type: SequencingMethod = analysis_types[0]
     return UploadObservationsAPI(

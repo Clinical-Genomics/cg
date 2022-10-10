@@ -10,7 +10,14 @@ from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
 from cg.cli.upload.observations.utils import get_observations_case_to_upload, get_observations_api
-from cg.exc import DuplicateRecordError, DuplicateSampleError, CaseNotFoundError, LoqusdbUploadError
+from cg.exc import (
+    DuplicateRecordError,
+    DuplicateSampleError,
+    CaseNotFoundError,
+    LoqusdbUploadError,
+    CustomerPermissionError,
+    DataIntegrityError,
+)
 from cg.meta.upload.observations.observations_api import UploadObservationsAPI
 from cg.store import models, Store
 
@@ -34,13 +41,16 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
 
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
 
-    case: models.Family = get_observations_case_to_upload(context, case_id)
-    observations_api: UploadObservationsAPI = get_observations_api(context, case)
+    with contextlib.suppress(
+        DuplicateRecordError, DuplicateSampleError, CustomerPermissionError, DataIntegrityError
+    ):
+        case: models.Family = get_observations_case_to_upload(context, case_id)
+        observations_api: UploadObservationsAPI = get_observations_api(context, case)
 
-    if dry_run:
-        LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
-        return
-    with contextlib.suppress(DuplicateRecordError, DuplicateSampleError):
+        if dry_run:
+            LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
+            return
+
         observations_api.process(case.analyses[0])
 
 
@@ -70,5 +80,7 @@ def available_observations(context: click.Context, pipeline: Optional[Pipeline],
             FileNotFoundError,
             DuplicateRecordError,
             DuplicateSampleError,
+            CustomerPermissionError,
+            DataIntegrityError,
         ):
             continue
