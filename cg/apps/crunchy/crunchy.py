@@ -245,6 +245,7 @@ class CrunchyAPI:
                 log_dir=log_dir.as_posix(),
                 memory=50,
                 number_tasks=12,
+                quality_of_service=SlurmQos.MAINTENANCE,
             )
         else:
             commands = FASTQ_TO_SPRING_COMMANDS.format(
