@@ -12,6 +12,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 EXIT_SUCCESS = 0
 EXIT_FAIL = 1
 
+
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
     # GIVEN no arguments or options besides the command call
@@ -86,7 +87,9 @@ def test_store(
     assert rnafusion_context.status_db.family(case_id).analyses
     assert rnafusion_context.housekeeper_api.bundle(case_id)
     result_fail = cli_runner.invoke(store, [case_id_fail], obj=rnafusion_context)
-    assert result_fail.exit_core == EXIT_FAIL
+    assert result_fail.exit_code == EXIT_FAIL
+
+
 #
 def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog, mocker):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
