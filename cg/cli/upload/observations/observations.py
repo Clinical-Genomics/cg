@@ -41,15 +41,16 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
 
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
 
-    case: models.Family = get_observations_case_to_upload(context, case_id)
-    observations_api: UploadObservationsAPI = get_observations_api(context, case)
-
-    if dry_run:
-        LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
-        return
     with contextlib.suppress(
         DuplicateRecordError, DuplicateSampleError, CustomerPermissionError, DataIntegrityError
     ):
+        case: models.Family = get_observations_case_to_upload(context, case_id)
+        observations_api: UploadObservationsAPI = get_observations_api(context, case)
+
+        if dry_run:
+            LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
+            return
+
         observations_api.process(case.analyses[0])
 
 
