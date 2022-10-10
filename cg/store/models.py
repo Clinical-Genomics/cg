@@ -118,13 +118,13 @@ class Application(Model):
 
     @property
     def analysis_type(self):
-        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING:
+        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
             return self.prep_category
 
         return (
-            PrepCategory.WHOLE_GENOME_SEQUENCING
-            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
-            else PrepCategory.WHOLE_EXOME_SEQUENCING
+            PrepCategory.WHOLE_GENOME_SEQUENCING.value
+            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING.value
+            else PrepCategory.WHOLE_EXOME_SEQUENCING.value
         )
 
 
