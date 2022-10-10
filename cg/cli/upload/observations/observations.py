@@ -80,5 +80,7 @@ def available_observations(context: click.Context, pipeline: Optional[Pipeline],
             FileNotFoundError,
             DuplicateRecordError,
             DuplicateSampleError,
+            CustomerPermissionError,
+            DataIntegrityError,
         ):
             continue
