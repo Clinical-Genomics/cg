@@ -7,7 +7,7 @@ from typing import List, Optional, Tuple, Union
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline, Priority
-from cg.constants.priority import SlurmQos, PRIORITY_TO_SLURM_QOS
+from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -75,7 +75,7 @@ class AnalysisAPI(MetaAPI):
     def verify_case_path_exists(self, case_id: str) -> None:
         if not self.get_case_path(case_id=case_id).exists():
             LOG.error("Working directory path for %s does not exist", case_id)
-            raise CgError()
+            raise CgError("No working directory for %s exists", case_id)
 
     def all_flowcells_on_disk(self, case_id: str) -> bool:
         """Check if flowcells are on disk for sample before starting the analysis.
