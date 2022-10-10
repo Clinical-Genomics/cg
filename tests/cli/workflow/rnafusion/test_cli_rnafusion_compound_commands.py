@@ -87,7 +87,7 @@ def test_store(
     assert rnafusion_context.status_db.family(case_id).analyses
     assert rnafusion_context.housekeeper_api.bundle(case_id)
     result_fail = cli_runner.invoke(store, [case_id_fail], obj=rnafusion_context)
-    assert result_fail.exit_code == EXIT_FAIL
+    assert result_fail.exit_code != EXIT_SUCCESS
 
 
 #
