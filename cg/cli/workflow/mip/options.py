@@ -6,9 +6,7 @@ EMAIL_OPTION = click.option("-e", "--email", help="Email to send errors to", typ
 QOS_OPTION = click.option(
     "-qos",
     "--slurm-quality-of-service",
-    type=click.Choice(
-        [SlurmQos.MAINTENANCE, SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH, SlurmQos.EXPRESS]
-    ),
+    type=click.Choice([SlurmQos.LOW, SlurmQos.NORMAL, SlurmQos.HIGH, SlurmQos.EXPRESS]),
 )
 START_AFTER_PROGRAM = click.option(
     "-sa", "--start-after", help="Start mip after this program.", type=str
