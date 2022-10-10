@@ -268,30 +268,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def verify_deliverables_file_exists(self, case_id: str):
         NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
 
-    # def replace_in_dataframe(self, dataframe: pd.DataFrame, replace_map: dict) -> pd.DataFrame:
-    #     for str_to_replace, with_value in replace_map.items():
-    #         dataframe = dataframe.replace(str_to_replace, with_value, regex=True)
-    #     return dataframe
-
-    # def parse_template_deliverables_file(
-    #     self, case_id: str, deliverables_template: pd.DataFrame
-    # ) -> pd.DataFrame:
-    #     """Replace PATHTOCASE and CASEID from template deliverables file
-    #     to corresponding strings, add path_index column."""
-    #     replace_map: dict = {
-    #         "PATHTOCASE": str(NextflowAnalysisAPI.get_case_path(case_id, self.root_dir)),
-    #         "CASEID": case_id,
-    #     }
-    #
-    #     deliverables_template = self.replace_in_dataframe(deliverables_template, replace_map)
-    #
-    #     deliverables_template["path_index"] = "~"
-    #     return deliverables_template
-
-    # def convert_deliverables_dataframe(self, dataframe: pd.DataFrame) -> dict:
-    #     """Convert deliverables dataframe."""
-    #     return dataframe.to_dict(orient="records").replace("'~'", "~")
-
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
         deliverables_content: dict = NextflowAnalysisAPI.get_template_deliverables_file_content(

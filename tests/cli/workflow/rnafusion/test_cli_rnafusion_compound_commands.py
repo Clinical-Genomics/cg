@@ -142,15 +142,6 @@ def test_store_available(
     # GIVEN CASE ID of sample where read counts pass threshold
     case_id_success = "rnafusion_case_enough_reads"
 
-    # # Ensure the config is mocked for fail case to run compound command
-    # Path.mkdir(
-    #     Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
-    #     exist_ok=True,
-    # )
-    # Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).touch(
-    #     exist_ok=True
-    # )
-
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
