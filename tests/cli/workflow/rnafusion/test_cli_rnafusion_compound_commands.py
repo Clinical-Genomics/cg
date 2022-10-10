@@ -10,7 +10,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 
 
 EXIT_SUCCESS = 0
-
+EXIT_FAIL = 1
 
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
     """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
@@ -60,6 +60,9 @@ def test_store(
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
     case_id = "rnafusion_case_enough_reads"
 
+    # GIVEN CASE ID where analysis finish is not mocked
+    case_id_fail = "rnafusion_case_not_finished"
+
     # Set Housekeeper to an empty real Housekeeper store
     rnafusion_context.housekeeper_api_ = real_housekeeper_api
     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
@@ -82,8 +85,8 @@ def test_store(
     assert "Analysis successfully stored in StatusDB" in caplog.text
     assert rnafusion_context.status_db.family(case_id).analyses
     assert rnafusion_context.housekeeper_api.bundle(case_id)
-
-
+    result_fail = cli_runner.invoke(store, [case_id_fail], obj=rnafusion_context)
+    assert result_fail.exit_core == EXIT_FAIL
 #
 def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog, mocker):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
@@ -112,7 +115,7 @@ def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
 
     # THEN command exits with 0
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should successfully identify the one case eligible for auto-start
     assert case_id_success in caplog.text
@@ -136,17 +139,14 @@ def test_store_available(
     # GIVEN CASE ID of sample where read counts pass threshold
     case_id_success = "rnafusion_case_enough_reads"
 
-    # GIVEN CASE ID where analysis finish is not mocked
-    case_id_fail = "rnafusion_case_not_finished"
-
-    # Ensure the config is mocked for fail case to run compound command
-    Path.mkdir(
-        Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
-        exist_ok=True,
-    )
-    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).touch(
-        exist_ok=True
-    )
+    # # Ensure the config is mocked for fail case to run compound command
+    # Path.mkdir(
+    #     Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).parent,
+    #     exist_ok=True,
+    # )
+    # Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_fail)).touch(
+    #     exist_ok=True
+    # )
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -157,8 +157,8 @@ def test_store_available(
     rnafusion_context.status_db.family(case_id_success).action = "running"
     rnafusion_context.status_db.commit()
 
-    # THEN command exits with 1 because one of the cases threw errors
-    assert result.exit_code == 1
+    # THEN command exits with 0
+    assert result.exit_code == EXIT_SUCCESS
     assert case_id_success in caplog.text
     assert rnafusion_context.status_db.family(case_id_success).action == "running"
 
@@ -169,7 +169,7 @@ def test_store_available(
     result = cli_runner.invoke(store_available, obj=rnafusion_context)
 
     # THEN command exits successfully
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN case id with analysis_finish gets picked up
     assert case_id_success in caplog.text
