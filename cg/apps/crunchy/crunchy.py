@@ -210,7 +210,7 @@ class CrunchyAPI:
 
     # These are the compression/decompression methods
     def fastq_to_spring(self, compression_obj: CompressionData, sample_id: str = "") -> int:
-        """Compress FASTQ files into SPRING by sending to sbatch SLURM. """
+        """Compress FASTQ files into SPRING by sending to sbatch SLURM."""
         CrunchyAPI.create_pending_file(
             pending_path=compression_obj.pending_path, dry_run=self.dry_run
         )
