@@ -445,7 +445,8 @@ class AnalysisAPI(MetaAPI):
         try:
             self.verify_case_path_exists(case_id=case_id)
         except FileNotFoundError:
-            self.clean_analyses(case_id)
+            if not dry_run:
+                self.clean_analyses(case_id)
 
         analysis_path: Path = self.get_case_path(case_id)
 
