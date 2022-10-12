@@ -1,12 +1,12 @@
 import logging
 
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type
 
 from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
+from cg.constants import COLLABORATORS, COMBOS, MasterList, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.tags import HkMipAnalysisTag
 from cg.exc import CgError
@@ -159,8 +159,8 @@ class MipAnalysisAPI(AnalysisAPI):
     def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
         """Convert between default panels and all panels included in gene list."""
         # check if all default panels are part of master list
-        if customer in COLLABORATORS and all(panel in MASTER_LIST for panel in default_panels):
-            return MASTER_LIST
+        if customer in COLLABORATORS and all(panel in dir(MasterList) for panel in default_panels):
+            return dir(MasterList)
 
         # the rest are handled the same way
         all_panels = set(default_panels)
@@ -172,7 +172,7 @@ class MipAnalysisAPI(AnalysisAPI):
                     all_panels.add(extra_panel)
 
         # add OMIM to every panel choice
-        all_panels.add("OMIM-AUTO")
+        all_panels.add(MasterList.OMIM_AUTO)
 
         return list(all_panels)
 
