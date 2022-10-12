@@ -1,53 +1,46 @@
+"""Loqusdb input files models."""
+
+import logging
 from pathlib import Path
 from typing import Optional
 
 from pydantic import BaseModel, validator
 
-from cg.constants.observations import ObservationAnalysisTag
+
+LOG = logging.getLogger(__name__)
 
 
-def check_observation_file_from_hk(file_tag: str, file: Path) -> bool:
-    """Check if file exists in HK and file system"""
-    if file is None:
-        raise FileNotFoundError(f"No file with {file_tag} tag in housekeeper")
-    if not file.exists():
-        raise FileNotFoundError(f"{file} does not exist")
-    return True
+def validate_observations_file(file: Path) -> Path:
+    """Check if file exists in file system."""
+    if file and not file.exists():
+        LOG.error(f"File {file} could not be found if file system")
+        raise FileNotFoundError
+
+    return file
 
 
 class ObservationsInputFiles(BaseModel):
-    """Model for validating input files to Loqus"""
+    """Model for validating Loqusdb input files."""
 
     case_id: str
-    pedigree: Path
-    snv_gbcf: Path
-    snv_vcf: Path
-    sv_vcf: Optional[Path] = None
+    vcf_path: Path
+    profile_vcf_path: Path
+    sv_vcf_path: Optional[Path] = None
 
-    @validator("pedigree", always=True)
-    def check_pedigree(cls, value) -> Path:
-        """Check pedigree file exists in HK and file system"""
-        if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.PEDIGREE, file=value):
-            return value
+    _file_path = validator(
+        "vcf_path", "profile_vcf_path", "sv_vcf_path", always=False, allow_reuse=True
+    )(validate_observations_file)
 
-    @validator("snv_gbcf", always=True)
-    def check_snv_gbcf(cls, value) -> Path:
-        """Check snv_gbcf file exists in HK and file system"""
-        if check_observation_file_from_hk(
-            file_tag=ObservationAnalysisTag.CHECK_PROFILE_GBCF, file=value
-        ):
-            return value
 
-    @validator("snv_vcf", always=True)
-    def check_snv_vcf(cls, value) -> Path:
-        """Check snv_vcf file exists in HK and file system"""
-        if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.SNV_VARIANTS, file=value):
-            return value
+class MipDNAObservationsInputFiles(ObservationsInputFiles):
+    """Model for validating rare disease Loqusdb input files."""
 
-    @validator("sv_vcf", always=True)
-    def check_sv_vcf(cls, value) -> Path:
-        """Check sv_vcf file exists in HK and file system"""
-        if not value:
-            return value
-        if check_observation_file_from_hk(file_tag=ObservationAnalysisTag.SV_VARIANTS, file=value):
-            return value
+    family_ped_path: Path
+
+    _file_path = validator("family_ped_path", always=False, allow_reuse=True)(
+        validate_observations_file
+    )
+
+
+class BalsamicObservationsInputFiles(ObservationsInputFiles):
+    """Model for validating cancer Loqusdb input files."""
