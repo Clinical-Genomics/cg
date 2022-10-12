@@ -78,8 +78,8 @@ class AnalysisAPI(MetaAPI):
 
     def verify_case_path_exists(self, case_id: str) -> None:
         if not self.get_case_path(case_id=case_id).exists():
-            LOG.error(f"No working directory for {case_id} exists")
-            raise CgError(f"No working directory for {case_id} exists")
+            LOG.info(f"No working directory for {case_id} exists")
+            raise FileNotFoundError(f"No working directory for {case_id} exists")
 
     def all_flowcells_on_disk(self, case_id: str) -> bool:
         """Check if flowcells are on disk for sample before starting the analysis.
@@ -431,16 +431,22 @@ class AnalysisAPI(MetaAPI):
     def clean_analyses(self, case_id: str) -> None:
         """Add a cleaned at date for all analyses related to a case."""
         analyses: list = self.status_db.family(case_id).analyses
+        LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False) -> None:
+    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False):
         """Remove workflow run directory."""
 
         self.verify_case_id_in_statusdb(case_id)
         self.check_analysis_ongoing(case_id=case_id)
-        self.verify_case_path_exists(case_id=case_id)
+
+        try:
+            self.verify_case_path_exists(case_id=case_id)
+        except FileNotFoundError:
+            self.clean_analyses(case_id)
+
         analysis_path: Path = self.get_case_path(case_id)
 
         if dry_run:
@@ -456,3 +462,5 @@ class AnalysisAPI(MetaAPI):
 
             shutil.rmtree(analysis_path, ignore_errors=True)
             LOG.info("Cleaned %s", analysis_path)
+            self.clean_analyses(case_id=case_id)
+            return EXIT_SUCCESS

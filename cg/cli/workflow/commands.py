@@ -164,7 +164,6 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.clean_run_dir(case_id=case_id, yes=yes, dry_run=dry_run)
-    analysis_api.clean_analyses(case_id)
 
 
 @click.command("past-run-dirs")
