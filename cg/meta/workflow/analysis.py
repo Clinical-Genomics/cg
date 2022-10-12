@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
+import shutil
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline, Priority
@@ -15,6 +16,9 @@ from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import Bundle, Version
+from cg.utils import click
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+
 
 LOG = logging.getLogger(__name__)
 
@@ -423,3 +427,32 @@ class AnalysisAPI(MetaAPI):
         """Parses output analysis files"""
 
         raise NotImplementedError
+
+    def clean_analyses(self, case_id: str) -> None:
+        """Add a cleaned at date for all analyses related to a case."""
+        analyses: list = self.status_db.family(case_id).analyses
+        for analysis_obj in analyses:
+            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
+            self.status_db.commit()
+
+    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False) -> None:
+        """Remove workflow run directory."""
+
+        self.verify_case_id_in_statusdb(case_id)
+        self.check_analysis_ongoing(case_id=case_id)
+        self.verify_case_path_exists(case_id=case_id)
+        analysis_path: Path = self.get_case_path(case_id)
+
+        if dry_run:
+            LOG.info(f"Would have deleted: {analysis_path}")
+            return EXIT_SUCCESS
+
+        if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
+            if analysis_path.is_symlink():
+                LOG.warning(
+                    f"Will not automatically delete symlink: {analysis_path}, delete it manually",
+                )
+                return EXIT_FAIL
+
+            shutil.rmtree(analysis_path, ignore_errors=True)
+            LOG.info("Cleaned %s", analysis_path)

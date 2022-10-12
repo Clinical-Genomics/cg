@@ -9,6 +9,7 @@
 import logging
 import os
 import re
+import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -23,6 +24,7 @@ from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 from cg.constants import Priority
 
@@ -69,10 +71,42 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         )
 
         if len(case_path_list) == 0:
-            LOG.error("There is no case paths for case %s", case_id)
-            raise FileNotFoundError
+            LOG.info(
+                f"There is no case paths for case {case_id}. Setting cleaned at to {datetime.now()}"
+            )
+            self.clean_analyses(case_id)
 
         return case_path_list
+
+    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False) -> None:
+        """Remove workflow run directories for a MicroSALT case."""
+
+        self.verify_case_id_in_statusdb(case_id)
+        self.check_analysis_ongoing(case_id=case_id)
+
+        try:
+            case_path_list: List[Path] = self.get_case_path(case_id=case_id)
+        except FileNotFoundError:
+            return EXIT_FAIL
+
+        if dry_run:
+            LOG.info(f"Would have deleted: {case_path_list}")
+            return EXIT_SUCCESS
+
+        for analysis_path in case_path_list:
+            self.verify_case_path_exists(case_id=case_id)
+
+            if yes or click.confirm(
+                f"Are you sure you want to remove all files in {analysis_path}?"
+            ):
+                if analysis_path.is_symlink():
+                    LOG.warning(
+                        f"Will not automatically delete symlink: {analysis_path}, delete it manually",
+                    )
+                    return EXIT_FAIL
+
+                shutil.rmtree(analysis_path, ignore_errors=True)
+                LOG.info("Cleaned %s", analysis_path)
 
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
