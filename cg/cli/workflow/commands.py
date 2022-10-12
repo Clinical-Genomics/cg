@@ -168,11 +168,8 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
     if analysis_api.pipeline == Pipeline.MICROSALT:
-        print("We are insdide clea_run_dir for microsalt")
         try:
             case_path_list: List[Path] = analysis_api.get_case_path(case_id=case_id)
-            print(case_path_list)
-
         except FileNotFoundError:
             return EXIT_FAIL
 
@@ -180,13 +177,11 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
             LOG.info(f"Would have deleted: {case_path_list}")
             return EXIT_SUCCESS
 
-        print("Just before looping through microsalt list")
-
         for analysis_path in case_path_list:
             analysis_api.verify_case_path_exists(case_id=case_id)
 
             if yes or click.confirm(
-                    f"Are you sure you want to remove all files in {analysis_path}?"
+                f"Are you sure you want to remove all files in {analysis_path}?"
             ):
                 if analysis_path.is_symlink():
                     LOG.warning(
@@ -227,7 +222,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def past_run_dirs(
-        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of old case run dirs."""
 
@@ -257,7 +252,7 @@ def past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def balsamic_past_run_dirs(
-        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Balsamic case run dirs."""
 
@@ -272,7 +267,7 @@ def balsamic_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def fluffy_past_run_dirs(
-        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" Fluffy case run dirs."""
 
@@ -287,7 +282,7 @@ def fluffy_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mip_past_run_dirs(
-        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MIP case run dirs."""
 
@@ -302,7 +297,7 @@ def mip_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def mutant_past_run_dirs(
-        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" MUTANT case run dirs."""
 
@@ -317,7 +312,7 @@ def mutant_past_run_dirs(
 @ARGUMENT_BEFORE_STR
 @click.pass_context
 def microsalt_past_run_dirs(
-        context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
     """Clean up of "old" microSALT case run dirs."""
 

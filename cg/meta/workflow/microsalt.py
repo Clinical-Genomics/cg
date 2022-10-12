@@ -61,22 +61,20 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return self._process
 
     def get_case_path(self, case_id: str) -> List[Path]:
-        print("We are in get case path for microsalt")
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
-        lims_project += "_*"
 
-        case_path_list: List[Path] = [Path(case_path) for case_path in glob.glob(f"{self.root_dir}/results/{lims_project}", recursive=True)]
-        print(f"{self.root_dir}/results/{lims_project}")
-        print(type(case_path_list))
-        print(type(case_path_list[0]))
-        print(case_path_list[0])
+        case_path_list: List[Path] = [
+            Path(case_path)
+            for case_path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+        ]
 
         if len(case_path_list) == 0:
             LOG.error("There is no case paths for case %s", case_id)
             raise FileNotFoundError
 
         return case_path_list
+
     def get_case_fastq_path(self, case_id: str) -> Path:
         return Path(self.root_dir, "fastq", case_id)
 
