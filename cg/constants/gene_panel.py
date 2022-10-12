@@ -8,6 +8,7 @@ GENOME_BUILD_38 = "GRCh38"
 class MasterList(StrEnum):
     BRAIN: str = "BRAIN"
     CARDIOLOGY: str = "Cardiology"
+    CH: str = "CH"
     CTD: str = "CTD"
     DIAB: str = "DIAB"
     ENDO: str = "ENDO"
@@ -28,3 +29,4 @@ class MasterList(StrEnum):
     PIDCAD: str = "PIDCAD"
     OMIM_AUTO: str = "OMIM-AUTO"
     SKD: str = "SKD"
+    
