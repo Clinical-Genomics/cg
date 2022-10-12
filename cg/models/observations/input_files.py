@@ -22,13 +22,12 @@ def validate_observations_file(file: Path) -> Path:
 class ObservationsInputFiles(BaseModel):
     """Model for validating Loqusdb input files."""
 
-    case_id: str
-    vcf_path: Path
+    snv_vcf_path: Path
     profile_vcf_path: Path
     sv_vcf_path: Optional[Path] = None
 
     _file_path = validator(
-        "vcf_path", "profile_vcf_path", "sv_vcf_path", always=False, allow_reuse=True
+        "snv_vcf_path", "profile_vcf_path", "sv_vcf_path", always=False, allow_reuse=True
     )(validate_observations_file)
 
 

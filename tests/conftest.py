@@ -1296,13 +1296,12 @@ def fixture_cg_context(
     return cg_config
 
 
-@pytest.fixture(name="observation_input_files_raw")
-def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict:
-    """Raw observations input files."""
+@pytest.fixture(name="mip_dna_observation_input_files")
+def fixture_mip_dna_observation_input_files(case_id: str, filled_file: Path) -> dict:
+    """Raw observations input files for rare diseases."""
     return {
-        "case_id": case_id,
-        "pedigree": filled_file,
-        "snv_gbcf": filled_file,
-        "snv_vcf": filled_file,
-        "sv_vcf": None,
+        "snv_vcf_path": filled_file,
+        "profile_vcf_path": filled_file,
+        "family_ped_path": filled_file,
+        "sv_vcf_path": None,
     }

@@ -28,7 +28,7 @@ def test_instantiate_input_files_missing_field(
     """Tests input files against a pydantic MipDNAObservationsInputFiles with not existent field."""
 
     # GIVEN a dictionary with the basic input files and a file path that does not exist
-    mip_dna_observation_input_files["vcf_path"] = file_does_not_exist
+    mip_dna_observation_input_files["snv_vcf_path"] = file_does_not_exist
 
     # WHEN checking the observation file
 
@@ -36,18 +36,6 @@ def test_instantiate_input_files_missing_field(
     with pytest.raises(FileNotFoundError):
         # WHEN instantiating a ObservationsInputFiles object
         MipDNAObservationsInputFiles(**mip_dna_observation_input_files)
-
-
-def test_input_files_case_id(case_id: str, mip_dna_observation_input_files: dict):
-    """Test case ID assignment."""
-
-    # GIVEN a dictionary with the basic input files
-
-    # WHEN instantiating an observations input files object
-    files_object = MipDNAObservationsInputFiles(**mip_dna_observation_input_files)
-
-    # THEN assert that case ID was set
-    assert files_object.case_id == case_id
 
 
 def test_validate_observations_file(filled_file: Path):
