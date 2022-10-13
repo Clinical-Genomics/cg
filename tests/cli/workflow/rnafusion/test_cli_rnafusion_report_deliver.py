@@ -51,7 +51,7 @@ def test_without_samples(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     assert "no samples" in caplog.text
 
 
-def test_dry_run(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_dry_run(cli_runner: CliRunner, rnafusion_context: CGConfig, mock_analysis_finish, caplog):
     """Test command with case_id and analysis_finish which should execute successfully"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id

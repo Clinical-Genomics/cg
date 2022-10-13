@@ -43,7 +43,7 @@ class NextflowAnalysisAPI:
     def verify_analysis_finished(cls, case_id: str, root_dir: str) -> None:
         if not Path(cls.get_software_version_path(case_id=case_id, root_dir=root_dir)).exists():
             raise ValueError(
-                f"Analysis not finished: pipeline_info/software_versions.yml file found for case {case_id}"
+                f"Analysis not finished: pipeline_info/software_versions.yml file not found for case {case_id}"
             )
 
     @classmethod
