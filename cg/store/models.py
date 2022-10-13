@@ -377,6 +377,16 @@ class Family(Model, PriorityMixin):
         """Get samples in a case."""
         return [link.sample for link in self.links]
 
+    @property
+    def get_tumour_samples(self) -> List[str]:
+        """Return tumour samples from a case."""
+        return [link.sample for link in self.links if link.sample.is_tumour]
+
+    @property
+    def get_loqusdb_uploaded_samples(self) -> List[str]:
+        """Return samples uploaded to Loqusdb."""
+        return [link.sample for link in self.links if link.sample.loqusdb_id]
+
     def get_delivery_arguments(self) -> Set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
         delivery_arguments: Set[str] = set()
