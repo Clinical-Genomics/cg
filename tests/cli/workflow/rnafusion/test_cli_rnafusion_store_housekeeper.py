@@ -49,9 +49,7 @@ def test_with_missing_case(cli_runner: CliRunner, rnafusion_context: CGConfig, c
     assert "could not be found" in caplog.text
 
 
-def test_case_without_deliverables_file(
-    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog
-):
+def test_case_without_deliverables_file(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
     """Test command with case_id and config file but no analysis_finish"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
