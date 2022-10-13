@@ -64,7 +64,7 @@ def test_case_not_finished(cli_runner: CliRunner, rnafusion_context: CGConfig, c
     # THEN warning should be printed that no analysis_finish is found
     assert (
         "Analysis not finished: pipeline_info/software_versions.yml file not found for case"
-        in caplog.text
+        in result.output
     )
 
 
@@ -175,4 +175,4 @@ def test_valid_case_already_added(
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN user should be informed that bundle was already added
-    assert "Bundle already added" in caplog.text
+    assert "Bundle already added" in result.output
