@@ -66,9 +66,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        case_path_list: List[Path] = glob.glob(
-            f"{self.root_dir}/results/{lims_project}_*", recursive=True
-        )
+        case_path_list: List[Path] = [
+            Path(path)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+        ]
 
         return case_path_list
 
