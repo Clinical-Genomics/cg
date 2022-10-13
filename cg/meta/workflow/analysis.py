@@ -441,18 +441,16 @@ class AnalysisAPI(MetaAPI):
 
         self.verify_case_id_in_statusdb(case_id)
         self.check_analysis_ongoing(case_id=case_id)
-
-        try:
-            self.verify_case_path_exists(case_id=case_id)
-        except FileNotFoundError:
-            if not dry_run:
-                self.clean_analyses(case_id)
-
         analysis_path: Path = self.get_case_path(case_id)
 
         if dry_run:
             LOG.info(f"Would have deleted: {analysis_path}")
             return EXIT_SUCCESS
+
+        try:
+            self.verify_case_path_exists(case_id=case_id)
+        except FileNotFoundError:
+            self.clean_analyses(case_id)
 
         if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
             if analysis_path.is_symlink():

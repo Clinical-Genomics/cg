@@ -70,11 +70,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             f"{self.root_dir}/results/{lims_project}_*", recursive=True
         )
 
-        if not case_path_list:
-            LOG.info(
-                f"There is no case paths for case {case_id}. Setting cleaned at to {datetime.now()}"
-            )
-
         return case_path_list
 
     def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False):
@@ -84,6 +79,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         self.check_analysis_ongoing(case_id=case_id)
 
         case_path_list: List[Path] = self.get_case_path(case_id=case_id)
+
+        if not case_path_list:
+            LOG.info(
+                f"There is no case paths for case {case_id}. Setting cleaned at to {datetime.now()}"
+            )
+            if not dry_run:
+                self.clean_analyses(case_id=case_id)
+            return EXIT_SUCCESS
 
         if dry_run:
             LOG.info(f"Would have deleted: {case_path_list}")
@@ -101,7 +104,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
                 shutil.rmtree(analysis_path, ignore_errors=True)
                 LOG.info("Cleaned %s", analysis_path)
+
         self.clean_analyses(case_id=case_id)
+
         return EXIT_SUCCESS
 
     def get_case_fastq_path(self, case_id: str) -> Path:
