@@ -96,7 +96,7 @@ class DuplicateSampleError(CgError):
 
 class DeleteCaseError(CgError):
     """
-    Exception raised when a case cannot be deleted in LoqusDB.
+    Exception raised when a case cannot be deleted from Loqusdb.
     """
 
 
@@ -237,8 +237,8 @@ class DeleteDemuxError(CgError):
     """Raised when there is an issue with wiping a flowcell before start."""
 
 
-class LoqusdbUploadError(CgError):
-    """Exception related to the upload of a case to Loqusdb."""
+class LoqusdbError(CgError):
+    """Exception related to the Loqusdb app."""
 
 
 class CustomerPermissionError(CgError):
