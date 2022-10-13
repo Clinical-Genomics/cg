@@ -100,12 +100,6 @@ class DeleteCaseError(CgError):
     """
 
 
-class DeleteCaseError(CgError):
-    """
-    Exception raised when a case cannot be deleted in LoqusDB.
-    """
-
-
 class EmailNotSentError(CgError):
     """Raised when email not sent."""
 
@@ -251,3 +245,11 @@ class DeleteDemuxError(CgError):
 
 class LoqusdbUploadError(CgError):
     """Exception related to the upload of a case to Loqusdb."""
+
+
+class CustomerPermissionError(CgError):
+    """Exception related to the limited permissions of a customer."""
+
+
+class DataIntegrityError(CgError):
+    """Raised when data integrity is not met."""

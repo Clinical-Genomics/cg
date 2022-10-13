@@ -1,11 +1,13 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
+import typing
+
 import datetime as dt
 import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generator, Dict, List
+from typing import Generator, Dict, List, Any
 
 import pytest
 
@@ -34,7 +36,48 @@ from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
 
+from housekeeper.store import models as hk_models
+
 LOG = logging.getLogger(__name__)
+
+
+# Timestamp fixture
+
+
+@pytest.fixture(scope="function", name="old_timestamp")
+def fixture_old_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format."""
+    return dt.datetime(1900, 1, 1)
+
+
+@pytest.fixture(scope="function", name="timestamp")
+def fixture_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format."""
+    return dt.datetime(2020, 5, 1)
+
+
+@pytest.fixture(scope="function", name="later_timestamp")
+def fixture_later_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format."""
+    return dt.datetime(2020, 6, 1)
+
+
+@pytest.fixture(scope="function", name="timestamp_now")
+def fixture_timestamp_now() -> dt.datetime:
+    """Return a time stamp of today's date in date time format."""
+    return dt.datetime.now()
+
+
+@pytest.fixture(scope="function", name="timestamp_yesterday")
+def fixture_timestamp_yesterday(timestamp_now: dt.datetime) -> dt.datetime:
+    """Return a time stamp of yesterday's date in date time format."""
+    return timestamp_now - dt.timedelta(days=1)
+
+
+@pytest.fixture(scope="function", name="timestamp_in_2_weeks")
+def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
+    """Return a time stamp 14 days ahead in time."""
+    return timestamp_now + dt.timedelta(days=14)
 
 
 # Case fixtures
@@ -42,21 +85,25 @@ LOG = logging.getLogger(__name__)
 
 @pytest.fixture(name="slurm_account")
 def fixture_slurm_account() -> str:
+    """Return a SLURM account."""
     return "super_account"
 
 
 @pytest.fixture(name="user_name")
 def fixture_user_name() -> str:
+    """Return a user name."""
     return "Paul Anderson"
 
 
 @pytest.fixture(name="user_mail")
 def fixture_user_mail() -> str:
+    """Return a user email."""
     return "paul@magnolia.com"
 
 
 @pytest.fixture(name="email_adress")
 def fixture_email_adress() -> str:
+    """Return an email adress."""
     return "james.holden@scilifelab.se"
 
 
@@ -66,10 +113,22 @@ def fixture_case_id() -> str:
     return "yellowhog"
 
 
+@pytest.fixture(name="another_case_id")
+def fixture_another_case_id() -> str:
+    """Return another case id."""
+    return "another_case_id"
+
+
 @pytest.fixture(name="sample_id")
 def fixture_sample_id() -> str:
     """Returns a sample id."""
     return "ADM1"
+
+
+@pytest.fixture(name="sample_name")
+def fixture_sample_name() -> str:
+    """Returns a sample name."""
+    return "a_sample_name"
 
 
 @pytest.fixture(name="cust_sample_id", scope="session")
@@ -90,8 +149,15 @@ def fixture_customer_id() -> str:
     return "cust000"
 
 
+@pytest.fixture(name="sbatch_job_number")
+def fixture_sbatch_job_number() -> int:
+    return 123456
+
+
 @pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) -> dict:
+def fixture_analysis_family_single(
+    case_id: str, family_name: str, sample_id: str, ticket: str
+) -> dict:
     """Build an example case."""
     return {
         "name": family_name,
@@ -104,7 +170,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
             {
                 "name": "proband",
                 "sex": Gender.MALE,
-                "internal_id": "ADM1",
+                "internal_id": sample_id,
                 "status": "affected",
                 "original_ticket": ticket,
                 "reads": 5000000000,
@@ -115,8 +181,8 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
 
 
 @pytest.fixture(scope="function", name="analysis_family")
-def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict:
-    """Return a dictionary with information from a analysis case"""
+def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket: str) -> dict:
+    """Return a dictionary with information from a analysis case."""
     return {
         "name": family_name,
         "internal_id": case_id,
@@ -128,7 +194,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
             {
                 "name": "child",
                 "sex": Gender.MALE,
-                "internal_id": "ADM1",
+                "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
@@ -163,7 +229,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
 
 @pytest.fixture(name="base_config_dict")
 def fixture_base_config_dict() -> dict:
-    """Returns the basic configs necessary for running CG"""
+    """Returns the basic configs necessary for running CG."""
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
@@ -189,9 +255,9 @@ def fixture_cg_config_object(base_config_dict: dict) -> CGConfig:
     return CGConfig(**base_config_dict)
 
 
-@pytest.fixture
-def chanjo_config_dict() -> dict:
-    """Chanjo configs."""
+@pytest.fixture(name="chanjo_config")
+def fixture_chanjo_config() -> Dict[str, Dict[str, str]]:
+    """Chanjo configs"""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
@@ -258,7 +324,6 @@ def madeline_api(madeline_output) -> MockMadelineAPI:
     """madeline_api fixture."""
     _api = MockMadelineAPI()
     _api.set_outpath(madeline_output)
-
     return _api
 
 
@@ -312,8 +377,7 @@ def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
 @pytest.fixture(scope="function", name="project_dir")
 def fixture_project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
-    my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
+    yield Path(tmpdir_factory.mktemp("data"))
 
 
 @pytest.fixture(scope="function")
@@ -331,14 +395,13 @@ def fixture_non_existing_file_path(project_dir: Path) -> Path:
 @pytest.fixture(name="content")
 def fixture_content() -> str:
     """Return some content for a file."""
-    _content = (
+    return (
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
         " ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ull"
         "amco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehende"
         "rit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaec"
         "at cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
     )
-    return _content
 
 
 @pytest.fixture(name="filled_file")
@@ -428,9 +491,9 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 
 
 @pytest.fixture(name="madeline_output")
-def fixture_madeline_output(apps_dir: Path) -> str:
+def fixture_madeline_output(apps_dir: Path) -> Path:
     """Return str of path for file with Madeline output."""
-    return Path(apps_dir, "madeline", "madeline.xml").as_posix()
+    return Path(apps_dir, "madeline", "madeline.xml")
 
 
 # Compression fixtures
@@ -445,14 +508,13 @@ def fixture_run_name() -> str:
 @pytest.fixture(scope="function", name="original_fastq_data")
 def fixture_original_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
     """Return a compression object with a path to the original fastq files."""
-
-    return CompressionData(fastq_dir / run_name)
+    return CompressionData(Path(fastq_dir, run_name))
 
 
 @pytest.fixture(scope="function", name="fastq_stub")
 def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
     """Creates a path to the base format of a fastq run."""
-    return project_dir / run_name
+    return Path(project_dir, run_name)
 
 
 @pytest.fixture(scope="function", name="compression_object")
@@ -512,32 +574,38 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
 
 @pytest.fixture(name="flowcell_full_name")
 def fixture_flowcell_full_name() -> str:
+    """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(name="flowcell_name")
 def fixture_flowcell_name() -> str:
+    """Return flow cell name."""
     return "HVKJCDRXX"
 
 
 @pytest.fixture(name="another_flow_cell_name")
 def fixture_another_flow_cell_name() -> str:
+    """Return another flow cell name."""
     return "HF57HDRXY"
 
 
-# Unknown file fixtures
+# Genotype file fixture
 
 
 @pytest.fixture(name="bcf_file")
 def fixture_bcf_file(apps_dir: Path) -> Path:
-    """Return the path to a bcf file."""
-    return apps_dir / "gt" / "yellowhog.bcf"
+    """Return the path to a BCF file."""
+    return Path(apps_dir, "gt", "yellowhog.bcf")
+
+
+# Housekeeper, Chanjo file fixtures
 
 
 @pytest.fixture(scope="function", name="bed_file")
-def fixture_bed_file(analysis_dir) -> str:
-    """Get the path to a bed file file."""
-    return str(analysis_dir / "sample_coverage.bed")
+def fixture_bed_file(analysis_dir) -> Path:
+    """Return the path to a bed file."""
+    return Path(analysis_dir, "sample_coverage.bed")
 
 
 # Helper fixtures
@@ -566,50 +634,14 @@ def fixture_root_path(project_dir: Path) -> Path:
     return _root_path
 
 
-@pytest.fixture(scope="function", name="old_timestamp")
-def fixture_old_timestamp() -> dt.datetime:
-    """Return a time stamp in date time format."""
-    return dt.datetime(1900, 1, 1)
-
-
-@pytest.fixture(scope="function", name="timestamp")
-def fixture_timestamp() -> dt.datetime:
-    """Return a time stamp in date time format."""
-    return dt.datetime(2020, 5, 1)
-
-
-@pytest.fixture(scope="function", name="later_timestamp")
-def fixture_later_timestamp() -> dt.datetime:
-    """Return a time stamp in date time format."""
-    return dt.datetime(2020, 6, 1)
-
-
-@pytest.fixture(scope="function", name="timestamp_now")
-def fixture_timestamp_now() -> dt.datetime:
-    """Return a time stamp of today's date in date time format."""
-    return dt.datetime.now()
-
-
-@pytest.fixture(scope="function", name="timestamp_yesterday")
-def fixture_timestamp_yesterday(timestamp_now: dt.datetime) -> dt.datetime:
-    """Return a time stamp of yesterday's date in date time format."""
-    return timestamp_now - dt.timedelta(days=1)
-
-
-@pytest.fixture(scope="function", name="timestamp_in_2_weeks")
-def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
-    """Return a time stamp 14 days ahead in time."""
-    return timestamp_now + dt.timedelta(days=14)
-
-
 @pytest.fixture(scope="function", name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) -> dict:
-    """Get some bundle data for housekeeper."""
+def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: dt.datetime) -> Dict[str, Any]:
+    """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
-        "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
+        "files": [{"path": bed_file.as_posix(), "archive": False, "tags": ["bed", "sample"]}],
     }
 
 
@@ -658,7 +690,6 @@ def fixture_compress_hk_fastq_bundle(
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)
-
     return hk_bundle_data
 
 
@@ -689,17 +720,12 @@ def fixture_populated_housekeeper_api(
 @pytest.fixture(scope="function", name="hk_version_obj")
 def fixture_hk_version_obj(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
-) -> MockHousekeeperAPI:
-    """Get a housekeeper version object."""
+) -> hk_models.Version:
+    """Get a Housekeeper version object."""
     return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
 
 # Process Mock
-
-
-@pytest.fixture(name="sbatch_job_number")
-def fixture_sbatch_job_number() -> int:
-    return 123456
 
 
 @pytest.fixture(name="process")
@@ -713,13 +739,13 @@ def fixture_process() -> ProcessMock:
 
 @pytest.fixture(name="hermes_process")
 def fixture_hermes_process() -> ProcessMock:
-    """Return a mocked hermes process."""
+    """Return a mocked Hermes process."""
     return ProcessMock(binary="hermes")
 
 
 @pytest.fixture(name="hermes_api")
 def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
-    """Return a hermes api with a mocked process."""
+    """Return a Hermes API with a mocked process."""
     hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
@@ -731,7 +757,7 @@ def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
 
 @pytest.fixture(scope="function", name="scout_api")
 def fixture_scout_api() -> MockScoutAPI:
-    """Setup Scout api."""
+    """Setup Scout API."""
     return MockScoutAPI()
 
 
@@ -740,7 +766,7 @@ def fixture_scout_api() -> MockScoutAPI:
 
 @pytest.fixture(scope="function", name="crunchy_api")
 def fixture_crunchy_api():
-    """Setup Crunchy api."""
+    """Setup Crunchy API."""
     return MockCrunchyAPI()
 
 
@@ -749,8 +775,8 @@ def fixture_crunchy_api():
 
 @pytest.fixture(scope="function", name="analysis_store")
 def fixture_analysis_store(
-    base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
-):
+    base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers: StoreHelpers
+) -> Generator[Store, None, None]:
     """Setup a store instance for testing analysis API."""
     helpers.ensure_case_from_dict(
         base_store, case_info=analysis_family, app_tag=wgs_application_tag
@@ -759,17 +785,17 @@ def fixture_analysis_store(
 
 
 @pytest.fixture(scope="function", name="analysis_store_trio")
-def fixture_analysis_store_trio(analysis_store):
-    """Setup a store instance with a trion loaded for testing analysis API."""
-
+def fixture_analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
+    """Setup a store instance with a trio loaded for testing analysis API."""
     yield analysis_store
 
 
 @pytest.fixture(scope="function", name="analysis_store_single_case")
-def fixture_analysis_store_single(base_store, analysis_family_single_case, helpers):
+def fixture_analysis_store_single(
+    base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
+):
     """Setup a store instance with a single ind case for testing analysis API."""
     helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
-
     yield base_store
 
 
@@ -782,68 +808,68 @@ def fixture_collaboration_id() -> str:
 @pytest.fixture(scope="function", name="customer_production")
 def fixture_customer_production(collaboration_id: str, customer_id: str) -> dict:
     """Return a dictionary with information about the prod customer."""
-    return dict(
-        customer_id=customer_id,
-        name="Production",
-        scout_access=True,
-        collaboration_id=collaboration_id,
-    )
+    return {
+        "customer_id": customer_id,
+        "name": "Production",
+        "scout_access": True,
+        "collaboration_id": collaboration_id,
+    }
 
 
 @pytest.fixture(scope="function", name="external_wgs_application_tag")
 def fixture_external_wgs_application_tag() -> str:
-    """Return the external wgs app tag."""
+    """Return the external WGS application tag."""
     return "WGXCUSC000"
 
 
 @pytest.fixture(scope="function", name="external_wgs_info")
-def fixture_external_wgs_info(external_wgs_application_tag) -> dict:
+def fixture_external_wgs_info(external_wgs_application_tag: str) -> dict:
     """Return a dictionary with information external WGS application."""
-    return dict(
-        application_tag=external_wgs_application_tag,
-        application_type="wgs",
-        description="External WGS",
-        is_external=True,
-        target_reads=10,
-    )
+    return {
+        "application_tag": external_wgs_application_tag,
+        "application_type": "wgs",
+        "description": "External WGS",
+        "is_external": True,
+        "target_reads": 10,
+    }
 
 
 @pytest.fixture(scope="function", name="external_wes_application_tag")
 def fixture_external_wes_application_tag() -> str:
-    """Return the external whole exome sequencing app tag."""
+    """Return the external whole exome sequencing application tag."""
     return "EXXCUSR000"
 
 
 @pytest.fixture(scope="function", name="external_wes_info")
-def fixture_external_wes_info(external_wes_application_tag) -> dict:
+def fixture_external_wes_info(external_wes_application_tag: str) -> dict:
     """Return a dictionary with information external WES application."""
-    return dict(
-        application_tag=external_wes_application_tag,
-        application_type="wes",
-        description="External WES",
-        is_external=True,
-        target_reads=10,
-    )
+    return {
+        "application_tag": external_wes_application_tag,
+        "application_type": "wes",
+        "description": "External WES",
+        "is_external": True,
+        "target_reads": 10,
+    }
 
 
 @pytest.fixture(scope="function", name="wgs_application_tag")
 def fixture_wgs_application_tag() -> str:
-    """Return the wgs app tag."""
+    """Return the WGS application tag."""
     return "WGSPCFC030"
 
 
 @pytest.fixture(scope="function", name="wgs_application_info")
-def fixture_wgs_application_info(wgs_application_tag) -> dict:
+def fixture_wgs_application_info(wgs_application_tag: str) -> dict:
     """Return a dictionary with information the WGS application."""
-    return dict(
-        application_tag=wgs_application_tag,
-        application_type="wgs",
-        description="WGS, double",
-        sequencing_depth=30,
-        is_external=True,
-        is_accredited=True,
-        target_reads=10,
-    )
+    return {
+        "application_tag": wgs_application_tag,
+        "application_type": "wgs",
+        "description": "WGS, double",
+        "sequencing_depth": 30,
+        "is_external": True,
+        "is_accredited": True,
+        "target_reads": 10,
+    }
 
 
 @pytest.fixture(name="store")
@@ -857,6 +883,7 @@ def fixture_store() -> Store:
 
 @pytest.fixture(name="apptag_rna")
 def fixture_apptag_rna() -> str:
+    """Return the RNA application tag."""
     return "RNAPOAR025"
 
 
@@ -1021,14 +1048,14 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
 
 
 @pytest.fixture(scope="function")
-def sample_store(base_store) -> Store:
+def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
         base_store.add_sample("ordered", sex=Gender.MALE),
-        base_store.add_sample("received", sex="unknown", received=dt.datetime.now()),
+        base_store.add_sample("received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
         base_store.add_sample(
             "received-prepared",
-            sex="unknown",
+            sex=Gender.UNKNOWN,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
         ),
@@ -1064,36 +1091,43 @@ def sample_store(base_store) -> Store:
 
 @pytest.fixture(scope="function", name="trailblazer_api")
 def fixture_trailblazer_api() -> MockTB:
+    """Return a mock traailblazer API."""
     return MockTB()
 
 
 @pytest.fixture(scope="function", name="lims_api")
 def fixture_lims_api() -> MockLimsAPI:
+    """Return a mock LIMS API."""
     return MockLimsAPI()
 
 
 @pytest.fixture(name="config_root_dir")
 def config_root_dir(tmpdir_factory) -> Path:
+    """Return a path to the config root directory."""
     return Path("tests/fixtures/data")
 
 
 @pytest.fixture()
 def housekeeper_dir(tmpdir_factory):
+    """Return a temporary directory for Housekeeper testing."""
     return tmpdir_factory.mktemp("housekeeper")
 
 
 @pytest.fixture()
 def mip_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for MIP testing."""
     return tmpdir_factory.mktemp("mip")
 
 
 @pytest.fixture(scope="function")
 def fluffy_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for Fluffy testing."""
     return tmpdir_factory.mktemp("fluffy")
 
 
 @pytest.fixture(scope="function")
 def balsamic_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for Balsamic testing."""
     return tmpdir_factory.mktemp("balsamic")
 
 
@@ -1104,21 +1138,25 @@ def rnafusion_dir(tmpdir_factory) -> Path:
 
 @pytest.fixture(scope="function")
 def cg_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
 
 
 @pytest.fixture(scope="function")
 def microsalt_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for Microsalt testing."""
     return tmpdir_factory.mktemp("microsalt")
 
 
-@pytest.fixture(name="fixture_cg_uri")
+@pytest.fixture(name="cg_uri")
 def fixture_cg_uri() -> str:
+    """Return a cg URI."""
     return "sqlite:///"
 
 
-@pytest.fixture(name="fixture_hk_uri")
+@pytest.fixture(name="hk_uri")
 def fixture_hk_uri() -> str:
+    """Return a Housekeeper URI."""
     return "sqlite:///"
 
 
@@ -1130,18 +1168,19 @@ def fixture_loqusdb_id() -> str:
 
 @pytest.fixture(name="context_config")
 def fixture_context_config(
-    fixture_cg_uri: str,
-    fixture_hk_uri: str,
-    fluffy_dir: str,
-    housekeeper_dir: str,
-    mip_dir: str,
-    cg_dir: str,
-    balsamic_dir: str,
-    microsalt_dir: str,
-    rnafusion_dir: str,
+    cg_uri: str,
+    hk_uri: str,
+    fluffy_dir: Path,
+    housekeeper_dir: Path,
+    mip_dir: Path,
+    cg_dir: Path,
+    balsamic_dir: Path,
+    microsalt_dir: Path,
+    rnafusion_dir: Path,
 ) -> dict:
+    """Return a context config."""
     return {
-        "database": fixture_cg_uri,
+        "database": cg_uri,
         "madeline_exe": "echo",
         "bed_path": str(cg_dir),
         "pon_path": str(cg_dir),
@@ -1198,7 +1237,7 @@ def fixture_context_config(
         "pdc": {"binary_path": "/bin/dsmc"},
         "tar": {"binary_path": "/bin/tar"},
         "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
-        "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
+        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
@@ -1302,8 +1341,9 @@ def fixture_context_config(
 
 @pytest.fixture(name="cg_context")
 def fixture_cg_context(
-    context_config: dict, base_store: Store, housekeeper_api: HousekeeperAPI
+    context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
+    """Return a cg config."""
     cg_config = CGConfig(**context_config)
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api

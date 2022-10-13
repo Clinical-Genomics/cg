@@ -33,7 +33,9 @@ the title if not.
     1. Log in to appropriate server `ssh <server.scilifelab.se>`
     2. `us`
     3. Request stage environment `paxa` and follow instructions
-    4. `bash update-cg-stage.sh master`
+    4. ```shell
+       bash /home/proj/production/servers/resources/hasta.scilifelab.se/update-tool-stage.sh -e S_main -t cg -b master -a
+       ```
     5. Make sure that installation was successful
    
 
