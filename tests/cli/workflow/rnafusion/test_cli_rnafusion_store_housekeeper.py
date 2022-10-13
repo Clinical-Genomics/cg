@@ -62,7 +62,10 @@ def test_case_not_finished(cli_runner: CliRunner, rnafusion_context: CGConfig, c
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN warning should be printed that no analysis_finish is found
-    assert "Analysis not finished: pipeline_info/software_versions.yml file not found for case" in caplog.text
+    assert (
+        "Analysis not finished: pipeline_info/software_versions.yml file not found for case"
+        in caplog.text
+    )
 
 
 def test_case_with_malformed_deliverables_file(
