@@ -64,7 +64,7 @@ def test_get_case_files_from_version(
     case_id: str,
     real_housekeeper_api: HousekeeperAPI,
     case_hk_bundle_no_files: dict,
-    bed_file: str,
+    bed_file: Path,
     vcf_file: Path,
     project_dir: Path,
     helpers=StoreHelpers,
@@ -84,7 +84,7 @@ def test_get_case_files_from_version(
 
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
     case_hk_bundle_no_files["files"] = [
-        {"path": bed_file, "archive": False, "tags": ["case-tag"]},
+        {"path": bed_file.as_posix(), "archive": False, "tags": ["case-tag"]},
         {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
     ]
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
@@ -107,7 +107,7 @@ def test_get_case_files_from_version(
     nr_files: int = 0
     case_file: Path
     for nr_files, case_file in enumerate(case_files, 1):
-        assert case_file.name == Path(bed_file).name
+        assert case_file.name == bed_file.name
     # THEN assert that only the case-tag file was returned
     assert nr_files == 1
 
@@ -115,7 +115,7 @@ def test_get_case_files_from_version(
 def test_get_sample_files_from_version(
     deliver_api: DeliverAPI,
     case_hk_bundle_no_files: dict,
-    bed_file: str,
+    bed_file: Path,
     vcf_file: Path,
     project_dir: Path,
     case_id: str,
@@ -129,7 +129,7 @@ def test_get_sample_files_from_version(
     # GIVEN a housekeeper db populated with a bundle including a case specific file and a sample specific file
     hk_api = deliver_api.hk_api
     case_hk_bundle_no_files["files"] = [
-        {"path": bed_file, "archive": False, "tags": ["case-tag"]},
+        {"path": bed_file.as_posix(), "archive": False, "tags": ["case-tag"]},
         {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
     ]
     helpers.ensure_hk_bundle(hk_api, bundle_data=case_hk_bundle_no_files)

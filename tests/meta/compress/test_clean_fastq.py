@@ -55,7 +55,7 @@ def test_update_hk_fastq(real_housekeeper_api, compress_hk_fastq_bundle, compres
     hk_fastq_flag_file = list(hk_api.files(tags=["spring-metadata"]))
     assert not hk_fastq_flag_file
     # GIVEN a housekeeper version
-    version_obj = compress_api.get_latest_version(sample_id)
+    version_obj = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
     fastq_dict = files.get_fastq_files(sample_id=sample_id, version_obj=version_obj)
     run = list(fastq_dict.keys())[0]
     compression_obj = fastq_dict[run]["compression_data"]
