@@ -235,6 +235,8 @@ class CGConfig(BaseModel):
     loqusdb: CommonAppConfig = None
     loqusdb_api_: LoqusdbAPI = None
     loqusdb_wes: CommonAppConfig = Field(None, alias="loqusdb-wes")
+    loqusdb_somatic: CommonAppConfig = Field(None, alias="loqusdb-somatic")
+    loqusdb_tumor: CommonAppConfig = Field(None, alias="loqusdb-tumor")
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
@@ -361,7 +363,9 @@ class CGConfig(BaseModel):
         api = self.__dict__.get("loqusdb_api_")
         if api is None:
             LOG.debug("Instantiating loqusdb api")
-            api = LoqusdbAPI(config=self.dict())
+            api = LoqusdbAPI(
+                binary_path=self.loqusdb.binary_path, config_path=self.loqusdb.config_path
+            )
             self.loqusdb_api_ = api
         return api
 
