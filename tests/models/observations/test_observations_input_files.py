@@ -10,32 +10,32 @@ from cg.models.observations.input_files import (
 )
 
 
-def test_instantiate_input_files(mip_dna_observation_input_files: dict):
+def test_instantiate_input_files(observations_input_files_dict: dict):
     """Tests input files against a pydantic MipDNAObservationsInputFiles."""
 
     # GIVEN a dictionary with the basic input files
 
     # WHEN instantiating an observations input files object
-    input_files = MipDNAObservationsInputFiles(**mip_dna_observation_input_files)
+    input_files = MipDNAObservationsInputFiles(**observations_input_files_dict)
 
     # THEN assert that it was successfully created
     assert isinstance(input_files, MipDNAObservationsInputFiles)
 
 
 def test_instantiate_input_files_missing_field(
-    mip_dna_observation_input_files: dict, file_does_not_exist: Path
+    observations_input_files_dict: dict, file_does_not_exist: Path
 ):
     """Tests input files against a pydantic MipDNAObservationsInputFiles with not existent field."""
 
     # GIVEN a dictionary with the basic input files and a file path that does not exist
-    mip_dna_observation_input_files["snv_vcf_path"] = file_does_not_exist
+    observations_input_files_dict["snv_vcf_path"] = file_does_not_exist
 
     # WHEN checking the observation file
 
     # THEN the file is not successfully validated and an error is returned
     with pytest.raises(FileNotFoundError):
         # WHEN instantiating a ObservationsInputFiles object
-        MipDNAObservationsInputFiles(**mip_dna_observation_input_files)
+        MipDNAObservationsInputFiles(**observations_input_files_dict)
 
 
 def test_validate_observations_file(filled_file: Path):

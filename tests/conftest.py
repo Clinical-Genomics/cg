@@ -433,6 +433,12 @@ def fixture_madeline_output(apps_dir: Path) -> str:
     return Path(apps_dir, "madeline", "madeline.xml").as_posix()
 
 
+@pytest.fixture(name="file_does_not_exist")
+def fixture_file_does_not_exist() -> Path:
+    """Return a file path that does not exist."""
+    return Path("file", "does", "not", "exist")
+
+
 # Compression fixtures
 
 
@@ -1225,6 +1231,8 @@ def fixture_context_config(
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
+        "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
+        "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
         "balsamic": {
             "root": str(balsamic_dir),
             "binary_path": "echo",
@@ -1294,14 +1302,3 @@ def fixture_cg_context(
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
-
-
-@pytest.fixture(name="mip_dna_observation_input_files")
-def fixture_mip_dna_observation_input_files(case_id: str, filled_file: Path) -> dict:
-    """Raw observations input files for rare diseases."""
-    return {
-        "snv_vcf_path": filled_file,
-        "profile_vcf_path": filled_file,
-        "family_ped_path": filled_file,
-        "sv_vcf_path": None,
-    }
