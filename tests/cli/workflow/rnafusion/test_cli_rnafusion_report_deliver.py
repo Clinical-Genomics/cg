@@ -70,4 +70,4 @@ def test_dry_run(cli_runner: CliRunner, rnafusion_context: CGConfig, mock_analys
     assert result.exit_code == EXIT_SUCCESS
     # THEN rnafusion and case_id should be found in command string
     assert "rnafusion" in caplog.text
-    assert case_id + ".json" in caplog.text
+    assert case_id in caplog.text
