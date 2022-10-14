@@ -6,7 +6,7 @@ from typing import Generator, Optional, Union, Dict, List
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
 from dateutil.parser import parse as parse_date
-from genologics.entities import Process, Project, Sample
+from genologics.entities import Process, Project, Sample, Artifact
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
@@ -330,9 +330,13 @@ class LimsAPI(Lims, OrderHandler):
 
         for process_name in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
-            if artifacts:
+            if not artifacts:
+                continue
+            # Get a list of parent processes for the artifacts
+            processes = self.get_processes_from_artifacts(artifacts=artifacts)
+            for process in processes:
                 # Check which type of method document has been used
-                method_type = self.get_method_type(artifacts[0], step_names_udfs[process_name])
+                method_type = self.get_method_type(process, step_names_udfs[process_name])
                 if method_type == DocumentationMethod.ATLAS:
                     udf_key_method_doc = step_names_udfs[process_name]["atlas_document"]
                     udf_key_version = step_names_udfs[process_name]["atlas_version"]
@@ -341,9 +345,9 @@ class LimsAPI(Lims, OrderHandler):
                     udf_key_version = step_names_udfs[process_name]["method_version"]
                 methods.append(
                     (
-                        artifacts[0].parent_process.date_run,
-                        self.get_method_document(artifacts[0], udf_key_method_doc),
-                        self.get_method_version(artifacts[0], udf_key_version),
+                        process.date_run,
+                        self.get_method_document(process, udf_key_method_doc),
+                        self.get_method_version(process, udf_key_version),
                         method_type,
                     )
                 )
@@ -371,11 +375,23 @@ class LimsAPI(Lims, OrderHandler):
         return None
 
     @staticmethod
-    def get_method_type(artifact, method_udfs):
+    def get_processes_from_artifacts(artifacts: List[Artifact]) -> List[Process]:
+        """
+        Get a list of parent processes from a set of given artifacts.
+        """
+        processes = []
+        for artifact in artifacts:
+            parent_process = artifact.parent_process
+            if parent_process not in processes:
+                processes.append(parent_process)
+        return processes
+
+    @staticmethod
+    def get_method_type(process: Process, method_udfs: Dict) -> str:
         """
         Assess which type of method documentation has been used, AM or Atlas.
         """
-        if "atlas_version" in method_udfs and artifact.parent_process.udf.get(
+        if "atlas_version" in method_udfs and process.udf.get(
             method_udfs["atlas_version"]
         ):
             return DocumentationMethod.ATLAS
@@ -383,18 +399,18 @@ class LimsAPI(Lims, OrderHandler):
         return DocumentationMethod.AM
 
     @staticmethod
-    def get_method_document(artifact, udf_key_method_doc):
+    def get_method_document(process: Process, udf_key_method_doc: str) -> str:
         """
         get method number for artifact
         """
-        return artifact.parent_process.udf.get(udf_key_method_doc)
+        return process.udf.get(udf_key_method_doc)
 
     @staticmethod
-    def get_method_version(artifact, udf_key_version):
+    def get_method_version(process: Process, udf_key_version: str) -> str:
         """
         get method version for artifact
         """
-        return artifact.parent_process.udf.get(udf_key_version)
+        return process.udf.get(udf_key_version)
 
     @staticmethod
     def _find_capture_kits(artifacts, udf_key):
