@@ -1,7 +1,7 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Generator, Optional, Union, Dict, List
+from typing import Generator, Optional, Union, Dict, List, Tuple
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
@@ -333,16 +333,13 @@ class LimsAPI(Lims, OrderHandler):
             if not artifacts:
                 continue
             # Get a list of parent processes for the artifacts
-            processes = self.get_processes_from_artifacts(artifacts=artifacts)
+            processes: List[Process] = self.get_processes_from_artifacts(artifacts=artifacts)
             for process in processes:
                 # Check which type of method document has been used
-                method_type = self.get_method_type(process, step_names_udfs[process_name])
-                if method_type == DocumentationMethod.ATLAS:
-                    udf_key_method_doc = step_names_udfs[process_name]["atlas_document"]
-                    udf_key_version = step_names_udfs[process_name]["atlas_version"]
-                else:
-                    udf_key_method_doc = step_names_udfs[process_name]["method_number"]
-                    udf_key_version = step_names_udfs[process_name]["method_version"]
+                method_type: str = self.get_method_type(process, step_names_udfs[process_name])
+                udf_key_method_doc, udf_key_version = self.get_method_udf_values(
+                    step_names_udfs[process_name], method_type
+                )
                 methods.append(
                     (
                         process.date_run,
@@ -379,9 +376,9 @@ class LimsAPI(Lims, OrderHandler):
         """
         Get a list of parent processes from a set of given artifacts.
         """
-        processes = []
+        processes: List = []
         for artifact in artifacts:
-            parent_process = artifact.parent_process
+            parent_process: Process = artifact.parent_process
             if parent_process not in processes:
                 processes.append(parent_process)
         return processes
@@ -389,24 +386,36 @@ class LimsAPI(Lims, OrderHandler):
     @staticmethod
     def get_method_type(process: Process, method_udfs: Dict) -> str:
         """
-        Assess which type of method documentation has been used, AM or Atlas.
+        Return which type of method documentation has been used, AM or Atlas.
         """
         if "atlas_version" in method_udfs and process.udf.get(method_udfs["atlas_version"]):
             return DocumentationMethod.ATLAS
-
         return DocumentationMethod.AM
+
+    @staticmethod
+    def get_method_udf_values(method_udfs: Dict, method_type: str) -> Tuple[str, str]:
+        """
+        Return UDF values for Method and Method version depending on which method type.
+        """
+        if method_type == DocumentationMethod.ATLAS:
+            udf_key_method_doc = method_udfs["atlas_document"]
+            udf_key_version = method_udfs["atlas_version"]
+        else:
+            udf_key_method_doc = method_udfs["method_number"]
+            udf_key_version = method_udfs["method_version"]
+        return udf_key_method_doc, udf_key_version
 
     @staticmethod
     def get_method_document(process: Process, udf_key_method_doc: str) -> str:
         """
-        get method number for artifact
+        Return method number for artifact.
         """
         return process.udf.get(udf_key_method_doc)
 
     @staticmethod
     def get_method_version(process: Process, udf_key_version: str) -> str:
         """
-        get method version for artifact
+        Return method version for artifact.
         """
         return process.udf.get(udf_key_version)
 
