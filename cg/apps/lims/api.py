@@ -391,9 +391,7 @@ class LimsAPI(Lims, OrderHandler):
         """
         Assess which type of method documentation has been used, AM or Atlas.
         """
-        if "atlas_version" in method_udfs and process.udf.get(
-            method_udfs["atlas_version"]
-        ):
+        if "atlas_version" in method_udfs and process.udf.get(method_udfs["atlas_version"]):
             return DocumentationMethod.ATLAS
 
         return DocumentationMethod.AM
