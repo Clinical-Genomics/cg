@@ -77,6 +77,7 @@ class AnalysisAPI(MetaAPI):
             raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def verify_case_path_exists(self, case_id: str) -> None:
+        """Check if case path exists."""
         if not self.get_case_path(case_id=case_id).exists():
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")

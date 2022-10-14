@@ -73,7 +73,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return case_path_list
 
-    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False):
+    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         self.verify_case_id_in_statusdb(case_id)
@@ -111,12 +111,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return EXIT_SUCCESS
 
     def get_case_fastq_path(self, case_id: str) -> Path:
+        """Get fastq pats for a case."""
         return Path(self.root_dir, "fastq", case_id)
 
     def get_config_path(self, filename: str) -> Path:
         return Path(self.queries_path, filename).with_suffix(".json")
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
+        """Get trailblazer config path."""
         case_obj: models.Family = self.status_db.family(case_id)
         sample_obj: models.Sample = case_obj.links[0].sample
         project_id: str = self.get_project(sample_obj.internal_id)
