@@ -15,7 +15,7 @@ from tests.store_helpers import StoreHelpers
 
 
 class MockCompressAPI(CompressAPI):
-    """Mock out necessary functions for running the compress CLI functions"""
+    """Mock out necessary functions for running the compress CLI functions."""
 
     def __init__(self):
         """initialize mock"""
