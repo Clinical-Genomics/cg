@@ -111,7 +111,7 @@ class AnalysisAPI(MetaAPI):
         return PRIORITY_TO_SLURM_QOS[priority]
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
-        """Path to case working directory"""
+        """Path to case working directory."""
         raise NotImplementedError
 
     def get_case_config_path(self, case_id) -> Path:
@@ -461,6 +461,6 @@ class AnalysisAPI(MetaAPI):
                 return EXIT_FAIL
 
             shutil.rmtree(analysis_path, ignore_errors=True)
-            LOG.info("Cleaned %s", analysis_path)
+            LOG.info(f"Cleaned {analysis_path}")
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS

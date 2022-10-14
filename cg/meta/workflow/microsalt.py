@@ -66,12 +66,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        case_path_list: List[Path] = [
+        return  [
             Path(path)
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
         ]
 
-        return case_path_list
 
     def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False) -> int:
         """Remove workflow run directories for a MicroSALT case."""
@@ -104,10 +103,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     return EXIT_FAIL
 
                 shutil.rmtree(analysis_path, ignore_errors=True)
-                LOG.info("Cleaned %s", analysis_path)
+                LOG.info(f"Cleaned {analysis_path}")
 
         self.clean_analyses(case_id=case_id)
-
         return EXIT_SUCCESS
 
     def get_case_fastq_path(self, case_id: str) -> Path:
