@@ -61,14 +61,8 @@ def test_case_not_finished(cli_runner: CliRunner, rnafusion_context: CGConfig, c
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
 
-    print(caplog)
-    print(caplog.text)
-
     # THEN warning should be printed that no analysis_finish is found
-    assert (
-        "Analysis not finished: pipeline_info/software_versions.yml file not found for case"
-        in caplog.text
-    )
+    assert "Analysis not finished" in caplog.text
 
 
 def test_case_with_malformed_deliverables_file(
@@ -125,7 +119,7 @@ def test_valid_case(
 
     # Make sure nothing is currently stored in Housekeeper
 
-    # Make sure  analysis not already stored in ClinicalDB
+    # Make sure  analysis not already stored in StatusDB
     assert not rnafusion_context.status_db.family(case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
@@ -135,7 +129,7 @@ def test_valid_case(
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
 
-    # THEN bundle should be successfully added to HK and STATUS
+    # THEN bundle should be successfully added to HK and StatusDB
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in StatusDB" in caplog.text
@@ -177,7 +171,5 @@ def test_valid_case_already_added(
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
 
-    print(caplog)
-    print(caplog.text)
     # THEN user should be informed that bundle was already added
     assert "Bundle already added" in caplog.text
