@@ -257,10 +257,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
-        LOG.info("Reaching here C")
-        LOG.info(
-            NextflowAnalysisAPI.get_deliverables_file_path(case_id=case_id, root_dir=self.root_dir)
-        )
         return NextflowAnalysisAPI.get_deliverables_file_path(
             case_id=case_id, root_dir=self.root_dir
         )
