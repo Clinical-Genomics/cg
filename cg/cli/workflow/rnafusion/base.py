@@ -287,13 +287,13 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str) -> None:
     """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
-
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.verify_analysis_finished(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id)
         analysis_api.upload_bundle_statusdb(case_id=case_id)
