@@ -186,10 +186,6 @@ def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) 
         tags: List[str] = []
         if "html" in file_info["format"]:
             tags.append("multiqc-html")
-        # elif "fastq" in file_info["format"]:
-        #     tags.append("fastq")
-        # elif "vcf" in file_info["format"]:
-        #     tags.extend(["vcf-snv-clinical", "cnvkit", "filtered"])
         hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
     return hermes_output
 
