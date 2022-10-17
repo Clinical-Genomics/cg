@@ -91,7 +91,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for analysis_path in case_path_list:
             if yes or click.confirm(
-                    f"Are you sure you want to remove all files in {analysis_path}?"
+                f"Are you sure you want to remove all files in {analysis_path}?"
             ):
                 if analysis_path.is_symlink():
                     LOG.warning(
@@ -138,12 +138,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return deliverables_file_path
 
     def get_sample_fastq_destination_dir(
-            self, case_obj: models.Family, sample_obj: models.Sample
+        self, case_obj: models.Family, sample_obj: models.Sample
     ) -> Path:
         return Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_obj.internal_id)
 
     def link_fastq_files(
-            self, case_id: str, sample_id: Optional[str], dry_run: bool = False
+        self, case_id: str, sample_id: Optional[str], dry_run: bool = False
     ) -> None:
         case_obj: models.Family = self.status_db.family(case_id)
         samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
@@ -246,7 +246,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         ]
 
     def resolve_case_sample_id(
-            self, sample: bool, ticket: bool, unique_id: Any
+        self, sample: bool, ticket: bool, unique_id: Any
     ) -> Tuple[str, Optional[str]]:
         """Resolve case_id and sample_id w based on input arguments."""
         if ticket and sample:
