@@ -18,9 +18,9 @@ class LoqusdbAPI:
     """API for Loqusdb."""
 
     def __init__(self, binary_path: str, config_path: str):
-        self.binary = binary_path
-        self.config = config_path
-        self.process = Process(binary=self.binary, config=self.config)
+        self.binary_path = binary_path
+        self.config_path = config_path
+        self.process = Process(binary=self.binary_path, config=self.config_path)
 
     def load(
         self,
@@ -105,4 +105,4 @@ class LoqusdbAPI:
         raise DeleteCaseError
 
     def __repr__(self):
-        return f"LoqusdbAPI(binary={self.binary}, config={self.config})"
+        return f"LoqusdbAPI(binary={self.binary_path}, config={self.config_path})"

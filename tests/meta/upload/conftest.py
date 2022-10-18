@@ -1,4 +1,4 @@
-"""Fixtures for meta/upload tests"""
+"""Fixtures for meta/upload tests."""
 
 from datetime import datetime
 from pathlib import Path
@@ -7,44 +7,14 @@ import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.constants import Pipeline
-from cg.constants.sequencing import SequencingMethod
 from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
-from cg.meta.upload.observations.observations_api import ObservationsAPI
 from cg.store import Store, models
 
 
 class MockCoverage(ChanjoAPI):
     """Mock chanjo coverage api."""
-
-
-class MockLoqusAPI:
-    """Mock LoqusAPI class."""
-
-    def __init__(self, analysis_type=SequencingMethod.WGS):
-        self.analysis_type = analysis_type
-
-    @staticmethod
-    def load(*args, **kwargs):
-        """Mock load method."""
-        _ = args
-        _ = kwargs
-        return dict(variants=12)
-
-    @staticmethod
-    def get_case(*args, **kwargs):
-        """Mock get_case method."""
-        _ = args
-        _ = kwargs
-        return {"case_id": "case_id", "_id": "123"}
-
-    @staticmethod
-    def get_duplicate(*args, **kwargs):
-        """Mock get_duplicate method."""
-        _ = args
-        _ = kwargs
-        return {"case_id": "case_id"}
 
 
 @pytest.fixture(name="upload_genotypes_hk_bundle")
@@ -90,36 +60,6 @@ def fixture_upload_genotypes_api(
     )
 
     return _api
-
-
-@pytest.fixture(scope="function")
-def observations_api(analysis_store, populated_housekeeper_api):
-    """Create mocked ObservationsAPI object."""
-
-    loqus_mock = MockLoqusAPI()
-
-    _api = ObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
-    )
-
-    yield _api
-
-
-@pytest.fixture(scope="function")
-def observations_api_wes(analysis_store, populated_housekeeper_api):
-    """Create mocked ObservationsAPI object."""
-
-    loqus_mock = MockLoqusAPI(analysis_type=SequencingMethod.WES)
-
-    _api = ObservationsAPI(
-        status_api=analysis_store,
-        hk_api=populated_housekeeper_api,
-        loqus_api=loqus_mock,
-    )
-
-    yield _api
 
 
 @pytest.yield_fixture(scope="function")

@@ -26,8 +26,8 @@ def test_instantiate(cg_config_locusdb: CGConfig):
     loqusdb_api = LoqusdbAPI(binary_path=binary_path, config_path=config_path)
 
     # THEN assert that the API was properly initialised
-    assert loqusdb_api.binary == binary_path
-    assert loqusdb_api.config == config_path
+    assert loqusdb_api.binary_path == binary_path
+    assert loqusdb_api.config_path == config_path
     assert loqusdb_api.process
 
 
