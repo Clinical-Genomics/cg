@@ -111,6 +111,7 @@ def test_valid_case(
     rnafusion_context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
     mock_deliverable,
+    mock_analysis_finish,
     caplog,
 ):
     caplog.set_level(logging.INFO)
