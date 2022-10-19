@@ -167,7 +167,13 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     analysis_path: Path = analysis_api.get_case_path(case_id)
 
     if dry_run:
-        LOG.info(f"Would have deleted: {analysis_path}")
+        LOG.info("DRY-RUN")
+        if analysis_path.is_dir():
+            LOG.info(f"Would have deleted: {analysis_path}")
+        else:
+            LOG.info(
+                f"Analysis directory doesn't exist for: {analysis_path}. If Cleaned at date is missing it would be set as of today"
+            )
         return EXIT_SUCCESS
 
     if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
@@ -176,9 +182,13 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
                 f"Will not automatically delete symlink: {analysis_path}, delete it manually",
             )
             return EXIT_FAIL
-
-        shutil.rmtree(analysis_path, ignore_errors=True)
-        LOG.info("Cleaned %s", analysis_path)
+        if analysis_path.is_dir():
+            shutil.rmtree(analysis_path, ignore_errors=True)
+            LOG.info("Cleaned %s", analysis_path)
+        else:
+            LOG.warning(
+                f"Analysis directory doesn't exists for: {analysis_path}. If Cleaned at date is missing it will be set as of today",
+            )
         analyses: list = status_db.family(case_id).analyses
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
