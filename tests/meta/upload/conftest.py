@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
+from typing import Dict
 
 import pytest
 
@@ -11,6 +12,7 @@ from cg.constants.tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import Store, models
+from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 class MockCoverage(ChanjoAPI):
@@ -63,13 +65,13 @@ def fixture_upload_genotypes_api(
 
 
 @pytest.yield_fixture(scope="function")
-def coverage_upload_api(chanjo_config_dict, populated_housekeeper_api):
-    """Fixture for coverage upload API."""
-    hk_api = populated_housekeeper_api
-    status_api = None
-    coverage_api = MockCoverage(chanjo_config_dict)
-    _api = UploadCoverageApi(status_api=status_api, hk_api=hk_api, chanjo_api=coverage_api)
-    return _api
+def coverage_upload_api(
+    chanjo_config: Dict[str, Dict[str, str]], populated_housekeeper_api: MockHousekeeperAPI
+):
+    """Return a upload coverage API."""
+    return UploadCoverageApi(
+        status_api=None, hk_api=populated_housekeeper_api, chanjo_api=MockCoverage(chanjo_config)
+    )
 
 
 @pytest.fixture(scope="function")
