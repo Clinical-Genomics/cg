@@ -1,14 +1,13 @@
 """Test observations API methods."""
 
 import logging
-from pathlib import Path
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import DuplicateRecordError, DataIntegrityError
+from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError
 from cg.meta.upload.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store import models, Store
@@ -36,7 +35,7 @@ def test_observations_upload(
     mock_mip_dna_observations_api.upload(case)
 
     # THEN the case should be successfully uploaded
-    assert f"Uploaded 15 variants to {Path(loqusdb_config_path).stem}" in caplog.text
+    assert f"Uploaded 15 variants to Loqusdb" in caplog.text
 
 
 def test_observations_upload_duplicate(
@@ -53,7 +52,7 @@ def test_observations_upload_duplicate(
     case: models.Family = analysis_store.family(case_id)
 
     # WHEN uploading the case observations to Loqusdb
-    with pytest.raises(DuplicateRecordError):
+    with pytest.raises(LoqusdbDuplicateRecordError):
         # THEN a duplicate record error should be raised
         mock_mip_dna_observations_api_duplicate_case.upload(case)
 
@@ -81,7 +80,7 @@ def test_mip_dna_load_observations(
     )
 
     # THEN the observations should be loaded without any errors
-    assert f"Uploaded 15 variants to {Path(loqusdb_config_path).stem}" in caplog.text
+    assert f"Uploaded 15 variants to Loqusdb" in caplog.text
 
 
 def test_mip_dna_get_loqusdb_api(
@@ -119,7 +118,7 @@ def test_mip_dna_get_loqusdb_api_tumor_case(
     case.links[0].sample.is_tumour = True
 
     # WHEN getting the Loqusdb API
-    with pytest.raises(DataIntegrityError):
+    with pytest.raises(LoqusdbUploadCaseError):
         # THEN a data integrity error should be raised and the execution aborted
         mip_dna_observations_api.get_loqusdb_api(case)
 

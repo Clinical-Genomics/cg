@@ -1,7 +1,6 @@
 """Code for uploading observations data via CLI."""
 
 import logging
-import contextlib
 from datetime import datetime
 from typing import Optional
 
@@ -10,14 +9,7 @@ from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
 from cg.cli.upload.observations.utils import get_observations_case_to_upload, get_observations_api
-from cg.exc import (
-    DuplicateRecordError,
-    DuplicateSampleError,
-    CaseNotFoundError,
-    LoqusdbUploadError,
-    CustomerPermissionError,
-    DataIntegrityError,
-)
+from cg.exc import LoqusdbError, CaseNotFoundError
 from cg.meta.upload.observations.observations_api import ObservationsAPI
 from cg.store import models, Store
 
@@ -41,9 +33,7 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
 
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
 
-    with contextlib.suppress(
-        DuplicateRecordError, DuplicateSampleError, CustomerPermissionError, DataIntegrityError
-    ):
+    try:
         case: models.Family = get_observations_case_to_upload(context, case_id)
         observations_api: ObservationsAPI = get_observations_api(context, case)
 
@@ -51,7 +41,9 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
             LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")
             return
 
-        observations_api.process(case.analyses[0])
+        observations_api.upload(case)
+    except LoqusdbError:
+        pass
 
 
 @click.command("available-observations")
@@ -74,13 +66,5 @@ def available_observations(context: click.Context, pipeline: Optional[Pipeline],
     for case in cases_to_upload:
         try:
             context.invoke(observations, case_id=case.internal_id, dry_run=dry_run)
-        except (
-            CaseNotFoundError,
-            LoqusdbUploadError,
-            FileNotFoundError,
-            DuplicateRecordError,
-            DuplicateSampleError,
-            CustomerPermissionError,
-            DataIntegrityError,
-        ):
+        except (CaseNotFoundError, FileNotFoundError):
             continue

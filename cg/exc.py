@@ -231,13 +231,13 @@ class LoqusdbError(CgError):
     """Exception related to the Loqusdb app."""
 
 
-class LoqusdbDuplicateRecordError(LoqusdbError):
-    """Exception related to duplicate records in Loqusdb."""
-
-
-class LoqusdbUnsupportedDataError(LoqusdbError):
-    """Exception raised when the data used for observations upload is not supported by Loqusdb."""
+class LoqusdbUploadCaseError(LoqusdbError):
+    """Exception raised when a case could not be uploaded to Loqusdb."""
 
 
 class LoqusdbDeleteCaseError(LoqusdbError):
     """Exception raised when a case cannot be deleted from Loqusdb."""
+
+
+class LoqusdbDuplicateRecordError(LoqusdbError):
+    """Exception related to duplicate records in Loqusdb."""

@@ -1,7 +1,6 @@
 """API for uploading rare disease observations."""
 
 import logging
-from pathlib import Path
 from typing import List
 
 from housekeeper.store.models import Version, File
@@ -9,7 +8,7 @@ from housekeeper.store.models import Version, File
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import MipDNAObservationsAnalysisTag, MipDNALoadParameters
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import DataIntegrityError
+from cg.exc import LoqusdbUploadCaseError
 from cg.meta.upload.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
@@ -44,13 +43,13 @@ class MipDNAObservationsAPI(ObservationsAPI):
         )
         loqusdb_id = str(loqusdb_api.get_case(case.internal_id)["_id"])
         self.update_loqusdb_id(case.get_samples_in_case, loqusdb_id)
-        LOG.info(f"Uploaded {output['variants']} variants to {Path(loqusdb_api.config_path).stem}")
+        LOG.info(f"Uploaded {output['variants']} variants to {repr(loqusdb_api)}")
 
     def get_loqusdb_api(self, case: models.Family) -> LoqusdbAPI:
         """Return a Loqusdb API specific to the analysis type."""
         if case.get_tumour_samples:
             LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling its upload.")
-            raise DataIntegrityError
+            raise LoqusdbUploadCaseError
 
         binary_path, config_path = (
             (self.loqusdb.binary_path, self.loqusdb.config_path)

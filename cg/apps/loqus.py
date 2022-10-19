@@ -6,7 +6,7 @@ from subprocess import CalledProcessError
 from typing import Optional
 
 from cg.constants.constants import FileFormat
-from cg.exc import CaseNotFoundError, DeleteCaseError, LoqusdbError
+from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
 from cg.io.controller import ReadStream
 from cg.utils import Process
 from cg.utils.format import get_flattened_dictionary
@@ -61,7 +61,7 @@ class LoqusdbAPI:
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
         self.process.run_command(parameters=cases_parameters)
         if not self.process.stdout:  # Case not in loqusdb, stdout of loqusdb command will be empty.
-            LOG.info(f"Case {case_id} not found in Loqusdb")
+            LOG.info(f"Case {case_id} not found in {repr(self)}")
             return None
 
         return ReadStream.get_content_from_stream(
@@ -78,9 +78,9 @@ class LoqusdbAPI:
 
         try:
             self.process.run_command(parameters=duplicate_call_params)
-        except CalledProcessError:
+        except CalledProcessError as exception:
             LOG.error(f"Could not execute the profile command for: {profile_vcf_path.as_posix()}")
-            raise LoqusdbError
+            raise exception
         if not self.process.stdout:
             LOG.info(f"No duplicates found for profile: {profile_vcf_path.as_posix()}")
             return None
@@ -95,14 +95,14 @@ class LoqusdbAPI:
         self.process.run_command(parameters=delete_call_parameters)
         for line in self.process.stderr_lines():
             if f"INFO Removing case {case_id}" in line:
-                LOG.info(f"Removing case {case_id} from Loqusdb")
+                LOG.info(f"Removing case {case_id} from {repr(self)}")
                 return
             if f"WARNING Case {case_id} does not exist" in line:
-                LOG.error(f"Case {case_id} not found in Loqusdb")
+                LOG.error(f"Case {case_id} not found in {repr(self)}")
                 raise CaseNotFoundError
 
-        LOG.error(f"Could not delete case {case_id} from Loqusdb")
-        raise DeleteCaseError
+        LOG.error(f"Could not delete case {case_id} from {repr(self)}")
+        raise LoqusdbDeleteCaseError
 
     def __repr__(self):
         return f"LoqusdbAPI(binary={self.binary_path}, config={self.config_path})"

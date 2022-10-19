@@ -9,7 +9,7 @@ from housekeeper.store.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import DataIntegrityError, DuplicateRecordError
+from cg.exc import LoqusdbUploadCaseError, LoqusdbDuplicateRecordError
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import ObservationsInputFiles
 from cg.store import Store, models
@@ -35,14 +35,16 @@ class ObservationsAPI:
             LOG.error(
                 f"Sequencing method {self.sequencing_method} is not supported by Loqusdb. Cancelling its upload"
             )
-            raise DataIntegrityError
+            raise LoqusdbUploadCaseError
 
         loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(case)
         input_files: ObservationsInputFiles = self.get_observations_input_files(case)
         if self.is_duplicate(case, loqusdb_api, input_files):
-            LOG.error(f"Case {case.internal_id} has been already uploaded to Loqusdb")
-            raise DuplicateRecordError
+            LOG.error(f"Case {case.internal_id} has been already uploaded to {repr(loqusdb_api)}")
+            raise LoqusdbDuplicateRecordError
+
         self.load_observations(case, loqusdb_api, input_files)
+        LOG.info(f"Observations uploaded for case {case.internal_id} to {repr(loqusdb_api)}")
 
     def get_observations_input_files(self, case: models.Family) -> ObservationsInputFiles:
         """Fetch input files from a case to upload to Loqusdb."""
