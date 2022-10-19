@@ -6,7 +6,9 @@ from pathlib import Path
 import pytest
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
+from tests.mocks.microsalt_analysis_mock import MockMicrosaltAnalysis
 from tests.store_helpers import StoreHelpers
 
 
@@ -102,3 +104,88 @@ def fixture_rsync_process(project_dir: Path) -> Path:
 
     rsync_process.mkdir(exist_ok=True, parents=True)
     return rsync_process
+
+
+@pytest.fixture(name="microsalt_case_clean_dry")
+def fixture_microsalt_case_clean_dry() -> str:
+    """Return a microsalt case to clean in dry-run"""
+    return "microsalt_case_clean_dry"
+
+
+@pytest.fixture(name="microsalt_case_clean")
+def fixture_microsalt_case_not_clean() -> str:
+    """Return a microsalt case to clean"""
+    return "microsalt_case_clean"
+
+
+@pytest.fixture(scope="function")
+def clean_context_microsalt(
+    microsalt_case_clean: str,
+    microsalt_case_clean_dry: str,
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    project_dir: Path,
+    timestamp_yesterday: datetime.datetime,
+    timestamp_now: datetime.datetime,
+) -> CGConfig:
+    analysis_api = MockMicrosaltAnalysis(cg_context)
+    store = analysis_api.status_db
+
+    # Create textbook case for cleaning
+    case_to_clean = helpers.add_case(
+        store=store,
+        internal_id=microsalt_case_clean,
+        name=microsalt_case_clean,
+        data_analysis=Pipeline.MICROSALT,
+    )
+    sample_case_to_clean = helpers.add_sample(
+        store,
+        internal_id=microsalt_case_clean,
+    )
+
+    helpers.add_relationship(store, case=case_to_clean, sample=sample_case_to_clean)
+
+    helpers.add_analysis(
+        store,
+        case=case_to_clean,
+        pipeline=Pipeline.MICROSALT,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
+    )
+    case_path_list = analysis_api.get_case_path(microsalt_case_clean)
+    for path in case_path_list:
+        Path(path).mkdir(exist_ok=True, parents=True)
+
+    # Create textbook case for cleaning in dry run
+    case_to_not_clean = helpers.add_case(
+        store=store,
+        internal_id=microsalt_case_clean_dry,
+        name=microsalt_case_clean_dry,
+        data_analysis=Pipeline.MICROSALT,
+    )
+
+    sample_case_to_not_clean = helpers.add_sample(
+        store,
+        internal_id=microsalt_case_clean_dry,
+    )
+    helpers.add_relationship(store, case=case_to_not_clean, sample=sample_case_to_not_clean)
+
+    helpers.add_analysis(
+        store,
+        case=case_to_not_clean,
+        pipeline=Pipeline.MICROSALT,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
+    )
+
+    case_path_list = analysis_api.get_case_path(microsalt_case_clean_dry)
+    for path in case_path_list:
+        Path(path).mkdir(exist_ok=True, parents=True)
+
+    cg_context.meta_apis["analysis_api"] = analysis_api
+
+    cg_context.data_delivery.base_path = f"{project_dir}/rsync"
+
+    return cg_context
