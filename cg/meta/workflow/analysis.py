@@ -437,30 +437,24 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.commit()
 
-    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False):
+    def clean_run_dir(
+        self, case_id: str, yes: bool, case_path: Union[List[Path], Path], dry_run: bool = False
+    ):
         """Remove workflow run directory."""
-
-        self.verify_case_id_in_statusdb(case_id)
-        self.check_analysis_ongoing(case_id=case_id)
-        analysis_path: Path = self.get_case_path(case_id)
-
-        if dry_run:
-            LOG.info(f"Would have deleted: {analysis_path}")
-            return EXIT_SUCCESS
 
         try:
             self.verify_case_path_exists(case_id=case_id)
         except FileNotFoundError:
             self.clean_analyses(case_id)
 
-        if yes or click.confirm(f"Are you sure you want to remove all files in {analysis_path}?"):
-            if analysis_path.is_symlink():
+        if yes or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
+            if case_path.is_symlink():
                 LOG.warning(
-                    f"Will not automatically delete symlink: {analysis_path}, delete it manually",
+                    f"Will not automatically delete symlink: {case_path}, delete it manually",
                 )
                 return EXIT_FAIL
 
-            shutil.rmtree(analysis_path, ignore_errors=True)
-            LOG.info(f"Cleaned {analysis_path}")
+            shutil.rmtree(case_path, ignore_errors=True)
+            LOG.info(f"Cleaned {case_path}")
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS

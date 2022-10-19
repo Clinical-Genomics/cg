@@ -13,7 +13,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 import glob
 
 import click
@@ -71,25 +71,19 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
         ]
 
-    def clean_run_dir(self, case_id: str, yes: bool, dry_run: bool = False) -> int:
+    def clean_run_dir(
+        self, case_id: str, yes: bool, case_path: Union[List[Path], Path], dry_run: bool = False
+    ) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
-        self.verify_case_id_in_statusdb(case_id)
-        self.check_analysis_ongoing(case_id=case_id)
-        case_path_list: List[Path] = self.get_case_path(case_id=case_id)
-
-        if dry_run:
-            LOG.info(f"Would have deleted: {case_path_list}")
-            return EXIT_SUCCESS
-
-        if not case_path_list:
+        if not case_path:
             LOG.info(
                 f"There is no case paths for case {case_id}. Setting cleaned at to {datetime.now()}"
             )
             self.clean_analyses(case_id=case_id)
             return EXIT_SUCCESS
 
-        for analysis_path in case_path_list:
+        for analysis_path in case_path:
             if yes or click.confirm(
                 f"Are you sure you want to remove all files in {analysis_path}?"
             ):

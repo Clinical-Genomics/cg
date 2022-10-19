@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 import click
 import datetime as dt
@@ -163,7 +163,16 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     """Remove workflow run directory."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.clean_run_dir(case_id=case_id, yes=yes, dry_run=dry_run)
+    analysis_api.verify_case_id_in_statusdb(case_id)
+    analysis_api.check_analysis_ongoing(case_id=case_id)
+
+    analysis_path: Union[List[Path], Path] = analysis_api.get_case_path(case_id)
+
+    if dry_run:
+        LOG.info(f"Would have deleted: {analysis_path}")
+        return EXIT_SUCCESS
+
+    analysis_api.clean_run_dir(case_id=case_id, yes=yes, dry_run=dry_run, case_path=analysis_path)
 
 
 @click.command("past-run-dirs")
