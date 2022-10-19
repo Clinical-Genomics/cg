@@ -180,6 +180,10 @@ def fixture_base_config_dict() -> dict:
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
+        "loqusdb": {
+            "binary_path": "binary",
+            "config_path": "config",
+        },
     }
 
 
