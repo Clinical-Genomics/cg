@@ -197,9 +197,12 @@ def past_run_dirs(
         try:
             LOG.info("Cleaning %s output for %s", analysis_api.pipeline, case_id)
             context.invoke(clean_run_dir, yes=yes, case_id=case_id, dry_run=dry_run)
+        except FileNotFoundError:
+            continue
         except Exception as error:
             LOG.error("Failed to clean directories for case %s - %s", case_id, error)
             exit_code = EXIT_FAIL
+
     if exit_code:
         raise click.Abort
     LOG.info("Done cleaning %s output ", analysis_api.pipeline)
