@@ -1,6 +1,7 @@
 """Test observations API methods."""
 
 import logging
+from typing import List
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -200,7 +201,9 @@ def test_mip_dna_get_supported_sequencing_methods(mip_dna_observations_api: MipD
     # GIVEN a MIP DNA observations API
 
     # WHEN retrieving the rare disease sequencing methods
-    sequencing_methods = mip_dna_observations_api.get_supported_sequencing_methods()
+    sequencing_methods: List[
+        SequencingMethod
+    ] = mip_dna_observations_api.get_supported_sequencing_methods()
 
     # WHEN retrieving the supported analysis
     assert len(sequencing_methods) == 2

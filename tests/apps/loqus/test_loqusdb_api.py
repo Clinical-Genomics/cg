@@ -43,7 +43,7 @@ def test_load(
 
     # WHEN uploading a case with 15 variants to Loqusdb
     loqusdb_api.process.stderr = loqusdb_load_output.decode("utf-8")
-    output = loqusdb_api.load(
+    output: dict = loqusdb_api.load(
         case_id=case_id,
         snv_vcf_path=observations_input_files.snv_vcf_path,
         sv_vcf_path=observations_input_files.sv_vcf_path,
@@ -150,7 +150,7 @@ def test_get_duplicate(
     loqusdb_api.process.stdout = loqusdb_duplicate_output.decode("utf-8")
 
     # GIVEN the expected duplicated output
-    expected_duplicate = ReadStream.get_content_from_stream(
+    expected_duplicate: dict = ReadStream.get_content_from_stream(
         file_format=FileFormat.JSON, stream=loqusdb_duplicate_output.decode("utf-8")
     )
 
@@ -233,7 +233,7 @@ def test_repr_string(loqusdb_api: LoqusdbAPI, loqusdb_binary_path: str, loqusdb_
     # GIVEN a Loqusdb API
 
     # WHEN __repr__ is called
-    repr_string = repr(loqusdb_api)
+    repr_string: str = repr(loqusdb_api)
 
     # THEN __repr__ should return a representation of the Loqusdb object
     assert f"LoqusdbAPI(binary={loqusdb_binary_path}, config={loqusdb_config_path})" in repr_string
