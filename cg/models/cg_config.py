@@ -19,6 +19,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.shipping import ShippingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
+from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
 
@@ -232,11 +233,11 @@ class CGConfig(BaseModel):
     hermes_api_: HermesApi = None
     lims: LimsConfig = None
     lims_api_: LimsAPI = None
-    loqusdb: CommonAppConfig = None
+    loqusdb: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS.value)
     loqusdb_api_: LoqusdbAPI = None
-    loqusdb_wes: CommonAppConfig = Field(None, alias="loqusdb-wes")
-    loqusdb_somatic: CommonAppConfig = Field(None, alias="loqusdb-somatic")
-    loqusdb_tumor: CommonAppConfig = Field(None, alias="loqusdb-tumor")
+    loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
+    loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None

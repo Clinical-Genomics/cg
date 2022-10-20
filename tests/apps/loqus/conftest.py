@@ -2,6 +2,7 @@
 
 import pytest
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.observations import LoqusdbInstance
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from tests.mocks.process_mock import ProcessMock
 from tests.models.observations.conftest import (
@@ -98,10 +99,13 @@ LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.com
 def fixture_loqusdb_config_dict() -> dict:
     """Loqusdb config fixture."""
     return {
-        "loqusdb": {"binary_path": "binary", "config_path": "config"},
-        "loqusdb-wes": {"binary_path": "binary_wes", "config_path": "config_wes"},
-        "loqusdb-somatic": {"binary_path": "binary_somatic", "config_path": "config_somatic"},
-        "loqusdb-tumor": {"binary_path": "binary_tumor", "config_path": "config_tumor"},
+        LoqusdbInstance.WGS.value: {"binary_path": "binary", "config_path": "config"},
+        LoqusdbInstance.WES.value: {"binary_path": "binary_wes", "config_path": "config_wes"},
+        LoqusdbInstance.SOMATIC.value: {
+            "binary_path": "binary_somatic",
+            "config_path": "config_somatic",
+        },
+        LoqusdbInstance.TUMOR.value: {"binary_path": "binary_tumor", "config_path": "config_tumor"},
     }
 
 
@@ -110,10 +114,14 @@ def fixture_loqusdb_config_object(
     loqusdb_config_dict: dict, cg_config_object: CGConfig
 ) -> CGConfig:
     """Loqusdb config object fixture."""
-    cg_config_object.loqusdb = CommonAppConfig(**loqusdb_config_dict["loqusdb"])
-    cg_config_object.loqusdb_wes = CommonAppConfig(**loqusdb_config_dict["loqusdb-wes"])
-    cg_config_object.loqusdb_somatic = CommonAppConfig(**loqusdb_config_dict["loqusdb-somatic"])
-    cg_config_object.loqusdb_tumor = CommonAppConfig(**loqusdb_config_dict["loqusdb-tumor"])
+    cg_config_object.loqusdb = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WGS.value])
+    cg_config_object.loqusdb_wes = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WES.value])
+    cg_config_object.loqusdb_somatic = CommonAppConfig(
+        **loqusdb_config_dict[LoqusdbInstance.SOMATIC.value]
+    )
+    cg_config_object.loqusdb_tumor = CommonAppConfig(
+        **loqusdb_config_dict[LoqusdbInstance.TUMOR.value]
+    )
     return cg_config_object
 
 

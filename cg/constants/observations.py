@@ -8,6 +8,15 @@ from cgmodels.cg.constants import Pipeline, StrEnum
 LOQUSDB_SUPPORTED_PIPELINES = [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
 
 
+class LoqusdbInstance(StrEnum):
+    """Observations instances."""
+
+    WGS: str = "loqusdb"
+    WES: str = "loqusdb-wes"
+    SOMATIC: str = "loqusdb-somatic"
+    TUMOR: str = "loqusdb-tumor"
+
+
 class MipDNAObservationsAnalysisTag(StrEnum):
     """Observations files analysis tags."""
 
