@@ -68,7 +68,7 @@ def test_clean_run(
     caplog,
     mocker,
 ):
-    """Test command with dry run options"""
+    """Test command with dry run options."""
 
     # GIVEN a case on disk that could be deleted
     caplog.set_level(logging.INFO)
