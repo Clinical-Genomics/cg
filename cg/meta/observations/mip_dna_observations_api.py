@@ -103,3 +103,10 @@ class MipDNAObservationsAPI(ObservationsAPI):
     def get_supported_sequencing_methods(self) -> List[SequencingMethod]:
         """Return a list of supported sequencing methods for Loqusdb upload."""
         return [SequencingMethod.WGS, SequencingMethod.WES]
+
+    def delete_case(self, case: models.Family) -> None:
+        """Delete rare diseases case observations from Loqusdb."""
+        loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(case)
+        loqusdb_api.delete_case(case.internal_id)
+        self.update_loqusdb_id(case.get_samples_in_case, loqusdb_id=None)
+        LOG.info(f"Removed observations for case {case.internal_id} from {repr(loqusdb_api)}")

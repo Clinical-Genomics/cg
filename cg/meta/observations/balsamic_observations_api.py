@@ -52,3 +52,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
     def get_supported_sequencing_methods(self) -> List[SequencingMethod]:
         """Return a list of supported sequencing methods for Loqusdb upload."""
         raise NotImplementedError
+
+    def delete_case(self, case: models.Family) -> None:
+        """Delete cancer case observations from Loqusdb."""
+        raise NotImplementedError

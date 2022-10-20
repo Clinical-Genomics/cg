@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from housekeeper.store.models import Version
 
@@ -55,7 +55,7 @@ class ObservationsAPI:
         )
         return self.extract_observations_files_from_hk(hk_version)
 
-    def update_loqusdb_id(self, samples: List[models.Family], loqusdb_id: str) -> None:
+    def update_loqusdb_id(self, samples: List[models.Family], loqusdb_id: Optional[str]) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
@@ -83,4 +83,8 @@ class ObservationsAPI:
 
     def get_supported_sequencing_methods(self) -> List[SequencingMethod]:
         """Return a list of supported sequencing methods for Loqusdb upload."""
+        raise NotImplementedError
+
+    def delete_case(self, case: models.Family) -> None:
+        """Delete case observations from Loqusdb."""
         raise NotImplementedError
