@@ -172,7 +172,7 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
         LOG.info(f"Would have deleted: {analysis_path}")
         return EXIT_SUCCESS
 
-    analysis_api.clean_run_dir(case_id=case_id, yes=yes, dry_run=dry_run, case_path=analysis_path)
+    analysis_api.clean_run_dir(case_id=case_id, yes=yes, case_path=analysis_path)
 
 
 @click.command("past-run-dirs")
