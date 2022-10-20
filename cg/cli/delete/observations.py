@@ -5,10 +5,9 @@ import click
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
-from cg.apps.loqus import LoqusdbAPI
 from cg.cli.upload.observations.utils import get_observations_case_to_delete
 from cg.cli.workflow.commands import OPTION_LOQUSDB_SUPPORTED_PIPELINES, ARGUMENT_CASE_ID
-from cg.exc import CaseNotFoundError
+from cg.exc import CaseNotFoundError, LoqusdbError
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
@@ -59,5 +58,5 @@ def available_observations(
         for case in uploaded_observations:
             try:
                 context.invoke(observations, case_id=case.internal_id, yes=yes, dry_run=dry_run)
-            except CaseNotFoundError:
+            except (CaseNotFoundError, LoqusdbError):
                 continue

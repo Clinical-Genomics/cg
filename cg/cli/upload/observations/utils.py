@@ -56,7 +56,7 @@ def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.F
     loqusdb_api: LoqusdbAPI = context.loqusdb_api
     case: models.Family = get_observations_case(context, case_id, upload=False)
     if not loqusdb_api.get_case(case_id):
-        LOG.error(f"Case {case.internal_id} could not be found in Loqusdb")
+        LOG.error(f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion.")
         raise CaseNotFoundError
     return case
 
