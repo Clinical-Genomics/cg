@@ -9,7 +9,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import MipDNAObservationsAnalysisTag, MipDNALoadParameters
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbUploadCaseError
-from cg.meta.upload.observations.observations_api import ObservationsAPI
+from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store import models

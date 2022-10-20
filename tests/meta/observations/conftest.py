@@ -10,7 +10,7 @@ from cg.store import models
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.sequencing import SequencingMethod
-from cg.meta.upload.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 
 from tests.apps.loqus.conftest import (

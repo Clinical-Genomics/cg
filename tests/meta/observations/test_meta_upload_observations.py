@@ -9,10 +9,10 @@ from _pytest.logging import LogCaptureFixture
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError
-from cg.meta.upload.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store import models, Store
-from tests.meta.upload.observations.conftest import (
+from tests.meta.observations.conftest import (
     MockLoqusdbAPI,
     MockMipDNAObservationsAPI,
     MockMipDNAObservationsAPIDuplicateCase,

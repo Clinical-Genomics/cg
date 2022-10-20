@@ -10,7 +10,7 @@ from cgmodels.cg.constants import Pipeline
 
 from cg.cli.upload.observations.utils import get_observations_case_to_upload, get_observations_api
 from cg.exc import LoqusdbError, CaseNotFoundError
-from cg.meta.upload.observations.observations_api import ObservationsAPI
+from cg.meta.observations.observations_api import ObservationsAPI
 from cg.store import models, Store
 
 from cg.cli.workflow.commands import (

@@ -8,7 +8,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.sequencing import SequencingMethod
-from cg.meta.upload.observations.observations_api import ObservationsAPI
+from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 

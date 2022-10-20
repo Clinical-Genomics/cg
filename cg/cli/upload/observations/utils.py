@@ -9,9 +9,9 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
-from cg.meta.upload.observations.balsamic_observations_api import BalsamicObservationsAPI
-from cg.meta.upload.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.meta.upload.observations.observations_api import ObservationsAPI
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.meta.observations.observations_api import ObservationsAPI
 from cg.store import models, Store
 
 from cg.models.cg_config import CGConfig

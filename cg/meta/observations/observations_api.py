@@ -1,4 +1,4 @@
-"""API for uploading observations."""
+"""Observations API."""
 
 import logging
 from datetime import datetime

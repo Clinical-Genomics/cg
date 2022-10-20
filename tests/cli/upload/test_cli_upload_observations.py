@@ -19,7 +19,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
-from cg.meta.upload.observations.observations_api import ObservationsAPI
+from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
