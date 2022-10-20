@@ -10,7 +10,7 @@ from cg.constants.observations import MipDNAObservationsAnalysisTag, MipDNALoadP
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbUploadCaseError
 from cg.meta.observations.observations_api import ObservationsAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store import models
 
@@ -21,6 +21,8 @@ class MipDNAObservationsAPI(ObservationsAPI):
     """API to manage MIP-DNA observations."""
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+        self.loqusdb: CommonAppConfig = config.loqusdb
+        self.loqusdb_wes: CommonAppConfig = config.loqusdb_wes
         super().__init__(config, sequencing_method)
 
     def load_observations(

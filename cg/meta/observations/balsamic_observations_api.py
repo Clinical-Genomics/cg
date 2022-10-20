@@ -9,7 +9,7 @@ from housekeeper.store.models import Version
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.observations_api import ObservationsAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
 
 LOG = logging.getLogger(__name__)
@@ -19,6 +19,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
     """API to manage Balsamic observations."""
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
+        self.loqusdb_somatic: CommonAppConfig = config.loqusdb_somatic
+        self.loqusdb_tumor: CommonAppConfig = config.loqusdb_tumor
         super().__init__(config, sequencing_method)
 
     def load_observations(

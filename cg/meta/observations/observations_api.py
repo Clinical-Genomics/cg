@@ -24,10 +24,6 @@ class ObservationsAPI:
         self.store: Store = config.status_db
         self.housekeeper_api: HousekeeperAPI = config.housekeeper_api
         self.sequencing_method: SequencingMethod = sequencing_method
-        self.loqusdb: CommonAppConfig = config.loqusdb
-        self.loqusdb_wes: CommonAppConfig = config.loqusdb_wes
-        self.loqusdb_somatic: CommonAppConfig = config.loqusdb_somatic
-        self.loqusdb_tumor: CommonAppConfig = config.loqusdb_tumor
 
     def upload(self, case: models.Family) -> None:
         """Upload observations to Loqusdb."""
