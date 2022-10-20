@@ -437,9 +437,7 @@ class AnalysisAPI(MetaAPI):
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
             self.status_db.commit()
 
-    def clean_run_dir(
-        self, case_id: str, yes: bool, case_path: Union[List[Path], Path], dry_run: bool = False
-    ):
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directory."""
 
         try:

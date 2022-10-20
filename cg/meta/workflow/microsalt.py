@@ -71,9 +71,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
         ]
 
-    def clean_run_dir(
-        self, case_id: str, yes: bool, case_path: Union[List[Path], Path], dry_run: bool = False
-    ) -> int:
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directories for a MicroSALT case."""
 
         if not case_path:
