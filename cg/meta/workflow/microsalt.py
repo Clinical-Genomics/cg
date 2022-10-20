@@ -63,6 +63,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return self._process
 
     def get_case_path(self, case_id: str) -> List[Path]:
+        """Returns all paths associated with the case."""
+
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
@@ -98,7 +100,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return EXIT_SUCCESS
 
     def get_case_fastq_path(self, case_id: str) -> Path:
-        """Get fastq pats for a case."""
+        """Get fastq paths for a case."""
         return Path(self.root_dir, "fastq", case_id)
 
     def get_config_path(self, filename: str) -> Path:

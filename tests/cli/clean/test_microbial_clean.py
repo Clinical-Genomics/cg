@@ -55,6 +55,8 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert microsalt_case_clean_dry in caplog.text
+
+    # THEN the analysis should still be in the analyses_to_clean query since this is a dry-ryn
     assert analysis_to_clean.cleaned_at == None
     assert analysis_to_clean in base_store.analyses_to_clean(pipeline=Pipeline.MICROSALT)
 
@@ -101,5 +103,7 @@ def test_clean_run(
     assert result.exit_code == EXIT_SUCCESS
     assert microsalt_case_clean in caplog.text
     assert "Cleaned" in caplog.text
+
+    # THEN the analysis should no longer be in the analyses_to_clean query
     assert isinstance(analysis_to_clean.cleaned_at, dt.datetime)
     assert analysis_to_clean not in base_store.analyses_to_clean(pipeline=Pipeline.MICROSALT)

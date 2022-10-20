@@ -4,11 +4,11 @@ import datetime
 from pathlib import Path
 
 import pytest
+
 from cg.constants import Pipeline
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from tests.mocks.microsalt_analysis_mock import MockMicrosaltAnalysis
 from tests.store_helpers import StoreHelpers
 
 
@@ -127,11 +127,20 @@ def clean_context_microsalt(
     project_dir: Path,
     timestamp_yesterday: datetime.datetime,
     timestamp_now: datetime.datetime,
+    mocker,
 ) -> CGConfig:
-    analysis_api = MockMicrosaltAnalysis(cg_context)
+    """Clean context for microsalt."""
+
+    analysis_api = MicrosaltAnalysisAPI(cg_context)
     store = analysis_api.status_db
 
+    mocker.patch.object(MicrosaltAnalysisAPI, "get_case_path")
+
     # Create textbook case for cleaning
+    MicrosaltAnalysisAPI.get_case_path.return_value = [
+        Path("home/proj/production/microbial/test/result", microsalt_case_clean)
+    ]
+
     case_to_clean = helpers.add_case(
         store=store,
         internal_id=microsalt_case_clean,
@@ -158,7 +167,11 @@ def clean_context_microsalt(
         Path(path).mkdir(exist_ok=True, parents=True)
 
     # Create textbook case for cleaning in dry run
-    case_to_not_clean = helpers.add_case(
+    MicrosaltAnalysisAPI.get_case_path.return_value = [
+        Path("home/proj/production/microbial/test/result", microsalt_case_clean_dry)
+    ]
+
+    case_to_clean_dry_run = helpers.add_case(
         store=store,
         internal_id=microsalt_case_clean_dry,
         name=microsalt_case_clean_dry,
@@ -169,11 +182,11 @@ def clean_context_microsalt(
         store,
         internal_id=microsalt_case_clean_dry,
     )
-    helpers.add_relationship(store, case=case_to_not_clean, sample=sample_case_to_not_clean)
+    helpers.add_relationship(store, case=case_to_clean_dry_run, sample=sample_case_to_not_clean)
 
     helpers.add_analysis(
         store,
-        case=case_to_not_clean,
+        case=case_to_clean_dry_run,
         pipeline=Pipeline.MICROSALT,
         started_at=timestamp_yesterday,
         uploaded_at=timestamp_yesterday,
