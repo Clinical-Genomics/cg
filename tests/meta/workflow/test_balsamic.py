@@ -73,7 +73,7 @@ def test_get_verified_pon():
         BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, invalid_pon_cnn)
 
 
-def test_get_latest_observations(cg_context, observations_dir, observations_files_path):
+def test_get_latest_observations_export_file(cg_context, observations_dir, observations_files_path):
     """Test latest observations extraction."""
 
     # GIVEN a Loqusdb temporary directory and a file wildcard
@@ -82,7 +82,7 @@ def test_get_latest_observations(cg_context, observations_dir, observations_file
     wildcard = ObservationFileWildcards.CANCER_SOMATIC_SNV
 
     # WHEN getting the latest observations file
-    observation = balsamic_analysis_api.get_latest_observations(wildcard)
+    observation = balsamic_analysis_api.get_latest_observations_export_file(wildcard)
 
     # THEN the extracted observation should match the latest file
     assert observation == str(observations_files_path[0])

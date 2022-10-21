@@ -434,7 +434,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if sample_obj:
             return sample_obj.internal_id
 
-    def get_latest_observations(self, observations_pattern: str) -> Optional[str]:
+    def get_latest_observations_export_file(self, observations_pattern: str) -> Optional[str]:
         """
         Returns the latest Loqusdb dump file (loqusdb_<observations>_export-<date>-.vcf.gz) matching an
         observations pattern.
@@ -449,18 +449,18 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_verified_observations(self, observations: List[str]) -> dict:
         """Returns a verified {option: path} observations dictionary."""
-        observations_dict = dict()
+        verified_observations = {}
         for wildcard in list(ObservationFileWildcards):
             path: str = get_string_from_list_by_pattern(observations, wildcard)
-            observations_dict.update(
+            verified_observations.update(
                 {
                     wildcard.replace("_", "-") + "-observations": path
                     if path
-                    else self.get_latest_observations(wildcard)
+                    else self.get_latest_observations_export_file(wildcard)
                 }
             )
 
-        return observations_dict
+        return verified_observations
 
     def get_verified_config_case_arguments(
         self,
