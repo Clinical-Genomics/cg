@@ -73,7 +73,9 @@ def test_get_verified_pon():
         BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, invalid_pon_cnn)
 
 
-def test_get_latest_observations_export_file(cg_context, observations_dir, observations_files_path):
+def test_get_latest_observations_export_file(
+    cg_context, observations_dir, observations_files_paths
+):
     """Test latest observations extraction."""
 
     # GIVEN a Loqusdb temporary directory and a file wildcard
@@ -85,11 +87,11 @@ def test_get_latest_observations_export_file(cg_context, observations_dir, obser
     observation = balsamic_analysis_api.get_latest_observations_export_file(wildcard)
 
     # THEN the extracted observation should match the latest file
-    assert observation == str(observations_files_path[0])
+    assert observation == str(observations_files_paths[0])
 
 
 def test_get_parsed_observation_file_paths_no_args(
-    cg_context, observations_dir, observations_files_path
+    cg_context, observations_dir, observations_files_paths
 ):
     """Test verified observations extraction with no arguments."""
 
@@ -100,9 +102,9 @@ def test_get_parsed_observation_file_paths_no_args(
     # GIVEN the expected output dictionary
     expected_args = {
         "clinical-snv-observations": None,
-        "clinical-sv-observations": str(observations_files_path[2]),
+        "clinical-sv-observations": str(observations_files_paths[2]),
         "cancer-all-snv-observations": None,
-        "cancer-somatic-snv-observations": str(observations_files_path[0]),
+        "cancer-somatic-snv-observations": str(observations_files_paths[0]),
         "cancer-somatic-sv-observations": None,
     }
 
@@ -114,7 +116,7 @@ def test_get_parsed_observation_file_paths_no_args(
 
 
 def test_get_parsed_observation_file_paths_overwrite_input(
-    cg_context, observations_dir, observations_files_path
+    cg_context, observations_dir, observations_files_paths
 ):
     """Test verified observations extraction when providing a non default observation file."""
 
@@ -129,7 +131,7 @@ def test_get_parsed_observation_file_paths_overwrite_input(
     # GIVEN the expected output dictionary
     expected_args = {
         "clinical-snv-observations": loqusdb_files[0],
-        "clinical-sv-observations": str(observations_files_path[2]),
+        "clinical-sv-observations": str(observations_files_paths[2]),
         "cancer-all-snv-observations": None,
         "cancer-somatic-snv-observations": loqusdb_files[1],
         "cancer-somatic-sv-observations": None,

@@ -1142,16 +1142,19 @@ def fixture_observations_dir(tmpdir_factory, tmp_path) -> Path:
     return tmpdir_factory.mktemp("loqusdb")
 
 
-@pytest.fixture(scope="function")
-def observations_files_path(observations_dir) -> List[Path]:
+@pytest.fixture(scope="function", name="observations_files_paths")
+def fixture_observations_files_paths(observations_dir: Path) -> List[Path]:
     """Mock observations files."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf")
-    mock_file.touch(exist_ok=True)
-    mock_old_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf")
-    mock_old_file.touch(exist_ok=True)
-    mock_clinical_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf")
-    mock_clinical_file.touch(exist_ok=True)
-    return [mock_file, mock_old_file, mock_clinical_file]
+    mock_files: List[Path] = []
+    for file_name in [
+        "loqusdb_cancer_somatic_snv_export-20220101-.vcf",
+        "loqusdb_cancer_somatic_snv_export-20180101-.vcf",
+        "loqusdb_clinical_sv_export-20220101-.vcf",
+    ]:
+        mock_file = Path(observations_dir, file_name)
+        mock_file.touch(exist_ok=True)
+        mock_files.append(mock_file)
+    return mock_files
 
 
 @pytest.fixture(scope="function")
