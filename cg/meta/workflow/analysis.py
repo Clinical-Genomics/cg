@@ -158,7 +158,6 @@ class AnalysisAPI(MetaAPI):
 
     def upload_bundle_housekeeper(self, case_id: str) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
-
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=self.get_hermes_transformed_deliverables(case_id)

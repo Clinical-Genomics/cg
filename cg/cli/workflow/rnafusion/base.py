@@ -292,6 +292,7 @@ def store_housekeeper(context: CGConfig, case_id: str) -> None:
     status_db: Store = context.status_db
 
     try:
+
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_analysis_finished(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)

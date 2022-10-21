@@ -158,13 +158,15 @@ def test_valid_case_already_added(
 
     # Make sure  analysis not already stored in ClinicalDB
     assert not rnafusion_context.status_db.family(case_id).analyses
-
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # Ensure bundles exist by creating them first
-    cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
+    result_first = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
+
+    # GIVEN that the first command executed successfully
+    assert result_first.exit_code == EXIT_SUCCESS
 
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
