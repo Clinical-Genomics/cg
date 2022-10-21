@@ -451,11 +451,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a verified {option: path} observations dictionary."""
         verified_observations = {}
         for wildcard in list(ObservationFileWildcards):
-            path: str = get_string_from_list_by_pattern(observations, wildcard)
+            file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
                 {
-                    wildcard.replace("_", "-") + "-observations": path
-                    if path
+                    wildcard.replace("_", "-") + "-observations": file_path
+                    if file_path
                     else self.get_latest_observations_export_file(wildcard)
                 }
             )

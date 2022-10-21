@@ -88,7 +88,9 @@ def test_get_latest_observations_export_file(cg_context, observations_dir, obser
     assert observation == str(observations_files_path[0])
 
 
-def test_get_verified_observation_no_args(cg_context, observations_dir, observations_files_path):
+def test_get_parsed_observation_file_paths_no_args(
+    cg_context, observations_dir, observations_files_path
+):
     """Test verified observations extraction with no arguments."""
 
     # GIVEN a Loqusdb temporary directory
@@ -105,13 +107,13 @@ def test_get_verified_observation_no_args(cg_context, observations_dir, observat
     }
 
     # WHEN getting the latest observations dictionary
-    args: dict = balsamic_analysis_api.get_verified_observations(None)
+    args: dict = balsamic_analysis_api.get_parsed_observation_file_paths(None)
 
     # THEN the extracted observation arguments should match the expected one
     assert args == expected_args
 
 
-def test_get_verified_observation_overwrite_input(
+def test_get_parsed_observation_file_paths_overwrite_input(
     cg_context, observations_dir, observations_files_path
 ):
     """Test verified observations extraction when providing a non default observation file."""
@@ -134,7 +136,7 @@ def test_get_verified_observation_overwrite_input(
     }
 
     # WHEN getting the latest observations dictionary
-    args: dict = balsamic_analysis_api.get_verified_observations(loqusdb_files)
+    args: dict = balsamic_analysis_api.get_parsed_observation_file_paths(loqusdb_files)
 
     # THEN the extracted observation arguments should match the expected one
     assert args == expected_args
