@@ -447,7 +447,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return str(available_files[0]) if available_files else None
 
-    def get_verified_observations(self, observations: List[str]) -> dict:
+    def get_parsed_observation_file_paths(self, observations: List[str]) -> dict:
         """Returns a verified {option: path} observations dictionary."""
         verified_observations = {}
         for wildcard in list(ObservationFileWildcards):
@@ -501,7 +501,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         }
 
         if not verified_panel_bed:
-            args_dict.update(self.get_verified_observations(observations))
+            args_dict.update(self.get_parsed_observation_file_paths(observations))
 
         return args_dict
 
