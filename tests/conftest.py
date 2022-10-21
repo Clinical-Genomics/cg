@@ -1142,19 +1142,50 @@ def fixture_observations_dir(tmpdir_factory, tmp_path) -> Path:
     return tmpdir_factory.mktemp("loqusdb")
 
 
-@pytest.fixture(scope="function", name="observations_files_paths")
-def fixture_observations_files_paths(observations_dir: Path) -> List[Path]:
-    """Mock observations files."""
-    mock_files: List[Path] = []
-    for file_name in [
-        "loqusdb_cancer_somatic_snv_export-20220101-.vcf",
-        "loqusdb_cancer_somatic_snv_export-20180101-.vcf",
-        "loqusdb_clinical_sv_export-20220101-.vcf",
-    ]:
-        mock_file = Path(observations_dir, file_name)
-        mock_file.touch(exist_ok=True)
-        mock_files.append(mock_file)
-    return mock_files
+@pytest.fixture(scope="function", name="observations_clinical_snv_file_path")
+def fixture_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a clinical SNV file."""
+    mock_file = Path(observations_dir, "loqusdb_clinical_snv_export-20220101-.vcf")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(scope="function", name="observations_clinical_sv_file_path")
+def fixture_observations_clinical_sv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a clinical SV file."""
+    mock_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(scope="function", name="observations_somatic_snv_file_path")
+def fixture_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a cancer somatic SNV file."""
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(scope="function", name="outdated_observations_somatic_snv_file_path")
+def fixture_outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to an outdated cancer somatic SNV file."""
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(scope="function", name="observations_somatic_sv_file_path")
+def fixture_observations_somatic_sv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a cancer somatic SV file."""
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_sv_export-20180101-.vcf")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(scope="function", name="custom_observations_clinical_snv_file_path")
+def fixture_custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
+    """Return a custom path for the clinical SNV observations file."""
+    return Path(observations_dir, "clinical_snv_export-19990101-.vcf")
 
 
 @pytest.fixture(scope="function")
