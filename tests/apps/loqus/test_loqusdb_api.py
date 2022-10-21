@@ -236,4 +236,7 @@ def test_repr_string(loqusdb_api: LoqusdbAPI, loqusdb_binary_path: str, loqusdb_
     repr_string: str = repr(loqusdb_api)
 
     # THEN __repr__ should return a representation of the Loqusdb object
-    assert f"LoqusdbAPI(binary={loqusdb_binary_path}, config={loqusdb_config_path})" in repr_string
+    assert (
+        f"LoqusdbAPI(binary_path={loqusdb_binary_path}, config_path={loqusdb_config_path})"
+        in repr_string
+    )

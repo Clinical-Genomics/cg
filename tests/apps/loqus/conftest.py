@@ -99,13 +99,10 @@ LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.com
 def fixture_loqusdb_config_dict() -> dict:
     """Loqusdb config fixture."""
     return {
-        LoqusdbInstance.WGS.value: {"binary_path": "binary", "config_path": "config"},
-        LoqusdbInstance.WES.value: {"binary_path": "binary_wes", "config_path": "config_wes"},
-        LoqusdbInstance.SOMATIC.value: {
-            "binary_path": "binary_somatic",
-            "config_path": "config_somatic",
-        },
-        LoqusdbInstance.TUMOR.value: {"binary_path": "binary_tumor", "config_path": "config_tumor"},
+        LoqusdbInstance.WGS: {"binary_path": "binary", "config_path": "config"},
+        LoqusdbInstance.WES: {"binary_path": "binary_wes", "config_path": "config_wes"},
+        LoqusdbInstance.SOMATIC: {"binary_path": "binary_somatic", "config_path": "config_somatic"},
+        LoqusdbInstance.TUMOR: {"binary_path": "binary_tumor", "config_path": "config_tumor"},
     }
 
 
@@ -114,14 +111,12 @@ def fixture_loqusdb_config_object(
     loqusdb_config_dict: dict, cg_config_object: CGConfig
 ) -> CGConfig:
     """Loqusdb config object fixture."""
-    cg_config_object.loqusdb = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WGS.value])
-    cg_config_object.loqusdb_wes = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WES.value])
+    cg_config_object.loqusdb = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WGS])
+    cg_config_object.loqusdb_wes = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WES])
     cg_config_object.loqusdb_somatic = CommonAppConfig(
-        **loqusdb_config_dict[LoqusdbInstance.SOMATIC.value]
+        **loqusdb_config_dict[LoqusdbInstance.SOMATIC]
     )
-    cg_config_object.loqusdb_tumor = CommonAppConfig(
-        **loqusdb_config_dict[LoqusdbInstance.TUMOR.value]
-    )
+    cg_config_object.loqusdb_tumor = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.TUMOR])
     return cg_config_object
 
 

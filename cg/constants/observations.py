@@ -4,8 +4,10 @@ from enum import Enum
 
 from cgmodels.cg.constants import Pipeline, StrEnum
 
+from cg.constants.sequencing import SequencingMethod
 
 LOQUSDB_SUPPORTED_PIPELINES = [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
+LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
 
 
 class LoqusdbInstance(StrEnum):

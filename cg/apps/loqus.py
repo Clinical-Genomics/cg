@@ -105,4 +105,4 @@ class LoqusdbAPI:
         raise LoqusdbDeleteCaseError
 
     def __repr__(self):
-        return f"LoqusdbAPI(binary={self.binary_path}, config={self.config_path})"
+        return f"LoqusdbAPI(binary_path={self.binary_path}, config_path={self.config_path})"

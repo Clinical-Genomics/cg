@@ -250,6 +250,18 @@ def fixture_base_config_dict() -> dict:
             "binary_path": "binary",
             "config_path": "config",
         },
+        "loqusdb-wes": {
+            "binary_path": "binary_wes",
+            "config_path": "config_wes",
+        },
+        "loqusdb-somatic": {
+            "binary_path": "binary_somatic",
+            "config_path": "config_somatic",
+        },
+        "loqusdb-tumor": {
+            "binary_path": "binary_tumor",
+            "config_path": "config_tumor",
+        },
     }
 
 
