@@ -1,11 +1,13 @@
-"""Gene panel specific constants"""
+"""Gene panel specific constants."""
+from typing import List
+
 from cgmodels.cg.constants import StrEnum
 
 GENOME_BUILD_37 = "37"
 GENOME_BUILD_38 = "GRCh38"
 
 
-class MasterList(StrEnum):
+class GenePanelMasterList(StrEnum):
     BRAIN: str = "BRAIN"
     CARDIOLOGY: str = "Cardiology"
     CH: str = "CH"
@@ -29,4 +31,10 @@ class MasterList(StrEnum):
     PIDCAD: str = "PIDCAD"
     OMIM_AUTO: str = "OMIM-AUTO"
     SKD: str = "SKD"
-    
+
+    @classmethod
+    def get_panel_names(cls, panels=None) -> List[str]:
+        """Return requested panel names from Master list, or all panels if none are specified."""
+        if not panels:
+            return list(map(lambda p: p.value, cls))
+        return [panel_name.value for panel_name in panels]

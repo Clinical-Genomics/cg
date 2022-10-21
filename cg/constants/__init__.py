@@ -20,7 +20,7 @@ from cg.constants.constants import (
     HousekeeperTags,
     Pipeline,
 )
-from cg.constants.gene_panel import MasterList
+from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.paths import TMP_DIR
 from cg.constants.priority import Priority
 from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS, RETURN_SUCCESS
