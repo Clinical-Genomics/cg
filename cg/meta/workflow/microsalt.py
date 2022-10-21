@@ -9,19 +9,22 @@
 import logging
 import os
 import re
+import shutil
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+import glob
 
 import click
 from cg.constants import Pipeline
-from cg.exc import CgDataError
+from cg.exc import CgDataError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 from cg.constants import Priority
 
@@ -59,15 +62,54 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
+    def get_case_path(self, case_id: str) -> List[Path]:
+        """Returns all paths associated with the case."""
+
+        case_obj: models.Family = self.status_db.family(case_id)
+        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
+
+        return [
+            Path(path)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+        ]
+
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+        """Remove workflow run directories for a MicroSALT case."""
+
+        if not case_path:
+            LOG.info(
+                f"There is no case paths for case {case_id}. Setting cleaned at to {datetime.now()}"
+            )
+            self.clean_analyses(case_id=case_id)
+            return EXIT_SUCCESS
+
+        for analysis_path in case_path:
+            if yes or click.confirm(
+                f"Are you sure you want to remove all files in {analysis_path}?"
+            ):
+                if analysis_path.is_symlink():
+                    LOG.warning(
+                        f"Will not automatically delete symlink: {analysis_path}, delete it manually",
+                    )
+                    return EXIT_FAIL
+
+                shutil.rmtree(analysis_path, ignore_errors=True)
+                LOG.info(f"Cleaned {analysis_path}")
+
+        self.clean_analyses(case_id=case_id)
+        return EXIT_SUCCESS
+
     def get_case_fastq_path(self, case_id: str) -> Path:
+        """Get fastq paths for a case."""
         return Path(self.root_dir, "fastq", case_id)
 
     def get_config_path(self, filename: str) -> Path:
         return Path(self.queries_path, filename).with_suffix(".json")
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
+        """Get trailblazer config path."""
         case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: model.Sample = case_obj.links[0].sample
+        sample_obj: models.Sample = case_obj.links[0].sample
         project_id: str = self.get_project(sample_obj.internal_id)
         return Path(
             self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
