@@ -41,7 +41,7 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
         if not self._process:
             self._process = Process(
                 binary=f"{self.script} {self.mip_pipeline}",
-                conda_binary=f"{self.conda_binary}",
+                conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 config=self.config.mip_rd_rna.mip_config,
                 environment=self.conda_env,
             )
