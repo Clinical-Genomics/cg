@@ -1136,8 +1136,8 @@ def cg_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("cg")
 
 
-@pytest.fixture(scope="function")
-def observations_dir(tmpdir_factory, tmp_path) -> Path:
+@pytest.fixture(scope="function", name="observations_dir")
+def fixture_observations_dir(tmpdir_factory, tmp_path) -> Path:
     """Loqusdb temporary directory containing observations mock files."""
     return tmpdir_factory.mktemp("loqusdb")
 
