@@ -1,5 +1,7 @@
 """Tests for BALSAMIC analysis"""
 
+from pathlib import Path
+
 import pytest
 
 from cg.constants.loqus_upload import ObservationFileWildcards
@@ -7,6 +9,7 @@ from cg.constants.subject import Gender
 from cg.exc import BalsamicStartError
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 
 def test_get_verified_gender():
@@ -74,7 +77,7 @@ def test_get_verified_pon():
 
 
 def test_get_latest_observations_export_file(
-    cg_context, observations_dir, observations_somatic_snv_file_path
+    cg_context: CGConfig, observations_dir: Path, observations_somatic_snv_file_path: Path
 ):
     """Test latest observations extraction."""
 
@@ -91,11 +94,11 @@ def test_get_latest_observations_export_file(
 
 
 def test_get_parsed_observation_file_paths_no_args(
-    cg_context,
-    observations_dir,
-    observations_clinical_sv_file_path,
-    observations_somatic_snv_file_path,
-    outdated_observations_somatic_snv_file_path,
+    cg_context: CGConfig,
+    observations_dir: Path,
+    observations_clinical_sv_file_path: Path,
+    observations_somatic_snv_file_path: Path,
+    outdated_observations_somatic_snv_file_path: Path,
 ):
     """Test verified observations extraction with no arguments."""
 
@@ -119,10 +122,10 @@ def test_get_parsed_observation_file_paths_no_args(
 
 
 def test_get_parsed_observation_file_paths_overwrite_input(
-    cg_context,
-    observations_dir,
-    observations_clinical_snv_file_path,
-    custom_observations_clinical_snv_file_path,
+    cg_context: CGConfig,
+    observations_dir: Path,
+    observations_clinical_snv_file_path: Path,
+    custom_observations_clinical_snv_file_path: Path,
 ):
     """Test verified observations extraction when providing a non default observation file."""
 
