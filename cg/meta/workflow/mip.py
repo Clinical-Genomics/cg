@@ -159,10 +159,9 @@ class MipAnalysisAPI(AnalysisAPI):
     def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
         """Convert between default panels and all panels included in gene list."""
         # check if all default panels are part of master list
-        if customer in COLLABORATORS and all(
-            panels in GenePanelMasterList.get_panel_names() for panels in default_panels
-        ):
-            return GenePanelMasterList.get_panel_names()
+        master_list: List[str] = GenePanelMasterList.get_panel_names()
+        if customer in COLLABORATORS and all(panels in master_list for panels in default_panels):
+            return master_list
 
         # the rest are handled the same way
         all_panels = set(default_panels)
