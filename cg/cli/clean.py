@@ -21,6 +21,7 @@ from cg.cli.workflow.commands import (
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
+    microsalt_past_run_dirs,
 )
 from cg.constants import FlowCellStatus, HousekeeperTags
 from cg.constants.constants import DRY_RUN, Sequencers
@@ -57,6 +58,7 @@ clean.add_command(mip_past_run_dirs)
 clean.add_command(mutant_past_run_dirs)
 clean.add_command(rnafusion_past_run_dirs)
 clean.add_command(rsync_past_run_dirs)
+clean.add_command(microsalt_past_run_dirs)
 
 
 def get_date_days_ago(days_ago: int) -> datetime:
