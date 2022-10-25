@@ -68,7 +68,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
             soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
         )
         loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)["_id"])
-        self.update_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=loqusdb_id)
+        self.update_statusdb_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=loqusdb_id)
         LOG.info(f"Uploaded {output['variants']} variants to {repr(self.loqusdb_api)}")
 
     def is_duplicate(self, case: models.Family, profile_vcf_path: Path) -> bool:
@@ -109,5 +109,5 @@ class MipDNAObservationsAPI(ObservationsAPI):
     def delete_case(self, case: models.Family) -> None:
         """Delete rare diseases case observations from Loqusdb."""
         self.loqusdb_api.delete_case(case.internal_id)
-        self.update_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=None)
+        self.update_statusdb_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")

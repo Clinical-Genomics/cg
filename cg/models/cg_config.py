@@ -364,7 +364,7 @@ class CGConfig(BaseModel):
         api = self.__dict__.get("loqusdb_api_")
         if api is None:
             LOG.debug("Instantiating loqusdb api")
-            api = LoqusdbAPI(
+            api: LoqusdbAPI = LoqusdbAPI(
                 binary_path=self.loqusdb.binary_path, config_path=self.loqusdb.config_path
             )
             self.loqusdb_api_ = api

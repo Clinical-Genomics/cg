@@ -63,7 +63,9 @@ class ObservationsAPI:
         }
         return loqusdb_apis[loqusdb_instance]
 
-    def update_loqusdb_id(self, samples: List[models.Family], loqusdb_id: Optional[str]) -> None:
+    def update_statusdb_loqusdb_id(
+        self, samples: List[models.Family], loqusdb_id: Optional[str]
+    ) -> None:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
