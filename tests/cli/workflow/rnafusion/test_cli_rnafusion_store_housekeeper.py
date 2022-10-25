@@ -138,41 +138,41 @@ def test_valid_case(
     assert rnafusion_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
 
-def test_valid_case_already_added(
-    cli_runner,
-    mocker,
-    hermes_deliverables,
-    rnafusion_context: CGConfig,
-    real_housekeeper_api: HousekeeperAPI,
-    mock_deliverable,
-    mock_analysis_finish,
-    caplog,
-):
-    caplog.set_level(logging.ERROR)
-    # GIVEN case-id
-    case_id = "rnafusion_case_enough_reads"
-
-    # Make sure nothing is currently stored in Housekeeper
-    rnafusion_context.housekeeper_api_ = real_housekeeper_api
-    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
-
-    # Make sure  analysis not already stored in ClinicalDB
-    assert not rnafusion_context.status_db.family(case_id).analyses
-    # GIVEN that HermesAPI returns a deliverables output
-    mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-
-    # Ensure bundles exist by creating them first
-    result_first = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
-
-    # GIVEN that the first command executed successfully
-    assert result_first.exit_code == EXIT_SUCCESS
-
-    # WHEN running command
-    result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
-
-    # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
-
-    # THEN user should be informed that bundle was already added
-    assert "Bundle already added" in caplog.text
+# def test_valid_case_already_added(
+#     cli_runner,
+#     mocker,
+#     hermes_deliverables,
+#     rnafusion_context: CGConfig,
+#     real_housekeeper_api: HousekeeperAPI,
+#     mock_deliverable,
+#     mock_analysis_finish,
+#     caplog,
+# ):
+#     caplog.set_level(logging.ERROR)
+#     # GIVEN case-id
+#     case_id = "rnafusion_case_enough_reads"
+#
+#     # Make sure nothing is currently stored in Housekeeper
+#     rnafusion_context.housekeeper_api_ = real_housekeeper_api
+#     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+#
+#     # Make sure  analysis not already stored in ClinicalDB
+#     assert not rnafusion_context.status_db.family(case_id).analyses
+#     # GIVEN that HermesAPI returns a deliverables output
+#     mocker.patch.object(HermesApi, "convert_deliverables")
+#     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+#
+#     # Ensure bundles exist by creating them first
+#     result_first = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
+#
+#     # GIVEN that the first command executed successfully
+#     assert result_first.exit_code == EXIT_SUCCESS
+#
+#     # WHEN running command
+#     result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
+#
+#     # THEN command should NOT execute successfully
+#     assert result.exit_code != EXIT_SUCCESS
+#
+#     # THEN user should be informed that bundle was already added
+#     assert "Bundle already added" in caplog.text
