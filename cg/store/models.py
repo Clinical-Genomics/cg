@@ -373,18 +373,33 @@ class Family(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def get_samples_in_case(self) -> List[str]:
-        """Get samples in a case."""
+    def samples(self) -> List[str]:
+        """Return case samples."""
+        return self._get_samples
+
+    @property
+    def _get_samples(self) -> List[str]:
+        """Extract samples from a case."""
         return [link.sample for link in self.links]
 
     @property
-    def get_tumour_samples(self) -> List[str]:
-        """Return tumour samples from a case."""
+    def tumour_samples(self) -> List[str]:
+        """Return tumour samples."""
+        return self._get_tumour_samples
+
+    @property
+    def _get_tumour_samples(self) -> List[str]:
+        """Extract tumour samples."""
         return [link.sample for link in self.links if link.sample.is_tumour]
 
     @property
-    def get_loqusdb_uploaded_samples(self) -> List[str]:
-        """Return samples uploaded to Loqusdb."""
+    def loqusdb_uploaded_samples(self) -> List[str]:
+        """Return uploaded samples to Loqusdb."""
+        return self._get_loqusdb_uploaded_samples
+
+    @property
+    def _get_loqusdb_uploaded_samples(self) -> List[str]:
+        """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
     def get_delivery_arguments(self) -> Set[str]:

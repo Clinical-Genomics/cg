@@ -49,7 +49,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self, case: models.Family, input_files: MipDNAObservationsInputFiles
     ) -> None:
         """Load observation counts to Loqusdb for a MIP-DNA case."""
-        if case.get_tumour_samples:
+        if case.tumour_samples:
             LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
             raise LoqusdbUploadCaseError
 
@@ -70,7 +70,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
             soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
         )
         loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)["_id"])
-        self.update_statusdb_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=loqusdb_id)
+        self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
         LOG.info(f"Uploaded {output['variants']} variants to {repr(self.loqusdb_api)}")
 
     def is_duplicate(self, case: models.Family, profile_vcf_path: Path) -> bool:
@@ -80,7 +80,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
             profile_vcf_path=profile_vcf_path,
             profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
         )
-        return bool(loqusdb_case or duplicate or case.get_loqusdb_uploaded_samples)
+        return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
     def extract_observations_files_from_hk(
         self, hk_version: Version
@@ -111,5 +111,5 @@ class MipDNAObservationsAPI(ObservationsAPI):
     def delete_case(self, case: models.Family) -> None:
         """Delete rare diseases case observations from Loqusdb."""
         self.loqusdb_api.delete_case(case.internal_id)
-        self.update_statusdb_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=None)
+        self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")

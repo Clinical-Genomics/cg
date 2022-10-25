@@ -11,7 +11,7 @@ from cg.models.cg_config import CGConfig
 
 from tests.apps.loqus.conftest import fixture_loqusdb_config, fixture_nr_of_loaded_variants
 from tests.models.observations.conftest import (
-    observations_input_files_raw,
+    fixture_observations_input_files_raw,
     fixture_observations_input_files,
 )
 
