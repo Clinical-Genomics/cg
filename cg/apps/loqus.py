@@ -9,7 +9,7 @@ from cg.constants.constants import FileFormat
 from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
 from cg.io.controller import ReadStream
 from cg.utils import Process
-from cg.utils.format import get_flattened_dictionary
+from cg.utils.format import get_list_from_dictionary
 
 LOG = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class LoqusdbAPI:
             "--hard-threshold": str(hard_threshold) if hard_threshold else None,
             "--soft-threshold": str(soft_threshold) if soft_threshold else None,
         }
-        load_call_params: list = ["load"] + get_flattened_dictionary(load_params)
+        load_call_params: list = ["load"] + get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params)
         variants = 0
         for line in self.process.stderr_lines():
@@ -74,7 +74,7 @@ class LoqusdbAPI:
             "--check-vcf": profile_vcf_path.as_posix(),
             "--profile-threshold": str(profile_threshold),
         }
-        duplicate_call_params: list = ["profile"] + get_flattened_dictionary(duplicates_params)
+        duplicate_call_params: list = ["profile"] + get_list_from_dictionary(duplicates_params)
 
         try:
             self.process.run_command(parameters=duplicate_call_params)

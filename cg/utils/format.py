@@ -1,7 +1,12 @@
 """Module to handle formatting functions."""
 
+from typing import List
 
-def get_flattened_dictionary(dictionary: dict) -> list:
-    """Takes a dictionary and returns a list of its non-empty elements flattened into a list."""
-    populated_dict = {param: value for param, value in dictionary.items() if value}
-    return [item for sublist in populated_dict.items() for item in sublist]
+
+def get_list_from_dictionary(dictionary: dict) -> list:
+    """Returns a list of the passed dict non-empty key values."""
+    list_from_dict: List[str] = []
+    for key, value in dictionary.items():
+        if value:
+            list_from_dict.extend([key, value])
+    return list_from_dict
