@@ -1,4 +1,4 @@
-"""Module to handle formatting functions."""
+"""Module to handle dictionary helper functions."""
 
 from typing import List
 

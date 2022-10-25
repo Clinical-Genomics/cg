@@ -42,7 +42,7 @@ def test_load(
 
     # GIVEN a Loqusdb API and a list of observations input files
 
-    # WHEN uploading a case with 15 variants to Loqusdb
+    # WHEN uploading a case to Loqusdb
     loqusdb_api.process.stderr = loqusdb_load_stderr.decode("utf-8")
     output: dict = loqusdb_api.load(
         case_id=case_id,
@@ -71,7 +71,7 @@ def test_load_parameters(
 
     # GIVEN a Loqusdb API and a list of observations input files
 
-    # WHEN uploading a case with 15 variants to Loqusdb
+    # WHEN uploading a case to Loqusdb
     loqusdb_api.process.stderr = loqusdb_load_stderr.decode("utf-8")
     loqusdb_api.load(
         case_id=case_id,

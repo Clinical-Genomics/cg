@@ -1,6 +1,6 @@
 """Tests for the formatting module."""
 
-from cg.utils.format import get_list_from_dictionary
+from cg.utils.dict import get_list_from_dictionary
 
 
 def test_get_list_from_dictionary():

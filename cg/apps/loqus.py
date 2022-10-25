@@ -9,7 +9,7 @@ from cg.constants.constants import FileFormat
 from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
 from cg.io.controller import ReadStream
 from cg.utils import Process
-from cg.utils.format import get_list_from_dictionary
+from cg.utils.dict import get_list_from_dictionary
 
 LOG = logging.getLogger(__name__)
 
