@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional
+from typing import Optional, Dict
 
 from cg.constants.constants import FileFormat
 from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
@@ -33,7 +33,7 @@ class LoqusdbAPI:
         gq_threshold: Optional[int] = None,
         hard_threshold: Optional[float] = None,
         soft_threshold: Optional[float] = None,
-    ) -> dict:
+    ) -> Dict[str, int]:
         """Add observations to Loqusdb from VCF files."""
         load_params = {
             "--case-id": case_id,
@@ -48,13 +48,7 @@ class LoqusdbAPI:
         }
         load_call_params: list = ["load"] + get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params)
-        variants = 0
-        for line in self.process.stderr_lines():
-            line_content = line.split("INFO")[-1].strip()
-            if "inserted" in line_content:
-                variants = int(line_content.split(":")[-1].strip())
-
-        return dict(variants=variants)
+        return self.get_nr_of_variants_in_file()
 
     def get_case(self, case_id: str) -> Optional[dict]:
         """Return a case found in Loqusdb."""
@@ -103,6 +97,15 @@ class LoqusdbAPI:
 
         LOG.error(f"Could not delete case {case_id} from {repr(self)}")
         raise LoqusdbDeleteCaseError
+
+    def get_nr_of_variants_in_file(self) -> Dict[str, int]:
+        """Return the number of variants in the uploaded to Loqusdb file."""
+        variants = 0
+        for line in self.process.stderr_lines():
+            line_content = line.split("INFO")[-1].strip()
+            if "inserted" in line_content:
+                variants = int(line_content.split(":")[-1].strip())
+        return {"variants": variants}
 
     def __repr__(self):
         return f"LoqusdbAPI(binary_path={self.binary_path}, config_path={self.config_path})"

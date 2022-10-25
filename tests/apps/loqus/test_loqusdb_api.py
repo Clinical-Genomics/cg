@@ -227,6 +227,19 @@ def test_delete_case_non_existing(
     assert f"Case {case_id} not found in Loqusdb" in caplog.text
 
 
+def test_get_nr_of_variants_in_file(loqusdb_api: LoqusdbAPI, loqusdb_load_output: bytes):
+    """Test getting the number of variants from a Loqusdb uploaded file."""
+
+    # GIVEN a Loqusdb API and a successfully uploaded case
+    loqusdb_api.process.stderr = loqusdb_load_output.decode("utf-8")
+
+    # WHEN retrieving the number of variants
+    output = loqusdb_api.get_nr_of_variants_in_file()
+
+    # THEN assert that the number of retrieved variants is 15
+    assert output["variants"] == 15
+
+
 def test_repr_string(loqusdb_api: LoqusdbAPI, loqusdb_binary_path: str, loqusdb_config_path: str):
     """Test __repr__ of the Loqusdb API."""
 
