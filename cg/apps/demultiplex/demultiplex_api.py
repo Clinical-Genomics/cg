@@ -104,6 +104,16 @@ class DemultiplexingAPI:
         """Create the path to the logfile"""
         return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stdout"
 
+    def get_all_demultiplex_flow_cells_out_dirs(self) -> List[Path]:
+        """Return all demultiplex flow cell out directories."""
+        demultiplex_flow_cells: List[Path]
+        for sub_dir in self.run_dir.iterdir():
+            if not sub_dir.is_dir():
+                continue
+            LOG.debug(f"Found directory {sub_dir}")
+            demultiplex_flow_cells.append(sub_dir)
+        return demultiplex_flow_cells
+
     def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
         """Create the path to where the demuliplexed result should be produced"""
         return self.out_dir / flowcell.path.name

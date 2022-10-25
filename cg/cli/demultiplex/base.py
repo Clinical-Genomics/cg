@@ -17,6 +17,7 @@ def demultiplex_cmd_group():
 
 
 demultiplex_cmd_group: click.Group
+demultiplex_cmd_group.add_command(check_new_demultiplex)
 demultiplex_cmd_group.add_command(demultiplex_flowcell)
 demultiplex_cmd_group.add_command(demultiplex_all)
 demultiplex_cmd_group.add_command(sample_sheet_commands)
