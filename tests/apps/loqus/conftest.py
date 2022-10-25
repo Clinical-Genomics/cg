@@ -1,4 +1,5 @@
 """ Conftest for Loqusdb API."""
+from typing import Dict
 
 import pytest
 from cg.apps.loqus import LoqusdbAPI
@@ -96,7 +97,7 @@ LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.com
 
 
 @pytest.fixture(name="loqusdb_config_dict")
-def fixture_loqusdb_config_dict() -> dict:
+def fixture_loqusdb_config_dict() -> Dict[LoqusdbInstance, dict]:
     """Loqusdb config fixture."""
     return {
         LoqusdbInstance.WGS: {"binary_path": "binary", "config_path": "config"},
@@ -108,7 +109,7 @@ def fixture_loqusdb_config_dict() -> dict:
 
 @pytest.fixture(name="cg_config_locusdb")
 def fixture_loqusdb_config_object(
-    loqusdb_config_dict: dict, cg_config_object: CGConfig
+    loqusdb_config_dict: Dict[LoqusdbInstance, dict], cg_config_object: CGConfig
 ) -> CGConfig:
     """Loqusdb config object fixture."""
     cg_config_object.loqusdb = CommonAppConfig(**loqusdb_config_dict[LoqusdbInstance.WGS])
@@ -121,15 +122,15 @@ def fixture_loqusdb_config_object(
 
 
 @pytest.fixture(scope="function", name="loqusdb_binary_path")
-def fixture_loqusdb_binary_path(loqusdb_config_dict: dict) -> str:
+def fixture_loqusdb_binary_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
     """Loqusdb binary fixture."""
-    return loqusdb_config_dict["loqusdb"]["binary_path"]
+    return loqusdb_config_dict[LoqusdbInstance.WGS]["binary_path"]
 
 
 @pytest.fixture(scope="function", name="loqusdb_config_path")
-def fixture_loqusdb_config_path(loqusdb_config_dict: dict) -> str:
+def fixture_loqusdb_config_path(loqusdb_config_dict: Dict[LoqusdbInstance, dict]) -> str:
     """Loqusdb config fixture."""
-    return loqusdb_config_dict["loqusdb"]["config_path"]
+    return loqusdb_config_dict[LoqusdbInstance.WGS]["config_path"]
 
 
 @pytest.fixture(scope="function", name="loqusdb_process")

@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Dict
 
 from housekeeper.store.models import Version, File
 
@@ -27,18 +28,16 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
         super().__init__(config)
-        self.sequencing_method = sequencing_method
+        self.sequencing_method: SequencingMethod = sequencing_method
         self.loqusdb_api: LoqusdbAPI = self.get_loqusdb_api(self.get_loqusdb_instance())
 
     def get_loqusdb_instance(self) -> LoqusdbInstance:
         """Return the Loqusdb instance associated to the sequencing method."""
         if self.sequencing_method not in LOQUSDB_MIP_SEQUENCING_METHODS:
-            LOG.error(
-                f"Sequencing method {self.sequencing_method} is not supported by Loqusdb. Cancelling its upload."
-            )
+            LOG.error(f"Sequencing method {self.sequencing_method} is not supported by Loqusdb.")
             raise LoqusdbUploadCaseError
 
-        loqusdb_instances = {
+        loqusdb_instances: Dict[SequencingMethod, LoqusdbInstance] = {
             SequencingMethod.WGS: LoqusdbInstance.WGS,
             SequencingMethod.WES: LoqusdbInstance.WES,
         }
@@ -47,12 +46,12 @@ class MipDNAObservationsAPI(ObservationsAPI):
     def load_observations(
         self, case: models.Family, input_files: MipDNAObservationsInputFiles
     ) -> None:
-        """Load an observations count to Loqusdb for a MIP-DNA case."""
+        """Load observation counts to Loqusdb for a MIP-DNA case."""
         if case.get_tumour_samples:
             LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling its upload.")
             raise LoqusdbUploadCaseError
 
-        if self.is_duplicate(case, input_files.profile_vcf_path):
+        if self.is_duplicate(case=case, profile_vcf_path=input_files.profile_vcf_path):
             LOG.error(
                 f"Case {case.internal_id} has been already uploaded to {repr(self.loqusdb_api)}"
             )
@@ -68,19 +67,18 @@ class MipDNAObservationsAPI(ObservationsAPI):
             hard_threshold=MipDNALoadParameters.HARD_THRESHOLD.value,
             soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
         )
-        loqusdb_id = str(self.loqusdb_api.get_case(case.internal_id)["_id"])
-        self.update_loqusdb_id(case.get_samples_in_case, loqusdb_id)
+        loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)["_id"])
+        self.update_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=loqusdb_id)
         LOG.info(f"Uploaded {output['variants']} variants to {repr(self.loqusdb_api)}")
 
     def is_duplicate(self, case: models.Family, profile_vcf_path: Path) -> bool:
-        """Check if a case has been already uploaded to Loqusdb."""
-        loqusdb_case: dict = self.loqusdb_api.get_case(case.internal_id)
+        """Check if a case has already been uploaded to Loqusdb."""
+        loqusdb_case: dict = self.loqusdb_api.get_case(case_id=case.internal_id)
         duplicate = self.loqusdb_api.get_duplicate(
-            profile_vcf_path, MipDNALoadParameters.PROFILE_THRESHOLD.value
+            profile_vcf_path=profile_vcf_path,
+            profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
         )
-        if loqusdb_case or duplicate or case.get_loqusdb_uploaded_samples:
-            return True
-        return False
+        return bool(loqusdb_case or duplicate or case.get_loqusdb_uploaded_samples)
 
     def extract_observations_files_from_hk(
         self, hk_version: Version
@@ -111,5 +109,5 @@ class MipDNAObservationsAPI(ObservationsAPI):
     def delete_case(self, case: models.Family) -> None:
         """Delete rare diseases case observations from Loqusdb."""
         self.loqusdb_api.delete_case(case.internal_id)
-        self.update_loqusdb_id(case.get_samples_in_case, loqusdb_id=None)
+        self.update_loqusdb_id(samples=case.get_samples_in_case, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")

@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 def validate_observations_file(file: Path) -> Path:
     """Check if file exists in file system."""
     if file and not file.exists():
-        LOG.error(f"File {file} could not be found if file system")
+        LOG.error(f"File {file} could not be found")
         raise FileNotFoundError
 
     return file

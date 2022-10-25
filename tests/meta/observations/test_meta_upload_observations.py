@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Dict
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -43,7 +44,8 @@ def test_observations_upload(
 
 
 def test_get_loqusdb_api(
-    mip_dna_observations_api: MipDNAObservationsAPI, loqusdb_config_dict: dict
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    loqusdb_config_dict: Dict[LoqusdbInstance, dict],
 ):
     """Test Loqusdb API retrieval given a Loqusdb instance."""
 
@@ -87,10 +89,7 @@ def test_mip_dna_get_loqusdb_instance_not_supported(
         # THEN the upload should be canceled
         mip_dna_observations_api.get_loqusdb_instance()
 
-    assert (
-        f"Sequencing method {SequencingMethod.WTS} is not supported by Loqusdb. Cancelling its upload."
-        in caplog.text
-    )
+    assert f"Sequencing method {SequencingMethod.WTS} is not supported by Loqusdb" in caplog.text
 
 
 def test_mip_dna_load_observations(
@@ -178,7 +177,7 @@ def test_mip_dna_is_duplicate(
 
     # WHEN checking that a case has not been uploaded to Loqusdb
     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
-        case, observations_input_files.profile_vcf_path
+        case=case, profile_vcf_path=observations_input_files.profile_vcf_path
     )
 
     # THEN there should be no duplicates in Loqusdb
@@ -198,7 +197,7 @@ def test_mip_dna_is_duplicate_case_output(
 
     # WHEN checking that a case has been already uploaded to Loqusdb
     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
-        case, observations_input_files.profile_vcf_path
+        case=case, profile_vcf_path=observations_input_files.profile_vcf_path
     )
 
     # THEN an upload of a duplicate case should be detected
@@ -223,7 +222,7 @@ def test_mip_dna_is_duplicate_loqusdb_id(
 
     # WHEN checking that the sample observations have already been uploaded
     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
-        case, observations_input_files.profile_vcf_path
+        case=case, profile_vcf_path=observations_input_files.profile_vcf_path
     )
 
     # THEN a duplicated upload should be identified

@@ -1,7 +1,7 @@
 """Delete observations CLI."""
 
 import logging
-from typing import Optional
+from typing import Optional, Type
 
 import click
 from alchy import Query
@@ -23,11 +23,11 @@ LOG = logging.getLogger(__name__)
 @SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_obj
-def observations(context: CGConfig, case_id: str, yes: bool, dry_run: bool):
+def observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
 
     case: models.Family = get_observations_case_to_delete(context, case_id)
-    observations_api: ObservationsAPI = get_observations_api(context, case)
+    observations_api: Type[ObservationsAPI] = get_observations_api(context, case)
 
     if dry_run:
         LOG.info(f"Dry run. This would delete all variants in Loqusdb for case: {case.internal_id}")
@@ -44,7 +44,7 @@ def observations(context: CGConfig, case_id: str, yes: bool, dry_run: bool):
 @DRY_RUN
 @click.pass_context
 def available_observations(
-    context: click.Context, pipeline: Optional[Pipeline], yes: bool, dry_run: bool
+    context: click.Context, pipeline: Optional[Pipeline], dry_run: bool, yes: bool
 ):
     """Delete available observation from Loqusdb."""
 
@@ -57,6 +57,6 @@ def available_observations(
     if yes or click.confirm("Do you want to continue?", abort=True):
         for case in uploaded_observations:
             try:
-                context.invoke(observations, case_id=case.internal_id, yes=yes, dry_run=dry_run)
+                context.invoke(observations, case_id=case.internal_id, dry_run=dry_run, yes=yes)
             except (CaseNotFoundError, LoqusdbError):
                 continue

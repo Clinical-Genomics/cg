@@ -17,13 +17,13 @@ class BalsamicObservationsAPI(ObservationsAPI):
     """API to manage Balsamic observations."""
 
     def __init__(self, config: CGConfig, sequencing_method: SequencingMethod):
-        self.sequencing_method = sequencing_method
+        self.sequencing_method: SequencingMethod = sequencing_method
         super().__init__(config)
 
     def load_observations(
         self, case: models.Family, input_files: BalsamicObservationsInputFiles
     ) -> None:
-        """Load an observations count to Loqusdb for a Balsamic case."""
+        """Load observation counts to Loqusdb for a Balsamic case."""
         raise NotImplementedError
 
     def extract_observations_files_from_hk(

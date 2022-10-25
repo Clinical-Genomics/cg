@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from housekeeper.store.models import Version
 
@@ -29,10 +29,10 @@ class ObservationsAPI:
 
     def upload(self, case: models.Family) -> None:
         """Upload observations to Loqusdb."""
-        input_files: ObservationsInputFiles = self.get_observations_input_files(case)
-        self.load_observations(case, input_files)
+        input_files: Type[ObservationsInputFiles] = self.get_observations_input_files(case)
+        self.load_observations(case=case, input_files=input_files)
 
-    def get_observations_input_files(self, case: models.Family) -> ObservationsInputFiles:
+    def get_observations_input_files(self, case: models.Family) -> Type[ObservationsInputFiles]:
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: models.Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
@@ -69,8 +69,10 @@ class ObservationsAPI:
             sample.loqusdb_id = loqusdb_id
         self.store.commit()
 
-    def load_observations(self, case: models.Family, input_files: ObservationsInputFiles) -> None:
-        """Load an observations count to Loqusdb."""
+    def load_observations(
+        self, case: models.Family, input_files: Type[ObservationsInputFiles]
+    ) -> None:
+        """Load observation counts to Loqusdb."""
         raise NotImplementedError
 
     def extract_observations_files_from_hk(self, hk_version: Version) -> ObservationsInputFiles:

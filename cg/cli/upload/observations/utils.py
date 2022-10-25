@@ -1,6 +1,7 @@
 """Helper functions for observations related actions."""
 
 import logging
+from typing import Type
 
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
@@ -61,7 +62,7 @@ def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.F
     return case
 
 
-def get_observations_api(context: CGConfig, case: models.Family) -> ObservationsAPI:
+def get_observations_api(context: CGConfig, case: models.Family) -> Type[ObservationsAPI]:
     """Return an observations API given a specific case object."""
     observations_apis = {
         Pipeline.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),

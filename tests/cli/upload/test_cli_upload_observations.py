@@ -1,9 +1,11 @@
 """Test CG CLI upload observations module."""
 
 import logging
+from typing import Type
 
 import pytest
 from _pytest.logging import LogCaptureFixture
+from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
 from cg.apps.loqus import LoqusdbAPI
@@ -19,6 +21,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -113,15 +116,16 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     store: Store = base_context.status_db
 
     # GIVEN a Loqusdb supported case
-    case: models.Family = helpers.add_case(store)
+    case: models.Family = helpers.add_case(store, data_analysis=Pipeline.MIP_DNA)
     sample: models.Sample = helpers.add_sample(store, application_type=SequencingMethod.WES)
     store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
 
     # WHEN retrieving the observation API
-    observations_api: ObservationsAPI = get_observations_api(base_context, case)
+    observations_api: Type[ObservationsAPI] = get_observations_api(base_context, case)
 
-    # THEN the API should be returned
+    # THEN a MIP-DNA API should be returned
     assert observations_api
+    assert isinstance(observations_api, MipDNAObservationsAPI)
 
 
 def test_get_sequencing_method(base_context: CGConfig, helpers: StoreHelpers):
