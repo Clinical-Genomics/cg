@@ -7,9 +7,9 @@ import pytest
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 
 
-@pytest.fixture(name="observations_input_files_dict")
-def fixture_observations_input_files_dict(case_id: str, filled_file: Path) -> dict:
-    """Raw observations input files for rare diseases."""
+@pytest.fixture(name="observations_input_files_raw")
+def fixture_observations_input_files_raw(case_id: str, filled_file: Path) -> dict:
+    """Return raw observations input files for rare diseases."""
     return {
         "snv_vcf_path": filled_file,
         "profile_vcf_path": filled_file,
@@ -20,7 +20,7 @@ def fixture_observations_input_files_dict(case_id: str, filled_file: Path) -> di
 
 @pytest.fixture(name="observations_input_files")
 def fixture_observations_input_files(
-    observations_input_files_dict: dict,
+    observations_input_files_raw: dict,
 ) -> MipDNAObservationsInputFiles:
-    """Observations input file model for rare diseases."""
-    return MipDNAObservationsInputFiles(**observations_input_files_dict)
+    """Return raw observations input files for rare diseases WES analysis ."""
+    return MipDNAObservationsInputFiles(**observations_input_files_raw)

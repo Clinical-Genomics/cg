@@ -32,7 +32,7 @@ from tests.mocks.report import MockMipDNAReportAPI
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
 
 from tests.apps.loqus.conftest import (
-    fixture_loqusdb_config_dict,
+    fixture_loqusdb_config,
     fixture_loqusdb_binary_path,
     fixture_loqusdb_config_path,
     fixture_loqusdb_process,

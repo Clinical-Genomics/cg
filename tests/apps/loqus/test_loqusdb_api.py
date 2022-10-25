@@ -35,14 +35,15 @@ def test_load(
     case_id: str,
     loqusdb_api: LoqusdbAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    loqusdb_load_output: bytes,
+    loqusdb_load_stderr: bytes,
+    nr_of_loaded_variants: int,
 ):
     """Test loading of case to Loqusdb."""
 
     # GIVEN a Loqusdb API and a list of observations input files
 
     # WHEN uploading a case with 15 variants to Loqusdb
-    loqusdb_api.process.stderr = loqusdb_load_output.decode("utf-8")
+    loqusdb_api.process.stderr = loqusdb_load_stderr.decode("utf-8")
     output: dict = loqusdb_api.load(
         case_id=case_id,
         snv_vcf_path=observations_input_files.snv_vcf_path,
@@ -54,15 +55,15 @@ def test_load(
         soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
     )
 
-    # THEN assert that the number of variants is 15
-    assert output["variants"] == 15
+    # THEN assert that the number of variants is the expected one
+    assert output["variants"] == nr_of_loaded_variants
 
 
 def test_load_parameters(
     case_id: str,
     loqusdb_api: LoqusdbAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    loqusdb_load_output: bytes,
+    loqusdb_load_stderr: bytes,
     caplog: LogCaptureFixture,
 ):
     """Test Loqusdb load command params."""
@@ -71,7 +72,7 @@ def test_load_parameters(
     # GIVEN a Loqusdb API and a list of observations input files
 
     # WHEN uploading a case with 15 variants to Loqusdb
-    loqusdb_api.process.stderr = loqusdb_load_output.decode("utf-8")
+    loqusdb_api.process.stderr = loqusdb_load_stderr.decode("utf-8")
     loqusdb_api.load(
         case_id=case_id,
         snv_vcf_path=observations_input_files.snv_vcf_path,
@@ -227,17 +228,19 @@ def test_delete_case_non_existing(
     assert f"Case {case_id} not found in Loqusdb" in caplog.text
 
 
-def test_get_nr_of_variants_in_file(loqusdb_api: LoqusdbAPI, loqusdb_load_output: bytes):
+def test_get_nr_of_variants_in_file(
+    loqusdb_api: LoqusdbAPI, loqusdb_load_stderr: bytes, nr_of_loaded_variants: int
+):
     """Test getting the number of variants from a Loqusdb uploaded file."""
 
     # GIVEN a Loqusdb API and a successfully uploaded case
-    loqusdb_api.process.stderr = loqusdb_load_output.decode("utf-8")
+    loqusdb_api.process.stderr = loqusdb_load_stderr.decode("utf-8")
 
     # WHEN retrieving the number of variants
     output = loqusdb_api.get_nr_of_variants_in_file()
 
-    # THEN assert that the number of retrieved variants is 15
-    assert output["variants"] == 15
+    # THEN assert that the number of retrieved variants is correctly retrieved
+    assert output["variants"] == nr_of_loaded_variants
 
 
 def test_repr_string(loqusdb_api: LoqusdbAPI, loqusdb_binary_path: str, loqusdb_config_path: str):

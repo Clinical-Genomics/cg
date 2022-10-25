@@ -20,6 +20,7 @@ def test_observations_upload(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
+    nr_of_loaded_variants,
     analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
@@ -40,7 +41,7 @@ def test_observations_upload(
     mip_dna_observations_api.upload(case)
 
     # THEN the case should be successfully uploaded
-    assert f"Uploaded 15 variants to Loqusdb" in caplog.text
+    assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
 
 
 def test_get_loqusdb_api(
@@ -89,13 +90,17 @@ def test_mip_dna_get_loqusdb_instance_not_supported(
         # THEN the upload should be canceled
         mip_dna_observations_api.get_loqusdb_instance()
 
-    assert f"Sequencing method {SequencingMethod.WTS} is not supported by Loqusdb" in caplog.text
+    assert (
+        f"Sequencing method {SequencingMethod.WTS} is not supported by Loqusdb. Cancelling upload."
+        in caplog.text
+    )
 
 
 def test_mip_dna_load_observations(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
+    nr_of_loaded_variants,
     analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
@@ -111,7 +116,7 @@ def test_mip_dna_load_observations(
     mip_dna_observations_api.load_observations(case, observations_input_files)
 
     # THEN the observations should be loaded without any errors
-    assert f"Uploaded 15 variants to Loqusdb" in caplog.text
+    assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
 
 
 def test_mip_dna_load_observations_duplicate(
@@ -158,7 +163,7 @@ def test_mip_dna_load_observations_tumor_case(
         # THEN an upload error should be raised and the execution aborted
         mip_dna_observations_api.load_observations(case, observations_input_files)
 
-    assert f"Case {case.internal_id} has tumour samples. Cancelling its upload." in caplog.text
+    assert f"Case {case.internal_id} has tumour samples. Cancelling upload." in caplog.text
 
 
 def test_mip_dna_is_duplicate(

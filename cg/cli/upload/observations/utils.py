@@ -77,7 +77,7 @@ def get_sequencing_method(case: models.Family) -> SequencingMethod:
         link.sample.application_version.application.analysis_type for link in case.links
     ]
     if len(set(analysis_types)) != 1:
-        LOG.error(f"Case {case.internal_id} has a mixed analysis type. Cancelling its upload.")
+        LOG.error(f"Case {case.internal_id} has a mixed analysis type. Cancelling upload.")
         raise LoqusdbUploadCaseError
 
     return analysis_types[0]

@@ -170,6 +170,4 @@ def test_get_sequencing_method_exception(
         # THEN a LoqusdbUploadCaseError should be raised
         get_sequencing_method(case)
 
-    assert (
-        f"Case {case.internal_id} has a mixed analysis type. Cancelling its upload." in caplog.text
-    )
+    assert f"Case {case.internal_id} has a mixed analysis type. Cancelling upload." in caplog.text

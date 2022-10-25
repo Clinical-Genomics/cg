@@ -34,7 +34,9 @@ class MipDNAObservationsAPI(ObservationsAPI):
     def get_loqusdb_instance(self) -> LoqusdbInstance:
         """Return the Loqusdb instance associated to the sequencing method."""
         if self.sequencing_method not in LOQUSDB_MIP_SEQUENCING_METHODS:
-            LOG.error(f"Sequencing method {self.sequencing_method} is not supported by Loqusdb.")
+            LOG.error(
+                f"Sequencing method {self.sequencing_method} is not supported by Loqusdb. Cancelling upload."
+            )
             raise LoqusdbUploadCaseError
 
         loqusdb_instances: Dict[SequencingMethod, LoqusdbInstance] = {
@@ -48,7 +50,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
     ) -> None:
         """Load observation counts to Loqusdb for a MIP-DNA case."""
         if case.get_tumour_samples:
-            LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling its upload.")
+            LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
             raise LoqusdbUploadCaseError
 
         if self.is_duplicate(case=case, profile_vcf_path=input_files.profile_vcf_path):
