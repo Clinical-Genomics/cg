@@ -15,7 +15,6 @@ def validate_observations_file(file: Path) -> Path:
     if file and not file.exists():
         LOG.error(f"File {file} could not be found")
         raise FileNotFoundError
-
     return file
 
 
@@ -26,7 +25,7 @@ class ObservationsInputFiles(BaseModel):
     sv_vcf_path: Optional[Path] = None
     profile_vcf_path: Optional[Path] = None
 
-    _file_path = validator(
+    _ = validator(
         "snv_vcf_path", "sv_vcf_path", "profile_vcf_path", always=False, allow_reuse=True
     )(validate_observations_file)
 
@@ -36,9 +35,7 @@ class MipDNAObservationsInputFiles(ObservationsInputFiles):
 
     family_ped_path: Path
 
-    _file_path = validator("family_ped_path", always=False, allow_reuse=True)(
-        validate_observations_file
-    )
+    _ = validator("family_ped_path", always=False, allow_reuse=True)(validate_observations_file)
 
 
 class BalsamicObservationsInputFiles(ObservationsInputFiles):
