@@ -9,11 +9,12 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.models.cg_config import CGConfig
 
 
-@click.group(name="finish")
+@click.group(name="check")
 def check_group():
     """Check for new demultiplexing."""
 
 
+@click.command(name="check_new_demultiplex")
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def check_new_demultiplex(context: CGConfig, dry_run: bool):

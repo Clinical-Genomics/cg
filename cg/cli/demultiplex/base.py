@@ -2,6 +2,7 @@ import logging
 
 import click
 from cg.cli.demultiplex.add import add_flowcell_cmd, select_project_cmd
+from cg.cli.demultiplex.check import check_new_demultiplex
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flowcell, delete_flow_cell
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.report import create_report_cmd
