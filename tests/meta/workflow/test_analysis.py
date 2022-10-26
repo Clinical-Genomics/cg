@@ -56,7 +56,7 @@ def test_gene_panels_not_added(customer_id):
 
     # WHEN converting the gene panels between the default and the gene_panel_master_list:
     list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
-        customer_id, default_panels=default_panels_not_included
+        customer=customer_id, default_panels=default_panels_not_included
     )
 
     # THEN the list_of_gene_panels_used should return the custom panel and OMIM-AUTO:
