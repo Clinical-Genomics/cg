@@ -13,7 +13,6 @@ from cg.models.cg_config import CGConfig, DemultiplexConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
-from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.apps.demultiplex.conftest import (
     fixture_demux_run_dir,
     fixture_demux_run_dir_bcl2fastq,

@@ -22,7 +22,6 @@ from tests.cli.demultiplex.conftest import (
     fixture_demux_run_dir,
     fixture_flowcell_object,
     fixture_flowcell_runs_working_directory,
-    fixture_sbatch_process,
     fixture_stats_api,
 )
 from tests.models.demultiplexing.conftest import (

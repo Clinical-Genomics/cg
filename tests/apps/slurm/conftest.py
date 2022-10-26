@@ -3,8 +3,6 @@ from pathlib import Path
 import pytest
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.models.slurm.sbatch import Sbatch
-from cg.utils import Process
-from tests.apps.crunchy.conftest import fixture_sbatch_process
 from tests.mocks.process_mock import ProcessMock
 
 

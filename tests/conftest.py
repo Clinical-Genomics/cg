@@ -154,6 +154,14 @@ def fixture_sbatch_job_number() -> int:
     return 123456
 
 
+@pytest.fixture(name="sbatch_process")
+def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
+    """Return a mocked process object."""
+    slurm_process = ProcessMock(binary="sbatch")
+    slurm_process.set_stdout(text=str(sbatch_job_number))
+    return slurm_process
+
+
 @pytest.fixture(scope="function", name="analysis_family_single_case")
 def fixture_analysis_family_single(
     case_id: str, family_name: str, sample_id: str, ticket: str
