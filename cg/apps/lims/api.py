@@ -1,16 +1,16 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Generator, Optional, Union, Dict, List
+from typing import Generator, Optional, Union, Dict, List, Tuple
 
 # fixes https://github.com/Clinical-Genomics/servers/issues/30
 import requests_cache
 from dateutil.parser import parse as parse_date
-from genologics.entities import Process, Project, Sample
+from genologics.entities import Process, Project, Sample, Artifact
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF
+from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -34,8 +34,9 @@ AM_METHODS = {
     "2182": "Manual SARS-CoV-2 library preparation using Illumina COVIDseq Test",
     "2175": "Manual SARS-CoV-2 library preparation using Illumina DNA Prep",
     "1830": "NovaSeq 6000 Sequencing method",
+    "2234": "Method - Illumina Stranded mRNA Library Preparation",
 }
-METHOD_INDEX, METHOD_NUMBER_INDEX, METHOD_VERSION_INDEX = 0, 1, 2
+METHOD_INDEX, METHOD_DOCUMENT_INDEX, METHOD_VERSION_INDEX, METHOD_TYPE_INDEX = 0, 1, 2, 3
 
 LOG = logging.getLogger(__name__)
 
@@ -322,20 +323,29 @@ class LimsAPI(Lims, OrderHandler):
 
     def _get_methods(self, step_names_udfs, lims_id):
         """
-        Gets the method, method number and method version for a given list of stop names
+        Gets the method, method number and method version for a given list of step names for AM documents.
+        Only method name and Atlas version is returned if Atlas documentation instead has been used.
         """
         methods = []
 
         for process_name in step_names_udfs:
             artifacts = self.get_artifacts(process_type=process_name, samplelimsid=lims_id)
-            if artifacts:
-                udf_key_number = step_names_udfs[process_name]["method_number"]
-                udf_key_version = step_names_udfs[process_name]["method_version"]
+            if not artifacts:
+                continue
+            # Get a list of parent processes for the artifacts
+            processes: List[Process] = self.get_processes_from_artifacts(artifacts=artifacts)
+            for process in processes:
+                # Check which type of method document has been used
+                method_type: str = self.get_method_type(process, step_names_udfs[process_name])
+                udf_key_method_doc, udf_key_version = self.get_method_udf_values(
+                    step_names_udfs[process_name], method_type
+                )
                 methods.append(
                     (
-                        artifacts[0].parent_process.date_run,
-                        self.get_method_number(artifacts[0], udf_key_number),
-                        self.get_method_version(artifacts[0], udf_key_version),
+                        process.date_run,
+                        self.get_method_document(process, udf_key_method_doc),
+                        self.get_method_version(process, udf_key_version),
+                        method_type,
                     )
                 )
 
@@ -344,28 +354,70 @@ class LimsAPI(Lims, OrderHandler):
         if sorted_methods:
             method = sorted_methods[METHOD_INDEX]
 
-            if method[METHOD_NUMBER_INDEX] is not None:
-                method_name = AM_METHODS.get(method[METHOD_NUMBER_INDEX])
+            if (
+                method[METHOD_TYPE_INDEX] == DocumentationMethod.AM
+                and method[METHOD_DOCUMENT_INDEX] is not None
+            ):
+                method_name = AM_METHODS.get(method[METHOD_DOCUMENT_INDEX])
                 return (
-                    f"{method[METHOD_NUMBER_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
+                    f"{method[METHOD_DOCUMENT_INDEX]}:{method[METHOD_VERSION_INDEX]} - "
                     f"{method_name}"
                 )
+            elif (
+                method[METHOD_TYPE_INDEX] == DocumentationMethod.ATLAS
+                and method[METHOD_DOCUMENT_INDEX] is not None
+            ):
+                return f"{method[METHOD_DOCUMENT_INDEX]} ({method[METHOD_VERSION_INDEX]})"
 
         return None
 
     @staticmethod
-    def get_method_number(artifact, udf_key_number):
+    def get_processes_from_artifacts(artifacts: List[Artifact]) -> List[Process]:
         """
-        get method number for artifact
+        Get a list of parent processes from a set of given artifacts.
         """
-        return artifact.parent_process.udf.get(udf_key_number)
+        processes: List = []
+        for artifact in artifacts:
+            parent_process: Process = artifact.parent_process
+            if parent_process not in processes:
+                processes.append(parent_process)
+        return processes
 
     @staticmethod
-    def get_method_version(artifact, udf_key_version):
+    def get_method_type(process: Process, method_udfs: Dict) -> str:
         """
-        get method version for artifact
+        Return which type of method documentation has been used, AM or Atlas.
         """
-        return artifact.parent_process.udf.get(udf_key_version)
+        if "atlas_version" in method_udfs and process.udf.get(method_udfs["atlas_version"]):
+            return DocumentationMethod.ATLAS
+        return DocumentationMethod.AM
+
+    @staticmethod
+    def get_method_udf_values(method_udfs: Dict, method_type: str) -> Tuple[str, str]:
+        """
+        Return UDF values for Method and Method version depending on which method type.
+        """
+        if method_type == DocumentationMethod.ATLAS:
+            udf_key_method_doc = method_udfs["atlas_document"]
+            udf_key_version = method_udfs["atlas_version"]
+        else:
+            udf_key_method_doc = method_udfs["method_number"]
+            udf_key_version = method_udfs["method_version"]
+        return udf_key_method_doc, udf_key_version
+
+    @staticmethod
+    def get_method_document(process: Process, udf_key_method_doc: str) -> str:
+        """
+        Return method number for artifact.
+        """
+        return process.udf.get(udf_key_method_doc)
+
+    @staticmethod
+    def get_method_version(process: Process, udf_key_version: str) -> str:
+        """
+        Return method version for artifact.
+        """
+        return process.udf.get(udf_key_version)
 
     @staticmethod
     def _find_capture_kits(artifacts, udf_key):
