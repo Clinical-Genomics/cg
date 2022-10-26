@@ -34,32 +34,32 @@ def test_get_slurm_qos_for_case(mocker, case_id: str, priority, expected_slurm_q
 
 
 def test_gene_panels_correctly_added(customer_id):
-    """Test get correct gene panel list"""
+    """Test get correct gene panel list."""
 
-    # GIVEN a case that has a gene panel included in the gene panel master list:
+    # GIVEN a case that has a gene panel included in the gene panel master list
     default_panels_included: List[str] = [GenePanelMasterList.get_panel_names()[0]]
     master_list: List[str] = GenePanelMasterList.get_panel_names()
 
-    # WHEN converting the gene panels between the default and the gene_panel_master_list:
+    # WHEN converting the gene panels between the default and the gene_panel_master_list
     list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
         customer=customer_id, default_panels=default_panels_included
     )
 
-    # THEN the list_of_gene_panels_used should return all gene panels:
+    # THEN the list_of_gene_panels_used should return all gene panels
     assert set(list_of_gene_panels_used) == set(master_list)
 
 
 def test_gene_panels_not_added(customer_id):
-    """Test get only OMIM-AUTO and custom gene panel list"""
-    # GIVEN a case that has a gene panel that is NOT included in the gene panel master list:
+    """Test get only OMIM-AUTO and custom gene panel list."""
+    # GIVEN a case that has a gene panel that is NOT included in the gene panel master list
     default_panels_not_included: List[str] = ["PANEL_NOT_IN_GENE_PANEL_MASTER_LIST"]
 
-    # WHEN converting the gene panels between the default and the gene_panel_master_list:
+    # WHEN converting the gene panels between the default and the gene_panel_master_list
     list_of_gene_panels_used = MipAnalysisAPI.convert_panels(
         customer=customer_id, default_panels=default_panels_not_included
     )
 
-    # THEN the list_of_gene_panels_used should return the custom panel and OMIM-AUTO:
+    # THEN the list_of_gene_panels_used should return the custom panel and OMIM-AUTO
     assert set(list_of_gene_panels_used) == set(
         default_panels_not_included + [GenePanelMasterList.OMIM_AUTO]
     )
