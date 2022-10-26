@@ -301,9 +301,3 @@ def fixture_demultiplex_context(
     cg_context.cg_stats_api_ = stats_api
     cg_context.housekeeper_api_ = real_housekeeper_api
     return cg_context
-
-
-@pytest.fixture(name="cli_runner")
-def fixture_cli_runner():
-    """Create a CliRunner"""
-    return CliRunner()

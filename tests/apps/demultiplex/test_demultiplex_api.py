@@ -20,10 +20,10 @@ from tests.cli.demultiplex.conftest import (
 def test_get_all_demultiplex_flow_cells_out_dirs(
     demultiplex_context: CGConfig, demultiplexed_flowcell_finished_working_directory: Path
 ):
-    """Test returning all flow cell directories from demultiplexing."""
-    # GIVEN a demultiplex flow cell finished out dir that exist
+    """Test returning all flow cell directories from the demultiplexing run directory."""
+    # GIVEN a demultiplex flow cell finished output directory that exist
 
-    # GIVEN that a demultiplex context
+    # GIVEN a demultiplex context
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
 
     # WHEN calling get_all_demultiplex_flow_cells_out_dirs

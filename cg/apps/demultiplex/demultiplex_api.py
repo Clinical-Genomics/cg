@@ -38,9 +38,8 @@ class DemultiplexingAPI:
 
     @property
     def slurm_quality_of_service(self) -> Literal[SlurmQos.HIGH, SlurmQos.LOW]:
-        if self.environment == "stage":
-            return SlurmQos.LOW
-        return SlurmQos.HIGH
+        """Return SLURM quality of service."""
+        return SlurmQos.LOW if self.environment == "stage" else SlurmQos.HIGH
 
     def set_dry_run(self, dry_run: bool) -> None:
         LOG.debug("Set dry run to %s", dry_run)
@@ -123,12 +122,12 @@ class DemultiplexingAPI:
         return self.flowcell_out_dir_path(flowcell) / "Unaligned"
 
     def demultiplexing_completed_path(self, flowcell: Flowcell) -> Path:
-        """Create the path to where the demuliplexed result should be produced"""
-        return self.flowcell_out_dir_path(flowcell) / "demuxcomplete.txt"
+        """Return the path to where the demuliplexed result should be produced."""
+        return Path(self.flowcell_out_dir_path(flowcell), "demuxcomplete.txt")
 
     def is_demultiplexing_completed(self, flowcell: Flowcell) -> bool:
-        """Create the path to where the demuliplexed result should be produced"""
-        LOG.info("Check if demultiplexing is ready for %s", flowcell.path)
+        """Check the path to where the demuliplexed result should be produced"""
+        LOG.info(f"Check if demultiplexing is ready for {flowcell.path}")
         logfile: Path = self.get_stderr_logfile(flowcell)
         if not logfile.exists():
             LOG.warning("Could not find logfile!")

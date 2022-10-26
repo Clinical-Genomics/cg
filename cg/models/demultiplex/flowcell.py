@@ -81,7 +81,18 @@ class Flowcell:
 
     @property
     def copy_complete_path(self) -> Path:
+        """Return copy complete path."""
         return Path(self.path, "CopyComplete.txt")
+
+    @property
+    def prior_novaseq_copy_complete_path(self) -> Path:
+        """Return copy complete path prior to Novaseq."""
+        return Path(self.path, "delivery.txt")
+
+    @property
+    def prior_novaseq_delivery_started_path(self) -> Path:
+        """Return delivery started path prior roo Novaseq."""
+        return Path(self.path, "copycomplete.txt")
 
     @property
     def demultiplexing_started_path(self) -> Path:
@@ -137,12 +148,22 @@ class Flowcell:
         return self.rta_complete_path.exists()
 
     def is_copy_completed(self) -> bool:
-        """Check if copy of flowcell is done
+        """Check if copy of flowcell is done.
 
-        This is indicated by that the file CopyComplete.txt exists
+        This is indicated by that the file CopyComplete.txt exists.
         """
         LOG.info("Check if copy of data from sequence instrument is ready")
         return self.copy_complete_path.exists()
+
+    def is_prior_novaseq_copy_completed(self) -> bool:
+        """Check if copy of flowcell prior to Novaseq is done."""
+        LOG.info("Check if copy of data from sequence prior to Novaseq instrument is ready")
+        return self.prior_novaseq_copy_complete_path.exists()
+
+    def is_prior_novaseq_delivery_started(self) -> bool:
+        """Check if delivery of flowcell prior to Novaseq is started."""
+        LOG.info("Check if delivery of data from sequence prior to Novaseq instrument is ready")
+        return self.prior_novaseq_delivery_started_path.exists()
 
     def is_flowcell_ready(self) -> bool:
         """Check if a flowcell is ready for demultiplexing

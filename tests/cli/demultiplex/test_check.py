@@ -17,10 +17,9 @@ def test_check_new_demultiplex_dry_run(
 ):
     caplog.set_level(logging.INFO)
 
-    # GIVEN a demultiplex flow cell finished out dir that exist
+    # GIVEN a demultiplex flow cell finished output directory that exist
 
-    # GIVEN that a demultiplex context
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
+    # GIVEN a demultiplex context
 
     # WHEN starting check for new demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
