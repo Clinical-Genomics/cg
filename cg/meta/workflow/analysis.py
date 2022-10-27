@@ -17,7 +17,6 @@ from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import Bundle, Version
-from cg.utils import click
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 
