@@ -11,18 +11,18 @@ from click.testing import CliRunner
 EXIT_SUCCESS = 0
 
 
-def test_balsamic_no_args(cli_runner: CliRunner, balsamic_context: CGConfig):
-    """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
-    # GIVEN no arguments or options besides the command call
-
-    # WHEN running command
-    result = cli_runner.invoke(balsamic, [], obj=balsamic_context)
-
-    # THEN command runs successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-    # THEN help should be printed
-    assert "help" in result.output
+# def test_balsamic_no_args(cli_runner: CliRunner, balsamic_context: CGConfig):
+#     """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
+#     # GIVEN no arguments or options besides the command call
+#
+#     # WHEN running command
+#     result = cli_runner.invoke(balsamic, [], obj=balsamic_context)
+#
+#     # THEN command runs successfully
+#     assert result.exit_code == EXIT_SUCCESS
+#
+#     # THEN help should be printed
+#     assert "help" in result.output
 
 
 def test_start(cli_runner: CliRunner, balsamic_context: CGConfig, mock_config, caplog, mocker):
