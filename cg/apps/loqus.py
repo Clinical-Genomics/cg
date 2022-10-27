@@ -100,12 +100,12 @@ class LoqusdbAPI:
 
     def get_nr_of_variants_in_file(self) -> Dict[str, int]:
         """Return the number of variants in the uploaded to Loqusdb file."""
-        variants = 0
+        nr_of_variants: int = 0
         for line in self.process.stderr_lines():
-            line_content = line.split("INFO")[-1].strip()
+            line_content: str = line.split("INFO")[-1].strip()
             if "inserted" in line_content:
-                variants = int(line_content.split(":")[-1].strip())
-        return {"variants": variants}
+                nr_of_variants = int(line_content.split(":")[-1].strip())
+        return {"variants": nr_of_variants}
 
     def __repr__(self):
         return f"LoqusdbAPI(binary_path={self.binary_path}, config_path={self.config_path})"
