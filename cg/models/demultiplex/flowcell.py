@@ -87,12 +87,12 @@ class Flowcell:
     @property
     def prior_novaseq_copy_complete_path(self) -> Path:
         """Return copy complete path prior to Novaseq."""
-        return Path(self.path, "delivery.txt")
+        return Path(self.path, "copycomplete.txt")
 
     @property
     def prior_novaseq_delivery_started_path(self) -> Path:
-        """Return delivery started path prior roo Novaseq."""
-        return Path(self.path, "copycomplete.txt")
+        """Return delivery started path prior to Novaseq."""
+        return Path(self.path, "delivery.txt")
 
     @property
     def demultiplexing_started_path(self) -> Path:

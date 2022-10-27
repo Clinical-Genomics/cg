@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from cg.models.demultiplex.flowcell import Flowcell
@@ -36,3 +37,41 @@ def test_rta_exists(flowcell_object: Flowcell):
 
     # THEN assert that the file exists
     assert rta_file.exists()
+
+
+def test_is_prior_novaseq_copy_completed_ready(flowcell_object: Flowcell):
+    # GIVEN the path to a demultiplexed finished flow cell
+    # GIVEN a flowcell object
+    # GIVEN a copy complete file
+
+    # WHEN fetching the path to the copy complete file
+    is_completed = flowcell_object.is_prior_novaseq_copy_completed()
+
+    # THEN assert that the file exists
+    assert is_completed is True
+
+
+def test_is_prior_novaseq_delivery_started_ready(flowcell_object: Flowcell):
+    # GIVEN the path to a demultiplexed finished flow cell
+    # GIVEN a flowcell object
+    # GIVEN a delivery file
+    Path(flowcell_object.path, "delivery.txt").touch()
+
+    # WHEN fetching the path to the copy complete file
+    is_delivered = flowcell_object.is_prior_novaseq_delivery_started()
+
+    os.remove(Path(flowcell_object.path, "delivery.txt").as_posix())
+
+    # THEN assert that the file exists
+    assert is_delivered is True
+
+
+def test_is_prior_novaseq_delivery_started_not_ready(flowcell_object: Flowcell):
+    # GIVEN the path to a demultiplexed finished flow cell
+    # GIVEN a flowcell object
+
+    # WHEN fetching the path to the copy complete file
+    is_delivered = flowcell_object.is_prior_novaseq_delivery_started()
+
+    # THEN assert that the file do not exist
+    assert is_delivered is False
