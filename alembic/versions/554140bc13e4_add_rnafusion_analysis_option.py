@@ -1,8 +1,8 @@
 """add rnafusion analysis option
 
-Revision ID: ce06591cec83
-Revises: 2968d39ac35f
-Create Date: 2022-08-30 14:00:17.865006
+Revision ID: 554140bc13e4
+Revises: 20750539a335
+Create Date: 2022-09-27 14:00:17.865006
 
 """
 from alembic import op
