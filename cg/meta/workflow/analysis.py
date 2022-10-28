@@ -167,6 +167,7 @@ class AnalysisAPI(MetaAPI):
             bundle_data=self.get_hermes_transformed_deliverables(case_id)
         )
         if not bundle_result:
+            LOG.info("Bundle already added to Housekeeper!")
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
         self.housekeeper_api.include(bundle_version)
