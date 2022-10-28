@@ -175,4 +175,4 @@ def test_valid_case_already_added(
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN user should be informed that bundle was already added
-    assert "Bundle already added" in caplog.text
+    assert "Bundle already added" in result.output
