@@ -3,9 +3,6 @@
 import logging
 from pathlib import Path
 from typing import List
-import pandas as pd
-import csv
-
 from cg.constants import Pipeline
 from cg.constants.constants import (
     RNAFUSION_SAMPLESHEET_HEADERS,
@@ -24,7 +21,6 @@ from cg.models.nextflow.deliverable import NextflowDeliverable, replace_dict_val
 from cg.utils import Process
 from cg import resources
 from pydantic import ValidationError
-from subprocess import CalledProcessError
 
 
 LOG = logging.getLogger(__name__)
@@ -165,14 +161,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             "--arriba": arriba,
         }
 
-    def get_pipeline_version(self, case_id: str) -> str:
-        try:
-            self.process.run_command(["-version"])
-            return list(self.process.stdout_lines())[2].split()[1]
-        except (Exception, CalledProcessError):
-            LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
-            return "0.0.0"
-
     @staticmethod
     def __build_command_str(options: dict) -> List[str]:
         formatted_options: list = []
@@ -260,6 +248,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return NextflowAnalysisAPI.get_deliverables_file_path(
             case_id=case_id, root_dir=self.root_dir
         )
+
+    def get_pipeline_version(self, case_id: str) -> str:
+        return NextflowAnalysisAPI.get_pipeline_version(
+            case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline)
 
     def verify_deliverables_file_exists(self, case_id: str):
         NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)

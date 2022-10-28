@@ -10,6 +10,7 @@ from cg.constants.constants import NFX_WORK_DIR, NFX_SAMPLE_HEADER
 from cg.io.controller import ReadFile, WriteFile
 from cg.constants.constants import FileFormat
 from cg.exc import CgError
+from subprocess import CalledProcessError
 
 LOG = logging.getLogger(__name__)
 
@@ -38,6 +39,16 @@ class NextflowAnalysisAPI:
         return Path(
             (cls.get_case_path(case_id, root_dir)), "pipeline_info", "software_versions.yml"
         )
+
+    @classmethod
+    def get_pipeline_version(cls,  case_id: str, root_dir: str, pipeline: str) -> str:
+        try:
+            with open(cls.get_software_version_path(case_id=case_id, root_dir=root_dir), "r") as file:
+                last_line = file.readlines()[-1]
+            return last_line.split(" ")[-1]
+        except (Exception, CalledProcessError):
+            LOG.warning("Could not retrieve %s workflow version!", pipeline)
+            return "0.0.0"
 
     @classmethod
     def verify_analysis_finished(cls, case_id: str, root_dir: str) -> None:
