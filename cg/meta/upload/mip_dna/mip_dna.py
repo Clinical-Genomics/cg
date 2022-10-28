@@ -10,6 +10,7 @@ from cg.cli.upload.observations import observations
 from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.validate import validate
 from cg.cli.upload.coverage import coverage
+from cg.cli.upload.clinical_delivery import clinical_delivery
 from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -38,6 +39,7 @@ class MipDNAUploadAPI(UploadAPI):
         ctx.invoke(validate, family_id=case_obj.internal_id)
         ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
         ctx.invoke(observations, case_id=case_obj.internal_id)
+        ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
 
         # Delivery report generation
         if case_obj.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
@@ -46,5 +48,7 @@ class MipDNAUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
+
+
 
         self.update_uploaded_at(analysis_obj)
