@@ -38,6 +38,9 @@ def check_new_demultiplex(context: CGConfig, dry_run: bool):
                 logging.info(
                     f"{flow_cell_run_name} copy is complete and delivery has already started"
                 )
+                if Path(demultiplex_flow_cell_out_dir, "l1t11").exists():
+                    logging.info(f"cgstats add --machine X {demultiplex_flow_cell_out_dir}")
+
             else:
                 logging.info(f"{flow_cell_run_name} copy is complete and delivery will start")
                 Path(demultiplex_flow_cell_out_dir, "delivery.txt").touch()
