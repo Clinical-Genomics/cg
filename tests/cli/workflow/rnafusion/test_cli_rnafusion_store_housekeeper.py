@@ -148,7 +148,7 @@ def test_valid_case_already_added(
     mock_analysis_finish,
     caplog,
 ):
-    caplog.set_level(logging.ERROR)
+    caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id = "rnafusion_case_enough_reads"
 
