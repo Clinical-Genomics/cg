@@ -41,9 +41,11 @@ class NextflowAnalysisAPI:
         )
 
     @classmethod
-    def get_pipeline_version(cls,  case_id: str, root_dir: str, pipeline: str) -> str:
+    def get_pipeline_version(cls, case_id: str, root_dir: str, pipeline: str) -> str:
         try:
-            with open(cls.get_software_version_path(case_id=case_id, root_dir=root_dir), "r") as file:
+            with open(
+                cls.get_software_version_path(case_id=case_id, root_dir=root_dir), "r"
+            ) as file:
                 last_line = file.readlines()[-1]
             return last_line.split(" ")[-1]
         except (Exception, CalledProcessError):

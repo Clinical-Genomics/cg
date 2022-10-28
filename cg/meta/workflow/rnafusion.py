@@ -251,7 +251,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def get_pipeline_version(self, case_id: str) -> str:
         return NextflowAnalysisAPI.get_pipeline_version(
-            case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline)
+            case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline
+        )
 
     def verify_deliverables_file_exists(self, case_id: str):
         NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
