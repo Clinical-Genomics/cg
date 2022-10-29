@@ -16,13 +16,13 @@ class NextflowDeliverable(BaseModel):
     """Nextflow deliverable model
 
     Attributes:
-        deliverables: dictionary containing format, path, paht_index, step, tag and id keys
+        deliverables: dictionary containing format, path, path_index, step, tag and id keys
     """
 
     deliverables: dict
 
     @validator("deliverables")
-    def headers(cls, v: dict) -> str:
+    def headers(cls, v: dict) -> None:
         if collections.Counter(list(v.keys())) != collections.Counter(DELIVER_FILE_HEADERS):
             raise ValueError(
                 f"Headers are not matching the standard header format: {DELIVER_FILE_HEADERS}"
