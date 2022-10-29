@@ -122,7 +122,7 @@ class DemultiplexingAPI:
         return self.flowcell_out_dir_path(flowcell) / "Unaligned"
 
     def demultiplexing_completed_path(self, flowcell: Flowcell) -> Path:
-        """Return the path to where the demuliplexed result should be produced."""
+        """Return the path to demultiplexing complete file."""
         return Path(self.flowcell_out_dir_path(flowcell), "demuxcomplete.txt")
 
     def is_demultiplexing_completed(self, flowcell: Flowcell) -> bool:

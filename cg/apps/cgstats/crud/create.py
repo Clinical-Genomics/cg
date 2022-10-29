@@ -212,7 +212,8 @@ def _create_samples(
 ) -> Union[int, None]:
     """handles sample objects creation for the table `Sample` in cgstats"""
 
-    barcode = sample.index if not sample.second_index else f"{sample.index}+{sample.second_index}"
+    barcode = f"{sample.index}+{sample.second_index}" if sample.second_index else sample.index
+
     sample_id: Optional[int] = find.get_sample_id(sample_id=sample.sample_id, barcode=barcode)
     if sample.project == "indexcheck":
         LOG.debug("Skip adding indexcheck sample to database")

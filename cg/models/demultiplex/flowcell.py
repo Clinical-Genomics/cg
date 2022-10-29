@@ -102,6 +102,11 @@ class Flowcell:
     def trailblazer_config_path(self) -> Path:
         return Path(self.path, "slurm_job_ids.yaml")
 
+    @property
+    def hiseq_x_flow_cell(self) -> Path:
+        """Return path to Hiseq X flow cell directory"""
+        return Path(self.path, "l1t11")
+
     def validate_flow_cell_name(self) -> None:
         """
         Validate on the following criteria:
@@ -164,6 +169,11 @@ class Flowcell:
         """Check if delivery of flowcell prior to Novaseq is started."""
         LOG.info("Check if delivery of data from sequence prior to Novaseq instrument is ready")
         return self.prior_novaseq_delivery_started_path.exists()
+
+    def is_hiseq_x(self) -> bool:
+        """Check if flowcell is Hiseq X."""
+        LOG.debug("Check if flow cell iis Hiseq X")
+        return self.hiseq_x_flow_cell.exists()
 
     def is_flowcell_ready(self) -> bool:
         """Check if a flowcell is ready for demultiplexing

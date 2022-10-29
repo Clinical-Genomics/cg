@@ -96,12 +96,7 @@ class DemuxPostProcessingAPI:
             flowcell_id=flowcell_id, project_name=project_name
         )
 
-        return [
-            sample_line
-            for sample_line in self.get_report_lines(
-                stats_samples=project_samples, flowcell_id=flowcell_id
-            )
-        ]
+        return list(self.get_report_lines(stats_samples=project_samples, flowcell_id=flowcell_id))
 
     def create_cgstats_reports(self, demux_results: DemuxResults) -> None:
         """Create a report for every project that was demultiplexed"""

@@ -4,8 +4,8 @@ from pathlib import Path
 
 from click import testing
 
-from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.check import check_new_demultiplex
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
 
@@ -29,4 +29,4 @@ def test_check_new_demultiplex_dry_run(
     )
 
     # THEN assert the command exits without problems
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SUCCESS

@@ -57,10 +57,10 @@ def test_is_prior_novaseq_delivery_started_ready(flowcell_object: Flowcell):
     # GIVEN a delivery file
     Path(flowcell_object.path, "delivery.txt").touch()
 
-    # WHEN fetching the path to the copy complete file
+    # WHEN checking the path to the delivery file
     is_delivered = flowcell_object.is_prior_novaseq_delivery_started()
 
-    os.remove(Path(flowcell_object.path, "delivery.txt").as_posix())
+    Path(flowcell_object.path, "delivery.txt").unlink()
 
     # THEN assert that the file exists
     assert is_delivered is True
@@ -70,8 +70,23 @@ def test_is_prior_novaseq_delivery_started_not_ready(flowcell_object: Flowcell):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flowcell object
 
-    # WHEN fetching the path to the copy complete file
+    # WHEN checking the path to the copy complete file
     is_delivered = flowcell_object.is_prior_novaseq_delivery_started()
 
     # THEN assert that the file do not exist
     assert is_delivered is False
+
+
+def test_is_hiseq_x(flowcell_object: Flowcell):
+    # GIVEN the path to a demultiplexed finished flow cell
+    # GIVEN a flowcell object
+    # GIVEN a Hiseq X directory
+    Path(flowcell_object.path, "l1t11").mkdir()
+
+    # WHEN checking the path to the Hiseq X flow cell directory
+    is_hiseq_x = flowcell_object.is_hiseq_x()
+
+    Path(flowcell_object.path, "l1t11").rmdir()
+
+    # THEN assert that the file exists
+    assert is_hiseq_x is True

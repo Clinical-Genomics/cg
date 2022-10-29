@@ -164,7 +164,7 @@ class DemuxResults:
                 LOG.debug("Skipping %s since it is not a directory", sub_dir)
                 continue
             dir_name: str = sub_dir.name
-            if dir_name in ["Stats", "Reports", "Logs"]:
+            if dir_name in {"Stats", "Reports", "Logs"}:
                 LOG.debug("Skipping %s dir %s", dir_name, sub_dir)
                 continue
             if dir_name.startswith("Project_"):
@@ -207,7 +207,7 @@ class DemuxResults:
         id_string: Optional[str] = None
 
         with open(err_log_path, "r") as logfile:
-            for line in logfile.readlines():
+            for line in logfile:
                 if "Dragen BCL Convert finished!" in line:
                     time: datetime.datetime = self._parse_time(line)
 
@@ -218,7 +218,7 @@ class DemuxResults:
             raise FileNotFoundError
 
         with open(out_log_path, "r") as logfile:
-            for line in logfile.readlines():
+            for line in logfile:
                 if "Command Line" in line:
                     line = line.strip()
                     split_line = line.split(" ")
@@ -250,7 +250,7 @@ class DemuxResults:
         id_string: Optional[str] = None
 
         with open(log_path, "r") as logfile:
-            for line in logfile.readlines():
+            for line in logfile:
                 # Fetch the line where the call that was made is
                 if "bcl2fastq" in line and "singularity" in line:
                     time: datetime.datetime = self._parse_time(line)
