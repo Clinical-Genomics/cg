@@ -3,6 +3,12 @@ from pathlib import Path
 import click
 from cgmodels.cg.constants import StrEnum
 
+
+class BclConverter(StrEnum):
+    DRAGEN: str = "dragen"
+    BCL2FASTQ: str = "bcl2fastq"
+
+
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
         "FCID",

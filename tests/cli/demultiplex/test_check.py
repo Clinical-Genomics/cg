@@ -27,6 +27,7 @@ def test_check_new_demultiplex_dry_run(
         ["--dry-run"],
         obj=demultiplex_context,
     )
+    print(caplog.records)
 
     # THEN assert the command exits without problems
     assert result.exit_code == EXIT_SUCCESS

@@ -1,7 +1,8 @@
 import logging
 import shutil
+from contextlib import redirect_stdout
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Generator, Any
 
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
@@ -14,8 +15,108 @@ from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
+
+
+class DemuxPostProcessingHiseqXAPI:
+    def __init__(self, config: CGConfig):
+        self.demux_api: DemultiplexingAPI = config.demultiplex_api
+        self.dry_run = False
+
+    def set_dry_run(self, dry_run: bool) -> None:
+        """Set dry run."""
+        LOG.debug(f"Set dry run to {dry_run}")
+        self.dry_run = dry_run
+        if dry_run:
+            self.demux_api.set_dry_run(dry_run=dry_run)
+
+    def post_process_flowcell(
+        self, flowcell: Flowcell, flowcell_name: str, flowcell_path: Path
+    ) -> List[str]:
+        """Run all the necessary steps for post processing a demultiplexed flow cell."""
+        if not flowcell.is_prior_novaseq_copy_completed():
+            logging.info(f"{flowcell_name} is not yet completely copied")
+            return
+        if flowcell.is_prior_novaseq_delivery_started():
+            logging.info(f"{flowcell_name} copy is complete and delivery has already started")
+            return
+        if not flowcell.is_hiseq_x():
+            logging.debug(f"{flowcell_name} is not an Hiseq X flow cell")
+            return
+        logging.info(f"{flowcell_name} copy is complete and delivery will start")
+        Path(flowcell_path, "delivery.txt").touch()
+        flowcell_to_transfer: List[str] = []
+
+        logging.info(f"cgstats add --machine X {flowcell_path}")
+        cgstats_add_parameters = [
+            "add",
+            "--machine",
+            "X",
+            {flowcell_path},
+        ]
+        cgstats_process: Process = Process(binary="cgstats")
+        cgstats_process.run_command(parameters=cgstats_add_parameters, dry_run=self.dry_run)
+        for project in Path(flowcell_path, "Unaligned", "Project").iterdir():
+            stdout_file: Path = Path(
+                flowcell_path,
+                "-".join("stats", project_id, flowcell_name),
+                ".txt",
+            )
+            (_, project_id) = project.name.split("_")
+            logging.info(f"cgstats select --project {project_id} {flowcell_name}")
+            cgstats_select_parameters: List[str] = [
+                "selected",
+                "--project",
+                project_id,
+                flowcell_name,
+            ]
+            with open(stdout_file, "w") as file:
+                with redirect_stdout(file):
+                    cgstats_process.run_command(
+                        parameters=cgstats_select_parameters, dry_run=dry_run
+                    )
+
+        cgstats_lane_parameters: List[str] = [
+            "lanestats",
+            flowcell_path,
+        ]
+        logging.info(f"cgstats lanestats {flowcell_path}")
+        cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
+        flowcell_to_transfer.append(flowcell_name)
+        return flowcell_to_transfer
+
+    def finish_flowcell(
+        self, bcl_converter: str, flowcell_name: str, flowcell_path: Path, force: bool = False
+    ) -> List[str]:
+        """Post processing flow cell.
+        Force is used to finish a flow cell even if the files are renamed already.
+        """
+        LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
+        try:
+            flowcell: Flowcell = Flowcell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
+        except FlowcellError:
+            return
+        return self.post_process_flowcell(
+            flowcell=flowcell, flowcell_name=flowcell_name, flowcell_path=flowcell_path
+        )
+
+    def finish_all_flowcells(self, bcl_converter: str) -> Generator[list[str], Any, None]:
+        """Loop over all flow cells and post process those that need it"""
+        flowcell_to_transfer: Generator[list[str], Any, None] = []
+        demultiplex_flow_cell_out_dirs: List[
+            Path
+        ] = self.demux_api.get_all_demultiplex_flow_cells_out_dirs()
+        flowcell_to_transfer.extend(
+            self.finish_flowcell(
+                bcl_converter=bcl_converter,
+                flowcell_name=flowcell_dir.name,
+                flowcell_path=flowcell_dir,
+            )
+            for flowcell_dir in demultiplex_flow_cell_out_dirs
+        )
+        return flowcell_to_transfer
 
 
 class DemuxPostProcessingAPI:
@@ -25,7 +126,8 @@ class DemuxPostProcessingAPI:
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool) -> None:
-        LOG.debug("Set dry run to %s", dry_run)
+        """Set dry run."""
+        LOG.debug(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
