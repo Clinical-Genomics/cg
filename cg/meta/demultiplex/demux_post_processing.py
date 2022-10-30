@@ -34,7 +34,7 @@ class DemuxPostProcessingHiseqXAPI:
 
     def post_process_flowcell(
         self, flowcell: Flowcell, flowcell_name: str, flowcell_path: Path
-    ) -> List[str]:
+    ) -> str:
         """Run all the necessary steps for post processing a demultiplexed flow cell."""
         if not flowcell.is_prior_novaseq_copy_completed():
             logging.info(f"{flowcell_name} is not yet completely copied")
@@ -47,7 +47,6 @@ class DemuxPostProcessingHiseqXAPI:
             return
         logging.info(f"{flowcell_name} copy is complete and delivery will start")
         Path(flowcell_path, "delivery.txt").touch()
-        flowcell_to_transfer: List[str] = []
 
         logging.info(f"cgstats add --machine X {flowcell_path}")
         cgstats_add_parameters = [
@@ -84,12 +83,11 @@ class DemuxPostProcessingHiseqXAPI:
         ]
         logging.info(f"cgstats lanestats {flowcell_path}")
         cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
-        flowcell_to_transfer.append(flowcell_name)
-        return flowcell_to_transfer
+        return flowcell_name
 
     def finish_flowcell(
         self, bcl_converter: str, flowcell_name: str, flowcell_path: Path, force: bool = False
-    ) -> List[str]:
+    ) -> str:
         """Post processing flow cell.
         Force is used to finish a flow cell even if the files are renamed already.
         """
@@ -102,13 +100,13 @@ class DemuxPostProcessingHiseqXAPI:
             flowcell=flowcell, flowcell_name=flowcell_name, flowcell_path=flowcell_path
         )
 
-    def finish_all_flowcells(self, bcl_converter: str) -> Generator[list[str], Any, None]:
+    def finish_all_flowcells(self, bcl_converter: str) -> list[str]:
         """Loop over all flow cells and post process those that need it"""
-        flowcell_to_transfer: Generator[list[str], Any, None] = []
+        transfer_flow_cells: list[str] = []
         demultiplex_flow_cell_out_dirs: List[
             Path
         ] = self.demux_api.get_all_demultiplex_flow_cells_out_dirs()
-        flowcell_to_transfer.extend(
+        transfer_flow_cells.extend(
             self.finish_flowcell(
                 bcl_converter=bcl_converter,
                 flowcell_name=flowcell_dir.name,
@@ -116,7 +114,7 @@ class DemuxPostProcessingHiseqXAPI:
             )
             for flowcell_dir in demultiplex_flow_cell_out_dirs
         )
-        return flowcell_to_transfer
+        return transfer_flow_cells
 
 
 class DemuxPostProcessingAPI:

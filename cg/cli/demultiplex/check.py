@@ -25,14 +25,14 @@ def check_new_demultiplex(context: CGConfig, dry_run: bool):
     logging.debug("Checking for new Hiseq X demultiplexed flowcells")
     demux_post_processing_api = DemuxPostProcessingHiseqXAPI(config=context)
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
-    transfer_flow_cells: Generator[
-        list[str], Any, None
-    ] = demux_post_processing_api.finish_all_flowcells(bcl_converter=BclConverter.BCL2FASTQ.value)
+    transfer_flow_cells: list[str] = demux_post_processing_api.finish_all_flowcells(
+        bcl_converter=BclConverter.BCL2FASTQ.value
+    )
 
     for flowcell in transfer_flow_cells:
         print(flowcell)
+        #        context.invoke(flowcell, content=context.forward(transfer))
         pass
 
 
-#        context.invoke(flowcell, content=context.forward(transfer))
 #        today: str = datetime.datetime.strptime(datetime.date, "%Y-%m-%d")
