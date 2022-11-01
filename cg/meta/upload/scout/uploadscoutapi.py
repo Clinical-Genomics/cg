@@ -431,7 +431,7 @@ class UploadScoutAPI:
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-        subject_id_dna_samples = self._filter_mip_dna_balsamic(subject_id_samples)
+        subject_id_dna_samples = self._get_dna_samples_by_pipeline(subject_id_samples)
         nr_of_subject_id_dna_samples: int = len(subject_id_dna_samples)
         if nr_of_subject_id_dna_samples != 1:
             raise CgDataError(
@@ -452,7 +452,8 @@ class UploadScoutAPI:
         for dna_sample.link in dna_sample.links:
             case_object: models.Family = dna_sample.link.family
             if (
-                case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
+                case_object.data_analysis
+                in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
                 and case_object.customer_id == rna_sample.customer_id
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
@@ -460,11 +461,16 @@ class UploadScoutAPI:
                 )
 
     @staticmethod
-    def _filter_mip_dna_balsamic(subject_id_samples: Query) -> List[Any]:
+    def _get_dna_samples_by_pipeline(subject_id_samples: Query) -> List[Any]:
+        """Selects DNA samples based on their pipeline."""
         subject_id_dna_samples: List[Any] = []
         for sample in subject_id_samples.all():
             for sample.link in sample.links:
                 case_object: models.Family = sample.link.family
-                if case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]:
+                if case_object.data_analysis in [
+                    Pipeline.MIP_DNA,
+                    Pipeline.BALSAMIC,
+                    Pipeline.BALSAMIC_UMI,
+                ]:
                     subject_id_dna_samples.append(sample)
         return subject_id_dna_samples
