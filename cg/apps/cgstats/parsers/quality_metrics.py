@@ -27,6 +27,7 @@ class QualityMetrics:
                 sample_id = row["SampleID"]
                 parsed_metrics[lane] = parsed_metrics.get(lane, {})
                 parsed_metrics[lane][sample_id] = row
+                row["YieldQ30"] = int(row["YieldQ30"])
 
         return self.summerize_quality_metrics(parsed_metrics=parsed_metrics)
 
@@ -41,6 +42,7 @@ class QualityMetrics:
             for value in parsed_metrics[lane].values():
                 sample_id = value.get("Sample_ID")
                 summarized_metrics[lane][sample_id] = summarized_metrics[lane].get(sample_id, value)
-                summarized_metrics[lane][sample_id]["YieldQ30"] += int(value.get("YieldQ30"))
+                if summarized_metrics[lane][sample_id]["YieldQ30"]:
+                    summarized_metrics[lane][sample_id]["YieldQ30"] += value.get("YieldQ30")
 
         return summarized_metrics
