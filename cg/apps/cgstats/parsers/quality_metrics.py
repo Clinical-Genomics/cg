@@ -24,10 +24,11 @@ class QualityMetrics:
             metrics_reader = csv.DictReader(metrics_file)
             for row in metrics_reader:
                 lane = int(row["Lane"])
+                read_number = row["ReadNumber"]
                 sample_id = row["SampleID"]
                 parsed_metrics[lane] = parsed_metrics.get(lane, {})
                 row["YieldQ30"] = int(row["YieldQ30"])
-                parsed_metrics[lane][sample_id] = row
+                parsed_metrics[lane][(read_number, sample_id)] = row
 
         return self.summerize_quality_metrics(parsed_metrics=parsed_metrics)
 
@@ -40,6 +41,7 @@ class QualityMetrics:
             # Iterate over all samples in lane
             summarized_metrics[lane] = summarized_metrics.get(lane, {})
             for value in parsed_metrics[lane].values():
+                value["YieldQ30"] = int(value["YieldQ30"])
                 sample_id = value.get("SampleID")
                 if sample_id not in summarized_metrics[lane]:
                     summarized_metrics[lane][sample_id] = value
