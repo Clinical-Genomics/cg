@@ -24,7 +24,7 @@ class QualityMetrics:
             metrics_reader = csv.DictReader(metrics_file)
             for row in metrics_reader:
                 lane = int(row["Lane"])
-                sample_id = row["Sample_ID"]
+                sample_id = row["SampleID"]
                 parsed_metrics[lane] = parsed_metrics.get(lane, {})
                 parsed_metrics[lane][sample_id] = row
 
