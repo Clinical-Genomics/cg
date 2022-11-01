@@ -160,7 +160,9 @@ def get_dragen_demux_samples(
             sample.sample_id
         ]
 
-        quality_metrics = demux_results.quality_metrics.parsed_metrics[sample.lane][sample.sample_id]
+        quality_metrics = demux_results.quality_metrics.parsed_metrics[sample.lane][
+            sample.sample_id
+        ]
 
         adapter_metrics = demux_results.adapter_metrics.parsed_metrics[sample.lane][
             sample.sample_id

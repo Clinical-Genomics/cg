@@ -28,4 +28,20 @@ class AdapterMetrics:
                 parsed_metrics[lane] = parsed_metrics.get(lane, {})
                 parsed_metrics[lane][sample_id] = row
 
-        return parsed_metrics
+        summerized_metrics = self.summerize_adapter_metrics(parsed_metrics)
+
+        return summerized_metrics
+
+    def summerize_adapter_metrics(self, parsed_metrics: Dict[int, dict]) -> Dict[int, dict]:
+        """Summerize lane information for each sample"""
+
+        summerized_metrics = parsed_metrics
+
+        for lane in summerized_metrics.items():
+            # iterate through the sample dict in second tuple index
+            for value in lane[1].values():
+                value["R1_SampleBases"] = value["SampleBases"]
+                value["R2_SampleBases"] = value["SampleBases"]
+                del value["SampleBases"]
+
+        return summerized_metrics
