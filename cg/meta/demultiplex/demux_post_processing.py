@@ -2,7 +2,7 @@ import logging
 import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
-from typing import Iterable, List, Optional, Generator, Any
+from typing import Iterable, List, Optional
 
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
@@ -20,7 +20,9 @@ from cg.utils import Process
 LOG = logging.getLogger(__name__)
 
 
-class DemuxPostProcessingHiseqXAPI:
+class DemuxPostProcessingAPI:
+    """Post demultiplexing API class."""
+
     def __init__(self, config: CGConfig):
         self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
@@ -32,6 +34,10 @@ class DemuxPostProcessingHiseqXAPI:
         self.dry_run = dry_run
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
+
+
+class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
+    """Post demultiplexing API class for Hiseq X flow cell."""
 
     def add_to_cgstats(self, flowcell_path: Path) -> None:
         """Add flow cell to cgstats."""
@@ -142,18 +148,8 @@ class DemuxPostProcessingHiseqXAPI:
         return transfer_flow_cells
 
 
-class DemuxPostProcessingAPI:
-    def __init__(self, config: CGConfig):
-        self.stats_api: StatsAPI = config.cg_stats_api
-        self.demux_api: DemultiplexingAPI = config.demultiplex_api
-        self.dry_run = False
-
-    def set_dry_run(self, dry_run: bool) -> None:
-        """Set dry run."""
-        LOG.debug(f"Set dry run to {dry_run}")
-        self.dry_run = dry_run
-        if dry_run:
-            self.demux_api.set_dry_run(dry_run=dry_run)
+class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
+    """Post demultiplexing API class for Novaseq X flow cell."""
 
     def rename_files(self, demux_results: DemuxResults) -> None:
         """Rename the files according to how we want to have it after demultiplexing is ready"""
@@ -202,7 +198,7 @@ class DemuxPostProcessingAPI:
     def get_report_lines(stats_samples: List[StatsSample], flowcell_id: str) -> Iterable[str]:
         """Convert stats samples to format lines ready to print"""
         for stats_sample in sorted(stats_samples, key=lambda x: x.sample_name):
-            yield DemuxPostProcessingAPI.sample_to_report_line(
+            yield DemuxPostProcessingNovaseqAPI.sample_to_report_line(
                 stats_sample=stats_sample, flowcell_id=flowcell_id
             )
 

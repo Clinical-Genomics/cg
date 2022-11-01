@@ -14,7 +14,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowcellError
-from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingAPI
+from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingNovaseqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
@@ -55,7 +55,7 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str, bcl_converter: str):
 def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[str]):
     """Select a flowcell to fetch statistics from"""
     # Need to instantiate API
-    post_processing_api = DemuxPostProcessingAPI(config=context)
+    post_processing_api = DemuxPostProcessingNovaseqAPI(config=context)
     report_content: List[str] = post_processing_api.get_report_data(
         flowcell_id=flowcell_id, project_name=project
     )

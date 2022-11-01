@@ -7,7 +7,7 @@ import click
 from cg.constants.constants import DRY_RUN
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, BclConverter
 from cg.meta.demultiplex.demux_post_processing import (
-    DemuxPostProcessingAPI,
+    DemuxPostProcessingNovaseqAPI,
     DemuxPostProcessingHiseqXAPI,
 )
 from cg.models.cg_config import CGConfig
@@ -27,7 +27,9 @@ def finish_group():
 @click.pass_obj
 def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None:
     """Command to post-process all demultiplexed flow cells."""
-    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
+        config=context
+    )
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
     demux_post_processing_api.finish_all_flowcells(bcl_converter=bcl_converter)
 
@@ -46,7 +48,9 @@ def finish_flowcell(
     flowcell-name is full flow cell name, e.g. '201203_A00689_0200_AHVKJCDRXX'.
     """
 
-    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(
+        config=context
+    )
     demux_post_processing_api.set_dry_run(dry_run)
     demux_post_processing_api.finish_flowcell(
         flowcell_name=flowcell_name, force=force, bcl_converter=bcl_converter
