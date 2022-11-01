@@ -16,7 +16,7 @@ class QualityMetrics:
         self,
     ) -> Dict[int, dict]:
         """Parse the Dragen quality metrics file"""
-        LOG.info("Parsing Dragen demultiplexing quality metrics file %s", self.quality_metrics_file)
+        LOG.info("Parsing Dragen demultiplexing quality metrics file %s", self.quality_metrics_path)
 
         parsed_metrics = {}
 
