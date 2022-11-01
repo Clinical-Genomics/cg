@@ -14,7 +14,7 @@ class AdapterMetrics:
 
     @staticmethod
     def summerize_adapter_metrics(parsed_metrics: Dict[int, dict]) -> Dict[Tuple[str, str], dict]:
-        """Summerize lane information for each sample"""
+        """Summerize forward and reverse read information for each sample in each lane."""
 
         summarized_metrics = {}
         for lane in parsed_metrics:
@@ -30,7 +30,7 @@ class AdapterMetrics:
         return summarized_metrics
 
     def parse_metrics_file(self) -> Dict[int, dict]:
-        """Parse the Dragen adapter metrics file"""
+        """Parse the Dragen adapter metrics file."""
         LOG.info("Parsing Dragen demultiplexing adapter metrics file %s", self.adapter_metrics_path)
         parsed_metrics = {}
 
