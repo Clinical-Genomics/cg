@@ -2,7 +2,7 @@
 import csv
 import logging
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 LOG = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class AdapterMetrics:
         self.parsed_metrics = self.parse_metrics_file()
 
     @staticmethod
-    def summerize_adapter_metrics(parsed_metrics: Dict[int, dict]) -> Dict[int, dict]:
+    def summerize_adapter_metrics(parsed_metrics: Dict[int, dict]) -> Dict[Tuple[str, str], dict]:
         """Summerize lane information for each sample"""
 
         summarized_metrics = {}
@@ -38,7 +38,7 @@ class AdapterMetrics:
             metrics_reader = csv.DictReader(metrics_file)
             for row in metrics_reader:
                 lane = int(row["Lane"])
-                read_number = int(row["ReadNumber"])
+                read_number = row["ReadNumber"]
                 sample_id = row["Sample_ID"]
                 parsed_metrics[lane] = parsed_metrics.get(lane, {})
                 parsed_metrics[lane][(read_number, sample_id)] = row
