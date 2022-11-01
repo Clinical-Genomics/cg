@@ -42,5 +42,5 @@ class QualityMetrics:
                 sample_id = value.get("Sample_ID")
                 summarized_metrics[lane][sample_id] = summarized_metrics[lane].get(sample_id, value)
                 summarized_metrics[lane][sample_id]["YieldQ30"] += int(value.get("YieldQ30"))
-                
+
         return summarized_metrics
