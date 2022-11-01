@@ -164,12 +164,11 @@ def list_changeable_sample_attributes(
 def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
     LOG.info("sample_id: optional, internal_id of sample to set value on")
-    show_option_help(long_name=OPTION_LONG_SKIP_LIMS, help_text=HELP_SKIP_LIMS)
-    show_option_help(short_name=OPTION_SHORT_YES, long_name=OPTION_LONG_YES, help_text=HELP_YES)
-    show_option_help(
-        short_name=OPTION_SHORT_KEY_VALUE, long_name=OPTION_LONG_KEY_VALUE, help_text=HELP_KEY_VALUE
-    )
+    LOG.info("Below is a set of changeable sample attributes, to combine with -kv flag")
+
     list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
+
+    LOG.info("See example below:")
     LOG.info(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
     LOG.info(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
     LOG.info(
@@ -177,6 +176,7 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     )
 
 
+# Below function is probably deprecated and can be removed / MJ
 def show_option_help(short_name: str = "", long_name: str = "", help_text: str = "") -> None:
     """Show help for one option"""
     help_message = f"Use "
@@ -209,7 +209,7 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
 )
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
 @click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
-@click.option("--help", is_flag=True)
+@click.option("--lkv", is_flag=True)
 @click.pass_obj
 def sample(
     context: CGConfig,
@@ -217,12 +217,13 @@ def sample(
     kwargs: click.Tuple([str, str]),
     skip_lims: bool,
     yes: bool,
-    help: bool,
+    lkv: bool,
 ):
+    """Set key values on a sample"""
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
 
-    if help:
+    if lkv:
         show_set_sample_help(sample_obj)
 
     if sample_obj is None:
