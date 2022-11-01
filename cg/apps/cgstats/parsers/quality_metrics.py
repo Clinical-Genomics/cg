@@ -20,8 +20,8 @@ class QualityMetrics:
 
         parsed_metrics = {}
 
-        with open(self.quality_metrics_path, mode="r") as quality_metrics_file:
-            metrics_reader = csv.DictReader(quality_metrics_file)
+        with open(self.quality_metrics_path, mode="r") as metrics_file:
+            metrics_reader = csv.DictReader(metrics_file)
             for row in metrics_reader:
                 lane = int(row["Lane"])
                 sample_id = row["Sample_ID"]
