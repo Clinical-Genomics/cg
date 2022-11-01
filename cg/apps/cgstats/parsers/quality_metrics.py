@@ -40,7 +40,7 @@ class QualityMetrics:
             # Iterate over all samples in lane
             summarized_metrics[lane] = summarized_metrics.get(lane, {})
             for value in parsed_metrics[lane].values():
-                sample_id = value.get("Sample_ID")
+                sample_id = value.get("SampleID")
                 if sample_id not in summarized_metrics[lane]:
                     summarized_metrics[lane][sample_id] = value
                     continue
