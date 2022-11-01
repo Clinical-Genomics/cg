@@ -6,7 +6,7 @@ from datetime import datetime
 
 from cg.constants import Pipeline
 from cg.constants.constants import CaseActions
-from cg.constants.subject import Gender
+from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
 
@@ -28,7 +28,7 @@ def test_get_families_with_extended_models(
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[Query] = list(base_store.get_families_with_analyses())
@@ -52,6 +52,30 @@ def test_get_families_with_extended_models_when_no_case(base_store: Store):
 
     # THEN no cases should be returned
     assert not cases
+
+
+def test_get_families_with_samples(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test that a family and samples query is returned from the database."""
+
+    # GIVEN a sequenced sample
+    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+
+    # GIVEN a completed analysis
+    test_analysis: models.Analysis = helpers.add_analysis(
+        base_store, completed_at=timestamp_now, pipeline=Pipeline.MIP_DNA
+    )
+
+    # GIVEN a database with a case with one of one sequenced samples and completed analysis
+    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
+
+    # WHEN getting the stored case with its associated samples
+    cases: List[Query] = list(base_store.get_families_with_samples())
+
+    # THEN a list of cases should be returned, and it should contain the stored and linked sample
+    assert cases
+    assert test_sample == cases[0].links[0].sample
 
 
 def test_that_many_cases_can_have_one_sample_each(
@@ -89,7 +113,7 @@ def test_that_cases_can_have_many_samples(
     case_with_one: models.Family = helpers.add_case(base_store, "case_with_one_sample")
 
     # GIVEN a database with a case with one sample sequenced sample
-    base_store.relate_sample(case_with_one, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(case_with_one, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -121,7 +145,7 @@ def test_external_sample_to_re_analyse(
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one not sequenced external sample
-    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -143,7 +167,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
     test_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one externally sequenced samples for BALSAMIC analysis
-    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.BALSAMIC)
@@ -168,7 +192,7 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -196,7 +220,7 @@ def test_all_samples_and_analysis_completed(
     test_analysis.family.action: str = CaseActions.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
-    base_store.relate_sample(test_analysis.family, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -217,7 +241,7 @@ def test_specified_analysis_in_result(
     test_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for BALSAMIC analysis
-    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.BALSAMIC)
@@ -242,7 +266,7 @@ def test_exclude_other_pipeline_analysis_from_result(
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
-    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse for another pipeline
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
@@ -267,8 +291,8 @@ def test_one_of_two_sequenced_samples(
     not_sequenced_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None)
 
     # GIVEN a database with a case with one of one sequenced samples and no analysis
-    base_store.relate_sample(test_case, sequenced_sample, Gender.UNKNOWN)
-    base_store.relate_sample(test_case, not_sequenced_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_case, sequenced_sample, PhenotypeStatus.UNKNOWN)
+    base_store.relate_sample(test_case, not_sequenced_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
     cases: List[models.Family] = base_store.cases_to_analyze(
@@ -292,7 +316,7 @@ def test_one_of_one_sequenced_samples(
     test_sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a database with a case with a sequenced samples and no analysis
-    base_store.relate_sample(test_case, test_sample, Gender.UNKNOWN)
+    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
     assert test_sample.sequenced_at is not None
 
     # WHEN getting cases to analyse

@@ -3,7 +3,7 @@ from typing import List
 
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants import DataDelivery
+from cg.constants import DataDelivery, GenePanelMasterList
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -61,7 +61,7 @@ class FastqSubmitter(Submitter):
             data_analysis=Pipeline(Pipeline.MIP_DNA),
             data_delivery=DataDelivery(DataDelivery.ANALYSIS_FILES),
             name="_".join([sample_obj.name, "MAF"]),
-            panels=None,
+            panels=[GenePanelMasterList.OMIM_AUTO],
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
