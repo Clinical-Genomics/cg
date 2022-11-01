@@ -20,6 +20,8 @@ class QualityMetrics:
 
         parsed_metrics = {}
 
+        print(self.quality_metrics_path)
+
         with open(self.quality_metrics_path, mode="r") as metrics_file:
             metrics_reader = csv.DictReader(metrics_file)
             for row in metrics_reader:
