@@ -6,6 +6,7 @@ from typing import Dict
 
 LOG = logging.getLogger(__name__)
 
+
 class QualityMetrics:
     def __init__(self, quality_metrics_path: Path):
         self.quality_metrics_path = quality_metrics_path
@@ -13,8 +14,7 @@ class QualityMetrics:
 
     def quality_metrics_file(
         self,
-
-    )-> Dict[int, dict]:
+    ) -> Dict[int, dict]:
         """Parse the Dragen quality metrics file"""
         LOG.info("Parsing Dragen demultiplexing quality metrics file %s", self.quality_metrics_file)
 
