@@ -85,7 +85,7 @@ class DemuxResults:
         if self._quality_metrics:
             return self._quality_metrics
         self._quality_metrics = QualityMetrics(self.quality_metrics_path)
-        return self.__adapter_metrics
+        return self._adapter_metrics
 
     @property
     def run_info(self) -> RunInfo:
