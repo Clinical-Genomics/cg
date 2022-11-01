@@ -9,6 +9,7 @@ from typing_extensions import Literal
 
 from cg.apps.cgstats.parsers.adapter_metrics import AdapterMetrics
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
+from cg.apps.cgstats.parsers.quality_metrics import QualityMetrics
 from cg.apps.cgstats.parsers.dragen_demultiplexing_stats import DragenDemultiplexingStats
 from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -37,6 +38,7 @@ class DemuxResults:
         self._conversion_stats: Optional[ConversionStats] = None
         self._demultiplexing_stats: Optional[DragenDemultiplexingStats] = None
         self._adapter_metrics: Optional[AdapterMetrics] = None
+        self._quality_metrics: Optional[QualityMetrics] = None
         self._runinfo: Optional[RunInfo] = None
 
     @property
@@ -79,6 +81,13 @@ class DemuxResults:
         return self._adapter_metrics
 
     @property
+    def quality_metrics(self) -> QualityMetrics:
+        if self._quality_metrics:
+            return self._quality_metrics
+        self._quality_metrics = QualityMetrics(self.quality_metrics_path)
+        return self._quality_metrics
+
+    @property
     def run_info(self) -> RunInfo:
         if self._runinfo:
             return self._runinfo
@@ -96,6 +105,10 @@ class DemuxResults:
     @property
     def adapter_metrics_path(self) -> Path:
         return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["adapter_metrics_stats"]
+
+    @property
+    def quality_metrics_path(self) -> Path:
+        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["quality_metrics"]
 
     @property
     def runinfo_path(self) -> Path:
