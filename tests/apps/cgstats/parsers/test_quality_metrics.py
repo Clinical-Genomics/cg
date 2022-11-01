@@ -11,4 +11,3 @@ def test_parse_quality_metrics(quality_metrics_path: Path):
 
     # THEN the object should be successfully parsed
     assert quality_metrics_obj.parse_metrics_file()
-
