@@ -8,7 +8,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.models.cg_config import CGConfig, DemultiplexConfig
+from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api

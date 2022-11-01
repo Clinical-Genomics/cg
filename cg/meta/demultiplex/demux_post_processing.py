@@ -113,7 +113,7 @@ class DemuxPostProcessingHiseqXAPI:
     def finish_flowcell(
         self, bcl_converter: str, flowcell_name: str, flowcell_path: Path, force: bool = False
     ) -> str:
-        """Post processing flow cell.
+        """Post-processing flow cell.
         Force is used to finish a flow cell even if the files are renamed already.
         """
         LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
