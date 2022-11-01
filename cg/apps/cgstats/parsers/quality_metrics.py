@@ -10,9 +10,9 @@ LOG = logging.getLogger(__name__)
 class QualityMetrics:
     def __init__(self, quality_metrics_path: Path):
         self.quality_metrics_path = quality_metrics_path
-        self.quality_metrics = self.quality_metrics_file()
+        self.parsed_metrics = self.parse_metrics_file()
 
-    def quality_metrics_file(
+    def parse_metrics_file(
         self,
     ) -> Dict[int, dict]:
         """Parse the Dragen quality metrics file"""
