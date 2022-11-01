@@ -29,4 +29,3 @@ class QualityMetrics:
                 parsed_metrics[lane][sample_id] = row
 
         return parsed_metrics
-
