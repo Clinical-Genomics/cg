@@ -142,6 +142,7 @@ class MipConfig(BaseModel):
 
 
 class CGStatsConfig(BaseModel):
+    binary_path: str
     database: str
     root: str
 
@@ -200,6 +201,8 @@ class ExternalConfig(BaseModel):
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
+    binary_path: str
+    hasta_config: str
     madeline_exe: str
     bed_path: str
     pon_path: str

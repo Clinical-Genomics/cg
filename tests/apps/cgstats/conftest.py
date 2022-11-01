@@ -74,7 +74,15 @@ class MockDemuxSample(BaseModel):
 @pytest.fixture(name="stats_api")
 def fixture_stats_api(project_dir: Path) -> StatsAPI:
     """Setup base CGStats store."""
-    _store = StatsAPI({"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}})
+    _store = StatsAPI(
+        {
+            "cgstats": {
+                "binary_path": "echo",
+                "database": "sqlite://",
+                "root": "tests/fixtures/DEMUX",
+            }
+        }
+    )
     _store.create_all()
     yield _store
     _store.drop_all()

@@ -240,6 +240,8 @@ def fixture_base_config_dict() -> dict:
     """Returns the basic configs necessary for running CG."""
     return {
         "database": "sqlite:///",
+        "binary_path": "echo",
+        "hasta_config": "path/to/hasta_config",
         "madeline_exe": "path/to/madeline",
         "bed_path": "path/to/bed",
         "pon_path": "path/to/pon",
@@ -1182,17 +1184,52 @@ def fixture_context_config(
 ) -> dict:
     """Return a context config."""
     return {
-        "database": cg_uri,
-        "madeline_exe": "echo",
+        "binary_path": "echo",
         "bed_path": str(cg_dir),
-        "pon_path": str(cg_dir),
+        "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
             "sender_email": "test@gmail.com",
             "sender_password": "",
+        },
+        "hasta_config": "cg_config",
+        "madeline_exe": "echo",
+        "pon_path": str(cg_dir),
+        "backup": {
+            "encrypt_dir": "/home/ENCRYPT/",
+            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+        },
+        "balsamic": {
+            "balsamic_cache": "hello",
+            "binary_path": "echo",
+            "conda_env": "S_BALSAMIC",
+            "root": str(balsamic_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+                "qos": SlurmQos.LOW,
+            },
+        },
+        "cgstats": {"binary_path": "echo", "database": "sqlite:///./cgstats", "root": str(cg_dir)},
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "crunchy": {
+            "conda_binary": "a_conda_binary",
+            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "slurm": {
+                "account": "development",
+                "conda_env": "S_crunchy",
+                "mail_user": "mans.magnusson@scilifelab.se",
+            },
+        },
+        "data-delivery": {
+            "account": "development",
+            "base_path": "/another/path",
+            "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
+            "destination_path": "server.name.se:/some",
+            "mail_user": "an@email.com",
         },
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
@@ -1202,10 +1239,15 @@ def fixture_context_config(
                 "mail_user": "mans.magnusson@scilifelab.se",
             },
         },
+        "encryption": {"binary_path": "bin/gpg"},
+        "external": {
+            "caesar": "server.name.se:/path/%s/on/caesar",
+            "hasta": "/path/on/hasta/%s",
+        },
         "fluffy": {
-            "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
+            "deploy_config": "fluffy-deploy-stage.yaml",
             "root_dir": str(fluffy_dir),
             "sftp": {
                 "user": "sftpuser",
@@ -1215,74 +1257,27 @@ def fixture_context_config(
                 "port": 22,
             },
         },
-        "statina": {
-            "host": "http://localhost:28002",
-            "user": "user",
-            "key": "key",
-            "api_url": "api_url",
-            "upload_path": "upload_path",
-            "auth_path": "auth_path",
-        },
-        "data-delivery": {
-            "destination_path": "server.name.se:/some",
-            "covid_destination_path": "server.name.se:/another/%s/foldername/",
-            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
-            "base_path": "/another/path",
-            "account": "development",
-            "mail_user": "an@email.com",
-        },
-        "external": {
-            "hasta": "/path/on/hasta/%s",
-            "caesar": "server.name.se:/path/%s/on/caesar",
-        },
-        "encryption": {"binary_path": "bin/gpg"},
-        "pdc": {"binary_path": "/bin/dsmc"},
-        "tar": {"binary_path": "/bin/tar"},
-        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
-        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
-        "trailblazer": {
-            "service_account": "SERVICE",
-            "service_account_auth_file": "trailblazer-auth.json",
-            "host": "https://trailblazer.scilifelab.se/",
-        },
-        "gisaid": {
-            "binary_path": "/path/to/gisaid_uploader.py",
-            "log_dir": "/path/to/log",
-            "submitter": "s.submitter",
-            "logwatch_email": "some@email.com",
-            "upload_password": "pass",
-            "upload_cid": "cid",
-        },
-        "lims": {
-            "host": "https://lims.scilifelab.se",
-            "username": "user",
-            "password": "password",
-        },
-        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "genotype": {
             "binary_path": "echo",
             "config_path": "genotype-stage.yaml",
         },
-        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
-        "cgstats": {"database": "sqlite:///./cgstats", "root": str(cg_dir)},
-        "scout": {
-            "binary_path": "echo",
-            "config_path": "scout-stage.yaml",
-            "deploy_config": "scout-deploy-stage.yaml",
+        "gisaid": {
+            "binary_path": "/path/to/gisaid_uploader.py",
+            "log_dir": "/path/to/log",
+            "logwatch_email": "some@email.com",
+            "upload_cid": "cid",
+            "upload_password": "pass",
+            "submitter": "s.submitter",
+        },
+        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
+        "lims": {
+            "host": "https://lims.scilifelab.se",
+            "password": "password",
+            "username": "user",
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
-        "balsamic": {
-            "root": str(balsamic_dir),
-            "binary_path": "echo",
-            "conda_env": "S_BALSAMIC",
-            "balsamic_cache": "hello",
-            "slurm": {
-                "mail_user": "test.email@scilifelab.se",
-                "account": "development",
-                "qos": SlurmQos.LOW,
-            },
-        },
         "microsalt": {
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
@@ -1307,8 +1302,8 @@ def fixture_context_config(
             "script": "mip",
         },
         "mutacc-auto": {
-            "config_path": "mutacc-auto-stage.yaml",
             "binary_path": "echo",
+            "config_path": "mutacc-auto-stage.yaml",
             "padding": 300,
         },
         "mutant": {
@@ -1317,19 +1312,28 @@ def fixture_context_config(
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
-        "crunchy": {
-            "conda_binary": "a_conda_binary",
-            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
-            "slurm": {
-                "account": "development",
-                "mail_user": "mans.magnusson@scilifelab.se",
-                "conda_env": "S_crunchy",
-            },
+        "pdc": {"binary_path": "/bin/dsmc"},
+        "scout": {
+            "binary_path": "echo",
+            "config_path": "scout-stage.yaml",
+            "deploy_config": "scout-deploy-stage.yaml",
         },
-        "backup": {
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
-            "encrypt_dir": "/home/ENCRYPT/",
+        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
+        "statina": {
+            "api_url": "api_url",
+            "auth_path": "auth_path",
+            "host": "http://localhost:28002",
+            "key": "key",
+            "upload_path": "upload_path",
+            "user": "user",
         },
+        "tar": {"binary_path": "/bin/tar"},
+        "trailblazer": {
+            "host": "https://trailblazer.scilifelab.se/",
+            "service_account": "SERVICE",
+            "service_account_auth_file": "trailblazer-auth.json",
+        },
+        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
     }
 
 

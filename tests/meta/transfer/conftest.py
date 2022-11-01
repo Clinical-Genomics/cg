@@ -28,7 +28,15 @@ def fixture_data() -> dict:
 @pytest.fixture(scope="function")
 def store_stats() -> StatsAPI:
     """Setup base CGStats store."""
-    _store = StatsAPI({"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}})
+    _store = StatsAPI(
+        {
+            "cgstats": {
+                "binary_path": "echo",
+                "database": "sqlite://",
+                "root": "tests/fixtures/DEMUX",
+            }
+        }
+    )
     _store.create_all()
     yield _store
     _store.drop_all()

@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI

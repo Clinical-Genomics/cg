@@ -22,6 +22,7 @@ LOG = logging.getLogger(__name__)
 
 class DemuxPostProcessingHiseqXAPI:
     def __init__(self, config: CGConfig):
+        self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.dry_run = False
 
@@ -32,10 +33,67 @@ class DemuxPostProcessingHiseqXAPI:
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
 
+    def add_to_cgstats(self, flowcell_path: Path) -> None:
+        """Add flow cell to cgstats."""
+        logging.info(
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X {flowcell_path.as_posix()}"
+        )
+        cgstats_add_parameters = [
+            "--database",
+            self.stats_api.db_uri,
+            "add",
+            "--machine",
+            "X",
+            {flowcell_path.as_posix()},
+        ]
+        cgstats_process: Process = Process(binary=self.stats_api.binary)
+        cgstats_process.run_command(parameters=cgstats_add_parameters, dry_run=self.dry_run)
+
+    def cgstats_select_project(self, flowcell_name: str, flowcell_path: Path) -> None:
+        """Process selected project using cgstats."""
+        for project in Path(flowcell_path, "Unaligned", "Project").iterdir():
+            (_, project_id) = project.name.split("_")
+            stdout_file: Path = Path(
+                flowcell_path,
+                "-".join("stats", project_id, flowcell_name),
+                ".txt",
+            )
+            logging.info(
+                f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flowcell_name}"
+            )
+            cgstats_select_parameters: List[str] = [
+                "--database",
+                self.stats_api.db_uri,
+                "selected",
+                "--project",
+                project_id,
+                flowcell_name,
+            ]
+            cgstats_process: Process = Process(binary=self.stats_api.binary)
+            with open(stdout_file.as_posix(), "w") as file:
+                with redirect_stdout(file):
+                    cgstats_process.run_command(
+                        parameters=cgstats_select_parameters, dry_run=self.dry_run
+                    )
+
+    def cgstats_lanestats(self, flowcell_path: Path) -> None:
+        """Process lane stats using cgstats."""
+        cgstats_lane_parameters: List[str] = [
+            "--database",
+            self.stats_api.db_uri,
+            "lanestats",
+            flowcell_path.as_posix(),
+        ]
+        cgstats_process: Process = Process(binary=self.stats_api.binary)
+        logging.info(
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri} lanestats {flowcell_path.as_posix()}"
+        )
+        cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
+
     def post_process_flowcell(
         self, flowcell: Flowcell, flowcell_name: str, flowcell_path: Path
     ) -> str:
-        """Run all the necessary steps for post processing a demultiplexed flow cell."""
+        """Run all the necessary steps for post-processing a demultiplexed flow cell."""
         if not flowcell.is_prior_novaseq_copy_completed():
             logging.info(f"{flowcell_name} is not yet completely copied")
             return
@@ -47,42 +105,9 @@ class DemuxPostProcessingHiseqXAPI:
             return
         logging.info(f"{flowcell_name} copy is complete and delivery will start")
         Path(flowcell_path, "delivery.txt").touch()
-
-        logging.info(f"cgstats add --machine X {flowcell_path}")
-        cgstats_add_parameters = [
-            "add",
-            "--machine",
-            "X",
-            {flowcell_path},
-        ]
-        cgstats_process: Process = Process(binary="cgstats")
-        cgstats_process.run_command(parameters=cgstats_add_parameters, dry_run=self.dry_run)
-        for project in Path(flowcell_path, "Unaligned", "Project").iterdir():
-            stdout_file: Path = Path(
-                flowcell_path,
-                "-".join("stats", project_id, flowcell_name),
-                ".txt",
-            )
-            (_, project_id) = project.name.split("_")
-            logging.info(f"cgstats select --project {project_id} {flowcell_name}")
-            cgstats_select_parameters: List[str] = [
-                "selected",
-                "--project",
-                project_id,
-                flowcell_name,
-            ]
-            with open(stdout_file, "w") as file:
-                with redirect_stdout(file):
-                    cgstats_process.run_command(
-                        parameters=cgstats_select_parameters, dry_run=dry_run
-                    )
-
-        cgstats_lane_parameters: List[str] = [
-            "lanestats",
-            flowcell_path,
-        ]
-        logging.info(f"cgstats lanestats {flowcell_path}")
-        cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
+        self.add_to_cgstats(flowcell_path=flowcell_path)
+        self.cgstats_select_project(flowcell_name=flowcell_name, flowcell_path=flowcell_path)
+        self.cgstats_lanestats(flowcell_path=flowcell_path)
         return flowcell_name
 
     def finish_flowcell(
