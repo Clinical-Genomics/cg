@@ -106,6 +106,7 @@ class DemuxResults:
     def adapter_metrics_path(self) -> Path:
         return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["adapter_metrics_stats"]
 
+    @property
     def quality_metrics_path(self) -> Path:
         return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["quality_metrics"]
 
