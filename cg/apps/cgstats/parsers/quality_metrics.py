@@ -2,7 +2,7 @@
 import csv
 import logging
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 LOG = logging.getLogger(__name__)
 
@@ -28,4 +28,19 @@ class QualityMetrics:
                 parsed_metrics[lane] = parsed_metrics.get(lane, {})
                 parsed_metrics[lane][sample_id] = row
 
-        return parsed_metrics
+        return self.summerize_quality_metrics(parsed_metrics=parsed_metrics)
+
+    @staticmethod
+    def summerize_quality_metrics(parsed_metrics: Dict[int, dict]) -> Dict[Tuple[str, str], dict]:
+        """Summerize forward and reverse read information for each sample in each lane."""
+
+        summarized_metrics = {}
+        for lane in parsed_metrics:
+            # Iterate over all samples in lane
+            summarized_metrics[lane] = summarized_metrics.get(lane, {})
+            for value in parsed_metrics[lane].values():
+                sample_id = value.get("Sample_ID")
+                summarized_metrics[lane][sample_id] = summarized_metrics[lane].get(sample_id, value)
+                summarized_metrics[lane][sample_id]["YieldQ30"] += int(value.get("YieldQ30"))
+                
+        return summarized_metrics
