@@ -49,7 +49,7 @@ def ensure_extra_rna_case_match(
     rna_sample_son_id: str,
     rna_store: Store,
 ) -> None:
-    """Ensures that we have one RNA case that has two matching DNA cases via subject id and tumour state."""
+    """Ensures that we have an extra RNA case that matches by subject_id the existing RNA case and DNA cases."""
     rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
     rna_extra_case = helpers.ensure_case(
         store=rna_store,
