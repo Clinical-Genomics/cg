@@ -44,25 +44,24 @@ def ensure_two_dna_tumour_matches(
 
 def ensure_extra_rna_case_match(
     another_rna_sample_id: str,
+    another_rna_case_id: str,
     helpers: StoreHelpers,
     rna_case_id: str,
-    rna_sample_son_id: str,
     rna_store: Store,
 ) -> None:
     """Ensures that we have an extra RNA case that matches by subject_id the existing RNA case and DNA cases."""
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+
     rna_extra_case = helpers.ensure_case(
         store=rna_store,
         customer=rna_store.family(rna_case_id).customer,
-        case_id="extra_rna_case_id",
+        case_id=another_rna_case_id,
     )
-    another_rna_sample_id = helpers.add_sample(
+    another_rna_sample = helpers.add_sample(
         store=rna_store,
         name=another_rna_sample_id,
-        subject_id=rna_sample.subject_id,
-        is_tumour=rna_sample.is_tumour,
+        subject_id="son",
     )
-    helpers.add_relationship(store=rna_store, sample=another_rna_sample_id, case=rna_extra_case)
+    helpers.add_relationship(store=rna_store, sample=another_rna_sample, case=rna_extra_case)
     rna_store.commit()
 
 
@@ -466,6 +465,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
 
 def test_get_mip_dna_and_balsamic_samples(
     another_rna_sample_id: str,
+    another_rna_case_id: str,
     helpers: StoreHelpers,
     rna_case_id: str,
     rna_sample_son_id: str,
@@ -478,8 +478,12 @@ def test_get_mip_dna_and_balsamic_samples(
     # GIVEN an RNA sample that is connected by subject ID to one RNA and one DNA sample in other cases
     rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
     ensure_extra_rna_case_match(
-        another_rna_sample_id, helpers, rna_case_id, rna_sample_son_id, rna_store
+        another_rna_sample_id, another_rna_case_id, helpers, rna_case_id, rna_store
     )
+    upload_scout_api.status_db = rna_store
+    set_is_tumour_on_case(store=rna_store, case_id=another_rna_case_id, is_tumour=True)
+    is_it_there: models.Sample = rna_store.sample(another_rna_sample_id)
+    assert is_it_there is not None
 
     all_son_rna_dna_samples: Query = upload_scout_api.status_db.samples_by_subject_id(
         customer_id=rna_sample.customer.internal_id,
