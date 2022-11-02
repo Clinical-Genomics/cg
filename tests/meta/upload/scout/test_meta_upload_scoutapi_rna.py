@@ -42,6 +42,30 @@ def ensure_two_dna_tumour_matches(
     rna_store.commit()
 
 
+def ensure_extra_rna_case_match(
+    another_rna_sample_id: str,
+    helpers: StoreHelpers,
+    rna_case_id: str,
+    rna_sample_son_id: str,
+    rna_store: Store,
+) -> None:
+    """Ensures that we have one RNA case that has two matching DNA cases via subject id and tumour state."""
+    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    rna_extra_case = helpers.ensure_case(
+        store=rna_store,
+        customer=rna_store.family(rna_case_id).customer,
+        case_id="extra_rna_case_id",
+    )
+    another_rna_sample_id = helpers.add_sample(
+        store=rna_store,
+        name=another_rna_sample_id,
+        subject_id=rna_sample.subject_id,
+        is_tumour=rna_sample.is_tumour,
+    )
+    helpers.add_relationship(store=rna_store, sample=another_rna_sample_id, case=rna_extra_case)
+    rna_store.commit()
+
+
 def test_upload_rna_junctions_to_scout(
     caplog: Generator[LogCaptureFixture, None, None],
     mip_rna_analysis_hk_api: HousekeeperAPI,
@@ -438,6 +462,42 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_get_mip_dna_and_balsamic_samples(
+    another_rna_sample_id: str,
+    helpers: StoreHelpers,
+    rna_case_id: str,
+    rna_sample_son_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+
+    """Test that RNA samples are removed when filtering sample list by pipeline"""
+
+    # GIVEN an RNA sample that is connected by subject ID to one RNA and one DNA sample in other cases
+    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    ensure_extra_rna_case_match(
+        another_rna_sample_id, helpers, rna_case_id, rna_sample_son_id, rna_store
+    )
+
+    all_son_rna_dna_samples: Query = upload_scout_api.status_db.samples_by_subject_id(
+        customer_id=rna_sample.customer.internal_id,
+        subject_id=rna_sample.subject_id,
+        is_tumour=rna_sample.is_tumour,
+    )
+    # TODO current it does not work. The code above should add another RNA case with a matching RNA samples to the rna store, but it somehow does not get added to the Query below.
+
+    # WHEN running the method to filter a models.Query containing RNA and DNA samples connected by subject_id
+    only_son_dna_samples = upload_scout_api._get_mip_dna_and_balsamic_samples(
+        all_son_rna_dna_samples
+    )
+
+    # THEN even though an RNA sample is present in the initial query, the output should not contain any RNA samples
+    nr_of_subject_id_samples: int = len([all_son_rna_dna_samples])
+    nr_of_subject_id_dna_samples: int = len([only_son_dna_samples])
+    assert nr_of_subject_id_samples == 2
+    assert nr_of_subject_id_dna_samples == 1
 
 
 def test_create_rna_dna_sample_case_map(
