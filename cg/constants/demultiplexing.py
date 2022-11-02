@@ -55,16 +55,16 @@ FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
 
 DEMUX_STATS_PATH = {
     "bcl2fastq": {
-        "demultiplexing_stats": Path("Stats") / Path("DemultiplexingStats.xml"),
-        "conversion_stats": Path("Stats") / Path("ConversionStats.xml"),
+        "demultiplexing_stats": Path("Stats", "DemultiplexingStats.xml"),
+        "conversion_stats": Path("Stats", "ConversionStats.xml"),
         "runinfo": None,
     },
     "dragen": {
-        "demultiplexing_stats": Path("Reports") / Path("Demultiplex_Stats.csv"),
-        "conversion_stats": Path("Reports") / Path("Demultiplex_Stats.csv"),
-        "adapter_metrics_stats": Path("Reports") / Path("Adapter_Metrics.csv"),
-        "runinfo": Path("Reports") / Path("RunInfo.xml"),
-        "quality_metrics": Path("Reports") / Path("Quality_Metrics.csv"),
+        "demultiplexing_stats": Path("Reports", "Demultiplex_Stats.csv"),
+        "conversion_stats": Path("Reports", "Demultiplex_Stats.csv"),
+        "adapter_metrics_stats": Path("Reports", "Adapter_Metrics.csv"),
+        "runinfo": Path("Reports", "RunInfo.xml"),
+        "quality_metrics": Path("Reports", "Quality_Metrics.csv"),
     },
 }
 
@@ -72,8 +72,11 @@ DRAGEN_PASSED_FILTER_PCT = 100.00000
 
 
 class DemultiplexingDirsAndFiles(StrEnum):
-    """Demultiplexing related dirs and files"""
+    """Demultiplexing related directories and files."""
 
+    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
+    DELIVERY: str = "delivery.txt"
+    HiseqX_TILE_DIR: str = "l1t11"
+    RTACOMPLETE: str = "RTAComplete.txt"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
-    RTACOMPLETE: str = "RTAComplete.txt"

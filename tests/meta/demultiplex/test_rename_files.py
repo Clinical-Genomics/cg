@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from cg.apps.cgstats.stats import StatsAPI
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingNovaseqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -11,7 +10,6 @@ def test_rename_demux_result(
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
     flowcell_object: Flowcell,
-    caplog,
 ):
 
     # GIVEN that this is the location of the demultiplex api
@@ -24,13 +22,14 @@ def test_rename_demux_result(
         demux_dir=demux_dir, flowcell=flowcell_object, bcl_converter="bcl2fastq"
     )
     # GIVEN that there are no projects with the correct file name
-    assert len(list(demux_results.projects)) == 0
+    assert not list(demux_results.projects)
+
     # GIVEN the location of a demultiplexed flowcell that is not finished
-    assert len(list(demux_results.raw_projects)) != 0
+    assert list(demux_results.raw_projects)
 
     # WHEN renaming the files
     post_demux_api.rename_files(demux_results=demux_results)
 
-    # THEN assert that that the files have been renamed
-    assert len(list(demux_results.projects)) != 0
-    assert len(list(demux_results.raw_projects)) == 0
+    # THEN assert that the files have been renamed
+    assert list(demux_results.projects)
+    assert not list(demux_results.raw_projects)

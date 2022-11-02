@@ -9,6 +9,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.constants.cgstats import STATS_HEADER
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowcellError
 from cg.meta.demultiplex import files
 from cg.models.cg_config import CGConfig
@@ -41,7 +42,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
 
     def add_to_cgstats(self, flowcell_path: Path) -> None:
         """Add flow cell to cgstats."""
-        logging.info(
+        LOG.info(
             f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X {flowcell_path.as_posix()}"
         )
         cgstats_add_parameters = [
@@ -50,21 +51,19 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             "add",
             "--machine",
             "X",
-            {flowcell_path.as_posix()},
+            flowcell_path.as_posix(),
         ]
         cgstats_process: Process = Process(binary=self.stats_api.binary)
         cgstats_process.run_command(parameters=cgstats_add_parameters, dry_run=self.dry_run)
 
     def cgstats_select_project(self, flowcell_name: str, flowcell_path: Path) -> None:
         """Process selected project using cgstats."""
-        for project in Path(flowcell_path, "Unaligned", "Project").iterdir():
+        for project in Path(flowcell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME).iterdir():
             (_, project_id) = project.name.split("_")
             stdout_file: Path = Path(
-                flowcell_path,
-                "-".join("stats", project_id, flowcell_name),
-                ".txt",
+                flowcell_path, "-".join(["stats", project_id, flowcell_name]) + ".txt"
             )
-            logging.info(
+            LOG.info(
                 f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flowcell_name}"
             )
             cgstats_select_parameters: List[str] = [
@@ -91,7 +90,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flowcell_path.as_posix(),
         ]
         cgstats_process: Process = Process(binary=self.stats_api.binary)
-        logging.info(
+        LOG.info(
             f"{self.stats_api.binary} --database {self.stats_api.db_uri} lanestats {flowcell_path.as_posix()}"
         )
         cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
@@ -100,16 +99,16 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         self, flowcell: Flowcell, flowcell_name: str, flowcell_path: Path
     ) -> str:
         """Run all the necessary steps for post-processing a demultiplexed flow cell."""
-        if not flowcell.is_prior_novaseq_copy_completed():
-            logging.info(f"{flowcell_name} is not yet completely copied")
+        if not flowcell.is_hiseq_x_copy_completed():
+            LOG.info(f"{flowcell_name} is not yet completely copied")
             return
-        if flowcell.is_prior_novaseq_delivery_started():
-            logging.info(f"{flowcell_name} copy is complete and delivery has already started")
+        if flowcell.is_hiseq_x_delivery_started():
+            LOG.info(f"{flowcell_name} copy is complete and delivery has already started")
             return
         if not flowcell.is_hiseq_x():
-            logging.debug(f"{flowcell_name} is not an Hiseq X flow cell")
+            LOG.debug(f"{flowcell_name} is not an Hiseq X flow cell")
             return
-        logging.info(f"{flowcell_name} copy is complete and delivery will start")
+        LOG.info(f"{flowcell_name} copy is complete and delivery will start")
         Path(flowcell_path, "delivery.txt").touch()
         self.add_to_cgstats(flowcell_path=flowcell_path)
         self.cgstats_select_project(flowcell_name=flowcell_name, flowcell_path=flowcell_path)
@@ -122,7 +121,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Post-processing flow cell.
         Force is used to finish a flow cell even if the files are renamed already.
         """
-        LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
+        LOG.INFO(f"Check demultiplexed flow cell {flowcell_name}")
         try:
             flowcell: Flowcell = Flowcell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
         except FlowcellError:

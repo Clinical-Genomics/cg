@@ -39,7 +39,9 @@ def fixture_tmp_demulitplexing_dir(
     demultiplexed_flowcells_working_directory: Path, flowcell_full_name: str
 ) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
-    tmp_demulitplexing_dir: Path = demultiplexed_flowcells_working_directory / flowcell_full_name
+    tmp_demulitplexing_dir: Path = Path(
+        demultiplexed_flowcells_working_directory, flowcell_full_name
+    )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
 
@@ -74,6 +76,12 @@ def fixture_tmp_flow_cell_run_path(project_dir: Path, flowcell_full_name: str) -
     tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
 
     return tmp_flow_cell_run_path
+
+
+@pytest.fixture(name="flowcell_project_id")
+def fixture_flowcell_project_id() -> int:
+    """Return flow cell run project id."""
+    return 174578
 
 
 @pytest.fixture(name="populated_flow_cell_store")

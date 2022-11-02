@@ -6,6 +6,7 @@ from typing import List, Optional
 from pydantic import ValidationError
 from typing_extensions import Literal
 
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowcellError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
@@ -85,14 +86,14 @@ class Flowcell:
         return Path(self.path, "CopyComplete.txt")
 
     @property
-    def prior_novaseq_copy_complete_path(self) -> Path:
+    def hiseq_x_copy_complete_path(self) -> Path:
         """Return copy complete path prior to Novaseq."""
-        return Path(self.path, "copycomplete.txt")
+        return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
 
     @property
-    def prior_novaseq_delivery_started_path(self) -> Path:
+    def hiseq_x_delivery_started_path(self) -> Path:
         """Return delivery started path prior to Novaseq."""
-        return Path(self.path, "delivery.txt")
+        return Path(self.path, DemultiplexingDirsAndFiles.DELIVERY)
 
     @property
     def demultiplexing_started_path(self) -> Path:
@@ -105,7 +106,7 @@ class Flowcell:
     @property
     def hiseq_x_flow_cell(self) -> Path:
         """Return path to Hiseq X flow cell directory"""
-        return Path(self.path, "l1t11")
+        return Path(self.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 
     def validate_flow_cell_name(self) -> None:
         """
@@ -160,19 +161,19 @@ class Flowcell:
         LOG.info("Check if copy of data from sequence instrument is ready")
         return self.copy_complete_path.exists()
 
-    def is_prior_novaseq_copy_completed(self) -> bool:
+    def is_hiseq_x_copy_completed(self) -> bool:
         """Check if copy of flowcell prior to Novaseq is done."""
         LOG.info("Check if copy of data from sequence prior to Novaseq instrument is ready")
-        return self.prior_novaseq_copy_complete_path.exists()
+        return self.hiseq_x_copy_complete_path.exists()
 
-    def is_prior_novaseq_delivery_started(self) -> bool:
+    def is_hiseq_x_delivery_started(self) -> bool:
         """Check if delivery of flowcell prior to Novaseq is started."""
         LOG.info("Check if delivery of data from sequence prior to Novaseq instrument is ready")
-        return self.prior_novaseq_delivery_started_path.exists()
+        return self.hiseq_x_delivery_started_path.exists()
 
     def is_hiseq_x(self) -> bool:
         """Check if flowcell is Hiseq X."""
-        LOG.debug("Check if flow cell iis Hiseq X")
+        LOG.debug("Check if flow cell is Hiseq X")
         return self.hiseq_x_flow_cell.exists()
 
     def is_flowcell_ready(self) -> bool:
