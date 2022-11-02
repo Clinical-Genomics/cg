@@ -44,7 +44,7 @@ class CaseSubmitter(Submitter):
             new_gender: str = sample.sex
             if new_gender == "unknown":
                 continue
-            existing_samples: [models.Sample] = self.status.samples_by_subject_id(
+            existing_samples: List[models.Sample] = self.status.samples_by_subject_id(
                 customer_id=customer_id, subject_id=subject_id
             )
             existing_sample: models.Sample

@@ -338,7 +338,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def samples_by_subject_id(
         self, customer_id: str, subject_id: str, is_tumour: bool = None
-    ) -> Query:
+    ) -> List[models.Sample]:
         """Get samples of customer with given subject_id.
 
         Args:
@@ -354,7 +354,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         if is_tumour:
             query: Query = query.filter(models.Sample.is_tumour == is_tumour)
-        return query
+        return query.all()
 
     def samples_by_ids(self, **identifiers) -> Query:
         records = self.Sample.query

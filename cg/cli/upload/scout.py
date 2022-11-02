@@ -176,14 +176,16 @@ def upload_rna_to_scout(
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
-    result: int = context.invoke(
-        upload_rna_fusion_report_to_scout,
-        case_id=case_id,
-        dry_run=dry_run,
-        research=research,
-        update=update_fusion_report,
-    )
-    if result == 0:
+    result: int
+    result = context.invoke(upload_multiqc_rna_to_scout, case_id=case_id, dry_run=dry_run)
+    while result:
+        result: int = context.invoke(
+            upload_rna_fusion_report_to_scout,
+            case_id=case_id,
+            dry_run=dry_run,
+            research=research,
+            update=update_fusion_report,
+        )
         result = context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
     return result
 
@@ -252,6 +254,40 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     try:
         scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
+    except (CgDataError, ScoutUploadError) as error:
+        LOG.error(error)
+        return 1
+    return 0
+
+
+@click.command(name="multiqc-rna-to-scout")
+@click.option("--dry-run", is_flag=True)
+@click.argument("case_id")
+@click.pass_obj
+def upload_multiqc_rna_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
+    """Upload RNA multiqc report to Scout.
+        This can also be run as
+        `housekeeper get file -V --tag multiqc --tag multiqc-html <case_id>`
+        `scout load report -t multiqc_rna <case_id> <path/to/multiqc_report.html>`
+    `   ```
+
+        Args:
+            dry_run     (bool):         Skip uploading
+            case_id     (string):       RNA case identifier
+        Returns:
+
+    """
+    LOG.info("----------------- UPLOAD MULTIQC RNA TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    report_type, multiqc_rna_report = scout_upload_api.get_multiqc_html_report(case_id=case_id)
+    try:
+        scout_upload_api.upload_report_to_scout(
+            dry_run=dry_run,
+            case_id=case_id,
+            report_type=report_type,
+            report_file=multiqc_rna_report,
+        )
     except (CgDataError, ScoutUploadError) as error:
         LOG.error(error)
         return 1

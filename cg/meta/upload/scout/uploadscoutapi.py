@@ -2,9 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, Set, Dict, List
-
-from sqlalchemy.orm import Query
+from typing import Optional, Set, Dict, List, Tuple
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -106,6 +104,17 @@ class UploadScoutAPI:
         LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
 
+    def get_multiqc_html_report(self, case_id: str) -> Tuple[str, Optional[hk_models.File]]:
+        """Get a multiqc report for case in housekeeper
+
+        Args:
+            case_id     (string):       Case identifier
+        Returns:
+            multiqc-html-report (housekeeper.store.models.File): Multiqc report
+        """
+        multiqc_tag = "multiqc-html"
+        return (multiqc_tag, self.housekeeper.files(bundle=case_id, tags=[multiqc_tag]).first())
+
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[hk_models.File]:
         """Get a fusion report for case in housekeeper
 
@@ -124,11 +133,7 @@ class UploadScoutAPI:
         else:
             tags.add("clinical")
 
-        fusion_report: Optional[hk_models.File] = self.housekeeper.find_file_in_latest_version(
-            case_id=case_id, tags=tags
-        )
-
-        return fusion_report
+        return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
         """Get a splice junctions bed file for case in housekeeper
@@ -142,7 +147,7 @@ class UploadScoutAPI:
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
-        tags: {str} = {"junction", "bed", sample_id}
+        tags: Set[str] = {"junction", "bed", sample_id}
         splice_junctions_bed: Optional[hk_models.File]
         try:
             splice_junctions_bed = self.housekeeper.find_file_in_latest_version(
@@ -165,13 +170,20 @@ class UploadScoutAPI:
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
-        tags: {str} = {"coverage", "bigwig", sample_id}
+        tags: Set[str] = {"coverage", "bigwig", sample_id}
 
-        rna_coverage_bigwig: Optional[
-            hk_models.File
-        ] = self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
+        return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
-        return rna_coverage_bigwig
+    def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
+        """Return a set of unique dna cases related to a rna case"""
+        case_obj: models.Family = self.status_db.family(case_id)
+
+        return {
+            dna_case
+            for dna_case_dict in self.create_rna_dna_sample_case_map(rna_case=case_obj).values()
+            for case_list in dna_case_dict.values()
+            for dna_case in case_list
+        }
 
     def upload_fusion_report_to_scout(
         self, dry_run: bool, case_id: str, research: bool = False, update: bool = False
@@ -193,12 +205,7 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         report_type: str = "Research" if research else "Clinical"
-        rna_case: models.Family = status_db.family(case_id)
 
-        rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
-            rna_case=rna_case
-        )
-        unique_dna_cases: Set[str] = set()
         fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
         if fusion_report is None:
             raise FileNotFoundError(
@@ -206,12 +213,8 @@ class UploadScoutAPI:
             )
 
         LOG.info(f"{report_type} fusion report {fusion_report.path} found")
-        for rna_sample_id in rna_dna_sample_case_map:
-            dna_cases: List[str]
-            dna_sample_id, dna_cases = rna_dna_sample_case_map[rna_sample_id].popitem()
-            unique_dna_cases.update(dna_cases)
 
-        for dna_case_id in unique_dna_cases:
+        for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(case_id):
             LOG.info(f"Uploading {report_type} fusion report to scout for case {dna_case_id}")
 
             if dry_run:
@@ -225,6 +228,53 @@ class UploadScoutAPI:
             LOG.info("Uploaded %s fusion report", report_type)
 
         LOG.info("Upload %s fusion report finished!", report_type)
+
+    def upload_rna_report_scout(
+        self,
+        dry_run: bool,
+        report_type: str,
+        report_file: hk_models.File,
+        rna_case_id: str,
+    ) -> None:
+        """Upload report file to dna cases related to a rna case in scout"""
+        for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(rna_case_id):
+            self.upload_report_to_scout(
+                dry_run=dry_run,
+                report_type=report_type,
+                report_file=report_file,
+                case_id=dna_case_id,
+            )
+
+    def upload_report_to_scout(
+        self,
+        dry_run: bool,
+        case_id: str,
+        report_type: str,
+        report_file: hk_models.File,
+    ) -> None:
+        """Upload report file a case to Scout.
+
+        Args:
+            dry_run     (bool):         Skip uploading
+            case_id     (string):       Case identifier
+            report_type (string):       Report type
+            report_file (housekeeper.store.models.File): Report file
+        Returns:
+            Nothing
+        """
+
+        LOG.info(f"Uploading {report_type} report to scout for case {case_id}")
+
+        if dry_run:
+            return
+        self.scout.upload_report(
+            case_id=case_id,
+            report_path=report_file.full_path,
+            report_type=report_type,
+        )
+        LOG.info("Uploaded %s report", report_type)
+
+        LOG.info("Upload %s report finished!", report_type)
 
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
         """Upload rna_coverage_bigwig file for a case to Scout.
@@ -387,7 +437,9 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
-    def create_rna_dna_sample_case_map(self, rna_case: models.Family) -> Dict[str, Dict[str, list]]:
+    def create_rna_dna_sample_case_map(
+        self, rna_case: models.Family
+    ) -> Dict[str, Dict[str, List[str]]]:
         """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
         subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
 
@@ -396,67 +448,75 @@ class UploadScoutAPI:
         Case Returns:
             rna_dna_sample_case_map     (Dict):       rna-dna relationships, and related dna cases based on subject id
         """
-        rna_dna_sample_case_map: Dict[str, Dict[str, list]] = {}
-        for rna_case.link in rna_case.links:
-            self._add_rna_sample(
-                rna_sample=rna_case.link.sample, rna_dna_sample_case_map=rna_dna_sample_case_map
+        rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
+        for link in rna_case.links:
+            self._map_rna_sample(
+                rna_sample=link.sample, rna_dna_sample_case_map=rna_dna_sample_case_map
             )
         return rna_dna_sample_case_map
 
-    def _add_rna_sample(
-        self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
-    ) -> Dict[str, Dict[str, list]]:
-        """Adds an RNA sample and its matching DNA sample, and cases."""
-        dna_sample: models.Sample = self._link_rna_sample_to_dna_sample(
+    def _map_rna_sample(
+        self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]]
+    ) -> Dict[str, Dict[str, List[str]]]:
+        """Create a dictionary of all DNA samples, and their related cases, related to a RNA sample."""
+        dna_sample: models.Sample = self._map_dna_samples_related_to_rna_sample(
             rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
         )
-        self._add_dna_cases_to_dna_sample(
+        self._map_dna_cases_to_dna_sample(
             dna_sample=dna_sample,
             rna_dna_sample_case_map=rna_dna_sample_case_map,
             rna_sample=rna_sample,
         )
         return rna_dna_sample_case_map
 
-    def _link_rna_sample_to_dna_sample(
-        self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
+    def _map_dna_samples_related_to_rna_sample(
+        self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]]
     ) -> models.Sample:
-
+        """Maps an RNA sample to a DNA sample based on subject id."""
         if not rna_sample.subject_id:
             raise CgDataError(
-                f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
+                f"Failed to link RNA samepl {rna_sample.internal_id} to dna samples - subject_id field is empty"
             )
 
-        subject_id_samples: Query = self.status_db.samples_by_subject_id(
-            customer_id=rna_sample.customer.internal_id,
-            subject_id=rna_sample.subject_id,
-            is_tumour=rna_sample.is_tumour,
+        subject_id_samples: List[models.Sample] = self.validate_number_of_dna_samples_by_subject_id(
+            self.status_db.samples_by_subject_id(
+                customer_id=rna_sample.customer.internal_id,
+                subject_id=rna_sample.subject_id,
+                is_tumour=rna_sample.is_tumour,
+            )
         )
-        nr_of_subject_id_dna_samples: int = len(subject_id_samples.all())
-        if nr_of_subject_id_dna_samples != 2:
-            raise CgDataError(
-                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {nr_of_subject_id_dna_samples} "
-            )
 
-        rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, list] = {}
+        rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, List[str]] = {}
         sample: models.Sample
         for sample in subject_id_samples:
-            if sample.internal_id == rna_sample.internal_id:
-                continue
-            rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: list = []
-            return sample
+            if sample.internal_id != rna_sample.internal_id:
+                rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: List[str] = []
+                return sample
+
+    def validate_number_of_dna_samples_by_subject_id(
+        self, subject_id_samples: List[models.Sample]
+    ) -> List[models.Sample]:
+        """Validates that there are two DNA samples with the same subject_id."""
+
+        if len(subject_id_samples) != 2:
+            raise CgDataError(
+                f"Unexpected number of DNA sample matches for subject_id: {subject_id_samples[0].subject_id}.\n"
+                f" Number of matches: {len(subject_id_samples)}"
+            )
+        return subject_id_samples
 
     @staticmethod
-    def _add_dna_cases_to_dna_sample(
+    def _map_dna_cases_to_dna_sample(
         dna_sample: models.Sample,
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
         rna_sample: models.Sample,
     ) -> None:
-        for dna_sample.link in dna_sample.links:
-            case_object: models.Family = dna_sample.link.family
+        """Maps a list of DNA cases linked to DNA sample."""
+        for link in dna_sample.links:
             if (
-                case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
-                and case_object.customer_id == rna_sample.customer_id
+                link.family.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
+                and link.family.customer_id == rna_sample.customer_id
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
-                    case_object.internal_id
+                    link.family.internal_id
                 )

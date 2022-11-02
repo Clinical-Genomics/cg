@@ -229,6 +229,29 @@ class ScoutAPI:
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading delivery report")
 
+    def upload_report(self, case_id: str, report_path: str, report_type: str) -> None:
+        """Load report into a case in the database
+
+        If the report already exists the function will exit.
+
+        Args:
+            report_path (string):      Path to report
+            case_id     (string):       Case identifier
+            report_type  (string):       Report tag
+
+        Returns:
+            None
+
+        """
+        # This command can be run with `scout load report <REPORT-TAG> <CASE-ID> <REPORT-PATH>`
+        upload_command = ["load", "report", "-t", report_type, case_id, report_path]
+
+        try:
+            LOG.info("Uploading multiqc report %s to case %s", case_id, report_path)
+            self.process.run_command(upload_command)
+        except CalledProcessError:
+            LOG.warning("Something went wrong when uploading multiqc report")
+
     def upload_fusion_report(
         self, case_id: str, report_path: str, research: bool, update: bool
     ) -> None:
