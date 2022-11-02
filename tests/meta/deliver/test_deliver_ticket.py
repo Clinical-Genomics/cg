@@ -6,10 +6,11 @@ from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 from cgmodels.cg.constants import Pipeline
 from cg.store import Store
+from tests.store_helpers import StoreHelpers
 
 
-def test_get_inbox_path(cg_context: CGConfig, helpers, mocker):
-    """Test to get the path to customer inbox on the HPC"""
+def test_get_inbox_path(cg_context: CGConfig, helpers: StoreHelpers, mocker):
+    """Test to get the path to customer inbox on the HPC."""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 
