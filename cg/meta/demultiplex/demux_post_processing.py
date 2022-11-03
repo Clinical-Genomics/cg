@@ -58,8 +58,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
 
     def cgstats_select_project(self, flowcell_name: str, flowcell_path: Path) -> None:
         """Process selected project using cgstats."""
-        for project in Path(flowcell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME).iterdir():
-            (_, project_id) = project.name.split("_")
+        unaligned_dir: Path = Path(flowcell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+        for project_dir in unaligned_dir.glob("Project_*"):
+            (_, project_id) = project_dir.name.split("_")
             stdout_file: Path = Path(
                 flowcell_path, "-".join(["stats", project_id, flowcell_name]) + ".txt"
             )
