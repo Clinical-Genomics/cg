@@ -28,6 +28,28 @@ def test_set_dry_run(
     assert post_demux_api.dry_run is True
 
 
+def test_cg_transfer_flow_cell(
+    caplog,
+    demultiplexed_flowcell_working_directory: Path,
+    demultiplex_context: CGConfig,
+    flowcell_object: Flowcell,
+):
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a demultiplex context
+
+    # GIVEN a Demultiplexing post process API
+    post_demux_api: DemuxPostProcessingHiseqXAPI = DemuxPostProcessingHiseqXAPI(
+        config=demultiplex_context
+    )
+
+    # When adding to cgstats
+    post_demux_api.cg_transfer_flow_cell(flowcell_name=flowcell_object.flowcell_full_name)
+
+    # THEN we should run the command
+    assert f"transfer {flowcell_object.flowcell_full_name}" in caplog.text
+
+
 def test_add_to_cgstats(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
@@ -131,7 +153,7 @@ def test_post_process_flowcell_copy_not_completed(
     # GIVEN a not completely copied flow cell
     Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE).unlink()
 
-    # When post processing flow cell
+    # When post-processing flow cell
     post_demux_api.post_process_flowcell(
         flowcell=flowcell_object,
         flowcell_name=flowcell_object.flowcell_full_name,
@@ -163,7 +185,7 @@ def test_post_process_flowcell_delivery_started(
     # GIVEN an already started flag file
     Path(flowcell_object.path, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
-    # When post processing flow cell
+    # When post-processing flow cell
     post_demux_api.post_process_flowcell(
         flowcell=flowcell_object,
         flowcell_name=flowcell_object.flowcell_full_name,
@@ -200,7 +222,7 @@ def test_post_process_flowcell_not_hiseq_X(
     if hiseq_x_dir.exists():
         hiseq_x_dir.rmdir()
 
-    # When post processing flow cell
+    # When post-processing flow cell
     post_demux_api.post_process_flowcell(
         flowcell=flowcell_object,
         flowcell_name=flowcell_object.flowcell_full_name,
@@ -239,8 +261,8 @@ def test_post_process_flowcell(
         f"Project_{flowcell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
-    # When post processing flow cell
-    processed_flow_cell: str = post_demux_api.post_process_flowcell(
+    # When post-processing flow cell
+    post_demux_api.post_process_flowcell(
         flowcell=flowcell_object,
         flowcell_name=flowcell_object.flowcell_full_name,
         flowcell_path=flowcell_object.path,
@@ -259,9 +281,6 @@ def test_post_process_flowcell(
         f"{flowcell_object.flowcell_full_name} copy is complete and delivery will start"
         in caplog.text
     )
-
-    # ThEN we should return the flow cell name
-    assert processed_flow_cell == flowcell_object.flowcell_full_name
 
 
 def test_finish_flowcell(
@@ -282,8 +301,8 @@ def test_finish_flowcell(
     # GIVEN a not completely copied flow cell
     Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE).unlink()
 
-    # When post processing flow cell
-    flow_cell = post_demux_api.finish_flowcell(
+    # When post-processing flow cell
+    post_demux_api.finish_flowcell(
         bcl_converter=BclConverter.BCL2FASTQ,
         flowcell_name=flowcell_object.flowcell_full_name,
         flowcell_path=flowcell_object.path,
@@ -294,9 +313,6 @@ def test_finish_flowcell(
 
     # THEN we should run the command
     assert f"Check demultiplexed flow cell {flowcell_object.flowcell_full_name}" in caplog.text
-
-    # THEN no flow cell should be returned
-    assert flow_cell is None
 
 
 def test_finish_all_flowcells(
@@ -317,8 +333,8 @@ def test_finish_all_flowcells(
     # GIVEN a not completely copied flow cell
     Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE).unlink()
 
-    # When post processing flow cell
-    flow_cells: List[str] = post_demux_api.finish_all_flowcells(
+    # When post-processing flow cell
+    post_demux_api.finish_all_flowcells(
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
@@ -327,7 +343,3 @@ def test_finish_all_flowcells(
 
     # THEN we should run the command
     assert f"Check demultiplexed flow cell {flowcell_object.flowcell_full_name}" in caplog.text
-
-    # THEN none should be returned
-    assert len(flow_cells) == 1
-    assert flow_cells[0] is None

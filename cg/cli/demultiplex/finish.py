@@ -67,12 +67,4 @@ def finish_all_hiseq_x(context: CGConfig, dry_run: bool) -> None:
         config=context
     )
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
-    transfer_flow_cells: list[str] = demux_post_processing_api.finish_all_flowcells(
-        bcl_converter=BclConverter.BCL2FASTQ.value
-    )
-
-    for flowcell in filter(None, transfer_flow_cells):
-        cg_transfer_parameters: List[str] = ["--config", context.hasta_config, flowcell]
-        cgstats_process: Process = Process(binary=context.binary_path)
-        LOG.info(f"{context.binary_path} --config {context.hasta_config} {flowcell}")
-        cgstats_process.run_command(parameters=cg_transfer_parameters, dry_run=dry_run)
+    demux_post_processing_api.finish_all_flowcells(bcl_converter=BclConverter.BCL2FASTQ.value)

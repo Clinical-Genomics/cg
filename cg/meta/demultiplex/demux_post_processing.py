@@ -2,7 +2,7 @@ import logging
 import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional
 
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
@@ -27,6 +27,8 @@ class DemuxPostProcessingAPI:
     def __init__(self, config: CGConfig):
         self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
+        self.cg_binary_path: str = config.binary_path
+        self.cg_hasta_config: str = config.hasta_config
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool) -> None:
@@ -35,6 +37,18 @@ class DemuxPostProcessingAPI:
         self.dry_run = dry_run
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
+
+    def cg_transfer_flow_cell(self, flowcell_name: str) -> None:
+        """Transfer post-processed flow cell."""
+        cg_transfer_parameters: List[str] = [
+            "--config",
+            self.cg_hasta_config,
+            "transfer",
+            flowcell_name,
+        ]
+        cgstats_process: Process = Process(binary=self.cg_binary_path)
+        LOG.info(f"{self.cg_binary_path} --config {self.cg_hasta_config} transfer {flowcell_name}")
+        cgstats_process.run_command(parameters=cg_transfer_parameters, dry_run=self.dry_run)
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
@@ -98,7 +112,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
 
     def post_process_flowcell(
         self, flowcell: Flowcell, flowcell_name: str, flowcell_path: Path
-    ) -> str:
+    ) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell."""
         if not flowcell.is_hiseq_x_copy_completed():
             LOG.info(f"{flowcell_name} is not yet completely copied")
@@ -114,11 +128,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         self.add_to_cgstats(flowcell_path=flowcell_path)
         self.cgstats_select_project(flowcell_name=flowcell_name, flowcell_path=flowcell_path)
         self.cgstats_lanestats(flowcell_path=flowcell_path)
-        return flowcell_name
+        self.cg_transfer_flow_cell(flowcell_name=flowcell_name)
 
-    def finish_flowcell(
-        self, bcl_converter: str, flowcell_name: str, flowcell_path: Path
-    ) -> Union[str, None]:
+    def finish_flowcell(self, bcl_converter: str, flowcell_name: str, flowcell_path: Path) -> None:
         """Post-processing flow cell.
         Force is used to finish a flow cell even if the files are renamed already.
         """
@@ -127,25 +139,21 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flowcell: Flowcell = Flowcell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
         except FlowcellError:
             return
-        return self.post_process_flowcell(
+        self.post_process_flowcell(
             flowcell=flowcell, flowcell_name=flowcell_name, flowcell_path=flowcell_path
         )
 
-    def finish_all_flowcells(self, bcl_converter: str) -> list[str]:
+    def finish_all_flowcells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post process those that need it"""
-        transfer_flow_cells: list[str] = []
         demultiplex_flow_cell_out_dirs: List[
             Path
         ] = self.demux_api.get_all_demultiplex_flow_cells_out_dirs()
-        transfer_flow_cells.extend(
+        for flowcell_dir in demultiplex_flow_cell_out_dirs:
             self.finish_flowcell(
                 bcl_converter=bcl_converter,
                 flowcell_name=flowcell_dir.name,
                 flowcell_path=flowcell_dir,
             )
-            for flowcell_dir in demultiplex_flow_cell_out_dirs
-        )
-        return transfer_flow_cells
 
 
 class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
@@ -254,13 +262,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             demux_results.demux_sample_sheet_path.as_posix(),
         )
 
-    @staticmethod
-    def create_copy_complete_file(demux_results: DemuxResults) -> None:
-        """Suggestion is to deprecate this as a flag and store information in database instead"""
-        LOG.info("Creating %s", demux_results.copy_complete_path)
-        demux_results.copy_complete_path.touch()
-
-    def post_process_flowcell(self, demux_results: DemuxResults) -> None:
+    def post_process_flowcell(self, demux_results: DemuxResults, flowcell_name: str) -> None:
         """Run all the necessary steps for post processing a demultiplexed flowcell
 
         This will
@@ -278,7 +280,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.bcl_converter == "bcl2fastq":
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
-        self.create_copy_complete_file(demux_results=demux_results)
+        self.cg_transfer_flow_cell(flowcell_name=flowcell_name)
 
     def finish_flowcell(self, flowcell_name: str, bcl_converter: str, force: bool = False) -> None:
         """Go through the post processing steps for a flowcell
@@ -309,7 +311,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             if not force:
                 return
             LOG.info("Post processing flowcell anyway")
-        self.post_process_flowcell(demux_results=demux_results)
+        self.post_process_flowcell(demux_results=demux_results, flowcell_name=flowcell_name)
 
     def finish_all_flowcells(self, bcl_converter: str) -> None:
         """Loop over all flowcells and post process those that need it"""
