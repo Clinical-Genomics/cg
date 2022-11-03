@@ -99,6 +99,7 @@ MIP_RNA_ANALYSIS_CASE_TAGS = [
     {"vcf-snv-clinical-index"},
     {"vcf-snv-research"},
     {"vcf-snv-research-index"},
+    {"multiqc-html"},
 ]
 
 MIP_RNA_ANALYSIS_SAMPLE_TAGS = [

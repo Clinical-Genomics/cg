@@ -26,6 +26,9 @@ LOG = logging.getLogger(__name__)
 def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     """Links the appropriate files for a case, based on the data_delivery, to the customer folder
     and subsequently uses rsync to upload it to caesar."""
+
+    click.echo(click.style("----------------- Clinical-delivery -----------------"))
+
     case_obj: models.Family = context.obj.status_db.family(case_id)
     delivery_types: Set[str] = case_obj.get_delivery_arguments()
     is_sample_delivery: bool
