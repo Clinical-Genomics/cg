@@ -74,5 +74,5 @@ def finish_all_hiseq_x(context: CGConfig, dry_run: bool) -> None:
     for flowcell in filter(None, transfer_flow_cells):
         cg_transfer_parameters: List[str] = ["--config", context.hasta_config, flowcell]
         cgstats_process: Process = Process(binary=context.binary_path)
-        logging.info(f"{context.binary_path} --config {context.hasta_config} {flowcell}")
+        LOG.info(f"{context.binary_path} --config {context.hasta_config} {flowcell}")
         cgstats_process.run_command(parameters=cg_transfer_parameters, dry_run=dry_run)

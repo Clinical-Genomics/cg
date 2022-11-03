@@ -297,3 +297,37 @@ def test_finish_flowcell(
 
     # THEN no flow cell should be returned
     assert flow_cell is None
+
+
+def test_finish_all_flowcells(
+    caplog,
+    demultiplexed_flowcell_working_directory: Path,
+    demultiplex_context: CGConfig,
+    flowcell_object: Flowcell,
+):
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a demultiplex context
+
+    # GIVEN a Demultiplexing post process API
+    post_demux_api: DemuxPostProcessingHiseqXAPI = DemuxPostProcessingHiseqXAPI(
+        config=demultiplex_context
+    )
+
+    # GIVEN a not completely copied flow cell
+    Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE).unlink()
+
+    # When post processing flow cell
+    flow_cells: List[str] = post_demux_api.finish_all_flowcells(
+        bcl_converter=BclConverter.BCL2FASTQ,
+    )
+
+    # Reinstate
+    Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE).touch()
+
+    # THEN we should run the command
+    assert f"Check demultiplexed flow cell {flowcell_object.flowcell_full_name}" in caplog.text
+
+    # THEN none should be returned
+    assert len(flow_cells) == 1
+    assert flow_cells[0] is None
