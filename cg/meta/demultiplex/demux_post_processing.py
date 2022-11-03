@@ -2,7 +2,7 @@ import logging
 import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Union
 
 from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
@@ -117,12 +117,12 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         return flowcell_name
 
     def finish_flowcell(
-        self, bcl_converter: str, flowcell_name: str, flowcell_path: Path, force: bool = False
-    ) -> str:
+        self, bcl_converter: str, flowcell_name: str, flowcell_path: Path
+    ) -> Union[str, None]:
         """Post-processing flow cell.
         Force is used to finish a flow cell even if the files are renamed already.
         """
-        LOG.INFO(f"Check demultiplexed flow cell {flowcell_name}")
+        LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
         try:
             flowcell: Flowcell = Flowcell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
         except FlowcellError:
