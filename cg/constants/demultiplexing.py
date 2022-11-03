@@ -34,7 +34,11 @@ SAMPLE_SHEET_HEADERS = {
 
 SAMPLE_SHEET_DATA_HEADER = "[Data]"
 
-DRAGEN_BARCODE_MISMATCH = ["BarcodeMismatchIndex1,#", "BarcodeMismatchIndex2,#"]
+SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
+
+DRAGEN_BARCODE_MISMATCH_INDEX1 = "BarcodeMismatchIndex1,0"
+
+DRAGEN_BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchIndex2,0"
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",
