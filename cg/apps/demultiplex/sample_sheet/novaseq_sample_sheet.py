@@ -11,8 +11,8 @@ from cg.constants.demultiplexing import (
     SAMPLE_SHEET_DATA_HEADER,
     SAMPLE_SHEET_HEADERS,
     SAMPLE_SHEET_SETTINGS_HEADER,
-    DRAGEN_BARCODE_MISMATCH_INDEX1,
-    DRAGEN_BARCODE_MISMATCH_INDEX2,
+    SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
+    SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
 )
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet
@@ -96,8 +96,8 @@ class SampleSheetCreator:
         LOG.info("Convert samples to string")
         sample_sheet = [
             SAMPLE_SHEET_SETTINGS_HEADER,
-            DRAGEN_BARCODE_MISMATCH_INDEX1,
-            DRAGEN_BARCODE_MISMATCH_INDEX2,
+            SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
+            SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
             SAMPLE_SHEET_DATA_HEADER,
             ",".join(SAMPLE_SHEET_HEADERS[self.bcl_converter]),
         ]
