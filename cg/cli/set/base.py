@@ -163,16 +163,16 @@ def list_changeable_sample_attributes(
 
 def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
-    LOG.info("sample_id: optional, internal_id of sample to set value on")
-    LOG.info("Below is a set of changeable sample attributes, to combine with -kv flag")
+    LOG.info(f"sample_id: optional, internal_id of sample to set value on \n")
+    LOG.info(f"Below is a set of changeable sample attributes, to combine with -kv flag:\n")
 
     list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
 
-    LOG.info("See example below:")
+    LOG.info(f"\nSee example below:")
     LOG.info(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
     LOG.info(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
     LOG.info(
-        f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]"
+        f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]\n"
     )
 
 
