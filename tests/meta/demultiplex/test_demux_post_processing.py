@@ -151,7 +151,11 @@ def test_post_process_flowcell_copy_not_completed(
     )
 
     # GIVEN a not completely copied flow cell
-    Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE).unlink()
+    copy_complete_file: Path = Path(
+        flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE
+    )
+    if copy_complete_file.exists():
+        copy_complete_file.unlink()
 
     # When post-processing flow cell
     post_demux_api.post_process_flowcell(
