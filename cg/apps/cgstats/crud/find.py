@@ -15,7 +15,10 @@ SAMPLE_PATTERN = "{}\_%"
 def get_support_parameters_id(demux_results: DemuxResults) -> Optional[int]:
     """Fetch the id of the support parameters if post exists"""
     LOG.debug("Search for support parameters with file %s", demux_results.results_dir)
-    if support_parameters_id := models.Supportparams.exists(str(demux_results.results_dir)):
+    support_parameters_id: Optional[int] = models.Supportparams.exists(
+        str(demux_results.results_dir)
+    )
+    if support_parameters_id:
         LOG.debug("Found support parameters with id %s", support_parameters_id)
         return support_parameters_id
     LOG.debug("Could not find support parameters")
@@ -29,7 +32,10 @@ def get_datasource_id(demux_results: DemuxResults) -> Optional[int]:
         "dragen": demux_results.demux_stats_path,
     }
     LOG.debug("Search for datasource with file %s", stats_path[demux_results.bcl_converter])
-    if datasource_id := models.Datasource.exists(str(stats_path[demux_results.bcl_converter])):
+    datasource_id: Optional[int] = models.Datasource.exists(
+        str(stats_path[demux_results.bcl_converter])
+    )
+    if datasource_id:
         LOG.debug("Found datasource with id %s", datasource_id)
         return datasource_id
     LOG.debug("Could not find datasource")
@@ -38,7 +44,8 @@ def get_datasource_id(demux_results: DemuxResults) -> Optional[int]:
 
 def get_flowcell_id(flowcell_name: str) -> Optional[int]:
     LOG.debug("Search for flowcell %s", flowcell_name)
-    if flowcell_id := models.Flowcell.exists(flowcell_name):
+    flowcell_id: Optional[int] = models.Flowcell.exists(flowcell_name)
+    if flowcell_id:
         LOG.debug("Found flowcell with id %s", flowcell_id)
         return flowcell_id
     LOG.debug("Could not find flowcell")
@@ -47,13 +54,17 @@ def get_flowcell_id(flowcell_name: str) -> Optional[int]:
 
 def get_demux_id(flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
     """Flowcell object id refers to a database object"""
-    if demux_id := models.Demux.exists(flowcell_id=flowcell_object_id, basemask=base_mask):
+    demux_id: Optional[int] = models.Demux.exists(
+        flowcell_id=flowcell_object_id, basemask=base_mask
+    )
+    if demux_id:
         return demux_id
     return None
 
 
 def get_project_id(project_name: str) -> Optional[int]:
-    if project_id := models.Project.exists(project_name=project_name):
+    project_id: Optional[int] = models.Project.exists(project_name=project_name)
+    if project_id:
         return project_id
     return None
 
@@ -67,13 +78,17 @@ def get_sample(sample_id: str):
 
 
 def get_sample_id(sample_id: str, barcode: str) -> Optional[int]:
-    if sample_id := models.Sample.exists(sample_name=sample_id, barcode=barcode):
+    sample_id: Optional[int] = models.Sample.exists(sample_name=sample_id, barcode=barcode)
+    if sample_id:
         return sample_id
     return None
 
 
 def get_unaligned_id(sample_id: int, demux_id: int, lane: int) -> Optional[int]:
-    if unaligned_id := models.Unaligned.exists(sample_id=sample_id, demux_id=demux_id, lane=lane):
+    unaligned_id: Optional[int] = models.Unaligned.exists(
+        sample_id=sample_id, demux_id=demux_id, lane=lane
+    )
+    if unaligned_id:
         return unaligned_id
     return None
 
