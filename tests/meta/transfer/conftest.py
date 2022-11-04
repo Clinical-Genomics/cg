@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import List
+from typing import List, Generator
 
 import pytest
 from cg.apps.cgstats.db import models as stats_models
@@ -109,16 +109,16 @@ def flowcell_store(base_store: Store, data: dict) -> Store:
     yield base_store
 
 
-@pytest.fixture(scope="function")
-def transfer_flowcell_api(
+@pytest.fixture(name="transfer_flowcell_api")
+def fiixture_transfer_flowcell_api(
     flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
-) -> TransferFlowcell:
+) -> Generator[TransferFlowcell, None, None]:
     """Setup flow cell transfer API."""
     yield TransferFlowcell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)
 
 
 @pytest.fixture(name="transfer_lims_api")
-def fixture_transfer_lims_api(sample_store: Store) -> TransferLims:
+def fixture_transfer_lims_api(sample_store: Store) -> Generator[TransferLims, None, None]:
     """Setup LIMS transfer API."""
     yield TransferLims(sample_store, MockLimsAPI(config=""))
 

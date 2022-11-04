@@ -78,15 +78,8 @@ def test_transfer_sample_files_from_source(
     caplog.set_level(logging.INFO)
 
     # GIVEN a Store with three samples, where only two samples are present in the source folder
-    sample_name1: str = f"{cust_sample_id}1"
-    sample_name2: str = f"{cust_sample_id}2"
-    sample_name3: str = f"{cust_sample_id}3"
-
     for sample in [f"{cust_sample_id}1", f"{cust_sample_id}2", f"{cust_sample_id}3"]:
         helpers.add_sample(store=external_data_api.status_db, name=sample, original_ticket=ticket)
-    #    helpers.add_sample(store=external_data_api.status_db, name=sample_name1, original_ticket=ticket)
-    #    helpers.add_sample(store=external_data_api.status_db, name=sample_name2, original_ticket=ticket)
-    #    helpers.add_sample(store=external_data_api.status_db, name=sample_name3, original_ticket=ticket)
 
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
@@ -269,7 +262,7 @@ def test_extract_checksum(fastq_file: Path):
     """Tests if the function successfully extract the correct md5sum."""
 
     # Given a file containing a md5sum
-    file = Path(f"{fastq_file.as_posix()}.md5")
+    md5sum_file = Path(f"{fastq_file.as_posix()}.md5")
 
     # Then the function should extract it
-    assert extract_md5sum(md5sum_file=file) == "a95cbb265540a2261fce941059784fd1"
+    assert extract_md5sum(md5sum_file=md5sum_file) == "a95cbb265540a2261fce941059784fd1"

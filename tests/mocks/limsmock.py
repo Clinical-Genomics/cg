@@ -96,7 +96,7 @@ class MockLimsAPI(LimsAPI):
         self._samples = samples
 
     def cache(self):
-        pass
+        pass  # This is completely mocked out
 
     def get_received_date(self, lims_id: str):
 

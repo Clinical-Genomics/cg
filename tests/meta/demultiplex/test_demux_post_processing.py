@@ -202,7 +202,7 @@ def test_post_process_flowcell_delivery_started(
     )
 
 
-def test_post_process_flowcell_not_hiseq_X(
+def test_post_process_flowcell_not_hiseq_x(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
@@ -250,9 +250,9 @@ def test_post_process_flowcell(
     )
 
     # GIVEN a Hiseq X tile directory
-    Path(flowcell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR).mkdir(
-        parents=True, exist_ok=True
-    )
+    hiseq_x_tile_dir: Path = Path(flowcell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+
+    hiseq_x_tile_dir.mkdir(parents=True, exist_ok=True)
 
     # GIVEN an unaligned project directory
     Path(
@@ -274,7 +274,6 @@ def test_post_process_flowcell(
     )
 
     expected_cgstats_select_project_log_file.unlink()
-    Path(flowcell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR).rmdir
 
     # THEN we should run the command
     assert (
