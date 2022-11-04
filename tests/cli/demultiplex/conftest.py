@@ -84,7 +84,7 @@ def fixture_flowcell_runs_working_directory_dragen(flowcell_runs_working_directo
 
 @pytest.fixture(name="demultiplexed_flowcells_working_directory")
 def fixture_demultiplexed_flowcells_working_directory(project_dir: Path) -> Path:
-    """Return the path to a working directory with flowc  'ells that have been demultiplexed."""
+    """Return the path to a working directory with flow cells that have been demultiplexed."""
     working_dir: Path = Path(project_dir, "demultiplexed-runs")
     working_dir.mkdir(parents=True)
     return working_dir

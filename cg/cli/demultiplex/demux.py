@@ -33,7 +33,7 @@ def demultiplex_all(
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
     tb_api: TrailblazerAPI = context.trailblazer_api
-    LOG.info("Search for flow cells ready to demultiplex in %s", flowcells_directory)
+    LOG.info(f"Search for flow cells ready to demultiplex in {flowcells_directory}")
     for sub_dir in flowcells_directory.iterdir():
         if not sub_dir.is_dir():
             continue

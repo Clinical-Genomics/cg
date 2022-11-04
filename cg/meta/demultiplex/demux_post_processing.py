@@ -131,9 +131,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         self.cg_transfer_flow_cell(flowcell_name=flowcell_name)
 
     def finish_flowcell(self, bcl_converter: str, flowcell_name: str, flowcell_path: Path) -> None:
-        """Post-processing flow cell.
-        Force is used to finish a flow cell even if the files are renamed already.
-        """
+        """Post-processing flow cell."""
         LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
         try:
             flowcell: Flowcell = Flowcell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
@@ -157,7 +155,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
 
 
 class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
-    """Post demultiplexing API class for Novaseq X flow cell."""
+    """Post demultiplexing API class for Novaseq flow cell."""
 
     def rename_files(self, demux_results: DemuxResults) -> None:
         """Rename the files according to how we want to have it after demultiplexing is ready"""
