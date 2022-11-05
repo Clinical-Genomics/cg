@@ -268,6 +268,9 @@ def test_post_process_flowcell(
         flowcell_path=flowcell_object.path,
     )
 
+    # THEN a delivery file should have been created
+    assert demultiplexing_delivery_file.exists()
+
     # Clean up
     cgstats_select_project_log_file.unlink()
     demultiplexing_delivery_file.unlink()
