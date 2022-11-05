@@ -6,8 +6,10 @@ from typing import List
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flowcell import Flowcell
 from cg.store.api import Store
 from cg.store.models import Sample, Family
 
@@ -82,6 +84,35 @@ def fixture_tmp_flow_cell_run_path(project_dir: Path, flowcell_full_name: str) -
 def fixture_flowcell_project_id() -> int:
     """Return flow cell run project id."""
     return 174578
+
+
+@pytest.fixture(name="cgstats_select_project_log_file")
+def fixture_cgstats_select_project_log_file(
+    flowcell_object: Flowcell, flowcell_project_id: int
+) -> Path:
+    """Return cgstats select project out file."""
+    return Path(
+        flowcell_object.path,
+        "-".join(["stats", str(flowcell_project_id), flowcell_object.flowcell_full_name]) + ".txt",
+    )
+
+
+@pytest.fixture(name="hiseq_x_copy_complete_file")
+def fixture_hiseq_x_copy_complete_file(flowcell_object: Flowcell) -> Path:
+    """Return Hiseq X flow cell copy complete file."""
+    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
+
+
+@pytest.fixture(name="demultiplexing_delivery_file")
+def fixture_demultiplexing_delivery_file(flowcell_object: Flowcell) -> Path:
+    """Return demultiplexing delivery started file."""
+    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.DELIVERY)
+
+
+@pytest.fixture(name="hiseq_x_tile_dir")
+def fixture_hiseq_x_tile_dir(flowcell_object: Flowcell) -> Path:
+    """Return Hiseq X tile dir."""
+    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 
 
 @pytest.fixture(name="populated_flow_cell_store")

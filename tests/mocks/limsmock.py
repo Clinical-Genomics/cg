@@ -35,7 +35,7 @@ class MockLimsAPI(LimsAPI):
         if samples is None:
             samples = []
         self.config = config
-        self.baseuri = "https://clinical-lims-stage.scilifelab.se"
+        self.baseuri = "https://clinical-lims-mock.scilifelab.se"
         self._received_at = None
         self.sample_vars = {}
         self._samples = samples

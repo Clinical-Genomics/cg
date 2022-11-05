@@ -44,7 +44,7 @@ def test_finish_all_cmd(
 
     # GIVEN a demultiplex context
 
-    # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
+    # WHEN starting post-processing for new demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         finish_all_cmd,
         obj=demultiplex_context,
@@ -95,7 +95,7 @@ def test_finish_flowcell(
 
     # GIVEN a flow cell
 
-    # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
+    # WHEN starting post-processing for new demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         finish_flowcell,
         [flowcell_name],
@@ -141,7 +141,7 @@ def test_finish_all_hiseq_x(
 
     # GIVEN a demultiplex context
 
-    # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
+    # WHEN starting post-processing for new demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         finish_all_hiseq_x,
         obj=demultiplex_context,
