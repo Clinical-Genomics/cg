@@ -1,6 +1,5 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
-import typing
 
 import datetime as dt
 import logging
@@ -16,6 +15,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.io.controller import ReadFile
 from cg.constants.subject import Gender
@@ -23,6 +23,7 @@ from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flowcell import Flowcell
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -551,11 +552,6 @@ def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     return Path(apps_dir, "demultiplexing")
 
 
-@pytest.fixture(name="demultiplexed_runs")
-def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    return Path(demultiplex_fixtures, "demultiplexed-runs")
-
-
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
 def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a novaseq bcl2fastq sample sheet."""
@@ -566,6 +562,36 @@ def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path
 def fixture_raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the raw samples fixtures."""
     return Path(demultiplex_fixtures, "raw_lims_samples")
+
+
+@pytest.fixture(name="demultiplexed_runs")
+def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flow cells ready for demultiplexing."""
+    return Path(demultiplex_fixtures, "demultiplexed-runs")
+
+
+@pytest.fixture(name="demux_run_dir")
+def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flowcells ready for demultiplexing"""
+    return Path(demultiplex_fixtures, "flowcell-runs")
+
+
+@pytest.fixture(name="flowcell_object")
+def fixture_flowcell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flowcell:
+    """Create a flow cell object with flow cell that is demultiplexed."""
+    return Flowcell(flowcell_path=Path(demux_run_dir, flowcell_full_name))
+
+
+@pytest.fixture(name="demultiplexing_delivery_file")
+def fixture_demultiplexing_delivery_file(flowcell_object: Flowcell) -> Path:
+    """Return demultiplexing delivery started file."""
+    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.DELIVERY)
+
+
+@pytest.fixture(name="hiseq_x_tile_dir")
+def fixture_hiseq_x_tile_dir(flowcell_object: Flowcell) -> Path:
+    """Return Hiseq X tile dir."""
+    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")

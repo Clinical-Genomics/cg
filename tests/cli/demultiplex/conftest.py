@@ -13,7 +13,6 @@ from cg.models.demultiplex.flowcell import Flowcell
 from cg.utils import Process
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
 from tests.apps.demultiplex.conftest import (
-    fixture_demux_run_dir,
     fixture_demux_run_dir_bcl2fastq,
     fixture_demux_run_dir_dragen,
     fixture_lims_novaseq_bcl2fastq_samples,
@@ -32,22 +31,10 @@ from tests.models.demultiplexing.conftest import (
 LOG = logging.getLogger(__name__)
 
 
-@pytest.fixture(name="demux_results_finished_dir")
-def fixture_demux_results_finished_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with demultiplexing results where files are renamed etc."""
-    return Path(demultiplex_fixtures, "demultiplexed-runs")
-
-
 @pytest.fixture(name="demux_results_not_finished_dir")
 def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with demultiplexing results where demux has been done but nothing is cleaned."""
     return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
-
-
-@pytest.fixture(name="flowcell_object")
-def fixture_flowcell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flowcell:
-    """Create a flow cell object with flow cell that is demultiplexed."""
-    return Flowcell(flowcell_path=Path(demux_run_dir, flowcell_full_name))
 
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
@@ -105,12 +92,12 @@ def fixture_demultiplexed_flowcell_working_directory(
 
 @pytest.fixture(name="demultiplexed_flowcell_finished_working_directory")
 def fixture_demultiplexed_flowcell_finished_working_directory(
-    demux_results_finished_dir: Path,
+    demultiplexed_runs: Path,
     demultiplexed_flowcells_working_directory: Path,
     flowcell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    source: Path = Path(demux_results_finished_dir, flowcell_full_name)
+    source: Path = Path(demultiplexed_runs, flowcell_full_name)
     destination: Path = Path(demultiplexed_flowcells_working_directory, flowcell_full_name)
     shutil.copytree(src=source, dst=destination)
     return destination

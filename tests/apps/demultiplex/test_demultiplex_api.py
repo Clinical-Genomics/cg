@@ -7,7 +7,6 @@ from cg.models.cg_config import CGConfig
 
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
 from tests.cli.demultiplex.conftest import (
-    fixture_demux_results_finished_dir,
     fixture_demultiplexing_api,
     fixture_demultiplex_configs,
     fixture_flowcell_runs_working_directory,

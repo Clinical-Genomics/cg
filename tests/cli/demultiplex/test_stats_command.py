@@ -13,7 +13,7 @@ from cg.models.demultiplex.flowcell import Flowcell
 def test_select_command(
     cli_runner: CliRunner,
     populated_stats_api: StatsAPI,
-    demux_results_finished_dir: Path,
+    demultiplexed_runs: Path,
     flowcell_object: Flowcell,
     demultiplex_context: CGConfig,
 ):
@@ -23,7 +23,7 @@ def test_select_command(
     full_flowcell_name: str = flowcell_object.flowcell_full_name
     assert find.get_flowcell_id(flowcell_id)
     demux_results = DemuxResults(
-        demux_dir=demux_results_finished_dir / full_flowcell_name,
+        demux_dir=demultiplexed_runs / full_flowcell_name,
         flowcell=flowcell_object,
         bcl_converter="bcl2fastq",
     )

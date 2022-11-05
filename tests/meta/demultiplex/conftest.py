@@ -21,15 +21,12 @@ from tests.cli.demultiplex.conftest import (
     fixture_demultiplexed_flowcells_working_directory,
     fixture_demultiplexing_api,
     fixture_demux_results_not_finished_dir,
-    fixture_demux_run_dir,
-    fixture_flowcell_object,
     fixture_flowcell_runs_working_directory,
     fixture_stats_api,
 )
 from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_flowcell,
-    fixture_flowcell_object,
     fixture_flowcell_path,
     fixture_flowcell_runs,
 )
@@ -101,18 +98,6 @@ def fixture_cgstats_select_project_log_file(
 def fixture_hiseq_x_copy_complete_file(flowcell_object: Flowcell) -> Path:
     """Return Hiseq X flow cell copy complete file."""
     return Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
-
-
-@pytest.fixture(name="demultiplexing_delivery_file")
-def fixture_demultiplexing_delivery_file(flowcell_object: Flowcell) -> Path:
-    """Return demultiplexing delivery started file."""
-    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.DELIVERY)
-
-
-@pytest.fixture(name="hiseq_x_tile_dir")
-def fixture_hiseq_x_tile_dir(flowcell_object: Flowcell) -> Path:
-    """Return Hiseq X tile dir."""
-    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 
 
 @pytest.fixture(name="populated_flow_cell_store")

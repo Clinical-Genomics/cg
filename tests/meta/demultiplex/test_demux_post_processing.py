@@ -236,6 +236,7 @@ def test_post_process_flowcell(
     caplog,
     cgstats_select_project_log_file: Path,
     demultiplexed_flowcell_working_directory: Path,
+    demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flowcell_object: Flowcell,
     flowcell_project_id: int,
@@ -267,7 +268,9 @@ def test_post_process_flowcell(
         flowcell_path=flowcell_object.path,
     )
 
+    # Clean up
     cgstats_select_project_log_file.unlink()
+    demultiplexing_delivery_file.unlink()
 
     # THEN we should log that post-processing will begin
     assert (
