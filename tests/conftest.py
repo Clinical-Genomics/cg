@@ -746,7 +746,7 @@ def fixture_hermes_process() -> ProcessMock:
 @pytest.fixture(name="hermes_api")
 def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a Hermes API with a mocked process."""
-    hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
+    hermes_config = {"hermes": {"binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
@@ -1179,7 +1179,7 @@ def fixture_context_config(
         "bed_path": str(cg_dir),
         "pon_path": str(cg_dir),
         "delivery_path": str(cg_dir),
-        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "hermes": {"binary_path": "hermes"},
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
@@ -1195,7 +1195,6 @@ def fixture_context_config(
             },
         },
         "fluffy": {
-            "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
@@ -1230,7 +1229,6 @@ def fixture_context_config(
         "encryption": {"binary_path": "bin/gpg"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "tar": {"binary_path": "/bin/tar"},
-        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
             "service_account": "SERVICE",
@@ -1260,7 +1258,6 @@ def fixture_context_config(
         "scout": {
             "binary_path": "echo",
             "config_path": "scout-stage.yaml",
-            "deploy_config": "scout-deploy-stage.yaml",
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},

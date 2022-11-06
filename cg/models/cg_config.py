@@ -16,7 +16,6 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.shipping import ShippingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
 from cg.constants.priority import SlurmQos
@@ -85,7 +84,6 @@ class StatinaConfig(BaseModel):
 class CommonAppConfig(BaseModel):
     binary_path: str
     config_path: Optional[str]
-    deploy_config: Optional[str]
 
 
 class FluffyUploadConfig(BaseModel):
@@ -160,10 +158,6 @@ class GisaidConfig(CommonAppConfig):
     logwatch_email: EmailStr
     upload_password: str
     upload_cid: str
-
-
-class ShippingConfig(CommonAppConfig):
-    host_config: str
 
 
 class DataDeliveryConfig(BaseModel):
@@ -241,8 +235,6 @@ class CGConfig(BaseModel):
     pdc: Optional[CommonAppConfig] = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    shipping: ShippingConfig = None
-    shipping_api_: ShippingAPI = None
     tar: Optional[CommonAppConfig] = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
@@ -278,7 +270,6 @@ class CGConfig(BaseModel):
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
             "scout_api_": "scout_api",
-            "shipping_api_": "shipping_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
             "vogue_api_": "vogue_api",
@@ -390,15 +381,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating scout api")
             api = ScoutAPI(config=self.dict())
             self.scout_api_ = api
-        return api
-
-    @property
-    def shipping_api(self) -> ShippingAPI:
-        api = self.__dict__.get("shipping_api_")
-        if api is None:
-            LOG.debug("Instantiating shipping api")
-            api = ShippingAPI(config=self.shipping.dict())
-            self.shipping_api_ = api
         return api
 
     @property
