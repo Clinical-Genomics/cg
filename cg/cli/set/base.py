@@ -163,7 +163,6 @@ def list_changeable_sample_attributes(
 
 def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     """Show help for the set sample command"""
-    LOG.info(f"sample_id: optional, internal_id of sample to set value on \n")
     LOG.info(f"Below is a set of changeable sample attributes, to combine with -kv flag:\n")
 
     list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
@@ -207,7 +206,7 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
     multiple=True,
     help=HELP_KEY_VALUE,
 )
-@click.option("--lkv", is_flag=True, help="List all available modifiable sample properties")
+@click.option("--lk", is_flag=True, help="List all available modifiable sample properties")
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
 @click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
 @click.pass_obj
@@ -217,13 +216,13 @@ def sample(
     kwargs: click.Tuple([str, str]),
     skip_lims: bool,
     yes: bool,
-    lkv: bool,
+    lk: bool,
 ):
-    """Set key values on a sample"""
+    """Set key values on a sample: (sample_id: optional, internal_id of sample to set value on)"""
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
 
-    if lkv:
+    if lk:
         show_set_sample_help(sample_obj)
 
     if sample_obj is None:
