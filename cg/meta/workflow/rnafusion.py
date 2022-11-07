@@ -54,7 +54,11 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     @property
     def process(self):
         if not self._process:
-            self._process = Process(binary=self.config.rnafusion.binary_path, environment=self.conda_env, conda_binary=self.conda_binary)
+            self._process = Process(
+                binary=self.config.rnafusion.binary_path,
+                environment=self.conda_env,
+                conda_binary=self.conda_binary,
+            )
         return self._process
 
     def get_profile(self, profile: str = None) -> str:
