@@ -148,6 +148,7 @@ class RnafusionConfig(CommonAppConfig):
     pipeline_path: str
     conda_env: str
     profile: str
+    conda_binary: Optional[str] = None
 
 
 class CGStatsConfig(BaseModel):
