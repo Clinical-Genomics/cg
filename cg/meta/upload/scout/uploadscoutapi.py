@@ -431,7 +431,8 @@ class UploadScoutAPI:
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-        subject_id_dna_samples = self._get_mip_dna_and_balsamic_samples(subject_id_samples)
+        subject_id_sample_list = subject_id_samples.all()
+        subject_id_dna_samples = self._get_mip_dna_and_balsamic_samples(subject_id_sample_list)
         nr_of_subject_id_dna_samples: int = len(subject_id_dna_samples)
         if nr_of_subject_id_dna_samples != 1:
             raise CgDataError(
@@ -461,10 +462,10 @@ class UploadScoutAPI:
                 )
 
     @staticmethod
-    def _get_mip_dna_and_balsamic_samples(subject_id_samples: Query) -> List[Any]:
+    def _get_mip_dna_and_balsamic_samples(subject_id_samples: List[models.Sample]) -> List[Any]:
         """Filter a models.Sample query, returning DNA samples connected to MIP or BALSAMIC cases"""
         subject_id_dna_samples: List[Any] = []
-        for sample in subject_id_samples.all():
+        for sample in subject_id_samples:
             for sample.link in sample.links:
                 if sample.link.family.data_analysis in [
                     Pipeline.MIP_DNA,

@@ -33,12 +33,6 @@ def fixture_rna_case_id() -> str:
     return "affirmativecat"
 
 
-@pytest.fixture(name="another_rna_case_id")
-def fixture_another_rna_case_id() -> str:
-    """Return another rna case id"""
-    return "holydog"
-
-
 @pytest.fixture(name="dna_case_id")
 def fixture_dna_case_id(case_id) -> str:
     """Return a dna case id"""
