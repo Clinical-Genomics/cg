@@ -1246,7 +1246,7 @@ def fixture_context_config(
             "slurm": {
                 "account": "development",
                 "conda_env": "S_crunchy",
-                "mail_user": "mans.magnusson@scilifelab.se",
+                "mail_user": "an@scilifelab.se",
             },
         },
         "data-delivery": {
@@ -1262,7 +1262,7 @@ def fixture_context_config(
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
-                "mail_user": "mans.magnusson@scilifelab.se",
+                "mail_user": "an@scilifelab.se",
             },
         },
         "encryption": {"binary_path": "bin/gpg"},
