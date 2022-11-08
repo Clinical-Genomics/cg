@@ -98,7 +98,7 @@ def flowcell_samples(
     containers: List[Container] = lims.get_containers(name=flowcell_id)
     if not containers:
         return []
-    container: Container = containers[-1]  # only take the last one. See ÖA#217.
+    container: Container = containers[0]  # only take the last one. See ÖA#217.
     raw_lanes: List[str] = sorted(container.placements.keys())
     for raw_lane in raw_lanes:
         lane: int = get_placement_lane(raw_lane)
