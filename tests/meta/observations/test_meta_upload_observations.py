@@ -1,7 +1,6 @@
 """Test observations API methods."""
 
 import logging
-from pathlib import Path
 from typing import Dict
 
 import pytest
@@ -10,10 +9,12 @@ from _pytest.logging import LogCaptureFixture
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError
+from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError, CaseNotFoundError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
+from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store import models, Store
+from tests.store_helpers import StoreHelpers
 
 
 def test_observations_upload(
@@ -234,13 +235,13 @@ def test_mip_dna_is_duplicate_loqusdb_id(
     assert is_duplicate is True
 
 
-def test_mip_dna_delete(
+def test_mip_dna_delete_case(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     analysis_store: Store,
     caplog: LogCaptureFixture,
 ):
-    """Test delete of a case from Loqusdb."""
+    """Test delete case from Loqusdb."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a Loqusdb instance filled with a case
@@ -251,3 +252,29 @@ def test_mip_dna_delete(
 
     # THEN the case should be deleted from Loqusdb
     assert f"Removed observations for case {case.internal_id} from Loqusdb" in caplog.text
+
+
+def test_mip_dna_delete_case_not_found(
+    base_context: CGConfig,
+    helpers: StoreHelpers,
+    loqusdb_api: LoqusdbAPI,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    caplog: LogCaptureFixture,
+):
+    """Test delete case from Loqusdb that has not been uploaded."""
+    store: Store = base_context.status_db
+
+    # GIVEN an observations instance and a case that has not been uploaded to Loqusdb
+    loqusdb_api.process.stdout = None
+    mip_dna_observations_api.loqusdb_api = loqusdb_api
+    case: models.Family = helpers.add_case(store)
+
+    # WHEN deleting a rare disease case that does not exist in Loqusdb
+    with pytest.raises(CaseNotFoundError):
+        # THEN a CaseNotFoundError should be raised
+        mip_dna_observations_api.delete_case(case)
+
+    assert (
+        f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
+        in caplog.text
+    )

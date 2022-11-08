@@ -31,15 +31,6 @@ from tests.mocks.report import MockMipDNAReportAPI
 
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
 
-from tests.apps.loqus.conftest import (
-    fixture_loqusdb_config,
-    fixture_loqusdb_binary_path,
-    fixture_loqusdb_config_path,
-    fixture_loqusdb_process,
-    fixture_loqusdb_case_output,
-    fixture_loqusdb_api,
-)
-
 LOG = logging.getLogger(__name__)
 
 

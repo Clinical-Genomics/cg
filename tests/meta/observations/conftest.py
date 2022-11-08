@@ -9,7 +9,15 @@ from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 
-from tests.apps.loqus.conftest import fixture_loqusdb_config, fixture_nr_of_loaded_variants
+from tests.cli.conftest import fixture_base_context
+from tests.apps.loqus.conftest import (
+    fixture_loqusdb_config,
+    fixture_nr_of_loaded_variants,
+    fixture_loqusdb_binary_path,
+    fixture_loqusdb_config_path,
+    fixture_loqusdb_process,
+    fixture_loqusdb_api,
+)
 from tests.models.observations.conftest import (
     fixture_observations_input_files_raw,
     fixture_observations_input_files,

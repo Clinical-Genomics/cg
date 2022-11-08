@@ -8,13 +8,11 @@ from _pytest.logging import LogCaptureFixture
 from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
-from cg.apps.loqus import LoqusdbAPI
 from cg.cli.upload.observations import observations
 from cg.cli.upload.observations.utils import (
     get_observations_case,
     get_observations_case_to_upload,
     get_observations_api,
-    get_observations_case_to_delete,
     get_sequencing_method,
 )
 from cg.constants import EXIT_SUCCESS
@@ -90,27 +88,6 @@ def test_get_observations_case_to_upload(base_context: CGConfig, helpers: StoreH
     assert extracted_case == case
 
 
-def test_get_observations_case_to_delete(
-    base_context: CGConfig,
-    helpers: StoreHelpers,
-    loqusdb_api: LoqusdbAPI,
-    loqusdb_case_output: bytes,
-):
-    """Test get case ready to be deleted from Loqusdb."""
-    store: Store = base_context.status_db
-
-    # GIVEN an observations instance and a case ready to be deleted from Loqusdb
-    loqusdb_api.process.stdout = loqusdb_case_output.decode("utf-8").rstrip()
-    base_context.loqusdb_api_ = loqusdb_api
-    case: models.Family = helpers.add_case(store)
-
-    # WHEN retrieving a case to delete given a specific case ID
-    extracted_case = get_observations_case_to_delete(base_context, case.internal_id)
-
-    # THEN the extracted case should match the stored one
-    assert case == extracted_case
-
-
 def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     """Test get observation API given a Loqusdb supported case."""
     store: Store = base_context.status_db
@@ -170,4 +147,4 @@ def test_get_sequencing_method_exception(
         # THEN a LoqusdbUploadCaseError should be raised
         get_sequencing_method(case)
 
-    assert f"Case {case.internal_id} has a mixed analysis type. Cancelling upload." in caplog.text
+    assert f"Case {case.internal_id} has a mixed analysis type. Cancelling action." in caplog.text

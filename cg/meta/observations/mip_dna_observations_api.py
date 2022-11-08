@@ -14,7 +14,7 @@ from cg.constants.observations import (
     LOQUSDB_MIP_SEQUENCING_METHODS,
 )
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import LoqusdbUploadCaseError, LoqusdbDuplicateRecordError
+from cg.exc import LoqusdbUploadCaseError, LoqusdbDuplicateRecordError, CaseNotFoundError
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
@@ -109,7 +109,13 @@ class MipDNAObservationsAPI(ObservationsAPI):
         )
 
     def delete_case(self, case: models.Family) -> None:
-        """Delete rare diseases case observations from Loqusdb."""
+        """Delete rare disease case observations from Loqusdb."""
+        if not self.loqusdb_api.get_case(case.internal_id):
+            LOG.error(
+                f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
+            )
+            raise CaseNotFoundError
+
         self.loqusdb_api.delete_case(case.internal_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")

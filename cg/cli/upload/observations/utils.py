@@ -6,7 +6,6 @@ from typing import Type
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
-from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
@@ -52,16 +51,6 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
     return case
 
 
-def get_observations_case_to_delete(context: CGConfig, case_id: str) -> models.Family:
-    """Return a verified case ready to be deleted from Loqusdb."""
-    loqusdb_api: LoqusdbAPI = context.loqusdb_api
-    case: models.Family = get_observations_case(context, case_id, upload=False)
-    if not loqusdb_api.get_case(case_id):
-        LOG.error(f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion.")
-        raise CaseNotFoundError
-    return case
-
-
 def get_observations_api(context: CGConfig, case: models.Family) -> Type[ObservationsAPI]:
     """Return an observations API given a specific case object."""
     observations_apis = {
@@ -77,7 +66,7 @@ def get_sequencing_method(case: models.Family) -> SequencingMethod:
         link.sample.application_version.application.analysis_type for link in case.links
     ]
     if len(set(analysis_types)) != 1:
-        LOG.error(f"Case {case.internal_id} has a mixed analysis type. Cancelling upload.")
+        LOG.error(f"Case {case.internal_id} has a mixed analysis type. Cancelling action.")
         raise LoqusdbUploadCaseError
 
     return analysis_types[0]
