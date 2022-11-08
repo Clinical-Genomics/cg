@@ -100,12 +100,12 @@ class MipDNAObservationsAPI(ObservationsAPI):
         ).first()
 
         return MipDNAObservationsInputFiles(
-            snv_vcf_path=snv_vcf_file.full_path,
+            snv_vcf_path=snv_vcf_file.full_path if snv_vcf_file else None,
             sv_vcf_path=sv_vcf_file.full_path
-            if self.sequencing_method == SequencingMethod.WGS
+            if sv_vcf_file and self.sequencing_method == SequencingMethod.WGS
             else None,
-            profile_vcf_path=profile_vcf_file.full_path,
-            family_ped_path=family_ped_path.full_path,
+            profile_vcf_path=profile_vcf_file.full_path if profile_vcf_file else None,
+            family_ped_path=family_ped_path.full_path if family_ped_path else None,
         )
 
     def delete_case(self, case: models.Family) -> None:
