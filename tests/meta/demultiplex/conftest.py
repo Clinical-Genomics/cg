@@ -104,7 +104,8 @@ def fixture_hiseq_x_copy_complete_file(flowcell_object: Flowcell) -> Path:
 def fixture_populated_flow_cell_store(
     family_name: str, flowcell_name: str, sample_id: str, store: Store, helpers: StoreHelpers
 ) -> Store:
-    """Populate a store with a Novaseq flow cell."""
+    """Populate a store with a NovaSeq flow cell."""
+
     populated_flow_cell_store: Store = store
     sample: Sample = helpers.add_sample(store=populated_flow_cell_store, internal_id=sample_id)
     family: Family = helpers.add_case(store=populated_flow_cell_store, internal_id=family_name)

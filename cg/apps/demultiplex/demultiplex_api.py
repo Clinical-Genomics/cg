@@ -107,10 +107,9 @@ class DemultiplexingAPI:
         """Return all demultiplex flow cell out directories."""
         demultiplex_flow_cells: List[Path] = []
         for flow_cell_dir in self.out_dir.iterdir():
-            if not flow_cell_dir.is_dir():
-                continue
-            LOG.debug(f"Found directory {flow_cell_dir}")
-            demultiplex_flow_cells.append(flow_cell_dir)
+            if flow_cell_dir.is_dir():
+                LOG.debug(f"Found directory {flow_cell_dir}")
+                demultiplex_flow_cells.append(flow_cell_dir)
         return demultiplex_flow_cells
 
     def flowcell_out_dir_path(self, flowcell: Flowcell) -> Path:
