@@ -3,7 +3,7 @@
 import contextlib
 import logging
 from datetime import datetime
-from typing import Optional, Type
+from typing import Optional, Union
 
 import click
 from alchy import Query
@@ -12,7 +12,8 @@ from pydantic import ValidationError
 
 from cg.cli.upload.observations.utils import get_observations_case_to_upload, get_observations_api
 from cg.exc import LoqusdbError, CaseNotFoundError
-from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.store import models, Store
 
 from cg.cli.workflow.commands import (
@@ -37,7 +38,9 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
 
     with contextlib.suppress(LoqusdbError):
         case: models.Family = get_observations_case_to_upload(context, case_id)
-        observations_api: Type[ObservationsAPI] = get_observations_api(context, case)
+        observations_api: Union[
+            MipDNAObservationsAPI, BalsamicObservationsAPI
+        ] = get_observations_api(context, case)
 
         if dry_run:
             LOG.info(f"Dry run. Would upload observations for {case.internal_id}.")

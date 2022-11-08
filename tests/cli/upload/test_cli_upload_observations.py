@@ -1,7 +1,6 @@
 """Test CG CLI upload observations module."""
 
 import logging
-from typing import Type
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -20,7 +19,6 @@ from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
@@ -98,7 +96,7 @@ def test_get_observations_api(base_context: CGConfig, helpers: StoreHelpers):
     store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
 
     # WHEN retrieving the observation API
-    observations_api: Type[ObservationsAPI] = get_observations_api(base_context, case)
+    observations_api: MipDNAObservationsAPI = get_observations_api(base_context, case)
 
     # THEN a MIP-DNA API should be returned
     assert observations_api

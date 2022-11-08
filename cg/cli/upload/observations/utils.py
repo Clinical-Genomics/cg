@@ -1,7 +1,7 @@
 """Helper functions for observations related actions."""
 
 import logging
-from typing import Type
+from typing import Union
 
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
@@ -11,7 +11,6 @@ from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.meta.observations.observations_api import ObservationsAPI
 from cg.store import models, Store
 
 from cg.models.cg_config import CGConfig
@@ -51,7 +50,9 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
     return case
 
 
-def get_observations_api(context: CGConfig, case: models.Family) -> Type[ObservationsAPI]:
+def get_observations_api(
+    context: CGConfig, case: models.Family
+) -> Union[MipDNAObservationsAPI, BalsamicObservationsAPI]:
     """Return an observations API given a specific case object."""
     observations_apis = {
         Pipeline.MIP_DNA: MipDNAObservationsAPI(context, get_sequencing_method(case)),

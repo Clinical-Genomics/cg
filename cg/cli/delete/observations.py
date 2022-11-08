@@ -1,7 +1,7 @@
 """Delete observations CLI."""
 
 import logging
-from typing import Optional, Type
+from typing import Optional, Union
 
 import click
 from alchy import Query
@@ -10,7 +10,8 @@ from cgmodels.cg.constants import Pipeline
 from cg.cli.upload.observations.utils import get_observations_api, get_observations_case
 from cg.cli.workflow.commands import OPTION_LOQUSDB_SUPPORTED_PIPELINES, ARGUMENT_CASE_ID
 from cg.exc import CaseNotFoundError, LoqusdbError
-from cg.meta.observations.observations_api import ObservationsAPI
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
+from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
@@ -27,7 +28,9 @@ def observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
 
     case: models.Family = get_observations_case(context, case_id, upload=False)
-    observations_api: Type[ObservationsAPI] = get_observations_api(context, case)
+    observations_api: Union[MipDNAObservationsAPI, BalsamicObservationsAPI] = get_observations_api(
+        context, case
+    )
 
     if dry_run:
         LOG.info(f"Dry run. This would delete all variants in Loqusdb for case: {case.internal_id}")

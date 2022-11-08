@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import List, Optional, Type
+from typing import List, Optional, Union
 
 from housekeeper.store.models import Version
 
@@ -10,7 +10,10 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance
 from cg.models.cg_config import CGConfig, CommonAppConfig
-from cg.models.observations.input_files import ObservationsInputFiles
+from cg.models.observations.input_files import (
+    MipDNAObservationsInputFiles,
+    BalsamicObservationsInputFiles,
+)
 from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
@@ -29,10 +32,14 @@ class ObservationsAPI:
 
     def upload(self, case: models.Family) -> None:
         """Upload observations to Loqusdb."""
-        input_files: Type[ObservationsInputFiles] = self.get_observations_input_files(case)
+        input_files: Union[
+            MipDNAObservationsInputFiles, BalsamicObservationsInputFiles
+        ] = self.get_observations_input_files(case)
         self.load_observations(case=case, input_files=input_files)
 
-    def get_observations_input_files(self, case: models.Family) -> Type[ObservationsInputFiles]:
+    def get_observations_input_files(
+        self, case: models.Family
+    ) -> Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles]:
         """Fetch input files from a case to upload to Loqusdb."""
         analysis: models.Analysis = case.analyses[0]
         analysis_date: datetime = analysis.started_at or analysis.completed_at
@@ -72,12 +79,16 @@ class ObservationsAPI:
         self.store.commit()
 
     def load_observations(
-        self, case: models.Family, input_files: Type[ObservationsInputFiles]
+        self,
+        case: models.Family,
+        input_files: Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles],
     ) -> None:
         """Load observation counts to Loqusdb."""
         raise NotImplementedError
 
-    def extract_observations_files_from_hk(self, hk_version: Version) -> ObservationsInputFiles:
+    def extract_observations_files_from_hk(
+        self, hk_version: Version
+    ) -> Union[MipDNAObservationsInputFiles, BalsamicObservationsInputFiles]:
         """Extract observations files given a housekeeper version."""
         raise NotImplementedError
 
