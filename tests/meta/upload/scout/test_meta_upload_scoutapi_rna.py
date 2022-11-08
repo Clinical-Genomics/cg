@@ -481,7 +481,6 @@ def test_get_mip_dna_and_balsamic_samples(
     ensure_extra_rna_case_match(another_rna_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
     dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
     another_rna_sample_id: models.Sample = rna_store.sample(another_rna_sample_id)
     all_son_rna_dna_samples: List[models.Sample] = [dna_sample, another_rna_sample_id]
