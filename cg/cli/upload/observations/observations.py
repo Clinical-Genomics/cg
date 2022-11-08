@@ -65,6 +65,8 @@ def available_observations(context: click.Context, pipeline: Optional[Pipeline],
 
     for case in cases_to_upload:
         try:
+            LOG.info(f"Will upload observations for {case.internal_id}")
             context.invoke(observations, case_id=case.internal_id, dry_run=dry_run)
-        except (CaseNotFoundError, FileNotFoundError, ValidationError):
+        except (CaseNotFoundError, FileNotFoundError, ValidationError) as error:
+            LOG.error(f"Error uploading observations for {case.internal_id}: {error}")
             continue
