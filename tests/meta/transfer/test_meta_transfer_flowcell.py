@@ -1,5 +1,5 @@
 """Tests for transfer flowcell data"""
-import datetime as dt
+from datetime import datetime
 import warnings
 from pathlib import Path
 
@@ -18,7 +18,7 @@ def test_transfer_flowcell(
     # GIVEN a store with a received but not sequenced sample
     flowcell_id = "HJKMYBCXX"
     housekeeper_api = transfer_flowcell_api.hk
-    assert flowcell_store.samples().count() == 1
+    assert flowcell_store.samples().count() == 2
     assert flowcell_store.flowcells().count() == 0
     assert housekeeper_api.bundles().count() == 0
 
@@ -36,7 +36,7 @@ def test_transfer_flowcell(
     assert isinstance(flowcell_obj.id, int)
     assert flowcell_obj.name == flowcell_id
     status_sample = flowcell_store.samples().first()
-    assert isinstance(status_sample.sequenced_at, dt.datetime)
+    assert isinstance(status_sample.sequenced_at, datetime)
 
     # ... and it should store the fastq files and samplesheet for the sample in housekeeper
     hk_bundle = housekeeper_api.bundle(status_sample.internal_id)

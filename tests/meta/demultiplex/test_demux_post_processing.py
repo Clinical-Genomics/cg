@@ -6,8 +6,10 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
+from cg.meta.transfer import TransferFlowcell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import Flowcell
+from cg.store import Store
 
 
 def test_set_dry_run(
@@ -26,28 +28,6 @@ def test_set_dry_run(
 
     # THEN dry run should be True
     assert post_demux_api.dry_run is True
-
-
-def test_cg_transfer_flow_cell(
-    caplog,
-    demultiplexed_flowcell_working_directory: Path,
-    demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
-):
-    caplog.set_level(logging.INFO)
-
-    # GIVEN a demultiplex context
-
-    # GIVEN a Demultiplexing post process API
-    post_demux_api: DemuxPostProcessingHiseqXAPI = DemuxPostProcessingHiseqXAPI(
-        config=demultiplex_context
-    )
-
-    # When transferring flow cell
-    post_demux_api.cg_transfer_flow_cell(flowcell_name=flowcell_object.flowcell_full_name)
-
-    # THEN we should run the command
-    assert f"transfer {flowcell_object.flowcell_full_name}" in caplog.text
 
 
 def test_add_to_cgstats(
@@ -240,7 +220,11 @@ def test_post_process_flowcell(
     demultiplex_context: CGConfig,
     flowcell_object: Flowcell,
     flowcell_project_id: int,
+    flowcell_store: Store,
     hiseq_x_tile_dir: Path,
+    transfer_flowcell_api,
+    mocker,
+    tmp_file,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -261,6 +245,9 @@ def test_post_process_flowcell(
         f"Project_{flowcell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
+    mocker.patch.object(TransferFlowcell, "_sample_sheet_path")
+    TransferFlowcell._sample_sheet_path.return_value = tmp_file.as_posix()
+
     # When post-processing flow cell
     post_demux_api.post_process_flowcell(
         flowcell=flowcell_object,
@@ -280,6 +267,9 @@ def test_post_process_flowcell(
         f"{flowcell_object.flowcell_full_name} copy is complete and delivery will start"
         in caplog.text
     )
+
+    # THEN we should also transfer the flow cell
+    assert f"Flowcell added: {flowcell_object.flowcell_full_name}" in caplog.text
 
 
 def test_finish_flowcell(

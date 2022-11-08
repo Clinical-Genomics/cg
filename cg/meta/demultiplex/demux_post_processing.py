@@ -9,14 +9,17 @@ from cg.apps.cgstats.crud import create, find
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowcellError
 from cg.meta.demultiplex import files
+from cg.meta.transfer import TransferFlowcell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flowcell import Flowcell
+from cg.store import Store, models
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -28,6 +31,12 @@ class DemuxPostProcessingAPI:
     def __init__(self, config: CGConfig):
         self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
+        self.status_db: Store = config.status_db
+        self.hk_api: HousekeeperAPI = config.housekeeper_api
+        self.transfer_flowcell_api: TransferFlowcell = TransferFlowcell(
+            db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
+        )
+
         self.cg_binary_path: str = config.binary_path
         self.cg_hasta_config: str = config.hasta_config
         self.dry_run = False
@@ -38,18 +47,6 @@ class DemuxPostProcessingAPI:
         self.dry_run = dry_run
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
-
-    def cg_transfer_flow_cell(self, flowcell_name: str) -> None:
-        """Transfer post-processed flow cell."""
-        cg_transfer_parameters: List[str] = [
-            "--config",
-            self.cg_hasta_config,
-            "transfer",
-            flowcell_name,
-        ]
-        cg_process: Process = Process(binary=self.cg_binary_path)
-        LOG.info(f"{self.cg_binary_path} --config {self.cg_hasta_config} transfer {flowcell_name}")
-        cg_process.run_command(parameters=cg_transfer_parameters, dry_run=self.dry_run)
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
@@ -129,7 +126,11 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         self.add_to_cgstats(flowcell_path=flowcell_path)
         self.cgstats_select_project(flowcell_name=flowcell_name, flowcell_path=flowcell_path)
         self.cgstats_lanestats(flowcell_path=flowcell_path)
-        self.cg_transfer_flow_cell(flowcell_name=flowcell_name)
+        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(
+            flowcell_name=flowcell_name
+        )
+        self.status_db.add_commit(new_record)
+        LOG.info(f"Flowcell added: {new_record}")
 
     def finish_flowcell(self, bcl_converter: str, flowcell_name: str, flowcell_path: Path) -> None:
         """Post-processing flow cell."""
@@ -279,7 +280,11 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.bcl_converter == "bcl2fastq":
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
-        self.cg_transfer_flow_cell(flowcell_name=flowcell_name)
+        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(
+            flowcell_name=flowcell_name
+        )
+        self.status_db.add_commit(new_record)
+        LOG.info(f"Flowcell added: {new_record}")
 
     def finish_flowcell(self, flowcell_name: str, bcl_converter: str, force: bool = False) -> None:
         """Go through the post processing steps for a flowcell

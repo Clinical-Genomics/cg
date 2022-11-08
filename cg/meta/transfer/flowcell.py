@@ -1,4 +1,4 @@
-"""API for transfer a flowcell"""
+"""API for transfer a flowcell."""
 
 import logging
 from pathlib import Path
@@ -8,7 +8,6 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.store import Store, models
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -30,6 +29,7 @@ class TransferFlowcell:
         if store and self.hk.tag(flowcell_name) is None:
             self.hk.add_commit(self.hk.new_tag(flowcell_name))
         stats_data: StatsFlowcell = self.stats.flowcell(flowcell_name)
+        print(stats_data)
         flowcell_obj: models.Flowcell = self.db.flowcell(flowcell_name)
 
         if flowcell_obj is None:
@@ -82,7 +82,7 @@ class TransferFlowcell:
         return flowcell_obj
 
     def store_fastqs(self, sample: str, flowcell: str, fastq_files: List[str]):
-        """Store FASTQ files for a sample in housekeeper."""
+        """Store FASTQ files for a sample in Housekeeper."""
         hk_bundle = self.hk.bundle(sample)
         if hk_bundle is None:
             hk_bundle = self.hk.new_bundle(sample)
@@ -123,7 +123,7 @@ class TransferFlowcell:
         self.hk.commit()
 
     def _sample_sheet_path(self, flowcell: str) -> str:
-        """Construct the path to the samplesheet to be stored"""
+        """Construct the path to the samplesheet to be stored."""
         run_name: str = self.stats.run_name(flowcell)
         document_path: str = self.stats.document_path(flowcell)
         unaligned_dir: str = Path(document_path).name
