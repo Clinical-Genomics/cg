@@ -1,6 +1,5 @@
 """Commands to finish up after a demultiplex run."""
 import logging
-from typing import List
 
 import click
 
@@ -11,7 +10,6 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingHiseqXAPI,
 )
 from cg.models.cg_config import CGConfig
-from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 

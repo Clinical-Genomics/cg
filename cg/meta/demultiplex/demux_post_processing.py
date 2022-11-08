@@ -47,9 +47,9 @@ class DemuxPostProcessingAPI:
             "transfer",
             flowcell_name,
         ]
-        cgstats_process: Process = Process(binary=self.cg_binary_path)
+        cg_process: Process = Process(binary=self.cg_binary_path)
         LOG.info(f"{self.cg_binary_path} --config {self.cg_hasta_config} transfer {flowcell_name}")
-        cgstats_process.run_command(parameters=cg_transfer_parameters, dry_run=self.dry_run)
+        cg_process.run_command(parameters=cg_transfer_parameters, dry_run=self.dry_run)
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
