@@ -56,7 +56,7 @@ class BundleAlreadyAddedError(CgError):
 
 class CaseNotFoundError(CgError):
     """
-    Exception raised when a case is not found in Loqusdb.
+    Exception raised when a case is not found.
     """
 
 
@@ -79,24 +79,6 @@ class DecompressionNeededError(CgError):
 class DeliveryReportError(CgError):
     """
     Exception related to delivery report creation.
-    """
-
-
-class DuplicateRecordError(CgError):
-    """
-    Exception related to duplicate records in LoqusDB.
-    """
-
-
-class DuplicateSampleError(CgError):
-    """
-    Exception raised when sample duplicate is found in loqusdb.
-    """
-
-
-class DeleteCaseError(CgError):
-    """
-    Exception raised when a case cannot be deleted in LoqusDB.
     """
 
 
@@ -237,13 +219,25 @@ class DeleteDemuxError(CgError):
     """Raised when there is an issue with wiping a flowcell before start."""
 
 
-class LoqusdbUploadError(CgError):
-    """Exception related to the upload of a case to Loqusdb."""
-
-
 class CustomerPermissionError(CgError):
     """Exception related to the limited permissions of a customer."""
 
 
 class DataIntegrityError(CgError):
     """Raised when data integrity is not met."""
+
+
+class LoqusdbError(CgError):
+    """Exception related to the Loqusdb app."""
+
+
+class LoqusdbUploadCaseError(LoqusdbError):
+    """Exception raised when a case could not be uploaded to Loqusdb."""
+
+
+class LoqusdbDeleteCaseError(LoqusdbError):
+    """Exception raised when a case cannot be deleted from Loqusdb."""
+
+
+class LoqusdbDuplicateRecordError(LoqusdbError):
+    """Exception related to duplicate records in Loqusdb."""

@@ -2,33 +2,11 @@
 from datetime import datetime, timedelta
 
 from cg.cli.upload.base import upload
-from cg.constants.sequencing import SequencingMethod
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from click.testing import CliRunner
 
-from cg.store.api.link import LinkHelper
 from tests.store_helpers import StoreHelpers
-
-
-def test_all_samples_are_non_tumor(analysis_store: Store, case_id: str):
-    """Test that all samples are non tumor."""
-
-    case_obj = analysis_store.family(case_id)
-    assert LinkHelper.is_all_samples_non_tumour(case_obj.links)
-
-
-def test_all_samples_list_analyses(analysis_store: Store, case_id: str):
-    """Test that all samples have an analysis type."""
-
-    # GIVEN case obj where each sample is wgs analysis
-    case_obj = analysis_store.family(case_id)
-
-    # WHEN looking up the analysis type for the samples in the case
-    analysis_types = LinkHelper.get_analysis_type_for_each_link(case_obj.links)
-
-    # THEN all the samples should have analysis type 'wgs'
-    assert len(set(analysis_types)) == 1 and analysis_types[0] == SequencingMethod.WGS
 
 
 def test_upload_started_long_time_ago_raises_exception(
