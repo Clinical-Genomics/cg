@@ -206,7 +206,7 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
     multiple=True,
     help=HELP_KEY_VALUE,
 )
-@click.option("--lk", is_flag=True, help="List all available modifiable sample properties")
+@click.option("-lk", "--listkeys", is_flag=True, help="List all available modifiable sample properties")
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
 @click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
 @click.pass_obj
