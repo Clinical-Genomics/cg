@@ -197,11 +197,17 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
 
 @set_cmd.command()
 @click.option("-lks", "--listkeys_statusdb", is_flag=True, help="List all available modifiable sample properties in statusDB")
-@click.option("-lkl", "--listkeys_lims", is_flag=True, help="List all available modifiable sample properties in LIMS")
+@click.option("-lkl", "--listkeys_lims", is_flag=True, help="List all available modifiable sample properties in LIMS (placeholder)")
+@click.pass_obj
 def list_keys(context: CGConfig, listkeys_statusdb: bool, listkeys_lims: bool):
     """List modifiable keys in statusDB and LIMS"""
+    status_db: Store = context.status_db
+    sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
     if listkeys_statusdb:
         show_set_sample_help(sample_obj)
+    if listkeys_lims:
+        LOG.warning("Function lkl not implemented yet")
+        raise click.Abort
 
 @set_cmd.command()
 @click.argument("sample_id", required=False)
