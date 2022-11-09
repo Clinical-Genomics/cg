@@ -196,6 +196,14 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
 
 
 @set_cmd.command()
+@click.option("-lks", "--listkeys_statusdb", is_flag=True, help="List all available modifiable sample properties in statusDB")
+@click.option("-lkl", "--listkeys_lims", is_flag=True, help="List all available modifiable sample properties in LIMS")
+def list_modifiable_keys(context: CGConfig, lks: bool, lkl: bool):
+    """List modifiable keys in statusDB and LIMS"""
+    if lk:
+        show_set_sample_help(sample_obj)
+
+@set_cmd.command()
 @click.argument("sample_id", required=False)
 @click.option(
     OPTION_SHORT_KEY_VALUE,
@@ -206,7 +214,6 @@ def show_option_help(short_name: str = "", long_name: str = "", help_text: str =
     multiple=True,
     help=HELP_KEY_VALUE,
 )
-@click.option("-lk", "--listkeys", is_flag=True, help="List all available modifiable sample properties")
 @click.option(OPTION_LONG_SKIP_LIMS, is_flag=True, help=HELP_SKIP_LIMS)
 @click.option(OPTION_SHORT_YES, OPTION_LONG_YES, is_flag=True, help=HELP_YES)
 @click.pass_obj
@@ -216,14 +223,10 @@ def sample(
     kwargs: click.Tuple([str, str]),
     skip_lims: bool,
     yes: bool,
-    lk: bool,
 ):
     """Set key values on a sample: (sample_id: optional, internal_id of sample to set value on)"""
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
-
-    if lk:
-        show_set_sample_help(sample_obj)
 
     if sample_obj is None:
         LOG.error(f"Can't find sample {sample_id}")
