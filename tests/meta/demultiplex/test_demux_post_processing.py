@@ -57,7 +57,7 @@ def test_cgstats_select_project(
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
     flowcell_object: Flowcell,
-    flowcell_project_id: int,
+    flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
     caplog.set_level(logging.INFO)
@@ -70,7 +70,7 @@ def test_cgstats_select_project(
     )
 
     # GIVEN an unaligned project directory
-    Path(flowcell_object.path, "Unaligned", f"Project_{flowcell_project_id}").mkdir(
+    Path(flowcell_object.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
         parents=True, exist_ok=True
     )
 
@@ -86,7 +86,7 @@ def test_cgstats_select_project(
     cgstats_select_project_log_file.unlink()
 
     # THEN we should run the command
-    assert f"select --project {flowcell_project_id}" in caplog.text
+    assert f"select --project {flow_cell_project_id}" in caplog.text
 
 
 def test_cgstats_lanestats(
@@ -219,7 +219,7 @@ def test_post_process_flowcell(
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flowcell_object: Flowcell,
-    flowcell_project_id: int,
+    flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
     transfer_flowcell_api,
@@ -242,7 +242,7 @@ def test_post_process_flowcell(
     Path(
         flowcell_object.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
-        f"Project_{flowcell_project_id}",
+        f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
     mocker.patch.object(TransferFlowcell, "_sample_sheet_path")

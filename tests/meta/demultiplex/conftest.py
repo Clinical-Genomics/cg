@@ -77,20 +77,20 @@ def fixture_tmp_flow_cell_run_path(project_dir: Path, flowcell_full_name: str) -
     return tmp_flow_cell_run_path
 
 
-@pytest.fixture(name="flowcell_project_id")
-def fixture_flowcell_project_id() -> int:
+@pytest.fixture(name="flow_cell_project_id")
+def fixture_flow_cell_project_id() -> int:
     """Return flow cell run project id."""
     return 174578
 
 
 @pytest.fixture(name="cgstats_select_project_log_file")
 def fixture_cgstats_select_project_log_file(
-    flowcell_object: Flowcell, flowcell_project_id: int
+    flowcell_object: Flowcell, flow_cell_project_id: int
 ) -> Path:
     """Return cgstats select project out file."""
     return Path(
         flowcell_object.path,
-        "-".join(["stats", str(flowcell_project_id), flowcell_object.flowcell_full_name]) + ".txt",
+        "-".join(["stats", str(flow_cell_project_id), flowcell_object.flowcell_full_name]) + ".txt",
     )
 
 
