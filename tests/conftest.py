@@ -241,8 +241,6 @@ def fixture_base_config_dict() -> dict:
     """Returns the basic configs necessary for running CG."""
     return {
         "database": "sqlite:///",
-        "binary_path": "echo",
-        "hasta_config": "path/to/hasta_config",
         "madeline_exe": "path/to/madeline",
         "bed_path": "path/to/bed",
         "pon_path": "path/to/pon",
@@ -256,6 +254,22 @@ def fixture_base_config_dict() -> dict:
             "smtp_server": "smtp.gmail.com",
             "sender_email": "test@gmail.com",
             "sender_password": "",
+        },
+        "loqusdb": {
+            "binary_path": "binary",
+            "config_path": "config",
+        },
+        "loqusdb-wes": {
+            "binary_path": "binary_wes",
+            "config_path": "config_wes",
+        },
+        "loqusdb-somatic": {
+            "binary_path": "binary_somatic",
+            "config_path": "config_somatic",
+        },
+        "loqusdb-tumor": {
+            "binary_path": "binary_tumor",
+            "config_path": "config_tumor",
         },
     }
 
@@ -505,6 +519,12 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 def fixture_madeline_output(apps_dir: Path) -> Path:
     """Return str of path for file with Madeline output."""
     return Path(apps_dir, "madeline", "madeline.xml")
+
+
+@pytest.fixture(name="file_does_not_exist")
+def fixture_file_does_not_exist() -> Path:
+    """Return a file path that does not exist."""
+    return Path("file", "does", "not", "exist")
 
 
 # Compression fixtures
@@ -1210,7 +1230,6 @@ def fixture_context_config(
 ) -> dict:
     """Return a context config."""
     return {
-        "binary_path": "echo",
         "bed_path": str(cg_dir),
         "database": cg_uri,
         "delivery_path": str(cg_dir),
@@ -1304,6 +1323,8 @@ def fixture_context_config(
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
+        "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
+        "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
         "microsalt": {
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
@@ -1372,15 +1393,3 @@ def fixture_cg_context(
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
-
-
-@pytest.fixture(name="observation_input_files_raw")
-def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict:
-    """Raw observations input files."""
-    return {
-        "case_id": case_id,
-        "pedigree": filled_file,
-        "snv_gbcf": filled_file,
-        "snv_vcf": filled_file,
-        "sv_vcf": None,
-    }

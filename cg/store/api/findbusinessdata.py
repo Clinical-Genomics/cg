@@ -198,7 +198,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Get samples on a given family_id."""
 
         case: models.Family = self.family(internal_id=family_id)
-        return case.get_samples_in_case if case else []
+        return case.samples if case else []
 
     def get_sequenced_samples(self, family_id: str) -> List[models.Sample]:
         """Get sequenced samples by family_id."""
