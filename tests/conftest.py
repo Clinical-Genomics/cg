@@ -1239,7 +1239,6 @@ def fixture_context_config(
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
-        "hasta_config": "cg_config",
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {

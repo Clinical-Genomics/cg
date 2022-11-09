@@ -127,10 +127,10 @@ def fixture_stats_sample_data(sample_id: str, flowcell_full_name: str) -> dict:
     }
 
 
-@pytest.fixture(scope="function")
-def store_stats() -> StatsAPI:
+@pytest.fixture(name="store_stats")
+def fixture_store_stats() -> Generator[StatsAPI, None, None]:
     """Setup base CGStats store."""
-    _store = StatsAPI(
+    _store: StatsAPI = StatsAPI(
         {
             "cgstats": {
                 "binary_path": "echo",
@@ -144,10 +144,12 @@ def store_stats() -> StatsAPI:
     _store.drop_all()
 
 
-@pytest.fixture(scope="function")
-def base_store_stats(store_stats: StatsAPI, stats_sample_data: dict) -> StatsAPI:
+@pytest.fixture(name="base_store_stats")
+def fixture_base_store_stats(
+    store_stats: StatsAPI, stats_sample_data: dict
+) -> Generator[StatsAPI, None, None]:
     """Setup CGStats store with sample data."""
-    demuxes = {}
+    demuxes: dict = {}
     for sample_data in stats_sample_data["samples"]:
         project: stats_models.Project = store_stats.Project(
             projectname="test", time=dt.datetime.now()
@@ -190,8 +192,10 @@ def base_store_stats(store_stats: StatsAPI, stats_sample_data: dict) -> StatsAPI
     yield store_stats
 
 
-@pytest.fixture(scope="function")
-def flowcell_store(base_store: Store, stats_sample_data: dict) -> Store:
+@pytest.fixture(name="flowcell_store")
+def fixture_flowcell_store(
+    base_store: Store, stats_sample_data: dict
+) -> Generator[Store, None, None]:
     """Setup store with sample data for testing flow cell transfer."""
     for sample_data in stats_sample_data["samples"]:
         customer_obj: models.Customer = base_store.customers().first()

@@ -36,9 +36,6 @@ class DemuxPostProcessingAPI:
         self.transfer_flowcell_api: TransferFlowcell = TransferFlowcell(
             db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
         )
-
-        self.cg_binary_path: str = config.binary_path
-        self.cg_hasta_config: str = config.hasta_config
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool) -> None:
