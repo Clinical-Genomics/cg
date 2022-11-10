@@ -169,13 +169,12 @@ def test_demultiplex_all(
     demultiplex_context: CGConfig,
     demultiplex_ready_flowcell: Path,
     caplog,
-    mocker,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    flowcell_object: FlowCell = FlowCell(flow_cell_path=demultiplex_ready_flowcell)
+    flow_cell: FlowCell = FlowCell(flow_cell_path=demultiplex_ready_flowcell)
 
     assert demux_api.run_dir == demultiplex_ready_flowcell.parent
 
@@ -191,7 +190,7 @@ def test_demultiplex_all(
     assert "Found directory" in caplog.text
 
     # THEN assert it found a flowcell that is ready for demultiplexing
-    assert f"Flowcell {flowcell_object.id} is ready for demultiplexing" in caplog.text
+    assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
 
 
 def test_start_demultiplexing_when_already_completed(

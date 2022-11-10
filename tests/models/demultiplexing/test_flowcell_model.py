@@ -24,7 +24,7 @@ def test_flowcell_position(flow_cell_path: Path):
     flowcell_obj = FlowCell(flow_cell_path)
 
     # WHEN fetching the flow cell position
-    position = flowcell_obj.flowcell_position
+    position = flowcell_obj.position
 
     # THEN assert it is A or B
     assert position in ["A", "B"]

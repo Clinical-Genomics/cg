@@ -58,7 +58,7 @@ def create_datasource(
 def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> stats_models.Flowcell:
     flowcell = manager.Flowcell()
     flowcell.flowcellname = demux_results.flowcell.id
-    flowcell.flowcell_pos = demux_results.flowcell.flowcell_position
+    flowcell.flowcell_pos = demux_results.flowcell.position
     flowcell.hiseqtype = "novaseq"
     flowcell.time = sqlalchemy.func.now()
 

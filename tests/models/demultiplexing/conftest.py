@@ -29,7 +29,7 @@ def fixture_flowcell_path(flowcell_runs: Path, flow_cell_full_name: str) -> Path
 @pytest.fixture(name="flow_cell")
 def fixture_flow_cell(flow_cell_path: Path) -> FlowCell:
     flow_cell = FlowCell(flow_cell_path)
-    flow_cell.parse_flowcell_name()
+    flow_cell.parse_flow_cell_name()
     return FlowCell(flow_cell_path)
 
 
@@ -67,7 +67,7 @@ def fixture_demultiplexed_dragen_flow_cell(
 @pytest.fixture(name="dragen_flow_cell")
 def fixture_dragen_flow_cell(dragen_flow_cell_path: Path) -> FlowCell:
     flow_cell = FlowCell(dragen_flow_cell_path)
-    flow_cell.parse_flowcell_name()
+    flow_cell.parse_flow_cell_name()
     return FlowCell(dragen_flow_cell_path)
 
 
