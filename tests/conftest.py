@@ -802,7 +802,7 @@ def fixture_hermes_process() -> ProcessMock:
 @pytest.fixture(name="hermes_api")
 def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a Hermes API with a mocked process."""
-    hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
+    hermes_config = {"hermes": {"binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
@@ -1233,6 +1233,7 @@ def fixture_context_config(
         "bed_path": str(cg_dir),
         "database": cg_uri,
         "delivery_path": str(cg_dir),
+        "hermes": {"binary_path": "hermes"},
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
@@ -1291,7 +1292,6 @@ def fixture_context_config(
         "fluffy": {
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
-            "deploy_config": "fluffy-deploy-stage.yaml",
             "root_dir": str(fluffy_dir),
             "sftp": {
                 "user": "sftpuser",
@@ -1313,7 +1313,7 @@ def fixture_context_config(
             "upload_password": "pass",
             "submitter": "s.submitter",
         },
-        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "hermes": {"binary_path": "hermes"},
         "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
         "lims": {
             "host": "https://lims.scilifelab.se",
@@ -1362,9 +1362,7 @@ def fixture_context_config(
         "scout": {
             "binary_path": "echo",
             "config_path": "scout-stage.yaml",
-            "deploy_config": "scout-deploy-stage.yaml",
         },
-        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "statina": {
             "api_url": "api_url",
             "auth_path": "auth_path",
