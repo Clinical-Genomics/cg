@@ -235,14 +235,13 @@ def test_delete_flow_cell_dry_run_cgstats(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flowcell: Path,
     demultiplex_context: CGConfig,
-    flowcell_name: str,
+    flow_cell_name: str,
     caplog,
 ):
-    """Test if logic work - call function in dry run"""
+    """Test if logic work - call function in dry run."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cell to be deleted
-    flow_cell_name: str = flowcell_name
     assert flow_cell_name in demultiplex_ready_flowcell.name
 
     # WHEN executing the commando to remove flow cell from cgstats in dry run mode
@@ -263,7 +262,7 @@ def test_delete_flow_cell_dry_run_cgstats(
     # THEN the exit code should be fine
     assert result.exit_code == 0
 
-    # THEN the approriate flow cell should be prompted for removal
+    # THEN the appropriate flow cell should be prompted for removal
     assert f"DeleteDemuxAPI-CGStats: Would remove {flow_cell_name}" in caplog.text
 
 
@@ -271,16 +270,14 @@ def test_delete_flow_cell_dry_run_status_db(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flowcell: Path,
     demultiplex_context: CGConfig,
-    flowcell_full_name: str,
-    flowcell_name: str,
+    flow_cell_full_name: str,
+    flow_cell_name: str,
     caplog,
 ):
-    """Test if logic work - call all true if status_db passed"""
+    """Test if logic work - call all true if status_db passed."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cell to be deleted
-
-    flow_cell_name: str = flowcell_name
     assert flow_cell_name in demultiplex_ready_flowcell.name
 
     # WHEN deleting a flowcell from status db in dry run mode
@@ -314,7 +311,7 @@ def test_delete_flow_cell_dry_run_status_db(
     assert f"DeleteDemuxAPI-CGStats: Would remove {flow_cell_name}" in caplog.text
     assert (
         "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
-        f"{demultiplex_context.demultiplex_api.out_dir / Path(flowcell_full_name)}\n"
+        f"{demultiplex_context.demultiplex_api.out_dir / Path(flow_cell_full_name)}\n"
         f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flowcell}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text

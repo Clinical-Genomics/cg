@@ -263,7 +263,7 @@ def fixture_re_sequenced_sample_store(
     another_flow_cell_name: str,
     case_id: str,
     family_name: str,
-    flowcell_name: str,
+    flow_cell_name: str,
     sample_id: str,
     ticket: str,
     timestamp_now: dt.datetime,
@@ -299,7 +299,7 @@ def fixture_re_sequenced_sample_store(
 
     helpers.add_flowcell(
         store=re_sequenced_sample_store,
-        flowcell_id=flowcell_name,
+        flowcell_id=flow_cell_name,
         samples=[store_sample],
         date=one_day_ahead_of_now,
     )

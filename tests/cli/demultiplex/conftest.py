@@ -81,11 +81,11 @@ def fixture_demultiplexed_flowcells_working_directory(project_dir: Path) -> Path
 def fixture_demultiplexed_flowcell_working_directory(
     demux_results_not_finished_dir: Path,
     demultiplexed_flowcells_working_directory: Path,
-    flowcell_full_name: str,
+    flow_cell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    source: Path = Path(demux_results_not_finished_dir, flowcell_full_name)
-    destination: Path = Path(demultiplexed_flowcells_working_directory, flowcell_full_name)
+    source: Path = Path(demux_results_not_finished_dir, flow_cell_full_name)
+    destination: Path = Path(demultiplexed_flowcells_working_directory, flow_cell_full_name)
     shutil.copytree(src=source, dst=destination)
     return destination
 
@@ -94,11 +94,11 @@ def fixture_demultiplexed_flowcell_working_directory(
 def fixture_demultiplexed_flowcell_finished_working_directory(
     demultiplexed_runs: Path,
     demultiplexed_flowcells_working_directory: Path,
-    flowcell_full_name: str,
+    flow_cell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    source: Path = Path(demultiplexed_runs, flowcell_full_name)
-    destination: Path = Path(demultiplexed_flowcells_working_directory, flowcell_full_name)
+    source: Path = Path(demultiplexed_runs, flow_cell_full_name)
+    destination: Path = Path(demultiplexed_flowcells_working_directory, flow_cell_full_name)
     shutil.copytree(src=source, dst=destination)
     return destination
 

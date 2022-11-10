@@ -7,8 +7,8 @@ from cg.models.demultiplex.flowcell import Flowcell
 
 
 @pytest.fixture(name="flow_cell_name")
-def fixture_flow_cell_name(flowcell_full_name: str) -> str:
-    return flowcell_full_name.split("_")[-1][1:]
+def fixture_flow_cell_name(flow_cell_full_name: str) -> str:
+    return flow_cell_full_name.split("_")[-1][1:]
 
 
 @pytest.fixture(name="flowcell_runs")
@@ -16,34 +16,34 @@ def fixture_flowcell_runs(demultiplex_fixtures: Path) -> Path:
     return demultiplex_fixtures / "flowcell-runs"
 
 
-@pytest.fixture(name="flowcell_full_name")
-def fixture_flowcell_full_name() -> str:
+@pytest.fixture(name="flow_cell_full_name")
+def fixture_flow_cell_full_name() -> str:
     return "201203_A00689_0200_AHVKJCDRXX"
 
 
 @pytest.fixture(name="flowcell_path")
-def fixture_flowcell_path(flowcell_runs: Path, flowcell_full_name: str) -> Path:
-    return flowcell_runs / flowcell_full_name
+def fixture_flowcell_path(flowcell_runs: Path, flow_cell_full_name: str) -> Path:
+    return flowcell_runs / flow_cell_full_name
 
 
-@pytest.fixture(name="flow_cell_object")
-def fixture_flow_cell_object(flowcell_path: Path) -> Flowcell:
+@pytest.fixture(name="flow_cell")
+def fixture_flow_cell(flowcell_path: Path) -> Flowcell:
     flow_cell = Flowcell(flowcell_path)
     flow_cell.parse_flowcell_name()
     return Flowcell(flowcell_path)
 
 
 @pytest.fixture(name="demultiplexed_flowcell")
-def fixture_demultiplexed_flowcell(demultiplexed_runs: Path, flowcell_full_name: str) -> Path:
-    return demultiplexed_runs / flowcell_full_name
+def fixture_demultiplexed_flowcell(demultiplexed_runs: Path, flow_cell_full_name: str) -> Path:
+    return demultiplexed_runs / flow_cell_full_name
 
 
 @pytest.fixture(name="bcl2fastq_demux_results")
 def fixture_bcl2fastq_demux_results(
-    demultiplexed_flowcell: Path, flow_cell_object: Flowcell
+    demultiplexed_flowcell: Path, flow_cell: Flowcell
 ) -> DemuxResults:
     return DemuxResults(
-        demux_dir=demultiplexed_flowcell, flowcell=flow_cell_object, bcl_converter="bcl2fastq"
+        demux_dir=demultiplexed_flowcell, flowcell=flow_cell, bcl_converter="bcl2fastq"
     )
 
 
@@ -64,8 +64,8 @@ def fixture_demultiplexed_dragen_flow_cell(
     return demultiplexed_runs / dragen_flow_cell_full_name
 
 
-@pytest.fixture(name="dragen_flow_cell_object")
-def fixture_dragen_flow_cell_object(dragen_flow_cell_path: Path) -> Flowcell:
+@pytest.fixture(name="dragen_flow_cell")
+def fixture_dragen_flow_cell(dragen_flow_cell_path: Path) -> Flowcell:
     flow_cell = Flowcell(dragen_flow_cell_path)
     flow_cell.parse_flowcell_name()
     return Flowcell(dragen_flow_cell_path)
@@ -73,10 +73,10 @@ def fixture_dragen_flow_cell_object(dragen_flow_cell_path: Path) -> Flowcell:
 
 @pytest.fixture(name="dragen_demux_results")
 def fixture_dragen_demux_results(
-    demultiplexed_dragen_flow_cell: Path, dragen_flow_cell_object: Flowcell
+    demultiplexed_dragen_flow_cell: Path, dragen_flow_cell: Flowcell
 ) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_dragen_flow_cell,
-        flowcell=dragen_flow_cell_object,
+        flowcell=dragen_flow_cell,
         bcl_converter="dragen",
     )

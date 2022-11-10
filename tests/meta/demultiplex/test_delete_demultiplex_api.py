@@ -19,7 +19,7 @@ def test_initiate_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
-    flowcell_full_name: str,
+    flow_cell_full_name: str,
 ):
     """Test to initialize the DeleteDemuxAPI"""
 
@@ -33,18 +33,18 @@ def test_initiate_delete_demux_api(
         config=config,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=True,
-        run_path=flowcell_full_name,
+        run_path=flow_cell_full_name,
     )
 
     # THEN the API should be correctly initialized
     assert "DeleteDemuxAPI: API initiated" in caplog.text
 
 
-def test_flowcell_name(wipe_demultiplex_api: DeleteDemuxAPI, flowcell_name: str):
+def test_flowcell_name(wipe_demultiplex_api: DeleteDemuxAPI, flow_cell_name: str):
     """Test to parse the correct flow cell name from the run name"""
 
     # GIVEN a DeleteDemuxAPI object with loaded flow cell information
-    name_to_be_generated: str = flowcell_name
+    name_to_be_generated: str = flow_cell_name
 
     # WHEN the name is generated
     generated_flow_cell_name = wipe_demultiplex_api.flow_cell_name
@@ -57,7 +57,7 @@ def test_get_presence_status_status_db(
     caplog,
     helpers: StoreHelpers,
     wipe_demultiplex_api: DeleteDemuxAPI,
-    flowcell_name: str,
+    flow_cell_name: str,
 ):
     """Test to see if the presence of a flowcell is detected in status-db"""
     caplog.set_level(logging.INFO)
@@ -72,7 +72,7 @@ def test_get_presence_status_status_db(
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
     helpers.add_flowcell(
-        store=wipe_demux_api.status_db, flowcell_id=flowcell_name, sequencer_type="novaseq"
+        store=wipe_demux_api.status_db, flowcell_id=flow_cell_name, sequencer_type="novaseq"
     )
     populated_presence: bool = wipe_demux_api.status_db_presence
 
@@ -84,7 +84,7 @@ def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
-    flowcell_full_name: str,
+    flow_cell_full_name: str,
     stats_api: StatsAPI,
 ):
     """Test to test function to set the API to run in dry run mode"""
@@ -96,7 +96,7 @@ def test_set_dry_run_delete_demux_api(
         config=cg_context,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=True,
-        run_path=flowcell_full_name,
+        run_path=flow_cell_full_name,
     )
 
     # THEN the dry run parameter should be set to True and it should be logged
@@ -105,14 +105,14 @@ def test_set_dry_run_delete_demux_api(
 
 
 def test_no_active_samples_on_flow_cell(
-    populated_wipe_demultiplex_api: DeleteDemuxAPI, flowcell_name: str
+    populated_wipe_demultiplex_api: DeleteDemuxAPI, flow_cell_name: str
 ):
     """Test if the function to find no active samples works correctly"""
 
     # GIVEN a flowcell with no active samples related to it
     store_: Store = populated_wipe_demultiplex_api.status_db
     samples_on_flow_cell: List[Sample] = (
-        store_.query(Flowcell).filter(Flowcell.name == flowcell_name).first().samples
+        store_.query(Flowcell).filter(Flowcell.name == flow_cell_name).first().samples
     )
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
@@ -131,7 +131,7 @@ def test_no_active_samples_on_flow_cell(
 
 def test_active_samples_on_flow_cell(
     active_flow_cell_store: Store,
-    flowcell_name: str,
+    flow_cell_name: str,
     active_wipe_demultiplex_api: DeleteDemuxAPI,
 ):
     """Test if the function to find active samples works correctly"""
@@ -139,7 +139,7 @@ def test_active_samples_on_flow_cell(
     store_: Store = active_flow_cell_store
 
     samples_on_flow_cell: List[Sample] = (
-        store_.query(Flowcell).filter(Flowcell.name == flowcell_name).first().samples
+        store_.query(Flowcell).filter(Flowcell.name == flow_cell_name).first().samples
     )
 
     assert samples_on_flow_cell
@@ -176,7 +176,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
-    flowcell_full_name: str,
+    flow_cell_full_name: str,
     populated_flow_cell_store: Store,
     sample_level_housekeeper_api: HousekeeperAPI,
     tmp_fastq_paths: List[Path],
@@ -197,7 +197,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
         config=cg_context,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_path=Path(flowcell_full_name),
+        run_path=Path(flow_cell_full_name),
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
@@ -223,7 +223,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     cg_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
     flow_cell_name_housekeeper_api: HousekeeperAPI,
-    flowcell_full_name: str,
+    flow_cell_full_name: str,
     populated_flow_cell_store: Store,
     tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
@@ -243,7 +243,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
         config=cg_context,
         demultiplex_base=demultiplexed_flowcells_working_directory,
         dry_run=False,
-        run_path=Path(flowcell_full_name),
+        run_path=Path(flow_cell_full_name),
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
@@ -264,7 +264,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
 
 def test_delete_flow_cell_statusdb(
     caplog,
-    flowcell_name: str,
+    flow_cell_name: str,
     populated_wipe_demultiplex_api: DeleteDemuxAPI,
     populated_wipe_demux_context: CGConfig,
 ):
@@ -279,7 +279,7 @@ def test_delete_flow_cell_statusdb(
 
     existing_object: Flowcell = (
         populated_wipe_demux_context.status_db.query(Flowcell)
-        .filter(Flowcell.name == flowcell_name)
+        .filter(Flowcell.name == flow_cell_name)
         .first()
     )
     assert existing_object
@@ -296,7 +296,7 @@ def test_delete_flow_cell_statusdb(
 
     existing_object: Flowcell = (
         populated_wipe_demux_context.status_db.query(Flowcell)
-        .filter(Flowcell.name == flowcell_name)
+        .filter(Flowcell.name == flow_cell_name)
         .first()
     )
 
@@ -351,7 +351,7 @@ def test_delete_flow_cell_cgstats(
     caplog,
     populated_wipe_demux_context: CGConfig,
     populated_wipe_demultiplex_api: DeleteDemuxAPI,
-    flowcell_name: str,
+    flow_cell_name: str,
 ):
     """Test if function to remove objects from cg-stats is working"""
 
@@ -363,7 +363,7 @@ def test_delete_flow_cell_cgstats(
 
     existing_object: models.Flowcell = (
         populated_wipe_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == flowcell_name)
+        .filter(models.Flowcell.flowcellname == flow_cell_name)
         .first()
     )
 
@@ -375,13 +375,13 @@ def test_delete_flow_cell_cgstats(
 
     # THEN the user should be notified that the object was removed
 
-    assert f"Removing entry {flowcell_name} in from cgstats" in caplog.text
+    assert f"Removing entry {flow_cell_name} in from cgstats" in caplog.text
 
     # AND the object should no longer exist
 
     existing_object: models.Flowcell = (
         populated_wipe_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == flowcell_name)
+        .filter(models.Flowcell.flowcellname == flow_cell_name)
         .first()
     )
 

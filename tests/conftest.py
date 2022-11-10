@@ -596,28 +596,28 @@ def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "flowcell-runs")
 
 
-@pytest.fixture(name="flow_cell_object")
-def fixture_flow_cell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flowcell:
+@pytest.fixture(name="flow_cell")
+def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> Flowcell:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return Flowcell(flowcell_path=Path(demux_run_dir, flowcell_full_name))
+    return Flowcell(flowcell_path=Path(demux_run_dir, flow_cell_full_name))
 
 
 @pytest.fixture(name="flow_cell_id")
-def fixture_flow_cell_id(flow_cell_object: Flowcell) -> str:
+def fixture_flow_cell_id(flow_cell: Flowcell) -> str:
     """Return flow cell id from flow cell object."""
-    return flow_cell_object.flowcell_id
+    return flow_cell.flowcell_id
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")
-def fixture_demultiplexing_delivery_file(flow_cell_object: Flowcell) -> Path:
+def fixture_demultiplexing_delivery_file(flow_cell: Flowcell) -> Path:
     """Return demultiplexing delivery started file."""
-    return Path(flow_cell_object.path, DemultiplexingDirsAndFiles.DELIVERY)
+    return Path(flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
-def fixture_hiseq_x_tile_dir(flow_cell_object: Flowcell) -> Path:
+def fixture_hiseq_x_tile_dir(flow_cell: Flowcell) -> Path:
     """Return Hiseq X tile dir."""
-    return Path(flow_cell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+    return Path(flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
@@ -628,20 +628,20 @@ def fixture_lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
 
 @pytest.fixture(name="lims_novaseq_samples_raw")
 def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
-    """Return a list of raw flowcell samples."""
+    """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
     )
 
 
-@pytest.fixture(name="flowcell_full_name")
-def fixture_flowcell_full_name() -> str:
+@pytest.fixture(name="flow_cell_full_name")
+def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
 
 
-@pytest.fixture(name="flowcell_name")
-def fixture_flowcell_name() -> str:
+@pytest.fixture(name="flow_cell_name")
+def fixture_flow_cell_name() -> str:
     """Return flow cell name."""
     return "HVKJCDRXX"
 

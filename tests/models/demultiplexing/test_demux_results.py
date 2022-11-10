@@ -4,12 +4,12 @@ from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 from cg.models.demultiplex.flowcell import Flowcell
 
 
-def test_demux_results_instance(demultiplexed_flowcell: Path, flow_cell_object: Flowcell):
+def test_demux_results_instance(demultiplexed_flowcell: Path, flow_cell: Flowcell):
     # GIVEN the path to a demultiplexed flow cell and a flow cell object
 
     # WHEN instantiating a demux results object
     demux_results = DemuxResults(
-        demux_dir=demultiplexed_flowcell, flowcell=flow_cell_object, bcl_converter="bcl2fastq"
+        demux_dir=demultiplexed_flowcell, flowcell=flow_cell, bcl_converter="bcl2fastq"
     )
 
     # THEN assert that the results dir is the unaligned dir
