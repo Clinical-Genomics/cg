@@ -42,5 +42,15 @@ class BalsamicObservationsAnalysisTag(StrEnum):
     """Cancer observations files analysis tags."""
 
     SNV_VCF: str = "vcf-snv-clinical"
-    SNV_ALL_VCF: str = "vcf-snv-clinical-germline"
+    SNV_ALL_VCF: str = "vcf-snv-germline-tumor"
     SV_VCF: str = "vcf-sv-clinical"
+    PROFILE_VCF: str = "vcf-snv-germline-normal"
+
+
+class BalsamicLoadParameters(Enum):
+    """Cancer Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD: float = 0.95
+    GQ_THRESHOLD: int = 10
+    HARD_THRESHOLD: float = 0.95
+    SOFT_THRESHOLD: float = 0.90

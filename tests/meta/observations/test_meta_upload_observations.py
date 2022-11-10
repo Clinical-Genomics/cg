@@ -7,7 +7,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LoqusdbInstance
+from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError, CaseNotFoundError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
@@ -63,6 +63,83 @@ def test_get_loqusdb_api(
     assert isinstance(loqusdb_api, LoqusdbAPI)
     assert loqusdb_api.binary_path == loqusdb_config_dict[LoqusdbInstance.WES]["binary_path"]
     assert loqusdb_api.config_path == loqusdb_config_dict[LoqusdbInstance.WES]["config_path"]
+
+
+def test_is_duplicate(
+    case_id: str,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    observations_input_files: MipDNAObservationsInputFiles,
+    analysis_store: Store,
+    mocker,
+):
+    """Test duplicate extraction for a case that is not Loqusdb."""
+
+    # GIVEN a Loqusdb instance with no case duplicates
+    case: models.Family = analysis_store.family(case_id)
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
+
+    # WHEN checking that a case has not been uploaded to Loqusdb
+    is_duplicate: bool = mip_dna_observations_api.is_duplicate(
+        case=case,
+        loqusdb_api=mip_dna_observations_api.loqusdb_api,
+        profile_vcf_path=observations_input_files.profile_vcf_path,
+        profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
+    )
+
+    # THEN there should be no duplicates in Loqusdb
+    assert is_duplicate is False
+
+
+def test_is_duplicate_case_output(
+    case_id: str,
+    observations_input_files: MipDNAObservationsInputFiles,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    analysis_store: Store,
+):
+    """Test duplicate extraction for a case that already exists in Loqusdb."""
+
+    # GIVEN a Loqusdb instance with a duplicated case
+    case: models.Family = analysis_store.family(case_id)
+
+    # WHEN checking that a case has already been uploaded to Loqusdb
+    is_duplicate: bool = mip_dna_observations_api.is_duplicate(
+        case=case,
+        loqusdb_api=mip_dna_observations_api.loqusdb_api,
+        profile_vcf_path=observations_input_files.profile_vcf_path,
+        profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
+    )
+
+    # THEN an upload of a duplicate case should be detected
+    assert is_duplicate is True
+
+
+def test_is_duplicate_loqusdb_id(
+    case_id: str,
+    loqusdb_id: str,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    observations_input_files: MipDNAObservationsInputFiles,
+    analysis_store: Store,
+    mocker,
+):
+    """Test duplicate extraction for a case that already exists in Loqusdb."""
+
+    # GIVEN a Loqusdb instance with a duplicated case and whose samples already have a Loqusdb ID
+    case: models.Family = analysis_store.family(case_id)
+    case.links[0].sample.loqusdb_id = loqusdb_id
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
+    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
+
+    # WHEN checking that the sample observations have already been uploaded
+    is_duplicate: bool = mip_dna_observations_api.is_duplicate(
+        case=case,
+        loqusdb_api=mip_dna_observations_api.loqusdb_api,
+        profile_vcf_path=observations_input_files.profile_vcf_path,
+        profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD,
+    )
+
+    # THEN a duplicated upload should be identified
+    assert is_duplicate is True
 
 
 def test_mip_dna_get_loqusdb_instance(mip_dna_observations_api: MipDNAObservationsAPI):
@@ -165,74 +242,6 @@ def test_mip_dna_load_observations_tumor_case(
         mip_dna_observations_api.load_observations(case, observations_input_files)
 
     assert f"Case {case.internal_id} has tumour samples. Cancelling upload." in caplog.text
-
-
-def test_mip_dna_is_duplicate(
-    case_id: str,
-    mip_dna_observations_api: MipDNAObservationsAPI,
-    observations_input_files: MipDNAObservationsInputFiles,
-    analysis_store: Store,
-    mocker,
-):
-    """Test duplicate extraction for a case that is not Loqusdb."""
-
-    # GIVEN a Loqusdb instance with no case duplicates
-    case: models.Family = analysis_store.family(case_id)
-    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
-    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
-
-    # WHEN checking that a case has not been uploaded to Loqusdb
-    is_duplicate: bool = mip_dna_observations_api.is_duplicate(
-        case=case, profile_vcf_path=observations_input_files.profile_vcf_path
-    )
-
-    # THEN there should be no duplicates in Loqusdb
-    assert is_duplicate is False
-
-
-def test_mip_dna_is_duplicate_case_output(
-    case_id: str,
-    observations_input_files: MipDNAObservationsInputFiles,
-    mip_dna_observations_api: MipDNAObservationsAPI,
-    analysis_store: Store,
-):
-    """Test duplicate extraction for a case that already exists in Loqusdb."""
-
-    # GIVEN a Loqusdb instance with a duplicated case
-    case: models.Family = analysis_store.family(case_id)
-
-    # WHEN checking that a case has already been uploaded to Loqusdb
-    is_duplicate: bool = mip_dna_observations_api.is_duplicate(
-        case=case, profile_vcf_path=observations_input_files.profile_vcf_path
-    )
-
-    # THEN an upload of a duplicate case should be detected
-    assert is_duplicate is True
-
-
-def test_mip_dna_is_duplicate_loqusdb_id(
-    case_id: str,
-    loqusdb_id: str,
-    mip_dna_observations_api: MipDNAObservationsAPI,
-    observations_input_files: MipDNAObservationsInputFiles,
-    analysis_store: Store,
-    mocker,
-):
-    """Test duplicate extraction for a case that already exists in Loqusdb."""
-
-    # GIVEN a Loqusdb instance with a duplicated case and whose samples already have a Loqusdb ID
-    case: models.Family = analysis_store.family(case_id)
-    case.links[0].sample.loqusdb_id = loqusdb_id
-    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_case", return_value=None)
-    mocker.patch.object(mip_dna_observations_api.loqusdb_api, "get_duplicate", return_value=False)
-
-    # WHEN checking that the sample observations have already been uploaded
-    is_duplicate: bool = mip_dna_observations_api.is_duplicate(
-        case=case, profile_vcf_path=observations_input_files.profile_vcf_path
-    )
-
-    # THEN a duplicated upload should be identified
-    assert is_duplicate is True
 
 
 def test_mip_dna_delete_case(

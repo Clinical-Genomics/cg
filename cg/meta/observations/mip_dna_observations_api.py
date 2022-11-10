@@ -1,7 +1,6 @@
 """API for uploading rare disease observations."""
 
 import logging
-from pathlib import Path
 from typing import Dict
 
 from housekeeper.store.models import Version, File
@@ -53,13 +52,18 @@ class MipDNAObservationsAPI(ObservationsAPI):
             LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
             raise LoqusdbUploadCaseError
 
-        if self.is_duplicate(case=case, profile_vcf_path=input_files.profile_vcf_path):
+        if self.is_duplicate(
+            case=case,
+            loqusdb_api=self.loqusdb_api,
+            profile_vcf_path=input_files.profile_vcf_path,
+            profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
+        ):
             LOG.error(
                 f"Case {case.internal_id} has already been uploaded to {repr(self.loqusdb_api)}"
             )
             raise LoqusdbDuplicateRecordError
 
-        load_output = self.loqusdb_api.load(
+        load_output: dict = self.loqusdb_api.load(
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path,
             sv_vcf_path=input_files.sv_vcf_path,
@@ -72,15 +76,6 @@ class MipDNAObservationsAPI(ObservationsAPI):
         loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)["_id"])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
-
-    def is_duplicate(self, case: models.Family, profile_vcf_path: Path) -> bool:
-        """Check if a case has already been uploaded to Loqusdb."""
-        loqusdb_case: dict = self.loqusdb_api.get_case(case_id=case.internal_id)
-        duplicate = self.loqusdb_api.get_duplicate(
-            profile_vcf_path=profile_vcf_path,
-            profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
-        )
-        return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
     def extract_observations_files_from_hk(
         self, hk_version: Version

@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional, Union
 
 from housekeeper.store.models import Version
@@ -69,6 +70,20 @@ class ObservationsAPI:
             ),
         }
         return loqusdb_apis[loqusdb_instance]
+
+    @staticmethod
+    def is_duplicate(
+        case: models.Family,
+        loqusdb_api: LoqusdbAPI,
+        profile_vcf_path: Path,
+        profile_threshold: float,
+    ) -> bool:
+        """Check if a case has already been uploaded to Loqusdb."""
+        loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
+        duplicate = loqusdb_api.get_duplicate(
+            profile_vcf_path=profile_vcf_path, profile_threshold=profile_threshold
+        )
+        return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
     def update_statusdb_loqusdb_id(
         self, samples: List[models.Family], loqusdb_id: Optional[str]

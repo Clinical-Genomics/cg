@@ -23,7 +23,7 @@ class ObservationsInputFiles(BaseModel):
 
     snv_vcf_path: Path
     sv_vcf_path: Optional[Path] = None
-    profile_vcf_path: Optional[Path] = None
+    profile_vcf_path: Path
 
     _ = validator(
         "snv_vcf_path", "sv_vcf_path", "profile_vcf_path", always=False, allow_reuse=True

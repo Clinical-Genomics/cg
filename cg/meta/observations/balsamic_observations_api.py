@@ -7,6 +7,7 @@ from cg.constants.observations import (
     BalsamicObservationsAnalysisTag,
     LoqusdbInstance,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+    BalsamicLoadParameters,
 )
 from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.store import models
@@ -39,44 +40,49 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             raise LoqusdbUploadCaseError
 
-        if self.is_duplicate(case=case, loqusdb_api=self.loqusdb_somatic_api) or self.is_duplicate(
-            case=case, loqusdb_api=self.loqusdb_tumor_api
-        ):
+        duplicate_somatic: bool = self.is_duplicate(
+            case=case,
+            loqusdb_api=self.loqusdb_somatic_api,
+            profile_vcf_path=input_files.profile_vcf_path,
+            profile_threshold=BalsamicLoadParameters.PROFILE_THRESHOLD,
+        )
+        duplicate_tumor: bool = self.is_duplicate(
+            case=case,
+            loqusdb_api=self.loqusdb_tumor_api,
+            profile_vcf_path=input_files.profile_vcf_path,
+            profile_threshold=BalsamicLoadParameters.PROFILE_THRESHOLD,
+        )
+        if duplicate_somatic or duplicate_tumor:
             LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
             raise LoqusdbDuplicateRecordError
 
-        self.load_somatic_observations(case=models.Family, input_files=input_files)
-        self.load_tumor_observations(case=models.Family, input_files=input_files)
-
-    @staticmethod
-    def is_duplicate(case: models.Family, loqusdb_api: LoqusdbAPI) -> bool:
-        """Check if a case has already been uploaded to Loqusdb."""
-        loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
-        return bool(loqusdb_case or case.loqusdb_uploaded_samples)
-
-    def load_somatic_observations(
-        self, case: models.Family, input_files: BalsamicObservationsInputFiles
-    ) -> None:
-        """Load cancer somatic observations."""
-        load_output = self.loqusdb_somatic_api.load(
-            case_id=case.internal_id,
-            snv_vcf_path=input_files.snv_vcf_path,
-            sv_vcf_path=input_files.sv_vcf_path,
+        self.load_cancer_observations(
+            case=case, input_files=input_files, loqusdb_api=self.loqusdb_somatic_api
+        )
+        self.load_cancer_observations(
+            case=case, input_files=input_files, loqusdb_api=self.loqusdb_tumor_api
         )
         loqusdb_id: str = str(self.loqusdb_somatic_api.get_case(case_id=case.internal_id)["_id"])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
-        LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_somatic_api)}")
 
-    def load_tumor_observations(
-        self, case: models.Family, input_files: BalsamicObservationsInputFiles
+    @staticmethod
+    def load_cancer_observations(
+        case: models.Family,
+        input_files: BalsamicObservationsInputFiles,
+        loqusdb_api: LoqusdbAPI,
     ) -> None:
-        """Load cancer germline observations."""
-        load_output = self.loqusdb_tumor_api.load(
-            case_id=case.internal_id, snv_vcf_path=input_files.snv_all_vcf_path
+        """Load cancer observations to a specific Loqusdb API."""
+        is_somatic: bool = True if "somatic" in loqusdb_api.config_path else False
+        load_output: dict = loqusdb_api.load(
+            case_id=case.internal_id,
+            snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_all_vcf_path,
+            sv_vcf_path=input_files.sv_vcf_path if is_somatic else None,
+            profile_vcf_path=input_files.profile_vcf_path,
+            gq_threshold=BalsamicLoadParameters.GQ_THRESHOLD.value,
+            hard_threshold=BalsamicLoadParameters.HARD_THRESHOLD.value,
+            soft_threshold=BalsamicLoadParameters.SOFT_THRESHOLD.value,
         )
-        loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)["_id"])
-        self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
-        LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_tumor_api)}")
+        LOG.info(f"Uploaded {load_output['variants']} variants to {repr(loqusdb_api)}")
 
     def extract_observations_files_from_hk(
         self, hk_version: Version
@@ -91,11 +97,15 @@ class BalsamicObservationsAPI(ObservationsAPI):
         sv_vcf_file: File = self.housekeeper_api.files(
             version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
         ).first()
+        profile_vcf_file: File = self.housekeeper_api.files(
+            version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.PROFILE_VCF]
+        ).first()
 
         return BalsamicObservationsInputFiles(
             snv_vcf_path=snv_vcf_file.full_path if snv_vcf_file else None,
             snv_all_vcf_path=snv_all_vcf_file.full_path if snv_all_vcf_file else None,
             sv_vcf_path=sv_vcf_file.full_path if sv_vcf_file else None,
+            profile_vcf_path=profile_vcf_file.full_path if profile_vcf_file else None,
         )
 
     def delete_case(self, case: models.Family) -> None:
