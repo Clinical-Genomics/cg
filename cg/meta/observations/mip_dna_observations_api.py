@@ -55,7 +55,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
 
         if self.is_duplicate(case=case, profile_vcf_path=input_files.profile_vcf_path):
             LOG.error(
-                f"Case {case.internal_id} has been already uploaded to {repr(self.loqusdb_api)}"
+                f"Case {case.internal_id} has already been uploaded to {repr(self.loqusdb_api)}"
             )
             raise LoqusdbDuplicateRecordError
 

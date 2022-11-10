@@ -140,7 +140,7 @@ def test_mip_dna_load_observations_duplicate(
         # THEN a duplicate record error should be raised
         mip_dna_observations_api.load_observations(case, observations_input_files)
 
-    assert f"Case {case.internal_id} has been already uploaded to Loqusdb" in caplog.text
+    assert f"Case {case.internal_id} has already been uploaded to Loqusdb" in caplog.text
 
 
 def test_mip_dna_load_observations_tumor_case(
@@ -201,7 +201,7 @@ def test_mip_dna_is_duplicate_case_output(
     # GIVEN a Loqusdb instance with a duplicated case
     case: models.Family = analysis_store.family(case_id)
 
-    # WHEN checking that a case has been already uploaded to Loqusdb
+    # WHEN checking that a case has already been uploaded to Loqusdb
     is_duplicate: bool = mip_dna_observations_api.is_duplicate(
         case=case, profile_vcf_path=observations_input_files.profile_vcf_path
     )
