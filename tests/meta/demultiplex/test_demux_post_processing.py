@@ -75,9 +75,7 @@ def test_cgstats_select_project(
     )
 
     # When processing project with cgstats
-    post_demux_api.cgstats_select_project(
-        flowcell_id=flow_cell.flowcell_id, flowcell_path=flow_cell.path
-    )
+    post_demux_api.cgstats_select_project(flowcell_id=flow_cell.id, flowcell_path=flow_cell.path)
 
     # THEN we should have created a stats outfile
     assert cgstats_select_project_log_file.exists()
@@ -86,7 +84,7 @@ def test_cgstats_select_project(
     cgstats_select_project_log_file.unlink()
 
     # THEN we should run the command
-    assert f"select --project {flow_cell_project_id} {flow_cell.flowcell_id}" in caplog.text
+    assert f"select --project {flow_cell_project_id} {flow_cell.id}" in caplog.text
 
 
 def test_cgstats_lanestats(
@@ -266,7 +264,7 @@ def test_post_process_flowcell(
     assert f"{flow_cell.flowcell_full_name} copy is complete and delivery will start" in caplog.text
 
     # THEN we should also transfer the flow cell
-    assert f"Flow cell added: {flow_cell.flowcell_id}" in caplog.text
+    assert f"Flow cell added: {flow_cell.id}" in caplog.text
 
 
 def test_finish_flowcell(

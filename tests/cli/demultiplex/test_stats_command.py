@@ -19,7 +19,7 @@ def test_select_command(
 ):
     demultiplex_context.cg_stats_api_ = populated_stats_api
     # GIVEN a stats api with some information about a flowcell
-    flowcell_id: str = flow_cell.flowcell_id
+    flowcell_id: str = flow_cell.id
     full_flow_cell_name: str = flow_cell.flowcell_full_name
     assert find.get_flowcell_id(flowcell_id)
     demux_results = DemuxResults(

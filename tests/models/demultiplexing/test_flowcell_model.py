@@ -14,7 +14,7 @@ def test_flowcell_id(flow_cell_path: Path):
     flowcell_obj = FlowCell(flow_cell_path)
 
     # THEN assert that the flow cell id is parsed
-    assert flowcell_obj.flowcell_id == flowcell_id
+    assert flowcell_obj.id == flowcell_id
 
 
 def test_flowcell_position(flow_cell_path: Path):

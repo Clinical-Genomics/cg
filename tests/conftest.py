@@ -605,7 +605,7 @@ def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> FlowCell
 @pytest.fixture(name="flow_cell_id")
 def fixture_flow_cell_id(flow_cell: FlowCell) -> str:
     """Return flow cell id from flow cell object."""
-    return flow_cell.flowcell_id
+    return flow_cell.id
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")

@@ -121,11 +121,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         LOG.info(f"{flowcell_name} copy is complete and delivery will start")
         Path(flowcell_path, DemultiplexingDirsAndFiles.DELIVERY).touch()
         self.add_to_cgstats(flowcell_path=flowcell_path)
-        self.cgstats_select_project(flowcell_id=flowcell.flowcell_id, flowcell_path=flowcell_path)
+        self.cgstats_select_project(flowcell_id=flowcell.id, flowcell_path=flowcell_path)
         self.cgstats_lanestats(flowcell_path=flowcell_path)
-        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(
-            flow_cell_id=flowcell.flowcell_id
-        )
+        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flowcell.id)
         self.status_db.add_commit(new_record)
         LOG.info(f"Flow cell added: {new_record}")
 
@@ -159,7 +157,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
     def rename_files(self, demux_results: DemuxResults) -> None:
         """Rename the files according to how we want to have it after demultiplexing is ready"""
         LOG.info("Renaming files for flowcell %s", demux_results.flowcell.flowcell_full_name)
-        flowcell_id: str = demux_results.flowcell.flowcell_id
+        flowcell_id: str = demux_results.flowcell.id
         for project_dir in demux_results.raw_projects:
             files.rename_project_directory(
                 project_directory=project_dir, flowcell_id=flowcell_id, dry_run=self.dry_run
@@ -226,7 +224,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def create_cgstats_reports(self, demux_results: DemuxResults) -> None:
         """Create a report for every project that was demultiplexed"""
-        flowcell_id: str = demux_results.flowcell.flowcell_id
+        flowcell_id: str = demux_results.flowcell.id
         for project in demux_results.projects:
             project_name: str = project.split("_")[-1]
             report_data: List[str] = self.get_report_data(
@@ -310,7 +308,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             if not force:
                 return
             LOG.info("Post processing flowcell anyway")
-        self.post_process_flowcell(demux_results=demux_results, flowcell_id=flowcell.flowcell_id)
+        self.post_process_flowcell(demux_results=demux_results, flowcell_id=flowcell.id)
 
     def finish_all_flowcells(self, bcl_converter: str) -> None:
         """Loop over all flowcells and post process those that need it"""

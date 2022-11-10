@@ -191,7 +191,7 @@ def test_demultiplex_all(
     assert "Found directory" in caplog.text
 
     # THEN assert it found a flowcell that is ready for demultiplexing
-    assert f"Flowcell {flowcell_object.flowcell_id} is ready for demultiplexing" in caplog.text
+    assert f"Flowcell {flowcell_object.id} is ready for demultiplexing" in caplog.text
 
 
 def test_start_demultiplexing_when_already_completed(
@@ -227,7 +227,7 @@ def test_start_demultiplexing_when_already_completed(
     assert result.exit_code == 0
 
     # THEN assert it was communicated that demultiplexing was completed
-    assert f"Demultiplexing is already completed for flowcell {flowcell.flowcell_id}"
+    assert f"Demultiplexing is already completed for flowcell {flowcell.id}"
 
 
 def test_delete_flow_cell_dry_run_cgstats(

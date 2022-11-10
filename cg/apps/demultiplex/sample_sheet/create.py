@@ -27,7 +27,7 @@ def create_sample_sheet(
         raise FlowcellError(message=message)
 
     sample_sheet_creator = SampleSheetCreator(
-        flowcell_id=flowcell.flowcell_id,
+        flowcell_id=flowcell.id,
         lims_samples=lims_samples,
         run_parameters=run_parameters,
         bcl_converter=bcl_converter,

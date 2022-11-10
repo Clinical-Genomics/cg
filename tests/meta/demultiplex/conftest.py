@@ -88,7 +88,7 @@ def fixture_cgstats_select_project_log_file(flow_cell: FlowCell, flow_cell_proje
     """Return cgstats select project out file."""
     return Path(
         flow_cell.path,
-        "-".join(["stats", str(flow_cell_project_id), flow_cell.flowcell_id]) + ".txt",
+        "-".join(["stats", str(flow_cell_project_id), flow_cell.id]) + ".txt",
     )
 
 

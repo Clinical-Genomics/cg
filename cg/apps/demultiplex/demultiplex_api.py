@@ -55,7 +55,7 @@ class DemultiplexingAPI:
         """Create the sbatch error string"""
         LOG.info("Creating the sbatch error string")
         error_parameters: SbatchError = SbatchError(
-            flowcell_name=flowcell.flowcell_id,
+            flowcell_name=flowcell.id,
             email=email,
             logfile=DemultiplexingAPI.get_stderr_logfile(flowcell=flowcell).as_posix(),
             demux_dir=demux_dir.as_posix(),
@@ -91,7 +91,7 @@ class DemultiplexingAPI:
     @staticmethod
     def get_run_name(flowcell: FlowCell) -> str:
         """Create the run name for the sbatch job"""
-        return f"{flowcell.flowcell_id}_demultiplex"
+        return f"{flowcell.id}_demultiplex"
 
     @staticmethod
     def get_stderr_logfile(flowcell: FlowCell) -> Path:
@@ -140,13 +140,13 @@ class DemultiplexingAPI:
         AND
         that the demultiplexing completed file does not exist
         """
-        LOG.debug("Check if demultiplexing is ongoing for %s", flowcell.flowcell_id)
+        LOG.debug("Check if demultiplexing is ongoing for %s", flowcell.id)
         if not flowcell.demultiplexing_started_path.exists():
             LOG.debug("Demultiplexing has not been started")
             return False
         LOG.debug("Demultiplexing has been started!")
         if self.is_demultiplexing_completed(flowcell):
-            LOG.debug("Demultiplexing is already completed for flowcell %s", flowcell.flowcell_id)
+            LOG.debug("Demultiplexing is already completed for flowcell %s", flowcell.id)
             return False
         LOG.debug("Demultiplexing is not finished!")
         return True
@@ -159,13 +159,13 @@ class DemultiplexingAPI:
             - sample sheet needs to exist
             - demultiplexing should not be running
         """
-        LOG.info("Check if demultiplexing is possible for %s", flowcell.flowcell_id)
+        LOG.info("Check if demultiplexing is possible for %s", flowcell.id)
         demultiplexing_possible = True
         if not flowcell.is_flowcell_ready():
             demultiplexing_possible = False
 
         if not flowcell.sample_sheet_exists():
-            LOG.warning("Could not find sample sheet for %s", flowcell.flowcell_id)
+            LOG.warning("Could not find sample sheet for %s", flowcell.id)
             demultiplexing_possible = False
 
         if flowcell.is_demultiplexing_started():
@@ -177,7 +177,7 @@ class DemultiplexingAPI:
             demultiplexing_possible = False
 
         if self.is_demultiplexing_completed(flowcell):
-            LOG.warning("Demultiplexing is already completed for flowcell %s", flowcell.flowcell_id)
+            LOG.warning("Demultiplexing is already completed for flowcell %s", flowcell.id)
             demultiplexing_possible = False
         return demultiplexing_possible
 
@@ -208,7 +208,7 @@ class DemultiplexingAPI:
             file_path=flowcell.trailblazer_config_path,
         )
         tb_api.add_pending_analysis(
-            case_id=flowcell.flowcell_id,
+            case_id=flowcell.id,
             analysis_type=AnalysisTypes.OTHER,
             config_path=flowcell.trailblazer_config_path.as_posix(),
             out_dir=flowcell.trailblazer_config_path.parent.as_posix(),

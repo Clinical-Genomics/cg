@@ -71,12 +71,12 @@ def create_sheet(context: CGConfig, flowcell_name: str, bcl_converter: str, dry_
     lims_samples: List[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]] = list(
         flowcell_samples(
             lims=context.lims_api,
-            flowcell_id=flowcell_object.flowcell_id,
+            flowcell_id=flowcell_object.id,
             bcl_converter=bcl_converter,
         )
     )
     if not lims_samples:
-        LOG.warning("Could not find any samples in lims for %s", flowcell_object.flowcell_id)
+        LOG.warning("Could not find any samples in lims for %s", flowcell_object.id)
         raise click.Abort
 
     try:
@@ -117,16 +117,16 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
         if flowcell_object.sample_sheet_exists():
             LOG.info("Sample sheet already exists")
             continue
-        LOG.info("Creating sample sheet for flowcell %s", flowcell_object.flowcell_id)
+        LOG.info("Creating sample sheet for flowcell %s", flowcell_object.id)
         lims_samples: List[LimsFlowcellSample] = list(
             flowcell_samples(
                 lims=context.lims_api,
-                flowcell_id=flowcell_object.flowcell_id,
+                flowcell_id=flowcell_object.id,
                 bcl_converter=bcl_converter,
             )
         )
         if not lims_samples:
-            LOG.warning("Could not find any samples in lims for %s", flowcell_object.flowcell_id)
+            LOG.warning("Could not find any samples in lims for %s", flowcell_object.id)
             continue
 
         try:

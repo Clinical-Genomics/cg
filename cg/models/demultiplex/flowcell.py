@@ -28,7 +28,7 @@ class FlowCell:
         self.machine_name: str = ""
         self.machine_number: int = 0
         self.base_name: str = ""  # Base name is flowcell-id + flowcell position
-        self.flowcell_id: str = ""
+        self.id: str = ""
         self.flowcell_position: Literal["A", "B"] = "A"
         self.parse_flowcell_name()
 
@@ -47,7 +47,7 @@ class FlowCell:
         base_name: str = self.split_flow_cell_name[-1]
         self.base_name = base_name
         LOG.debug("Set flowcell id to %s", base_name)
-        self.flowcell_id = base_name[1:]
+        self.id = base_name[1:]
         self.flowcell_position = base_name[0]
 
     @property
@@ -184,14 +184,14 @@ class FlowCell:
         """
         LOG.info("Check if flowcell is ready for demultiplexing")
         if not self.is_sequencing_done():
-            LOG.info("Sequencing is not completed for flowcell %s", self.flowcell_id)
+            LOG.info("Sequencing is not completed for flowcell %s", self.id)
             return False
-        LOG.debug("Sequence is done for flowcell %s", self.flowcell_id)
+        LOG.debug("Sequence is done for flowcell %s", self.id)
         if not self.is_copy_completed():
-            LOG.info("Copy of sequence data is not ready for flowcell %s", self.flowcell_id)
+            LOG.info("Copy of sequence data is not ready for flowcell %s", self.id)
             return False
-        LOG.debug("All data has been transferred for flowcell %s", self.flowcell_id)
-        LOG.info("Flowcell %s is ready for demultiplexing", self.flowcell_id)
+        LOG.debug("All data has been transferred for flowcell %s", self.id)
+        LOG.info("Flowcell %s is ready for demultiplexing", self.id)
         return True
 
     def __str__(self):
