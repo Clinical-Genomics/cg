@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 
 
 def test_flowcell_id(flowcell_path: Path):
@@ -11,7 +11,7 @@ def test_flowcell_id(flowcell_path: Path):
     flowcell_id: str = flowcell_path.name.split("_")[-1][1:]
 
     # WHEN instantiating a flow cell object
-    flowcell_obj = Flowcell(flowcell_path)
+    flowcell_obj = FlowCell(flowcell_path)
 
     # THEN assert that the flow cell id is parsed
     assert flowcell_obj.flowcell_id == flowcell_id
@@ -21,7 +21,7 @@ def test_flowcell_position(flowcell_path: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
-    flowcell_obj = Flowcell(flowcell_path)
+    flowcell_obj = FlowCell(flowcell_path)
 
     # WHEN fetching the flow cell position
     position = flowcell_obj.flowcell_position
@@ -30,7 +30,7 @@ def test_flowcell_position(flowcell_path: Path):
     assert position in ["A", "B"]
 
 
-def test_rta_exists(flow_cell: Flowcell):
+def test_rta_exists(flow_cell: FlowCell):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
@@ -42,7 +42,7 @@ def test_rta_exists(flow_cell: Flowcell):
     assert rta_file.exists()
 
 
-def test_is_hiseq_x_copy_completed_ready(flow_cell: Flowcell):
+def test_is_hiseq_x_copy_completed_ready(flow_cell: FlowCell):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
     # GIVEN a copy complete file
@@ -54,7 +54,7 @@ def test_is_hiseq_x_copy_completed_ready(flow_cell: Flowcell):
     assert is_completed is True
 
 
-def test_is_hiseq_x_delivery_started_ready(flow_cell: Flowcell, demultiplexing_delivery_file: Path):
+def test_is_hiseq_x_delivery_started_ready(flow_cell: FlowCell, demultiplexing_delivery_file: Path):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
     # GIVEN a delivery file
@@ -69,7 +69,7 @@ def test_is_hiseq_x_delivery_started_ready(flow_cell: Flowcell, demultiplexing_d
     assert is_delivered is True
 
 
-def test_is_hiseq_x_delivery_started_not_ready(flow_cell: Flowcell):
+def test_is_hiseq_x_delivery_started_not_ready(flow_cell: FlowCell):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
 
@@ -80,7 +80,7 @@ def test_is_hiseq_x_delivery_started_not_ready(flow_cell: Flowcell):
     assert is_delivered is False
 
 
-def test_is_hiseq_x(flow_cell: Flowcell, hiseq_x_tile_dir: Path):
+def test_is_hiseq_x(flow_cell: FlowCell, hiseq_x_tile_dir: Path):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
     # GIVEN a Hiseq X directory

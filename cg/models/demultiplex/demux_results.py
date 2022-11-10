@@ -14,7 +14,7 @@ from cg.apps.cgstats.parsers.dragen_demultiplexing_stats import DragenDemultiple
 from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.demultiplexing import DEMUX_STATS_PATH
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 
 LOG = logging.getLogger(__name__)
 
@@ -30,10 +30,10 @@ class LogfileParameters(BaseModel):
 class DemuxResults:
     """Class to gather information from a demultiplex result"""
 
-    def __init__(self, demux_dir: Path, flowcell: Flowcell, bcl_converter: str):
+    def __init__(self, demux_dir: Path, flowcell: FlowCell, bcl_converter: str):
         LOG.info("Instantiating DemuxResults with path %s", demux_dir)
         self.demux_dir: Path = demux_dir
-        self.flowcell: Flowcell = flowcell
+        self.flowcell: FlowCell = flowcell
         self.bcl_converter = bcl_converter
         self._conversion_stats: Optional[ConversionStats] = None
         self._demultiplexing_stats: Optional[DragenDemultiplexingStats] = None
@@ -294,4 +294,4 @@ class DemuxResults:
         return time
 
     def __str__(self):
-        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=Flowcell(flowcell_path={self.flowcell.path})"
+        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=FlowCell(flowcell_path={self.flowcell.path})"

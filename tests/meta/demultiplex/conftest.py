@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 from cg.store.api import Store
 from cg.store.models import Sample, Family
 
@@ -84,7 +84,7 @@ def fixture_flow_cell_project_id() -> int:
 
 
 @pytest.fixture(name="cgstats_select_project_log_file")
-def fixture_cgstats_select_project_log_file(flow_cell: Flowcell, flow_cell_project_id: int) -> Path:
+def fixture_cgstats_select_project_log_file(flow_cell: FlowCell, flow_cell_project_id: int) -> Path:
     """Return cgstats select project out file."""
     return Path(
         flow_cell.path,
@@ -93,7 +93,7 @@ def fixture_cgstats_select_project_log_file(flow_cell: Flowcell, flow_cell_proje
 
 
 @pytest.fixture(name="hiseq_x_copy_complete_file")
-def fixture_hiseq_x_copy_complete_file(flow_cell: Flowcell) -> Path:
+def fixture_hiseq_x_copy_complete_file(flow_cell: FlowCell) -> Path:
     """Return Hiseq X flow cell copy complete file."""
     return Path(flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
 

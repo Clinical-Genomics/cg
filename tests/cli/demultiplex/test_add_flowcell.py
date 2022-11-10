@@ -3,13 +3,13 @@ from pathlib import Path
 from cg.apps.cgstats.crud.find import get_flowcell_id
 from cg.cli.demultiplex.add import add_flowcell_cmd
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 from click.testing import CliRunner
 
 
 def test_add_flowcell_cmd(
     cli_runner: CliRunner,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     demultiplex_context: CGConfig,
     demultiplexed_flowcell_finished_working_directory: Path,
     demultiplex_ready_flowcell: Path,

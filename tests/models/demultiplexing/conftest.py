@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 
 
 @pytest.fixture(name="flow_cell_name")
@@ -27,10 +27,10 @@ def fixture_flowcell_path(flowcell_runs: Path, flow_cell_full_name: str) -> Path
 
 
 @pytest.fixture(name="flow_cell")
-def fixture_flow_cell(flowcell_path: Path) -> Flowcell:
-    flow_cell = Flowcell(flowcell_path)
+def fixture_flow_cell(flowcell_path: Path) -> FlowCell:
+    flow_cell = FlowCell(flowcell_path)
     flow_cell.parse_flowcell_name()
-    return Flowcell(flowcell_path)
+    return FlowCell(flowcell_path)
 
 
 @pytest.fixture(name="demultiplexed_flowcell")
@@ -40,7 +40,7 @@ def fixture_demultiplexed_flowcell(demultiplexed_runs: Path, flow_cell_full_name
 
 @pytest.fixture(name="bcl2fastq_demux_results")
 def fixture_bcl2fastq_demux_results(
-    demultiplexed_flowcell: Path, flow_cell: Flowcell
+    demultiplexed_flowcell: Path, flow_cell: FlowCell
 ) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_flowcell, flowcell=flow_cell, bcl_converter="bcl2fastq"
@@ -65,15 +65,15 @@ def fixture_demultiplexed_dragen_flow_cell(
 
 
 @pytest.fixture(name="dragen_flow_cell")
-def fixture_dragen_flow_cell(dragen_flow_cell_path: Path) -> Flowcell:
-    flow_cell = Flowcell(dragen_flow_cell_path)
+def fixture_dragen_flow_cell(dragen_flow_cell_path: Path) -> FlowCell:
+    flow_cell = FlowCell(dragen_flow_cell_path)
     flow_cell.parse_flowcell_name()
-    return Flowcell(dragen_flow_cell_path)
+    return FlowCell(dragen_flow_cell_path)
 
 
 @pytest.fixture(name="dragen_demux_results")
 def fixture_dragen_demux_results(
-    demultiplexed_dragen_flow_cell: Path, dragen_flow_cell: Flowcell
+    demultiplexed_dragen_flow_cell: Path, dragen_flow_cell: FlowCell
 ) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_dragen_flow_cell,

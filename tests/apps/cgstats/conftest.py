@@ -10,7 +10,7 @@ from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_dragen_flow_cell,
@@ -32,7 +32,7 @@ class MockDemuxResults:
         self.bcl_converter = "dragen"
         self.conversion_stats_path = Path("Demultiplex_Stats.csv")
         self.demux_host = "hasta"
-        self.flowcell: Flowcell = self.mock_flowcell(flow_cell_full_name=flow_cell_full_name)
+        self.flowcell: FlowCell = self.mock_flowcell(flow_cell_full_name=flow_cell_full_name)
         self.machine_name = "barbara"
         self.run_date = datetime.now()
         self.run_name = flow_cell_full_name
@@ -53,8 +53,8 @@ class MockDemuxResults:
         return self.LogfileParameters()
 
     @staticmethod
-    def mock_flowcell(flow_cell_full_name: str) -> Flowcell:
-        return Flowcell(flowcell_path=Path(flow_cell_full_name))
+    def mock_flowcell(flow_cell_full_name: str) -> FlowCell:
+        return FlowCell(flowcell_path=Path(flow_cell_full_name))
 
 
 class MockDemuxSample(BaseModel):
@@ -108,7 +108,7 @@ def fixture_nipt_stats_api(
     support_parameters_obj: stats_models.Supportparams = create.create_support_parameters(
         manager=nipt_stats_api, demux_results=mock_demux_results
     )
-    flowcell_obj: stats_models.Flowcell = create.create_flowcell(
+    flowcell_obj: stats_models.FlowCell = create.create_flowcell(
         manager=nipt_stats_api, demux_results=mock_demux_results
     )
     datasource_obj: stats_models.Datasource = create.create_datasource(

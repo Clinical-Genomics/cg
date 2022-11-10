@@ -9,7 +9,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 from cg.utils import Process
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
 from tests.apps.demultiplex.conftest import (
@@ -113,8 +113,8 @@ def fixture_flowcell_working_directory(
     """
     working_dir: Path = Path(flowcell_runs_working_directory, novaseq_dir.name)
     working_dir.mkdir(parents=True)
-    existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir)
-    working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
+    existing_flowcell: FlowCell = FlowCell(flowcell_path=novaseq_dir)
+    working_flowcell: FlowCell = FlowCell(flowcell_path=working_dir)
     shutil.copy(
         existing_flowcell.run_parameters_path.as_posix(),
         working_flowcell.run_parameters_path.as_posix(),
@@ -132,8 +132,8 @@ def fixture_flowcell_working_directory_bcl2fastq(
     """
     working_dir: Path = Path(flowcell_runs_working_directory_bcl2fastq, flowcell_dir_bcl2fastq.name)
     working_dir.mkdir(parents=True)
-    existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_bcl2fastq)
-    working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
+    existing_flowcell: FlowCell = FlowCell(flowcell_path=flowcell_dir_bcl2fastq)
+    working_flowcell: FlowCell = FlowCell(flowcell_path=working_dir)
     shutil.copy(
         existing_flowcell.run_parameters_path.as_posix(),
         working_flowcell.run_parameters_path.as_posix(),
@@ -151,8 +151,8 @@ def fixture_flowcell_working_directory_dragen(
     """
     working_dir: Path = Path(flowcell_runs_working_directory_dragen, flowcell_dir_dragen.name)
     working_dir.mkdir(parents=True)
-    existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_dragen)
-    working_flowcell: Flowcell = Flowcell(flowcell_path=working_dir)
+    existing_flowcell: FlowCell = FlowCell(flowcell_path=flowcell_dir_dragen)
+    working_flowcell: FlowCell = FlowCell(flowcell_path=working_dir)
     shutil.copy(
         existing_flowcell.run_parameters_path.as_posix(),
         working_flowcell.run_parameters_path.as_posix(),
@@ -176,8 +176,8 @@ def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq
 
     This is a path to a flowcell directory with all the files necessary to start demultiplexing present.
     """
-    existing_flowcell: Flowcell = Flowcell(flowcell_path=novaseq_dir)
-    working_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_working_directory)
+    existing_flowcell: FlowCell = FlowCell(flowcell_path=novaseq_dir)
+    working_flowcell: FlowCell = FlowCell(flowcell_path=flowcell_working_directory)
     shutil.copy(
         existing_flowcell.sample_sheet_path.as_posix(),
         working_flowcell.sample_sheet_path.as_posix(),
@@ -199,8 +199,8 @@ def fixture_demultiplex_ready_flowcell_bcl2fastq(
 
     This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
     """
-    existing_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_dir_bcl2fastq)
-    working_flowcell: Flowcell = Flowcell(flowcell_path=flowcell_working_directory_bcl2fastq)
+    existing_flowcell: FlowCell = FlowCell(flowcell_path=flowcell_dir_bcl2fastq)
+    working_flowcell: FlowCell = FlowCell(flowcell_path=flowcell_working_directory_bcl2fastq)
     shutil.copy(
         existing_flowcell.sample_sheet_path.as_posix(),
         working_flowcell.sample_sheet_path.as_posix(),
@@ -222,10 +222,10 @@ def fixture_demultiplex_ready_flowcell_dragen(
 
     This is a path to a flowcell directory with all the files necessary to start demultiplexing present.
     """
-    existing_flowcell: Flowcell = Flowcell(
+    existing_flowcell: FlowCell = FlowCell(
         flowcell_path=flowcell_dir_dragen, bcl_converter="dragen"
     )
-    working_flowcell: Flowcell = Flowcell(
+    working_flowcell: FlowCell = FlowCell(
         flowcell_path=flowcell_working_directory_dragen, bcl_converter="dragen"
     )
     shutil.copy(

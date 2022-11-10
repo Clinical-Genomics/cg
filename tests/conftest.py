@@ -23,7 +23,7 @@ from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -592,30 +592,30 @@ def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
 
 @pytest.fixture(name="demux_run_dir")
 def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
+    """Return the path to a dir with flow cells ready for demultiplexing."""
     return Path(demultiplex_fixtures, "flowcell-runs")
 
 
 @pytest.fixture(name="flow_cell")
-def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> Flowcell:
+def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> FlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return Flowcell(flowcell_path=Path(demux_run_dir, flow_cell_full_name))
+    return FlowCell(flowcell_path=Path(demux_run_dir, flow_cell_full_name))
 
 
 @pytest.fixture(name="flow_cell_id")
-def fixture_flow_cell_id(flow_cell: Flowcell) -> str:
+def fixture_flow_cell_id(flow_cell: FlowCell) -> str:
     """Return flow cell id from flow cell object."""
     return flow_cell.flowcell_id
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")
-def fixture_demultiplexing_delivery_file(flow_cell: Flowcell) -> Path:
+def fixture_demultiplexing_delivery_file(flow_cell: FlowCell) -> Path:
     """Return demultiplexing delivery started file."""
     return Path(flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
-def fixture_hiseq_x_tile_dir(flow_cell: Flowcell) -> Path:
+def fixture_hiseq_x_tile_dir(flow_cell: FlowCell) -> Path:
     """Return Hiseq X tile dir."""
     return Path(flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 

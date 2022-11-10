@@ -8,7 +8,7 @@ from cg.meta.demultiplex.demux_post_processing import (
 )
 from cg.meta.transfer import TransferFlowcell
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 from cg.store import Store
 
 
@@ -34,7 +34,7 @@ def test_add_to_cgstats(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -56,7 +56,7 @@ def test_cgstats_select_project(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -93,7 +93,7 @@ def test_cgstats_lanestats(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -115,7 +115,7 @@ def test_post_process_flowcell_copy_not_completed(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -150,7 +150,7 @@ def test_post_process_flowcell_delivery_started(
     demultiplexed_flowcell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -185,7 +185,7 @@ def test_post_process_flowcell_not_hiseq_x(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     hiseq_x_tile_dir: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -218,7 +218,7 @@ def test_post_process_flowcell(
     demultiplexed_flowcell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -266,14 +266,14 @@ def test_post_process_flowcell(
     assert f"{flow_cell.flowcell_full_name} copy is complete and delivery will start" in caplog.text
 
     # THEN we should also transfer the flow cell
-    assert f"Flowcell added: {flow_cell.flowcell_id}" in caplog.text
+    assert f"Flow cell added: {flow_cell.flowcell_id}" in caplog.text
 
 
 def test_finish_flowcell(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -306,7 +306,7 @@ def test_finish_all_flowcells(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)

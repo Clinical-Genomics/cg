@@ -1,3 +1,4 @@
+"""Module for modeling flow cells."""
 import datetime
 import logging
 from pathlib import Path
@@ -15,8 +16,8 @@ from cgmodels.exceptions import SampleSheetError
 LOG = logging.getLogger(__name__)
 
 
-class Flowcell:
-    """Class to collect information about flowcell directories and there particular files"""
+class FlowCell:
+    """Class to collect information about flow cell directories and there particular files."""
 
     def __init__(self, flowcell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
         LOG.debug("Instantiating Flowcell with path %s", flowcell_path)
@@ -33,11 +34,11 @@ class Flowcell:
         self.parse_flowcell_name()
 
     def parse_flowcell_name(self):
-        """Parse relevant information from flowcell name
+        """Parse relevant information from flow cell name.
 
         This will assume that the flowcell naming convention is used. If not we skip the flowcell.
         Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
-        Example: 201203_A00689_0200_AHVKJCDRXX
+        Example: '201203_A00689_0200_AHVKJCDRXX'.
         """
 
         self.validate_flow_cell_name()

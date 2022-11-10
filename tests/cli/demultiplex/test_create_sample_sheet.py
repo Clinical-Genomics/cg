@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 from typing import List
 
@@ -12,7 +11,7 @@ from cg.apps.lims.samplesheet import (
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 
 
 def test_create_sample_sheet_no_run_parameters(
@@ -23,7 +22,7 @@ def test_create_sample_sheet_no_run_parameters(
     mocker,
 ):
     # GIVEN a folder with a non existing sample sheet
-    flowcell_object: Flowcell = Flowcell(flowcell_working_directory_no_run_parameters)
+    flowcell_object: FlowCell = FlowCell(flowcell_working_directory_no_run_parameters)
     assert flowcell_object.run_parameters_path.exists() is False
     mocker.patch("cg.cli.demultiplex.sample_sheet.flowcell_samples", return_value=[{"sample": 1}])
     demux_api: DemultiplexingAPI = sample_sheet_context.demultiplex_api
@@ -49,7 +48,7 @@ def test_create_bcl2fastq_sample_sheet(
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: Flowcell = Flowcell(flowcell_working_directory)
+    flowcell: FlowCell = FlowCell(flowcell_working_directory)
     assert flowcell.run_parameters_path.exists()
     # GIVEN that there is no sample sheet present
     assert not flowcell.sample_sheet_exists()
@@ -80,7 +79,7 @@ def test_create_dragen_sample_sheet(
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: Flowcell = Flowcell(flowcell_working_directory, bcl_converter="dragen")
+    flowcell: FlowCell = FlowCell(flowcell_working_directory, bcl_converter="dragen")
     assert flowcell.run_parameters_path.exists()
     # GIVEN that there is no sample sheet present
     assert not flowcell.sample_sheet_exists()

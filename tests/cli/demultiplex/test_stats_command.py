@@ -7,14 +7,14 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.cli.demultiplex.add import select_project_cmd
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 
 
 def test_select_command(
     cli_runner: CliRunner,
     populated_stats_api: StatsAPI,
     demultiplexed_runs: Path,
-    flow_cell: Flowcell,
+    flow_cell: FlowCell,
     demultiplex_context: CGConfig,
 ):
     demultiplex_context.cg_stats_api_ = populated_stats_api

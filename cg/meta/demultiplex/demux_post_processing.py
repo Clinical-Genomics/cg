@@ -18,7 +18,7 @@ from cg.meta.transfer import TransferFlowcell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flowcell import FlowCell
 from cg.store import Store, models
 from cg.utils import Process
 
@@ -106,7 +106,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
 
     def post_process_flowcell(
-        self, flowcell: Flowcell, flowcell_name: str, flowcell_path: Path
+        self, flowcell: FlowCell, flowcell_name: str, flowcell_path: Path
     ) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell."""
         if not flowcell.is_hiseq_x_copy_completed():
@@ -127,13 +127,13 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flow_cell_id=flowcell.flowcell_id
         )
         self.status_db.add_commit(new_record)
-        LOG.info(f"Flowcell added: {new_record}")
+        LOG.info(f"Flow cell added: {new_record}")
 
     def finish_flowcell(self, bcl_converter: str, flowcell_name: str, flowcell_path: Path) -> None:
         """Post-processing flow cell."""
         LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
         try:
-            flowcell: Flowcell = Flowcell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
+            flowcell: FlowCell = FlowCell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
         except FlowcellError:
             return
         self.post_process_flowcell(
@@ -279,7 +279,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         self.copy_sample_sheet(demux_results=demux_results)
         new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flowcell_id)
         self.status_db.add_commit(new_record)
-        LOG.info(f"Flowcell added: {new_record}")
+        LOG.info(f"Flow cell added: {new_record}")
 
     def finish_flowcell(self, flowcell_name: str, bcl_converter: str, force: bool = False) -> None:
         """Go through the post processing steps for a flowcell
@@ -288,7 +288,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         """
         LOG.info("Check demuxed flowcell %s", flowcell_name)
         try:
-            flowcell: Flowcell = Flowcell(
+            flowcell: FlowCell = FlowCell(
                 flowcell_path=self.demux_api.run_dir / flowcell_name, bcl_converter=bcl_converter
             )
         except FlowcellError:
@@ -306,7 +306,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.info("Can not finish flowcell %s", flowcell_name)
             return
         if demux_results.files_renamed():
-            LOG.warning("Flowcell is already finished!")
+            LOG.warning("Flow cell is already finished!")
             if not force:
                 return
             LOG.info("Post processing flowcell anyway")
