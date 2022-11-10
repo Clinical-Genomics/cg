@@ -59,7 +59,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
             )
             raise LoqusdbDuplicateRecordError
 
-        output = self.loqusdb_api.load(
+        load_output = self.loqusdb_api.load(
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path,
             sv_vcf_path=input_files.sv_vcf_path,
@@ -71,7 +71,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         )
         loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)["_id"])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
-        LOG.info(f"Uploaded {output['variants']} variants to {repr(self.loqusdb_api)}")
+        LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
 
     def is_duplicate(self, case: models.Family, profile_vcf_path: Path) -> bool:
         """Check if a case has already been uploaded to Loqusdb."""
