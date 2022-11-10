@@ -76,7 +76,7 @@ def test_cgstats_select_project(
 
     # When processing project with cgstats
     post_demux_api.cgstats_select_project(
-        flowcell_name=flowcell_object.flowcell_full_name, flowcell_path=flowcell_object.path
+        flowcell_id=flowcell_object.flowcell_id, flowcell_path=flowcell_object.path
     )
 
     # THEN we should have created a stats outfile
@@ -86,7 +86,7 @@ def test_cgstats_select_project(
     cgstats_select_project_log_file.unlink()
 
     # THEN we should run the command
-    assert f"select --project {flow_cell_project_id}" in caplog.text
+    assert f"select --project {flow_cell_project_id} {flowcell_object.flowcell_id}" in caplog.text
 
 
 def test_cgstats_lanestats(

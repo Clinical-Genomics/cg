@@ -90,7 +90,7 @@ def fixture_cgstats_select_project_log_file(
     """Return cgstats select project out file."""
     return Path(
         flowcell_object.path,
-        "-".join(["stats", str(flow_cell_project_id), flowcell_object.flowcell_full_name]) + ".txt",
+        "-".join(["stats", str(flow_cell_project_id), flowcell_object.flowcell_id]) + ".txt",
     )
 
 

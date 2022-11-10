@@ -65,16 +65,16 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         cgstats_process: Process = Process(binary=self.stats_api.binary)
         cgstats_process.run_command(parameters=cgstats_add_parameters, dry_run=self.dry_run)
 
-    def cgstats_select_project(self, flowcell_name: str, flowcell_path: Path) -> None:
+    def cgstats_select_project(self, flowcell_id: str, flowcell_path: Path) -> None:
         """Process selected project using cgstats."""
         unaligned_dir: Path = Path(flowcell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
         for project_dir in unaligned_dir.glob("Project_*"):
             (_, project_id) = project_dir.name.split("_")
             stdout_file: Path = Path(
-                flowcell_path, "-".join(["stats", project_id, flowcell_name]) + ".txt"
+                flowcell_path, "-".join(["stats", project_id, flowcell_id]) + ".txt"
             )
             LOG.info(
-                f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flowcell_name}"
+                f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flowcell_id}"
             )
             cgstats_select_parameters: List[str] = [
                 "--database",
@@ -82,7 +82,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
                 "selected",
                 "--project",
                 project_id,
-                flowcell_name,
+                flowcell_id,
             ]
             cgstats_process: Process = Process(binary=self.stats_api.binary)
             with open(stdout_file.as_posix(), "w") as file:
@@ -121,7 +121,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         LOG.info(f"{flowcell_name} copy is complete and delivery will start")
         Path(flowcell_path, DemultiplexingDirsAndFiles.DELIVERY).touch()
         self.add_to_cgstats(flowcell_path=flowcell_path)
-        self.cgstats_select_project(flowcell_name=flowcell_name, flowcell_path=flowcell_path)
+        self.cgstats_select_project(flowcell_id=flowcell.flowcell_id, flowcell_path=flowcell_path)
         self.cgstats_lanestats(flowcell_path=flowcell_path)
         new_record: models.Flowcell = self.transfer_flowcell_api.transfer(
             flowcell_name=flowcell_name
