@@ -202,6 +202,7 @@ class AnalysisAPI(MetaAPI):
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
+            ticket=self.status_db.get_latest_ticket_from_case(case_id)
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
