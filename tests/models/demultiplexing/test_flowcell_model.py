@@ -30,32 +30,32 @@ def test_flowcell_position(flowcell_path: Path):
     assert position in ["A", "B"]
 
 
-def test_rta_exists(flowcell_object: Flowcell):
+def test_rta_exists(flow_cell_object: Flowcell):
     """Test return of RTS file."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
 
     # WHEN fetching the path to the RTA file
-    rta_file: Path = flowcell_object.rta_complete_path
+    rta_file: Path = flow_cell_object.rta_complete_path
 
     # THEN assert that the file exists
     assert rta_file.exists()
 
 
-def test_is_hiseq_x_copy_completed_ready(flowcell_object: Flowcell):
+def test_is_hiseq_x_copy_completed_ready(flow_cell_object: Flowcell):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
     # GIVEN a copy complete file
 
     # WHEN fetching the path to the copy complete file
-    is_completed = flowcell_object.is_hiseq_x_copy_completed()
+    is_completed = flow_cell_object.is_hiseq_x_copy_completed()
 
     # THEN assert that the file exists
     assert is_completed is True
 
 
 def test_is_hiseq_x_delivery_started_ready(
-    flowcell_object: Flowcell, demultiplexing_delivery_file: Path
+    flow_cell_object: Flowcell, demultiplexing_delivery_file: Path
 ):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
@@ -63,7 +63,7 @@ def test_is_hiseq_x_delivery_started_ready(
     demultiplexing_delivery_file.touch()
 
     # WHEN checking the path to the delivery file
-    is_delivered = flowcell_object.is_hiseq_x_delivery_started()
+    is_delivered = flow_cell_object.is_hiseq_x_delivery_started()
 
     demultiplexing_delivery_file.unlink()
 
@@ -71,25 +71,25 @@ def test_is_hiseq_x_delivery_started_ready(
     assert is_delivered is True
 
 
-def test_is_hiseq_x_delivery_started_not_ready(flowcell_object: Flowcell):
+def test_is_hiseq_x_delivery_started_not_ready(flow_cell_object: Flowcell):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
 
     # WHEN checking the path to the copy complete file
-    is_delivered = flowcell_object.is_hiseq_x_delivery_started()
+    is_delivered = flow_cell_object.is_hiseq_x_delivery_started()
 
     # THEN assert that the file do not exist
     assert is_delivered is False
 
 
-def test_is_hiseq_x(flowcell_object: Flowcell, hiseq_x_tile_dir: Path):
+def test_is_hiseq_x(flow_cell_object: Flowcell, hiseq_x_tile_dir: Path):
     # GIVEN the path to a demultiplexed finished flow cell
     # GIVEN a flow cell object
     # GIVEN a Hiseq X directory
     hiseq_x_tile_dir.mkdir(exist_ok=True)
 
     # WHEN checking the path to the Hiseq X flow cell directory
-    is_hiseq_x = flowcell_object.is_hiseq_x()
+    is_hiseq_x = flow_cell_object.is_hiseq_x()
 
     # Clean up
     hiseq_x_tile_dir.rmdir()

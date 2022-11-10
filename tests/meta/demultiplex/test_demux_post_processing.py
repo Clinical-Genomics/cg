@@ -34,7 +34,7 @@ def test_add_to_cgstats(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -46,17 +46,17 @@ def test_add_to_cgstats(
     )
 
     # When adding to cgstats
-    post_demux_api.add_to_cgstats(flowcell_path=flowcell_object.path)
+    post_demux_api.add_to_cgstats(flowcell_path=flow_cell_object.path)
 
     # THEN we should run the command
-    assert f"add --machine X {flowcell_object.path}" in caplog.text
+    assert f"add --machine X {flow_cell_object.path}" in caplog.text
 
 
 def test_cgstats_select_project(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -70,13 +70,13 @@ def test_cgstats_select_project(
     )
 
     # GIVEN an unaligned project directory
-    Path(flowcell_object.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
+    Path(flow_cell_object.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
         parents=True, exist_ok=True
     )
 
     # When processing project with cgstats
     post_demux_api.cgstats_select_project(
-        flowcell_id=flowcell_object.flowcell_id, flowcell_path=flowcell_object.path
+        flowcell_id=flow_cell_object.flowcell_id, flowcell_path=flow_cell_object.path
     )
 
     # THEN we should have created a stats outfile
@@ -86,14 +86,14 @@ def test_cgstats_select_project(
     cgstats_select_project_log_file.unlink()
 
     # THEN we should run the command
-    assert f"select --project {flow_cell_project_id} {flowcell_object.flowcell_id}" in caplog.text
+    assert f"select --project {flow_cell_project_id} {flow_cell_object.flowcell_id}" in caplog.text
 
 
 def test_cgstats_lanestats(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -105,17 +105,17 @@ def test_cgstats_lanestats(
     )
 
     # When processing lane stats with cgstats
-    post_demux_api.cgstats_lanestats(flowcell_path=flowcell_object.path)
+    post_demux_api.cgstats_lanestats(flowcell_path=flow_cell_object.path)
 
     # THEN we should run the command
-    assert f"lanestats {flowcell_object.path}" in caplog.text
+    assert f"lanestats {flow_cell_object.path}" in caplog.text
 
 
 def test_post_process_flowcell_copy_not_completed(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -133,16 +133,16 @@ def test_post_process_flowcell_copy_not_completed(
 
     # When post-processing flow cell
     post_demux_api.post_process_flowcell(
-        flowcell=flowcell_object,
-        flowcell_name=flowcell_object.flowcell_full_name,
-        flowcell_path=flowcell_object.path,
+        flowcell=flow_cell_object,
+        flowcell_name=flow_cell_object.flowcell_full_name,
+        flowcell_path=flow_cell_object.path,
     )
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that copy is not complete
-    assert f"{flowcell_object.flowcell_full_name} is not yet completely copied" in caplog.text
+    assert f"{flow_cell_object.flowcell_full_name} is not yet completely copied" in caplog.text
 
 
 def test_post_process_flowcell_delivery_started(
@@ -150,7 +150,7 @@ def test_post_process_flowcell_delivery_started(
     demultiplexed_flowcell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -166,9 +166,9 @@ def test_post_process_flowcell_delivery_started(
 
     # When post-processing flow cell
     post_demux_api.post_process_flowcell(
-        flowcell=flowcell_object,
-        flowcell_name=flowcell_object.flowcell_full_name,
-        flowcell_path=flowcell_object.path,
+        flowcell=flow_cell_object,
+        flowcell_name=flow_cell_object.flowcell_full_name,
+        flowcell_path=flow_cell_object.path,
     )
 
     # Clean up
@@ -176,7 +176,7 @@ def test_post_process_flowcell_delivery_started(
 
     # THEN we should log that the delivery has already started
     assert (
-        f"{flowcell_object.flowcell_full_name} copy is complete and delivery has already started"
+        f"{flow_cell_object.flowcell_full_name} copy is complete and delivery has already started"
         in caplog.text
     )
 
@@ -185,7 +185,7 @@ def test_post_process_flowcell_not_hiseq_x(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
     hiseq_x_tile_dir: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -203,13 +203,13 @@ def test_post_process_flowcell_not_hiseq_x(
 
     # When post-processing flow cell
     post_demux_api.post_process_flowcell(
-        flowcell=flowcell_object,
-        flowcell_name=flowcell_object.flowcell_full_name,
-        flowcell_path=flowcell_object.path,
+        flowcell=flow_cell_object,
+        flowcell_name=flow_cell_object.flowcell_full_name,
+        flowcell_path=flow_cell_object.path,
     )
 
     # THEN we should log that this is not an Hiseq X flow cell
-    assert f"{flowcell_object.flowcell_full_name} is not an Hiseq X flow cell" in caplog.text
+    assert f"{flow_cell_object.flowcell_full_name} is not an Hiseq X flow cell" in caplog.text
 
 
 def test_post_process_flowcell(
@@ -218,7 +218,7 @@ def test_post_process_flowcell(
     demultiplexed_flowcell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -240,7 +240,7 @@ def test_post_process_flowcell(
 
     # GIVEN an unaligned project directory
     Path(
-        flowcell_object.path,
+        flow_cell_object.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
@@ -250,9 +250,9 @@ def test_post_process_flowcell(
 
     # When post-processing flow cell
     post_demux_api.post_process_flowcell(
-        flowcell=flowcell_object,
-        flowcell_name=flowcell_object.flowcell_full_name,
-        flowcell_path=flowcell_object.path,
+        flowcell=flow_cell_object,
+        flowcell_name=flow_cell_object.flowcell_full_name,
+        flowcell_path=flow_cell_object.path,
     )
 
     # THEN a delivery file should have been created
@@ -264,19 +264,19 @@ def test_post_process_flowcell(
 
     # THEN we should log that post-processing will begin
     assert (
-        f"{flowcell_object.flowcell_full_name} copy is complete and delivery will start"
+        f"{flow_cell_object.flowcell_full_name} copy is complete and delivery will start"
         in caplog.text
     )
 
     # THEN we should also transfer the flow cell
-    assert f"Flowcell added: {flowcell_object.flowcell_full_name}" in caplog.text
+    assert f"Flowcell added: {flow_cell_object.flowcell_id}" in caplog.text
 
 
 def test_finish_flowcell(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -294,22 +294,22 @@ def test_finish_flowcell(
     # When post-processing flow cell
     post_demux_api.finish_flowcell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flowcell_name=flowcell_object.flowcell_full_name,
-        flowcell_path=flowcell_object.path,
+        flowcell_name=flow_cell_object.flowcell_full_name,
+        flowcell_path=flow_cell_object.path,
     )
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flowcell_object.flowcell_full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {flow_cell_object.flowcell_full_name}" in caplog.text
 
 
 def test_finish_all_flowcells(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -333,4 +333,4 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flowcell_object.flowcell_full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {flow_cell_object.flowcell_full_name}" in caplog.text

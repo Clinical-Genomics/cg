@@ -85,19 +85,19 @@ def fixture_flow_cell_project_id() -> int:
 
 @pytest.fixture(name="cgstats_select_project_log_file")
 def fixture_cgstats_select_project_log_file(
-    flowcell_object: Flowcell, flow_cell_project_id: int
+    flow_cell_object: Flowcell, flow_cell_project_id: int
 ) -> Path:
     """Return cgstats select project out file."""
     return Path(
-        flowcell_object.path,
-        "-".join(["stats", str(flow_cell_project_id), flowcell_object.flowcell_id]) + ".txt",
+        flow_cell_object.path,
+        "-".join(["stats", str(flow_cell_project_id), flow_cell_object.flowcell_id]) + ".txt",
     )
 
 
 @pytest.fixture(name="hiseq_x_copy_complete_file")
-def fixture_hiseq_x_copy_complete_file(flowcell_object: Flowcell) -> Path:
+def fixture_hiseq_x_copy_complete_file(flow_cell_object: Flowcell) -> Path:
     """Return Hiseq X flow cell copy complete file."""
-    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
+    return Path(flow_cell_object.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
 
 
 @pytest.fixture(name="populated_flow_cell_store")

@@ -20,32 +20,32 @@ class TransferFlowcell:
         self.stats: StatsAPI = stats_api
         self.hk: HousekeeperAPI = hk_api
 
-    def transfer(self, flowcell_name: str, store: bool = True) -> models.Flowcell:
+    def transfer(self, flow_cell_id: str, store: bool = True) -> models.Flowcell:
         """Populate the database with the information."""
         if store and self.hk.tag("fastq") is None:
             self.hk.add_commit(self.hk.new_tag("fastq"))
         if store and self.hk.tag("samplesheet") is None:
             self.hk.add_commit(self.hk.new_tag("samplesheet"))
-        if store and self.hk.tag(flowcell_name) is None:
-            self.hk.add_commit(self.hk.new_tag(flowcell_name))
-        stats_data: StatsFlowcell = self.stats.flowcell(flowcell_name)
+        if store and self.hk.tag(flow_cell_id) is None:
+            self.hk.add_commit(self.hk.new_tag(flow_cell_id))
+        stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
         print(stats_data)
-        flowcell_obj: models.Flowcell = self.db.flowcell(flowcell_name)
+        flowcell_obj: models.Flowcell = self.db.flowcell(flow_cell_id)
 
         if flowcell_obj is None:
             flowcell_obj: models.Flowcell = self.db.add_flowcell(
-                name=flowcell_name,
+                name=flow_cell_id,
                 sequencer=stats_data.sequencer,
                 sequencer_type=stats_data.sequencer_type,
                 date=stats_data.date,
             )
         flowcell_obj.status = "ondisk"
 
-        sample_sheet_path = self._sample_sheet_path(flowcell_name)
+        sample_sheet_path = self._sample_sheet_path(flow_cell_id)
         if not Path(sample_sheet_path).exists():
             LOG.warning(f"unable to find samplesheet: {sample_sheet_path}")
         elif store:
-            self.store_samplesheet(flowcell_name, sample_sheet_path)
+            self.store_samplesheet(flow_cell_id, sample_sheet_path)
 
         for sample_data in stats_data.samples:
             LOG.debug(f"adding reads/fastqs to sample: {sample_data.name}")
@@ -57,7 +57,7 @@ class TransferFlowcell:
             if store:
                 self.store_fastqs(
                     sample=sample_obj.internal_id,
-                    flowcell=flowcell_name,
+                    flowcell=flow_cell_id,
                     fastq_files=sample_data.fastqs,
                 )
 

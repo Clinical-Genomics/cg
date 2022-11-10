@@ -108,13 +108,13 @@ def fixture_binary_path() -> str:
 
 
 @pytest.fixture(name="stats_sample_data")
-def fixture_stats_sample_data(sample_id: str, flowcell_full_name: str) -> dict:
+def fixture_stats_sample_data(sample_id: str, flow_cell_id: str) -> dict:
     return {
         "samples": [
             {
                 "name": sample_id,
                 "index": "ACGTACAT",
-                "flowcell": flowcell_full_name,
+                "flowcell": flow_cell_id,
                 "type": "hiseqx",
             },
             {

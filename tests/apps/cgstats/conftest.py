@@ -19,7 +19,7 @@ from tests.models.demultiplexing.conftest import (
     fixture_dragen_flow_cell_full_name,
     fixture_dragen_flow_cell_object,
     fixture_dragen_flow_cell_path,
-    fixture_flowcell_object,
+    fixture_flow_cell_object,
     fixture_flowcell_path,
     fixture_flowcell_runs,
 )

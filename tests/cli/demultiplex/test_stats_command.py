@@ -14,17 +14,17 @@ def test_select_command(
     cli_runner: CliRunner,
     populated_stats_api: StatsAPI,
     demultiplexed_runs: Path,
-    flowcell_object: Flowcell,
+    flow_cell_object: Flowcell,
     demultiplex_context: CGConfig,
 ):
     demultiplex_context.cg_stats_api_ = populated_stats_api
     # GIVEN a stats api with some information about a flowcell
-    flowcell_id: str = flowcell_object.flowcell_id
-    full_flowcell_name: str = flowcell_object.flowcell_full_name
+    flowcell_id: str = flow_cell_object.flowcell_id
+    full_flowcell_name: str = flow_cell_object.flowcell_full_name
     assert find.get_flowcell_id(flowcell_id)
     demux_results = DemuxResults(
         demux_dir=demultiplexed_runs / full_flowcell_name,
-        flowcell=flowcell_object,
+        flowcell=flow_cell_object,
         bcl_converter="bcl2fastq",
     )
 

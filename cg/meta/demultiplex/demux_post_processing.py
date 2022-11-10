@@ -124,7 +124,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         self.cgstats_select_project(flowcell_id=flowcell.flowcell_id, flowcell_path=flowcell_path)
         self.cgstats_lanestats(flowcell_path=flowcell_path)
         new_record: models.Flowcell = self.transfer_flowcell_api.transfer(
-            flowcell_name=flowcell_name
+            flow_cell_id=flowcell.flowcell_id
         )
         self.status_db.add_commit(new_record)
         LOG.info(f"Flowcell added: {new_record}")
@@ -259,8 +259,8 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             demux_results.demux_sample_sheet_path.as_posix(),
         )
 
-    def post_process_flowcell(self, demux_results: DemuxResults, flowcell_name: str) -> None:
-        """Run all the necessary steps for post processing a demultiplexed flowcell
+    def post_process_flowcell(self, demux_results: DemuxResults, flowcell_id: str) -> None:
+        """Run all the necessary steps for post-processing a demultiplexed flowcell
 
         This will
             1. rename all the necessary files and folders
@@ -277,9 +277,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.bcl_converter == "bcl2fastq":
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
-        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(
-            flowcell_name=flowcell_name
-        )
+        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flowcell_id)
         self.status_db.add_commit(new_record)
         LOG.info(f"Flowcell added: {new_record}")
 
@@ -312,7 +310,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             if not force:
                 return
             LOG.info("Post processing flowcell anyway")
-        self.post_process_flowcell(demux_results=demux_results, flowcell_name=flowcell_name)
+        self.post_process_flowcell(demux_results=demux_results, flowcell_id=flowcell.flowcell_id)
 
     def finish_all_flowcells(self, bcl_converter: str) -> None:
         """Loop over all flowcells and post process those that need it"""

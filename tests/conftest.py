@@ -596,22 +596,28 @@ def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "flowcell-runs")
 
 
-@pytest.fixture(name="flowcell_object")
-def fixture_flowcell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flowcell:
+@pytest.fixture(name="flow_cell_object")
+def fixture_flow_cell_object(demux_run_dir: Path, flowcell_full_name: str) -> Flowcell:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return Flowcell(flowcell_path=Path(demux_run_dir, flowcell_full_name))
 
 
+@pytest.fixture(name="flow_cell_id")
+def fixture_flow_cell_id(flow_cell_object: Flowcell) -> str:
+    """Return flow cell id from flow cell object."""
+    return flow_cell_object.flowcell_id
+
+
 @pytest.fixture(name="demultiplexing_delivery_file")
-def fixture_demultiplexing_delivery_file(flowcell_object: Flowcell) -> Path:
+def fixture_demultiplexing_delivery_file(flow_cell_object: Flowcell) -> Path:
     """Return demultiplexing delivery started file."""
-    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.DELIVERY)
+    return Path(flow_cell_object.path, DemultiplexingDirsAndFiles.DELIVERY)
 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
-def fixture_hiseq_x_tile_dir(flowcell_object: Flowcell) -> Path:
+def fixture_hiseq_x_tile_dir(flow_cell_object: Flowcell) -> Path:
     """Return Hiseq X tile dir."""
-    return Path(flowcell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+    return Path(flow_cell_object.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
@@ -1233,7 +1239,6 @@ def fixture_context_config(
         "bed_path": str(cg_dir),
         "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "hermes": {"binary_path": "hermes"},
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",

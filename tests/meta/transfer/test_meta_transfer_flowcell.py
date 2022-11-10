@@ -29,7 +29,7 @@ def test_transfer_flowcell(
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-        flowcell_obj = transfer_flowcell_api.transfer(flowcell_id)
+        flowcell_obj = transfer_flowcell_api.transfer(flow_cell_id=flowcell_id)
 
     # THEN it should create a new flowcell record
     assert flowcell_store.flowcells().count() == 1
