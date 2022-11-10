@@ -8,7 +8,7 @@ from cg.constants.observations import (
     LoqusdbInstance,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
 )
-from cg.exc import LoqusdbUploadCaseError
+from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.store import models
 from housekeeper.store.models import Version, File
 
@@ -39,19 +39,20 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             raise LoqusdbUploadCaseError
 
-        if not self.is_duplicate(case=case, loqusdb_api=self.loqusdb_somatic_api):
-            self.load_somatic_observations(case=models.Family, input_files=input_files)
-        if not self.is_duplicate(case=case, loqusdb_api=self.loqusdb_tumor_api):
-            self.load_tumor_observations(case=models.Family, input_files=input_files)
+        if self.is_duplicate(case=case, loqusdb_api=self.loqusdb_somatic_api) or self.is_duplicate(
+            case=case, loqusdb_api=self.loqusdb_tumor_api
+        ):
+            LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
+            raise LoqusdbDuplicateRecordError
+
+        self.load_somatic_observations(case=models.Family, input_files=input_files)
+        self.load_tumor_observations(case=models.Family, input_files=input_files)
 
     @staticmethod
     def is_duplicate(case: models.Family, loqusdb_api: LoqusdbAPI) -> bool:
         """Check if a case has already been uploaded to Loqusdb."""
         loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
-        duplicate: bool = bool(loqusdb_case or case.loqusdb_uploaded_samples)
-        if duplicate:
-            LOG.error(f"Case {case.internal_id} has already been uploaded to {repr(loqusdb_api)}")
-        return duplicate
+        return bool(loqusdb_case or case.loqusdb_uploaded_samples)
 
     def load_somatic_observations(
         self, case: models.Family, input_files: BalsamicObservationsInputFiles
@@ -70,12 +71,12 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, case: models.Family, input_files: BalsamicObservationsInputFiles
     ) -> None:
         """Load cancer germline observations."""
-        output = self.loqusdb_tumor_api.load(
+        load_output = self.loqusdb_tumor_api.load(
             case_id=case.internal_id, snv_vcf_path=input_files.snv_all_vcf_path
         )
         loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)["_id"])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
-        LOG.info(f"Uploaded {output['variants']} variants to {repr(self.loqusdb_tumor_api)}")
+        LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_tumor_api)}")
 
     def extract_observations_files_from_hk(
         self, hk_version: Version
@@ -99,4 +100,15 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def delete_case(self, case: models.Family) -> None:
         """Delete cancer case observations from Loqusdb."""
-        raise NotImplementedError
+        if not self.loqusdb_somatic_api.get_case(
+            case.internal_id
+        ) or not self.loqusdb_tumor_api.get_case(case.internal_id):
+            LOG.error(
+                f"Skipping case deletion. Case {case.internal_id} could not be found in Loqusdb."
+            )
+            raise CaseNotFoundError
+
+        self.loqusdb_somatic_api.delete_case(case.internal_id)
+        self.loqusdb_tumor_api.delete_case(case.internal_id)
+        self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
+        LOG.info(f"Removed observations for case {case.internal_id} from Loqusdb")
