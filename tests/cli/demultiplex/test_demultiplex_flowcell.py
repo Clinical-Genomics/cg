@@ -226,7 +226,7 @@ def test_start_demultiplexing_when_already_completed(
     assert result.exit_code == 0
 
     # THEN assert it was communicated that demultiplexing was completed
-    assert f"Demultiplexing is already completed for flowcell {flowcell.id}"
+    assert f"Demultiplexing is already completed for flow cell {flowcell.id}"
 
 
 def test_delete_flow_cell_dry_run_cgstats(

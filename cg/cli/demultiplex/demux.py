@@ -86,12 +86,12 @@ def demultiplex_flowcell(
     flowcell_id: str,
     bcl_converter: str,
 ):
-    """Demultiplex a flowcell on slurm using CG
+    """Demultiplex a flow cell.
 
-    flowcell-id is the flowcell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+    flow cell id is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
     """
 
-    LOG.info("Running cg demultiplex flowcell, using %s.", bcl_converter)
+    LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
     flowcell_directory: Path = Path(context.demultiplex.run_dir) / flowcell_id
 
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api

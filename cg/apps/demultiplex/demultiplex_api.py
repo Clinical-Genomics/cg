@@ -122,6 +122,7 @@ class DemultiplexingAPI:
 
     def demultiplexing_completed_path(self, flowcell: FlowCell) -> Path:
         """Return the path to demultiplexing complete file."""
+        LOG.info(Path(self.flowcell_out_dir_path(flowcell), "demuxcomplete.txt"))
         return Path(self.flowcell_out_dir_path(flowcell), "demuxcomplete.txt")
 
     def is_demultiplexing_completed(self, flowcell: FlowCell) -> bool:
