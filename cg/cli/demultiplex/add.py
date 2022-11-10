@@ -39,7 +39,7 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str, bcl_converter: str):
         LOG.warning("Could not find demultiplex result path %s", demux_results_path)
         raise click.Abort
     try:
-        flowcell: FlowCell = FlowCell(flowcell_path=flowcell_run_path, bcl_converter=bcl_converter)
+        flowcell: FlowCell = FlowCell(flow_cell_path=flowcell_run_path, bcl_converter=bcl_converter)
     except FlowcellError:
         raise click.Abort
     demux_results: DemuxResults = DemuxResults(

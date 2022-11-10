@@ -54,7 +54,7 @@ class MockDemuxResults:
 
     @staticmethod
     def mock_flowcell(flow_cell_full_name: str) -> FlowCell:
-        return FlowCell(flowcell_path=Path(flow_cell_full_name))
+        return FlowCell(flow_cell_path=Path(flow_cell_full_name))
 
 
 class MockDemuxSample(BaseModel):

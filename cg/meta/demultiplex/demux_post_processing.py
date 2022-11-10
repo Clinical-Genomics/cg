@@ -133,7 +133,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Post-processing flow cell."""
         LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
         try:
-            flowcell: FlowCell = FlowCell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
+            flowcell: FlowCell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
         except FlowcellError:
             return
         self.post_process_flowcell(
@@ -289,7 +289,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         LOG.info("Check demuxed flowcell %s", flowcell_name)
         try:
             flowcell: FlowCell = FlowCell(
-                flowcell_path=self.demux_api.run_dir / flowcell_name, bcl_converter=bcl_converter
+                flow_cell_path=self.demux_api.run_dir / flowcell_name, bcl_converter=bcl_converter
             )
         except FlowcellError:
             return

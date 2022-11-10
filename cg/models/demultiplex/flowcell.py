@@ -19,16 +19,15 @@ LOG = logging.getLogger(__name__)
 class FlowCell:
     """Class to collect information about flow cell directories and there particular files."""
 
-    def __init__(self, flowcell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
-        LOG.debug("Instantiating Flowcell with path %s", flowcell_path)
-        self.path = flowcell_path
+    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
+        LOG.debug(f"Instantiating FlowCell with path {flow_cell_path}")
+        self.path: Path = flow_cell_path
         self.bcl_converter: Optional[str] = bcl_converter
         self._run_parameters: Optional[RunParameters] = None
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_name: str = ""
         self.machine_number: int = 0
-        # Base name is flowcell-id + flowcell position
-        self.base_name: str = ""
+        self.base_name: str = ""  # Base name is flowcell-id + flowcell position
         self.flowcell_id: str = ""
         self.flowcell_position: Literal["A", "B"] = "A"
         self.parse_flowcell_name()

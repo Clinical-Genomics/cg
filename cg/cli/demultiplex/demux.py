@@ -39,7 +39,7 @@ def demultiplex_all(
             continue
         LOG.info("Found directory %s", sub_dir)
         try:
-            flowcell_obj = FlowCell(flowcell_path=sub_dir, bcl_converter=bcl_converter)
+            flowcell_obj = FlowCell(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
         except FlowcellError:
             continue
 
@@ -100,7 +100,7 @@ def demultiplex_flowcell(
     LOG.info(f"SETTING OUT DIR TO {demultiplex_api.out_dir}")
 
     try:
-        flowcell_obj = FlowCell(flowcell_path=flowcell_directory, bcl_converter=bcl_converter)
+        flowcell_obj = FlowCell(flow_cell_path=flowcell_directory, bcl_converter=bcl_converter)
     except FlowcellError as error:
         raise click.Abort from error
 

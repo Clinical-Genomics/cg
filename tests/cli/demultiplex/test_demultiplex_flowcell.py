@@ -134,7 +134,7 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN that all files are present for dragen demultiplexing
     flowcell: FlowCell = FlowCell(
-        flowcell_path=demultiplex_ready_flowcell_dragen, bcl_converter="dragen"
+        flow_cell_path=demultiplex_ready_flowcell_dragen, bcl_converter="dragen"
     )
 
     # GIVEN a out dir that does not exist
@@ -175,7 +175,7 @@ def test_demultiplex_all(
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    flowcell_object: FlowCell = FlowCell(flowcell_path=demultiplex_ready_flowcell)
+    flowcell_object: FlowCell = FlowCell(flow_cell_path=demultiplex_ready_flowcell)
 
     assert demux_api.run_dir == demultiplex_ready_flowcell.parent
 

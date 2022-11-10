@@ -599,7 +599,7 @@ def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(name="flow_cell")
 def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> FlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCell(flowcell_path=Path(demux_run_dir, flow_cell_full_name))
+    return FlowCell(flow_cell_path=Path(demux_run_dir, flow_cell_full_name))
 
 
 @pytest.fixture(name="flow_cell_id")

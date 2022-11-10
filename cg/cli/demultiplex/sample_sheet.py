@@ -65,7 +65,7 @@ def create_sheet(context: CGConfig, flowcell_name: str, bcl_converter: str, dry_
         LOG.warning("Could not find flowcell %s", flowcell_path)
         raise click.Abort
     try:
-        flowcell_object = FlowCell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
+        flowcell_object = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
     except FlowcellError:
         raise click.Abort
     lims_samples: List[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]] = list(
@@ -111,7 +111,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
         LOG.info("Found directory %s", sub_dir)
         try:
-            flowcell_object = FlowCell(flowcell_path=sub_dir, bcl_converter=bcl_converter)
+            flowcell_object = FlowCell(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
         except FlowcellError:
             continue
         if flowcell_object.sample_sheet_exists():

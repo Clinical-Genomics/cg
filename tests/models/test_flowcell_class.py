@@ -14,7 +14,7 @@ def test_get_run_parameters_when_non_existing(fixtures_dir: Path):
         / "demultiplexed-runs"
         / "201203_A00689_0200_AHVKJCDRXX"
     )
-    flow_cell = FlowCell(flowcell_path=flowcell_path)
+    flow_cell = FlowCell(flow_cell_path=flowcell_path)
     assert flow_cell.run_parameters_path.exists() is False
 
     # WHEN fetching the run parameters object
