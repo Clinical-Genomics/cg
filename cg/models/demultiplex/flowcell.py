@@ -27,7 +27,7 @@ class FlowCell:
         self.run_date: datetime.datetime = datetime.datetime.now()
         self.machine_name: str = ""
         self.machine_number: int = 0
-        self.base_name: str = ""  # Base name is flowcell-id + flowcell position
+        self.base_name: str = ""  # Base name is flow cell-id + flow cell position
         self.id: str = ""
         self.position: Literal["A", "B"] = "A"
         self.parse_flow_cell_name()
@@ -35,8 +35,8 @@ class FlowCell:
     def parse_flow_cell_name(self):
         """Parse relevant information from flow cell name.
 
-        This will assume that the flowcell naming convention is used. If not we skip the flowcell.
-        Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
+        This will assume that the flow cell naming convention is used. If not we skip the flow cell.
+        Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
         Example: '201203_A00689_0200_AHVKJCDRXX'.
         """
 
@@ -46,7 +46,7 @@ class FlowCell:
         self.machine_number = int(self.split_flow_cell_name[2])
         base_name: str = self.split_flow_cell_name[-1]
         self.base_name = base_name
-        LOG.debug("Set flowcell id to %s", base_name)
+        LOG.debug(f"Set flow cell id to {base_name}")
         self.id = base_name[1:]
         self.position = base_name[0]
 
@@ -56,18 +56,18 @@ class FlowCell:
         return self.path.name.split("_")
 
     @property
-    def flowcell_full_name(self) -> str:
+    def flow_cell_full_name(self) -> str:
         """Return flow cell full name."""
         return self.path.name
 
     @property
     def sample_sheet_path(self) -> Path:
         """Return sample sheet path."""
-        return Path(self.path, "SampleSheet.csv")
+        return Path(self.path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
     @property
     def run_parameters_path(self) -> Path:
-        return Path(self.path, "RunParameters.xml")
+        return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
 
     @property
     def run_parameters_object(self) -> RunParameters:
@@ -83,12 +83,12 @@ class FlowCell:
     @property
     def rta_complete_path(self) -> Path:
         """Return RTAComplete path."""
-        return Path(self.path, "RTAComplete.txt")
+        return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
 
     @property
     def copy_complete_path(self) -> Path:
         """Return copy complete path."""
-        return Path(self.path, "CopyComplete.txt")
+        return Path(self.path, DemultiplexingDirsAndFiles.COPY_COMPLETE)
 
     @property
     def hiseq_x_copy_complete_path(self) -> Path:
@@ -103,7 +103,7 @@ class FlowCell:
     @property
     def demultiplexing_started_path(self) -> Path:
         """Return demux started path."""
-        return Path(self.path, "demuxstarted.txt")
+        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_STARTED)
 
     @property
     def trailblazer_config_path(self) -> Path:
@@ -118,11 +118,11 @@ class FlowCell:
     def validate_flow_cell_name(self) -> None:
         """
         Validate on the following criteria:
-        Convention is: <date>_<machine>_<run_numbers>_<A|B><flowcell_id>
+        Convention is: <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>
         Example: '201203_A00689_0200_AHVKJCDRXX'.
         """
         if len(self.split_flow_cell_name) != 4:
-            message = f"Flowcell {self.path.name} does not follow the flowcell naming convention"
+            message = f"Flowcell {self.path.name} does not follow the flow cell naming convention"
             LOG.warning(message)
             raise FlowcellError(message)
 
@@ -155,15 +155,13 @@ class FlowCell:
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.
-
         This is indicated by that the file RTAComplete.txt exists.
         """
         LOG.info("Check if sequencing is done")
         return self.rta_complete_path.exists()
 
     def is_copy_completed(self) -> bool:
-        """Check if copy of flowcell is done.
-
+        """Check if copy of flow cell is done.
         This is indicated by that the file CopyComplete.txt exists.
         """
         LOG.info("Check if copy of data from sequence instrument is ready")
@@ -184,7 +182,7 @@ class FlowCell:
         LOG.debug("Check if flow cell is Hiseq X")
         return self.hiseq_x_flow_cell.exists()
 
-    def is_flowcell_ready(self) -> bool:
+    def is_flow_cell_ready(self) -> bool:
         """Check if a flow cell is ready for demultiplexing.
 
         A flow cell is ready if the two files RTAComplete.txt and CopyComplete.txt exists in the
@@ -194,7 +192,7 @@ class FlowCell:
         if not self.is_sequencing_done():
             LOG.info(f"Sequencing is not completed for flow cell {self.id}")
             return False
-        LOG.debug(f"Sequence is done for flowcell {self.id}")
+        LOG.debug(f"Sequence is done for flow cell {self.id}")
         if not self.is_copy_completed():
             LOG.info(f"Copy of sequence data is not ready for flow cell {self.id}")
             return False

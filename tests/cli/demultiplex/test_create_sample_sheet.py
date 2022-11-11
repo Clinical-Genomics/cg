@@ -31,7 +31,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
-        create_sheet, [flowcell_object.flowcell_full_name], obj=sample_sheet_context
+        create_sheet, [flowcell_object.flow_cell_full_name], obj=sample_sheet_context
     )
 
     # THEN assert it exits with a non zero exit code

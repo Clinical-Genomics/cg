@@ -162,7 +162,7 @@ class DemultiplexingAPI:
         """
         LOG.info("Check if demultiplexing is possible for %s", flowcell.id)
         demultiplexing_possible = True
-        if not flowcell.is_flowcell_ready():
+        if not flowcell.is_flow_cell_ready():
             demultiplexing_possible = False
 
         if not flowcell.sample_sheet_exists():

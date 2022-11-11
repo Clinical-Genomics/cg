@@ -78,9 +78,12 @@ DRAGEN_PASSED_FILTER_PCT = 100.00000
 class DemultiplexingDirsAndFiles(StrEnum):
     """Demultiplexing related directories and files."""
 
-    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
+    COPY_COMPLETE: str = "CopyComplete.txt"
     DELIVERY: str = "delivery.txt"
+    DEMUX_STARTED: str = "demuxstarted.txt"
+    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
     HiseqX_TILE_DIR: str = "l1t11"
     RTACOMPLETE: str = "RTAComplete.txt"
+    RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
