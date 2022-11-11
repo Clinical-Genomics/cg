@@ -1,4 +1,4 @@
-"""Tests for transfer flowcell data"""
+"""Tests for transfer flow cell data."""
 from datetime import datetime
 import warnings
 from pathlib import Path
@@ -10,7 +10,7 @@ from cg.store import Store
 
 
 @mock.patch("pathlib.Path.exists")
-@mock.patch("cg.meta.transfer.flowcell.TransferFlowcell._sample_sheet_path")
+@mock.patch("cg.meta.transfer.flowcell.TransferFlowCell._sample_sheet_path")
 def test_transfer_flowcell(
     mock_sample_sheet_path, mock_path_exists, flowcell_store: Store, transfer_flowcell_api
 ):

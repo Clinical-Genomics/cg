@@ -9,7 +9,7 @@ from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.tags import HkMipAnalysisTag
-from cg.meta.transfer import TransferFlowcell
+from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
@@ -216,6 +216,6 @@ def fixture_flowcell_store(
 @pytest.fixture(name="transfer_flowcell_api")
 def fixture_transfer_flowcell_api(
     flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
-) -> Generator[TransferFlowcell, None, None]:
+) -> Generator[TransferFlowCell, None, None]:
     """Setup flow cell transfer API."""
-    yield TransferFlowcell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)
+    yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)

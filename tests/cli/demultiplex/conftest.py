@@ -43,28 +43,28 @@ def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> P
     return Path(demultiplex_fixtures, "SampleSheetS2_Bcl2Fastq.csv")
 
 
-@pytest.fixture(name="flowcell_runs_working_directory")
-def fixture_flowcell_runs_working_directory(project_dir: Path) -> Path:
+@pytest.fixture(name="flow_cell_runs_working_directory")
+def fixture_flow_cell_runs_working_directory(project_dir: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
     working_dir: Path = Path(project_dir, "flowcell-runs")
     working_dir.mkdir(parents=True)
     return working_dir
 
 
-@pytest.fixture(name="flowcell_runs_working_directory_bcl2fastq")
-def fixture_flowcell_runs_working_directory_bcl2fastq(
-    flowcell_runs_working_directory: Path,
+@pytest.fixture(name="flow_cell_runs_working_directory_bcl2fastq")
+def fixture_flow_cell_runs_working_directory_bcl2fastq(
+    flow_cell_runs_working_directory: Path,
 ) -> Path:
     """Return the path to a working directory with flowcells ready for demux."""
-    working_dir: Path = Path(flowcell_runs_working_directory, "bcl2fastq")
+    working_dir: Path = Path(flow_cell_runs_working_directory, "bcl2fastq")
     working_dir.mkdir(parents=True)
     return working_dir
 
 
-@pytest.fixture(name="flowcell_runs_working_directory_dragen")
-def fixture_flowcell_runs_working_directory_dragen(flowcell_runs_working_directory: Path) -> Path:
+@pytest.fixture(name="flow_cell_runs_working_directory_dragen")
+def fixture_flow_cell_runs_working_directory_dragen(flow_cell_runs_working_directory: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(flowcell_runs_working_directory, "dragen")
+    working_dir: Path = Path(flow_cell_runs_working_directory, "dragen")
     working_dir.mkdir(parents=True)
     return working_dir
 
@@ -105,13 +105,13 @@ def fixture_demultiplexed_flowcell_finished_working_directory(
 
 @pytest.fixture(name="flowcell_working_directory")
 def fixture_flowcell_working_directory(
-    novaseq_dir: Path, flowcell_runs_working_directory: Path
+    novaseq_dir: Path, flow_cell_runs_working_directory: Path
 ) -> Path:
     """Return the path to a working directory that will be deleted after test is run.
 
     This is a path to a flowcell directory with the run parameters present.
     """
-    working_dir: Path = Path(flowcell_runs_working_directory, novaseq_dir.name)
+    working_dir: Path = Path(flow_cell_runs_working_directory, novaseq_dir.name)
     working_dir.mkdir(parents=True)
     existing_flowcell: FlowCell = FlowCell(flow_cell_path=novaseq_dir)
     working_flowcell: FlowCell = FlowCell(flow_cell_path=working_dir)
@@ -124,13 +124,15 @@ def fixture_flowcell_working_directory(
 
 @pytest.fixture(name="flowcell_working_directory_bcl2fastq")
 def fixture_flowcell_working_directory_bcl2fastq(
-    flowcell_dir_bcl2fastq: Path, flowcell_runs_working_directory_bcl2fastq: Path
+    flowcell_dir_bcl2fastq: Path, flow_cell_runs_working_directory_bcl2fastq: Path
 ) -> Path:
     """Return the path to a working directory that will be deleted after test is run.
 
     This is a path to a flowcell directory with the run parameters present.
     """
-    working_dir: Path = Path(flowcell_runs_working_directory_bcl2fastq, flowcell_dir_bcl2fastq.name)
+    working_dir: Path = Path(
+        flow_cell_runs_working_directory_bcl2fastq, flowcell_dir_bcl2fastq.name
+    )
     working_dir.mkdir(parents=True)
     existing_flowcell: FlowCell = FlowCell(flow_cell_path=flowcell_dir_bcl2fastq)
     working_flowcell: FlowCell = FlowCell(flow_cell_path=working_dir)
@@ -143,13 +145,13 @@ def fixture_flowcell_working_directory_bcl2fastq(
 
 @pytest.fixture(name="flowcell_working_directory_dragen")
 def fixture_flowcell_working_directory_dragen(
-    flowcell_dir_dragen: Path, flowcell_runs_working_directory_dragen: Path
+    flowcell_dir_dragen: Path, flow_cell_runs_working_directory_dragen: Path
 ) -> Path:
     """Return the path to a working directory that will be deleted after test is run.
 
     This is a path to a flowcell directory with the run parameters present.
     """
-    working_dir: Path = Path(flowcell_runs_working_directory_dragen, flowcell_dir_dragen.name)
+    working_dir: Path = Path(flow_cell_runs_working_directory_dragen, flowcell_dir_dragen.name)
     working_dir.mkdir(parents=True)
     existing_flowcell: FlowCell = FlowCell(flow_cell_path=flowcell_dir_dragen)
     working_flowcell: FlowCell = FlowCell(flow_cell_path=working_dir)
@@ -162,16 +164,18 @@ def fixture_flowcell_working_directory_dragen(
 
 @pytest.fixture(name="flowcell_working_directory_no_run_parameters")
 def fixture_flowcell_working_directory_no_run_parameters(
-    novaseq_dir: Path, flowcell_runs_working_directory: Path
+    novaseq_dir: Path, flow_cell_runs_working_directory: Path
 ) -> Path:
     """This is a path to a flow cell directory with the run parameters missing."""
-    working_dir: Path = Path(flowcell_runs_working_directory, novaseq_dir.name)
+    working_dir: Path = Path(flow_cell_runs_working_directory, novaseq_dir.name)
     working_dir.mkdir(parents=True)
     return working_dir
 
 
-@pytest.fixture(name="demultiplex_ready_flowcell")
-def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq_dir: Path) -> Path:
+@pytest.fixture(name="demultiplex_ready_flow_cell")
+def fixture_demultiplex_ready_flow_cell(
+    flowcell_working_directory: Path, novaseq_dir: Path
+) -> Path:
     """Return the path to a working directory that is ready for demultiplexing.
 
     This is a path to a flowcell directory with all the files necessary to start demultiplexing present.
@@ -191,8 +195,8 @@ def fixture_demultiplex_ready_flowcell(flowcell_working_directory: Path, novaseq
     return flowcell_working_directory
 
 
-@pytest.fixture(name="demultiplex_ready_flowcell_bcl2fastq")
-def fixture_demultiplex_ready_flowcell_bcl2fastq(
+@pytest.fixture(name="demultiplex_ready_flow_cell_bcl2fastq")
+def fixture_demultiplex_ready_flow_cell_bcl2fastq(
     flowcell_working_directory_bcl2fastq: Path, flowcell_dir_bcl2fastq: Path
 ) -> Path:
     """Return the path to a working directory that is ready for demultiplexing.
@@ -214,8 +218,8 @@ def fixture_demultiplex_ready_flowcell_bcl2fastq(
     return flowcell_working_directory_bcl2fastq
 
 
-@pytest.fixture(name="demultiplex_ready_flowcell_dragen")
-def fixture_demultiplex_ready_flowcell_dragen(
+@pytest.fixture(name="demultiplex_ready_flow_cell_dragen")
+def fixture_demultiplex_ready_flow_cell_dragen(
     flowcell_working_directory_dragen: Path, flowcell_dir_dragen: Path
 ) -> Path:
     """Return the path to a working directory that is ready for demultiplexing.
@@ -250,7 +254,7 @@ def fixture_sample_sheet_context(cg_context: CGConfig, lims_api: LimsAPI) -> CGC
 
 @pytest.fixture(name="demultiplex_configs")
 def fixture_demultiplex_configs(
-    flowcell_runs_working_directory: Path,
+    flow_cell_runs_working_directory: Path,
     demultiplexed_flowcells_working_directory: Path,
     demultiplex_fixtures: Path,
 ) -> dict:
@@ -259,7 +263,7 @@ def fixture_demultiplex_configs(
     return {
         "demultiplex": {
             "out_dir": demultiplexed_flowcells_working_directory.as_posix(),
-            "run_dir": flowcell_runs_working_directory.as_posix(),
+            "run_dir": flow_cell_runs_working_directory.as_posix(),
             "slurm": {"account": "test", "mail_user": "testuser@github.se"},
         }
     }

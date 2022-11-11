@@ -43,7 +43,7 @@ def demultiplex_all(
         except FlowcellError:
             continue
 
-        if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
+        if not demultiplex_api.is_demultiplexing_possible(flow_cell=flowcell_obj) and not dry_run:
             continue
 
         if not flowcell_obj.validate_sample_sheet():
@@ -120,7 +120,7 @@ def demultiplex_flowcell(
         status_db=False,
     )
 
-    if not demultiplex_api.is_demultiplexing_possible(flowcell=flowcell_obj) and not dry_run:
+    if not demultiplex_api.is_demultiplexing_possible(flow_cell=flowcell_obj) and not dry_run:
         LOG.warning("Can not start demultiplexing!")
         return
 

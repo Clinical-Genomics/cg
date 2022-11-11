@@ -12,7 +12,7 @@ from cg.store import Store, models
 LOG = logging.getLogger(__name__)
 
 
-class TransferFlowcell:
+class TransferFlowCell:
     """Transfer flow cell API."""
 
     def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI):
@@ -56,7 +56,7 @@ class TransferFlowcell:
             if store:
                 self.store_fastqs(
                     sample=sample_obj.internal_id,
-                    flowcell=flow_cell_id,
+                    flow_cell_id=flow_cell_id,
                     fastq_files=sample_data.fastqs,
                 )
 
@@ -80,7 +80,7 @@ class TransferFlowcell:
 
         return flow_cell
 
-    def store_fastqs(self, sample: str, flowcell: str, fastq_files: List[str]):
+    def store_fastqs(self, sample: str, flow_cell_id: str, fastq_files: List[str]):
         """Store FASTQ files for a sample in Housekeeper."""
         hk_bundle = self.hk.bundle(sample)
         if hk_bundle is None:
@@ -96,16 +96,16 @@ class TransferFlowcell:
             for fastq_file in fastq_files:
                 if self.hk.files(path=fastq_file).first() is None:
                     LOG.info(f"found FASTQ file: {fastq_file}")
-                    tags = [self.hk.tag("fastq"), self.hk.tag(flowcell)]
+                    tags = [self.hk.tag("fastq"), self.hk.tag(flow_cell_id)]
                     new_file = self.hk.new_file(path=fastq_file, tags=tags)
                     hk_version.files.append(new_file)
             self.hk.commit()
 
-    def store_samplesheet(self, flowcell: str, sample_sheet_path: str):
+    def store_samplesheet(self, flow_cell_id: str, sample_sheet_path: str):
         """Store samplesheet for a run in Housekeeper"""
-        hk_bundle = self.hk.bundle(flowcell)
+        hk_bundle = self.hk.bundle(flow_cell_id)
         if hk_bundle is None:
-            hk_bundle = self.hk.new_bundle(flowcell)
+            hk_bundle = self.hk.new_bundle(flow_cell_id)
             self.hk.add_commit(hk_bundle)
             new_version = self.hk.new_version(created_at=hk_bundle.created_at)
             hk_bundle.versions.append(new_version)
@@ -116,15 +116,15 @@ class TransferFlowcell:
             hk_version = hk_bundle.versions[0]
             if self.hk.files(path=sample_sheet_path).first() is None:
                 LOG.info(f"Adding samplesheet: {sample_sheet_path}")
-                tags = [self.hk.tag("samplesheet"), self.hk.tag(flowcell)]
+                tags = [self.hk.tag("samplesheet"), self.hk.tag(flow_cell_id)]
                 new_file = self.hk.new_file(path=sample_sheet_path, tags=tags)
                 hk_version.files.append(new_file)
         self.hk.commit()
 
-    def _sample_sheet_path(self, flowcell: str) -> str:
+    def _sample_sheet_path(self, flow_cell_id: str) -> str:
         """Construct the path to the samplesheet to be stored."""
-        run_name: str = self.stats.run_name(flowcell)
-        document_path: str = self.stats.document_path(flowcell)
+        run_name: str = self.stats.run_name(flow_cell_id)
+        document_path: str = self.stats.document_path(flow_cell_id)
         unaligned_dir: str = Path(document_path).name
         root_dir: Path = self.stats.root_dir
         return str(root_dir.joinpath(run_name, unaligned_dir, "SampleSheet.csv"))

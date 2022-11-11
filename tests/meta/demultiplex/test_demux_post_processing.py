@@ -6,7 +6,7 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
-from cg.meta.transfer import TransferFlowcell
+from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flowcell import FlowCell
 from cg.store import Store
@@ -328,8 +328,8 @@ def test_post_process_flow_cell_dry_run(
     # GIVEN dry run set to True
     post_demux_api.set_dry_run(dry_run=True)
 
-    mocker.patch.object(TransferFlowcell, "_sample_sheet_path")
-    TransferFlowcell._sample_sheet_path.return_value = tmp_file.as_posix()
+    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
+    TransferFlowCell._sample_sheet_path.return_value = tmp_file.as_posix()
 
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
@@ -381,8 +381,8 @@ def test_post_process_flow_cell(
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
-    mocker.patch.object(TransferFlowcell, "_sample_sheet_path")
-    TransferFlowcell._sample_sheet_path.return_value = tmp_file.as_posix()
+    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
+    TransferFlowCell._sample_sheet_path.return_value = tmp_file.as_posix()
 
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(

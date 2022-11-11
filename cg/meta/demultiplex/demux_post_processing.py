@@ -14,7 +14,7 @@ from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.exc import FlowcellError
 from cg.meta.demultiplex import files
-from cg.meta.transfer import TransferFlowcell
+from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -33,7 +33,7 @@ class DemuxPostProcessingAPI:
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
-        self.transfer_flowcell_api: TransferFlowcell = TransferFlowcell(
+        self.transfer_flowcell_api: TransferFlowCell = TransferFlowCell(
             db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
         )
         self.dry_run = False

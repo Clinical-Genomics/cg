@@ -9,7 +9,7 @@ from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_sta
 from tests.cli.demultiplex.conftest import (
     fixture_demultiplexing_api,
     fixture_demultiplex_configs,
-    fixture_flowcell_runs_working_directory,
+    fixture_flow_cell_runs_working_directory,
     fixture_demultiplexed_flowcells_working_directory,
     fixture_demultiplex_context,
     fixture_demultiplexed_flowcell_finished_working_directory,

@@ -49,18 +49,18 @@ class DemultiplexingAPI:
 
     @staticmethod
     def get_sbatch_error(
-        flowcell: FlowCell,
+        flow_cell: FlowCell,
         email: str,
         demux_dir: Path,
     ) -> str:
-        """Create the sbatch error string"""
+        """Create the sbatch error string."""
         LOG.info("Creating the sbatch error string")
         error_parameters: SbatchError = SbatchError(
-            flowcell_name=flowcell.id,
+            flow_cell_name=flow_cell.id,
             email=email,
-            logfile=DemultiplexingAPI.get_stderr_logfile(flowcell=flowcell).as_posix(),
+            logfile=DemultiplexingAPI.get_stderr_logfile(flowcell=flow_cell).as_posix(),
             demux_dir=demux_dir.as_posix(),
-            demux_started=flowcell.demultiplexing_started_path.as_posix(),
+            demux_started=flow_cell.demultiplexing_started_path.as_posix(),
         )
         return DEMULTIPLEX_ERROR.format(**error_parameters.dict())
 
@@ -70,9 +70,10 @@ class DemultiplexingAPI:
         unaligned_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
-        flowcell: FlowCell,
+        flow_cell: FlowCell,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
+        """Return sbatch command."""
         LOG.info("Creating the sbatch command string")
         command_parameters: SbatchCommand = SbatchCommand(
             run_dir=run_dir.as_posix(),
@@ -82,27 +83,27 @@ class DemultiplexingAPI:
             demux_completed_file=demux_completed.as_posix(),
             environment=environment,
         )
-        return DEMULTIPLEX_COMMAND[flowcell.bcl_converter].format(**command_parameters.dict())
+        return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(**command_parameters.dict())
 
     @staticmethod
     def demultiplex_sbatch_path(flowcell: FlowCell) -> Path:
-        """Get the path to where sbatch file should be kept"""
-        return flowcell.path / "demux-novaseq.sh"
+        """Get the path to where sbatch file should be kept."""
+        return Path(flowcell.path, "demux-novaseq.sh")
 
     @staticmethod
     def get_run_name(flowcell: FlowCell) -> str:
-        """Create the run name for the sbatch job"""
+        """Create the run name for the sbatch job."""
         return f"{flowcell.id}_demultiplex"
 
     @staticmethod
     def get_stderr_logfile(flowcell: FlowCell) -> Path:
-        """Create the path to the logfile"""
-        return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stderr"
+        """Create the path to the stderr logfile."""
+        return Path(flowcell.path, f"{DemultiplexingAPI.get_run_name(flowcell)}.stderr")
 
     @staticmethod
     def get_stdout_logfile(flowcell: FlowCell) -> Path:
-        """Create the path to the logfile"""
-        return flowcell.path / f"{DemultiplexingAPI.get_run_name(flowcell)}.stdout"
+        """Create the path to the stdout logfile."""
+        return Path(flowcell.path, f"{DemultiplexingAPI.get_run_name(flowcell)}.stdout")
 
     def get_all_demultiplex_flow_cells_out_dirs(self) -> List[Path]:
         """Return all demultiplex flow cell out directories."""
@@ -159,33 +160,33 @@ class DemultiplexingAPI:
         LOG.debug("Demultiplexing is not finished!")
         return True
 
-    def is_demultiplexing_possible(self, flowcell: FlowCell) -> bool:
-        """Check if it is possible to start demultiplexing
+    def is_demultiplexing_possible(self, flow_cell: FlowCell) -> bool:
+        """Check if it is possible to start demultiplexing.
 
         This means that
-            - flowcell should be ready for demultiplexing (all files in place)
+            - flow cell should be ready for demultiplexing (all files in place)
             - sample sheet needs to exist
             - demultiplexing should not be running
         """
-        LOG.info("Check if demultiplexing is possible for %s", flowcell.id)
+        LOG.info(f"Check if demultiplexing is possible for {flow_cell.id}")
         demultiplexing_possible = True
-        if not flowcell.is_flow_cell_ready():
+        if not flow_cell.is_flow_cell_ready():
             demultiplexing_possible = False
 
-        if not flowcell.sample_sheet_exists():
-            LOG.warning("Could not find sample sheet for %s", flowcell.id)
+        if not flow_cell.sample_sheet_exists():
+            LOG.warning(f"Could not find sample sheet for {flow_cell.id}")
             demultiplexing_possible = False
 
-        if flowcell.is_demultiplexing_started():
+        if flow_cell.is_demultiplexing_started():
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False
 
-        if self.flowcell_out_dir_path(flow_cell=flowcell).exists():
+        if self.flowcell_out_dir_path(flow_cell=flow_cell).exists():
             LOG.warning("Flow cell out dir exists")
             demultiplexing_possible = False
 
-        if self.is_demultiplexing_completed(flowcell):
-            LOG.warning("Demultiplexing is already completed for flowcell %s", flowcell.id)
+        if self.is_demultiplexing_completed(flow_cell):
+            LOG.warning(f"Demultiplexing is already completed for flow cell {flow_cell.id}")
             demultiplexing_possible = False
         return demultiplexing_possible
 
@@ -237,14 +238,14 @@ class DemultiplexingAPI:
 
         log_path: Path = self.get_stderr_logfile(flowcell=flowcell)
         error_function: str = self.get_sbatch_error(
-            flowcell=flowcell, email=self.mail, demux_dir=demux_dir
+            flow_cell=flowcell, email=self.mail, demux_dir=demux_dir
         )
         commands: str = self.get_sbatch_command(
             run_dir=flowcell.path,
             unaligned_dir=unaligned_dir,
             sample_sheet=flowcell.sample_sheet_path,
             demux_completed=self.demultiplexing_completed_path(flow_cell=flowcell),
-            flowcell=flowcell,
+            flow_cell=flowcell,
             environment=self.environment,
         )
 

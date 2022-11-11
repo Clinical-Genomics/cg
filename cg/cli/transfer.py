@@ -4,7 +4,7 @@ import click
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.meta.transfer import PoolState, SampleState, TransferFlowcell, TransferLims
+from cg.meta.transfer import PoolState, SampleState, TransferFlowCell, TransferLims
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -19,7 +19,7 @@ def transfer_group(context: CGConfig):
     status_db: Store = context.status_db
     hk_api: HousekeeperAPI = context.housekeeper_api
     stats_api: StatsAPI = context.cg_stats_api
-    context.meta_apis["transfer_flowcell_api"] = TransferFlowcell(
+    context.meta_apis["transfer_flowcell_api"] = TransferFlowCell(
         db=status_db, stats_api=stats_api, hk_api=hk_api
     )
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)

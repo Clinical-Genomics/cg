@@ -12,19 +12,19 @@ from cg.models.demultiplex.flowcell import FlowCell
 
 def test_demultiplex_flowcell_dry_run(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell: Path,
+    demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
     caplog,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for demultiplexing
-    flowcell: FlowCell = FlowCell(demultiplex_ready_flowcell)
+    flow_cell: FlowCell = FlowCell(demultiplex_ready_flow_cell)
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
+    assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
+    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
@@ -32,7 +32,7 @@ def test_demultiplex_flowcell_dry_run(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flowcell,
-        [str(demultiplex_ready_flowcell), "--dry-run"],
+        [str(demultiplex_ready_flow_cell), "--dry-run"],
         obj=demultiplex_context,
     )
 
@@ -46,7 +46,7 @@ def test_demultiplex_flowcell_dry_run(
 
 def test_demultiplex_flowcell(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell: Path,
+    demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
     caplog,
     mocker,
@@ -54,13 +54,13 @@ def test_demultiplex_flowcell(
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for demultiplexing
-    flowcell: FlowCell = FlowCell(demultiplex_ready_flowcell)
+    flow_cell: FlowCell = FlowCell(demultiplex_ready_flow_cell)
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
+    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
-    assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
+    assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
@@ -68,7 +68,7 @@ def test_demultiplex_flowcell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flowcell,
-        [str(demultiplex_ready_flowcell)],
+        [str(demultiplex_ready_flow_cell)],
         obj=demultiplex_context,
     )
 
@@ -80,12 +80,12 @@ def test_demultiplex_flowcell(
     assert unaligned_dir.exists()
 
     # THEN assert that the sbatch script was created
-    assert demux_api.demultiplex_sbatch_path(flowcell).exists()
+    assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
 
 
 def test_demultiplex_bcl2fastq_flowcell(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell_bcl2fastq: Path,
+    demultiplex_ready_flow_cell_bcl2fastq: Path,
     demultiplex_context: CGConfig,
     caplog,
     mocker,
@@ -93,13 +93,13 @@ def test_demultiplex_bcl2fastq_flowcell(
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for bcl2fastq demultiplexing
-    flowcell: FlowCell = FlowCell(demultiplex_ready_flowcell_bcl2fastq)
+    flow_cell: FlowCell = FlowCell(demultiplex_ready_flow_cell_bcl2fastq)
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
+    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
-    assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
+    assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
@@ -107,7 +107,7 @@ def test_demultiplex_bcl2fastq_flowcell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flowcell,
-        [str(demultiplex_ready_flowcell_bcl2fastq)],
+        [str(demultiplex_ready_flow_cell_bcl2fastq)],
         obj=demultiplex_context,
     )
 
@@ -119,12 +119,12 @@ def test_demultiplex_bcl2fastq_flowcell(
     assert unaligned_dir.exists()
 
     # THEN assert that the sbatch script was created
-    assert demux_api.demultiplex_sbatch_path(flowcell).exists()
+    assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
 
 
 def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell_dragen: Path,
+    demultiplex_ready_flow_cell_dragen: Path,
     demultiplex_context: CGConfig,
     demultiplexed_flowcells_working_directory: Path,
     caplog,
@@ -133,15 +133,15 @@ def test_demultiplex_dragen_flowcell(
     caplog.set_level(logging.INFO)
 
     # GIVEN that all files are present for dragen demultiplexing
-    flowcell: FlowCell = FlowCell(
-        flow_cell_path=demultiplex_ready_flowcell_dragen, bcl_converter="dragen"
+    flow_cell: FlowCell = FlowCell(
+        flow_cell_path=demultiplex_ready_flow_cell_dragen, bcl_converter="dragen"
     )
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flowcell)
+    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
-    assert demux_api.is_demultiplexing_possible(flowcell=flowcell)
+    assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
@@ -149,7 +149,7 @@ def test_demultiplex_dragen_flowcell(
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         demultiplex_flowcell,
-        [str(demultiplex_ready_flowcell_dragen), "-b", "dragen"],
+        [str(demultiplex_ready_flow_cell_dragen), "-b", "dragen"],
         obj=demultiplex_context,
     )
 
@@ -161,22 +161,22 @@ def test_demultiplex_dragen_flowcell(
     assert unaligned_dir.exists()
 
     # THEN assert that the sbatch script was created
-    assert demux_api.demultiplex_sbatch_path(flowcell).exists()
+    assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
 
 
 def test_demultiplex_all(
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplex_ready_flowcell: Path,
+    demultiplex_ready_flow_cell: Path,
     caplog,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    flow_cell: FlowCell = FlowCell(flow_cell_path=demultiplex_ready_flowcell)
+    flow_cell: FlowCell = FlowCell(flow_cell_path=demultiplex_ready_flow_cell)
 
-    assert demux_api.run_dir == demultiplex_ready_flowcell.parent
+    assert demux_api.run_dir == demultiplex_ready_flow_cell.parent
 
     # WHEN running the demultiplex all command
     result: testing.Result = cli_runner.invoke(
@@ -189,13 +189,13 @@ def test_demultiplex_all(
     # THEN assert it found the directory
     assert "Found directory" in caplog.text
 
-    # THEN assert it found a flowcell that is ready for demultiplexing
+    # THEN assert it found a flow cell that is ready for demultiplexing
     assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
 
 
 def test_start_demultiplexing_when_already_completed(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell: Path,
+    demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
     caplog,
     mocker,
@@ -203,22 +203,22 @@ def test_start_demultiplexing_when_already_completed(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN that all files are present for demultiplexing
-    flowcell: FlowCell = FlowCell(demultiplex_ready_flowcell)
+    flow_cell: FlowCell = FlowCell(demultiplex_ready_flow_cell)
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
 
     # GIVEN that demultiplexing has started
-    flowcell.demultiplexing_started_path.touch()
+    flow_cell.demultiplexing_started_path.touch()
 
     # GIVEN a out dir that exist
-    demux_api.flowcell_out_dir_path(flowcell).mkdir(parents=True)
+    demux_api.flowcell_out_dir_path(flow_cell).mkdir(parents=True)
 
     # GIVEN that demultiplexing is completed
-    demux_api.demultiplexing_completed_path(flow_cell=flowcell).touch()
+    demux_api.demultiplexing_completed_path(flow_cell=flow_cell).touch()
 
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flowcell,
-        [str(demultiplex_ready_flowcell), "-b", "bcl2fastq"],
+        [str(demultiplex_ready_flow_cell), "-b", "bcl2fastq"],
         obj=demultiplex_context,
     )
 
@@ -226,12 +226,12 @@ def test_start_demultiplexing_when_already_completed(
     assert result.exit_code == 0
 
     # THEN assert it was communicated that demultiplexing was completed
-    assert f"Demultiplexing is already completed for flow cell {flowcell.id}"
+    assert f"Demultiplexing is already completed for flow cell {flow_cell.id}"
 
 
 def test_delete_flow_cell_dry_run_cgstats(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell: Path,
+    demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
     flow_cell_name: str,
     caplog,
@@ -240,7 +240,7 @@ def test_delete_flow_cell_dry_run_cgstats(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cell to be deleted
-    assert flow_cell_name in demultiplex_ready_flowcell.name
+    assert flow_cell_name in demultiplex_ready_flow_cell.name
 
     # WHEN executing the commando to remove flow cell from cgstats in dry run mode
     result: testing.Result = cli_runner.invoke(
@@ -249,7 +249,7 @@ def test_delete_flow_cell_dry_run_cgstats(
             "-d",
             str(demultiplex_context.demultiplex_api.out_dir),
             "-r",
-            demultiplex_ready_flowcell,
+            demultiplex_ready_flow_cell,
             "--cg-stats",
             "--dry-run",
             "--yes",
@@ -266,7 +266,7 @@ def test_delete_flow_cell_dry_run_cgstats(
 
 def test_delete_flow_cell_dry_run_status_db(
     cli_runner: testing.CliRunner,
-    demultiplex_ready_flowcell: Path,
+    demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
     flow_cell_full_name: str,
     flow_cell_name: str,
@@ -276,7 +276,7 @@ def test_delete_flow_cell_dry_run_status_db(
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cell to be deleted
-    assert flow_cell_name in demultiplex_ready_flowcell.name
+    assert flow_cell_name in demultiplex_ready_flow_cell.name
 
     # WHEN deleting a flowcell from status db in dry run mode
     result: testing.Result = cli_runner.invoke(
@@ -285,7 +285,7 @@ def test_delete_flow_cell_dry_run_status_db(
             "-d",
             str(demultiplex_context.demultiplex_api.out_dir),
             "-r",
-            demultiplex_ready_flowcell,
+            demultiplex_ready_flow_cell,
             "--status-db",
             "--dry-run",
             "--yes",
@@ -310,6 +310,6 @@ def test_delete_flow_cell_dry_run_status_db(
     assert (
         "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
         f"{demultiplex_context.demultiplex_api.out_dir / Path(flow_cell_full_name)}\n"
-        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flowcell}"
+        f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flow_cell}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text

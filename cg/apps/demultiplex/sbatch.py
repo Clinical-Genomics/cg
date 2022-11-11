@@ -42,9 +42,9 @@ touch {demux_completed_file}
 log "Dragen BCL Convert finished!"
 """,
 }
-# This needs flowcell_name, email. logfile
+# This needs flow cell_name, email. logfile
 DEMULTIPLEX_ERROR = """
-mail -s 'ERROR demultiplexing of {flowcell_name}' {email} < '{logfile}'
+mail -s 'ERROR demultiplexing of {flow_cell_name}' {email} < '{logfile}'
 if [[ -e {demux_dir} ]]
 then
     rm -r {demux_dir}
