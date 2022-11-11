@@ -81,7 +81,7 @@ def fixture_mip_dna_observations_api(
 @pytest.fixture(scope="function", name="balsamic_observations_api")
 def fixture_balsamic_observations_api(
     cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI
-) -> MipDNAObservationsAPI:
+) -> BalsamicObservationsAPI:
     """Rare diseases observations API fixture."""
     balsamic_observations_api = BalsamicObservationsAPI(cg_config_object, SequencingMethod.WGS)
     balsamic_observations_api.loqusdb_somatic_api = mock_loqusdb_api
