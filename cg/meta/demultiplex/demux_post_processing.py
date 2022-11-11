@@ -54,6 +54,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         LOG.info(
             f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X {flowcell_path.as_posix()}"
         )
+        if self.dry_run:
+            LOG.info("Dry run will not add flow cell stats")
+            return
         cgstats_add_parameters = [
             "--database",
             self.stats_api.db_uri,
@@ -76,6 +79,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             LOG.info(
                 f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flowcell_id}"
             )
+            if self.dry_run:
+                LOG.info("Dry run will not process selected project")
+                return
             cgstats_select_parameters: List[str] = [
                 "--database",
                 self.stats_api.db_uri,
@@ -93,6 +99,12 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
 
     def cgstats_lanestats(self, flowcell_path: Path) -> None:
         """Process lane stats using cgstats."""
+        LOG.info(
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri} lanestats {flowcell_path.as_posix()}"
+        )
+        if self.dry_run:
+            LOG.info("Dry run will not add lane stats")
+            return
         cgstats_lane_parameters: List[str] = [
             "--database",
             self.stats_api.db_uri,
@@ -100,9 +112,6 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flowcell_path.as_posix(),
         ]
         cgstats_process: Process = Process(binary=self.stats_api.binary)
-        LOG.info(
-            f"{self.stats_api.binary} --database {self.stats_api.db_uri} lanestats {flowcell_path.as_posix()}"
-        )
         cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
 
     def post_process_flowcell(
@@ -124,6 +133,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         self.cgstats_select_project(flowcell_id=flowcell.id, flowcell_path=flowcell_path)
         self.cgstats_lanestats(flowcell_path=flowcell_path)
         new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flowcell.id)
+        if self.dry_run:
+            LOG.info("Dry run will commit flow cell to database")
+            return
         self.status_db.add_commit(new_record)
         LOG.info(f"Flow cell added: {new_record}")
 
@@ -276,6 +288,9 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
         new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flowcell_id)
+        if self.dry_run:
+            LOG.info("Dry run will commit flow cell to database")
+            return
         self.status_db.add_commit(new_record)
         LOG.info(f"Flow cell added: {new_record}")
 

@@ -29,7 +29,6 @@ class TransferFlowcell:
         if store and self.hk.tag(flow_cell_id) is None:
             self.hk.add_commit(self.hk.new_tag(flow_cell_id))
         stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
-        print(stats_data)
         flowcell_obj: models.Flowcell = self.db.flowcell(flow_cell_id)
 
         if flowcell_obj is None:
