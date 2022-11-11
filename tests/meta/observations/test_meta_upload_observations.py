@@ -76,7 +76,7 @@ def test_is_duplicate(
     analysis_store: Store,
     mocker,
 ):
-    """Test duplicate extraction for a case that is not Loqusdb."""
+    """Test duplicate extraction for a case that is not in Loqusdb."""
 
     # GIVEN a Loqusdb instance with no case duplicates
     case: models.Family = analysis_store.family(case_id)

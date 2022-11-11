@@ -25,7 +25,7 @@ def fixture_observations_input_files_raw(case_id: str, filled_file: Path) -> dic
 def fixture_observations_input_files(
     observations_input_files_raw: dict,
 ) -> MipDNAObservationsInputFiles:
-    """Return raw observations input files for rare diseases WES analysis ."""
+    """Return raw observations input files for rare diseases WES analysis."""
     return MipDNAObservationsInputFiles(**observations_input_files_raw)
 
 
@@ -44,5 +44,5 @@ def fixture_balsamic_observations_input_files_raw(case_id: str, filled_file: Pat
 def fixture_balsamic_observations_input_files(
     balsamic_observations_input_files_raw: dict,
 ) -> BalsamicObservationsInputFiles:
-    """Return raw observations input files for cancer WGS analysis ."""
+    """Return raw observations input files for cancer WGS analysis."""
     return BalsamicObservationsInputFiles(**balsamic_observations_input_files_raw)
