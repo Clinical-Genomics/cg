@@ -13,7 +13,10 @@ from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError, CaseNotF
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
-from cg.models.observations.input_files import MipDNAObservationsInputFiles
+from cg.models.observations.input_files import (
+    MipDNAObservationsInputFiles,
+    BalsamicObservationsInputFiles,
+)
 from cg.store import models, Store
 from tests.store_helpers import StoreHelpers
 
@@ -187,7 +190,7 @@ def test_mip_dna_load_observations(
     """Test loading of case observations for rare disease."""
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN a mock MIP DNA observations API  and a list of observations input files
+    # GIVEN a mock MIP DNA observations API and a list of observations input files
     case: models.Family = analysis_store.family(case_id)
     mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=False)
 
@@ -288,6 +291,30 @@ def test_mip_dna_delete_case_not_found(
         f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
         in caplog.text
     )
+
+
+def test_balsamic_load_cancer_observations(
+    case_id: str,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    balsamic_observations_input_files: BalsamicObservationsInputFiles,
+    nr_of_loaded_variants,
+    analysis_store: Store,
+    caplog: LogCaptureFixture,
+):
+    """Test loading of case observations for rare disease."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a mock BALSAMIC observations API and a list of observations input files
+    case: models.Family = analysis_store.family(case_id)
+
+    # WHEN loading the case to a somatic Loqusdb instance
+    balsamic_observations_api.load_cancer_observations(
+        case, balsamic_observations_input_files, balsamic_observations_api.loqusdb_somatic_api
+    )
+
+    # THEN the observations should be loaded successfully
+    assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
+    print(caplog.text)
 
 
 def test_balsamic_delete_case(

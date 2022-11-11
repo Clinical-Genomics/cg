@@ -72,7 +72,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         loqusdb_api: LoqusdbAPI,
     ) -> None:
         """Load cancer observations to a specific Loqusdb API."""
-        is_somatic: bool = True if "somatic" in loqusdb_api.config_path else False
+        is_somatic: bool = "somatic" in str(loqusdb_api.config_path)
         load_output: dict = loqusdb_api.load(
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_all_vcf_path,

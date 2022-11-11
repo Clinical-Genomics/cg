@@ -22,6 +22,8 @@ from tests.apps.loqus.conftest import (
 from tests.models.observations.conftest import (
     fixture_observations_input_files_raw,
     fixture_observations_input_files,
+    fixture_balsamic_observations_input_files_raw,
+    fixture_balsamic_observations_input_files,
 )
 
 
