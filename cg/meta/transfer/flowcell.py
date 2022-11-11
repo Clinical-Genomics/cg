@@ -1,4 +1,4 @@
-"""API for transfer a flowcell."""
+"""API for transfer a flow cell."""
 
 import logging
 from pathlib import Path
@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TransferFlowcell:
-    """Transfer flowcell API"""
+    """Transfer flow cell API."""
 
     def __init__(self, db: Store, stats_api: StatsAPI, hk_api: HousekeeperAPI):
         self.db: Store = db
@@ -29,16 +29,16 @@ class TransferFlowcell:
         if store and self.hk.tag(flow_cell_id) is None:
             self.hk.add_commit(self.hk.new_tag(flow_cell_id))
         stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
-        flowcell_obj: models.Flowcell = self.db.flowcell(flow_cell_id)
+        flow_cell: models.Flowcell = self.db.flowcell(flow_cell_id)
 
-        if flowcell_obj is None:
-            flowcell_obj: models.Flowcell = self.db.add_flowcell(
+        if flow_cell is None:
+            flow_cell: models.Flowcell = self.db.add_flowcell(
                 name=flow_cell_id,
                 sequencer=stats_data.sequencer,
                 sequencer_type=stats_data.sequencer_type,
                 date=stats_data.date,
             )
-        flowcell_obj.status = "ondisk"
+        flow_cell.status = "ondisk"
 
         sample_sheet_path = self._sample_sheet_path(flow_cell_id)
         if not Path(sample_sheet_path).exists():
@@ -65,20 +65,20 @@ class TransferFlowcell:
                 sample_obj.reads > sample_obj.application_version.application.expected_reads
             )
             newest_date = (sample_obj.sequenced_at is None) or (
-                flowcell_obj.sequenced_at > sample_obj.sequenced_at
+                flow_cell.sequenced_at > sample_obj.sequenced_at
             )
             if newest_date:
-                sample_obj.sequenced_at = flowcell_obj.sequenced_at
+                sample_obj.sequenced_at = flow_cell.sequenced_at
 
             if isinstance(sample_obj, models.Sample):
-                flowcell_obj.samples.append(sample_obj)
+                flow_cell.samples.append(sample_obj)
 
             LOG.info(
                 f"added reads to sample: {sample_data.name} - {sample_data.reads} "
                 f"[{'DONE' if enough_reads else 'NOT DONE'}]"
             )
 
-        return flowcell_obj
+        return flow_cell
 
     def store_fastqs(self, sample: str, flowcell: str, fastq_files: List[str]):
         """Store FASTQ files for a sample in Housekeeper."""

@@ -273,8 +273,8 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             demux_results.demux_sample_sheet_path.as_posix(),
         )
 
-    def post_process_flow_cell(self, demux_results: DemuxResults, flowcell_id: str) -> None:
-        """Run all the necessary steps for post-processing a demultiplexed flowcell
+    def post_process_flow_cell(self, demux_results: DemuxResults, flow_cell_id: str) -> None:
+        """Run all the necessary steps for post-processing a demultiplexed flow cell.
 
         This will
             1. rename all the necessary files and folders
@@ -291,7 +291,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.bcl_converter == "bcl2fastq":
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
-        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flowcell_id)
+        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flow_cell_id)
         if self.dry_run:
             LOG.info("Dry run will commit flow cell to database")
             return
@@ -332,7 +332,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             if not force:
                 return
             LOG.info("Post processing flow cell anyway")
-        self.post_process_flow_cell(demux_results=demux_results, flowcell_id=flow_cell.id)
+        self.post_process_flow_cell(demux_results=demux_results, flow_cell_id=flow_cell.id)
 
     def finish_all_flowcells(self, bcl_converter: str) -> None:
         """Loop over all flowcells and post process those that need it"""
