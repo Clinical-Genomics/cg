@@ -246,6 +246,22 @@ def fixture_base_config_dict() -> dict:
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
+        "loqusdb": {
+            "binary_path": "binary",
+            "config_path": "config",
+        },
+        "loqusdb-wes": {
+            "binary_path": "binary_wes",
+            "config_path": "config_wes",
+        },
+        "loqusdb-somatic": {
+            "binary_path": "binary_somatic",
+            "config_path": "config_somatic",
+        },
+        "loqusdb-tumor": {
+            "binary_path": "binary_tumor",
+            "config_path": "config_tumor",
+        },
     }
 
 
@@ -494,6 +510,12 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 def fixture_madeline_output(apps_dir: Path) -> Path:
     """Return str of path for file with Madeline output."""
     return Path(apps_dir, "madeline", "madeline.xml")
+
+
+@pytest.fixture(name="file_does_not_exist")
+def fixture_file_does_not_exist() -> Path:
+    """Return a file path that does not exist."""
+    return Path("file", "does", "not", "exist")
 
 
 # Compression fixtures
@@ -746,7 +768,7 @@ def fixture_hermes_process() -> ProcessMock:
 @pytest.fixture(name="hermes_api")
 def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a Hermes API with a mocked process."""
-    hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
+    hermes_config = {"hermes": {"binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
@@ -1179,7 +1201,7 @@ def fixture_context_config(
         "bed_path": str(cg_dir),
         "pon_path": str(cg_dir),
         "delivery_path": str(cg_dir),
-        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
+        "hermes": {"binary_path": "hermes"},
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
@@ -1195,7 +1217,6 @@ def fixture_context_config(
             },
         },
         "fluffy": {
-            "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
@@ -1230,7 +1251,6 @@ def fixture_context_config(
         "encryption": {"binary_path": "bin/gpg"},
         "pdc": {"binary_path": "/bin/dsmc"},
         "tar": {"binary_path": "/bin/tar"},
-        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
         "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
         "trailblazer": {
             "service_account": "SERVICE",
@@ -1260,10 +1280,11 @@ def fixture_context_config(
         "scout": {
             "binary_path": "echo",
             "config_path": "scout-stage.yaml",
-            "deploy_config": "scout-deploy-stage.yaml",
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
+        "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
+        "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
         "balsamic": {
             "root": str(balsamic_dir),
             "binary_path": "echo",
@@ -1334,15 +1355,3 @@ def fixture_cg_context(
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
-
-
-@pytest.fixture(name="observation_input_files_raw")
-def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict:
-    """Raw observations input files."""
-    return {
-        "case_id": case_id,
-        "pedigree": filled_file,
-        "snv_gbcf": filled_file,
-        "snv_vcf": filled_file,
-        "sv_vcf": None,
-    }
