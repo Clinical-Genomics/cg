@@ -29,21 +29,21 @@ def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None
         config=context
     )
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
-    demux_post_processing_api.finish_all_flowcells(bcl_converter=bcl_converter)
+    demux_post_processing_api.finish_all_flow_cells(bcl_converter=bcl_converter)
 
 
-@finish_group.command(name="flowcell")
+@finish_group.command(name="flow-cell")
 @click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
 @DRY_RUN
 @click.option("--force", is_flag=True)
 @click.pass_obj
-def finish_flowcell(
+def finish_flow_cell(
     context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool
 ) -> None:
     """Command to finish up a flow cell after demultiplexing.
 
-    flowcell-name is full flow cell name, e.g. '201203_A00689_0200_AHVKJCDRXX'.
+    flow-cell-name is full flow cell name, e.g. '201203_A00689_0200_AHVKJCDRXX'.
     """
 
     demux_post_processing_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(

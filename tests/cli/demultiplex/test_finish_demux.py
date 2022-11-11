@@ -4,7 +4,7 @@ from pathlib import Path
 
 from click import testing
 
-from cg.cli.demultiplex.finish import finish_all_hiseq_x, finish_all_cmd, finish_flowcell
+from cg.cli.demultiplex.finish import finish_all_hiseq_x, finish_all_cmd, finish_flow_cell
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 
@@ -54,7 +54,7 @@ def test_finish_all_cmd(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_finish_flowcell_dry_run(
+def test_finish_flow_cell_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
@@ -71,7 +71,7 @@ def test_finish_flowcell_dry_run(
 
     # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
-        finish_flowcell,
+        finish_flow_cell,
         ["--dry-run", flow_cell_name],
         obj=demultiplex_context,
     )
@@ -80,7 +80,7 @@ def test_finish_flowcell_dry_run(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_finish_flowcell(
+def test_finish_flow_cell(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
@@ -97,7 +97,7 @@ def test_finish_flowcell(
 
     # WHEN starting post-processing for new demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
-        finish_flowcell,
+        finish_flow_cell,
         [flow_cell_name],
         obj=demultiplex_context,
     )

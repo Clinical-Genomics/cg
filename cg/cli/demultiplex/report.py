@@ -5,10 +5,10 @@ import click
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def create_report_cmd(context: CGConfig, flowcell_name: str):
     demux_api: DemultiplexingAPI = context.demultiplex_api
     try:
         flowcell: FlowCell = FlowCell(flow_cell_path=demux_api.run_dir / flowcell_name)
-    except FlowcellError:
+    except FlowCellError:
         raise click.Abort
     demux_results: DemuxResults = DemuxResults(
         demux_dir=demux_api.out_dir / flowcell_name, flow_cell=flowcell

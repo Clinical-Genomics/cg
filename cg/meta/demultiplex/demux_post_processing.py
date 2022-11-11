@@ -12,13 +12,13 @@ from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store, models
 from cg.utils import Process
 
@@ -33,7 +33,7 @@ class DemuxPostProcessingAPI:
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.status_db: Store = config.status_db
         self.hk_api: HousekeeperAPI = config.housekeeper_api
-        self.transfer_flowcell_api: TransferFlowCell = TransferFlowCell(
+        self.transfer_flow_cell_api: TransferFlowCell = TransferFlowCell(
             db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
         )
         self.dry_run = False
@@ -132,7 +132,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         self.add_to_cgstats(flow_cell_path=flow_cell_path)
         self.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell_path)
         self.cgstats_lanestats(flow_cell_path=flow_cell_path)
-        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flow_cell.id)
+        new_record: models.Flowcell = self.transfer_flow_cell_api.transfer(
+            flow_cell_id=flow_cell.id
+        )
         if self.dry_run:
             LOG.info("Dry run will commit flow cell to database")
             return
@@ -148,7 +150,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flow_cell: FlowCell = FlowCell(
                 flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
             )
-        except FlowcellError:
+        except FlowCellError:
             return
         self.post_process_flow_cell(
             flow_cell=flow_cell, flow_cell_name=flow_cell_name, flow_cell_path=flow_cell_path
@@ -171,12 +173,12 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
     """Post demultiplexing API class for Novaseq flow cell."""
 
     def rename_files(self, demux_results: DemuxResults) -> None:
-        """Rename the files according to how we want to have it after demultiplexing is ready"""
-        LOG.info(f"Renaming files for flowcell {demux_results.flow_cell.flow_cell_full_name}")
-        flowcell_id: str = demux_results.flow_cell.id
+        """Rename the files according to how we want to have it after demultiplexing is ready."""
+        LOG.info(f"Renaming files for flow cell {demux_results.flow_cell.flow_cell_full_name}")
+        flow_cell_id: str = demux_results.flow_cell.id
         for project_dir in demux_results.raw_projects:
             files.rename_project_directory(
-                project_directory=project_dir, flowcell_id=flowcell_id, dry_run=self.dry_run
+                project_directory=project_dir, flow_cell_id=flow_cell_id, dry_run=self.dry_run
             )
 
     def add_to_cgstats(self, demux_results: DemuxResults) -> None:
@@ -184,25 +186,25 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         create.create_novaseq_flowcell(manager=self.stats_api, demux_results=demux_results)
 
     @staticmethod
-    def fetch_report_samples(flowcell_id: str, project_name: str) -> List[StatsSample]:
+    def fetch_report_samples(flow_cell_id: str, project_name: str) -> List[StatsSample]:
         samples: List[StatsSample] = find.project_sample_stats(
-            flowcell=flowcell_id, project_name=project_name
+            flowcell=flow_cell_id, project_name=project_name
         )
         LOG.info(
-            "Found samples: %s for flowcell: %s, project: %s",
+            "Found samples: %s for flow cell: %s, project: %s",
             ",".join(sample.sample_name for sample in samples),
-            flowcell_id,
+            flow_cell_id,
             project_name,
         )
         return samples
 
     @staticmethod
-    def sample_to_report_line(stats_sample: StatsSample, flowcell_id: str) -> str:
+    def sample_to_report_line(stats_sample: StatsSample, flow_cell_id: str) -> str:
         lanes: str = ",".join(str(lane) for lane in stats_sample.lanes)
         return "\t".join(
             [
                 stats_sample.sample_name,
-                flowcell_id,
+                flow_cell_id,
                 lanes,
                 ",".join(str(unaligned.read_count) for unaligned in stats_sample.unaligned),
                 str(stats_sample.read_count_sum),
@@ -214,11 +216,11 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         )
 
     @staticmethod
-    def get_report_lines(stats_samples: List[StatsSample], flowcell_id: str) -> Iterable[str]:
-        """Convert stats samples to format lines ready to print"""
+    def get_report_lines(stats_samples: List[StatsSample], flow_cell_id: str) -> Iterable[str]:
+        """Convert stats samples to format lines ready to print."""
         for stats_sample in sorted(stats_samples, key=lambda x: x.sample_name):
             yield DemuxPostProcessingNovaseqAPI.sample_to_report_line(
-                stats_sample=stats_sample, flowcell_id=flowcell_id
+                stats_sample=stats_sample, flow_cell_id=flow_cell_id
             )
 
     @staticmethod
@@ -229,24 +231,24 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             for line in report_data:
                 report_file.write(line + "\n")
 
-    def get_report_data(self, flowcell_id: str, project_name: Optional[str] = None) -> List[str]:
-        """Fetch the lines that are used to make a report from a flowcell"""
-        LOG.info("Fetch report data for flowcell: %s project: %s", flowcell_id, project_name)
+    def get_report_data(self, flow_cell_id: str, project_name: Optional[str] = None) -> List[str]:
+        """Fetch the lines that are used to make a report from a flow cell."""
+        LOG.info(f"Fetch report data for flow cell: {flow_cell_id} project: {project_name}")
         project_samples: List[StatsSample] = self.fetch_report_samples(
-            flowcell_id=flowcell_id, project_name=project_name
+            flow_cell_id=flow_cell_id, project_name=project_name
         )
 
-        return list(self.get_report_lines(stats_samples=project_samples, flowcell_id=flowcell_id))
+        return list(self.get_report_lines(stats_samples=project_samples, flow_cell_id=flow_cell_id))
 
     def create_cgstats_reports(self, demux_results: DemuxResults) -> None:
-        """Create a report for every project that was demultiplexed"""
-        flowcell_id: str = demux_results.flow_cell.id
+        """Create a report for every project that was demultiplexed."""
+        flow_cell_id: str = demux_results.flow_cell.id
         for project in demux_results.projects:
             project_name: str = project.split("_")[-1]
             report_data: List[str] = self.get_report_data(
-                flowcell_id=flowcell_id, project_name=project_name
+                flow_cell_id=flow_cell_id, project_name=project_name
             )
-            report_path: Path = demux_results.demux_dir / f"stats-{project_name}-{flowcell_id}.txt"
+            report_path: Path = demux_results.demux_dir / f"stats-{project_name}-{flow_cell_id}.txt"
             self.write_report(report_path=report_path, report_data=report_data)
 
     @staticmethod
@@ -264,9 +266,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
     def copy_sample_sheet(demux_results: DemuxResults) -> None:
         """Copy the sample sheet from run dir to demux dir"""
         LOG.info(
-            "Copy sample sheet (%s) from flowcell to demuxed result dir (%s)",
-            demux_results.sample_sheet_path,
-            demux_results.demux_sample_sheet_path,
+            f"Copy sample sheet {demux_results.sample_sheet_path} from flow cell to demuxed result dir {demux_results.demux_sample_sheet_path}"
         )
         shutil.copy(
             demux_results.sample_sheet_path.as_posix(),
@@ -291,7 +291,9 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.bcl_converter == "bcl2fastq":
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
-        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flow_cell_id)
+        new_record: models.Flowcell = self.transfer_flow_cell_api.transfer(
+            flow_cell_id=flow_cell_id
+        )
         if self.dry_run:
             LOG.info("Dry run will commit flow cell to database")
             return
@@ -313,7 +315,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
                 flow_cell_path=Path(self.demux_api.run_dir, flow_cell_name),
                 bcl_converter=bcl_converter,
             )
-        except FlowcellError:
+        except FlowCellError:
             return
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
@@ -325,7 +327,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         )
         if not demux_results.results_dir.exists():
             LOG.warning(f"Could not find results directory {demux_results.results_dir}")
-            LOG.info(f"Can not finish flowcell {flow_cell_name}")
+            LOG.info(f"Can not finish flow cell {flow_cell_name}")
             return
         if demux_results.files_renamed():
             LOG.warning("Flow cell is already finished!")
@@ -334,10 +336,10 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results, flow_cell_id=flow_cell.id)
 
-    def finish_all_flowcells(self, bcl_converter: str) -> None:
-        """Loop over all flowcells and post process those that need it"""
-        demuxed_flowcells_dir: Path = self.demux_api.out_dir
-        for flowcell_dir in demuxed_flowcells_dir.iterdir():
-            if not flowcell_dir.is_dir():
+    def finish_all_flow_cells(self, bcl_converter: str) -> None:
+        """Loop over all flow cells and post-process those that need it."""
+        demuxed_flow_cells_dir: Path = self.demux_api.out_dir
+        for flow_cell_dir in demuxed_flow_cells_dir.iterdir():
+            if not flow_cell_dir.is_dir():
                 continue
-            self.finish_flow_cell(flow_cell_name=flowcell_dir.name, bcl_converter=bcl_converter)
+            self.finish_flow_cell(flow_cell_name=flow_cell_dir.name, bcl_converter=bcl_converter)

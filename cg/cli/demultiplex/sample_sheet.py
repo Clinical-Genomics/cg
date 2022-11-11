@@ -14,9 +14,9 @@ from cg.apps.lims.samplesheet import (
     flowcell_samples,
 )
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 
 LOG = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def create_sheet(context: CGConfig, flowcell_name: str, bcl_converter: str, dry_
         raise click.Abort
     try:
         flowcell_object = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
-    except FlowcellError:
+    except FlowCellError:
         raise click.Abort
     lims_samples: List[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]] = list(
         flowcell_samples(
@@ -112,7 +112,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
         LOG.info("Found directory %s", sub_dir)
         try:
             flowcell_object = FlowCell(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
-        except FlowcellError:
+        except FlowCellError:
             continue
         if flowcell_object.sample_sheet_exists():
             LOG.info("Sample sheet already exists")

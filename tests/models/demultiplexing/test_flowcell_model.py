@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 def test_flowcell_id(flow_cell_path: Path):

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 def test_demux_results_instance(demultiplexed_flowcell: Path, flow_cell: FlowCell):

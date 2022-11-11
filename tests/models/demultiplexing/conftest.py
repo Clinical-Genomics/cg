@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 @pytest.fixture(name="flow_cell_name")

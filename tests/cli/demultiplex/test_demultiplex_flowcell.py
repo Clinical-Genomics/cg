@@ -5,12 +5,12 @@ from pathlib import Path
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flowcell, delete_flow_cell
+from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
-def test_demultiplex_flowcell_dry_run(
+def test_demultiplex_flow_cell_dry_run(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
@@ -24,14 +24,14 @@ def test_demultiplex_flowcell_dry_run(
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
+    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_dir.exists() is False
     assert unaligned_dir.exists() is False
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
-        demultiplex_flowcell,
+        demultiplex_flow_cell,
         [str(demultiplex_ready_flow_cell), "--dry-run"],
         obj=demultiplex_context,
     )
@@ -44,7 +44,7 @@ def test_demultiplex_flowcell_dry_run(
     assert unaligned_dir.exists() is False
 
 
-def test_demultiplex_flowcell(
+def test_demultiplex_flow_cell(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
@@ -58,7 +58,7 @@ def test_demultiplex_flowcell(
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
+    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
@@ -67,7 +67,7 @@ def test_demultiplex_flowcell(
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
-        demultiplex_flowcell,
+        demultiplex_flow_cell,
         [str(demultiplex_ready_flow_cell)],
         obj=demultiplex_context,
     )
@@ -97,7 +97,7 @@ def test_demultiplex_bcl2fastq_flowcell(
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
+    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
@@ -106,7 +106,7 @@ def test_demultiplex_bcl2fastq_flowcell(
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
-        demultiplex_flowcell,
+        demultiplex_flow_cell,
         [str(demultiplex_ready_flow_cell_bcl2fastq)],
         obj=demultiplex_context,
     )
@@ -139,7 +139,7 @@ def test_demultiplex_dragen_flowcell(
 
     # GIVEN a out dir that does not exist
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    demux_dir: Path = demux_api.flowcell_out_dir_path(flow_cell)
+    demux_dir: Path = demux_api.flow_cell_out_dir_path(flow_cell)
     unaligned_dir: Path = demux_dir / "Unaligned"
     assert demux_api.is_demultiplexing_possible(flow_cell=flow_cell)
     assert demux_dir.exists() is False
@@ -148,7 +148,7 @@ def test_demultiplex_dragen_flowcell(
 
     # WHEN starting demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
-        demultiplex_flowcell,
+        demultiplex_flow_cell,
         [str(demultiplex_ready_flow_cell_dragen), "-b", "dragen"],
         obj=demultiplex_context,
     )
@@ -198,7 +198,6 @@ def test_start_demultiplexing_when_already_completed(
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
     caplog,
-    mocker,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -210,14 +209,14 @@ def test_start_demultiplexing_when_already_completed(
     flow_cell.demultiplexing_started_path.touch()
 
     # GIVEN a out dir that exist
-    demux_api.flowcell_out_dir_path(flow_cell).mkdir(parents=True)
+    demux_api.flow_cell_out_dir_path(flow_cell).mkdir(parents=True)
 
     # GIVEN that demultiplexing is completed
     demux_api.demultiplexing_completed_path(flow_cell=flow_cell).touch()
 
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
-        demultiplex_flowcell,
+        demultiplex_flow_cell,
         [str(demultiplex_ready_flow_cell), "-b", "bcl2fastq"],
         obj=demultiplex_context,
     )
@@ -302,7 +301,7 @@ def test_delete_flow_cell_dry_run_status_db(
         in caplog.text
     )
     assert (
-        f"DeleteDemuxAPI-Housekeeper: Would delete fastq and spring files related to flowcell {flow_cell_name}"
+        f"DeleteDemuxAPI-Housekeeper: Would delete fastq and spring files related to flow cell {flow_cell_name}"
         in caplog.text
     )
     assert f"DeleteDemuxAPI-StatusDB: Would remove {flow_cell_name}" in caplog.text

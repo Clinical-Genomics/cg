@@ -3,7 +3,7 @@ import logging
 
 import click
 from cg.cli.demultiplex.add import add_flowcell_cmd, select_project_cmd
-from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flowcell, delete_flow_cell
+from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.report import create_report_cmd
 from cg.cli.demultiplex.sample_sheet import sample_sheet_commands
@@ -22,7 +22,7 @@ for sub_cmd in [
     add_flowcell_cmd,
     create_report_cmd,
     delete_flow_cell,
-    demultiplex_flowcell,
+    demultiplex_flow_cell,
     demultiplex_all,
     finish_group,
     sample_sheet_commands,

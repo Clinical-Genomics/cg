@@ -14,7 +14,7 @@ from cg.apps.cgstats.parsers.dragen_demultiplexing_stats import DragenDemultiple
 from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.demultiplexing import DEMUX_STATS_PATH
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 LOG = logging.getLogger(__name__)
 
@@ -116,11 +116,11 @@ class DemuxResults:
 
     @property
     def stderr_log_path(self) -> Path:
-        return DemultiplexingAPI.get_stderr_logfile(flowcell=self.flow_cell)
+        return DemultiplexingAPI.get_stderr_logfile(flow_cell=self.flow_cell)
 
     @property
     def stdout_log_path(self) -> Path:
-        return DemultiplexingAPI.get_stdout_logfile(flowcell=self.flow_cell)
+        return DemultiplexingAPI.get_stdout_logfile(flow_cell=self.flow_cell)
 
     @property
     def results_dir(self) -> Path:

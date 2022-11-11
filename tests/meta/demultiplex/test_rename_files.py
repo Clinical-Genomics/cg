@@ -3,7 +3,7 @@ from pathlib import Path
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingNovaseqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 def test_rename_demux_result(

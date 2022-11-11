@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from typing_extensions import Literal
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
 from cgmodels.exceptions import SampleSheetError
@@ -124,7 +124,7 @@ class FlowCell:
         if len(self.split_flow_cell_name) != 4:
             message = f"Flowcell {self.path.name} does not follow the flow cell naming convention"
             LOG.warning(message)
-            raise FlowcellError(message)
+            raise FlowCellError(message)
 
     def is_demultiplexing_started(self) -> bool:
         """Check if demultiplexing started path exists."""

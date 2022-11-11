@@ -2,7 +2,7 @@
 from pathlib import Path
 
 import pytest
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 def test_get_run_parameters_when_non_existing(fixtures_dir: Path):

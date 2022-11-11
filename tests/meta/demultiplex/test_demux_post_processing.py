@@ -8,7 +8,7 @@ from cg.meta.demultiplex.demux_post_processing import (
 )
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
 
 
@@ -302,7 +302,7 @@ def test_post_process_flow_cell_dry_run(
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
-    transfer_flowcell_api,
+    transfer_flow_cell_api,
     mocker,
     tmp_file,
 ):
@@ -358,7 +358,7 @@ def test_post_process_flow_cell(
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
-    transfer_flowcell_api,
+    transfer_flow_cell_api,
     mocker,
     tmp_file,
 ):
@@ -407,7 +407,7 @@ def test_post_process_flow_cell(
     assert f"Flow cell added: {flow_cell.id}" in caplog.text
 
 
-def test_finish_flowcell(
+def test_finish_flow_cell(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,

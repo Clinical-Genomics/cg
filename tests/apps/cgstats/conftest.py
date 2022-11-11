@@ -10,7 +10,7 @@ from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
     fixture_demultiplexed_dragen_flow_cell,

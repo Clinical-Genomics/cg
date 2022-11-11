@@ -13,11 +13,11 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingNovaseqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 LOG = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def add_flowcell_cmd(context: CGConfig, flowcell_id: str, bcl_converter: str):
         raise click.Abort
     try:
         flowcell: FlowCell = FlowCell(flow_cell_path=flowcell_run_path, bcl_converter=bcl_converter)
-    except FlowcellError:
+    except FlowCellError:
         raise click.Abort
     demux_results: DemuxResults = DemuxResults(
         demux_dir=demux_results_path, flow_cell=flowcell, bcl_converter=bcl_converter
@@ -57,7 +57,7 @@ def select_project_cmd(context: CGConfig, flowcell_id: str, project: Optional[st
     # Need to instantiate API
     post_processing_api = DemuxPostProcessingNovaseqAPI(config=context)
     report_content: List[str] = post_processing_api.get_report_data(
-        flowcell_id=flowcell_id, project_name=project
+        flow_cell_id=flowcell_id, project_name=project
     )
 
     click.echo("\t".join(STATS_HEADER))

@@ -11,7 +11,7 @@ from cg.apps.lims.samplesheet import (
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 def test_create_sample_sheet_no_run_parameters(

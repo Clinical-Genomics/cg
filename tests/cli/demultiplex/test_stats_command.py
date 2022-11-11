@@ -7,7 +7,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.cli.demultiplex.add import select_project_cmd
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 def test_select_command(

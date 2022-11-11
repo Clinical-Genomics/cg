@@ -213,8 +213,8 @@ def fixture_flowcell_store(
     yield base_store
 
 
-@pytest.fixture(name="transfer_flowcell_api")
-def fixture_transfer_flowcell_api(
+@pytest.fixture(name="transfer_flow_cell_api")
+def fixture_transfer_flow_cell_api(
     flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
 ) -> Generator[TransferFlowCell, None, None]:
     """Setup flow cell transfer API."""
