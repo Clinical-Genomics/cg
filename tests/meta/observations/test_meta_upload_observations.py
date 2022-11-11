@@ -139,7 +139,7 @@ def test_is_duplicate_loqusdb_id(
         case=case,
         loqusdb_api=mip_dna_observations_api.loqusdb_api,
         profile_vcf_path=observations_input_files.profile_vcf_path,
-        profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD,
+        profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
     )
 
     # THEN a duplicated upload should be identified
