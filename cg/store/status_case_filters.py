@@ -45,8 +45,10 @@ def filter_cases_with_loqusdb_supported_sequencing_method(
         Pipeline.MIP_DNA: LOQUSDB_MIP_SEQUENCING_METHODS,
         Pipeline.BALSAMIC: LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     }
-    return cases.filter(
-        models.Application.prep_category.in_(supported_sequencing_methods[pipeline])
+    return (
+        cases.filter(models.Application.prep_category.in_(supported_sequencing_methods[pipeline]))
+        if pipeline
+        else cases
     )
 
 
@@ -88,6 +90,7 @@ def apply_case_filter(function: str, cases: Query, pipeline: Optional[str] = Non
         "cases_has_sequence": filter_cases_has_sequence,
         "cases_with_pipeline": filter_cases_with_pipeline,
         "cases_with_loqusdb_supported_pipeline": filter_cases_with_loqusdb_supported_pipeline,
+        "cases_with_loqusdb_supported_sequencing_method": filter_cases_with_loqusdb_supported_sequencing_method,
         "filter_cases_for_analysis": filter_cases_for_analysis,
         "cases_with_scout_data_delivery": filter_cases_with_scout_data_delivery,
         "filter_report_cases_with_valid_data_delivery": filter_report_supported_data_delivery_cases,
