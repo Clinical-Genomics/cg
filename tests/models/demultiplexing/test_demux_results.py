@@ -9,7 +9,7 @@ def test_demux_results_instance(demultiplexed_flowcell: Path, flow_cell: FlowCel
 
     # WHEN instantiating a demux results object
     demux_results = DemuxResults(
-        demux_dir=demultiplexed_flowcell, flowcell=flow_cell, bcl_converter="bcl2fastq"
+        demux_dir=demultiplexed_flowcell, flow_cell=flow_cell, bcl_converter="bcl2fastq"
     )
 
     # THEN assert that the results dir is the unaligned dir

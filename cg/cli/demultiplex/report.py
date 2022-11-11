@@ -25,7 +25,7 @@ def create_report_cmd(context: CGConfig, flowcell_name: str):
     except FlowcellError:
         raise click.Abort
     demux_results: DemuxResults = DemuxResults(
-        demux_dir=demux_api.out_dir / flowcell_name, flowcell=flowcell
+        demux_dir=demux_api.out_dir / flowcell_name, flow_cell=flowcell
     )
     conversion_stats: Path = demux_results.conversion_stats_path
     if not conversion_stats.exists():

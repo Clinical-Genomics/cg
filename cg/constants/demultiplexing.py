@@ -81,6 +81,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     COPY_COMPLETE: str = "CopyComplete.txt"
     DELIVERY: str = "delivery.txt"
     DEMUX_STARTED: str = "demuxstarted.txt"
+    DEMUX_COMPLETE: str = "demuxcomplete.txt"
     Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
     HiseqX_TILE_DIR: str = "l1t11"
     RTACOMPLETE: str = "RTAComplete.txt"

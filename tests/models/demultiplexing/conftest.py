@@ -43,7 +43,7 @@ def fixture_bcl2fastq_demux_results(
     demultiplexed_flowcell: Path, flow_cell: FlowCell
 ) -> DemuxResults:
     return DemuxResults(
-        demux_dir=demultiplexed_flowcell, flowcell=flow_cell, bcl_converter="bcl2fastq"
+        demux_dir=demultiplexed_flowcell, flow_cell=flow_cell, bcl_converter="bcl2fastq"
     )
 
 
@@ -77,6 +77,6 @@ def fixture_dragen_demux_results(
 ) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_dragen_flow_cell,
-        flowcell=dragen_flow_cell,
+        flow_cell=dragen_flow_cell,
         bcl_converter="dragen",
     )

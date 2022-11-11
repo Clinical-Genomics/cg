@@ -57,8 +57,8 @@ def create_datasource(
 
 def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> stats_models.Flowcell:
     flowcell = manager.Flowcell()
-    flowcell.flowcellname = demux_results.flowcell.id
-    flowcell.flowcell_pos = demux_results.flowcell.position
+    flowcell.flowcellname = demux_results.flow_cell.id
+    flowcell.flowcell_pos = demux_results.flow_cell.position
     flowcell.hiseqtype = "novaseq"
     flowcell.time = sqlalchemy.func.now()
 
@@ -313,8 +313,8 @@ def create_samples(
 ) -> None:
     """dispatches sample object and unaligned object creation for samples based on the
     bcl-converter used in demultiplexing."""
-    LOG.info(f"Creating samples for flow cell {demux_results.flowcell.flow_cell_full_name}")
-    sample_sheet: SampleSheet = demux_results.flowcell.get_sample_sheet()
+    LOG.info(f"Creating samples for flow cell {demux_results.flow_cell.flow_cell_full_name}")
+    sample_sheet: SampleSheet = demux_results.flow_cell.get_sample_sheet()
 
     create_samples_function = {
         "dragen": _create_dragen_samples,
@@ -349,7 +349,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         datasource_id: int = datasource_object.datasource_id
     else:
         LOG.info("Data source already exists")
-    flowcell_id: Optional[int] = find.get_flowcell_id(flowcell_name=demux_results.flowcell.id)
+    flowcell_id: Optional[int] = find.get_flowcell_id(flowcell_name=demux_results.flow_cell.id)
 
     if not flowcell_id:
         flowcell: stats_models.Flowcell = create_flowcell(

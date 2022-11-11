@@ -30,10 +30,10 @@ class LogfileParameters(BaseModel):
 class DemuxResults:
     """Class to gather information from a demultiplex result"""
 
-    def __init__(self, demux_dir: Path, flowcell: FlowCell, bcl_converter: str):
-        LOG.info("Instantiating DemuxResults with path %s", demux_dir)
+    def __init__(self, demux_dir: Path, flow_cell: FlowCell, bcl_converter: str):
+        LOG.info(f"Instantiating DemuxResults with path {demux_dir}")
         self.demux_dir: Path = demux_dir
-        self.flowcell: FlowCell = flowcell
+        self.flow_cell: FlowCell = flow_cell
         self.bcl_converter = bcl_converter
         self._conversion_stats: Optional[ConversionStats] = None
         self._demultiplexing_stats: Optional[DragenDemultiplexingStats] = None
@@ -116,11 +116,11 @@ class DemuxResults:
 
     @property
     def stderr_log_path(self) -> Path:
-        return DemultiplexingAPI.get_stderr_logfile(flowcell=self.flowcell)
+        return DemultiplexingAPI.get_stderr_logfile(flowcell=self.flow_cell)
 
     @property
     def stdout_log_path(self) -> Path:
-        return DemultiplexingAPI.get_stdout_logfile(flowcell=self.flowcell)
+        return DemultiplexingAPI.get_stdout_logfile(flowcell=self.flow_cell)
 
     @property
     def results_dir(self) -> Path:
@@ -129,7 +129,7 @@ class DemuxResults:
     @property
     def sample_sheet_path(self) -> Path:
         """Return the path to where the original sample sheet is"""
-        return self.flowcell.sample_sheet_path
+        return self.flow_cell.sample_sheet_path
 
     @property
     def barcode_report(self) -> Path:
@@ -139,7 +139,7 @@ class DemuxResults:
     @property
     def demux_sample_sheet_path(self) -> Path:
         """Return the path to sample sheet in demuxed flowcell dir"""
-        return self.results_dir / self.flowcell.sample_sheet_path.name
+        return self.results_dir / self.flow_cell.sample_sheet_path.name
 
     @property
     def copy_complete_path(self) -> Path:
@@ -294,4 +294,4 @@ class DemuxResults:
         return time
 
     def __str__(self):
-        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=FlowCell(flowcell_path={self.flowcell.path})"
+        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=FlowCell(flowcell_path={self.flow_cell.path})"

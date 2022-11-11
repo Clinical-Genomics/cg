@@ -24,7 +24,7 @@ def test_select_command(
     assert find.get_flowcell_id(flowcell_id)
     demux_results = DemuxResults(
         demux_dir=demultiplexed_runs / full_flow_cell_name,
-        flowcell=flow_cell,
+        flow_cell=flow_cell,
         bcl_converter="bcl2fastq",
     )
 

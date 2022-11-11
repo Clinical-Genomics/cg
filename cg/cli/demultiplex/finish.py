@@ -33,13 +33,13 @@ def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None
 
 
 @finish_group.command(name="flowcell")
-@click.argument("flowcell-name")
+@click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
 @DRY_RUN
 @click.option("--force", is_flag=True)
 @click.pass_obj
 def finish_flowcell(
-    context: CGConfig, flowcell_name: str, bcl_converter: str, dry_run: bool, force: bool
+    context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool
 ) -> None:
     """Command to finish up a flow cell after demultiplexing.
 
@@ -50,8 +50,8 @@ def finish_flowcell(
         config=context
     )
     demux_post_processing_api.set_dry_run(dry_run)
-    demux_post_processing_api.finish_flowcell(
-        flowcell_name=flowcell_name, force=force, bcl_converter=bcl_converter
+    demux_post_processing_api.finish_flow_cell(
+        flow_cell_name=flow_cell_name, force=force, bcl_converter=bcl_converter
     )
 
 
@@ -65,4 +65,4 @@ def finish_all_hiseq_x(context: CGConfig, dry_run: bool) -> None:
         config=context
     )
     demux_post_processing_api.set_dry_run(dry_run=dry_run)
-    demux_post_processing_api.finish_all_flowcells(bcl_converter=BclConverter.BCL2FASTQ.value)
+    demux_post_processing_api.finish_all_flow_cells(bcl_converter=BclConverter.BCL2FASTQ.value)

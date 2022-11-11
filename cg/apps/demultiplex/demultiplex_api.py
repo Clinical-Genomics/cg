@@ -10,6 +10,7 @@ from cg.apps.demultiplex.sbatch import DEMULTIPLEX_COMMAND, DEMULTIPLEX_ERROR
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteFile
 from cg.models.demultiplex.flowcell import FlowCell
@@ -112,27 +113,33 @@ class DemultiplexingAPI:
                 demultiplex_flow_cells.append(flow_cell_dir)
         return demultiplex_flow_cells
 
-    def flowcell_out_dir_path(self, flowcell: FlowCell) -> Path:
-        """Create the path to where the demuliplexed result should be produced"""
-        return self.out_dir / flowcell.path.name
+    def flowcell_out_dir_path(self, flow_cell: FlowCell) -> Path:
+        """Create the path to where the demuliplexed result should be produced."""
+        return Path(self.out_dir, flow_cell.path.name)
 
-    def unaligned_dir_path(self, flowcell: FlowCell) -> Path:
-        """Create the path to where the demuliplexed result should be produced"""
-        return self.flowcell_out_dir_path(flowcell) / "Unaligned"
+    def unaligned_dir_path(self, flow_cell: FlowCell) -> Path:
+        """Create the path to where the demuliplexed result should be produced."""
+        return Path(
+            self.flowcell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
+        )
 
-    def demultiplexing_completed_path(self, flowcell: FlowCell) -> Path:
+    def demultiplexing_completed_path(self, flow_cell: FlowCell) -> Path:
         """Return the path to demultiplexing complete file."""
-        LOG.info(Path(self.flowcell_out_dir_path(flowcell), "demuxcomplete.txt"))
-        return Path(self.flowcell_out_dir_path(flowcell), "demuxcomplete.txt")
+        LOG.info(
+            Path(self.flowcell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.DEMUX_COMPLETE)
+        )
+        return Path(
+            self.flowcell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.DEMUX_COMPLETE
+        )
 
-    def is_demultiplexing_completed(self, flowcell: FlowCell) -> bool:
-        """Check the path to where the demuliplexed result should be produced"""
-        LOG.info(f"Check if demultiplexing is ready for {flowcell.path}")
-        logfile: Path = self.get_stderr_logfile(flowcell)
+    def is_demultiplexing_completed(self, flow_cell: FlowCell) -> bool:
+        """Check the path to where the demuliplexed result should be produced."""
+        LOG.info(f"Check if demultiplexing is ready for {flow_cell.path}")
+        logfile: Path = self.get_stderr_logfile(flow_cell)
         if not logfile.exists():
             LOG.warning("Could not find logfile!")
             return False
-        return self.demultiplexing_completed_path(flowcell).exists()
+        return self.demultiplexing_completed_path(flow_cell).exists()
 
     def is_demultiplexing_ongoing(self, flowcell: FlowCell) -> bool:
         """Check if demultiplexing is ongoing
@@ -173,7 +180,7 @@ class DemultiplexingAPI:
             LOG.warning("Demultiplexing has already been started")
             demultiplexing_possible = False
 
-        if self.flowcell_out_dir_path(flowcell=flowcell).exists():
+        if self.flowcell_out_dir_path(flow_cell=flowcell).exists():
             LOG.warning("Flow cell out dir exists")
             demultiplexing_possible = False
 
@@ -221,8 +228,8 @@ class DemultiplexingAPI:
     def start_demultiplexing(self, flowcell: FlowCell):
         """Start demultiplexing for a flowcell"""
         self.create_demultiplexing_started_file(flowcell.demultiplexing_started_path)
-        demux_dir: Path = self.flowcell_out_dir_path(flowcell=flowcell)
-        unaligned_dir: Path = self.unaligned_dir_path(flowcell=flowcell)
+        demux_dir: Path = self.flowcell_out_dir_path(flow_cell=flowcell)
+        unaligned_dir: Path = self.unaligned_dir_path(flow_cell=flowcell)
         LOG.info("Demultiplexing to %s", unaligned_dir)
         if not self.dry_run:
             LOG.info("Creating demux dir %s", unaligned_dir)
@@ -236,7 +243,7 @@ class DemultiplexingAPI:
             run_dir=flowcell.path,
             unaligned_dir=unaligned_dir,
             sample_sheet=flowcell.sample_sheet_path,
-            demux_completed=self.demultiplexing_completed_path(flowcell=flowcell),
+            demux_completed=self.demultiplexing_completed_path(flow_cell=flowcell),
             flowcell=flowcell,
             environment=self.environment,
         )

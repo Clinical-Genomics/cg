@@ -49,10 +49,10 @@ class DemuxPostProcessingAPI:
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     """Post demultiplexing API class for Hiseq X flow cell."""
 
-    def add_to_cgstats(self, flowcell_path: Path) -> None:
+    def add_to_cgstats(self, flow_cell_path: Path) -> None:
         """Add flow cell to cgstats."""
         LOG.info(
-            f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X {flowcell_path.as_posix()}"
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X {flow_cell_path.as_posix()}"
         )
         if self.dry_run:
             LOG.info("Dry run will not add flow cell stats")
@@ -63,21 +63,21 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             "add",
             "--machine",
             "X",
-            flowcell_path.as_posix(),
+            flow_cell_path.as_posix(),
         ]
         cgstats_process: Process = Process(binary=self.stats_api.binary)
         cgstats_process.run_command(parameters=cgstats_add_parameters, dry_run=self.dry_run)
 
-    def cgstats_select_project(self, flowcell_id: str, flowcell_path: Path) -> None:
+    def cgstats_select_project(self, flow_cell_id: str, flow_cell_path: Path) -> None:
         """Process selected project using cgstats."""
-        unaligned_dir: Path = Path(flowcell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+        unaligned_dir: Path = Path(flow_cell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
         for project_dir in unaligned_dir.glob("Project_*[0-9]*"):
             (_, project_id) = project_dir.name.split("_")
             stdout_file: Path = Path(
-                flowcell_path, "-".join(["stats", project_id, flowcell_id]) + ".txt"
+                flow_cell_path, "-".join(["stats", project_id, flow_cell_id]) + ".txt"
             )
             LOG.info(
-                f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flowcell_id}"
+                f"{self.stats_api.binary} --database {self.stats_api.db_uri} select --project {project_id} {flow_cell_id}"
             )
             if self.dry_run:
                 LOG.info("Dry run will not process selected project")
@@ -88,7 +88,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
                 "selected",
                 "--project",
                 project_id,
-                flowcell_id,
+                flow_cell_id,
             ]
             cgstats_process: Process = Process(binary=self.stats_api.binary)
             with open(stdout_file.as_posix(), "w") as file:
@@ -97,10 +97,10 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
                         parameters=cgstats_select_parameters, dry_run=self.dry_run
                     )
 
-    def cgstats_lanestats(self, flowcell_path: Path) -> None:
+    def cgstats_lanestats(self, flow_cell_path: Path) -> None:
         """Process lane stats using cgstats."""
         LOG.info(
-            f"{self.stats_api.binary} --database {self.stats_api.db_uri} lanestats {flowcell_path.as_posix()}"
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri} lanestats {flow_cell_path.as_posix()}"
         )
         if self.dry_run:
             LOG.info("Dry run will not add lane stats")
@@ -109,57 +109,61 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             "--database",
             self.stats_api.db_uri,
             "lanestats",
-            flowcell_path.as_posix(),
+            flow_cell_path.as_posix(),
         ]
         cgstats_process: Process = Process(binary=self.stats_api.binary)
         cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
 
-    def post_process_flowcell(
-        self, flowcell: FlowCell, flowcell_name: str, flowcell_path: Path
+    def post_process_flow_cell(
+        self, flow_cell: FlowCell, flow_cell_name: str, flow_cell_path: Path
     ) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell."""
-        if not flowcell.is_hiseq_x_copy_completed():
-            LOG.info(f"{flowcell_name} is not yet completely copied")
+        if not flow_cell.is_hiseq_x_copy_completed():
+            LOG.info(f"{flow_cell_name} is not yet completely copied")
             return
-        if flowcell.is_hiseq_x_delivery_started():
-            LOG.info(f"{flowcell_name} copy is complete and delivery has already started")
+        if flow_cell.is_hiseq_x_delivery_started():
+            LOG.info(f"{flow_cell_name} copy is complete and delivery has already started")
             return
-        if not flowcell.is_hiseq_x():
-            LOG.debug(f"{flowcell_name} is not an Hiseq X flow cell")
+        if not flow_cell.is_hiseq_x():
+            LOG.debug(f"{flow_cell_name} is not an Hiseq X flow cell")
             return
-        LOG.info(f"{flowcell_name} copy is complete and delivery will start")
-        Path(flowcell_path, DemultiplexingDirsAndFiles.DELIVERY).touch()
-        self.add_to_cgstats(flowcell_path=flowcell_path)
-        self.cgstats_select_project(flowcell_id=flowcell.id, flowcell_path=flowcell_path)
-        self.cgstats_lanestats(flowcell_path=flowcell_path)
-        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flowcell.id)
+        LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
+        Path(flow_cell_path, DemultiplexingDirsAndFiles.DELIVERY).touch()
+        self.add_to_cgstats(flow_cell_path=flow_cell_path)
+        self.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell_path)
+        self.cgstats_lanestats(flow_cell_path=flow_cell_path)
+        new_record: models.Flowcell = self.transfer_flowcell_api.transfer(flow_cell_id=flow_cell.id)
         if self.dry_run:
             LOG.info("Dry run will commit flow cell to database")
             return
         self.status_db.add_commit(new_record)
         LOG.info(f"Flow cell added: {new_record}")
 
-    def finish_flowcell(self, bcl_converter: str, flowcell_name: str, flowcell_path: Path) -> None:
+    def finish_flow_cell(
+        self, bcl_converter: str, flow_cell_name: str, flow_cell_path: Path
+    ) -> None:
         """Post-processing flow cell."""
-        LOG.info(f"Check demultiplexed flow cell {flowcell_name}")
+        LOG.info(f"Check demultiplexed flow cell {flow_cell_name}")
         try:
-            flowcell: FlowCell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
+            flow_cell: FlowCell = FlowCell(
+                flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
+            )
         except FlowcellError:
             return
-        self.post_process_flowcell(
-            flowcell=flowcell, flowcell_name=flowcell_name, flowcell_path=flowcell_path
+        self.post_process_flow_cell(
+            flow_cell=flow_cell, flow_cell_name=flow_cell_name, flow_cell_path=flow_cell_path
         )
 
-    def finish_all_flowcells(self, bcl_converter: str) -> None:
+    def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post process those that need it."""
         demultiplex_flow_cell_out_dirs: List[
             Path
         ] = self.demux_api.get_all_demultiplex_flow_cells_out_dirs()
-        for flowcell_dir in demultiplex_flow_cell_out_dirs:
-            self.finish_flowcell(
+        for flow_cell_dir in demultiplex_flow_cell_out_dirs:
+            self.finish_flow_cell(
                 bcl_converter=bcl_converter,
-                flowcell_name=flowcell_dir.name,
-                flowcell_path=flowcell_dir,
+                flow_cell_name=flow_cell_dir.name,
+                flow_cell_path=flow_cell_dir,
             )
 
 
@@ -168,8 +172,8 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def rename_files(self, demux_results: DemuxResults) -> None:
         """Rename the files according to how we want to have it after demultiplexing is ready"""
-        LOG.info(f"Renaming files for flowcell {demux_results.flowcell.flow_cell_full_name}")
-        flowcell_id: str = demux_results.flowcell.id
+        LOG.info(f"Renaming files for flowcell {demux_results.flow_cell.flow_cell_full_name}")
+        flowcell_id: str = demux_results.flow_cell.id
         for project_dir in demux_results.raw_projects:
             files.rename_project_directory(
                 project_directory=project_dir, flowcell_id=flowcell_id, dry_run=self.dry_run
@@ -236,7 +240,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def create_cgstats_reports(self, demux_results: DemuxResults) -> None:
         """Create a report for every project that was demultiplexed"""
-        flowcell_id: str = demux_results.flowcell.id
+        flowcell_id: str = demux_results.flow_cell.id
         for project in demux_results.projects:
             project_name: str = project.split("_")[-1]
             report_data: List[str] = self.get_report_data(
@@ -269,7 +273,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             demux_results.demux_sample_sheet_path.as_posix(),
         )
 
-    def post_process_flowcell(self, demux_results: DemuxResults, flowcell_id: str) -> None:
+    def post_process_flow_cell(self, demux_results: DemuxResults, flowcell_id: str) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flowcell
 
         This will
@@ -294,36 +298,41 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         self.status_db.add_commit(new_record)
         LOG.info(f"Flow cell added: {new_record}")
 
-    def finish_flowcell(self, flowcell_name: str, bcl_converter: str, force: bool = False) -> None:
-        """Go through the post processing steps for a flowcell
+    def finish_flow_cell(
+        self, flow_cell_name: str, bcl_converter: str, force: bool = False
+    ) -> None:
+        """Go through the post-processing steps for a flow cell.
 
-        Force is used to finish a flowcell even if the files are renamed already
+        Force is used to finish a flow cell even if the files are renamed already.
         """
-        LOG.info("Check demuxed flowcell %s", flowcell_name)
+        LOG.info(
+            f"Check demuxed flow cell {flow_cell_name}",
+        )
         try:
-            flowcell: FlowCell = FlowCell(
-                flow_cell_path=self.demux_api.run_dir / flowcell_name, bcl_converter=bcl_converter
+            flow_cell: FlowCell = FlowCell(
+                flow_cell_path=Path(self.demux_api.run_dir, flow_cell_name),
+                bcl_converter=bcl_converter,
             )
         except FlowcellError:
             return
-        if not self.demux_api.is_demultiplexing_completed(flowcell=flowcell):
-            LOG.warning("Demultiplex is not ready for %s", flowcell_name)
+        if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
+            LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
         demux_results: DemuxResults = DemuxResults(
-            demux_dir=self.demux_api.out_dir / flowcell_name,
-            flowcell=flowcell,
+            demux_dir=self.demux_api.out_dir / flow_cell_name,
+            flow_cell=flow_cell,
             bcl_converter=bcl_converter,
         )
         if not demux_results.results_dir.exists():
-            LOG.warning("Could not find results directory %s", demux_results.results_dir)
-            LOG.info("Can not finish flowcell %s", flowcell_name)
+            LOG.warning(f"Could not find results directory {demux_results.results_dir}")
+            LOG.info(f"Can not finish flowcell {flow_cell_name}")
             return
         if demux_results.files_renamed():
             LOG.warning("Flow cell is already finished!")
             if not force:
                 return
-            LOG.info("Post processing flowcell anyway")
-        self.post_process_flowcell(demux_results=demux_results, flowcell_id=flowcell.id)
+            LOG.info("Post processing flow cell anyway")
+        self.post_process_flow_cell(demux_results=demux_results, flowcell_id=flow_cell.id)
 
     def finish_all_flowcells(self, bcl_converter: str) -> None:
         """Loop over all flowcells and post process those that need it"""
@@ -331,4 +340,4 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         for flowcell_dir in demuxed_flowcells_dir.iterdir():
             if not flowcell_dir.is_dir():
                 continue
-            self.finish_flowcell(flowcell_name=flowcell_dir.name, bcl_converter=bcl_converter)
+            self.finish_flow_cell(flow_cell_name=flowcell_dir.name, bcl_converter=bcl_converter)

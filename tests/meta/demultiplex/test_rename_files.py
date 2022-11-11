@@ -19,7 +19,7 @@ def test_rename_demux_result(
     )
     demux_dir: Path = demultiplexed_flowcell_working_directory
     demux_results: DemuxResults = DemuxResults(
-        demux_dir=demux_dir, flowcell=flow_cell, bcl_converter="bcl2fastq"
+        demux_dir=demux_dir, flow_cell=flow_cell, bcl_converter="bcl2fastq"
     )
     # GIVEN that there are no projects with the correct file name
     assert not list(demux_results.projects)

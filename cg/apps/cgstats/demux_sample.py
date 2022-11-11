@@ -170,7 +170,7 @@ def get_dragen_demux_samples(
 
         demux_samples[sample.lane][sample.sample_id] = DragenDemuxSample(
             sample_name=sample.sample_id,
-            flowcell=demux_results.flowcell.id,
+            flowcell=demux_results.flow_cell.id,
             lane=sample.lane,
             reads=int(demultiplexing_stats["# Reads"]),
             perfect_reads=int(demultiplexing_stats["# Perfect Index Reads"]),

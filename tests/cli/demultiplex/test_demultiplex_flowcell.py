@@ -213,7 +213,7 @@ def test_start_demultiplexing_when_already_completed(
     demux_api.flowcell_out_dir_path(flowcell).mkdir(parents=True)
 
     # GIVEN that demultiplexing is completed
-    demux_api.demultiplexing_completed_path(flowcell=flowcell).touch()
+    demux_api.demultiplexing_completed_path(flow_cell=flowcell).touch()
 
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(

@@ -49,7 +49,7 @@ def test_add_to_cgstats_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When adding to cgstats
-    post_demux_api.add_to_cgstats(flowcell_path=flow_cell.path)
+    post_demux_api.add_to_cgstats(flow_cell_path=flow_cell.path)
 
     # THEN we should just log and exit
     assert "Dry run will not add flow cell stats" in caplog.text
@@ -71,7 +71,7 @@ def test_add_to_cgstats(
     )
 
     # When adding to cgstats
-    post_demux_api.add_to_cgstats(flowcell_path=flow_cell.path)
+    post_demux_api.add_to_cgstats(flow_cell_path=flow_cell.path)
 
     # THEN we should run the command
     assert f"add --machine X {flow_cell.path}" in caplog.text
@@ -103,7 +103,7 @@ def test_cgstats_select_project_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When processing project with cgstats
-    post_demux_api.cgstats_select_project(flowcell_id=flow_cell.id, flowcell_path=flow_cell.path)
+    post_demux_api.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell.path)
 
     # THEN we should just log and exit
     assert "Dry run will not process selected project" in caplog.text
@@ -132,7 +132,7 @@ def test_cgstats_select_project(
     )
 
     # When processing project with cgstats
-    post_demux_api.cgstats_select_project(flowcell_id=flow_cell.id, flowcell_path=flow_cell.path)
+    post_demux_api.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell.path)
 
     # THEN we should have created a stats outfile
     assert cgstats_select_project_log_file.exists()
@@ -163,7 +163,7 @@ def test_cgstats_lanestats_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When processing lane stats with cgstats
-    post_demux_api.cgstats_lanestats(flowcell_path=flow_cell.path)
+    post_demux_api.cgstats_lanestats(flow_cell_path=flow_cell.path)
 
     # THEN we should run the command
     assert "Dry run will not add lane stats" in caplog.text
@@ -185,13 +185,13 @@ def test_cgstats_lanestats(
     )
 
     # When processing lane stats with cgstats
-    post_demux_api.cgstats_lanestats(flowcell_path=flow_cell.path)
+    post_demux_api.cgstats_lanestats(flow_cell_path=flow_cell.path)
 
     # THEN we should run the command
     assert f"lanestats {flow_cell.path}" in caplog.text
 
 
-def test_post_process_flowcell_copy_not_completed(
+def test_post_process_flow_cell_copy_not_completed(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
@@ -212,10 +212,10 @@ def test_post_process_flowcell_copy_not_completed(
         hiseq_x_copy_complete_file.unlink()
 
     # When post-processing flow cell
-    post_demux_api.post_process_flowcell(
-        flowcell=flow_cell,
-        flowcell_name=flow_cell.flow_cell_full_name,
-        flowcell_path=flow_cell.path,
+    post_demux_api.post_process_flow_cell(
+        flow_cell=flow_cell,
+        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_path=flow_cell.path,
     )
 
     # Reinstate
@@ -225,7 +225,7 @@ def test_post_process_flowcell_copy_not_completed(
     assert f"{flow_cell.flow_cell_full_name} is not yet completely copied" in caplog.text
 
 
-def test_post_process_flowcell_delivery_started(
+def test_post_process_flow_cell_delivery_started(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplexing_delivery_file: Path,
@@ -245,10 +245,10 @@ def test_post_process_flowcell_delivery_started(
     demultiplexing_delivery_file.touch()
 
     # When post-processing flow cell
-    post_demux_api.post_process_flowcell(
-        flowcell=flow_cell,
-        flowcell_name=flow_cell.flow_cell_full_name,
-        flowcell_path=flow_cell.path,
+    post_demux_api.post_process_flow_cell(
+        flow_cell=flow_cell,
+        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_path=flow_cell.path,
     )
 
     # Clean up
@@ -261,7 +261,7 @@ def test_post_process_flowcell_delivery_started(
     )
 
 
-def test_post_process_flowcell_not_hiseq_x(
+def test_post_process_flow_cell_not_hiseq_x(
     caplog,
     demultiplexed_flowcell_working_directory: Path,
     demultiplex_context: CGConfig,
@@ -282,17 +282,17 @@ def test_post_process_flowcell_not_hiseq_x(
         hiseq_x_tile_dir.rmdir()
 
     # When post-processing flow cell
-    post_demux_api.post_process_flowcell(
-        flowcell=flow_cell,
-        flowcell_name=flow_cell.flow_cell_full_name,
-        flowcell_path=flow_cell.path,
+    post_demux_api.post_process_flow_cell(
+        flow_cell=flow_cell,
+        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_path=flow_cell.path,
     )
 
     # THEN we should log that this is not an Hiseq X flow cell
     assert f"{flow_cell.flow_cell_full_name} is not an Hiseq X flow cell" in caplog.text
 
 
-def test_post_process_flowcell_dry_run(
+def test_post_process_flow_cell_dry_run(
     caplog,
     cgstats_select_project_log_file: Path,
     demultiplexed_flowcell_working_directory: Path,
@@ -332,10 +332,10 @@ def test_post_process_flowcell_dry_run(
     TransferFlowcell._sample_sheet_path.return_value = tmp_file.as_posix()
 
     # When post-processing flow cell
-    post_demux_api.post_process_flowcell(
-        flowcell=flow_cell,
-        flowcell_name=flow_cell.flow_cell_full_name,
-        flowcell_path=flow_cell.path,
+    post_demux_api.post_process_flow_cell(
+        flow_cell=flow_cell,
+        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_path=flow_cell.path,
     )
 
     # THEN a delivery file should have been created
@@ -348,7 +348,7 @@ def test_post_process_flowcell_dry_run(
     assert "Dry run will commit flow cell to database" in caplog.text
 
 
-def test_post_process_flowcell(
+def test_post_process_flow_cell(
     caplog,
     cgstats_select_project_log_file: Path,
     demultiplexed_flowcell_working_directory: Path,
@@ -385,10 +385,10 @@ def test_post_process_flowcell(
     TransferFlowcell._sample_sheet_path.return_value = tmp_file.as_posix()
 
     # When post-processing flow cell
-    post_demux_api.post_process_flowcell(
-        flowcell=flow_cell,
-        flowcell_name=flow_cell.flow_cell_full_name,
-        flowcell_path=flow_cell.path,
+    post_demux_api.post_process_flow_cell(
+        flow_cell=flow_cell,
+        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_path=flow_cell.path,
     )
 
     # THEN a delivery file should have been created
@@ -427,10 +427,10 @@ def test_finish_flowcell(
     hiseq_x_copy_complete_file.unlink()
 
     # When post-processing flow cell
-    post_demux_api.finish_flowcell(
+    post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flowcell_name=flow_cell.flow_cell_full_name,
-        flowcell_path=flow_cell.path,
+        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_path=flow_cell.path,
     )
 
     # Reinstate
@@ -460,7 +460,7 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.unlink()
 
     # When post-processing flow cell
-    post_demux_api.finish_all_flowcells(
+    post_demux_api.finish_all_flow_cells(
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
