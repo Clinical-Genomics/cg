@@ -32,7 +32,7 @@ def test_set_dry_run(
 
 def test_add_to_cgstats_dry_run(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -57,7 +57,7 @@ def test_add_to_cgstats_dry_run(
 
 def test_add_to_cgstats(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -79,7 +79,7 @@ def test_add_to_cgstats(
 
 def test_cgstats_select_project_dry_run(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     flow_cell_project_id: int,
@@ -111,7 +111,7 @@ def test_cgstats_select_project_dry_run(
 
 def test_cgstats_select_project(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     flow_cell_project_id: int,
@@ -146,7 +146,7 @@ def test_cgstats_select_project(
 
 def test_cgstats_lanestats_dry_run(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -171,7 +171,7 @@ def test_cgstats_lanestats_dry_run(
 
 def test_cgstats_lanestats(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -193,7 +193,7 @@ def test_cgstats_lanestats(
 
 def test_post_process_flow_cell_copy_not_completed(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
@@ -227,7 +227,7 @@ def test_post_process_flow_cell_copy_not_completed(
 
 def test_post_process_flow_cell_delivery_started(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
@@ -263,7 +263,7 @@ def test_post_process_flow_cell_delivery_started(
 
 def test_post_process_flow_cell_not_hiseq_x(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     hiseq_x_tile_dir: Path,
@@ -295,7 +295,7 @@ def test_post_process_flow_cell_not_hiseq_x(
 def test_post_process_flow_cell_dry_run(
     caplog,
     cgstats_select_project_log_file: Path,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
@@ -351,7 +351,7 @@ def test_post_process_flow_cell_dry_run(
 def test_post_process_flow_cell(
     caplog,
     cgstats_select_project_log_file: Path,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
@@ -409,7 +409,7 @@ def test_post_process_flow_cell(
 
 def test_finish_flow_cell(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
@@ -442,7 +442,7 @@ def test_finish_flow_cell(
 
 def test_finish_all_flowcells(
     caplog,
-    demultiplexed_flowcell_working_directory: Path,
+    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,

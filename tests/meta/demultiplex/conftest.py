@@ -17,8 +17,8 @@ from tests.apps.cgstats.conftest import fixture_populated_stats_api
 from tests.cli.demultiplex.conftest import (
     fixture_demultiplex_configs,
     fixture_demultiplex_context,
-    fixture_demultiplexed_flowcell_working_directory,
-    fixture_demultiplexed_flowcells_working_directory,
+    fixture_demultiplexed_flow_cell_working_directory,
+    fixture_demultiplexed_flow_cells_working_directory,
     fixture_demultiplexing_api,
     fixture_demux_results_not_finished_dir,
     fixture_flow_cell_runs_working_directory,
@@ -26,7 +26,7 @@ from tests.cli.demultiplex.conftest import (
 )
 from tests.models.demultiplexing.conftest import (
     fixture_bcl2fastq_demux_results,
-    fixture_demultiplexed_flowcell,
+    fixture_demultiplexed_flow_cell,
     fixture_flowcell_path,
     fixture_flowcell_runs,
 )
@@ -35,11 +35,11 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def fixture_tmp_demulitplexing_dir(
-    demultiplexed_flowcells_working_directory: Path, flow_cell_full_name: str
+    demultiplexed_flow_cells_working_directory: Path, flow_cell_full_name: str
 ) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
     tmp_demulitplexing_dir: Path = Path(
-        demultiplexed_flowcells_working_directory, flow_cell_full_name
+        demultiplexed_flow_cells_working_directory, flow_cell_full_name
     )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
@@ -234,13 +234,13 @@ def fixture_active_wipe_demux_context(
 @pytest.fixture(name="populated_wipe_demultiplex_api")
 def fixture_populated_wipe_demultiplex_api(
     populated_wipe_demux_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     tmp_flow_cell_run_path: Path,
 ) -> DeleteDemuxAPI:
     """Return an initialized populated DeleteDemuxAPI."""
     return DeleteDemuxAPI(
         config=populated_wipe_demux_context,
-        demultiplex_base=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
         run_path=tmp_flow_cell_run_path,
     )
@@ -249,13 +249,13 @@ def fixture_populated_wipe_demultiplex_api(
 @pytest.fixture(name="active_wipe_demultiplex_api")
 def fixture_active_wipe_demultiplex_api(
     active_wipe_demux_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     flow_cell_full_name: str,
 ) -> DeleteDemuxAPI:
     """Return an instantiated DeleteDemuxAPI with active samples on a flow cell."""
     return DeleteDemuxAPI(
         config=active_wipe_demux_context,
-        demultiplex_base=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
         run_path=Path(flow_cell_full_name),
     )
@@ -264,7 +264,7 @@ def fixture_active_wipe_demultiplex_api(
 @pytest.fixture(name="wipe_demultiplex_api")
 def fixture_wipe_demultiplex_api(
     cg_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     flow_cell_full_name: str,
     stats_api: StatsAPI,
 ) -> DeleteDemuxAPI:
@@ -272,7 +272,7 @@ def fixture_wipe_demultiplex_api(
     cg_context.cg_stats_api_ = stats_api
     return DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
         run_path=Path(flow_cell_full_name),
     )

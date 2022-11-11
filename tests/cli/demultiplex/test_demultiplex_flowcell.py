@@ -126,7 +126,7 @@ def test_demultiplex_dragen_flowcell(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell_dragen: Path,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     caplog,
     mocker,
 ):

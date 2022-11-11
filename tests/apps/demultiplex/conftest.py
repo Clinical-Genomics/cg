@@ -43,13 +43,13 @@ def fixture_novaseq_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
     return Path(demux_run_dir, flow_cell_full_name)
 
 
-@pytest.fixture(name="flowcell_dir_bcl2fastq")
+@pytest.fixture(name="flow_cell_dir_bcl2fastq")
 def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
     return Path(demux_run_dir_bcl2fastq, flow_cell_full_name)
 
 
-@pytest.fixture(name="flowcell_dir_dragen")
+@pytest.fixture(name="flow_cell_dir_dragen")
 def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
     return Path(demux_run_dir_dragen, flow_cell_full_name)

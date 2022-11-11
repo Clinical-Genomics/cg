@@ -13,7 +13,7 @@ def test_finish_all_cmd_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcell_finished_working_directory: Path,
+    demultiplexed_flow_cell_finished_working_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 
@@ -36,7 +36,7 @@ def test_finish_all_cmd(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcell_finished_working_directory: Path,
+    demultiplexed_flow_cell_finished_working_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 
@@ -58,7 +58,7 @@ def test_finish_flow_cell_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcell_finished_working_directory: Path,
+    demultiplexed_flow_cell_finished_working_directory: Path,
     flow_cell_name: str,
 ):
     caplog.set_level(logging.INFO)
@@ -84,7 +84,7 @@ def test_finish_flow_cell(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcell_finished_working_directory: Path,
+    demultiplexed_flow_cell_finished_working_directory: Path,
     flow_cell_name: str,
 ):
     caplog.set_level(logging.INFO)
@@ -110,7 +110,7 @@ def test_finish_all_hiseq_x_dry_run(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcell_finished_working_directory: Path,
+    demultiplexed_flow_cell_finished_working_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 
@@ -133,7 +133,7 @@ def test_finish_all_hiseq_x(
     caplog,
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcell_finished_working_directory: Path,
+    demultiplexed_flow_cell_finished_working_directory: Path,
 ):
     caplog.set_level(logging.INFO)
 

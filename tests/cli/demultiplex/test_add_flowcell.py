@@ -11,14 +11,14 @@ def test_add_flowcell_cmd(
     cli_runner: CliRunner,
     flow_cell: FlowCell,
     demultiplex_context: CGConfig,
-    demultiplexed_flowcell_finished_working_directory: Path,
+    demultiplexed_flow_cell_finished_working_directory: Path,
     demultiplex_ready_flow_cell: Path,
 ):
     # GIVEN a cgstats api and a demultiplex api
     # GIVEN that there is a flowcell in the run dir
     assert demultiplex_ready_flow_cell.exists()
     # GIVEN that there is a demultiplexed flowcell
-    assert demultiplexed_flowcell_finished_working_directory.exists()
+    assert demultiplexed_flow_cell_finished_working_directory.exists()
 
     # GIVEN that the flowcell does not exist in the cgstats database
     assert not get_flowcell_id(flowcell_name=flow_cell.id)

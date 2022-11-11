@@ -18,7 +18,7 @@ from tests.store_helpers import StoreHelpers
 def test_initiate_delete_demux_api(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     flow_cell_full_name: str,
 ):
     """Test to initialize the DeleteDemuxAPI"""
@@ -31,7 +31,7 @@ def test_initiate_delete_demux_api(
     # WHEN initializing the DeleteDemuxAPI
     DeleteDemuxAPI(
         config=config,
-        demultiplex_base=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=True,
         run_path=flow_cell_full_name,
     )
@@ -83,7 +83,7 @@ def test_get_presence_status_status_db(
 def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     flow_cell_full_name: str,
     stats_api: StatsAPI,
 ):
@@ -94,7 +94,7 @@ def test_set_dry_run_delete_demux_api(
     # WHEN setting the dry_run mode on a DeleteDemuxAPI
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=True,
         run_path=flow_cell_full_name,
     )
@@ -175,7 +175,7 @@ def test_check_active_sample(active_wipe_demultiplex_api: DeleteDemuxAPI):
 def test_delete_flow_cell_housekeeper_only_sample_level(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     flow_cell_full_name: str,
     populated_flow_cell_store: Store,
     sample_level_housekeeper_api: HousekeeperAPI,
@@ -195,7 +195,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
         run_path=Path(flow_cell_full_name),
     )
@@ -221,7 +221,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
 def test_delete_flow_cell_housekeeper_flowcell_name(
     caplog,
     cg_context: CGConfig,
-    demultiplexed_flowcells_working_directory: Path,
+    demultiplexed_flow_cells_working_directory: Path,
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     flow_cell_full_name: str,
     populated_flow_cell_store: Store,
@@ -241,7 +241,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
-        demultiplex_base=demultiplexed_flowcells_working_directory,
+        demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
         run_path=Path(flow_cell_full_name),
     )

@@ -10,14 +10,14 @@ from tests.cli.demultiplex.conftest import (
     fixture_demultiplexing_api,
     fixture_demultiplex_configs,
     fixture_flow_cell_runs_working_directory,
-    fixture_demultiplexed_flowcells_working_directory,
+    fixture_demultiplexed_flow_cells_working_directory,
     fixture_demultiplex_context,
-    fixture_demultiplexed_flowcell_finished_working_directory,
+    fixture_demultiplexed_flow_cell_finished_working_directory,
 )
 
 
 def test_get_all_demultiplex_flow_cells_out_dirs(
-    demultiplex_context: CGConfig, demultiplexed_flowcell_finished_working_directory: Path
+    demultiplex_context: CGConfig, demultiplexed_flow_cell_finished_working_directory: Path
 ):
     """Test returning all flow cell directories from the demultiplexing run directory."""
     # GIVEN a demultiplex flow cell finished output directory that exist
@@ -29,4 +29,4 @@ def test_get_all_demultiplex_flow_cells_out_dirs(
     demultiplex_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplex_flow_cells_out_dirs()
 
     # THEN the demultiplexed flow cells run directories should be returned
-    assert demultiplex_flow_cell_dirs[0] == demultiplexed_flowcell_finished_working_directory
+    assert demultiplex_flow_cell_dirs[0] == demultiplexed_flow_cell_finished_working_directory

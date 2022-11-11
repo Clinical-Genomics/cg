@@ -33,17 +33,17 @@ def fixture_flow_cell(flow_cell_path: Path) -> FlowCell:
     return FlowCell(flow_cell_path)
 
 
-@pytest.fixture(name="demultiplexed_flowcell")
-def fixture_demultiplexed_flowcell(demultiplexed_runs: Path, flow_cell_full_name: str) -> Path:
+@pytest.fixture(name="demultiplexed_flow_cell")
+def fixture_demultiplexed_flow_cell(demultiplexed_runs: Path, flow_cell_full_name: str) -> Path:
     return demultiplexed_runs / flow_cell_full_name
 
 
 @pytest.fixture(name="bcl2fastq_demux_results")
 def fixture_bcl2fastq_demux_results(
-    demultiplexed_flowcell: Path, flow_cell: FlowCell
+    demultiplexed_flow_cell: Path, flow_cell: FlowCell
 ) -> DemuxResults:
     return DemuxResults(
-        demux_dir=demultiplexed_flowcell, flow_cell=flow_cell, bcl_converter="bcl2fastq"
+        demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter="bcl2fastq"
     )
 
 
