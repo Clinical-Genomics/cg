@@ -25,7 +25,7 @@ def test_observations_upload(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    nr_of_loaded_variants,
+    nr_of_loaded_variants: int,
     analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
@@ -182,7 +182,7 @@ def test_mip_dna_load_observations(
     case_id: str,
     mip_dna_observations_api: MipDNAObservationsAPI,
     observations_input_files: MipDNAObservationsInputFiles,
-    nr_of_loaded_variants,
+    nr_of_loaded_variants: int,
     analysis_store: Store,
     caplog: LogCaptureFixture,
     mocker,
@@ -293,15 +293,61 @@ def test_mip_dna_delete_case_not_found(
     )
 
 
+def test_balsamic_load_observations(
+    case_id: str,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    balsamic_observations_input_files: BalsamicObservationsInputFiles,
+    nr_of_loaded_variants: int,
+    analysis_store: Store,
+    caplog: LogCaptureFixture,
+    mocker,
+):
+    """Test loading of cancer case observations."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a mock BALSAMIC observations API and a list of observations input files
+    case: models.Family = analysis_store.family(case_id)
+    mocker.patch.object(balsamic_observations_api, "is_duplicate", return_value=False)
+
+    # WHEN loading the case to Loqusdb
+    balsamic_observations_api.load_observations(case, balsamic_observations_input_files)
+
+    # THEN the observations should be loaded successfully
+    assert f"Uploaded {nr_of_loaded_variants} variants to Loqusdb" in caplog.text
+
+
+def test_balsamic_load_observations_duplicate(
+    case_id: str,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    observations_input_files: MipDNAObservationsInputFiles,
+    analysis_store: Store,
+    caplog: LogCaptureFixture,
+    mocker,
+):
+    """Test upload cancer duplicate case observations to Loqusdb."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a balsamic observations API and a case object that has already been uploaded to Loqusdb
+    case: models.Family = analysis_store.family(case_id)
+    mocker.patch.object(mip_dna_observations_api, "is_duplicate", return_value=True)
+
+    # WHEN uploading the case observations to Loqusdb
+    with pytest.raises(LoqusdbDuplicateRecordError):
+        # THEN a duplicate record error should be raised
+        mip_dna_observations_api.load_observations(case, observations_input_files)
+
+    assert f"Case {case.internal_id} has already been uploaded to Loqusdb" in caplog.text
+
+
 def test_balsamic_load_cancer_observations(
     case_id: str,
     balsamic_observations_api: BalsamicObservationsAPI,
     balsamic_observations_input_files: BalsamicObservationsInputFiles,
-    nr_of_loaded_variants,
+    nr_of_loaded_variants: int,
     analysis_store: Store,
     caplog: LogCaptureFixture,
 ):
-    """Test loading of case observations for rare disease."""
+    """Test loading of case observations for cancer."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a mock BALSAMIC observations API and a list of observations input files
