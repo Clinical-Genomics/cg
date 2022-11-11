@@ -68,7 +68,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     def cgstats_select_project(self, flowcell_id: str, flowcell_path: Path) -> None:
         """Process selected project using cgstats."""
         unaligned_dir: Path = Path(flowcell_path, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-        for project_dir in unaligned_dir.glob("Project_*"):
+        for project_dir in unaligned_dir.glob("Project_*[0-9]*"):
             (_, project_id) = project_dir.name.split("_")
             stdout_file: Path = Path(
                 flowcell_path, "-".join(["stats", project_id, flowcell_id]) + ".txt"
@@ -139,7 +139,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         )
 
     def finish_all_flowcells(self, bcl_converter: str) -> None:
-        """Loop over all flow cells and post process those that need it"""
+        """Loop over all flow cells and post process those that need it."""
         demultiplex_flow_cell_out_dirs: List[
             Path
         ] = self.demux_api.get_all_demultiplex_flow_cells_out_dirs()
