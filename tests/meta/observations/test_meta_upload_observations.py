@@ -10,6 +10,7 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError, CaseNotFoundError
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
@@ -282,6 +283,52 @@ def test_mip_dna_delete_case_not_found(
     with pytest.raises(CaseNotFoundError):
         # THEN a CaseNotFoundError should be raised
         mip_dna_observations_api.delete_case(case)
+
+    assert (
+        f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
+        in caplog.text
+    )
+
+
+def test_balsamic_delete_case(
+    case_id: str,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    analysis_store: Store,
+    caplog: LogCaptureFixture,
+):
+    """Test delete balsamic case observations from Loqusdb."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a Loqusdb instance and a case that has been uploaded to both somatic and tumor instances
+    case: models.Family = analysis_store.family(case_id)
+
+    # WHEN deleting the case
+    balsamic_observations_api.delete_case(case)
+
+    # THEN the case should be deleted from Loqusdb
+    assert f"Removed observations for case {case.internal_id} from Loqusdb" in caplog.text
+
+
+def test_balsamic_delete_case_not_found(
+    base_context: CGConfig,
+    helpers: StoreHelpers,
+    loqusdb_api: LoqusdbAPI,
+    balsamic_observations_api: BalsamicObservationsAPI,
+    caplog: LogCaptureFixture,
+):
+    """Test delete balsamic case observations from Loqusdb that have not been uploaded."""
+    store: Store = base_context.status_db
+
+    # GIVEN empty Loqusdb instances
+    loqusdb_api.process.stdout = None
+    balsamic_observations_api.loqusdb_somatic_api = loqusdb_api
+    balsamic_observations_api.loqusdb_tumor_api = loqusdb_api
+    case: models.Family = helpers.add_case(store)
+
+    # WHEN deleting a cancer case that does not exist in Loqusdb
+    with pytest.raises(CaseNotFoundError):
+        # THEN a CaseNotFoundError should be raised
+        balsamic_observations_api.delete_case(case)
 
     assert (
         f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."

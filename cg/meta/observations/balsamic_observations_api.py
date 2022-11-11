@@ -114,7 +114,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             case.internal_id
         ) or not self.loqusdb_tumor_api.get_case(case.internal_id):
             LOG.error(
-                f"Skipping case deletion. Case {case.internal_id} could not be found in Loqusdb."
+                f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
             )
             raise CaseNotFoundError
 

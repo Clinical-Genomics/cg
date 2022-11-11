@@ -6,6 +6,7 @@ import pytest
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.sequencing import SequencingMethod
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 
@@ -73,3 +74,14 @@ def fixture_mip_dna_observations_api(
     mip_dna_observations_api = MipDNAObservationsAPI(cg_config_object, SequencingMethod.WGS)
     mip_dna_observations_api.loqusdb_api = mock_loqusdb_api
     return mip_dna_observations_api
+
+
+@pytest.fixture(scope="function", name="balsamic_observations_api")
+def fixture_balsamic_observations_api(
+    cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI
+) -> MipDNAObservationsAPI:
+    """Rare diseases observations API fixture."""
+    balsamic_observations_api = BalsamicObservationsAPI(cg_config_object, SequencingMethod.WGS)
+    balsamic_observations_api.loqusdb_somatic_api = mock_loqusdb_api
+    balsamic_observations_api.loqusdb_tumor_api = mock_loqusdb_api
+    return balsamic_observations_api
