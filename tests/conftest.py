@@ -608,6 +608,12 @@ def fixture_flow_cell_id(flow_cell: FlowCell) -> str:
     return flow_cell.id
 
 
+@pytest.fixture(name="another_flow_cell_id")
+def fixture_another_flow_cell_id() -> str:
+    """Return another flow cell id."""
+    return "HF57HDRXY"
+
+
 @pytest.fixture(name="demultiplexing_delivery_file")
 def fixture_demultiplexing_delivery_file(flow_cell: FlowCell) -> Path:
     """Return demultiplexing delivery started file."""
@@ -638,18 +644,6 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
-
-
-@pytest.fixture(name="flow_cell_name")
-def fixture_flow_cell_name() -> str:
-    """Return flow cell name."""
-    return "HVKJCDRXX"
-
-
-@pytest.fixture(name="another_flow_cell_name")
-def fixture_another_flow_cell_name() -> str:
-    """Return another flow cell name."""
-    return "HF57HDRXY"
 
 
 # Genotype file fixture

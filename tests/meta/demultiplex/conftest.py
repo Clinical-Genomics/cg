@@ -100,7 +100,7 @@ def fixture_hiseq_x_copy_complete_file(flow_cell: FlowCell) -> Path:
 
 @pytest.fixture(name="populated_flow_cell_store")
 def fixture_populated_flow_cell_store(
-    family_name: str, flow_cell_name: str, sample_id: str, store: Store, helpers: StoreHelpers
+    family_name: str, flow_cell_id: str, sample_id: str, store: Store, helpers: StoreHelpers
 ) -> Store:
     """Populate a store with a NovaSeq flow cell."""
 
@@ -114,7 +114,7 @@ def fixture_populated_flow_cell_store(
     )
     helpers.add_flowcell(
         store=populated_flow_cell_store,
-        flowcell_id=flow_cell_name,
+        flowcell_id=flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -123,7 +123,7 @@ def fixture_populated_flow_cell_store(
 
 @pytest.fixture(name="active_flow_cell_store")
 def fixture_active_flow_cell_store(
-    family_name: str, flow_cell_name: str, sample_id: str, base_store: Store, helpers: StoreHelpers
+    family_name: str, flow_cell_id: str, sample_id: str, base_store: Store, helpers: StoreHelpers
 ) -> Store:
     """Populate a store with a Novaseq flow cell, with active samples on it."""
     active_flow_cell_store: Store = base_store
@@ -138,7 +138,7 @@ def fixture_active_flow_cell_store(
     )
     helpers.add_flowcell(
         store=active_flow_cell_store,
-        flowcell_id=flow_cell_name,
+        flowcell_id=flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -147,7 +147,7 @@ def fixture_active_flow_cell_store(
 
 @pytest.fixture(name="sample_level_housekeeper_api")
 def fixture_sample_level_housekeeper_api(
-    flow_cell_name: str,
+    flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: List[Path],
@@ -160,7 +160,7 @@ def fixture_sample_level_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq", flow_cell_name], "archive": False}
+            {"path": path.as_posix(), "tags": ["fastq", flow_cell_id], "archive": False}
             for path in tmp_fastq_paths
         ],
     }
@@ -170,7 +170,7 @@ def fixture_sample_level_housekeeper_api(
 
 @pytest.fixture(name="flow_cell_name_housekeeper_api")
 def fixture_flow_cell_name_housekeeper_api(
-    flow_cell_name: str,
+    flow_cell_id: str,
     real_housekeeper_api: HousekeeperAPI,
     sample_id: str,
     tmp_fastq_paths: List[Path],
@@ -184,18 +184,18 @@ def fixture_flow_cell_name_housekeeper_api(
         "created": datetime.now(),
         "version": "1.0",
         "files": [
-            {"path": path.as_posix(), "tags": ["fastq", flow_cell_name], "archive": False}
+            {"path": path.as_posix(), "tags": ["fastq", flow_cell_id], "archive": False}
             for path in tmp_fastq_paths
         ],
     }
     flow_cell_bundle_data = {
-        "name": flow_cell_name,
+        "name": flow_cell_id,
         "created": datetime.now(),
         "version": "1.0",
         "files": [
             {
                 "path": tmp_sample_sheet_path.as_posix(),
-                "tags": ["samplesheet", flow_cell_name],
+                "tags": ["samplesheet", flow_cell_id],
                 "archive": False,
             }
         ],
@@ -280,14 +280,14 @@ def fixture_wipe_demultiplex_api(
 
 @pytest.fixture(name="demultiplexing_init_files")
 def tmp_demultiplexing_init_files(
-    flow_cell_name: str, populated_wipe_demultiplex_api: DeleteDemuxAPI
+    flow_cell_id: str, populated_wipe_demultiplex_api: DeleteDemuxAPI
 ) -> List[Path]:
     """Return a list of demultiplexing init files present in the run directory."""
     run_path: Path = populated_wipe_demultiplex_api.run_path
     slurm_job_id_file_path: Path = Path(run_path, "slurm_job_ids.yaml")
     demux_script_file_path: Path = Path(run_path, "demux-novaseq.sh")
-    error_log_path: Path = Path(run_path, f"{flow_cell_name}_demultiplex.stderr")
-    log_path: Path = Path(run_path, f"{flow_cell_name}_demultiplex.stdout")
+    error_log_path: Path = Path(run_path, f"{flow_cell_id}_demultiplex.stderr")
+    log_path: Path = Path(run_path, f"{flow_cell_id}_demultiplex.stdout")
 
     demultiplexing_init_files: List[Path] = [
         slurm_job_id_file_path,

@@ -59,7 +59,7 @@ def test_finish_flow_cell_dry_run(
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
     demultiplexed_flow_cell_finished_working_directory: Path,
-    flow_cell_name: str,
+    flow_cell_id: str,
 ):
     caplog.set_level(logging.INFO)
 
@@ -67,12 +67,12 @@ def test_finish_flow_cell_dry_run(
 
     # GIVEN a demultiplex context
 
-    # GIVEN a flow cell
+    # GIVEN a flow cell id
 
     # WHEN starting post-processing for new demultiplexing from the CLI with dry run flag
     result: testing.Result = cli_runner.invoke(
         finish_flow_cell,
-        ["--dry-run", flow_cell_name],
+        ["--dry-run", flow_cell_id],
         obj=demultiplex_context,
     )
 
@@ -85,7 +85,7 @@ def test_finish_flow_cell(
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
     demultiplexed_flow_cell_finished_working_directory: Path,
-    flow_cell_name: str,
+    flow_cell_id: str,
 ):
     caplog.set_level(logging.INFO)
 
@@ -93,12 +93,12 @@ def test_finish_flow_cell(
 
     # GIVEN a demultiplex context
 
-    # GIVEN a flow cell
+    # GIVEN a flow cell id
 
     # WHEN starting post-processing for new demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         finish_flow_cell,
-        [flow_cell_name],
+        [flow_cell_id],
         obj=demultiplex_context,
     )
 

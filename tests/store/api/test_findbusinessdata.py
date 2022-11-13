@@ -22,13 +22,13 @@ def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
 
 
 def test_get_latest_flow_cell_on_case(
-    re_sequenced_sample_store: Store, case_id: str, flow_cell_name: str
+    re_sequenced_sample_store: Store, case_id: str, flow_cell_id: str
 ):
-    """Test function to fetch the latest sequenced flowcell on a case"""
+    """Test function to fetch the latest sequenced flow cell on a case"""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
     latest_flow_cell_obj: models.Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
-        models.Flowcell.name == flow_cell_name
+        models.Flowcell.name == flow_cell_id
     ).first()
 
     # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
