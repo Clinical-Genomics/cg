@@ -106,7 +106,7 @@ class DemultiplexingAPI:
         """Create the path to the stdout logfile."""
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
-    def get_all_demultiplex_flow_cells_out_dirs(self) -> List[Path]:
+    def get_all_flow_cells_dirs(self) -> List[Path]:
         """Return all demultiplex flow cell out directories."""
         demultiplex_flow_cells: List[Path] = []
         for flow_cell_dir in self.out_dir.iterdir():

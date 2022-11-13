@@ -178,7 +178,7 @@ def fixture_demultiplex_ready_flow_cell(
 ) -> Path:
     """Return the path to a working directory that is ready for demultiplexing.
 
-    This is a path to a flowc ell directory with all the files necessary to start demultiplexing present.
+    This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
     """
     existing_flow_cell: FlowCell = FlowCell(flow_cell_path=novaseq_dir)
     working_flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_working_directory)
