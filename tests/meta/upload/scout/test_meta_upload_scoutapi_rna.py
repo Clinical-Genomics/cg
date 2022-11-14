@@ -7,6 +7,7 @@ from _pytest.logging import LogCaptureFixture
 from alchy import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.store import Store, models
@@ -38,7 +39,12 @@ def ensure_two_dna_tumour_matches(
         store=rna_store, customer=rna_store.family(dna_case_id).customer
     )
     another_sample_id = helpers.add_sample(
-        store=rna_store, name=another_sample_id, subject_id=subject_id, is_tumour=True
+        store=rna_store,
+        name=another_sample_id,
+        subject_id=subject_id,
+        is_tumour=True,
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
     )
     helpers.add_relationship(store=rna_store, sample=another_sample_id, case=dna_extra_case)
     rna_store.commit()
@@ -62,6 +68,7 @@ def ensure_extra_rna_case_match(
         internal_id=another_rna_sample_id,
         subject_id=subject_id,
         is_tumour=False,
+        application_type=SequencingMethod.WTS,
     )
     helpers.add_relationship(store=rna_store, sample=another_rna_sample_id, case=rna_extra_case)
 
@@ -464,7 +471,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
         upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
 
 
-def test_get_mip_dna_and_balsamic_samples(
+def test_get_application_prep_category(
     another_rna_sample_id: str,
     dna_sample_son_id: str,
     helpers: StoreHelpers,
@@ -486,9 +493,7 @@ def test_get_mip_dna_and_balsamic_samples(
     all_son_rna_dna_samples: List[models.Sample] = [dna_sample, another_rna_sample_id]
 
     # WHEN running the method to filter a list of models.Sample objects containing RNA and DNA samples connected by subject_id
-    only_son_dna_samples = upload_scout_api._get_mip_dna_and_balsamic_samples(
-        all_son_rna_dna_samples
-    )
+    only_son_dna_samples = upload_scout_api._get_application_prep_category(all_son_rna_dna_samples)
 
     # THEN even though an RNA sample is present in the initial query, the output should not contain any RNA samples
     nr_of_subject_id_samples: int = len(all_son_rna_dna_samples)

@@ -12,6 +12,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import HousekeeperVersionMissingError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -431,8 +432,7 @@ class UploadScoutAPI:
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-        subject_id_sample_list = subject_id_samples.all()
-        subject_id_dna_samples = self._get_mip_dna_and_balsamic_samples(subject_id_sample_list)
+        subject_id_dna_samples = self._get_application_prep_category(subject_id_samples.all())
         nr_of_subject_id_dna_samples: int = len(subject_id_dna_samples)
         if nr_of_subject_id_dna_samples != 1:
             raise CgDataError(
@@ -462,15 +462,14 @@ class UploadScoutAPI:
                 )
 
     @staticmethod
-    def _get_mip_dna_and_balsamic_samples(subject_id_samples: List[models.Sample]) -> List[Any]:
-        """Filter a models.Sample query, returning DNA samples connected to MIP or BALSAMIC cases"""
-        subject_id_dna_samples: List[Any] = []
+    def _get_application_prep_category(subject_id_samples: List[models.Sample]) -> List[Any]:
+        """Filter a models.Sample list, returning DNA samples selected on their prep_category."""
+        subject_id_dna_samples: List[models.Sample] = []
         for sample in subject_id_samples:
-            for sample.link in sample.links:
-                if sample.link.family.data_analysis in [
-                    Pipeline.MIP_DNA,
-                    Pipeline.BALSAMIC,
-                    Pipeline.BALSAMIC_UMI,
-                ]:
-                    subject_id_dna_samples.append(sample)
+            if sample.application_version.application.prep_category in [
+                SequencingMethod.WGS,
+                SequencingMethod.TGS,
+                SequencingMethod.WES,
+            ]:
+                subject_id_dna_samples.append(sample)
         return subject_id_dna_samples
