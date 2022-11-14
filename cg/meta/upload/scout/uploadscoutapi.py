@@ -436,7 +436,7 @@ class UploadScoutAPI:
 
         if len(subject_id_dna_samples) != 1:
             raise CgDataError(
-                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {nr_of_subject_id_dna_samples} "
+                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {len(subject_id_dna_samples)} "
             )
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, list] = {}
         sample: models.Sample
