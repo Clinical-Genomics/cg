@@ -112,7 +112,7 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS = [
     {"salmon-quant"},
 ]
 
-MICROSALT_ANALYSIS_CASE_TAGS = [{"deliver", "visualization"}]
+MICROSALT_ANALYSIS_CASE_TAGS = [{"qc-report"}, {"typing-report"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS = []
 
