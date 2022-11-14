@@ -148,7 +148,9 @@ class TrailblazerAPI:
         slurm_quality_of_service: SlurmQos,
         email: str = None,
         data_analysis: Pipeline = None,
+        ticket: str = None,
     ) -> TrailblazerAnalysis:
+
         request_body = {
             "case_id": case_id,
             "email": email,
@@ -157,6 +159,7 @@ class TrailblazerAPI:
             "out_dir": out_dir,
             "priority": slurm_quality_of_service,
             "data_analysis": str(data_analysis).upper(),
+            "ticket": ticket,
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
