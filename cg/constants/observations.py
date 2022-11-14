@@ -44,7 +44,7 @@ class BalsamicObservationsAnalysisTag(StrEnum):
     SNV_VCF: str = "vcf-snv-clinical"
     SNV_ALL_VCF: str = "vcf-snv-germline-tumor"
     SV_VCF: str = "vcf-sv-clinical"
-    PROFILE_VCF: str = "vcf-snv-germline-normal"
+    PROFILE_VCF: str = "vcf-snv-germline-tumor"
 
 
 class BalsamicLoadParameters(Enum):
