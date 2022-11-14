@@ -64,7 +64,7 @@ def create_sheet(context: CGConfig, flow_cell_name: str, bcl_converter: str, dry
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     flowcell_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
     if not flowcell_path.exists():
-        LOG.warning(f"Could not find flowcell {flowcell_path}")
+        LOG.warning(f"Could not find flow   cell {flowcell_path}")
         raise click.Abort
     try:
         flow_cell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
@@ -83,7 +83,7 @@ def create_sheet(context: CGConfig, flow_cell_name: str, bcl_converter: str, dry
 
     try:
         sample_sheet: str = create_sample_sheet(
-            flowcell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
+            flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
         )
     except (FileNotFoundError, FileExistsError) as error:
         raise click.Abort from error
@@ -133,7 +133,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
 
         try:
             sample_sheet: str = create_sample_sheet(
-                flowcell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
+                flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
             )
         except (FileNotFoundError, FileExistsError):
             continue

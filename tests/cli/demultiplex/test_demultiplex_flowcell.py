@@ -193,16 +193,17 @@ def test_demultiplex_all(
     assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
 
 
-def test_start_demultiplexing_when_already_completed(
+def test_start_demultiplex_flow_cell(
+    caplog,
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
-    caplog,
+    flow_cell: FlowCell,
+    mocker,
 ):
     caplog.set_level(logging.DEBUG)
 
     # GIVEN that all files are present for demultiplexing
-    flow_cell: FlowCell = FlowCell(demultiplex_ready_flow_cell)
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
 
     # GIVEN that demultiplexing has started
@@ -214,6 +215,8 @@ def test_start_demultiplexing_when_already_completed(
     # GIVEN that demultiplexing is completed
     demux_api.demultiplexing_completed_path(flow_cell=flow_cell).touch()
 
+    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
+
     # WHEN starting demultiplexing from the CLI
     result: testing.Result = cli_runner.invoke(
         demultiplex_flow_cell,
@@ -224,8 +227,11 @@ def test_start_demultiplexing_when_already_completed(
     # THEN assert the command exits without problems
     assert result.exit_code == 0
 
-    # THEN assert it was communicated that demultiplexing was completed
-    assert f"Demultiplexing is already completed for flow cell {flow_cell.id}"
+    # THEN assert it was communicated that previous demux was deleted
+    assert f"Removing flow cell demultiplexing directory {flow_cell.path}"
+
+    # THEN demultiplexing was started
+    assert f"Demultiplexing running as job" in caplog.text
 
 
 def test_delete_flow_cell_dry_run_cgstats(
