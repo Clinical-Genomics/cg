@@ -112,14 +112,7 @@ MIP_RNA_ANALYSIS_SAMPLE_TAGS = [
     {"salmon-quant"},
 ]
 
-MICROSALT_ANALYSIS_CASE_TAGS = [
-    {"microsalt-qc"},
-    {"microsalt-type"},
-    {"assembly"},
-    {"trimmed-forward-reads"},
-    {"trimmed-reverse-reads"},
-    {"reference-alignment-deduplicated"},
-]
+MICROSALT_ANALYSIS_CASE_TAGS = [{"deliver", "visualization"}]
 
 MICROSALT_ANALYSIS_SAMPLE_TAGS = []
 
