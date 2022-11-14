@@ -136,7 +136,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flow_cell_id=flow_cell.id
         )
         if self.dry_run:
-            LOG.info("Dry run will commit flow cell to database")
+            LOG.info("Dry run will not commit flow cell to database")
             return
         self.status_db.add_commit(new_record)
         LOG.info(f"Flow cell added: {new_record}")
@@ -158,7 +158,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
 
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post process those that need it."""
-        for flow_cell_dir in self.demux_api.get_all_flow_cells_dirs():
+        for flow_cell_dir in self.demux_api.get_all_demultiplexed_flow_cell_dirs():
             self.finish_flow_cell(
                 bcl_converter=bcl_converter,
                 flow_cell_name=flow_cell_dir.name,
@@ -292,7 +292,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             flow_cell_id=flow_cell_id
         )
         if self.dry_run:
-            LOG.info("Dry run will commit flow cell to database")
+            LOG.info("Dry run will not commit flow cell to database")
             return
         self.status_db.add_commit(new_record)
         LOG.info(f"Flow cell added: {new_record}")
@@ -335,5 +335,5 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post-process those that need it."""
-        for flow_cell_dir in self.demux_api.get_all_flow_cells_dirs():
+        for flow_cell_dir in self.demux_api.get_all_demultiplexed_flow_cell_dirs():
             self.finish_flow_cell(flow_cell_name=flow_cell_dir.name, bcl_converter=bcl_converter)

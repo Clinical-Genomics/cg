@@ -345,7 +345,7 @@ def test_post_process_flow_cell_dry_run(
     demultiplexing_delivery_file.unlink()
 
     # THEN we should log that we will not commit
-    assert "Dry run will commit flow cell to database" in caplog.text
+    assert "Dry run will not commit flow cell to database" in caplog.text
 
 
 def test_post_process_flow_cell(

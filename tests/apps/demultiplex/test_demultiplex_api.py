@@ -16,7 +16,7 @@ from tests.cli.demultiplex.conftest import (
 )
 
 
-def test_get_all_demultiplex_flow_cells_out_dirs(
+def test_get_all_demultiplexed_flow_cell_out_dirs(
     demultiplex_context: CGConfig, demultiplexed_flow_cell_finished_working_directory: Path
 ):
     """Test returning all flow cell directories from the demultiplexing run directory."""
@@ -25,8 +25,8 @@ def test_get_all_demultiplex_flow_cells_out_dirs(
     # GIVEN a demultiplex context
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
 
-    # WHEN calling get_all_flow_cells_dirs
-    demultiplex_flow_cell_dirs: List[Path] = demux_api.get_all_flow_cells_dirs()
+    # WHEN calling get_all_demultiplexed_flow_cell_dirs
+    demultiplex_flow_cell_dirs: List[Path] = demux_api.get_all_demultiplexed_flow_cell_dirs()
 
     # THEN the demultiplexed flow cells run directories should be returned
     assert demultiplex_flow_cell_dirs[0] == demultiplexed_flow_cell_finished_working_directory
