@@ -433,8 +433,8 @@ class UploadScoutAPI:
             is_tumour=rna_sample.is_tumour,
         )
         subject_id_dna_samples = self._get_application_prep_category(subject_id_samples.all())
-        nr_of_subject_id_dna_samples: int = len(subject_id_dna_samples)
-        if nr_of_subject_id_dna_samples != 1:
+
+        if len(subject_id_dna_samples) != 1:
             raise CgDataError(
                 f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {nr_of_subject_id_dna_samples} "
             )
