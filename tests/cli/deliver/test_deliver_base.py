@@ -90,8 +90,6 @@ def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers, ticke
     DeliverTicketAPI.check_if_upload_is_needed.return_value = True
 
     # GIVEN data needs to be concatenated
-    mocker.patch.object(DeliverTicketAPI, "check_if_concatenation_is_needed")
-    DeliverTicketAPI.check_if_concatenation_is_needed.return_value = True
 
     # WHEN running cg deliver ticket
     result = runner.invoke(

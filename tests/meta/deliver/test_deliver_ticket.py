@@ -109,54 +109,6 @@ def test_sort_files(cg_context: CGConfig):
     assert str(sorted_list_of_paths[0]) == "1.fastq"
 
 
-def test_check_if_concatenation_is_needed(
-    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket: str
-):
-    """Test to check if concatenation is needed when it is not needed"""
-    # GIVEN a deliver_ticket API
-    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-
-    # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
-
-    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
-    DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
-
-    # GIVEN an application tag that is not a micro application
-    mocker.patch.object(DeliverTicketAPI, "get_app_tag")
-    DeliverTicketAPI.get_app_tag.return_value = "RMLP15S175"
-
-    # WHEN running check_if_concatenation_is_needed
-    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(ticket=ticket)
-
-    # THEN concatenation is not needed
-    assert is_concatenation_needed is False
-
-
-def test_check_if_concatenation_is_needed_part_deux(
-    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket: str
-):
-    """Test to check if concatenation is needed when it is needed"""
-    # GIVEN a deliver_ticket API
-    deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-
-    # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
-
-    mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
-    DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
-
-    # GIVEN an application tag that is a micro application
-    mocker.patch.object(DeliverTicketAPI, "get_app_tag")
-    DeliverTicketAPI.get_app_tag.return_value = "MWRNXTR003"
-
-    # WHEN running check_if_concatenation_is_needed
-    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(ticket=ticket)
-
-    # THEN concatenation is needed
-    assert is_concatenation_needed is True
-
-
 def test_get_all_samples_from_ticket(
     cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket: str
 ):
