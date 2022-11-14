@@ -15,7 +15,6 @@ from cg.store import models
 
 
 LOG = logging.getLogger(__name__)
-PREFIX_TO_CONCATENATE = ["MWG", "MWL", "MWM", "MWR", "MWX"]
 
 
 class DeliverTicketAPI(MetaAPI):
@@ -165,22 +164,3 @@ class DeliverTicketAPI(MetaAPI):
     def get_app_tag(self, samples: list) -> str:
         app_tag = samples[0].application_version.application.tag
         return app_tag
-
-    def check_if_concatenation_is_needed(self, ticket: str) -> bool:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
-        case_id = cases[0].internal_id
-        case_obj = self.status_db.family(case_id)
-        samples: List[models.Sample] = [link.sample for link in case_obj.links]
-        app_tag = self.get_app_tag(samples=samples)
-        for prefix in PREFIX_TO_CONCATENATE:
-            if app_tag.startswith(prefix):
-                LOG.info(
-                    "Identified %s as application tag, i.e. the fastqs should be concatenated",
-                    app_tag,
-                )
-                return True
-        LOG.info(
-            "The following application tag was identified: %s, concatenation will be skipped",
-            app_tag,
-        )
-        return False
