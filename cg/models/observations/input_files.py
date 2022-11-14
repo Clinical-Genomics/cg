@@ -42,8 +42,5 @@ class BalsamicObservationsInputFiles(ObservationsInputFiles):
     """Model for validating cancer Loqusdb input files."""
 
     snv_all_vcf_path: Path
-    sv_vcf_path: Path
 
-    _ = validator("snv_all_vcf_path", "sv_vcf_path", always=False, allow_reuse=True)(
-        validate_observations_file
-    )
+    _ = validator("snv_all_vcf_path", always=False, allow_reuse=True)(validate_observations_file)

@@ -62,7 +62,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.load_cancer_observations(
             case=case, input_files=input_files, loqusdb_api=self.loqusdb_tumor_api
         )
-        loqusdb_id: str = str(self.loqusdb_somatic_api.get_case(case_id=case.internal_id)["_id"])
+        # Update Statusb with a germline Loqusdb ID
+        loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)["_id"])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
     @staticmethod
