@@ -2,7 +2,7 @@
 import logging
 
 import click
-from cg.cli.demultiplex.add import add_flowcell_cmd, select_project_cmd
+from cg.cli.demultiplex.add import add_flow_cell_cmd, select_project_cmd
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
 from cg.cli.demultiplex.finish import finish_group
 from cg.cli.demultiplex.report import create_report_cmd
@@ -19,7 +19,7 @@ def demultiplex_cmd_group():
 
 demultiplex_cmd_group: click.Group
 for sub_cmd in [
-    add_flowcell_cmd,
+    add_flow_cell_cmd,
     create_report_cmd,
     delete_flow_cell,
     demultiplex_flow_cell,

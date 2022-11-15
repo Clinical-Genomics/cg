@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from cg.apps.cgstats.crud.find import get_flowcell_id
-from cg.cli.demultiplex.add import add_flowcell_cmd
+from cg.cli.demultiplex.add import add_flow_cell_cmd
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 from click.testing import CliRunner
@@ -25,7 +25,7 @@ def test_add_flowcell_cmd(
 
     # WHEN running the add flowcell command
     result = cli_runner.invoke(
-        add_flowcell_cmd, [flow_cell.flow_cell_full_name], obj=demultiplex_context
+        add_flow_cell_cmd, [flow_cell.flow_cell_full_name], obj=demultiplex_context
     )
 
     # THEN assert that the run was success
