@@ -24,9 +24,7 @@ def test_add_flowcell_cmd(
     assert not get_flowcell_id(flowcell_name=flow_cell.id)
 
     # WHEN running the add flowcell command
-    result = cli_runner.invoke(
-        add_flow_cell_cmd, [flow_cell.flow_cell_full_name], obj=demultiplex_context
-    )
+    result = cli_runner.invoke(add_flow_cell_cmd, [flow_cell.full_name], obj=demultiplex_context)
 
     # THEN assert that the run was success
     assert result.exit_code == 0

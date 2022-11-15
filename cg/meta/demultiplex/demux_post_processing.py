@@ -171,7 +171,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def rename_files(self, demux_results: DemuxResults) -> None:
         """Rename the files according to how we want to have it after demultiplexing is ready."""
-        LOG.info(f"Renaming files for flow cell {demux_results.flow_cell.flow_cell_full_name}")
+        LOG.info(f"Renaming files for flow cell {demux_results.flow_cell.full_name}")
         flow_cell_id: str = demux_results.flow_cell.id
         for project_dir in demux_results.raw_projects:
             files.rename_project_directory(

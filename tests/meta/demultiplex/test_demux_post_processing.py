@@ -214,7 +214,7 @@ def test_post_process_flow_cell_copy_not_completed(
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
         flow_cell=flow_cell,
-        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
 
@@ -222,7 +222,7 @@ def test_post_process_flow_cell_copy_not_completed(
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that copy is not complete
-    assert f"{flow_cell.flow_cell_full_name} is not yet completely copied" in caplog.text
+    assert f"{flow_cell.full_name} is not yet completely copied" in caplog.text
 
 
 def test_post_process_flow_cell_delivery_started(
@@ -247,7 +247,7 @@ def test_post_process_flow_cell_delivery_started(
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
         flow_cell=flow_cell,
-        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
 
@@ -255,10 +255,7 @@ def test_post_process_flow_cell_delivery_started(
     demultiplexing_delivery_file.unlink()
 
     # THEN we should log that the delivery has already started
-    assert (
-        f"{flow_cell.flow_cell_full_name} copy is complete and delivery has already started"
-        in caplog.text
-    )
+    assert f"{flow_cell.full_name} copy is complete and delivery has already started" in caplog.text
 
 
 def test_post_process_flow_cell_not_hiseq_x(
@@ -284,12 +281,12 @@ def test_post_process_flow_cell_not_hiseq_x(
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
         flow_cell=flow_cell,
-        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
 
     # THEN we should log that this is not an Hiseq X flow cell
-    assert f"{flow_cell.flow_cell_full_name} is not an Hiseq X flow cell" in caplog.text
+    assert f"{flow_cell.full_name} is not an Hiseq X flow cell" in caplog.text
 
 
 def test_post_process_flow_cell_dry_run(
@@ -334,7 +331,7 @@ def test_post_process_flow_cell_dry_run(
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
         flow_cell=flow_cell,
-        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
 
@@ -387,7 +384,7 @@ def test_post_process_flow_cell(
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
         flow_cell=flow_cell,
-        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
 
@@ -399,9 +396,7 @@ def test_post_process_flow_cell(
     demultiplexing_delivery_file.unlink()
 
     # THEN we should log that post-processing will begin
-    assert (
-        f"{flow_cell.flow_cell_full_name} copy is complete and delivery will start" in caplog.text
-    )
+    assert f"{flow_cell.full_name} copy is complete and delivery will start" in caplog.text
 
     # THEN we should also transfer the flow cell
     assert f"Flow cell added: {flow_cell.id}" in caplog.text
@@ -429,7 +424,7 @@ def test_finish_flow_cell(
     # When post-processing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.flow_cell_full_name,
+        flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
 
@@ -437,7 +432,7 @@ def test_finish_flow_cell(
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flow_cell.flow_cell_full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {flow_cell.full_name}" in caplog.text
 
 
 def test_finish_all_flowcells(
@@ -468,4 +463,4 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flow_cell.flow_cell_full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {flow_cell.full_name}" in caplog.text

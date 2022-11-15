@@ -56,7 +56,7 @@ class FlowCell:
         return self.path.name.split("_")
 
     @property
-    def flow_cell_full_name(self) -> str:
+    def full_name(self) -> str:
         """Return flow cell full name."""
         return self.path.name
 
