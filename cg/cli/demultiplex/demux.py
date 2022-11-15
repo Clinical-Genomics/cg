@@ -75,27 +75,27 @@ def demultiplex_all(
 
 
 @click.command(name="flow-cell")
-@click.argument("flow-cell-id")
+@click.argument("flow-cell-name")
 @DRY_RUN
 @OPTION_BCL_CONVERTER
 @click.pass_obj
 def demultiplex_flow_cell(
     context: CGConfig,
     dry_run: bool,
-    flow_cell_id: str,
+    flow_cell_name: str,
     bcl_converter: str,
 ):
     """Demultiplex a flow cell.
 
-    flow cell id is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+    flow cell name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
     """
 
     LOG.info(f"Running cg demultiplex flow cell, using {bcl_converter}")
-    flow_cell_directory: Path = Path(context.demultiplex.run_dir, flow_cell_id)
+    flow_cell_directory: Path = Path(context.demultiplex.run_dir, flow_cell_name)
 
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     demultiplex_api.set_dry_run(dry_run=dry_run)
-    LOG.info(f"setting flow cell id to {flow_cell_id}")
+    LOG.info(f"setting flow cell id to {flow_cell_name}")
     LOG.info(f"setting out dir to {demultiplex_api.out_dir}")
 
     try:

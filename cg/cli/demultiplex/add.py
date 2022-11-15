@@ -24,17 +24,17 @@ LOG = logging.getLogger(__name__)
 
 @click.command(name="add")
 @OPTION_BCL_CONVERTER
-@click.argument("flow-cell-id")
+@click.argument("flow-cell-name")
 @click.pass_obj
-def add_flow_cell_cmd(context: CGConfig, flow_cell_id: str, bcl_converter: str):
+def add_flow_cell_cmd(context: CGConfig, flow_cell_name: str, bcl_converter: str):
     """Add a flow cell to the cgstats database."""
     stats_api: StatsAPI = context.cg_stats_api
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flow_cell_run_path: Path = Path(demultiplex_api.run_dir, flow_cell_id)
+    flow_cell_run_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
     if not flow_cell_run_path.exists():
         LOG.warning(f"Could not find flow cell path {flow_cell_run_path}")
         raise click.Abort
-    demux_results_path: Path = Path(demultiplex_api.out_dir, flow_cell_id)
+    demux_results_path: Path = Path(demultiplex_api.out_dir, flow_cell_name)
     if not demux_results_path.exists():
         LOG.warning(f"Could not find demultiplex result path {demux_results_path}")
         raise click.Abort
@@ -55,7 +55,7 @@ def add_flow_cell_cmd(context: CGConfig, flow_cell_id: str, bcl_converter: str):
 @click.option("--project", help="Name of project to fetch data for")
 @click.pass_obj
 def select_project_cmd(context: CGConfig, flow_cell_id: str, project: Optional[str]):
-    """Select a flowcell to fetch statistics from"""
+    """Select a flow cell to fetch statistics from"""
     # Need to instantiate API
     post_processing_api = DemuxPostProcessingNovaseqAPI(config=context)
     report_content: List[str] = post_processing_api.get_report_data(
