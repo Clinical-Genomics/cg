@@ -57,7 +57,7 @@ class DemultiplexingAPI:
         """Create the sbatch error string."""
         LOG.info("Creating the sbatch error string")
         error_parameters: SbatchError = SbatchError(
-            flow_cell_name=flow_cell.id,
+            flow_cell_id=flow_cell.id,
             email=email,
             logfile=DemultiplexingAPI.get_stderr_logfile(flow_cell=flow_cell).as_posix(),
             demux_dir=demux_dir.as_posix(),

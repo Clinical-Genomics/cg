@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 
 
 class LogfileParameters(BaseModel):
-    id_string: str  # This indicate software and version
+    id_string: str  # This indicates software and version
     # This is the binary that was executed (atm only bcl2fastq)
     program: Literal["bcl2fastq", "dragen"] = "bcl2fastq"
     command_line: str
@@ -28,7 +28,7 @@ class LogfileParameters(BaseModel):
 
 
 class DemuxResults:
-    """Class to gather information from a demultiplex result"""
+    """Class to gather information from a demultiplex result."""
 
     def __init__(self, demux_dir: Path, flow_cell: FlowCell, bcl_converter: str):
         LOG.info(f"Instantiating DemuxResults with path {demux_dir}")
@@ -96,23 +96,23 @@ class DemuxResults:
 
     @property
     def conversion_stats_path(self) -> Union[Path, None]:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["conversion_stats"]
+        return Path(self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["conversion_stats"])
 
     @property
     def demux_stats_path(self) -> Path:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["demultiplexing_stats"]
+        return Path(self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["demultiplexing_stats"])
 
     @property
     def adapter_metrics_path(self) -> Path:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["adapter_metrics_stats"]
+        return Path(self.results_dir, DEMUX_STATS_PATH[self.bcl_converter]["adapter_metrics_stats"])
 
     @property
     def quality_metrics_path(self) -> Path:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["quality_metrics"]
+        return Path(self.results_dir, DEMUX_STATS_PATH[self.bcl_converter]["quality_metrics"])
 
     @property
     def runinfo_path(self) -> Path:
-        return self.results_dir / DEMUX_STATS_PATH[self.bcl_converter]["runinfo"]
+        return Path(self.results_dir, DEMUX_STATS_PATH[self.bcl_converter]["runinfo"])
 
     @property
     def stderr_log_path(self) -> Path:
@@ -124,7 +124,7 @@ class DemuxResults:
 
     @property
     def results_dir(self) -> Path:
-        return self.demux_dir / "Unaligned"
+        return Path(self.demux_dir, "Unaligned")
 
     @property
     def sample_sheet_path(self) -> Path:
@@ -134,18 +134,18 @@ class DemuxResults:
     @property
     def barcode_report(self) -> Path:
         """Return the path to the report with samples with low cluster count"""
-        return self.demux_dir / "lane_barcode_summary.csv"
+        return Path(self.demux_dir, "lane_barcode_summary.csv")
 
     @property
     def demux_sample_sheet_path(self) -> Path:
         """Return the path to sample sheet in demuxed flowcell dir"""
-        return self.results_dir / self.flow_cell.sample_sheet_path.name
+        return Path(self.results_dir, self.flow_cell.sample_sheet_path.name)
 
     @property
     def copy_complete_path(self) -> Path:
         """Return the path to a file named copycomplete.txt used as flag that post processing is
-        ready"""
-        return self.demux_dir / "copycomplete.txt"
+        ready."""
+        return Path(self.demux_dir, "copycomplete.txt")
 
     @property
     def projects(self) -> Iterable[str]:
@@ -164,7 +164,7 @@ class DemuxResults:
     @property
     def raw_index_dir(self) -> Path:
         """Return the path to a index dir that is not given the 'Project_'-prefix"""
-        return self.results_dir / "indexcheck"
+        return Path(self.results_dir, "indexcheck")
 
     @property
     def raw_projects(self) -> Iterable[Path]:
@@ -294,4 +294,4 @@ class DemuxResults:
         return time
 
     def __str__(self):
-        return f"DemuxResults(demux_dir={self.demux_dir},flowcell=FlowCell(flowcell_path={self.flow_cell.path})"
+        return f"DemuxResults(demux_dir={self.demux_dir},flow_cell=FlowCell(flow_cell_path={self.flow_cell.path})"

@@ -67,6 +67,7 @@ class FlowCell:
 
     @property
     def run_parameters_path(self) -> Path:
+        """Return path to run parameters file."""
         return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
 
     @property
