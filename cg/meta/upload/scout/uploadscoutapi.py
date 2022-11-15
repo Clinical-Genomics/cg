@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, Set, Dict, List
+from typing import Optional, Set, Dict, List, Any
 
 from sqlalchemy.orm import Query
 
@@ -12,6 +12,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import HousekeeperVersionMissingError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -431,17 +432,15 @@ class UploadScoutAPI:
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-        nr_of_subject_id_dna_samples: int = len(subject_id_samples.all())
-        if nr_of_subject_id_dna_samples != 2:
-            raise CgDataError(
-                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {nr_of_subject_id_dna_samples} "
-            )
+        subject_id_dna_samples = self._get_application_prep_category(subject_id_samples.all())
 
+        if len(subject_id_dna_samples) != 1:
+            raise CgDataError(
+                f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {len(subject_id_dna_samples)} "
+            )
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, list] = {}
         sample: models.Sample
-        for sample in subject_id_samples:
-            if sample.internal_id == rna_sample.internal_id:
-                continue
+        for sample in subject_id_dna_samples:
             rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: list = []
             return sample
 
@@ -454,9 +453,23 @@ class UploadScoutAPI:
         for dna_sample.link in dna_sample.links:
             case_object: models.Family = dna_sample.link.family
             if (
-                case_object.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
+                case_object.data_analysis
+                in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
                 and case_object.customer_id == rna_sample.customer_id
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
                     case_object.internal_id
                 )
+
+    @staticmethod
+    def _get_application_prep_category(subject_id_samples: List[models.Sample]) -> List[Any]:
+        """Filter a models.Sample list, returning DNA samples selected on their prep_category."""
+        subject_id_dna_samples: List[models.Sample] = []
+        for sample in subject_id_samples:
+            if sample.application_version.application.prep_category in [
+                SequencingMethod.WGS,
+                SequencingMethod.TGS,
+                SequencingMethod.WES,
+            ]:
+                subject_id_dna_samples.append(sample)
+        return subject_id_dna_samples
