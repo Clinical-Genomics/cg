@@ -8,6 +8,7 @@ from cg.constants.observations import (
     LoqusdbInstance,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     BalsamicLoadParameters,
+    LOQUSDB_ID,
 )
 from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.store import models
@@ -57,7 +58,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
 
         # Update Statusb with a germline Loqusdb ID
-        loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)["_id"])
+        loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
 
     @staticmethod

@@ -11,6 +11,7 @@ from cg.constants.observations import (
     MipDNALoadParameters,
     LoqusdbInstance,
     LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_ID,
 )
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbUploadCaseError, LoqusdbDuplicateRecordError, CaseNotFoundError
@@ -73,7 +74,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
             hard_threshold=MipDNALoadParameters.HARD_THRESHOLD.value,
             soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
         )
-        loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)["_id"])
+        loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
         LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
 

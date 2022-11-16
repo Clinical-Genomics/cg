@@ -5,6 +5,7 @@ from typing import Optional
 import pytest
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.observations import LOQUSDB_ID
 from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
@@ -45,7 +46,7 @@ class MockLoqusdbAPI(LoqusdbAPI):
         """Mock get_case method."""
         _ = args
         _ = kwargs
-        return {"case_id": "case_id", "_id": "123"}
+        return {"case_id": "case_id", LOQUSDB_ID: "123"}
 
     @staticmethod
     def get_duplicate(*args, **kwargs) -> Optional[dict]:
