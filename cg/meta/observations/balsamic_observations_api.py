@@ -1,7 +1,7 @@
 """API for uploading cancer observations."""
 
 import logging
-from typing import Dict
+from typing import Dict, List
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
@@ -43,7 +43,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             raise LoqusdbUploadCaseError
 
-        loqusdb_upload_apis = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        loqusdb_upload_apis: List[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_upload_apis:
             if self.is_duplicate(
                 case=case,
@@ -104,15 +104,15 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     def delete_case(self, case: models.Family) -> None:
         """Delete cancer case observations from Loqusdb."""
-        if not self.loqusdb_somatic_api.get_case(
-            case.internal_id
-        ) or not self.loqusdb_tumor_api.get_case(case.internal_id):
-            LOG.error(
-                f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
-            )
-            raise CaseNotFoundError
+        loqusdb_apis: List[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        for loqusdb_api in loqusdb_apis:
+            if not loqusdb_api.get_case(case.internal_id):
+                LOG.error(
+                    f"Case {case.internal_id} could not be found in Loqusdb. Skipping case deletion."
+                )
+                raise CaseNotFoundError
 
-        self.loqusdb_somatic_api.delete_case(case.internal_id)
-        self.loqusdb_tumor_api.delete_case(case.internal_id)
+        for loqusdb_api in loqusdb_apis:
+            loqusdb_api.delete_case(case.internal_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from Loqusdb")
