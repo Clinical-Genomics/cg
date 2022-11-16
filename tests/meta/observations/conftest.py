@@ -63,13 +63,13 @@ class MockLoqusdbAPI(LoqusdbAPI):
         return None
 
 
-@pytest.fixture(scope="function", name="mock_loqusdb_api")
+@pytest.fixture(name="mock_loqusdb_api")
 def fixture_mock_loqusdb_api(filled_file) -> MockLoqusdbAPI:
     """Mock Loqusdb API."""
     return MockLoqusdbAPI(binary_path=filled_file, config_path=filled_file)
 
 
-@pytest.fixture(scope="function", name="mip_dna_observations_api")
+@pytest.fixture(name="mip_dna_observations_api")
 def fixture_mip_dna_observations_api(
     cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI
 ) -> MipDNAObservationsAPI:
@@ -79,7 +79,7 @@ def fixture_mip_dna_observations_api(
     return mip_dna_observations_api
 
 
-@pytest.fixture(scope="function", name="balsamic_observations_api")
+@pytest.fixture(name="balsamic_observations_api")
 def fixture_balsamic_observations_api(
     cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI
 ) -> BalsamicObservationsAPI:
