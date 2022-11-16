@@ -1,6 +1,7 @@
 """API for uploading cancer observations."""
 
 import logging
+from typing import Dict
 
 from cg.apps.loqus import LoqusdbAPI
 from cg.constants.observations import (
@@ -18,6 +19,7 @@ from cg.constants.sequencing import SequencingMethod
 from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import BalsamicObservationsInputFiles
+from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
 
@@ -84,25 +86,21 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self, hk_version: Version
     ) -> BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version for cancer."""
-        snv_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_VCF]
-        ).first()
-        snv_all_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_ALL_VCF]
-        ).first()
-        sv_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
-        ).first()
-        profile_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.PROFILE_VCF]
-        ).first()
-
-        return BalsamicObservationsInputFiles(
-            snv_vcf_path=snv_vcf_file.full_path if snv_vcf_file else None,
-            snv_all_vcf_path=snv_all_vcf_file.full_path if snv_all_vcf_file else None,
-            sv_vcf_path=sv_vcf_file.full_path if sv_vcf_file else None,
-            profile_vcf_path=profile_vcf_file.full_path if profile_vcf_file else None,
-        )
+        input_files: Dict[str, File] = {
+            "snv_vcf_file": self.housekeeper_api.files(
+                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_VCF]
+            ).first(),
+            "snv_all_vcf_file": self.housekeeper_api.files(
+                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_ALL_VCF]
+            ).first(),
+            "sv_vcf_file": self.housekeeper_api.files(
+                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
+            ).first(),
+            "profile_vcf_file": self.housekeeper_api.files(
+                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.PROFILE_VCF]
+            ).first(),
+        }
+        return BalsamicObservationsInputFiles(**get_full_path_dictionary(input_files))
 
     def delete_case(self, case: models.Family) -> None:
         """Delete cancer case observations from Loqusdb."""

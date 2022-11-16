@@ -19,6 +19,7 @@ from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store import models
+from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
 
@@ -82,27 +83,23 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self, hk_version: Version
     ) -> MipDNAObservationsInputFiles:
         """Extract observations files given a housekeeper version for rare diseases."""
-        snv_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
-        ).first()
-        sv_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
-        ).first()
-        profile_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF]
-        ).first()
-        family_ped_path: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.FAMILY_PED]
-        ).first()
-
-        return MipDNAObservationsInputFiles(
-            snv_vcf_path=snv_vcf_file.full_path if snv_vcf_file else None,
-            sv_vcf_path=sv_vcf_file.full_path
-            if sv_vcf_file and self.sequencing_method == SequencingMethod.WGS
+        input_files: Dict[str, File] = {
+            "snv_vcf_file": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
+            ).first(),
+            "sv_vcf_file": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
+            ).first()
+            if self.sequencing_method == SequencingMethod.WGS
             else None,
-            profile_vcf_path=profile_vcf_file.full_path if profile_vcf_file else None,
-            family_ped_path=family_ped_path.full_path if family_ped_path else None,
-        )
+            "profile_vcf_file": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF]
+            ).first(),
+            "family_ped_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.FAMILY_PED]
+            ).first(),
+        }
+        return MipDNAObservationsInputFiles(**get_full_path_dictionary(input_files))
 
     def delete_case(self, case: models.Family) -> None:
         """Delete rare disease case observations from Loqusdb."""
