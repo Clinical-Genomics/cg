@@ -40,28 +40,22 @@ class BalsamicObservationsAPI(ObservationsAPI):
             )
             raise LoqusdbUploadCaseError
 
-        duplicate_somatic: bool = self.is_duplicate(
-            case=case,
-            loqusdb_api=self.loqusdb_somatic_api,
-            profile_vcf_path=input_files.profile_vcf_path,
-            profile_threshold=BalsamicLoadParameters.PROFILE_THRESHOLD.value,
-        )
-        duplicate_tumor: bool = self.is_duplicate(
-            case=case,
-            loqusdb_api=self.loqusdb_tumor_api,
-            profile_vcf_path=input_files.profile_vcf_path,
-            profile_threshold=BalsamicLoadParameters.PROFILE_THRESHOLD.value,
-        )
-        if duplicate_somatic or duplicate_tumor:
-            LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
-            raise LoqusdbDuplicateRecordError
+        loqusdb_upload_apis = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
+        for loqusdb_api in loqusdb_upload_apis:
+            if self.is_duplicate(
+                case=case,
+                loqusdb_api=loqusdb_api,
+                profile_vcf_path=input_files.profile_vcf_path,
+                profile_threshold=BalsamicLoadParameters.PROFILE_THRESHOLD.value,
+            ):
+                LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
+                raise LoqusdbDuplicateRecordError
 
-        self.load_cancer_observations(
-            case=case, input_files=input_files, loqusdb_api=self.loqusdb_somatic_api
-        )
-        self.load_cancer_observations(
-            case=case, input_files=input_files, loqusdb_api=self.loqusdb_tumor_api
-        )
+        for loqusdb_api in loqusdb_upload_apis:
+            self.load_cancer_observations(
+                case=case, input_files=input_files, loqusdb_api=loqusdb_api
+            )
+
         # Update Statusb with a germline Loqusdb ID
         loqusdb_id: str = str(self.loqusdb_tumor_api.get_case(case_id=case.internal_id)["_id"])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
