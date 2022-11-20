@@ -55,7 +55,7 @@ def finish_flow_cell(
     )
 
 
-@click.command(name="all-hiseq-x")
+@finish_group.command(name="all-hiseq-x")
 @DRY_RUN
 @click.pass_obj
 def finish_all_hiseq_x(context: CGConfig, dry_run: bool) -> None:
