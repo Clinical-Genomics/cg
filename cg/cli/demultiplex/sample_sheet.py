@@ -80,7 +80,6 @@ def create_sheet(context: CGConfig, flow_cell_name: str, bcl_converter: str, dry
     if not lims_samples:
         LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
         raise click.Abort
-
     try:
         sample_sheet: str = create_sample_sheet(
             flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
