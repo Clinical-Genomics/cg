@@ -128,7 +128,8 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             LOG.debug(f"{flow_cell_name} is not an Hiseq X flow cell")
             return
         LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
-        Path(flow_cell_path, DemultiplexingDirsAndFiles.DELIVERY).touch()
+        if not self.dry_run:
+            Path(flow_cell_path, DemultiplexingDirsAndFiles.DELIVERY).touch()
         self.add_to_cgstats(flow_cell_path=flow_cell_path)
         self.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell_path)
         self.cgstats_lanestats(flow_cell_path=flow_cell_path)
