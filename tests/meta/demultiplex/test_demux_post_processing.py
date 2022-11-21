@@ -335,11 +335,8 @@ def test_post_process_flow_cell_dry_run(
         flow_cell_path=flow_cell.path,
     )
 
-    # THEN a delivery file should have been created
-    assert demultiplexing_delivery_file.exists()
-
-    # Clean up
-    demultiplexing_delivery_file.unlink()
+    # THEN a delivery file should not have been created
+    assert not demultiplexing_delivery_file.exists()
 
     # THEN we should log that we will not commit
     assert "Dry run will not commit flow cell to database" in caplog.text
