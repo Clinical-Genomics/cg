@@ -87,7 +87,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             cgstats_select_parameters: List[str] = [
                 "--database",
                 self.stats_api.db_uri,
-                "selected",
+                "select",
                 "--project",
                 project_id,
                 flow_cell_id,

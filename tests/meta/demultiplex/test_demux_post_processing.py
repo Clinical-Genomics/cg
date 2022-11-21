@@ -74,7 +74,7 @@ def test_add_to_cgstats(
     post_demux_api.add_to_cgstats(flow_cell_path=flow_cell.path)
 
     # THEN we should run the command
-    assert f"add --machine X {flow_cell.path}" in caplog.text
+    assert f"add --machine X -u Unaligned {flow_cell.path}" in caplog.text
 
 
 def test_cgstats_select_project_dry_run(
