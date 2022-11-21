@@ -170,7 +170,6 @@ def families_in_collaboration():
     """Fetch families in collaboration."""
     order_customer: models.Customer = db.customer(request.args.get("customer"))
     data_analysis: str = request.args.get("data_analysis")
-    print(request.args)
     families_q: Query = db.families(
         enquiry=request.args.get("enquiry"),
         customers=order_customer.collaborators,
