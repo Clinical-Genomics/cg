@@ -122,7 +122,12 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: List[models.Customer] = None, enquiry: str = None, action: str = None
+        self,
+        *,
+        action: Optional[str] = None,
+        data_analysis: Optional[str] = None,
+        customers: List[models.Customer] = None,
+        enquiry: Optional[str] = None,
     ) -> Query:
         """Fetch families."""
 
@@ -142,8 +147,8 @@ class FindBusinessDataHandler(BaseHandler):
             if enquiry
             else records
         )
-
         records = records.filter_by(action=action) if action else records
+        records = records.filter_by(data_analysis=data_analysis) if data_analysis else records
         return records.order_by(models.Family.created_at.desc())
 
     def family(self, internal_id: str) -> models.Family:
