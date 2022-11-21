@@ -52,7 +52,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     def add_to_cgstats(self, flow_cell_path: Path) -> None:
         """Add flow cell to cgstats."""
         LOG.info(
-            f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X {flow_cell_path.as_posix()}"
+            f"{self.stats_api.binary} --database {self.stats_api.db_uri} add --machine X -u Unaligned {flow_cell_path.as_posix()}"
         )
         if self.dry_run:
             LOG.info("Dry run will not add flow cell stats")
