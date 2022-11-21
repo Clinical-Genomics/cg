@@ -63,6 +63,8 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             "add",
             "--machine",
             "X",
+            "-u",
+            "Unaligned",
             flow_cell_path.as_posix(),
         ]
         cgstats_process: Process = Process(binary=self.stats_api.binary)
