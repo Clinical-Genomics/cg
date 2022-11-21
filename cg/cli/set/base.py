@@ -46,6 +46,8 @@ def set_cmd():
     pass
 
 
+
+
 @set_cmd.command()
 @click.option(
     "-id",
@@ -173,26 +175,6 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
     LOG.info(
         f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]\n"
     )
-
-
-# Below function is probably deprecated and can be removed / MJ
-def show_option_help(short_name: str = "", long_name: str = "", help_text: str = "") -> None:
-    """Show help for one option"""
-    help_message = f"Use "
-
-    if short_name:
-        help_message += f"'{short_name}'"
-
-    if short_name and long_name:
-        help_message += " or "
-
-    if long_name:
-        help_message += f"'{long_name}'"
-
-    if help_text:
-        help_message += f": {help_text}"
-
-    LOG.info(help_message)
 
 
 @set_cmd.command()
