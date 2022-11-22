@@ -84,15 +84,15 @@ class MipDNAObservationsAPI(ObservationsAPI):
     ) -> MipDNAObservationsInputFiles:
         """Extract observations files given a housekeeper version for rare diseases."""
         input_files: Dict[str, File] = {
-            "snv_vcf_file": self.housekeeper_api.files(
+            "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
             ).first(),
-            "sv_vcf_file": self.housekeeper_api.files(
+            "sv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
             ).first()
             if self.sequencing_method == SequencingMethod.WGS
             else None,
-            "profile_vcf_file": self.housekeeper_api.files(
+            "profile_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF]
             ).first(),
             "family_ped_path": self.housekeeper_api.files(

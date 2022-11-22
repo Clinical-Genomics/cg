@@ -87,16 +87,16 @@ class BalsamicObservationsAPI(ObservationsAPI):
     ) -> BalsamicObservationsInputFiles:
         """Extract observations files given a housekeeper version for cancer."""
         input_files: Dict[str, File] = {
-            "snv_vcf_file": self.housekeeper_api.files(
+            "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_VCF]
             ).first(),
-            "snv_all_vcf_file": self.housekeeper_api.files(
+            "snv_all_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SNV_ALL_VCF]
             ).first(),
-            "sv_vcf_file": self.housekeeper_api.files(
+            "sv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
             ).first(),
-            "profile_vcf_file": self.housekeeper_api.files(
+            "profile_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.PROFILE_VCF]
             ).first(),
         }
