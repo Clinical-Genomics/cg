@@ -3,7 +3,7 @@ import datetime as dt
 import glob
 import logging
 from pathlib import Path
-from typing import List, Dict, Iterable
+from typing import List, Dict, Iterable, Tuple
 
 from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.slurm.slurm_api import SlurmAPI
@@ -186,7 +186,7 @@ class RsyncAPI(MetaAPI):
         dry_run: bool,
         sample_files_present: bool = False,
         case_files_present: bool = False,
-    ) -> int:
+    ) -> Tuple[bool, int]:
         """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
 
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
@@ -201,13 +201,19 @@ class RsyncAPI(MetaAPI):
             sample_files_present=sample_files_present,
             case_files_present=case_files_present,
         )
+        existing_folder_list: List[str] = [
+            folder
+            for folder in folder_list
+            if (source_and_destination_paths["delivery_source_path"].joinpath(folder).exists())
+        ]
         commands: str = RsyncAPI.concatenate_rsync_commands(
-            folder_list=folder_list,
+            folder_list=existing_folder_list,
             source_and_destination_paths=source_and_destination_paths,
             ticket=ticket,
         )
-
-        return self.sbatch_rsync_commands(commands=commands, job_prefix=case_id, dry_run=dry_run)
+        return folder_list == existing_folder_list, self.sbatch_rsync_commands(
+            commands=commands, job_prefix=case_id, dry_run=dry_run
+        )
 
     def run_rsync_on_slurm(self, ticket: str, dry_run: bool) -> int:
         """Runs rsync of a whole ticket folder to the delivery server."""
@@ -271,3 +277,6 @@ class RsyncAPI(MetaAPI):
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         return sbatch_number
+
+    def verify_folder_existance(self, folder_name: str, folder_parent: Path):
+        return folder_parent.joinpath(folder_name).exists()
