@@ -62,9 +62,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str) -> Union[List[Path], bool]:
+    def get_case_path(self, case_id: str) -> List[Path]:
         """Returns all paths associated with the case."""
-        old_date = datetime.now() - timedelta(days=21)
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
@@ -73,14 +72,19 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
         ]
 
-        for case in case_paths:
-            creation_date = datetime.fromtimestamp(os.path.getctime(case))
-            # if younger than 21 days:
-            if creation_date > old_date:
-                # move on to next case
-                raise FileNotFoundError
+        # check creation date
+        self.check_creation_date(case_paths, case_id)
 
         return case_paths
+
+    def check_creation_date(self, case_paths: List[Path], case_id: str):
+        old_date = datetime.now() - timedelta(days=21)
+        for case in case_paths:
+            creation_date = datetime.fromtimestamp(os.path.getctime(case))
+            if creation_date > old_date:
+                raise FileNotFoundError(
+                    f"All paths in {case_id} is not older than 21 days, skipping"
+                )
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directories for a MicroSALT case."""
