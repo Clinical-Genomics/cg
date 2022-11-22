@@ -10,7 +10,7 @@ import logging
 import os
 import re
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -62,16 +62,25 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str) -> List[Path]:
+    def get_case_path(self, case_id: str) -> Union[List[Path], bool]:
         """Returns all paths associated with the case."""
-
+        old_date = datetime.now() - timedelta(days=21)
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        return [
+        case_paths = [
             Path(path)
-            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
         ]
+
+        for case in case_paths:
+            creation_date = datetime.fromtimestamp(os.path.getctime(case))
+            # if younger than 21 days:
+            if creation_date > old_date:
+                # move on to next case
+                raise FileNotFoundError
+
+        return case_paths
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directories for a MicroSALT case."""
