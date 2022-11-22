@@ -132,6 +132,7 @@ class RsyncAPI(MetaAPI):
             slurm_quality_of_service=self.slurm_quality_of_service,
             email=self.mail_user,
             data_analysis=Pipeline.RSYNC,
+            ticket=ticket,
         )
 
     def format_covid_report_path(self, case: models.Family, ticket: str) -> str:

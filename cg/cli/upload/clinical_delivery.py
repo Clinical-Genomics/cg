@@ -72,6 +72,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
             out_dir=rsync_api.log_dir.as_posix(),
             slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case_obj.priority],
             data_analysis=Pipeline.RSYNC,
+            ticket=case_obj.latest_ticket,
         )
     LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
 
