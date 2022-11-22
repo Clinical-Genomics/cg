@@ -1,3 +1,6 @@
+[Settings]
+BarcodeMismatchesIndex1,0
+BarcodeMismatchesIndex2,0
 [Data]
 FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project
 HWJFTDRXX,1,ACC7534A1,hg19,AATCGTTA,ACGTTATT,342712,N,R1,script,342712
