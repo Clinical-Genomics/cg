@@ -72,7 +72,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     except SyntaxError as error:
         LOG.warning("%s", error)
-        raise click.Abort
+        raise click.Abort from error
     LOG.info("Found load config %s", scout_load_config)
     if scout_load_config.track == "cancer":
         root_dir: Path = Path(context.balsamic.root)
@@ -110,7 +110,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         )
     except FileExistsError as error:
         LOG.warning("%s, consider removing the file from housekeeper and try again", str(error))
-        raise click.Abort
+        raise click.Abort from error
 
 
 @click.command(name="upload-case-to-scout")
@@ -163,21 +163,11 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 def upload_rna_to_scout(
     context, case_id: str, dry_run: bool, update_fusion_report: bool, research: bool
 ) -> int:
-    """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id
-
-    Args:
-        case_id                 (string):       RNA case identifier
-        dry_run                 (bool):         Skip uploading
-        research                (bool):         Upload research report instead of clinical
-        update_fusion_report    (bool):         Overwrite existing fusion report
-    Returns:
-
-    """
+    """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
-    result: int
-    result = context.invoke(upload_multiqc_rna_to_scout, case_id=case_id, dry_run=dry_run)
+    result: int = context.invoke(upload_multiqc_rna_to_scout, case_id=case_id, dry_run=dry_run)
     while result:
         result: int = context.invoke(
             upload_rna_fusion_report_to_scout,
@@ -204,19 +194,8 @@ def upload_rna_to_scout(
 def upload_rna_fusion_report_to_scout(
     context: CGConfig, dry_run: bool, case_id: str, update: bool, research: bool
 ) -> int:
-    """Upload fusion report file for a case to Scout.
-    This can also be run as
-    `housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>`
-    `scout load gene-fusion-report [-r] <case_id> <path/to/research_gene_fusion_report.pdf>`
+    """Upload fusion report file for a case to Scout."""
 
-    Args:
-        dry_run     (bool):         Skip uploading
-        case_id     (string):       RNA case identifier
-        research    (bool):         Upload research report instead of clinical
-        update      (bool):         Overwrite existing report
-    Returns:
-
-    """
     LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
@@ -236,18 +215,6 @@ def upload_rna_fusion_report_to_scout(
 @click.pass_obj
 def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
     """Upload RNA junctions splice files to Scout.
-        This can also be run as
-        `housekeeper get file -V --tag junction --tag bed <sample_id>`
-        `scout update individual -c <case_id> -n <customer_sample_id> splice_junctions_bed <path/to/junction_file.bed>`
-        `housekeeper get file -V --tag coverage --tag bigwig <sample_id>`
-        scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig <path/to/coverage_file.bigWig>
-    `   ```
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       RNA case identifier
-        Returns:
-
     """
     LOG.info("----------------- UPLOAD RNA JUNCTIONS TO SCOUT -----------------------")
 
@@ -265,18 +232,7 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
 @click.argument("case_id")
 @click.pass_obj
 def upload_multiqc_rna_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
-    """Upload RNA multiqc report to Scout.
-        This can also be run as
-        `housekeeper get file -V --tag multiqc --tag multiqc-html <case_id>`
-        `scout load report -t multiqc_rna <case_id> <path/to/multiqc_report.html>`
-    `   ```
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       RNA case identifier
-        Returns:
-
-    """
+    """Upload RNA multiqc report to Scout."""
     LOG.info("----------------- UPLOAD MULTIQC RNA TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api

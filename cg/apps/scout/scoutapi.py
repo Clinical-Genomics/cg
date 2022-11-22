@@ -43,7 +43,7 @@ class ScoutAPI:
                 LOG.info("update existing Scout case")
             else:
                 existing_date = existing_case.analysis_date.date()
-                LOG.warning("analysis of case already loaded: %s", existing_date)
+                LOG.warning(f"analysis of case already loaded: {existing_date}")
                 return
         LOG.debug("load new Scout case")
         self.process.run_command(load_command)
@@ -69,8 +69,7 @@ class ScoutAPI:
         Return list of lines in bed format
         """
         export_panels_command = ["export", "panel", "--bed"]
-        for panel_id in panels:
-            export_panels_command.append(panel_id)
+        export_panels_command.extend(iter(panels))
 
         if build:
             export_panels_command.extend(["--build", build])
@@ -83,19 +82,10 @@ class ScoutAPI:
             LOG.info("Could not find panels")
             return []
 
-        return [line for line in self.process.stdout_lines()]
+        return list(self.process.stdout_lines())
 
     def get_genes(self, panel_id: str, build: str = None) -> list:
-        """Fetch panel genes.
-
-        Args:
-            panel_id (str): unique id for the panel
-            build (str): version of the panel. If 'None' latest version will be returned
-
-        Returns:
-            panel genes: panel genes list
-        """
-        # This can be run from CLI with `scout export panels <panel1> `
+        """Fetch panel genes."""
         export_panel_command = ["export", "panel", panel_id]
         if build:
             export_panel_command.extend(["--build", build])
@@ -105,7 +95,7 @@ class ScoutAPI:
             if not self.process.stdout:
                 return []
         except CalledProcessError:
-            LOG.info("Could not find panel %s", panel_id)
+            LOG.info(f"Could not find panel {panel_id}")
             return []
 
         panel_genes = []
@@ -113,7 +103,7 @@ class ScoutAPI:
             if gene_line.startswith("#"):
                 continue
             gene_info = gene_line.strip().split("\t")
-            if not len(gene_info) > 1:
+            if len(gene_info) <= 1:
                 continue
             panel_genes.append({"hgnc_id": int(gene_info[0]), "hgnc_symbol": gene_info[1]})
 
@@ -123,28 +113,22 @@ class ScoutAPI:
         """
         Get causative variants for a case
         """
-        # These commands can be run with `scout export variants`
         get_causatives_command = ["export", "variants", "--json", "--case-id", case_id]
         try:
             self.process.run_command(get_causatives_command)
             if not self.process.stdout:
                 return []
         except CalledProcessError:
-            LOG.warning("Could not find case %s in scout", case_id)
+            LOG.warning(f"Could not find case {case_id} in scout")
             return []
-        variants: List[Variant] = []
-        for variant_info in ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=self.process.stdout
-        ):
-            variants.append(Variant(**variant_info))
+        variants: List[Variant] = [Variant(**variant_info) for variant_info in ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=self.process.stdout)]
+
         return variants
 
     def get_case(self, case_id: str) -> Optional[ScoutExportCase]:
         """Fetch a case from Scout"""
         cases: List[ScoutExportCase] = self.get_cases(case_id=case_id)
-        if not cases:
-            return None
-        return cases[0]
+        return cases[0] if cases else None
 
     def get_cases(
         self,
@@ -155,7 +139,6 @@ class ScoutAPI:
         days_ago: int = None,
     ) -> List[ScoutExportCase]:
         """Interact with cases existing in the database."""
-        # These commands can be run with `scout export cases`
         get_cases_command = ["export", "cases", "--json"]
         if case_id:
             get_cases_command.extend(["--case-id", case_id])
@@ -185,69 +168,41 @@ class ScoutAPI:
         for case_export in ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         ):
-            LOG.info("Validating case %s", case_export.get("_id"))
+            LOG.info(f"Validating case {case_export.get('_id')}")
             cases.append(ScoutExportCase(**case_export))
         return cases
 
     def get_solved_cases(self, days_ago: int) -> List[ScoutExportCase]:
         """
         Get cases solved within chosen timespan
-
-        Args:
-            days_ago (int): Maximum days ago a case has been solved
-
-        Return:
-            cases (list): list of cases
         """
         return self.get_cases(status="solved", days_ago=days_ago)
 
     def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False) -> None:
         """Load a delivery report into a case in the database
-
         If the report already exists the function will exit.
         If the user want to load a report that is already in the database
         'update' has to be 'True'
-
-        Args:
-            report_path (string):       Path to delivery report
-            case_id     (string):       Case identifier
-            update      (bool):         If an existing report should be replaced
-
-        Returns:
-            updated_case(dict)
-
         """
-        # This command can be run with `scout load delivery-report <CASE-ID> <REPORT-PATH>`
-        upload_command = ["load", "delivery-report", case_id, report_path]
+
+        upload_command: List[str] = ["load", "delivery-report", case_id, report_path]
 
         if update:
             upload_command.append("--update")
 
         try:
-            LOG.info("Uploading delivery report %s to case %s", report_path, case_id)
+            LOG.info(f"Uploading delivery report {report_path} to case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading delivery report")
 
     def upload_report(self, case_id: str, report_path: str, report_type: str) -> None:
-        """Load report into a case in the database
+        """Load report into a case in the database. If the report already exists the function will exit."""
 
-        If the report already exists the function will exit.
-
-        Args:
-            report_path (string):      Path to report
-            case_id     (string):       Case identifier
-            report_type  (string):       Report tag
-
-        Returns:
-            None
-
-        """
-        # This command can be run with `scout load report <REPORT-TAG> <CASE-ID> <REPORT-PATH>`
-        upload_command = ["load", "report", "-t", report_type, case_id, report_path]
+        upload_command: List[str] = ["load", "report", "-t", report_type, case_id, report_path]
 
         try:
-            LOG.info("Uploading multiqc report %s to case %s", case_id, report_path)
+            LOG.info(f"Uploading multiqc report {case_id} to case {report_path}")
             self.process.run_command(upload_command)
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading multiqc report")
@@ -255,20 +210,9 @@ class ScoutAPI:
     def upload_fusion_report(
         self, case_id: str, report_path: str, research: bool, update: bool
     ) -> None:
-        """Load a fusion report into a case in the database
+        """Load a fusion report into a case in the database"""
 
-        Args:
-            report_path (string):       Path to delivery report
-            case_id     (string):       Case identifier
-            research    (bool):         Research report
-            update      (bool):         If an existing report should be replaced
-        Returns:
-            Nothing
-        """
-
-        # This command can be run with
-        # `scout load gene-fusion-report [-r] <case_id> <path/to/research_gene_fusion_report.pdf>`
-        upload_command = ["load", "gene-fusion-report"]
+        upload_command: List[str] = ["load", "gene-fusion-report"]
 
         if research:
             upload_command.append("--research")
@@ -279,27 +223,15 @@ class ScoutAPI:
         upload_command.extend([case_id, report_path])
 
         try:
-            LOG.info("Uploading fusion report %s to case %s", report_path, case_id)
+            LOG.info(f"Uploading fusion report {report_path} to case {case_id}")
             self.process.run_command(upload_command)
-        except CalledProcessError:
-            raise ScoutUploadError("Something went wrong when uploading fusion report")
+        except CalledProcessError as e:
+            raise ScoutUploadError("Something went wrong when uploading fusion report") from e
 
     def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
-        """Load a splice junctions bed file into a case in the database.
+        """Load a splice junctions bed file into a case in the database."""
 
-        Args:
-            file_path           (string):       Path to delivery report
-            case_id             (string):       Case identifier
-            customer_sample_id  (string):       Customers sample identifier
-        Returns:
-            updated_case(dict)
-
-        """
-
-        # This command can be run with
-        # `scout update individual -c <case_id> -n <customer_sample_id> splice_junctions_bed
-        #   <path/to/junction_file.bed>`
-        upload_command = [
+        upload_command: List[str] = [
             "update",
             "individual",
             "-c",
@@ -311,27 +243,17 @@ class ScoutAPI:
         ]
 
         try:
-            LOG.info("Uploading splice junctions bed file %s to case %s", file_path, case_id)
+            LOG.info("Uploading splice junctions bed file {file_path} to case {case_id}")
             self.process.run_command(upload_command)
-        except CalledProcessError:
-            raise ScoutUploadError("Something went wrong when uploading splice junctions bed file")
+        except CalledProcessError as e:
+            raise ScoutUploadError(
+                "Something went wrong when uploading splice junctions bed file"
+            ) from e
 
     def upload_rna_coverage_bigwig(self, file_path: str, case_id: str, customer_sample_id: str):
-        """Load a rna coverage bigwig file into a case in the database
+        """Load a rna coverage bigwig file into a case in the database."""
 
-        Args:
-            file_path           (string):       Path to delivery report
-            case_id             (string):       Case identifier
-            customer_sample_id  (string):       Customers sample identifier
-        Returns:
-            updated_case(dict)
-
-        """
-
-        # This command can be run with
-        # `scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig
-        #         <path/to/coverage_file.bigWig>`
-        upload_command = [
+        upload_command: List[str] = [
             "update",
             "individual",
             "-c",
@@ -343,7 +265,9 @@ class ScoutAPI:
         ]
 
         try:
-            LOG.info("Uploading rna coverage bigwig file %s to case %s", file_path, case_id)
+            LOG.info(f"Uploading rna coverage bigwig file {file_path} to case {case_id}")
             self.process.run_command(upload_command)
-        except CalledProcessError:
-            raise ScoutUploadError("Something went wrong when uploading rna coverage bigwig file")
+        except CalledProcessError as e:
+            raise ScoutUploadError(
+                "Something went wrong when uploading rna coverage bigwig file"
+            ) from e
