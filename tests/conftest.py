@@ -20,7 +20,7 @@ from cg.constants.priority import SlurmQos
 from cg.io.controller import ReadFile
 from cg.constants.subject import Gender
 from cg.meta.rsync import RsyncAPI
-from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.external_data import ExternalDataHandler
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
@@ -330,10 +330,10 @@ def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
     return RsyncAPI(config=cg_context)
 
 
-@pytest.fixture(name="external_data_api")
-def fixture_external_data_api(analysis_store, cg_context: CGConfig) -> ExternalDataAPI:
-    """ExternalDataAPI fixture."""
-    return ExternalDataAPI(config=cg_context)
+@pytest.fixture(name="external_data_handler")
+def fixture_external_data_handler(analysis_store, cg_context: CGConfig) -> ExternalDataHandler:
+    """ExternalDataHandler fixture."""
+    return ExternalDataHandler(config=cg_context)
 
 
 @pytest.fixture(name="genotype_api")
@@ -1285,8 +1285,7 @@ def fixture_context_config(
         },
         "encryption": {"binary_path": "bin/gpg"},
         "external": {
-            "caesar": "server.name.se:/path/%s/on/caesar",
-            "hasta": "/path/on/hasta/%s",
+            "external_data_dir": "/path/on/hasta/%s",
         },
         "fluffy": {
             "binary_path": "echo",

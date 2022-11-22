@@ -189,8 +189,7 @@ class FOHMConfig(BaseModel):
 
 
 class ExternalConfig(BaseModel):
-    hasta: str
-    caesar: str
+    external_data_dir: str
 
 
 class CGConfig(BaseModel):

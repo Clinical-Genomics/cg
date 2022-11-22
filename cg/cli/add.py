@@ -3,7 +3,7 @@ from typing import Optional, Tuple, List
 
 import click
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
-from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.external_data import ExternalDataHandler
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -274,36 +274,9 @@ def relationship(
 
 
 @add.command()
-@click.option(
-    "-t",
-    "--ticket",
-    type=str,
-    help="Ticket id",
-    required=True,
-)
-@click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def external(context: CGConfig, ticket: str, dry_run: bool):
-    """Downloads external data from the delivery server and places it in appropriate folder on
-    the HPC"""
-    external_data_api = ExternalDataAPI(config=context)
-    external_data_api.transfer_sample_files_from_source(ticket=ticket, dry_run=dry_run)
-
-
-@add.command("external-hk")
-@click.option(
-    "-t",
-    "--ticket",
-    type=str,
-    help="Ticket id",
-    required=True,
-)
-@click.option("--dry-run", is_flag=True)
-@click.option(
-    "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
-)
-@click.pass_obj
-def external_hk(context: CGConfig, ticket: str, dry_run: bool, force):
-    """Adds external data to Housekeeper"""
-    external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)
+    """Iterates through the external data directory and creates/updates housekeeper when new
+    files are added."""
+    external_data_handler = ExternalDataHandler(config=context)
+    external_data_handler.curate_external_folder()
