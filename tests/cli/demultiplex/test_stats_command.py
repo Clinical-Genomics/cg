@@ -7,24 +7,24 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.cli.demultiplex.add import select_project_cmd
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flow_cell import FlowCell
 
 
 def test_select_command(
     cli_runner: CliRunner,
     populated_stats_api: StatsAPI,
-    demux_results_finished_dir: Path,
-    flowcell_object: Flowcell,
+    demultiplexed_runs: Path,
+    flow_cell: FlowCell,
     demultiplex_context: CGConfig,
 ):
     demultiplex_context.cg_stats_api_ = populated_stats_api
     # GIVEN a stats api with some information about a flowcell
-    flowcell_id: str = flowcell_object.flowcell_id
-    full_flowcell_name: str = flowcell_object.flowcell_full_name
+    flowcell_id: str = flow_cell.id
+    full_flow_cell_name: str = flow_cell.full_name
     assert find.get_flowcell_id(flowcell_id)
     demux_results = DemuxResults(
-        demux_dir=demux_results_finished_dir / full_flowcell_name,
-        flowcell=flowcell_object,
+        demux_dir=demultiplexed_runs / full_flow_cell_name,
+        flow_cell=flow_cell,
         bcl_converter="bcl2fastq",
     )
 
