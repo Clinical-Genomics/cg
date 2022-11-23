@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set , Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -425,8 +425,7 @@ class UploadScoutAPI:
         cases_related_to_dna_sample = [link.family for link in dna_sample.links]
         for case in cases_related_to_dna_sample:
             if (
-                case.data_analysis
-                in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
+                case.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
                 and case.customer_id == rna_sample.customer_id
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(

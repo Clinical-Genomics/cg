@@ -650,6 +650,8 @@ def fixture_rna_dna_sample_case_map(
 
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
-    upload_scout_api._map_dna_samples_related_to_rna_sample(rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map)
+    upload_scout_api._map_dna_samples_related_to_rna_sample(
+        rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
+    )
 
     return rna_dna_sample_case_map
