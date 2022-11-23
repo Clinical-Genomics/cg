@@ -176,17 +176,18 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
         f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]\n"
     )
 
+
 @set_cmd.command()
 @click.option("-l", "--list-keys", is_flag=True, help="List all available modifiable sample properties")
 @click.pass_obj
-def list(context: CGConfig, l: bool):
-    """List all available modifiable keys for samples"""    
-    if l:
+def list_keys(context: CGConfig, blabla: str, list_keys: bool,):
+    """List all available modifiable keys"""
+    if list_keys:
         show_set_sample_help()
 
 
 @set_cmd.command()
-@click.argument("sample_id", required=True, help="Internal sample ID")
+@click.argument("sample_id", required=True)
 @click.option(
     OPTION_SHORT_KEY_VALUE,
     OPTION_LONG_KEY_VALUE,
