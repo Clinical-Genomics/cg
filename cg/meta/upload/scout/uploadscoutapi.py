@@ -2,7 +2,8 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, Set, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Set , Tuple
+
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -10,6 +11,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import HousekeeperVersionMissingError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -391,6 +393,7 @@ class UploadScoutAPI:
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
+
         self.validate_number_of_dna_samples_by_subject_id(
             samples_by_subject_id=samples_by_subject_id
         )
@@ -429,3 +432,16 @@ class UploadScoutAPI:
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
                     case.internal_id
                 )
+
+    @staticmethod
+    def _get_application_prep_category(subject_id_samples: List[models.Sample]) -> List[Any]:
+        """Filter a models.Sample list, returning DNA samples selected on their prep_category."""
+        subject_id_dna_samples: List[models.Sample] = []
+        for sample in subject_id_samples:
+            if sample.application_version.application.prep_category in [
+                SequencingMethod.WGS,
+                SequencingMethod.TGS,
+                SequencingMethod.WES,
+            ]:
+                subject_id_dna_samples.append(sample)
+        return subject_id_dna_samples

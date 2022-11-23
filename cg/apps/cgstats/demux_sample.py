@@ -159,19 +159,24 @@ def get_dragen_demux_samples(
         demultiplexing_stats = demux_results.demultiplexing_stats.parsed_stats[sample.lane][
             sample.sample_id
         ]
+
+        quality_metrics = demux_results.quality_metrics.parsed_metrics[sample.lane][
+            sample.sample_id
+        ]
+
         adapter_metrics = demux_results.adapter_metrics.parsed_metrics[sample.lane][
             sample.sample_id
         ]
 
         demux_samples[sample.lane][sample.sample_id] = DragenDemuxSample(
             sample_name=sample.sample_id,
-            flowcell=demux_results.flowcell.flowcell_id,
+            flowcell=demux_results.flow_cell.id,
             lane=sample.lane,
             reads=int(demultiplexing_stats["# Reads"]),
             perfect_reads=int(demultiplexing_stats["# Perfect Index Reads"]),
             one_mismatch_reads=int(demultiplexing_stats["# One Mismatch Index Reads"]),
-            pass_filter_q30=int(demultiplexing_stats["# of >= Q30 Bases (PF)"]),
-            mean_quality_score=float(demultiplexing_stats["Mean Quality Score (PF)"]),
+            pass_filter_q30=int(quality_metrics["YieldQ30"]),
+            mean_quality_score=float(quality_metrics["Mean Quality Score (PF)"]),
             r1_sample_bases=int(adapter_metrics["R1_SampleBases"]),
             r2_sample_bases=int(adapter_metrics["R2_SampleBases"]),
             read_length=demux_results.run_info.mean_read_length(),

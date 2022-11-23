@@ -604,9 +604,14 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Fetch observations that have not been uploaded."""
         records: Query = self.get_families_with_samples()
-        records: Query = apply_case_filter(
-            function="cases_with_loqusdb_supported_pipeline", cases=records, pipeline=pipeline
-        )
+        case_filter_functions: List[str] = [
+            "cases_with_loqusdb_supported_pipeline",
+            "cases_with_loqusdb_supported_sequencing_method",
+        ]
+        for filter_function in case_filter_functions:
+            records: Query = apply_case_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
         records: Query = apply_sample_filter(
             function="samples_not_uploaded_to_loqusdb", samples=records
         )

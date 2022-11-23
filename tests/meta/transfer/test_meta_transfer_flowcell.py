@@ -1,5 +1,5 @@
-"""Tests for transfer flowcell data"""
-import datetime as dt
+"""Tests for transfer flow cell data."""
+from datetime import datetime
 import warnings
 from pathlib import Path
 
@@ -10,15 +10,15 @@ from cg.store import Store
 
 
 @mock.patch("pathlib.Path.exists")
-@mock.patch("cg.meta.transfer.flowcell.TransferFlowcell._sample_sheet_path")
-def test_transfer_flowcell(
-    mock_sample_sheet_path, mock_path_exists, flowcell_store: Store, transfer_flowcell_api
+@mock.patch("cg.meta.transfer.flowcell.TransferFlowCell._sample_sheet_path")
+def test_transfer_flow_cell(
+    mock_sample_sheet_path, mock_path_exists, flowcell_store: Store, transfer_flow_cell_api
 ):
 
     # GIVEN a store with a received but not sequenced sample
     flowcell_id = "HJKMYBCXX"
-    housekeeper_api = transfer_flowcell_api.hk
-    assert flowcell_store.samples().count() == 1
+    housekeeper_api = transfer_flow_cell_api.hk
+    assert flowcell_store.samples().count() == 2
     assert flowcell_store.flowcells().count() == 0
     assert housekeeper_api.bundles().count() == 0
 
@@ -29,14 +29,14 @@ def test_transfer_flowcell(
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-        flowcell_obj = transfer_flowcell_api.transfer(flowcell_id)
+        flow_cell = transfer_flow_cell_api.transfer(flow_cell_id=flowcell_id)
 
     # THEN it should create a new flowcell record
     assert flowcell_store.flowcells().count() == 1
-    assert isinstance(flowcell_obj.id, int)
-    assert flowcell_obj.name == flowcell_id
+    assert isinstance(flow_cell.id, int)
+    assert flow_cell.name == flowcell_id
     status_sample = flowcell_store.samples().first()
-    assert isinstance(status_sample.sequenced_at, dt.datetime)
+    assert isinstance(status_sample.sequenced_at, datetime)
 
     # ... and it should store the fastq files and samplesheet for the sample in housekeeper
     hk_bundle = housekeeper_api.bundle(status_sample.internal_id)

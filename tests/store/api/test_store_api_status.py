@@ -121,7 +121,7 @@ def test_case_not_in_observations_to_upload(
 ):
     """Test case extraction that should not be uploaded to Loqusdb."""
 
-    # GIVEN a case with completed analysis and samples w loqusdb_id
+    # GIVEN a case with completed analysis and samples with a Loqusdb ID
     analysis: models.Analysis = helpers.add_analysis(store=sample_store, pipeline=Pipeline.MIP_DNA)
     analysis.family.customer.loqus_upload = True
     sample: models.Sample = helpers.add_sample(sample_store, loqusdb_id=loqusdb_id)
