@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Generator, Dict, List, Any
 
 import pytest
+from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
@@ -441,6 +442,12 @@ def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with order forms."""
     return Path(fixtures_dir, "orderforms")
+
+
+@pytest.fixture(name="hk_file")
+def fixture_hk_file(filled_file, case_id) -> File:
+    """Return a housekeeper File object."""
+    return File(id=case_id, path=filled_file)
 
 
 @pytest.fixture(name="mip_dna_store_files")
