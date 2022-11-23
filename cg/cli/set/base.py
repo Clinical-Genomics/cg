@@ -46,8 +46,6 @@ def set_cmd():
     pass
 
 
-
-
 @set_cmd.command()
 @click.option(
     "-id",
@@ -180,7 +178,10 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
 @set_cmd.command()
 @click.option("-s", "--sample_id", help="List all available modifiable keys for sample")
 @click.pass_obj
-def list_keys(context: CGConfig, sample_id: Optional[str],):
+def list_keys(
+    context: CGConfig,
+    sample_id: Optional[str],
+):
     """List all available modifiable keys"""
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
