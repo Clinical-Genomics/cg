@@ -1,10 +1,11 @@
 """Tests for RNA part of the scout upload API"""
 import logging
-from typing import Generator
+from typing import Dict, Generator, List
 import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Pipeline
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.store import Store, models
@@ -524,3 +525,119 @@ def test_add_dna_cases_to_dna_sample(
     # THEN the rna_dna_case_map should contain the DNA_case name associated with the DNA sample
     case_names: list = rna_dna_case_map[rna_sample.internal_id][dna_sample.name]
     assert dna_case.internal_id in case_names
+
+
+def test_add_dna_cases_to_dna_sample(
+    dna_case_id: str,
+    dna_sample_son_id: str,
+    rna_sample_son_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
+
+    # GIVEN an RNA sample, a DNA sample, and a DNA case
+    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
+    dna_case: models.Family = rna_store.families(enquiry=dna_case_id).first()
+
+    # WHEN adding the RNA sample rna_dna_case_map
+    rna_dna_case_map: dict = {}
+    upload_scout_api._map_rna_sample(
+        rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
+    )
+
+    # THEN the rna_dna_case_map should contain the DNA_case name associated with the DNA sample
+    case_names: list = rna_dna_case_map[rna_sample.internal_id][dna_sample.name]
+    assert dna_case.internal_id in case_names
+
+
+def test_map_dna_cases_to_dna_sample(
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+    dna_sample_son_id: str,
+    rna_sample_son_id: str,
+    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]],
+):
+    """Test that the DNA case name is mapped to the DNA sample name in the rna_dna_case_map."""
+
+    # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
+
+    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
+    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+
+    # WHEN mapping the DNA case name to the DNA sample name in the rna_dna_case_map
+    upload_scout_api._map_dna_cases_to_dna_sample(
+        dna_sample=dna_sample,
+        rna_dna_sample_case_map=rna_dna_sample_case_map,
+        rna_sample=rna_sample,
+    )
+
+    # THEN the rna_dna_case_map should contain the DNA case name associated with the DNA sample name
+    assert dna_sample.name in rna_dna_sample_case_map[rna_sample.internal_id]
+
+
+def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+    dna_sample_son_id: str,
+    dna_case_id: str,
+    rna_sample_son_id: str,
+    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]],
+):
+    """Test that the DNA case name is not mapped to the DNA sample name in the rna-dna-sample-case map."""
+
+    # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
+
+    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
+    dna_case: models.Family = rna_store.family(dna_case_id)
+    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+
+    # GIVEN that the DNA case has a different pipeline than the expected pipeline
+    dna_case.data_analysis: Pipeline = Pipeline.FASTQ
+
+    # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
+    upload_scout_api._map_dna_cases_to_dna_sample(
+        dna_sample=dna_sample,
+        rna_dna_sample_case_map=rna_dna_sample_case_map,
+        rna_sample=rna_sample,
+    )
+
+    # THEN the rna-dna-sample-case map should not contain the DNA case name associated with the DNA sample name
+    assert (
+        dna_case.internal_id
+        not in rna_dna_sample_case_map[rna_sample.internal_id][dna_sample_son_id]
+    )
+
+
+def test_map_dna_cases_to_dna_sample_incorrect_customer(
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+    dna_sample_son_id: str,
+    dna_case_id: str,
+    rna_sample_son_id: str,
+    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]],
+):
+    """Test that the DNA case name is not mapped to the DNA sample name in the rna-dna-sample-case map."""
+
+    # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
+
+    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
+    dna_case: models.Family = rna_store.family(dna_case_id)
+    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+
+    # GIVEN that the DNA case has a different customer than the expected customer
+    dna_case.customer_id: int = 1000000
+
+    # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
+    upload_scout_api._map_dna_cases_to_dna_sample(
+        dna_sample=dna_sample,
+        rna_dna_sample_case_map=rna_dna_sample_case_map,
+        rna_sample=rna_sample,
+    )
+
+    # THEN the rna-dna-sample-case map should not contain the DNA case name associated with the DNA sample name
+    assert (
+        dna_case.internal_id
+        not in rna_dna_sample_case_map[rna_sample.internal_id][dna_sample_son_id]
+    )

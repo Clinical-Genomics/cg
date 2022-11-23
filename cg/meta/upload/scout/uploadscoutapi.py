@@ -105,28 +105,14 @@ class UploadScoutAPI:
         return file_obj
 
     def get_multiqc_html_report(self, case_id: str) -> Tuple[str, Optional[hk_models.File]]:
-        """Get a multiqc report for case in housekeeper
+        """Get a multiqc report for case in housekeeper."""
 
-        Args:
-            case_id     (string):       Case identifier
-        Returns:
-            multiqc-html-report (housekeeper.store.models.File): Multiqc report
-        """
         multiqc_tag = "multiqc-html"
         return (multiqc_tag, self.housekeeper.files(bundle=case_id, tags=[multiqc_tag]).first())
 
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[hk_models.File]:
-        """Get a fusion report for case in housekeeper
+        """Get a fusion report for case in housekeeper."""
 
-        Args:
-            case_id     (string):       Case identifier
-            research    (bool):         Research report
-        Returns:
-            File in housekeeper (Optional[hk_models.File])
-        """
-
-        # This command can be executed as:
-        # ´housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>´
         tags = {"fusion"}
         if research:
             tags.add("research")
@@ -136,17 +122,8 @@ class UploadScoutAPI:
         return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
-        """Get a splice junctions bed file for case in housekeeper
+        """Get a splice junctions bed file for case in housekeeper."""
 
-        Args:
-            case_id     (string):       Case identifier
-            sample_id   (string):       Sample identifier
-        Returns:
-            File in housekeeper (Optional[hk_models.File])
-        """
-
-        # This command can be executed as:
-        # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
         tags: Set[str] = {"junction", "bed", sample_id}
         splice_junctions_bed: Optional[hk_models.File]
         try:
@@ -159,23 +136,14 @@ class UploadScoutAPI:
         return splice_junctions_bed
 
     def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
-        """Get a rna coverage bigwig file for case in housekeeper
+        """Get a RNA coverage bigwig file for case in housekeeper."""
 
-        Args:
-            case_id     (string):       Case identifier
-            sample_id   (string):       Sample identifier
-        Returns:
-            File in housekeeper (Optional[hk_models.File])
-        """
-
-        # This command can be executed as:
-        # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
         tags: Set[str] = {"coverage", "bigwig", sample_id}
 
         return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
-        """Return a set of unique dna cases related to a rna case"""
+        """Return a set of unique dna cases related to a RNA case"""
         case_obj: models.Family = self.status_db.family(case_id)
 
         return {
@@ -188,19 +156,7 @@ class UploadScoutAPI:
     def upload_fusion_report_to_scout(
         self, dry_run: bool, case_id: str, research: bool = False, update: bool = False
     ) -> None:
-        """Upload fusion report file for a case to Scout.
-        This can also be run as
-        `housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>`
-        `scout load gene-fusion-report [-r] <case_id> <path/to/research_gene_fusion_report.pdf>`
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       Case identifier
-            research    (bool):         Upload research report instead of clinical
-            update      (bool):         Overwrite existing report
-        Returns:
-            Nothing
-        """
+        """Upload fusion report file for a case to Scout."""
 
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
@@ -225,9 +181,11 @@ class UploadScoutAPI:
                 research=research,
                 update=update,
             )
-            LOG.info("Uploaded %s fusion report", report_type)
+            LOG.info(
+                f"Uploaded {report_type} fusion report",
+            )
 
-        LOG.info("Upload %s fusion report finished!", report_type)
+        LOG.info(f"Upload {report_type} fusion report finished!")
 
     def upload_rna_report_scout(
         self,
@@ -236,7 +194,7 @@ class UploadScoutAPI:
         report_file: hk_models.File,
         rna_case_id: str,
     ) -> None:
-        """Upload report file to dna cases related to a rna case in scout"""
+        """Upload report file to DNA cases related to a RNA case in scout"""
         for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(rna_case_id):
             self.upload_report_to_scout(
                 dry_run=dry_run,
@@ -252,16 +210,7 @@ class UploadScoutAPI:
         report_type: str,
         report_file: hk_models.File,
     ) -> None:
-        """Upload report file a case to Scout.
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       Case identifier
-            report_type (string):       Report type
-            report_file (housekeeper.store.models.File): Report file
-        Returns:
-            Nothing
-        """
+        """Upload report file a case to Scout."""
 
         LOG.info(f"Uploading {report_type} report to scout for case {case_id}")
 
@@ -272,23 +221,12 @@ class UploadScoutAPI:
             report_path=report_file.full_path,
             report_type=report_type,
         )
-        LOG.info("Uploaded %s report", report_type)
+        LOG.info(f"Uploaded {report_type} report")
 
-        LOG.info("Upload %s report finished!", report_type)
+        LOG.info(f"Upload {report_type} report finished!")
 
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
-        """Upload rna_coverage_bigwig file for a case to Scout.
-            This command can be executed as:
-            `housekeeper get file -V --tag coverage --tag bigwig <sample_id>;`
-            `scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig
-            <path/to/coverage_file.bigWig>;`
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       Case identifier
-        Returns:
-            Nothing
-        """
+        """Upload rna_coverage_bigwig file for a case to Scout."""
 
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
@@ -330,17 +268,8 @@ class UploadScoutAPI:
         LOG.info("Upload RNA coverage bigwig file finished!")
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
-        """Upload splice_junctions_bed file for a case to Scout.
-            This command can be executed as:
-            `housekeeper get file -V --tag junction --tag bed <sample_id>;`
-            `scout update individual -c <case_id> -n <customer_sample_id> splice_junctions_bed <path/to/junction_file.bed>;`
+        """Upload splice_junctions_bed file for a case to Scout."""
 
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       Case identifier
-        Returns:
-            Nothing
-        """
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         rna_case: models.Family = status_db.family(case_id)
@@ -382,27 +311,13 @@ class UploadScoutAPI:
         LOG.info("Upload splice junctions bed file finished!")
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
-        """Upload RNA junctions splice files to Scout.
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       RNA case identifier
-        Returns:
-            Nothing
-        """
+        """Upload RNA junctions splice files to Scout."""
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
     @staticmethod
     def _get_sample(case: models.Family, subject_id: str) -> Optional[models.Sample]:
-        """Get sample of a case for a subject_id.
-
-        Args:
-            case     (models.Family):               Case
-            subject_id   (str):                     Subject id to search for
-        Returns:
-            matching sample (models.Sample)
-        """
+        """Get sample of a case for a subject_id."""
 
         link: models.FamilySample
         for link in case.links:
@@ -441,13 +356,7 @@ class UploadScoutAPI:
         self, rna_case: models.Family
     ) -> Dict[str, Dict[str, List[str]]]:
         """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
-        subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
-
-        Args:
-            rna_case                (models.Family):  RNA case identifier
-        Case Returns:
-            rna_dna_sample_case_map     (Dict):       rna-dna relationships, and related dna cases based on subject id
-        """
+        subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}."""
         rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
         for link in rna_case.links:
             self._map_rna_sample(
@@ -477,33 +386,31 @@ class UploadScoutAPI:
             raise CgDataError(
                 f"Failed to link RNA samepl {rna_sample.internal_id} to dna samples - subject_id field is empty"
             )
-
-        subject_id_samples: List[models.Sample] = self.validate_number_of_dna_samples_by_subject_id(
-            self.status_db.samples_by_subject_id(
-                customer_id=rna_sample.customer.internal_id,
-                subject_id=rna_sample.subject_id,
-                is_tumour=rna_sample.is_tumour,
-            )
+        samples_by_subject_id: List[models.Sample] = self.status_db.samples_by_subject_id(
+            customer_id=rna_sample.customer.internal_id,
+            subject_id=rna_sample.subject_id,
+            is_tumour=rna_sample.is_tumour,
         )
-
+        self.validate_number_of_dna_samples_by_subject_id(
+            samples_by_subject_id=samples_by_subject_id
+        )
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, List[str]] = {}
         sample: models.Sample
-        for sample in subject_id_samples:
+        for sample in samples_by_subject_id:
             if sample.internal_id != rna_sample.internal_id:
                 rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: List[str] = []
                 return sample
 
     def validate_number_of_dna_samples_by_subject_id(
-        self, subject_id_samples: List[models.Sample]
-    ) -> List[models.Sample]:
+        self, samples_by_subject_id: List[models.Sample]
+    ) -> None:
         """Validates that there are two DNA samples with the same subject_id."""
 
-        if len(subject_id_samples) != 2:
+        if len(samples_by_subject_id) != 2:
             raise CgDataError(
-                f"Unexpected number of DNA sample matches for subject_id: {subject_id_samples[0].subject_id}.\n"
-                f" Number of matches: {len(subject_id_samples)}"
+                f"Unexpected number of DNA sample matches for subject_id: {samples_by_subject_id[0].subject_id}.\n"
+                f"Number of matches: {len(samples_by_subject_id)}"
             )
-        return subject_id_samples
 
     @staticmethod
     def _map_dna_cases_to_dna_sample(
@@ -512,11 +419,13 @@ class UploadScoutAPI:
         rna_sample: models.Sample,
     ) -> None:
         """Maps a list of DNA cases linked to DNA sample."""
-        for link in dna_sample.links:
+        cases_related_to_dna_sample = [link.family for link in dna_sample.links]
+        for case in cases_related_to_dna_sample:
             if (
-                link.family.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
-                and link.family.customer_id == rna_sample.customer_id
+                case.data_analysis
+                in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
+                and case.customer_id == rna_sample.customer_id
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
-                    link.family.internal_id
+                    case.internal_id
                 )
