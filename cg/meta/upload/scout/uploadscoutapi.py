@@ -406,7 +406,7 @@ class UploadScoutAPI:
     ) -> None:
         """Validates that there are two DNA samples with the same subject_id."""
 
-        if len(samples_by_subject_id) != 2:
+        if len(samples_by_subject_id) != 1:
             raise CgDataError(
                 f"Unexpected number of DNA sample matches for subject_id: {samples_by_subject_id[0].subject_id}.\n"
                 f"Number of matches: {len(samples_by_subject_id)}"
