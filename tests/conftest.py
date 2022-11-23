@@ -1,6 +1,5 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
-import typing
 
 import datetime as dt
 import logging
@@ -10,12 +9,14 @@ from pathlib import Path
 from typing import Generator, Dict, List, Any
 
 import pytest
+from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.io.controller import ReadFile
 from cg.constants.subject import Gender
@@ -23,6 +24,7 @@ from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
 
 from .mocks.crunchy import MockCrunchyAPI
@@ -152,6 +154,14 @@ def fixture_customer_id() -> str:
 @pytest.fixture(name="sbatch_job_number")
 def fixture_sbatch_job_number() -> int:
     return 123456
+
+
+@pytest.fixture(name="sbatch_process")
+def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
+    """Return a mocked process object."""
+    slurm_process = ProcessMock(binary="sbatch")
+    slurm_process.set_stdout(text=str(sbatch_job_number))
+    return slurm_process
 
 
 @pytest.fixture(scope="function", name="analysis_family_single_case")
@@ -434,6 +444,12 @@ def fixture_orderform(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "orderforms")
 
 
+@pytest.fixture(name="hk_file")
+def fixture_hk_file(filled_file, case_id) -> File:
+    """Return a housekeeper File object."""
+    return File(id=case_id, path=filled_file)
+
+
 @pytest.fixture(name="mip_dna_store_files")
 def fixture_mip_dna_store_files(apps_dir: Path) -> Path:
     """Return the path to the directory with mip dna store files."""
@@ -563,11 +579,6 @@ def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     return Path(apps_dir, "demultiplexing")
 
 
-@pytest.fixture(name="demultiplexed_runs")
-def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    return Path(demultiplex_fixtures, "demultiplexed-runs")
-
-
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
 def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a novaseq bcl2fastq sample sheet."""
@@ -580,6 +591,48 @@ def fixture_raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "raw_lims_samples")
 
 
+@pytest.fixture(name="demultiplexed_runs")
+def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flow cells ready for demultiplexing."""
+    return Path(demultiplex_fixtures, "demultiplexed-runs")
+
+
+@pytest.fixture(name="demux_run_dir")
+def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flow cells ready for demultiplexing."""
+    return Path(demultiplex_fixtures, "flowcell-runs")
+
+
+@pytest.fixture(name="flow_cell")
+def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> FlowCell:
+    """Create a flow cell object with flow cell that is demultiplexed."""
+    return FlowCell(flow_cell_path=Path(demux_run_dir, flow_cell_full_name))
+
+
+@pytest.fixture(name="flow_cell_id")
+def fixture_flow_cell_id(flow_cell: FlowCell) -> str:
+    """Return flow cell id from flow cell object."""
+    return flow_cell.id
+
+
+@pytest.fixture(name="another_flow_cell_id")
+def fixture_another_flow_cell_id() -> str:
+    """Return another flow cell id."""
+    return "HF57HDRXY"
+
+
+@pytest.fixture(name="demultiplexing_delivery_file")
+def fixture_demultiplexing_delivery_file(flow_cell: FlowCell) -> Path:
+    """Return demultiplexing delivery started file."""
+    return Path(flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
+
+
+@pytest.fixture(name="hiseq_x_tile_dir")
+def fixture_hiseq_x_tile_dir(flow_cell: FlowCell) -> Path:
+    """Return Hiseq X tile dir."""
+    return Path(flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+
+
 @pytest.fixture(name="lims_novaseq_samples_file")
 def fixture_lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
     """Return the path to a file with sample info in lims format."""
@@ -588,28 +641,16 @@ def fixture_lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
 
 @pytest.fixture(name="lims_novaseq_samples_raw")
 def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
-    """Return a list of raw flowcell samples."""
+    """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
     )
 
 
-@pytest.fixture(name="flowcell_full_name")
-def fixture_flowcell_full_name() -> str:
+@pytest.fixture(name="flow_cell_full_name")
+def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
-
-
-@pytest.fixture(name="flowcell_name")
-def fixture_flowcell_name() -> str:
-    """Return flow cell name."""
-    return "HVKJCDRXX"
-
-
-@pytest.fixture(name="another_flow_cell_name")
-def fixture_another_flow_cell_name() -> str:
-    """Return another flow cell name."""
-    return "HF57HDRXY"
 
 
 # Genotype file fixture
@@ -768,7 +809,7 @@ def fixture_hermes_process() -> ProcessMock:
 @pytest.fixture(name="hermes_api")
 def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
     """Return a Hermes API with a mocked process."""
-    hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
+    hermes_config = {"hermes": {"binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
@@ -1196,28 +1237,65 @@ def fixture_context_config(
 ) -> dict:
     """Return a context config."""
     return {
-        "database": cg_uri,
-        "madeline_exe": "echo",
         "bed_path": str(cg_dir),
-        "pon_path": str(cg_dir),
+        "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
+        "madeline_exe": "echo",
+        "pon_path": str(cg_dir),
+        "backup": {
+            "encrypt_dir": "/home/ENCRYPT/",
+            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+        },
+        "balsamic": {
+            "balsamic_cache": "hello",
+            "binary_path": "echo",
+            "conda_env": "S_BALSAMIC",
+            "root": str(balsamic_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+                "qos": SlurmQos.LOW,
+            },
+        },
+        "cgstats": {"binary_path": "echo", "database": "sqlite:///./cgstats", "root": str(cg_dir)},
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "crunchy": {
+            "conda_binary": "a_conda_binary",
+            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "slurm": {
+                "account": "development",
+                "conda_env": "S_crunchy",
+                "mail_user": "an@scilifelab.se",
+            },
+        },
+        "data-delivery": {
+            "account": "development",
+            "base_path": "/another/path",
+            "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
+            "destination_path": "server.name.se:/some",
+            "mail_user": "an@email.com",
+        },
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
-                "mail_user": "mans.magnusson@scilifelab.se",
+                "mail_user": "an@scilifelab.se",
             },
         },
+        "encryption": {"binary_path": "bin/gpg"},
+        "external": {
+            "caesar": "server.name.se:/path/%s/on/caesar",
+            "hasta": "/path/on/hasta/%s",
+        },
         "fluffy": {
-            "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
@@ -1229,76 +1307,29 @@ def fixture_context_config(
                 "port": 22,
             },
         },
-        "statina": {
-            "host": "http://localhost:28002",
-            "user": "user",
-            "key": "key",
-            "api_url": "api_url",
-            "upload_path": "upload_path",
-            "auth_path": "auth_path",
-        },
-        "data-delivery": {
-            "destination_path": "server.name.se:/some",
-            "covid_destination_path": "server.name.se:/another/%s/foldername/",
-            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
-            "base_path": "/another/path",
-            "account": "development",
-            "mail_user": "an@email.com",
-        },
-        "external": {
-            "hasta": "/path/on/hasta/%s",
-            "caesar": "server.name.se:/path/%s/on/caesar",
-        },
-        "encryption": {"binary_path": "bin/gpg"},
-        "pdc": {"binary_path": "/bin/dsmc"},
-        "tar": {"binary_path": "/bin/tar"},
-        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
-        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
-        "trailblazer": {
-            "service_account": "SERVICE",
-            "service_account_auth_file": "trailblazer-auth.json",
-            "host": "https://trailblazer.scilifelab.se/",
-        },
-        "gisaid": {
-            "binary_path": "/path/to/gisaid_uploader.py",
-            "log_dir": "/path/to/log",
-            "submitter": "s.submitter",
-            "logwatch_email": "some@email.com",
-            "upload_password": "pass",
-            "upload_cid": "cid",
-        },
-        "lims": {
-            "host": "https://lims.scilifelab.se",
-            "username": "user",
-            "password": "password",
-        },
-        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "genotype": {
             "binary_path": "echo",
             "config_path": "genotype-stage.yaml",
         },
-        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
-        "cgstats": {"database": "sqlite:///./cgstats", "root": str(cg_dir)},
-        "scout": {
-            "binary_path": "echo",
-            "config_path": "scout-stage.yaml",
-            "deploy_config": "scout-deploy-stage.yaml",
+        "gisaid": {
+            "binary_path": "/path/to/gisaid_uploader.py",
+            "log_dir": "/path/to/log",
+            "logwatch_email": "some@email.com",
+            "upload_cid": "cid",
+            "upload_password": "pass",
+            "submitter": "s.submitter",
+        },
+        "hermes": {"binary_path": "hermes"},
+        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
+        "lims": {
+            "host": "https://lims.scilifelab.se",
+            "password": "password",
+            "username": "user",
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
         "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
         "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
-        "balsamic": {
-            "root": str(balsamic_dir),
-            "binary_path": "echo",
-            "conda_env": "S_BALSAMIC",
-            "balsamic_cache": "hello",
-            "slurm": {
-                "mail_user": "test.email@scilifelab.se",
-                "account": "development",
-                "qos": SlurmQos.LOW,
-            },
-        },
         "microsalt": {
             "binary_path": "echo",
             "conda_binary": "a_conda_binary",
@@ -1323,8 +1354,8 @@ def fixture_context_config(
             "script": "mip",
         },
         "mutacc-auto": {
-            "config_path": "mutacc-auto-stage.yaml",
             "binary_path": "echo",
+            "config_path": "mutacc-auto-stage.yaml",
             "padding": 300,
         },
         "mutant": {
@@ -1333,19 +1364,26 @@ def fixture_context_config(
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
-        "crunchy": {
-            "conda_binary": "a_conda_binary",
-            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
-            "slurm": {
-                "account": "development",
-                "mail_user": "mans.magnusson@scilifelab.se",
-                "conda_env": "S_crunchy",
-            },
+        "pdc": {"binary_path": "/bin/dsmc"},
+        "scout": {
+            "binary_path": "echo",
+            "config_path": "scout-stage.yaml",
         },
-        "backup": {
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
-            "encrypt_dir": "/home/ENCRYPT/",
+        "statina": {
+            "api_url": "api_url",
+            "auth_path": "auth_path",
+            "host": "http://localhost:28002",
+            "key": "key",
+            "upload_path": "upload_path",
+            "user": "user",
         },
+        "tar": {"binary_path": "/bin/tar"},
+        "trailblazer": {
+            "host": "https://trailblazer.scilifelab.se/",
+            "service_account": "SERVICE",
+            "service_account_auth_file": "trailblazer-auth.json",
+        },
+        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
     }
 
 

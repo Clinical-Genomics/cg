@@ -59,7 +59,7 @@ class FastqSubmitter(Submitter):
     def create_maf_case(self, sample_obj: models.Sample):
         case_obj: models.Family = self.status.add_case(
             data_analysis=Pipeline(Pipeline.MIP_DNA),
-            data_delivery=DataDelivery(DataDelivery.ANALYSIS_FILES),
+            data_delivery=DataDelivery(DataDelivery.NO_DELIVERY),
             name="_".join([sample_obj.name, "MAF"]),
             panels=[GenePanelMasterList.OMIM_AUTO],
             priority=Priority.research,

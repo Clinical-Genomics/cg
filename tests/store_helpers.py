@@ -516,7 +516,7 @@ class StoreHelpers:
         status: str = None,
         date: datetime = datetime.now(),
     ) -> models.Flowcell:
-        """Utility function to set a flowcell to use in tests"""
+        """Utility function to set a flow cell to use in tests"""
         flowcell_obj = store.add_flowcell(
             name=flowcell_id,
             sequencer="dummy_sequencer",
