@@ -1,11 +1,14 @@
 """Tests for RNA part of the scout upload API"""
 import logging
 from typing import Dict, Generator, List
+
 import pytest
 from _pytest.logging import LogCaptureFixture
 
+from alchy import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.store import Store, models
@@ -37,10 +40,38 @@ def ensure_two_dna_tumour_matches(
         store=rna_store, customer=rna_store.family(dna_case_id).customer
     )
     another_sample_id = helpers.add_sample(
-        store=rna_store, name=another_sample_id, subject_id=subject_id, is_tumour=True
+        store=rna_store,
+        name=another_sample_id,
+        subject_id=subject_id,
+        is_tumour=True,
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
     )
     helpers.add_relationship(store=rna_store, sample=another_sample_id, case=dna_extra_case)
     rna_store.commit()
+
+
+def ensure_extra_rna_case_match(
+    another_rna_sample_id: str,
+    helpers: StoreHelpers,
+    rna_case_id: str,
+    rna_store: Store,
+) -> None:
+    """Ensures that we have an extra RNA case that matches by subject_id the existing RNA case and DNA cases."""
+    rna_extra_case = helpers.ensure_case(
+        store=rna_store,
+        data_analysis=Pipeline.MIP_RNA,
+        customer=rna_store.family(rna_case_id).customer,
+    )
+    subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
+    another_rna_sample_id = helpers.add_sample(
+        store=rna_store,
+        internal_id=another_rna_sample_id,
+        subject_id=subject_id,
+        is_tumour=False,
+        application_type=SequencingMethod.WTS,
+    )
+    helpers.add_relationship(store=rna_store, sample=another_rna_sample_id, case=rna_extra_case)
 
 
 def test_upload_rna_junctions_to_scout(
@@ -439,6 +470,37 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
         upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+
+
+def test_get_application_prep_category(
+    another_rna_sample_id: str,
+    dna_sample_son_id: str,
+    helpers: StoreHelpers,
+    rna_case_id: str,
+    rna_sample_son_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+
+    """Test that RNA samples are removed when filtering sample list by pipeline"""
+
+    # GIVEN an RNA sample that is connected by subject ID to one RNA and one DNA sample in other cases
+
+    ensure_extra_rna_case_match(another_rna_sample_id, helpers, rna_case_id, rna_store)
+    upload_scout_api.status_db = rna_store
+
+    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
+    another_rna_sample_id: models.Sample = rna_store.sample(another_rna_sample_id)
+    all_son_rna_dna_samples: List[models.Sample] = [dna_sample, another_rna_sample_id]
+
+    # WHEN running the method to filter a list of models.Sample objects containing RNA and DNA samples connected by subject_id
+    only_son_dna_samples = upload_scout_api._get_application_prep_category(all_son_rna_dna_samples)
+
+    # THEN even though an RNA sample is present in the initial query, the output should not contain any RNA samples
+    nr_of_subject_id_samples: int = len(all_son_rna_dna_samples)
+    nr_of_subject_id_dna_samples: int = len([only_son_dna_samples])
+    assert nr_of_subject_id_samples == 2
+    assert nr_of_subject_id_dna_samples == 1
 
 
 def test_create_rna_dna_sample_case_map(
