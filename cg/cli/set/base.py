@@ -178,12 +178,14 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
 
 
 @set_cmd.command()
-@click.option("-l", "--list-keys", is_flag=True, help="List all available modifiable sample properties")
+@click.option("-s", "--sample_id", help="List all available modifiable keys for sample")
 @click.pass_obj
-def list_keys(context: CGConfig, list_keys: bool,):
+def list_keys(context: CGConfig, sample_id: Optional[str],):
     """List all available modifiable keys"""
+    status_db: Store = context.status_db
+    sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
     if list_keys:
-        show_set_sample_help()
+        show_set_sample_help(sample_obj)
 
 
 @set_cmd.command()
