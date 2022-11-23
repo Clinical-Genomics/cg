@@ -209,7 +209,7 @@ def sample(
     skip_lims: bool,
     yes: bool,
 ):
-    """Set key values on a SAMPLE_ID"""
+    """Set key values on a sample"""
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
 
