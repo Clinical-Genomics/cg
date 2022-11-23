@@ -167,17 +167,15 @@ def upload_rna_to_scout(
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
-    result: int = context.invoke(upload_multiqc_rna_to_scout, case_id=case_id, dry_run=dry_run)
-    while result:
-        result: int = context.invoke(
-            upload_rna_fusion_report_to_scout,
-            case_id=case_id,
-            dry_run=dry_run,
-            research=research,
-            update=update_fusion_report,
-        )
-        result = context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
-    return result
+    context.invoke(upload_multiqc_rna_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(
+        upload_rna_fusion_report_to_scout,
+        case_id=case_id,
+        dry_run=dry_run,
+        research=research,
+        update=update_fusion_report,
+    )
+    context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
 @click.command(name="rna-fusion-report-to-scout")
@@ -193,7 +191,7 @@ def upload_rna_to_scout(
 @click.pass_obj
 def upload_rna_fusion_report_to_scout(
     context: CGConfig, dry_run: bool, case_id: str, update: bool, research: bool
-) -> int:
+) -> None:
     """Upload fusion report file for a case to Scout."""
 
     LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
@@ -204,27 +202,22 @@ def upload_rna_fusion_report_to_scout(
             dry_run=dry_run, research=research, case_id=case_id, update=update
         )
     except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error)
-        return 1
-    return 0
+        raise error from error
 
 
 @click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
-def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
-    """Upload RNA junctions splice files to Scout.
-    """
+def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Upload RNA junctions splice files to Scout."""
     LOG.info("----------------- UPLOAD RNA JUNCTIONS TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     try:
         scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
     except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error)
-        return 1
-    return 0
+        raise error from error
 
 
 @click.command(name="multiqc-rna-to-scout")
@@ -245,6 +238,4 @@ def upload_multiqc_rna_to_scout(context: CGConfig, case_id: str, dry_run: bool) 
             report_file=multiqc_rna_report,
         )
     except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error)
-        return 1
-    return 0
+        raise error from error
