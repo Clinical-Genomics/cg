@@ -28,12 +28,12 @@ def test_get_dummy_sample_name():
     assert dummy_sample_name == "D10---D710-D504--TCCGCGAA-GGCTCTGA-"
 
 
-def test_get_dummy_sample(flowcell_name: str, index_obj: Index):
+def test_get_dummy_sample(flow_cell_id: str, index_obj: Index):
     # GIVEN some dummy sample data
 
     # WHEN creating the dummy sample for a bcl2fastq samplesheet
     dummy_sample_obj: LimsFlowcellSample = dummy_sample.dummy_sample(
-        flowcell=flowcell_name,
+        flowcell=flow_cell_id,
         dummy_index=index_obj.sequence,
         lane=1,
         name=index_obj.name,

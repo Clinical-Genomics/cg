@@ -357,7 +357,7 @@ class Family(Model, PriorityMixin):
                 sequenced_dates.append(link.sample.ordered_at)
             elif link.sample.sequenced_at:
                 sequenced_dates.append(link.sample.sequenced_at)
-        return max(sequenced_dates) if sequenced_dates else None
+        return max(sequenced_dates, default=None)
 
     @property
     def all_samples_pass_qc(self) -> bool:
