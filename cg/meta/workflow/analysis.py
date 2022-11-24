@@ -142,7 +142,7 @@ class AnalysisAPI(MetaAPI):
         Gets application type for sample. Only application types supported by trailblazer (or other)
         are valid outputs
         """
-        analysis_type: str = sample_obj.application_version.application.prep_category
+        analysis_type: str = sample_obj.prep_category
         if analysis_type and analysis_type.lower() in [
             "wgs",
             "wes",

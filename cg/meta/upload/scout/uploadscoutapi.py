@@ -11,7 +11,7 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.constants import PrepCategory
 from cg.exc import HousekeeperVersionMissingError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -160,8 +160,6 @@ class UploadScoutAPI:
     ) -> None:
         """Upload fusion report file for a case to Scout."""
 
-        scout_api: ScoutAPI = self.scout
-        status_db: Store = self.status_db
         report_type: str = "Research" if research else "Clinical"
 
         fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
@@ -177,7 +175,7 @@ class UploadScoutAPI:
 
             if dry_run:
                 continue
-            scout_api.upload_fusion_report(
+            self.scout_api.upload_fusion_report(
                 case_id=dna_case_id,
                 report_path=fusion_report.full_path,
                 research=research,
@@ -388,18 +386,21 @@ class UploadScoutAPI:
             raise CgDataError(
                 f"Failed to link RNA samepl {rna_sample.internal_id} to dna samples - subject_id field is empty"
             )
+
         samples_by_subject_id: List[models.Sample] = self.status_db.samples_by_subject_id(
             customer_id=rna_sample.customer.internal_id,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-
+        subject_id_dna_samples: List[Optional[models.Sample]] = self._get_application_prep_category(
+            samples_by_subject_id
+        )
         self.validate_number_of_dna_samples_by_subject_id(
-            samples_by_subject_id=samples_by_subject_id
+            samples_by_subject_id=subject_id_dna_samples
         )
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, List[str]] = {}
         sample: models.Sample
-        for sample in samples_by_subject_id:
+        for sample in subject_id_dna_samples:
             if sample.internal_id != rna_sample.internal_id:
                 rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: List[str] = []
                 return sample
@@ -411,7 +412,7 @@ class UploadScoutAPI:
 
         if len(samples_by_subject_id) != 1:
             raise CgDataError(
-                f"Unexpected number of DNA sample matches for subject_id: {samples_by_subject_id[0].subject_id}.\n"
+                f"Unexpected number of DNA sample matches for subject_id.\n"
                 f"Number of matches: {len(samples_by_subject_id)}"
             )
 
@@ -433,14 +434,19 @@ class UploadScoutAPI:
                 )
 
     @staticmethod
-    def _get_application_prep_category(subject_id_samples: List[models.Sample]) -> List[Any]:
+    def _get_application_prep_category(
+        subject_id_samples: List[models.Sample],
+    ) -> List[Optional[models.Sample]]:
         """Filter a models.Sample list, returning DNA samples selected on their prep_category."""
-        subject_id_dna_samples: List[models.Sample] = []
-        for sample in subject_id_samples:
-            if sample.application_version.application.prep_category in [
-                SequencingMethod.WGS,
-                SequencingMethod.TGS,
-                SequencingMethod.WES,
-            ]:
-                subject_id_dna_samples.append(sample)
+        subject_id_dna_samples: List[Optional[models.Sample]] = [
+            sample
+            for sample in subject_id_samples
+            if sample.prep_category
+            in [
+                PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+                PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+                PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+            ]
+        ]
+
         return subject_id_dna_samples

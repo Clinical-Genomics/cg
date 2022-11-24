@@ -113,7 +113,7 @@ class FastqSubmitter(Submitter):
                     )
                 if (
                     not new_sample.is_tumour
-                    and new_sample.application_version.application.prep_category == "wgs"
+                    and new_sample.prep_category == "wgs"
                 ):
                     self.create_maf_case(sample_obj=new_sample)
                 case_obj.customer = customer_obj

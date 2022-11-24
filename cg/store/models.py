@@ -629,6 +629,11 @@ class Sample(Model, PriorityMixin):
         self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
+    def prep_category(self) -> str:
+        """Return the prep category of the sample."""
+        return self.application_version.application.prep_category
+
+    @property
     def state(self) -> str:
         """Get the current sample state."""
         if self.delivered_at:
