@@ -44,53 +44,6 @@ def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: St
     assert base_context.lims_api.get_updated_sample_value() != new_value
 
 
-def test_help_without_sample(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers, caplog
-):
-    # GIVEN a database with no sample
-
-    # WHEN setting sample but asking for help
-    with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(sample, ["--help"], obj=base_context)
-
-    # THEN it should fail on not having a sample as argument
-    assert result.exit_code != SUCCESS
-
-    # THEN the flags should have been mentioned in the output
-    assert "-kv" in caplog.text
-    assert "--skip-lims" in caplog.text
-    assert "-y" in caplog.text
-
-    # THEN the name property should have been mentioned
-    assert "name" in caplog.text
-
-
-def test_help_with_sample(
-    cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers, caplog
-):
-    # GIVEN a database with a sample
-
-    sample_obj = helpers.add_sample(base_store, gender="female")
-
-    # WHEN setting sample but skipping lims
-    with caplog.at_level(logging.INFO):
-        result = cli_runner.invoke(sample, [sample_obj.internal_id, "--help"], obj=base_context)
-
-    # THEN it should not fail on not having a sample as argument
-    assert result.exit_code == SUCCESS
-
-    # THEN the flags should have been mentioned in the output
-    assert "-kv" in caplog.text
-    assert "--skip-lims" in caplog.text
-    assert "-y" in caplog.text
-
-    # THEN the name property should have been mentioned
-    assert "name" in caplog.text
-
-    # THEN the name value should have been mentioned
-    assert sample_obj.name in caplog.text
-
-
 @pytest.mark.parametrize("key", ["name", "capture_kit"])
 def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, key, helpers):
     # GIVEN a database with a sample
