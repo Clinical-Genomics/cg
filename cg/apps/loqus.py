@@ -108,4 +108,4 @@ class LoqusdbAPI:
         return {"variants": nr_of_variants}
 
     def __repr__(self):
-        return f"LoqusdbAPI(binary_path={self.binary_path}, config_path={self.config_path})"
+        return f"LoqusdbAPI(binary_path={Path(self.binary_path).stem}, config_path={Path(self.config_path).stem})"

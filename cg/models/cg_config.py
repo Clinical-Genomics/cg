@@ -141,6 +141,7 @@ class MipConfig(BaseModel):
 
 
 class CGStatsConfig(BaseModel):
+    binary_path: str
     database: str
     root: str
 

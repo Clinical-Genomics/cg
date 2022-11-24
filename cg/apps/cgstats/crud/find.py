@@ -108,7 +108,4 @@ def get_samples(flowcell: str, project_name: Optional[str] = None) -> alchy.Quer
 def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> List[StatsSample]:
     samples_query: alchy.Query = get_samples(flowcell=flowcell, project_name=project_name)
     db_sample: models.Sample
-    sample_stats: List[StatsSample] = [
-        StatsSample.from_orm(db_sample) for db_sample in samples_query
-    ]
-    return sample_stats
+    return [StatsSample.from_orm(db_sample) for db_sample in samples_query]

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 import pytest
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -35,7 +35,7 @@ def test_get_unknown_type_run_parameters(unknown_run_parameters: Path, caplog):
     run_parameters_obj = RunParameters(unknown_run_parameters)
 
     # WHEN fetching the flowcell type
-    with pytest.raises(FlowcellError):
+    with pytest.raises(FlowCellError):
         # THEN assert that an exception was raised since the flowcell type was unknown
         run_parameters_obj.flowcell_type
 
@@ -49,7 +49,7 @@ def test_get_flowcell_type_when_missing(run_parameters_missing_flowcell_type: Pa
     run_parameters_obj = RunParameters(run_parameters_missing_flowcell_type)
 
     # WHEN parsing the run parameters
-    with pytest.raises(FlowcellError):
+    with pytest.raises(FlowCellError):
         # THEN assert that an exception was raised since the flowcell type was unknown
         run_parameters_obj.flowcell_type
 

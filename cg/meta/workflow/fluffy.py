@@ -140,7 +140,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
 
         samplesheet_df = pd.read_csv(
-            samplesheet_housekeeper_path, index_col=None, header=0, skiprows=1
+            samplesheet_housekeeper_path, index_col=None, header=0, skiprows=4
         )
         LOG.info(samplesheet_df)
         sample_id_column_alias = (

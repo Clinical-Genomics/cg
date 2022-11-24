@@ -212,11 +212,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         sample_id = sample_obj.internal_id
         method_library_prep = self.lims_api.get_prep_method(sample_id)
-        if method_library_prep:
-            method_library_prep, _ = method_library_prep.split(" ", 1)
         method_sequencing = self.lims_api.get_sequencing_method(sample_id)
-        if method_sequencing:
-            method_sequencing, _ = method_sequencing.split(" ", 1)
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )
