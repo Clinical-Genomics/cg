@@ -72,18 +72,18 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
         ]
 
-        self.check_creation_date(case_paths, case_id)
+        self.verify_case_path_age(case_paths, case_id)
 
         return case_paths
 
-    def check_creation_date(self, case_paths: List[Path], case_id: str):
+    def verify_case_path_age(self, case_paths: List[Path], case_id: str):
         old_date = datetime.now() - timedelta(days=21)
         for case in case_paths:
             creation_date = datetime.fromtimestamp(os.path.getctime(case))
             if creation_date > old_date:
-                LOG.info(f"All paths in {case_id} is not older than 21 days, skipping")
+                LOG.info(f"All paths in {case_id} is not older than 21 days, skipping and going to next case!")
                 raise FileNotFoundError(
-                    f"All paths in {case_id} is not older than 21 days, skipping"
+                    f"All paths in {case_id} is not older than 21 days, skipping and going to next case!"
                 )
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
