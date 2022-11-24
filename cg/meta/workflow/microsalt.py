@@ -81,7 +81,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         for case in case_paths:
             creation_date = datetime.fromtimestamp(os.path.getctime(case))
             if creation_date > old_date:
-                LOG.info(f"All paths in {case_id} is not older than 21 days, skipping and going to next case!")
+                LOG.info(
+                    f"All paths in {case_id} is not older than 21 days, skipping and going to next case!"
+                )
                 raise FileNotFoundError(
                     f"All paths in {case_id} is not older than 21 days, skipping and going to next case!"
                 )
