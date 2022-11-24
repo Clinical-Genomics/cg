@@ -133,3 +133,7 @@ class MipLoadConfig(ScoutLoadConfig):
         if v is None:
             raise ValueError("Mandatory vcf can not be None")
         return v
+
+
+class RnafusionLoadConfig(ScoutLoadConfig):
+    pass

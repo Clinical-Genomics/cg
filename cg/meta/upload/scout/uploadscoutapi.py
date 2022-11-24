@@ -369,6 +369,9 @@ class UploadScoutAPI:
             Pipeline.BALSAMIC_UMI: BalsamicUmiConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
+            Pipeline.RNAFUSION: RnafusionConfigBuilder(
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
+            ),
             Pipeline.MIP_DNA: MipConfigBuilder(
                 hk_version_obj=hk_version,
                 analysis_obj=analysis,
