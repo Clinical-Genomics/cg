@@ -72,11 +72,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
         ]
 
-        self.verify_case_path_age(case_paths, case_id)
+        self.verify_case_paths_age(case_paths, case_id)
 
         return case_paths
 
-    def verify_case_path_age(self, case_paths: List[Path], case_id: str):
+    def verify_case_paths_age(self, case_paths: List[Path], case_id: str):
         old_date = datetime.now() - timedelta(days=21)
         for case in case_paths:
             creation_date = datetime.fromtimestamp(os.path.getctime(case))
