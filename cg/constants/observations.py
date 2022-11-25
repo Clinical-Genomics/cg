@@ -6,8 +6,10 @@ from cgmodels.cg.constants import Pipeline, StrEnum
 
 from cg.constants.sequencing import SequencingMethod
 
+LOQUSDB_ID = "_id"
 LOQUSDB_SUPPORTED_PIPELINES = [Pipeline.MIP_DNA, Pipeline.BALSAMIC]
 LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
+LOQUSDB_BALSAMIC_SEQUENCING_METHODS = [SequencingMethod.WGS]
 
 
 class LoqusdbInstance(StrEnum):
@@ -20,7 +22,7 @@ class LoqusdbInstance(StrEnum):
 
 
 class MipDNAObservationsAnalysisTag(StrEnum):
-    """Observations files analysis tags."""
+    """Rare disease observations files analysis tags."""
 
     SNV_VCF: str = "deepvariant"
     SV_VCF: str = "vcf-sv-research"
@@ -29,7 +31,25 @@ class MipDNAObservationsAnalysisTag(StrEnum):
 
 
 class MipDNALoadParameters(Enum):
-    """MipDNA Loqusdb load command parameters."""
+    """Rare disease Loqusdb load command parameters."""
+
+    PROFILE_THRESHOLD: float = 0.95
+    GQ_THRESHOLD: int = 10
+    HARD_THRESHOLD: float = 0.95
+    SOFT_THRESHOLD: float = 0.90
+
+
+class BalsamicObservationsAnalysisTag(StrEnum):
+    """Cancer observations files analysis tags."""
+
+    SNV_VCF: str = "vcf-snv-clinical"
+    SNV_ALL_VCF: str = "vcf-snv-germline-tumor"
+    SV_VCF: str = "vcf-sv-clinical"
+    PROFILE_VCF: str = "vcf-snv-germline-tumor"
+
+
+class BalsamicLoadParameters(Enum):
+    """Cancer Loqusdb load command parameters."""
 
     PROFILE_THRESHOLD: float = 0.95
     GQ_THRESHOLD: int = 10
