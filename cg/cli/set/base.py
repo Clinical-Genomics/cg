@@ -151,6 +151,8 @@ def list_changeable_sample_attributes(
     sample_obj: Optional[models.Sample] = None, skip_attributes: List[str] = []
 ) -> None:
     """List changeable attributes on sample and its current value"""
+    LOG.info(f"Below is a set of changeable sample attributes, to combine with -kv flag:\n")
+
     sample_attributes: Iterable[str] = models.Sample.__dict__.keys()
     for attribute in sample_attributes:
         if is_locked_attribute_on_sample(attribute, skip_attributes):
@@ -159,13 +161,6 @@ def list_changeable_sample_attributes(
         if sample_obj:
             message += f": {sample_obj.__dict__.get(attribute)}"
         LOG.info(message)
-
-
-def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
-    """Show help for the set sample command"""
-    LOG.info(f"Below is a set of changeable sample attributes, to combine with -kv flag:\n")
-
-    list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
 
 
 @set_cmd.command()
@@ -179,7 +174,7 @@ def list_keys(
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
     if list_keys:
-        show_set_sample_help(sample_obj)
+        list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
 
 
 @set_cmd.command()
