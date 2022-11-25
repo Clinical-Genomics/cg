@@ -19,6 +19,9 @@ def test_list_keys_without_sample(
     with caplog.at_level(logging.INFO):
         result = cli_runner.invoke(list_keys, obj=base_context)
 
+    # THEN it should not fail on not having a sample as argument
+    assert result.exit_code == EXIT_SUCCES
+
     # THEN the flags should have been mentioned in the output
     assert "-kv" in caplog.text
 
@@ -39,7 +42,7 @@ def test_list_keys_with_sample(
             list_keys, ["--sample_id", sample_obj.internal_id], obj=base_context
         )
 
-    # THEN it should not fail on not having a sample as argument
+    # THEN it should not fail on having a sample as argument
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN the flags should have been mentioned in the output
