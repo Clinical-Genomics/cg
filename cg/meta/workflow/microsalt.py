@@ -76,10 +76,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return case_paths
 
-    def verify_case_paths_age(self, case_paths: List[Path], case_id: str):
-        old_date = datetime.now() - timedelta(days=21)
+    def verify_case_paths_age(self, case_paths: List[Path], case_id: str) -> None:
+        old_date: datetime = datetime.now() - timedelta(days=21)
         for case in case_paths:
-            creation_date = datetime.fromtimestamp(os.path.getctime(case))
+            creation_date: datetime = datetime.fromtimestamp(os.path.getctime(case))
             if creation_date > old_date:
                 LOG.info(
                     f"All paths in {case_id} is not older than 21 days, skipping and going to next case!"
