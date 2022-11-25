@@ -243,7 +243,6 @@ def fixture_base_config_dict() -> dict:
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
-        "bed_path": "path/to/bed",
         "delivery_path": "path/to/delivery",
         "housekeeper": {
             "database": "sqlite:///",
@@ -1288,7 +1287,6 @@ def fixture_context_config(
 ) -> dict:
     """Return a context config."""
     return {
-        "bed_path": str(cg_dir),
         "database": cg_uri,
         "delivery_path": str(cg_dir),
         "email_base_settings": {
@@ -1306,6 +1304,7 @@ def fixture_context_config(
         "balsamic": {
             "root": str(balsamic_dir),
             "binary_path": "echo",
+            "bed_path": str(cg_dir),
             "pon_path": str(cg_dir),
             "loqusdb_path": str(cg_dir),
             "conda_env": "S_Balsamic",
