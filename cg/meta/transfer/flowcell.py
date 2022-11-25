@@ -6,6 +6,8 @@ from typing import List
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import FlowCellStatus
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.store import Store, models
 
@@ -22,10 +24,10 @@ class TransferFlowCell:
 
     def transfer(self, flow_cell_id: str, store: bool = True) -> models.Flowcell:
         """Populate the database with the information."""
-        if store and self.hk.tag("fastq") is None:
-            self.hk.add_commit(self.hk.new_tag("fastq"))
-        if store and self.hk.tag("samplesheet") is None:
-            self.hk.add_commit(self.hk.new_tag("samplesheet"))
+        if store and self.hk.tag(SequencingFileTag.FASTQ) is None:
+            self.hk.add_commit(self.hk.new_tag(SequencingFileTag.FASTQ))
+        if store and self.hk.tag(SequencingFileTag.SAMPLESHEET) is None:
+            self.hk.add_commit(self.hk.new_tag(SequencingFileTag.SAMPLESHEET))
         if store and self.hk.tag(flow_cell_id) is None:
             self.hk.add_commit(self.hk.new_tag(flow_cell_id))
         stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
@@ -38,19 +40,19 @@ class TransferFlowCell:
                 sequencer_type=stats_data.sequencer_type,
                 date=stats_data.date,
             )
-        flow_cell.status = "ondisk"
+        flow_cell.status = FlowCellStatus.ONDISK
 
         sample_sheet_path = self._sample_sheet_path(flow_cell_id)
         if not Path(sample_sheet_path).exists():
-            LOG.warning(f"unable to find samplesheet: {sample_sheet_path}")
+            LOG.warning(f"Unable to find sample sheet: {sample_sheet_path}")
         elif store:
             self.store_samplesheet(flow_cell_id, sample_sheet_path)
 
         for sample_data in stats_data.samples:
-            LOG.debug(f"adding reads/fastqs to sample: {sample_data.name}")
+            LOG.debug(f"Adding reads/FASTQs to sample: {sample_data.name}")
             sample_obj = self.db.sample(sample_data.name)
             if sample_obj is None:
-                LOG.warning(f"unable to find sample: {sample_data.name}")
+                LOG.warning(f"Unable to find sample: {sample_data.name}")
                 continue
 
             if store:
@@ -74,10 +76,9 @@ class TransferFlowCell:
                 flow_cell.samples.append(sample_obj)
 
             LOG.info(
-                f"added reads to sample: {sample_data.name} - {sample_data.reads} "
+                f"Added reads to sample: {sample_data.name} - {sample_data.reads} "
                 f"[{'DONE' if enough_reads else 'NOT DONE'}]"
             )
-
         return flow_cell
 
     def store_fastqs(self, sample: str, flow_cell_id: str, fastq_files: List[str]):

@@ -1,5 +1,5 @@
 """Module that handles deletion of flow cell run directories and their BCL files from
-flow_cell_run_dir/<sequencer> """
+flow_cell_run_dir/<sequencer>."""
 import logging
 import shutil
 from datetime import datetime, timedelta
@@ -9,9 +9,10 @@ from typing import Optional
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import FlowCellStatus, HousekeeperTags
+from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.symbols import UNDERSCORE
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.store import Store
 
 FLOW_CELL_DATE_POSITION = 0
@@ -104,7 +105,7 @@ class RunDirFlowCell:
             self.hk.add_and_include_file_to_latest_version(
                 case_id=self.id,
                 file=self.sample_sheet_path,
-                tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id],
+                tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id],
             )
         except FileExistsError:
             LOG.warning("Sample sheet already included!")

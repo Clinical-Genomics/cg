@@ -2,8 +2,8 @@
 cg.meta.clean.flow_cell_run_directories.RunDirFlowCell."""
 from unittest import mock
 
-from cg.constants import HousekeeperTags
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 
 
@@ -88,5 +88,5 @@ def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, flow_cell_path, 
     flow_cell.hk.add_and_include_file_to_latest_version.assert_called_once_with(
         case_id=flow_cell.id,
         file=flow_cell.sample_sheet_path,
-        tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET, flow_cell.id],
+        tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, flow_cell.id],
     )

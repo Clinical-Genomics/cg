@@ -1,10 +1,18 @@
-"""Tags for storing analyses in Housekeeper"""
+"""File tags for files in Housekeeper."""
 
 from typing import List
 
 from cgmodels.cg.constants import Pipeline, StrEnum
 
-HK_FASTQ_TAGS = ["fastq"]
+
+class SequencingFileTag(StrEnum):
+    FASTQ: str = "fastq"
+    SAMPLESHEET: str = "samplesheet"
+    SPRING: str = "spring"
+    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
+
+
+HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
 HK_DELIVERY_REPORT_TAG = "delivery-report"
 

@@ -8,7 +8,7 @@ import pytest
 from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store

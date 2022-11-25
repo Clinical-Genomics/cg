@@ -1,5 +1,5 @@
 """Module that handles data and information regarding flow cells and flow cell directories. Used to
-inspect and clean flow cell directories in demultiplexed runs """
+inspect and clean flow cell directories in demultiplexed runs."""
 import logging
 import re
 import shutil
@@ -11,10 +11,11 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants import FlowCellStatus, HousekeeperTags
+from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.constants.symbols import ASTERISK
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.store import Store
 
 FLOW_CELL_IDENTIFIER_POSITION = 3
@@ -224,12 +225,12 @@ class DemultiplexedRunsFlowCell:
 
     def remove_files_from_housekeeper(self):
         """Remove fastq files and the sample sheet from Housekeeper when deleting a
-        flow cell from demultiplexed-runs"""
+        flow cell from demultiplexed-runs."""
         if self.fastq_files_exist_in_housekeeper:
             for fastq_file in self.hk_fastq_files:
                 LOG.info(f"Removing {fastq_file} from Housekeeper.")
                 self.hk.delete_file(fastq_file.id)
-            sample_sheets = self.hk.files(tags=[self.id, HousekeeperTags.SAMPLESHEET])
+            sample_sheets = self.hk.files(tags=[self.id, SequencingFileTag.SAMPLESHEET])
             for sample_sheet in sample_sheets:
                 LOG.info(f"Removing {sample_sheet} from Housekeeper.")
                 self.hk.delete_file(sample_sheet.id)
@@ -301,6 +302,6 @@ class DemultiplexedRunsFlowCell:
             hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
             if self.hk.files(path=str(sample_sheet_path)).first() is None:
                 LOG.info(f"Adding archived sample sheet: {str(sample_sheet_path)}")
-                tags: List[str] = [HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id]
+                tags: List[str] = [SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id]
                 self.hk.add_file(path=str(sample_sheet_path), version_obj=hk_version, tags=tags)
         self.hk.commit()

@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List
 
-from cg.constants import HK_FASTQ_TAGS
+from cg.constants import HK_FASTQ_TAGS, FileExtensions
 from cg.constants.compression import (
     FASTQ_DATETIME_DELTA,
     FASTQ_FIRST_READ_SUFFIX,
@@ -39,27 +39,26 @@ def get_hk_files_dict(
 
 
 def is_file_in_version(version_obj: hk_models.Version, path: Path) -> bool:
-    """Check if a file is in a certain version"""
-    for file_obj in version_obj.files:
-        if file_obj.path == str(path):
-            return True
-    return False
+    """Check if a file is in a certain version."""
+    return any(file_obj.path == str(path) for file_obj in version_obj.files)
 
 
 # Functions to get FASTQ like files
 
 
 def get_spring_paths(version_obj: hk_models.Version) -> List[CompressionData]:
-    """Get all SPRING paths for a sample"""
+    """Get all SPRING paths for a sample."""
     hk_files_dict = get_hk_files_dict(tags=["spring"], version_obj=version_obj)
     spring_paths = []
 
     if hk_files_dict is None:
         return spring_paths
 
-    for file_path in hk_files_dict:
-        if file_path.suffix == ".spring":
-            spring_paths.append(CompressionData(file_path.with_suffix("")))
+    spring_paths.extend(
+        CompressionData(file_path.with_suffix(""))
+        for file_path in hk_files_dict
+        if file_path.suffix == FileExtensions.SPRING
+    )
 
     return spring_paths
 
