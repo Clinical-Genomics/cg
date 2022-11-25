@@ -76,11 +76,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return case_paths
 
-    def verify_case_paths_age(self, case_paths: List[Path], case_id: str) -> None:
-        old_date: datetime = datetime.now() - timedelta(days=21)
+    def verify_case_paths_age(self, case_paths: List[Path], case_id: str, ANALYSIS_DUE_DATE:int = 21) -> None:
+        """Check file age for a microsalt case."""
+        due_date: datetime = datetime.now() - timedelta(days=ANALYSIS_DUE_DATE)
         for case in case_paths:
             creation_date: datetime = datetime.fromtimestamp(os.path.getctime(case))
-            if creation_date > old_date:
+            if creation_date > due_date:
                 LOG.info(
                     f"All paths in {case_id} is not older than 21 days, skipping and going to next case!"
                 )
