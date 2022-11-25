@@ -2,13 +2,11 @@
 import logging
 
 import pytest
-from click.testing import CliRunner
-
 from cg.cli.set.base import sample
+from cg.constants import Priority
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
-from cg.constants import Priority
+from click.testing import CliRunner
 
 SUCCESS = 0
 
