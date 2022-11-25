@@ -167,13 +167,6 @@ def show_set_sample_help(sample_obj: models.Sample = "None") -> None:
 
     list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
 
-    LOG.info(f"\nSee example below:")
-    LOG.info(f"To set apptag use '{OPTION_SHORT_KEY_VALUE} application_version [APPTAG]")
-    LOG.info(f"To set customer use '{OPTION_SHORT_KEY_VALUE} customer [CUSTOMER]")
-    LOG.info(
-        f"To set priority use '{OPTION_SHORT_KEY_VALUE} priority [priority as text or " f"number]\n"
-    )
-
 
 @set_cmd.command()
 @click.option("-s", "--sample_id", help="List all available modifiable keys for sample")
@@ -210,7 +203,14 @@ def sample(
     skip_lims: bool,
     yes: bool,
 ):
-    """Set key values on a sample"""
+    """Set key values on a sample
+
+    \b
+    To set apptag use: -kv application_version [APPTAG]
+    To set customer use: -kv customer [CUSTOMER]
+    To set priority use: -kv priority [priority as text or number]
+
+    """
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
 
