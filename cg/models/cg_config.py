@@ -122,6 +122,7 @@ class BalsamicConfig(CommonAppConfig):
     bed_path: str
     pon_path: str
     loqusdb_path: str
+    swegen_path: str
     binary_path: str
     conda_env: str
     slurm: SlurmConfig

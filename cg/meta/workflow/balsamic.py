@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
+from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat
 from cg.constants.tags import BalsamicAnalysisTag
@@ -50,6 +51,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.bed_path = config.balsamic.bed_path
         self.pon_path = config.balsamic.pon_path
         self.loqusdb_path = config.balsamic.loqusdb_path
+        self.swegen_path = config.balsamic.swegen_path
 
     @property
     def root(self) -> str:
@@ -434,17 +436,14 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if sample_obj:
             return sample_obj.internal_id
 
-    def get_latest_observations_export_file(self, observations_pattern: str) -> Optional[str]:
-        """
-        Returns the latest Loqusdb dump file (loqusdb_<observations>_export-<date>-.vcf.gz) matching an
-        observations pattern.
-        """
+    @staticmethod
+    def get_latest_file_by_pattern(directory: Path, pattern: str) -> Optional[str]:
+        """Returns the latest file (<file_name>-<date>-.vcf) matching a pattern from a specific directory."""
         available_files: iter = sorted(
-            Path(self.loqusdb_path).glob(f"*{observations_pattern}*"),
+            Path(directory).glob(f"*{pattern}*.vcf"),
             key=lambda file: file.stem.split("-"),
             reverse=True,
         )
-
         return str(available_files[0]) if available_files else None
 
     def get_parsed_observation_file_paths(self, observations: List[str]) -> dict:
@@ -454,13 +453,29 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
                 {
-                    wildcard.replace("_", "-") + "-observations": file_path
+                    wildcard: file_path
                     if file_path
-                    else self.get_latest_observations_export_file(wildcard)
+                    else self.get_latest_file_by_pattern(
+                        directory=self.loqusdb_path, pattern=wildcard
+                    )
                 }
             )
 
         return verified_observations
+
+    def get_parsed_swegen_paths(self) -> dict:
+        """Returns a verified {option: path} SweGen dictionary."""
+        return {
+            "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
+            "swegen_sv": self.get_swegen_verified_path(Variants.SV),
+        }
+
+    def get_swegen_verified_path(self, variants: Variants) -> Optional[str]:
+        """Return verified SweGen path."""
+        swegen_file: str = self.get_latest_file_by_pattern(
+            directory=self.swegen_path, pattern=variants
+        )
+        return swegen_file
 
     def get_verified_config_case_arguments(
         self,
@@ -500,8 +515,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
         }
 
-        if not verified_panel_bed:
+        if self.pipeline == Pipeline.BALSAMIC and not verified_panel_bed:
             args_dict.update(self.get_parsed_observation_file_paths(observations))
+            args_dict.update(self.get_parsed_swegen_paths())
 
         return args_dict
 
@@ -673,13 +689,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--umi-trim-length": arguments.get("umi_trim_length"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
-                "--clinical-snv-observations": arguments.get("clinical_snv_observations"),
-                "--clinical-sv-observations": arguments.get("clinical_sv_observations"),
-                "--cancer-all-snv-observations": arguments.get("cancer_all_snv_observations"),
-                "--cancer-somatic-snv-observations": arguments.get(
-                    "cancer_somatic_snv_observations"
-                ),
-                "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv_observations"),
+                "--swegen-snv": arguments.get("swegen_snv"),
+                "--swegen-sv": arguments.get("swegen_sv"),
+                "--clinical-snv-observations": arguments.get("clinical_snv"),
+                "--clinical-sv-observations": arguments.get("clinical_sv"),
+                "--cancer-all-snv-observations": arguments.get("cancer_all_snv"),
+                "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
+                "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
             }
         )
         parameters = command + options

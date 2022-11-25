@@ -1198,6 +1198,28 @@ def cg_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("cg")
 
 
+@pytest.fixture(scope="function", name="swegen_dir")
+def fixture_swegen_dir(tmpdir_factory, tmp_path) -> Path:
+    """SweGen temporary directory containing mocked reference files."""
+    return tmpdir_factory.mktemp("swegen")
+
+
+@pytest.fixture(scope="function", name="swegen_snv_reference")
+def fixture_swegen_snv_reference_path(swegen_dir: Path) -> Path:
+    """Return a temporary path to a SweGen SNV reference file."""
+    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(scope="function", name="swegen_sv_reference")
+def fixture_swegen_sv_reference_path(swegen_dir: Path) -> Path:
+    """Return a temporary path to a SweGen SV reference file."""
+    mock_file = Path(swegen_dir, "grch37_swegen_10k_sv_-20220101-.vcf")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
 @pytest.fixture(scope="function", name="observations_dir")
 def fixture_observations_dir(tmpdir_factory, tmp_path) -> Path:
     """Loqusdb temporary directory containing observations mock files."""
@@ -1307,6 +1329,7 @@ def fixture_context_config(
             "bed_path": str(cg_dir),
             "pon_path": str(cg_dir),
             "loqusdb_path": str(cg_dir),
+            "swegen_path": str(cg_dir),
             "conda_env": "S_Balsamic",
             "balsamic_cache": "hello",
             "slurm": {

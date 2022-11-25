@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants.observations import ObservationsFileWildcards
+from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
 from cg.exc import BalsamicStartError
 
@@ -22,7 +23,7 @@ def test_get_verified_gender():
     }
 
     # WHEN extracting the gender
-    retrieved_gender = BalsamicAnalysisAPI.get_verified_gender(sample_obj)
+    retrieved_gender: Gender = BalsamicAnalysisAPI.get_verified_gender(sample_obj)
 
     # THEN gender must match the expected one
     assert retrieved_gender == "female"
@@ -52,7 +53,7 @@ def test_get_verified_gender_unknown(caplog):
     }
 
     # WHEN extracting the gender
-    retrieved_gender = BalsamicAnalysisAPI.get_verified_gender(sample_obj)
+    retrieved_gender: Gender = BalsamicAnalysisAPI.get_verified_gender(sample_obj)
 
     # THEN gender must match the expected one
     assert retrieved_gender == Gender.FEMALE
@@ -68,7 +69,7 @@ def test_get_verified_pon():
     invalid_pon_cnn = "/path/PON/gmssolid_15.2_hg19_design_CNVkit_PON_reference_v2.cnn"
 
     # WHEN validating the PON
-    validated_pon = BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, pon_cnn)
+    validated_pon: str = BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, pon_cnn)
 
     # THEN the PON verification should be performed successfully
     assert pon_cnn == validated_pon
@@ -76,18 +77,19 @@ def test_get_verified_pon():
         BalsamicAnalysisAPI.get_verified_pon(None, panel_bed, invalid_pon_cnn)
 
 
-def test_get_latest_observations_export_file(
+def test_get_latest_file_by_pattern(
     cg_context: CGConfig, observations_dir: Path, observations_somatic_snv_file_path: Path
 ):
     """Test latest observations extraction."""
 
     # GIVEN a Loqusdb temporary directory and a cancer SNV file wildcard
-    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context)
-    balsamic_analysis_api.loqusdb_path = observations_dir
+    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
     wildcard = ObservationsFileWildcards.CANCER_SOMATIC_SNV
 
     # WHEN getting the latest observations file
-    observation: str = balsamic_analysis_api.get_latest_observations_export_file(wildcard)
+    observation: str = balsamic_analysis_api.get_latest_file_by_pattern(
+        directory=observations_dir, pattern=wildcard
+    )
 
     # THEN the extracted observation should match the latest file
     assert observation == observations_somatic_snv_file_path.as_posix()
@@ -103,22 +105,27 @@ def test_get_parsed_observation_file_paths_no_args(
     """Test verified observations extraction with no arguments."""
 
     # GIVEN a Loqusdb temporary directory
-    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context)
+    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
     balsamic_analysis_api.loqusdb_path = observations_dir
 
     # WHEN getting the latest observations arguments dictionary
     args: dict = balsamic_analysis_api.get_parsed_observation_file_paths(None)
 
     # THEN only the created observations files should be returned
-    assert args["clinical-snv-observations"] is None
-    assert args["clinical-sv-observations"] == observations_clinical_sv_file_path.as_posix()
-    assert args["cancer-all-snv-observations"] is None
-    assert args["cancer-somatic-snv-observations"] == observations_somatic_snv_file_path.as_posix()
+    assert args[ObservationsFileWildcards.CLINICAL_SNV] is None
+    assert (
+        args[ObservationsFileWildcards.CLINICAL_SV] == observations_clinical_sv_file_path.as_posix()
+    )
+    assert args[ObservationsFileWildcards.CANCER_ALL_SNV] is None
+    assert (
+        args[ObservationsFileWildcards.CANCER_SOMATIC_SNV]
+        == observations_somatic_snv_file_path.as_posix()
+    )
     assert (
         outdated_observations_somatic_snv_file_path.as_posix()
-        not in args["cancer-somatic-snv-observations"]
+        not in args[ObservationsFileWildcards.CANCER_SOMATIC_SNV]
     )
-    assert args["cancer-somatic-sv-observations"] is None
+    assert args[ObservationsFileWildcards.CANCER_SOMATIC_SV] is None
 
 
 def test_get_parsed_observation_file_paths_overwrite_input(
@@ -130,7 +137,7 @@ def test_get_parsed_observation_file_paths_overwrite_input(
     """Test verified observations extraction when providing a non default observation file."""
 
     # GIVEN a Loqusdb temporary directory and a custom Loqusdb file
-    balsamic_analysis_api = BalsamicAnalysisAPI(cg_context)
+    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
     balsamic_analysis_api.loqusdb_path = observations_dir
 
     # WHEN getting the latest observations dictionary
@@ -139,7 +146,47 @@ def test_get_parsed_observation_file_paths_overwrite_input(
     )
 
     # THEN the default file should be overwritten by the custom file
-    assert observations_clinical_snv_file_path.as_posix() not in args["clinical-snv-observations"]
     assert (
-        args["clinical-snv-observations"] == custom_observations_clinical_snv_file_path.as_posix()
+        observations_clinical_snv_file_path.as_posix()
+        not in args[ObservationsFileWildcards.CLINICAL_SNV]
     )
+    assert (
+        args[ObservationsFileWildcards.CLINICAL_SNV]
+        == custom_observations_clinical_snv_file_path.as_posix()
+    )
+
+
+def test_get_parsed_swegen_paths(
+    cg_context: CGConfig,
+    swegen_dir: Path,
+    swegen_snv_reference: Path,
+    swegen_sv_reference: Path,
+):
+    """Test verified SweGen files extraction."""
+
+    # GIVEN a Balsamic analysis API and a Swegen temporary directory
+    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
+    balsamic_analysis_api.swegen_path = swegen_dir
+
+    # WHEN getting the latest observations dictionary
+    args: dict = balsamic_analysis_api.get_parsed_swegen_paths()
+
+    # THEN the SNV and SV paths should be correctly retrieved
+    assert args["swegen_snv"] == swegen_snv_reference.as_posix()
+    assert args["swegen_sv"] == swegen_sv_reference.as_posix()
+
+
+def test_get_swegen_verified_path(
+    cg_context: CGConfig, swegen_dir: Path, swegen_snv_reference: Path
+):
+    """Test verified SweGen path return."""
+
+    # GIVEN A SNV variants pattern and a BALSAMIC analysis API
+    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
+    balsamic_analysis_api.swegen_path = swegen_dir
+
+    # WHEN obtaining the latest file by pattern
+    swegen_file: str = balsamic_analysis_api.get_swegen_verified_path(Variants.SNV)
+
+    # THEN the returned file should match the SweGen SNV reference
+    assert swegen_file == swegen_snv_reference.as_posix()
