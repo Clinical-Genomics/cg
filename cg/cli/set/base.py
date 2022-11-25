@@ -174,7 +174,9 @@ def list_keys(
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
     if list_keys:
-        list_changeable_sample_attributes(sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES)
+        list_changeable_sample_attributes(
+            sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES
+        )
 
 
 @set_cmd.command()
