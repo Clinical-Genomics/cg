@@ -50,7 +50,7 @@ class HousekeeperAPI:
         new_version: Version = self.new_version(created_at=new_bundle.created_at)
         new_bundle.versions.append(new_version)
         self.commit()
-        LOG.info("New bundle created with name %s", new_bundle.name)
+        LOG.info(f"New bundle created with name {new_bundle.name}")
         return new_bundle
 
     def set_to_archive(self, file: File, value: bool) -> None:

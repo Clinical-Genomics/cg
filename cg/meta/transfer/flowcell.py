@@ -105,12 +105,7 @@ class TransferFlowCell:
         """Store sample sheet for a run in Housekeeper."""
         hk_bundle = self.hk.bundle(flow_cell_id)
         if hk_bundle is None:
-            hk_bundle = self.hk.new_bundle(flow_cell_id)
-            self.hk.add_commit(hk_bundle)
-            new_version = self.hk.new_version(created_at=hk_bundle.created_at)
-            hk_bundle.versions.append(new_version)
-            self.hk.commit()
-            LOG.info(f"Added new Housekeeper bundle: {hk_bundle.name}")
+            hk_bundle = self.hk.create_new_bundle_and_version(name=flow_cell_id)
 
         with self.hk.session_no_autoflush():
             hk_version = hk_bundle.versions[0]
