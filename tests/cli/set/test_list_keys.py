@@ -1,4 +1,4 @@
-"""Test methods for cg/cli/set/sample"""
+"""Test methods for cg cli set list_keys"""
 import logging
 
 import pytest
