@@ -9,7 +9,7 @@ from cg.store import Store
 from click.testing import CliRunner
 
 from cg.constants import EXIT_SUCCESS
-
+from cg.constants.subject import Gender
 
 def test_list_keys_without_sample(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers, caplog
@@ -32,7 +32,7 @@ def test_list_keys_with_sample(
 ):
     # GIVEN a database with a sample
 
-    sample_obj = helpers.add_sample(base_store, gender="female")
+    sample_obj = helpers.add_sample(base_store, gender=Gender.FEMALE)
 
     # WHEN setting sample but skipping lims
     with caplog.at_level(logging.INFO):
