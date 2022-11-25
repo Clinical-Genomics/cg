@@ -77,7 +77,7 @@ def samples(
     yes: bool,
     case_id: str,
 ):
-    """Set values on many samples at the same time"""
+    """Set values on many samples at the same time."""
     store: Store = context.obj.status_db
     sample_objs = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
 
@@ -170,7 +170,7 @@ def list_keys(
     context: CGConfig,
     sample_id: Optional[str],
 ):
-    """List all available modifiable keys"""
+    """List all available modifiable keys."""
     status_db: Store = context.status_db
     sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
     if list_keys:
@@ -200,7 +200,7 @@ def sample(
     skip_lims: bool,
     yes: bool,
 ):
-    """Set key values on a sample
+    """Set key values on a sample.
 
     \b
     To set apptag use: -kv application_version [APPTAG]
@@ -298,7 +298,7 @@ def _update_comment(comment, obj):
 @click.argument("flowcell_name")
 @click.pass_obj
 def flowcell(context: CGConfig, flowcell_name: str, status: Optional[str]):
-    """Update information about a flowcell"""
+    """Update information about a flowcell."""
     status_db: Store = context.status_db
     flowcell_obj: models.Flowcell = status_db.flowcell(flowcell_name)
 
