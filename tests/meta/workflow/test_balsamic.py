@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.constants.loqus_upload import ObservationFileWildcards
+from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.subject import Gender
 from cg.exc import BalsamicStartError
 
@@ -84,7 +84,7 @@ def test_get_latest_observations_export_file(
     # GIVEN a Loqusdb temporary directory and a cancer SNV file wildcard
     balsamic_analysis_api = BalsamicAnalysisAPI(cg_context)
     balsamic_analysis_api.loqusdb_path = observations_dir
-    wildcard = ObservationFileWildcards.CANCER_SOMATIC_SNV
+    wildcard = ObservationsFileWildcards.CANCER_SOMATIC_SNV
 
     # WHEN getting the latest observations file
     observation: str = balsamic_analysis_api.get_latest_observations_export_file(wildcard)

@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 from pydantic import ValidationError
 from cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
-from cg.constants.loqus_upload import ObservationFileWildcards
+from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat
 from cg.constants.tags import BalsamicAnalysisTag
@@ -450,7 +450,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_parsed_observation_file_paths(self, observations: List[str]) -> dict:
         """Returns a verified {option: path} observations dictionary."""
         verified_observations = {}
-        for wildcard in list(ObservationFileWildcards):
+        for wildcard in list(ObservationsFileWildcards):
             file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
                 {
