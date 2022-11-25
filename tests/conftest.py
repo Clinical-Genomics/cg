@@ -1207,7 +1207,7 @@ def fixture_swegen_dir(tmpdir_factory, tmp_path) -> Path:
 @pytest.fixture(scope="function", name="swegen_snv_reference")
 def fixture_swegen_snv_reference_path(swegen_dir: Path) -> Path:
     """Return a temporary path to a SweGen SNV reference file."""
-    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf")
+    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1215,7 +1215,7 @@ def fixture_swegen_snv_reference_path(swegen_dir: Path) -> Path:
 @pytest.fixture(scope="function", name="swegen_sv_reference")
 def fixture_swegen_sv_reference_path(swegen_dir: Path) -> Path:
     """Return a temporary path to a SweGen SV reference file."""
-    mock_file = Path(swegen_dir, "grch37_swegen_10k_sv_-20220101-.vcf")
+    mock_file = Path(swegen_dir, "grch37_swegen_10k_sv_-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1229,7 +1229,7 @@ def fixture_observations_dir(tmpdir_factory, tmp_path) -> Path:
 @pytest.fixture(scope="function", name="observations_clinical_snv_file_path")
 def fixture_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to a clinical SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_clinical_snv_export-20220101-.vcf")
+    mock_file = Path(observations_dir, "loqusdb_clinical_snv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1237,7 +1237,7 @@ def fixture_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
 @pytest.fixture(scope="function", name="observations_clinical_sv_file_path")
 def fixture_observations_clinical_sv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to a clinical SV file."""
-    mock_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf")
+    mock_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1245,7 +1245,7 @@ def fixture_observations_clinical_sv_file_path(observations_dir: Path) -> Path:
 @pytest.fixture(scope="function", name="observations_somatic_snv_file_path")
 def fixture_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to a cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf")
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1253,7 +1253,7 @@ def fixture_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
 @pytest.fixture(scope="function", name="outdated_observations_somatic_snv_file_path")
 def fixture_outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to an outdated cancer somatic SNV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf")
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1261,7 +1261,7 @@ def fixture_outdated_observations_somatic_snv_file_path(observations_dir: Path) 
 @pytest.fixture(scope="function", name="observations_somatic_sv_file_path")
 def fixture_observations_somatic_sv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to a cancer somatic SV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_sv_export-20180101-.vcf")
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_sv_export-20180101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 
@@ -1269,7 +1269,7 @@ def fixture_observations_somatic_sv_file_path(observations_dir: Path) -> Path:
 @pytest.fixture(scope="function", name="custom_observations_clinical_snv_file_path")
 def fixture_custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
     """Return a custom path for the clinical SNV observations file."""
-    return Path(observations_dir, "clinical_snv_export-19990101-.vcf")
+    return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
 @pytest.fixture(scope="function")

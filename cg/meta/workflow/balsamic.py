@@ -438,9 +438,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def get_latest_file_by_pattern(directory: Path, pattern: str) -> Optional[str]:
-        """Returns the latest file (<file_name>-<date>-.vcf) matching a pattern from a specific directory."""
+        """Returns the latest file (<file_name>-<date>-.vcf.gz) matching a pattern from a specific directory."""
         available_files: iter = sorted(
-            Path(directory).glob(f"*{pattern}*.vcf"),
+            Path(directory).glob(f"*{pattern}*.vcf.gz"),
             key=lambda file: file.stem.split("-"),
             reverse=True,
         )
