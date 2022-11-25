@@ -8,7 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
-SUCCESS = 0
+from cg.constants import EXIT_SUCCESS
 
 
 def test_list_keys_without_sample(
@@ -41,7 +41,7 @@ def test_list_keys_with_sample(
         )
 
     # THEN it should not fail on not having a sample as argument
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN the flags should have been mentioned in the output
     assert "-kv" in caplog.text

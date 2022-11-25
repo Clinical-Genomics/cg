@@ -8,7 +8,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
-SUCCESS = 0
+from cg.constants import EXIT_SUCCESS
 
 
 def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):
@@ -19,7 +19,7 @@ def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):
     result = cli_runner.invoke(sample, [sample_id], obj=base_context)
 
     # THEN it should complain on invalid sample
-    assert result.exit_code != SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
 
 
 def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
@@ -37,7 +37,7 @@ def test_skip_lims(cli_runner: CliRunner, base_context: CGConfig, base_store: St
     )
 
     # THEN update sample should have no recorded update key and value
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert base_context.lims_api.get_updated_sample_key() != key
     assert base_context.lims_api.get_updated_sample_value() != new_value
 
@@ -58,7 +58,7 @@ def test_set_sample(cli_runner: CliRunner, base_context: CGConfig, base_store: S
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert getattr(sample_obj, key) == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == new_value
@@ -81,7 +81,7 @@ def test_set_boolean_sample(
     )
 
     # THEN it should have new_value as attribute key on the sample
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert getattr(sample_obj, "no_invoice") == value
 
 
@@ -99,7 +99,7 @@ def test_sex(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, h
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert getattr(sample_obj, key) == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == new_value
@@ -118,7 +118,7 @@ def test_priority_text(cli_runner: CliRunner, base_context: CGConfig, base_store
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert sample_obj.priority_human == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == sample_obj.priority_human
@@ -139,7 +139,7 @@ def test_priority_number(cli_runner: CliRunner, base_context: CGConfig, base_sto
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert sample_obj.priority == new_value
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == sample_obj.priority_human
@@ -157,7 +157,7 @@ def test_sample_comment(cli_runner: CliRunner, base_context: CGConfig, base_stor
     )
 
     # THEN it should have new_value as attribute key on the sample and in LIMS
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert getattr(sample_obj, key).endswith(new_value)
     assert base_context.lims_api.get_updated_sample_key() == key
     assert base_context.lims_api.get_updated_sample_value() == new_value
@@ -181,7 +181,7 @@ def test_sample_comment_append(
 
     # THEN it should have new_value above old_value as attribute key on the sample and in LIMS
     comments = getattr(sample_obj, key).split("\n")
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert comments[0].endswith(new_value)
     assert comments[1].endswith(old_value)
     assert base_context.lims_api.get_updated_sample_key() == key
@@ -202,7 +202,7 @@ def test_invalid_customer(
     )
 
     # THEN it should error about missing customer instead of setting the value
-    assert result.exit_code != SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
     assert base_store.Sample.query.first().customer.internal_id != customer_id
 
 
@@ -218,7 +218,7 @@ def test_customer(cli_runner: CliRunner, base_context: CGConfig, base_store: Sto
     )
 
     # THEN it should set the customer of the sample
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert base_store.Sample.query.first().customer.internal_id == customer_id
 
 
@@ -232,7 +232,7 @@ def test_invalid_downsampled_to(cli_runner: CliRunner, base_context: CGConfig):
     )
 
     # THEN wrong data type
-    assert result.exit_code != SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
 
 
 def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
@@ -247,7 +247,7 @@ def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_stor
     )
 
     # THEN the value should have been set on the sample
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert base_store.Sample.query.first().downsampled_to == downsampled_to
 
 
@@ -265,7 +265,7 @@ def test_reset_downsampled_to(
     )
 
     # THEN the value should have been set on the sample
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert not base_store.Sample.query.first().downsampled_to
 
 
@@ -285,7 +285,7 @@ def test_invalid_application(
     )
 
     # THEN it should error about missing application instead of setting the value
-    assert result.exit_code != SUCCESS
+    assert result.exit_code != EXIT_SUCCESS
     assert base_store.Sample.query.first().application_version.application.tag != application_tag
 
 
@@ -311,7 +311,7 @@ def test_application(cli_runner: CliRunner, base_context: CGConfig, base_store: 
     )
 
     # THEN the application should have been set in status db
-    assert result.exit_code == SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     assert sample_obj.application_version.application.tag == application_tag
     # THEN the application should have been set in LIMS
     assert base_context.lims_api.get_updated_sample_key() == "application"
