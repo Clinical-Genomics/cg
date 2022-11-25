@@ -645,7 +645,7 @@ def fixture_rna_dna_sample_case_map(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
 ) -> Dict[str, List[str]]:
-    """Return a valid rna-dna case map"""
+    """Return a valid RNA-DNA case map."""
     rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
 
     # WHEN adding the RNA sample rna_dna_case_map

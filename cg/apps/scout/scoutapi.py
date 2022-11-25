@@ -111,7 +111,7 @@ class ScoutAPI:
 
     def get_causative_variants(self, case_id: str) -> List[Variant]:
         """
-        Get causative variants for a case
+        Get causative variants for a case.
         """
         get_causatives_command = ["export", "variants", "--json", "--case-id", case_id]
         try:
@@ -174,15 +174,15 @@ class ScoutAPI:
 
     def get_solved_cases(self, days_ago: int) -> List[ScoutExportCase]:
         """
-        Get cases solved within chosen timespan
+        Get cases solved within chosen time span.
         """
         return self.get_cases(status="solved", days_ago=days_ago)
 
     def upload_delivery_report(self, report_path: str, case_id: str, update: bool = False) -> None:
-        """Load a delivery report into a case in the database
+        """Load a delivery report into a case in the database.
         If the report already exists the function will exit.
         If the user want to load a report that is already in the database
-        'update' has to be 'True'
+        'update' has to be 'True'.
         """
 
         upload_command: List[str] = ["load", "delivery-report", case_id, report_path]
@@ -210,7 +210,7 @@ class ScoutAPI:
     def upload_fusion_report(
         self, case_id: str, report_path: str, research: bool, update: bool
     ) -> None:
-        """Load a fusion report into a case in the database"""
+        """Load a fusion report into a case in the database."""
 
         upload_command: List[str] = ["load", "gene-fusion-report"]
 
@@ -225,8 +225,8 @@ class ScoutAPI:
         try:
             LOG.info(f"Uploading fusion report {report_path} to case {case_id}")
             self.process.run_command(upload_command)
-        except CalledProcessError as e:
-            raise ScoutUploadError("Something went wrong when uploading fusion report") from e
+        except CalledProcessError as error:
+            raise ScoutUploadError("Something went wrong when uploading fusion report") from error
 
     def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
         """Load a splice junctions bed file into a case in the database."""
@@ -245,10 +245,10 @@ class ScoutAPI:
         try:
             LOG.info("Uploading splice junctions bed file {file_path} to case {case_id}")
             self.process.run_command(upload_command)
-        except CalledProcessError as e:
+        except CalledProcessError as error:
             raise ScoutUploadError(
                 "Something went wrong when uploading splice junctions bed file"
-            ) from e
+            ) from error
 
     def upload_rna_coverage_bigwig(self, file_path: str, case_id: str, customer_sample_id: str):
         """Load a rna coverage bigwig file into a case in the database."""
@@ -267,7 +267,7 @@ class ScoutAPI:
         try:
             LOG.info(f"Uploading rna coverage bigwig file {file_path} to case {case_id}")
             self.process.run_command(upload_command)
-        except CalledProcessError as e:
+        except CalledProcessError as error:
             raise ScoutUploadError(
                 "Something went wrong when uploading rna coverage bigwig file"
-            ) from e
+            ) from error
