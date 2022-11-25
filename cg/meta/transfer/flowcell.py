@@ -7,6 +7,7 @@ from typing import List
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.store import Store, models
@@ -24,12 +25,10 @@ class TransferFlowCell:
 
     def transfer(self, flow_cell_id: str, store: bool = True) -> models.Flowcell:
         """Populate the database with the information."""
-        if store and self.hk.tag(SequencingFileTag.FASTQ) is None:
-            self.hk.add_commit(self.hk.new_tag(SequencingFileTag.FASTQ))
-        if store and self.hk.tag(SequencingFileTag.SAMPLESHEET) is None:
-            self.hk.add_commit(self.hk.new_tag(SequencingFileTag.SAMPLESHEET))
-        if store and self.hk.tag(flow_cell_id) is None:
-            self.hk.add_commit(self.hk.new_tag(flow_cell_id))
+        for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id]:
+            if store and self.hk.tag(name=tag) is None:
+                self.hk.add_commit(self.hk.new_tag(tag))
+
         stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
         flow_cell: models.Flowcell = self.db.flowcell(flow_cell_id)
 
@@ -42,9 +41,9 @@ class TransferFlowCell:
             )
         flow_cell.status = FlowCellStatus.ONDISK
 
-        sample_sheet_path = self._sample_sheet_path(flow_cell_id)
-        if not Path(sample_sheet_path).exists():
-            LOG.warning(f"Unable to find sample sheet: {sample_sheet_path}")
+        sample_sheet_path: Path = self._sample_sheet_path(flow_cell_id)
+        if not sample_sheet_path.exists():
+            LOG.warning(f"Unable to find sample sheet: {sample_sheet_path.as_posix()}")
         elif store:
             self.store_samplesheet(flow_cell_id, sample_sheet_path)
 
@@ -90,20 +89,20 @@ class TransferFlowCell:
             new_version = self.hk.new_version(created_at=hk_bundle.created_at)
             hk_bundle.versions.append(new_version)
             self.hk.commit()
-            LOG.info(f"added new Housekeeper bundle: {hk_bundle.name}")
+            LOG.info(f"Added new Housekeeper bundle: {hk_bundle.name}")
 
         with self.hk.session_no_autoflush():
             hk_version = hk_bundle.versions[0]
             for fastq_file in fastq_files:
                 if self.hk.files(path=fastq_file).first() is None:
-                    LOG.info(f"found FASTQ file: {fastq_file}")
-                    tags = [self.hk.tag("fastq"), self.hk.tag(flow_cell_id)]
+                    LOG.info(f"Found FASTQ file: {fastq_file}")
+                    tags = [self.hk.tag(SequencingFileTag.FASTQ), self.hk.tag(flow_cell_id)]
                     new_file = self.hk.new_file(path=fastq_file, tags=tags)
                     hk_version.files.append(new_file)
             self.hk.commit()
 
-    def store_samplesheet(self, flow_cell_id: str, sample_sheet_path: str):
-        """Store samplesheet for a run in Housekeeper"""
+    def store_samplesheet(self, flow_cell_id: str, sample_sheet_path: Path):
+        """Store sample sheet for a run in Housekeeper."""
         hk_bundle = self.hk.bundle(flow_cell_id)
         if hk_bundle is None:
             hk_bundle = self.hk.new_bundle(flow_cell_id)
@@ -111,21 +110,23 @@ class TransferFlowCell:
             new_version = self.hk.new_version(created_at=hk_bundle.created_at)
             hk_bundle.versions.append(new_version)
             self.hk.commit()
-            LOG.info(f"added new Housekeeper bundle: {hk_bundle.name}")
+            LOG.info(f"Added new Housekeeper bundle: {hk_bundle.name}")
 
         with self.hk.session_no_autoflush():
             hk_version = hk_bundle.versions[0]
-            if self.hk.files(path=sample_sheet_path).first() is None:
-                LOG.info(f"Adding samplesheet: {sample_sheet_path}")
-                tags = [self.hk.tag("samplesheet"), self.hk.tag(flow_cell_id)]
-                new_file = self.hk.new_file(path=sample_sheet_path, tags=tags)
+            if self.hk.files(path=sample_sheet_path.as_posix()).first() is None:
+                LOG.info(f"Adding sample sheet: {sample_sheet_path.as_posix()}")
+                tags = [self.hk.tag(SequencingFileTag.SAMPLESHEET), self.hk.tag(flow_cell_id)]
+                new_file = self.hk.new_file(path=sample_sheet_path.as_posix(), tags=tags)
                 hk_version.files.append(new_file)
         self.hk.commit()
 
-    def _sample_sheet_path(self, flow_cell_id: str) -> str:
-        """Construct the path to the samplesheet to be stored."""
+    def _sample_sheet_path(self, flow_cell_id: str) -> Path:
+        """Construct the path to the sample sheet to be stored."""
         run_name: str = self.stats.run_name(flow_cell_id)
         document_path: str = self.stats.document_path(flow_cell_id)
         unaligned_dir: str = Path(document_path).name
         root_dir: Path = self.stats.root_dir
-        return str(root_dir.joinpath(run_name, unaligned_dir, "SampleSheet.csv"))
+        return root_dir.joinpath(
+            run_name, unaligned_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )

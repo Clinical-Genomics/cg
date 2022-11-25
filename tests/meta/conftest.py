@@ -9,6 +9,7 @@ from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
+from cg.constants.sequencing import Sequencers
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
@@ -107,21 +108,29 @@ def fixture_binary_path() -> str:
     return "/usr/bin/binary"
 
 
+@pytest.fixture(name="yet_another_flow_cell_id")
+def fixture_yet_another_flow_cell_id() -> str:
+    """Return flow cell id."""
+    return "HJKMYBCXX"
+
+
 @pytest.fixture(name="stats_sample_data")
-def fixture_stats_sample_data(sample_id: str, flow_cell_id: str) -> dict:
+def fixture_stats_sample_data(
+    sample_id: str, flow_cell_id: str, yet_another_flow_cell_id: str
+) -> dict:
     return {
         "samples": [
             {
                 "name": sample_id,
                 "index": "ACGTACAT",
                 "flowcell": flow_cell_id,
-                "type": "hiseqx",
+                "type": Sequencers.HISEQX,
             },
             {
                 "name": "ADM1136A3",
                 "index": "ACGTACAT",
-                "flowcell": "HJKMYBCXX",
-                "type": "hiseqx",
+                "flowcell": yet_another_flow_cell_id,
+                "type": Sequencers.HISEQX,
             },
         ]
     }

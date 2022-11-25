@@ -326,7 +326,7 @@ def test_post_process_flow_cell_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = tmp_file.as_posix()
+    TransferFlowCell._sample_sheet_path.return_value = tmp_file
 
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
@@ -376,7 +376,7 @@ def test_post_process_flow_cell(
     ).mkdir(parents=True, exist_ok=True)
 
     mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = tmp_file.as_posix()
+    TransferFlowCell._sample_sheet_path.return_value = tmp_file
 
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(

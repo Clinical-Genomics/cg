@@ -2,29 +2,38 @@
 from datetime import datetime
 import warnings
 from pathlib import Path
+from typing import Generator
 
-import mock
 from sqlalchemy import exc as sa_exc
 
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.meta.transfer import TransferFlowCell
 from cg.store import Store
 
 
-@mock.patch("pathlib.Path.exists")
-@mock.patch("cg.meta.transfer.flowcell.TransferFlowCell._sample_sheet_path")
 def test_transfer_flow_cell(
-    mock_sample_sheet_path, mock_path_exists, flowcell_store: Store, transfer_flow_cell_api
+    flowcell_store: Store,
+    mocker,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
+    yet_another_flow_cell_id: str,
 ):
 
     # GIVEN a store with a received but not sequenced sample
-    flowcell_id = "HJKMYBCXX"
+    flowcell_id = yet_another_flow_cell_id
     housekeeper_api = transfer_flow_cell_api.hk
     assert flowcell_store.samples().count() == 2
     assert flowcell_store.flowcells().count() == 0
     assert housekeeper_api.bundles().count() == 0
 
-    # AND a samplesheet
-    mock_sample_sheet_path.return_value = "/path/to/samplesheet.csv"
-    mock_path_exists.return_vale = True
+    # AND a sample sheet
+    mock_sample_sheet = Path("path", "to", DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+    Path("path", "to").mkdir(parents=True, exist_ok=True)
+    mock_sample_sheet.touch()
+    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
+    TransferFlowCell._sample_sheet_path.return_value = mock_sample_sheet
+
+    # mock_sample_sheet_path.return_value = "/path/to/samplesheet.csv"
+    # mock_path_exists.return_vale = True
 
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
