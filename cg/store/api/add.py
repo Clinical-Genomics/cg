@@ -1,6 +1,6 @@
 import datetime as dt
 import logging
-from typing import List, Optional, Literal
+from typing import List, Optional
 
 import petname
 
@@ -206,7 +206,7 @@ class AddHandler(BaseHandler):
         sequencer_name: str,
         sequencer_type: str,
         date: dt.datetime,
-        flow_cell_status: Optional[Literal[FlowCellStatus]] = FlowCellStatus.ONDISK,
+        flow_cell_status: Optional[str] = FlowCellStatus.ONDISK,
     ) -> Flowcell:
         """Build a new Flowcell record."""
         return self.Flowcell(
