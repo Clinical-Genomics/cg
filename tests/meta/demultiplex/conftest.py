@@ -114,7 +114,7 @@ def fixture_populated_flow_cell_store(
     )
     helpers.add_flowcell(
         store=populated_flow_cell_store,
-        flowcell_id=flow_cell_id,
+        flow_cell_id=flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -138,7 +138,7 @@ def fixture_active_flow_cell_store(
     )
     helpers.add_flowcell(
         store=active_flow_cell_store,
-        flowcell_id=flow_cell_id,
+        flow_cell_id=flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )

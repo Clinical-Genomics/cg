@@ -20,11 +20,11 @@ def test_add_flowcell(
 
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
-        name=flow_cell_id,
-        sequencer=sequencer_name,
+        flow_cell_id=flow_cell_id,
+        sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
-        status=FlowCellStatus.ONDISK,
+        flow_cell_status=FlowCellStatus.ONDISK,
     )
 
     # THEN flow cell should be returned
@@ -41,17 +41,17 @@ def test_add_flowcell_status(
     sequencer_name: str,
     timestamp_now: datetime,
 ):
-    """Test adding a flow cell with a status to the database."""
+    """Test adding a flow cell with a statusto the database."""
 
     # GIVEN a database with no flow cell
 
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
-        name=flow_cell_id,
-        sequencer=sequencer_name,
+        flow_cell_id=flow_cell_id,
+        sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
-        status=FlowCellStatus.PROCESSING,
+        flow_cell_status=FlowCellStatus.PROCESSING,
     )
 
     # THEN the flow cell status should be "processing"

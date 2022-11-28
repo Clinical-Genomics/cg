@@ -9,6 +9,7 @@ from cg.store import models
 from cg.store.api.base import BaseHandler
 
 from cg.constants import Priority
+from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -201,19 +202,19 @@ class AddHandler(BaseHandler):
 
     def add_flow_cell(
         self,
-        name: str,
-        sequencer: str,
+        flow_cell_id: str,
+        sequencer_name: str,
         sequencer_type: str,
         date: dt.datetime,
-        status: Optional[Literal[FlowCellStatus]] = FlowCellStatus.ONDISK,
-    ) -> models.Flowcell:
+        flow_cell_status: Optional[Literal[FlowCellStatus]] = FlowCellStatus.ONDISK,
+    ) -> Flowcell:
         """Build a new Flowcell record."""
         return self.Flowcell(
-            name=name,
-            sequencer_name=sequencer,
+            name=flow_cell_id,
+            sequencer_name=sequencer_name,
             sequencer_type=sequencer_type,
             sequenced_at=date,
-            status=status,
+            status=flow_cell_status,
         )
 
     def add_analysis(

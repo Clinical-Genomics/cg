@@ -7,9 +7,12 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
+from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
+
+from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -510,28 +513,28 @@ class StoreHelpers:
     @staticmethod
     def add_flowcell(
         store: Store,
-        flowcell_id: str = "flowcell_test",
+        flow_cell_id: str = "flowcell_test",
         archived_at: datetime = None,
-        sequencer_type: str = "hiseqx",
+        sequencer_type: str = Sequencers.HISEQX,
         samples: list = None,
         status: str = None,
         date: datetime = datetime.now(),
-    ) -> models.Flowcell:
-        """Utility function to set a flow cell to use in tests."""
-        flowcell_obj = store.add_flow_cell(
-            name=flowcell_id,
-            sequencer="dummy_sequencer",
+    ) -> Flowcell:
+        """Utility function to add a flow cell to the store and return an object."""
+        flow_cell = store.add_flow_cell(
+            flow_cell_id=flow_cell_id,
+            sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,
         )
-        flowcell_obj.archived_at = archived_at
+        flow_cell.archived_at = archived_at
         if samples:
-            flowcell_obj.samples = samples
+            flow_cell.samples = samples
         if status:
-            flowcell_obj.status = status
+            flow_cell.status = status
 
-        store.add_commit(flowcell_obj)
-        return flowcell_obj
+        store.add_commit(flow_cell)
+        return flow_cell
 
     @staticmethod
     def add_relationship(

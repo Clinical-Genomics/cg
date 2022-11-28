@@ -36,11 +36,11 @@ class TransferFlowCell:
 
         if flow_cell is None:
             flow_cell: models.Flowcell = self.db.add_flow_cell(
-                name=flow_cell_id,
-                sequencer=stats_data.sequencer,
+                flow_cell_id=flow_cell_id,
+                sequencer_name=stats_data.sequencer,
                 sequencer_type=stats_data.sequencer_type,
                 date=stats_data.date,
-                status=FlowCellStatus.ONDISK,
+                flow_cell_status=FlowCellStatus.ONDISK,
             )
 
         sample_sheet_path: Path = self._sample_sheet_path(flow_cell_id)

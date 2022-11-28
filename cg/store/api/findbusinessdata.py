@@ -229,7 +229,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
         """Return flow cell."""
         return apply_flow_cell_filter(
-            flow_cells=self.Flowcell.query, flow_cell_id=flow_cell_id, function="flow_cell_has_name"
+            flow_cells=self.Flowcell.query, flow_cell_id=flow_cell_id, function="flow_cell_has_id"
         )
 
     def flowcells(
