@@ -85,10 +85,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             creation_date: datetime = datetime.fromtimestamp(os.path.getmtime(case))
             if creation_date > due_date:
                 LOG.info(
-                    f"All paths in {case_id} is not older than 21 days, skipping and going to next case!"
+                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
                 )
                 raise FileNotFoundError(
-                    f"All paths in {case_id} is not older than 21 days, skipping and going to next case!"
+                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
                 )
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
