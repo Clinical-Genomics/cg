@@ -113,17 +113,14 @@ def test_clean_run(
 
 
 def test_verify_case_paths_age(
-    caplog, clean_context_microsalt: CGConfig, microsalt_case_clean: str, tmpdir_factory
+    clean_context_microsalt: CGConfig, microsalt_case_clean: str, tmpdir_factory
 ):
     # GIVEN a list of run_dir paths for a microsalt case
-    caplog.set_level(logging.INFO)
     run_dir = [tmpdir_factory.mktemp("microsalt_case")]
 
+    # WHEN at least one of the paths is younger than 21 days
     with pytest.raises(FileNotFoundError):
-        # WHEN at least one of the paths is younger than 21 days
+        # THEN a FileNotFoundError should be raised
         clean_context_microsalt.meta_apis["analysis_api"].verify_case_paths_age(
             run_dir, microsalt_case_clean
         )
-
-    # THEN a FileNotFoundError should be raised and logged in the log
-    assert "is not older than 21 days, skipping and going to next case!" in caplog.text
