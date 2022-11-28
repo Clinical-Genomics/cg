@@ -11,6 +11,7 @@ from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
 
 from cg.store.models import Flowcell
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -227,7 +228,9 @@ class FindBusinessDataHandler(BaseHandler):
 
     def flowcell(self, name: str) -> Flowcell:
         """Fetch a flowcell by name."""
-        return self.Flowcell.query.filter(models.Flowcell.name == name).first()
+        return apply_flow_cell_filter(
+            flow_cells=self.Flowcell.query, flow_cell_id=name, function="flow_cell_has_name"
+        )
 
     def flowcells(
         self, *, status: str = None, family: models.Family = None, enquiry: str = None
