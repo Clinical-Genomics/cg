@@ -1,6 +1,7 @@
 """Fixtures for the meta tests."""
 import datetime as dt
 from datetime import datetime
+from pathlib import Path
 from typing import Generator
 
 import pytest
@@ -8,6 +9,7 @@ import pytest
 from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.sequencing import Sequencers
 from cg.meta.transfer import TransferFlowCell
@@ -97,6 +99,7 @@ def fixture_mip_hk_store(
 
 @pytest.fixture()
 def mip_analysis_api(context_config, mip_hk_store, analysis_store):
+    """Return a MIP analysis API."""
     analysis_api = MipDNAAnalysisAPI(context_config)
     analysis_api.housekeeper_api = mip_hk_store
     analysis_api.status_db = analysis_store
@@ -105,8 +108,16 @@ def mip_analysis_api(context_config, mip_hk_store, analysis_store):
 
 @pytest.fixture(name="binary_path")
 def fixture_binary_path() -> str:
-    """Return the string of a path to a (fake) binary"""
-    return "/usr/bin/binary"
+    """Return the string of a path to a (fake) binary."""
+    return Path("usr", "bin", "binary").as_posix()
+
+
+@pytest.fixture(name="create_sample_sheet_file")
+def fixture_create_sample_sheet_file(tmpdir_factory) -> Generator[Path, None, None]:
+    output_dir = tmpdir_factory.mktemp("path", "to")
+    file_path = Path(output_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+    file_path.touch(exist_ok=True)
+    yield file_path
 
 
 @pytest.fixture(name="yet_another_flow_cell_id")
@@ -225,5 +236,5 @@ def fixture_flowcell_store(
 def fixture_transfer_flow_cell_api(
     flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
 ) -> Generator[TransferFlowCell, None, None]:
-    """Setup flow cell transfer API."""
+    """Setup transfer flow cell API."""
     yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)

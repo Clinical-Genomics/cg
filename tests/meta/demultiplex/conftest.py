@@ -77,12 +77,6 @@ def fixture_tmp_flow_cell_run_path(project_dir: Path, flow_cell_full_name: str) 
     return tmp_flow_cell_run_path
 
 
-@pytest.fixture(name="flow_cell_project_id")
-def fixture_flow_cell_project_id() -> int:
-    """Return flow cell run project id."""
-    return 174578
-
-
 @pytest.fixture(name="cgstats_select_project_log_file")
 def fixture_cgstats_select_project_log_file(flow_cell: FlowCell, flow_cell_project_id: int) -> Path:
     """Return cgstats select project out file."""
@@ -90,6 +84,12 @@ def fixture_cgstats_select_project_log_file(flow_cell: FlowCell, flow_cell_proje
         flow_cell.path,
         "-".join(["stats", str(flow_cell_project_id), flow_cell.id]) + ".txt",
     )
+
+
+@pytest.fixture(name="flow_cell_project_id")
+def fixture_flow_cell_project_id() -> int:
+    """Return flow cell run project id."""
+    return 174578
 
 
 @pytest.fixture(name="hiseq_x_copy_complete_file")

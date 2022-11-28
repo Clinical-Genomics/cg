@@ -12,7 +12,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.store import Store, models
-from cg.store.models import Sample
+from cg.store.models import Sample, Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -25,23 +25,18 @@ class TransferFlowCell:
         self.stats: StatsAPI = stats_api
         self.hk: HousekeeperAPI = hk_api
 
-    def transfer(self, flow_cell_id: str, store: bool = True) -> models.Flowcell:
+    def transfer(self, flow_cell_id: str, store: bool = True) -> Flowcell:
         """Populate the database with the information."""
-        for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id]:
-            if store and self.hk.tag(name=tag) is None:
-                self.hk.add_commit(self.hk.new_tag(tag))
+        self._add_tag_to_housekeeper(
+            store=store, tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id]
+        )
 
-        stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
-        flow_cell: models.Flowcell = self.db.get_flow_cell(flow_cell_id)
-
-        if flow_cell is None:
-            flow_cell: models.Flowcell = self.db.add_flow_cell(
-                flow_cell_id=flow_cell_id,
-                sequencer_name=stats_data.sequencer,
-                sequencer_type=stats_data.sequencer_type,
-                date=stats_data.date,
-                flow_cell_status=FlowCellStatus.ONDISK,
-            )
+        cgstats_flow_cell: StatsFlowcell = self.stats.flowcell(flow_cell_id)
+        flow_cell: Flowcell = self._add_flow_cell_to_status_db(
+            cgstats_flow_cell=cgstats_flow_cell,
+            flow_cell=self.db.get_flow_cell(flow_cell_id=flow_cell_id),
+            flow_cell_id=flow_cell_id,
+        )
 
         sample_sheet_path: Path = self._sample_sheet_path(flow_cell_id)
         if not sample_sheet_path.exists():
@@ -53,7 +48,7 @@ class TransferFlowCell:
                 tag_name=SequencingFileTag.FASTQ,
             )
 
-        for sample_data in stats_data.samples:
+        for sample_data in cgstats_flow_cell.samples:
             LOG.debug(f"Adding reads/FASTQs to sample: {sample_data.name}")
             sample: Sample = self.db.sample(sample_data.name)
             if sample is None:
@@ -82,6 +77,26 @@ class TransferFlowCell:
             LOG.info(
                 f"Added reads to sample: {sample_data.name} - {sample_data.reads} "
                 f"[{'DONE' if enough_reads else 'NOT DONE'}]"
+            )
+        return flow_cell
+
+    def _add_tag_to_housekeeper(self, store: bool, tags: List[str]) -> None:
+        """Add and commit tag to Housekeeper if not already existing in database."""
+        for tag in tags:
+            if store and self.hk.tag(name=tag) is None:
+                self.hk.add_commit(self.hk.new_tag(tag))
+
+    def _add_flow_cell_to_status_db(
+        self, cgstats_flow_cell: StatsFlowcell, flow_cell: Flowcell, flow_cell_id: str
+    ) -> Flowcell:
+        """Add a flow cell to the status database."""
+        if flow_cell is None:
+            flow_cell: Flowcell = self.db.add_flow_cell(
+                flow_cell_id=flow_cell_id,
+                sequencer_name=cgstats_flow_cell.sequencer,
+                sequencer_type=cgstats_flow_cell.sequencer_type,
+                date=cgstats_flow_cell.date,
+                flow_cell_status=FlowCellStatus.ONDISK,
             )
         return flow_cell
 

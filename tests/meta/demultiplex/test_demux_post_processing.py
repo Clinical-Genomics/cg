@@ -292,6 +292,7 @@ def test_post_process_flow_cell_not_hiseq_x(
 def test_post_process_flow_cell_dry_run(
     caplog,
     cgstats_select_project_log_file: Path,
+    create_sample_sheet_file: Path,
     demultiplexed_flow_cell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
@@ -301,7 +302,6 @@ def test_post_process_flow_cell_dry_run(
     hiseq_x_tile_dir: Path,
     transfer_flow_cell_api,
     mocker,
-    tmp_file,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -326,7 +326,7 @@ def test_post_process_flow_cell_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = tmp_file
+    TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
 
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
@@ -345,6 +345,7 @@ def test_post_process_flow_cell_dry_run(
 def test_post_process_flow_cell(
     caplog,
     cgstats_select_project_log_file: Path,
+    create_sample_sheet_file: Path,
     demultiplexed_flow_cell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
@@ -354,7 +355,6 @@ def test_post_process_flow_cell(
     hiseq_x_tile_dir: Path,
     transfer_flow_cell_api,
     mocker,
-    tmp_file,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -376,7 +376,7 @@ def test_post_process_flow_cell(
     ).mkdir(parents=True, exist_ok=True)
 
     mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = tmp_file
+    TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
 
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(
