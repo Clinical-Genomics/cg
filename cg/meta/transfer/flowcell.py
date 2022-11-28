@@ -38,15 +38,7 @@ class TransferFlowCell:
             flow_cell_id=flow_cell_id,
         )
 
-        sample_sheet_path: Path = self._sample_sheet_path(flow_cell_id)
-        if not sample_sheet_path.exists():
-            LOG.warning(f"Unable to find sample sheet: {sample_sheet_path.as_posix()}")
-        elif store:
-            self._store_sequencing_file(
-                flow_cell_id=flow_cell_id,
-                sequencing_files=[sample_sheet_path.as_posix()],
-                tag_name=SequencingFileTag.FASTQ,
-            )
+        self._add_sample_sheet_to_housekeeper(flow_cell_id=flow_cell_id, store=store)
 
         for sample_data in cgstats_flow_cell.samples:
             LOG.debug(f"Adding reads/FASTQs to sample: {sample_data.name}")
@@ -99,6 +91,18 @@ class TransferFlowCell:
                 flow_cell_status=FlowCellStatus.ONDISK,
             )
         return flow_cell
+
+    def _add_sample_sheet_to_housekeeper(self, flow_cell_id: str, store: bool) -> None:
+        """Add sample sheet to Housekeeper."""
+        sample_sheet_path: Path = self._sample_sheet_path(flow_cell_id)
+        if not sample_sheet_path.exists():
+            LOG.warning(f"Unable to find sample sheet: {sample_sheet_path.as_posix()}")
+        elif store:
+            self._store_sequencing_file(
+                flow_cell_id=flow_cell_id,
+                sequencing_files=[sample_sheet_path.as_posix()],
+                tag_name=SequencingFileTag.FASTQ,
+            )
 
     def _store_sequencing_file(
         self,
