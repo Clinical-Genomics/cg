@@ -33,9 +33,6 @@ def test_transfer_flow_cell(
     mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
     TransferFlowCell._sample_sheet_path.return_value = mock_sample_sheet
 
-    # mock_sample_sheet_path.return_value = "/path/to/samplesheet.csv"
-    # mock_path_exists.return_vale = True
-
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=sa_exc.SAWarning)
