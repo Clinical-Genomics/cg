@@ -1,4 +1,4 @@
-"""Tests the findbusinessdata part of the cg.store.api"""
+"""Tests the findbusinessdata part of the Cg stoore API."""
 from datetime import datetime
 
 import pytest

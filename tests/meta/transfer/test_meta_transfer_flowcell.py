@@ -6,6 +6,7 @@ from typing import Generator
 
 from sqlalchemy import exc as sa_exc
 
+from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferFlowCell
 from cg.store import Store
@@ -42,6 +43,7 @@ def test_transfer_flow_cell(
 
     # THEN it should create a new flowcell record
     assert flowcell_store.flowcells().count() == 1
+    assert flow_cell.status == FlowCellStatus.ONDISK
     assert isinstance(flow_cell.id, int)
     assert flow_cell.name == flowcell_id
     status_sample = flowcell_store.samples().first()

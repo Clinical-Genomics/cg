@@ -1,10 +1,10 @@
 import datetime as dt
 import logging
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 import petname
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Pipeline, FlowCellStatus
 from cg.store import models
 from cg.store.api.base import BaseHandler
 
@@ -69,7 +69,7 @@ class AddHandler(BaseHandler):
     ) -> models.Application:
         """Build a new application  record."""
 
-        new_record = self.Application(
+        return self.Application(
             tag=tag,
             prep_category=category,
             description=description,
@@ -78,7 +78,6 @@ class AddHandler(BaseHandler):
             percent_reads_guaranteed=percent_reads_guaranteed,
             **kwargs,
         )
-        return new_record
 
     def add_version(
         self,
@@ -103,9 +102,7 @@ class AddHandler(BaseHandler):
 
     def add_bed(self, name: str, **kwargs) -> models.Bed:
         """Build a new bed record."""
-
-        new_record = self.Bed(name=name, **kwargs)
-        return new_record
+        return self.Bed(name=name, **kwargs)
 
     def add_bed_version(
         self, bed: models.Bed, version: int, filename: str, **kwargs
@@ -173,7 +170,7 @@ class AddHandler(BaseHandler):
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
 
-        new_case = self.Family(
+        return self.Family(
             cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),
@@ -184,7 +181,6 @@ class AddHandler(BaseHandler):
             synopsis=synopsis,
             tickets=ticket,
         )
-        return new_case
 
     def relate_sample(
         self,
@@ -203,15 +199,22 @@ class AddHandler(BaseHandler):
         new_record.father = father
         return new_record
 
-    def add_flowcell(
-        self, name: str, sequencer: str, sequencer_type: str, date: dt.datetime
+    def add_flow_cell(
+        self,
+        name: str,
+        sequencer: str,
+        sequencer_type: str,
+        date: dt.datetime,
+        status: Optional[Literal[FlowCellStatus]] = FlowCellStatus.ONDISK,
     ) -> models.Flowcell:
         """Build a new Flowcell record."""
-
-        new_record = self.Flowcell(
-            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date
+        return self.Flowcell(
+            name=name,
+            sequencer_name=sequencer,
+            sequencer_type=sequencer_type,
+            sequenced_at=date,
+            status=status,
         )
-        return new_record
 
     def add_analysis(
         self,
@@ -224,8 +227,7 @@ class AddHandler(BaseHandler):
         **kwargs,
     ) -> models.Analysis:
         """Build a new Analysis record."""
-
-        new_record = self.Analysis(
+        return self.Analysis(
             pipeline=str(pipeline),
             pipeline_version=version,
             completed_at=completed_at,
@@ -234,7 +236,6 @@ class AddHandler(BaseHandler):
             started_at=started_at,
             **kwargs,
         )
-        return new_record
 
     def add_panel(
         self,
@@ -330,12 +331,10 @@ class AddHandler(BaseHandler):
         **kwargs,
     ) -> models.Organism:
         """Build a new Organism record."""
-
-        new_organism = self.Organism(
+        return self.Organism(
             internal_id=internal_id,
             name=name,
             reference_genome=reference_genome,
             verified=verified,
             **kwargs,
         )
-        return new_organism

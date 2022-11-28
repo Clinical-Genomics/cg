@@ -13,6 +13,7 @@ from cg.constants.sequencing import Sequencers
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
+from cg.store.models import Flowcell, Customer, ApplicationVersion
 from tests.store_helpers import StoreHelpers
 
 
@@ -207,10 +208,8 @@ def fixture_flowcell_store(
 ) -> Generator[Store, None, None]:
     """Setup store with sample data for testing flow cell transfer."""
     for sample_data in stats_sample_data["samples"]:
-        customer_obj: models.Customer = base_store.customers().first()
-        application_version: models.ApplicationVersion = base_store.application(
-            "WGSPCFC030"
-        ).versions[0]
+        customer_obj: Customer = base_store.customers().first()
+        application_version: ApplicationVersion = base_store.application("WGSPCFC030").versions[0]
         sample: models.Sample = base_store.add_sample(
             name="NA", sex="male", internal_id=sample_data["name"]
         )
