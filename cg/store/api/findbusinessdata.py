@@ -226,7 +226,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
-    def flowcell(self, name: str) -> Flowcell:
+    def get_flow_cell(self, name: str) -> Flowcell:
         """Fetch a flowcell by name."""
         return apply_flow_cell_filter(
             flow_cells=self.Flowcell.query, flow_cell_id=name, function="flow_cell_has_name"

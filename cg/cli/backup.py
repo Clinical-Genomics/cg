@@ -49,7 +49,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
 
     flow_cell_obj: Optional[models.Flowcell] = None
     if flow_cell:
-        flow_cell_obj: Optional[models.Flowcell] = status_api.flowcell(flow_cell)
+        flow_cell_obj: Optional[models.Flowcell] = status_api.get_flow_cell(flow_cell)
         if flow_cell_obj is None:
             LOG.error(f"{flow_cell}: not found in database")
             raise click.Abort

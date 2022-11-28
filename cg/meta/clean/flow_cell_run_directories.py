@@ -53,9 +53,11 @@ class RunDirFlowCell:
     def sequenced_date(self) -> datetime:
         """The date on which the flow cell was sequenced"""
         if self._sequenced_date is None:
-            if self.status_db.flowcell(name=self.id):
+            if self.status_db.get_flow_cell(name=self.id):
                 LOG.info("Found flow cell %s in statusdb, getting sequenced date.", self.id)
-                self._sequenced_date: datetime = self.status_db.flowcell(name=self.id).sequenced_at
+                self._sequenced_date: datetime = self.status_db.get_flow_cell(
+                    name=self.id
+                ).sequenced_at
             else:
                 LOG.info(
                     "Flow cell %s NOT found in statusdb, deriving sequenced date from run dir name!",
@@ -75,14 +77,14 @@ class RunDirFlowCell:
     def flow_cell_status(self) -> str:
         """Status of the flow cell"""
         if self._flow_cell_status is None:
-            self._flow_cell_status = self.status_db.flowcell(name=self.id).status
+            self._flow_cell_status = self.status_db.get_flow_cell(name=self.id).status
         return self._flow_cell_status
 
     @property
     def exists_in_statusdb(self) -> bool:
         """The flow cell exists in statusdb"""
         if self._exists_in_statusdb is None:
-            self._exists_in_statusdb = self.status_db.flowcell(name=self.id) is not None
+            self._exists_in_statusdb = self.status_db.get_flow_cell(name=self.id) is not None
         return self._exists_in_statusdb
 
     def remove_run_directory(self):

@@ -313,7 +313,7 @@ def test_delete_flow_cell_hasta(
 
     caplog.set_level(logging.INFO)
     wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
-    flow_cell_obj: Flowcell = wipe_demux_api.status_db.flowcell(wipe_demux_api.flow_cell_name)
+    flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell(wipe_demux_api.flow_cell_name)
     wipe_demux_api.set_dry_run(dry_run=False)
 
     # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"

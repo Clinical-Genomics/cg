@@ -107,7 +107,7 @@ class DemultiplexedRunsFlowCell:
     def exists_in_statusdb(self) -> bool:
         """Checks if flow cell exists in statusdb"""
         if self._exists_in_statusdb is None:
-            self._exists_in_statusdb: bool = self.status_db.flowcell(self.id) is not None
+            self._exists_in_statusdb: bool = self.status_db.get_flow_cell(self.id) is not None
             if not self._exists_in_statusdb:
                 LOG.warning("Flow cell %s does not exist in statusdb!", self.id)
         return self._exists_in_statusdb
@@ -242,7 +242,7 @@ class DemultiplexedRunsFlowCell:
             self.archive_sample_sheet()
         shutil.rmtree(self.path, ignore_errors=True)
         if self.exists_in_statusdb and self.is_correctly_named:
-            self.status_db.flowcell(self.id).status = FlowCellStatus.REMOVED
+            self.status_db.get_flow_cell(self.id).status = FlowCellStatus.REMOVED
         self.status_db.commit()
 
     def remove_failed_flow_cell(self):

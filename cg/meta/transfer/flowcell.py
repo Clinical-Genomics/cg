@@ -32,7 +32,7 @@ class TransferFlowCell:
                 self.hk.add_commit(self.hk.new_tag(tag))
 
         stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
-        flow_cell: models.Flowcell = self.db.flowcell(flow_cell_id)
+        flow_cell: models.Flowcell = self.db.get_flow_cell(flow_cell_id)
 
         if flow_cell is None:
             flow_cell: models.Flowcell = self.db.add_flow_cell(
