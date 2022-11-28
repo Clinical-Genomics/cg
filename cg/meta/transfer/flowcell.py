@@ -85,9 +85,6 @@ class TransferFlowCell:
             )
         return flow_cell
 
-    def set_flow(self) -> models.Flowcell:
-        """Set"""
-
     def _store_sequencing_file(
         self,
         flow_cell_id: str,
