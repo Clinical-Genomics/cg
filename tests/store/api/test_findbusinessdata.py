@@ -26,7 +26,7 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: models.Flowcell = re_sequenced_sample_store.get_flow_cell(name=flow_cell_id)
+    flow_cell: models.Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id

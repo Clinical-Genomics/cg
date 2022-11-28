@@ -1,10 +1,8 @@
 """Fixtures for store tests."""
-import datetime as dt
 from pathlib import Path
 
 import pytest
 
-# Files fixtures
 from cg.constants import Pipeline
 from cg.store import Store, models
 
