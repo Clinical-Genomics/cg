@@ -82,7 +82,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Check file age for a microsalt case."""
         due_date: datetime = datetime.now() - timedelta(days=analysis_due_date)
         for case_path in case_paths:
-            creation_date: datetime = datetime.fromtimestamp(os.path.getmtime(case))
+            creation_date: datetime = datetime.fromtimestamp(os.path.getmtime(case_path))
             if creation_date > due_date:
                 LOG.info(
                     f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"

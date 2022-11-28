@@ -8,7 +8,6 @@ from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import clean_run_dir
 from cg.constants import Pipeline
 from click.testing import CliRunner
-from tests.conftest import microsalt_dir
 
 from cg.models.cg_config import CGConfig
 from tests.store_helpers import StoreHelpers
