@@ -8,7 +8,11 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_add_flowcell(
-    base_store: Store, flow_cell_id: str, helpers: StoreHelpers, timestamp_now: datetime
+    base_store: Store,
+    flow_cell_id: str,
+    helpers: StoreHelpers,
+    sequencer_name: str,
+    timestamp_now: datetime,
 ):
     """Test adding a flow cell to the database."""
 
@@ -17,7 +21,7 @@ def test_add_flowcell(
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
         name=flow_cell_id,
-        sequencer="A00689",
+        sequencer=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
         status=FlowCellStatus.ONDISK,
@@ -31,7 +35,11 @@ def test_add_flowcell(
 
 
 def test_add_flowcell_status(
-    base_store: Store, flow_cell_id: str, helpers: StoreHelpers, timestamp_now: datetime
+    base_store: Store,
+    flow_cell_id: str,
+    helpers: StoreHelpers,
+    sequencer_name: str,
+    timestamp_now: datetime,
 ):
     """Test adding a flow cell with a status to the database."""
 
@@ -40,7 +48,7 @@ def test_add_flowcell_status(
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
         name=flow_cell_id,
-        sequencer="A00689",
+        sequencer=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
         status=FlowCellStatus.PROCESSING,

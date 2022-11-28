@@ -4,35 +4,35 @@ from pathlib import Path
 import pytest
 
 from cg.constants import Pipeline
+from cg.constants.subject import Gender
 from cg.store import Store, models
+from cg.store.models import Analysis, Family, Sample
 
 
-@pytest.fixture
-def application_versions_file(fixtures_dir: Path) -> str:
-    """ "application version import file."""
-    _file = fixtures_dir / "store/api/application_versions.xlsx"
-    return str(_file)
+@pytest.fixture(name="application_versions_file")
+def fixture_application_versions_file(fixtures_dir: Path) -> str:
+    """Return application version import file."""
+    return Path(fixtures_dir, "store/api/application_versions.xlsx").as_posix()
 
 
-@pytest.fixture
-def applications_file(fixtures_dir):
-    """ "application import file."""
-    _file = fixtures_dir / "store/api/applications.xlsx"
-    return str(_file)
+@pytest.fixture(name="applications_file")
+def fixture_applications_file(fixtures_dir: Path) -> str:
+    """Return application import file."""
+    return Path(fixtures_dir, "store/api/applications.xlsx").as_posix()
 
 
 @pytest.fixture(name="microbial_submitted_order")
-def fixture_microbial_submitted_order():
+def fixture_microbial_submitted_order() -> dict:
     """Build an example order as it looks after submission to ."""
 
     def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
-        """Return a item"""
+        """Return a item."""
         ref_genomes = {
             "C. Jejuni": "NC_111",
             "M. upium": "NC_222",
             "C. difficile": "NC_333",
         }
-        item = dict(
+        return dict(
             name=name,
             internal_id=internal_id,
             reads="1000",
@@ -65,9 +65,8 @@ def fixture_microbial_submitted_order():
             mother=None,
             father=None,
         )
-        return item
 
-    order = {
+    return {
         "customer": "cust000",
         "name": "test order",
         "internal_id": "lims_reference",
@@ -80,12 +79,11 @@ def fixture_microbial_submitted_order():
         ],
         "project_type": "microbial",
     }
-    return order
 
 
 @pytest.fixture(scope="function")
-def microbial_store(base_store: Store, microbial_submitted_order):
-    """Setup a store instance for testing analysis API."""
+def microbial_store(base_store: Store, microbial_submitted_order: dict) -> Store:
+    """Set up a store instance for testing analysis API."""
     customer = base_store.customer(microbial_submitted_order["customer"])
 
     for sample_data in microbial_submitted_order["items"]:
@@ -96,7 +94,7 @@ def microbial_store(base_store: Store, microbial_submitted_order):
         base_store.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
-            sex="unknown",
+            sex=Gender.UNKNOWN,
             comment=sample_data["comment"],
             priority=sample_data["priority"],
             reads=sample_data["reads"],
@@ -111,19 +109,25 @@ def microbial_store(base_store: Store, microbial_submitted_order):
     yield base_store
 
 
-@pytest.fixture(scope="function", name="analysis_obj")
-def fixture_analysis_obj(analysis_store: Store) -> models.Analysis:
-    """Fetch a analysis object from a populated store."""
+@pytest.fixture(name="analysis_obj")
+def fixture_analysis_obj(analysis_store: Store) -> Analysis:
+    """Return an analysis object from a populated store."""
     return analysis_store.analyses()[0]
 
 
-@pytest.fixture(scope="function", name="case_obj")
-def fixture_case_obj(analysis_store: Store) -> models.Family:
+@pytest.fixture(name="case_obj")
+def fixture_case_obj(analysis_store: Store) -> Family:
     """Return a case models object."""
     return analysis_store.families()[0]
 
 
-@pytest.fixture(scope="function", name="sample_obj")
-def fixture_sample_obj(analysis_store) -> models.Sample:
+@pytest.fixture(name="sample_obj")
+def fixture_sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
     return analysis_store.samples()[0]
+
+
+@pytest.fixture(name="sequencer_name")
+def fixture_sequencer_name() -> str:
+    """Return sequencer name."""
+    return "A00689"
