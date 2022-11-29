@@ -96,8 +96,8 @@ class FastaSequenceMissingError(CgError):
     """
 
 
-class FlowcellError(CgError):
-    """Raised when there is a problem with demultiplexing a flowcell."""
+class FlowCellError(CgError):
+    """Raised when there is a problem with demultiplexing a flow cell."""
 
 
 class FlowcellsNeededError(CgError):

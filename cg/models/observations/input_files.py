@@ -23,7 +23,7 @@ class ObservationsInputFiles(BaseModel):
 
     snv_vcf_path: Path
     sv_vcf_path: Optional[Path] = None
-    profile_vcf_path: Optional[Path] = None
+    profile_vcf_path: Path
 
     _ = validator(
         "snv_vcf_path", "sv_vcf_path", "profile_vcf_path", always=False, allow_reuse=True
@@ -41,4 +41,6 @@ class MipDNAObservationsInputFiles(ObservationsInputFiles):
 class BalsamicObservationsInputFiles(ObservationsInputFiles):
     """Model for validating cancer Loqusdb input files."""
 
-    pass
+    snv_all_vcf_path: Path
+
+    _ = validator("snv_all_vcf_path", always=False, allow_reuse=True)(validate_observations_file)
