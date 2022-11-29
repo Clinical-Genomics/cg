@@ -68,8 +68,8 @@ def config_case(
         LOG.info(f"Creating samplesheet file for {case_id}.")
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.config_case(case_id=case_id, strandedness=strandedness)
-    except CgError as e:
-        LOG.error(f"Could not create samplesheet: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not create samplesheet: {error.message}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not create samplesheet: {error}")
@@ -151,11 +151,11 @@ def run(
             LOG.info("Did not run analysis: dry-run")
             return
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as e:
-        LOG.error(f"Could not run analysis: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not run analysis: {error.message}")
         raise click.Abort()
-    except Exception as e:
-        LOG.error(f"Could not run analysis: {e}")
+    except Exception as error:
+        LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
 
 
@@ -251,8 +251,8 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
         except CgError as error:
             LOG.error(error.message)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error("Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -274,11 +274,11 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             analysis_api.report_deliver(case_id=case_id)
         else:
             LOG.info("Dry-run")
-    except CgError as e:
-        LOG.error(f"Could not create report file: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not create report file: {error.message}")
         raise click.Abort()
-    except Exception as e:
-        LOG.error(f"Could not create report file: {e}")
+    except Exception as error:
+        LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
 
 
@@ -336,8 +336,8 @@ def store_available(context: click.Context, dry_run: bool) -> None:
         LOG.info("Storing RNAFUSION deliverables for %s", case_obj.internal_id)
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
-        except Exception as exception_object:
-            LOG.error("Error storing %s: %s", case_obj.internal_id, exception_object)
+        except Exception as error:
+            LOG.error(f"Error storing {case_obj.internal_id}: {error}")
             exit_code: int = EXIT_FAIL
     if exit_code:
         raise click.Abort

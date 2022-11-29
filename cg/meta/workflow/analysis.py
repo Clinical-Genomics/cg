@@ -58,7 +58,7 @@ class AnalysisAPI(MetaAPI):
         """
         if context.invoked_subcommand is None:
             click.echo(context.get_help())
-            return None
+            return
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():

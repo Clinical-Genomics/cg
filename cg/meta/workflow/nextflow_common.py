@@ -32,7 +32,7 @@ class NextflowAnalysisAPI:
     @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> Path:
         """Generates a path where the Rnafusion sample sheet for the case_id should be located."""
-        return Path((cls.get_case_path(case_id, root_dir)), case_id + "_samplesheet.csv")
+        return Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
 
     @classmethod
     def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
@@ -49,7 +49,7 @@ class NextflowAnalysisAPI:
                 last_line = file.readlines()[-1]
             return last_line.split(" ")[-1]
         except (Exception, CalledProcessError):
-            LOG.warning("Could not retrieve %s workflow version!", pipeline)
+            LOG.warning(f"Could not retrieve {pipeline} workflow version!")
             return "0.0.0"
 
     @classmethod
@@ -65,7 +65,7 @@ class NextflowAnalysisAPI:
         os.makedirs(cls.get_case_path(case_id, root_dir), exist_ok=True)
 
     @classmethod
-    def extract_read_files(cls, read_nb: int, metadata: list) -> list:
+    def extract_read_files(cls, read_nb: int, metadata: list) -> List[str]:
         sorted_metadata: list = sorted(metadata, key=operator.itemgetter("path"))
         return [d["path"] for d in sorted_metadata if d["read"] == read_nb]
 
@@ -98,7 +98,7 @@ class NextflowAnalysisAPI:
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             cls.get_case_path(case_id, root_dir),
-            case_id + "_" + pipeline + "_nextflow_log_" + launch_time + ".log",
+            f"{case_id}_{pipeline}_nextflow_log_{launch_time}.log",
         )
 
     @classmethod
@@ -121,16 +121,9 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_nextflow_stdout_stderr(cls, case_id: str, root_dir: str) -> List[str]:
+        case_path = cls.get_case_path(case_id, root_dir).as_posix()
         return [
-            " > "
-            + str(cls.get_case_path(case_id=case_id, root_dir=root_dir))
-            + "/"
-            + case_id
-            + "-stdout.log 2> "
-            + str(cls.get_case_path(case_id=case_id, root_dir=root_dir))
-            + "/"
-            + case_id
-            + "-stdout.err  < /dev/null & "
+            f" > {case_path}/{case_id}-stdout.log 2> {case_path}/{case_id}-stdout.err < /dev/null & "
         ]
 
     @classmethod
@@ -143,7 +136,7 @@ class NextflowAnalysisAPI:
     @classmethod
     def get_deliverables_file_path(cls, case_id: str, root_dir: str) -> Path:
         """Returns a path where the rnafusion deliverables file for the case_id should be located."""
-        return Path(cls.get_case_path(case_id, root_dir), case_id + "_deliverables.yaml")
+        return Path(cls.get_case_path(case_id, root_dir), f"{case_id}_deliverables.yaml")
 
     @classmethod
     def get_template_deliverables_file_content(cls, file_bundle_template: Path) -> dict:

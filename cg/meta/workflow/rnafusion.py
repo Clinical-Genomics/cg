@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from cg.constants import Pipeline
 from cg.constants.constants import (
     RNAFUSION_SAMPLESHEET_HEADERS,
@@ -61,7 +61,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_profile(self, profile: str = None) -> str:
+    def get_profile(self, profile: Optional[str] = None) -> str:
         if profile:
             return profile
         return self.profile
@@ -104,7 +104,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         if len(case_obj.links) != 1:
-            raise NotImplementedError("Case objects are assuming one link")
+            raise NotImplementedError("Case objects are assumed to be related to a single sample (one link)")
 
         for link in case_obj.links:
             sample_metadata: list = self.gather_file_metadata_for_sample(link.sample)
@@ -120,7 +120,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 NextflowAnalysisAPI.get_case_config_path(case_id, self.root_dir),
             )
 
-    def get_references_path(self, genomes_bases: Path = None) -> Path:
+    def get_references_path(self, genomes_bases: Optional[Path] = None) -> Path:
         if genomes_bases:
             return genomes_bases
         return Path(self.references)

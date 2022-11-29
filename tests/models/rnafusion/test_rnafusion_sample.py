@@ -1,12 +1,13 @@
 import pytest
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from typing import List
 import pydantic
 
 
 def test_instantiate_rnafusion_sample(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: list,
-    rnafusion_fastq_r2_same_length: list,
+    rnafusion_fastq_r1: List[str],
+    rnafusion_fastq_r2_same_length: List[str],
     rnafusion_strandedness_acceptable: str,
 ):
     """
@@ -28,8 +29,8 @@ def test_instantiate_rnafusion_sample(
 
 def test_instantiate_rnafusion_sample_fastq_r1_r2_different_length(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: list,
-    rnafusion_fastq_r2_not_same_length: list,
+    rnafusion_fastq_r1: List[str],
+    rnafusion_fastq_r2_not_same_length: List[str],
     rnafusion_strandedness_acceptable: str,
 ):
     """
@@ -51,7 +52,7 @@ def test_instantiate_rnafusion_sample_fastq_r1_r2_different_length(
 
 def test_instantiate_rnafusion_sample_fastq_r2_empty(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: list,
+    rnafusion_fastq_r1: List[str],
     rnafusion_fastq_r2_empty: list,
     rnafusion_strandedness_acceptable: str,
 ):
@@ -75,8 +76,8 @@ def test_instantiate_rnafusion_sample_fastq_r2_empty(
 
 def test_instantiate_rnafusion_strandedness_not_acceptable(
     rnafusion_sample: str,
-    rnafusion_fastq_r1: list,
-    rnafusion_fastq_r2_same_length: list,
+    rnafusion_fastq_r1: List[str],
+    rnafusion_fastq_r2_same_length: List[str],
     rnafusion_strandedness_not_acceptable: str,
 ):
     """
