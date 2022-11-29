@@ -25,6 +25,13 @@ def test_start_associated_case(
     assert all(case_links.family.action == "analyze" for case_links in sample_obj.links)
 
 
+def test_add_sample_to_hk(
+    external_data_handler, housekeeper_api, sample_obj, external_data_directory
+):
+    # GIVEN a sample_folder with associated
+    external_data_directory.iterdir()
+
+
 # def test_add_transfer_to_housekeeper(
 #     case_id,
 #     external_data_api: ExternalDataAPI,

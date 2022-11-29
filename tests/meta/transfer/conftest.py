@@ -16,16 +16,18 @@ def fixture_transfer_lims_api(sample_store: Store) -> Generator[TransferLims, No
 
 @pytest.fixture(name="external_data_directory", scope="session")
 def external_data_directory(
-    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket: str
+    tmpdir_factory, tmp_path_factory, customer_id: str, cust_sample_id: str
 ) -> Path:
     """Returns a customer folder with fastq.gz files in sample-directories."""
-    cust_folder: Path = tmpdir_factory.mktemp(customer_id, numbered=False)
-    ticket_folder: Path = Path(cust_folder, ticket)
-    ticket_folder.mkdir()
-    samples: List[str] = [f"{cust_sample_id}1", f"{cust_sample_id}2"]
-    for sample in samples:
-        Path(ticket_folder, sample).mkdir(exist_ok=True, parents=True)
-        for read in [1, 2]:
-            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz").touch(exist_ok=True)
-            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz.md5").touch(exist_ok=True)
-    return Path(ticket_folder)
+    cust_folders: List[Path] = []
+    for cust_number in range(2):
+        cust_folders.append(tmpdir_factory.mktemp(f"cust00{cust_number}", numbered=False))
+        for sample_number in range(2):
+            sample_dir: Path = Path(
+                tmpdir_factory.mktemp(
+                    f"cust00{cust_number}/cust00{cust_number}_sample{sample_number}", numbered=False
+                )
+            )
+            for fastq_number in range(2):
+                sample_dir.joinpath(f"fastq_{fastq_number}").touch()
+    return cust_folders[0].parent

@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 from pathlib import Path
 
@@ -7,6 +8,7 @@ from cg.constants import HK_FASTQ_TAGS
 from cg.constants.constants import CaseActions
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
+from cg.utils.time import get_file_timestamp
 
 LOG = logging.getLogger(__name__)
 
@@ -37,7 +39,9 @@ class ExternalDataHandler:
             bundle=sample_object.internal_id
         )
         for fastq_file in sample_folder.iterdir():
-            if self.hk_api.files(version=hk_version, path=fastq_file.as_posix()):
+            if self.hk_api.files(
+                version=hk_version, path=fastq_file.as_posix()
+            ) or self.is_recent_file(fastq_file):
                 LOG.debug(f"File {fastq_file} already added to bundle {hk_version.bundle.name}")
                 continue
             LOG.info(f"File {fastq_file} added to bundle {hk_version.bundle.name}")
@@ -51,3 +55,7 @@ class ExternalDataHandler:
             self.status_db.set_case_action(
                 action=CaseActions.ANALYZE, case_id=case_link.family.internal_id
             )
+
+    @staticmethod
+    def is_recent_file(fastq_file: Path) -> bool:
+        return dt.datetime.now() - get_file_timestamp(fastq_file) > dt.timedelta(hours=4)
