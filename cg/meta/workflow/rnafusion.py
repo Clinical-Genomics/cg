@@ -104,7 +104,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         if len(case_obj.links) != 1:
-            raise NotImplementedError("Case objects are assumed to be related to a single sample (one link)")
+            raise NotImplementedError(
+                "Case objects are assumed to be related to a single sample (one link)"
+            )
 
         for link in case_obj.links:
             sample_metadata: list = self.gather_file_metadata_for_sample(link.sample)
