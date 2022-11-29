@@ -148,7 +148,7 @@ def is_private_attribute(key: str) -> bool:
 
 
 def list_changeable_sample_attributes(
-    sample_obj: Optional[models.Sample] = None, skip_attributes: List[str] = []
+    sample: Optional[models.Sample] = None, skip_attributes: List[str] = []
 ) -> None:
     """List changeable attributes on sample and its current value"""
     LOG.info(f"Below is a set of changeable sample attributes, to combine with -kv flag:\n")
@@ -158,8 +158,8 @@ def list_changeable_sample_attributes(
         if is_locked_attribute_on_sample(attribute, skip_attributes):
             continue
         message: str = attribute
-        if sample_obj:
-            message += f": {sample_obj.__dict__.get(attribute)}"
+        if sample:
+            message += f": {sample.__dict__.get(attribute)}"
         LOG.info(message)
 
 
@@ -172,9 +172,9 @@ def list_keys(
 ):
     """List all available modifiable keys."""
     status_db: Store = context.status_db
-    sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
+    sample: models.Sample = status_db.sample(internal_id=sample_id)
     list_changeable_sample_attributes(
-        sample_obj=sample_obj, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES
+        sample=sample, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES
     )
 
 
@@ -208,9 +208,9 @@ def sample(
 
     """
     status_db: Store = context.status_db
-    sample_obj: models.Sample = status_db.sample(internal_id=sample_id)
+    sample: models.Sample = status_db.sample(internal_id=sample_id)
 
-    if sample_obj is None:
+    if sample is None:
         LOG.error(f"Can't find sample {sample_id}")
         raise click.Abort
 
@@ -219,12 +219,12 @@ def sample(
         if is_locked_attribute_on_sample(key, NOT_CHANGEABLE_SAMPLE_ATTRIBUTES):
             LOG.warning(f"{key} is not a changeable attribute on sample")
             continue
-        if not hasattr(sample_obj, key):
+        if not hasattr(sample, key):
             LOG.warning(f"{key} is not a property of sample")
             continue
 
         new_key: str = key
-        if isinstance(getattr(sample_obj, key), bool):
+        if isinstance(getattr(sample, key), bool):
             new_value: bool = bool(value.lower() == "true")
         else:
             new_value: str = value
@@ -242,20 +242,20 @@ def sample(
                 LOG.error(f"{key} {value} not found, aborting")
                 raise click.Abort
 
-        old_value = getattr(sample_obj, new_key)
+        old_value = getattr(sample, new_key)
 
         LOG.info(
-            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample_obj}"
+            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample}"
         )
 
         if not (yes or click.confirm(CONFIRM)):
             continue
 
         if key == "comment":
-            _update_comment(new_value, sample_obj)
+            _update_comment(new_value, sample)
         else:
-            setattr(sample_obj, new_key, new_value)
-            _update_comment(_generate_comment(new_key, old_value, new_value), sample_obj)
+            setattr(sample, new_key, new_value)
+            _update_comment(_generate_comment(new_key, old_value, new_value), sample)
 
         status_db.commit()
 
@@ -264,8 +264,8 @@ def sample(
         for key, value in kwargs:
 
             new_key = "application" if key == "application_version" else key
-            new_value = sample_obj.priority_human if key == "priority" else value
-            LOG.info(f"Would set {new_key} to {new_value} for {sample_obj.internal_id} in LIMS")
+            new_value = sample.priority_human if key == "priority" else value
+            LOG.info(f"Would set {new_key} to {new_value} for {sample.internal_id} in LIMS")
 
             if not (yes or click.confirm(CONFIRM)):
                 raise click.Abort
