@@ -244,9 +244,7 @@ def sample(
 
         old_value = getattr(sample, new_key)
 
-        LOG.info(
-            f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample}"
-        )
+        LOG.info(f"Would change from {new_key}={old_value} to {new_key}={new_value} on {sample}")
 
         if not (yes or click.confirm(CONFIRM)):
             continue
