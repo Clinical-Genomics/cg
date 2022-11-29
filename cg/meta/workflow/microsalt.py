@@ -10,7 +10,7 @@ import logging
 import os
 import re
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -64,14 +64,32 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_path(self, case_id: str) -> List[Path]:
         """Returns all paths associated with the case."""
-
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        return [
+        case_paths = [
             Path(path)
-            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
         ]
+
+        self.verify_case_paths_age(case_paths, case_id)
+
+        return case_paths
+
+    def verify_case_paths_age(
+        self, case_paths: List[Path], case_id: str, analysis_due_date: int = 21
+    ) -> None:
+        """Check file age for a microsalt case."""
+        due_date: datetime = datetime.now() - timedelta(days=analysis_due_date)
+        for case_path in case_paths:
+            creation_date: datetime = datetime.fromtimestamp(os.path.getmtime(case_path))
+            if creation_date > due_date:
+                LOG.info(
+                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
+                )
+                raise FileNotFoundError(
+                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
+                )
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directories for a MicroSALT case."""
@@ -199,11 +217,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         sample_id = sample_obj.internal_id
         method_library_prep = self.lims_api.get_prep_method(sample_id)
-        if method_library_prep:
-            method_library_prep, _ = method_library_prep.split(" ", 1)
         method_sequencing = self.lims_api.get_sequencing_method(sample_id)
-        if method_sequencing:
-            method_sequencing, _ = method_sequencing.split(" ", 1)
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )
