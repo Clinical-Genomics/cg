@@ -156,26 +156,6 @@ def test_get_parsed_observation_file_paths_overwrite_input(
     )
 
 
-def test_get_parsed_swegen_paths(
-    cg_context: CGConfig,
-    swegen_dir: Path,
-    swegen_snv_reference: Path,
-    swegen_sv_reference: Path,
-):
-    """Test verified SweGen files extraction."""
-
-    # GIVEN a Balsamic analysis API and a Swegen temporary directory
-    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
-    balsamic_analysis_api.swegen_path = swegen_dir
-
-    # WHEN getting the latest observations dictionary
-    args: dict = balsamic_analysis_api.get_parsed_swegen_paths()
-
-    # THEN the SNV and SV paths should be correctly retrieved
-    assert args["swegen_snv"] == swegen_snv_reference.as_posix()
-    assert args["swegen_sv"] == swegen_sv_reference.as_posix()
-
-
 def test_get_swegen_verified_path(
     cg_context: CGConfig, swegen_dir: Path, swegen_snv_reference: Path
 ):

@@ -463,13 +463,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return verified_observations
 
-    def get_parsed_swegen_paths(self) -> dict:
-        """Returns a verified {option: path} SweGen dictionary."""
-        return {
-            "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
-            "swegen_sv": self.get_swegen_verified_path(Variants.SV),
-        }
-
     def get_swegen_verified_path(self, variants: Variants) -> Optional[str]:
         """Return verified SweGen path."""
         swegen_file: str = self.get_latest_file_by_pattern(
@@ -513,11 +506,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
+            "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
+            "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
-
-        if self.pipeline == Pipeline.BALSAMIC and not verified_panel_bed:
-            args_dict.update(self.get_parsed_observation_file_paths(observations))
-            args_dict.update(self.get_parsed_swegen_paths())
+        args_dict.update(self.get_parsed_observation_file_paths(observations))
 
         return args_dict
 
