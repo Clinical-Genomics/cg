@@ -149,7 +149,7 @@ def run(
             return
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
     except CgError as error:
-        LOG.error(f"Could not run analysis: {error.message}")
+        LOG.error(f"Could not run analysis: {error}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
@@ -229,8 +229,8 @@ def start(
             arriba=arriba,
             dry_run=dry_run,
         )
-    except DecompressionNeededError as e:
-        LOG.error(e.message)
+    except DecompressionNeededError as error:
+        LOG.error(error)
 
 
 @rnafusion.command("start-available")
@@ -246,7 +246,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
         try:
             context.invoke(start, case_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
             LOG.error(f"Unspecified error occurred: {error}")
@@ -272,7 +272,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
         else:
             LOG.info("Dry-run")
     except CgError as error:
-        LOG.error(f"Could not create report file: {error.message}")
+        LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not create report file: {error}")
@@ -299,8 +299,8 @@ def store_housekeeper(context: CGConfig, case_id: str) -> None:
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
-    except CgError as e:
-        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {e.message}")
+    except CgError as error:
+        LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}")
         raise click.Abort()
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
