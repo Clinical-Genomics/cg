@@ -131,6 +131,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         work_dir: Path,
+        log: Path,
         resume: bool,
         profile: str,
         with_tower: bool,
@@ -151,6 +152,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         defaults constructed with case_id paths or from config."""
         return {
             "-w": NextflowAnalysisAPI.get_workdir_path(case_id, self.root_dir, work_dir),
+            "-log": NextflowAnalysisAPI.get_log_path(case_id, self.root_dir, self.pipeline, log),
             "-resume": resume,
             "-profile": self.get_profile(profile=profile),
             "-with-tower": with_tower,
@@ -214,6 +216,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             self.get_verified_arguments(
                 case_id=case_id,
                 work_dir=work_dir,
+                log=log,
                 resume=resume,
                 profile=profile,
                 with_tower=with_tower,
@@ -231,11 +234,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 arriba=arriba,
             )
         )
-        nextflow_options = self.__build_command_str(
-            NextflowAnalysisAPI.get_verified_arguments_nextflow(
-                case_id=case_id, log=log, pipeline=self.pipeline, root_dir=self.root_dir
-            )
-        )
+        nextflow_options = self.__build_command_str({})
+        # nextflow_options = self.__build_command_str(
+        #     NextflowAnalysisAPI.get_verified_arguments_nextflow(
+        #         case_id=case_id, log=log, pipeline=self.pipeline, root_dir=self.root_dir
+        #     )
+        # )
         command = ["run", self.nfcore_pipeline_path]
         parameters = (
             nextflow_options
