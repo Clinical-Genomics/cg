@@ -173,7 +173,4 @@ class TrailblazerAPI:
 
         LOG.debug(f"Setting analyis uploaded at for case {request_body}")
         LOG.info(f"{case_id} - uploaded at set to {datetime.datetime.now()}")
-        self.query_trailblazer(
-            command="set_analysis_uploaded", request_body=request_body
-        )
-
+        self.query_trailblazer(command="set_analysis_uploaded", request_body=request_body)
