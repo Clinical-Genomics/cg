@@ -16,6 +16,7 @@ from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
+from cg.apps.tb import TrailblazerAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class NiptUploadAPI:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
+        self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run"""
@@ -125,9 +127,11 @@ class NiptUploadAPI:
 
         case_obj: models.Family = self.status_db.family(case_id)
         analysis_obj: models.Analysis = case_obj.analyses[0]
+        uploaded_at: dt.datetime = dt.datetime.now()
 
         if not self.dry_run:
-            analysis_obj.uploaded_at = dt.datetime.now()
+            self.trailblazer_api.set_analysis_uploaded(case_id=case_id, uploaded_at=uploaded_at)
+            analysis_obj.uploaded_at = uploaded_at
             self.status_db.commit()
 
         return analysis_obj
@@ -145,7 +149,7 @@ class NiptUploadAPI:
         return analysis_obj
 
     def get_statina_files(self, case_id: str) -> StatinaUploadFiles:
-        """Get statina files from from housekeeper."""
+        """Get statina files from housekeeper."""
 
         hk_results_file: str = self.get_housekeeper_results_file(
             case_id=case_id, tags=["nipt", "metrics"]

@@ -44,7 +44,7 @@ class UploadAPI(MetaAPI):
     def update_uploaded_at(self, analysis: models.Analysis) -> None:
         """Updates the uploaded_at field with the current local date and time"""
 
-        uploaded_at = datetime.now()
+        uploaded_at: datetime = datetime.now()
         analysis.uploaded_at = uploaded_at
 
         self.status_db.commit()
