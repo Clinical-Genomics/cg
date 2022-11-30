@@ -27,6 +27,7 @@ class DeliverAPI:
         sample_tags: List[Set[str]],
         project_base_path: Path,
         delivery_type: str,
+        force_all: bool = False,
     ):
         """Initialize a delivery api
 
@@ -48,6 +49,7 @@ class DeliverAPI:
         self.dry_run = False
         self.delivery_type: str = delivery_type
         self.skip_missing_bundle = self.delivery_type in constants.SKIP_MISSING
+        self.deliver_failed_samples = force_all
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -66,7 +68,7 @@ class DeliverAPI:
         if not last_version:
             if not self.case_tags:
                 LOG.info(f"Could not find any version for {case_id}")
-            elif not self.skip_missing_bundle:
+            elif not self.deliver_failed_samples:
                 raise SyntaxError(f"Could not find any version for {case_id}")
         link_objs: List[FamilySample] = self.store.family_samples(case_id)
         if not link_objs:
@@ -91,6 +93,11 @@ class DeliverAPI:
 
         link_obj: FamilySample
         for link_obj in link_objs:
+            LOG.warning(
+                f"Sample {link_obj.sample.internal_id}. QC_pass: {link_obj.sample.sequencing_qc}, Deliver failed sample: {self.deliver_failed_samples}"
+            )
+            if not link_obj.sample.sequencing_qc:
+                continue
             sample_id: str = link_obj.sample.internal_id
             sample_name: str = link_obj.sample.name
             LOG.debug("Fetch last version for sample bundle %s", sample_id)

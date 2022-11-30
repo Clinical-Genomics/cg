@@ -196,7 +196,9 @@ def test_slurm_rsync_single_case(
     Store.get_latest_ticket_from_case.return_value = ticket
 
     # WHEN the destination path is created
-    sbatch_number: int = rsync_api.slurm_rsync_single_case(
+    sbatch_number: int
+    partial_delivery: bool
+    partial_delivery, sbatch_number = rsync_api.slurm_rsync_single_case(
         case_id=case.internal_id, case_files_present=True, dry_run=True
     )
 

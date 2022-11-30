@@ -39,6 +39,11 @@ def deliver():
 @click.option(
     "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
 )
+@click.option(
+    "--force-all",
+    help="Deliver sample files for all samples regardles of amount of reads",
+    default=False,
+)
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
@@ -46,6 +51,7 @@ def deliver_analysis(
     ticket: Optional[str],
     delivery_type: List[str],
     dry_run: bool,
+    force_all: Optional[bool],
 ):
     """Deliver analysis files to customer inbox
 
@@ -70,6 +76,7 @@ def deliver_analysis(
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
             project_base_path=Path(inbox),
             delivery_type=delivery,
+            force_all=force_all,
         )
         deliver_api.set_dry_run(dry_run)
         cases: List[models.Family] = []
