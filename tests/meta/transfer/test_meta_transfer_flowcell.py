@@ -1,5 +1,6 @@
 """Tests for transfer flow cell data."""
 from datetime import datetime
+import logging
 import warnings
 from pathlib import Path
 from typing import Generator
@@ -10,7 +11,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, SequencingFileTag
 from cg.meta.transfer import TransferFlowCell
-from cg.meta.transfer.flowcell import _set_status_db_sample_sequenced_at
+from cg.meta.transfer.flowcell import _set_status_db_sample_sequenced_at, log_enough_reads
 from cg.models.cgstats.flowcell import StatsFlowcell
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
@@ -93,7 +94,6 @@ def test_add_flow_cell_to_status_db_existing_flow_cell(
 
 def test_add_sample_sheet_to_housekeeper_when_not_existing(
     caplog,
-    create_sample_sheet_file: Generator[Path, None, None],
     flow_cell_id: str,
     mocker,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
@@ -116,7 +116,6 @@ def test_add_sample_sheet_to_housekeeper_when_not_existing(
 
 def test_add_sample_sheet_to_housekeeper(
     caplog,
-    create_sample_sheet_file: Generator[Path, None, None],
     flow_cell_id: str,
     mocker,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
@@ -192,6 +191,112 @@ def test_set_status_db_sample_sequenced_at_when_sequenced_again(
 
     # THEN the sample sequenced at should be set to today
     assert sample.sequenced_at == timestamp_now
+
+
+def test_log_enough_reads_when_enough_reads(caplog, sample_name: str):
+    """Test logging enough reads."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a status db sample reads with enough reads
+
+    # GIVEN a sample application expected reads
+
+    # WHEN setting sequenced at for the sample
+    log_enough_reads(
+        status_db_sample_reads=2, application_expected_reads=1, cgstats_sample_name=sample_name
+    )
+
+    # THEN we should log DONE
+    assert f"[DONE]" in caplog.text
+
+
+def test_log_enough_reads_when_not_enough_reads(caplog, sample_name: str):
+    """Test logging not enough reads."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a status db sample with not enough reads
+
+    # GIVEN a sample application expected reads
+
+    # WHEN setting sequenced at for the sample
+    log_enough_reads(
+        status_db_sample_reads=1, application_expected_reads=2, cgstats_sample_name=sample_name
+    )
+
+    # THEN the should log NOT DONE
+    assert f"[NOT DONE]" in caplog.text
+
+
+def test_parse_flow_cell_samples(
+    flowcell_store: Store,
+    helpers: StoreHelpers,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
+    yet_another_flow_cell_id: str,
+):
+    """Test parsing of flow cell samples."""
+
+    # GIVEN a cgstats flow cell
+    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(
+        yet_another_flow_cell_id
+    )
+    # GIVEN a flow cell that exist in status db
+    flow_cell: Flowcell = helpers.add_flowcell(
+        store=flowcell_store, flow_cell_id=yet_another_flow_cell_id
+    )
+
+    # GIVEN no sample in flow cell
+    assert len(flow_cell.samples) == 0
+
+    # WHEN parsing the flow cell samples
+    transfer_flow_cell_api._parse_flow_cell_samples(
+        cgstats_flow_cell=cgstats_flow_cell,
+        flow_cell=flow_cell,
+        flow_cell_id=yet_another_flow_cell_id,
+        store=True,
+    )
+
+    # THEN a sample should have been added
+    assert len(flow_cell.samples) == 1
+
+
+def test_parse_flow_cell_samples_when_no_cgstats_sample(
+    caplog,
+    flowcell_store: Store,
+    helpers: StoreHelpers,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
+    yet_another_flow_cell_id: str,
+):
+    """Test parsing of flow cell samples when no cgstats sample."""
+
+    # GIVEN a cgstats flow cell
+    cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(
+        yet_another_flow_cell_id
+    )
+
+    # GIVEN a samplle name that dooes not exist in cgstats
+    cgstats_flow_cell.samples[0].name = "sample_does_not_exist_in_cgstats"
+
+    # GIVEN a flow cell that exist in status db
+    flow_cell: Flowcell = helpers.add_flowcell(
+        store=flowcell_store, flow_cell_id=yet_another_flow_cell_id
+    )
+
+    # GIVEN no sample in flow cell
+    assert len(flow_cell.samples) == 0
+
+    # WHEN parsing the flow cell samples
+    transfer_flow_cell_api._parse_flow_cell_samples(
+        cgstats_flow_cell=cgstats_flow_cell,
+        flow_cell=flow_cell,
+        flow_cell_id=yet_another_flow_cell_id,
+        store=True,
+    )
+
+    # THEN no sample should have been added
+    assert len(flow_cell.samples) == 0
+
+    # THEN we should llog that sample cannot be found
+    assert f"Unable to find sample: {cgstats_flow_cell.samples[0].name}" in caplog.text
 
 
 def test_transfer(

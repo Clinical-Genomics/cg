@@ -29,6 +29,15 @@ def _set_status_db_sample_sequenced_at(
         status_db_sample.sequenced_at = flow_cell_sequenced_at
 
 
+def log_enough_reads(
+    status_db_sample_reads: int, application_expected_reads: int, cgstats_sample_name: str
+) -> None:
+    """Check and log if sample in status db got enough reads."""
+    enough_reads: bool = status_db_sample_reads > application_expected_reads
+    LOG.info(f"Added reads to sample: {cgstats_sample_name} - {status_db_sample_reads} ")
+    LOG.info(f"[{'DONE' if enough_reads else 'NOT DONE'}]")
+
+
 class TransferFlowCell:
     """Transfer flow cell API."""
 
@@ -51,7 +60,28 @@ class TransferFlowCell:
         )
 
         self._add_sample_sheet_to_housekeeper(flow_cell_id=flow_cell_id, store=store)
+        self._parse_flow_cell_samples(
+            cgstats_flow_cell=cgstats_flow_cell,
+            flow_cell=flow_cell,
+            flow_cell_id=flow_cell_id,
+            store=store,
+        )
+        return flow_cell
 
+    def _add_tag_to_housekeeper(self, store: bool, tags: List[str]) -> None:
+        """Add and commit tag to Housekeeper if not already existing in database."""
+        for tag in tags:
+            if store and self.hk.tag(name=tag) is None:
+                self.hk.add_commit(self.hk.new_tag(tag))
+
+    def _parse_flow_cell_samples(
+        self,
+        cgstats_flow_cell: StatsFlowcell,
+        flow_cell: Flowcell,
+        flow_cell_id: str,
+        store: bool,
+    ) -> None:
+        """Adds fastq to Housekeeper, set sequenced at for sample, add samples to flow cell."""
         for cgstats_sample in cgstats_flow_cell.samples:
             LOG.debug(f"Adding reads/FASTQs to sample: {cgstats_sample.name}")
 
@@ -77,21 +107,11 @@ class TransferFlowCell:
             if isinstance(status_db_sample, Sample):
                 flow_cell.samples.append(status_db_sample)
 
-            enough_reads = (
-                status_db_sample.reads
-                > status_db_sample.application_version.application.expected_reads
+            log_enough_reads(
+                status_db_sample_reads=status_db_sample.reads,
+                application_expected_reads=status_db_sample.application_version.application.expected_reads,
+                cgstats_sample_name=cgstats_sample.name,
             )
-            LOG.info(
-                f"Added reads to sample: {cgstats_sample.name} - {cgstats_sample.reads} "
-                f"[{'DONE' if enough_reads else 'NOT DONE'}]"
-            )
-        return flow_cell
-
-    def _add_tag_to_housekeeper(self, store: bool, tags: List[str]) -> None:
-        """Add and commit tag to Housekeeper if not already existing in database."""
-        for tag in tags:
-            if store and self.hk.tag(name=tag) is None:
-                self.hk.add_commit(self.hk.new_tag(tag))
 
     def _add_flow_cell_to_status_db(
         self, cgstats_flow_cell: StatsFlowcell, flow_cell: Flowcell, flow_cell_id: str
