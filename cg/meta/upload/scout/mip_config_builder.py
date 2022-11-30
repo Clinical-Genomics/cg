@@ -131,6 +131,15 @@ class MipConfigBuilder(ScoutConfigBuilder):
                 hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
             )
         )
+        config_sample.reviewer.alignment = self.fetch_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment, sample_id=sample_id
+        )
+        config_sample.reviewer.vcf = self.fetch_sample_file(
+            hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
+        )
+        self.load_config.variant_catalog = self.fetch_file_from_hk(
+            self.fetch_file_from_hk(self.case_tags.str_catalog)
+        )
 
     @staticmethod
     def extract_generic_filepath(file_path: Optional[str]) -> Optional[str]:

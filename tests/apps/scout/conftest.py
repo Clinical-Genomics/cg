@@ -26,6 +26,10 @@ def fixture_sample_dict() -> dict:
         "analysis_type": "wgs",
         "bam_path": Path("path", "to", "sample.bam").as_posix(),
         "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
+        "reviewer": {
+            "alignment": Path("path", "to", "expansionhunter.bam").as_posix(),
+            "vcf": Path("path", "to", "expansionhunter.vcf").as_posix(),
+        },
         "capture_kit": None,
         Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
         Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,

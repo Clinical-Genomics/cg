@@ -10,6 +10,7 @@ MIP_CASE_TAGS = dict(
     peddy_check={"ped-check", "peddy"},
     multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
+    str_catalog={"expansionhunter", "variant_catalog"}
 )
 
 BALSAMIC_CASE_TAGS = dict(
@@ -36,6 +37,8 @@ MIP_SAMPLE_TAGS = dict(
     chromograph_coverage={"chromograph", "tcov"},
     chromograph_regions={"chromograph", "regions"},
     chromograph_sites={"chromograph", "sites"},
+    reviewer_alignment={"expansionhunter","bam"},
+    reviewer_vcf={"expansionhunter","vcf-str"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(
