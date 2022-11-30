@@ -1,6 +1,7 @@
 """API for transfer a flow cell."""
 
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -11,10 +12,21 @@ from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cgstats.flowcell import StatsFlowcell
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import Sample, Flowcell
 
 LOG = logging.getLogger(__name__)
+
+
+def _set_status_db_sample_sequenced_at(
+    status_db_sample: Sample, flow_cell_sequenced_at: datetime
+) -> None:
+    """Set sequenced at for status db."""
+    is_newer_date = (status_db_sample.sequenced_at is None) or (
+        flow_cell_sequenced_at > status_db_sample.sequenced_at
+    )
+    if is_newer_date:
+        status_db_sample.sequenced_at = flow_cell_sequenced_at
 
 
 class TransferFlowCell:
@@ -40,34 +52,37 @@ class TransferFlowCell:
 
         self._add_sample_sheet_to_housekeeper(flow_cell_id=flow_cell_id, store=store)
 
-        for sample_data in cgstats_flow_cell.samples:
-            LOG.debug(f"Adding reads/FASTQs to sample: {sample_data.name}")
-            sample: Sample = self.db.sample(sample_data.name)
-            if sample is None:
-                LOG.warning(f"Unable to find sample: {sample_data.name}")
+        for cgstats_sample in cgstats_flow_cell.samples:
+            LOG.debug(f"Adding reads/FASTQs to sample: {cgstats_sample.name}")
+
+            status_db_sample: Sample = self.db.sample(internal_id=cgstats_sample.name)
+            if status_db_sample is None:
+                LOG.warning(f"Unable to find sample: {cgstats_sample.name}")
                 continue
 
             if store:
                 self._store_sequencing_file(
                     flow_cell_id=flow_cell_id,
-                    sample_id=sample.internal_id,
-                    sequencing_files=sample_data.fastqs,
+                    sample_id=status_db_sample.internal_id,
+                    sequencing_files=cgstats_sample.fastqs,
                     tag_name=SequencingFileTag.FASTQ,
                 )
 
-            sample.reads = sample_data.reads
-            enough_reads = sample.reads > sample.application_version.application.expected_reads
-            newest_date = (sample.sequenced_at is None) or (
-                flow_cell.sequenced_at > sample.sequenced_at
+            status_db_sample.reads = cgstats_sample.reads
+
+            _set_status_db_sample_sequenced_at(
+                status_db_sample=status_db_sample, flow_cell_sequenced_at=flow_cell.sequenced_at
             )
-            if newest_date:
-                sample.sequenced_at = flow_cell.sequenced_at
 
-            if isinstance(sample, models.Sample):
-                flow_cell.samples.append(sample)
+            if isinstance(status_db_sample, Sample):
+                flow_cell.samples.append(status_db_sample)
 
+            enough_reads = (
+                status_db_sample.reads
+                > status_db_sample.application_version.application.expected_reads
+            )
             LOG.info(
-                f"Added reads to sample: {sample_data.name} - {sample_data.reads} "
+                f"Added reads to sample: {cgstats_sample.name} - {cgstats_sample.reads} "
                 f"[{'DONE' if enough_reads else 'NOT DONE'}]"
             )
         return flow_cell
