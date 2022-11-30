@@ -167,8 +167,8 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.parse_obj(response)
 
-    def set_analysis_uploaded(self, case_id) -> None:
-        request_body = {"case_id": case_id}
+    def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:
+        request_body = {"case_id": case_id, "uploaded_at": uploaded_at}
 
         LOG.info(f"{case_id} - uploaded at set to {datetime.datetime.now()}")
         self.query_trailblazer(command="set_analysis_uploaded", request_body=request_body)

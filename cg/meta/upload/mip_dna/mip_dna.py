@@ -50,5 +50,4 @@ class MipDNAUploadAPI(UploadAPI):
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
 
-        self.config.trailblazer_api.set_analysis_uploaded(case_id=case_obj.internal_id)
         self.update_uploaded_at(analysis_obj)
