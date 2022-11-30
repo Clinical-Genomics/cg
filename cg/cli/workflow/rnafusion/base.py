@@ -69,9 +69,6 @@ def config_case(
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.config_case(case_id=case_id, strandedness=strandedness)
     except CgError as error:
-        LOG.error(f"Could not create samplesheet: {error.message}")
-        raise click.Abort()
-    except Exception as error:
         LOG.error(f"Could not create samplesheet: {error}")
         raise click.Abort()
 
