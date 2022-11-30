@@ -81,8 +81,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             RnafusionSample(
                 sample=case_id, fastq_r1=fastq_r1, fastq_r2=fastq_r2, strandedness=strandedness
             )
-        except ValidationError as e:
-            LOG.error(e)
+        except ValidationError as error:
+            LOG.error(error)
             raise ValueError
 
         samples_full_list: list = []
@@ -276,8 +276,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                     NextflowAnalysisAPI.get_replace_map(case_id=case_id, root_dir=self.root_dir),
                     deliver_file,
                 )
-        except ValidationError as e:
-            LOG.error(e)
+        except ValidationError as error:
+            LOG.error(error)
             raise ValueError
         NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         NextflowAnalysisAPI.write_deliverables_bundle(
