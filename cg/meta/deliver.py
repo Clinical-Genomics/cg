@@ -93,9 +93,6 @@ class DeliverAPI:
 
         link_obj: FamilySample
         for link_obj in link_objs:
-            LOG.warning(
-                f"Sample {link_obj.sample.internal_id}. QC_pass: {link_obj.sample.sequencing_qc}, Deliver failed sample: {self.deliver_failed_samples}"
-            )
             if not link_obj.sample.sequencing_qc:
                 continue
             sample_id: str = link_obj.sample.internal_id
