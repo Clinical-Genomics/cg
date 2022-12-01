@@ -2,11 +2,12 @@
 
 import logging
 
-from cg.cli.workflow.rnafusion.base import config_case
+from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
-from cg.models.cg_config import CGConfig
+from cg.cli.workflow.rnafusion.base import config_case
 from cg.constants import EXIT_SUCCESS
+from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +22,9 @@ def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_with_missing_case(
+    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -35,7 +38,9 @@ def test_with_missing_case(cli_runner: CliRunner, rnafusion_context: CGConfig, c
     assert "could not be found in StatusDB!" in caplog.text
 
 
-def test_without_samples(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_without_samples(
+    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -49,7 +54,9 @@ def test_without_samples(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     assert "has no samples" in caplog.text
 
 
-def test_strandedness(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_strandedness(
+    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+):
     """Test command with --strandedness option"""
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id and genome_version
@@ -70,7 +77,9 @@ def test_strandedness(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog
         assert option_value in caplog.text
 
 
-def test_wrong_strandedness(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_wrong_strandedness(
+    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+):
     """Test command with --strandedness option"""
     caplog.set_level(logging.INFO)
     # GIVEN a VALID case_id and genome_version

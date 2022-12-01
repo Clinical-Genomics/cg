@@ -1,13 +1,15 @@
 import logging
 from pathlib import Path
 
+from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
-from cg.cli.workflow.rnafusion.base import rnafusion, start, store, start_available, store_available
-from cg.models.cg_config import CGConfig
-from click.testing import CliRunner
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
 from cg.constants import EXIT_SUCCESS
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
+from cg.models.cg_config import CGConfig
 
 
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -26,7 +28,11 @@ def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
     assert "help" in result.output
 
 
-def test_start(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_start(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+):
     """Test to ensure all parts of start command will run successfully given ideal conditions"""
     caplog.set_level(logging.INFO)
 
@@ -50,7 +56,7 @@ def test_store(
     real_housekeeper_api,
     mock_deliverable,
     mock_analysis_finish,
-    caplog,
+    caplog: LogCaptureFixture,
     hermes_deliverables,
     mocker,
 ):
@@ -90,7 +96,9 @@ def test_store(
 
 
 #
-def test_start_available(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog, mocker):
+def test_start_available(
+    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture, mocker
+):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones"""
     caplog.set_level(logging.INFO)
@@ -130,7 +138,7 @@ def test_store_available(
     real_housekeeper_api,
     mock_deliverable,
     mock_analysis_finish,
-    caplog,
+    caplog: LogCaptureFixture,
     mocker,
     hermes_deliverables,
 ):

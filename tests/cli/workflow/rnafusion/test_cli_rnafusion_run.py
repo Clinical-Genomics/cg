@@ -2,11 +2,11 @@
 import logging
 from pathlib import Path
 
+from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 
 from cg.cli.workflow.rnafusion.base import run
 from cg.constants import EXIT_SUCCESS
-from cg.constants.priority import SlurmQos
 from cg.models.cg_config import CGConfig
 
 
@@ -21,7 +21,11 @@ def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_with_missing_case(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
@@ -36,7 +40,11 @@ def test_with_missing_case(cli_runner: CliRunner, rnafusion_context: CGConfig, c
     assert "could not be found" in caplog.text
 
 
-def test_without_samples(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_without_samples(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+):
     """Test command with case_id and no samples"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -50,7 +58,11 @@ def test_without_samples(cli_runner: CliRunner, rnafusion_context: CGConfig, cap
     assert "no samples" in caplog.text
 
 
-def test_without_config(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_without_config(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+):
     """Test command with case_id and no config file"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -63,7 +75,11 @@ def test_without_config(cli_runner: CliRunner, rnafusion_context: CGConfig, capl
     assert "No config file found" in caplog.text
 
 
-def test_with_config(tmpdir_factory, cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_with_config(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+):
     """Test command with case_id and config file"""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -78,5 +94,6 @@ def test_with_config(tmpdir_factory, cli_runner: CliRunner, rnafusion_context: C
     )
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
+
     # THEN command should NOT execute successfully
     assert result.exit_code == EXIT_SUCCESS

@@ -2,6 +2,10 @@ import logging
 from pathlib import Path
 
 import pytest
+from _pytest.logging import LogCaptureFixture
+from click.testing import CliRunner
+from pydantic import ValidationError
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -12,8 +16,6 @@ from cg.io.controller import WriteStream
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
-from click.testing import CliRunner
-from pydantic import ValidationError
 
 
 def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
@@ -30,7 +32,9 @@ def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
     assert "Missing argument" in result.output
 
 
-def test_with_missing_case(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_with_missing_case(
+    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+):
     """Test command with invalid case to start with"""
     caplog.set_level(logging.ERROR)
 
@@ -49,7 +53,9 @@ def test_with_missing_case(cli_runner: CliRunner, rnafusion_context: CGConfig, c
     assert "could not be found" in caplog.text
 
 
-def test_case_not_finished(cli_runner: CliRunner, rnafusion_context: CGConfig, caplog):
+def test_case_not_finished(
+    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+):
     """Test command with case_id and config file but no analysis_finish"""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
@@ -71,7 +77,7 @@ def test_case_with_malformed_deliverables_file(
     rnafusion_context: CGConfig,
     mock_deliverable,
     malformed_hermes_deliverables: dict,
-    caplog,
+    caplog: LogCaptureFixture,
 ):
     """Test command with case_id and config file and analysis_finish but malformed deliverables output"""
     caplog.set_level(logging.WARNING)
@@ -112,7 +118,7 @@ def test_valid_case(
     real_housekeeper_api: HousekeeperAPI,
     mock_deliverable,
     mock_analysis_finish,
-    caplog,
+    caplog: LogCaptureFixture,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
@@ -146,7 +152,7 @@ def test_valid_case_already_added(
     real_housekeeper_api: HousekeeperAPI,
     mock_deliverable,
     mock_analysis_finish,
-    caplog,
+    caplog: LogCaptureFixture,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
