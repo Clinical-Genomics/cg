@@ -44,12 +44,11 @@ class UploadAPI(MetaAPI):
     def update_uploaded_at(self, analysis: models.Analysis) -> None:
         """Updates the uploaded_at field with the current local date and time"""
 
-        uploaded_at: datetime = datetime.now()
-        analysis.uploaded_at = uploaded_at
+        analysis.uploaded_at: datetime = datetime.now()
 
         self.status_db.commit()
         self.trailblazer_api.set_analysis_uploaded(
-            case_id=analysis.family_id, uploaded_at=uploaded_at
+            case_id=analysis.family_id, uploaded_at= analysis.uploaded_at
         )
 
     @staticmethod
