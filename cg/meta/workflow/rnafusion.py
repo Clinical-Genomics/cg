@@ -233,7 +233,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
         nextflow_options = self.__build_command_str(
             NextflowAnalysisAPI.get_verified_arguments_nextflow(
-                case_id=case_id, log=log, pipeline=self.pipeline, root_dir=self.root_dir
+                case_id=case_id, pipeline=self.pipeline, root_dir=self.root_dir, log=log
             )
         )
         command = ["run", self.nfcore_pipeline_path]

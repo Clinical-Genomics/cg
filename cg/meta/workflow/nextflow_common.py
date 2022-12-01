@@ -92,7 +92,7 @@ class NextflowAnalysisAPI:
         }
 
     @classmethod
-    def get_log_path(cls, case_id: str, root_dir: str, pipeline: str, log: Path = None) -> Path:
+    def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: Path = None) -> Path:
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
