@@ -130,9 +130,9 @@ class NiptUploadAPI:
         uploaded_at: dt.datetime = dt.datetime.now()
 
         if not self.dry_run:
-            self.trailblazer_api.set_analysis_uploaded(case_id=case_id, uploaded_at=uploaded_at)
             analysis_obj.uploaded_at = uploaded_at
             self.status_db.commit()
+            self.trailblazer_api.set_analysis_uploaded(case_id=case_id, uploaded_at=uploaded_at)
 
         return analysis_obj
 
