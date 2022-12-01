@@ -14,7 +14,7 @@ jobs:
 
     steps:
 
-    # Check out Housekeeper code
+    # Check out Cg code
     - uses: actions/checkout@v2
 
     # Set up python
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: coverallsapp/github-action@master
+      uses: coverallsapp/github-action@1.1.3
       with:
         github-token: ${{ secrets.github_token }}
         parallel-finished: true
