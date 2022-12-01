@@ -5,13 +5,11 @@ import warnings
 from pathlib import Path
 from typing import Generator
 
-import pytest
 from sqlalchemy import exc as sa_exc
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, SequencingFileTag
-from cg.exc import HousekeeperVersionMissingError
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.transfer.flowcell import _set_status_db_sample_sequenced_at, log_enough_reads
 from cg.models.cgstats.flowcell import StatsFlowcell
@@ -114,6 +112,54 @@ def test_add_sample_sheet_to_housekeeper_when_not_existing(
 
     # THEN tha sample sheet should not be found
     assert "Unable to find sample sheet:" in caplog.text
+
+
+def test__store_sequencing_file(
+    caplog,
+    flow_cell_id: str,
+    mocker,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
+):
+    """Test storing sequencing files to Housekeeper."""
+    caplog.set_level(logging.INFO)
+    # GIVEN transfer flow cell API
+
+    # GIVEN a sample sheet tag in Housekeeper
+    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
+
+    # GIVEN no flow cell id bundle in housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    assert hk_bundle is None
+
+    mocker.patch.object(StatsAPI, "run_name")
+    StatsAPI.run_name.return_value = flow_cell_id
+
+    # GIVEN a sample sheet that exists
+    sample_sheet_path_dir: Path = Path("tests", "fixtures", "DEMUX", "HVKJCDRXX", "NAADM1")
+
+    sample_sheet_path_dir.mkdir(parents=True, exist_ok=True)
+
+    sample_sheet_file: Path = Path(sample_sheet_path_dir, "SampleSheet.csv")
+
+    sample_sheet_file.touch()
+
+    # WHEN adding sample sheet to Housekeeper
+    transfer_flow_cell_api._store_sequencing_file(
+        flow_cell_id=flow_cell_id,
+        sequencing_files=[sample_sheet_file.as_posix()],
+        tag_name=SequencingFileTag.SAMPLESHEET,
+    )
+
+    # Clean-up
+    sample_sheet_file.unlink()
+
+    # THEN we should log that we are adding a file
+    assert f"Adding file using tag: {SequencingFileTag.SAMPLESHEET}" in caplog.text
+
+    # THEN tha sample sheet should be added to Housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    for hk_file in hk_bundle.versions[0].files:
+        assert hk_file.path.endswith("csv")
 
 
 def test_add_sample_sheet_to_housekeeper(

@@ -150,21 +150,15 @@ class TransferFlowCell:
         hk_bundle: Bundle = self.hk.bundle(sample_id) if sample_id else self.hk.bundle(flow_cell_id)
         if hk_bundle is None:
             self.hk.create_new_bundle_and_version(name=flow_cell_id)
-            # hk_bundle: Bundle = self.hk.create_new_bundle_and_version(name=flow_cell_id)
 
         with self.hk.session_no_autoflush():
-            #   hk_version: Version = hk_bundle.versions[0]
             for file in sequencing_files:
                 if self.hk.files(path=file).first() is None:
                     LOG.info(f"Found new file: {file}.")
                     LOG.info(f"Adding file using tag: {tag_name}")
-                    # tags: List[Tag] = [self.hk.tag(name=tag_name), self.hk.tag(name=flow_cell_id)]
-                    tags: List[Tag] = [tag_name, flow_cell_id]
-                    # hk_version.files.append(self.hk.new_file(path=file, tags=tags))
                     self.hk.add_and_include_file_to_latest_version(
-                        case_id=flow_cell_id, file=Path(file), tags=tags
+                        case_id=flow_cell_id, file=Path(file), tags=[tag_name, flow_cell_id]
                     )
-            # self.hk.commit()
 
     def _sample_sheet_path(self, flow_cell_id: str) -> Path:
         """Construct the path to the sample sheet to be stored."""
