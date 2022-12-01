@@ -5,11 +5,13 @@ import warnings
 from pathlib import Path
 from typing import Generator
 
+import pytest
 from sqlalchemy import exc as sa_exc
 
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, SequencingFileTag
+from cg.exc import HousekeeperVersionMissingError
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.transfer.flowcell import _set_status_db_sample_sequenced_at, log_enough_reads
 from cg.models.cgstats.flowcell import StatsFlowcell

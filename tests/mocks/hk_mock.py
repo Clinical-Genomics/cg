@@ -8,7 +8,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import HousekeeperVersionMissingError
 from cg.store import models
+
+from housekeeper.store.models import File, Version
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -468,6 +471,16 @@ class MockHousekeeperAPI:
         self.commit()
         LOG.info("New bundle created with name %s", new_bundle.name)
         return new_bundle
+
+    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
+        """Adds and includes a file in the latest version of a case bundle."""
+        version: Version = self.last_version(case_id)
+        if not version:
+            LOG.info("Case ID: %s not found in housekeeper", case_id)
+            raise HousekeeperVersionMissingError
+        hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
+        self.include_file(version_obj=version, file_obj=hk_file)
+        self.commit()
 
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:

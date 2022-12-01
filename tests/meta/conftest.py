@@ -16,6 +16,7 @@ from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
 from cg.store.models import Flowcell, Customer, ApplicationVersion
+from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
 
@@ -234,7 +235,7 @@ def fixture_flowcell_store(
 
 @pytest.fixture(name="transfer_flow_cell_api")
 def fixture_transfer_flow_cell_api(
-    flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
+    flowcell_store: Store, housekeeper_api: MockHousekeeperAPI, base_store_stats: StatsAPI
 ) -> Generator[TransferFlowCell, None, None]:
     """Setup transfer flow cell API."""
     yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)

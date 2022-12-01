@@ -298,7 +298,7 @@ class HousekeeperAPI:
         self._store.drop_all()
 
     def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
-        """Adds amd includes a file in the latest version of a case bundle."""
+        """Adds and includes a file in the latest version of a case bundle."""
         version_obj: Version = self.last_version(case_id)
         if not version_obj:
             LOG.info("Case ID: %s not found in housekeeper", case_id)
