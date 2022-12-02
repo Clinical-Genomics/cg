@@ -46,20 +46,22 @@ class TransferFlowCell:
         self.stats: StatsAPI = stats_api
         self.hk: HousekeeperAPI = hk_api
 
-    def transfer(self, flow_cell_id: str, store: bool = True) -> Flowcell:
+    def transfer(self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True) -> Flowcell:
         """Populate the database with the information."""
         self._add_tag_to_housekeeper(
             store=store, tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id]
         )
-
-        cgstats_flow_cell: StatsFlowcell = self.stats.flowcell(flow_cell_id)
+        print(flow_cell_id)
+        cgstats_flow_cell: StatsFlowcell = self.stats.flowcell(flowcell_name=flow_cell_id)
         flow_cell: Flowcell = self._add_flow_cell_to_status_db(
             cgstats_flow_cell=cgstats_flow_cell,
             flow_cell=self.db.get_flow_cell(flow_cell_id=flow_cell_id),
             flow_cell_id=flow_cell_id,
         )
 
-        self._add_sample_sheet_to_housekeeper(flow_cell_id=flow_cell_id, store=store)
+        self._add_sample_sheet_to_housekeeper(
+            flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
+        )
         self._parse_flow_cell_samples(
             cgstats_flow_cell=cgstats_flow_cell,
             flow_cell=flow_cell,
@@ -127,9 +129,14 @@ class TransferFlowCell:
             )
         return flow_cell
 
-    def _add_sample_sheet_to_housekeeper(self, flow_cell_id: str, store: bool) -> None:
+    def _add_sample_sheet_to_housekeeper(
+        self, flow_cell_dir: Path, flow_cell_id: str, store: bool
+    ) -> None:
         """Add sample sheet to Housekeeper."""
-        sample_sheet_path: Path = self._sample_sheet_path(flow_cell_id)
+        sample_sheet_path: Path = Path(
+            flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+        # = self._sample_sheet_path(flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id)
         if not sample_sheet_path.exists():
             LOG.warning(f"Unable to find sample sheet: {sample_sheet_path.as_posix()}")
         elif store:
@@ -160,12 +167,18 @@ class TransferFlowCell:
                         bundle_name=flow_cell_id, file=Path(file), tags=[tag_name, flow_cell_id]
                     )
 
-    def _sample_sheet_path(self, flow_cell_id: str) -> Path:
+    def _sample_sheet_path(self, flow_cell_dir: Path, flow_cell_id: str) -> Path:
         """Construct the path to the sample sheet to be stored."""
         run_name: str = self.stats.run_name(flow_cell_id)
-        document_path: str = self.stats.document_path(flow_cell_id)
-        unaligned_dir: str = Path(document_path).name
+        #        document_path: str = self.stats.document_path(flow_cell_id)
+        #        unaligned_dir: str = Path(document_path).name
         root_dir: Path = self.stats.root_dir
-        return root_dir.joinpath(
-            run_name, unaligned_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-        )
+        return Path(flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+
+#        return flow_cell_dir.joinpath(
+#           DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+#       )
+#        return root_dir.joinpath(
+#            flow_cell_dir, unaligned_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+#        )

@@ -25,8 +25,6 @@ from tests.cli.demultiplex.conftest import (
     fixture_stats_api,
 )
 from tests.models.demultiplexing.conftest import (
-    fixture_bcl2fastq_demux_results,
-    fixture_demultiplexed_flow_cell,
     fixture_flowcell_path,
     fixture_flow_cell_runs,
 )

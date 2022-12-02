@@ -24,6 +24,7 @@ from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
 
@@ -651,6 +652,20 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
+
+
+@pytest.fixture(name="demultiplexed_flow_cell")
+def fixture_demultiplexed_flow_cell(demultiplexed_runs: Path, flow_cell_full_name: str) -> Path:
+    return Path(demultiplexed_runs, flow_cell_full_name)
+
+
+@pytest.fixture(name="bcl2fastq_demux_results")
+def fixture_bcl2fastq_demux_results(
+    demultiplexed_flow_cell: Path, flow_cell: FlowCell
+) -> DemuxResults:
+    return DemuxResults(
+        demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter="bcl2fastq"
+    )
 
 
 # Genotype file fixture

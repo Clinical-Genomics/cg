@@ -8,6 +8,7 @@ from cg.meta.demultiplex.demux_post_processing import (
 )
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
 
@@ -191,9 +192,8 @@ def test_cgstats_lanestats(
     assert f"lanestats {flow_cell.path}" in caplog.text
 
 
-def test_post_process_flow_cell_copy_not_completed(
+def test_finish_flow_cell_copy_not_completed(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
@@ -211,9 +211,9 @@ def test_post_process_flow_cell_copy_not_completed(
     if hiseq_x_copy_complete_file.exists():
         hiseq_x_copy_complete_file.unlink()
 
-    # When post-processing flow cell
-    post_demux_api.post_process_flow_cell(
-        flow_cell=flow_cell,
+    # When finishing flow cell
+    post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
@@ -225,9 +225,8 @@ def test_post_process_flow_cell_copy_not_completed(
     assert f"{flow_cell.full_name} is not yet completely copied" in caplog.text
 
 
-def test_post_process_flow_cell_delivery_started(
+def test_finish_flow_cell_delivery_started(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
@@ -244,9 +243,9 @@ def test_post_process_flow_cell_delivery_started(
     # GIVEN an already started flag file
     demultiplexing_delivery_file.touch()
 
-    # When post-processing flow cell
-    post_demux_api.post_process_flow_cell(
-        flow_cell=flow_cell,
+    # When finishing flow cell
+    post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
@@ -258,9 +257,8 @@ def test_post_process_flow_cell_delivery_started(
     assert f"{flow_cell.full_name} copy is complete and delivery has already started" in caplog.text
 
 
-def test_post_process_flow_cell_not_hiseq_x(
+def test_finish_flow_cell_delivery_not_hiseq_x(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     hiseq_x_tile_dir: Path,
@@ -278,9 +276,9 @@ def test_post_process_flow_cell_not_hiseq_x(
     if hiseq_x_tile_dir.exists():
         hiseq_x_tile_dir.rmdir()
 
-    # When post-processing flow cell
-    post_demux_api.post_process_flow_cell(
-        flow_cell=flow_cell,
+    # When finishing flow cell
+    post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=flow_cell.full_name,
         flow_cell_path=flow_cell.path,
     )
@@ -289,11 +287,57 @@ def test_post_process_flow_cell_not_hiseq_x(
     assert f"{flow_cell.full_name} is not an Hiseq X flow cell" in caplog.text
 
 
-def test_post_process_flow_cell_dry_run(
+def test_finish_flow_cell_ready(
     caplog,
-    cgstats_select_project_log_file: Path,
     create_sample_sheet_file: Path,
-    demultiplexed_flow_cell_working_directory: Path,
+    demultiplex_context: CGConfig,
+    flow_cell: FlowCell,
+    flow_cell_project_id: int,
+    demultiplexing_delivery_file: Path,
+    hiseq_x_tile_dir: Path,
+    transfer_flow_cell_api,
+    mocker,
+):
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a demultiplex context
+
+    # GIVEN a Demultiplexing post process API
+    post_demux_api: DemuxPostProcessingHiseqXAPI = DemuxPostProcessingHiseqXAPI(
+        config=demultiplex_context
+    )
+
+    # GIVEN dry run set to True
+    post_demux_api.set_dry_run(dry_run=True)
+
+    # GIVEN a Hiseq X tile directory
+    hiseq_x_tile_dir.mkdir(parents=True, exist_ok=True)
+
+    # GIVEN an unaligned project directory
+    Path(
+        flow_cell.path,
+        DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+        f"Project_{flow_cell_project_id}",
+    ).mkdir(parents=True, exist_ok=True)
+
+    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
+    TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
+
+    # When finishing flow cell
+    post_demux_api.finish_flow_cell(
+        bcl_converter=BclConverter.BCL2FASTQ,
+        flow_cell_name=flow_cell.full_name,
+        flow_cell_path=flow_cell.path,
+    )
+
+    # THEN we should log that post-processing will begin
+    assert f"{flow_cell.full_name} copy is complete and delivery will start" in caplog.text
+
+
+def test_post_process_flow_cell_dry_run(
+    bcl2fastq_demux_results: DemuxResults,
+    caplog,
+    create_sample_sheet_file: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
@@ -329,11 +373,7 @@ def test_post_process_flow_cell_dry_run(
     TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
 
     # When post-processing flow cell
-    post_demux_api.post_process_flow_cell(
-        flow_cell=flow_cell,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
-    )
+    post_demux_api.post_process_flow_cell(demux_results=bcl2fastq_demux_results)
 
     # THEN a delivery file should not have been created
     assert not demultiplexing_delivery_file.exists()
@@ -343,6 +383,7 @@ def test_post_process_flow_cell_dry_run(
 
 
 def test_post_process_flow_cell(
+    bcl2fastq_demux_results: DemuxResults,
     caplog,
     cgstats_select_project_log_file: Path,
     create_sample_sheet_file: Path,
@@ -379,11 +420,7 @@ def test_post_process_flow_cell(
     TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
 
     # When post-processing flow cell
-    post_demux_api.post_process_flow_cell(
-        flow_cell=flow_cell,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
-    )
+    post_demux_api.post_process_flow_cell(demux_results=bcl2fastq_demux_results)
 
     # THEN a delivery file should have been created
     assert demultiplexing_delivery_file.exists()
@@ -391,9 +428,6 @@ def test_post_process_flow_cell(
     # Clean up
     cgstats_select_project_log_file.unlink()
     demultiplexing_delivery_file.unlink()
-
-    # THEN we should log that post-processing will begin
-    assert f"{flow_cell.full_name} copy is complete and delivery will start" in caplog.text
 
     # THEN we should also transfer the flow cell
     assert f"Flow cell added: {flow_cell.id}" in caplog.text

@@ -13,6 +13,7 @@ from cg.constants import FlowCellStatus, SequencingFileTag
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.transfer.flowcell import _set_status_db_sample_sequenced_at, log_enough_reads
 from cg.models.cgstats.flowcell import StatsFlowcell
+from cg.models.demultiplex.demux_results import DemuxResults
 from cg.store import Store
 from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
@@ -108,13 +109,57 @@ def test_add_sample_sheet_to_housekeeper_when_not_existing(
     StatsAPI.run_name.return_value = flow_cell_id
 
     # WHEN adding sample sheet to Housekeeper
-    transfer_flow_cell_api._add_sample_sheet_to_housekeeper(flow_cell_id=flow_cell_id, store=True)
+    transfer_flow_cell_api._add_sample_sheet_to_housekeeper(
+        flow_cell_dir=Path("does_not_exist"), flow_cell_id=flow_cell_id, store=True
+    )
 
     # THEN tha sample sheet should not be found
     assert "Unable to find sample sheet:" in caplog.text
 
 
-def test__store_sequencing_file(
+def test_add_sample_sheet_to_housekeeper(
+    caplog,
+    flow_cell_id: str,
+    mocker,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
+):
+    """Test adding sample sheet to Housekeeper."""
+    # GIVEN transfer flow cell API
+
+    # GIVEN a sample sheet tag in Housekeeper
+    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
+
+    # GIVEN no flow cell id bundle in housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    assert hk_bundle is None
+
+    mocker.patch.object(StatsAPI, "run_name")
+    StatsAPI.run_name.return_value = flow_cell_id
+
+    # GIVEN a sample sheet that exists
+    sample_sheet_path_dir: Path = Path("tests", "fixtures", "DEMUX", "HVKJCDRXX", "NAADM1")
+
+    sample_sheet_path_dir.mkdir(parents=True, exist_ok=True)
+
+    sample_sheet_file: Path = Path(sample_sheet_path_dir, "SampleSheet.csv")
+
+    sample_sheet_file.touch()
+
+    # WHEN adding sample sheet to Housekeeper
+    transfer_flow_cell_api._add_sample_sheet_to_housekeeper(
+        flow_cell_dir=sample_sheet_path_dir, flow_cell_id=flow_cell_id, store=True
+    )
+
+    # Clean-up
+    sample_sheet_file.unlink()
+
+    # THEN tha sample sheet should be added to Housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    for hk_file in hk_bundle.versions[0].files:
+        assert hk_file.path.endswith("csv")
+
+
+def test_store_sequencing_file(
     caplog,
     flow_cell_id: str,
     mocker,
@@ -155,46 +200,6 @@ def test__store_sequencing_file(
 
     # THEN we should log that we are adding a file
     assert f"Adding file using tag: {SequencingFileTag.SAMPLESHEET}" in caplog.text
-
-    # THEN tha sample sheet should be added to Housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
-    for hk_file in hk_bundle.versions[0].files:
-        assert hk_file.path.endswith("csv")
-
-
-def test_add_sample_sheet_to_housekeeper(
-    caplog,
-    flow_cell_id: str,
-    mocker,
-    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
-):
-    """Test adding sample sheet to Housekeeper."""
-    # GIVEN transfer flow cell API
-
-    # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
-
-    # GIVEN no flow cell id bundle in housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
-    assert hk_bundle is None
-
-    mocker.patch.object(StatsAPI, "run_name")
-    StatsAPI.run_name.return_value = flow_cell_id
-
-    # GIVEN a sample sheet that exists
-    sample_sheet_path_dir: Path = Path("tests", "fixtures", "DEMUX", "HVKJCDRXX", "NAADM1")
-
-    sample_sheet_path_dir.mkdir(parents=True, exist_ok=True)
-
-    sample_sheet_file: Path = Path(sample_sheet_path_dir, "SampleSheet.csv")
-
-    sample_sheet_file.touch()
-
-    # WHEN adding sample sheet to Housekeeper
-    transfer_flow_cell_api._add_sample_sheet_to_housekeeper(flow_cell_id=flow_cell_id, store=True)
-
-    # Clean-up
-    sample_sheet_file.unlink()
 
     # THEN tha sample sheet should be added to Housekeeper
     hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
@@ -321,7 +326,7 @@ def test_parse_flow_cell_samples_when_no_cgstats_sample(
         yet_another_flow_cell_id
     )
 
-    # GIVEN a samplle name that dooes not exist in cgstats
+    # GIVEN a sample name that does not exist in cgstats
     cgstats_flow_cell.samples[0].name = "sample_does_not_exist_in_cgstats"
 
     # GIVEN a flow cell that exist in status db
@@ -348,6 +353,7 @@ def test_parse_flow_cell_samples_when_no_cgstats_sample(
 
 
 def test_transfer(
+    bcl2fastq_demux_results: DemuxResults,
     create_sample_sheet_file: Generator[Path, None, None],
     flowcell_store: Store,
     mocker,
@@ -369,7 +375,10 @@ def test_transfer(
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=sa_exc.SAWarning)
-        flow_cell = transfer_flow_cell_api.transfer(flow_cell_id=yet_another_flow_cell_id)
+        flow_cell = transfer_flow_cell_api.transfer(
+            flow_cell_dir=bcl2fastq_demux_results.flow_cell.path,
+            flow_cell_id=yet_another_flow_cell_id,
+        )
 
     # THEN it should create a new flowcell record
     assert flowcell_store.flowcells().count() == 1
