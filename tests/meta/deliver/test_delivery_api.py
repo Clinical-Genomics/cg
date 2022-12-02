@@ -8,9 +8,11 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store
+from cg.store import Store, models
 from cg.store.models import FamilySample, Sample
 from tests.store_helpers import StoreHelpers
+from tests.store.conftest import fixture_case_obj
+from tests.cli.deliver.conftest import fixture_fastq_delivery_bundle, fixture_mip_delivery_bundle
 
 
 def test_get_delivery_path(
@@ -188,3 +190,54 @@ def test_get_delivery_scope_case_and_sample():
     # THEN both case_delivery and sample_delivery should be True
     assert case_delivery
     assert sample_delivery
+
+
+def test_deliver_files_enough_reads(
+    caplog,
+    case_id: str,
+    deliver_api: DeliverAPI,
+    deliver_api_destination_path: Path,
+    fastq_delivery_bundle: dict,
+    helpers: StoreHelpers,
+    mip_delivery_bundle: dict,
+    sample_id: str,
+):
+    # GIVEN a case to be delivered and a sample with enough reads
+    case_obj: models.Family = deliver_api.store.family(internal_id=case_id)
+    sample_obj: models.Sample = deliver_api.store.sample(sample_id)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
+
+    # WHEN the command is run on the case
+    deliver_api.deliver_files(case_obj=case_obj)
+
+    # THEN the sample folder should be created
+    assert Path(
+        deliver_api.project_base_path, deliver_api_destination_path, sample_obj.name
+    ).exists()
+
+
+def test_deliver_files_not_enough_reads(
+    caplog,
+    case_id: str,
+    deliver_api: DeliverAPI,
+    deliver_api_destination_path: Path,
+    fastq_delivery_bundle: dict,
+    helpers: StoreHelpers,
+    mip_delivery_bundle: dict,
+    sample_id: str,
+):
+    # GIVEN a case to be delivered and a sample with too fewenough reads
+    case_obj: models.Family = deliver_api.store.family(internal_id=case_id)
+    sample_obj: models.Sample = deliver_api.store.sample(sample_id)
+    sample_obj.reads = 1
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
+
+    # WHEN the command is run on the case
+    deliver_api.deliver_files(case_obj=case_obj)
+
+    # THEN the sample folder should be created
+    assert not Path(
+        deliver_api.project_base_path, deliver_api_destination_path, sample_obj.name
+    ).exists()

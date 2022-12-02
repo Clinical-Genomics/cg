@@ -136,12 +136,18 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
     help="Deliver and rsync the files for ALL cases connected to a ticket",
     required=True,
 )
+@click.option(
+    "--force-all",
+    help="Deliver sample files for all samples regardles of amount of reads",
+    default=False,
+)
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
-    ticket: str,
     delivery_type: List[str],
     dry_run: bool,
+    force_all: Optional[bool],
+    ticket: str,
 ):
     """Will first collect hard links in the customer inbox then
     concatenate fastq files if needed and finally send the folder
@@ -153,7 +159,11 @@ def deliver_ticket(
     if is_upload_needed:
         LOG.info("Delivering files to customer inbox on the HPC")
         context.invoke(
-            deliver_analysis, ticket=ticket, delivery_type=delivery_type, dry_run=dry_run
+            deliver_analysis,
+            delivery_type=delivery_type,
+            dry_run=dry_run,
+            force_all=force_all,
+            ticket=ticket,
         )
     else:
         LOG.info("Files already delivered to customer inbox on the HPC")

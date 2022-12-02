@@ -79,7 +79,7 @@ class RsyncAPI(MetaAPI):
         """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
         for folder in folder_list:
-            source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
+            source_path: Path = Path(source_and_destination_paths["delivery_source_path"], folder)
             destination_path: Path = Path(
                 source_and_destination_paths["rsync_destination_path"], ticket
             )
@@ -204,14 +204,15 @@ class RsyncAPI(MetaAPI):
         existing_folder_list: List[str] = [
             folder
             for folder in folder_list
-            if (source_and_destination_paths["delivery_source_path"].joinpath(folder).exists())
+            if Path(source_and_destination_paths["delivery_source_path"], folder).exists()
         ]
         commands: str = RsyncAPI.concatenate_rsync_commands(
             folder_list=existing_folder_list,
             source_and_destination_paths=source_and_destination_paths,
             ticket=ticket,
         )
-        return folder_list == existing_folder_list, self.sbatch_rsync_commands(
+        is_complete_delivery: bool = folder_list == existing_folder_list
+        return is_complete_delivery, self.sbatch_rsync_commands(
             commands=commands, job_prefix=case_id, dry_run=dry_run
         )
 
@@ -277,6 +278,3 @@ class RsyncAPI(MetaAPI):
             sbatch_content=sbatch_content, sbatch_path=sbatch_path
         )
         return sbatch_number
-
-    def verify_folder_existance(self, folder_name: str, folder_parent: Path):
-        return folder_parent.joinpath(folder_name).exists()

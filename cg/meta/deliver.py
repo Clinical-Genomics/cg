@@ -93,24 +93,27 @@ class DeliverAPI:
 
         link_obj: FamilySample
         for link_obj in link_objs:
-            if not link_obj.sample.sequencing_qc:
+            if link_obj.sample.sequencing_qc or self.deliver_failed_samples:
+                sample_id: str = link_obj.sample.internal_id
+                sample_name: str = link_obj.sample.name
+                LOG.debug("Fetch last version for sample bundle %s", sample_id)
+                if self.delivery_type == "fastq":
+                    last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
+                if not last_version:
+                    if self.skip_missing_bundle:
+                        LOG.info(f"Could not find any version for {sample_id}")
+                        continue
+                    raise SyntaxError(f"Could not find any version for {sample_id}")
+                self.deliver_sample_files(
+                    case_id=case_id,
+                    case_name=case_name,
+                    sample_id=sample_id,
+                    sample_name=sample_name,
+                    version_obj=last_version,
+                )
                 continue
-            sample_id: str = link_obj.sample.internal_id
-            sample_name: str = link_obj.sample.name
-            LOG.debug("Fetch last version for sample bundle %s", sample_id)
-            if self.delivery_type == "fastq":
-                last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
-            if not last_version:
-                if self.skip_missing_bundle:
-                    LOG.info(f"Could not find any version for {sample_id}")
-                    continue
-                raise SyntaxError(f"Could not find any version for {sample_id}")
-            self.deliver_sample_files(
-                case_id=case_id,
-                case_name=case_name,
-                sample_id=sample_id,
-                sample_name=sample_name,
-                version_obj=last_version,
+            LOG.warning(
+                f"Sample {link_obj.sample.internal_id} did not receive enough reads and will not be delivered"
             )
 
     def deliver_case_files(
