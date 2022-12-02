@@ -157,7 +157,7 @@ class TransferFlowCell:
                     LOG.info(f"Found new file: {file}.")
                     LOG.info(f"Adding file using tag: {tag_name}")
                     self.hk.add_and_include_file_to_latest_version(
-                        case_id=flow_cell_id, file=Path(file), tags=[tag_name, flow_cell_id]
+                        bundle_name=flow_cell_id, file=Path(file), tags=[tag_name, flow_cell_id]
                     )
 
     def _sample_sheet_path(self, flow_cell_id: str) -> Path:

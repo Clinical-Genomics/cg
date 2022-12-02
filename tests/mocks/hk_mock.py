@@ -472,11 +472,13 @@ class MockHousekeeperAPI:
         LOG.info("New bundle created with name %s", new_bundle.name)
         return new_bundle
 
-    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
-        """Adds and includes a file in the latest version of a case bundle."""
-        version: Version = self.last_version(case_id)
+    def add_and_include_file_to_latest_version(
+        self, bundle_name: str, file: Path, tags: list
+    ) -> None:
+        """Adds and includes a file in the latest version of a bundle."""
+        version: Version = self.last_version(bundle_name)
         if not version:
-            LOG.info("Case ID: %s not found in housekeeper", case_id)
+            LOG.info(f"Bundle: {bundle_name} not found in housekeeper")
             raise HousekeeperVersionMissingError
         hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version, file_obj=hk_file)

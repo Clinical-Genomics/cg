@@ -86,7 +86,7 @@ def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, flow_cell_path, 
 
     # THEN the sample sheet should be be added to Housekeeper
     flow_cell.hk.add_and_include_file_to_latest_version.assert_called_once_with(
-        case_id=flow_cell.id,
+        bundle_name=flow_cell.id,
         file=flow_cell.sample_sheet_path,
         tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, flow_cell.id],
     )

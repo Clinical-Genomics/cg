@@ -297,16 +297,16 @@ class HousekeeperAPI:
         """Drop all tables in the store."""
         self._store.drop_all()
 
-    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
-        """Adds and includes a file in the latest version of a case bundle."""
-        version_obj: Version = self.last_version(case_id)
-        if not version_obj:
-            LOG.info("Case ID: %s not found in housekeeper", case_id)
+    def add_and_include_file_to_latest_version(
+        self, bundle_name: str, file: Path, tags: list
+    ) -> None:
+        """Adds and includes a file in the latest version of a bundle."""
+        version: Version = self.last_version(bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperVersionMissingError
-        file_obj: File = self.add_file(
-            version_obj=version_obj, tags=tags, path=str(file.absolute())
-        )
-        self.include_file(version_obj=version_obj, file_obj=file_obj)
+        file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
+        self.include_file(version_obj=version, file_obj=file)
         self.commit()
 
     def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:

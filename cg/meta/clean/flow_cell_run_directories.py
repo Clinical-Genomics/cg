@@ -107,7 +107,7 @@ class RunDirFlowCell:
             self.hk.create_new_bundle_and_version(name=self.id)
         try:
             self.hk.add_and_include_file_to_latest_version(
-                case_id=self.id,
+                bundle_name=self.id,
                 file=self.sample_sheet_path,
                 tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id],
             )
