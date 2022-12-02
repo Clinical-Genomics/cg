@@ -6,7 +6,6 @@ from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
-from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
@@ -33,7 +32,6 @@ def test_set_dry_run(
 
 def test_add_to_cgstats_dry_run(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -58,7 +56,6 @@ def test_add_to_cgstats_dry_run(
 
 def test_add_to_cgstats(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -80,7 +77,6 @@ def test_add_to_cgstats(
 
 def test_cgstats_select_project_dry_run(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     flow_cell_project_id: int,
@@ -112,7 +108,6 @@ def test_cgstats_select_project_dry_run(
 
 def test_cgstats_select_project(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     flow_cell_project_id: int,
@@ -147,7 +142,6 @@ def test_cgstats_select_project(
 
 def test_cgstats_lanestats_dry_run(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -172,7 +166,6 @@ def test_cgstats_lanestats_dry_run(
 
 def test_cgstats_lanestats(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
@@ -289,14 +282,12 @@ def test_finish_flow_cell_delivery_not_hiseq_x(
 
 def test_finish_flow_cell_ready(
     caplog,
-    create_sample_sheet_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     flow_cell_project_id: int,
     demultiplexing_delivery_file: Path,
     hiseq_x_tile_dir: Path,
     transfer_flow_cell_api,
-    mocker,
 ):
     caplog.set_level(logging.INFO)
 
@@ -320,9 +311,6 @@ def test_finish_flow_cell_ready(
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
-    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
-
     # When finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
@@ -337,7 +325,6 @@ def test_finish_flow_cell_ready(
 def test_post_process_flow_cell_dry_run(
     bcl2fastq_demux_results: DemuxResults,
     caplog,
-    create_sample_sheet_file: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
@@ -345,7 +332,6 @@ def test_post_process_flow_cell_dry_run(
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
     transfer_flow_cell_api,
-    mocker,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -369,9 +355,6 @@ def test_post_process_flow_cell_dry_run(
     # GIVEN dry run set to True
     post_demux_api.set_dry_run(dry_run=True)
 
-    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
-
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(demux_results=bcl2fastq_demux_results)
 
@@ -386,8 +369,6 @@ def test_post_process_flow_cell(
     bcl2fastq_demux_results: DemuxResults,
     caplog,
     cgstats_select_project_log_file: Path,
-    create_sample_sheet_file: Path,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
@@ -395,7 +376,6 @@ def test_post_process_flow_cell(
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
     transfer_flow_cell_api,
-    mocker,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -416,9 +396,6 @@ def test_post_process_flow_cell(
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
-    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
-
     # When post-processing flow cell
     post_demux_api.post_process_flow_cell(demux_results=bcl2fastq_demux_results)
 
@@ -435,7 +412,6 @@ def test_post_process_flow_cell(
 
 def test_finish_flow_cell(
     caplog,
-    demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,

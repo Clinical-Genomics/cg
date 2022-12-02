@@ -289,10 +289,10 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         """Run all the necessary steps for post-processing a demultiplexed flow cell.
 
         This will
-            1. rename all the necessary files and folders
-            2. add the demux results to cgstats
-            3. produce reports for every project
-            4. generate a report with samples that have low cluster count
+            1. Rename all the necessary files and folders
+            2. Add the demux results to cgstats
+            3. Produce reports for every project
+            4. Generate a report with samples that have low cluster count
         """
         if demux_results.files_renamed():
             LOG.info("Files have already been renamed")

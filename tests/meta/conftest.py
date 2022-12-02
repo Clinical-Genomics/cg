@@ -113,14 +113,6 @@ def fixture_binary_path() -> str:
     return Path("usr", "bin", "binary").as_posix()
 
 
-@pytest.fixture(name="create_sample_sheet_file")
-def fixture_create_sample_sheet_file(tmpdir_factory) -> Generator[Path, None, None]:
-    output_dir = tmpdir_factory.mktemp("path", "to")
-    file_path = Path(output_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
-    file_path.touch(exist_ok=True)
-    yield file_path
-
-
 @pytest.fixture(name="yet_another_flow_cell_id")
 def fixture_yet_another_flow_cell_id() -> str:
     """Return flow cell id."""

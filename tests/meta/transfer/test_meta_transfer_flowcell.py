@@ -38,7 +38,7 @@ def test_add_tag_to_housekeeper(
 
 
 def test_add_flow_cell_to_status_db(
-    yet_another_flow_cell_id: str, transfer_flow_cell_api: Generator[TransferFlowCell, None, None]
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None], yet_another_flow_cell_id: str
 ):
     """Test adding flow cell to Status db."""
     # GIVEN transfer flow cell API
@@ -96,7 +96,6 @@ def test_add_flow_cell_to_status_db_existing_flow_cell(
 def test_add_sample_sheet_to_housekeeper_when_not_existing(
     caplog,
     flow_cell_id: str,
-    mocker,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
     """Test adding sample sheet to Housekeeper when none can be found."""
@@ -104,9 +103,6 @@ def test_add_sample_sheet_to_housekeeper_when_not_existing(
 
     # GIVEN a sample sheet tag in Housekeeper
     transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
-
-    mocker.patch.object(StatsAPI, "run_name")
-    StatsAPI.run_name.return_value = flow_cell_id
 
     # WHEN adding sample sheet to Housekeeper
     transfer_flow_cell_api._add_sample_sheet_to_housekeeper(
@@ -120,7 +116,6 @@ def test_add_sample_sheet_to_housekeeper_when_not_existing(
 def test_add_sample_sheet_to_housekeeper(
     caplog,
     flow_cell_id: str,
-    mocker,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
     """Test adding sample sheet to Housekeeper."""
@@ -132,9 +127,6 @@ def test_add_sample_sheet_to_housekeeper(
     # GIVEN no flow cell id bundle in housekeeper
     hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
     assert hk_bundle is None
-
-    mocker.patch.object(StatsAPI, "run_name")
-    StatsAPI.run_name.return_value = flow_cell_id
 
     # GIVEN a sample sheet that exists
     sample_sheet_path_dir: Path = Path("tests", "fixtures", "DEMUX", "HVKJCDRXX", "NAADM1")
@@ -162,7 +154,6 @@ def test_add_sample_sheet_to_housekeeper(
 def test_store_sequencing_file(
     caplog,
     flow_cell_id: str,
-    mocker,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
     """Test storing sequencing files to Housekeeper."""
@@ -175,9 +166,6 @@ def test_store_sequencing_file(
     # GIVEN no flow cell id bundle in housekeeper
     hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
     assert hk_bundle is None
-
-    mocker.patch.object(StatsAPI, "run_name")
-    StatsAPI.run_name.return_value = flow_cell_id
 
     # GIVEN a sample sheet that exists
     sample_sheet_path_dir: Path = Path("tests", "fixtures", "DEMUX", "HVKJCDRXX", "NAADM1")
@@ -354,9 +342,7 @@ def test_parse_flow_cell_samples_when_no_cgstats_sample(
 
 def test_transfer(
     bcl2fastq_demux_results: DemuxResults,
-    create_sample_sheet_file: Generator[Path, None, None],
     flowcell_store: Store,
-    mocker,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
     yet_another_flow_cell_id: str,
 ):
@@ -369,8 +355,6 @@ def test_transfer(
     assert housekeeper_api.bundles().count() == 0
 
     # GIVEN a sample sheet
-    mocker.patch.object(TransferFlowCell, "_sample_sheet_path")
-    TransferFlowCell._sample_sheet_path.return_value = create_sample_sheet_file
 
     # WHEN transferring the flowcell containing the sample
     with warnings.catch_warnings():
