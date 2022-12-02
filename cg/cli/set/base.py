@@ -14,6 +14,10 @@ from cg.store import Store, models
 from .families import families
 from .family import family
 
+
+
+import pdb
+
 CONFIRM = "Continue?"
 HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"
 HELP_SKIP_LIMS = "Skip setting value in LIMS"
@@ -265,6 +269,8 @@ def sample(
 
         status_db.commit()
     """
+
+    pdb.set_trace()    
     if not skip_lims:
 
         for key, value in kwargs:
