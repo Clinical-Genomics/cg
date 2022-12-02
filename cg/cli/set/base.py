@@ -6,6 +6,7 @@ from typing import Iterable, List, Optional
 
 import click
 from cg.constants import FLOWCELL_STATUS
+from cg.constants.lims import PROP2UDF
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
@@ -178,6 +179,13 @@ def list_keys(
     )
 
 
+def translate_statusdb_to_lims_params():
+    # name is fine
+    #
+    keys_mapping = {"application_version": "application",
+                    "is_tumour": "tumour"}
+    
+
 @set_cmd.command()
 @click.argument("sample_id", required=True)
 @click.option(
@@ -213,7 +221,7 @@ def sample(
     if sample is None:
         LOG.error(f"Can't find sample {sample_id}")
         raise click.Abort
-
+    """
     for key, value in kwargs:
 
         if is_locked_attribute_on_sample(key, NOT_CHANGEABLE_SAMPLE_ATTRIBUTES):
@@ -256,10 +264,11 @@ def sample(
             _update_comment(_generate_comment(new_key, old_value, new_value), sample)
 
         status_db.commit()
-
+    """
     if not skip_lims:
 
         for key, value in kwargs:
+
 
             new_key = "application" if key == "application_version" else key
             new_value = sample.priority_human if key == "priority" else value
