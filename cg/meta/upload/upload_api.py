@@ -48,7 +48,7 @@ class UploadAPI(MetaAPI):
 
         self.status_db.commit()
         self.trailblazer_api.set_analysis_uploaded(
-            case_id=analysis.family_id, uploaded_at=analysis.uploaded_at
+            case_id=analysis.family.interal_id, uploaded_at=analysis.uploaded_at
         )
 
     @staticmethod
