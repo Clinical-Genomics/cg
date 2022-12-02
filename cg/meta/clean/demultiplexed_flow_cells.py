@@ -230,7 +230,7 @@ class DemultiplexedRunsFlowCell:
             for fastq_file in self.hk_fastq_files:
                 LOG.info(f"Removing {fastq_file} from Housekeeper.")
                 self.hk.delete_file(fastq_file.id)
-            sample_sheets = self.hk.files(tags=[self.id, SequencingFileTag.SAMPLESHEET])
+            sample_sheets = self.hk.files(tags=[self.id, SequencingFileTag.SAMPLE_SHEET])
             for sample_sheet in sample_sheets:
                 LOG.info(f"Removing {sample_sheet} from Housekeeper.")
                 self.hk.delete_file(sample_sheet.id)

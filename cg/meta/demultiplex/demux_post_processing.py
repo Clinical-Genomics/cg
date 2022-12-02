@@ -328,7 +328,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
         demux_results: DemuxResults = DemuxResults(
-            demux_dir=self.demux_api.out_dir / flow_cell_name,
+            demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
             flow_cell=flow_cell,
             bcl_converter=bcl_converter,
         )

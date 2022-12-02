@@ -16,7 +16,7 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.priority import SlurmQos
 from cg.io.controller import ReadFile
 from cg.constants.subject import Gender
@@ -664,7 +664,7 @@ def fixture_bcl2fastq_demux_results(
     demultiplexed_flow_cell: Path, flow_cell: FlowCell
 ) -> DemuxResults:
     return DemuxResults(
-        demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter="bcl2fastq"
+        demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter=BclConverter.BCL2FASTQ
     )
 
 

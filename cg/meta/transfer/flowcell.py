@@ -21,19 +21,19 @@ LOG = logging.getLogger(__name__)
 def _set_status_db_sample_sequenced_at(
     status_db_sample: Sample, flow_cell_sequenced_at: datetime
 ) -> None:
-    """Set sequenced at for status db."""
-    is_newer_date = (status_db_sample.sequenced_at is None) or (
+    """Set sequenced at for sample in status db."""
+    is_newer_date: datetime = (status_db_sample.sequenced_at is None) or (
         flow_cell_sequenced_at > status_db_sample.sequenced_at
     )
     if is_newer_date:
-        status_db_sample.sequenced_at = flow_cell_sequenced_at
+        status_db_sample.sequenced_at: datetime = flow_cell_sequenced_at
 
 
 def log_enough_reads(
     status_db_sample_reads: int, application_expected_reads: int, cgstats_sample_name: str
 ) -> None:
     """Check and log if sample in status db got enough reads."""
-    enough_reads: bool = status_db_sample_reads > application_expected_reads
+    enough_reads: bool = bool(status_db_sample_reads > application_expected_reads)
     LOG.info(f"Added reads to sample: {cgstats_sample_name} - {status_db_sample_reads} ")
     LOG.info(f"[{'DONE' if enough_reads else 'NOT DONE'}]")
 
@@ -50,7 +50,12 @@ class TransferFlowCell:
         """Populate the database with the information."""
         self._add_tag_to_housekeeper(
             store=store,
-            tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id, "log"],
+            tags=[
+                SequencingFileTag.FASTQ,
+                SequencingFileTag.SAMPLE_SHEET,
+                flow_cell_id,
+                SequencingFileTag.CGSTATS_LOG,
+            ],
         )
         cgstats_flow_cell: StatsFlowcell = self.stats.flowcell(flowcell_name=flow_cell_id)
         flow_cell: Flowcell = self._add_flow_cell_to_status_db(
@@ -74,7 +79,7 @@ class TransferFlowCell:
         return flow_cell
 
     def _add_tag_to_housekeeper(self, store: bool, tags: List[str]) -> None:
-        """Add and commit tag to Housekeeper if not already existing in database."""
+        """Add and commit tag to Housekeeper if not already exists in database."""
         for tag in tags:
             if store and self.hk.tag(name=tag) is None:
                 self.hk.add_commit(self.hk.new_tag(tag))
@@ -96,7 +101,7 @@ class TransferFlowCell:
                 continue
 
             if store:
-                self._store_sequencing_file(
+                self._store_sequencing_files(
                     flow_cell_id=flow_cell_id,
                     sample_id=status_db_sample.internal_id,
                     sequencing_files=cgstats_sample.fastqs,
@@ -135,11 +140,11 @@ class TransferFlowCell:
     def _include_sequencing_file(
         self, file_path: Path, flow_cell_id: str, store: bool, tag_name: str
     ) -> None:
-        """Include sequencing file to housekeeper."""
+        """Include sequencing file in housekeeper."""
         if not file_path.exists():
             LOG.warning(f"Unable to find file: {file_path.as_posix()}")
         elif store:
-            self._store_sequencing_file(
+            self._store_sequencing_files(
                 flow_cell_id=flow_cell_id,
                 sequencing_files=[file_path.as_posix()],
                 tag_name=tag_name,
@@ -148,7 +153,7 @@ class TransferFlowCell:
     def _include_sample_sheet_to_housekeeper(
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool
     ) -> None:
-        """Add sample sheet to Housekeeper."""
+        """Include sample sheet in Housekeeper."""
         sample_sheet_path: Path = Path(
             flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
@@ -156,13 +161,13 @@ class TransferFlowCell:
             file_path=sample_sheet_path,
             flow_cell_id=flow_cell_id,
             store=store,
-            tag_name=SequencingFileTag.SAMPLESHEET,
+            tag_name=SequencingFileTag.SAMPLE_SHEET,
         )
 
     def _include_cgstats_log_to_housekeeper(
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool
     ) -> None:
-        """Add cgstats log to Housekeeper."""
+        """Include cgstats log in Housekeeper."""
         unaligned_dir: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
         for cgstats_log_path in unaligned_dir.glob("stats-*[0-9]*"):
             self._include_sequencing_file(
@@ -172,7 +177,7 @@ class TransferFlowCell:
                 tag_name=SequencingFileTag.CGSTATS_LOG,
             )
 
-    def _store_sequencing_file(
+    def _store_sequencing_files(
         self,
         flow_cell_id: str,
         sequencing_files: List[str],

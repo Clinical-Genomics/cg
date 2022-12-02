@@ -41,7 +41,7 @@ def test_add_flowcell_status(
     sequencer_name: str,
     timestamp_now: datetime,
 ):
-    """Test adding a flow cell with a statusto the database."""
+    """Test adding a flow cell with a status to the database."""
 
     # GIVEN a database with no flow cell
 

@@ -9,7 +9,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_filter_flow_cell_has_id(base_store: Store, helpers: StoreHelpers, flow_cell_id: str):
-    """Test that a flow cell is returned when there is a floow cell with matching flow cell id."""
+    """Test that a flow cell is returned when there is a flow cell with matching flow cell id."""
 
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(store=base_store, flow_cell_id=flow_cell_id)

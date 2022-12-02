@@ -1,7 +1,5 @@
-"""Tests the findbusinessdata part of the Cg stoore API."""
+"""Tests the findbusinessdata part of the Cg store API."""
 from datetime import datetime
-
-import pytest
 
 from cg.store import Store, models
 from cg.constants.indexes import ListIndexes

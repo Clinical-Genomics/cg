@@ -9,7 +9,6 @@ from sqlalchemy import exc as sa_exc
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus, SequencingFileTag
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.transfer.flowcell import _set_status_db_sample_sequenced_at, log_enough_reads
 from cg.models.cgstats.flowcell import StatsFlowcell
@@ -30,7 +29,7 @@ def test_add_tag_to_housekeeper(
 
     # WHEN adding tags to Housekeeper
     transfer_flow_cell_api._add_tag_to_housekeeper(
-        store=True, tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id]
+        store=True, tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_id]
     )
 
     # THEN tha tags should be added
@@ -62,7 +61,7 @@ def test_add_flow_cell_to_status_db(
         flow_cell_id=yet_another_flow_cell_id,
     )
 
-    # THEN the tags should be added
+    # THEN the flow cell added/returned should have the same id
     assert added_flow_cell.name == yet_another_flow_cell_id
 
 
@@ -98,13 +97,15 @@ def test_include_sample_sheet_to_housekeeper_when_not_existing(
     flow_cell_id: str,
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
-    """Test adding sample sheet to Housekeeper when none can be found."""
+    """Test including sample sheet to Housekeeper when none can be found."""
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
+    transfer_flow_cell_api._add_tag_to_housekeeper(
+        store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
+    )
 
-    # WHEN adding sample sheet to Housekeeper
+    # WHEN including sample sheet to Housekeeper
     transfer_flow_cell_api._include_sample_sheet_to_housekeeper(
         flow_cell_dir=Path("does_not_exist"), flow_cell_id=flow_cell_id, store=True
     )
@@ -119,30 +120,32 @@ def test_include_sample_sheet_to_housekeeper(
     sample_sheet_path: Generator[Path, None, None],
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
-    """Test adding sample sheet to Housekeeper."""
+    """Test including sample sheet to Housekeeper."""
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
+    transfer_flow_cell_api._add_tag_to_housekeeper(
+        store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
+    )
 
     # GIVEN no flow cell id bundle in housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLE_SHEET)
     assert hk_bundle is None
 
     # GIVEN a sample sheet that exists
 
-    # WHEN adding sample sheet to Housekeeper
+    # WHEN including sample sheet to Housekeeper
     transfer_flow_cell_api._include_sample_sheet_to_housekeeper(
         flow_cell_dir=sample_sheet_path.parent, flow_cell_id=flow_cell_id, store=True
     )
 
-    # THEN tha sample sheet should be added to Housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    # THEN the sample sheet should be included to Housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLE_SHEET)
     for hk_file in hk_bundle.versions[0].files:
         assert hk_file.path.endswith("csv")
 
 
-def test_store_sequencing_file(
+def test_store_sequencing_files(
     caplog,
     sample_sheet_path: Generator[Path, None, None],
     flow_cell_id: str,
@@ -153,26 +156,28 @@ def test_store_sequencing_file(
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
+    transfer_flow_cell_api._add_tag_to_housekeeper(
+        store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
+    )
 
     # GIVEN no flow cell id bundle in housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLE_SHEET)
     assert hk_bundle is None
 
     # GIVEN a sample sheet that exists
 
     # WHEN adding sample sheet to Housekeeper
-    transfer_flow_cell_api._store_sequencing_file(
+    transfer_flow_cell_api._store_sequencing_files(
         flow_cell_id=flow_cell_id,
         sequencing_files=[sample_sheet_path.as_posix()],
-        tag_name=SequencingFileTag.SAMPLESHEET,
+        tag_name=SequencingFileTag.SAMPLE_SHEET,
     )
 
     # THEN we should log that we are adding a file
-    assert f"Adding file using tag: {SequencingFileTag.SAMPLESHEET}" in caplog.text
+    assert f"Adding file using tag: {SequencingFileTag.SAMPLE_SHEET}" in caplog.text
 
     # THEN tha sample sheet should be added to Housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLE_SHEET)
     for hk_file in hk_bundle.versions[0].files:
         assert hk_file.path.endswith("csv")
 
@@ -188,26 +193,28 @@ def test_include_sequencing_file(
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.SAMPLESHEET])
+    transfer_flow_cell_api._add_tag_to_housekeeper(
+        store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
+    )
 
     # GIVEN no flow cell id bundle in housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLE_SHEET)
     assert hk_bundle is None
 
     # GIVEN a sample sheet that exists
 
     # WHEN adding sample sheet to Housekeeper
-    transfer_flow_cell_api._store_sequencing_file(
+    transfer_flow_cell_api._store_sequencing_files(
         flow_cell_id=flow_cell_id,
         sequencing_files=[sample_sheet_path.as_posix()],
-        tag_name=SequencingFileTag.SAMPLESHEET,
+        tag_name=SequencingFileTag.SAMPLE_SHEET,
     )
 
     # THEN we should log that we are adding a file
-    assert f"Adding file using tag: {SequencingFileTag.SAMPLESHEET}" in caplog.text
+    assert f"Adding file using tag: {SequencingFileTag.SAMPLE_SHEET}" in caplog.text
 
     # THEN tha sample sheet should be added to Housekeeper
-    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLESHEET)
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLE_SHEET)
     for hk_file in hk_bundle.versions[0].files:
         assert hk_file.path.endswith("csv")
 
@@ -297,6 +304,7 @@ def test_parse_flow_cell_samples(
     cgstats_flow_cell: StatsFlowcell = transfer_flow_cell_api.stats.flowcell(
         yet_another_flow_cell_id
     )
+
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(
         store=flowcell_store, flow_cell_id=yet_another_flow_cell_id

@@ -9,7 +9,7 @@ class SequencingFileTag(StrEnum):
     ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
     CGSTATS_LOG: str = "log"
     FASTQ: str = "fastq"
-    SAMPLESHEET: str = "samplesheet"
+    SAMPLE_SHEET: str = "samplesheet"
     SPRING: str = "spring"
 
 

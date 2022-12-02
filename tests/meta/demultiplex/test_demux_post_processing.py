@@ -1,11 +1,13 @@
 import logging
 from pathlib import Path
+from typing import Generator
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
 )
+from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
@@ -287,7 +289,7 @@ def test_finish_flow_cell_ready(
     flow_cell_project_id: int,
     demultiplexing_delivery_file: Path,
     hiseq_x_tile_dir: Path,
-    transfer_flow_cell_api,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
     caplog.set_level(logging.INFO)
 
@@ -331,7 +333,7 @@ def test_post_process_flow_cell_dry_run(
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
-    transfer_flow_cell_api,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -375,7 +377,7 @@ def test_post_process_flow_cell(
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
-    transfer_flow_cell_api,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
 ):
     caplog.set_level(logging.DEBUG)
 
