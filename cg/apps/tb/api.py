@@ -171,6 +171,6 @@ class TrailblazerAPI:
         """Set a uploaded at date for a trailblazer analysis."""
         request_body = {"case_id": case_id, "uploaded_at": str(uploaded_at)}
 
-        LOG.debug(f"Setting analyis uploaded at for {request_body}")
+        LOG.debug(f"Setting analysis uploaded at for {request_body}")
         LOG.info(f"{case_id} - uploaded at set to {uploaded_at}")
         self.query_trailblazer(command="set_analysis_uploaded", request_body=request_body)
