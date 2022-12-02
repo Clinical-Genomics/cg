@@ -15,10 +15,7 @@ START_WITH_PROGRAM = click.option(
     "-sw", "--start-with", help="Start mip from this program.", type=str
 )
 OPTION_BWA_MEM = click.option(
-    "--use-bwa-mem",
-    is_flag=True,
-    default=False,
-    help="Use BWA-mem instead of the default BWA-mem2"
+    "--use-bwa-mem", is_flag=True, default=False, help="Use BWA-mem instead of the default BWA-mem2"
 )
 OPTION_DRY = click.option(
     "-d",
