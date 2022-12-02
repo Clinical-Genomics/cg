@@ -6,10 +6,11 @@ from cgmodels.cg.constants import Pipeline, StrEnum
 
 
 class SequencingFileTag(StrEnum):
+    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
+    CGSTATS_LOG: str = "log"
     FASTQ: str = "fastq"
     SAMPLESHEET: str = "samplesheet"
     SPRING: str = "spring"
-    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
 
 
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]

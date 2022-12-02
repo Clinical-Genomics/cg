@@ -2,6 +2,7 @@ from typing import List, Generator
 
 import pytest
 
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferLims
 from cg.store import Store
 from pathlib import Path
@@ -30,3 +31,15 @@ def external_data_directory(
             Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz").touch(exist_ok=True)
             Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz.md5").touch(exist_ok=True)
     return Path(ticket_folder)
+
+
+@pytest.fixture(name="sample_sheet_path")
+def fixture_sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
+    """Create and return path to sample sheet."""
+    sample_sheet_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
+    sample_sheet_path_dir.mkdir(parents=True, exist_ok=True)
+    sample_sheet_path: Path = Path(
+        sample_sheet_path_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    sample_sheet_path.touch()
+    yield sample_sheet_path

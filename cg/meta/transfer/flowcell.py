@@ -49,7 +49,8 @@ class TransferFlowCell:
     def transfer(self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True) -> Flowcell:
         """Populate the database with the information."""
         self._add_tag_to_housekeeper(
-            store=store, tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id]
+            store=store,
+            tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLESHEET, flow_cell_id, "log"],
         )
         cgstats_flow_cell: StatsFlowcell = self.stats.flowcell(flowcell_name=flow_cell_id)
         flow_cell: Flowcell = self._add_flow_cell_to_status_db(
@@ -58,7 +59,10 @@ class TransferFlowCell:
             flow_cell_id=flow_cell_id,
         )
 
-        self._add_sample_sheet_to_housekeeper(
+        self._include_sample_sheet_to_housekeeper(
+            flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
+        )
+        self._include_cgstats_log_to_housekeeper(
             flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
         )
         self._parse_flow_cell_samples(
@@ -128,20 +132,44 @@ class TransferFlowCell:
             )
         return flow_cell
 
-    def _add_sample_sheet_to_housekeeper(
+    def _include_sequencing_file(
+        self, file_path: Path, flow_cell_id: str, store: bool, tag_name: str
+    ) -> None:
+        """Include sequencing file to housekeeper."""
+        if not file_path.exists():
+            LOG.warning(f"Unable to find file: {file_path.as_posix()}")
+        elif store:
+            self._store_sequencing_file(
+                flow_cell_id=flow_cell_id,
+                sequencing_files=[file_path.as_posix()],
+                tag_name=tag_name,
+            )
+
+    def _include_sample_sheet_to_housekeeper(
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool
     ) -> None:
         """Add sample sheet to Housekeeper."""
         sample_sheet_path: Path = Path(
             flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
-        if not sample_sheet_path.exists():
-            LOG.warning(f"Unable to find sample sheet: {sample_sheet_path.as_posix()}")
-        elif store:
-            self._store_sequencing_file(
+        self._include_sequencing_file(
+            file_path=sample_sheet_path,
+            flow_cell_id=flow_cell_id,
+            store=store,
+            tag_name=SequencingFileTag.SAMPLESHEET,
+        )
+
+    def _include_cgstats_log_to_housekeeper(
+        self, flow_cell_dir: Path, flow_cell_id: str, store: bool
+    ) -> None:
+        """Add cgstats log to Housekeeper."""
+        unaligned_dir: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
+        for cgstats_log_path in unaligned_dir.glob("stats-*[0-9]*"):
+            self._include_sequencing_file(
+                file_path=cgstats_log_path,
                 flow_cell_id=flow_cell_id,
-                sequencing_files=[sample_sheet_path.as_posix()],
-                tag_name=SequencingFileTag.FASTQ,
+                store=store,
+                tag_name=SequencingFileTag.CGSTATS_LOG,
             )
 
     def _store_sequencing_file(

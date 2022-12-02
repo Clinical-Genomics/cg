@@ -305,8 +305,8 @@ class HousekeeperAPI:
         if not version:
             LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperVersionMissingError
-        file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
-        self.include_file(version_obj=version, file_obj=file)
+        hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
+        self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()
 
     def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:

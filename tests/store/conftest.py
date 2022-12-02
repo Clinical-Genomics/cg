@@ -1,5 +1,6 @@
 """Fixtures for store tests."""
 from pathlib import Path
+from typing import Generator
 
 import pytest
 
@@ -81,8 +82,10 @@ def fixture_microbial_submitted_order() -> dict:
     }
 
 
-@pytest.fixture(scope="function")
-def microbial_store(base_store: Store, microbial_submitted_order: dict) -> Store:
+@pytest.fixture(name="microbial_store")
+def fixture_microbial_store(
+    base_store: Store, microbial_submitted_order: dict
+) -> Generator[Store, None, None]:
     """Set up a store instance for testing analysis API."""
     customer = base_store.customer(microbial_submitted_order["customer"])
 
