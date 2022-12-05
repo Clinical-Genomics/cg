@@ -6,6 +6,7 @@ from click.testing import CliRunner
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -13,7 +14,7 @@ from cg.models.cg_config import CGConfig
 
 
 def test_rnafusion_no_args(cli_runner: CliRunner, rnafusion_context: CGConfig):
-    """Test to see that running BALSAMIC without options prints help and doesn't result in an error"""
+    """Test to see that running BALSAMIC without options prints help and doesn't result in an error."""
     # GIVEN no arguments or options besides the command call
 
     # WHEN running command
@@ -32,12 +33,13 @@ def test_start(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
 ):
-    """Test to ensure all parts of start command will run successfully given ideal conditions"""
+    """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
     # GIVEN case id for which we created a config file
-    case_id = "rnafusion_case_enough_reads"
+    case_id: str = rnafusion_case_id
 
     # GIVEN decompression is not needed
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
@@ -53,24 +55,25 @@ def test_start(
 def test_store(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
-    real_housekeeper_api,
+    real_housekeeper_api: HousekeeperAPI,
     mock_deliverable,
     mock_analysis_finish,
     caplog: LogCaptureFixture,
-    hermes_deliverables,
+    hermes_deliverables: dict,
     mocker,
+    rnafusion_case_id: str,
 ):
-    """Test to ensure all parts of store command are run successfully given ideal conditions"""
+    """Test to ensure all parts of store command are run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
-    case_id = "rnafusion_case_enough_reads"
+    case_id: str = rnafusion_case_id
 
     # GIVEN CASE ID where analysis finish is not mocked
-    case_id_fail = "rnafusion_case_not_finished"
+    case_id_fail: str = "rnafusion_case_not_finished"
 
     # Set Housekeeper to an empty real Housekeeper store
-    rnafusion_context.housekeeper_api_ = real_housekeeper_api
+    rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # Make sure the bundle was not present in hk
@@ -97,14 +100,18 @@ def test_store(
 
 #
 def test_start_available(
-    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture, mocker
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    mocker,
+    rnafusion_case_id: str,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
-    Test that start-available picks up eligible cases and does not pick up ineligible ones"""
+    Test that start-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
-    case_id_success = "rnafusion_case_enough_reads"
+    case_id_success: str = rnafusion_case_id
 
     # Ensure the config is mocked to run compound command
     Path.mkdir(
@@ -141,13 +148,14 @@ def test_store_available(
     caplog: LogCaptureFixture,
     mocker,
     hermes_deliverables,
+    rnafusion_case_id: str,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
-    Test that sore-available picks up eligible cases and does not pick up ineligible ones"""
+    Test that sore-available picks up eligible cases and does not pick up ineligible ones."""
     caplog.set_level(logging.INFO)
 
     # GIVEN CASE ID of sample where read counts pass threshold
-    case_id_success = "rnafusion_case_enough_reads"
+    case_id_success: str = rnafusion_case_id
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")

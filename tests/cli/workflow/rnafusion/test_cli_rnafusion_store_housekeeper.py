@@ -19,7 +19,7 @@ from cg.utils import Process
 
 
 def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
-    """Test command without case_id argument"""
+    """Test command without case_id argument."""
     # GIVEN no case_id
 
     # WHEN dry running without anything specified
@@ -33,33 +33,38 @@ def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
 
 
 def test_with_missing_case(
-    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    not_existing_case_id: str,
 ):
-    """Test command with invalid case to start with"""
+    """Test command with invalid case to start with."""
     caplog.set_level(logging.ERROR)
 
     # GIVEN case_id not in database
-    case_id = "soberelephant"
-    assert not rnafusion_context.status_db.family(case_id)
+    assert not rnafusion_context.status_db.family(not_existing_case_id)
 
     # WHEN running
-    result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
+    result = cli_runner.invoke(store_housekeeper, [not_existing_case_id], obj=rnafusion_context)
 
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN ERROR log should be printed containing invalid case_id
-    assert case_id in caplog.text
+    assert not_existing_case_id in caplog.text
     assert "could not be found" in caplog.text
 
 
 def test_case_not_finished(
-    cli_runner: CliRunner, rnafusion_context: CGConfig, caplog: LogCaptureFixture
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
 ):
-    """Test command with case_id and config file but no analysis_finish"""
+    """Test command with case_id and config file but no analysis_finish."""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
-    case_id = "rnafusion_case_enough_reads"
+    case_id: str = rnafusion_case_id
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
@@ -78,8 +83,9 @@ def test_case_with_malformed_deliverables_file(
     mock_deliverable,
     malformed_hermes_deliverables: dict,
     caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
 ):
-    """Test command with case_id and config file and analysis_finish but malformed deliverables output"""
+    """Test command with case_id and config file and analysis_finish but malformed deliverables output."""
     caplog.set_level(logging.WARNING)
     # GIVEN a malformed output from hermes
     analysis_api: RnafusionAnalysisAPI = rnafusion_context.meta_apis["analysis_api"]
@@ -97,7 +103,7 @@ def test_case_with_malformed_deliverables_file(
         )
 
         # GIVEN case-id
-        case_id = "rnafusion_case_enough_reads"
+        case_id: str = rnafusion_case_id
 
         # WHEN dry running with dry specified
         result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
@@ -115,14 +121,14 @@ def test_valid_case(
     mocker,
     hermes_deliverables,
     rnafusion_context: CGConfig,
-    real_housekeeper_api: HousekeeperAPI,
     mock_deliverable,
     mock_analysis_finish,
     caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id = "rnafusion_case_enough_reads"
+    case_id: str = rnafusion_case_id
 
     # Make sure nothing is currently stored in Housekeeper
 
@@ -153,13 +159,14 @@ def test_valid_case_already_added(
     mock_deliverable,
     mock_analysis_finish,
     caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
 ):
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id = "rnafusion_case_enough_reads"
+    case_id: str = rnafusion_case_id
 
     # Make sure nothing is currently stored in Housekeeper
-    rnafusion_context.housekeeper_api_ = real_housekeeper_api
+    rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # Make sure  analysis not already stored in ClinicalDB

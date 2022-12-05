@@ -1,7 +1,9 @@
-import pytest
-from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from typing import List
+
 import pydantic
+import pytest
+
+from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 
 
 def test_instantiate_rnafusion_sample(
@@ -11,7 +13,7 @@ def test_instantiate_rnafusion_sample(
     rnafusion_strandedness_acceptable: str,
 ):
     """
-    Tests rnafusion sample
+    Tests rnafusion sample.
     """
     # GIVEN a sample with fastq files and strandedness
 
@@ -34,7 +36,7 @@ def test_instantiate_rnafusion_sample_fastq_r1_r2_different_length(
     rnafusion_strandedness_acceptable: str,
 ):
     """
-    Tests rnafusion sample with different fastq_r1 and fastq_r2 length
+    Tests rnafusion sample with different fastq_r1 and fastq_r2 length.
     """
 
     # GIVEN a sample with fastq files and strandedness
@@ -57,13 +59,13 @@ def test_instantiate_rnafusion_sample_fastq_r2_empty(
     rnafusion_strandedness_acceptable: str,
 ):
     """
-    Tests rnafusion sample with fastq_r2 empty (single end)
+    Tests rnafusion sample with fastq_r2 empty (single end).
     """
 
     # GIVEN a sample with fastq files and strandedness
 
     # WHEN instantiating a sample object
-    rnafusion_sample_object = RnafusionSample(
+    rnafusion_sample_object: RnafusionSample = RnafusionSample(
         sample=rnafusion_sample,
         fastq_r1=rnafusion_fastq_r1,
         fastq_r2=rnafusion_fastq_r2_empty,
@@ -81,7 +83,7 @@ def test_instantiate_rnafusion_strandedness_not_acceptable(
     rnafusion_strandedness_not_acceptable: str,
 ):
     """
-    Tests rnafusion sample with unacceptable strandedness
+    Tests rnafusion sample with unacceptable strandedness.
     """
     # WHEN instantiating a sample object THEN throws a ValidationError
 

@@ -2,26 +2,26 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional
-from cg.constants import Pipeline
-from cg.constants.constants import (
-    RNAFUSION_SAMPLESHEET_HEADERS,
-    NFX_SAMPLE_HEADER,
-    NFX_READ1_HEADER,
-    NFX_READ2_HEADER,
-    RNAFUSION_STRANDEDNESS_HEADER,
-)
+from typing import Dict, List, Optional
 
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
-from cg.meta.workflow.fastq import RnafusionFastqHandler
-from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.rnafusion_sample import RnafusionSample
-from cg.models.nextflow.deliverable import NextflowDeliverable, replace_dict_values
-from cg.utils import Process
-from cg import resources
 from pydantic import ValidationError
 
+from cg import resources
+from cg.constants import Pipeline
+from cg.constants.constants import (
+    NFX_READ1_HEADER,
+    NFX_READ2_HEADER,
+    NFX_SAMPLE_HEADER,
+    RNAFUSION_SAMPLESHEET_HEADERS,
+    RNAFUSION_STRANDEDNESS_HEADER,
+)
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.fastq import RnafusionFastqHandler
+from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.models.cg_config import CGConfig
+from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
+from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
 
@@ -74,8 +74,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def build_samplesheet_content(
-        case_id: str, fastq_r1: list, fastq_r2: list, strandedness: str
-    ) -> dict:
+        case_id: str, fastq_r1: List[str], fastq_r2: List[str], strandedness: str
+    ) -> Dict[str, List[str]]:
         """Build samplesheet headers and lists"""
         try:
             RnafusionSample(
@@ -109,10 +109,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
 
         for link in case_obj.links:
-            sample_metadata: list = self.gather_file_metadata_for_sample(link.sample)
-            fastq_r1: list = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
-            fastq_r2: list = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
-            samplesheet_content: dict = self.build_samplesheet_content(
+            sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
+            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
+            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
+            samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2, strandedness
             )
             LOG.info(samplesheet_content)
@@ -146,7 +146,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         starfusion: bool,
         fusioncatcher: bool,
         arriba: bool,
-    ) -> dict:
+    ) -> Dict[str, str]:
         """Transforms click argument related to rnafusion that were left empty into
         defaults constructed with case_id paths or from config."""
         return {
@@ -236,7 +236,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id=case_id, pipeline=self.pipeline, root_dir=self.root_dir, log=log
             )
         )
-        command = ["run", self.nfcore_pipeline_path]
+        command: List[str] = ["run", self.nfcore_pipeline_path]
         parameters = (
             nextflow_options
             + ["-bg", "-q"]
@@ -248,7 +248,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
-    def verify_case_config_file_exists(self, case_id: str):
+    def verify_case_config_file_exists(self, case_id: str) -> None:
         NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir)
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
@@ -261,7 +261,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             case_id=case_id, root_dir=self.root_dir, pipeline=self.pipeline
         )
 
-    def verify_deliverables_file_exists(self, case_id: str):
+    def verify_deliverables_file_exists(self, case_id: str) -> None:
         NextflowAnalysisAPI.verify_deliverables_file_exists(case_id=case_id, root_dir=self.root_dir)
 
     def report_deliver(self, case_id: str) -> None:
@@ -271,7 +271,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
         try:
             for index, deliver_file in enumerate(deliverables_content):
-                NextflowDeliverable(deliverables=deliver_file)
+                NextflowDeliverables(deliverables=deliver_file)
                 deliverables_content[index] = replace_dict_values(
                     NextflowAnalysisAPI.get_replace_map(case_id=case_id, root_dir=self.root_dir),
                     deliver_file,

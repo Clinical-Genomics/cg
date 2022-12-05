@@ -1,6 +1,8 @@
-from pydantic import BaseModel, validator
-from cg.constants.constants import DELIVER_FILE_HEADERS
 import collections
+
+from pydantic import BaseModel, validator
+
+from cg.constants.constants import DELIVER_FILE_HEADERS
 
 
 def replace_dict_values(replace_map: dict, my_dict: dict) -> dict:
@@ -12,8 +14,8 @@ def replace_dict_values(replace_map: dict, my_dict: dict) -> dict:
     return my_dict
 
 
-class NextflowDeliverable(BaseModel):
-    """Nextflow deliverable model
+class NextflowDeliverables(BaseModel):
+    """Nextflow deliverables model
 
     Attributes:
         deliverables: dictionary containing format, path, path_index, step, tag and id keys

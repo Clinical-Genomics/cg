@@ -1,16 +1,16 @@
 """Module for Nextflow Analysis API."""
 
 import logging
-from pathlib import Path
-from typing import List
-from datetime import datetime
-import os
 import operator
-from cg.constants.constants import NFX_WORK_DIR, NFX_SAMPLE_HEADER
-from cg.io.controller import ReadFile, WriteFile
-from cg.constants.constants import FileFormat
-from cg.exc import CgError
+import os
+from datetime import datetime
+from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Dict, List
+
+from cg.constants.constants import NFX_SAMPLE_HEADER, NFX_WORK_DIR, FileFormat
+from cg.exc import CgError
+from cg.io.controller import ReadFile, WriteFile
 
 LOG = logging.getLogger(__name__)
 
@@ -71,7 +71,10 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def create_samplesheet_csv(
-        cls, samplesheet_content: dict, headers: list, config_path: Path
+        cls,
+        samplesheet_content: Dict[str, List[str]],
+        headers: List[str],
+        config_path: Path,
     ) -> None:
         """Write sample sheet csv file."""
         with open(config_path, "w") as outfile:

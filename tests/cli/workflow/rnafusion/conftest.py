@@ -3,9 +3,9 @@
 import datetime as dt
 import gzip
 from pathlib import Path
-from typing import List
 
 import pytest
+
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
@@ -13,7 +13,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
+from cg.store import Store, models
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.process_mock import ProcessMock
 from tests.mocks.tb_mock import MockTB
@@ -22,14 +22,33 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(name="rnafusion_dir")
 def rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
-    """Return the path to the rnafusion apps dir"""
+    """Return the path to the rnafusion apps dir."""
     rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
     return Path(rnafusion_dir).absolute().as_posix()
 
 
 @pytest.fixture(name="rnafusion_case_id")
 def fixture_rnafusion_case_id() -> str:
+    """Returns a rnafusion case id."""
     return "rnafusion_case_enough_reads"
+
+
+@pytest.fixture(name="no_sample_case_id")
+def fixture_no_sample_case_id() -> str:
+    """Returns a case id of a case with no samples."""
+    return "no_sample_case"
+
+
+@pytest.fixture(name="not_existing_case_id")
+def fixture_not_existing_case_id() -> str:
+    """Returns a case id not existing in dbs."""
+    return "soberelephant"
+
+
+@pytest.fixture(name="rnafusion_sample_id")
+def fixture_rnafusion_sample_id() -> str:
+    """Returns a rnafusion sample id."""
+    return "sample_rnafusion_case_enough_reads"
 
 
 @pytest.fixture(name="rnafusion_housekeeper_dir")
@@ -68,33 +87,29 @@ def rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
 @pytest.fixture
 def rnafusion_mock_fastq_files(
     rnafusion_fastq_file_l_1_r_1: Path, rnafusion_fastq_file_l_1_r_2: Path
-) -> list:
+) -> List[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper"""
     return [rnafusion_fastq_file_l_1_r_1, rnafusion_fastq_file_l_1_r_2]
 
 
 @pytest.fixture(scope="function", name="rnafusion_housekeeper")
 def rnafusion_housekeeper(
-    housekeeper_api,
-    helpers,
-    rnafusion_mock_fastq_files: list,
+    housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    rnafusion_mock_fastq_files: List[Path],
+    rnafusion_sample_id: str,
 ):
-    """Create populated housekeeper that holds files for all mock samples"""
+    """Create populated housekeeper that holds files for all mock samples."""
 
-    samples = [
-        "sample_rnafusion_case_enough_reads",
-    ]
-
-    for sample in samples:
-        bundle_data = {
-            "name": sample,
-            "created": dt.datetime.now(),
-            "version": "1.0",
-            "files": [
-                {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
-            ],
-        }
-        helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+    bundle_data = {
+        "name": rnafusion_sample_id,
+        "created": dt.datetime.now(),
+        "version": "1.0",
+        "files": [
+            {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
+        ],
+    }
+    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
     return housekeeper_api
 
 
@@ -105,7 +120,10 @@ def fixture_rnafusion_context(
     rnafusion_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
     hermes_api: HermesApi,
-    cg_dir,
+    cg_dir: Path,
+    rnafusion_case_id: str,
+    rnafusion_sample_id: str,
+    no_sample_case_id: str,
 ) -> CGConfig:
     """context to use in cli"""
     cg_context.housekeeper_api_ = rnafusion_housekeeper
@@ -114,19 +132,19 @@ def fixture_rnafusion_context(
     status_db: Store = cg_context.status_db
 
     # Create ERROR case with NO SAMPLES
-    helpers.add_case(status_db, internal_id="no_sample_case", name="no_sample_case")
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Create textbook case with enough reads
-    case_enough_reads = helpers.add_case(
+    case_enough_reads: models.Family = helpers.add_case(
         store=status_db,
-        internal_id="rnafusion_case_enough_reads",
-        name="rnafusion_case_enough_reads",
+        internal_id=rnafusion_case_id,
+        name=rnafusion_case_id,
         data_analysis=Pipeline.RNAFUSION,
     )
 
-    sample_rnafusion_case_enough_reads = helpers.add_sample(
+    sample_rnafusion_case_enough_reads: models.Sample = helpers.add_sample(
         status_db,
-        internal_id="sample_rnafusion_case_enough_reads",
+        internal_id=rnafusion_sample_id,
         sequenced_at=dt.datetime.now(),
     )
 
@@ -139,8 +157,9 @@ def fixture_rnafusion_context(
 
 
 @pytest.fixture(name="deliverable_data")
-def fixture_deliverables_data(rnafusion_dir: Path, rnafusion_case_id: str) -> dict:
-    sample = "sample_rnafusion_case_enough_reads"
+def fixture_deliverables_data(
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_sample_id: str
+) -> dict:
 
     return {
         "files": [
@@ -149,7 +168,7 @@ def fixture_deliverables_data(rnafusion_dir: Path, rnafusion_case_id: str) -> di
                 "path_index": "",
                 "step": "multiqc",
                 "tag": ["qc"],
-                "id": sample,
+                "id": rnafusion_sample_id,
                 "format": "html",
                 "mandatory": True,
             },
@@ -159,7 +178,7 @@ def fixture_deliverables_data(rnafusion_dir: Path, rnafusion_case_id: str) -> di
 
 @pytest.fixture
 def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
-    """Create deliverable file with dummy data and files to deliver"""
+    """Create deliverable file with dummy data and files to deliver."""
     Path.mkdir(
         Path(rnafusion_dir, rnafusion_case_id),
         parents=True,
@@ -192,7 +211,7 @@ def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) 
 
 @pytest.fixture(name="malformed_hermes_deliverables")
 def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
-    malformed_deliverable = hermes_deliverables.copy()
+    malformed_deliverable: dict = hermes_deliverables.copy()
     malformed_deliverable.pop("pipeline")
 
     return malformed_deliverable
@@ -202,7 +221,7 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 def fixture_rnafusion_hermes_process(
     hermes_deliverables: dict, process: ProcessMock
 ) -> ProcessMock:
-    """Return a process mock populated with some rnafusion hermes output"""
+    """Return a process mock populated with some rnafusion hermes output."""
     process.set_stdout(
         text=WriteStream.write_stream_from_content(
             content=hermes_deliverables, file_format=FileFormat.JSON
