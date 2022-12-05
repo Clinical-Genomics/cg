@@ -3,6 +3,7 @@
 import datetime as dt
 import gzip
 from pathlib import Path
+from typing import List
 
 import pytest
 
