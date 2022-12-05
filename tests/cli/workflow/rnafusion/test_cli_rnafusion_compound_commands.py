@@ -52,7 +52,7 @@ def test_start(
     assert case_id in caplog.text
 
 
-def test_store(
+def test_store_success(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
@@ -68,9 +68,6 @@ def test_store(
 
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
     case_id: str = rnafusion_case_id
-
-    # GIVEN CASE ID where analysis finish is not mocked
-    case_id_fail: str = "rnafusion_case_not_finished"
 
     # Set Housekeeper to an empty real Housekeeper store
     rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
@@ -94,11 +91,37 @@ def test_store(
     assert "Analysis successfully stored in StatusDB" in caplog.text
     assert rnafusion_context.status_db.family(case_id).analyses
     assert rnafusion_context.housekeeper_api.bundle(case_id)
+
+
+def test_store_fail(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    real_housekeeper_api: HousekeeperAPI,
+    mock_deliverable,
+    mock_analysis_finish,
+    caplog: LogCaptureFixture,
+    hermes_deliverables: dict,
+):
+    """Test store command fails when a case did not finish."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN CASE ID where analysis finish is not mocked
+    case_id_fail: str = "rnafusion_case_not_finished"
+
+    # Set Housekeeper to an empty real Housekeeper store
+    rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # Make sure the bundle was not present in hk
+    assert not rnafusion_context.housekeeper_api.bundle(case_id_fail)
+
+    # WHEN running command
     result_fail = cli_runner.invoke(store, [case_id_fail], obj=rnafusion_context)
+
+    # THEN bundle exist status should be
     assert result_fail.exit_code != EXIT_SUCCESS
 
 
-#
 def test_start_available(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
