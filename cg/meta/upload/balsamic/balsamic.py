@@ -57,10 +57,10 @@ class BalsamicUploadAPI(UploadAPI):
             LOG.info(f"Balsamic case {case_obj.internal_id} is not compatible for Genotype upload")
 
         # Observations upload
-        # if (
-        #     self.analysis_api.get_case_application_type(case_obj.internal_id)
-        #     == SequencingMethod.WGS
-        # ):
-        #     ctx.invoke(observations, case_id=case_obj.internal_id)
+        if (
+            self.analysis_api.get_case_application_type(case_obj.internal_id)
+            == SequencingMethod.WGS
+        ):
+            ctx.invoke(observations, case_id=case_obj.internal_id)
 
         self.update_uploaded_at(analysis_obj)
