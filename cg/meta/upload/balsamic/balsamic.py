@@ -3,12 +3,14 @@
 import logging
 
 import click
+from cg.cli.upload.observations import observations
 
 from cg.cli.generate.report.base import delivery_report
 from cg.cli.upload.scout import scout
 from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.clinical_delivery import clinical_delivery
 from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
+from cg.constants.sequencing import SequencingMethod
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.upload.upload_api import UploadAPI
@@ -55,3 +57,10 @@ class BalsamicUploadAPI(UploadAPI):
             LOG.info(f"Balsamic case {case_obj.internal_id} is not compatible for Genotype upload")
 
         self.update_uploaded_at(analysis_obj)
+
+        # Observations upload
+        if (
+            self.analysis_api.get_case_application_type(case_obj.internal_id)
+            == SequencingMethod.WGS
+        ):
+            ctx.invoke(observations, case_id=case_obj.internal_id)
