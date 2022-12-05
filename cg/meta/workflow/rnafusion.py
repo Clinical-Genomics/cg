@@ -210,7 +210,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         dry_run: bool = False,
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
-        options = self.__build_command_str(
+        options: List[str] = self.__build_command_str(
             self.get_verified_arguments(
                 case_id=case_id,
                 work_dir=work_dir,
@@ -231,7 +231,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 arriba=arriba,
             )
         )
-        nextflow_options = self.__build_command_str(
+        nextflow_options: List[str] = self.__build_command_str(
             NextflowAnalysisAPI.get_verified_arguments_nextflow(
                 case_id=case_id, pipeline=self.pipeline, root_dir=self.root_dir, log=log
             )
