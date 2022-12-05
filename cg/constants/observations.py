@@ -52,9 +52,9 @@ class MipDNALoadParameters(Enum):
 class BalsamicObservationsAnalysisTag(StrEnum):
     """Cancer observations files analysis tags."""
 
-    SNV_VCF: str = "vcf-snv-clinical"
+    SNV_VCF: str = "vcf-snv"
     SNV_ALL_VCF: str = "vcf-snv-germline-tumor"
-    SV_VCF: str = "vcf-sv-clinical"
+    SV_VCF: str = "vcf-sv"
     PROFILE_VCF: str = "vcf-snv-germline-tumor"
 
 
