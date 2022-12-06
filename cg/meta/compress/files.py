@@ -140,13 +140,6 @@ def check_fastqs(compression_obj: CompressionData) -> bool:
     if not compression_obj.pair_exists():
         return False
 
-    # Check if the FASTQ file is a symlinc (soft link)
-    if compression_obj.is_symlink(compression_obj.fastq_first) or compression_obj.is_symlink(
-        compression_obj.fastq_second
-    ):
-        LOG.info("Run %s has symbolic link, skipping run", compression_obj.run_name)
-        return False
-
     date_changed = compression_obj.get_change_date(compression_obj.fastq_first)
     today = datetime.datetime.now()
 
