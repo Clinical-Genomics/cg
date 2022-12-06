@@ -13,6 +13,11 @@ from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.cli.workflow.mip.conftest import (
+    fixture_dna_mip_context,
+    fixture_mip_case_ids,
+    fixture_mip_case_id,
+)
 
 
 class MockCoverage(ChanjoAPI):
@@ -88,3 +93,31 @@ def analysis(analysis_store, case_id, timestamp):
 def fixture_genotype_analysis_sex() -> dict:
     """Return predicted sex per sample_id."""
     return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}
+
+
+@pytest.fixture(name="mip_case")
+def fixture_mip_case(dna_mip_context, helpers) -> models.Family:
+    """Returns a mip case."""
+
+    store = dna_mip_context.status_db
+
+    mip_case = helpers.add_case(
+        store=store,
+        internal_id="mip-case",
+        name="mip-case",
+        data_analysis=Pipeline.MIP_DNA,
+    )
+    mip_sample = helpers.add_sample(
+        store,
+        internal_id="mip-case",
+        application_type="wgs",
+    )
+    helpers.add_relationship(store, case=mip_case, sample=mip_sample)
+
+    helpers.add_analysis(
+        store,
+        case=mip_case,
+        pipeline=Pipeline.MIP_DNA,
+    )
+
+    return mip_case

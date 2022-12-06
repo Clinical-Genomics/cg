@@ -242,6 +242,9 @@ class MockTB:
         """Override TrailblazerAPI has_analysis_started method to avoid default behaviour"""
         return False
 
+    def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime):
+        return None
+
 
 @pytest.fixture(scope="function")
 def tb_api():

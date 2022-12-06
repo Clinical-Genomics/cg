@@ -71,16 +71,16 @@ class TrailblazerAPI:
         return ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=response.text)
 
     def analyses(
-            self,
-            case_id: str = None,
-            query: str = None,
-            status: str = None,
-            deleted: bool = None,
-            temp: bool = False,
-            before: dt.datetime = None,
-            is_visible: bool = None,
-            family: str = None,
-            data_analysis: Pipeline = None,
+        self,
+        case_id: str = None,
+        query: str = None,
+        status: str = None,
+        deleted: bool = None,
+        temp: bool = False,
+        before: dt.datetime = None,
+        is_visible: bool = None,
+        family: str = None,
+        data_analysis: Pipeline = None,
     ) -> list:
         request_body = {
             "case_id": case_id,
@@ -110,7 +110,7 @@ class TrailblazerAPI:
             return TrailblazerAnalysis.parse_obj(response)
 
     def find_analysis(
-            self, case_id: str, started_at: dt.datetime, status: str
+        self, case_id: str, started_at: dt.datetime, status: str
     ) -> Optional[TrailblazerAnalysis]:
         request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
         response = self.query_trailblazer(command="find-analysis", request_body=request_body)
@@ -151,15 +151,15 @@ class TrailblazerAPI:
                 return [TrailblazerAnalysis.parse_obj(response)]
 
     def add_pending_analysis(
-            self,
-            case_id: str,
-            analysis_type: str,
-            config_path: str,
-            out_dir: str,
-            slurm_quality_of_service: SlurmQos,
-            email: str = None,
-            data_analysis: Pipeline = None,
-            ticket: str = None,
+        self,
+        case_id: str,
+        analysis_type: str,
+        config_path: str,
+        out_dir: str,
+        slurm_quality_of_service: SlurmQos,
+        email: str = None,
+        data_analysis: Pipeline = None,
+        ticket: str = None,
     ) -> TrailblazerAnalysis:
 
         request_body = {
@@ -183,4 +183,6 @@ class TrailblazerAPI:
 
         LOG.debug(f"Setting analysis uploaded at for {request_body}")
         LOG.info(f"{case_id} - uploaded at set to {uploaded_at}")
-        self.query_trailblazer(command="set-analysis-uploaded", request_body=request_body, method="PUT")
+        self.query_trailblazer(
+            command="set-analysis-uploaded", request_body=request_body, method="PUT"
+        )
