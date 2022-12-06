@@ -206,7 +206,7 @@ def test_finish_flow_cell_copy_not_completed(
     if hiseq_x_copy_complete_file.exists():
         hiseq_x_copy_complete_file.unlink()
 
-    # When finishing flow cell
+    # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=flow_cell.full_name,
@@ -238,7 +238,7 @@ def test_finish_flow_cell_delivery_started(
     # GIVEN an already started flag file
     demultiplexing_delivery_file.touch()
 
-    # When finishing flow cell
+    # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=flow_cell.full_name,
@@ -271,7 +271,7 @@ def test_finish_flow_cell_delivery_not_hiseq_x(
     if hiseq_x_tile_dir.exists():
         hiseq_x_tile_dir.rmdir()
 
-    # When finishing flow cell
+    # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=flow_cell.full_name,
@@ -357,7 +357,7 @@ def test_post_process_flow_cell_dry_run(
     # GIVEN dry run set to True
     post_demux_api.set_dry_run(dry_run=True)
 
-    # When post-processing flow cell
+    # WHEN post-processing flow cell
     post_demux_api.post_process_flow_cell(demux_results=bcl2fastq_demux_results)
 
     # THEN a delivery file should not have been created
@@ -398,7 +398,7 @@ def test_post_process_flow_cell(
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
-    # When post-processing flow cell
+    # WHEN post-processing flow cell
     post_demux_api.post_process_flow_cell(demux_results=bcl2fastq_demux_results)
 
     # THEN a delivery file should have been created
