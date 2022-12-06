@@ -184,9 +184,10 @@ class TransferFlowCell:
         sample_id: Optional[str] = None,
     ) -> None:
         """Stor sequencing file(s) in Housekeeper."""
-        hk_bundle: Bundle = self.hk.bundle(sample_id) if sample_id else self.hk.bundle(flow_cell_id)
+        bundle_name: str = sample_id if sample_id else flow_cell_id
+        hk_bundle: Bundle = self.hk.bundle(bundle_name)
         if hk_bundle is None:
-            self.hk.create_new_bundle_and_version(name=flow_cell_id)
+            self.hk.create_new_bundle_and_version(name=bundle_name)
 
         with self.hk.session_no_autoflush():
             for file in sequencing_files:
@@ -194,5 +195,5 @@ class TransferFlowCell:
                     LOG.info(f"Found new file: {file}.")
                     LOG.info(f"Adding file using tag: {tag_name}")
                     self.hk.add_and_include_file_to_latest_version(
-                        bundle_name=flow_cell_id, file=Path(file), tags=[tag_name, flow_cell_id]
+                        bundle_name=bundle_name, file=Path(file), tags=[tag_name, flow_cell_id]
                     )
