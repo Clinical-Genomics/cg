@@ -1,10 +1,10 @@
 """Tests cli methods to create the case config for RNAfusion"""
 
 import logging
+from typing import List
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
-from typig import List
 
 from cg.cli.workflow.rnafusion.base import config_case
 from cg.constants import EXIT_SUCCESS
