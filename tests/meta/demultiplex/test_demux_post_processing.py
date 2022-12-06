@@ -313,7 +313,7 @@ def test_finish_flow_cell_ready(
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
 
-    # When finishing flow cell
+    # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
         flow_cell_name=flow_cell.full_name,
