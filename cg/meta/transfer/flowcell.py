@@ -168,8 +168,7 @@ class TransferFlowCell:
         self, flow_cell_dir: Path, flow_cell_id: str, store: bool
     ) -> None:
         """Include cgstats log in Housekeeper."""
-        unaligned_dir: Path = Path(flow_cell_dir, DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME)
-        for cgstats_log_path in unaligned_dir.glob("stats-*[0-9]*-*"):
+        for cgstats_log_path in flow_cell_dir.glob("stats-*[0-9]-*"):
             self._include_sequencing_file(
                 file_path=cgstats_log_path,
                 flow_cell_id=flow_cell_id,

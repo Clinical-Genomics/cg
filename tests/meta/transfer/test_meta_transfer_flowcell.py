@@ -115,7 +115,6 @@ def test_include_sample_sheet_to_housekeeper_when_not_existing(
 
 
 def test_include_sample_sheet_to_housekeeper(
-    caplog,
     flow_cell_id: str,
     sample_sheet_path: Generator[Path, None, None],
     transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
@@ -143,6 +142,60 @@ def test_include_sample_sheet_to_housekeeper(
     hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.SAMPLE_SHEET)
     for hk_file in hk_bundle.versions[0].files:
         assert hk_file.path.endswith("csv")
+
+
+def test_include_cgstats_log_to_housekeeper_when_not_existing(
+    flow_cell_id: str,
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
+):
+    """Test including cgstats log to Housekeeper when not existing."""
+    # GIVEN transfer flow cell API
+
+    # GIVEN a cgstats log tag in Housekeeper
+    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.CGSTATS_LOG])
+
+    # GIVEN no flow cell id bundle in housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.CGSTATS_LOG)
+    assert hk_bundle is None
+
+    # GIVEN no cgstats log file
+
+    # WHEN including cgstats log file to Housekeeper
+    transfer_flow_cell_api._include_cgstats_log_to_housekeeper(
+        flow_cell_dir=Path("does_not_exist"), flow_cell_id=flow_cell_id, store=True
+    )
+
+    # THEN the cgstats log file not be included to Housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.CGSTATS_LOG)
+    assert hk_bundle is None
+
+
+def test_include_cgstats_log_to_housekeeper(
+    flow_cell_id: str,
+    cgstats_log_path: Generator[Path, None, None],
+    transfer_flow_cell_api: Generator[TransferFlowCell, None, None],
+):
+    """Test including cgstats log to Housekeeper."""
+    # GIVEN transfer flow cell API
+
+    # GIVEN a cgstats log tag in Housekeeper
+    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.CGSTATS_LOG])
+
+    # GIVEN no flow cell id bundle in housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.CGSTATS_LOG)
+    assert hk_bundle is None
+
+    # GIVEN a cgstats log file that exists
+
+    # WHEN including cgstats log file to Housekeeper
+    transfer_flow_cell_api._include_cgstats_log_to_housekeeper(
+        flow_cell_dir=cgstats_log_path.parent, flow_cell_id=flow_cell_id, store=True
+    )
+
+    # THEN the cgstats log file be included to Housekeeper
+    hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.CGSTATS_LOG)
+    for hk_file in hk_bundle.versions[0].files:
+        assert hk_file.path.endswith("txt")
 
 
 def test_store_sequencing_files(
