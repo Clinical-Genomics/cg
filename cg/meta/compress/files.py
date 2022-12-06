@@ -140,14 +140,6 @@ def check_fastqs(compression_obj: CompressionData) -> bool:
     if not compression_obj.pair_exists():
         return False
 
-    # Check if file is hardlinked multiple times
-    if (
-        compression_obj.get_nlinks(compression_obj.fastq_first) > 1
-        or compression_obj.get_nlinks(compression_obj.fastq_second) > 1
-    ):
-        LOG.info("More than 1 inode to same file for %s", compression_obj.run_name)
-        return False
-
     # Check if the FASTQ file is a symlinc (soft link)
     if compression_obj.is_symlink(compression_obj.fastq_first) or compression_obj.is_symlink(
         compression_obj.fastq_second
