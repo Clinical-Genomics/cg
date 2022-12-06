@@ -22,7 +22,7 @@ class CaseTags(BaseModel):
     peddy_check: Set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
     multiqc_report: Set[str]
     delivery_report: Set[str] = Field(None, description="Delivery report for cancer")
-    str_catalog: Set[str] = None
+    str_catalog: Set[str] = Field(None, description="Variant catalog used with expansionhunter")
 
 
 class SampleTags(BaseModel):
@@ -36,4 +36,5 @@ class SampleTags(BaseModel):
     chromograph_regions: Set[str] = None
     chromograph_sites: Set[str] = None
     reviewer_alignment: Set[str] = None
+    reviewer_alignment_index: Set[str] = None
     reviewer_vcf: Set[str] = None

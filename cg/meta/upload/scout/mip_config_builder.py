@@ -3,6 +3,8 @@ import re
 from pathlib import Path
 from typing import Optional
 
+from housekeeper.store import models as hk_models
+
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
@@ -12,7 +14,6 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
 from cg.store import models
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -133,6 +134,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
         )
         config_sample.reviewer.alignment = self.fetch_sample_file(
             hk_tags=self.sample_tags.reviewer_alignment, sample_id=sample_id
+        )
+        config_sample.reviewer.alignment_index = self.fetch_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment_index, sample_id=sample_id
         )
         config_sample.reviewer.vcf = self.fetch_sample_file(
             hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id

@@ -38,6 +38,7 @@ MIP_SAMPLE_TAGS = dict(
     chromograph_regions={"chromograph", "regions"},
     chromograph_sites={"chromograph", "sites"},
     reviewer_alignment={"expansionhunter","bam"},
+    reviewer_alignment_index={"expansionhunter","bam-index"},
     reviewer_vcf={"expansionhunter","vcf-str"},
 )
 

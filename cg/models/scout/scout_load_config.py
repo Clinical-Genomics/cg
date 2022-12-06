@@ -15,6 +15,7 @@ class ChromographImages(BaseModel):
 
 class Reviewer(BaseModel):
     alignment: Optional[str] = None
+    alignment_index: Optional[str] = None
     vcf: Optional[str] = None
     catalog: Optional[str] = None
 
