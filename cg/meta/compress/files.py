@@ -54,11 +54,7 @@ def get_spring_paths(version_obj: hk_models.Version) -> List[CompressionData]:
     if hk_files_dict is None:
         return spring_paths
 
-    spring_paths.extend(
-        CompressionData(file_path.with_suffix(""))
-        for file_path in hk_files_dict
-        if file_path.suffix == FileExtensions.SPRING
-    )
+    spring_paths.extend(CompressionData(file_path.with_suffix("")) for file_path in hk_files_dict)
 
     return spring_paths
 
