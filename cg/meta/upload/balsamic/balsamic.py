@@ -62,5 +62,7 @@ class BalsamicUploadAPI(UploadAPI):
             == SequencingMethod.WGS
         ):
             ctx.invoke(observations, case_id=case_obj.internal_id)
+        else:
+            LOG.info(f"Balsamic case {case_obj.internal} is not compatible for Observations upload")
 
         self.update_uploaded_at(analysis_obj)
