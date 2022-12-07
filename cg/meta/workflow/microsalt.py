@@ -313,12 +313,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def qc_check(self, case_id: str) -> bool:
         """Check if Microsalt case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
-        qc_check: bool = True
         failed_samples: List[Sample] = []
         qc_percent_threshold: float = 1 / 10
         run_dir_path: Path = self.get_case_path(case_id=case_id, cleaning=False)[0]
         lims_project: str = self.get_project(samples[0])
-        qc_file = read_json(Path(run_dir_path, f"{lims_project}.json"))
+        qc_file = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample in samples:
             # check if Percent Reads Guaranteed	is meet for each sample
@@ -330,23 +329,31 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
             # check BP > 10X
             if not self.check_coverage_10x(sample.internal_id, qc_file):
+                LOG.info(
+                    f"Sample {sample.internal_id} failed QC due to not meeting the 10x Coverage Guaranteed."
+                )
                 if sample not in failed_samples:
                     failed_samples.append(sample)
-
-        # QC check
-        if len(failed_samples) / len(samples) > qc_percent_threshold:
-            qc_check = False
-            LOG.info(f"Case {case_id} failed QC, setting case status to FAILED in Trailblazer.")
-            # set to failed in TB
 
         # Create a QC_done.txt in the run folder
         open(Path(run_dir_path, "QC_done.txt"), "w")
 
-        return qc_check
+        # QC check
+        if len(failed_samples) / len(samples) > qc_percent_threshold:
+            LOG.info(f"Case {case_id} failed QC, setting case status to FAILED in Trailblazer.")
+            # set to failed in TB
+            return False
+
+        return True
 
     def check_coverage_10x(self, sample_name: str, qc_file: dict) -> bool:
         """Check if a sample passed the coverage_10x criteria."""
-        coverage_10x_treshold: float = 0.9
-        coverage_10x_check: bool = True
+        coverage_10x_treshold: float = 0.75
+        sample_coverage_10x: float = qc_file[sample_name]["microsalt_samtools_stats"][
+            "coverage_10x"
+        ]
 
-        return coverage_10x_check
+        if sample_coverage_10x < coverage_10x_treshold:
+            return False
+
+        return True
