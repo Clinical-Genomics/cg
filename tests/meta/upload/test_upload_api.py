@@ -1,4 +1,5 @@
 """Test for upload API."""
+import datetime as dt
 
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
@@ -20,4 +21,4 @@ def test_update_uploaded_at(dna_mip_context: CGConfig, helpers: StoreHelpers, mi
     upload_api.update_uploaded_at(analysis=mip_analysis)
 
     # THEN the uploaded at should be set to a date
-    assert mip_analysis.uploaded_at is not None
+    assert isinstance(mip_analysis.uploaded_at, dt.datetime)
