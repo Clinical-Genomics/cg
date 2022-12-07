@@ -3,6 +3,7 @@
 """
 
 import logging
+import re
 from pathlib import Path
 from typing import List
 
@@ -50,16 +51,16 @@ class CompressAPI:
         if self.backup_api:
             self.backup_api.dry_run = self.dry_run
 
-    def get_flow_cell_name(self, fastq_path: Path) -> str:
-        """
-        Extract the flow cell name from a fastq path assuming fastq files are kept in their
-        demultiplexed path and the following run_name convention:
-
-            - <date>_<machine>_<run_numbers>_<A|B><flow_cell_id>:
-            - Ex: 220128_A00689_0460_BHVN2FDSX2
-        """
-        run_name: str = fastq_path.relative_to(self.demux_root).parts[0]
-        return run_name.split("_")[-1][1:]
+    def get_flow_cell_id(self, fastq_path: Path) -> str:
+        """Extract the flow cell id from a fastq path assuming flow cell id is the first word in the file name."""
+        flow_cell_id: str = ""
+        regexp = r"(\A[A-Z0-9]+)"
+        try:
+            flow_cell_id: str = re.search(regexp, fastq_path.name).group()
+        except AttributeError as error:
+            LOG.error(error)
+            LOG.info("Could not find flow cell id from fastq path")
+        return flow_cell_id
 
     # Compression methods
     def compress_fastq(self, sample_id: str) -> bool:
@@ -291,8 +292,8 @@ class CompressAPI:
         """Add FASTQ files to housekeeper."""
 
         if not sample_obj.application_version.application.is_external:
-            flow_cell_name: str = self.get_flow_cell_name(fastq_path=fastq_first)
-            fastq_tags = [flow_cell_name, CompressionHkTags.FASTQ]
+            flow_cell_id: str = self.get_flow_cell_id(fastq_path=fastq_first)
+            fastq_tags = [flow_cell_id, CompressionHkTags.FASTQ]
         else:
             fastq_tags = [sample_obj.internal_id, CompressionHkTags.FASTQ]
         last_version = self.hk_api.last_version(bundle=sample_obj.internal_id)

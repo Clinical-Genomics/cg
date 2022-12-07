@@ -33,7 +33,7 @@ def log_enough_reads(
     status_db_sample_reads: int, application_expected_reads: int, cgstats_sample_name: str
 ) -> None:
     """Check and log if sample in status db got enough reads."""
-    enough_reads: bool = bool(status_db_sample_reads > application_expected_reads)
+    enough_reads: bool = status_db_sample_reads > application_expected_reads
     LOG.info(f"Added reads to sample: {cgstats_sample_name} - {status_db_sample_reads} ")
     LOG.info(f"[{'DONE' if enough_reads else 'NOT DONE'}]")
 
@@ -184,7 +184,7 @@ class TransferFlowCell:
         sample_id: Optional[str] = None,
     ) -> None:
         """Stor sequencing file(s) in Housekeeper."""
-        bundle_name: str = sample_id if sample_id else flow_cell_id
+        bundle_name: str = sample_id or flow_cell_id
         hk_bundle: Bundle = self.hk.bundle(bundle_name)
         if hk_bundle is None:
             self.hk.create_new_bundle_and_version(name=bundle_name)
