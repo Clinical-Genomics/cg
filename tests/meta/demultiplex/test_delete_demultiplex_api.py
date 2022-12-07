@@ -181,8 +181,8 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     sample_level_housekeeper_api: HousekeeperAPI,
     tmp_fastq_paths: List[Path],
 ):
-    """Test function to remove fastqs from Housekeeper when there are only files on sample level
-    (not on flow cell name)
+    """Test removing fastqs from Housekeeper when there are only files on sample level
+    (not on flow cell name).
     """
 
     caplog.set_level(logging.INFO)
@@ -212,10 +212,8 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
         in caplog.text
     )
 
-    # AND you should be notified that there were fastq files removed on sample level
-
-    for file in sample_level_files:
-        assert f"{file.as_posix()} deleted" in caplog.text
+    # THEN you should be notified that there were fastq files removed on sample level
+    assert "Deleting file" in caplog.text
 
 
 def test_delete_flow_cell_housekeeper_flowcell_name(
@@ -228,7 +226,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
 ):
-    """Test function to remove files from Housekeeper using flow cell name as a tag"""
+    """Test removing files from Housekeeper using flow cell name as a tag."""
 
     caplog.set_level(logging.INFO)
     cg_context.housekeeper_api_ = flow_cell_name_housekeeper_api
@@ -258,8 +256,9 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
         not in caplog.text
     )
     assert f"Deleted {sample_sheet_file.as_posix()} from housekeeper" in caplog.text
-    for fastq_file in fastq_files:
-        assert f"{fastq_file.as_posix()} deleted" in caplog.text
+
+    # THEN you should be notified that there were fastq files removed on sample level
+    assert "Deleting file" in caplog.text
 
 
 def test_delete_flow_cell_statusdb(

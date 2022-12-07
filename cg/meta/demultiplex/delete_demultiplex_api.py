@@ -99,9 +99,7 @@ class DeleteDemuxAPI:
             log.info(f"Could not find {tag} for {sample.internal_id}")
         else:
             for housekeeper_file in housekeeper_files:
-                self.housekeeper_api.delete_file_if_related(
-                    stem=self.demultiplexing_path.as_posix(), hk_file=housekeeper_file
-                )
+                self.housekeeper_api.delete_file(file_id=housekeeper_file.id)
 
     def _delete_fastq_and_spring_housekeeper(self) -> None:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""

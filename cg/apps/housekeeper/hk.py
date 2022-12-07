@@ -79,14 +79,14 @@ class HousekeeperAPI:
         """Delete a file both from database and disk (if included)."""
         file_obj: File = self.get_file(file_id)
         if not file_obj:
-            LOG.info("Could not find file %s", file_id)
+            LOG.info(f"Could not find file {file_id}")
             return
 
         if file_obj.is_included and Path(file_obj.full_path).exists():
-            LOG.info("Deleting file %s from disc", file_obj.full_path)
+            LOG.info(f"Deleting file {file_obj.full_path} from disc")
             Path(file_obj.full_path).unlink()
 
-        LOG.info("Deleting file %s from housekeeper", file_id)
+        LOG.info(f"Deleting file {file_id} from housekeeper")
         file_obj.delete()
         self._store.commit()
 
