@@ -48,8 +48,8 @@ class BalsamicObservationsAPI(ObservationsAPI):
             if self.is_duplicate(
                 case=case,
                 loqusdb_api=loqusdb_api,
-                profile_vcf_path=input_files.profile_vcf_path,
-                profile_threshold=BalsamicLoadParameters.PROFILE_THRESHOLD.value,
+                profile_vcf_path=None,
+                profile_threshold=None,
             ):
                 LOG.error(f"Case {case.internal_id} has already been uploaded to Loqusdb")
                 raise LoqusdbDuplicateRecordError
@@ -75,7 +75,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path if is_somatic else input_files.snv_all_vcf_path,
             sv_vcf_path=input_files.sv_vcf_path if is_somatic else None,
-            profile_vcf_path=input_files.profile_vcf_path,
+            profile_vcf_path=None,
             gq_threshold=BalsamicLoadParameters.GQ_THRESHOLD.value,
             hard_threshold=BalsamicLoadParameters.HARD_THRESHOLD.value,
             soft_threshold=BalsamicLoadParameters.SOFT_THRESHOLD.value,
@@ -96,9 +96,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             "sv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.SV_VCF]
             ).first(),
-            "profile_vcf_path": self.housekeeper_api.files(
-                version=hk_version.id, tags=[BalsamicObservationsAnalysisTag.PROFILE_VCF]
-            ).first(),
+            "profile_vcf_path": None,
         }
         return BalsamicObservationsInputFiles(**get_full_path_dictionary(input_files))
 

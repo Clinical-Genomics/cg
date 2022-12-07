@@ -75,13 +75,17 @@ class ObservationsAPI:
     def is_duplicate(
         case: models.Family,
         loqusdb_api: LoqusdbAPI,
-        profile_vcf_path: Path,
-        profile_threshold: float,
+        profile_vcf_path: Optional[Path],
+        profile_threshold: Optional[float],
     ) -> bool:
         """Check if a case has already been uploaded to Loqusdb."""
         loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
-        duplicate = loqusdb_api.get_duplicate(
-            profile_vcf_path=profile_vcf_path, profile_threshold=profile_threshold
+        duplicate = (
+            loqusdb_api.get_duplicate(
+                profile_vcf_path=profile_vcf_path, profile_threshold=profile_threshold
+            )
+            if profile_vcf_path and profile_threshold
+            else None
         )
         return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
 
