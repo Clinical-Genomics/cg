@@ -14,7 +14,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
-from cg.io.controller import ReadStream
+from cg.io.controller import ReadStream, APIRequest
 
 LOG = logging.getLogger(__name__)
 
@@ -46,21 +46,11 @@ class TrailblazerAPI:
     def query_trailblazer(self, command: str, request_body: dict, method: str = "POST") -> Any:
         url = self.host + "/" + command
         LOG.debug(f"REQUEST HEADER {self.auth_header}")
+        LOG.debug(f"{method}: URL={url}; JSON={request_body}")
 
-        if method == "PUT":
-            LOG.debug(f"PUT: URL={url}; JSON={request_body}")
-            response = requests.put(
-                url=url,
-                headers=self.auth_header,
-                json=request_body,
-            )
-        else:
-            LOG.debug(f"POST: URL={url}; JSON={request_body}")
-            response = requests.post(
-                url=url,
-                headers=self.auth_header,
-                json=request_body,
-            )
+        response = APIRequest.api_request_from_content(
+            api_method=method, url=url, headers=self.auth_header, json=request_body
+        )
 
         LOG.debug(f"RESPONSE STATUS CODE {response.status_code}")
         if not response.ok:
