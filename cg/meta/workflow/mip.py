@@ -31,8 +31,9 @@ CLI_OPTIONS = {
     "skip_evaluation": {"option": "--qccollect_skip_evaluation"},
     "start_after": {"option": "--start_after_recipe"},
     "start_with": {"option": "--start_with_recipe"},
+    "use_bwa_mem": {"option": "--bwa_mem 1 --bwa_mem2 0"},
 }
-
+##TODO test this option above
 LOG = logging.getLogger(__name__)
 
 
