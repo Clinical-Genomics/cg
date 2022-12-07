@@ -190,9 +190,6 @@ def test_slurm_rsync_single_case(
     """Test for running rsync on a single case on slurm"""
     caplog.set_level(logging.INFO)
 
-    # GIVEN a valid mip case
-    case_obj: models.Family
-
     # GIVEN paths needed to run rsync
     mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
     RsyncAPI.get_source_and_destination_paths.return_value = {
@@ -230,7 +227,6 @@ def test_slurm_rsync_single_case_missing_file(
     caplog.set_level(logging.INFO)
 
     # GIVEN a valid mip case and sample folder missing
-    case_obj: models.Family
     shutil.rmtree(Path(all_samples_in_inbox, case_obj.links[0].sample.name))
 
     # GIVEN paths needed to run rsync
