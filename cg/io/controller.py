@@ -76,5 +76,7 @@ class APIRequest:
     }
 
     @classmethod
-    def api_request_from_content(cls, api_method: str, url: str, headers: dict, json: dict) -> Response:
+    def api_request_from_content(
+        cls, api_method: str, url: str, headers: dict, json: dict
+    ) -> Response:
         return cls.api_request[api_method](url=url, headers=headers, json=json)
