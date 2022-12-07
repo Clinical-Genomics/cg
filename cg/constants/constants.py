@@ -32,9 +32,11 @@ CAPTUREKIT_OPTIONS = (
 
 class CaseActions(StrEnum):
     ANALYZE: str = "analyze"
+    HOLD: str = "hold"
+    RUNNING: str = "running"
 
 
-CASE_ACTIONS = (CaseActions.ANALYZE, "running", "hold")
+CASE_ACTIONS = (CaseActions.ANALYZE, CaseActions.RUNNING, CaseActions.HOLD)
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 

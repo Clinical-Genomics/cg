@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.exc import HousekeeperVersionMissingError
+from cg.exc import HousekeeperBundleVersionMissingError
 from cg.store import models
 
 from housekeeper.store.models import File, Version
@@ -479,7 +479,7 @@ class MockHousekeeperAPI:
         version: Version = self.last_version(bundle_name)
         if not version:
             LOG.info(f"Bundle: {bundle_name} not found in housekeeper")
-            raise HousekeeperVersionMissingError
+            raise HousekeeperBundleVersionMissingError
         hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()

@@ -11,7 +11,7 @@ from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Bundle, File, Version
 
-from cg.exc import HousekeeperVersionMissingError
+from cg.exc import HousekeeperBundleVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -304,7 +304,7 @@ class HousekeeperAPI:
         version: Version = self.last_version(bundle_name)
         if not version:
             LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
-            raise HousekeeperVersionMissingError
+            raise HousekeeperBundleVersionMissingError
         hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
         self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()
@@ -314,6 +314,6 @@ class HousekeeperAPI:
         version_obj: Version = self.last_version(case_id)
         if not version_obj:
             LOG.info("Case ID: %s not found in housekeeper", case_id)
-            raise HousekeeperVersionMissingError
+            raise HousekeeperBundleVersionMissingError
         file: File = self.files(version=version_obj.id, tags=tags).first()
         return file

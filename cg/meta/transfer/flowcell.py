@@ -96,7 +96,7 @@ class TransferFlowCell:
             LOG.debug(f"Adding reads/FASTQs to sample: {cgstats_sample.name}")
 
             status_db_sample: Sample = self.db.sample(internal_id=cgstats_sample.name)
-            if status_db_sample is None:
+            if not status_db_sample:
                 LOG.warning(f"Unable to find sample: {cgstats_sample.name}")
                 continue
 
@@ -124,10 +124,10 @@ class TransferFlowCell:
             )
 
     def _add_flow_cell_to_status_db(
-        self, cgstats_flow_cell: StatsFlowcell, flow_cell: Flowcell, flow_cell_id: str
+        self, cgstats_flow_cell: StatsFlowcell, flow_cell: Optional[Flowcell], flow_cell_id: str
     ) -> Flowcell:
         """Add a flow cell to the status database."""
-        if flow_cell is None:
+        if not flow_cell:
             flow_cell: Flowcell = self.db.add_flow_cell(
                 flow_cell_id=flow_cell_id,
                 sequencer_name=cgstats_flow_cell.sequencer,
@@ -186,7 +186,7 @@ class TransferFlowCell:
         """Stor sequencing file(s) in Housekeeper."""
         bundle_name: str = sample_id or flow_cell_id
         hk_bundle: Bundle = self.hk.bundle(bundle_name)
-        if hk_bundle is None:
+        if not hk_bundle:
             self.hk.create_new_bundle_and_version(name=bundle_name)
 
         with self.hk.session_no_autoflush():
