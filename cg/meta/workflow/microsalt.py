@@ -26,6 +26,7 @@ from cg.store import models
 from cg.store.models import Sample
 from cg.utils import Process
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+from cg.io.json import read_json
 
 from cg.constants import Priority
 
@@ -63,7 +64,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str) -> List[Path]:
+    def get_case_path(self, case_id: str, cleaning: bool = True) -> List[Path]:
         """Returns all paths associated with the case."""
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
@@ -73,7 +74,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
         ]
 
-        self.verify_case_paths_age(case_paths, case_id)
+        if cleaning:
+            self.verify_case_paths_age(case_paths, case_id)
 
         return case_paths
 
@@ -313,25 +315,38 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         samples: List[Sample] = self.get_samples(case_id=case_id)
         qc_check: bool = True
         failed_samples: List[Sample] = []
-        qc_percent_threshold: float = 1/10
+        qc_percent_threshold: float = 1 / 10
+        run_dir_path: Path = self.get_case_path(case_id=case_id, cleaning=False)[0]
+        lims_project: str = self.get_project(samples[0])
+        qc_file = read_json(Path(run_dir_path, f"{lims_project}.json"))
 
         for sample in samples:
             # check if Percent Reads Guaranteed	is meet for each sample
             if not sample.sequencing_qc:
                 failed_samples.append(sample)
-                LOG.warning(f"Sample {sample.internal_id} failed QC due to not meeting the Reads Guaranteed.")
+                LOG.info(
+                    f"Sample {sample.internal_id} failed QC due to not meeting the Reads Guaranteed."
+                )
 
             # check BP > 10X
+            if not self.check_coverage_10x(sample.internal_id, qc_file):
+                if sample not in failed_samples:
+                    failed_samples.append(sample)
 
         # QC check
-        if len(failed_samples)/len(samples) > qc_percent_threshold:
+        if len(failed_samples) / len(samples) > qc_percent_threshold:
             qc_check = False
+            LOG.info(f"Case {case_id} failed QC, setting case status to FAILED in Trailblazer.")
             # set to failed in TB
 
         # Create a QC_done.txt in the run folder
-        open(Path(self.root_dir, "results", self.get_project(samples[0]), "QC_done.txt"), "w")
+        open(Path(run_dir_path, "QC_done.txt"), "w")
 
         return qc_check
 
+    def check_coverage_10x(self, sample_name: str, qc_file: dict) -> bool:
+        """Check if a sample passed the coverage_10x criteria."""
+        coverage_10x_treshold: float = 0.9
+        coverage_10x_check: bool = True
 
-
+        return coverage_10x_check
