@@ -97,7 +97,7 @@ def fixture_genotype_analysis_sex() -> dict:
 
 @pytest.fixture(name="mip_case")
 def fixture_mip_case(dna_mip_context, helpers) -> models.Family:
-    """Returns a mip case."""
+    """Return a MIP case."""
 
     store = dna_mip_context.status_db
 

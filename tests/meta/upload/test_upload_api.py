@@ -1,14 +1,14 @@
-"""Test for upload API"""
+"""Test for upload API."""
 
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Family
 from tests.cli.workflow.conftest import tb_api
 from tests.store_helpers import StoreHelpers
 
 
 def test_update_uploaded_at(
-    dna_mip_context: CGConfig, helpers: StoreHelpers, mip_case: models.Family
+    dna_mip_context: CGConfig, helpers: StoreHelpers, mip_case: Family
 ):
     """Test setting uploaded at for a finished analysis."""
     # GIVEN an analysis that should be uploaded
@@ -21,5 +21,5 @@ def test_update_uploaded_at(
     # WHEN setting the uploaded at
     upload_api.update_uploaded_at(analysis=mip_analysis)
 
-    # THEN the uploaded at should not be none anymore
+    # THEN the uploaded at should be set to a date
     assert mip_analysis.uploaded_at is not None
