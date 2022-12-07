@@ -306,3 +306,32 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             raise click.Abort
         case_id = case_obj.internal_id
         return case_id, None
+
+    def qc_check(self, case_id: str) -> bool:
+        """Check if Microsalt case passes QC check."""
+        samples: List[models.Sample] = self.get_samples(case_id=case_id)
+        qc_check: bool = True
+        failed_samples: List[models.Sample] = []
+        qc_percent_threshold: float = 1/10
+
+        for sample in samples:
+            # check if Percent Reads Guaranteed	is meet for each sample
+            if not sample.sequencing_qc:
+                failed_samples.append(sample)
+                LOG.warning(f"Sample {sample.internal_id} failed QC due to not meeting the Reads Guaranteed.")
+
+            # check BP > 10X
+
+        # set QC fail
+        if len(failed_samples)/len(samples) > qc_percent_threshold:
+            qc_check = False
+            # set to failed in TB
+
+        # Create a QC_done.txt in the run folder
+        qc_done_path = Path(self.root_dir, "results", self.get_project(samples[0]), "QC_done.txt")
+        open(qc_done_path, "w")
+
+        return qc_check
+
+
+
