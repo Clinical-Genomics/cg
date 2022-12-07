@@ -48,7 +48,7 @@ class TransferFlowCell:
 
     def transfer(self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True) -> Flowcell:
         """Populate the database with the information."""
-        self._add_tag_to_housekeeper(
+        self._add_tags_to_housekeeper(
             store=store,
             tags=[
                 SequencingFileTag.FASTQ,
@@ -78,8 +78,8 @@ class TransferFlowCell:
         )
         return flow_cell
 
-    def _add_tag_to_housekeeper(self, store: bool, tags: List[str]) -> None:
-        """Add and commit tag to Housekeeper if not already exists in database."""
+    def _add_tags_to_housekeeper(self, store: bool, tags: List[str]) -> None:
+        """Add and commit tag(s) to Housekeeper if not already exists in database."""
         for tag in tags:
             if store and self.hk.tag(name=tag) is None:
                 self.hk.add_commit(self.hk.new_tag(tag))

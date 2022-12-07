@@ -18,7 +18,7 @@ from cg.store.models import Flowcell, Sample
 from tests.store_helpers import StoreHelpers
 
 
-def test_add_tag_to_housekeeper(
+def test_add_tags_to_housekeeper(
     flow_cell_id: str, transfer_flow_cell_api: Generator[TransferFlowCell, None, None]
 ):
     """Test adding tag to Housekeeper."""
@@ -28,7 +28,7 @@ def test_add_tag_to_housekeeper(
     assert transfer_flow_cell_api.hk.tag(name=flow_cell_id) is None
 
     # WHEN adding tags to Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(
+    transfer_flow_cell_api._add_tags_to_housekeeper(
         store=True, tags=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_id]
     )
 
@@ -101,7 +101,7 @@ def test_include_sample_sheet_to_housekeeper_when_not_existing(
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(
+    transfer_flow_cell_api._add_tags_to_housekeeper(
         store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
     )
 
@@ -123,7 +123,7 @@ def test_include_sample_sheet_to_housekeeper(
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(
+    transfer_flow_cell_api._add_tags_to_housekeeper(
         store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
     )
 
@@ -152,7 +152,9 @@ def test_include_cgstats_log_to_housekeeper_when_not_existing(
     # GIVEN transfer flow cell API
 
     # GIVEN a cgstats log tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.CGSTATS_LOG])
+    transfer_flow_cell_api._add_tags_to_housekeeper(
+        store=True, tags=[SequencingFileTag.CGSTATS_LOG]
+    )
 
     # GIVEN no flow cell id bundle in housekeeper
     hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.CGSTATS_LOG)
@@ -179,7 +181,9 @@ def test_include_cgstats_log_to_housekeeper(
     # GIVEN transfer flow cell API
 
     # GIVEN a cgstats log tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(store=True, tags=[SequencingFileTag.CGSTATS_LOG])
+    transfer_flow_cell_api._add_tags_to_housekeeper(
+        store=True, tags=[SequencingFileTag.CGSTATS_LOG]
+    )
 
     # GIVEN no flow cell id bundle in housekeeper
     hk_bundle = transfer_flow_cell_api.hk.bundle(name=SequencingFileTag.CGSTATS_LOG)
@@ -209,7 +213,7 @@ def test_store_sequencing_files(
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(
+    transfer_flow_cell_api._add_tags_to_housekeeper(
         store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
     )
 
@@ -246,7 +250,7 @@ def test_include_sequencing_file(
     # GIVEN transfer flow cell API
 
     # GIVEN a sample sheet tag in Housekeeper
-    transfer_flow_cell_api._add_tag_to_housekeeper(
+    transfer_flow_cell_api._add_tags_to_housekeeper(
         store=True, tags=[SequencingFileTag.SAMPLE_SHEET]
     )
 
