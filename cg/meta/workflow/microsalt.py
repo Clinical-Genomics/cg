@@ -23,6 +23,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.store import models
+from cg.store.models import Sample
 from cg.utils import Process
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
@@ -309,9 +310,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def qc_check(self, case_id: str) -> bool:
         """Check if Microsalt case passes QC check."""
-        samples: List[models.Sample] = self.get_samples(case_id=case_id)
+        samples: List[Sample] = self.get_samples(case_id=case_id)
         qc_check: bool = True
-        failed_samples: List[models.Sample] = []
+        failed_samples: List[Sample] = []
         qc_percent_threshold: float = 1/10
 
         for sample in samples:
@@ -322,14 +323,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
             # check BP > 10X
 
-        # set QC fail
+        # QC check
         if len(failed_samples)/len(samples) > qc_percent_threshold:
             qc_check = False
             # set to failed in TB
 
         # Create a QC_done.txt in the run folder
-        qc_done_path = Path(self.root_dir, "results", self.get_project(samples[0]), "QC_done.txt")
-        open(qc_done_path, "w")
+        open(Path(self.root_dir, "results", self.get_project(samples[0]), "QC_done.txt"), "w")
 
         return qc_check
 
