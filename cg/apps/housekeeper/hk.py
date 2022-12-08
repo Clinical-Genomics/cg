@@ -92,13 +92,6 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def delete_file_if_related(self, stem: str, hk_file: File):
-        """Delete a file if the full path includes the root."""
-        if stem in hk_file.path:
-            self.delete_file(file_id=hk_file.id)
-            self._store.commit()
-            LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
-
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
         """Check if there are files for a bundle, tags, and/or version."""
         return any(self.files(bundle=bundle, tags=tags, version=version))
