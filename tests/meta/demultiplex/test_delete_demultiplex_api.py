@@ -179,7 +179,6 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     flow_cell_full_name: str,
     populated_flow_cell_store: Store,
     sample_level_housekeeper_api: HousekeeperAPI,
-    tmp_fastq_paths: List[Path],
 ):
     """Test removing fastqs from Housekeeper when there are only files on sample level
     (not on flow cell name).
@@ -190,8 +189,6 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     cg_context.status_db_ = populated_flow_cell_store
 
     # GIVEN a DeleteDemuxAPI with a HousekeeperAPI with no files with flow cell name as a tag
-
-    sample_level_files: List[Path] = tmp_fastq_paths
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
@@ -223,7 +220,6 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     flow_cell_full_name: str,
     populated_flow_cell_store: Store,
-    tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
 ):
     """Test removing files from Housekeeper using flow cell name as a tag."""
@@ -234,7 +230,6 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
 
     # GIVEN
 
-    fastq_files: List[Path] = tmp_fastq_paths
     sample_sheet_file: Path = tmp_sample_sheet_path
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(

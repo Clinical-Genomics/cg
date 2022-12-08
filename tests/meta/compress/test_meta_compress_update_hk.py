@@ -7,7 +7,7 @@ from cg.constants import HK_FASTQ_TAGS
 from cg.meta.compress import CompressAPI, files
 
 
-def test_get_flow_cell_id_when_hiseqX(
+def test_get_flow_cell_id_when_hiseqx(
     compress_api: CompressAPI, flow_cell_id: str, flow_cell_full_name: str
 ):
     """Test extracting the flow cell id from a fastq file path."""
