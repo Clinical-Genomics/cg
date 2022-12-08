@@ -43,7 +43,7 @@ class TrailblazerAPI:
         jwt_token = jwt.encode(signer=signer, payload=payload).decode("ascii")
         return {"Authorization": f"Bearer {jwt_token}"}
 
-    def query_trailblazer(self, command: str, request_body: dict, method: str = "POST") -> Any:
+    def query_trailblazer(self, command: str, request_body: dict, method: str = APIMethods.POST) -> Any:
         url = self.host + "/" + command
         LOG.debug(f"REQUEST HEADER {self.auth_header}")
         LOG.debug(f"{method}: URL={url}; JSON={request_body}")
@@ -174,5 +174,5 @@ class TrailblazerAPI:
         LOG.debug(f"Setting analysis uploaded at for {request_body}")
         LOG.info(f"{case_id} - uploaded at set to {uploaded_at}")
         self.query_trailblazer(
-            command="set-analysis-uploaded", request_body=request_body, method="PUT"
+            command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
