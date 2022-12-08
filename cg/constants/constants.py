@@ -156,3 +156,9 @@ SKIP_CONFIRMATION = click.option(
     default=False,
     help="Skip confirmation",
 )
+
+
+class MicrosaltQC(StrEnum):
+    QC_PERCENT_THRESHOLD: float = 0.1
+    COVERAGE_10X_THRESHOLD: float = 0.75
+    NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2

@@ -18,6 +18,7 @@ import glob
 
 import click
 from cg.constants import Pipeline
+from cg.constants.constants import MicrosaltQC
 from cg.exc import CgDataError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
@@ -310,37 +311,34 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_id = case_obj.internal_id
         return case_id, None
 
-    def qc_check(self, case_id: str) -> bool:
+    def qc_check(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if Microsalt case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
         failed_samples: List[Sample] = []
-        qc_percent_threshold: float = 1 / 10
-        run_dir_path: Path = self.get_case_path(case_id=case_id, cleaning=False)[0]
-        lims_project: str = self.get_project(samples[0])
         qc_file = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample in samples:
-            # check if Percent Reads Guaranteed	is meet for each sample
-            if not sample.sequencing_qc:
-                failed_samples.append(sample)
-                LOG.info(
-                    f"Sample {sample.internal_id} failed QC due to not meeting the Reads Guaranteed."
-                )
-
-            # check BP > 10X
-            if not self.check_coverage_10x(sample.internal_id, qc_file):
-                LOG.info(
-                    f"Sample {sample.internal_id} failed QC due to not meeting the 10x Coverage Guaranteed."
-                )
-                if sample not in failed_samples:
+            if sample.control == "negative":
+                if not self.check_external_negative_control_sample(sample):
                     failed_samples.append(sample)
+                    LOG.info(f"Negative control sample {sample.internal_id} failed QC.")
+            else:
+                if not sample.sequencing_qc or not self.check_coverage_10x(
+                    sample.internal_id, qc_file
+                ):
+                    failed_samples.append(sample)
+                    LOG.info(f"Sample {sample.internal_id} failed QC.")
+                    LOG.info(f"Passed Reads Guaranteed = {sample.sequencing_qc}")
+                    LOG.info(
+                        f"Passed BP > 10X = {self.check_coverage_10x(sample.internal_id, qc_file)}"
+                    )
 
-        # Create a QC_done.txt in the run folder
-        open(Path(run_dir_path, "QC_done.txt"), "w")
+        self.create_qc_done_file(run_dir_path=run_dir_path)
 
-        # QC check
-        if len(failed_samples) / len(samples) > qc_percent_threshold:
+        # skapa en ny funktion här som gör nedanstående för MWX
+        if len(failed_samples) / len(samples) > MicrosaltQC.QC_PERCENT_THRESHOLD:
             LOG.info(f"Case {case_id} failed QC, setting case status to FAILED in Trailblazer.")
+            LOG.info(f"samples that failed: {failed_samples}")
             # set to failed in TB
             return False
 
@@ -348,12 +346,18 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def check_coverage_10x(self, sample_name: str, qc_file: dict) -> bool:
         """Check if a sample passed the coverage_10x criteria."""
-        coverage_10x_treshold: float = 0.75
-        sample_coverage_10x: float = qc_file[sample_name]["microsalt_samtools_stats"][
-            "coverage_10x"
-        ]
+        return (
+            qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
+            >= MicrosaltQC.COVERAGE_10X_THRESHOLD
+        )
 
-        if sample_coverage_10x < coverage_10x_treshold:
-            return False
+    def check_external_negative_control_sample(self, sample: Sample) -> bool:
+        """Check if external negative control passed read check"""
+        return sample.reads < (
+            sample.application_version.application.expected_reads
+            * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
+        )
 
-        return True
+    def create_qc_done_file(self, run_dir_path: Path) -> None:
+        """Creates a QC_done when a QC check is performed."""
+        open(os.path.join(run_dir_path, "QC_done.txt"), "w")
