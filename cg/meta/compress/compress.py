@@ -59,10 +59,9 @@ class CompressAPI:
             flow_cell_id: str = re.search(regexp, fastq_path.name).group()
         except AttributeError as error:
             LOG.error(error)
-            LOG.info("Could not find flow cell id from fastq path")
+            LOG.info(f"Could not find flow cell id from fastq path: {fastq_path.as_posix()}")
         return flow_cell_id
 
-    # Compression methods
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for a individual."""
         LOG.info("Check if FASTQ compression is possible for %s", sample_id)
