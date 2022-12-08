@@ -13,7 +13,7 @@ from housekeeper.store import models as housekeeper_models
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CompressionHkTags
+from cg.constants import SequencingFileTag
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
@@ -248,19 +248,13 @@ class CompressAPI:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version_obj = self.hk_api.last_version(sample_id)
 
-        spring_tags = [sample_id, CompressionHkTags.SPRING]
-        spring_metadata_tags = [sample_id, CompressionHkTags.SPRING_METADATA]
-        LOG.info("Updating FASTQ files in Housekeeper update for %s:", sample_id)
+        spring_tags = [sample_id, SequencingFileTag.SPRING]
+        spring_metadata_tags = [sample_id, SequencingFileTag.SPRING_METADATA]
+        LOG.info(f"Updating FASTQ files in Housekeeper update for {sample_id}:")
         LOG.info(
-            "%s, %s -> %s, with tags %s",
-            compression_obj.fastq_first,
-            compression_obj.fastq_second,
-            compression_obj.spring_path,
-            spring_tags,
+            f"{compression_obj.fastq_first}, {compression_obj.fastq_second} -> {compression_obj.spring_path}, with tags {spring_tags}"
         )
-        LOG.info(
-            "Adds %s, with tags %s", compression_obj.spring_metadata_path, spring_metadata_tags
-        )
+        LOG.info(f"Adds {compression_obj.spring_metadata_path}, with tags {spring_metadata_tags}")
         if self.dry_run:
             return
 
@@ -293,9 +287,9 @@ class CompressAPI:
 
         if not sample_obj.application_version.application.is_external:
             flow_cell_id: str = self.get_flow_cell_id(fastq_path=fastq_first)
-            fastq_tags = [flow_cell_id, CompressionHkTags.FASTQ]
+            fastq_tags = [flow_cell_id, SequencingFileTag.FASTQ]
         else:
-            fastq_tags = [sample_obj.internal_id, CompressionHkTags.FASTQ]
+            fastq_tags = [sample_obj.internal_id, SequencingFileTag.FASTQ]
         last_version = self.hk_api.last_version(bundle=sample_obj.internal_id)
         LOG.info(
             "Adds %s, %s to bundle %s with tags %s",

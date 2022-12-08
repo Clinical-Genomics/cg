@@ -8,6 +8,7 @@ from typing import Iterable, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.cgstats.stats import StatsAPI
+from cg.constants import SequencingFileTag
 from cg.exc import DeleteDemuxError
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -104,7 +105,7 @@ class DeleteDemuxAPI:
     def _delete_fastq_and_spring_housekeeper(self) -> None:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
 
-        tags = ["fastq", "spring"]
+        tags = [SequencingFileTag.FASTQ, SequencingFileTag.SPRING]
         for tag, sample in itertools.product(tags, self.samples_on_flow_cell):
             self._delete_files_if_related_in_housekeeper_by_tag(sample=sample, tag=tag)
 

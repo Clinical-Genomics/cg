@@ -11,6 +11,7 @@ class SequencingFileTag(StrEnum):
     FASTQ: str = "fastq"
     SAMPLE_SHEET: str = "samplesheet"
     SPRING: str = "spring"
+    SPRING_METADATA: str = "spring-metadata"
 
 
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
