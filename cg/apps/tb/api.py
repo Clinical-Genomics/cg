@@ -10,7 +10,7 @@ from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, APIMethods
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
