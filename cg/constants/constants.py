@@ -141,6 +141,14 @@ class FileExtensions(StrEnum):
     TMP: str = ".tmp"
 
 
+class APIMethods(StrEnum):
+    POST: str = "POST"
+    PUT: str = "PUT"
+    GET: str = "GET"
+    DELETE: str = "DELETE"
+    PATCH: str = "PATCH"
+
+
 DRY_RUN = click.option(
     "-d",
     "--dry-run",
