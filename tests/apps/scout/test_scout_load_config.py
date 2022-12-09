@@ -46,7 +46,7 @@ def test_validate_reviewer_catalog(sample_dict):
     sample = sample_dict
     # WHEN validating the sample data
     ind_obj = scout_load_config.ScoutMipIndividual(**sample)
-    print(sample_dict)
+
     # THEN assert that the reviewer alignment path is correct
     assert ind_obj.reviewer.catalog == sample["reviewer"]["catalog"]
 
