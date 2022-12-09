@@ -120,6 +120,7 @@ def qc_pass_microsalt_samples() -> List[str]:
     """Return a list of 20 microsalt samples internal_ids."""
     return [f"ACC10848A{i}" for i in range(1, 21)]
 
+
 @pytest.fixture(name="qc_fail_microsalt_samples")
 def qc_fail_microsalt_samples() -> List[str]:
     """Return a list of 20 microsalt samples internal_ids."""

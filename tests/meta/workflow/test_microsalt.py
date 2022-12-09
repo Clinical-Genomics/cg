@@ -41,7 +41,7 @@ def test_qc_check_pass(
     microsalt_qc_pass_lims_project: str,
     microsalt_case_qc_pass: str,
     caplog,
-    mocker
+    mocker,
 ):
     """QC check for a microsalt case that should pass."""
     caplog.set_level(logging.INFO)

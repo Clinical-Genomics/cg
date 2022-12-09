@@ -81,7 +81,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return case_paths
 
     def verify_case_paths_age(
-            self, case_paths: List[Path], case_id: str, analysis_due_date: int = 21
+        self, case_paths: List[Path], case_id: str, analysis_due_date: int = 21
     ) -> None:
         """Check file age for a microsalt case."""
         due_date: datetime = datetime.now() - timedelta(days=analysis_due_date)
@@ -107,7 +107,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for analysis_path in case_path:
             if yes or click.confirm(
-                    f"Are you sure you want to remove all files in {analysis_path}?"
+                f"Are you sure you want to remove all files in {analysis_path}?"
             ):
                 if analysis_path.is_symlink():
                     LOG.warning(
@@ -154,12 +154,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return deliverables_file_path
 
     def get_sample_fastq_destination_dir(
-            self, case_obj: models.Family, sample_obj: models.Sample
+        self, case_obj: models.Family, sample_obj: models.Sample
     ) -> Path:
         return Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_obj.internal_id)
 
     def link_fastq_files(
-            self, case_id: str, sample_id: Optional[str], dry_run: bool = False
+        self, case_id: str, sample_id: Optional[str], dry_run: bool = False
     ) -> None:
         case_obj: models.Family = self.status_db.family(case_id)
         samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
@@ -258,7 +258,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         ]
 
     def resolve_case_sample_id(
-            self, sample: bool, ticket: bool, unique_id: Any
+        self, sample: bool, ticket: bool, unique_id: Any
     ) -> Tuple[str, Optional[str]]:
         """Resolve case_id and sample_id w based on input arguments."""
         if ticket and sample:
@@ -324,7 +324,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     LOG.info(f"Negative control sample {sample.internal_id} failed QC.")
             else:
                 if not sample.sequencing_qc or not self.check_coverage_10x(
-                        sample.internal_id, qc_file
+                    sample.internal_id, qc_file
                 ):
                     failed_samples.append(sample)
                     LOG.info(f"Sample {sample.internal_id} failed QC.")
@@ -340,15 +340,15 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def check_coverage_10x(self, sample_name: str, qc_file: dict) -> bool:
         """Check if a sample passed the coverage_10x criteria."""
         return (
-                qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
-                >= MicrosaltQC.COVERAGE_10X_THRESHOLD
+            qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
+            >= MicrosaltQC.COVERAGE_10X_THRESHOLD
         )
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
         """Check if external negative control passed read check"""
         return sample.reads < (
-                sample.application_version.application.target_reads
-                * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
+            sample.application_version.application.target_reads
+            * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
         )
 
     def create_qc_done_file(self, run_dir_path: Path, failed_samples: List[Sample]) -> None:
@@ -358,7 +358,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 f.write(sample.internal_id + "\n")
 
     def qc_case_check(
-            self, case_id: str, samples: List[Sample], failed_samples: List[Sample]
+        self, case_id: str, samples: List[Sample], failed_samples: List[Sample]
     ) -> bool:
         """Perform the final QC check for a microbial case based on failed samples."""
         qc_pass: bool = True
