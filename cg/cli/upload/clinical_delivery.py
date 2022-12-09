@@ -63,7 +63,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     RsyncAPI.write_trailblazer_config(
         {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
     )
-    analysis_name: str = case_id if is_complete_delivery else f"{case_id}_partial"
+    analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     if not dry_run:
         context.obj.trailblazer_api.add_pending_analysis(
             case_id=analysis_name,
