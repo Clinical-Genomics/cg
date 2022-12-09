@@ -27,6 +27,7 @@ class TrailblazerAnalysis(BaseModel):
     progress: Optional[float] = 0.0
     data_analysis: Optional[str]
     ticket: Optional[str]
+    uploaded_at: Optional[str]
 
     @validator("case_id")
     def inherit_family_value(cls, value: str, values: dict) -> str:
