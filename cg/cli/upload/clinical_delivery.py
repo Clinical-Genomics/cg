@@ -63,7 +63,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     )
     if not dry_run:
         context.obj.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
+            case_id=case_id + "_rsync",
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
             out_dir=rsync_api.log_dir.as_posix(),
