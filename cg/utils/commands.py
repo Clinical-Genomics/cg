@@ -43,9 +43,6 @@ class Process:
         if conda_binary:
             LOG.debug(f"Activating environment with conda run for binary: {self.conda_binary}")
             self.base_call.insert(0, f"{self.conda_binary} run --name {self.environment}")
-        elif environment:
-            LOG.debug(f"Activating environment with: {self.environment}")
-            self.base_call.insert(0, f"source activate {self.environment};")
         if config:
             self.base_call.extend([config_parameter, config])
         LOG.debug(f"Use base call {self.base_call}")
@@ -53,42 +50,22 @@ class Process:
         self._stderr = ""
 
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
-        """Execute a command in the shell.
-        If environment is supplied - shell=True has to be supplied to enable passing as a string for executing multiple
-         commands
-
-        Args:
-            parameters(list):
-            dry_run(bool): Print command instead of executing it
-        Return(int): Return code from called process
-
-        """
+        """Execute a command in the shell."""
         command = copy.deepcopy(self.base_call)
         if parameters:
             command.extend(parameters)
 
-        LOG.info("Running command %s", " ".join(command))
+        LOG.info(f"""Running command {" ".join(command)}""")
         if dry_run:
-            LOG.info("Dry run: process call will not be executed!!")
+            LOG.info("Dry run: process call will not be executed!")
             return RETURN_SUCCESS
 
-        if self.environment:
-            res = subprocess.run(
-                " ".join(command),
-                shell=True,
-                check=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-        else:
-            res = subprocess.run(
-                command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
+        res = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
         if res.returncode != RETURN_SUCCESS:
-            LOG.critical("Call %s exit with a non zero exit code", command)
+            LOG.critical(f"Call {command} exit with a non zero exit code")
             LOG.critical(self.stderr)
             raise CalledProcessError(res.returncode, command)
 
