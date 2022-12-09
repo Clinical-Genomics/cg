@@ -6,11 +6,13 @@ import pytest
 from cgmodels.cg.constants import Pipeline
 
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
+from tests.conftest import fixture_base_store
 from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 
 from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.store.models import Family, Sample, Application
 from tests.store_helpers import StoreHelpers
 
 
@@ -84,7 +86,7 @@ def microsalt_qc_pass_run_dir_path(microsalt_qc_pass_lims_project: str) -> Path:
 
 
 @pytest.fixture(name="microsalt_qc_fail_run_dir_path")
-def microsalt_qc_pass_run_dir_path(microsalt_qc_fail_lims_project: str) -> Path:
+def microsalt_qc_fail_run_dir_path(microsalt_qc_fail_lims_project: str) -> Path:
     """Return a microsalt run dir path fixture that fails QC."""
     return Path("tests/fixtures/analysis/microsalt", microsalt_qc_fail_lims_project)
 
@@ -92,7 +94,7 @@ def microsalt_qc_pass_run_dir_path(microsalt_qc_fail_lims_project: str) -> Path:
 @pytest.fixture(name="microsalt_qc_pass_lims_project")
 def microsalt_qc_pass_lims_project() -> str:
     """Return a microsalt LIMS project id that passes QC."""
-    return "ACC123456_qc_pass"
+    return "ACC10848_qc_pass"
 
 
 @pytest.fixture(name="microsalt_qc_fail_lims_project")
@@ -107,38 +109,78 @@ def microsalt_case_qc_pass() -> str:
     return "microsalt_case_qc_pass"
 
 
-@pytest.fixture(name="microsalt_qc_fail_case")
-def microsalt_qc_fail_case() -> str:
+@pytest.fixture(name="microsalt_case_qc_fail")
+def microsalt_case_qc_fail() -> str:
     """Return a microsalt case to fail QC."""
-    return "microsalt_qc_fail_case"
+    return "microsalt_case_qc_fail"
 
 
-@pytest.fixture(name="qc_microsalt_samples")
-def qc_microsalt_samples() -> List[str]:
+@pytest.fixture(name="qc_pass_microsalt_samples")
+def qc_pass_microsalt_samples() -> List[str]:
     """Return a list of 20 microsalt samples internal_ids."""
-    return [f"ACC123456A{i}" for i in range(1, 21)]
+    return [f"ACC10848A{i}" for i in range(1, 21)]
+
+@pytest.fixture(name="qc_fail_microsalt_samples")
+def qc_fail_microsalt_samples() -> List[str]:
+    """Return a list of 20 microsalt samples internal_ids."""
+    return [f"A{i}" for i in range(1, 21)]
 
 
 @pytest.fixture(name="qc_microsalt_context")
 def qc_microsalt_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
-    microsalt_case_pass: str,
-    qc_microsalt_samples: List[str],
+    microsalt_case_qc_pass: str,
+    microsalt_case_qc_fail: str,
+    qc_pass_microsalt_samples: List[str],
+    qc_fail_microsalt_samples: List[str],
 ) -> CGConfig:
     """Return a Microsalt CG context."""
     analysis_api = MicrosaltAnalysisAPI(cg_context)
     store = analysis_api.status_db
 
-    # Create microsalt case that passes QC
-    microsalt_case_qc_pass = helpers.add_case(
+    # Create MWR microsalt case that passes QC
+    microsalt_case_qc_pass: Family = helpers.add_case(
         store=store,
-        internal_id=microsalt_case_pass,
-        name=microsalt_case_pass,
+        internal_id=microsalt_case_qc_pass,
+        name=microsalt_case_qc_pass,
         data_analysis=Pipeline.MICROSALT,
     )
 
-    for sample in qc_microsalt_samples:
-        helpers.add_sample()
+    for sample in qc_pass_microsalt_samples:
+        sample_to_add: Sample = helpers.add_sample(
+            store=store,
+            internal_id=sample,
+            application_tag="MWRNXTR003",
+            application_type="mic",
+            reads=6000000,
+        )
 
-    # Create microsalt case that fails QC
+        helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
+
+    # Create a microsalt MWX case that fails QC
+    microsalt_case_qc_fail: Family = helpers.add_case(
+        store=store,
+        internal_id=microsalt_case_qc_fail,
+        name=microsalt_case_qc_fail,
+        data_analysis=Pipeline.MICROSALT,
+    )
+
+    for sample in qc_fail_microsalt_samples:
+        sample_to_add: Sample = helpers.add_sample(
+            store=store,
+            internal_id=sample,
+            application_tag="MWXNXTR003",
+            application_type="mic",
+            reads=4000000,
+        )
+
+        helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
+
+    # Setting the target reads to correspond with statusDB
+    store.application(tag="MWRNXTR003").target_reads = 6000000
+    store.application(tag="MWXNXTR003").target_reads = 6000000
+
+    cg_context.meta_apis["analysis_api"] = analysis_api
+
+    return cg_context

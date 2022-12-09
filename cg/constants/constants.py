@@ -166,7 +166,12 @@ SKIP_CONFIRMATION = click.option(
 )
 
 
-class MicrosaltQC(StrEnum):
+class MicrosaltQC:
     QC_PERCENT_THRESHOLD: float = 0.1
     COVERAGE_10X_THRESHOLD: float = 0.75
     NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
+
+
+class MicrosaltAppTags:
+    MWRNXTR003: str = "MWRNXTR003"
+    MWXNXTR003: str = "MWXNXTR003"
