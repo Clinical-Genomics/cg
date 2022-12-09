@@ -65,7 +65,8 @@ def fixture_populated_deliver_api(
 
 
 @pytest.fixture(name="dummy_file_name")
-def fixture_dummy_file_name():
+def fixture_dummy_file_name() -> str:
+    """Returns a dummy file name"""
     return "dummy_file_name"
 
 

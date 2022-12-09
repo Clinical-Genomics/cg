@@ -11,7 +11,7 @@ from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models, Store
-from tests.meta.deliver.conftest import fixture_all_samples_in_inbox
+from tests.meta.deliver.conftest import fixture_all_samples_in_inbox, fixture_dummy_file_name
 from tests.store.conftest import fixture_case_obj
 
 
