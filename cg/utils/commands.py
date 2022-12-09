@@ -60,7 +60,18 @@ class Process:
             LOG.info("Dry run: process call will not be executed!")
             return RETURN_SUCCESS
 
-        res = subprocess.run(command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if self.environment:
+            res = subprocess.run(
+                " ".join(command),
+                shell=False,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        else:
+            res = subprocess.run(
+                command, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
 
         self.stdout = res.stdout.decode("utf-8").rstrip()
         self.stderr = res.stderr.decode("utf-8").rstrip()
