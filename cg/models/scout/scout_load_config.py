@@ -13,6 +13,7 @@ class ChromographImages(BaseModel):
     upd_regions: Optional[str] = None
     upd_sites: Optional[str] = None
 
+
 class Reviewer(BaseModel):
     alignment: Optional[str] = None
     alignment_index: Optional[str] = None
