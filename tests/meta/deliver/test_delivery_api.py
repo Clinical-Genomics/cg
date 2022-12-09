@@ -202,6 +202,7 @@ def test_deliver_files_enough_reads(
     mip_delivery_bundle: dict,
     sample_id: str,
 ):
+    """Tests the deliver_files method for a sample with enough reads."""
     # GIVEN a case to be delivered and a sample with enough reads
     case_obj: models.Family = deliver_api.store.family(internal_id=case_id)
     sample_obj: models.Sample = deliver_api.store.sample(sample_id)
@@ -227,6 +228,7 @@ def test_deliver_files_not_enough_reads(
     mip_delivery_bundle: dict,
     sample_id: str,
 ):
+    """Tests the deliver_files method for a sample with too few reads."""
     # GIVEN a case to be delivered and a sample with too fewenough reads
     case_obj: models.Family = deliver_api.store.family(internal_id=case_id)
     sample_obj: models.Sample = deliver_api.store.sample(sample_id)
@@ -237,7 +239,39 @@ def test_deliver_files_not_enough_reads(
     # WHEN the command is run on the case
     deliver_api.deliver_files(case_obj=case_obj)
 
-    # THEN the sample folder should be created
+    # THEN the sample folder should not be created
     assert not Path(
+        deliver_api.project_base_path, deliver_api_destination_path, sample_obj.name
+    ).exists()
+
+
+def test_deliver_files_not_enough_reads_force(
+    caplog,
+    case_id: str,
+    deliver_api: DeliverAPI,
+    deliver_api_destination_path: Path,
+    fastq_delivery_bundle: dict,
+    helpers: StoreHelpers,
+    mip_delivery_bundle: dict,
+    sample_id: str,
+):
+    """Tests the deliver_files method for a sample with too few reads but with override."""
+    # GIVEN a case to be delivered and a sample with too fewenough reads
+    case_obj: models.Family = deliver_api.store.family(internal_id=case_id)
+    sample_obj: models.Sample = deliver_api.store.sample(sample_id)
+    sample_obj.reads = 1
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
+
+    # Given that the API was created with force_all=True
+    deliver_api.deliver_failed_samples = True
+
+    # WHEN the command is run on the case
+    deliver_api.deliver_files(
+        case_obj=case_obj,
+    )
+
+    # THEN the sample folder should be created
+    assert Path(
         deliver_api.project_base_path, deliver_api_destination_path, sample_obj.name
     ).exists()

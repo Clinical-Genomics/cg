@@ -42,7 +42,7 @@ def deliver():
 @click.option(
     "--force-all",
     help="Deliver sample files for all samples regardles of amount of reads",
-    default=False,
+    is_flag=True,
 )
 @click.pass_obj
 def deliver_analysis(
@@ -51,7 +51,7 @@ def deliver_analysis(
     ticket: Optional[str],
     delivery_type: List[str],
     dry_run: bool,
-    force_all: Optional[bool],
+    force_all: bool,
 ):
     """Deliver analysis files to customer inbox
 
@@ -139,14 +139,14 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
 @click.option(
     "--force-all",
     help="Deliver sample files for all samples regardles of amount of reads",
-    default=False,
+    is_flag=True,
 )
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
     delivery_type: List[str],
     dry_run: bool,
-    force_all: Optional[bool],
+    force_all: bool,
     ticket: str,
 ):
     """Will first collect hard links in the customer inbox then
