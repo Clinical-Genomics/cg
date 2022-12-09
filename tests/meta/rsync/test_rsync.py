@@ -182,6 +182,7 @@ def test_concatenate_rsync_commands(
 def test_slurm_rsync_single_case(
     all_samples_in_inbox: Path,
     case_obj: models.Family,
+    destination_path: Path,
     rsync_api: RsyncAPI,
     caplog,
     mocker,
@@ -194,7 +195,7 @@ def test_slurm_rsync_single_case(
     mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
     RsyncAPI.get_source_and_destination_paths.return_value = {
         "delivery_source_path": all_samples_in_inbox,
-        "rsync_destination_path": Path("/path/to/destination"),
+        "rsync_destination_path": destination_path,
     }
 
     mocker.patch.object(Store, "get_latest_ticket_from_case")
@@ -218,6 +219,7 @@ def test_slurm_rsync_single_case(
 def test_slurm_rsync_single_case_missing_file(
     all_samples_in_inbox: Path,
     case_obj: models.Family,
+    destination_path: Path,
     rsync_api: RsyncAPI,
     caplog,
     mocker,
@@ -233,7 +235,7 @@ def test_slurm_rsync_single_case_missing_file(
     mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
     RsyncAPI.get_source_and_destination_paths.return_value = {
         "delivery_source_path": all_samples_in_inbox,
-        "rsync_destination_path": Path("/path/to/destination"),
+        "rsync_destination_path": destination_path,
     }
 
     mocker.patch.object(Store, "get_latest_ticket_from_case")

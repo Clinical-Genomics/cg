@@ -64,27 +64,32 @@ def fixture_populated_deliver_api(
     return _deliver_api
 
 
+@pytest.fixture(name="dummy_file_name")
+def fixture_dummy_file_name():
+    return "dummy_file_name"
+
+
 @pytest.fixture(name="all_samples_in_inbox")
-def fixture_all_samples_in_inbox(analysis_family, tmpdir_factory) -> Path:
+def fixture_all_samples_in_inbox(analysis_family, dummy_file_name: str, tmpdir_factory) -> Path:
     """Fixture that returns a customer inbox path with all samples delivered"""
     inbox = tmpdir_factory.mktemp("inbox")
     Path(inbox, analysis_family["samples"][0]["name"]).mkdir(exist_ok=True, parents=True)
     Path(inbox, analysis_family["samples"][1]["name"]).mkdir(exist_ok=True, parents=True)
     Path(inbox, analysis_family["samples"][2]["name"]).mkdir(exist_ok=True, parents=True)
     Path(inbox, analysis_family["name"]).mkdir(exist_ok=True, parents=True)
-    Path(inbox, analysis_family["samples"][0]["name"], "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, analysis_family["samples"][1]["name"], "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, analysis_family["name"], "case_file.txt").touch(exist_ok=True)
+    Path(inbox, analysis_family["samples"][0]["name"], dummy_file_name).touch(exist_ok=True)
+    Path(inbox, analysis_family["samples"][1]["name"], dummy_file_name).touch(exist_ok=True)
+    Path(inbox, analysis_family["name"], dummy_file_name).touch(exist_ok=True)
     return Path(inbox)
 
 
 @pytest.fixture(name="samples_missing_in_inbox")
-def fixture_samples_missing_in_inbox(tmpdir_factory) -> Path:
+def fixture_samples_missing_in_inbox(dummy_file_name: str, tmpdir_factory) -> Path:
     """Fixture that returns a customer inbox path with all samples delivered"""
     inbox = tmpdir_factory.mktemp("inbox")
     Path(inbox, "sample1").mkdir(exist_ok=True, parents=True)
     Path(inbox, "sample2").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample1", "sample_file.txt").touch(exist_ok=True)
+    Path(inbox, "sample1", dummy_file_name).touch(exist_ok=True)
     Path(inbox, "case_with_no_data").mkdir(exist_ok=True, parents=True)
     return Path(inbox)
 

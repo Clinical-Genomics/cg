@@ -68,7 +68,7 @@ class DeliverAPI:
         if not last_version:
             if not self.case_tags:
                 LOG.info(f"Could not find any version for {case_id}")
-            elif not self.deliver_failed_samples:
+            elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
         link_objs: List[FamilySample] = self.store.family_samples(case_id)
         if not link_objs:
