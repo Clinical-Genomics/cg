@@ -135,7 +135,7 @@ class MipLoadConfig(ScoutLoadConfig):
     peddy_check: Optional[str] = None
     madeline: Optional[str] = None
     samples: List[ScoutMipIndividual] = []
-    variant_catalog: Optional[List[str]] = None
+    variant_catalog: Optional[str] = None
 
     @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
     def check_mandatory_files(cls, v):

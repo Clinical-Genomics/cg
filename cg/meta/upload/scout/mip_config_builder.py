@@ -142,7 +142,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
         )
         self.load_config.variant_catalog = self.fetch_file_from_hk(
-            self.fetch_file_from_hk(self.case_tags.str_catalog)
+            hk_tags=self.case_tags.str_catalog
         )
 
     @staticmethod
