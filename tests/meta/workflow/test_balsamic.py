@@ -84,11 +84,10 @@ def test_get_latest_file_by_pattern(
 
     # GIVEN a Loqusdb temporary directory and a cancer SNV file wildcard
     balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
-    wildcard = ObservationsFileWildcards.CANCER_SOMATIC_SNV
 
     # WHEN getting the latest observations file
     observation: str = balsamic_analysis_api.get_latest_file_by_pattern(
-        directory=observations_dir, pattern=wildcard
+        directory=observations_dir, pattern=ObservationsFileWildcards.CANCER_SOMATIC_SNV
     )
 
     # THEN the extracted observation should match the latest file
