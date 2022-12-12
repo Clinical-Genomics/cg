@@ -321,15 +321,15 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             if sample.control == "negative":
                 if not self.check_external_negative_control_sample(sample):
                     failed_samples.append(sample)
-                    LOG.info(f"Negative control sample {sample.internal_id} failed QC.")
+                    LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
             else:
                 if not sample.sequencing_qc or not self.check_coverage_10x(
                     sample.internal_id, qc_file
                 ):
                     failed_samples.append(sample)
-                    LOG.info(f"Sample {sample.internal_id} failed QC.")
-                    LOG.info(f"Passed Reads Guaranteed = {sample.sequencing_qc}")
-                    LOG.info(
+                    LOG.warning(f"Sample {sample.internal_id} failed QC.")
+                    LOG.warning(f"Passed Reads Guaranteed = {sample.sequencing_qc}")
+                    LOG.warning(
                         f"Passed BP > 10X = {self.check_coverage_10x(sample.internal_id, qc_file)}"
                     )
 
@@ -372,7 +372,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 qc_pass = False
 
         # Check if more than 10% of MWX samples failed
-        if len(failed_samples) / len(samples) > MicrosaltQC.QC_PERCENT_THRESHOLD:
+        if len(failed_samples) / len(samples) > MicrosaltQC.QC_PERCENT_THRESHOLD_MWX:
             qc_pass = False
 
         if not qc_pass:

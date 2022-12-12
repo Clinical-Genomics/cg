@@ -23,6 +23,12 @@ def test_qc_check_fail(
 
     # GIVEN a case that is to be stored
     microsalt_case: Family = store.family(microsalt_case_qc_fail)
+    microsalt_case.samples[0].reads = 1000
+    microsalt_case.samples[1].reads = 1000
+    microsalt_case.samples[2].reads = 1000
+    microsalt_case.samples[3].reads = 1000
+
+    mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
 
     # WHEN performing QC check
     qc_pass: bool = microsalt_api.microsalt_qc(
@@ -32,8 +38,10 @@ def test_qc_check_fail(
     )
 
     # THEN the QC should fail
-    assert 1 != 0
-
+    assert not qc_pass
+    assert "failed" in caplog.text
+    assert "Passed Reads Guaranteed = False" in caplog.text
+    assert "Passed BP > 10X = False" in caplog.text
 
 def test_qc_check_pass(
     qc_microsalt_context: CGConfig,
@@ -67,5 +75,32 @@ def test_qc_check_pass(
     assert "passed" in caplog.text
 
 
-def test_qc_check_negative_control_fail():
-    assert 1 != 0
+def test_qc_check_negative_control_fail(qc_microsalt_context: CGConfig,
+    microsalt_qc_fail_run_dir_path: Path,
+    microsalt_qc_fail_lims_project: str,
+    microsalt_case_qc_fail: str,
+    caplog,
+    mocker,):
+    """QC check for a microsalt case where a negative control fails QC."""
+
+    caplog.set_level(logging.INFO)
+    store = qc_microsalt_context.status_db
+    microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
+
+    # GIVEN a case that is to be stored
+    microsalt_case: Family = store.family(microsalt_case_qc_fail)
+    microsalt_case.samples[0].control = "negative"
+
+    mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
+
+    # WHEN performing QC check
+    qc_pass: bool = microsalt_api.microsalt_qc(
+        case_id=microsalt_case_qc_fail,
+        run_dir_path=microsalt_qc_fail_run_dir_path,
+        lims_project=microsalt_qc_fail_lims_project,
+    )
+
+    # THEN the QC should fail
+    assert not qc_pass
+    assert "failed" in caplog.text
+    assert "Negative control sample" in caplog.text

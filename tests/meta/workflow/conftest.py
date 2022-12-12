@@ -100,7 +100,7 @@ def microsalt_qc_pass_lims_project() -> str:
 @pytest.fixture(name="microsalt_qc_fail_lims_project")
 def microsalt_qc_fail_lims_project() -> str:
     """Return a microsalt LIMS project id that fails QC."""
-    return "ACC123456_qc_fail"
+    return "ACC10813_qc_fail"
 
 
 @pytest.fixture(name="microsalt_case_qc_pass")
@@ -124,7 +124,7 @@ def qc_pass_microsalt_samples() -> List[str]:
 @pytest.fixture(name="qc_fail_microsalt_samples")
 def qc_fail_microsalt_samples() -> List[str]:
     """Return a list of 20 microsalt samples internal_ids."""
-    return [f"A{i}" for i in range(1, 21)]
+    return [f"ACC10813A{i}" for i in range(1, 21)]
 
 
 @pytest.fixture(name="qc_microsalt_context")
@@ -173,7 +173,7 @@ def qc_microsalt_context(
             internal_id=sample,
             application_tag="MWXNXTR003",
             application_type="mic",
-            reads=4000000,
+            reads=6000000,
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
