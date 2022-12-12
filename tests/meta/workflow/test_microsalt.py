@@ -43,6 +43,7 @@ def test_qc_check_fail(
     assert "Passed Reads Guaranteed = False" in caplog.text
     assert "Passed BP > 10X = False" in caplog.text
 
+
 def test_qc_check_pass(
     qc_microsalt_context: CGConfig,
     microsalt_qc_pass_run_dir_path: Path,
@@ -75,12 +76,14 @@ def test_qc_check_pass(
     assert "passed" in caplog.text
 
 
-def test_qc_check_negative_control_fail(qc_microsalt_context: CGConfig,
+def test_qc_check_negative_control_fail(
+    qc_microsalt_context: CGConfig,
     microsalt_qc_fail_run_dir_path: Path,
     microsalt_qc_fail_lims_project: str,
     microsalt_case_qc_fail: str,
     caplog,
-    mocker,):
+    mocker,
+):
     """QC check for a microsalt case where a negative control fails QC."""
 
     caplog.set_level(logging.INFO)
