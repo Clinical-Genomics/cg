@@ -117,15 +117,15 @@ class MutaccAutoConfig(CommonAppConfig):
 
 
 class BalsamicConfig(CommonAppConfig):
-    root: str
     balsamic_cache: str
     bed_path: str
-    pon_path: str
-    loqusdb_path: str
-    swegen_path: str
     binary_path: str
     conda_env: str
+    loqusdb_path: str
+    pon_path: str
+    root: str
     slurm: SlurmConfig
+    swegen_path: str
 
 
 class MutantConfig(BaseModel):
