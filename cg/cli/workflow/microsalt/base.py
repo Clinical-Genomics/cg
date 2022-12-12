@@ -301,6 +301,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
 
 
 @microsalt.command("qc-microsalt")
+@ARGUMENT_UNIQUE_IDENTIFIER
 def qc_microsalt(context: click.Context, unique_id: str) -> None:
     """Perform QC on a microsalt case."""
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
