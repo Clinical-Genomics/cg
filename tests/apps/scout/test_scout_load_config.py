@@ -30,24 +30,24 @@ def test_validate_mt_bam(sample_dict):
 
 
 def test_validate_reviewer_alignment(sample_dict):
-    """Test to validate an individual"""
+    """Test to validate a reviewer alignment file for an individual."""
     # GIVEN some sample information
     sample = sample_dict
     # WHEN validating the sample data
     ind_obj = scout_load_config.ScoutMipIndividual(**sample)
 
-    # THEN assert that the reviewer alignment path is correct
+    # THEN assert that the reviewer alignment path is set
     assert ind_obj.reviewer.alignment == sample["reviewer"]["alignment"]
 
 
 def test_validate_reviewer_catalog(sample_dict):
-    """Test to validate an individual"""
+    """Test to validate a reviewer catalogue file for an individual."""
     # GIVEN some sample information
     sample = sample_dict
     # WHEN validating the sample data
     ind_obj = scout_load_config.ScoutMipIndividual(**sample)
 
-    # THEN assert that the reviewer alignment path is correct
+    # THEN assert that the reviewer alignment path is set
     assert ind_obj.reviewer.catalog == sample["reviewer"]["catalog"]
 
 
