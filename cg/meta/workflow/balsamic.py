@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from pydantic import ValidationError
 from cg.constants import Pipeline
@@ -448,7 +448,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_parsed_observation_file_paths(self, observations: List[str]) -> dict:
         """Returns a verified {option: path} observations dictionary."""
-        verified_observations = {}
+        verified_observations: Dict[str, str] = {}
         for wildcard in list(ObservationsFileWildcards):
             file_path: str = get_string_from_list_by_pattern(observations, wildcard)
             verified_observations.update(
@@ -495,7 +495,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             else None
         )
 
-        args_dict = {
+        config_case: Dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
@@ -509,9 +509,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
-        args_dict.update(self.get_parsed_observation_file_paths(observations))
+        config_case.update(self.get_parsed_observation_file_paths(observations))
 
-        return args_dict
+        return config_case
 
     def build_sample_id_map_string(self, case_id: str) -> str:
         """Creates sample info string for balsamic with format lims_id:tumor/normal:customer_sample_id"""
