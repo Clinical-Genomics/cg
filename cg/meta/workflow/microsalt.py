@@ -249,12 +249,34 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return self.lims_api.get_sample_project(sample_id)
 
     def get_cases_to_store(self) -> List[models.Family]:
-        """Retrieve a list of microbial deliverables files for orders where analysis finished
-        successfully, and are ready to be stored in Housekeeper"""
+        """Retrieve a list of cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper."""
+
+        cases_qc_ready: List[models.Family] = self.get_qc_ready_cases()
+        cases_to_store: List[models.Family] = []
+
+        for case in cases_qc_ready:
+            case_run_dir: Path = self.get_case_path(case_id=case.internal_id, cleaning=False)[0]
+            if not os.path.exists(os.path.join(case_run_dir, "QC_done.txt")):
+                if self.microsalt_qc(
+                    case_id=case.internal_id,
+                    run_dir_path=case_run_dir,
+                    lims_project=self.get_project(case.samples[0]),
+                ):
+                    cases_to_store.append(case)
+                else:
+                    self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
+            else:
+                cases_to_store.append(case)
+
+        return cases_to_store
+
+    def get_qc_ready_cases(self) -> List[models.Family]:
+        """Retrieve a list of QC ready cases."""
         return [
-            case_obj
-            for case_obj in self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
-            if self.get_deliverables_file_path(case_id=case_obj.internal_id).exists()
+            case_object
+            for case_object in self.get_running_cases()
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
 
     def resolve_case_sample_id(
@@ -376,8 +398,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             qc_pass = False
 
         if not qc_pass:
-            LOG.info(f"Case {case_id} failed QC, setting case status to FAILED in Trailblazer.")
-            # set failed in TB
+            LOG.info(f"Case {case_id} failed QC.")
         else:
             LOG.info(f"Case {case_id} passed QC.")
 

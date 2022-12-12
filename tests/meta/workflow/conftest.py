@@ -135,6 +135,8 @@ def qc_microsalt_context(
     microsalt_case_qc_fail: str,
     qc_pass_microsalt_samples: List[str],
     qc_fail_microsalt_samples: List[str],
+    microsalt_qc_pass_lims_project: str,
+    microsalt_qc_fail_lims_project: str,
 ) -> CGConfig:
     """Return a Microsalt CG context."""
     analysis_api = MicrosaltAnalysisAPI(cg_context)
