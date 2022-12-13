@@ -11,7 +11,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.constants import DataDelivery
-from cg.exc import HousekeeperVersionMissingError
+from cg.apps.housekeeper.hk import HousekeeperVersionMissingError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
