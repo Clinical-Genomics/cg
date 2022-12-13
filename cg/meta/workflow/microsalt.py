@@ -262,7 +262,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     if self.microsalt_qc(
                         case_id=case.internal_id,
                         run_dir_path=case_run_dir,
-                        lims_project=self.get_project(case.samples[0]),
+                        lims_project=self.get_project(case.samples[0].internal_id),
                     ):
                         cases_to_store.append(case)
                     else:
