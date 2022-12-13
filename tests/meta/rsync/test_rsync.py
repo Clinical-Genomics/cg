@@ -93,7 +93,7 @@ def test_make_log_dir(rsync_api: RsyncAPI, ticket: str, caplog):
 def test_run_rsync_on_slurm(
     microsalt_case: models.Family, rsync_api: RsyncAPI, ticket: str, caplog, mocker, helpers
 ):
-    """Test for running rsync on slurm"""
+    """Test for running rsync using SLURM."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a valid microsalt case
@@ -122,7 +122,7 @@ def test_run_rsync_on_slurm(
 def test_get_folders_to_deliver(
     analysis_family: dict, analysis_store_trio, rsync_api: RsyncAPI, case_id: str
 ):
-    """Tests the ability for the rsync api to get case and sample names"""
+    """Tests the ability for the rsync api to get case and sample names."""
     # GIVEN a case
 
     # WHEN the function gets the folders
@@ -142,7 +142,7 @@ def test_get_folders_to_deliver(
 def test_concatenate_rsync_commands(
     analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket: str
 ):
-    """Tests the function to concatenate rsync commands for transferring multiple files"""
+    """Tests the function to concatenate rsync commands for transferring multiple files."""
     # GIVEN a list with a case and a sample name
     folder_list: List[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
     source_and_destination_paths = {
@@ -188,7 +188,7 @@ def test_slurm_rsync_single_case(
     mocker,
     ticket: str,
 ):
-    """Test for running rsync on a single case on slurm"""
+    """Test for running rsync on a single case using SLURM."""
     caplog.set_level(logging.INFO)
 
     # GIVEN paths needed to run rsync
@@ -225,7 +225,7 @@ def test_slurm_rsync_single_case_missing_file(
     mocker,
     ticket: str,
 ):
-    """Test for running rsync on a single case on slurm"""
+    """Test for running rsync on a single case with a missing file using SLURM."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a valid mip case and sample folder missing

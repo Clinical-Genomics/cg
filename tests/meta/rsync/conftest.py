@@ -36,4 +36,4 @@ def fixture_microsalt_case(
 @pytest.fixture(name="destination_path")
 def fixture_destination_path() -> Path:
     """Retyrbs a dummy path."""
-    return Path("/path/to/destination")
+    return Path("path", "to", "destination")
