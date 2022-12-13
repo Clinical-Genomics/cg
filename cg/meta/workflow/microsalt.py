@@ -27,7 +27,7 @@ from cg.store import models
 from cg.store.models import Sample
 from cg.utils import Process
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.io.json import read_json
+from cg.io.json import read_json, write_json
 
 from cg.constants import Priority
 
@@ -339,7 +339,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if Microsalt case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
-        failed_samples: List[Sample] = []
+        failed_samples: Dict = {}
 
         if not os.path.exists(run_dir_path):
             LOG.error(f"Running directory does not exists for case {case_id}.")
@@ -353,18 +353,23 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 continue
             if sample.control == "negative":
                 if not self.check_external_negative_control_sample(sample):
-                    failed_samples.append(sample)
+                    # failed_samples.append(sample)
+                    failed_samples[sample.internal_id][
+                        "NTC reads"
+                    ] = self.check_external_negative_control_sample(sample)
                     LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
             else:
                 if not sample.sequencing_qc or not self.check_coverage_10x(
                     sample.internal_id, qc_file
                 ):
-                    failed_samples.append(sample)
-                    LOG.warning(f"Sample {sample.internal_id} failed QC.")
-                    LOG.warning(f"Passed Reads Guaranteed = {sample.sequencing_qc}")
-                    LOG.warning(
-                        f"Passed BP > 10X = {self.check_coverage_10x(sample.internal_id, qc_file)}"
+                    # failed_samples.append(sample)
+                    failed_samples[sample.internal_id]["Reads"] = sample.sequencing_qc
+                    failed_samples[sample.internal_id]["Reads"] = self.check_coverage_10x(
+                        sample.internal_id, qc_file
                     )
+                    LOG.warning(f"Sample {sample.internal_id} failed QC.")
+                    # LOG.warning(f"Passed Reads Guaranteed = {sample.sequencing_qc}")
+                    # LOG.warning(f"Passed BP > 10X = {self.check_coverage_10x(sample.internal_id, qc_file)}")
 
         self.create_qc_done_file(run_dir_path=run_dir_path, failed_samples=failed_samples)
 
@@ -390,11 +395,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
         )
 
-    def create_qc_done_file(self, run_dir_path: Path, failed_samples: List[Sample]) -> None:
+    def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict) -> None:
         """Creates a QC_done when a QC check is performed."""
-        with open(os.path.join(run_dir_path, "QC_done.txt"), "w") as f:
-            for sample in failed_samples:
-                f.write(sample.internal_id + "\n")
+        write_json(file_path=os.path.join(run_dir_path, "QC_done.txt"), content=failed_samples)
 
     def qc_case_check(
         self, case_id: str, samples: List[Sample], failed_samples: List[Sample]
@@ -415,7 +418,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             qc_pass = False
 
         if not qc_pass:
-            LOG.info(f"Case {case_id} failed QC.")
+            LOG.info(f"Case {case_id} failed QC, see QC_done.txt for more information.")
         else:
             LOG.info(f"Case {case_id} passed QC.")
 

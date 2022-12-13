@@ -43,8 +43,6 @@ def test_qc_check_fail(
     # THEN the QC should fail
     assert not qc_pass
     assert "failed" in caplog.text
-    assert "Passed Reads Guaranteed = False" in caplog.text
-    assert "Passed BP > 10X = False" in caplog.text
 
 
 def test_qc_check_pass(
