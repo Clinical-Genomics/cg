@@ -1,4 +1,4 @@
-"""Constants specific for compression"""
+"""Constants specific for compression."""
 import datetime
 
 from cgmodels.cg.constants import StrEnum
@@ -8,12 +8,6 @@ FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
 FLAG_PATH_SUFFIX = ".crunchy.txt"
 PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
-
-
-class CompressionHkTags(StrEnum):
-    FASTQ: str = "fastq"
-    SPRING: str = "spring"
-    SPRING_METADATA: str = "spring-metadata"
 
 
 # Number of days until fastqs counts as old

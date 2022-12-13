@@ -1,15 +1,41 @@
 """API for transfer a flow cell."""
 
 import logging
+from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Optional
 
+from housekeeper.store.models import Bundle, Version, Tag, File
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import FlowCellStatus
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.models.cgstats.flowcell import StatsFlowcell
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Sample, Flowcell
 
 LOG = logging.getLogger(__name__)
+
+
+def _set_status_db_sample_sequenced_at(
+    status_db_sample: Sample, flow_cell_sequenced_at: datetime
+) -> None:
+    """Set sequenced at for sample in status db."""
+    is_newer_date: datetime = (status_db_sample.sequenced_at is None) or (
+        flow_cell_sequenced_at > status_db_sample.sequenced_at
+    )
+    if is_newer_date:
+        status_db_sample.sequenced_at: datetime = flow_cell_sequenced_at
+
+
+def log_enough_reads(
+    status_db_sample_reads: int, application_expected_reads: int, cgstats_sample_name: str
+) -> None:
+    """Check and log if sample in status db got enough reads."""
+    enough_reads: bool = status_db_sample_reads > application_expected_reads
+    LOG.info(f"Added reads to sample: {cgstats_sample_name} - {status_db_sample_reads} ")
+    LOG.info(f"[{'DONE' if enough_reads else 'NOT DONE'}]")
 
 
 class TransferFlowCell:
@@ -20,111 +46,154 @@ class TransferFlowCell:
         self.stats: StatsAPI = stats_api
         self.hk: HousekeeperAPI = hk_api
 
-    def transfer(self, flow_cell_id: str, store: bool = True) -> models.Flowcell:
+    def transfer(self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True) -> Flowcell:
         """Populate the database with the information."""
-        if store and self.hk.tag("fastq") is None:
-            self.hk.add_commit(self.hk.new_tag("fastq"))
-        if store and self.hk.tag("samplesheet") is None:
-            self.hk.add_commit(self.hk.new_tag("samplesheet"))
-        if store and self.hk.tag(flow_cell_id) is None:
-            self.hk.add_commit(self.hk.new_tag(flow_cell_id))
-        stats_data: StatsFlowcell = self.stats.flowcell(flow_cell_id)
-        flow_cell: models.Flowcell = self.db.flowcell(flow_cell_id)
+        self._add_tags_to_housekeeper(
+            store=store,
+            tags=[
+                SequencingFileTag.FASTQ,
+                SequencingFileTag.SAMPLE_SHEET,
+                flow_cell_id,
+                SequencingFileTag.CGSTATS_LOG,
+            ],
+        )
+        cgstats_flow_cell: StatsFlowcell = self.stats.flowcell(flowcell_name=flow_cell_id)
+        flow_cell: Flowcell = self._add_flow_cell_to_status_db(
+            cgstats_flow_cell=cgstats_flow_cell,
+            flow_cell=self.db.get_flow_cell(flow_cell_id=flow_cell_id),
+            flow_cell_id=flow_cell_id,
+        )
 
-        if flow_cell is None:
-            flow_cell: models.Flowcell = self.db.add_flowcell(
-                name=flow_cell_id,
-                sequencer=stats_data.sequencer,
-                sequencer_type=stats_data.sequencer_type,
-                date=stats_data.date,
-            )
-        flow_cell.status = "ondisk"
+        self._include_sample_sheet_to_housekeeper(
+            flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
+        )
+        self._include_cgstats_log_to_housekeeper(
+            flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
+        )
+        self._parse_flow_cell_samples(
+            cgstats_flow_cell=cgstats_flow_cell,
+            flow_cell=flow_cell,
+            flow_cell_id=flow_cell_id,
+            store=store,
+        )
+        return flow_cell
 
-        sample_sheet_path = self._sample_sheet_path(flow_cell_id)
-        if not Path(sample_sheet_path).exists():
-            LOG.warning(f"unable to find samplesheet: {sample_sheet_path}")
-        elif store:
-            self.store_samplesheet(flow_cell_id, sample_sheet_path)
+    def _add_tags_to_housekeeper(self, store: bool, tags: List[str]) -> None:
+        """Add and commit tag(s) to Housekeeper if not already exists in database."""
+        for tag in tags:
+            if store and self.hk.tag(name=tag) is None:
+                self.hk.add_commit(self.hk.new_tag(tag))
 
-        for sample_data in stats_data.samples:
-            LOG.debug(f"adding reads/fastqs to sample: {sample_data.name}")
-            sample_obj = self.db.sample(sample_data.name)
-            if sample_obj is None:
-                LOG.warning(f"unable to find sample: {sample_data.name}")
+    def _parse_flow_cell_samples(
+        self,
+        cgstats_flow_cell: StatsFlowcell,
+        flow_cell: Flowcell,
+        flow_cell_id: str,
+        store: bool,
+    ) -> None:
+        """Adds fastq to Housekeeper, set sequenced at for sample, add samples to flow cell."""
+        for cgstats_sample in cgstats_flow_cell.samples:
+            LOG.debug(f"Adding reads/FASTQs to sample: {cgstats_sample.name}")
+
+            status_db_sample: Sample = self.db.sample(internal_id=cgstats_sample.name)
+            if not status_db_sample:
+                LOG.warning(f"Unable to find sample: {cgstats_sample.name}")
                 continue
 
             if store:
-                self.store_fastqs(
-                    sample=sample_obj.internal_id,
+                self._store_sequencing_files(
                     flow_cell_id=flow_cell_id,
-                    fastq_files=sample_data.fastqs,
+                    sample_id=status_db_sample.internal_id,
+                    sequencing_files=cgstats_sample.fastqs,
+                    tag_name=SequencingFileTag.FASTQ,
                 )
 
-            sample_obj.reads = sample_data.reads
-            enough_reads = (
-                sample_obj.reads > sample_obj.application_version.application.expected_reads
-            )
-            newest_date = (sample_obj.sequenced_at is None) or (
-                flow_cell.sequenced_at > sample_obj.sequenced_at
-            )
-            if newest_date:
-                sample_obj.sequenced_at = flow_cell.sequenced_at
+            status_db_sample.reads = cgstats_sample.reads
 
-            if isinstance(sample_obj, models.Sample):
-                flow_cell.samples.append(sample_obj)
-
-            LOG.info(
-                f"added reads to sample: {sample_data.name} - {sample_data.reads} "
-                f"[{'DONE' if enough_reads else 'NOT DONE'}]"
+            _set_status_db_sample_sequenced_at(
+                status_db_sample=status_db_sample, flow_cell_sequenced_at=flow_cell.sequenced_at
             )
 
+            if isinstance(status_db_sample, Sample):
+                flow_cell.samples.append(status_db_sample)
+
+            log_enough_reads(
+                status_db_sample_reads=status_db_sample.reads,
+                application_expected_reads=status_db_sample.application_version.application.expected_reads,
+                cgstats_sample_name=cgstats_sample.name,
+            )
+
+    def _add_flow_cell_to_status_db(
+        self, cgstats_flow_cell: StatsFlowcell, flow_cell: Optional[Flowcell], flow_cell_id: str
+    ) -> Flowcell:
+        """Add a flow cell to the status database."""
+        if not flow_cell:
+            flow_cell: Flowcell = self.db.add_flow_cell(
+                flow_cell_id=flow_cell_id,
+                sequencer_name=cgstats_flow_cell.sequencer,
+                sequencer_type=cgstats_flow_cell.sequencer_type,
+                date=cgstats_flow_cell.date,
+                flow_cell_status=FlowCellStatus.ONDISK,
+            )
         return flow_cell
 
-    def store_fastqs(self, sample: str, flow_cell_id: str, fastq_files: List[str]):
-        """Store FASTQ files for a sample in Housekeeper."""
-        hk_bundle = self.hk.bundle(sample)
-        if hk_bundle is None:
-            hk_bundle = self.hk.new_bundle(sample)
-            self.hk.add_commit(hk_bundle)
-            new_version = self.hk.new_version(created_at=hk_bundle.created_at)
-            hk_bundle.versions.append(new_version)
-            self.hk.commit()
-            LOG.info(f"added new Housekeeper bundle: {hk_bundle.name}")
+    def _include_sequencing_file(
+        self, file_path: Path, flow_cell_id: str, store: bool, tag_name: str
+    ) -> None:
+        """Include sequencing file in housekeeper."""
+        if not file_path.exists():
+            LOG.warning(f"Unable to find file: {file_path.as_posix()}")
+        elif store:
+            self._store_sequencing_files(
+                flow_cell_id=flow_cell_id,
+                sequencing_files=[file_path.as_posix()],
+                tag_name=tag_name,
+            )
+
+    def _include_sample_sheet_to_housekeeper(
+        self, flow_cell_dir: Path, flow_cell_id: str, store: bool
+    ) -> None:
+        """Include sample sheet in Housekeeper."""
+        sample_sheet_path: Path = Path(
+            flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
+        self._include_sequencing_file(
+            file_path=sample_sheet_path,
+            flow_cell_id=flow_cell_id,
+            store=store,
+            tag_name=SequencingFileTag.SAMPLE_SHEET,
+        )
+
+    def _include_cgstats_log_to_housekeeper(
+        self, flow_cell_dir: Path, flow_cell_id: str, store: bool
+    ) -> None:
+        """Include cgstats log in Housekeeper."""
+        for cgstats_log_path in flow_cell_dir.glob("stats-*[0-9]-*"):
+            self._include_sequencing_file(
+                file_path=cgstats_log_path,
+                flow_cell_id=flow_cell_id,
+                store=store,
+                tag_name=SequencingFileTag.CGSTATS_LOG,
+            )
+
+    def _store_sequencing_files(
+        self,
+        flow_cell_id: str,
+        sequencing_files: List[str],
+        tag_name: str,
+        sample_id: Optional[str] = None,
+    ) -> None:
+        """Stor sequencing file(s) in Housekeeper."""
+        bundle_name: str = sample_id or flow_cell_id
+        hk_bundle: Bundle = self.hk.bundle(bundle_name)
+        if not hk_bundle:
+            self.hk.create_new_bundle_and_version(name=bundle_name)
 
         with self.hk.session_no_autoflush():
-            hk_version = hk_bundle.versions[0]
-            for fastq_file in fastq_files:
-                if self.hk.files(path=fastq_file).first() is None:
-                    LOG.info(f"found FASTQ file: {fastq_file}")
-                    tags = [self.hk.tag("fastq"), self.hk.tag(flow_cell_id)]
-                    new_file = self.hk.new_file(path=fastq_file, tags=tags)
-                    hk_version.files.append(new_file)
-            self.hk.commit()
-
-    def store_samplesheet(self, flow_cell_id: str, sample_sheet_path: str):
-        """Store samplesheet for a run in Housekeeper"""
-        hk_bundle = self.hk.bundle(flow_cell_id)
-        if hk_bundle is None:
-            hk_bundle = self.hk.new_bundle(flow_cell_id)
-            self.hk.add_commit(hk_bundle)
-            new_version = self.hk.new_version(created_at=hk_bundle.created_at)
-            hk_bundle.versions.append(new_version)
-            self.hk.commit()
-            LOG.info(f"added new Housekeeper bundle: {hk_bundle.name}")
-
-        with self.hk.session_no_autoflush():
-            hk_version = hk_bundle.versions[0]
-            if self.hk.files(path=sample_sheet_path).first() is None:
-                LOG.info(f"Adding samplesheet: {sample_sheet_path}")
-                tags = [self.hk.tag("samplesheet"), self.hk.tag(flow_cell_id)]
-                new_file = self.hk.new_file(path=sample_sheet_path, tags=tags)
-                hk_version.files.append(new_file)
-        self.hk.commit()
-
-    def _sample_sheet_path(self, flow_cell_id: str) -> str:
-        """Construct the path to the samplesheet to be stored."""
-        run_name: str = self.stats.run_name(flow_cell_id)
-        document_path: str = self.stats.document_path(flow_cell_id)
-        unaligned_dir: str = Path(document_path).name
-        root_dir: Path = self.stats.root_dir
-        return str(root_dir.joinpath(run_name, unaligned_dir, "SampleSheet.csv"))
+            for file in sequencing_files:
+                if self.hk.files(path=file).first() is None:
+                    LOG.info(f"Found new file: {file}.")
+                    LOG.info(f"Adding file using tag: {tag_name}")
+                    self.hk.add_and_include_file_to_latest_version(
+                        bundle_name=bundle_name, file=Path(file), tags=[tag_name, flow_cell_id]
+                    )

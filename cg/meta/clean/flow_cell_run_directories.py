@@ -1,5 +1,5 @@
 """Module that handles deletion of flow cell run directories and their BCL files from
-flow_cell_run_dir/<sequencer> """
+flow_cell_run_dir/<sequencer>."""
 import logging
 import shutil
 from datetime import datetime, timedelta
@@ -9,9 +9,10 @@ from typing import Optional
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import FlowCellStatus, HousekeeperTags
+from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.symbols import UNDERSCORE
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.store import Store
 
 FLOW_CELL_DATE_POSITION = 0
@@ -52,9 +53,11 @@ class RunDirFlowCell:
     def sequenced_date(self) -> datetime:
         """The date on which the flow cell was sequenced"""
         if self._sequenced_date is None:
-            if self.status_db.flowcell(name=self.id):
+            if self.status_db.get_flow_cell(flow_cell_id=self.id):
                 LOG.info("Found flow cell %s in statusdb, getting sequenced date.", self.id)
-                self._sequenced_date: datetime = self.status_db.flowcell(name=self.id).sequenced_at
+                self._sequenced_date: datetime = self.status_db.get_flow_cell(
+                    flow_cell_id=self.id
+                ).sequenced_at
             else:
                 LOG.info(
                     "Flow cell %s NOT found in statusdb, deriving sequenced date from run dir name!",
@@ -74,14 +77,16 @@ class RunDirFlowCell:
     def flow_cell_status(self) -> str:
         """Status of the flow cell"""
         if self._flow_cell_status is None:
-            self._flow_cell_status = self.status_db.flowcell(name=self.id).status
+            self._flow_cell_status = self.status_db.get_flow_cell(flow_cell_id=self.id).status
         return self._flow_cell_status
 
     @property
     def exists_in_statusdb(self) -> bool:
         """The flow cell exists in statusdb"""
         if self._exists_in_statusdb is None:
-            self._exists_in_statusdb = self.status_db.flowcell(name=self.id) is not None
+            self._exists_in_statusdb = (
+                self.status_db.get_flow_cell(flow_cell_id=self.id) is not None
+            )
         return self._exists_in_statusdb
 
     def remove_run_directory(self):
@@ -102,9 +107,9 @@ class RunDirFlowCell:
             self.hk.create_new_bundle_and_version(name=self.id)
         try:
             self.hk.add_and_include_file_to_latest_version(
-                case_id=self.id,
+                bundle_name=self.id,
                 file=self.sample_sheet_path,
-                tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET, self.id],
+                tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id],
             )
         except FileExistsError:
             LOG.warning("Sample sheet already included!")
