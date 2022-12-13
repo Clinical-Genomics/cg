@@ -267,11 +267,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                         cases_to_store.append(case)
                     else:
                         self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
+                else:
+                    cases_to_store.append(case)
             except IndexError:
                 self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
                 LOG.error(f"There are no running directories for case {case.internal_id}.")
-            else:
-                cases_to_store.append(case)
+
 
         return cases_to_store
 
