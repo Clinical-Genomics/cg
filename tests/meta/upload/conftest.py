@@ -8,7 +8,7 @@ import pytest
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.constants import Pipeline
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.meta.upload.coverage import UploadCoverageApi
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.store import Store

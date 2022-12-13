@@ -19,7 +19,7 @@ jobs:
 
     # Set up python
     - name: Set up Python 3.7
-      uses: actions/setup-python@v2.3.3
+      uses: actions/setup-python@v4.3.1
       with:
         python-version: 3.7
 
