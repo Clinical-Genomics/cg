@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Iterable, List, Set, Tuple
 from housekeeper.store import models as hk_models
 
-from cg.apps.housekeeper.hk import HousekeeperAPI, HousekeeperVersionMissingError
+# from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
+from cg.exc import HousekeeperVersionMissingError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
@@ -22,7 +23,7 @@ class DeliverAPI:
     def __init__(
         self,
         store: Store,
-        hk_api: HousekeeperAPI,
+        hk_api,
         case_tags: List[Set[str]],
         sample_tags: List[Set[str]],
         project_base_path: Path,
