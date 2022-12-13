@@ -7,10 +7,9 @@ from pathlib import Path
 from typing import Iterable, List, Set, Tuple
 from housekeeper.store import models as hk_models
 
-# from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
-from cg.exc import HousekeeperVersionMissingError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
@@ -23,7 +22,7 @@ class DeliverAPI:
     def __init__(
         self,
         store: Store,
-        hk_api,
+        hk_api: HousekeeperAPI,
         case_tags: List[Set[str]],
         sample_tags: List[Set[str]],
         project_base_path: Path,
@@ -106,9 +105,7 @@ class DeliverAPI:
                     if self.skip_missing_bundle:
                         LOG.info(f"Could not find any version for {sample_id}")
                         continue
-                    raise HousekeeperVersionMissingError(
-                        f"Could not find any version for {sample_id}"
-                    )
+                    raise SyntaxError(f"Could not find any version for {sample_id}")
                 self.deliver_sample_files(
                     case_id=case_id,
                     case_name=case_name,
