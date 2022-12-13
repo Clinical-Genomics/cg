@@ -256,19 +256,20 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         cases_to_store: List[models.Family] = []
 
         for case in cases_qc_ready:
-            case_run_dir: Path = self.get_case_path(case_id=case.internal_id, cleaning=False)[0]
-            if not os.path.exists(os.path.join(case_run_dir, "QC_done.txt")):
-                try:
+            try:
+                case_run_dir: Path = self.get_case_path(case_id=case.internal_id, cleaning=False)[0]
+                if not os.path.exists(os.path.join(case_run_dir, "QC_done.txt")):
                     if self.microsalt_qc(
-                        case_id=case.internal_id,
-                        run_dir_path=case_run_dir,
-                        lims_project=self.get_project(case.samples[0].internal_id),
+                            case_id=case.internal_id,
+                            run_dir_path=case_run_dir,
+                            lims_project=self.get_project(case.samples[0].internal_id),
                     ):
                         cases_to_store.append(case)
                     else:
                         self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
-                except FileNotFoundError:
-                    self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
+            except IndexError:
+                self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
+                LOG.error(f"There are no running directories for case {case.internal_id}.")
             else:
                 cases_to_store.append(case)
 
@@ -340,10 +341,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Check if Microsalt case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
         failed_samples: Dict = {}
-
-        if not os.path.exists(run_dir_path):
-            LOG.error(f"Running directory does not exists for case {case_id}.")
-            raise FileNotFoundError
 
         qc_file = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
