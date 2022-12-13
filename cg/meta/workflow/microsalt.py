@@ -73,7 +73,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_paths = [
             Path(path)
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
-        ]
+        ].sort(key=os.path.getctime(), reverse=True)
 
         if cleaning:
             self.verify_case_paths_age(case_paths, case_id)
@@ -258,13 +258,16 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         for case in cases_qc_ready:
             case_run_dir: Path = self.get_case_path(case_id=case.internal_id, cleaning=False)[0]
             if not os.path.exists(os.path.join(case_run_dir, "QC_done.txt")):
-                if self.microsalt_qc(
-                    case_id=case.internal_id,
-                    run_dir_path=case_run_dir,
-                    lims_project=self.get_project(case.samples[0]),
-                ):
-                    cases_to_store.append(case)
-                else:
+                try:
+                    if self.microsalt_qc(
+                        case_id=case.internal_id,
+                        run_dir_path=case_run_dir,
+                        lims_project=self.get_project(case.samples[0]),
+                    ):
+                        cases_to_store.append(case)
+                    else:
+                        self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
+                except FileNotFoundError:
                     self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
             else:
                 cases_to_store.append(case)
@@ -337,10 +340,17 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Check if Microsalt case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
         failed_samples: List[Sample] = []
+
+        if not os.path.exists(run_dir_path):
+            LOG.error(f"Running directory does not exists for case {case_id}.")
+            raise FileNotFoundError
+
         qc_file = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample in samples:
             LOG.debug(sample)
+            if not sample.sequenced_at:
+                continue
             if sample.control == "negative":
                 if not self.check_external_negative_control_sample(sample):
                     failed_samples.append(sample)
@@ -362,10 +372,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def check_coverage_10x(self, sample_name: str, qc_file: dict) -> bool:
         """Check if a sample passed the coverage_10x criteria."""
-        return (
-            qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
-            >= MicrosaltQC.COVERAGE_10X_THRESHOLD
-        )
+        try:
+            return (
+                qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
+                >= MicrosaltQC.COVERAGE_10X_THRESHOLD
+            )
+        except TypeError:
+            return False
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
         """Check if external negative control passed read check"""
