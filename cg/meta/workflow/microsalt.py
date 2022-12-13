@@ -340,6 +340,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         qc_file = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample in samples:
+            LOG.debug(sample)
             if sample.control == "negative":
                 if not self.check_external_negative_control_sample(sample):
                     failed_samples.append(sample)
