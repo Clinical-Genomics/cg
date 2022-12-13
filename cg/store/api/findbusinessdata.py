@@ -10,6 +10,9 @@ from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
 
+from cg.store.models import Flowcell
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+
 
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
@@ -122,7 +125,12 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: List[models.Customer] = None, enquiry: str = None, action: str = None
+        self,
+        *,
+        action: Optional[str] = None,
+        data_analysis: Optional[str] = None,
+        customers: List[models.Customer] = None,
+        enquiry: Optional[str] = None,
     ) -> Query:
         """Fetch families."""
 
@@ -142,8 +150,8 @@ class FindBusinessDataHandler(BaseHandler):
             if enquiry
             else records
         )
-
         records = records.filter_by(action=action) if action else records
+        records = records.filter_by(data_analysis=data_analysis) if data_analysis else records
         return records.order_by(models.Family.created_at.desc())
 
     def family(self, internal_id: str) -> models.Family:
@@ -218,9 +226,11 @@ class FindBusinessDataHandler(BaseHandler):
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
-    def flowcell(self, name: str) -> models.Flowcell:
-        """Fetch a flowcell."""
-        return self.Flowcell.query.filter(models.Flowcell.name == name).first()
+    def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
+        """Return flow cell."""
+        return apply_flow_cell_filter(
+            flow_cells=self.Flowcell.query, flow_cell_id=flow_cell_id, function="flow_cell_has_id"
+        )
 
     def flowcells(
         self, *, status: str = None, family: models.Family = None, enquiry: str = None

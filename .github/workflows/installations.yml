@@ -15,11 +15,11 @@ jobs:
 
     # Check out cg code
     - name: Check out git repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.5.0
 
     # Set up python
     - name: Set up Python ${{ matrix.python-version}}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4.3.1
       with:
         python-version: ${{ matrix.python-version}}
 
@@ -27,7 +27,7 @@ jobs:
       # Make sure that we have correct python version and pip version
       # For details see .github/workflows/server_info.md
       run: |
-        python -m pip install --upgrade pip==21.0.1
+        python -m pip install --upgrade pip
         echo $PYTHON_VERSION
         pip --version
       env:

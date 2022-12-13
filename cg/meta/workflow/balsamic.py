@@ -9,7 +9,7 @@ from cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat
-from cg.constants.tags import BalsamicAnalysisTag
+from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI

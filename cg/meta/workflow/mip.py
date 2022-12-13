@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import WriteFile, ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -31,8 +31,9 @@ CLI_OPTIONS = {
     "skip_evaluation": {"option": "--qccollect_skip_evaluation"},
     "start_after": {"option": "--start_after_recipe"},
     "start_with": {"option": "--start_with_recipe"},
+    "use_bwa_mem": {"option": "--bwa_mem 1 --bwa_mem2 0"},
 }
-
+##TODO test this option above
 LOG = logging.getLogger(__name__)
 
 

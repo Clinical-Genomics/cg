@@ -96,8 +96,8 @@ class FastaSequenceMissingError(CgError):
     """
 
 
-class FlowcellError(CgError):
-    """Raised when there is a problem with demultiplexing a flowcell."""
+class FlowCellError(CgError):
+    """Raised when there is a problem with demultiplexing a flow cell."""
 
 
 class FlowcellsNeededError(CgError):
@@ -118,9 +118,9 @@ class HousekeeperFileMissingError(CgError):
         self.errors = errors
 
 
-class HousekeeperVersionMissingError(CgError):
+class HousekeeperBundleVersionMissingError(CgError):
     """
-    Exception raised when family version is missing in Housekeeper.
+    Exception raised when bundle version is missing in Housekeeper.
     """
 
 

@@ -270,7 +270,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data, ticket: str):
     for sample in new_samples:
         assert len(sample.deliveries) == 1
     assert family_link.family.data_analysis
-    assert family_link.family.data_delivery in [DataDelivery.FASTQ, DataDelivery.ANALYSIS_FILES]
+    assert family_link.family.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
 
 
 def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, ticket: str):
