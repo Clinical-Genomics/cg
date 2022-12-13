@@ -9,9 +9,8 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
-from cg.constants.delivery import INBOX_NAME
 from cg.constants.constants import DataDelivery
-from cg.apps.housekeeper.hk import HousekeeperVersionMissingError
+from cg.exc import HousekeeperVersionMissingError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
@@ -287,7 +286,7 @@ class DeliverAPI:
         Note that case name and sample name needs to be the identifiers sent from customer.
         """
         delivery_path: Path = Path(
-            self.project_base_path, self.customer_id, INBOX_NAME, self.ticket
+            self.project_base_path, self.customer_id, constants.INBOX_NAME, self.ticket
         )
         if case_name:
             delivery_path = delivery_path / case_name
