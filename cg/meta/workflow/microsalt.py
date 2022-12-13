@@ -260,9 +260,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 case_run_dir: Path = self.get_case_path(case_id=case.internal_id, cleaning=False)[0]
                 if not os.path.exists(os.path.join(case_run_dir, "QC_done.txt")):
                     if self.microsalt_qc(
-                            case_id=case.internal_id,
-                            run_dir_path=case_run_dir,
-                            lims_project=self.get_project(case.samples[0].internal_id),
+                        case_id=case.internal_id,
+                        run_dir_path=case_run_dir,
+                        lims_project=self.get_project(case.samples[0].internal_id),
                     ):
                         cases_to_store.append(case)
                     else:
@@ -272,7 +272,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             except IndexError:
                 self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
                 LOG.error(f"There are no running directories for case {case.internal_id}.")
-
 
         return cases_to_store
 
