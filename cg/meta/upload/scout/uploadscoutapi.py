@@ -13,7 +13,7 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import HousekeeperVersionMissingError, CgDataError
+from cg.exc import HousekeeperBundleVersionMissingError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
@@ -149,7 +149,7 @@ class UploadScoutAPI:
             splice_junctions_bed = self.housekeeper.find_file_in_latest_version(
                 case_id=case_id, tags=tags
             )
-        except HousekeeperVersionMissingError:
+        except HousekeeperBundleVersionMissingError:
             LOG.debug("Could not find bundle for case %s", case_id)
 
         return splice_junctions_bed

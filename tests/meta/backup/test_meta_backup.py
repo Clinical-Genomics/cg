@@ -6,11 +6,12 @@ import subprocess
 import mock
 import pytest
 from mock import call
+
+from cg.constants.sequencing import Sequencers
 from tests.mocks.hk_mock import MockFile
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, FlowCellStatus
-from cg.constants.constants import Sequencers
 from cg.exc import ChecksumFailedError
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI

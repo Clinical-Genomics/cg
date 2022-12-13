@@ -118,9 +118,9 @@ class HousekeeperFileMissingError(CgError):
         self.errors = errors
 
 
-class HousekeeperVersionMissingError(CgError):
+class HousekeeperBundleVersionMissingError(CgError):
     """
-    Exception raised when family version is missing in Housekeeper.
+    Exception raised when bundle version is missing in Housekeeper.
     """
 
 

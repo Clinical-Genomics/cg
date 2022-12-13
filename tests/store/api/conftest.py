@@ -269,7 +269,7 @@ def fixture_re_sequenced_sample_store(
     timestamp_now: dt.datetime,
     helpers,
 ) -> Store:
-    """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells"""
+    """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells."""
     re_sequenced_sample_store: Store = store
     store_case = helpers.add_case(
         store=re_sequenced_sample_store,
@@ -292,14 +292,14 @@ def fixture_re_sequenced_sample_store(
 
     helpers.add_flowcell(
         store=re_sequenced_sample_store,
-        flowcell_id=another_flow_cell_id,
+        flow_cell_id=another_flow_cell_id,
         samples=[store_sample],
         date=timestamp_now,
     )
 
     helpers.add_flowcell(
         store=re_sequenced_sample_store,
-        flowcell_id=flow_cell_id,
+        flow_cell_id=flow_cell_id,
         samples=[store_sample],
         date=one_day_ahead_of_now,
     )
