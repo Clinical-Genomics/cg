@@ -152,12 +152,12 @@ def test_get_cases_to_store_pass(
 
 
 def test_get_cases_to_store_fail(
-        qc_microsalt_context: CGConfig,
-        caplog,
-        mocker,
-        microsalt_qc_fail_lims_project: str,
-        microsalt_case_qc_fail: str,
-        microsalt_qc_fail_run_dir_path: Path,
+    qc_microsalt_context: CGConfig,
+    caplog,
+    mocker,
+    microsalt_qc_fail_lims_project: str,
+    microsalt_case_qc_fail: str,
+    microsalt_qc_fail_run_dir_path: Path,
 ):
     """Test get cases to store for a microsalt case that fails QC."""
 
