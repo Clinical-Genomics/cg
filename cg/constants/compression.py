@@ -50,6 +50,10 @@ BALSAMIC_VALIDATION_CASES = [
     "holykid",  # BALSAMICE validation case, HD829 reference for FLT3 Ascertation
 ]
 
+FLUFFY_VALIDATION_CASES = [
+    "simplesalmon",  # Chromosome 13, 18, 21 Suspected
+]
+
 MIP_VALIDATION_CASES = [
     "brightcaiman",  # DNA rare disease positive control
     "casualgannet",  # DNA rare disease positive control
@@ -122,6 +126,7 @@ CASES_TO_IGNORE = (
     PROBLEMATIC_CASES
     + OTHER_VALIDATION_CASES
     + BALSAMIC_VALIDATION_CASES
+    + FLUFFY_VALIDATION_CASES
     + MIP_VALIDATION_CASES
     + RNAFUSION_VALIDATION_CASES
 )
