@@ -353,23 +353,15 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 continue
             if sample.control == "negative":
                 if not self.check_external_negative_control_sample(sample):
-                    # failed_samples.append(sample)
-                    failed_samples[sample.internal_id][
-                        "NTC reads"
-                    ] = self.check_external_negative_control_sample(sample)
+                    failed_samples[sample] = {"Passed QC Reads": self.check_external_negative_control_sample(sample)}
                     LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
             else:
                 if not sample.sequencing_qc or not self.check_coverage_10x(
                     sample.internal_id, qc_file
                 ):
-                    # failed_samples.append(sample)
-                    failed_samples[sample.internal_id]["Reads"] = sample.sequencing_qc
-                    failed_samples[sample.internal_id]["Reads"] = self.check_coverage_10x(
-                        sample.internal_id, qc_file
-                    )
+                    failed_samples[sample] = {"Passed QC Reads": sample.sequencing_qc}
+                    failed_samples[sample]["Passed Coverage 10X"] = self.check_coverage_10x(sample.internal_id, qc_file)
                     LOG.warning(f"Sample {sample.internal_id} failed QC.")
-                    # LOG.warning(f"Passed Reads Guaranteed = {sample.sequencing_qc}")
-                    # LOG.warning(f"Passed BP > 10X = {self.check_coverage_10x(sample.internal_id, qc_file)}")
 
         self.create_qc_done_file(run_dir_path=run_dir_path, failed_samples=failed_samples)
 
@@ -383,9 +375,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 >= MicrosaltQC.COVERAGE_10X_THRESHOLD
             )
         except TypeError:
-            LOG.error(
-                f"Sample {sample_name} has no value for 10x coverage, setting sample to fail."
-            )
             return False
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
@@ -400,7 +389,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         write_json(file_path=os.path.join(run_dir_path, "QC_done.txt"), content=failed_samples)
 
     def qc_case_check(
-        self, case_id: str, samples: List[Sample], failed_samples: List[Sample]
+        self, case_id: str, samples: List[Sample], failed_samples: Dict
     ) -> bool:
         """Perform the final QC check for a microbial case based on failed samples."""
         qc_pass: bool = True

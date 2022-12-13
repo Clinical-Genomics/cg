@@ -1,4 +1,5 @@
 """Fixtures for the prepare_fastq api tests"""
+import datetime
 from pathlib import Path
 from typing import List
 
@@ -157,6 +158,7 @@ def qc_microsalt_context(
             application_tag="MWRNXTR003",
             application_type="mic",
             reads=6000000,
+            sequenced_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_pass, sample=sample_to_add)
@@ -176,6 +178,7 @@ def qc_microsalt_context(
             application_tag="MWXNXTR003",
             application_type="mic",
             reads=6000000,
+            sequenced_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
