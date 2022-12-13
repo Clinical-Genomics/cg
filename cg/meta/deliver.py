@@ -7,10 +7,9 @@ from pathlib import Path
 from typing import Iterable, List, Set, Tuple
 from housekeeper.store import models as hk_models
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.housekeeper.hk import HousekeeperAPI, HousekeeperVersionMissingError
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
-from cg.exc import HousekeeperVersionMissingError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
