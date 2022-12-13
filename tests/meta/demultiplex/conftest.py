@@ -25,8 +25,6 @@ from tests.cli.demultiplex.conftest import (
     fixture_stats_api,
 )
 from tests.models.demultiplexing.conftest import (
-    fixture_bcl2fastq_demux_results,
-    fixture_demultiplexed_flow_cell,
     fixture_flowcell_path,
     fixture_flow_cell_runs,
 )
@@ -77,12 +75,6 @@ def fixture_tmp_flow_cell_run_path(project_dir: Path, flow_cell_full_name: str) 
     return tmp_flow_cell_run_path
 
 
-@pytest.fixture(name="flow_cell_project_id")
-def fixture_flow_cell_project_id() -> int:
-    """Return flow cell run project id."""
-    return 174578
-
-
 @pytest.fixture(name="cgstats_select_project_log_file")
 def fixture_cgstats_select_project_log_file(flow_cell: FlowCell, flow_cell_project_id: int) -> Path:
     """Return cgstats select project out file."""
@@ -90,6 +82,12 @@ def fixture_cgstats_select_project_log_file(flow_cell: FlowCell, flow_cell_proje
         flow_cell.path,
         "-".join(["stats", str(flow_cell_project_id), flow_cell.id]) + ".txt",
     )
+
+
+@pytest.fixture(name="flow_cell_project_id")
+def fixture_flow_cell_project_id() -> int:
+    """Return flow cell run project id."""
+    return 174578
 
 
 @pytest.fixture(name="hiseq_x_copy_complete_file")
@@ -114,7 +112,7 @@ def fixture_populated_flow_cell_store(
     )
     helpers.add_flowcell(
         store=populated_flow_cell_store,
-        flowcell_id=flow_cell_id,
+        flow_cell_id=flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
@@ -138,7 +136,7 @@ def fixture_active_flow_cell_store(
     )
     helpers.add_flowcell(
         store=active_flow_cell_store,
-        flowcell_id=flow_cell_id,
+        flow_cell_id=flow_cell_id,
         sequencer_type="novaseq",
         samples=[sample],
     )
