@@ -378,6 +378,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 >= MicrosaltQC.COVERAGE_10X_THRESHOLD
             )
         except TypeError:
+            LOG.error(
+                f"Sample {sample_name} has no value for 10x coverage, setting sample to fail."
+            )
             return False
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
