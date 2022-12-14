@@ -268,6 +268,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     else:
                         self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
                 else:
+                    LOG.info(f"QC already performed for case {case.internal_id}, storing case.")
                     cases_to_store.append(case)
             except IndexError:
                 self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
