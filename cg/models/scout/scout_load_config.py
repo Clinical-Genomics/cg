@@ -14,6 +14,13 @@ class ChromographImages(BaseModel):
     upd_sites: Optional[str] = None
 
 
+class Reviewer(BaseModel):
+    alignment: Optional[str] = None
+    alignment_index: Optional[str] = None
+    vcf: Optional[str] = None
+    catalog: Optional[str] = None
+
+
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
     analysis_type: Literal[
@@ -44,6 +51,7 @@ class ScoutIndividual(BaseModel):
 class ScoutMipIndividual(ScoutIndividual):
     mt_bam: Optional[str] = None
     chromograph_images: ChromographImages = ChromographImages()
+    reviewer: Reviewer = Reviewer()
     rhocall_bed: Optional[str] = None
     rhocall_wig: Optional[str] = None
     tiddit_coverage_wig: Optional[str] = None
@@ -127,6 +135,7 @@ class MipLoadConfig(ScoutLoadConfig):
     peddy_check: Optional[str] = None
     madeline: Optional[str] = None
     samples: List[ScoutMipIndividual] = []
+    variant_catalog: Optional[str] = None
 
     @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
     def check_mandatory_files(cls, v):
