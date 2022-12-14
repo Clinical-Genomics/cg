@@ -19,7 +19,8 @@ from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Flowcell
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -44,6 +45,19 @@ class DemuxPostProcessingAPI:
         self.dry_run = dry_run
         if dry_run:
             self.demux_api.set_dry_run(dry_run=dry_run)
+
+    def transfer_flow_cell(
+        self, flow_cell_dir: Path, flow_cell_id: str, store: bool = True
+    ) -> None:
+        """Transfer flow cell and sequencing files."""
+        flow_cell: Flowcell = self.transfer_flow_cell_api.transfer(
+            flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
+        )
+        if self.dry_run:
+            LOG.info("Dry run will not commit flow cell to database")
+            return
+        self.status_db.add_commit(flow_cell)
+        LOG.info(f"Flow cell added: {flow_cell}")
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
@@ -116,33 +130,18 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         cgstats_process: Process = Process(binary=self.stats_api.binary)
         cgstats_process.run_command(parameters=cgstats_lane_parameters, dry_run=self.dry_run)
 
-    def post_process_flow_cell(
-        self, flow_cell: FlowCell, flow_cell_name: str, flow_cell_path: Path
-    ) -> None:
+    def post_process_flow_cell(self, demux_results: DemuxResults) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell."""
-        if not flow_cell.is_hiseq_x_copy_completed():
-            LOG.info(f"{flow_cell_name} is not yet completely copied")
-            return
-        if flow_cell.is_hiseq_x_delivery_started():
-            LOG.info(f"{flow_cell_name} copy is complete and delivery has already started")
-            return
-        if not flow_cell.is_hiseq_x():
-            LOG.debug(f"{flow_cell_name} is not an Hiseq X flow cell")
-            return
-        LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
         if not self.dry_run:
-            Path(flow_cell_path, DemultiplexingDirsAndFiles.DELIVERY).touch()
-        self.add_to_cgstats(flow_cell_path=flow_cell_path)
-        self.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell_path)
-        self.cgstats_lanestats(flow_cell_path=flow_cell_path)
-        new_record: models.Flowcell = self.transfer_flow_cell_api.transfer(
-            flow_cell_id=flow_cell.id
+            Path(demux_results.flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY).touch()
+        self.add_to_cgstats(flow_cell_path=demux_results.flow_cell.path)
+        self.cgstats_select_project(
+            flow_cell_id=demux_results.flow_cell.id, flow_cell_path=demux_results.flow_cell.path
         )
-        if self.dry_run:
-            LOG.info("Dry run will not commit flow cell to database")
-            return
-        self.status_db.add_commit(new_record)
-        LOG.info(f"Flow cell added: {new_record}")
+        self.cgstats_lanestats(flow_cell_path=demux_results.flow_cell.path)
+        self.transfer_flow_cell(
+            flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
+        )
 
     def finish_flow_cell(
         self, bcl_converter: str, flow_cell_name: str, flow_cell_path: Path
@@ -155,9 +154,22 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             )
         except FlowCellError:
             return
-        self.post_process_flow_cell(
-            flow_cell=flow_cell, flow_cell_name=flow_cell_name, flow_cell_path=flow_cell_path
+        demux_results: DemuxResults = DemuxResults(
+            demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
+            flow_cell=flow_cell,
+            bcl_converter=bcl_converter,
         )
+        if not demux_results.flow_cell.is_hiseq_x_copy_completed():
+            LOG.info(f"{flow_cell_name} is not yet completely copied")
+            return
+        if demux_results.flow_cell.is_hiseq_x_delivery_started():
+            LOG.info(f"{flow_cell_name} copy is complete and delivery has already started")
+            return
+        if not demux_results.flow_cell.is_hiseq_x():
+            LOG.info(f"{flow_cell_name} is not an Hiseq X flow cell")
+            return
+        LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
+        self.post_process_flow_cell(demux_results=demux_results)
 
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post process those that need it."""
@@ -273,14 +285,14 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             demux_results.demux_sample_sheet_path.as_posix(),
         )
 
-    def post_process_flow_cell(self, demux_results: DemuxResults, flow_cell_id: str) -> None:
+    def post_process_flow_cell(self, demux_results: DemuxResults) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell.
 
         This will
-            1. rename all the necessary files and folders
-            2. add the demux results to cgstats
-            3. produce reports for every project
-            4. generate a report with samples that have low cluster count
+            1. Rename all the necessary files and folders
+            2. Add the demux results to cgstats
+            3. Produce reports for every project
+            4. Generate a report with samples that have low cluster count
         """
         if demux_results.files_renamed():
             LOG.info("Files have already been renamed")
@@ -291,14 +303,9 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.bcl_converter == "bcl2fastq":
             self.create_barcode_summary_report(demux_results=demux_results)
         self.copy_sample_sheet(demux_results=demux_results)
-        new_record: models.Flowcell = self.transfer_flow_cell_api.transfer(
-            flow_cell_id=flow_cell_id
+        self.transfer_flow_cell(
+            flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
-        if self.dry_run:
-            LOG.info("Dry run will not commit flow cell to database")
-            return
-        self.status_db.add_commit(new_record)
-        LOG.info(f"Flow cell added: {new_record}")
 
     def finish_flow_cell(
         self, flow_cell_name: str, bcl_converter: str, force: bool = False
@@ -321,7 +328,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
         demux_results: DemuxResults = DemuxResults(
-            demux_dir=self.demux_api.out_dir / flow_cell_name,
+            demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
             flow_cell=flow_cell,
             bcl_converter=bcl_converter,
         )
@@ -334,7 +341,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             if not force:
                 return
             LOG.info("Post processing flow cell anyway")
-        self.post_process_flow_cell(demux_results=demux_results, flow_cell_id=flow_cell.id)
+        self.post_process_flow_cell(demux_results=demux_results)
 
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post-process those that need it."""

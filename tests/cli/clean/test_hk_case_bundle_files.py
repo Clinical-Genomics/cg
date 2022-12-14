@@ -2,7 +2,7 @@ import datetime as dt
 import logging
 
 from cg.cli.clean import hk_case_bundle_files
-from cg.constants.tags import WORKFLOW_PROTECTED_TAGS
+from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store import models

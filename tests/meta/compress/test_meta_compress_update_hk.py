@@ -1,28 +1,50 @@
 """Tests for meta compress functionality that updates housekeeper"""
 
+import logging
 from pathlib import Path
 
 from cg.constants import HK_FASTQ_TAGS
 from cg.meta.compress import CompressAPI, files
 
 
-def test_get_flow_cell_name(compress_api: CompressAPI, flow_cell_id: str, flow_cell_full_name: str):
-    """Test functionality to extract the flow cell name from a run name given a designated structure"""
+def test_get_flow_cell_id_when_hiseqx(
+    compress_api: CompressAPI, flow_cell_id: str, flow_cell_full_name: str
+):
+    """Test extracting the flow cell id from a fastq file path."""
 
-    # GIVEN a CompressAPI with a demux_root and a flowcell with a fastq in given demux_root
-    fixture_flow_cell_id: str = flow_cell_id
+    # GIVEN a CompressAPI and a flow cell id within a fastq file path
     fastq_path: Path = compress_api.demux_root.joinpath(
-        Path(flow_cell_full_name, "dummy_fastq.fastq.gz")
+        Path(
+            flow_cell_full_name, f"{flow_cell_id}-l6t11_Undetermined_GACGTCTT_L006_R1_001.fastq.gz"
+        )
     )
 
-    # WHEN retrieving the the name of the flow cell
-    flow_cell_name: str = compress_api.get_flow_cell_name(fastq_path=fastq_path)
+    # WHEN retrieving the flow cell id
+    returned_flow_cell_name: str = compress_api.get_flow_cell_id(fastq_path=fastq_path)
 
-    # THEN the flow cell name retrieved should be identical to the fixture flow cell name used
-    assert flow_cell_name == fixture_flow_cell_id
+    # THEN the flow cell id retrieved should be identical to the flow cell id used
+    assert returned_flow_cell_name == flow_cell_id
 
 
-def test_add_fastq_housekeeper(
+def test_get_flow_cell_id_when_novaseq(
+    compress_api: CompressAPI, flow_cell_id: str, flow_cell_full_name: str
+):
+    """Test extracting the flow cell id from a fastq file path."""
+
+    # GIVEN a CompressAPI and a flow cell id within a fastq file path
+    fastq_path: Path = compress_api.demux_root.joinpath(
+        Path(flow_cell_full_name, f"{flow_cell_id}_ACC10950A36_S36_L001_R1_001.fastq.gz")
+    )
+
+    # WHEN retrieving the flow cell id
+    returned_flow_cell_name: str = compress_api.get_flow_cell_id(fastq_path=fastq_path)
+
+    # THEN the flow cell id retrieved should be identical to the flow cell id used
+    assert returned_flow_cell_name == flow_cell_id
+
+
+def test_add_fastq_housekeeper_when_no_fastq_in_hk(
+    caplog,
     compress_api,
     real_housekeeper_api,
     decompress_hk_spring_bundle,
@@ -30,10 +52,9 @@ def test_add_fastq_housekeeper(
     store,
     helpers,
 ):
-    """Test functionality to add fastq files to housekeeper
+    """Test adding fastq files to Housekeeper when no fastq files in Housekeeper."""
+    caplog.set_level(logging.INFO)
 
-    This is done after a decompressed spring archives
-    """
     # GIVEN real housekeeper api populated with a housekeeper bundle with spring info
     hk_bundle = decompress_hk_spring_bundle
     sample_id = hk_bundle["name"]
