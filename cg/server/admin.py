@@ -262,7 +262,7 @@ class FamilyView(BaseView):
             if not self.handle_view_exception(ex):
                 raise
 
-            flash(gettext("Failed to approve users. %(error)s", error=str(ex)), "error")
+            flash(gettext(f"Failed to approve users. {str(ex)}"))
 
 
 class FlowcellView(BaseView):
