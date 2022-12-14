@@ -249,8 +249,8 @@ class FamilyView(BaseView):
     def action_set_hold(self, ids):
         try:
             query = db.Family.query.filter(db.Family.id.in_(ids))
-            for Family in query.all():
-                Family.action = CaseActions.HOLD
+            for family in query.all():
+                family.action = CaseActions.HOLD
 
             flash(
                 ngettext(
@@ -274,8 +274,8 @@ class FamilyView(BaseView):
     def action_set_empty(self, ids):
         try:
             query = db.Family.query.filter(db.Family.id.in_(ids))
-            for Family in query.all():
-                Family.action = None
+            for family in query.all():
+                family.action = None
 
             flash(
                 ngettext(
