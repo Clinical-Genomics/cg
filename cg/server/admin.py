@@ -1,10 +1,13 @@
 """Module for Flask-Admin views"""
-from flask import redirect, request, session, url_for
+from gettext import ngettext, gettext
+
+from flask import redirect, request, session, url_for, flash
+from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import DataDelivery, Pipeline
+from cg.constants.constants import DataDelivery, Pipeline, CASE_ACTIONS
 from cg.server.ext import db
 from cg.utils.flask.enum import SelectEnumField
 
@@ -202,12 +205,18 @@ class FamilyView(BaseView):
         "action",
         "data_analysis",
         "data_delivery",
+        "tickets",
     ]
     column_formatters = {
         "internal_id": view_family_sample_link,
         "priority": view_priority,
     }
-    column_searchable_list = ["internal_id", "name", "customer.internal_id"]
+    column_searchable_list = [
+        "internal_id",
+        "name",
+        "customer.internal_id",
+        "tickets",
+    ]
     form_excluded_columns = [
         "analyses",
         "_cohorts",
@@ -231,6 +240,29 @@ class FamilyView(BaseView):
             )
 
         return markup
+
+    @action(
+        "set_hold",
+        "Set to hold",
+        "Are you sure you want to set the action for selected families to hold?",
+    )
+    def action_set_hold(self, ids):
+        try:
+            query = db.Family.query.filter(db.Family.id.in_(ids))
+            for Family in query.all():
+                Family.action = CASE_ACTIONS.HOLD
+
+            flash(
+                ngettext(
+                    "User was successfully approved.",
+                    f"{len(ids)} users were successfully approved.",
+                )
+            )
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+
+            flash(gettext("Failed to approve users. %(error)s", error=str(ex)), "error")
 
 
 class FlowcellView(BaseView):
