@@ -7,7 +7,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 
-from cg.constants.constants import DataDelivery, Pipeline, CASE_ACTIONS
+from cg.constants.constants import DataDelivery, Pipeline, CaseActions
 from cg.server.ext import db
 from cg.utils.flask.enum import SelectEnumField
 
@@ -243,26 +243,53 @@ class FamilyView(BaseView):
 
     @action(
         "set_hold",
-        "Set to hold",
-        "Are you sure you want to set the action for selected families to hold?",
+        "Set to HOLD",
+        "Are you sure you want to set the action for selected families to HOLD?",
     )
     def action_set_hold(self, ids):
         try:
             query = db.Family.query.filter(db.Family.id.in_(ids))
             for Family in query.all():
-                Family.action = CASE_ACTIONS.HOLD
+                Family.action = CaseActions.HOLD
 
             flash(
                 ngettext(
-                    "User was successfully approved.",
-                    f"{len(ids)} users were successfully approved.",
+                    "Families were set to HOLD.",
+                    f"{len(ids)} families were set to HOLD.",
+                    len(ids),
                 )
             )
+            db.commit()
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
 
-            flash(gettext(f"Failed to approve users. {str(ex)}"))
+            flash(gettext(f"Failed to set family action. {str(ex)}"))
+
+    @action(
+        "set_empty",
+        "Set to Empty",
+        "Are you sure you want to set the action for selected families to empty?",
+    )
+    def action_set_empty(self, ids):
+        try:
+            query = db.Family.query.filter(db.Family.id.in_(ids))
+            for Family in query.all():
+                Family.action = None
+
+            flash(
+                ngettext(
+                    "Families were set to Empty",
+                    f"{len(ids)} families were set to Empty.",
+                    len(ids),
+                )
+            )
+            db.commit()
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+
+            flash(gettext(f"Failed to set family action. {str(ex)}"))
 
 
 class FlowcellView(BaseView):
