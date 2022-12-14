@@ -342,57 +342,23 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Check if Microsalt case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
         failed_samples: Dict = {}
-
-        qc_file = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
+        qc_file: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample in samples:
-            LOG.debug(sample)
             if not sample.sequenced_at:
                 continue
-            if sample.control == "negative":
-                if not self.check_external_negative_control_sample(sample):
-                    failed_samples[sample] = {
-                        "Passed QC Reads": self.check_external_negative_control_sample(sample)
-                    }
-                    LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
-            else:
-                if not sample.sequencing_qc or not self.check_coverage_10x(
-                    sample.internal_id, qc_file
-                ):
-                    failed_samples[sample] = {"Passed QC Reads": sample.sequencing_qc}
-                    failed_samples[sample]["Passed Coverage 10X"] = self.check_coverage_10x(
-                        sample.internal_id, qc_file
-                    )
-                    LOG.warning(f"Sample {sample.internal_id} failed QC.")
+            self.qc_sample_check(sample=sample, failed_samples=failed_samples, qc_file=qc_file)
 
-        self.create_qc_done_file(run_dir_path=run_dir_path, failed_samples=failed_samples)
-
-        return self.qc_case_check(case_id=case_id, failed_samples=failed_samples, samples=samples)
-
-    def check_coverage_10x(self, sample_name: str, qc_file: dict) -> bool:
-        """Check if a sample passed the coverage_10x criteria."""
-        try:
-            return (
-                qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
-                >= MicrosaltQC.COVERAGE_10X_THRESHOLD
-            )
-        except TypeError:
-            return False
-
-    def check_external_negative_control_sample(self, sample: Sample) -> bool:
-        """Check if external negative control passed read check"""
-        return sample.reads < (
-            sample.application_version.application.target_reads
-            * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
+        return self.qc_case_check(
+            case_id=case_id,
+            failed_samples=failed_samples,
+            samples=samples,
+            run_dir_path=run_dir_path,
         )
 
-    def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict) -> None:
-        """Creates a QC_done when a QC check is performed."""
-        with open(os.path.join(run_dir_path, "QC_done.txt"), "w") as file:
-            for sample_dict in failed_samples.items():
-                file.write(f"{sample_dict[0].internal_id}: {json.dumps(sample_dict[1])} \n")
-
-    def qc_case_check(self, case_id: str, samples: List[Sample], failed_samples: Dict) -> bool:
+    def qc_case_check(
+        self, case_id: str, samples: List[Sample], failed_samples: Dict, run_dir_path: Path
+    ) -> bool:
         """Perform the final QC check for a microbial case based on failed samples."""
         qc_pass: bool = True
 
@@ -409,8 +375,58 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             qc_pass = False
 
         if not qc_pass:
-            LOG.info(f"Case {case_id} failed QC, see QC_done.txt for more information.")
+            LOG.warning(
+                f"Case {case_id} failed QC, see {run_dir_path}/QC_done_fail.txt for more information."
+            )
         else:
             LOG.info(f"Case {case_id} passed QC.")
 
+        self.create_qc_done_file(
+            run_dir_path=run_dir_path, failed_samples=failed_samples, qc_pass=qc_pass
+        )
         return qc_pass
+
+    def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict, qc_pass: bool) -> None:
+        """Creates a QC_done when a QC check is performed."""
+        if qc_pass:
+            filename: str = "QC_done_pass.txt"
+        else:
+            filename: str = "QC_done_fail.txt"
+
+        with open(os.path.join(run_dir_path, filename), "w") as file:
+            for sample_dict in failed_samples.items():
+                file.write(f"{sample_dict[0].internal_id}: {json.dumps(sample_dict[1])} \n")
+
+    def qc_sample_check(self, sample: Sample, failed_samples: Dict, qc_file: Dict) -> None:
+        """Perform a QC on a sample."""
+
+        if sample.control == "negative":
+            if not self.check_external_negative_control_sample(sample):
+                failed_samples[sample] = {
+                    "Passed QC Reads": self.check_external_negative_control_sample(sample)
+                }
+                LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
+        else:
+            if not sample.sequencing_qc or not self.check_coverage_10x(sample.internal_id, qc_file):
+                failed_samples[sample] = {"Passed QC Reads": sample.sequencing_qc}
+                failed_samples[sample]["Passed Coverage 10X"] = self.check_coverage_10x(
+                    sample.internal_id, qc_file
+                )
+                LOG.warning(f"Sample {sample.internal_id} failed QC.")
+
+    def check_coverage_10x(self, sample_name: str, qc_file: Dict) -> bool:
+        """Check if a sample passed the coverage_10x criteria."""
+        try:
+            return (
+                qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
+                >= MicrosaltQC.COVERAGE_10X_THRESHOLD
+            )
+        except TypeError:
+            return False
+
+    def check_external_negative_control_sample(self, sample: Sample) -> bool:
+        """Check if external negative control passed read check"""
+        return sample.reads < (
+            sample.application_version.application.target_reads
+            * MicrosaltQC.NEGATIVE_CONTROL_READS_THRESHOLD
+        )
