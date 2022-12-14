@@ -27,6 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
+from cg.store.models import Customer
 
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
@@ -890,6 +891,26 @@ def fixture_customer_production(collaboration_id: str, customer_id: str) -> dict
         "scout_access": True,
         "collaboration_id": collaboration_id,
     }
+
+
+@pytest.fixture(name="customer_rare_diseases")
+def fixture_customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a Rare Disease customer."""
+    return Customer(
+        name="CMMS",
+        internal_id="cust003",
+        loqus_upload=True,
+    )
+
+
+@pytest.fixture(name="customer_balsamic")
+def fixture_customer_balsamic(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a Cancer customer."""
+    return Customer(
+        name="AML",
+        internal_id="cust110",
+        loqus_upload=True,
+    )
 
 
 @pytest.fixture(name="external_wgs_application_tag")

@@ -10,6 +10,7 @@ from cg.constants.observations import (
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     BalsamicLoadParameters,
     LOQUSDB_ID,
+    LoqusdbBalsamicCustomers,
 )
 from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
 from cg.store import models
@@ -114,3 +115,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
             loqusdb_api.delete_case(case.internal_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from Loqusdb")
+
+    def get_loqusdb_customers(self) -> LoqusdbBalsamicCustomers:
+        """Returns the customers that are entitled to Cancer Loqusdb uploads."""
+        return LoqusdbBalsamicCustomers

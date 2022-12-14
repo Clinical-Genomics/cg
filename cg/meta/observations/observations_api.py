@@ -9,13 +9,15 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LoqusdbInstance
+from cg.constants.observations import LoqusdbInstance, LoqusdbBalsamicCustomers, LoqusdbMipCustomers
+from cg.exc import LoqusdbUploadCaseError
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
     BalsamicObservationsInputFiles,
 )
 from cg.store import Store, models
+from cg.store.models import Customer
 
 LOG = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ class ObservationsAPI:
 
     def upload(self, case: models.Family) -> None:
         """Upload observations to Loqusdb."""
+        self.check_customer_loqusdb_permissions(case.customer)
         input_files: Union[
             MipDNAObservationsInputFiles, BalsamicObservationsInputFiles
         ] = self.get_observations_input_files(case)
@@ -96,6 +99,18 @@ class ObservationsAPI:
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
         self.store.commit()
+
+    def check_customer_loqusdb_permissions(self, customer: Customer) -> None:
+        """Verifies that the customer is whitelisted for Loqusdb uploads."""
+        if customer.internal_id not in [cust_id.value for cust_id in self.get_loqusdb_customers()]:
+            LOG.error(
+                f"Customer {customer.internal_id} is not whitelisted for Loqusdb uploads. Cancelling upload."
+            )
+            raise LoqusdbUploadCaseError
+
+    def get_loqusdb_customers(self) -> Union[LoqusdbMipCustomers, LoqusdbBalsamicCustomers]:
+        """Returns the customers that are entitled to Loqusdb uploads."""
+        raise NotImplementedError
 
     def load_observations(
         self,

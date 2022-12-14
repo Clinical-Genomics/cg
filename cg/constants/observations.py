@@ -12,6 +12,23 @@ LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
 LOQUSDB_BALSAMIC_SEQUENCING_METHODS = [SequencingMethod.WGS]
 
 
+class LoqusdbMipCustomers(StrEnum):
+    """Loqusdb Rare Disease customers."""
+
+    KLINISK_GENETIK: str = "cust002"
+    CMMS: str = "cust003"
+    KLINISK_IMMUNOLOGI: str = "cust004"
+
+
+class LoqusdbBalsamicCustomers(StrEnum):
+    """Loqusdb Balsamic customers."""
+
+    AML: str = "cust110"
+    BTB_GMS: str = "cust127"
+    ONKPAT_HAGLUND: str = "cust143"
+    BTB_GMS_LINKOPING: str = "cust147"
+
+
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
