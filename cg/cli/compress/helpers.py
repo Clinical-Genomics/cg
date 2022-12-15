@@ -2,7 +2,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import CaseNotFoundError
@@ -11,17 +11,19 @@ from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
 from housekeeper.store import models as hk_models
 
+from cg.store.models import Family
+
 LOG = logging.getLogger(__name__)
 
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
     """Return sample ids from cases that are ready for SPRING compression."""
-    case_obj = store.family(case_id)
-    if not case_obj:
+    case: Family = store.family(case_id)
+    if not case:
         LOG.error(f"Could not find case {case_id}")
         raise CaseNotFoundError("")
 
-    for link_obj in case_obj.links:
+    for link_obj in case.links:
         yield link_obj.sample.internal_id
 
 
@@ -65,16 +67,15 @@ def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[hk
         yield last_version
 
 
-def get_true_dir(dir_path: Path) -> Path:
+def get_true_dir(dir_path: Path) -> Optional[Path]:
     """Loop over the files in a directory, if any symlinks are found return the parent dir of the
-    origin file"""
+    origin file."""
     # Check if there are any links to fastq files in the directory
     for fastq_path in dir_path.rglob("*"):
         # Check if there are fastq symlinks that points to the directory where the spring
         # path is located
         if fastq_path.is_symlink():
-            true_dir = Path(os.readlink(fastq_path)).parent
-            return true_dir
+            return Path(os.readlink(fastq_path)).parent
     LOG.info("Could not find any symlinked files")
     return None
 
@@ -99,7 +100,6 @@ def correct_spring_paths(
             if spring_path.exists():
                 continue
 
-            spring_config_path = compression_obj.spring_metadata_path
             # true_dir is where the spring paths actually exists
             true_dir = get_true_dir(spring_path.parent)
             if not true_dir:
@@ -119,6 +119,6 @@ def correct_spring_paths(
             if not dry_run:
                 # We know from above that the spring path does not exist
                 true_spring_path.replace(spring_path)
-                true_spring_config_path.replace(spring_config_path)
+                true_spring_config_path.replace(compression_obj.spring_metadata_path)
         if i == 0:
             LOG.debug("Could not find any spring files")

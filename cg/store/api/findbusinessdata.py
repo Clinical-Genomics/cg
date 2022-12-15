@@ -250,10 +250,9 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch invoices."""
         query = self.Invoice.query
         if invoiced:
-            query = query.filter(models.Invoice.invoiced_at.isnot(None))
+            return query.filter(models.Invoice.invoiced_at.isnot(None))
         else:
-            query = query.filter(models.Invoice.invoiced_at.is_(None))
-        return query
+            return query.filter(models.Invoice.invoiced_at.is_(None))
 
     def invoice(self, invoice_id: int) -> models.Invoice:
         """Fetch an invoice."""
@@ -286,9 +285,7 @@ class FindBusinessDataHandler(BaseHandler):
         records = self.Pool.query
 
         if customers:
-            customer_ids = []
-            for customer in customers:
-                customer_ids.append(customer.id)
+            customer_ids = [customer.id for customer in customers]
             records = records.filter(models.Pool.customer_id.in_(customer_ids))
 
         records = (
@@ -328,9 +325,7 @@ class FindBusinessDataHandler(BaseHandler):
         records = self.Sample.query
 
         if customers:
-            customer_ids = []
-            for customer in customers:
-                customer_ids.append(customer.id)
+            customer_ids = [customer.id for customer in customers]
             records = records.filter(Sample.customer_id.in_(customer_ids))
 
         records = (
