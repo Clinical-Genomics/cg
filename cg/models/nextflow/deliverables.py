@@ -25,7 +25,7 @@ class NextflowDeliverables(BaseModel):
 
     @validator("deliverables")
     def headers(cls, v: dict) -> None:
-    """Validate header format."""
+        """Validate header format."""
         if collections.Counter(list(v.keys())) != collections.Counter(DELIVER_FILE_HEADERS):
             raise ValueError(
                 f"Headers are not matching the standard header format: {DELIVER_FILE_HEADERS}"
