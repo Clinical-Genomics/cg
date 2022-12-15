@@ -76,11 +76,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
             ]
             self.verify_case_paths_age(case_paths, case_id)
-
-        case_paths: List[Path] = [
-            Path(path)
-            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
-        ]
+        else:
+            case_paths: List[Path] = [
+                Path(path)
+                for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+            ]
 
         return sorted(case_paths, key=os.path.getctime, reverse=True)
 
