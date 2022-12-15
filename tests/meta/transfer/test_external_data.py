@@ -16,7 +16,7 @@ from housekeeper.store.models import Version
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket: str):
-    """Test generating the directory for logging"""
+    """Test generating the directory for logging."""
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
@@ -26,7 +26,7 @@ def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket: str)
     assert "Would have created path" in caplog.text
 
     # THEN the created path should start with 2 dirs and then the ticket id
-    assert str(log_dir).startswith("/another/path/123456")
+    assert str(log_dir).startswith(f"/another/path/{ticket}")
 
 
 def test_get_source_path(
@@ -35,7 +35,7 @@ def test_get_source_path(
     external_data_api: ExternalDataAPI,
     ticket: str,
 ):
-    """Test generating the source path"""
+    """Test generating the source path."""
     # GIVEN a ticket number a customer and a customer sample id
 
     # WHEN the function is called and assigned
@@ -54,7 +54,7 @@ def test_get_destination_path(
     external_data_api: ExternalDataAPI,
     sample_id: str,
 ):
-    """Test generating the destination path"""
+    """Test generating the destination path."""
     # GIVEN a customer and an internal sample id
     # WHEN the function creates the destination path
     destination_path = external_data_api.get_destination_path(
