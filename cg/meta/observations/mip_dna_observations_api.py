@@ -12,6 +12,7 @@ from cg.constants.observations import (
     LoqusdbInstance,
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_ID,
+    LoqusdbMipCustomers,
 )
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbUploadCaseError, LoqusdbDuplicateRecordError, CaseNotFoundError
@@ -112,3 +113,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self.loqusdb_api.delete_case(case.internal_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
+
+    def get_loqusdb_customers(self) -> LoqusdbMipCustomers:
+        """Returns the customers that are entitled to Rare Disease Loqusdb uploads."""
+        return LoqusdbMipCustomers
