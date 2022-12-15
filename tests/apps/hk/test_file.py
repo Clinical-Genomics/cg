@@ -6,7 +6,7 @@ from typing import List
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Version
 
 from tests.small_helpers import SmallHelpers
 
@@ -156,17 +156,17 @@ def test_get_included_path(populated_housekeeper_api: MockHousekeeperAPI, case_i
 def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id: str):
     """Test to get the included path for a file."""
     # GIVEN a populated housekeeper api and the root dir
-    root_dir = Path(populated_housekeeper_api.get_root_dir())
-    version_obj = populated_housekeeper_api.last_version(case_id)
-    file_obj = version_obj.files[0]
+    root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
+    version: Version = populated_housekeeper_api.last_version(case_id)
+    file_obj = version.files[0]
     original_path = Path(file_obj.path)
-    included_path = Path(root_dir, version_obj.relative_root_dir, original_path.name)
+    included_path = Path(root_dir, version.relative_root_dir, original_path.name)
 
     # GIVEN that the included file does not exist
     assert included_path.exists() is False
 
     # WHEN including the file
-    included_file = populated_housekeeper_api.include_file(file_obj, version_obj)
+    included_file = populated_housekeeper_api.include_file(file_obj, version)
 
     # THEN assert that the file has been linked to the included place
     assert included_path.exists() is True
@@ -179,7 +179,7 @@ def test_check_bundle_files(
     case_id: str,
     timestamp: datetime,
     populated_housekeeper_api: MockHousekeeperAPI,
-    hk_version_obj: hk_models.Version,
+    hk_version: Version,
     fastq_file: Path,
     sample_id: str,
     bed_file: Path,

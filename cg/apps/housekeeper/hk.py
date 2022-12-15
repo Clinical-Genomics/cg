@@ -192,7 +192,7 @@ class HousekeeperAPI:
             file_obj.checksum = HousekeeperAPI.checksum(file_obj.path)
         # hardlink file to the internal structure
         os.link(file_obj.path, new_path)
-        LOG.info("Linked file: %s -> %s", file_obj.path, new_path)
+        LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
         file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 

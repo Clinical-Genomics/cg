@@ -1,4 +1,4 @@
-"""Tests for the file handlers"""
+"""Tests for the file handlers."""
 import logging
 from typing import Optional
 
@@ -18,9 +18,11 @@ from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
 from tests.store_helpers import StoreHelpers
 
+from housekeeper.store.models import Version
+
 
 def test_mip_config_builder(
-    hk_version_obj: hk_models.Version,
+    hk_version: Version,
     mip_dna_analysis_obj: models.Analysis,
     lims_api: MockLimsAPI,
     mip_analysis_api: MockMipAnalysis,
@@ -30,7 +32,7 @@ def test_mip_config_builder(
 
     # WHEN instantiating
     config_builder = MipConfigBuilder(
-        hk_version_obj=hk_version_obj,
+        hk_version_obj=hk_version,
         analysis_obj=mip_dna_analysis_obj,
         lims_api=lims_api,
         mip_analysis_api=mip_analysis_api,
@@ -42,13 +44,13 @@ def test_mip_config_builder(
 
 
 def test_balsamic_config_builder(
-    hk_version_obj: hk_models.Version, balsamic_analysis_obj: models.Analysis, lims_api: MockLimsAPI
+    hk_version: Version, balsamic_analysis_obj: models.Analysis, lims_api: MockLimsAPI
 ):
     # GIVEN a balsamic file handler
 
     # WHEN instantiating
     file_handler = BalsamicConfigBuilder(
-        hk_version_obj=hk_version_obj, analysis_obj=balsamic_analysis_obj, lims_api=lims_api
+        hk_version_obj=hk_version, analysis_obj=balsamic_analysis_obj, lims_api=lims_api
     )
 
     # THEN assert that the correct case tags was used
