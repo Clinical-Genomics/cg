@@ -1,5 +1,6 @@
 """Tests for rsync API"""
 import logging
+import shutil
 from typing import List
 
 import pytest
@@ -10,6 +11,8 @@ from cg.exc import CgError
 from cg.meta.rsync import RsyncAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models, Store
+from tests.meta.deliver.conftest import fixture_all_samples_in_inbox, fixture_dummy_file_name
+from tests.store.conftest import fixture_case_obj
 
 
 def test_get_source_and_destination_paths(
@@ -90,7 +93,7 @@ def test_make_log_dir(rsync_api: RsyncAPI, ticket: str, caplog):
 def test_run_rsync_on_slurm(
     microsalt_case: models.Family, rsync_api: RsyncAPI, ticket: str, caplog, mocker, helpers
 ):
-    """Test for running rsync on slurm"""
+    """Test for running rsync using SLURM."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a valid microsalt case
@@ -119,7 +122,7 @@ def test_run_rsync_on_slurm(
 def test_get_folders_to_deliver(
     analysis_family: dict, analysis_store_trio, rsync_api: RsyncAPI, case_id: str
 ):
-    """Tests the ability for the rsync api to get case and sample names"""
+    """Tests the ability for the rsync api to get case and sample names."""
     # GIVEN a case
 
     # WHEN the function gets the folders
@@ -139,7 +142,7 @@ def test_get_folders_to_deliver(
 def test_concatenate_rsync_commands(
     analysis_family: dict, analysis_store_trio, project_dir, customer_id, ticket: str
 ):
-    """Tests the function to concatenate rsync commands for transferring multiple files"""
+    """Tests the function to concatenate rsync commands for transferring multiple files."""
     # GIVEN a list with a case and a sample name
     folder_list: List[str] = [analysis_family["name"], analysis_family["samples"][0]["name"]]
     source_and_destination_paths = {
@@ -177,28 +180,77 @@ def test_concatenate_rsync_commands(
 
 
 def test_slurm_rsync_single_case(
-    microsalt_case: models.Family, rsync_api: RsyncAPI, caplog, mocker, helpers, ticket: str
+    all_samples_in_inbox: Path,
+    case_obj: models.Family,
+    destination_path: Path,
+    rsync_api: RsyncAPI,
+    caplog,
+    mocker,
+    ticket: str,
 ):
-    """Test for running rsync on a single case on slurm"""
+    """Test for running rsync on a single case using SLURM."""
     caplog.set_level(logging.INFO)
-
-    # GIVEN a valid microsalt case
-    case: models.Family = microsalt_case
 
     # GIVEN paths needed to run rsync
     mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
     RsyncAPI.get_source_and_destination_paths.return_value = {
-        "delivery_source_path": Path("/path/to/source"),
-        "rsync_destination_path": Path("/path/to/destination"),
+        "delivery_source_path": all_samples_in_inbox,
+        "rsync_destination_path": destination_path,
     }
 
     mocker.patch.object(Store, "get_latest_ticket_from_case")
     Store.get_latest_ticket_from_case.return_value = ticket
 
     # WHEN the destination path is created
-    sbatch_number: int = rsync_api.slurm_rsync_single_case(
-        case_id=case.internal_id, case_files_present=True, dry_run=True
+    sbatch_number: int
+    is_complete_delivery: bool
+    is_complete_delivery, sbatch_number = rsync_api.slurm_rsync_single_case(
+        case_id=case_obj.internal_id,
+        case_files_present=True,
+        dry_run=True,
+        sample_files_present=True,
+    )
+
+    # THEN check that an integer was returned as sbatch number and the delivery should be complete
+    assert isinstance(sbatch_number, int)
+    assert is_complete_delivery
+
+
+def test_slurm_rsync_single_case_missing_file(
+    all_samples_in_inbox: Path,
+    case_obj: models.Family,
+    destination_path: Path,
+    rsync_api: RsyncAPI,
+    caplog,
+    mocker,
+    ticket: str,
+):
+    """Test for running rsync on a single case with a missing file using SLURM."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a valid mip case and sample folder missing
+    shutil.rmtree(Path(all_samples_in_inbox, case_obj.links[0].sample.name))
+
+    # GIVEN paths needed to run rsync
+    mocker.patch.object(RsyncAPI, "get_source_and_destination_paths")
+    RsyncAPI.get_source_and_destination_paths.return_value = {
+        "delivery_source_path": all_samples_in_inbox,
+        "rsync_destination_path": destination_path,
+    }
+
+    mocker.patch.object(Store, "get_latest_ticket_from_case")
+    Store.get_latest_ticket_from_case.return_value = ticket
+
+    # WHEN the destination path is created
+    sbatch_number: int
+    is_complete_delivery: bool
+    is_complete_delivery, sbatch_number = rsync_api.slurm_rsync_single_case(
+        case_id=case_obj.internal_id,
+        case_files_present=True,
+        dry_run=True,
+        sample_files_present=True,
     )
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
+    assert not is_complete_delivery
