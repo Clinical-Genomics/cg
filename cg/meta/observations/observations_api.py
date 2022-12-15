@@ -107,6 +107,7 @@ class ObservationsAPI:
                 f"Customer {customer.internal_id} is not whitelisted for Loqusdb uploads. Cancelling upload."
             )
             raise LoqusdbUploadCaseError
+        LOG.info(f"Valid customer {customer.internal_id} for Loqusdb uploads")
 
     def get_loqusdb_customers(self) -> Union[LoqusdbMipCustomers, LoqusdbBalsamicCustomers]:
         """Returns the customers that are entitled to Loqusdb uploads."""

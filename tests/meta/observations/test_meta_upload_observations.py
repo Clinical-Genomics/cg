@@ -153,15 +153,19 @@ def test_check_customer_loqusdb_permissions(
     customer_rare_diseases: Customer,
     customer_balsamic: Customer,
     mip_dna_observations_api: MipDNAObservationsAPI,
+    caplog: LogCaptureFixture,
 ):
     """Test customers Loqusdb permissions."""
+    caplog.set_level(logging.DEBUG)
 
     # GIVEN a MIP observations API, a Rare Disease customer and a Cancer customer
 
     # WHEN verifying the permissions for Loqusdb upload
     mip_dna_observations_api.check_customer_loqusdb_permissions(customer_rare_diseases)
+
+    # THEN it should be only possible to upload data from a RD customer
+    assert f"Valid customer {customer_rare_diseases.internal_id} for Loqusdb uploads" in caplog.text
     with pytest.raises(LoqusdbUploadCaseError):
-        # THEN it should be possible only to upload data from a RD customer
         mip_dna_observations_api.check_customer_loqusdb_permissions(customer_balsamic)
 
 
