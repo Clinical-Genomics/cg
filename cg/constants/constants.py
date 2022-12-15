@@ -1,6 +1,6 @@
 """Constants for cg"""
 import click
-from cgmodels.cg.constants import StrEnum
+from cgmodels.cg.constants import Pipeline, StrEnum
 
 from cg.constants.sequencing import Sequencers
 from cg.utils.date import get_date
