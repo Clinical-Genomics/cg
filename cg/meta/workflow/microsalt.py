@@ -427,7 +427,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.error(
                 f"Coverage 10X couldn't be checked for sample {sample_name}, setting to fail."
             )
-            LOG.error(f"see error {e}")
+            LOG.error(f"see error: {e}")
             return False
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
