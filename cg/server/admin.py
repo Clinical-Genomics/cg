@@ -246,7 +246,7 @@ class FamilyView(BaseView):
 
     @action(
         "set_hold",
-        "Set to HOLD",
+        "Set action to HOLD",
         "Are you sure you want to set the action for selected families to HOLD?",
     )
     def action_set_hold(self, ids: List[str]):
@@ -254,7 +254,7 @@ class FamilyView(BaseView):
 
     @action(
         "set_empty",
-        "Set to Empty",
+        "Set action to Empty",
         "Are you sure you want to set the action for selected families to empty?",
     )
     def action_set_empty(self, ids: List[str]):
