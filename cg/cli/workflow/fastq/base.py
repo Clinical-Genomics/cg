@@ -7,6 +7,7 @@ from cgmodels.cg.constants import Pipeline
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.constants.constants import DRY_RUN
 from cg.store import Store, models
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -15,9 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def fastq(context: click.Context):
     """Function for storing fastq-cases"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-    return None
+    AnalysisAPI.get_help(context)
 
 
 @fastq.command("store")
