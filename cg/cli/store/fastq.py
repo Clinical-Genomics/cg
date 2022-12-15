@@ -3,17 +3,19 @@ from typing import Iterable, List
 
 import click
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
+from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Sample
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command("sample")
 @click.argument("sample-id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def store_sample(context: CGConfig, sample_id: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to this sample in Housekeeper."""
@@ -32,7 +34,7 @@ def store_sample(context: CGConfig, sample_id: str, dry_run: bool):
 
 @click.command("case")
 @click.argument("case-id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_context
 def store_case(context: click.Context, case_id: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to this case in Housekeeper."""
@@ -49,15 +51,15 @@ def store_case(context: click.Context, case_id: str, dry_run: bool):
     LOG.info(f"Stored fastq files for {stored_individuals} samples")
 
 
-@click.command("flowcell")
-@click.argument("flowcell_id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@click.command("flow-cell")
+@click.argument("flow-cell-id", type=str)
+@DRY_RUN
 @click.pass_context
-def store_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
+def store_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to this flow cell in Housekeeper."""
 
     status_db: Store = context.obj.status_db
-    samples: List[models.Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flowcell_id)
+    samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
     stored_individuals = 0
     for sample in samples:
         stored_count: int = context.invoke(
@@ -69,12 +71,12 @@ def store_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
 
 @click.command("ticket")
 @click.argument("ticket", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_context
 def store_ticket(context: click.Context, ticket: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to a ticket in Housekeeper."""
     status_db: Store = context.obj.status_db
-    samples: List[models.Sample] = status_db.get_samples_from_ticket(ticket=ticket)
+    samples: List[Sample] = status_db.get_samples_from_ticket(ticket=ticket)
     stored_individuals = 0
     for sample in samples:
         stored_count: int = context.invoke(

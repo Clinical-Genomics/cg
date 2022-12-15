@@ -8,7 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 
-from .fastq import store_case, store_flowcell, store_sample, store_ticket
+from .fastq import store_case, store_flow_cell, store_sample, store_ticket
 
 LOG = logging.getLogger(__name__)
 
@@ -30,4 +30,4 @@ def store(context: CGConfig):
 store.add_command(store_sample)
 store.add_command(store_case)
 store.add_command(store_ticket)
-store.add_command(store_flowcell)
+store.add_command(store_flow_cell)
