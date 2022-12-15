@@ -1,31 +1,34 @@
-"""CLI support to create config and/or start RNAFUSION"""
+"""CLI support to create config and/or start RNAFUSION."""
 
 import logging
+
 import click
+from pydantic import ValidationError
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.cli.workflow.nextflow.options import (
+    OPTION_INPUT,
     OPTION_LOG,
-    OPTION_WORKDIR,
-    OPTION_RESUME,
+    OPTION_OUTDIR,
     OPTION_PROFILE,
+    OPTION_RESUME,
     OPTION_STUB,
     OPTION_TOWER,
-    OPTION_INPUT,
-    OPTION_OUTDIR,
+    OPTION_WORKDIR,
 )
 from cg.cli.workflow.rnafusion.options import (
-    OPTION_REFERENCES,
-    OPTION_STRANDEDNESS,
-    OPTION_TRIM,
-    OPTION_FUSIONINSPECTOR_FILTER,
     OPTION_ALL,
+    OPTION_ARRIBA,
+    OPTION_FUSIONCATCHER,
+    OPTION_FUSIONINSPECTOR_FILTER,
     OPTION_PIZZLY,
+    OPTION_REFERENCES,
     OPTION_SQUID,
     OPTION_STARFUSION,
-    OPTION_FUSIONCATCHER,
-    OPTION_ARRIBA,
+    OPTION_STRANDEDNESS,
+    OPTION_TRIM,
 )
-from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN
 from cg.exc import CgError, DecompressionNeededError
@@ -33,7 +36,6 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from pydantic import ValidationError
 
 LOG = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ LOG = logging.getLogger(__name__)
 @click.group(invoke_without_command=True)
 @click.pass_context
 def rnafusion(context: click.Context) -> None:
-    """nf-core/rnafusion analysis workflow"""
+    """nf-core/rnafusion analysis workflow."""
     AnalysisAPI.get_help(context)
     context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(
         config=context.obj,

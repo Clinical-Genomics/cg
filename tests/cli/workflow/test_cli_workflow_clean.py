@@ -1,12 +1,12 @@
 from click.testing import CliRunner
 
 from cg.cli.workflow.commands import (
-    fluffy_past_run_dirs,
     balsamic_past_run_dirs,
+    fluffy_past_run_dirs,
+    microsalt_past_run_dirs,
     mip_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
-    microsalt_past_run_dirs,
 )
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
@@ -79,7 +79,7 @@ def test_cli_workflow_clean_rnafusion(
     # WHEN running command in dry-run
     result = cli_runner.invoke(rnafusion_past_run_dirs, [before_date], obj=base_context)
 
-    # THEN command should terminate successfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
 

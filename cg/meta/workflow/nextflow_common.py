@@ -8,7 +8,8 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Dict, List
 
-from cg.constants.constants import NFX_SAMPLE_HEADER, NFX_WORK_DIR, FileFormat
+from cg.constants.constants import FileFormat
+from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 

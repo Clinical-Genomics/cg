@@ -1,6 +1,6 @@
 import click
-from cg.constants.constants import RNAFUSION_STRANDEDNESS_DEFAULT
 
+from cg.constants.rnafusion import RNAFUSION_STRANDEDNESS_DEFAULT
 
 OPTION_STRANDEDNESS = click.option(
     "--strandedness",

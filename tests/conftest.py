@@ -1480,12 +1480,12 @@ def fixture_context_config(
             "root": str(mip_dir),
         },
         "rnafusion": {
-            "root": str(rnafusion_dir),
-            "references": "/path/to/references",
             "binary_path": "/path/to/bin",
-            "pipeline_path": "/pipeline/path",
             "conda_env": "S_RNAFUSION",
+            "pipeline_path": "/pipeline/path",
             "profile": "myprofile",
+            "references": "/path/to/references",
+            "root": str(rnafusion_dir),
         },
         "pdc": {"binary_path": "/bin/dsmc"},
         "scout": {

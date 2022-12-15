@@ -1,10 +1,9 @@
 """Constants for cg"""
 import click
-from cgmodels.cg.constants import Pipeline, StrEnum
+from cgmodels.cg.constants import StrEnum
 
 from cg.constants.sequencing import Sequencers
 from cg.utils.date import get_date
-
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -93,28 +92,6 @@ SEX_OPTIONS = ("male", "female", "unknown")
 SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
-
-RNAFUSION_STRANDEDNESS_DEFAULT = "reverse"
-
-RNAFUSION_ACCEPTED_STRANDEDNESS = ["forward", "reverse", "unstranded"]
-
-NFX_WORK_DIR = "work"
-
-NFX_SAMPLE_HEADER = "sample"
-
-NFX_READ1_HEADER = "fastq_1"
-
-NFX_READ2_HEADER = "fastq_2"
-
-NFX_SAMPLESHEET_READS_HEADERS = [NFX_READ1_HEADER, NFX_READ2_HEADER]
-
-NFX_SAMPLESHEET_HEADERS = [NFX_SAMPLE_HEADER] + NFX_SAMPLESHEET_READS_HEADERS
-
-DELIVER_FILE_HEADERS = ["format", "id", "path", "path_index", "step", "tag"]
-
-RNAFUSION_STRANDEDNESS_HEADER = "strandedness"
-
-RNAFUSION_SAMPLESHEET_HEADERS = NFX_SAMPLESHEET_HEADERS + [RNAFUSION_STRANDEDNESS_HEADER]
 
 
 class FileFormat(StrEnum):
