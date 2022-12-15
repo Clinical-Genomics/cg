@@ -70,13 +70,17 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
+        if cleaning:
+            case_paths: List[Path] = [
+                Path(path)
+                for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
+            ]
+            self.verify_case_paths_age(case_paths, case_id)
+
         case_paths: List[Path] = [
             Path(path)
-            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
         ]
-
-        if cleaning:
-            self.verify_case_paths_age(case_paths, case_id)
 
         return sorted(case_paths, key=os.path.getctime, reverse=True)
 
