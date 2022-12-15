@@ -94,31 +94,32 @@ def test_add_decompressed_fastq(
     store,
     helpers,
 ):
-    """Test functionality to add decompressed fastq files"""
-    # GIVEN real housekeeper api populated with a housekeeper bundle with spring info
+    """Test functionality to add decompressed FASTQ files."""
+    # GIVEN real Housekeeper api populated with a Housekeeper bundle with SPRING meta data
     hk_bundle = decompress_hk_spring_bundle
     sample_id = hk_bundle["name"]
-    sample_obj = helpers.add_sample(store, internal_id=sample_id)
+    sample = helpers.add_sample(store, internal_id=sample_id)
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_bundle)
     compress_api.hk_api = real_housekeeper_api
-    # GIVEN that there exists a spring archive, spring metadata and unpacked fastqs
-    version_obj = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
+
+    # GIVEN that there exists a SPRING archive, spring metadata and unpacked fastqs
+    version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
     fastq_first = compression_files.fastq_first_file
     fastq_second = compression_files.fastq_second_file
     spring_file = compression_files.spring_file
     spring_metadata_file = compression_files.updated_spring_metadata_file
-    assert files.is_file_in_version(version_obj=version_obj, path=spring_file)
-    assert files.is_file_in_version(version_obj=version_obj, path=spring_metadata_file)
+    assert files.is_file_in_version(version_obj=version, path=spring_file)
+    assert files.is_file_in_version(version_obj=version, path=spring_metadata_file)
 
-    assert not files.is_file_in_version(version_obj=version_obj, path=fastq_first)
+    assert not files.is_file_in_version(version_obj=version, path=fastq_first)
 
-    # WHEN adding decompresed files
-    compress_api.add_decompressed_fastq(sample_obj=sample_obj)
+    # WHEN adding decompressed files
+    compress_api.add_decompressed_fastq(sample=sample)
 
     # THEN assert that the files where added
-    version_obj = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
-    assert files.is_file_in_version(version_obj=version_obj, path=spring_file)
-    assert files.is_file_in_version(version_obj=version_obj, path=spring_metadata_file)
+    version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
+    assert files.is_file_in_version(version_obj=version, path=spring_file)
+    assert files.is_file_in_version(version_obj=version, path=spring_metadata_file)
 
-    assert files.is_file_in_version(version_obj=version_obj, path=fastq_first)
-    assert files.is_file_in_version(version_obj=version_obj, path=fastq_second)
+    assert files.is_file_in_version(version_obj=version, path=fastq_first)
+    assert files.is_file_in_version(version_obj=version, path=fastq_second)

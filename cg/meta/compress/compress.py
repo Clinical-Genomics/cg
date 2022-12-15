@@ -19,7 +19,7 @@ from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store import models
 from cg.store.queries import get_cases_to_compress
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -65,9 +65,7 @@ class CompressAPI:
     def compress_fastq(self, sample_id: str) -> bool:
         """Compress the FASTQ files for a individual."""
         LOG.info("Check if FASTQ compression is possible for %s", sample_id)
-        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
-            bundle_name=sample_id
-        )
+        version_obj: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version_obj:
             return False
 
@@ -116,9 +114,7 @@ class CompressAPI:
             - The SPRING metadata file will be updated to include date for decompression
             - PDC archived SPRING files will be retrieved and decrypted before decompression
         """
-        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
-            bundle_name=sample_id
-        )
+        version_obj: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version_obj:
             return False
 
@@ -151,9 +147,7 @@ class CompressAPI:
         file and its metadata file.
         """
         LOG.info("Clean FASTQ files for %s", sample_id)
-        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
-            bundle_name=sample_id
-        )
+        version_obj: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_id)
         if not version_obj:
             return False
 
@@ -190,39 +184,34 @@ class CompressAPI:
 
         return all_cleaned
 
-    def add_decompressed_fastq(self, sample_obj: models.Sample) -> bool:
-        """Adds unpacked FASTQ files to housekeeper."""
-        LOG.info("Adds FASTQ to Housekeeper for %s", sample_obj.internal_id)
-        version_obj: hk_models.Version = self.hk_api.get_latest_bundle_version(
-            bundle_name=sample_obj.internal_id
-        )
-        if not version_obj:
+    def add_decompressed_fastq(self, sample: models.Sample) -> bool:
+        """Adds unpacked FASTQ files to Housekeeper."""
+        LOG.info(f"Adds FASTQ to Housekeeper for {sample.internal_id}")
+        version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample.internal_id)
+        if not version:
             return False
 
-        spring_paths: List[CompressionData] = files.get_spring_paths(version_obj)
+        spring_paths: List[CompressionData] = files.get_spring_paths(version)
         if not spring_paths:
-            LOG.warning("Could not find any spring paths for %s", sample_obj.internal_id)
+            LOG.warning(f"Could not find any spring paths for {sample.internal_id}")
         for compression_object in spring_paths:
             if not self.crunchy_api.is_spring_decompression_done(compression_object):
-                LOG.info("SPRING to FASTQ decompression not finished %s", sample_obj.internal_id)
+                LOG.info(f"SPRING to FASTQ decompression not finished {sample.internal_id}")
                 return False
 
-            fastq_first = compression_object.fastq_first
-            fastq_second = compression_object.fastq_second
+            fastq_first: Path = compression_object.fastq_first
+            fastq_second: Path = compression_object.fastq_second
             if files.is_file_in_version(
-                version_obj=version_obj, path=fastq_first
-            ) or files.is_file_in_version(version_obj=version_obj, path=fastq_second):
+                version_obj=version, path=fastq_first
+            ) or files.is_file_in_version(version_obj=version, path=fastq_second):
                 LOG.warning("FASTQ files already exists in Housekeeper")
                 continue
 
             LOG.info(
-                "Adding decompressed FASTQ files to Housekeeper for sample %s ",
-                sample_obj.internal_id,
+                f"Adding decompressed FASTQ files to Housekeeper for sample {sample.internal_id} "
             )
 
-            self.add_fastq_hk(
-                sample_obj=sample_obj, fastq_first=fastq_first, fastq_second=fastq_second
-            )
+            self.add_fastq_hk(sample_obj=sample, fastq_first=fastq_first, fastq_second=fastq_second)
 
         return True
 
@@ -282,20 +271,16 @@ class CompressAPI:
     def add_fastq_hk(
         self, sample_obj: models.Sample, fastq_first: Path, fastq_second: Path
     ) -> None:
-        """Add FASTQ files to housekeeper."""
+        """Add FASTQ files to Housekeeper."""
 
         if not sample_obj.application_version.application.is_external:
             flow_cell_id: str = self.get_flow_cell_id(fastq_path=fastq_first)
-            fastq_tags = [flow_cell_id, SequencingFileTag.FASTQ]
+            fastq_tags: List[str] = [flow_cell_id, SequencingFileTag.FASTQ]
         else:
-            fastq_tags = [sample_obj.internal_id, SequencingFileTag.FASTQ]
-        last_version = self.hk_api.last_version(bundle=sample_obj.internal_id)
+            fastq_tags: List[str] = [sample_obj.internal_id, SequencingFileTag.FASTQ]
+        last_version: Version = self.hk_api.last_version(bundle=sample_obj.internal_id)
         LOG.info(
-            "Adds %s, %s to bundle %s with tags %s",
-            fastq_first,
-            fastq_second,
-            sample_obj.internal_id,
-            fastq_tags,
+            f"Adds {fastq_first}, {fastq_second} to bundle {sample_obj.internal_id} with tags {fastq_tags}"
         )
         if self.dry_run:
             return

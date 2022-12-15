@@ -184,11 +184,6 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def get_samples_from_flowcell(self, flowcell_name: str) -> List[models.Sample]:
-        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_name).first()
-        if flowcell:
-            return flowcell.samples
-
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
         return self.family(case_id).latest_ticket
@@ -246,6 +241,14 @@ class FindBusinessDataHandler(BaseHandler):
         if enquiry:
             records = records.filter(models.Flowcell.name.like(f"%{enquiry}%"))
         return records.order_by(models.Flowcell.sequenced_at.desc())
+
+    def get_samples_from_flowcell(self, flowcell_name: str) -> List[models.Sample]:
+        """Return samples present on flow cell."""
+        flow_cell = (
+            self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_name).first()
+        )
+        if flow_cell:
+            return flow_cell.samples
 
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""

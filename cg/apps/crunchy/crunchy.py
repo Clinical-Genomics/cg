@@ -177,7 +177,7 @@ class CrunchyAPI:
         """
 
         spring_metadata_path: Path = compression_obj.spring_metadata_path
-        LOG.info("Check if SPRING metadata file %s exists", spring_metadata_path)
+        LOG.info(f"Check if SPRING metadata file {spring_metadata_path} exists")
 
         if not compression_obj.metadata_exists():
             LOG.info("No SPRING metadata file found")
@@ -188,14 +188,13 @@ class CrunchyAPI:
 
         for file_info in crunchy_metadata.files:
             if not Path(file_info.path).exists():
-                LOG.info("File %s does not exist", file_info.path)
+                LOG.info(f"File {file_info.path} does not exist")
                 return False
             if not file_info.updated:
                 LOG.info("Files have not been unarchived")
                 return False
 
-        LOG.info("SPRING decompression is done for run %s", compression_obj.run_name)
-
+        LOG.info(f"SPRING decompression is done for run {compression_obj.run_name}")
         return True
 
     @staticmethod

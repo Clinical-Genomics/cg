@@ -10,7 +10,7 @@ from cg.io.controller import ReadFile, WriteFile
 def test_is_spring_decompression_done_all_files_exist(
     crunchy_config_dict, compression_object, spring_metadata_file, caplog
 ):
-    """Test if SPRING decompression is done when FASTQ files are unarchived
+    """Test if SPRING decompression is done when FASTQ files are unarchived.
 
     The function should return true since both FASTQ files and SPRING files exists and there is an
     updated field in the SPRING metadata config.

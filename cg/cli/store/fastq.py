@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_obj
 def store_sample(context: CGConfig, sample_id: str, dry_run: bool):
-    """Include links to decompressed FASTQ files belonging to this sample in housekeeper"""
+    """Include links to decompressed FASTQ files belonging to this sample in Housekeeper."""
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     status_db: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
@@ -35,7 +35,7 @@ def store_sample(context: CGConfig, sample_id: str, dry_run: bool):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def store_case(context: click.Context, case_id: str, dry_run: bool):
-    """Include links to decompressed FASTQ files belonging to this case in housekeeper"""
+    """Include links to decompressed FASTQ files belonging to this case in Housekeeper."""
 
     status_db: Store = context.obj.status_db
     try:
@@ -54,7 +54,7 @@ def store_case(context: click.Context, case_id: str, dry_run: bool):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def store_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
-    """Include links to decompressed FASTQ files belonging to this flowcell in housekeeper"""
+    """Include links to decompressed FASTQ files belonging to this flow cell in Housekeeper."""
 
     status_db: Store = context.obj.status_db
     samples: List[models.Sample] = status_db.get_samples_from_flowcell(flowcell_name=flowcell_id)
@@ -72,7 +72,7 @@ def store_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
 def store_ticket(context: click.Context, ticket: str, dry_run: bool):
-    """Include links to decompressed FASTQ files belonging to this ticket in Housekeeper"""
+    """Include links to decompressed FASTQ files belonging to a ticket in Housekeeper."""
     status_db: Store = context.obj.status_db
     samples: List[models.Sample] = status_db.get_samples_from_ticket(ticket=ticket)
     stored_individuals = 0
