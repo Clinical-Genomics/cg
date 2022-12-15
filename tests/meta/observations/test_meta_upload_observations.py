@@ -5,9 +5,10 @@ from typing import Dict
 
 import pytest
 from _pytest.logging import LogCaptureFixture
+from cgmodels.cg.constants import Pipeline
 
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters
+from cg.constants.observations import LoqusdbInstance, MipDNALoadParameters, LoqusdbMipCustomers
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbDuplicateRecordError, LoqusdbUploadCaseError, CaseNotFoundError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
@@ -18,6 +19,7 @@ from cg.models.observations.input_files import (
     BalsamicObservationsInputFiles,
 )
 from cg.store import models, Store
+from cg.store.models import Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -35,6 +37,7 @@ def test_observations_upload(
 
     # GIVEN a mocked observations API and a list of mocked observations files
     case: models.Family = analysis_store.family(case_id)
+    case.customer.internal_id = LoqusdbMipCustomers.KLINISK_IMMUNOLOGI.value
     mocker.patch.object(
         mip_dna_observations_api,
         "get_observations_input_files",
@@ -144,6 +147,26 @@ def test_is_duplicate_loqusdb_id(
 
     # THEN a duplicated upload should be identified
     assert is_duplicate is True
+
+
+def test_check_customer_loqusdb_permissions(
+    customer_rare_diseases: Customer,
+    customer_balsamic: Customer,
+    mip_dna_observations_api: MipDNAObservationsAPI,
+    caplog: LogCaptureFixture,
+):
+    """Test customers Loqusdb permissions."""
+    caplog.set_level(logging.DEBUG)
+
+    # GIVEN a MIP observations API, a Rare Disease customer and a Cancer customer
+
+    # WHEN verifying the permissions for Loqusdb upload
+    mip_dna_observations_api.check_customer_loqusdb_permissions(customer_rare_diseases)
+
+    # THEN it should be only possible to upload data from a RD customer
+    assert f"Valid customer {customer_rare_diseases.internal_id} for Loqusdb uploads" in caplog.text
+    with pytest.raises(LoqusdbUploadCaseError):
+        mip_dna_observations_api.check_customer_loqusdb_permissions(customer_balsamic)
 
 
 def test_mip_dna_get_loqusdb_instance(mip_dna_observations_api: MipDNAObservationsAPI):

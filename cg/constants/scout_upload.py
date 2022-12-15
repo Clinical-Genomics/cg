@@ -16,7 +16,7 @@ MIP_CASE_TAGS = dict(
 BALSAMIC_CASE_TAGS = dict(
     sv_vcf={"vcf-sv-clinical"},
     snv_vcf={"vcf-snv-clinical"},
-    cnv_report={"ascatngs", "visualization"},
+    cnv_report={"cnv-report"},
     multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
 )
