@@ -382,13 +382,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         if not qc_pass:
             LOG.warning(
-                f"Case {case_id} failed QC, see {run_dir_path}/QC_done_fail.txt for more information."
+                f"Case {case_id} failed QC, see {run_dir_path}/QC_done.txt for more information."
             )
         else:
             LOG.info(f"Case {case_id} passed QC.")
 
         self.create_qc_done_file(
-            run_dir_path=run_dir_path, failed_samples=failed_samples, qc_pass=qc_pass
+            run_dir_path=run_dir_path,
+            failed_samples=failed_samples,
         )
         return qc_pass
 
