@@ -89,7 +89,7 @@ def fixture_samples_missing_in_inbox(
     analysis_family: dict,
     dummy_file_name: str,
 ) -> Path:
-    """Fixture that returns a customer inbox path with all samples delivered"""
+    """Fixture that returns a customer inbox path with all samples delivered."""
     all_samples_in_inbox.joinpath(analysis_family["samples"][0]["name"], dummy_file_name).unlink()
     return Path(all_samples_in_inbox)
 

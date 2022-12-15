@@ -31,7 +31,7 @@ def test_get_inbox_path(
     # WHEN running get_inbox_path
     inbox = deliver_ticket_api.get_inbox_path(ticket=ticket)
 
-    # THEN a path is returned for cust000 with the folder 123456 in the inbox
+    # THEN a path is returned for cust000 with the folder ticket in the inbox
     assert inbox.parts[-3:] == (customer_id, INBOX_NAME, ticket)
 
 
@@ -214,7 +214,7 @@ def test_samples_missing_in_inbox(
     ticket: str,
     samples_missing_in_inbox,
 ):
-    """Test when samples is missing in customer inbox"""
+    """Test when samples is missing in customer inbox."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a deliver_ticket API
