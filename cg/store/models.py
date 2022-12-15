@@ -341,9 +341,9 @@ class Family(Model, PriorityMixin):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @property
-    def latest_ticket(self) -> str:
+    def latest_ticket(self) -> Optional[str]:
         """Returns the last ticket the family was ordered in"""
-        return self.tickets.split(sep=",")[-1]
+        return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
     def latest_analyzed(self) -> Optional[dt.datetime]:

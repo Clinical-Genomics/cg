@@ -12,6 +12,23 @@ LOQUSDB_MIP_SEQUENCING_METHODS = [SequencingMethod.WGS, SequencingMethod.WES]
 LOQUSDB_BALSAMIC_SEQUENCING_METHODS = [SequencingMethod.WGS]
 
 
+class LoqusdbMipCustomers(StrEnum):
+    """Loqusdb Rare Disease customers."""
+
+    KLINISK_GENETIK: str = "cust002"
+    CMMS: str = "cust003"
+    KLINISK_IMMUNOLOGI: str = "cust004"
+
+
+class LoqusdbBalsamicCustomers(StrEnum):
+    """Loqusdb Balsamic customers."""
+
+    AML: str = "cust110"
+    BTB_GMS: str = "cust127"
+    ONKPAT_HAGLUND: str = "cust143"
+    BTB_GMS_LINKOPING: str = "cust147"
+
+
 class LoqusdbInstance(StrEnum):
     """Observations instances."""
 
@@ -19,6 +36,16 @@ class LoqusdbInstance(StrEnum):
     WES: str = "loqusdb-wes"
     SOMATIC: str = "loqusdb-somatic"
     TUMOR: str = "loqusdb-tumor"
+
+
+class ObservationsFileWildcards(StrEnum):
+    """File patterns regarding dump Loqusdb files."""
+
+    CLINICAL_SNV: str = "clinical_snv"
+    CLINICAL_SV: str = "clinical_sv"
+    CANCER_ALL_SNV: str = "cancer_all_snv"
+    CANCER_SOMATIC_SNV: str = "cancer_somatic_snv"
+    CANCER_SOMATIC_SV: str = "cancer_somatic_sv"
 
 
 class MipDNAObservationsAnalysisTag(StrEnum):
@@ -42,9 +69,9 @@ class MipDNALoadParameters(Enum):
 class BalsamicObservationsAnalysisTag(StrEnum):
     """Cancer observations files analysis tags."""
 
-    SNV_VCF: str = "vcf-snv-clinical"
+    SNV_VCF: str = "vcf-snv"
     SNV_ALL_VCF: str = "vcf-snv-germline-tumor"
-    SV_VCF: str = "vcf-sv-clinical"
+    SV_VCF: str = "vcf-sv"
     PROFILE_VCF: str = "vcf-snv-germline-tumor"
 
 
