@@ -57,7 +57,7 @@ def store_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to this flow cell in Housekeeper."""
 
     status_db: Store = context.obj.status_db
-    samples: List[models.Sample] = status_db.get_samples_from_flowcell(flowcell_name=flowcell_id)
+    samples: List[models.Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flowcell_id)
     stored_individuals = 0
     for sample in samples:
         stored_count: int = context.invoke(

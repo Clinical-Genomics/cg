@@ -196,7 +196,7 @@ def decompress_flowcell(context: click.Context, flowcell_id: str, dry_run: bool)
     """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
 
     store: Store = context.obj.status_db
-    samples: Iterable[models.Sample] = store.get_samples_from_flowcell(flowcell_name=flowcell_id)
+    samples: Iterable[models.Sample] = store.get_samples_from_flow_cell(flow_cell_id=flowcell_id)
     decompressed_inds = 0
     for sample in samples:
         decompressed_count = context.invoke(

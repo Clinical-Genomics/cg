@@ -1,16 +1,15 @@
-"""Handler to find business data objects"""
+"""Handler to find business data objects."""
 import datetime as dt
-from typing import List, Optional, Set
+from typing import List, Optional
 
 from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Query, load_only
+from sqlalchemy.orm import Query
 from cg.constants.constants import PrepCategory
 from cg.constants.indexes import ListIndexes
 from cg.store import models
 from cg.store.api.base import BaseHandler
-from cgmodels.cg.constants import Pipeline
 
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, Sample
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 
 
@@ -194,7 +193,6 @@ class FindBusinessDataHandler(BaseHandler):
         samples_on_case = case_obj.links
         flow_cells_on_case: List[models.Flowcell] = samples_on_case[0].sample.flowcells
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
-        # .sort() sorts by ascending order by default
         return flow_cells_on_case[-1]
 
     def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
@@ -242,11 +240,9 @@ class FindBusinessDataHandler(BaseHandler):
             records = records.filter(models.Flowcell.name.like(f"%{enquiry}%"))
         return records.order_by(models.Flowcell.sequenced_at.desc())
 
-    def get_samples_from_flowcell(self, flowcell_name: str) -> List[models.Sample]:
+    def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
-        flow_cell = (
-            self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_name).first()
-        )
+        flow_cell: Flowcell = self.get_flow_cell(flow_cell_id=flow_cell_id)
         if flow_cell:
             return flow_cell.samples
 
@@ -273,7 +269,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a link between a family and a sample."""
         return (
             self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(models.Family.internal_id == family_id, models.Sample.internal_id == sample_id)
+            .filter(models.Family.internal_id == family_id, Sample.internal_id == sample_id)
             .first()
         )
 
@@ -322,7 +318,7 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def sample(self, internal_id: str) -> models.Sample:
+    def sample(self, internal_id: str) -> Sample:
         """Fetch a sample by lims id."""
         return self.Sample.query.filter_by(internal_id=internal_id).first()
 
@@ -335,19 +331,19 @@ class FindBusinessDataHandler(BaseHandler):
             customer_ids = []
             for customer in customers:
                 customer_ids.append(customer.id)
-            records = records.filter(models.Sample.customer_id.in_(customer_ids))
+            records = records.filter(Sample.customer_id.in_(customer_ids))
 
         records = (
             records.filter(
                 or_(
-                    models.Sample.name.like(f"%{enquiry}%"),
-                    models.Sample.internal_id.like(f"%{enquiry}%"),
+                    Sample.name.like(f"%{enquiry}%"),
+                    Sample.internal_id.like(f"%{enquiry}%"),
                 )
             )
             if enquiry
             else records
         )
-        return records.order_by(models.Sample.created_at.desc())
+        return records.order_by(Sample.created_at.desc())
 
     def samples_by_subject_id(
         self, customer_id: str, subject_id: str, is_tumour: bool = None
@@ -359,27 +355,27 @@ class FindBusinessDataHandler(BaseHandler):
             subject_id   (str):               Subject id
             is_tumour    (bool):              (Optional) match on is_tumour
         Returns:
-            matching samples (list of models.Sample)
+            matching samples (list of Sample)
         """
 
         query: Query = self.Sample.query.join(models.Customer).filter(
-            models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
+            models.Customer.internal_id == customer_id, Sample.subject_id == subject_id
         )
         if is_tumour:
-            query: Query = query.filter(models.Sample.is_tumour == is_tumour)
+            query: Query = query.filter(Sample.is_tumour == is_tumour)
         return query
 
     def samples_by_ids(self, **identifiers) -> Query:
         records = self.Sample.query
 
         for identifier_name, identifier_value in identifiers.items():
-            identifier = getattr(models.Sample, identifier_name)
+            identifier = getattr(Sample, identifier_name)
             records = records.filter(identifier.contains(identifier_value))
 
-        return records.order_by(models.Sample.internal_id.desc())
+        return records.order_by(Sample.internal_id.desc())
 
-    def get_sample_by_name(self, name: str) -> models.Sample:
-        return self.Sample.query.filter(models.Sample.name == name).first()
+    def get_sample_by_name(self, name: str) -> Sample:
+        return self.Sample.query.filter(Sample.name == name).first()
 
     def get_case_pool(self, case_id: str) -> Optional[models.Pool]:
         """Returns the pool connected to the case. Returns None if no pool is found"""

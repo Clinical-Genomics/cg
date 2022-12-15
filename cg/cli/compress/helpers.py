@@ -15,10 +15,10 @@ LOG = logging.getLogger(__name__)
 
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
-    """Fetch individual ids from cases that are ready for SPRING compression"""
+    """Return sample ids from cases that are ready for SPRING compression."""
     case_obj = store.family(case_id)
     if not case_obj:
-        LOG.error("Could not find case %s", case_id)
+        LOG.error(f"Could not find case {case_id}")
         raise CaseNotFoundError("")
 
     for link_obj in case_obj.links:
