@@ -71,12 +71,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
         if cleaning:
+            # Get case and single sample analysis folders
             case_paths: List[Path] = [
                 Path(path)
                 for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
             ]
             self.verify_case_paths_age(case_paths, case_id)
         else:
+            # Only get case folders
             case_paths: List[Path] = [
                 Path(path)
                 for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
@@ -426,7 +428,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 >= MicrosaltQC.COVERAGE_10X_THRESHOLD
             )
         except TypeError:
-            LOG.error(f"There is no 10X Coverage value for sample {sample_name}.")
+            LOG.debug(f"There is no 10X Coverage value for sample {sample_name}.")
             return False
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
