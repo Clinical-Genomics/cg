@@ -117,11 +117,15 @@ class MutaccAutoConfig(CommonAppConfig):
 
 
 class BalsamicConfig(CommonAppConfig):
-    root: str
     balsamic_cache: str
+    bed_path: str
     binary_path: str
     conda_env: str
+    loqusdb_path: str
+    pon_path: str
+    root: str
     slurm: SlurmConfig
+    swegen_path: str
 
 
 class MutantConfig(BaseModel):
@@ -197,8 +201,6 @@ class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
-    bed_path: str
-    pon_path: str
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings

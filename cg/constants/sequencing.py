@@ -40,3 +40,10 @@ class SequencingMethod(StrEnum):
     WES: str = "wes"
     WGS: str = "wgs"
     WTS: str = "wts"
+
+
+class Variants(StrEnum):
+    """Type of variants."""
+
+    SNV: str = "snv"
+    SV: str = "sv"
