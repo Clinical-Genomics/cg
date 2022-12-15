@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from cg.store import models
@@ -29,3 +31,9 @@ def fixture_microsalt_case(
         data_analysis=Pipeline.MICROSALT,
     )
     return case
+
+
+@pytest.fixture(name="destination_path")
+def fixture_destination_path() -> Path:
+    """Retyrbs a dummy path."""
+    return Path("path", "to", "destination")
