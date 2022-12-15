@@ -1,4 +1,4 @@
-"""Fixtures for cli compress functions"""
+"""Fixtures for cli compress functions."""
 
 import datetime as dt
 from datetime import datetime
@@ -13,39 +13,6 @@ from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
-
-
-class MockCompressAPI(CompressAPI):
-    """Mock out necessary functions for running the compress CLI functions."""
-
-    def __init__(self):
-        """initialize mock"""
-        super().__init__(hk_api=None, crunchy_api=None, demux_root="")
-        self.ntasks = 12
-        self.mem = 50
-        self.fastq_compression_success = True
-        self.spring_decompression_success = True
-        self.dry_run = False
-
-    def set_dry_run(self, dry_run: bool):
-        """Update dry run"""
-        self.dry_run = dry_run
-
-    def compress_fastq(self, sample_id: str, dry_run: bool = False):
-        """Return if compression was succesfull"""
-        _ = sample_id, dry_run
-        return self.fastq_compression_success
-
-    def decompress_spring(self, sample_id: str, dry_run: bool = False):
-        """Return if decompression was succesfull"""
-        _ = sample_id, dry_run
-        return self.spring_decompression_success
-
-
-@pytest.fixture(name="compress_api")
-def fixture_compress_api():
-    """Return a compress context"""
-    return MockCompressAPI()
 
 
 @pytest.fixture(scope="function", name="real_crunchy_api")
@@ -96,39 +63,6 @@ class CaseInfo:
         self.application_tag = kwargs["application_tag"]
 
 
-@pytest.fixture(name="compress_case_info")
-def fixture_compress_case_info(
-    case_id,
-    family_name,
-    timestamp,
-    later_timestamp,
-    wgs_application_tag,
-):
-    """Returns a object with information about a case"""
-    return CaseInfo(
-        case_id=case_id,
-        family_name=family_name,
-        timestamp=timestamp,
-        later_timestamp=later_timestamp,
-        application_tag=wgs_application_tag,
-    )
-
-
-@pytest.fixture(name="populated_compress_store")
-def fixture_populated_compress_store(store, helpers, compress_case_info, analysis_family):
-    """Return a store populated with a completed analysis"""
-    # Make sure that there is a case where anaylsis is completer
-    helpers.ensure_case_from_dict(
-        store,
-        case_info=analysis_family,
-        app_tag=compress_case_info.application_tag,
-        ordered_at=compress_case_info.timestamp,
-        completed_at=compress_case_info.later_timestamp,
-    )
-
-    return store
-
-
 @pytest.fixture(name="populated_compress_multiple_store")
 def fixture_populated_compress_multiple_store(
     store,
@@ -167,14 +101,6 @@ def fixture_populated_compress_multiple_store(
 
 
 # Context fixtures
-@pytest.fixture(name="compress_context")
-def fixture_base_compress_context(
-    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
-) -> CGConfig:
-    """Return a compress context"""
-    cg_config_object.meta_apis["compress_api"] = compress_api
-    cg_config_object.status_db_ = store
-    return cg_config_object
 
 
 @pytest.fixture(name="store_fastq_context")
@@ -195,17 +121,6 @@ def fixture_populated_multiple_compress_context(
     # Make sure that there is a case where anaylis is completer
     cg_config_object.meta_apis["compress_api"] = compress_api
     cg_config_object.status_db_ = populated_compress_multiple_store
-    return cg_config_object
-
-
-@pytest.fixture(name="populated_compress_context")
-def fixture_populated_compress_context(
-    compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
-) -> CGConfig:
-    """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a case where analysis is completed
-    cg_config_object.meta_apis["compress_api"] = compress_api
-    cg_config_object.status_db_ = populated_compress_store
     return cg_config_object
 
 

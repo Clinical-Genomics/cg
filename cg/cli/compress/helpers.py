@@ -23,8 +23,8 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
         LOG.error(f"Could not find case {case_id}")
         raise CaseNotFoundError("")
 
-    for link_obj in case.links:
-        yield link_obj.sample.internal_id
+    for link in case.links:
+        yield link.sample.internal_id
 
 
 def update_compress_api(
