@@ -392,14 +392,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         )
         return qc_pass
 
-    def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict, qc_pass: bool) -> None:
+    def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict) -> None:
         """Creates a QC_done when a QC check is performed."""
-        if qc_pass:
-            filename: str = "QC_done_pass.txt"
-        else:
-            filename: str = "QC_done_fail.txt"
-
-        with open(os.path.join(run_dir_path, filename), "w") as file:
+        with open(os.path.join(run_dir_path, "QC_done.txt"), "w") as file:
             for sample_dict in failed_samples.items():
                 file.write(f"{sample_dict[0].internal_id}: {json.dumps(sample_dict[1])} \n")
 
