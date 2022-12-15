@@ -2,6 +2,7 @@
 import click
 from cgmodels.cg.constants import Pipeline, StrEnum
 
+from cg.constants.sequencing import Sequencers
 from cg.utils.date import get_date
 
 
@@ -31,9 +32,11 @@ CAPTUREKIT_OPTIONS = (
 
 class CaseActions(StrEnum):
     ANALYZE: str = "analyze"
+    HOLD: str = "hold"
+    RUNNING: str = "running"
 
 
-CASE_ACTIONS = ("analyze", "running", "hold")
+CASE_ACTIONS = (CaseActions.ANALYZE, CaseActions.RUNNING, CaseActions.HOLD)
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
@@ -50,12 +53,26 @@ CONTROL_OPTIONS = ("", "negative", "positive")
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
-FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
+class FlowCellStatus(StrEnum):
+    ONDISK: str = "ondisk"
+    REMOVED: str = "removed"
+    REQUESTED: str = "requested"
+    PROCESSING: str = "processing"
+    RETRIEVED: str = "retrieved"
+
+
+FLOWCELL_STATUS = (
+    FlowCellStatus.ONDISK,
+    FlowCellStatus.REMOVED,
+    FlowCellStatus.REQUESTED,
+    FlowCellStatus.PROCESSING,
+    FlowCellStatus.RETRIEVED,
+)
 
 FLOWCELL_Q30_THRESHOLD = {
-    "hiseqx": 75,
-    "hiseqga": 80,
-    "novaseq": 75,
+    Sequencers.HISEQX: 75,
+    Sequencers.HISEQGA: 80,
+    Sequencers.NOVASEQ: 75,
 }
 
 
@@ -126,30 +143,8 @@ class DataDelivery(StrEnum):
     STATINA: str = "statina"
 
 
-class FlowCellStatus(StrEnum):
-    ONDISK: str = "ondisk"
-    REMOVED: str = "removed"
-    REQUESTED: str = "requested"
-    PROCESSING: str = "processing"
-    RETRIEVED: str = "retrieved"
-
-
 class HastaSlurmPartitions(StrEnum):
     DRAGEN: str = "dragen"
-
-
-class HousekeeperTags(StrEnum):
-    FASTQ: str = "fastq"
-    SAMPLESHEET: str = "samplesheet"
-    SPRING: str = "spring"
-    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
-
-
-class Sequencers(StrEnum):
-    HISEQX: str = "hiseqx"
-    HISEQGA: str = "hiseqga"
-    NOVASEQ: str = "novaseq"
-    ALL: str = "all"
 
 
 class FileExtensions(StrEnum):
@@ -161,6 +156,14 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+
+
+class APIMethods(StrEnum):
+    POST: str = "POST"
+    PUT: str = "PUT"
+    GET: str = "GET"
+    DELETE: str = "DELETE"
+    PATCH: str = "PATCH"
 
 
 DRY_RUN = click.option(

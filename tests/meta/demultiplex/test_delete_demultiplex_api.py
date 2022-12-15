@@ -72,7 +72,7 @@ def test_get_presence_status_status_db(
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
     helpers.add_flowcell(
-        store=wipe_demux_api.status_db, flowcell_id=flow_cell_id, sequencer_type="novaseq"
+        store=wipe_demux_api.status_db, flow_cell_id=flow_cell_id, sequencer_type="novaseq"
     )
     populated_presence: bool = wipe_demux_api.status_db_presence
 
@@ -179,10 +179,9 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     flow_cell_full_name: str,
     populated_flow_cell_store: Store,
     sample_level_housekeeper_api: HousekeeperAPI,
-    tmp_fastq_paths: List[Path],
 ):
-    """Test function to remove fastqs from Housekeeper when there are only files on sample level
-    (not on flow cell name)
+    """Test removing fastqs from Housekeeper when there are only files on sample level
+    (not on flow cell name).
     """
 
     caplog.set_level(logging.INFO)
@@ -190,8 +189,6 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     cg_context.status_db_ = populated_flow_cell_store
 
     # GIVEN a DeleteDemuxAPI with a HousekeeperAPI with no files with flow cell name as a tag
-
-    sample_level_files: List[Path] = tmp_fastq_paths
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
         config=cg_context,
@@ -212,10 +209,8 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
         in caplog.text
     )
 
-    # AND you should be notified that there were fastq files removed on sample level
-
-    for file in sample_level_files:
-        assert f"{file.as_posix()} deleted" in caplog.text
+    # THEN you should be notified that there were fastq files removed on sample level
+    assert "Deleting file" in caplog.text
 
 
 def test_delete_flow_cell_housekeeper_flowcell_name(
@@ -225,10 +220,9 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     flow_cell_name_housekeeper_api: HousekeeperAPI,
     flow_cell_full_name: str,
     populated_flow_cell_store: Store,
-    tmp_fastq_paths: List[Path],
     tmp_sample_sheet_path: Path,
 ):
-    """Test function to remove files from Housekeeper using flow cell name as a tag"""
+    """Test removing files from Housekeeper using flow cell name as a tag."""
 
     caplog.set_level(logging.INFO)
     cg_context.housekeeper_api_ = flow_cell_name_housekeeper_api
@@ -236,7 +230,6 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
 
     # GIVEN
 
-    fastq_files: List[Path] = tmp_fastq_paths
     sample_sheet_file: Path = tmp_sample_sheet_path
 
     wipe_demultiplex_api: DeleteDemuxAPI = DeleteDemuxAPI(
@@ -258,8 +251,9 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
         not in caplog.text
     )
     assert f"Deleted {sample_sheet_file.as_posix()} from housekeeper" in caplog.text
-    for fastq_file in fastq_files:
-        assert f"{fastq_file.as_posix()} deleted" in caplog.text
+
+    # THEN you should be notified that there were fastq files removed on sample level
+    assert "Deleting file" in caplog.text
 
 
 def test_delete_flow_cell_statusdb(
@@ -313,7 +307,7 @@ def test_delete_flow_cell_hasta(
 
     caplog.set_level(logging.INFO)
     wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
-    flow_cell_obj: Flowcell = wipe_demux_api.status_db.flowcell(wipe_demux_api.flow_cell_name)
+    flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell(wipe_demux_api.flow_cell_name)
     wipe_demux_api.set_dry_run(dry_run=False)
 
     # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"

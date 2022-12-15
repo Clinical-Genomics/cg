@@ -1,4 +1,4 @@
-"""cg module for cleaning databases and files"""
+"""cg module for cleaning databases and files."""
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -23,8 +23,10 @@ from cg.cli.workflow.commands import (
     rsync_past_run_dirs,
     microsalt_past_run_dirs,
 )
-from cg.constants import FlowCellStatus, HousekeeperTags
-from cg.constants.constants import DRY_RUN, Sequencers
+from cg.constants import FlowCellStatus
+from cg.constants.constants import DRY_RUN
+from cg.constants.sequencing import Sequencers
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
@@ -99,12 +101,13 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
                 housekeeper_api.commit()
 
 
-def _get_confirm_question(bundle, file_obj):
-    if file_obj.is_included:
-        question = f"{bundle}: remove file from file system and database: {file_obj.full_path}"
-    else:
-        question = f"{bundle}: remove file from database: {file_obj.full_path}"
-    return question
+def _get_confirm_question(bundle, file_obj) -> str:
+    """Return confirmation question."""
+    return (
+        f"{bundle}: remove file from file system and database: {file_obj.full_path}"
+        if file_obj.is_included
+        else f"{bundle}: remove file from database: {file_obj.full_path}"
+    )
 
 
 @clean.command("scout-finished-cases")
@@ -253,11 +256,11 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
     search = f"%{demux_api.out_dir}%"
-    fastq_files_in_housekeeper: Query = housekeeper_api.files(tags=[HousekeeperTags.FASTQ]).filter(
-        hk_models.File.path.like(search)
-    )
+    fastq_files_in_housekeeper: Query = housekeeper_api.files(
+        tags=[SequencingFileTag.FASTQ]
+    ).filter(hk_models.File.path.like(search))
     spring_files_in_housekeeper: Query = housekeeper_api.files(
-        tags=[HousekeeperTags.SPRING]
+        tags=[SequencingFileTag.SPRING]
     ).filter(hk_models.File.path.like(search))
     for flow_cell_dir in demux_api.out_dir.iterdir():
         flow_cell_obj: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(

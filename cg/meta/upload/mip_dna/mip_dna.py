@@ -16,6 +16,7 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.upload.upload_api import UploadAPI
 from cg.store import models
+from cg.apps.tb import TrailblazerAPI
 
 
 LOG = logging.getLogger(__name__)

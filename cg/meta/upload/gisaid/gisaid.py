@@ -147,7 +147,7 @@ class GisaidAPI:
             return
 
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            case_id=case_id, file=gisaid_fasta_path, tags=["gisaid-fasta", case_id]
+            bundle_name=case_id, file=gisaid_fasta_path, tags=["gisaid-fasta", case_id]
         )
 
     def create_gisaid_csv(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
@@ -171,7 +171,7 @@ class GisaidAPI:
             return
 
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            case_id=case_id, file=gisaid_csv_path, tags=["gisaid-csv", case_id]
+            bundle_name=case_id, file=gisaid_csv_path, tags=["gisaid-csv", case_id]
         )
 
     def create_gisaid_log_file(self, case_id: str) -> None:
@@ -189,7 +189,7 @@ class GisaidAPI:
         if not log_file_path.exists():
             log_file_path.touch()
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            case_id=case_id, file=log_file_path, tags=["gisaid-log", case_id]
+            bundle_name=case_id, file=log_file_path, tags=["gisaid-log", case_id]
         )
 
     def create_gisaid_files_in_housekeeper(self, case_id: str) -> None:

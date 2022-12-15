@@ -2,8 +2,8 @@
 cg.meta.clean.flow_cell_run_directories.RunDirFlowCell."""
 from unittest import mock
 
-from cg.constants import HousekeeperTags
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 
 
@@ -36,7 +36,7 @@ def test_sequenced_date_from_statusdb(
 ):
     # GIVEN a flow cell with a sequenced_at date in statusdb
     flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
-    mock_statusdb.flowcell.return_value.sequenced_at = timestamp_yesterday
+    mock_statusdb.get_flow_cell.return_value.sequenced_at = timestamp_yesterday
 
     # WHEN determining the age of a flow cell
     result = flow_cell.sequenced_date
@@ -55,7 +55,7 @@ def test_sequenced_date_from_run_name(
 ):
     # GIVEN a flow cell that does not exist in statusdb
     flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
-    mock_statusdb.flowcell.return_value = None
+    mock_statusdb.get_flow_cell.return_value = None
 
     # WHEN determining the age of a flow cell
     result = flow_cell.sequenced_date
@@ -86,7 +86,7 @@ def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, flow_cell_path, 
 
     # THEN the sample sheet should be be added to Housekeeper
     flow_cell.hk.add_and_include_file_to_latest_version.assert_called_once_with(
-        case_id=flow_cell.id,
+        bundle_name=flow_cell.id,
         file=flow_cell.sample_sheet_path,
-        tags=[HousekeeperTags.ARCHIVED_SAMPLE_SHEET, flow_cell.id],
+        tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, flow_cell.id],
     )

@@ -1,13 +1,14 @@
 """Fixtures for cli compress functions"""
 
 import datetime as dt
+from datetime import datetime
 from pathlib import Path
 
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CompressionHkTags
+from cg.constants import FileExtensions, SequencingFileTag
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -239,11 +240,11 @@ def fixture_new_dir(project_dir: Path) -> Path:
 
 
 @pytest.fixture(name="spring_bundle")
-def fixture_spring_bundle(project_dir, timestamp, sample):
-    """Return a bundle with some spring info"""
-    spring_file = project_dir / "file.spring"
+def fixture_spring_bundle(project_dir: Path, timestamp: datetime, sample: str):
+    """Return a bundle with spring files."""
+    spring_file: Path = Path(project_dir, f"file{FileExtensions.SPRING}")
     spring_file.touch()
-    spring_meta_file = project_dir / "file.json"
+    spring_meta_file: Path = Path(project_dir, f"file{FileExtensions.JSON}")
     spring_meta_file.touch()
     hk_bundle_data = {
         "name": sample,
@@ -253,12 +254,12 @@ def fixture_spring_bundle(project_dir, timestamp, sample):
             {
                 "path": str(spring_file),
                 "archive": False,
-                "tags": [sample, CompressionHkTags.SPRING],
+                "tags": [sample, SequencingFileTag.SPRING],
             },
             {
                 "path": str(spring_meta_file),
                 "archive": False,
-                "tags": [sample, CompressionHkTags.SPRING_METADATA],
+                "tags": [sample, SequencingFileTag.SPRING_METADATA],
             },
         ],
     }
@@ -284,12 +285,12 @@ def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sampl
             {
                 "path": str(wrong_spring_file),
                 "archive": False,
-                "tags": [sample, CompressionHkTags.SPRING],
+                "tags": [sample, SequencingFileTag.SPRING],
             },
             {
                 "path": str(wrong_spring_meta_file),
                 "archive": False,
-                "tags": [sample, CompressionHkTags.SPRING_METADATA],
+                "tags": [sample, SequencingFileTag.SPRING_METADATA],
             },
         ],
     }

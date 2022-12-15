@@ -4,13 +4,12 @@ from pathlib import Path
 
 import pytest
 
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants.constants import FileFormat
 from cg.constants.pedigree import Pedigree
-from cg.constants.subject import RelationshipStatus, Gender, PhenotypeStatus
+from cg.constants.subject import Gender, PhenotypeStatus, RelationshipStatus
 from cg.io.controller import ReadFile
 from tests.mocks.process_mock import ProcessMock
-
-from cg.apps.scout.scoutapi import ScoutAPI
 
 
 class MockScoutApi(ScoutAPI):
@@ -26,6 +25,12 @@ def fixture_sample_dict() -> dict:
         "analysis_type": "wgs",
         "bam_path": Path("path", "to", "sample.bam").as_posix(),
         "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
+        "reviewer": {
+            "alignment": Path("path", "to", "expansionhunter.bam").as_posix(),
+            "alignment_index": Path("path", "to", "expansionhunter.bam.bai").as_posix(),
+            "vcf": Path("path", "to", "expansionhunter.vcf").as_posix(),
+            "catalog": Path("path", "to", "variant_catalog.json").as_posix(),
+        },
         "capture_kit": None,
         Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
         Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
