@@ -409,11 +409,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 }
                 LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
         else:
-            if not sample.sequencing_qc or not self.check_coverage_10x(sample.internal_id, qc_file):
-                failed_samples[sample] = {"Passed QC Reads": sample.sequencing_qc}
-                failed_samples[sample]["Passed Coverage 10X"] = self.check_coverage_10x(
-                    sample.internal_id, qc_file
-                )
+            reads_pass: bool = sample.sequencing_qc
+            coverage_10x_pass: bool = self.check_coverage_10x(sample.internal_id, qc_file)
+            if not reads_pass or not coverage_10x_pass:
+                failed_samples[sample] = {"Passed QC Reads": reads_pass}
+                failed_samples[sample]["Passed Coverage 10X"] = coverage_10x_pass
                 LOG.warning(f"Sample {sample.internal_id} failed QC.")
 
     def check_coverage_10x(self, sample_name: str, qc_file: Dict) -> bool:
@@ -423,8 +423,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
                 >= MicrosaltQC.COVERAGE_10X_THRESHOLD
             )
-        except TypeError:
-            LOG.debug(f"There is no 10X Coverage value for sample {sample_name}.")
+        except Exception as e:
+            LOG.error(
+                f"Coverage 10X couldn't be checked for sample {sample_name}, setting to fail."
+            )
+            LOG.error(f"see error {e}")
             return False
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
