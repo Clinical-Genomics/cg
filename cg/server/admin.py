@@ -1,14 +1,17 @@
 """Module for Flask-Admin views"""
 from gettext import ngettext, gettext
+from typing import List, Union
 
 from flask import redirect, request, session, url_for, flash
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
+from sqlalchemy.orm import Query
 
 from cg.constants.constants import DataDelivery, Pipeline, CaseActions
 from cg.server.ext import db
+from cg.store.models import Family
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -246,42 +249,29 @@ class FamilyView(BaseView):
         "Set to HOLD",
         "Are you sure you want to set the action for selected families to HOLD?",
     )
-    def action_set_hold(self, ids):
-        try:
-            query = db.Family.query.filter(db.Family.id.in_(ids))
-            for family in query.all():
-                family.action = CaseActions.HOLD
-
-            flash(
-                ngettext(
-                    "Families were set to HOLD.",
-                    f"{len(ids)} families were set to HOLD.",
-                    len(ids),
-                )
-            )
-            db.commit()
-        except Exception as ex:
-            if not self.handle_view_exception(ex):
-                raise
-
-            flash(gettext(f"Failed to set family action. {str(ex)}"))
+    def action_set_hold(self, ids: List[str]):
+        self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
 
     @action(
         "set_empty",
         "Set to Empty",
         "Are you sure you want to set the action for selected families to empty?",
     )
-    def action_set_empty(self, ids):
+    def action_set_empty(self, ids: List[str]):
+        self.set_action_for_batch(action=None, entry_ids=ids)
+
+    def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
         try:
-            query = db.Family.query.filter(db.Family.id.in_(ids))
+            query: Query = db.Family.query.filter(db.Family.id.in_(entry_ids))
+            family: Family
             for family in query.all():
-                family.action = None
+                family.action = action
 
             flash(
                 ngettext(
-                    "Families were set to Empty",
-                    f"{len(ids)} families were set to Empty.",
-                    len(ids),
+                    f"Families were set to {action}.",
+                    f"{len(entry_ids)} families were set to {action}.",
+                    len(entry_ids),
                 )
             )
             db.commit()
