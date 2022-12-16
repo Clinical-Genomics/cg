@@ -265,6 +265,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             try:
                 case_run_dir: Path = self.get_case_path(case_id=case.internal_id, cleaning=False)[0]
                 if not os.path.exists(os.path.join(case_run_dir, "QC_done.txt")):
+                    LOG.info(f"Performing QC on case {case.internal_id}")
                     if self.microsalt_qc(
                         case_id=case.internal_id,
                         run_dir_path=case_run_dir,
