@@ -1480,8 +1480,10 @@ def fixture_context_config(
             "root": str(mip_dir),
         },
         "rnafusion": {
-            "binary_path": "/path/to/bin",
+            "binary_path": "/path/to/bin/nextflow",
+            "conda_binary": "/path/to/bin/conda",
             "conda_env": "S_RNAFUSION",
+            "launch_directory": "/path/to/launchdir",
             "pipeline_path": "/pipeline/path",
             "profile": "myprofile",
             "references": "/path/to/references",
