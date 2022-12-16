@@ -5,7 +5,9 @@ Code to handle communications to the shell from CG.
 import copy
 import logging
 import subprocess
+from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Dict
 
 from cg.constants.process import RETURN_SUCCESS
 
@@ -26,6 +28,7 @@ class Process:
         config: str = None,
         config_parameter: str = "--config",
         environment: str = None,
+        launch_directory: str = None,
     ):
         """
         Args:
@@ -38,8 +41,10 @@ class Process:
         self.conda_binary = conda_binary
         self.config = config
         self.environment = environment
+        self.launch_directory = launch_directory
         LOG.debug("Initialising Process with binary: %s", self.binary)
         self.base_call = [self.binary]
+
         if conda_binary:
             LOG.debug(f"Activating environment with conda run for binary: {self.conda_binary}")
             self.base_call.insert(0, f"{self.conda_binary} run --name {self.environment}")
@@ -48,9 +53,21 @@ class Process:
             self.base_call.insert(0, f"source activate {self.environment};")
         if config:
             self.base_call.extend([config_parameter, config])
+        if launch_directory:
+            # if not Path(self.launch_directory).exists():
+            #     raise (FileNotFoundError(f"Not existing launch directory: {self.launch_directory}"))
+            self.base_call.insert(0, f"cd {self.launch_directory};")
+
         LOG.debug(f"Use base call {self.base_call}")
         self._stdout = ""
         self._stderr = ""
+
+    def export_variables(self, export: Dict[str, str]) -> None:
+        """Export variables prior execution."""
+        if export:
+            self.base_call.insert(
+                0, " ".join([f"export {variable}={value};" for variable, value in export.items()])
+            )
 
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
         """Execute a command in the shell.
