@@ -407,9 +407,9 @@ class MockHousekeeperAPI:
         """Get latest version of a bundle or log."""
         last_version = self.last_version(bundle_name)
         if not last_version:
-            LOG.warning("No bundle found for %s in housekeeper", bundle_name)
+            LOG.warning(f"No bundle found for {bundle_name} in Housekeeper")
             return None
-        LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
+        LOG.debug(f"Found version obj for {bundle_name}: {repr(last_version)}")
         return last_version
 
     def get_root_dir(self):

@@ -219,9 +219,9 @@ class HousekeeperAPI:
         """Get the latest version of a Housekeeper bundle."""
         last_version: Version = self.last_version(bundle_name)
         if not last_version:
-            LOG.warning("No bundle found for %s in housekeeper", bundle_name)
+            LOG.warning(f"No bundle found for {bundle_name} in Housekeeper")
             return None
-        LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
+        LOG.debug(f"Found Housekeeper version object for {bundle_name}: {repr(last_version)}")
         return last_version
 
     def get_create_version(self, bundle: str) -> Version:

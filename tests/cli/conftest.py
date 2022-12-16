@@ -1,6 +1,9 @@
 """Fixtures for cli tests."""
+from pathlib import Path
 
 import pytest
+
+from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
@@ -8,6 +11,7 @@ from cg.store import Store
 from click.testing import CliRunner
 
 from tests.cli.compress.conftest import CaseInfo
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="cli_runner")
@@ -126,5 +130,48 @@ def fixture_populated_compress_context(
     """Return a compress context populated with a completed analysis."""
     # Make sure that there is a case where analysis is completed
     cg_config_object.meta_apis["compress_api"] = compress_api
+    cg_config_object.status_db_ = populated_compress_store
+    return cg_config_object
+
+
+@pytest.fixture(name="real_crunchy_api")
+def fixture_real_crunchy_api(crunchy_config_dict):
+    """Return Crunchy API."""
+    _api = CrunchyAPI(crunchy_config_dict)
+    _api.set_dry_run(True)
+    yield _api
+
+
+@pytest.fixture(name="real_compress_api")
+def fixture_real_compress_api(
+    demultiplexed_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
+) -> CompressAPI:
+    """Return a compress API context."""
+    return CompressAPI(
+        crunchy_api=real_crunchy_api,
+        hk_api=housekeeper_api,
+        demux_root=demultiplexed_runs.as_posix(),
+    )
+
+
+@pytest.fixture(name="real_populated_compress_fastq_api")
+def fixture_real_populated_compress_fastq_api(
+    real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
+) -> CompressAPI:
+    """Return real populated compress API."""
+    helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
+
+    return real_compress_api
+
+
+@pytest.fixture(name="real_populated_compress_context")
+def fixture_real_populated_compress_context(
+    real_populated_compress_fastq_api: CompressAPI,
+    populated_compress_store: Store,
+    cg_config_object: CGConfig,
+) -> CGConfig:
+    """Return a compress context populated with a completed analysis"""
+    # Make sure that there is a case where analysis is completed
+    cg_config_object.meta_apis["compress_api"] = real_populated_compress_fastq_api
     cg_config_object.status_db_ = populated_compress_store
     return cg_config_object

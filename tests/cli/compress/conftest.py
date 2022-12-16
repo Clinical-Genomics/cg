@@ -6,41 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from cg.apps.crunchy import CrunchyAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from tests.store_helpers import StoreHelpers
-
-
-@pytest.fixture(scope="function", name="real_crunchy_api")
-def fixture_real_crunchy_api(crunchy_config_dict):
-    """crunchy api fixture"""
-    _api = CrunchyAPI(crunchy_config_dict)
-    _api.set_dry_run(True)
-    yield _api
-
-
-@pytest.fixture(scope="function", name="real_compress_api")
-def fixture_real_compress_api(
-    demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
-) -> CompressAPI:
-    """Return a compress context"""
-    return CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=demultiplex_runs.as_posix()
-    )
-
-
-@pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
-def fixture_real_populated_compress_fastq_api(
-    real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
-) -> CompressAPI:
-    """Populated compress api fixture"""
-    helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
-
-    return real_compress_api
 
 
 @pytest.fixture(name="samples")
@@ -121,19 +90,6 @@ def fixture_populated_multiple_compress_context(
     # Make sure that there is a case where anaylis is completer
     cg_config_object.meta_apis["compress_api"] = compress_api
     cg_config_object.status_db_ = populated_compress_multiple_store
-    return cg_config_object
-
-
-@pytest.fixture(name="real_populated_compress_context")
-def fixture_real_populated_compress_context(
-    real_populated_compress_fastq_api: CompressAPI,
-    populated_compress_store: Store,
-    cg_config_object: CGConfig,
-) -> CGConfig:
-    """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a case where analysis is completed
-    cg_config_object.meta_apis["compress_api"] = real_populated_compress_fastq_api
-    cg_config_object.status_db_ = populated_compress_store
     return cg_config_object
 
 

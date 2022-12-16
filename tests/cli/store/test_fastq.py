@@ -2,7 +2,13 @@ import logging
 
 from click.testing import CliRunner
 
-from cg.cli.store.fastq import store_sample, store_case, store_flow_cell, store_ticket
+from cg.cli.store.fastq import (
+    store_sample,
+    store_case,
+    store_flow_cell,
+    store_ticket,
+    store_bundles,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
@@ -146,7 +152,6 @@ def test_store_flow_cell(
 def test_store_ticket(
     caplog,
     cli_runner: CliRunner,
-    flow_cell_id: str,
     mocker,
     populated_compress_context: CGConfig,
     sample_id: str,
@@ -168,3 +173,28 @@ def test_store_ticket(
 
     # THEN assert that we log that we stored FASTQ files
     assert f"Stored fastq files for {sample_id}" in caplog.text
+
+
+def test_store_bundles(
+    caplog,
+    cli_runner: CliRunner,
+    flow_cell_id: str,
+    helpers,
+    mocker,
+    real_populated_compress_context: CGConfig,
+    sample_id: str,
+):
+    """Test to run store ticket command."""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a context with a sample
+    sample: Sample = real_populated_compress_context.status_db.sample(sample_id)
+
+    # GIVEN samples objects on a flow cell
+    mocker.patch.object(Store, "get_samples_from_flow_cell")
+    Store.get_samples_from_flow_cell.return_value = [sample]
+
+    # WHEN running the store ticket command
+    res = cli_runner.invoke(store_bundles, [flow_cell_id], obj=real_populated_compress_context)
+
+    # THEN assert that the command exits successfully
+    assert res.exit_code == EXIT_SUCCESS
