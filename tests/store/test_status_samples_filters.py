@@ -56,9 +56,7 @@ def test_sample_prep_category(sample_store: Store, helpers, sample_id: str):
     """Test sample prep category extraction."""
 
     # GIVEN a sample ...
-    sample: models.Sample = helpers.add_sample(
-        sample_store, internal_id=sample_id
-    )
+    sample: models.Sample = helpers.add_sample(sample_store, internal_id=sample_id)
 
     # GIVEN that the sample has wgs prep category
 

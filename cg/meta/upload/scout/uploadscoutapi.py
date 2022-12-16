@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, TypedDict
 
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -92,7 +92,7 @@ class UploadScoutAPI:
             version_obj=version_obj, tags={tag_name}
         )
         if uploaded_config_file:
-            LOG.info("Found config file: %s", uploaded_config_file)
+            LOG.info(f"Found config file: {uploaded_config_file}")
             if not delete:
                 raise FileExistsError("Upload config already exists")
             self.housekeeper.delete_file(uploaded_config_file.id)
@@ -144,9 +144,19 @@ class UploadScoutAPI:
 
         return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
+
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique dna cases related to a RNA case"""
         case_obj: models.Family = self.status_db.family(case_id)
+        rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = self.create_rna_dna_sample_case_map(rna_case=case_obj)
+        dna_sample_case_dict: Dict[str, List[str]]
+        unique_dna_cases_related_to_rna_case: Set[str] = set()
+        for dna_sample_case_dict in rna_dna_sample_case_map:
+            case_list: List[str]
+            for case_list in dna_sample_case_dict.values():
+                for case in case_list:
+                    unique_dna_cases_related_to_rna_case.update(case)
+
 
         return {
             dna_case
@@ -315,15 +325,6 @@ class UploadScoutAPI:
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
-    @staticmethod
-    def _get_sample(case: models.Family, subject_id: str) -> Optional[models.Sample]:
-        """Get sample of a case for a subject_id."""
-
-        link: models.FamilySample
-        for link in case.links:
-            sample: models.Sample = link.sample
-            if sample.subject_id == subject_id:
-                return sample
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
 
@@ -351,6 +352,169 @@ class UploadScoutAPI:
         }
 
         return config_builders[analysis.pipeline]
+
+
+
+class SubjectIdCaseMapper:
+
+    """Class to map case to other cases by subject id."""
+
+    def __init__(self, case_id: str, subject_id: str, status_db: Store):
+        self.case: models.Family = status_db.family(case_id)
+        self.subject_id: str = subject_id
+        self.status_db: Store = status_db
+
+    def _filter_cases_with_subject_id(self, is_tumour: Optional[bool]) -> List[models.Family]:
+        """Get all cases by subject id."""
+        return self.status_db.get_cases_with_subject_id(customer_id=self.subject_id,subject_id=self.subject_id,is_tumour=is_tumour)
+    
+    @staticmethod
+    def 
+
+    [
+            sample
+            for sample in subject_id_samples
+            if sample.prep_category
+            in [
+                PrepCategory.WHOLE_GENOME_SEQUENCING.value,
+                PrepCategory.TARGETED_GENOME_SEQUENCING.value,
+                PrepCategory.WHOLE_EXOME_SEQUENCING.value,
+            ]
+        ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    class RnaToDnaCaseMapper:
+        """Class to map RNA cases to DNA cases by subject id."""
+
+        def __init__(self, rna_case: models.Family):
+            self.rna_case: models.Family = rna_case
+
+        class DnaSampleCaseMap(TypedDict):
+            """DNA sample case map."""
+
+            dna_sample_id: str
+            dna_cases: List[str]
+
+
+        class RnaDnaSampleCaseMap(TypedDict):
+            """RNA-DNA sample case map."""
+
+            rna_sample_id: str
+            dna_cases_related_to_rna_case: DnaSampleCaseMap   
+
+
+                 
+
+        @classmethod
+        def get_rna_dna_sample_case_map(cls, rna_case: models.Family) -> RnaDnaSampleCaseMap:
+            """Get RNA-DNA sample case map."""
+            rna_dna_sample_case_map: cls.RnaDnaSampleCaseMap = {}
+            for link_obj in rna_case.links:
+                rna_sample_id: str = link_obj.sample.internal_id
+                rna_dna_sample_case_map[rna_sample_id] = cls.get_dna_sample_case_map(
+                    rna_case=rna_case, rna_sample_id=rna_sample_id
+                )
+
+            return rna_dna_sample_case_map
+
+
+        @classmethod
+        def get_dna_cases_relatated_to_sample_subject_id(
+            cls, sample_obj: models.Sample, status_db: Store
+        ):
+            """Get DNA cases related to a subject id."""
+            dna_cases: List[str] = []
+
+            samples_with_sample_subject_id: List[models.Sample] = status_db.status_db.samples_by_subject_id(
+            customer_id=sample_obj.customer.internal_id,
+            subject_id=sample_obj.subject_id,
+            is_tumour=sample_obj.is_tumour
+            )
+
+            for link_obj in sample_obj.links:
+                if link_obj.prep_category in [PrepCategory.WHOLE_GENOME_SEQUENCING.value,PrepCategory.TARGETED_GENOME_SEQUENCING.value,PrepCategory.WHOLE_EXOME_SEQUENCING.value]:
+                    dna_cases.append(link_obj.family.internal_id)
+                
+        def get_sampl
+
+
+        @classmethod
+        def get_dna_sample_case_map(
+            cls, rna_case: models.Family, rna_sample_id: str
+        ) -> RnaDnaSampleCaseMap.DnaSampleCaseMap:
+            """Get DNA sample case map."""
+            dna_sample_case_map: cls.RnaDnaSampleCaseMap.DnaSampleCaseMap = {}
+            for dna_sample_id in cls.get_dna_sample_ids(rna_case=rna_case):
+                dna_cases: List[str] = cls.get_dna_cases(
+                    rna_case=rna_case, rna_sample_id=rna_sample_id, dna_sample_id=dna_sample_id
+                )
+                dna_sample_case_map[dna_sample_id] = dna_cases
+
+            return dna_sample_case_map
+        )
+
+        @classmethod
+        def get_dna_sample_ids(cls, rna_case: models.Family) -> List[str]:
+            """Get DNA sample ids."""
+            dna_sample_ids: List[str] = []
+            for link_obj in rna_case.links:
+                for dna_sample_id in link_obj.sample.links:
+                    dna_sample_ids.append(dna_sample_id)
+
+            return dna_sample_ids
+
+        @classmethod
+        def get_dna_cases(
+            cls, rna_case: models.Family, rna_sample_id: str, dna_sample_id: str
+        ) -> List[str]:
+            """Get DNA cases."""
+            dna_cases: List[str] = []
+            for link_obj in rna_case.links:
+                if link_obj.sample.internal_id == rna_sample_id:
+                    for dna_sample_obj in link_obj.sample.links:
+                        if dna_sample_obj.internal_id == dna_sample_id:
+                            dna_cases.append(dna_sample_obj.family.internal_id)
+
+            return dna_cases
+
+    
+    
+    
+    
+    
+    
+    # we get a rna case
+    # the case hase samples on it
+    # those sammples have a subject id# those subject its can exist in another case
+    # we want to get the dna case that is related to the rna case
+    # but only if those cases are balsamic, dna or balsamic_umi
+
+
 
     def create_rna_dna_sample_case_map(
         self, rna_case: models.Family
@@ -384,7 +548,7 @@ class UploadScoutAPI:
         """Maps an RNA sample to a DNA sample based on subject id."""
         if not rna_sample.subject_id:
             raise CgDataError(
-                f"Failed to link RNA samepl {rna_sample.internal_id} to dna samples - subject_id field is empty"
+                f"Failed to link RNA sample {rna_sample.internal_id} to dna samples - subject_id field is empty"
             )
 
         samples_by_subject_id: List[models.Sample] = self.status_db.samples_by_subject_id(

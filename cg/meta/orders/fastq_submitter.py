@@ -111,10 +111,7 @@ class FastqSubmitter(Submitter):
                         priority=case["priority"],
                         ticket=ticket,
                     )
-                if (
-                    not new_sample.is_tumour
-                    and new_sample.prep_category == "wgs"
-                ):
+                if not new_sample.is_tumour and new_sample.prep_category == "wgs":
                     self.create_maf_case(sample_obj=new_sample)
                 case_obj.customer = customer_obj
                 new_relationship = self.status.relate_sample(

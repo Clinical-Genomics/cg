@@ -135,6 +135,9 @@ class UploadGenotypesAPI(object):
         samples: List[models.Sample] = case_obj.samples
         for sample in samples:
             sample_prep_category: str = sample.prep_category
-            if not sample.is_tumour and PrepCategory.WHOLE_GENOME_SEQUENCING == sample_prep_category:
-                    return True
+            if (
+                not sample.is_tumour
+                and PrepCategory.WHOLE_GENOME_SEQUENCING == sample_prep_category
+            ):
+                return True
         return False

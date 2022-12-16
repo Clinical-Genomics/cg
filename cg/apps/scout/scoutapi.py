@@ -121,7 +121,12 @@ class ScoutAPI:
         except CalledProcessError:
             LOG.warning(f"Could not find case {case_id} in scout")
             return []
-        variants: List[Variant] = [Variant(**variant_info) for variant_info in ReadStream.get_content_from_stream(file_format=FileFormat.JSON, stream=self.process.stdout)]
+        variants: List[Variant] = [
+            Variant(**variant_info)
+            for variant_info in ReadStream.get_content_from_stream(
+                file_format=FileFormat.JSON, stream=self.process.stdout
+            )
+        ]
 
         return variants
 

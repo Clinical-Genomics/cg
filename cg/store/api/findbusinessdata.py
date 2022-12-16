@@ -166,6 +166,19 @@ class FindBusinessDataHandler(BaseHandler):
     def get_cases_from_ticket(self, ticket: str) -> Query:
         return self.Family.query.filter(models.Family.tickets.contains(ticket))
 
+    def get_cases_with_subject_id(
+        self, customer_id: str, subject_id: str, is_tumour: Optional[bool] = None
+    ) -> List[models.Family]:
+        """Fetch all cases related to samples with a specific subject id."""
+        samples_by_subject_id: List[models.Sample] = self.samples_by_subject_id(
+            customer_id=customer_id, subject_id=subject_id, is_tumour=is_tumour
+        )
+        cases_with_subject_id: Set[models.Family] = {}
+        for sample in samples_by_subject_id:
+            cases_with_subject_id.update([link.family for link in sample.links])
+
+        return list(cases_with_subject_id)
+
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""
         return (
@@ -342,7 +355,7 @@ class FindBusinessDataHandler(BaseHandler):
         return records.order_by(models.Sample.created_at.desc())
 
     def samples_by_subject_id(
-        self, customer_id: str, subject_id: str, is_tumour: bool = None
+        self, customer_id: str, subject_id: str, is_tumour: Optional[bool] = None
     ) -> List[models.Sample]:
         """Get samples of customer with given subject_id.
 
