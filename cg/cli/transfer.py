@@ -1,7 +1,9 @@
 """Transfer CLI."""
 import logging
-
 import click
+
+from pathlib import Path
+
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -28,12 +30,24 @@ def transfer_group(context: CGConfig):
 
 @transfer_group.command()
 @click.argument("flow-cell-name")
+@click.option(
+    "-d",
+    "--demultiplexed-flow-cell-dir",
+    type=click.Path(exists=True, file_okay=False),
+    required=True,
+    help="Path to flow cells",
+)
+@click.option("--store/--no-store", default=True, help="Store samples of flow cell in  Housekeeper")
 @click.pass_obj
-def flow_cell(context: CGConfig, flow_cell_name: str):
+def flow_cell(
+    context: CGConfig, demultiplexed_flow_cell_dir: Path, flow_cell_name: str, store: bool = True
+):
     """Populate results from a flow cell."""
     status_db: Store = context.status_db
     transfer_api = context.meta_apis["transfer_flow_cell_api"]
-    new_record: models.Flowcell = transfer_api.transfer(flow_cell_name)
+    new_record: models.Flowcell = transfer_api.transfer(
+        flow_cell_dir=demultiplexed_flow_cell_dir, flow_cell_id=flow_cell_name, store=store
+    )
     status_db.add_commit(new_record)
     LOG.info(f"flow cell added: {new_record}")
 
