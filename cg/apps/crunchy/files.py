@@ -82,18 +82,34 @@ def get_spring_archive_files(crunchy_metadata: CrunchyMetadata) -> Dict[str, Cru
     return archive_files
 
 
-def update_metadata_date(spring_metadata_path: Path) -> None:
-    """Update date in the SPRING metadata file to today date"""
-
-    now: datetime = get_date()
-    spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_path)
-    LOG.info("Adding today date to SPRING metadata file")
-    for file_info in spring_metadata.files:
-        file_info.updated = now.date()
-
+def update_metadata_content(spring_metadata: CrunchyMetadata, spring_metadata_path: Path) -> None:
+    """Update the file on disk."""
     content: dict = ReadStream.get_content_from_stream(
         file_format=FileFormat.JSON, stream=spring_metadata.json(exclude_none=True)
     )
     WriteFile.write_file_from_content(
         content=content["files"], file_format=FileFormat.JSON, file_path=spring_metadata_path
+    )
+
+
+def update_metadata_date(spring_metadata_path: Path) -> None:
+    """Update date in the SPRING metadata file to today date"""
+    now: datetime = get_date()
+    spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_path)
+    LOG.info("Adding today date to SPRING metadata file")
+    for file_info in spring_metadata.files:
+        file_info.updated = now.date()
+    update_metadata_content(
+        spring_metadata=spring_metadata, spring_metadata_path=spring_metadata_path
+    )
+
+
+def update_metadata_paths(spring_metadata_path: Path, new_parent_path: Path) -> None:
+    """Update paths for file in SPRING metadatafile."""
+    spring_metadata: CrunchyMetadata = get_crunchy_metadata(metadata_path=spring_metadata_path)
+    LOG.info(f"Updating file paths in SPRING metadata file: {spring_metadata_path}")
+    for file in spring_metadata.files:
+        file.path = Path(new_parent_path, Path(file.path).name)
+    update_metadata_content(
+        spring_metadata=spring_metadata, spring_metadata_path=spring_metadata_path
     )

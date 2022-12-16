@@ -1,12 +1,17 @@
 import logging
+from pathlib import Path
 from typing import Iterable, List
 
 import click
-from housekeeper.store.models import Version
+from cgmodels.crunchy.metadata import CrunchyMetadata
+from housekeeper.store.models import Version, File
 
+from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_paths
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
-from cg.constants.constants import DRY_RUN
+from cg.constants import SequencingFileTag
+from cg.constants.constants import DRY_RUN, FileFormat
 from cg.exc import CaseNotFoundError
+from cg.io.controller import ReadFile, WriteFile, ReadStream
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -101,16 +106,14 @@ def store_bundles(context: click.Context, flow_cell_id: str, dry_run: bool) -> N
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     status_db: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
-    flow_cell_hk_bundle_version: Version = compress_api.hk_api.get_latest_bundle_version(
-        bundle_name=flow_cell_id
-    )
-    compress_api.hk_api.include(version_obj=flow_cell_hk_bundle_version)
-    compress_api.hk_api.add_commit(flow_cell_hk_bundle_version)
 
     samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
-    for sample in samples:
-        sample_hk_bundle_version: Version = compress_api.hk_api.get_latest_bundle_version(
-            bundle_name=sample.internal_id
-        )
-        compress_api.hk_api.include(version_obj=sample_hk_bundle_version)
-        compress_api.hk_api.add_commit(sample_hk_bundle_version)
+    bundle_names: List[str] = [sample.internal_id for sample in samples] + [flow_cell_id]
+    for bundle_name in bundle_names:
+        compress_api.hk_api.include_files_to_latest_version(bundle_name=bundle_name)
+
+
+#    LOG.info("Updating file paths in SPRING metadata file")
+#    for sample in samples:
+#        spring_metadata_path: File = compress_api.hk_api.find_file_in_latest_version(case_id=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA])
+#        update_metadata_paths(spring_metadata_path=spring_metadata_path, new_parent_path=Path(spring_metadata_path.path).parent)

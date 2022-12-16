@@ -2,6 +2,7 @@ import logging
 
 from click.testing import CliRunner
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.store.fastq import (
     store_sample,
     store_case,

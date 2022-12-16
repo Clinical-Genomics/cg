@@ -484,6 +484,12 @@ class MockHousekeeperAPI:
         self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()
 
+    def include_files_to_latest_version(self, bundle_name: str) -> None:
+        """Include all files in the latest version on a bundle."""
+        bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
+        self.include(version_obj=bundle_version)
+        self.commit()
+
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:
         """Fetch a tag"""

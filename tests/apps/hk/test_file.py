@@ -6,7 +6,7 @@ from typing import List
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import Version, File
 
 from tests.small_helpers import SmallHelpers
 
@@ -167,6 +167,33 @@ def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id
 
     # WHEN including the file
     included_file = populated_housekeeper_api.include_file(file_obj, version)
+
+    # THEN assert that the file has been linked to the included place
+    assert included_path.exists() is True
+
+    # THEN assert that the file path has been updated
+    assert included_file.path != original_path
+
+
+def test_include_files_to_latest_version(
+    populated_housekeeper_api: MockHousekeeperAPI, case_id: str
+):
+    """Test to included files for a bundle."""
+    # GIVEN a populated Housekeeper API and the root dir
+    root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
+    version: Version = populated_housekeeper_api.last_version(case_id)
+    file: File = version.files[0]
+    original_path: Path = Path(file.path)
+    included_path: Path = Path(root_dir, version.relative_root_dir, original_path.name)
+
+    # GIVEN that the included file does not exist
+    assert included_path.exists() is False
+
+    # WHEN including the file
+    populated_housekeeper_api.include_files_to_latest_version(bundle_name=case_id)
+
+    hk_version: Version = populated_housekeeper_api.get_latest_bundle_version(bundle_name=case_id)
+    included_file: File = hk_version.files[0]
 
     # THEN assert that the file has been linked to the included place
     assert included_path.exists() is True

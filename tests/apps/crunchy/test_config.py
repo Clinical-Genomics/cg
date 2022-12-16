@@ -1,10 +1,10 @@
 """Tests for the config part of Crunchy"""
 from pathlib import Path
 
-from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_date
+from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_date, update_metadata_paths
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
-from cgmodels.crunchy.metadata import CrunchyMetadata
+from cgmodels.crunchy.metadata import CrunchyMetadata, CrunchyFile
 
 
 def test_get_spring_metadata_real_file(real_spring_metadata_path: Path, crunchy_config_dict: dict):
@@ -35,3 +35,20 @@ def test_update_date(spring_metadata_file: Path, crunchy_config_dict: dict):
     updated_spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_file)
     for file_info in updated_spring_metadata.files:
         assert file_info.updated is not None
+
+
+def test_update_metadata_paths(
+    spring_metadata_file: Path, crunchy_config_dict: dict, fixtures_dir: Path
+):
+    """Test to update the date in a spring metadata file"""
+    # GIVEN the path to a metadata file without any "updated" information and a crunchy api
+    spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_file)
+    crunchy_file: CrunchyFile = spring_metadata.files[0]
+
+    # WHEN running the update date function
+    update_metadata_paths(spring_metadata_path=spring_metadata_file, new_parent_path=fixtures_dir)
+
+    # THEN assert that the parent path has been switched
+    updated_spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_file)
+    for file in updated_spring_metadata.files:
+        assert Path(file.path).parent == fixtures_dir
