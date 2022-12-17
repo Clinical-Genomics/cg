@@ -191,7 +191,11 @@ class TransferFlowCell:
 
         with self.hk.session_no_autoflush():
             for file in sequencing_files:
-                if self.hk.files(path=file).first() is None:
+                if not self.hk.files(path=file).first():
+                    LOG.info(f"Found file: {file}.")
+                    LOG.info("Skipping file")
+                    continue
+                else:
                     LOG.info(f"Found new file: {file}.")
                     LOG.info(f"Adding file using tag: {tag_name}")
                     self.hk.add_and_include_file_to_latest_version(
