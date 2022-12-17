@@ -177,10 +177,11 @@ class TransferFlowCell:
                 tag_name=SequencingFileTag.CGSTATS_LOG,
             )
 
-    def _check_if_file_is_on_bundle(self, file: str, bundle: Bundle) -> bool:
+    def _check_if_sequencing_file_is_on_bundle(self, file: str, bundle: Bundle) -> bool:
         """Check if file name is already on bundle."""
         return any(
-            Path(file).name == Path(bundle_file).name for bundle_file in bundle.versions[0].files
+            Path(file).name == Path(bundle_file.path).name
+            for bundle_file in bundle.versions[0].files
         )
 
     def _store_sequencing_files(
