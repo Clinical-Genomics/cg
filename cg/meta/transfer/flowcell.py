@@ -199,7 +199,7 @@ class TransferFlowCell:
 
         with self.hk.session_no_autoflush():
             for file in sequencing_files:
-                if self._check_if_file_is_on_bundle(file=file, bundle=hk_bundle):
+                if self._check_if_sequencing_file_is_on_bundle(file=file, bundle=hk_bundle):
                     LOG.info(f"Found file: {file}.")
                     LOG.info("Skipping file")
                 else:
