@@ -96,6 +96,7 @@ class TransferFlowCell:
             LOG.debug(f"Adding reads/FASTQs to sample: {cgstats_sample.name}")
 
             status_db_sample: Sample = self.db.sample(internal_id=cgstats_sample.name)
+
             if not status_db_sample:
                 LOG.warning(f"Unable to find sample: {cgstats_sample.name}")
                 continue
@@ -176,6 +177,13 @@ class TransferFlowCell:
                 tag_name=SequencingFileTag.CGSTATS_LOG,
             )
 
+    def _check_if_sequencing_file_is_on_bundle(self, file: str, bundle: Bundle) -> bool:
+        """Check if file name is already on bundle."""
+        latest_version: Version = self.hk.get_latest_bundle_version(bundle_name=bundle.name)
+        return any(
+            Path(file).name == Path(bundle_file.path).name for bundle_file in latest_version.files
+        )
+
     def _store_sequencing_files(
         self,
         flow_cell_id: str,
@@ -183,15 +191,18 @@ class TransferFlowCell:
         tag_name: str,
         sample_id: Optional[str] = None,
     ) -> None:
-        """Stor sequencing file(s) in Housekeeper."""
+        """Store sequencing file(s) in Housekeeper."""
         bundle_name: str = sample_id or flow_cell_id
-        hk_bundle: Bundle = self.hk.bundle(bundle_name)
+        hk_bundle: Optional[Bundle] = self.hk.bundle(bundle_name)
         if not hk_bundle:
-            self.hk.create_new_bundle_and_version(name=bundle_name)
+            hk_bundle: Bundle = self.hk.create_new_bundle_and_version(name=bundle_name)
 
         with self.hk.session_no_autoflush():
             for file in sequencing_files:
-                if self.hk.files(path=file).first() is None:
+                if self._check_if_sequencing_file_is_on_bundle(file=file, bundle=hk_bundle):
+                    LOG.info(f"Found file: {file}.")
+                    LOG.info("Skipping file")
+                else:
                     LOG.info(f"Found new file: {file}.")
                     LOG.info(f"Adding file using tag: {tag_name}")
                     self.hk.add_and_include_file_to_latest_version(
