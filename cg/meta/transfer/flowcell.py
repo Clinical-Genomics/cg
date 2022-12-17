@@ -99,7 +99,7 @@ class TransferFlowCell:
             if not status_db_sample:
                 LOG.warning(f"Unable to find sample: {cgstats_sample.name}")
                 continue
-
+            print(cgstats_sample.fastqs)
             if store:
                 self._store_sequencing_files(
                     flow_cell_id=flow_cell_id,
