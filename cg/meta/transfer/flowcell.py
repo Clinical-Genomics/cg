@@ -179,9 +179,9 @@ class TransferFlowCell:
 
     def _check_if_sequencing_file_is_on_bundle(self, file: str, bundle: Bundle) -> bool:
         """Check if file name is already on bundle."""
+        latest_version: Version = self.hk.get_latest_bundle_version(bundle_name=bundle.name)
         return any(
-            Path(file).name == Path(bundle_file.path).name
-            for bundle_file in bundle.versions[0].files
+            Path(file).name == Path(bundle_file.path).name for bundle_file in latest_version.files
         )
 
     def _store_sequencing_files(
@@ -193,9 +193,9 @@ class TransferFlowCell:
     ) -> None:
         """Store sequencing file(s) in Housekeeper."""
         bundle_name: str = sample_id or flow_cell_id
-        hk_bundle: Bundle = self.hk.bundle(bundle_name)
+        hk_bundle: Optional[Bundle] = self.hk.bundle(bundle_name)
         if not hk_bundle:
-            self.hk.create_new_bundle_and_version(name=bundle_name)
+            hk_bundle: Bundle = self.hk.create_new_bundle_and_version(name=bundle_name)
 
         with self.hk.session_no_autoflush():
             for file in sequencing_files:
