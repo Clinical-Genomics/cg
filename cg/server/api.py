@@ -44,12 +44,6 @@ def public(route_function):
 @BLUEPRINT.before_request
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
-    if not request.is_secure:
-        return abort(
-            make_response(
-                jsonify(message="outdated login certificate"), http.HTTPStatus.UNAUTHORIZED
-            )
-        )
     if request.method == "OPTIONS":
         return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
 
