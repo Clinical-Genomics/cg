@@ -178,14 +178,13 @@ class MockHousekeeperAPI:
             return None
         return self._files[0]
 
-    def find_file_in_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+    def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
         """Find a file in the latest version of a bundle."""
-        version_obj: Version = self.last_version(bundle_name)
-        if not version_obj:
+        version: Version = self.last_version(bundle=bundle_name)
+        if not version:
             LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
-        file: File = self.files(version=version_obj.id, tags=tags).first()
-        return file
+        return self.files(version=version.id, tags=tags).first()
 
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""

@@ -103,14 +103,13 @@ def test_get_files(
 def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
     """Test to get a file from the database."""
     # GIVEN a housekeeper api with a file
-    file_obj = populated_housekeeper_api.files().first()
-    assert file_obj
+    file = populated_housekeeper_api.files().first()
 
     # GIVEN the id of a file that exists in HK
-    file_id = file_obj.id
+    assert file
 
     # WHEN fetching the file with get_file
-    hk_file = populated_housekeeper_api.get_file(file_id)
+    hk_file = populated_housekeeper_api.get_file(file.id)
 
     # THEN assert a file was returned
     assert hk_file is not None
@@ -119,14 +118,14 @@ def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
 def test_find_file_in_latest_version(case_id: str, populated_housekeeper_api: MockHousekeeperAPI):
     """Test to get a file from the database from the latest version."""
     # GIVEN a housekeeper api with a file
-    file_obj: File = populated_housekeeper_api.files().first()
-    assert file_obj.tags
+    file: File = populated_housekeeper_api.files().first()
 
     # GIVEN a tag of a file that exists in HK
+    assert file.tags
 
     # WHEN fetching the file with get_file
-    hk_file = populated_housekeeper_api.find_file_in_latest_version(
-        bundle_name=case_id, tags=[file_obj.tags[0].name]
+    hk_file: File = populated_housekeeper_api.get_file_from_latest_version(
+        bundle_name=case_id, tags=[file.tags[0].name]
     )
 
     # THEN assert a file was returned

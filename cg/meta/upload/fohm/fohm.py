@@ -103,7 +103,7 @@ class FOHMUploadAPI:
         if not self._daily_reports_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_reports_list.append(
-                    self.housekeeper_api.find_file_in_latest_version(
+                    self.housekeeper_api.get_file_from_latest_version(
                         bundle_name=case_id, tags=["komplettering"]
                     ).full_path
                 )
@@ -114,7 +114,7 @@ class FOHMUploadAPI:
         if not self._daily_pangolin_list:
             for case_id in self._cases_to_aggregate:
                 self._daily_pangolin_list.append(
-                    self.housekeeper_api.find_file_in_latest_version(
+                    self.housekeeper_api.get_file_from_latest_version(
                         bundle_name=case_id, tags=["pangolin-typing-fohm"]
                     ).full_path
                 )

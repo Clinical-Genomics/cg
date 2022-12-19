@@ -125,7 +125,7 @@ class UploadScoutAPI:
         else:
             tags.add("clinical")
 
-        fusion_report: Optional[hk_models.File] = self.housekeeper.find_file_in_latest_version(
+        fusion_report: Optional[hk_models.File] = self.housekeeper.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
         )
 
@@ -146,7 +146,7 @@ class UploadScoutAPI:
         tags: {str} = {"junction", "bed", sample_id}
         splice_junctions_bed: Optional[hk_models.File]
         try:
-            splice_junctions_bed = self.housekeeper.find_file_in_latest_version(
+            splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
                 bundle_name=case_id, tags=tags
             )
         except HousekeeperBundleVersionMissingError:
@@ -170,7 +170,7 @@ class UploadScoutAPI:
 
         rna_coverage_bigwig: Optional[
             hk_models.File
-        ] = self.housekeeper.find_file_in_latest_version(bundle_name=case_id, tags=tags)
+        ] = self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
         return rna_coverage_bigwig
 

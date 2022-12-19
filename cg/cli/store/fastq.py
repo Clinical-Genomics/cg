@@ -111,7 +111,7 @@ def store_bundles(context: click.Context, flow_cell_id: str, dry_run: bool) -> N
         compress_api.hk_api.include_files_to_latest_version(bundle_name=bundle_name)
 
     for sample in samples:
-        spring_metadata_file: File = compress_api.hk_api.find_file_in_latest_version(
+        spring_metadata_file: File = compress_api.hk_api.get_file_from_latest_version(
             bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA]
         )
         if spring_metadata_file:
