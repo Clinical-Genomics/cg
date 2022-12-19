@@ -40,7 +40,7 @@ def test_update_date(spring_metadata_file: Path, crunchy_config_dict: dict):
 def test_update_metadata_paths(
     spring_metadata_file: Path, crunchy_config_dict: dict, fixtures_dir: Path
 ):
-    """Test to update the date in a spring metadata file"""
+    """Test to update paths in a spring metadata file"""
     # GIVEN the path to a metadata file without any "updated" information and a crunchy api
     spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_file)
     crunchy_file: CrunchyFile = spring_metadata.files[0]

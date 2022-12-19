@@ -18,13 +18,13 @@ def test_new_file(bed_file: Path, housekeeper_api: MockHousekeeperAPI, small_hel
     assert bed_file.exists() is True
 
     # WHEN creating a new file
-    new_file_obj = housekeeper_api.new_file(path=bed_file.as_posix())
+    new_file = housekeeper_api.new_file(path=bed_file.as_posix())
 
     # THEN assert a file object was created
-    assert new_file_obj
+    assert new_file
 
     # THEN assert that the path is correct
-    assert new_file_obj.path == bed_file.as_posix()
+    assert new_file.path == bed_file.as_posix()
 
     # THEN assert that no file is added to the database
     assert small_helpers.length_of_iterable(housekeeper_api.files()) == 0
@@ -37,13 +37,13 @@ def test_new_file_non_existing_path(housekeeper_api: MockHousekeeperAPI):
     assert file_name.exists() is False
 
     # WHEN creating a new file
-    new_file_obj = housekeeper_api.new_file(path=file_name.as_posix())
+    new_file: File = housekeeper_api.new_file(path=file_name.as_posix())
 
     # THEN assert a file object was created
-    assert new_file_obj
+    assert new_file
 
     # THEN assert that the path is correct
-    assert new_file_obj.path == file_name.as_posix()
+    assert new_file.path == file_name.as_posix()
 
 
 def test_add_new_file(
@@ -55,7 +55,7 @@ def test_add_new_file(
 ):
     """Test to create a new file with the Housekeeper API."""
     # GIVEN a populated housekeeper api and the existing version of a bundle
-    version_obj = populated_housekeeper_api.last_version(bundle=case_id)
+    version: Version = populated_housekeeper_api.last_version(bundle=case_id)
 
     # GIVEN an existing file that is not included in the database
     assert madeline_output.exists() is True
@@ -67,15 +67,15 @@ def test_add_new_file(
     nr_files_in_db = small_helpers.length_of_iterable(populated_housekeeper_api.files())
 
     # WHEN creating a new file
-    new_file_obj = populated_housekeeper_api.add_file(
-        path=madeline_output, version_obj=version_obj, tags=not_existing_hk_tag
+    new_file: File = populated_housekeeper_api.add_file(
+        path=madeline_output, version_obj=version, tags=not_existing_hk_tag
     )
 
     # THEN assert a file object was created
-    assert new_file_obj
+    assert new_file
 
     # THEN assert that the path is correct
-    assert new_file_obj.path == madeline_output.resolve().as_posix()
+    assert new_file.path == madeline_output.resolve().as_posix()
 
     # THEN assert that the file was not added to the database
     new_nr_files = small_helpers.length_of_iterable(populated_housekeeper_api.files())
@@ -103,7 +103,7 @@ def test_get_files(
 def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
     """Test to get a file from the database."""
     # GIVEN a housekeeper api with a file
-    file = populated_housekeeper_api.files().first()
+    file: File = populated_housekeeper_api.files().first()
 
     # GIVEN the id of a file that exists in HK
     assert file
@@ -115,7 +115,7 @@ def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
     assert hk_file is not None
 
 
-def test_find_file_in_latest_version(case_id: str, populated_housekeeper_api: MockHousekeeperAPI):
+def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: MockHousekeeperAPI):
     """Test to get a file from the database from the latest version."""
     # GIVEN a housekeeper api with a file
     file: File = populated_housekeeper_api.files().first()
@@ -135,38 +135,37 @@ def test_find_file_in_latest_version(case_id: str, populated_housekeeper_api: Mo
 def test_delete_file(populated_housekeeper_api: HousekeeperAPI):
     """Test to delete a file from the database."""
     # GIVEN a housekeeper api with a file
-    file_obj = populated_housekeeper_api.files().first()
-    assert file_obj
+    file: File = populated_housekeeper_api.files().first()
 
     # GIVEN the id of a file that exists in HK
-    file_id = file_obj.id
+    assert file
 
     # WHEN deleting the file
-    populated_housekeeper_api.delete_file(file_id)
+    populated_housekeeper_api.delete_file(file.id)
 
     # THEN assert the file was removed
-    assert populated_housekeeper_api.get_file(file_id) is None
+    assert populated_housekeeper_api.get_file(file.id) is None
 
 
 def test_get_included_path(populated_housekeeper_api: MockHousekeeperAPI, case_id: str):
     """Test to get the included path for a file."""
     # GIVEN a populated housekeeper api and the root dir
-    root_dir = Path(populated_housekeeper_api.get_root_dir())
+    root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
 
     # GIVEN a version and a file object
-    version_obj = populated_housekeeper_api.last_version(case_id)
-    file_obj = version_obj.files[0]
+    version: Version = populated_housekeeper_api.last_version(case_id)
+    file: File = version.files[0]
 
     # WHEN fetching the included path
-    included_path = populated_housekeeper_api.get_included_path(
-        root_dir=root_dir, version_obj=version_obj, file_obj=file_obj
+    included_path: Path = populated_housekeeper_api.get_included_path(
+        root_dir=root_dir, version_obj=version, file_obj=file
     )
 
     # THEN assert that there is no file existing in the included path
     assert included_path.exists() is False
 
     # THEN assert that the correct path was created
-    assert included_path == Path(root_dir, version_obj.relative_root_dir, Path(file_obj.path).name)
+    assert included_path == Path(root_dir, version.relative_root_dir, Path(file.path).name)
 
 
 def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id: str):
@@ -174,15 +173,15 @@ def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id
     # GIVEN a populated housekeeper api and the root dir
     root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
     version: Version = populated_housekeeper_api.last_version(case_id)
-    file_obj = version.files[0]
-    original_path = Path(file_obj.path)
-    included_path = Path(root_dir, version.relative_root_dir, original_path.name)
+    file: File = version.files[0]
+    original_path: Path = Path(file.path)
+    included_path: Path = Path(root_dir, version.relative_root_dir, original_path.name)
 
     # GIVEN that the included file does not exist
     assert included_path.exists() is False
 
     # WHEN including the file
-    included_file = populated_housekeeper_api.include_file(file_obj, version)
+    included_file = populated_housekeeper_api.include_file(file, version)
 
     # THEN assert that the file has been linked to the included place
     assert included_path.exists() is True
@@ -194,7 +193,7 @@ def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id
 def test_include_files_to_latest_version(
     populated_housekeeper_api: MockHousekeeperAPI, case_id: str
 ):
-    """Test to included files for a bundle."""
+    """Test to include files for a bundle."""
     # GIVEN a populated Housekeeper API and the root dir
     root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
     version: Version = populated_housekeeper_api.last_version(case_id)
@@ -229,7 +228,7 @@ def test_check_bundle_files(
 ):
     """Test to see if the function correctly identifies a file that is present and returns a lis without it."""
     # GIVEN a housekeeper version with a file
-    version = populated_housekeeper_api.version(bundle=case_id, date=timestamp)
+    version: Version = populated_housekeeper_api.version(bundle=case_id, date=timestamp)
 
     # WHEN attempting to add two files, one existing and one new
     files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(
@@ -245,11 +244,11 @@ def test_check_bundle_files(
 def test_get_tag_names_from_file(populated_housekeeper_api: MockHousekeeperAPI):
     """Test get tag names on a file."""
     # GIVEN a housekeeper api with a file
-    file_obj = populated_housekeeper_api.files().first()
-    assert file_obj.tags
+    file = populated_housekeeper_api.files().first()
+    assert file.tags
 
     # WHEN fetching tags of a file
-    tag_names = populated_housekeeper_api.get_tag_names_from_file(file_obj)
+    tag_names = populated_housekeeper_api.get_tag_names_from_file(file)
 
     # THEN a list of tag names is returned
     assert tag_names is not None

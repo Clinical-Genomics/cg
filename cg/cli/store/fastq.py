@@ -40,7 +40,7 @@ def store_sample(context: CGConfig, sample_id: str, dry_run: bool) -> int:
 
 
 def invoke_store_samples(context: click.Context, sample_ids: List[str], dry_run: bool) -> int:
-    """Invoke store sample for sample_ids."""
+    """Invoke store sample for sample ids."""
     stored_individuals: int = 0
     for sample_id in sample_ids:
         stored_count: int = context.invoke(store_sample, sample_id=sample_id, dry_run=dry_run)
