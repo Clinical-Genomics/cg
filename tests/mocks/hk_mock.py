@@ -178,11 +178,11 @@ class MockHousekeeperAPI:
             return None
         return self._files[0]
 
-    def find_file_in_latest_version(self, case_id, tags):
-        """Find a file in the latest version of a case bundle."""
-        version_obj: Version = self.last_version(case_id)
+    def find_file_in_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+        """Find a file in the latest version of a bundle."""
+        version_obj: Version = self.last_version(bundle_name)
         if not version_obj:
-            LOG.info("Case ID: %s not found in housekeeper", case_id)
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         file: File = self.files(version=version_obj.id, tags=tags).first()
         return file

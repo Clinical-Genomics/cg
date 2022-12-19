@@ -126,7 +126,7 @@ def test_find_file_in_latest_version(case_id: str, populated_housekeeper_api: Mo
 
     # WHEN fetching the file with get_file
     hk_file = populated_housekeeper_api.find_file_in_latest_version(
-        case_id=case_id, tags=[file_obj.tags[0].name]
+        bundle_name=case_id, tags=[file_obj.tags[0].name]
     )
 
     # THEN assert a file was returned

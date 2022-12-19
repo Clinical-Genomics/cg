@@ -112,7 +112,7 @@ def store_bundles(context: click.Context, flow_cell_id: str, dry_run: bool) -> N
 
     for sample in samples:
         spring_metadata_file: File = compress_api.hk_api.find_file_in_latest_version(
-            case_id=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA]
+            bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA]
         )
         if spring_metadata_file:
             LOG.info(f"Updating file paths in SPRING metadata file {spring_metadata_file.path}")

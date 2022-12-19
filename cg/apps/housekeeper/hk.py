@@ -308,11 +308,10 @@ class HousekeeperAPI:
         self.include(version_obj=bundle_version)
         self.commit()
 
-    def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:
-        """Find a file in the latest version of a case bundle."""
-        version_obj: Version = self.last_version(case_id)
-        if not version_obj:
-            LOG.info("Case ID: %s not found in housekeeper", case_id)
+    def find_file_in_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+        """Find a file in the latest version of a bundle."""
+        version: Version = self.last_version(bundle=bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
-        file: File = self.files(version=version_obj.id, tags=tags).first()
-        return file
+        return self.files(version=version.id, tags=tags).first()
