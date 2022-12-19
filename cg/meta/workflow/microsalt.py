@@ -19,6 +19,7 @@ import glob
 import click
 from cg.constants import Pipeline
 from cg.constants.constants import MicrosaltQC, MicrosaltAppTags
+from cg.constants.tb import AnalysisStatus
 from cg.exc import CgDataError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
@@ -273,12 +274,16 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     ):
                         cases_to_store.append(case)
                     else:
-                        self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
+                        self.trailblazer_api.set_analysis_status(
+                            case_id=case.internal_id, status=AnalysisStatus.FAILED
+                        )
                 else:
                     LOG.info(f"QC already performed for case {case.internal_id}, storing case.")
                     cases_to_store.append(case)
             except IndexError:
-                self.trailblazer_api.set_analysis_failed(case_id=case.internal_id)
+                self.trailblazer_api.set_analysis_status(
+                    case_id=case.internal_id, status=AnalysisStatus.FAILED
+                )
                 LOG.error(f"There are no running directories for case {case.internal_id}.")
 
         return cases_to_store

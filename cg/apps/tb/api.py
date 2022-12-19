@@ -179,9 +179,9 @@ class TrailblazerAPI:
             command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
 
-    def set_analysis_failed(self, case_id) -> datetime:
+    def set_analysis_status(self, case_id, status: str) -> datetime:
         """Set an analysis to failed."""
-        request_body = {"case_id": case_id, "status": AnalysisStatus.FAILED}
+        request_body = {"case_id": case_id, "status": status}
 
         LOG.debug(f"Setting analysis status to failed for {request_body}")
         LOG.info(f"Setting analysis status to failed for case {case_id}")
