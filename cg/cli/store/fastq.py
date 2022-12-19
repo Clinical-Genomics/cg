@@ -115,8 +115,10 @@ def store_bundles(context: click.Context, flow_cell_id: str, dry_run: bool) -> N
             bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA]
         )
         if spring_metadata_file:
-            LOG.info(f"Updating file paths in SPRING metadata file {spring_metadata_file.path}")
+            LOG.info(
+                f"Updating file paths in SPRING metadata file {spring_metadata_file.full_path}"
+            )
             update_metadata_paths(
-                spring_metadata_path=spring_metadata_file.path,
-                new_parent_path=Path(spring_metadata_file.path).parent,
+                spring_metadata_path=spring_metadata_file.full_path,
+                new_parent_path=Path(spring_metadata_file.full_path).parent,
             )
