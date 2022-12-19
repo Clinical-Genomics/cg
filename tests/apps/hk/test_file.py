@@ -116,6 +116,23 @@ def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
     assert hk_file is not None
 
 
+def test_find_file_in_latest_version(case_id: str, populated_housekeeper_api: MockHousekeeperAPI):
+    """Test to get a file from the database from the latest version."""
+    # GIVEN a housekeeper api with a file
+    file_obj: File = populated_housekeeper_api.files().first()
+    assert file_obj.tags
+
+    # GIVEN a tag of a file that exists in HK
+
+    # WHEN fetching the file with get_file
+    hk_file = populated_housekeeper_api.find_file_in_latest_version(
+        case_id=case_id, tags=[file_obj.tags[0].name]
+    )
+
+    # THEN assert a file was returned
+    assert hk_file is not None
+
+
 def test_delete_file(populated_housekeeper_api: HousekeeperAPI):
     """Test to delete a file from the database."""
     # GIVEN a housekeeper api with a file

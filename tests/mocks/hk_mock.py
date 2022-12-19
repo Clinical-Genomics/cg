@@ -179,12 +179,13 @@ class MockHousekeeperAPI:
         return self._files[0]
 
     def find_file_in_latest_version(self, case_id, tags):
-
-        for file_obj in self._files:
-            tag: models.Tag
-            file_tags = {tag.name for tag in file_obj.tags}
-            if tags.issubset(file_tags):
-                return file_obj
+        """Find a file in the latest version of a case bundle."""
+        version_obj: Version = self.last_version(case_id)
+        if not version_obj:
+            LOG.info("Case ID: %s not found in housekeeper", case_id)
+            raise HousekeeperBundleVersionMissingError
+        file: File = self.files(version=version_obj.id, tags=tags).first()
+        return file
 
     def add_missing_tag(self, tag_name: str):
         """Add a missing tag"""

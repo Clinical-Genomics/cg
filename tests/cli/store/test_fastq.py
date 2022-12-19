@@ -194,8 +194,12 @@ def test_store_bundles(
     mocker.patch.object(Store, "get_samples_from_flow_cell")
     Store.get_samples_from_flow_cell.return_value = [sample]
 
+    # GIVEN an updated metadata file
+    mocker.patch("cg.cli.store.fastq.update_metadata_paths", return_value=None)
+
     # WHEN running the store ticket command
     res = cli_runner.invoke(store_bundles, [flow_cell_id], obj=real_populated_compress_context)
 
+    print(res.output)
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS

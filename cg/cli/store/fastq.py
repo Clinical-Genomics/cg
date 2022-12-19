@@ -3,15 +3,13 @@ from pathlib import Path
 from typing import Iterable, List
 
 import click
-from cgmodels.crunchy.metadata import CrunchyMetadata
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import File
 
-from cg.apps.crunchy.files import get_crunchy_metadata, update_metadata_paths
+from cg.apps.crunchy.files import update_metadata_paths
 from cg.cli.compress.helpers import get_fastq_individuals, update_compress_api
 from cg.constants import SequencingFileTag
-from cg.constants.constants import DRY_RUN, FileFormat
+from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
-from cg.io.controller import ReadFile, WriteFile, ReadStream
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -112,8 +110,13 @@ def store_bundles(context: click.Context, flow_cell_id: str, dry_run: bool) -> N
     for bundle_name in bundle_names:
         compress_api.hk_api.include_files_to_latest_version(bundle_name=bundle_name)
 
-
-#    LOG.info("Updating file paths in SPRING metadata file")
-#    for sample in samples:
-#        spring_metadata_path: File = compress_api.hk_api.find_file_in_latest_version(case_id=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA])
-#        update_metadata_paths(spring_metadata_path=spring_metadata_path, new_parent_path=Path(spring_metadata_path.path).parent)
+    for sample in samples:
+        spring_metadata_file: File = compress_api.hk_api.find_file_in_latest_version(
+            case_id=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA]
+        )
+        if spring_metadata_file:
+            LOG.info(f"Updating file paths in SPRING metadata file {spring_metadata_file.path}")
+            update_metadata_paths(
+                spring_metadata_path=spring_metadata_file.path,
+                new_parent_path=Path(spring_metadata_file.path).parent,
+            )

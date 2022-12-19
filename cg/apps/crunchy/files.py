@@ -41,7 +41,7 @@ def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
 
 def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
     """Validate content of metadata file and return mapped content"""
-    LOG.info("Fetch SPRING metadata from %s", metadata_path)
+    LOG.info(f"Fetch SPRING metadata from {metadata_path}")
     try:
         content: List[Dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=metadata_path
@@ -105,7 +105,7 @@ def update_metadata_date(spring_metadata_path: Path) -> None:
 
 
 def update_metadata_paths(spring_metadata_path: Path, new_parent_path: Path) -> None:
-    """Update paths for file in SPRING metadatafile."""
+    """Update paths for file in SPRING metadata file."""
     spring_metadata: CrunchyMetadata = get_crunchy_metadata(metadata_path=spring_metadata_path)
     LOG.info(f"Updating file paths in SPRING metadata file: {spring_metadata_path}")
     for file in spring_metadata.files:
