@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Generator
 
 import pytest
-from cg.constants import Pipeline, DataDelivery
+from cg.constants import Pipeline, DataDelivery, FileExtensions
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile
@@ -27,6 +27,7 @@ from tests.store_helpers import StoreHelpers
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
 
 LOG = logging.getLogger(__name__)
+SNV_FILE_NAME: str = f"snv{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="rna_case_id")
@@ -265,7 +266,7 @@ def fixture_mip_dna_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": Path(mip_dna_analysis_dir, "snv.vcf").as_posix(),
+                "path": Path(mip_dna_analysis_dir, SNV_FILE_NAME).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
@@ -391,7 +392,7 @@ def fixture_balsamic_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": Path(balsamic_wgs_analysis_dir, "snv.vcf").as_posix(),
+                "path": Path(balsamic_wgs_analysis_dir, SNV_FILE_NAME).as_posix(),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
@@ -565,7 +566,7 @@ def fixture_mip_load_config(
     return MipLoadConfig(
         owner=customer_id,
         family=case_id,
-        vcf_snv=Path(mip_dna_analysis_dir, "snv.vcf").as_posix(),
+        vcf_snv=Path(mip_dna_analysis_dir, SNV_FILE_NAME).as_posix(),
         track="rare",
     )
 
