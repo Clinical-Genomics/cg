@@ -92,7 +92,8 @@ class FOHMUploadAPI:
 
     @property
     def aggregation_dataframe(self) -> pd.DataFrame:
-        """Dataframe with all 'komplettering' rows from multiple cases, and additional rows to be used for aggregation"""
+        """Dataframe with all 'komplettering' rows from multiple cases, and additional rows to be
+        used for aggregation."""
         if not isinstance(self._aggregation_dataframe, pd.DataFrame):
             self._aggregation_dataframe = self.reports_dataframe.copy()
         return self._aggregation_dataframe
@@ -129,7 +130,7 @@ class FOHMUploadAPI:
         if getpass.getuser() == self.config.fohm.valid_uploader:
             return
         raise CgError(
-            f"Cannot upload to FOHM as {getpass.getuser()}, please log in as {self.config.fohm.valid_uploader}"
+            f"Cannot upload to FOHM as {getpass.getuser()}, please log in as {self.config.fohm.valid_uploader} "
         )
 
     def set_cases_to_aggregate(self, cases: list) -> None:
@@ -164,10 +165,7 @@ class FOHMUploadAPI:
         )
 
     def link_sample_rawdata_files(self) -> None:
-        """
-        Hardlink samples rawdata files to fohm delivery folder
-        """
-        samples_to_link = len(self.aggregation_dataframe)
+        """Hardlink samples rawdata files to fohm delivery folder."""
         for sample_id in self.aggregation_dataframe["internal_id"]:
             sample_obj: models.Sample = self.status_db.sample(sample_id)
             bundle_name = sample_obj.links[0].family.internal_id
@@ -246,7 +244,6 @@ class FOHMUploadAPI:
         ed_key = paramiko.Ed25519Key.from_private_key_file(self.config.fohm.key)
         transport.connect(username=self.config.fohm.username, pkey=ed_key)
         sftp = paramiko.SFTPClient.from_transport(transport)
-        files_to_upload = len(list(self.daily_rawdata_path.iterdir()))
         for file in self.daily_rawdata_path.iterdir():
             LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
             if self._dry_run:
