@@ -111,7 +111,7 @@ OTHER_VALIDATION_CASES = [
     "keencalf",
     "keenviper",
     "luckyhog",
-    "maturejay",
+    "maturejay",  # sars-cov-2 case
     "meetpossum",
     "mintbaboon",
     "mintyeti",

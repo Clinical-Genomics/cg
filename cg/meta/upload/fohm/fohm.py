@@ -16,7 +16,6 @@ from cg.models.email import EmailInfo
 from cg.store import Store, models
 from cg.utils.email import send_mail
 from housekeeper.store.models import Version
-from alive_progress import alive_bar
 
 LOG = logging.getLogger(__name__)
 
@@ -169,21 +168,18 @@ class FOHMUploadAPI:
         Hardlink samples rawdata files to fohm delivery folder
         """
         samples_to_link = len(self.aggregation_dataframe)
-        with alive_bar(samples_to_link) as bar:
-            for sample_id in self.aggregation_dataframe["internal_id"]:
-                sample_obj: models.Sample = self.status_db.sample(sample_id)
-                bundle_name = sample_obj.links[0].family.internal_id
-                version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
-                files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
-                for file in files:
-                    if self._dry_run:
-                        LOG.info(
-                            f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
-                        )
-                        continue
-                    shutil.copy(file.full_path, Path(self.daily_rawdata_path))
-                    Path(self.daily_rawdata_path, Path(file.full_path).name).chmod(0o0777)
-                bar()
+        for sample_id in self.aggregation_dataframe["internal_id"]:
+            sample_obj: models.Sample = self.status_db.sample(sample_id)
+            bundle_name = sample_obj.links[0].family.internal_id
+            version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
+            files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()
+            for file in files:
+                if self._dry_run:
+                    LOG.info(
+                        f"Would have copied {file.full_path} to {Path(self.daily_rawdata_path)}"
+                    )
+                    continue
+                shutil.copy(file.full_path, Path(self.daily_rawdata_path))
 
     def create_pangolin_reports(self) -> None:
         LOG.info("Creating pangolin reports")
@@ -251,14 +247,12 @@ class FOHMUploadAPI:
         transport.connect(username=self.config.fohm.username, pkey=ed_key)
         sftp = paramiko.SFTPClient.from_transport(transport)
         files_to_upload = len(list(self.daily_rawdata_path.iterdir()))
-        with alive_bar(files_to_upload) as bar:
-            for file in self.daily_rawdata_path.iterdir():
-                bar()
-                LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
-                if self._dry_run:
-                    continue
-                sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
-                LOG.info(f"Finished sending {file}")
+        for file in self.daily_rawdata_path.iterdir():
+            LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
+            if self._dry_run:
+                continue
+            sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
+            LOG.info(f"Finished sending {file}")
         sftp.close()
         transport.close()
 
