@@ -1,12 +1,11 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
-
 import datetime as dt
 import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generator, Dict, List, Any
+from typing import Any, Dict, Generator, List
 
 import pytest
 from housekeeper.store.models import File
@@ -16,10 +15,10 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
-from cg.io.controller import ReadFile
 from cg.constants.subject import Gender
+from cg.io.controller import ReadFile
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
@@ -1228,6 +1227,11 @@ def balsamic_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("balsamic")
 
 
+@pytest.fixture(scope="function")
+def rnafusion_dir(tmpdir_factory) -> Path:
+    return tmpdir_factory.mktemp("rnafusion")
+
+
 @pytest.fixture()
 def cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
@@ -1342,6 +1346,7 @@ def fixture_context_config(
     cg_dir: Path,
     balsamic_dir: Path,
     microsalt_dir: Path,
+    rnafusion_dir: Path,
 ) -> dict:
     """Return a context config."""
     return {
@@ -1474,6 +1479,14 @@ def fixture_context_config(
             "conda_binary": "a_conda_binary",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
+        },
+        "rnafusion": {
+            "binary_path": "/path/to/bin",
+            "conda_env": "S_RNAFUSION",
+            "pipeline_path": "/pipeline/path",
+            "profile": "myprofile",
+            "references": "/path/to/references",
+            "root": str(rnafusion_dir),
         },
         "pdc": {"binary_path": "/bin/dsmc"},
         "scout": {

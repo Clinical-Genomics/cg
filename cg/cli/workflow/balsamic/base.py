@@ -31,9 +31,8 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def balsamic(context: click.Context):
     """Cancer analysis workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
+
     config = context.obj
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(
         config=config,

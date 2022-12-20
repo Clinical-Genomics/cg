@@ -144,6 +144,16 @@ class MipConfig(BaseModel):
     script: str
 
 
+class RnafusionConfig(CommonAppConfig):
+    root: str
+    references: str
+    binary_path: str
+    pipeline_path: str
+    conda_env: str
+    profile: str
+    conda_binary: Optional[str] = None
+
+
 class CGStatsConfig(BaseModel):
     binary_path: str
     database: str
@@ -257,6 +267,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
