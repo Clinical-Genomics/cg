@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple
 
 from alchy import Query
+from housekeeper.exc import VersionIncludedError
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
@@ -310,10 +311,10 @@ class HousekeeperAPI:
         try:
             self.include(version_obj=bundle_version)
             self.commit()
-        except FileExistsError as error:
+        except (FileExistsError, VersionIncludedError) as error:
             LOG.error(error)
             LOG.warning(
-                f"File already included in Housekeeper for bundle: {bundle_name}, version: {bundle_version}"
+                f"File(s) already included in Housekeeper for bundle: {bundle_name}, version: {bundle_version}"
             )
 
     def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
