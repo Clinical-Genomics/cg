@@ -9,7 +9,7 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 
 from cg.constants.constants import FileFormat
-from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR
+from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR, NXF_PID_FILE_ENV
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 
@@ -66,7 +66,7 @@ class NextflowAnalysisAPI:
     def get_variables_to_export(cls, case_id: str, root_dir: str) -> Dict[str, str]:
         """Generates a dictionary with variables that needs to be exported."""
         return {
-            "NXF_PID_FILE": cls.get_case_pid_path(case_id=case_id, root_dir=root_dir).as_posix()
+            NXF_PID_FILE_ENV: cls.get_case_pid_path(case_id=case_id, root_dir=root_dir).as_posix()
         }
 
     @classmethod
