@@ -308,7 +308,7 @@ def qc_microsalt(context: click.Context, unique_id: str) -> None:
     try:
         analysis_api.microsalt_qc(
             case_id=unique_id,
-            run_dir_path=analysis_api.get_case_path(case_id=unique_id, cleaning=False)[0],
+            run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
             lims_project=analysis_api.get_project(
                 analysis_api.status_db.family(internal_id=unique_id).samples[0].internal_id
             ),
