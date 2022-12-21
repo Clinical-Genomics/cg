@@ -40,7 +40,9 @@ class NextflowAnalysisAPI:
         """Generates a path where the Nextflow pid file for the case_id should be located."""
         # If not specified with the NXF_PID_FILE variable, a .nextflow.pid is created in the launch directory when
         # running nextflow in the background (with the bg option)
-        return Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_nextflow.pid")
+        return Path(
+            (cls.get_case_path(case_id=case_id, root_dir=root_dir)), f"{case_id}_nextflow.pid"
+        )
 
     @classmethod
     def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
