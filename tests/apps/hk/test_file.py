@@ -190,8 +190,43 @@ def test_get_include_file(populated_housekeeper_api: MockHousekeeperAPI, case_id
     assert included_file.path != original_path
 
 
+def test_include_files_to_latest_version_when_included(
+    caplog, case_id: str, populated_housekeeper_api: MockHousekeeperAPI
+):
+    """Test to include files for a bundle."""
+    # GIVEN a populated Housekeeper API and the root dir
+    root_dir: Path = Path(populated_housekeeper_api.get_root_dir())
+    version: Version = populated_housekeeper_api.last_version(case_id)
+    hk_file: File = version.files[0]
+    original_path: Path = Path(hk_file.path)
+    included_dir_path: Path = Path(root_dir, version.relative_root_dir)
+    included_dir_path.mkdir(parents=True, exist_ok=True)
+    included_path: Path = Path(included_dir_path, original_path.name)
+    included_path.touch()
+
+    # GIVEN that the included file does exist
+    assert included_path.exists() is True
+
+    # WHEN including the file
+    populated_housekeeper_api.include_files_to_latest_version(bundle_name=case_id)
+
+    hk_version: Version = populated_housekeeper_api.get_latest_bundle_version(bundle_name=case_id)
+    included_file: File = hk_version.files[0]
+
+    # THEN assert that the file is still linked to the included place
+    assert included_path.exists() is True
+
+    # THEN assert that the file path is unchanged
+    assert included_file.path == original_path.as_posix()
+
+    assert f"File is already included in Housekeeper for bundle: {case_id}" in caplog.text
+
+
 def test_include_files_to_latest_version(
-    populated_housekeeper_api: MockHousekeeperAPI, case_id: str
+    case_id: str,
+    madeline_output: Path,
+    not_existing_hk_tag: str,
+    populated_housekeeper_api: MockHousekeeperAPI,
 ):
     """Test to include files for a bundle."""
     # GIVEN a populated Housekeeper API and the root dir
@@ -204,17 +239,25 @@ def test_include_files_to_latest_version(
     # GIVEN that the included file does not exist
     assert included_path.exists() is False
 
+    new_file: File = populated_housekeeper_api.add_file(
+        path=madeline_output, version_obj=version, tags=not_existing_hk_tag
+    )
+    populated_housekeeper_api.commit()
+
+    assert Path(new_file.path).parent != included_path.parent
+
     # WHEN including the file
     populated_housekeeper_api.include_files_to_latest_version(bundle_name=case_id)
 
     hk_version: Version = populated_housekeeper_api.get_latest_bundle_version(bundle_name=case_id)
-    included_file: File = hk_version.files[0]
 
-    # THEN assert that the file has been linked to the included place
-    assert included_path.exists() is True
+    # THEN all files in bundle should be included
+    for file in hk_version.files:
+        assert file.is_included
 
     # THEN assert that the file path has been updated
-    assert included_file.path != original_path
+    included_madelaine_file: File = populated_housekeeper_api.get_file(file_id=new_file.id)
+    assert Path(included_madelaine_file.full_path).parent == included_path.parent
 
 
 def test_check_bundle_files(

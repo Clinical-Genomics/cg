@@ -308,14 +308,23 @@ class HousekeeperAPI:
         bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
         if not bundle_version:
             return None
-        try:
-            self.include(version_obj=bundle_version)
-            self.commit()
-        except (FileExistsError, VersionIncludedError) as error:
-            LOG.error(error)
-            LOG.warning(
-                f"File(s) already included in Housekeeper for bundle: {bundle_name}, version: {bundle_version}"
+        if bundle_version.included_at:
+            LOG.info(
+                f"Bundle: {bundle_name}, version: {bundle_version} already included at {bundle_version.included_at}"
             )
+            return
+        for hk_file in bundle_version.files:
+            if not hk_file.is_included:
+                try:
+                    self.include_file(version_obj=bundle_version, file_obj=hk_file)
+                except FileExistsError as error:
+                    LOG.error(error)
+                continue
+            LOG.warning(
+                f"File is already included in Housekeeper for bundle: {bundle_name}, version: {bundle_version}"
+            )
+        bundle_version.included_at = dt.datetime.now()
+        self.commit()
 
     def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
         """Find a file in the latest version of a bundle."""
