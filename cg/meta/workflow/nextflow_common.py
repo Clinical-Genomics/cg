@@ -36,7 +36,7 @@ class NextflowAnalysisAPI:
         return Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
 
     @classmethod
-    def get_case_pid_path(cls, case_id: str, root_dir: str) -> Path:
+    def get_case_nextflow_pid_path(cls, case_id: str, root_dir: str) -> Path:
         """Generates a path where the Nextflow pid file for the case_id should be located."""
         # If not specified with the NXF_PID_FILE variable, a .nextflow.pid is created in the launch directory when
         # running nextflow in the background (with the bg option)
@@ -66,7 +66,9 @@ class NextflowAnalysisAPI:
     def get_variables_to_export(cls, case_id: str, root_dir: str) -> Dict[str, str]:
         """Generates a dictionary with variables that needs to be exported."""
         return {
-            NXF_PID_FILE_ENV: cls.get_case_pid_path(case_id=case_id, root_dir=root_dir).as_posix()
+            NXF_PID_FILE_ENV: cls.get_case_nextflow_pid_path(
+                case_id=case_id, root_dir=root_dir
+            ).as_posix()
         }
 
     @classmethod
