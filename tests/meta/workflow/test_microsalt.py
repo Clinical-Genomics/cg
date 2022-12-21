@@ -26,8 +26,8 @@ def test_qc_check_fail(
 
     # GIVEN a case that is to be stored
     microsalt_case: Family = store.family(microsalt_case_qc_fail)
-for index in range(4):
-    microsalt_case.samples[index].reads = 1000
+    for index in range(4):
+        microsalt_case.samples[index].reads = 1000
 
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
 
@@ -131,7 +131,7 @@ def test_get_cases_to_store_pass(
 
     mocker.patch.object(
         MicrosaltAnalysisAPI,
-        "get_qc_ready_cases",
+        "get_completed_cases",
         return_value=[microsalt_pass_case],
     )
     mocker.patch.object(
@@ -139,7 +139,7 @@ def test_get_cases_to_store_pass(
     )
 
     mocker.patch.object(
-        MicrosaltAnalysisAPI, "get_case_path", return_value=[microsalt_qc_pass_run_dir_path]
+        MicrosaltAnalysisAPI, "get_latest_case_path", return_value=microsalt_qc_pass_run_dir_path
     )
 
     # WHEN get cases to store
@@ -170,7 +170,7 @@ def test_get_cases_to_store_fail(
 
     mocker.patch.object(
         MicrosaltAnalysisAPI,
-        "get_qc_ready_cases",
+        "get_completed_cases",
         return_value=[microsalt_fail_case],
     )
     mocker.patch.object(
@@ -178,7 +178,7 @@ def test_get_cases_to_store_fail(
     )
 
     mocker.patch.object(
-        MicrosaltAnalysisAPI, "get_case_path", return_value=[microsalt_qc_fail_run_dir_path]
+        MicrosaltAnalysisAPI, "get_latest_case_path", return_value=microsalt_qc_fail_run_dir_path
     )
 
     # WHEN get case to store

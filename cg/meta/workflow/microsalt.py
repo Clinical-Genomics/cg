@@ -24,6 +24,7 @@ from cg.exc import CgDataError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
+from cg.models.orders.sample_base import ControlEnum
 from cg.store import models
 from cg.store.models import Sample
 from cg.utils import Process
@@ -66,26 +67,30 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str, cleaning: bool = True) -> List[Path]:
-        """Returns all paths associated with the case."""
+    def get_case_path(self, case_id: str) -> List[Path]:
+        """Returns all paths associated with the case or single sample analysis."""
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        if cleaning:
-            # Get case and single sample analysis folders
-            case_paths: List[Path] = [
-                Path(path)
-                for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
-            ]
-            self.verify_case_paths_age(case_paths, case_id)
-        else:
-            # Only get case folders
-            case_paths: List[Path] = [
-                Path(path)
-                for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
-            ]
+        case_paths: List[Path] = [
+            Path(path)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
+        ]
 
-        return sorted(case_paths, key=os.path.getctime, reverse=True)
+        self.verify_case_paths_age(case_paths, case_id)
+
+        return case_paths
+
+    def get_latest_case_path(self, case_id: str) -> Path:
+        """Return latest run dir for a microbial case."""
+        case_obj: models.Family = self.status_db.family(case_id)
+        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
+        case_paths: List[Path] = [
+            Path(path)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+        ]
+
+        return sorted(case_paths, key=os.path.getctime, reverse=True)[0]
 
     def verify_case_paths_age(
         self, case_paths: List[Path], case_id: str, analysis_due_date: int = 21
@@ -259,13 +264,13 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
 
-        cases_qc_ready: List[models.Family] = self.get_qc_ready_cases()
+        cases_qc_ready: List[models.Family] = self.get_completed_cases()
         cases_to_store: List[models.Family] = []
 
         for case in cases_qc_ready:
             try:
-                case_run_dir: Path = self.get_case_path(case_id=case.internal_id, cleaning=False)[0]
-                if not os.path.exists(os.path.join(case_run_dir, "QC_done.txt")):
+                case_run_dir: Path = self.get_latest_case_path(case_id=case.internal_id)
+                if not case_run_dir.joinpath("QC_done.txt").exists():
                     LOG.info(f"Performing QC on case {case.internal_id}")
                     if self.microsalt_qc(
                         case_id=case.internal_id,
@@ -288,8 +293,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return cases_to_store
 
-    def get_qc_ready_cases(self) -> List[models.Family]:
-        """Retrieve a list of QC ready cases."""
+    def get_completed_cases(self) -> List[models.Family]:
+        """Retrieve a list of cases that are completed in trailblazer."""
         return [
             case_object
             for case_object in self.get_running_cases()
@@ -354,12 +359,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Check if given microSALT case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
         failed_samples: Dict = {}
-        qc_file: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
+        case_qc: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample in samples:
             if not sample.sequenced_at:
                 continue
-            self.qc_sample_check(sample=sample, failed_samples=failed_samples, qc_file=qc_file)
+            self.qc_sample_check(
+                sample=sample, failed_samples=failed_samples, sample_qc=case_qc[sample.internal_id]
+            )
 
         return self.qc_case_check(
             case_id=case_id,
@@ -376,7 +383,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         for sample in failed_samples:
             # Check if negative control failed
-            if sample.control == "negative":
+            if sample.control == ControlEnum.negative:
                 qc_pass = False
             # Check if MWR sample failed
             if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
@@ -401,14 +408,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict) -> None:
         """Creates a QC_done when a QC check is performed."""
-        with open(os.path.join(run_dir_path, "QC_done.txt"), "w") as file:
+        with open(run_dir_path.joinpath("QC_done.txt"), "w") as file:
             for sample_dict in failed_samples.items():
                 file.write(f"{sample_dict[0].internal_id}: {json.dumps(sample_dict[1])} \n")
 
-    def qc_sample_check(self, sample: Sample, failed_samples: Dict, qc_file: Dict) -> None:
+    def qc_sample_check(self, sample: Sample, failed_samples: Dict, sample_qc: Dict) -> None:
         """Perform a QC on a sample."""
 
-        if sample.control == "negative":
+        if sample.control == ControlEnum.negative:
             if not self.check_external_negative_control_sample(sample):
                 failed_samples[sample] = {
                     "Passed QC Reads": self.check_external_negative_control_sample(sample)
@@ -416,24 +423,24 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
         else:
             reads_pass: bool = sample.sequencing_qc
-            coverage_10x_pass: bool = self.check_coverage_10x(sample.internal_id, qc_file)
+            coverage_10x_pass: bool = self.check_coverage_10x(sample.internal_id, sample_qc)
             if not reads_pass or not coverage_10x_pass:
                 failed_samples[sample] = {"Passed QC Reads": reads_pass}
                 failed_samples[sample]["Passed Coverage 10X"] = coverage_10x_pass
                 LOG.warning(f"Sample {sample.internal_id} failed QC.")
 
-    def check_coverage_10x(self, sample_name: str, qc_file: Dict) -> bool:
+    def check_coverage_10x(self, sample_name: str, sample_qc: Dict) -> bool:
         """Check if a sample passed the coverage_10x criteria."""
         try:
             return (
-                qc_file[sample_name]["microsalt_samtools_stats"]["coverage_10x"]
+                sample_qc["microsalt_samtools_stats"]["coverage_10x"]
                 >= MicrosaltQC.COVERAGE_10X_THRESHOLD
             )
-        except Exception as e:
+        except TypeError as e:
             LOG.error(
-                f"Coverage 10X couldn't be checked for sample {sample_name}, setting to fail."
+                f"There is no 10X coverage value for sample {sample_name}, setting qc to fail for this sample"
             )
-            LOG.error(f"see error: {e}")
+            LOG.error(f"See error: {e}")
             return False
 
     def check_external_negative_control_sample(self, sample: Sample) -> bool:
