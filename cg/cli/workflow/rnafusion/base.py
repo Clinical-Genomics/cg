@@ -56,20 +56,22 @@ rnafusion.add_command(resolve_compression)
 @rnafusion.command("config-case")
 @ARGUMENT_CASE_ID
 @OPTION_STRANDEDNESS
+@DRY_RUN
 @click.pass_obj
 def config_case(
     context: CGConfig,
     case_id: str,
     strandedness: str,
+    dry_run: bool,
 ) -> None:
     """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
 
+    LOG.info(f"Creating samplesheet file for {case_id}.")
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
-        LOG.info(f"Creating samplesheet file for {case_id}.")
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.config_case(case_id=case_id, strandedness=strandedness)
+        analysis_api.config_case(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create samplesheet: {error}")
         raise click.Abort()

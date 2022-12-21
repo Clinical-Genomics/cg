@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
+from cg.constants.constants import DRY_RUN_MESSAGE
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import RNAFUSION_SAMPLESHEET_HEADERS, RNAFUSION_STRANDEDNESS_HEADER
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -95,7 +96,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         }
         return samplesheet_content
 
-    def write_samplesheet(self, case_id: str, strandedness: str) -> None:
+    def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         if len(case_obj.links) != 1:
@@ -111,6 +112,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id, fastq_r1, fastq_r2, strandedness
             )
             LOG.info(samplesheet_content)
+            if dry_run:
+                continue
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content,
                 RNAFUSION_SAMPLESHEET_HEADERS,
@@ -176,10 +179,16 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         strandedness: str,
+        dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
-        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
-        self.write_samplesheet(case_id, strandedness)
+        if dry_run:
+            LOG.info(DRY_RUN_MESSAGE)
+
+        NextflowAnalysisAPI.make_case_folder(
+            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
+        )
+        self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Samplesheet written")
 
     def run_analysis(
