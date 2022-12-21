@@ -7,7 +7,7 @@ import logging
 import subprocess
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Dict
+from typing import Dict, List
 
 from cg.constants.process import RETURN_SUCCESS
 
@@ -37,13 +37,13 @@ class Process:
             environment(str): Activate conda environment before executing binary
         """
         super(Process, self).__init__()
-        self.binary = binary
-        self.conda_binary = conda_binary
-        self.config = config
-        self.environment = environment
-        self.launch_directory = launch_directory
+        self.binary: str = binary
+        self.conda_binary: str = conda_binary
+        self.config: str = config
+        self.environment: str = environment
+        self.launch_directory: str = launch_directory
         LOG.debug("Initialising Process with binary: %s", self.binary)
-        self.base_call = [self.binary]
+        self.base_call: List[str] = [self.binary]
 
         if conda_binary:
             LOG.debug(f"Activating environment with conda run for binary: {self.conda_binary}")
