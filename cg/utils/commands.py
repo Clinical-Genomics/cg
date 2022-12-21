@@ -61,7 +61,7 @@ class Process:
         self._stderr = ""
 
     def export_variables(self, export: Dict[str, str]) -> None:
-        """Export variables prior execution."""
+        """Export variables prior to execution."""
         if export:
             self.base_call.insert(
                 0, " ".join([f"export {variable}={value};" for variable, value in export.items()])
