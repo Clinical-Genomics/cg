@@ -85,6 +85,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Return latest run dir for a microbial case."""
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
+
         case_paths: List[Path] = [
             Path(path)
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
@@ -266,6 +267,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         cases_qc_ready: List[models.Family] = self.get_completed_cases()
         cases_to_store: List[models.Family] = []
+        LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
 
         for case in cases_qc_ready:
             try:
