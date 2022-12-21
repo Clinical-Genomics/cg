@@ -104,13 +104,37 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_verified_arguments_nextflow(
-        cls, case_id: str, log: Path, pipeline: str, root_dir: str
+        cls, case_id: str, pipeline: str, root_dir: str, log: Path, bg: bool, q: bool
     ) -> dict:
         """Transforms click argument related to nextflow that were left empty
         into defaults constructed with case_id paths."""
 
         return {
-            "-log": NextflowAnalysisAPI.get_log_path(case_id, pipeline, root_dir, log),
+            "-bg": bg,
+            "-q": q,
+            "-log": cls.get_log_path(case_id, pipeline, root_dir, log),
+        }
+
+    @classmethod
+    def get_verified_arguments_run(
+        cls,
+        case_id: str,
+        root_dir: str,
+        work_dir: str,
+        resume: bool,
+        profile: bool,
+        with_tower: bool,
+        stub: bool,
+    ) -> dict:
+        """Transforms click argument related to nextflow run that were left empty
+        into defaults constructed with case_id paths."""
+
+        return {
+            "-w": cls.get_workdir_path(case_id, root_dir, work_dir),
+            "-resume": resume,
+            "-profile": profile,
+            "-with-tower": with_tower,
+            "-stub": stub,
         }
 
     @classmethod
