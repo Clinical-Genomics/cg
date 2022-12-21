@@ -54,8 +54,6 @@ class Process:
         if config:
             self.base_call.extend([config_parameter, config])
         if launch_directory:
-            # if not Path(self.launch_directory).exists():
-            #     raise (FileNotFoundError(f"Not existing launch directory: {self.launch_directory}"))
             self.base_call.insert(0, f"cd {self.launch_directory};")
 
         LOG.debug(f"Use base call {self.base_call}")
