@@ -12,7 +12,6 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_LOG,
     OPTION_OUTDIR,
     OPTION_PROFILE,
-    OPTION_RESUME,
     OPTION_STUB,
     OPTION_TOWER,
     OPTION_WORKDIR,
@@ -20,6 +19,7 @@ from cg.cli.workflow.nextflow.options import (
 from cg.cli.workflow.rnafusion.options import (
     OPTION_ALL,
     OPTION_ARRIBA,
+    OPTION_FROM_START,
     OPTION_FUSIONCATCHER,
     OPTION_FUSIONINSPECTOR_FILTER,
     OPTION_PIZZLY,
@@ -79,7 +79,7 @@ def config_case(
 @ARGUMENT_CASE_ID
 @OPTION_LOG
 @OPTION_WORKDIR
-@OPTION_RESUME
+@OPTION_FROM_START
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
@@ -101,7 +101,7 @@ def run(
     case_id: str,
     log: str,
     work_dir: str,
-    resume: bool,
+    from_start: bool,
     profile: str,
     with_tower: bool,
     stub: bool,
@@ -129,7 +129,7 @@ def run(
             case_id=case_id,
             log=log,
             work_dir=work_dir,
-            resume=resume,
+            resume=not from_start,
             profile=profile,
             with_tower=with_tower,
             stub=stub,
@@ -162,7 +162,6 @@ def run(
 @ARGUMENT_CASE_ID
 @OPTION_LOG
 @OPTION_WORKDIR
-@OPTION_RESUME
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
@@ -184,7 +183,6 @@ def start(
     case_id: str,
     log: str,
     work_dir: str,
-    resume: bool,
     profile: str,
     with_tower: bool,
     stub: bool,
@@ -214,7 +212,7 @@ def start(
             case_id=case_id,
             log=log,
             work_dir=work_dir,
-            resume=resume,
+            from_start=True,
             profile=profile,
             with_tower=with_tower,
             stub=stub,
