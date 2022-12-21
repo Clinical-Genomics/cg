@@ -351,7 +351,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return case_id, None
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
-        """Check if Microsalt case passes QC check."""
+        """Check if given microSALT case passes QC check."""
         samples: List[Sample] = self.get_samples(case_id=case_id)
         failed_samples: Dict = {}
         qc_file: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))

@@ -26,10 +26,8 @@ def test_qc_check_fail(
 
     # GIVEN a case that is to be stored
     microsalt_case: Family = store.family(microsalt_case_qc_fail)
-    microsalt_case.samples[0].reads = 1000
-    microsalt_case.samples[1].reads = 1000
-    microsalt_case.samples[2].reads = 1000
-    microsalt_case.samples[3].reads = 1000
+for index in range(4):
+    microsalt_case.samples[index].reads = 1000
 
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
 
