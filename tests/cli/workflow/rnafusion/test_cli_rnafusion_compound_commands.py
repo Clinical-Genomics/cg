@@ -3,6 +3,7 @@ from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
+from pytest_mock import MockFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -62,12 +63,10 @@ def test_start(
 def test_store_housekeeper_dry_run(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
-    real_housekeeper_api: HousekeeperAPI,
-    mock_deliverable,
-    mock_analysis_finish,
+    mock_deliverable: None,
+    mock_analysis_finish: None,
     caplog: LogCaptureFixture,
-    hermes_deliverables: dict,
-    mocker,
+    mocker: MockFixture,
     rnafusion_case_id: str,
 ):
     """Test to ensure all parts of store command are run successfully given ideal conditions."""
@@ -76,19 +75,8 @@ def test_store_housekeeper_dry_run(
     # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
     case_id: str = rnafusion_case_id
 
-    # Set Housekeeper to an empty real Housekeeper store
-    rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
-    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
-
-    # Make sure the bundle was not present in hk
-    assert not rnafusion_context.housekeeper_api.bundle(case_id)
-
-    # Make sure analysis not already stored in status_db
-    assert not rnafusion_context.status_db.family(case_id).analyses
-
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
-    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id, "--dry-run"], obj=rnafusion_context)
