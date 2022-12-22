@@ -7,7 +7,14 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
+from cg.cli.workflow.rnafusion.base import (
+    rnafusion,
+    start,
+    start_available,
+    store,
+    store_available,
+    store_housekeeper,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -50,6 +57,45 @@ def test_start(
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
+
+
+def test_store_housekeeper_dry_run(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    real_housekeeper_api: HousekeeperAPI,
+    mock_deliverable,
+    mock_analysis_finish,
+    caplog: LogCaptureFixture,
+    hermes_deliverables: dict,
+    mocker,
+    rnafusion_case_id: str,
+):
+    """Test to ensure all parts of store command are run successfully given ideal conditions."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
+    case_id: str = rnafusion_case_id
+
+    # Set Housekeeper to an empty real Housekeeper store
+    rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # Make sure the bundle was not present in hk
+    assert not rnafusion_context.housekeeper_api.bundle(case_id)
+
+    # Make sure analysis not already stored in status_db
+    assert not rnafusion_context.status_db.family(case_id).analyses
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+
+    # WHEN running command
+    result = cli_runner.invoke(store_housekeeper, [case_id, "--dry-run"], obj=rnafusion_context)
+    # THEN bundle should be successfully added to HK and STATUSDB
+    assert result.exit_code == EXIT_SUCCESS
+    assert "Dry-run: Housekeeper changes will not be commited" in caplog.text
+    assert "Dry-run: StatusDB changes will not be commited" in caplog.text
 
 
 def test_store_success(
