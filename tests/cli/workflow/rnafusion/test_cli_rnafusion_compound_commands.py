@@ -44,12 +44,24 @@ def test_start(
     # GIVEN decompression is not needed
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
+    # WHEN ensuring case config exists where it should be stored
+    Path.mkdir(
+        Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
+        exist_ok=True,
+    )
+    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
+        exist_ok=True
+    )
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
+
+    # THEN command should not include resume flag
+    assert "-resume" not in caplog.text
 
 
 def test_store_success(
