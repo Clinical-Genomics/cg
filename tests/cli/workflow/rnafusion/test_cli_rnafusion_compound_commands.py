@@ -183,7 +183,18 @@ def test_store_available(
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-    #
+
+    # Ensure the config is mocked to run compound command
+    Path.mkdir(
+        Path(
+            rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)
+        ).parent,
+        exist_ok=True,
+    )
+    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)).touch(
+        exist_ok=True
+    )
+
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
     rnafusion_context.status_db.family(case_id_success).action = "running"
