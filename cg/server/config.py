@@ -12,6 +12,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = "FLASK_DEBUG" in os.environ
 
 # server
 CG_ENABLE_ADMIN = ("FLASK_DEBUG" in os.environ) or (os.environ.get("CG_ENABLE_ADMIN") == "1")
+ALLOWED_ORIGINS = os.environ["ALLOWED_ORIGINS"] if "ALLOWED_ORIGINS" in os.environ else "*"
 
 # lims
 LIMS_HOST = os.environ["LIMS_HOST"]

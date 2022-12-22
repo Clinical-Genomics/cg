@@ -30,7 +30,7 @@ def _configure_extensions(app: Flask):
     certs_resp = requests.get("https://www.googleapis.com/oauth2/v1/certs")
     app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
 
-    ext.cors.init_app(app)
+    ext.cors.init_app(app, resources={r"/api/*": {"origins": app.config["ALLOWED_ORIGINS"]}})
     ext.db.init_app(app)
     ext.lims.init_app(app)
     if app.config["OSTICKET_API_KEY"]:
