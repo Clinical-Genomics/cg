@@ -502,6 +502,12 @@ def fixture_mip_dna_analysis_dir(mip_analysis_dir: Path) -> Path:
     return Path(mip_analysis_dir, "dna")
 
 
+@pytest.fixture(name="rnafusion_analysis_dir")
+def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with rnafusion analysis files."""
+    return Path(analysis_dir, "rnafusion")
+
+
 @pytest.fixture(name="sample1_cram")
 def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for sample 1."""

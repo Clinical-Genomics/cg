@@ -3,12 +3,13 @@ import logging
 from typing import List, Optional, Set
 
 import requests
+from housekeeper.store import models as hk_models
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
 from cg.store import models
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -62,6 +63,17 @@ class ScoutConfigBuilder:
         config_sample.tissue_type = lims_sample.get("source", "unknown")
         config_sample.subject_id = db_sample.sample.subject_id
 
+        # self.include_sample_alignment_file(config_sample=config_sample)
+        # self.include_sample_files(config_sample=config_sample)
+
+    def add_common_sample_files(
+        self,
+        config_sample: ScoutIndividual,
+        db_sample: models.FamilySample,
+    ) -> None:
+        """Add common sample files for different analysis types"""
+        sample_id: str = db_sample.sample.internal_id
+        LOG.info("Adding common files for sample %s", sample_id)
         self.include_sample_alignment_file(config_sample=config_sample)
         self.include_sample_files(config_sample=config_sample)
 

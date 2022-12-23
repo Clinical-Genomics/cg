@@ -3,19 +3,19 @@
 import logging
 
 import click
-from cg.cli.upload.observations import observations
 
 from cg.cli.generate.report.base import delivery_report
-from cg.cli.upload.scout import scout
-from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.clinical_delivery import clinical_delivery
-from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
+from cg.cli.upload.genotype import genotypes
+from cg.cli.upload.observations import observations
+from cg.cli.upload.scout import scout
+from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.constants.sequencing import SequencingMethod
+from cg.meta.upload.gt import UploadGenotypesAPI
+from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.meta.upload.upload_api import UploadAPI
 from cg.store import models
-from cg.meta.upload.gt import UploadGenotypesAPI
 
 LOG = logging.getLogger(__name__)
 

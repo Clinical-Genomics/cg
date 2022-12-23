@@ -24,7 +24,7 @@ class Reviewer(BaseModel):
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
     analysis_type: Literal[
-        "wgs", "wes", "mixed", "unknown", "panel", "panel-umi", "external"
+        "wgs", "wes", "mixed", "unknown", "panel", "panel-umi", "external", "wts"
     ] = None
     capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
@@ -66,6 +66,13 @@ class ScoutBalsamicIndividual(ScoutIndividual):
     msi: Optional[str] = None
     tumor_purity: float = 0
     vcf2cytosure: Optional[str] = None
+
+
+class ScoutRnafusionIndividual(ScoutIndividual):
+    tumor_type: Optional[str] = None
+    tmb: Optional[str] = None
+    msi: Optional[str] = None
+    tumor_purity: float = 0
 
 
 class ScoutLoadConfig(BaseModel):
@@ -142,3 +149,7 @@ class MipLoadConfig(ScoutLoadConfig):
         if v is None:
             raise ValueError("Mandatory vcf can not be None")
         return v
+
+
+class RnafusionLoadConfig(ScoutLoadConfig):
+    samples: List[ScoutRnafusionIndividual] = []

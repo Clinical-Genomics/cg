@@ -1,15 +1,17 @@
 """Test the methods that generate a scout load config"""
 
 import pytest
+
 from cg.constants import Pipeline
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
+    BalsamicUmiLoadConfig,
     MipLoadConfig,
+    RnafusionLoadConfig,
     ScoutLoadConfig,
     ScoutMipIndividual,
-    BalsamicUmiLoadConfig,
 )
 from cg.store import Store, models
 
@@ -68,6 +70,24 @@ def test_generate_balsamic_umi_load_config(
 
     # THEN assert that the config is a balsamic-umi config
     assert isinstance(config, BalsamicUmiLoadConfig)
+
+
+def test_generate_rnafusion_load_config(
+    rnafusion_analysis_obj: models.Analysis, upload_rnafusion_analysis_scout_api: UploadScoutAPI
+):
+    # GIVEN an analysis object that have been run with rnafusion
+    assert rnafusion_analysis_obj.pipeline == Pipeline.RNAFUSION
+
+    # GIVEN an upload scout api with some rnafusion information
+
+    # WHEN generating a load config
+    config = upload_rnafusion_analysis_scout_api.generate_config(
+        analysis_obj=rnafusion_analysis_obj
+    )
+    a = config
+    b = RnafusionLoadConfig
+    # THEN assert that the config is a rnafusion config
+    assert isinstance(config, RnafusionLoadConfig)
 
 
 @pytest.mark.parametrize("result_key", RESULT_KEYS)

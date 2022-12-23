@@ -6,7 +6,9 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cg.constants import Pipeline, DataDelivery
+from housekeeper.store import models as hk_models
+
+from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile
@@ -15,15 +17,14 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store, models
-from housekeeper.store import models as hk_models
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.mip_analysis_mock import MockMipAnalysis
 from tests.mocks.scout import MockScoutAPI
 from tests.store_helpers import StoreHelpers
-from tests.mocks.mip_analysis_mock import MockMipAnalysis
 
 LOG = logging.getLogger(__name__)
 
@@ -425,6 +426,25 @@ def fixture_balsamic_analysis_hk_bundle_data(
     }
 
 
+@pytest.fixture(scope="function", name="rnafusion_analysis_hk_bundle_data")
+def fixture_rnafusion_analysis_hk_bundle_data(
+    case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path, sample_id: str
+) -> dict:
+    """Get some bundle data for housekeeper"""
+    return {
+        "name": case_id,
+        "created": timestamp,
+        "expires": timestamp,
+        "files": [
+            {
+                "path": str(rnafusion_analysis_dir / "multiqc.html"),
+                "archive": False,
+                "tags": ["multiqc-html", sample_id],
+            },
+        ],
+    }
+
+
 @pytest.fixture(name="balsamic_analysis_hk_version")
 def fixture_balsamic_analysis_hk_version(
     housekeeper_api: MockHousekeeperAPI, balsamic_analysis_hk_bundle_data: dict, helpers
@@ -463,6 +483,15 @@ def fixture_balsamic_analysis_hk_api(
 ) -> MockHousekeeperAPI:
     """Return a housekeeper api populated with some mip analysis files"""
     helpers.ensure_hk_version(housekeeper_api, balsamic_analysis_hk_bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture(name="rnafusion_analysis_hk_api")
+def fixture_rnafusion_analysis_hk_api(
+    housekeeper_api: MockHousekeeperAPI, rnafusion_analysis_hk_bundle_data: dict, helpers
+) -> MockHousekeeperAPI:
+    """Return a housekeeper api populated with some mip analysis files"""
+    helpers.ensure_hk_version(housekeeper_api, rnafusion_analysis_hk_bundle_data)
     return housekeeper_api
 
 
@@ -513,6 +542,15 @@ def fixture_balsamic_umi_analysis_obj(analysis_obj: models.Analysis) -> models.A
         link_object.sample.application_version.application.prep_category = "wes"
         link_object.family.data_analysis = Pipeline.BALSAMIC_UMI
 
+    return analysis_obj
+
+
+@pytest.fixture(name="rnafusion_analysis_obj")
+def fixture_rnafusion_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    analysis_obj.pipeline = Pipeline.RNAFUSION
+    for link_object in analysis_obj.family.links:
+        link_object.sample.application_version.application.prep_category = "wts"
+        link_object.family.data_analysis = Pipeline.RNAFUSION
     return analysis_obj
 
 
@@ -629,6 +667,30 @@ def fixture_upload_balsamic_analysis_scout_api(
 
     _api = UploadScoutAPI(
         hk_api=balsamic_analysis_hk_api,
+        scout_api=scout_api,
+        madeline_api=madeline_api,
+        analysis_api=analysis_mock,
+        lims_api=lims_api,
+        status_db=store,
+    )
+
+    yield _api
+
+
+@pytest.fixture(name="upload_rnafusion_analysis_scout_api")
+def fixture_upload_rnafusion_analysis_scout_api(
+    scout_api: MockScoutAPI,
+    madeline_api: MockMadelineAPI,
+    lims_samples: List[dict],
+    rnafusion_analysis_hk_api: MockHousekeeperAPI,
+    store: Store,
+) -> UploadScoutAPI:
+    """Fixture for upload_scout_api"""
+    analysis_mock = MockMipAnalysis()
+    lims_api = MockLimsAPI(samples=lims_samples)
+
+    _api = UploadScoutAPI(
+        hk_api=rnafusion_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
         analysis_api=analysis_mock,

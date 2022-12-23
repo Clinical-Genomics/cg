@@ -2,9 +2,12 @@
 import logging
 from typing import Optional
 
+from housekeeper.store import models as hk_models
+
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.models.scout.scout_load_config import (
     BalsamicLoadConfig,
     MipLoadConfig,
@@ -12,7 +15,6 @@ from cg.models.scout.scout_load_config import (
     ScoutMipIndividual,
 )
 from cg.store import models
-from housekeeper.store import models as hk_models
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
@@ -49,6 +51,22 @@ def test_balsamic_config_builder(
     # WHEN instantiating
     file_handler = BalsamicConfigBuilder(
         hk_version_obj=hk_version_obj, analysis_obj=balsamic_analysis_obj, lims_api=lims_api
+    )
+
+    # THEN assert that the correct case tags was used
+    assert isinstance(file_handler.case_tags, CaseTags)
+
+
+def test_rnafusion_config_builder(
+    hk_version_obj: hk_models.Version,
+    rnafusion_analysis_obj: models.Analysis,
+    lims_api: MockLimsAPI,
+):
+    # GIVEN a rnafusion file handler
+
+    # WHEN instantiating
+    file_handler = RnafusionConfigBuilder(
+        hk_version_obj=hk_version_obj, analysis_obj=rnafusion_analysis_obj, lims_api=lims_api
     )
 
     # THEN assert that the correct case tags was used

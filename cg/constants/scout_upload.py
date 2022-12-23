@@ -28,6 +28,10 @@ BALSAMIC_UMI_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
 )
 
+RNAFUSION_CASE_TAGS = dict(
+    multiqc_report={"multiqc-html"},
+)
+
 MIP_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -52,3 +56,5 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
     bam_file={"umi-bam"},
     alignment_file={"umi-cram"},
 )
+
+RNAFUSION_SAMPLE_TAGS = dict()

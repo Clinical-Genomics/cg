@@ -16,6 +16,7 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.store import models
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -66,6 +67,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def verify_analysis_finished(self, case_id):
         return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
+
+    @staticmethod
+    def get_sample_type(sample_obj: models.Sample) -> str:
+        """Returns tissue type of a sample"""
+        if sample_obj.is_tumour:
+            return "tumor"
+        return "normal"
 
     @staticmethod
     def build_samplesheet_content(

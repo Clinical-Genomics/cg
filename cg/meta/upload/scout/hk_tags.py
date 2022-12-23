@@ -6,10 +6,16 @@ from pydantic import BaseModel, Field
 
 
 class CaseTags(BaseModel):
-    snv_vcf: Set[str] = Field(..., description="vcf_snv for rare disease and vcf_cancer for cancer")
+    snv_vcf: Set[str] = Field(
+        None, description="vcf_snv for rare disease and vcf_cancer for cancer"
+    )
+    # snv_vcf: Set[str] = Field(..., description="vcf_snv for rare disease and vcf_cancer for cancer")
     snv_research_vcf: Set[str] = Field(None, description="vcf_snv_research for rare disease")
+    # sv_vcf: Set[str] = Field(
+    #     ..., description="vcf_cancer_sv for rare disease and vcf_sv_cancer for cancer"
+    # )
     sv_vcf: Set[str] = Field(
-        ..., description="vcf_cancer_sv for rare disease and vcf_sv_cancer for cancer"
+        None, description="vcf_cancer_sv for rare disease and vcf_sv_cancer for cancer"
     )
     sv_research_vcf: Set[str] = Field(None, description="vcf_sv_research for rare disease")
     vcf_str: Set[str] = Field(
@@ -27,8 +33,8 @@ class CaseTags(BaseModel):
 
 class SampleTags(BaseModel):
     # If cram does not exist
-    bam_file: Set[str]
-    alignment_file: Set[str]
+    bam_file: Set[str] = None
+    alignment_file: Set[str] = None
     vcf2cytosure: Set[str] = None
     mt_bam: Set[str] = None
     chromograph_autozyg: Set[str] = None

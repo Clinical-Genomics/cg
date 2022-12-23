@@ -82,6 +82,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
 
         config_sample = ScoutMipIndividual()
         self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
+        self.add_common_sample_files(config_sample=config_sample, db_sample=db_sample)
         config_sample.father = db_sample.father.internal_id if db_sample.father else "0"
         config_sample.mother = db_sample.mother.internal_id if db_sample.mother else "0"
 
