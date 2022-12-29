@@ -35,7 +35,7 @@ class CaseActions(StrEnum):
     RUNNING: str = "running"
 
 
-CASE_ACTIONS = (CaseActions.ANALYZE, CaseActions.RUNNING, CaseActions.HOLD)
+CASE_ACTIONS = [action.value for action in CaseActions]
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
