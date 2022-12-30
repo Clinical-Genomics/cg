@@ -275,8 +275,8 @@ def relationship(
 
 @add.command()
 @click.pass_obj
-def external(context: CGConfig, ticket: str, dry_run: bool):
+def external_data(context: CGConfig, ticket: str, dry_run: bool):
     """Iterates through the external data directory and creates/updates housekeeper when new
     files are added."""
-    external_data_handler = ExternalDataHandler(config=context)
+    external_data_handler: ExternalDataHandler = ExternalDataHandler(config=context)
     external_data_handler.curate_external_folder()

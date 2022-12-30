@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from typing import List
 
+from cg.constants.constants import CaseActions
 from cg.meta.external_data import ExternalDataHandler
 from tests.cli.workflow.conftest import dna_case
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -11,18 +12,6 @@ from tests.store.conftest import fixture_sample_obj
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
-
-
-def test_start_associated_case(
-    external_data_handler: ExternalDataHandler, sample_obj: models.Sample
-):
-    # GIVEN a sample linked to a case set to hold
-    for case_links in sample_obj.links:
-        case_links.family.action = "hold"
-    # WHEN the function is called
-    external_data_handler.start_associated_case(sample_object=sample_obj)
-    # THEN the action should have changed
-    assert all(case_links.family.action == "analyze" for case_links in sample_obj.links)
 
 
 def test_add_sample_to_hk(

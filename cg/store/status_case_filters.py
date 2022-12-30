@@ -62,7 +62,6 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
         or_(
             models.Family.action == CaseActions.ANALYZE,
             and_(
-                models.Application.is_external.isnot(True),
                 models.Family.action.is_(None),
                 models.Analysis.created_at.is_(None),
             ),
