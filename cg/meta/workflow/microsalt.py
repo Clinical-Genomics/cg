@@ -5,7 +5,6 @@
     Method: Outputted as “1273:23”. Defaults to “Not in LIMS”
     Date: Returns latest == most recent date. Outputted as DT object “YYYY MM DD”. Defaults to
     datetime.min"""
-import json
 import logging
 import os
 import re
@@ -29,7 +28,7 @@ from cg.store import models
 from cg.store.models import Sample, Family
 from cg.utils import Process
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.io.json import read_json, write_json
+from cg.io.json import read_json, write_json_stream, write_json
 
 from cg.constants import Priority
 
@@ -384,9 +383,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         qc_pass: bool = True
 
         for sample in failed_samples:
-            if sample.control == ControlEnum.negative:
+            sample_obj: sample = self.get_samples(case_id=case_id, sample_id=sample)[0]
+            if sample_obj.control == ControlEnum.negative:
                 qc_pass = False
-            if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
+            if sample_obj.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
                 qc_pass = False
 
         # Check if more than 10% of MWX samples failed
@@ -408,9 +408,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def create_qc_done_file(self, run_dir_path: Path, failed_samples: Dict) -> None:
         """Creates a QC_done when a QC check is performed."""
-        with open(run_dir_path.joinpath("QC_done.txt"), "w") as file:
-            for sample_dict in failed_samples.items():
-                file.write(f"{sample_dict[0].internal_id}: {json.dumps(sample_dict[1])} \n")
+        write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
 
     def qc_sample_check(self, sample: Sample, failed_samples: Dict, sample_qc: Dict) -> None:
         """Perform a QC on a sample."""
@@ -418,14 +416,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         if sample.control == ControlEnum.negative:
             reads_pass: bool = self.check_external_negative_control_sample(sample)
             if not reads_pass:
-                failed_samples[sample] = {"Passed QC Reads": reads_pass}
+                failed_samples[sample.internal_id] = {"Passed QC Reads": reads_pass}
                 LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
         else:
             reads_pass: bool = sample.sequencing_qc
             coverage_10x_pass: bool = self.check_coverage_10x(sample.internal_id, sample_qc)
             if not reads_pass or not coverage_10x_pass:
-                failed_samples[sample] = {"Passed QC Reads": reads_pass}
-                failed_samples[sample]["Passed Coverage 10X"] = coverage_10x_pass
+                failed_samples[sample.internal_id] = {"Passed QC Reads": reads_pass}
+                failed_samples[sample.internal_id]["Passed Coverage 10X"] = coverage_10x_pass
                 LOG.warning(f"Sample {sample.internal_id} failed QC.")
 
     def check_coverage_10x(self, sample_name: str, sample_qc: Dict) -> bool:
