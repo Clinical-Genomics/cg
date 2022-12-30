@@ -418,10 +418,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Perform a QC on a sample."""
 
         if sample.control == ControlEnum.negative:
-            if not self.check_external_negative_control_sample(sample):
-                failed_samples[sample] = {
-                    "Passed QC Reads": self.check_external_negative_control_sample(sample)
-                }
+            reads_pass: bool = self.check_external_negative_control_sample(sample)
+            if not reads_pass:
+                failed_samples[sample] = {"Passed QC Reads": reads_pass}
                 LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
         else:
             reads_pass: bool = sample.sequencing_qc
