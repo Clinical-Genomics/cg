@@ -26,7 +26,7 @@ from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
 from cg.store import models
-from cg.store.models import Sample
+from cg.store.models import Sample, Family
 from cg.utils import Process
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.io.json import read_json, write_json
@@ -72,14 +72,14 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        case_paths: List[Path] = [
+        case_directories: List[Path] = [
             Path(path)
             for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
         ]
 
-        self.verify_case_paths_age(case_paths, case_id)
+        self.verify_case_paths_age(case_directories, case_id)
 
-        return case_paths
+        return case_directories
 
     def get_latest_case_path(self, case_id: str) -> Path:
         """Return latest run dir for a microbial case."""
@@ -261,12 +261,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Get LIMS project for a sample"""
         return self.lims_api.get_sample_project(sample_id)
 
-    def get_cases_to_store(self) -> List[models.Family]:
+    def get_cases_to_store(self) -> List[Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
 
-        cases_qc_ready: List[models.Family] = self.get_completed_cases()
-        cases_to_store: List[models.Family] = []
+        cases_qc_ready: List[Family] = self.get_completed_cases()
+        cases_to_store: List[Family] = []
         LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
 
         for case in cases_qc_ready:
@@ -295,7 +295,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return cases_to_store
 
-    def get_completed_cases(self) -> List[models.Family]:
+    def get_completed_cases(self) -> List[Family]:
         """Retrieve a list of cases that are completed in trailblazer."""
         return [
             case_object
@@ -384,10 +384,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         qc_pass: bool = True
 
         for sample in failed_samples:
-            # Check if negative control failed
             if sample.control == ControlEnum.negative:
                 qc_pass = False
-            # Check if MWR sample failed
             if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
                 qc_pass = False
 
