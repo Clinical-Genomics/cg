@@ -33,6 +33,8 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     delivery_types: Set[str] = case_obj.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
+    is_complete_delivery: bool
+    job_id: int
     is_sample_delivery, is_case_delivery = DeliverAPI.get_delivery_scope(
         delivery_arguments=delivery_types
     )
@@ -52,7 +54,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
         ).deliver_files(case_obj=case_obj)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)
-    job_id: int = rsync_api.slurm_rsync_single_case(
+    is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(
         case_id=case_id,
         dry_run=dry_run,
         sample_files_present=is_sample_delivery,
@@ -61,9 +63,10 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     RsyncAPI.write_trailblazer_config(
         {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
     )
+    analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
     if not dry_run:
         context.obj.trailblazer_api.add_pending_analysis(
-            case_id=case_id,
+            case_id=analysis_name,
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
             out_dir=rsync_api.log_dir.as_posix(),

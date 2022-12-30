@@ -5,6 +5,7 @@ from cgmodels.cg.constants import Pipeline
 from datetime import datetime
 
 from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store, models
 from cg.store.status_case_filters import (
@@ -14,6 +15,7 @@ from cg.store.status_case_filters import (
     filter_cases_with_scout_data_delivery,
     filter_report_supported_data_delivery_cases,
     filter_cases_with_loqusdb_supported_pipeline,
+    filter_cases_with_loqusdb_supported_sequencing_method,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -189,6 +191,62 @@ def test_filter_cases_with_loqusdb_supported_pipeline(
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases
     assert test_fluffy_case not in cases
+
+
+def test_filter_cases_with_loqusdb_supported_sequencing_method(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test retrieval of cases with a valid Loqusdb sequencing method."""
+
+    # GIVEN a sample with a valid Loqusdb sequencing method
+    test_sample_wes: models.Sample = helpers.add_sample(
+        base_store, sequenced_at=timestamp_now, application_type=SequencingMethod.WES
+    )
+
+    # GIVEN a MIP-DNA associated test case
+    test_case_wes: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
+
+    # GIVEN a cases Query
+    cases: Query = base_store.get_families_with_analyses()
+
+    # WHEN retrieving the available cases
+    cases: List[Query] = list(
+        filter_cases_with_loqusdb_supported_sequencing_method(
+            cases=cases, pipeline=Pipeline.MIP_DNA
+        )
+    )
+
+    # THEN the expected case should be retrieved
+    assert test_case_wes in cases
+
+
+def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test retrieval of cases with a valid Loqusdb sequencing method."""
+
+    # GIVEN a not supported loqusdb sample
+    test_sample_wts: models.Sample = helpers.add_sample(
+        base_store, name="sample_wts", sequenced_at=timestamp_now, is_rna=True
+    )
+
+    # GIVEN a MIP-DNA associated test case
+    test_case_wts: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    base_store.relate_sample(test_case_wts, test_sample_wts, PhenotypeStatus.UNKNOWN)
+
+    # GIVEN a cases Query
+    cases: Query = base_store.get_families_with_analyses()
+
+    # WHEN retrieving the valid cases
+    cases: List[Query] = list(
+        filter_cases_with_loqusdb_supported_sequencing_method(
+            cases=cases, pipeline=Pipeline.MIP_DNA
+        )
+    )
+
+    # THEN no cases should be returned
+    assert not cases
 
 
 def test_filter_cases_for_analysis(

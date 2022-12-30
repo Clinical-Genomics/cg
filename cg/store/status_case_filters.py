@@ -1,11 +1,16 @@
 from typing import Optional
 
 from alchy import Query
+from cgmodels.cg.constants import Pipeline
 from sqlalchemy import and_, or_
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
 from cg.constants.constants import CaseActions, DataDelivery
-from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
+from cg.constants.observations import (
+    LOQUSDB_SUPPORTED_PIPELINES,
+    LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+)
 from cg.store import models
 
 
@@ -22,7 +27,7 @@ def filter_cases_with_pipeline(cases: Query, pipeline: str = None, **kwargs) -> 
 def filter_cases_with_loqusdb_supported_pipeline(
     cases: Query, pipeline: str = None, **kwargs
 ) -> Query:
-    """Return loqusdb related cases with pipeline."""
+    """Return Loqusdb related cases with pipeline."""
     records: Query = (
         cases.filter(models.Family.data_analysis == pipeline)
         if pipeline
@@ -30,6 +35,21 @@ def filter_cases_with_loqusdb_supported_pipeline(
     )
 
     return records.filter(models.Customer.loqus_upload == True)
+
+
+def filter_cases_with_loqusdb_supported_sequencing_method(
+    cases: Query, pipeline: str = None, **kwargs
+) -> Query:
+    """Return cases with Loqusdb supported sequencing method."""
+    supported_sequencing_methods = {
+        Pipeline.MIP_DNA: LOQUSDB_MIP_SEQUENCING_METHODS,
+        Pipeline.BALSAMIC: LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
+    }
+    return (
+        cases.filter(models.Application.prep_category.in_(supported_sequencing_methods[pipeline]))
+        if pipeline
+        else cases
+    )
 
 
 def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
@@ -70,6 +90,7 @@ def apply_case_filter(function: str, cases: Query, pipeline: Optional[str] = Non
         "cases_has_sequence": filter_cases_has_sequence,
         "cases_with_pipeline": filter_cases_with_pipeline,
         "cases_with_loqusdb_supported_pipeline": filter_cases_with_loqusdb_supported_pipeline,
+        "cases_with_loqusdb_supported_sequencing_method": filter_cases_with_loqusdb_supported_sequencing_method,
         "filter_cases_for_analysis": filter_cases_for_analysis,
         "cases_with_scout_data_delivery": filter_cases_with_scout_data_delivery,
         "filter_report_cases_with_valid_data_delivery": filter_report_supported_data_delivery_cases,

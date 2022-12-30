@@ -7,10 +7,13 @@ from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.delivery import INBOX_NAME
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
-from cg.store.models import FamilySample, Sample
+from cg.store.models import FamilySample, Sample, Family
 from tests.store_helpers import StoreHelpers
+from tests.store.conftest import fixture_case_obj
+from tests.cli.deliver.conftest import fixture_fastq_delivery_bundle, fixture_mip_delivery_bundle
 
 
 def test_get_delivery_path(
@@ -35,7 +38,7 @@ def test_get_delivery_path(
     deliver_path = deliver_api.create_delivery_dir_path(case_name=case_id)
 
     # THEN assert that the path looks like expected
-    assert deliver_path == project_dir / customer_id / "inbox" / ticket / case_id
+    assert deliver_path == Path(project_dir, customer_id, INBOX_NAME, ticket, case_id)
 
 
 def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str):
@@ -188,3 +191,84 @@ def test_get_delivery_scope_case_and_sample():
     # THEN both case_delivery and sample_delivery should be True
     assert case_delivery
     assert sample_delivery
+
+
+def test_deliver_files_enough_reads(
+    caplog,
+    case_id: str,
+    deliver_api: DeliverAPI,
+    deliver_api_destination_path: Path,
+    fastq_delivery_bundle: dict,
+    helpers: StoreHelpers,
+    mip_delivery_bundle: dict,
+    sample_id: str,
+):
+    """Tests the deliver_files method for a sample with enough reads."""
+    # GIVEN a case to be delivered and a sample with enough reads
+    case: Family = deliver_api.store.family(internal_id=case_id)
+    sample: Sample = deliver_api.store.sample(sample_id)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
+
+    # WHEN delivering files for the case
+    deliver_api.deliver_files(case_obj=case)
+
+    # THEN the sample folder should be created
+    assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()
+
+
+def test_deliver_files_not_enough_reads(
+    caplog,
+    case_id: str,
+    deliver_api: DeliverAPI,
+    deliver_api_destination_path: Path,
+    fastq_delivery_bundle: dict,
+    helpers: StoreHelpers,
+    mip_delivery_bundle: dict,
+    sample_id: str,
+):
+    """Tests the deliver_files method for a sample with too few reads."""
+    # GIVEN a case to be delivered and a sample with too few reads
+    case: Family = deliver_api.store.family(internal_id=case_id)
+    sample: Sample = deliver_api.store.sample(sample_id)
+    sample.reads = 1
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
+
+    # WHEN delivering files for the case
+    deliver_api.deliver_files(case_obj=case)
+
+    # THEN the sample folder should not be created
+    assert not Path(
+        deliver_api.project_base_path, deliver_api_destination_path, sample.name
+    ).exists()
+
+
+def test_deliver_files_not_enough_reads_force(
+    caplog,
+    case_id: str,
+    deliver_api: DeliverAPI,
+    deliver_api_destination_path: Path,
+    fastq_delivery_bundle: dict,
+    helpers: StoreHelpers,
+    mip_delivery_bundle: dict,
+    sample_id: str,
+):
+    """Tests the deliver_files method for a sample with too few reads but with override."""
+    # GIVEN a case to be delivered and a sample with too few reads
+    case: Family = deliver_api.store.family(internal_id=case_id)
+    sample: Sample = deliver_api.store.sample(sample_id)
+    sample.reads = 1
+    helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
+    helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
+
+    # Given that the API was created with force_all=True
+    deliver_api.deliver_failed_samples = True
+
+    # WHEN delivering files for the case
+    deliver_api.deliver_files(
+        case_obj=case,
+    )
+
+    # THEN the sample folder should be created
+    assert Path(deliver_api.project_base_path, deliver_api_destination_path, sample.name).exists()

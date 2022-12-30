@@ -42,9 +42,18 @@ class QualityMetrics:
             summarized_metrics[lane] = summarized_metrics.get(lane, {})
             for value in parsed_metrics[lane].values():
                 value["YieldQ30"] = int(value["YieldQ30"])
+                value["Mean Quality Score (PF)"] = float(value["Mean Quality Score (PF)"])
+                value["QualityScoreSum"] = int(value["QualityScoreSum"])
                 sample_id = value.get("SampleID")
                 if sample_id not in summarized_metrics[lane]:
                     summarized_metrics[lane][sample_id] = value
                     continue
                 summarized_metrics[lane][sample_id]["YieldQ30"] += value.get("YieldQ30")
+                summarized_metrics[lane][sample_id]["Mean Quality Score (PF)"] += value.get(
+                    "Mean Quality Score (PF)"
+                )
+                summarized_metrics[lane][sample_id]["QualityScoreSum"] += value.get(
+                    "QualityScoreSum"
+                )
+
         return summarized_metrics

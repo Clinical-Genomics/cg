@@ -1,6 +1,8 @@
 from typing import List, Generator
 
 import pytest
+
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferLims
 from cg.store import Store
 from pathlib import Path
@@ -31,3 +33,25 @@ def external_data_directory(
             for fastq_number in range(2):
                 sample_dir.joinpath(f"fastq_{fastq_number}").touch()
     return cust_folders[0].parent
+
+
+@pytest.fixture(name="sample_sheet_path")
+def fixture_sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
+    """Create and return path to sample sheet."""
+    sample_sheet_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
+    sample_sheet_path_dir.mkdir(parents=True, exist_ok=True)
+    sample_sheet_path: Path = Path(
+        sample_sheet_path_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    sample_sheet_path.touch()
+    yield sample_sheet_path
+
+
+@pytest.fixture(name="cgstats_log_path")
+def fixture_cgstats_log_path(tmpdir_factory) -> Generator[Path, None, None]:
+    """Create and return path to cgstats log file."""
+    cgstats_log_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
+    cgstats_log_path_dir.mkdir(parents=True, exist_ok=True)
+    cgstats_log_path: Path = Path(cgstats_log_path_dir, "stats-121087-flow-cell-id.txt")
+    cgstats_log_path.touch()
+    yield cgstats_log_path

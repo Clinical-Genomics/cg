@@ -19,12 +19,10 @@ from cg.models import CompressionData
 from cg.models.slurm.sbatch import Sbatch
 
 from cg.apps.crunchy.sbatch import (
-    FASTQ_TO_SPRING_COMMANDS,
     FASTQ_TO_SPRING_ERROR,
-    SPRING_TO_FASTQ_COMMANDS,
     SPRING_TO_FASTQ_ERROR,
-    STAGE_FASTQ_TO_SPRING_COMMANDS,
-    STAGE_SPRING_TO_FASTQ_COMMANDS,
+    FASTQ_TO_SPRING_COMMANDS,
+    SPRING_TO_FASTQ_COMMANDS,
 )
 from cg.constants.priority import SlurmQos
 
@@ -221,58 +219,30 @@ class CrunchyAPI:
         )
         # Generate the commands
         sbatch_parameters: Sbatch
-        if self.conda_binary:
-
-            commands = STAGE_FASTQ_TO_SPRING_COMMANDS.format(
-                conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
-                fastq_first=compression_obj.fastq_first,
-                fastq_second=compression_obj.fastq_second,
-                pending_path=compression_obj.pending_path,
-                spring_path=compression_obj.spring_path,
-                tmp_dir=files.get_tmp_dir(
-                    prefix="spring_",
-                    suffix="_compress",
-                    base=compression_obj.analysis_dir.as_posix(),
-                ),
-            )
-            sbatch_parameters: Sbatch = Sbatch(
-                account=self.slurm_account,
-                commands=commands,
-                email=self.mail_user,
-                error=error_function,
-                hours=24,
-                job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
-                log_dir=log_dir.as_posix(),
-                memory=50,
-                number_tasks=12,
-                quality_of_service=SlurmQos.MAINTENANCE,
-            )
-        else:
-            commands = FASTQ_TO_SPRING_COMMANDS.format(
-                conda_env=self.crunchy_env,
-                fastq_first=compression_obj.fastq_first,
-                fastq_second=compression_obj.fastq_second,
-                pending_path=compression_obj.pending_path,
-                spring_path=compression_obj.spring_path,
-                tmp_dir=files.get_tmp_dir(
-                    prefix="spring_",
-                    suffix="_compress",
-                    base=compression_obj.analysis_dir.as_posix(),
-                ),
-            )
-            sbatch_parameters: Sbatch = Sbatch(
-                account=self.slurm_account,
-                email=self.mail_user,
-                error=error_function,
-                commands=commands,
-                hours=24,
-                job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
-                log_dir=log_dir.as_posix(),
-                memory=50,
-                number_tasks=12,
-                quality_of_service=SlurmQos.MAINTENANCE,
-                use_login_shell="--login",
-            )
+        commands = FASTQ_TO_SPRING_COMMANDS.format(
+            conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
+            fastq_first=compression_obj.fastq_first,
+            fastq_second=compression_obj.fastq_second,
+            pending_path=compression_obj.pending_path,
+            spring_path=compression_obj.spring_path,
+            tmp_dir=files.get_tmp_dir(
+                prefix="spring_",
+                suffix="_compress",
+                base=compression_obj.analysis_dir.as_posix(),
+            ),
+        )
+        sbatch_parameters: Sbatch = Sbatch(
+            account=self.slurm_account,
+            commands=commands,
+            email=self.mail_user,
+            error=error_function,
+            hours=24,
+            job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
+            log_dir=log_dir.as_posix(),
+            memory=50,
+            number_tasks=12,
+            quality_of_service=SlurmQos.MAINTENANCE,
+        )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
             sbatch_parameters=sbatch_parameters
         )
@@ -302,36 +272,20 @@ class CrunchyAPI:
             fastq_second=compression_obj.fastq_second,
             pending_path=compression_obj.pending_path,
         )
-        if self.conda_binary:
-            commands = STAGE_SPRING_TO_FASTQ_COMMANDS.format(
-                conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
-                tmp_dir=files.get_tmp_dir(
-                    prefix="spring_",
-                    suffix="_decompress",
-                    base=compression_obj.analysis_dir.as_posix(),
-                ),
-                fastq_first=compression_obj.fastq_first,
-                fastq_second=compression_obj.fastq_second,
-                spring_path=compression_obj.spring_path,
-                pending_path=compression_obj.pending_path,
-                checksum_first=files_info["fastq_first"].checksum,
-                checksum_second=files_info["fastq_second"].checksum,
-            )
-        else:
-            commands = SPRING_TO_FASTQ_COMMANDS.format(
-                conda_env=self.crunchy_env,
-                tmp_dir=files.get_tmp_dir(
-                    prefix="spring_",
-                    suffix="_decompress",
-                    base=compression_obj.analysis_dir.as_posix(),
-                ),
-                fastq_first=compression_obj.fastq_first,
-                fastq_second=compression_obj.fastq_second,
-                spring_path=compression_obj.spring_path,
-                pending_path=compression_obj.pending_path,
-                checksum_first=files_info["fastq_first"].checksum,
-                checksum_second=files_info["fastq_second"].checksum,
-            )
+        commands = SPRING_TO_FASTQ_COMMANDS.format(
+            conda_run=f"{self.conda_binary} run --name {self.crunchy_env}",
+            tmp_dir=files.get_tmp_dir(
+                prefix="spring_",
+                suffix="_decompress",
+                base=compression_obj.analysis_dir.as_posix(),
+            ),
+            fastq_first=compression_obj.fastq_first,
+            fastq_second=compression_obj.fastq_second,
+            spring_path=compression_obj.spring_path,
+            pending_path=compression_obj.pending_path,
+            checksum_first=files_info["fastq_first"].checksum,
+            checksum_second=files_info["fastq_second"].checksum,
+        )
         sbatch_parameters: Sbatch = Sbatch(
             account=self.slurm_account,
             commands=commands,

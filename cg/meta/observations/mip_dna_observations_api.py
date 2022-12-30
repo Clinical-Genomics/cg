@@ -1,7 +1,6 @@
 """API for uploading rare disease observations."""
 
 import logging
-from pathlib import Path
 from typing import Dict
 
 from housekeeper.store.models import Version, File
@@ -12,6 +11,8 @@ from cg.constants.observations import (
     MipDNALoadParameters,
     LoqusdbInstance,
     LOQUSDB_MIP_SEQUENCING_METHODS,
+    LOQUSDB_ID,
+    LoqusdbMipCustomers,
 )
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import LoqusdbUploadCaseError, LoqusdbDuplicateRecordError, CaseNotFoundError
@@ -19,6 +20,7 @@ from cg.meta.observations.observations_api import ObservationsAPI
 from cg.models.cg_config import CGConfig
 from cg.models.observations.input_files import MipDNAObservationsInputFiles
 from cg.store import models
+from cg.utils.dict import get_full_path_dictionary
 
 LOG = logging.getLogger(__name__)
 
@@ -53,13 +55,18 @@ class MipDNAObservationsAPI(ObservationsAPI):
             LOG.error(f"Case {case.internal_id} has tumour samples. Cancelling upload.")
             raise LoqusdbUploadCaseError
 
-        if self.is_duplicate(case=case, profile_vcf_path=input_files.profile_vcf_path):
+        if self.is_duplicate(
+            case=case,
+            loqusdb_api=self.loqusdb_api,
+            profile_vcf_path=input_files.profile_vcf_path,
+            profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
+        ):
             LOG.error(
-                f"Case {case.internal_id} has been already uploaded to {repr(self.loqusdb_api)}"
+                f"Case {case.internal_id} has already been uploaded to {repr(self.loqusdb_api)}"
             )
             raise LoqusdbDuplicateRecordError
 
-        output = self.loqusdb_api.load(
+        load_output: dict = self.loqusdb_api.load(
             case_id=case.internal_id,
             snv_vcf_path=input_files.snv_vcf_path,
             sv_vcf_path=input_files.sv_vcf_path,
@@ -69,44 +76,31 @@ class MipDNAObservationsAPI(ObservationsAPI):
             hard_threshold=MipDNALoadParameters.HARD_THRESHOLD.value,
             soft_threshold=MipDNALoadParameters.SOFT_THRESHOLD.value,
         )
-        loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)["_id"])
+        loqusdb_id: str = str(self.loqusdb_api.get_case(case_id=case.internal_id)[LOQUSDB_ID])
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=loqusdb_id)
-        LOG.info(f"Uploaded {output['variants']} variants to {repr(self.loqusdb_api)}")
-
-    def is_duplicate(self, case: models.Family, profile_vcf_path: Path) -> bool:
-        """Check if a case has already been uploaded to Loqusdb."""
-        loqusdb_case: dict = self.loqusdb_api.get_case(case_id=case.internal_id)
-        duplicate = self.loqusdb_api.get_duplicate(
-            profile_vcf_path=profile_vcf_path,
-            profile_threshold=MipDNALoadParameters.PROFILE_THRESHOLD.value,
-        )
-        return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
+        LOG.info(f"Uploaded {load_output['variants']} variants to {repr(self.loqusdb_api)}")
 
     def extract_observations_files_from_hk(
         self, hk_version: Version
     ) -> MipDNAObservationsInputFiles:
         """Extract observations files given a housekeeper version for rare diseases."""
-        snv_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
-        ).first()
-        sv_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
-        ).first()
-        profile_vcf_file: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF]
-        ).first()
-        family_ped_path: File = self.housekeeper_api.files(
-            version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.FAMILY_PED]
-        ).first()
-
-        return MipDNAObservationsInputFiles(
-            snv_vcf_path=snv_vcf_file.full_path if snv_vcf_file else None,
-            sv_vcf_path=sv_vcf_file.full_path
-            if sv_vcf_file and self.sequencing_method == SequencingMethod.WGS
+        input_files: Dict[str, File] = {
+            "snv_vcf_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SNV_VCF]
+            ).first(),
+            "sv_vcf_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.SV_VCF]
+            ).first()
+            if self.sequencing_method == SequencingMethod.WGS
             else None,
-            profile_vcf_path=profile_vcf_file.full_path if profile_vcf_file else None,
-            family_ped_path=family_ped_path.full_path if family_ped_path else None,
-        )
+            "profile_vcf_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.PROFILE_GBCF]
+            ).first(),
+            "family_ped_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[MipDNAObservationsAnalysisTag.FAMILY_PED]
+            ).first(),
+        }
+        return MipDNAObservationsInputFiles(**get_full_path_dictionary(input_files))
 
     def delete_case(self, case: models.Family) -> None:
         """Delete rare disease case observations from Loqusdb."""
@@ -119,3 +113,7 @@ class MipDNAObservationsAPI(ObservationsAPI):
         self.loqusdb_api.delete_case(case.internal_id)
         self.update_statusdb_loqusdb_id(samples=case.samples, loqusdb_id=None)
         LOG.info(f"Removed observations for case {case.internal_id} from {repr(self.loqusdb_api)}")
+
+    def get_loqusdb_customers(self) -> LoqusdbMipCustomers:
+        """Returns the customers that are entitled to Rare Disease Loqusdb uploads."""
+        return LoqusdbMipCustomers

@@ -11,7 +11,7 @@ from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Bundle, File, Version
 
-from cg.exc import HousekeeperVersionMissingError
+from cg.exc import HousekeeperBundleVersionMissingError
 
 LOG = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class HousekeeperAPI:
         new_version: Version = self.new_version(created_at=new_bundle.created_at)
         new_bundle.versions.append(new_version)
         self.commit()
-        LOG.info("New bundle created with name %s", new_bundle.name)
+        LOG.info(f"New bundle created with name {new_bundle.name}")
         return new_bundle
 
     def set_to_archive(self, file: File, value: bool) -> None:
@@ -79,25 +79,18 @@ class HousekeeperAPI:
         """Delete a file both from database and disk (if included)."""
         file_obj: File = self.get_file(file_id)
         if not file_obj:
-            LOG.info("Could not find file %s", file_id)
+            LOG.info(f"Could not find file {file_id}")
             return
 
         if file_obj.is_included and Path(file_obj.full_path).exists():
-            LOG.info("Deleting file %s from disc", file_obj.full_path)
+            LOG.info(f"Deleting file {file_obj.full_path} from disc")
             Path(file_obj.full_path).unlink()
 
-        LOG.info("Deleting file %s from housekeeper", file_id)
+        LOG.info(f"Deleting file {file_id} from housekeeper")
         file_obj.delete()
         self._store.commit()
 
         return file_obj
-
-    def delete_file_if_related(self, stem: str, hk_file: File):
-        """Delete a file if the full path includes the root."""
-        if stem in hk_file.path:
-            self.delete_file(file_id=hk_file.id)
-            self._store.commit()
-            LOG.info(f"HousekeeperAPI: {hk_file.path} deleted from Housekeeper")
 
     def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
         """Check if there are files for a bundle, tags, and/or version."""
@@ -297,16 +290,16 @@ class HousekeeperAPI:
         """Drop all tables in the store."""
         self._store.drop_all()
 
-    def add_and_include_file_to_latest_version(self, case_id: str, file: Path, tags: list) -> None:
-        """Adds amd includes a file in the latest version of a case bundle."""
-        version_obj: Version = self.last_version(case_id)
-        if not version_obj:
-            LOG.info("Case ID: %s not found in housekeeper", case_id)
-            raise HousekeeperVersionMissingError
-        file_obj: File = self.add_file(
-            version_obj=version_obj, tags=tags, path=str(file.absolute())
-        )
-        self.include_file(version_obj=version_obj, file_obj=file_obj)
+    def add_and_include_file_to_latest_version(
+        self, bundle_name: str, file: Path, tags: list
+    ) -> None:
+        """Adds and includes a file in the latest version of a bundle."""
+        version: Version = self.last_version(bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            raise HousekeeperBundleVersionMissingError
+        hk_file: File = self.add_file(version_obj=version, tags=tags, path=str(file.absolute()))
+        self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()
 
     def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:
@@ -314,6 +307,6 @@ class HousekeeperAPI:
         version_obj: Version = self.last_version(case_id)
         if not version_obj:
             LOG.info("Case ID: %s not found in housekeeper", case_id)
-            raise HousekeeperVersionMissingError
+            raise HousekeeperBundleVersionMissingError
         file: File = self.files(version=version_obj.id, tags=tags).first()
         return file
