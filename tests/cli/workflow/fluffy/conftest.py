@@ -150,7 +150,7 @@ def fluffy_context(
         sequenced_at=dt.datetime.now(),
     )
     helpers.add_flowcell(
-        fluffy_analysis_api.status_db, flowcell_id="flowcell", samples=[example_fluffy_sample]
+        fluffy_analysis_api.status_db, flow_cell_id="flowcell", samples=[example_fluffy_sample]
     )
     helpers.add_relationship(
         fluffy_analysis_api.status_db, case=example_fluffy_case, sample=example_fluffy_sample

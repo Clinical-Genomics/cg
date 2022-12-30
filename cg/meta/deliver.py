@@ -9,7 +9,7 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
-from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.constants import DataDelivery
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
@@ -27,6 +27,7 @@ class DeliverAPI:
         sample_tags: List[Set[str]],
         project_base_path: Path,
         delivery_type: str,
+        force_all: bool = False,
     ):
         """Initialize a delivery api
 
@@ -48,10 +49,11 @@ class DeliverAPI:
         self.dry_run = False
         self.delivery_type: str = delivery_type
         self.skip_missing_bundle = self.delivery_type in constants.SKIP_MISSING
+        self.deliver_failed_samples = force_all
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
-        LOG.info("Set dry run to %s", dry_run)
+        LOG.info(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
     def deliver_files(self, case_obj: Family):
@@ -61,18 +63,20 @@ class DeliverAPI:
         """
         case_id: str = case_obj.internal_id
         case_name: str = case_obj.name
-        LOG.debug("Fetch latest version for case %s", case_id)
+        LOG.debug(
+            f"Fetch latest version for case {case_id}",
+        )
         last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
         if not last_version:
             if not self.case_tags:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        link_objs: List[FamilySample] = self.store.family_samples(case_id)
-        if not link_objs:
-            LOG.warning("Could not find any samples linked to case %s", case_id)
+        links: List[FamilySample] = self.store.family_samples(case_id)
+        if not links:
+            LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
-        samples: List[Sample] = [link.sample for link in link_objs]
+        samples: List[Sample] = [link.sample for link in links]
         self.set_ticket(case_obj.latest_ticket)
         self.set_customer_id(case_obj=case_obj)
 
@@ -89,34 +93,39 @@ class DeliverAPI:
         if not self.sample_tags:
             return
 
-        link_obj: FamilySample
-        for link_obj in link_objs:
-            sample_id: str = link_obj.sample.internal_id
-            sample_name: str = link_obj.sample.name
-            LOG.debug("Fetch last version for sample bundle %s", sample_id)
-            if self.delivery_type == "fastq":
-                last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
-            if not last_version:
-                if self.skip_missing_bundle:
-                    LOG.info(f"Could not find any version for {sample_id}")
-                    continue
-                raise SyntaxError(f"Could not find any version for {sample_id}")
-            self.deliver_sample_files(
-                case_id=case_id,
-                case_name=case_name,
-                sample_id=sample_id,
-                sample_name=sample_name,
-                version_obj=last_version,
+        link: FamilySample
+        for link in links:
+            if link.sample.sequencing_qc or self.deliver_failed_samples:
+                sample_id: str = link.sample.internal_id
+                sample_name: str = link.sample.name
+                LOG.debug(f"Fetch last version for sample bundle {sample_id}")
+                if self.delivery_type == DataDelivery.FASTQ:
+                    last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
+                if not last_version:
+                    if self.skip_missing_bundle:
+                        LOG.info(f"Could not find any version for {sample_id}")
+                        continue
+                    raise SyntaxError(f"Could not find any version for {sample_id}")
+                self.deliver_sample_files(
+                    case_id=case_id,
+                    case_name=case_name,
+                    sample_id=sample_id,
+                    sample_name=sample_name,
+                    version_obj=last_version,
+                )
+                continue
+            LOG.warning(
+                f"Sample {link.sample.internal_id} did not receive enough reads and will not be delivered"
             )
 
     def deliver_case_files(
         self, case_id: str, case_name: str, version_obj: hk_models.Version, sample_ids: Set[str]
     ) -> None:
         """Deliver files on case level."""
-        LOG.debug("Deliver case files for %s", case_id)
+        LOG.debug(f"Deliver case files for {case_id}")
         # Make sure that the directory exists
         delivery_base: Path = self.create_delivery_dir_path(case_name=case_name)
-        LOG.debug("Creating project path %s", delivery_base)
+        LOG.debug(f"Creating project path {delivery_base}")
         if not self.dry_run:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
@@ -127,21 +136,21 @@ class DeliverAPI:
             # Out path should include customer names
             out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
             if out_path.exists():
-                LOG.warning("File %s already exists!", out_path)
+                LOG.warning(f"File {out_path} already exists!")
                 continue
 
             if self.dry_run:
-                LOG.info("Would hard link file %s to %s", file_path, out_path)
+                LOG.info(f"Would hard link file {file_path} to {out_path}")
                 number_linked_files += 1
                 continue
-            LOG.info("Hard link file %s to %s", file_path, out_path)
+            LOG.info(f"Hard link file {file_path} to {out_path}")
             try:
                 os.link(file_path, out_path)
                 number_linked_files += 1
             except FileExistsError:
-                LOG.info("Path %s exists, skipping", out_path)
+                LOG.info(f"Path {out_path} exists, skipping")
 
-        LOG.info("Linked %s files for case %s", number_linked_files, case_id)
+        LOG.info(f"Linked {number_linked_files} files for case {case_id}")
 
     def deliver_sample_files(
         self,
@@ -158,7 +167,7 @@ class DeliverAPI:
         delivery_base: Path = self.create_delivery_dir_path(
             case_name=case_name, sample_name=sample_name
         )
-        LOG.debug("Creating project path %s", delivery_base)
+        LOG.debug(f"Creating project path {delivery_base}")
         if not self.dry_run:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
@@ -172,16 +181,16 @@ class DeliverAPI:
                 file_name: str = file_name.replace(case_id, case_name)
             out_path: Path = delivery_base / file_name
             if self.dry_run:
-                LOG.info("Would hard link file %s to %s", file_path, out_path)
+                LOG.info(f"Would hard link file {file_path} to {out_path}")
                 number_linked_files += 1
                 continue
-            LOG.info("Hard link file %s to %s", file_path, out_path)
+            LOG.info(f"Hard link file {file_path} to {out_path})")
             try:
                 os.link(file_path, out_path)
                 number_linked_files += 1
             except FileExistsError:
-                LOG.info("Path %s exists, skipping", out_path)
-        LOG.info("Linked %s files for sample %s, case %s", number_linked_files, sample_id, case_id)
+                LOG.info(f"Path {out_path} exists, skipping")
+        LOG.info(f"Linked {number_linked_files} files for sample {sample_id}, case {case_id}")
 
     def get_case_files_from_version(
         self, version_obj: hk_models.Version, sample_ids: Set[str]
@@ -190,14 +199,15 @@ class DeliverAPI:
         file_obj: hk_models.File
         for file_obj in version_obj.files:
             if not self.include_file_case(file_obj, sample_ids=sample_ids):
-                LOG.debug("Skipping file %s", file_obj.path)
+                LOG.debug(f"Skipping file {file_obj.path}")
                 continue
             yield Path(file_obj.full_path)
 
     def get_sample_files_from_version(
         self, version_obj: hk_models.Version, sample_id: str
     ) -> Iterable[Path]:
-        """Fetch all files for a sample from a version that are tagged with any of the sample tags"""
+        """Fetch all files for a sample from a version that are tagged with any of the sample
+        tags."""
         file_obj: hk_models.File
         for file_obj in version_obj.files:
             if not self.include_file_sample(file_obj, sample_id=sample_id):
@@ -216,20 +226,20 @@ class DeliverAPI:
             LOG.debug("No tags are matching")
             return False
 
-        LOG.debug("Found file tags %s", ", ".join(file_tags))
+        LOG.debug(f"Found file tags {', '.join(file_tags)}")
 
         # Check if any of the sample tags exist
         if sample_ids.intersection(file_tags):
-            LOG.debug("Found sample tag, skipping %s", file_obj.path)
+            LOG.debug(f"Found sample tag, skipping {file_obj.path}")
             return False
 
         # Check if any of the file tags matches the case tags
         tags: Set[str]
         for tags in self.case_tags:
-            LOG.debug("check if %s is a subset of %s", tags, file_tags)
+            LOG.debug(f"check if {tags} is a subset of {file_tags}")
             if tags.issubset(file_tags):
                 return True
-        LOG.debug("Could not find any tags matching file %s with tags %s", file_obj.path, file_tags)
+        LOG.debug(f"Could not find any tags matching file {file_obj.path} with tags {file_tags}")
 
         return False
 
@@ -255,7 +265,7 @@ class DeliverAPI:
         return False
 
     def _set_customer_id(self, customer_id: str) -> None:
-        LOG.info("Setting customer_id to %s", customer_id)
+        LOG.info(f"Setting customer_id to {customer_id}")
         self.customer_id = customer_id
 
     def set_customer_id(self, case_obj: Family) -> None:
@@ -264,7 +274,7 @@ class DeliverAPI:
 
     def set_ticket(self, ticket: str) -> None:
         """Set the ticket for this upload"""
-        LOG.info("Setting ticket to %s", ticket)
+        LOG.info(f"Setting ticket to {ticket}")
         self.ticket = ticket
 
     def create_delivery_dir_path(self, case_name: str = None, sample_name: str = None) -> Path:
@@ -272,7 +282,9 @@ class DeliverAPI:
 
         Note that case name and sample name needs to be the identifiers sent from customer.
         """
-        delivery_path: Path = Path(self.project_base_path, self.customer_id, "inbox", self.ticket)
+        delivery_path: Path = Path(
+            self.project_base_path, self.customer_id, constants.INBOX_NAME, self.ticket
+        )
         if case_name:
             delivery_path = delivery_path / case_name
         if sample_name:

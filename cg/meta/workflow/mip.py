@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from cg.apps.mip.confighandler import ConfigHandler
 from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
 from cg.io.controller import WriteFile, ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI

@@ -8,7 +8,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.hk import models as housekeeper_models
 from cg.constants.constants import FileFormat, PrepCategory
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables

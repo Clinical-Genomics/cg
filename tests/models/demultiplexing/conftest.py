@@ -29,20 +29,6 @@ def fixture_flow_cell(flow_cell_path: Path) -> FlowCell:
     return FlowCell(flow_cell_path=flow_cell_path)
 
 
-@pytest.fixture(name="demultiplexed_flow_cell")
-def fixture_demultiplexed_flow_cell(demultiplexed_runs: Path, flow_cell_full_name: str) -> Path:
-    return Path(demultiplexed_runs, flow_cell_full_name)
-
-
-@pytest.fixture(name="bcl2fastq_demux_results")
-def fixture_bcl2fastq_demux_results(
-    demultiplexed_flow_cell: Path, flow_cell: FlowCell
-) -> DemuxResults:
-    return DemuxResults(
-        demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter="bcl2fastq"
-    )
-
-
 @pytest.fixture(name="dragen_flow_cell_full_name")
 def fixture_dragen_flow_cell_full_name() -> str:
     return "211101_A00187_0615_AHLG5GDRXY"

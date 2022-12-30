@@ -1,6 +1,7 @@
 import datetime as dt
 import logging
 import os
+import click
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
@@ -16,7 +17,6 @@ from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import Bundle, Version
-from cg.utils import click
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 
@@ -50,6 +50,14 @@ class AnalysisAPI(MetaAPI):
     @property
     def fastq_handler(self):
         return FastqHandler
+
+    @staticmethod
+    def get_help(context):
+        """
+        If no argument is passed, print help text
+        """
+        if context.invoked_subcommand is None:
+            click.echo(context.get_help())
 
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
@@ -153,12 +161,12 @@ class AnalysisAPI(MetaAPI):
 
     def upload_bundle_housekeeper(self, case_id: str) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
-
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=self.get_hermes_transformed_deliverables(case_id)
         )
         if not bundle_result:
+            LOG.info("Bundle already added to Housekeeper!")
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
         self.housekeeper_api.include(bundle_version)
