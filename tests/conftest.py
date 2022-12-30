@@ -292,7 +292,14 @@ def crunchy_config_dict():
         "crunchy": {
             "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
-            "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
+            "slurm": {
+                "account": "mock_account",
+                "conda_env": "mock_env",
+                "hours": 1,
+                "mail_user": "mock_mail",
+                "memory": 1,
+                "number_tasks": 1,
+            },
         }
     }
 
@@ -1386,7 +1393,10 @@ def fixture_context_config(
             "slurm": {
                 "account": "development",
                 "conda_env": "S_crunchy",
+                "hours": 1,
                 "mail_user": "an@scilifelab.se",
+                "memory": 1,
+                "number_tasks": 1,
             },
         },
         "data-delivery": {
