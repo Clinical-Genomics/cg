@@ -7,6 +7,7 @@ from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_comp
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
+    OPTION_BWA_MEM,
     OPTION_DRY,
     OPTION_MIP_DRY_RUN,
     OPTION_PANEL_BED,
@@ -69,6 +70,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool):
 @START_AFTER_PROGRAM
 @START_WITH_PROGRAM
 @ARGUMENT_CASE_ID
+@OPTION_BWA_MEM
 @OPTION_DRY
 @OPTION_MIP_DRY_RUN
 @OPTION_SKIP_EVALUATION
@@ -83,6 +85,7 @@ def run(
     skip_evaluation: bool = False,
     start_after: str = None,
     start_with: str = None,
+    use_bwa_mem: bool = False,
 ):
     """Run the analysis for a case"""
 
@@ -99,6 +102,7 @@ def run(
         skip_evaluation=analysis_api.get_skip_evaluation_flag(
             case_id=case_id, skip_evaluation=skip_evaluation
         ),
+        use_bwa_mem=use_bwa_mem,
     )
 
     try:
@@ -128,6 +132,7 @@ def run(
 @click.command()
 @ARGUMENT_CASE_ID
 @EMAIL_OPTION
+@OPTION_BWA_MEM
 @OPTION_DRY
 @OPTION_MIP_DRY_RUN
 @OPTION_PANEL_BED
@@ -147,6 +152,7 @@ def start(
     skip_evaluation: bool,
     start_after: str,
     start_with: str,
+    use_bwa_mem: bool,
 ):
     """Start full MIP analysis workflow for a case"""
 
@@ -170,6 +176,7 @@ def start(
             dry_run=dry_run,
             mip_dry_run=mip_dry_run,
             skip_evaluation=skip_evaluation,
+            use_bwa_mem=use_bwa_mem,
         )
     except (FlowcellsNeededError, DecompressionNeededError) as error:
         LOG.error(error)
