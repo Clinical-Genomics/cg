@@ -3,6 +3,7 @@
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Any
 
 import pytest
 
@@ -28,57 +29,56 @@ class MockCompressAPI(CompressAPI):
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool):
-        """Update dry run"""
+        """Update dry run."""
         self.dry_run = dry_run
 
     def compress_fastq(self, sample_id: str, dry_run: bool = False):
-        """Return if compression was succesfull"""
+        """Return if compression was successful."""
         _ = sample_id, dry_run
         return self.fastq_compression_success
 
     def decompress_spring(self, sample_id: str, dry_run: bool = False):
-        """Return if decompression was succesfull"""
+        """Return if decompression was successful."""
         _ = sample_id, dry_run
         return self.spring_decompression_success
 
 
 @pytest.fixture(name="compress_api")
-def fixture_compress_api():
-    """Return a compress context"""
+def fixture_compress_api() -> MockCompressAPI:
+    """Return a Compress context."""
     return MockCompressAPI()
 
 
-@pytest.fixture(scope="function", name="real_crunchy_api")
-def fixture_real_crunchy_api(crunchy_config_dict):
-    """crunchy api fixture"""
-    _api = CrunchyAPI(crunchy_config_dict)
+@pytest.fixture(name="real_crunchy_api")
+def fixture_real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]) -> CrunchyAPI:
+    """Return Crunchy API."""
+    _api = CrunchyAPI(crunchy_config)
     _api.set_dry_run(True)
     yield _api
 
 
-@pytest.fixture(scope="function", name="real_compress_api")
+@pytest.fixture(name="real_compress_api")
 def fixture_real_compress_api(
     demultiplex_runs: Path, housekeeper_api: HousekeeperAPI, real_crunchy_api: CrunchyAPI
 ) -> CompressAPI:
-    """Return a compress context"""
+    """Return a Compress context."""
     return CompressAPI(
         crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=demultiplex_runs.as_posix()
     )
 
 
-@pytest.fixture(scope="function", name="real_populated_compress_fastq_api")
+@pytest.fixture(name="real_populated_compress_fastq_api")
 def fixture_real_populated_compress_fastq_api(
     real_compress_api: CompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
 ) -> CompressAPI:
-    """Populated compress api fixture"""
+    """Return populated Compress API."""
     helpers.ensure_hk_bundle(real_compress_api.hk_api, compress_hk_fastq_bundle)
-
     return real_compress_api
 
 
 @pytest.fixture(name="samples")
 def fixture_samples():
-    """Return a list of sample ids"""
+    """Return a list of sample ids."""
     return ["sample1", "sample2", "sample3"]
 
 
@@ -86,7 +86,7 @@ def fixture_samples():
 
 
 class CaseInfo:
-    """Holds information for creating a case"""
+    """Holds information for creating a case."""
 
     def __init__(self, **kwargs):
         self.case_id = kwargs["case_id"]
@@ -98,13 +98,13 @@ class CaseInfo:
 
 @pytest.fixture(name="compress_case_info")
 def fixture_compress_case_info(
-    case_id,
-    family_name,
-    timestamp,
-    later_timestamp,
-    wgs_application_tag,
-):
-    """Returns a object with information about a case"""
+    case_id: str,
+    family_name: str,
+    timestamp: datetime,
+    later_timestamp: datetime,
+    wgs_application_tag: str,
+) -> CaseInfo:
+    """Returns a object with information about a case."""
     return CaseInfo(
         case_id=case_id,
         family_name=family_name,
@@ -115,9 +115,10 @@ def fixture_compress_case_info(
 
 
 @pytest.fixture(name="populated_compress_store")
-def fixture_populated_compress_store(store, helpers, compress_case_info, analysis_family):
-    """Return a store populated with a completed analysis"""
-    # Make sure that there is a case where anaylsis is completer
+def fixture_populated_compress_store(
+    store: Store, helpers: StoreHelpers, compress_case_info, analysis_family
+):
+    """Return a store populated with a completed analysis."""
     helpers.ensure_case_from_dict(
         store,
         case_info=analysis_family,
@@ -225,9 +226,9 @@ def fixture_real_populated_compress_context(
 # Bundle fixtures
 
 
-@pytest.fixture(scope="function", name="sample")
+@pytest.fixture(name="sample")
 def fixture_sample() -> str:
-    """Return the sample id for first sample"""
+    """Return the sample id for first sample."""
     return "sample_1"
 
 

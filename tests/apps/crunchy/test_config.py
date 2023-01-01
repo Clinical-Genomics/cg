@@ -7,7 +7,7 @@ from cg.io.controller import ReadFile
 from cgmodels.crunchy.metadata import CrunchyMetadata
 
 
-def test_get_spring_metadata_real_file(real_spring_metadata_path: Path, crunchy_config_dict: dict):
+def test_get_spring_metadata_real_file(real_spring_metadata_path: Path, crunchy_config):
     """Test to parse the content of a real spring metadata file"""
     # GIVEN the path to a file with spring metadata content
     content: list = ReadFile.get_content_from_file(
@@ -21,7 +21,7 @@ def test_get_spring_metadata_real_file(real_spring_metadata_path: Path, crunchy_
     assert len(content) == len(crunchy_metadata.files)
 
 
-def test_update_date(spring_metadata_file: Path, crunchy_config_dict: dict):
+def test_update_date(spring_metadata_file: Path, crunchy_config):
     """Test to update the date in a spring metadata file"""
     # GIVEN the path to a metadata file without any "updated" information and a crunchy api
     spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_file)

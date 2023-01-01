@@ -1,6 +1,6 @@
 """Fixtures for compress api tests"""
 import copy
-from typing import List
+from typing import List, Dict, Any
 
 import os
 from datetime import datetime
@@ -13,6 +13,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.compress import CompressAPI
+from tests.cli.compress.conftest import MockCompressAPI
+from tests.store_helpers import StoreHelpers
 
 
 class CompressionData:
@@ -127,126 +129,119 @@ def fixture_compression_files(compression_object):
     )
 
 
-@pytest.fixture(scope="function", name="real_crunchy_api")
-def fixture_real_crunchy_api(crunchy_config_dict):
-    """crunchy api fixture"""
+@pytest.fixture(name="real_crunchy_api")
+def fixture_real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]):
+    """Crunchy API fixture."""
+    yield CrunchyAPI(crunchy_config)
 
-    yield CrunchyAPI(crunchy_config_dict)
 
-
-@pytest.fixture(scope="function", name="compress_api")
+@pytest.fixture(name="compress_api")
 def fixture_compress_api(
     demultiplexed_runs: Path,
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,
 ):
-    """compress api fixture"""
+    """Return Compress API."""
     hk_api = housekeeper_api
     yield CompressAPI(
         crunchy_api=real_crunchy_api, hk_api=hk_api, demux_root=project_dir.as_posix()
     )
 
 
-@pytest.fixture(scope="function", name="populated_compress_fastq_api")
-def fixture_populated_compress_fastq_api(compress_api, compress_hk_fastq_bundle, helpers):
-    """Populated compress api fixture"""
+@pytest.fixture(name="populated_compress_fastq_api")
+def fixture_populated_compress_fastq_api(
+    compress_api: MockCompressAPI, compress_hk_fastq_bundle: dict, helpers: StoreHelpers
+) -> MockCompressAPI:
+    """Return populated Compress API."""
     helpers.ensure_hk_bundle(compress_api.hk_api, compress_hk_fastq_bundle)
-
     return compress_api
 
 
-@pytest.fixture(scope="function", name="populated_decompress_spring_api")
-def fixture_populated_decompress_spring_api(compress_api, decompress_hk_spring_bundle, helpers):
-    """Populated compress api fixture"""
+@pytest.fixture(name="populated_decompress_spring_api")
+def fixture_populated_decompress_spring_api(
+    compress_api: MockCompressAPI, decompress_hk_spring_bundle: dict, helpers: StoreHelpers
+) -> MockCompressAPI:
+    """Return populated Compress API with a Housekeeper bundle containing SPRING files."""
     helpers.ensure_hk_bundle(compress_api.hk_api, decompress_hk_spring_bundle)
-
     return compress_api
 
 
-@pytest.fixture(scope="function", name="sample")
+@pytest.fixture(name="sample")
 def fixture_sample():
-    """Return the sample id for first sample"""
+    """Return the sample id for first sample."""
     return "sample_1"
 
 
-@pytest.fixture(scope="function", name="spring_path")
+@pytest.fixture(name="spring_path")
 def fixture_spring_path(compression_object) -> Path:
-    """Return the path to a non existing spring file"""
+    """Return the path to a non-existing spring file."""
     return compression_object.spring_path
 
 
-@pytest.fixture(scope="function", name="spring_metadata_path")
+@pytest.fixture(name="spring_metadata_path")
 def fixture_spring_metadata_path(compression_object) -> Path:
-    """Return the path to a non existing spring metadata file"""
+    """Return the path to a non-existing spring metadata file."""
     return compression_object.spring_metadata_path
 
 
-@pytest.fixture(scope="function", name="fastq_flag_path")
+@pytest.fixture(name="fastq_flag_path")
 def fixture_fastq_flag_path(spring_metadata_path) -> Path:
-    """Return the path to a non existing fastq flag file"""
+    """Return the path to a non-existing fastq flag file."""
     return spring_metadata_path
 
 
-@pytest.fixture(scope="function", name="fastq_flag_file")
+@pytest.fixture(name="fastq_flag_file")
 def fixture_fastq_flag_file(spring_metadata_path) -> Path:
-    """Return the path to an existing fastq flag file"""
+    """Return the path to an existing fastq flag file."""
     spring_metadata_path.touch()
     return spring_metadata_path
 
 
-@pytest.fixture(scope="function", name="spring_file")
-def fixture_spring_file(spring_path) -> Path:
-    """Return the path to an existing spring file"""
+@pytest.fixture(name="spring_file")
+def fixture_spring_file(spring_path: Path) -> Path:
+    """Return the path to an existing spring file."""
     spring_path.touch()
     return spring_path
 
 
-@pytest.fixture(scope="function", name="multi_linked_file")
-def fixture_multi_linked_file(spring_path, project_dir) -> Path:
-    """Return the path to an existing file with two links"""
-    first_link = project_dir / "link-1"
+@pytest.fixture(name="multi_linked_file")
+def fixture_multi_linked_file(spring_path: Path, project_dir: Path) -> Path:
+    """Return the path to an existing file with two links."""
+    first_link = Path(project_dir, "link-1")
     os.link(spring_path, first_link)
-
     return spring_path
 
 
-@pytest.fixture(scope="function", name="fastq_paths")
-def fixture_fastq_paths(compression_object):
-    """Fixture for temporary fastq-files
-
-    Create fastq paths and return a dictionary with them
-    """
+@pytest.fixture(name="fastq_paths")
+def fixture_fastq_paths(compression_object: CompressionData) -> Dict[str, Path]:
+    """Return temporary fastq-files."""
     return {
         "fastq_first_path": compression_object.fastq_first,
         "fastq_second_path": compression_object.fastq_second,
     }
 
 
-@pytest.fixture(scope="function", name="fastq_files")
-def fixture_fastq_files(fastq_paths):
-    """Fixture for temporary fastq-files
-
-    Create fastq files and return a dictionary with them
-    """
+@pytest.fixture(name="fastq_files")
+def fixture_fastq_files(fastq_paths: Dict[str, Path]) -> Dict[str, Path]:
+    """Return temporary fastq-files that exist."""
     fastq_first_file = fastq_paths["fastq_first_path"]
     fastq_second_file = fastq_paths["fastq_second_path"]
     fastq_first_file.touch()
     fastq_second_file.touch()
-
     return fastq_paths
 
 
 # Bundle fixtures
 
 
-@pytest.fixture(scope="function", name="decompress_hk_spring_bundle")
+@pytest.fixture(name="decompress_hk_spring_bundle")
 def fixture_decompress_hk_spring_bundle(
-    sample_hk_bundle_no_files, spring_file, fastq_flag_file, sample
-):
-    """Create a complete bundle mock for testing decompression
+    sample_hk_bundle_no_files: dict, spring_file: Path, fastq_flag_file: Path, sample: str
+) -> dict:
+    """Create a complete bundle mock for testing decompression.
 
-    This bundle contains a spring file and a spring metadata file
+    This bundle contains a spring file and a spring metadata file.
     """
     hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
 
