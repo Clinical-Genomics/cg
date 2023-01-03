@@ -55,11 +55,3 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         config_sample.analysis_type = "wts"
 
         return config_sample
-
-    # def include_sample_alignment_file(self, config_sample: ScoutRnafusionIndividual) -> None:
-    #     """Include the alignment file for a sample"""
-    #     pass
-    #
-    # def include_sample_files(self, config_sample: ScoutRnafusionIndividual) -> None:
-    #     """Include all files that are used on sample level in Scout"""
-    #     pass

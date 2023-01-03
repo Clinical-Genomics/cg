@@ -84,8 +84,7 @@ def test_generate_rnafusion_load_config(
     config = upload_rnafusion_analysis_scout_api.generate_config(
         analysis_obj=rnafusion_analysis_obj
     )
-    a = config
-    b = RnafusionLoadConfig
+
     # THEN assert that the config is a rnafusion config
     assert isinstance(config, RnafusionLoadConfig)
 
