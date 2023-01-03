@@ -1,15 +1,16 @@
-"""Fixtures for cli compress functions"""
+"""Fixtures for cli Compress functions."""
 
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Generator, List
 
 import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, SequencingFileTag
+from cg.constants.pedigree import Pedigree
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -20,24 +21,24 @@ class MockCompressAPI(CompressAPI):
     """Mock out necessary functions for running the compress CLI functions."""
 
     def __init__(self):
-        """initialize mock"""
+        """initialize mock."""
         super().__init__(hk_api=None, crunchy_api=None, demux_root="")
-        self.ntasks = 12
-        self.mem = 50
-        self.fastq_compression_success = True
-        self.spring_decompression_success = True
-        self.dry_run = False
+        self.ntasks: int = 12
+        self.mem: int = 50
+        self.fastq_compression_success: bool = True
+        self.spring_decompression_success: bool = True
+        self.dry_run: bool = False
 
-    def set_dry_run(self, dry_run: bool):
+    def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
         self.dry_run = dry_run
 
-    def compress_fastq(self, sample_id: str, dry_run: bool = False):
+    def compress_fastq(self, sample_id: str, dry_run: bool = False) -> None:
         """Return if compression was successful."""
         _ = sample_id, dry_run
         return self.fastq_compression_success
 
-    def decompress_spring(self, sample_id: str, dry_run: bool = False):
+    def decompress_spring(self, sample_id: str, dry_run: bool = False) -> None:
         """Return if decompression was successful."""
         _ = sample_id, dry_run
         return self.spring_decompression_success
@@ -50,7 +51,9 @@ def fixture_compress_api() -> MockCompressAPI:
 
 
 @pytest.fixture(name="real_crunchy_api")
-def fixture_real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]) -> CrunchyAPI:
+def fixture_real_crunchy_api(
+    crunchy_config: Dict[str, Dict[str, Any]]
+) -> Generator[CrunchyAPI, None, None]:
     """Return Crunchy API."""
     _api = CrunchyAPI(crunchy_config)
     _api.set_dry_run(True)
@@ -77,7 +80,7 @@ def fixture_real_populated_compress_fastq_api(
 
 
 @pytest.fixture(name="samples")
-def fixture_samples():
+def fixture_samples() -> List[str]:
     """Return a list of sample ids."""
     return ["sample1", "sample2", "sample3"]
 
@@ -89,11 +92,11 @@ class CaseInfo:
     """Holds information for creating a case."""
 
     def __init__(self, **kwargs):
-        self.case_id = kwargs["case_id"]
-        self.family_name = kwargs["family_name"]
-        self.timestamp = kwargs["timestamp"]
-        self.later_timestamp = kwargs["later_timestamp"]
-        self.application_tag = kwargs["application_tag"]
+        self.case_id: str = kwargs["case_id"]
+        self.family_name: str = kwargs["family_name"]
+        self.timestamp: datetime = kwargs["timestamp"]
+        self.later_timestamp: datetime = kwargs["later_timestamp"]
+        self.application_tag: str = kwargs["application_tag"]
 
 
 @pytest.fixture(name="compress_case_info")
@@ -104,7 +107,7 @@ def fixture_compress_case_info(
     later_timestamp: datetime,
     wgs_application_tag: str,
 ) -> CaseInfo:
-    """Returns a object with information about a case."""
+    """Returns an object with information about a case."""
     return CaseInfo(
         case_id=case_id,
         family_name=family_name,
@@ -126,34 +129,33 @@ def fixture_populated_compress_store(
         ordered_at=compress_case_info.timestamp,
         completed_at=compress_case_info.later_timestamp,
     )
-
     return store
 
 
 @pytest.fixture(name="populated_compress_multiple_store")
 def fixture_populated_compress_multiple_store(
-    store,
-    helpers,
-    compress_case_info,
-    analysis_family,
-):
-    """Return a store populated with multiple completed analysis"""
-    case_id = compress_case_info.case_id
-    family_name = compress_case_info.family_name
+    store: Store,
+    helpers: StoreHelpers,
+    compress_case_info: CaseInfo,
+    analysis_family: dict,
+) -> Store:
+    """Return a store populated with multiple completed analyses."""
+    case_id: str = compress_case_info.case_id
+    family_name: str = compress_case_info.family_name
     for number in range(10):
-        analysis_family["internal_id"] = "_".join([str(number), case_id])
-        analysis_family["name"] = "_".join([str(number), family_name])
+        analysis_family["internal_id"]: str = "_".join([str(number), case_id])
+        analysis_family["name"]: str = "_".join([str(number), family_name])
         for ind, sample in enumerate(analysis_family["samples"]):
-            analysis_family["samples"][ind]["internal_id"] = "_".join(
+            analysis_family["samples"][ind]["internal_id"]: str = "_".join(
                 [str(number), sample["internal_id"]]
             )
-            if "father" in analysis_family["samples"][ind]:
-                analysis_family["samples"][ind]["father"] = "_".join(
-                    [str(number), analysis_family["samples"][ind]["father"]]
+            if Pedigree.FATHER in analysis_family["samples"][ind]:
+                analysis_family["samples"][ind][Pedigree.FATHER]: str = "_".join(
+                    [str(number), analysis_family["samples"][ind][Pedigree.FATHER]]
                 )
-            if "mother" in analysis_family["samples"][ind]:
-                analysis_family["samples"][ind]["mother"] = "_".join(
-                    [str(number), analysis_family["samples"][ind]["mother"]]
+            if Pedigree.MOTHER in analysis_family["samples"][ind]:
+                analysis_family["samples"][ind][Pedigree.MOTHER]: str = "_".join(
+                    [str(number), analysis_family["samples"][ind][Pedigree.MOTHER]]
                 )
 
         helpers.ensure_case_from_dict(
@@ -172,7 +174,7 @@ def fixture_populated_compress_multiple_store(
 def fixture_base_compress_context(
     compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
-    """Return a compress context"""
+    """Return a Compress context."""
     cg_config_object.meta_apis["compress_api"] = compress_api
     cg_config_object.status_db_ = store
     return cg_config_object
@@ -182,7 +184,7 @@ def fixture_base_compress_context(
 def fixture_store_fastq_context(
     compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
-    """Return a compress context"""
+    """Return a Compress context."""
     cg_config_object.meta_apis["compress_api"] = compress_api
     cg_config_object.status_db_ = store
     return cg_config_object
@@ -192,9 +194,8 @@ def fixture_store_fastq_context(
 def fixture_populated_multiple_compress_context(
     compress_api: CompressAPI, populated_compress_multiple_store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
-    """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a case where anaylis is completer
-    cg_config_object.meta_apis["compress_api"] = compress_api
+    """Return a Compress context populated with a completed analysis."""
+    cg_config_object.meta_apis["compress_api"]: CompressAPI = compress_api
     cg_config_object.status_db_ = populated_compress_multiple_store
     return cg_config_object
 
@@ -203,9 +204,8 @@ def fixture_populated_multiple_compress_context(
 def fixture_populated_compress_context(
     compress_api: CompressAPI, populated_compress_store: Store, cg_config_object: CGConfig
 ) -> CGConfig:
-    """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a case where analysis is completed
-    cg_config_object.meta_apis["compress_api"] = compress_api
+    """Return a Compress context populated with a completed analysis."""
+    cg_config_object.meta_apis["compress_api"]: CompressAPI = compress_api
     cg_config_object.status_db_ = populated_compress_store
     return cg_config_object
 
@@ -216,9 +216,8 @@ def fixture_real_populated_compress_context(
     populated_compress_store: Store,
     cg_config_object: CGConfig,
 ) -> CGConfig:
-    """Return a compress context populated with a completed analysis"""
-    # Make sure that there is a case where analysis is completed
-    cg_config_object.meta_apis["compress_api"] = real_populated_compress_fastq_api
+    """Return a Compress context populated with a completed analysis."""
+    cg_config_object.meta_apis["compress_api"]: CompressAPI = real_populated_compress_fastq_api
     cg_config_object.status_db_ = populated_compress_store
     return cg_config_object
 
@@ -232,22 +231,22 @@ def fixture_sample() -> str:
     return "sample_1"
 
 
-@pytest.fixture(scope="function", name="new_dir")
+@pytest.fixture(name="new_dir")
 def fixture_new_dir(project_dir: Path) -> Path:
-    """Return the path to a subdirectory"""
-    new_dir = project_dir / "new_dir/"
+    """Return the path to a subdirectory."""
+    new_dir = Path(project_dir, "new_dir")
     new_dir.mkdir()
     return new_dir
 
 
 @pytest.fixture(name="spring_bundle")
-def fixture_spring_bundle(project_dir: Path, timestamp: datetime, sample: str):
+def fixture_spring_bundle(project_dir: Path, timestamp: datetime, sample: str) -> dict:
     """Return a bundle with spring files."""
     spring_file: Path = Path(project_dir, f"file{FileExtensions.SPRING}")
     spring_file.touch()
     spring_meta_file: Path = Path(project_dir, f"file{FileExtensions.JSON}")
     spring_meta_file.touch()
-    hk_bundle_data = {
+    return {
         "name": sample,
         "created": timestamp,
         "expires": timestamp,
@@ -265,20 +264,19 @@ def fixture_spring_bundle(project_dir: Path, timestamp: datetime, sample: str):
         ],
     }
 
-    return hk_bundle_data
-
 
 @pytest.fixture(name="spring_bundle_symlink_problem")
-def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sample):
-    """Setup an environment that is similar to the case we want to solve"""
-    # Create spring files and faulty paths to spring files
-    spring_file = project_dir / "file.spring"
+def fixture_spring_bundle_symlink_problem(
+    project_dir: Path, new_dir: Path, timestamp: datetime, sample: str
+):
+    """Return Housekeeper bundle with SPRING files having symlinks."""
+    spring_file: Path = Path(project_dir, "file.spring")
     spring_file.touch()
-    wrong_spring_file = new_dir / "file.spring"
-    spring_meta_file = project_dir / "file.json"
+    wrong_spring_file: Path = Path(new_dir, "file.spring")
+    spring_meta_file: Path = Path(project_dir, "file.json")
     spring_meta_file.touch()
-    wrong_spring_meta_file = new_dir / "file.json"
-    hk_bundle_data = {
+    wrong_spring_meta_file: Path = Path(new_dir, "file.json")
+    return {
         "name": sample,
         "created": timestamp,
         "expires": timestamp,
@@ -296,18 +294,16 @@ def fixture_spring_bundle_symlink_problem(project_dir, new_dir, timestamp, sampl
         ],
     }
 
-    return hk_bundle_data
-
 
 @pytest.fixture(name="symlinked_fastqs")
 def fixture_symlinked_fastqs(project_dir: Path, new_dir: Path) -> dict:
-    """Setup an environment that is similar to the case we want to solve"""
-    fastq_first = project_dir / "first.fastq.gz"
-    fastq_second = project_dir / "second.fastq.gz"
+    """Setup an environment that is similar to the case we want to solve."""
+    fastq_first: Path = Path(project_dir, "first.fastq.gz")
+    fastq_second: Path = Path(project_dir, "second.fastq.gz")
 
-    symlinked_first = new_dir / "first.fastq.gz"
+    symlinked_first: Path = Path(new_dir, "first.fastq.gz")
     symlinked_first.symlink_to(fastq_first)
-    symlinked_second = new_dir / "second.fastq.gz"
+    symlinked_second: Path = Path(new_dir, "second.fastq.gz")
     symlinked_second.symlink_to(fastq_second)
     return {
         "fastq_first": fastq_first,

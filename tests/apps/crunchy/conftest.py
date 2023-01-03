@@ -41,7 +41,7 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
 
 @pytest.fixture(name="crunchy_metadata_object")
 def fixture_crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
-    """Return the parsed metadata."""
+    """Return Crunchy metadata."""
     return CrunchyMetadata(files=spring_metadata)
 
 
@@ -51,7 +51,6 @@ def fixture_spring_metadata_file(
 ) -> Path:
     """Return the path to a populated SPRING metadata file."""
     metadata_path = compression_object.spring_metadata_path
-
     WriteFile.write_file_from_content(
         content=spring_metadata, file_format=FileFormat.JSON, file_path=metadata_path
     )

@@ -1,4 +1,4 @@
-"""Fixtures for compress api tests"""
+"""Fixtures for Compress API tests."""
 import copy
 from typing import List, Dict, Any
 
@@ -10,6 +10,7 @@ import pytest
 
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile
 from cg.meta.compress import CompressAPI
@@ -18,32 +19,36 @@ from tests.store_helpers import StoreHelpers
 
 
 class CompressionData:
-    """Class to hold some data files"""
+    """Class to hold compression files."""
 
     def __init__(self, **kwargs):
-        self.spring_path = kwargs["spring_path"]
-        self.pending_path = kwargs["pending_path"]
-        self.spring_metadata_path = kwargs["spring_metadata_path"]
-        self.fastq_first = kwargs["fastq_first"]
-        self.fastq_second = kwargs["fastq_second"]
+        self.spring_path: Path = kwargs["spring_path"]
+        self.pending_path: Path = kwargs["pending_path"]
+        self.spring_metadata_path: Path = kwargs["spring_metadata_path"]
+        self.fastq_first: Path = kwargs["fastq_first"]
+        self.fastq_second: Path = kwargs["fastq_second"]
 
     @property
-    def spring_file(self):
-        """Return the path to an existing spring file"""
+    def spring_file(self) -> Path:
+        """Return the path to an existing SPRING file."""
         self.spring_path.touch()
         return self.spring_path
 
     @property
-    def pending_file(self):
-        """Return the path to an existing pending file"""
+    def pending_file(self) -> Path:
+        """Return the path to an existing SPRING pending file."""
         self.pending_path.touch()
         return self.pending_path
 
     @staticmethod
     def _spring_metadata(
-        fastq_first, fastq_second, spring_path, updated=False, date=None
+        fastq_first: Path,
+        fastq_second: Path,
+        spring_path: Path,
+        updated: bool = False,
+        date: datetime = None,
     ) -> List[dict]:
-        """Return spring metadata"""
+        """Return SPRING metadata."""
         metadata = [
             {
                 "path": str(fastq_first.resolve()),
@@ -65,8 +70,8 @@ class CompressionData:
         return metadata
 
     @property
-    def spring_metadata_file(self):
-        """Return the path to an existing spring metadata file"""
+    def spring_metadata_file(self) -> Path:
+        """Return the path to an existing SPRING metadata file."""
 
         spring_metadata: List[dict] = CompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path
@@ -79,9 +84,8 @@ class CompressionData:
         return self.spring_metadata_path
 
     @property
-    def updated_spring_metadata_file(self):
-        """Return the path to an existing spring metadata file"""
-
+    def updated_spring_metadata_file(self) -> Path:
+        """Return the path to an existing updated SPRING metadata file."""
         spring_metadata: List[dict] = CompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path, True
         )
@@ -93,33 +97,31 @@ class CompressionData:
         return self.spring_metadata_path
 
     @staticmethod
-    def make_old(file_path):
-        """ "Convert the modifying date so that the file looks old"""
-        # Convert the date to a float
+    def make_old(file_path: Path):
+        """Convert the modifying date making the file old."""
         before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
-        # Update the utime so file looks old
         os.utime(file_path, (before_timestamp, before_timestamp))
 
     @property
-    def fastq_first_file(self, old: bool = True):
-        """Return the path to an existing spring metadata file"""
+    def fastq_first_file(self, old: bool = True) -> Path:
+        """Return the path to an existing first read FASTQ file."""
         self.fastq_first.touch()
         if old:
             CompressionData.make_old(self.fastq_first)
         return self.fastq_first
 
     @property
-    def fastq_second_file(self, old: bool = True):
-        """Return the path to an existing fastq file"""
+    def fastq_second_file(self, old: bool = True) -> Path:
+        """Return the path to an existing second read FASTQ file."""
         self.fastq_second.touch()
         if old:
             CompressionData.make_old(self.fastq_second)
         return self.fastq_second
 
 
-@pytest.fixture(scope="function", name="compression_files")
-def fixture_compression_files(compression_object):
-    """Return a small class with compression files"""
+@pytest.fixture(name="compression_files")
+def fixture_compression_files(compression_object: CompressionData) -> CompressionData:
+    """Return a CompressionData class with files."""
     return CompressionData(
         spring_path=compression_object.spring_path,
         spring_metadata_path=compression_object.spring_metadata_path,
@@ -130,7 +132,7 @@ def fixture_compression_files(compression_object):
 
 
 @pytest.fixture(name="real_crunchy_api")
-def fixture_real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]):
+def fixture_real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]) -> CrunchyAPI:
     """Crunchy API fixture."""
     yield CrunchyAPI(crunchy_config)
 
@@ -141,11 +143,10 @@ def fixture_compress_api(
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,
-):
+) -> CompressAPI:
     """Return Compress API."""
-    hk_api = housekeeper_api
     yield CompressAPI(
-        crunchy_api=real_crunchy_api, hk_api=hk_api, demux_root=project_dir.as_posix()
+        crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()
     )
 
 
@@ -174,25 +175,25 @@ def fixture_sample():
 
 
 @pytest.fixture(name="spring_path")
-def fixture_spring_path(compression_object) -> Path:
+def fixture_spring_path(compression_object: CompressionData) -> Path:
     """Return the path to a non-existing spring file."""
     return compression_object.spring_path
 
 
 @pytest.fixture(name="spring_metadata_path")
-def fixture_spring_metadata_path(compression_object) -> Path:
+def fixture_spring_metadata_path(compression_object: CompressionData) -> Path:
     """Return the path to a non-existing spring metadata file."""
     return compression_object.spring_metadata_path
 
 
 @pytest.fixture(name="fastq_flag_path")
-def fixture_fastq_flag_path(spring_metadata_path) -> Path:
+def fixture_fastq_flag_path(spring_metadata_path: Path) -> Path:
     """Return the path to a non-existing fastq flag file."""
     return spring_metadata_path
 
 
 @pytest.fixture(name="fastq_flag_file")
-def fixture_fastq_flag_file(spring_metadata_path) -> Path:
+def fixture_fastq_flag_file(spring_metadata_path: Path) -> Path:
     """Return the path to an existing fastq flag file."""
     spring_metadata_path.touch()
     return spring_metadata_path
@@ -225,8 +226,8 @@ def fixture_fastq_paths(compression_object: CompressionData) -> Dict[str, Path]:
 @pytest.fixture(name="fastq_files")
 def fixture_fastq_files(fastq_paths: Dict[str, Path]) -> Dict[str, Path]:
     """Return temporary fastq-files that exist."""
-    fastq_first_file = fastq_paths["fastq_first_path"]
-    fastq_second_file = fastq_paths["fastq_second_path"]
+    fastq_first_file: Path = fastq_paths["fastq_first_path"]
+    fastq_second_file: Path = fastq_paths["fastq_second_path"]
     fastq_first_file.touch()
     fastq_second_file.touch()
     return fastq_paths
@@ -243,16 +244,18 @@ def fixture_decompress_hk_spring_bundle(
 
     This bundle contains a spring file and a spring metadata file.
     """
-    hk_bundle_data = copy.deepcopy(sample_hk_bundle_no_files)
+    hk_spring_bundle: dict = copy.deepcopy(sample_hk_bundle_no_files)
 
-    spring_file_info = {"path": str(spring_file), "archive": False, "tags": [sample, "spring"]}
-    spring_meta_info = {
-        "path": str(fastq_flag_file),
+    spring_file_info: dict = {
+        "path": spring_file.as_posix(),
         "archive": False,
-        "tags": [sample, "spring-metadata"],
+        "tags": [sample, SequencingFileTag.SPRING],
+    }
+    spring_meta_info: dict = {
+        "path": fastq_flag_file.as_posix(),
+        "archive": False,
+        "tags": [sample, SequencingFileTag.SPRING_METADATA],
     }
 
-    hk_bundle_data["files"].append(spring_file_info)
-    hk_bundle_data["files"].append(spring_meta_info)
-
-    return hk_bundle_data
+    hk_spring_bundle["files"].extend([spring_file_info, spring_meta_info])
+    return hk_spring_bundle
