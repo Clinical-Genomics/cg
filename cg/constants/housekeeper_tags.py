@@ -109,3 +109,5 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-csv"],
     ],
 }
+
+REPORT_TAGS = {"multicq_rna": ["multiqc-html"]}  # TODO: REVISE THESE AND COMPLETE

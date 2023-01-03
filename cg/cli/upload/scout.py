@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -14,10 +15,9 @@ from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Family
-from housekeeper.store import models as hk_models
 
-from .utils import suggest_cases_to_upload
-from ...exc import CgDataError, ScoutUploadError
+from ...exc import CgDataError, HousekeeperDataError, ScoutUploadError
+from .utils import get_root_dir, suggest_cases_to_upload
 
 LOG = logging.getLogger(__name__)
 
@@ -72,14 +72,15 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     except SyntaxError as error:
         LOG.warning("%s", error)
-        raise click.Abort
+        raise click.Abort from error
     LOG.info("Found load config %s", scout_load_config)
-    if scout_load_config.track == "cancer":
-        root_dir: Path = Path(context.balsamic.root)
-    else:
-        root_dir: Path = Path(context.mip_rd_dna.root)
+    try:
+        root_dir: Path = get_root_dir(case_obj=case_obj, context=context)
+    except ValueError as error:
+        LOG.error(f"{error}")
+        raise click.Abort from error
     LOG.info("Set root dir to %s", root_dir)
-    file_path: Path = root_dir / case_id / "scout_load.yaml"
+    file_path: Path = Path(root_dir, case_id, "scout_load.yaml")
 
     if print_console:
         click.echo(
@@ -147,6 +148,32 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
     LOG.info("uploaded to scout using load config %s", scout_config_file.full_path)
     LOG.info("Case loaded successfully to Scout")
+
+
+@click.command(name="upload-report-to-scout")
+@click.option("-t", "--report-type", type=str, required=True, help="Type of report")
+@click.option("--dry-run", is_flag=True)
+@click.argument("case_id")
+@click.pass_obj
+def upload_report_to_scout(context: CGConfig, report_type: bool, dry_run: bool, case_id: str):
+    """Upload report to Scout."""
+
+    LOG.info("----------------- UPLOAD REPORT TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    try:
+        report_file = scout_upload_api.get_report_file(report_type=report_type, case_id=case_id)
+    except (ValueError, HousekeeperDataError) as error:
+        raise click.Abort from error
+    try:
+        scout_upload_api.upload_report_to_scout(
+            dry_run=dry_run,
+            case_id=case_id,
+            report_type=report_type,
+            report_file=report_file,
+        )
+    except (CgDataError, ScoutUploadError) as error:
+        raise error from error
 
 
 @click.command(name="rna-to-scout")

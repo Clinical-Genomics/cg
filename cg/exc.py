@@ -124,6 +124,12 @@ class HousekeeperBundleVersionMissingError(CgError):
     """
 
 
+class HousekeeperDataError(CgError):
+    """
+    Error related to missing/incomplete data in Housekeeper.
+    """
+
+
 class InvalidFastaError(CgError):
     """
     Exception raised when fasta file content is invalid.
