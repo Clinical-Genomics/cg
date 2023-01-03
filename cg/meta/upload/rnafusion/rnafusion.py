@@ -5,7 +5,7 @@ import logging
 import click
 
 from cg.cli.upload.clinical_delivery import clinical_delivery
-from cg.cli.upload.scout import scout
+from cg.cli.upload.scout import scout, upload_report_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -29,7 +29,7 @@ class RnafusionUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis_obj)
 
         # Main upload
-        ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
+        # ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
 
         # Delivery report generation
         # if case_obj.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
@@ -38,5 +38,8 @@ class RnafusionUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
+            ctx.invoke(
+                upload_report_to_scout, case_id=case_obj.internal_id, report_type="multqc_rna"
+            )  # TODO:complete with correct reports
 
         self.update_uploaded_at(analysis_obj)

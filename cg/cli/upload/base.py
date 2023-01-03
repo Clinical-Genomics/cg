@@ -15,14 +15,14 @@ from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.gisaid import gisaid
 from cg.cli.upload.mutacc import process_solved, processed_solved
 from cg.cli.upload.nipt import nipt
-from cg.cli.upload.observations import observations, available_observations
+from cg.cli.upload.observations import available_observations, observations
 from cg.cli.upload.scout import (
     create_scout_load_config,
     scout,
     upload_case_to_scout,
     upload_rna_fusion_report_to_scout,
-    upload_rna_to_scout,
     upload_rna_junctions_to_scout,
+    upload_rna_to_scout,
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
@@ -30,6 +30,7 @@ from cg.constants import Pipeline
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -68,6 +69,8 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
         # Update the upload API based on the data analysis type (MIP-DNA by default)
         if Pipeline.BALSAMIC in case_obj.data_analysis:
             upload_api = BalsamicUploadAPI(config=config_object)
+        if Pipeline.RNAFUSION in case_obj.data_analysis:
+            upload_api = RnafusionUploadAPI(config=config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case_obj=case_obj, restart=restart)
