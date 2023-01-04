@@ -79,9 +79,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return sorted(case_directories, key=os.path.getctime, reverse=True)
 
     def get_latest_case_path(self, case_id: str) -> Union[Path, None]:
-        """Return latest run dir for a microbial case."""
-        case_obj: models.Family = self.status_db.family(case_id)
-        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
+        """Return latest run dir for a microbial case, if no path found it returns None."""
+        lims_project: str = self.get_project(
+            self.status_db.family(case_id).links[0].sample.internal_id
+        )
 
         return next(
             (path for path in self.get_case_path(case_id=case_id) if lims_project + "_" in path),
