@@ -35,10 +35,9 @@ class ExternalDataHandler:
                     LOG.info(f"Folder {sample_folder} has recent changes. Skipping")
                     continue
                 if sample:
-                    sample_folder = sample_folder.rename(
-                        sample_folder.parent.joinpath(sample.internal_id)
-                    )
-                    self.add_sample_to_hk(sample_folder=sample_folder, sample=sample)
+                    new_folder: Path = sample_folder.parent.joinpath(sample.internal_id)
+                    sample_folder.rename(new_folder)
+                    self.add_sample_to_hk(sample_folder=new_folder, sample=sample)
                     continue
                 if self.status_db.sample(internal_id=sample_folder.name):
                     LOG.debug(
