@@ -247,3 +247,10 @@ class LoqusdbDeleteCaseError(LoqusdbError):
 
 class LoqusdbDuplicateRecordError(LoqusdbError):
     """Exception related to duplicate records in Loqusdb."""
+
+class PdcNoFilesMatchingSearchError(CgError):
+    """Exception raised when PDC API returns no files matching the search criteria."""
+
+    def __init__(self, message: str = ""):
+        super().__init__(message)
+        self.exit_code = 8

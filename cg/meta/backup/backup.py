@@ -13,7 +13,7 @@ from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
 from cg.constants.process import RETURN_WARNING
 from cg.constants.symbols import ASTERISK, NEW_LINE
-from cg.exc import ChecksumFailedError
+from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
@@ -57,9 +57,7 @@ class BackupAPI:
         flow_cell_obj: Optional[models.Flowcell] = self.status.flowcells(
             status=FlowCellStatus.REQUESTED
         ).first()
-        if not flow_cell_obj:
-            return None
-        return flow_cell_obj
+        return flow_cell_obj or None
 
     def fetch_flow_cell(self, flow_cell_obj: Optional[models.Flowcell] = None) -> Optional[float]:
         """Start fetching a flow cell from backup if possible.
@@ -84,41 +82,45 @@ class BackupAPI:
             LOG.info("%s: retrieving from PDC", flow_cell_obj.name)
 
         try:
-            pdc_flow_cell_query: list = self.query_pdc_for_flow_cell(flow_cell_obj.name)
-        except subprocess.CalledProcessError as error:
-            LOG.error("PDC query failed: %s", error.stderr)
+            pdc_flow_cell_query: List[str] = self.query_pdc_for_flow_cell(flow_cell_obj.name)
+
+        except PdcNoFilesMatchingSearchError as error:
+            LOG.error(f"PDC query failed: {error}")
             raise error
 
         archived_key: Path = self.get_archived_encryption_key_path(query=pdc_flow_cell_query)
         archived_flow_cell: Path = self.get_archived_flow_cell_path(query=pdc_flow_cell_query)
 
         if not self.dry_run:
-            start_time = get_start_time()
-            run_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
-            self.retrieve_archived_key(archived_key, flow_cell_obj, run_dir)
-            self.retrieve_archived_flow_cell(archived_flow_cell, flow_cell_obj, run_dir)
+            return self._process_flow_cell(flow_cell_obj, archived_key, archived_flow_cell)
 
-            try:
-                (
-                    decrypted_flow_cell,
-                    encryption_key,
-                    retrieved_flow_cell,
-                    retrieved_key,
-                ) = self.decrypt_flow_cell(archived_flow_cell, archived_key, run_dir)
+    def _process_flow_cell(self, flow_cell_obj, archived_key, archived_flow_cell):
+        start_time = get_start_time()
+        run_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
+        self.retrieve_archived_key(archived_key, flow_cell_obj, run_dir)
+        self.retrieve_archived_flow_cell(archived_flow_cell, flow_cell_obj, run_dir)
 
-                self.extract_flow_cell(decrypted_flow_cell, run_dir)
-                self.create_rta_complete(decrypted_flow_cell, run_dir)
-                self.unlink_files(
-                    decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
-                )
-            except subprocess.CalledProcessError as error:
-                LOG.error("Decryption failed: %s", error.stderr)
-                if not self.dry_run:
-                    flow_cell_obj.status = FlowCellStatus.REQUESTED
-                    self.status.commit()
-                raise error
+        try:
+            (
+                decrypted_flow_cell,
+                encryption_key,
+                retrieved_flow_cell,
+                retrieved_key,
+            ) = self.decrypt_flow_cell(archived_flow_cell, archived_key, run_dir)
 
-            return get_elapsed_time(start_time=start_time)
+            self.extract_flow_cell(decrypted_flow_cell, run_dir)
+            self.create_rta_complete(decrypted_flow_cell, run_dir)
+            self.unlink_files(
+                decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
+            )
+        except subprocess.CalledProcessError as error:
+            LOG.error("Decryption failed: %s", error.stderr)
+            if not self.dry_run:
+                flow_cell_obj.status = FlowCellStatus.REQUESTED
+                self.status.commit()
+            raise error
+
+        return get_elapsed_time(start_time=start_time)
 
     def unlink_files(
         self,
@@ -128,25 +130,26 @@ class BackupAPI:
         retrieved_key: Path,
     ):
         """Remove files after flow cell has been fetched from PDC"""
-        if not self.dry_run:
-            LOG.debug(f"Unlink files")
-            message = "%s not found, skipping removal"
-            try:
-                retrieved_flow_cell.unlink()
-            except FileNotFoundError:
-                LOG.info(message, str(retrieved_flow_cell))
-            try:
-                decrypted_flow_cell.unlink()
-            except FileNotFoundError:
-                LOG.info(message, str(decrypted_flow_cell))
-            try:
-                retrieved_key.unlink()
-            except FileNotFoundError:
-                LOG.info(message, str(retrieved_key))
-            try:
-                encryption_key.unlink()
-            except FileNotFoundError:
-                LOG.info(message, str(encryption_key))
+        if self.dry_run:
+            return
+        LOG.debug("Unlink files")
+        message = "%s not found, skipping removal"
+        try:
+            retrieved_flow_cell.unlink()
+        except FileNotFoundError:
+            LOG.info(message, str(retrieved_flow_cell))
+        try:
+            decrypted_flow_cell.unlink()
+        except FileNotFoundError:
+            LOG.info(message, str(decrypted_flow_cell))
+        try:
+            retrieved_key.unlink()
+        except FileNotFoundError:
+            LOG.info(message, str(retrieved_key))
+        try:
+            encryption_key.unlink()
+        except FileNotFoundError:
+            LOG.info(message, str(encryption_key))
 
     @staticmethod
     def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
@@ -216,40 +219,53 @@ class BackupAPI:
                 run_dir=run_dir,
             )
             if not self.dry_run:
-                flow_cell_obj.status = FlowCellStatus.RETRIEVED
-                self.status.commit()
-                LOG.info(
-                    "Status for flow cell %s set to %s", flow_cell_obj.name, flow_cell_obj.status
-                )
+                self._set_flow_cell_status_to_retrieved(flow_cell_obj)
         except subprocess.CalledProcessError as error:
             if error.returncode == RETURN_WARNING:
                 LOG.warning(
-                    "WARNING for retrieval of flow cell %s, please check dsmerror.log",
-                    flow_cell_obj.name,
+                    f"WARNING for retrieval of flow cell {flow_cell_obj.name}, please check dsmerror.log"
                 )
                 if not self.dry_run:
-                    flow_cell_obj.status = FlowCellStatus.RETRIEVED
-                    self.status.commit()
-                    LOG.info(
-                        "Status for flow cell %s set to %s",
-                        flow_cell_obj.name,
-                        flow_cell_obj.status,
-                    )
+                    self._set_flow_cell_status_to_retrieved(flow_cell_obj)
             else:
-                LOG.error("%s: run directory retrieval failed", flow_cell_obj.name)
+                LOG.error(f"{flow_cell_obj.name}: run directory retrieval failed")
                 if not self.dry_run:
                     flow_cell_obj.status = FlowCellStatus.REQUESTED
                     self.status.commit()
                 raise error
 
+    def _set_flow_cell_status_to_retrieved(self, flow_cell_obj: models.Flowcell):
+        flow_cell_obj.status = FlowCellStatus.RETRIEVED
+        self.status.commit()
+        LOG.info(f"Status for flow cell {flow_cell_obj.name} set to {flow_cell_obj.status}")
+
     def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
         """Query PDC for a given flow cell id"""
         query: List[str] = []
-        for dir in self.encrypt_dirs.values():
-            search_pattern = dir + ASTERISK + flow_cell_id + ASTERISK
-            self.pdc.query_pdc(search_pattern=search_pattern)
-            query.append(self.pdc.process.stdout.split(NEW_LINE))
-        return query
+        search_patterns: List[str] = [
+            dir + ASTERISK + flow_cell_id + ASTERISK for dir in self.encrypt_dirs.values()
+        ]
+
+        for search_pattern in search_patterns:
+            try:
+                self.pdc.query_pdc(search_pattern=search_pattern)
+                query.append(self.pdc.process.stdout.split(NEW_LINE))
+            except subprocess.CalledProcessError as error:
+                pdc_no_files_mathing_search_error: PdcNoFilesMatchingSearchError = (
+                    PdcNoFilesMatchingSearchError(
+                        message=f"No archived files found for pdc query {search_pattern}"
+                    )
+                )
+                if error.returncode != pdc_no_files_mathing_search_error.exit_code:
+                    raise error
+                LOG.info(f"{pdc_no_files_mathing_search_error}")
+
+        if query:
+            return query
+        else:
+            raise PdcNoFilesMatchingSearchError(
+                message=f"No archived files found for pdc queries {search_patterns}"
+            )
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
         """Retrieve the archived file from PDC to a flow cell runs directory"""
