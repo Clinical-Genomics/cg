@@ -120,6 +120,13 @@ class DataDelivery(StrEnum):
     STATINA: str = "statina"
 
 
+class ReportTypes(StrEnum):
+    MULTIQC_RNA_REPORT: str = "multiqc_rna"
+    GENE_FUSION_REPORT: str = "gene_fusion"
+    RNAFUSION_REPORT: str = "RNAfusion_report"
+    RNAFUSION_INSPECTOR_REPORT: str = "RNAfusion_inspector"
+
+
 class HastaSlurmPartitions(StrEnum):
     DRAGEN: str = "dragen"
 
