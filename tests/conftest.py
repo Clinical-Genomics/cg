@@ -782,7 +782,7 @@ def fixture_housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
 
 
 @pytest.fixture(name="real_housekeeper_api")
-def fixture_real_housekeeper_api(hk_config_dict: dict) -> HousekeeperAPI:
+def fixture_real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None, None]:
     """Setup a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
