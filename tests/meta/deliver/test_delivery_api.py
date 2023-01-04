@@ -12,7 +12,7 @@ from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 from cg.store.models import FamilySample, Sample, Family
 from tests.store_helpers import StoreHelpers
-from tests.store.conftest import fixture_case_obj
+
 from tests.cli.deliver.conftest import fixture_fastq_delivery_bundle, fixture_mip_delivery_bundle
 
 

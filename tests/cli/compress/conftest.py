@@ -225,7 +225,7 @@ def fixture_real_populated_compress_context(
 # Bundle fixtures
 
 
-@pytest.fixture(scope="function", name="sample")
+@pytest.fixture(scope="function", name="sample_id")
 def fixture_sample() -> str:
     """Return the sample id for first sample"""
     return "sample_1"

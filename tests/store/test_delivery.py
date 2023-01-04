@@ -9,13 +9,13 @@ from cg.constants import DataDelivery
 from cg.store import models
 
 
-def test_get_delivery_arguments(case_obj: models.Family):
+def test_get_delivery_arguments(case: models.Family):
     """Testing the parsing of delivery arguments from the case data_delivery."""
     # GIVEN a DataDelivery
-    case_obj.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
+    case.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
 
     # WHEN parsing the delivery types
-    delivery_types: Set[str] = case_obj.get_delivery_arguments()
+    delivery_types: Set[str] = case.get_delivery_arguments()
 
     # THEN the correct delivery types should be returned
     assert delivery_types == {Pipeline.MIP_DNA, Pipeline.FASTQ}

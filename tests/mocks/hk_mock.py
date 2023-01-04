@@ -246,7 +246,7 @@ class MockHousekeeperAPI:
                 self._files.append(new_file)
                 self._file_added = True
                 version_obj.files.append(new_file)
-        version_obj.bundle_obj = bundle_obj
+        version_obj.bundle = bundle_obj
         bundle_obj.versions.append(version_obj)
         return bundle_obj, version_obj
 
@@ -315,8 +315,11 @@ class MockHousekeeperAPI:
         If it has been specified that some files should be missing return empty list
         """
         tags = set(kwargs.get("tags", []))
+        path: Path = kwargs.get("path", "")
         if tags.intersection(self._missing_tags):
             return QueryList()
+        if path:
+            return next((file for file in self._files if file.path == path), None)
         return self._files
 
     def new_tag(self, name: str, category: str = None):
@@ -397,10 +400,12 @@ class MockHousekeeperAPI:
         """Gets the latest version of a bundle."""
         if self._last_version is False:
             return None
-        if len(args) > 0:
-            bundle = self.bundle(args[0])
-            if bundle:
-                return bundle.versions[-1]
+        bundle_name: str = kwargs.get("bundle", "")
+        if bundle_name:
+            return next(
+                (bundle.versions[0] for bundle in self._bundles if bundle.name == bundle_name),
+                None,
+            )
         return self._version_obj
 
     def get_latest_bundle_version(self, bundle_name: str):

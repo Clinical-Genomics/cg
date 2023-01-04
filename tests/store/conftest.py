@@ -6,7 +6,7 @@ import pytest
 
 from cg.constants import Pipeline
 from cg.constants.subject import Gender
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
 
 
@@ -110,24 +110,6 @@ def fixture_microbial_store(
 
     base_store.commit()
     yield base_store
-
-
-@pytest.fixture(name="analysis_obj")
-def fixture_analysis_obj(analysis_store: Store) -> Analysis:
-    """Return an analysis object from a populated store."""
-    return analysis_store.analyses()[0]
-
-
-@pytest.fixture(name="case_obj")
-def fixture_case_obj(analysis_store: Store) -> Family:
-    """Return a case models object."""
-    return analysis_store.families()[0]
-
-
-@pytest.fixture(name="sample_obj")
-def fixture_sample_obj(analysis_store) -> Sample:
-    """Return a sample models object."""
-    return analysis_store.samples()[0]
 
 
 @pytest.fixture(name="sequencer_name")

@@ -6,9 +6,9 @@ from cg.meta.transfer.lims import IncludeOptions, SampleState
 from cg.store import Store
 
 
-def has_same_received_at(lims, sample_obj):
-    lims_received_date = lims.get_received_date(lims_id=sample_obj.internal_id)
-    return sample_obj.received_at == lims_received_date
+def has_same_received_at(lims, sample):
+    lims_received_date = lims.get_received_date(lims_id=sample.internal_id)
+    return sample.received_at == lims_received_date
 
 
 def test_transfer_samples_received_at_overwriteable(

@@ -31,9 +31,14 @@ class ExternalDataHandler:
                 sample: Sample = self.status_db.find_samples(
                     customer=customer, name=sample_folder.name
                 ).first()
+                if self.is_recent_file_system_entry(file_system_entry=sample_folder):
+                    LOG.info(f"Folder {sample_folder} has recent changes. Skipping")
+                    continue
                 if sample:
+                    sample_folder = sample_folder.rename(
+                        sample_folder.parent.joinpath(sample.internal_id)
+                    )
                     self.add_sample_to_hk(sample_folder=sample_folder, sample=sample)
-                    sample_folder.rename(sample.internal_id)
                     continue
                 if self.status_db.sample(internal_id=sample_folder.name):
                     LOG.debug(
@@ -52,9 +57,7 @@ class ExternalDataHandler:
         not already added."""
         hk_version: Version = self.hk_api.get_create_version(bundle=sample.internal_id)
         for fastq_file in sample_folder.iterdir():
-            if self.hk_api.files(
-                version=hk_version, path=fastq_file.as_posix()
-            ) or self.is_recent_file(fastq_file):
+            if self.hk_api.files(version=hk_version, path=fastq_file.as_posix()):
                 LOG.debug(f"File {fastq_file} already added to bundle {hk_version.bundle.name}")
                 continue
             self.hk_api.add_file(path=fastq_file, tags=HK_FASTQ_TAGS, version_obj=hk_version)
@@ -64,6 +67,6 @@ class ExternalDataHandler:
         self.hk_api.commit()
 
     @staticmethod
-    def is_recent_file(fastq_file: Path) -> bool:
-        """Checks if a file has changed recently."""
-        return dt.datetime.now() - get_file_timestamp(fastq_file) > dt.timedelta(hours=4)
+    def is_recent_file_system_entry(file_system_entry: Path) -> bool:
+        """Checks if a file or directory has changed recently."""
+        return dt.datetime.now() - get_file_timestamp(file_system_entry) < dt.timedelta(hours=4)

@@ -21,13 +21,12 @@ from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile
 from cg.meta.rsync import RsyncAPI
-from cg.meta.external_data import ExternalDataHandler
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer
+from cg.store.models import Analysis, Customer, Family, Sample
 
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
@@ -327,12 +326,6 @@ def fixture_genotype_config() -> dict:
 def fixture_rsync_api(cg_context: CGConfig) -> RsyncAPI:
     """RsyncAPI fixture."""
     return RsyncAPI(config=cg_context)
-
-
-@pytest.fixture(name="external_data_handler")
-def fixture_external_data_handler(analysis_store, cg_context: CGConfig) -> ExternalDataHandler:
-    """ExternalDataHandler fixture."""
-    return ExternalDataHandler(config=cg_context)
 
 
 @pytest.fixture(name="genotype_api")
@@ -872,6 +865,24 @@ def fixture_analysis_store_single(
     """Setup a store instance with a single ind case for testing analysis API."""
     helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
     yield base_store
+
+
+@pytest.fixture(name="analysis")
+def fixture_analysis(analysis_store: Store) -> Analysis:
+    """Return an analysis object from a populated store."""
+    return analysis_store.analyses()[0]
+
+
+@pytest.fixture(name="case")
+def fixture_case(analysis_store: Store) -> Family:
+    """Return a case models object."""
+    return analysis_store.families()[0]
+
+
+@pytest.fixture(name="sample")
+def fixture_sample(analysis_store) -> Sample:
+    """Return a sample models object."""
+    return analysis_store.samples()[0]
 
 
 @pytest.fixture(name="collaboration_id")

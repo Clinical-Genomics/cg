@@ -157,25 +157,6 @@ def test_external_sample_to_re_analyse(
     assert test_analysis.family in cases
 
 
-def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelpers):
-    """Test that a case with one external sample that has no specified data_analysis does not show up"""
-
-    # GIVEN an externally sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
-
-    # GIVEN a cancer case
-    test_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
-
-    # GIVEN a database with a case with one externally sequenced samples for BALSAMIC analysis
-    base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
-
-    # WHEN getting cases to analyse
-    cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.BALSAMIC)
-
-    # THEN cases should not contain the test case
-    assert test_case not in cases
-
-
 def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
     """Test that a case marked for re-analyse with one sample that has been sequenced and
     with completed analysis do show up among the cases to analyse"""

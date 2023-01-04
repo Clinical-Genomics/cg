@@ -2,7 +2,7 @@
 import logging
 
 
-def test_decompress_spring(populated_decompress_spring_api, compression_files, sample, caplog):
+def test_decompress_spring(populated_decompress_spring_api, compression_files, sample_id, caplog):
     """Test to compress all fastq files for a sample"""
     caplog.set_level(logging.DEBUG)
     compress_api = populated_decompress_spring_api
@@ -20,9 +20,9 @@ def test_decompress_spring(populated_decompress_spring_api, compression_files, s
     assert not compression_files.fastq_second.exists()
 
     # WHEN Decompressing the spring file for the sample
-    res = compress_api.decompress_spring(sample)
+    res = compress_api.decompress_spring(sample_id)
 
     # THEN assert compression succeded
     assert res is True
     # THEN assert that the correct information is communicated
-    assert f"Decompressing {spring_path} to FASTQ format for sample {sample}" in caplog.text
+    assert f"Decompressing {spring_path} to FASTQ format for sample {sample_id}" in caplog.text
