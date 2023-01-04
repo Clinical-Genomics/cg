@@ -11,6 +11,7 @@ from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
+from cg.constants.rnafusion import RNAFUSION_REPORTS
 
 LOG = logging.getLogger(__name__)
 
@@ -38,8 +39,9 @@ class RnafusionUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
-            ctx.invoke(
-                upload_report_to_scout, case_id=case_obj.internal_id, report_type="multqc_rna"
-            )  # TODO:complete with correct reports
+            for report_type in RNAFUSION_REPORTS:
+                ctx.invoke(
+                    upload_report_to_scout, case_id=case_obj.internal_id, report_type=report_type
+                )
 
         self.update_uploaded_at(analysis_obj)
