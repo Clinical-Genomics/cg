@@ -30,9 +30,11 @@ class Sequencers(BaseModel):
     hiseqga: str
     novaseq: str
 
+
 class EncryptionDirs(BaseModel):
     current: str
     legacy: str
+
 
 class FlowCellRunDirs(Sequencers):
     pass
