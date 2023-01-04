@@ -3,13 +3,60 @@
 import datetime as dt
 import logging
 
-from cg.cli.compress.fastq import fastq_cmd
+from cg.cli.compress.fastq import fastq_cmd, get_old_cases
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 from cg.store import Store
+from cg.store.models import Family
 
 from tests.store_helpers import StoreHelpers
+
+
+def test_get_old_cases(
+    populated_compress_context: CGConfig, cli_runner: CliRunner, helpers: StoreHelpers, caplog
+):
+    """Test to run get cases."""
+    caplog.set_level(logging.DEBUG)
+    status_db: Store = populated_compress_context.status_db
+
+    # GIVEN a context with a case that can be compressed
+    case_id = "chonkywombat"
+
+    valid_compressable_case = helpers.add_case(
+        store=status_db,
+        name=case_id,
+        internal_id=case_id,
+        data_analysis=Pipeline.MIP_DNA,
+        action=None,
+    )
+    valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
+    status_db.commit()
+
+    # WHEN running the compress command
+    cases: list[Family] = get_old_cases(days_back=1, store=status_db)
+
+    # THEN assert the program exits since no cases where found
+    assert cases
+    # THEN assert it was communicated that no families where found
+    assert cases[0].internal_id == case_id
+
+
+def test_get_old_cases_when_no_case(
+    populated_compress_context: CGConfig, cli_runner: CliRunner, helpers: StoreHelpers, caplog
+):
+    """Test to run get cases."""
+    caplog.set_level(logging.DEBUG)
+    status_db: Store = populated_compress_context.status_db
+    case_id = "notrealcase"
+
+    # WHEN running the compress command
+    cases: list[Family] = get_old_cases(case_id=case_id, days_back=1, store=status_db)
+
+    # THEN assert the program exits since no cases where found
+    assert not cases
+
+    assert f"Could not find case {case_id}" in caplog.text
 
 
 def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: CliRunner, caplog):

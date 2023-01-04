@@ -212,16 +212,19 @@ class StatusHandler(BaseHandler):
         case_obj.action = action
         self.commit()
 
+    def _get_case_query(self) -> Query:
+        """Return case query."""
+        return self.query(Family)
+
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
-        cases: Query = self.query(Family)
         filter_functions: List[str] = [
             "completed_analysis_cases",
             "new_cases",
         ]
         for filter_function in filter_functions:
             cases: List[Family] = apply_case_filter(
-                function=filter_function, cases=cases, date=date_threshold
+                function=filter_function, cases=self._get_case_query(), date=date_threshold
             )
         return cases
 

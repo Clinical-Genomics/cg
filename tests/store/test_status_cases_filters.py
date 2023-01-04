@@ -8,6 +8,7 @@ from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store, models
+from cg.store.models import Family
 from cg.store.status_case_filters import (
     filter_cases_with_pipeline,
     filter_cases_has_sequence,
@@ -16,6 +17,8 @@ from cg.store.status_case_filters import (
     filter_report_supported_data_delivery_cases,
     filter_cases_with_loqusdb_supported_pipeline,
     filter_cases_with_loqusdb_supported_sequencing_method,
+    filter_completed_analysis_cases,
+    filter_new_cases,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -417,3 +420,93 @@ def test_filter_report_supported_data_delivery_cases(
     # THEN only the delivery report supported case should be retrieved
     assert test_case in cases
     assert test_invalid_case not in cases
+
+
+def test_filter_completed_analysis_cases(base_store: Store, helpers: StoreHelpers):
+    """Test that completed case is returned when there is case which has no action set."""
+
+    # GIVEN a case
+    test_case = helpers.add_case(base_store)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_case_query()
+
+    # WHEN getting completed cases
+    cases: List[Family] = list(filter_completed_analysis_cases(cases=cases))
+
+    # THEN cases should contain the test case
+    assert cases
+
+    assert cases[0].internal_id == test_case.internal_id
+
+
+def test_filter_completed_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
+    """Test that completed case is returned when there is case which has action set to hold."""
+
+    # GIVEN a case
+    test_case = helpers.add_case(base_store, action=CaseActions.HOLD)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_case_query()
+
+    # WHEN getting completed cases
+    cases: List[Family] = list(filter_completed_analysis_cases(cases=cases))
+
+    # THEN cases should contain the test case
+    assert cases
+
+    assert cases[0].internal_id == test_case.internal_id
+
+
+def test_filter_completed_analysis_cases_when_not_completed(
+    base_store: Store, helpers: StoreHelpers
+):
+    """Test that completed case is returned when there is case which action set to running."""
+
+    # GIVEN a case
+    helpers.add_case(base_store, action=CaseActions.RUNNING)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_case_query()
+
+    # WHEN getting completed cases
+    cases: List[Family] = list(filter_completed_analysis_cases(cases=cases))
+
+    # THEN cases should not contain the test case
+    assert not cases
+
+
+def test_filter_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_weeks: datetime):
+    """Test that old case is returned when a future date is supplied."""
+
+    # GIVEN a case
+    test_case = helpers.add_case(base_store)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_case_query()
+
+    # WHEN getting completed cases
+    cases: List[Family] = list(filter_new_cases(cases=cases, date=timestamp_in_2_weeks))
+
+    # THEN cases should contain the test case
+    assert cases
+
+    assert cases[0].internal_id == test_case.internal_id
+
+
+def test_filter_new_cases_when_too_new(
+    base_store: Store, helpers: StoreHelpers, timestamp_yesterday: datetime
+):
+    """Test that old case is returned when a past date is supplied."""
+
+    # GIVEN a case
+    helpers.add_case(base_store)
+
+    # GIVEN a cases Query
+    cases: Query = base_store._get_case_query()
+
+    # WHEN getting completed cases
+    cases: List[Family] = list(filter_new_cases(cases=cases, date=timestamp_yesterday))
+
+    # THEN cases should not contain the test case
+    assert not cases

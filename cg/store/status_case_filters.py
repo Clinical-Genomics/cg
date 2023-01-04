@@ -21,8 +21,13 @@ def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
 
 
 def filter_completed_analysis_cases(cases: Query, **kwargs) -> Query:
-    """Return cases which are not running nor set to analyse."""
-    return cases.filter(models.Family.action not in [CaseActions.RUNNING, CaseActions.ANALYZE])
+    """Return cases which are not set or on hold."""
+    return cases.filter(
+        or_(
+            models.Family.action.is_(None),
+            models.Family.action.is_(CaseActions.HOLD),
+        )
+    )
 
 
 def filter_new_cases(cases: Query, date: datetime, **kwargs) -> Query:

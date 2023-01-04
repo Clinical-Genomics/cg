@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_old_cases(
-    compress_api: CompressAPI, days_back: dt.datetime, store: Store, case_id: Optional[str] = None
+    days_back: dt.datetime, store: Store, case_id: Optional[str] = None
 ) -> List[Family]:
     """Get old enough cases to process."""
     cases: List[Family] = []
@@ -68,9 +68,7 @@ def fastq_cmd(
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
 
-    cases: List[Family] = get_old_cases(
-        case_id=case_id, compress_api=compress_api, days_back=days_back, store=store
-    )
+    cases: List[Family] = get_old_cases(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
@@ -123,9 +121,7 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: List[Family] = get_old_cases(
-        case_id=case_id, compress_api=compress_api, days_back=days_back, store=store
-    )
+    cases: List[Family] = get_old_cases(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
