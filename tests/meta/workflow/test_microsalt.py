@@ -188,3 +188,29 @@ def test_get_cases_to_store_fail(
 
     # Then it should not be stored
     assert microsalt_fail_case not in cases_to_store
+
+
+def test_get_latest_case_path(
+    mocker,
+    qc_microsalt_context: CGConfig,
+    microsalt_case_qc_pass: str,
+):
+    """Test get_latest_case_path return the first case path and not single sample path"""
+    microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
+
+    # GIVEN a case with different case paths, both single sample and case analyses
+    mocker.patch.object(MicrosaltAnalysisAPI, "get_project", return_value="ACC12345")
+    mocker.patch.object(
+        MicrosaltAnalysisAPI,
+        "get_case_path",
+        return_value=[
+            "tests/fixtures/analysis/microsalt/ACC12345A2_2023",
+            "tests/fixtures/analysis/microsalt/ACC12345_2022",
+            "tests/fixtures/analysis/microsalt/ACC12345A1_2023",
+        ],
+    )
+    # WHEN getting the latest case path
+    path = microsalt_api.get_latest_case_path(case_id=microsalt_case_qc_pass)
+
+    # THEN the first case path should be returned
+    assert "tests/fixtures/analysis/microsalt/ACC12345_2022" == path

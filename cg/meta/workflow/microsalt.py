@@ -66,45 +66,27 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str, cleaning: bool = True) -> List[Path]:
+    def get_case_path(self, case_id: str) -> List[Path]:
         """Returns all paths associated with the case or single sample analysis."""
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        if cleaning:
-            # get both case and single sample paths
-            case_directories: List[Path] = [
-                Path(path)
-                for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
-            ]
-            self.verify_case_paths_age(case_directories, case_id)
-        else:
-            # only get case paths
-            case_directories: List[Path] = [
-                Path(path)
-                for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
-            ]
+        case_directories: List[Path] = [
+            Path(path)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
+        ]
 
-        return case_directories
+        return sorted(case_directories, key=os.path.getctime, reverse=True)
 
     def get_latest_case_path(self, case_id: str) -> Union[Path, None]:
         """Return latest run dir for a microbial case."""
-        return next(iter(self.get_case_path(case_id=case_id, cleaning=False)), None)
+        case_obj: models.Family = self.status_db.family(case_id)
+        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-    def verify_case_paths_age(
-        self, case_paths: List[Path], case_id: str, analysis_due_date: int = 21
-    ) -> None:
-        """Check file age for a microsalt case."""
-        due_date: datetime = datetime.now() - timedelta(days=analysis_due_date)
-        for case_path in case_paths:
-            creation_date: datetime = datetime.fromtimestamp(os.path.getmtime(case_path))
-            if creation_date > due_date:
-                LOG.info(
-                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
-                )
-                raise FileNotFoundError(
-                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
-                )
+        return next(
+            (path for path in self.get_case_path(case_id=case_id) if lims_project + "_" in path),
+            None,
+        )
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directories for a MicroSALT case."""
