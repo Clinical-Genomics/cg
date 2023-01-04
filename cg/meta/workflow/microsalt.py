@@ -66,31 +66,30 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             )
         return self._process
 
-    def get_case_path(self, case_id: str) -> List[Path]:
+    def get_case_path(self, case_id: str, cleaning: bool = True) -> List[Path]:
         """Returns all paths associated with the case or single sample analysis."""
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
 
-        case_directories: List[Path] = [
-            Path(path)
-            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
-        ]
-
-        self.verify_case_paths_age(case_directories, case_id)
+        if cleaning:
+            # get both case and single sample paths
+            case_directories: List[Path] = [
+                Path(path)
+                for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
+            ]
+            self.verify_case_paths_age(case_directories, case_id)
+        else:
+            # only get case paths
+            case_directories: List[Path] = [
+                Path(path)
+                for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
+            ]
 
         return case_directories
 
     def get_latest_case_path(self, case_id: str) -> Path:
         """Return latest run dir for a microbial case."""
-        case_obj: models.Family = self.status_db.family(case_id)
-        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
-
-        case_paths: List[Path] = [
-            Path(path)
-            for path in glob.glob(f"{self.root_dir}/results/{lims_project}_*", recursive=True)
-        ]
-
-        return sorted(case_paths, key=os.path.getctime, reverse=True)[0]
+        return next(iter(self.get_case_path(case_id=case_id, cleaning=False)), None)
 
     def verify_case_paths_age(
         self, case_paths: List[Path], case_id: str, analysis_due_date: int = 21
@@ -365,9 +364,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         for sample in samples:
             if not sample.sequenced_at:
                 continue
-            self.qc_sample_check(
-                sample=sample, failed_samples=failed_samples, sample_qc=case_qc[sample.internal_id]
+            sample_check: Union[Dict, None] = self.qc_sample_check(
+                sample=sample,
+                sample_qc=case_qc[sample.internal_id],
             )
+            if sample_check is not None:
+                failed_samples[sample.internal_id] = sample_check
 
         return self.qc_case_check(
             case_id=case_id,
@@ -410,21 +412,19 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Creates a QC_done when a QC check is performed."""
         write_json(file_path=run_dir_path.joinpath("QC_done.json"), content=failed_samples)
 
-    def qc_sample_check(self, sample: Sample, failed_samples: Dict, sample_qc: Dict) -> None:
+    def qc_sample_check(self, sample: Sample, sample_qc: Dict) -> Union[Dict, None]:
         """Perform a QC on a sample."""
-
         if sample.control == ControlEnum.negative:
             reads_pass: bool = self.check_external_negative_control_sample(sample)
             if not reads_pass:
-                failed_samples[sample.internal_id] = {"Passed QC Reads": reads_pass}
                 LOG.warning(f"Negative control sample {sample.internal_id} failed QC.")
+                return {"Passed QC Reads": reads_pass}
         else:
             reads_pass: bool = sample.sequencing_qc
             coverage_10x_pass: bool = self.check_coverage_10x(sample.internal_id, sample_qc)
             if not reads_pass or not coverage_10x_pass:
-                failed_samples[sample.internal_id] = {"Passed QC Reads": reads_pass}
-                failed_samples[sample.internal_id]["Passed Coverage 10X"] = coverage_10x_pass
                 LOG.warning(f"Sample {sample.internal_id} failed QC.")
+                return {"Passed QC Reads": reads_pass, "Passed Coverage 10X": coverage_10x_pass}
 
     def check_coverage_10x(self, sample_name: str, sample_qc: Dict) -> bool:
         """Check if a sample passed the coverage_10x criteria."""
