@@ -291,7 +291,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.info(f"There are no running directories for case {case_id}.")
             return False
 
-        if case_run_dir.joinpath("QC_done.txt").exists():
+        if case_run_dir.joinpath("QC_done.json").exists():
             LOG.info(f"QC already performed for case {case_id}, storing case.")
             return False
 
