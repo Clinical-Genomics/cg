@@ -38,7 +38,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
     context.meta_apis["backup_api"] = BackupAPI(
         encryption_api=encryption_api,
-        encrypt_dir=context.backup.encrypt_dir,
+        encrypt_dirs=context.backup.encrypt_dirs.dict(),
         status=context.status_db,
         tar_api=tar_api,
         pdc_api=pdc_api,

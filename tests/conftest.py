@@ -1360,7 +1360,7 @@ def fixture_context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": "/home/ENCRYPT/",
+            "encrypt_dirs": {"current": "/home/ENCRYPT/", "legacy": "/home/TO_PDC"},
             "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
         },
         "balsamic": {

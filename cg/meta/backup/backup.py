@@ -3,7 +3,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from housekeeper.store import models as hk_models
 
@@ -30,7 +30,7 @@ class BackupAPI:
     def __init__(
         self,
         encryption_api: EncryptionAPI,
-        encrypt_dir: str,
+        encrypt_dirs: Dict[str, str],
         status: Store,
         tar_api: TarAPI,
         pdc_api: PdcAPI,
@@ -39,7 +39,7 @@ class BackupAPI:
     ):
 
         self.encryption_api = encryption_api
-        self.encrypt_dir = encrypt_dir
+        self.encrypt_dirs = encrypt_dirs
         self.status: Store = status
         self.tar_api: TarAPI = tar_api
         self.pdc: PdcAPI = pdc_api
@@ -242,11 +242,13 @@ class BackupAPI:
                     self.status.commit()
                 raise error
 
-    def query_pdc_for_flow_cell(self, flow_cell_id) -> list:
+    def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
         """Query PDC for a given flow cell id"""
-        search_pattern = self.encrypt_dir + ASTERISK + flow_cell_id + ASTERISK
-        self.pdc.query_pdc(search_pattern=search_pattern)
-        query: list = self.pdc.process.stdout.split(NEW_LINE)
+        query: List[str] = []
+        for dir in self.encrypt_dirs.values():
+            search_pattern = dir + ASTERISK + flow_cell_id + ASTERISK
+            self.pdc.query_pdc(search_pattern=search_pattern)
+            query.append(self.pdc.process.stdout.split(NEW_LINE))
         return query
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
@@ -266,24 +268,30 @@ class BackupAPI:
             and FileExtensions.GZIP in row
             and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        re_archived_flow_cell_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
-        archived_flow_cell_path = Path(
-            re.search(re_archived_flow_cell_path, flow_cell_query).group()
-        )
-        LOG.info("Flow cell found: %s", str(archived_flow_cell_path))
-        return archived_flow_cell_path
+
+        for dir in self.encrypt_dirs.values():
+            re_archived_flow_cell_path: re.Pattern = re.compile(dir + ".+?(?=\s)")
+            archived_flow_cell_path = Path(
+                re.search(re_archived_flow_cell_path, flow_cell_query).group()
+            )
+            if archived_flow_cell_path:
+                LOG.info("Flow cell found: %s", str(archived_flow_cell_path))
+                return archived_flow_cell_path
 
     def get_archived_encryption_key_path(self, query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query"""
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
-        re_archived_encryption_key_path: re.Pattern = re.compile(self.encrypt_dir + ".+?(?=\s)")
-        archived_encryption_key_path = Path(
-            re.search(re_archived_encryption_key_path, encryption_key_query).group()
-        )
-        LOG.info("Encryption key found: %s", str(archived_encryption_key_path))
-        return archived_encryption_key_path
+
+        for dir in self.encrypt_dirs.values():
+            re_archived_encryption_key_path: re.Pattern = re.compile(dir + ".+?(?=\s)")
+            archived_encryption_key_path = Path(
+                re.search(re_archived_encryption_key_path, encryption_key_query).group()
+            )
+            if archived_encryption_key_path:
+                LOG.info("Encryption key found: %s", str(archived_encryption_key_path))
+                return archived_encryption_key_path
 
 
 class SpringBackupAPI:

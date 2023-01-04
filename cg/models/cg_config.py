@@ -30,6 +30,9 @@ class Sequencers(BaseModel):
     hiseqga: str
     novaseq: str
 
+class EncryptionDirs(BaseModel):
+    current: str
+    legacy: str
 
 class FlowCellRunDirs(Sequencers):
     pass
@@ -37,7 +40,7 @@ class FlowCellRunDirs(Sequencers):
 
 class BackupConfig(BaseModel):
     root: Sequencers
-    encrypt_dir: str
+    encrypt_dirs: EncryptionDirs
 
 
 class CleanDirs(BaseModel):
