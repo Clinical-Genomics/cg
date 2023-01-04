@@ -186,7 +186,7 @@ class TrailblazerAPI:
         LOG.debug(f"Request body: {request_body}")
         LOG.info(f"Setting analysis status to failed for case {case_id}")
         self.query_trailblazer(
-            command="set-analysis-failed", request_body=request_body, method=APIMethods.PUT
+            command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
         )
 
     def add_comment(self, case_id: str, comment: str):
