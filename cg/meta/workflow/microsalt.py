@@ -87,7 +87,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return case_directories
 
-    def get_latest_case_path(self, case_id: str) -> Path:
+    def get_latest_case_path(self, case_id: str) -> Union[Path, None]:
         """Return latest run dir for a microbial case."""
         return next(iter(self.get_case_path(case_id=case_id, cleaning=False)), None)
 
@@ -262,36 +262,41 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_cases_to_store(self) -> List[Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
-
         cases_qc_ready: List[Family] = self.get_completed_cases()
         cases_to_store: List[Family] = []
         LOG.info(f"Found {len(cases_qc_ready)} cases to perform QC on!")
 
         for case in cases_qc_ready:
-            try:
-                case_run_dir: Path = self.get_latest_case_path(case_id=case.internal_id)
-                if not case_run_dir.joinpath("QC_done.txt").exists():
-                    LOG.info(f"Performing QC on case {case.internal_id}")
-                    if self.microsalt_qc(
-                        case_id=case.internal_id,
-                        run_dir_path=case_run_dir,
-                        lims_project=self.get_project(case.samples[0].internal_id),
-                    ):
-                        cases_to_store.append(case)
-                    else:
-                        self.trailblazer_api.set_analysis_status(
-                            case_id=case.internal_id, status=AnalysisStatus.FAILED
-                        )
-                else:
-                    LOG.info(f"QC already performed for case {case.internal_id}, storing case.")
+            case_run_dir: Union[Path, None] = self.get_latest_case_path(case_id=case.internal_id)
+            if self.is_qc_required(case_run_dir=case_run_dir, case_id=case.internal_id):
+                if self.microsalt_qc(
+                    case_id=case.internal_id,
+                    run_dir_path=case_run_dir,
+                    lims_project=self.get_project(case.samples[0].internal_id),
+                ):
+                    # qc comment in tb
                     cases_to_store.append(case)
-            except IndexError:
-                self.trailblazer_api.set_analysis_status(
-                    case_id=case.internal_id, status=AnalysisStatus.FAILED
-                )
-                LOG.error(f"There are no running directories for case {case.internal_id}.")
+                else:
+                    self.trailblazer_api.set_analysis_status(
+                        case_id=case.internal_id, status=AnalysisStatus.FAILED
+                    )
+            else:
+                cases_to_store.append(case)
 
         return cases_to_store
+
+    def is_qc_required(self, case_run_dir: Union[Path, None], case_id: str) -> bool:
+        """Checks if a qc is required for a microbial case."""
+        if case_run_dir is None:
+            LOG.info(f"There are no running directories for case {case_id}.")
+            return False
+
+        if case_run_dir.joinpath("QC_done.txt").exists():
+            LOG.info(f"QC already performed for case {case_id}, storing case.")
+            return False
+
+        LOG.info(f"Performing QC on case {case_id}")
+        return True
 
     def get_completed_cases(self) -> List[Family]:
         """Retrieve a list of cases that are completed in trailblazer."""
