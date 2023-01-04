@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from alchy import Query
@@ -17,6 +18,17 @@ from cg.store import models
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Return cases that is not sequenced according to record in StatusDB."""
     return cases.filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
+
+
+def filter_completed_analysis_cases(cases: Query, **kwargs) -> Query:
+    """Return cases which are not running nor set to analyse."""
+    return cases.filter(models.Family.action not in [CaseActions.RUNNING, CaseActions.ANALYZE])
+
+
+def filter_new_cases(cases: Query, date: datetime, **kwargs) -> Query:
+    """Return old cases compared to date."""
+    cases = cases.filter(models.Family.created_at < date)
+    return cases.order_by(models.Family.created_at.asc())
 
 
 def filter_cases_with_pipeline(cases: Query, pipeline: str = None, **kwargs) -> Query:
@@ -84,9 +96,12 @@ def filter_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query
     return cases.filter(models.Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
 
 
-def apply_case_filter(function: str, cases: Query, pipeline: Optional[str] = None):
+def apply_case_filter(
+    function: str, cases: Query, date: Optional[datetime] = None, pipeline: Optional[str] = None
+):
     """Apply filtering functions and return filtered results."""
     filter_map = {
+        "completed_analysis_cases": filter_completed_analysis_cases,
         "cases_has_sequence": filter_cases_has_sequence,
         "cases_with_pipeline": filter_cases_with_pipeline,
         "cases_with_loqusdb_supported_pipeline": filter_cases_with_loqusdb_supported_pipeline,
@@ -94,5 +109,6 @@ def apply_case_filter(function: str, cases: Query, pipeline: Optional[str] = Non
         "filter_cases_for_analysis": filter_cases_for_analysis,
         "cases_with_scout_data_delivery": filter_cases_with_scout_data_delivery,
         "filter_report_cases_with_valid_data_delivery": filter_report_supported_data_delivery_cases,
+        "new_cases": filter_new_cases,
     }
-    return filter_map[function](cases=cases, pipeline=pipeline)
+    return filter_map[function](cases=cases, date=date, pipeline=pipeline)

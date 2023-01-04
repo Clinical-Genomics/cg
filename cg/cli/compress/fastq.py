@@ -32,9 +32,10 @@ def get_old_cases(
         cases.append(case)
     else:
         date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
-        cases: List[Family] = compress_api.get_cases_to_compress(
-            store, date_threshold=date_threshold
-        )
+        cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+        # cases: List[Family] = compress_api.get_cases_to_compress(
+        #    store, date_threshold=date_threshold
+        # )
     return cases
 
 
