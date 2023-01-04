@@ -123,6 +123,7 @@ def test_get_cases_to_store_pass(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
     mocker.patch.object(TrailblazerAPI, "set_analysis_status")
+    mocker.patch.object(TrailblazerAPI, "add_comment")
 
     # GIVEN a store with a QC ready microsalt case that will pass QC
     microsalt_pass_case: Family = store.family(microsalt_case_qc_pass)
@@ -164,6 +165,7 @@ def test_get_cases_to_store_fail(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
     mocker.patch.object(TrailblazerAPI, "set_analysis_status")
+    mocker.patch.object(TrailblazerAPI, "add_comment")
 
     # GIVEN a store with a QC ready microsalt case that will fail QC
     microsalt_fail_case: Family = store.family(microsalt_case_qc_fail)

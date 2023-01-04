@@ -274,7 +274,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     run_dir_path=case_run_dir,
                     lims_project=self.get_project(case.samples[0].internal_id),
                 ):
-                    # qc comment in tb
+                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC passed")
                     cases_to_store.append(case)
                 else:
                     self.trailblazer_api.set_analysis_status(
