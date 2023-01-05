@@ -296,6 +296,7 @@ class BackupAPI:
 
     def get_archived_encryption_key_path(self, query: list) -> Path:
         """Get the encryption key for the archived flow cell from a PDC query"""
+        LOG.info(f"{query}")
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
