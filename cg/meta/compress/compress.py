@@ -7,7 +7,6 @@ import re
 from pathlib import Path
 from typing import List
 
-from alchy import Query
 from housekeeper.store import models as housekeeper_models
 
 from cg.apps.crunchy import CrunchyAPI
@@ -18,7 +17,6 @@ from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store import models
-from cg.store.queries import get_cases_to_compress
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
@@ -41,7 +39,6 @@ class CompressAPI:
         self.backup_api: SpringBackupAPI = backup_api
         self.demux_root: Path = Path(demux_root)
         self.dry_run: bool = dry_run
-        self.get_cases_to_compress: Query = get_cases_to_compress
 
     def set_dry_run(self, dry_run: bool):
         """Update dry run."""

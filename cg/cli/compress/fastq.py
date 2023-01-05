@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 def get_old_cases(
     days_back: dt.datetime, store: Store, case_id: Optional[str] = None
 ) -> List[Family]:
-    """Get old enough cases to process."""
+    """Get cases to process."""
     cases: List[Family] = []
     if case_id:
         case: Family = store.family(case_id)
@@ -33,9 +33,6 @@ def get_old_cases(
     else:
         date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
         cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
-        # cases: List[Family] = compress_api.get_cases_to_compress(
-        #    store, date_threshold=date_threshold
-        # )
     return cases
 
 
