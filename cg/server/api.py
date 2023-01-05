@@ -168,9 +168,12 @@ def families():
 @BLUEPRINT.route("/families_in_collaboration")
 def families_in_collaboration():
     """Fetch families in collaboration."""
-    order_customer = db.customer(request.args.get("customer"))
+    order_customer: models.Customer = db.customer(request.args.get("customer"))
+    data_analysis: str = request.args.get("data_analysis")
     families_q: Query = db.families(
-        enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
+        enquiry=request.args.get("enquiry"),
+        customers=order_customer.collaborators,
+        data_analysis=data_analysis,
     )
     count = families_q.count()
     records = families_q.limit(30)
@@ -291,7 +294,7 @@ def flowcells():
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def flowcell(flowcell_id):
     """Fetch a single flowcell."""
-    record = db.flowcell(flowcell_id)
+    record = db.get_flow_cell(flowcell_id)
     if record is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**record.to_dict(samples=True))

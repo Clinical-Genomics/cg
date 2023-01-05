@@ -16,7 +16,7 @@ LOG = logging.getLogger(__name__)
 
 class SlurmAPI:
     def __init__(self):
-        self.process: Process = Process("sbatch")
+        self.process: Process = Process(binary="sbatch")
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:

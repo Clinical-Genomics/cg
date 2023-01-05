@@ -1,4 +1,5 @@
-"""Fixtures for cli balsamic tests"""
+"""Fixtures for cli balsamic tests."""
+
 from typing import Union
 
 import logging
@@ -14,10 +15,9 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
-from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -25,11 +25,11 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store, models
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
 
+from tests.meta.upload.scout.conftest import fixture_mip_load_config
 
 LOG = logging.getLogger(__name__)
 

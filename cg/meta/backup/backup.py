@@ -339,7 +339,7 @@ class SpringBackupAPI:
             LOG.debug(f"*** COMMAND PROCESS FAILED! ***")
             self.encryption_api.cleanup(spring_file_path)
         except ChecksumFailedError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             self.encryption_api.cleanup(spring_file_path)
             LOG.debug(f"*** CHECKSUM PROCESS FAILED! ***")
 

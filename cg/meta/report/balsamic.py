@@ -107,7 +107,7 @@ class BalsamicReportAPI(ReportAPI):
             else None
         )
 
-    def get_data_analysis_type(self, case: models.Family) -> str:
+    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
         return self.analysis_api.get_bundle_deliverables_type(case.internal_id)

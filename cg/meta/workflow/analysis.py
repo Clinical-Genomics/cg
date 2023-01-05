@@ -1,13 +1,15 @@
 import datetime as dt
 import logging
 import os
+import click
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
+import shutil
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, Pipeline, Priority
-from cg.constants.priority import SlurmQos, PRIORITY_TO_SLURM_QOS
+from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
@@ -15,6 +17,8 @@ from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import Bundle, Version
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
+
 
 LOG = logging.getLogger(__name__)
 
@@ -47,6 +51,14 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
+    @staticmethod
+    def get_help(context):
+        """
+        If no argument is passed, print help text
+        """
+        if context.invoked_subcommand is None:
+            click.echo(context.get_help())
+
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
@@ -73,9 +85,10 @@ class AnalysisAPI(MetaAPI):
             raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def verify_case_path_exists(self, case_id: str) -> None:
+        """Check if case path exists."""
         if not self.get_case_path(case_id=case_id).exists():
-            LOG.error("Working directory path for %s does not exist", case_id)
-            raise CgError()
+            LOG.info(f"No working directory for {case_id} exists")
+            raise FileNotFoundError(f"No working directory for {case_id} exists")
 
     def all_flowcells_on_disk(self, case_id: str) -> bool:
         """Check if flowcells are on disk for sample before starting the analysis.
@@ -105,8 +118,8 @@ class AnalysisAPI(MetaAPI):
         priority: int = self.get_priority_for_case(case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
-    def get_case_path(self, case_id: str) -> Path:
-        """Path to case working directory"""
+    def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
+        """Path to case working directory."""
         raise NotImplementedError
 
     def get_case_config_path(self, case_id) -> Path:
@@ -148,12 +161,12 @@ class AnalysisAPI(MetaAPI):
 
     def upload_bundle_housekeeper(self, case_id: str) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
-
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
         bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
             bundle_data=self.get_hermes_transformed_deliverables(case_id)
         )
         if not bundle_result:
+            LOG.info("Bundle already added to Housekeeper!")
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
         self.housekeeper_api.include(bundle_version)
@@ -197,6 +210,7 @@ class AnalysisAPI(MetaAPI):
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
+            ticket=self.status_db.get_latest_ticket_from_case(case_id),
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
@@ -423,3 +437,31 @@ class AnalysisAPI(MetaAPI):
         """Parses output analysis files"""
 
         raise NotImplementedError
+
+    def clean_analyses(self, case_id: str) -> None:
+        """Add a cleaned at date for all analyses related to a case."""
+        analyses: list = self.status_db.family(case_id).analyses
+        LOG.info(f"Adding a cleaned at date for case {case_id}")
+        for analysis_obj in analyses:
+            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
+            self.status_db.commit()
+
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+        """Remove workflow run directory."""
+
+        try:
+            self.verify_case_path_exists(case_id=case_id)
+        except FileNotFoundError:
+            self.clean_analyses(case_id)
+
+        if yes or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
+            if case_path.is_symlink():
+                LOG.warning(
+                    f"Will not automatically delete symlink: {case_path}, delete it manually",
+                )
+                return EXIT_FAIL
+
+            shutil.rmtree(case_path, ignore_errors=True)
+            LOG.info(f"Cleaned {case_path}")
+            self.clean_analyses(case_id=case_id)
+            return EXIT_SUCCESS

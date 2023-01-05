@@ -8,6 +8,7 @@ from typing import List
 import pytest
 from cg.constants import Pipeline, DataDelivery
 from cg.constants.constants import FileFormat
+from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -87,6 +88,18 @@ def fixture_dna_sample_father_id() -> str:
     return "dna_father"
 
 
+@pytest.fixture(name="another_sample_id")
+def fixture_another_sample_id() -> str:
+    """Return another sample id."""
+    return "another_sample_id"
+
+
+@pytest.fixture(name="another_rna_sample_id")
+def fixture_another_rna_sample_id() -> str:
+    """Return another RNA sample id."""
+    return "another_rna_sample_id"
+
+
 @pytest.fixture(name="rna_store")
 def fixture_rna_store(
     base_store: Store,
@@ -108,12 +121,30 @@ def fixture_rna_store(
     )
     rna_case.internal_id = rna_case_id
 
-    rna_sample_son = helpers.add_sample(store=store, name="rna_son", subject_id="son")
-    rna_sample_daughter = helpers.add_sample(
-        store=store, name="rna_daughter", subject_id="daughter"
+    rna_sample_son = helpers.add_sample(
+        store=store,
+        name="rna_son",
+        subject_id="son",
+        application_type=SequencingMethod.WTS,
     )
-    rna_sample_mother = helpers.add_sample(store=store, name="rna_mother", subject_id="mother")
-    rna_sample_father = helpers.add_sample(store=store, name="rna_father", subject_id="father")
+    rna_sample_daughter = helpers.add_sample(
+        store=store,
+        name="rna_daughter",
+        subject_id="daughter",
+        application_type=SequencingMethod.WTS,
+    )
+    rna_sample_mother = helpers.add_sample(
+        store=store,
+        name="rna_mother",
+        subject_id="mother",
+        application_type=SequencingMethod.WTS,
+    )
+    rna_sample_father = helpers.add_sample(
+        store=store,
+        name="rna_father",
+        subject_id="father",
+        application_type=SequencingMethod.WTS,
+    )
     helpers.add_relationship(
         store=store,
         sample=rna_sample_son,
@@ -150,12 +181,34 @@ def fixture_rna_store(
     )
     dna_case.internal_id = dna_case_id
 
-    dna_sample_son = helpers.add_sample(store=store, name="dna_son", subject_id="son")
-    dna_sample_daughter = helpers.add_sample(
-        store=store, name="dna_daughter", subject_id="daughter"
+    dna_sample_son = helpers.add_sample(
+        store=store,
+        name="dna_son",
+        subject_id="son",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
     )
-    dna_sample_mother = helpers.add_sample(store=store, name="dna_mother", subject_id="mother")
-    dna_sample_father = helpers.add_sample(store=store, name="dna_father", subject_id="father")
+    dna_sample_daughter = helpers.add_sample(
+        store=store,
+        name="dna_daughter",
+        subject_id="daughter",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
+    )
+    dna_sample_mother = helpers.add_sample(
+        store=store,
+        name="dna_mother",
+        subject_id="mother",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
+    )
+    dna_sample_father = helpers.add_sample(
+        store=store,
+        name="dna_father",
+        subject_id="father",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
+    )
     helpers.add_relationship(
         store=store,
         sample=dna_sample_son,

@@ -16,7 +16,7 @@ from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.constants.tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
@@ -248,8 +248,8 @@ class ReportAPI(MetaAPI):
     ) -> CaseModel:
         """Returns case associated validated attributes."""
 
-        samples = self.get_samples_data(case, analysis_metadata)
-        unique_applications = self.get_unique_applications(samples)
+        samples: List[SampleModel] = self.get_samples_data(case, analysis_metadata)
+        unique_applications: List[ApplicationModel] = self.get_unique_applications(samples)
 
         return CaseModel(
             name=case.name,
@@ -265,19 +265,19 @@ class ReportAPI(MetaAPI):
         """Extracts all the samples associated to a specific case and their attributes."""
 
         samples = list()
-        case_samples = self.status_db.family_samples(case.internal_id)
+        case_samples: List[models.FamilySample] = self.status_db.family_samples(case.internal_id)
 
         for case_sample in case_samples:
             sample: models.Sample = case_sample.sample
-            lims_sample: dict = self.get_lims_sample(sample.internal_id)
+            lims_sample: Optional[dict] = self.get_lims_sample(sample.internal_id)
 
             samples.append(
                 SampleModel(
-                    name=lims_sample.get("name"),
+                    name=sample.name,
                     id=sample.internal_id,
                     ticket=sample.original_ticket,
-                    gender=lims_sample.get("sex"),
-                    source=lims_sample.get("source"),
+                    gender=sample.sex,
+                    source=lims_sample.get("source") if lims_sample else None,
                     tumour=sample.is_tumour,
                     application=self.get_sample_application_data(lims_sample),
                     methods=self.get_sample_methods_data(sample.internal_id),
@@ -289,7 +289,7 @@ class ReportAPI(MetaAPI):
 
         return samples
 
-    def get_lims_sample(self, sample_id: str) -> dict:
+    def get_lims_sample(self, sample_id: str) -> Optional[dict]:
         """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
 
         lims_sample = dict()
@@ -307,14 +307,18 @@ class ReportAPI(MetaAPI):
             tag=lims_sample.get("application")
         )
 
-        return ApplicationModel(
-            tag=application.tag,
-            version=lims_sample.get("application_version"),
-            prep_category=application.prep_category,
-            description=application.description,
-            limitations=application.limitations,
-            accredited=application.is_accredited,
-            external=application.is_external,
+        return (
+            ApplicationModel(
+                tag=application.tag,
+                version=lims_sample.get("application_version"),
+                prep_category=application.prep_category,
+                description=application.description,
+                limitations=application.limitations,
+                accredited=application.is_accredited,
+                external=application.is_external,
+            )
+            if application
+            else ApplicationModel()
         )
 
     @staticmethod
@@ -392,7 +396,7 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_data_analysis_type(self, case: models.Family) -> str:
+    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
         raise NotImplementedError

@@ -78,13 +78,8 @@ def test_transfer_sample_files_from_source(
     caplog.set_level(logging.INFO)
 
     # GIVEN a Store with three samples, where only two samples are present in the source folder
-    sample_name1: str = cust_sample_id + "1"
-    sample_name2: str = cust_sample_id + "2"
-    sample_name3: str = cust_sample_id + "3"
-
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name1, original_ticket=ticket)
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name2, original_ticket=ticket)
-    helpers.add_sample(store=external_data_api.status_db, name=sample_name3, original_ticket=ticket)
+    for sample in [f"{cust_sample_id}1", f"{cust_sample_id}2", f"{cust_sample_id}3"]:
+        helpers.add_sample(store=external_data_api.status_db, name=sample, original_ticket=ticket)
 
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
@@ -114,7 +109,7 @@ def test_get_all_fastq(external_data_api: ExternalDataAPI, external_data_directo
             sample_folder=external_data_directory.joinpath(folder)
         )
         # THEN only fast.gz files are returned
-        assert all([tmp.suffixes == [".fastq", ".gz"] for tmp in files])
+        assert all(tmp.suffixes == [".fastq", ".gz"] for tmp in files)
 
 
 def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: Path):
@@ -193,7 +188,7 @@ def test_add_transfer_to_housekeeper(
     external_data_api.add_transfer_to_housekeeper(ticket=ticket)
 
     # THEN two sample bundles exist in housekeeper and the file has been added to those bundles bundles
-    added_samples = [sample for sample in external_data_api.housekeeper_api.bundles()]
+    added_samples = list(external_data_api.housekeeper_api.bundles())
     assert all(
         sample.internal_id in [added_sample.name for added_sample in added_samples]
         for sample in samples[:-1]
@@ -250,7 +245,7 @@ def test_get_available_samples_no_samples_avail(
 
 
 def test_checksum(fastq_file: Path):
-    """Tests if the function correctly calculates md5sum and returns the correct result"""
+    """Tests if the function correctly calculates md5sum and returns the correct result."""
     # GIVEN a fastq file with corresponding correct md5 file and a fastq file with a corresponding incorrect md5 file
     bad_md5sum_file_path: Path = fastq_file.parent.joinpath("fastq_run_R1_001.fastq.gz")
 
@@ -264,10 +259,10 @@ def test_checksum(fastq_file: Path):
 
 
 def test_extract_checksum(fastq_file: Path):
-    """Tests if the function successfully extract the correct md5sum"""
+    """Tests if the function successfully extract the correct md5sum."""
 
-    # Given a file containing an md5sum
-    file = Path(str(fastq_file) + ".md5")
+    # Given a file containing a md5sum
+    md5sum_file = Path(f"{fastq_file.as_posix()}.md5")
 
     # Then the function should extract it
-    assert extract_md5sum(md5sum_file=file) == "a95cbb265540a2261fce941059784fd1"
+    assert extract_md5sum(md5sum_file=md5sum_file) == "a95cbb265540a2261fce941059784fd1"

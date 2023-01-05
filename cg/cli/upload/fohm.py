@@ -86,9 +86,9 @@ def preprocess_all(
             fohm_api.update_upload_started_at(case_id=case_id)
             LOG.info(f"Upload of case {case_id} to GISAID was successful")
             upload_cases.append(case_id)
-        except Exception as e:
+        except Exception as error:
             LOG.error(
-                f"Upload of case {case_id} to GISAID unseccessful {e}, case {case_id} "
+                f"Upload of case {case_id} to GISAID unseccessful {error}, case {case_id} "
                 f"will be removed from delivery batch"
             )
     fohm_api.set_cases_to_aggregate(cases=upload_cases)

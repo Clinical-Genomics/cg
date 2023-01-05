@@ -16,6 +16,7 @@ from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
+from cg.apps.tb import TrailblazerAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class NiptUploadAPI:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
+        self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run"""
@@ -47,17 +49,8 @@ class NiptUploadAPI:
         LOG.info("Set dry run to %s", dry_run)
         self.dry_run = dry_run
 
-    def target_reads(self, case_id: str) -> float:
-        """Return the target reads of the case"""
-        case_obj: models.Family = self.status_db.family(case_id)
-        application_version = self.status_db.ApplicationVersion.query.filter(
-            models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id
-        ).first()
-
-        return application_version.application.target_reads
-
     def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
-        """Check average Q30 and of the latest flowcell related to a case"""
+        """Check average Q30 and of the latest flow cell related to a case."""
         latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
             family_id=case_id
         )
@@ -66,7 +59,9 @@ class NiptUploadAPI:
         ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
         return flow_cell_reads_and_q30_summary[
             "q30"
-        ] >= q30_threshold and flow_cell_reads_and_q30_summary["reads"] >= self.target_reads(
+        ] >= q30_threshold and flow_cell_reads_and_q30_summary[
+            "reads"
+        ] >= self.status_db.get_ready_made_library_expected_reads(
             case_id=case_id
         )
 
@@ -136,6 +131,9 @@ class NiptUploadAPI:
         if not self.dry_run:
             analysis_obj.uploaded_at = dt.datetime.now()
             self.status_db.commit()
+            self.trailblazer_api.set_analysis_uploaded(
+                case_id=case_id, uploaded_at=analysis_obj.uploaded_at
+            )
 
         return analysis_obj
 
@@ -152,7 +150,7 @@ class NiptUploadAPI:
         return analysis_obj
 
     def get_statina_files(self, case_id: str) -> StatinaUploadFiles:
-        """Get statina files from from housekeeper."""
+        """Get statina files from housekeeper."""
 
         hk_results_file: str = self.get_housekeeper_results_file(
             case_id=case_id, tags=["nipt", "metrics"]

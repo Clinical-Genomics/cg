@@ -1,4 +1,4 @@
-"""Backup related CLI commands"""
+"""Backup related CLI commands."""
 import logging
 from pathlib import Path
 from typing import Iterable, List, Optional, Union
@@ -7,7 +7,8 @@ import click
 import housekeeper.store.models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.constants import DRY_RUN, FlowCellStatus, HousekeeperTags
+from cg.constants.constants import DRY_RUN, FlowCellStatus
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.backup.backup import BackupAPI, SpringBackupAPI
 from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
@@ -48,7 +49,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
 
     flow_cell_obj: Optional[models.Flowcell] = None
     if flow_cell:
-        flow_cell_obj: Optional[models.Flowcell] = status_api.flowcell(flow_cell)
+        flow_cell_obj: Optional[models.Flowcell] = status_api.get_flow_cell(flow_cell)
         if flow_cell_obj is None:
             LOG.error(f"{flow_cell}: not found in database")
             raise click.Abort
@@ -78,7 +79,7 @@ def archive_spring_files(config: CGConfig, context: click.Context, dry_run: bool
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
     LOG.info("Getting all spring files from Housekeeper.")
     spring_files: Iterable[hk_models.File] = housekeeper_api.files(
-        tags=[HousekeeperTags.SPRING]
+        tags=[SequencingFileTag.SPRING]
     ).filter(hk_models.File.path.like(f"%{config.environment}/{config.demultiplex.out_dir}%"))
     for spring_file in spring_files:
         LOG.info("Attempting encryption and PDC archiving for file %s", spring_file.path)
@@ -138,7 +139,7 @@ def retrieve_spring_files(
         latest_version: hk_models.Version = housekeeper_api.last_version(bundle=sample.internal_id)
         spring_files: Iterable[hk_models.File] = housekeeper_api.files(
             bundle=sample.internal_id,
-            tags=[HousekeeperTags.SPRING],
+            tags=[SequencingFileTag.SPRING],
             version=latest_version.id,
         )
         for spring_file in spring_files:
@@ -153,7 +154,7 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[m
         "flow_cell": status_api.get_samples_from_flowcell,
     }
     samples: Union[models.Sample, List[models.Sample]] = get_samples[object_type](identifier)
-    return [samples] if not isinstance(samples, list) else samples
+    return samples if isinstance(samples, list) else [samples]
 
 
 @backup.command("retrieve-spring-file")

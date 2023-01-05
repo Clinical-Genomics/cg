@@ -17,6 +17,10 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         return self.config.mip_rd_dna.root
 
     @property
+    def conda_binary(self) -> str:
+        return self.config.mip_rd_dna.conda_binary
+
+    @property
     def conda_env(self) -> str:
         return self.config.mip_rd_dna.conda_env
 
@@ -37,6 +41,7 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
         if not self._process:
             self._process = Process(
                 binary=f"{self.script} {self.mip_pipeline}",
+                conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 config=self.config.mip_rd_dna.mip_config,
                 environment=self.conda_env,
             )

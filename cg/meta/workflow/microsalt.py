@@ -9,19 +9,22 @@
 import logging
 import os
 import re
-from datetime import datetime
+import shutil
+from datetime import datetime, timedelta
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+import glob
 
 import click
 from cg.constants import Pipeline
-from cg.exc import CgDataError
+from cg.exc import CgDataError, CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 
 from cg.constants import Priority
 
@@ -46,23 +49,85 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return MicrosaltFastqHandler
 
     @property
+    def conda_binary(self) -> str:
+        return self.config.microsalt.conda_binary
+
+    @property
     def process(self) -> Process:
         if not self._process:
             self._process = Process(
                 binary=self.config.microsalt.binary_path,
+                conda_binary=f"{self.conda_binary}" if self.conda_binary else None,
                 environment=self.config.microsalt.conda_env,
             )
         return self._process
 
+    def get_case_path(self, case_id: str) -> List[Path]:
+        """Returns all paths associated with the case."""
+        case_obj: models.Family = self.status_db.family(case_id)
+        lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
+
+        case_paths = [
+            Path(path)
+            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
+        ]
+
+        self.verify_case_paths_age(case_paths, case_id)
+
+        return case_paths
+
+    def verify_case_paths_age(
+        self, case_paths: List[Path], case_id: str, analysis_due_date: int = 21
+    ) -> None:
+        """Check file age for a microsalt case."""
+        due_date: datetime = datetime.now() - timedelta(days=analysis_due_date)
+        for case_path in case_paths:
+            creation_date: datetime = datetime.fromtimestamp(os.path.getmtime(case_path))
+            if creation_date > due_date:
+                LOG.info(
+                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
+                )
+                raise FileNotFoundError(
+                    f"All paths in {case_id} are not older than 21 days, skipping and moving on to the next case!"
+                )
+
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+        """Remove workflow run directories for a MicroSALT case."""
+
+        if not case_path:
+            LOG.info(
+                f"There is no case paths for case {case_id}. Setting cleaned at to {datetime.now()}"
+            )
+            self.clean_analyses(case_id=case_id)
+            return EXIT_SUCCESS
+
+        for analysis_path in case_path:
+            if yes or click.confirm(
+                f"Are you sure you want to remove all files in {analysis_path}?"
+            ):
+                if analysis_path.is_symlink():
+                    LOG.warning(
+                        f"Will not automatically delete symlink: {analysis_path}, delete it manually",
+                    )
+                    return EXIT_FAIL
+
+                shutil.rmtree(analysis_path, ignore_errors=True)
+                LOG.info(f"Cleaned {analysis_path}")
+
+        self.clean_analyses(case_id=case_id)
+        return EXIT_SUCCESS
+
     def get_case_fastq_path(self, case_id: str) -> Path:
+        """Get fastq paths for a case."""
         return Path(self.root_dir, "fastq", case_id)
 
     def get_config_path(self, filename: str) -> Path:
         return Path(self.queries_path, filename).with_suffix(".json")
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
+        """Get trailblazer config path."""
         case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: model.Sample = case_obj.links[0].sample
+        sample_obj: models.Sample = case_obj.links[0].sample
         project_id: str = self.get_project(sample_obj.internal_id)
         return Path(
             self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
@@ -129,7 +194,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         organism: str = sample_obj.organism.internal_id.strip()
         comment: str = self.get_lims_comment(sample_id=sample_obj.internal_id)
-        has_comment = bool(comment)
 
         if "gonorrhoeae" in organism:
             organism = "Neisseria spp."
@@ -138,6 +202,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         if organism == "VRE":
             reference = sample_obj.organism.reference_genome
+            has_comment = bool(comment)
             if reference == "NC_017960.1":
                 organism = "Enterococcus faecium"
             elif reference == "NC_004668.1":
@@ -152,11 +217,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         sample_id = sample_obj.internal_id
         method_library_prep = self.lims_api.get_prep_method(sample_id)
-        if method_library_prep:
-            method_library_prep, _ = method_library_prep.split(" ", 1)
         method_sequencing = self.lims_api.get_sequencing_method(sample_id)
-        if method_sequencing:
-            method_sequencing, _ = method_sequencing.split(" ", 1)
         priority = (
             Priority.research.name if sample_obj.priority_int == 0 else Priority.standard.name
         )

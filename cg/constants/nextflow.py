@@ -1,0 +1,10 @@
+"""Nextflow related constants."""
+
+
+NFX_WORK_DIR = "work"
+NFX_SAMPLE_HEADER = "sample"
+NFX_READ1_HEADER = "fastq_1"
+NFX_READ2_HEADER = "fastq_2"
+NFX_SAMPLESHEET_READS_HEADERS = [NFX_READ1_HEADER, NFX_READ2_HEADER]
+NFX_SAMPLESHEET_HEADERS = [NFX_SAMPLE_HEADER] + NFX_SAMPLESHEET_READS_HEADERS
+DELIVER_FILE_HEADERS = ["format", "id", "path", "path_index", "step", "tag"]

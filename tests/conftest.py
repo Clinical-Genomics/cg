@@ -5,23 +5,29 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Generator, Dict, List
+from typing import Any, Dict, Generator, List
 
 import pytest
+from housekeeper.store import models as hk_models
+from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
-from cg.io.controller import ReadFile
 from cg.constants.subject import Gender
+from cg.io.controller import ReadFile
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.demux_results import DemuxResults
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
+from cg.store.models import Customer
 
 from .mocks.crunchy import MockCrunchyAPI
 from .mocks.hk_mock import MockHousekeeperAPI
@@ -37,26 +43,69 @@ from .store_helpers import StoreHelpers
 LOG = logging.getLogger(__name__)
 
 
+# Timestamp fixture
+
+
+@pytest.fixture(name="old_timestamp")
+def fixture_old_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format."""
+    return dt.datetime(1900, 1, 1)
+
+
+@pytest.fixture(name="timestamp")
+def fixture_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format."""
+    return dt.datetime(2020, 5, 1)
+
+
+@pytest.fixture(name="later_timestamp")
+def fixture_later_timestamp() -> dt.datetime:
+    """Return a time stamp in date time format."""
+    return dt.datetime(2020, 6, 1)
+
+
+@pytest.fixture(name="timestamp_now")
+def fixture_timestamp_now() -> dt.datetime:
+    """Return a time stamp of today's date in date time format."""
+    return dt.datetime.now()
+
+
+@pytest.fixture(name="timestamp_yesterday")
+def fixture_timestamp_yesterday(timestamp_now: dt.datetime) -> dt.datetime:
+    """Return a time stamp of yesterday's date in date time format."""
+    return timestamp_now - dt.timedelta(days=1)
+
+
+@pytest.fixture(name="timestamp_in_2_weeks")
+def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
+    """Return a time stamp 14 days ahead in time."""
+    return timestamp_now + dt.timedelta(days=14)
+
+
 # Case fixtures
 
 
 @pytest.fixture(name="slurm_account")
 def fixture_slurm_account() -> str:
+    """Return a SLURM account."""
     return "super_account"
 
 
 @pytest.fixture(name="user_name")
 def fixture_user_name() -> str:
+    """Return a user name."""
     return "Paul Anderson"
 
 
 @pytest.fixture(name="user_mail")
 def fixture_user_mail() -> str:
+    """Return a user email."""
     return "paul@magnolia.com"
 
 
 @pytest.fixture(name="email_adress")
 def fixture_email_adress() -> str:
+    """Return an email adress."""
     return "james.holden@scilifelab.se"
 
 
@@ -66,10 +115,22 @@ def fixture_case_id() -> str:
     return "yellowhog"
 
 
+@pytest.fixture(name="another_case_id")
+def fixture_another_case_id() -> str:
+    """Return another case id."""
+    return "another_case_id"
+
+
 @pytest.fixture(name="sample_id")
 def fixture_sample_id() -> str:
     """Returns a sample id."""
     return "ADM1"
+
+
+@pytest.fixture(name="sample_name")
+def fixture_sample_name() -> str:
+    """Returns a sample name."""
+    return "a_sample_name"
 
 
 @pytest.fixture(name="cust_sample_id", scope="session")
@@ -90,8 +151,23 @@ def fixture_customer_id() -> str:
     return "cust000"
 
 
-@pytest.fixture(scope="function", name="analysis_family_single_case")
-def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) -> dict:
+@pytest.fixture(name="sbatch_job_number")
+def fixture_sbatch_job_number() -> int:
+    return 123456
+
+
+@pytest.fixture(name="sbatch_process")
+def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
+    """Return a mocked process object."""
+    slurm_process = ProcessMock(binary="sbatch")
+    slurm_process.set_stdout(text=str(sbatch_job_number))
+    return slurm_process
+
+
+@pytest.fixture(name="analysis_family_single_case")
+def fixture_analysis_family_single(
+    case_id: str, family_name: str, sample_id: str, ticket: str
+) -> dict:
     """Build an example case."""
     return {
         "name": family_name,
@@ -104,7 +180,7 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
             {
                 "name": "proband",
                 "sex": Gender.MALE,
-                "internal_id": "ADM1",
+                "internal_id": sample_id,
                 "status": "affected",
                 "original_ticket": ticket,
                 "reads": 5000000000,
@@ -114,9 +190,9 @@ def fixture_analysis_family_single(case_id: str, family_name: str, ticket: str) 
     }
 
 
-@pytest.fixture(scope="function", name="analysis_family")
-def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict:
-    """Return a dictionary with information from a analysis case"""
+@pytest.fixture(name="analysis_family")
+def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket: str) -> dict:
+    """Return a dictionary with information from a analysis case."""
     return {
         "name": family_name,
         "internal_id": case_id,
@@ -128,7 +204,7 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
             {
                 "name": "child",
                 "sex": Gender.MALE,
-                "internal_id": "ADM1",
+                "internal_id": sample_id,
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
@@ -163,12 +239,10 @@ def fixture_analysis_family(case_id: str, family_name: str, ticket: str) -> dict
 
 @pytest.fixture(name="base_config_dict")
 def fixture_base_config_dict() -> dict:
-    """Returns the basic configs necessary for running CG"""
+    """Returns the basic configs necessary for running CG."""
     return {
         "database": "sqlite:///",
         "madeline_exe": "path/to/madeline",
-        "bed_path": "path/to/bed",
-        "pon_path": "path/to/pon",
         "delivery_path": "path/to/delivery",
         "housekeeper": {
             "database": "sqlite:///",
@@ -180,6 +254,22 @@ def fixture_base_config_dict() -> dict:
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
+        "loqusdb": {
+            "binary_path": "binary",
+            "config_path": "config",
+        },
+        "loqusdb-wes": {
+            "binary_path": "binary_wes",
+            "config_path": "config_wes",
+        },
+        "loqusdb-somatic": {
+            "binary_path": "binary_somatic",
+            "config_path": "config_somatic",
+        },
+        "loqusdb-tumor": {
+            "binary_path": "binary_tumor",
+            "config_path": "config_tumor",
+        },
     }
 
 
@@ -189,9 +279,9 @@ def fixture_cg_config_object(base_config_dict: dict) -> CGConfig:
     return CGConfig(**base_config_dict)
 
 
-@pytest.fixture
-def chanjo_config_dict() -> dict:
-    """Chanjo configs."""
+@pytest.fixture(name="chanjo_config")
+def fixture_chanjo_config() -> Dict[str, Dict[str, str]]:
+    """Chanjo configs"""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
@@ -200,6 +290,7 @@ def crunchy_config_dict():
     """Crunchy configs."""
     return {
         "crunchy": {
+            "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
             "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
         }
@@ -252,12 +343,11 @@ def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     return _genotype_api
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def madeline_api(madeline_output) -> MockMadelineAPI:
     """madeline_api fixture."""
     _api = MockMadelineAPI()
     _api.set_outpath(madeline_output)
-
     return _api
 
 
@@ -308,14 +398,13 @@ def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
     return Path(demultiplexed_runs, "fastq")
 
 
-@pytest.fixture(scope="function", name="project_dir")
+@pytest.fixture(name="project_dir")
 def fixture_project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
-    my_tmpdir: Path = Path(tmpdir_factory.mktemp("data"))
-    yield my_tmpdir
+    yield Path(tmpdir_factory.mktemp("data"))
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def tmp_file(project_dir) -> Path:
     """Return a temp file path."""
     return Path(project_dir, "test")
@@ -330,14 +419,13 @@ def fixture_non_existing_file_path(project_dir: Path) -> Path:
 @pytest.fixture(name="content")
 def fixture_content() -> str:
     """Return some content for a file."""
-    _content = (
+    return (
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
         " ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ull"
         "amco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehende"
         "rit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaec"
         "at cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
     )
-    return _content
 
 
 @pytest.fixture(name="filled_file")
@@ -352,6 +440,12 @@ def fixture_filled_file(non_existing_file_path: Path, content: str) -> Path:
 def fixture_orderform(fixtures_dir: Path) -> Path:
     """Return the path to the directory with order forms."""
     return Path(fixtures_dir, "orderforms")
+
+
+@pytest.fixture(name="hk_file")
+def fixture_hk_file(filled_file, case_id) -> File:
+    """Return a housekeeper File object."""
+    return File(id=case_id, path=filled_file)
 
 
 @pytest.fixture(name="mip_dna_store_files")
@@ -427,34 +521,39 @@ def fixture_fastq_file(fastq_dir: Path) -> Path:
 
 
 @pytest.fixture(name="madeline_output")
-def fixture_madeline_output(apps_dir: Path) -> str:
+def fixture_madeline_output(apps_dir: Path) -> Path:
     """Return str of path for file with Madeline output."""
-    return Path(apps_dir, "madeline", "madeline.xml").as_posix()
+    return Path(apps_dir, "madeline", "madeline.xml")
+
+
+@pytest.fixture(name="file_does_not_exist")
+def fixture_file_does_not_exist() -> Path:
+    """Return a file path that does not exist."""
+    return Path("file", "does", "not", "exist")
 
 
 # Compression fixtures
 
 
-@pytest.fixture(scope="function", name="run_name")
+@pytest.fixture(name="run_name")
 def fixture_run_name() -> str:
     """Return the name of a fastq run."""
     return "fastq_run"
 
 
-@pytest.fixture(scope="function", name="original_fastq_data")
+@pytest.fixture(name="original_fastq_data")
 def fixture_original_fastq_data(fastq_dir: Path, run_name) -> CompressionData:
     """Return a compression object with a path to the original fastq files."""
+    return CompressionData(Path(fastq_dir, run_name))
 
-    return CompressionData(fastq_dir / run_name)
 
-
-@pytest.fixture(scope="function", name="fastq_stub")
+@pytest.fixture(name="fastq_stub")
 def fixture_fastq_stub(project_dir: Path, run_name: str) -> Path:
     """Creates a path to the base format of a fastq run."""
-    return project_dir / run_name
+    return Path(project_dir, run_name)
 
 
-@pytest.fixture(scope="function", name="compression_object")
+@pytest.fixture(name="compression_object")
 def fixture_compression_object(
     fastq_stub: Path, original_fastq_data: CompressionData
 ) -> CompressionData:
@@ -478,11 +577,6 @@ def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     return Path(apps_dir, "demultiplexing")
 
 
-@pytest.fixture(name="demultiplexed_runs")
-def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
-    return Path(demultiplex_fixtures, "demultiplexed-runs")
-
-
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
 def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a novaseq bcl2fastq sample sheet."""
@@ -495,6 +589,48 @@ def fixture_raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "raw_lims_samples")
 
 
+@pytest.fixture(name="demultiplexed_runs")
+def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flow cells ready for demultiplexing."""
+    return Path(demultiplex_fixtures, "demultiplexed-runs")
+
+
+@pytest.fixture(name="demux_run_dir")
+def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a dir with flow cells ready for demultiplexing."""
+    return Path(demultiplex_fixtures, "flowcell-runs")
+
+
+@pytest.fixture(name="flow_cell")
+def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> FlowCell:
+    """Create a flow cell object with flow cell that is demultiplexed."""
+    return FlowCell(flow_cell_path=Path(demux_run_dir, flow_cell_full_name))
+
+
+@pytest.fixture(name="flow_cell_id")
+def fixture_flow_cell_id(flow_cell: FlowCell) -> str:
+    """Return flow cell id from flow cell object."""
+    return flow_cell.id
+
+
+@pytest.fixture(name="another_flow_cell_id")
+def fixture_another_flow_cell_id() -> str:
+    """Return another flow cell id."""
+    return "HF57HDRXY"
+
+
+@pytest.fixture(name="demultiplexing_delivery_file")
+def fixture_demultiplexing_delivery_file(flow_cell: FlowCell) -> Path:
+    """Return demultiplexing delivery started file."""
+    return Path(flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
+
+
+@pytest.fixture(name="hiseq_x_tile_dir")
+def fixture_hiseq_x_tile_dir(flow_cell: FlowCell) -> Path:
+    """Return Hiseq X tile dir."""
+    return Path(flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+
+
 @pytest.fixture(name="lims_novaseq_samples_file")
 def fixture_lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
     """Return the path to a file with sample info in lims format."""
@@ -503,35 +639,48 @@ def fixture_lims_novaseq_samples_file(raw_lims_sample_dir: Path) -> Path:
 
 @pytest.fixture(name="lims_novaseq_samples_raw")
 def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[dict]:
-    """Return a list of raw flowcell samples."""
+    """Return a list of raw flow cell samples."""
     return ReadFile.get_content_from_file(
         file_format=FileFormat.JSON, file_path=lims_novaseq_samples_file
     )
 
 
-@pytest.fixture(name="flowcell_full_name")
-def fixture_flowcell_full_name() -> str:
+@pytest.fixture(name="flow_cell_full_name")
+def fixture_flow_cell_full_name() -> str:
+    """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
 
 
-@pytest.fixture(name="flowcell_name")
-def fixture_flowcell_name() -> str:
-    return "HVKJCDRXX"
+@pytest.fixture(name="demultiplexed_flow_cell")
+def fixture_demultiplexed_flow_cell(demultiplexed_runs: Path, flow_cell_full_name: str) -> Path:
+    return Path(demultiplexed_runs, flow_cell_full_name)
 
 
-# Unknown file fixtures
+@pytest.fixture(name="bcl2fastq_demux_results")
+def fixture_bcl2fastq_demux_results(
+    demultiplexed_flow_cell: Path, flow_cell: FlowCell
+) -> DemuxResults:
+    return DemuxResults(
+        demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter=BclConverter.BCL2FASTQ
+    )
+
+
+# Genotype file fixture
 
 
 @pytest.fixture(name="bcf_file")
 def fixture_bcf_file(apps_dir: Path) -> Path:
-    """Return the path to a bcf file."""
-    return apps_dir / "gt" / "yellowhog.bcf"
+    """Return the path to a BCF file."""
+    return Path(apps_dir, "gt", "yellowhog.bcf")
 
 
-@pytest.fixture(scope="function", name="bed_file")
-def fixture_bed_file(analysis_dir) -> str:
-    """Get the path to a bed file file."""
-    return str(analysis_dir / "sample_coverage.bed")
+# Housekeeper, Chanjo file fixtures
+
+
+@pytest.fixture(name="bed_file")
+def fixture_bed_file(analysis_dir) -> Path:
+    """Return the path to a bed file."""
+    return Path(analysis_dir, "sample_coverage.bed")
 
 
 # Helper fixtures
@@ -560,54 +709,18 @@ def fixture_root_path(project_dir: Path) -> Path:
     return _root_path
 
 
-@pytest.fixture(scope="function", name="old_timestamp")
-def fixture_old_timestamp() -> dt.datetime:
-    """Return a time stamp in date time format."""
-    return dt.datetime(1900, 1, 1)
-
-
-@pytest.fixture(scope="function", name="timestamp")
-def fixture_timestamp() -> dt.datetime:
-    """Return a time stamp in date time format."""
-    return dt.datetime(2020, 5, 1)
-
-
-@pytest.fixture(scope="function", name="later_timestamp")
-def fixture_later_timestamp() -> dt.datetime:
-    """Return a time stamp in date time format."""
-    return dt.datetime(2020, 6, 1)
-
-
-@pytest.fixture(scope="function", name="timestamp_today")
-def fixture_timestamp_today() -> dt.datetime:
-    """Return a time stamp of todays date in date time format."""
-    return dt.datetime.now()
-
-
-@pytest.fixture(scope="function", name="timestamp_yesterday")
-def fixture_timestamp_yesterday(timestamp_today: dt.datetime) -> dt.datetime:
-    """Return a time stamp of yesterdays date in date time format."""
-    return timestamp_today - dt.timedelta(days=1)
-
-
-@pytest.fixture(scope="function", name="timestamp_in_2_weeks")
-def fixture_timestamp_in_2_weeks(timestamp_today: dt.datetime) -> dt.datetime:
-    """Return a time stamp 14 days ahead in time."""
-    return timestamp_today + dt.timedelta(days=14)
-
-
-@pytest.fixture(scope="function", name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id: str, bed_file: str, timestamp: dt.datetime) -> dict:
-    """Get some bundle data for housekeeper."""
+@pytest.fixture(name="hk_bundle_data")
+def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: dt.datetime) -> Dict[str, Any]:
+    """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
-        "files": [{"path": bed_file, "archive": False, "tags": ["bed", "sample"]}],
+        "files": [{"path": bed_file.as_posix(), "archive": False, "tags": ["bed", "sample"]}],
     }
 
 
-@pytest.fixture(scope="function", name="sample_hk_bundle_no_files")
+@pytest.fixture(name="sample_hk_bundle_no_files")
 def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression."""
     return {
@@ -618,7 +731,7 @@ def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) ->
     }
 
 
-@pytest.fixture(scope="function", name="case_hk_bundle_no_files")
+@pytest.fixture(name="case_hk_bundle_no_files")
 def fixture_case_hk_bundle_no_files(case_id: str, timestamp: dt.datetime) -> dict:
     """Create a complete bundle mock for testing compression."""
     return {
@@ -629,7 +742,7 @@ def fixture_case_hk_bundle_no_files(case_id: str, timestamp: dt.datetime) -> dic
     }
 
 
-@pytest.fixture(scope="function", name="compress_hk_fastq_bundle")
+@pytest.fixture(name="compress_hk_fastq_bundle")
 def fixture_compress_hk_fastq_bundle(
     compression_object: CompressionData, sample_hk_bundle_no_files: dict
 ) -> dict:
@@ -652,7 +765,6 @@ def fixture_compress_hk_fastq_bundle(
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
 
         hk_bundle_data["files"].append(fastq_file_info)
-
     return hk_bundle_data
 
 
@@ -662,7 +774,7 @@ def fixture_housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
     return MockHousekeeperAPI(hk_config_dict)
 
 
-@pytest.fixture(scope="function", name="real_housekeeper_api")
+@pytest.fixture(name="real_housekeeper_api")
 def fixture_real_housekeeper_api(hk_config_dict: dict) -> HousekeeperAPI:
     """Setup a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
@@ -670,7 +782,7 @@ def fixture_real_housekeeper_api(hk_config_dict: dict) -> HousekeeperAPI:
     yield _api
 
 
-@pytest.fixture(scope="function", name="populated_housekeeper_api")
+@pytest.fixture(name="populated_housekeeper_api")
 def fixture_populated_housekeeper_api(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
@@ -680,20 +792,15 @@ def fixture_populated_housekeeper_api(
     return hk_api
 
 
-@pytest.fixture(scope="function", name="hk_version_obj")
+@pytest.fixture(name="hk_version_obj")
 def fixture_hk_version_obj(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
-) -> MockHousekeeperAPI:
-    """Get a housekeeper version object."""
+) -> hk_models.Version:
+    """Get a Housekeeper version object."""
     return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
 
 # Process Mock
-
-
-@pytest.fixture(name="sbatch_job_number")
-def fixture_sbatch_job_number() -> int:
-    return 123456
 
 
 @pytest.fixture(name="process")
@@ -707,14 +814,14 @@ def fixture_process() -> ProcessMock:
 
 @pytest.fixture(name="hermes_process")
 def fixture_hermes_process() -> ProcessMock:
-    """Return a mocked hermes process."""
+    """Return a mocked Hermes process."""
     return ProcessMock(binary="hermes")
 
 
 @pytest.fixture(name="hermes_api")
 def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
-    """Return a hermes api with a mocked process."""
-    hermes_config = {"hermes": {"deploy_config": "deploy_config", "binary_path": "/bin/true"}}
+    """Return a Hermes API with a mocked process."""
+    hermes_config = {"hermes": {"binary_path": "/bin/true"}}
     hermes_api = HermesApi(config=hermes_config)
     hermes_api.process = hermes_process
     return hermes_api
@@ -723,28 +830,28 @@ def fixture_hermes_api(hermes_process: ProcessMock) -> HermesApi:
 # Scout fixtures
 
 
-@pytest.fixture(scope="function", name="scout_api")
+@pytest.fixture(name="scout_api")
 def fixture_scout_api() -> MockScoutAPI:
-    """Setup Scout api."""
+    """Setup Scout API."""
     return MockScoutAPI()
 
 
 # Crunchy fixtures
 
 
-@pytest.fixture(scope="function", name="crunchy_api")
+@pytest.fixture(name="crunchy_api")
 def fixture_crunchy_api():
-    """Setup Crunchy api."""
+    """Setup Crunchy API."""
     return MockCrunchyAPI()
 
 
 # Store fixtures
 
 
-@pytest.fixture(scope="function", name="analysis_store")
+@pytest.fixture(name="analysis_store")
 def fixture_analysis_store(
-    base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers
-):
+    base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers: StoreHelpers
+) -> Generator[Store, None, None]:
     """Setup a store instance for testing analysis API."""
     helpers.ensure_case_from_dict(
         base_store, case_info=analysis_family, app_tag=wgs_application_tag
@@ -752,92 +859,112 @@ def fixture_analysis_store(
     yield base_store
 
 
-@pytest.fixture(scope="function", name="analysis_store_trio")
-def fixture_analysis_store_trio(analysis_store):
-    """Setup a store instance with a trion loaded for testing analysis API."""
-
+@pytest.fixture(name="analysis_store_trio")
+def fixture_analysis_store_trio(analysis_store: Store) -> Generator[Store, None, None]:
+    """Setup a store instance with a trio loaded for testing analysis API."""
     yield analysis_store
 
 
-@pytest.fixture(scope="function", name="analysis_store_single_case")
-def fixture_analysis_store_single(base_store, analysis_family_single_case, helpers):
+@pytest.fixture(name="analysis_store_single_case")
+def fixture_analysis_store_single(
+    base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
+):
     """Setup a store instance with a single ind case for testing analysis API."""
     helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
-
     yield base_store
 
 
-@pytest.fixture(scope="function", name="collaboration_id")
+@pytest.fixture(name="collaboration_id")
 def fixture_collaboration_id() -> str:
     """Return a default customer group."""
     return "all_customers"
 
 
-@pytest.fixture(scope="function", name="customer_production")
+@pytest.fixture(name="customer_production")
 def fixture_customer_production(collaboration_id: str, customer_id: str) -> dict:
     """Return a dictionary with information about the prod customer."""
-    return dict(
-        customer_id=customer_id,
-        name="Production",
-        scout_access=True,
-        collaboration_id=collaboration_id,
+    return {
+        "customer_id": customer_id,
+        "name": "Production",
+        "scout_access": True,
+        "collaboration_id": collaboration_id,
+    }
+
+
+@pytest.fixture(name="customer_rare_diseases")
+def fixture_customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a Rare Disease customer."""
+    return Customer(
+        name="CMMS",
+        internal_id="cust003",
+        loqus_upload=True,
     )
 
 
-@pytest.fixture(scope="function", name="external_wgs_application_tag")
+@pytest.fixture(name="customer_balsamic")
+def fixture_customer_balsamic(collaboration_id: str, customer_id: str) -> Customer:
+    """Return a Cancer customer."""
+    return Customer(
+        name="AML",
+        internal_id="cust110",
+        loqus_upload=True,
+    )
+
+
+@pytest.fixture(name="external_wgs_application_tag")
 def fixture_external_wgs_application_tag() -> str:
-    """Return the external wgs app tag."""
+    """Return the external WGS application tag."""
     return "WGXCUSC000"
 
 
-@pytest.fixture(scope="function", name="external_wgs_info")
-def fixture_external_wgs_info(external_wgs_application_tag) -> dict:
+@pytest.fixture(name="external_wgs_info")
+def fixture_external_wgs_info(external_wgs_application_tag: str) -> dict:
     """Return a dictionary with information external WGS application."""
-    return dict(
-        application_tag=external_wgs_application_tag,
-        application_type="wgs",
-        description="External WGS",
-        is_external=True,
-        target_reads=10,
-    )
+    return {
+        "application_tag": external_wgs_application_tag,
+        "application_type": "wgs",
+        "description": "External WGS",
+        "is_external": True,
+        "target_reads": 10,
+    }
 
 
-@pytest.fixture(scope="function", name="external_wes_application_tag")
+@pytest.fixture(name="external_wes_application_tag")
 def fixture_external_wes_application_tag() -> str:
-    """Return the external whole exome sequencing app tag."""
+    """Return the external whole exome sequencing application tag."""
     return "EXXCUSR000"
 
 
-@pytest.fixture(scope="function", name="external_wes_info")
-def fixture_external_wes_info(external_wes_application_tag) -> dict:
+@pytest.fixture(name="external_wes_info")
+def fixture_external_wes_info(external_wes_application_tag: str) -> dict:
     """Return a dictionary with information external WES application."""
-    return dict(
-        application_tag=external_wes_application_tag,
-        application_type="wes",
-        description="External WES",
-        is_external=True,
-        target_reads=10,
-    )
+    return {
+        "application_tag": external_wes_application_tag,
+        "application_type": "wes",
+        "description": "External WES",
+        "is_external": True,
+        "target_reads": 10,
+    }
 
 
-@pytest.fixture(scope="function", name="wgs_application_tag")
+@pytest.fixture(name="wgs_application_tag")
 def fixture_wgs_application_tag() -> str:
-    """Return the wgs app tag."""
+    """Return the WGS application tag."""
     return "WGSPCFC030"
 
 
-@pytest.fixture(scope="function", name="wgs_application_info")
-def fixture_wgs_application_info(wgs_application_tag) -> dict:
+@pytest.fixture(name="wgs_application_info")
+def fixture_wgs_application_info(wgs_application_tag: str) -> dict:
     """Return a dictionary with information the WGS application."""
-    return dict(
-        application_tag=wgs_application_tag,
-        application_type="wgs",
-        description="WGS, double",
-        sequencing_depth=30,
-        is_external=True,
-        is_accredited=True,
-        target_reads=10,
-    )
+    return {
+        "application_tag": wgs_application_tag,
+        "application_type": "wgs",
+        "description": "WGS, double",
+        "sequencing_depth": 30,
+        "is_external": True,
+        "is_accredited": True,
+        "target_reads": 10,
+    }
 
 
 @pytest.fixture(name="store")
@@ -851,10 +978,11 @@ def fixture_store() -> Store:
 
 @pytest.fixture(name="apptag_rna")
 def fixture_apptag_rna() -> str:
+    """Return the RNA application tag."""
     return "RNAPOAR025"
 
 
-@pytest.fixture(scope="function", name="base_store")
+@pytest.fixture(name="base_store")
 def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration("all_customers", "all customers")
@@ -1014,15 +1142,15 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
     yield store
 
 
-@pytest.fixture(scope="function")
-def sample_store(base_store) -> Store:
+@pytest.fixture()
+def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
         base_store.add_sample("ordered", sex=Gender.MALE),
-        base_store.add_sample("received", sex="unknown", received=dt.datetime.now()),
+        base_store.add_sample("received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
         base_store.add_sample(
             "received-prepared",
-            sex="unknown",
+            sex=Gender.UNKNOWN,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
         ),
@@ -1056,95 +1184,233 @@ def sample_store(base_store) -> Store:
     return base_store
 
 
-@pytest.fixture(scope="function", name="trailblazer_api")
+@pytest.fixture(name="trailblazer_api")
 def fixture_trailblazer_api() -> MockTB:
+    """Return a mock traailblazer API."""
     return MockTB()
 
 
-@pytest.fixture(scope="function", name="lims_api")
+@pytest.fixture(name="lims_api")
 def fixture_lims_api() -> MockLimsAPI:
+    """Return a mock LIMS API."""
     return MockLimsAPI()
 
 
 @pytest.fixture(name="config_root_dir")
 def config_root_dir(tmpdir_factory) -> Path:
+    """Return a path to the config root directory."""
     return Path("tests/fixtures/data")
 
 
 @pytest.fixture()
 def housekeeper_dir(tmpdir_factory):
+    """Return a temporary directory for Housekeeper testing."""
     return tmpdir_factory.mktemp("housekeeper")
 
 
 @pytest.fixture()
 def mip_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for MIP testing."""
     return tmpdir_factory.mktemp("mip")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def fluffy_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for Fluffy testing."""
     return tmpdir_factory.mktemp("fluffy")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def balsamic_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for Balsamic testing."""
     return tmpdir_factory.mktemp("balsamic")
 
 
 @pytest.fixture(scope="function")
+def rnafusion_dir(tmpdir_factory) -> Path:
+    return tmpdir_factory.mktemp("rnafusion")
+
+
+@pytest.fixture()
 def cg_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="swegen_dir")
+def fixture_swegen_dir(tmpdir_factory, tmp_path) -> Path:
+    """SweGen temporary directory containing mocked reference files."""
+    return tmpdir_factory.mktemp("swegen")
+
+
+@pytest.fixture(name="swegen_snv_reference")
+def fixture_swegen_snv_reference_path(swegen_dir: Path) -> Path:
+    """Return a temporary path to a SweGen SNV reference file."""
+    mock_file = Path(swegen_dir, "grch37_swegen_10k_snv_-20220101-.vcf.gz")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(name="swegen_sv_reference")
+def fixture_swegen_sv_reference_path(swegen_dir: Path) -> Path:
+    """Return a temporary path to a SweGen SV reference file."""
+    mock_file = Path(swegen_dir, "grch37_swegen_10k_sv_-20220101-.vcf.gz")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(name="observations_dir")
+def fixture_observations_dir(tmpdir_factory, tmp_path) -> Path:
+    """Loqusdb temporary directory containing observations mock files."""
+    return tmpdir_factory.mktemp("loqusdb")
+
+
+@pytest.fixture(name="observations_clinical_snv_file_path")
+def fixture_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a clinical SNV file."""
+    mock_file = Path(observations_dir, "loqusdb_clinical_snv_export-20220101-.vcf.gz")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(name="observations_clinical_sv_file_path")
+def fixture_observations_clinical_sv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a clinical SV file."""
+    mock_file = Path(observations_dir, "loqusdb_clinical_sv_export-20220101-.vcf.gz")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(name="observations_somatic_snv_file_path")
+def fixture_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a cancer somatic SNV file."""
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20220101-.vcf.gz")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(name="outdated_observations_somatic_snv_file_path")
+def fixture_outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to an outdated cancer somatic SNV file."""
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(name="observations_somatic_sv_file_path")
+def fixture_observations_somatic_sv_file_path(observations_dir: Path) -> Path:
+    """Return a temporary path to a cancer somatic SV file."""
+    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_sv_export-20180101-.vcf.gz")
+    mock_file.touch(exist_ok=True)
+    return mock_file
+
+
+@pytest.fixture(name="custom_observations_clinical_snv_file_path")
+def fixture_custom_observations_clinical_snv_file_path(observations_dir: Path) -> Path:
+    """Return a custom path for the clinical SNV observations file."""
+    return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
+
+
+@pytest.fixture()
 def microsalt_dir(tmpdir_factory) -> Path:
+    """Return a temporary directory for Microsalt testing."""
     return tmpdir_factory.mktemp("microsalt")
 
 
-@pytest.fixture(name="fixture_cg_uri")
+@pytest.fixture(name="cg_uri")
 def fixture_cg_uri() -> str:
+    """Return a cg URI."""
     return "sqlite:///"
 
 
-@pytest.fixture(name="fixture_hk_uri")
+@pytest.fixture(name="hk_uri")
 def fixture_hk_uri() -> str:
+    """Return a Housekeeper URI."""
     return "sqlite:///"
+
+
+@pytest.fixture(name="loqusdb_id")
+def fixture_loqusdb_id() -> str:
+    """Returns a Loqusdb mock ID."""
+    return "01ab23cd"
 
 
 @pytest.fixture(name="context_config")
 def fixture_context_config(
-    fixture_cg_uri: str,
-    fixture_hk_uri: str,
-    fluffy_dir: str,
-    housekeeper_dir: str,
-    mip_dir: str,
-    cg_dir: str,
-    balsamic_dir: str,
-    microsalt_dir: str,
+    cg_uri: str,
+    hk_uri: str,
+    fluffy_dir: Path,
+    housekeeper_dir: Path,
+    mip_dir: Path,
+    cg_dir: Path,
+    balsamic_dir: Path,
+    microsalt_dir: Path,
+    rnafusion_dir: Path,
 ) -> dict:
+    """Return a context config."""
     return {
-        "database": fixture_cg_uri,
-        "madeline_exe": "echo",
-        "bed_path": str(cg_dir),
-        "pon_path": str(cg_dir),
+        "database": cg_uri,
         "delivery_path": str(cg_dir),
-        "hermes": {"deploy_config": "hermes-deploy-stage.yaml", "binary_path": "hermes"},
         "email_base_settings": {
             "sll_port": 465,
             "smtp_server": "smtp.gmail.com",
             "sender_email": "test@gmail.com",
             "sender_password": "",
         },
+        "madeline_exe": "echo",
+        "pon_path": str(cg_dir),
+        "backup": {
+            "encrypt_dir": "/home/ENCRYPT/",
+            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
+        },
+        "balsamic": {
+            "balsamic_cache": "hello",
+            "bed_path": str(cg_dir),
+            "binary_path": "echo",
+            "conda_env": "S_Balsamic",
+            "loqusdb_path": str(cg_dir),
+            "pon_path": str(cg_dir),
+            "root": str(balsamic_dir),
+            "slurm": {
+                "mail_user": "test.email@scilifelab.se",
+                "account": "development",
+                "qos": SlurmQos.LOW,
+            },
+            "swegen_path": str(cg_dir),
+        },
+        "cgstats": {"binary_path": "echo", "database": "sqlite:///./cgstats", "root": str(cg_dir)},
+        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
+        "crunchy": {
+            "conda_binary": "a_conda_binary",
+            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
+            "slurm": {
+                "account": "development",
+                "conda_env": "S_crunchy",
+                "mail_user": "an@scilifelab.se",
+            },
+        },
+        "data-delivery": {
+            "account": "development",
+            "base_path": "/another/path",
+            "covid_destination_path": "server.name.se:/another/%s/foldername/",
+            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
+            "destination_path": "server.name.se:/some",
+            "mail_user": "an@email.com",
+        },
         "demultiplex": {
             "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",
-                "mail_user": "mans.magnusson@scilifelab.se",
+                "mail_user": "an@scilifelab.se",
             },
         },
+        "encryption": {"binary_path": "bin/gpg"},
+        "external": {
+            "caesar": "server.name.se:/path/%s/on/caesar",
+            "hasta": "/path/on/hasta/%s",
+        },
         "fluffy": {
-            "deploy_config": "fluffy-deploy-stage.yaml",
             "binary_path": "echo",
             "config_path": "fluffy/Config.json",
             "root_dir": str(fluffy_dir),
@@ -1156,81 +1422,38 @@ def fixture_context_config(
                 "port": 22,
             },
         },
-        "statina": {
-            "host": "http://localhost:28002",
-            "user": "user",
-            "key": "key",
-            "api_url": "api_url",
-            "upload_path": "upload_path",
-            "auth_path": "auth_path",
-        },
-        "data-delivery": {
-            "destination_path": "server.name.se:/some",
-            "covid_destination_path": "server.name.se:/another/%s/foldername/",
-            "covid_report_path": "/folder_structure/%s/yet_another_folder/filename_%s_data_*.csv",
-            "base_path": "/another/path",
-            "account": "development",
-            "mail_user": "an@email.com",
-        },
-        "external": {
-            "hasta": "/path/on/hasta/%s",
-            "caesar": "server.name.se:/path/%s/on/caesar",
-        },
-        "encryption": {"binary_path": "bin/gpg"},
-        "pdc": {"binary_path": "/bin/dsmc"},
-        "tar": {"binary_path": "/bin/tar"},
-        "shipping": {"host_config": "host_config_stage.yaml", "binary_path": "echo"},
-        "housekeeper": {"database": fixture_hk_uri, "root": str(housekeeper_dir)},
-        "trailblazer": {
-            "service_account": "SERVICE",
-            "service_account_auth_file": "trailblazer-auth.json",
-            "host": "https://trailblazer.scilifelab.se/",
-        },
-        "gisaid": {
-            "binary_path": "/path/to/gisaid_uploader.py",
-            "log_dir": "/path/to/log",
-            "submitter": "s.submitter",
-            "logwatch_email": "some@email.com",
-            "upload_password": "pass",
-            "upload_cid": "cid",
-        },
-        "lims": {
-            "host": "https://lims.scilifelab.se",
-            "username": "user",
-            "password": "password",
-        },
-        "chanjo": {"binary_path": "echo", "config_path": "chanjo-stage.yaml"},
         "genotype": {
             "binary_path": "echo",
             "config_path": "genotype-stage.yaml",
         },
-        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
-        "cgstats": {"database": "sqlite:///./cgstats", "root": str(cg_dir)},
-        "scout": {
-            "binary_path": "echo",
-            "config_path": "scout-stage.yaml",
-            "deploy_config": "scout-deploy-stage.yaml",
+        "gisaid": {
+            "binary_path": "/path/to/gisaid_uploader.py",
+            "log_dir": "/path/to/log",
+            "logwatch_email": "some@email.com",
+            "upload_cid": "cid",
+            "upload_password": "pass",
+            "submitter": "s.submitter",
+        },
+        "hermes": {"binary_path": "hermes"},
+        "housekeeper": {"database": hk_uri, "root": str(housekeeper_dir)},
+        "lims": {
+            "host": "https://lims.scilifelab.se",
+            "password": "password",
+            "username": "user",
         },
         "loqusdb": {"binary_path": "loqusdb", "config_path": "loqusdb-stage.yaml"},
         "loqusdb-wes": {"binary_path": "loqusdb", "config_path": "loqusdb-wes-stage.yaml"},
-        "balsamic": {
-            "root": str(balsamic_dir),
-            "binary_path": "echo",
-            "conda_env": "S_BALSAMIC",
-            "balsamic_cache": "hello",
-            "slurm": {
-                "mail_user": "test.email@scilifelab.se",
-                "account": "development",
-                "qos": SlurmQos.LOW,
-            },
-        },
+        "loqusdb-somatic": {"binary_path": "loqusdb", "config_path": "loqusdb-somatic-stage.yaml"},
+        "loqusdb-tumor": {"binary_path": "loqusdb", "config_path": "loqusdb-tumor-stage.yaml"},
         "microsalt": {
-            "root": str(microsalt_dir),
-            "queries_path": Path(microsalt_dir, "queries").as_posix(),
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_microSALT",
+            "queries_path": Path(microsalt_dir, "queries").as_posix(),
+            "root": str(microsalt_dir),
         },
         "mip-rd-dna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-dna-stage.yaml",
             "pipeline": "analyse rd_dna",
@@ -1238,6 +1461,7 @@ def fixture_context_config(
             "script": "mip",
         },
         "mip-rd-rna": {
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mip9.0",
             "mip_config": "mip9.0-rna-stage.yaml",
             "pipeline": "analyse rd_rna",
@@ -1245,47 +1469,53 @@ def fixture_context_config(
             "script": "mip",
         },
         "mutacc-auto": {
-            "config_path": "mutacc-auto-stage.yaml",
             "binary_path": "echo",
+            "config_path": "mutacc-auto-stage.yaml",
             "padding": 300,
         },
         "mutant": {
             "binary_path": "echo",
+            "conda_binary": "a_conda_binary",
             "conda_env": "S_mutant",
             "root": str(mip_dir),
         },
-        "crunchy": {
-            "cram_reference": "grch37_homo_sapiens_-d5-.fasta",
-            "slurm": {
-                "account": "development",
-                "mail_user": "mans.magnusson@scilifelab.se",
-                "conda_env": "S_crunchy",
-            },
+        "rnafusion": {
+            "binary_path": "/path/to/bin",
+            "conda_env": "S_RNAFUSION",
+            "pipeline_path": "/pipeline/path",
+            "profile": "myprofile",
+            "references": "/path/to/references",
+            "root": str(rnafusion_dir),
         },
-        "backup": {
-            "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
-            "encrypt_dir": "/home/ENCRYPT/",
+        "pdc": {"binary_path": "/bin/dsmc"},
+        "scout": {
+            "binary_path": "echo",
+            "config_path": "scout-stage.yaml",
         },
+        "statina": {
+            "api_url": "api_url",
+            "auth_path": "auth_path",
+            "host": "http://localhost:28002",
+            "key": "key",
+            "upload_path": "upload_path",
+            "user": "user",
+        },
+        "tar": {"binary_path": "/bin/tar"},
+        "trailblazer": {
+            "host": "https://trailblazer.scilifelab.se/",
+            "service_account": "SERVICE",
+            "service_account_auth_file": "trailblazer-auth.json",
+        },
+        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
     }
 
 
 @pytest.fixture(name="cg_context")
 def fixture_cg_context(
-    context_config: dict, base_store: Store, housekeeper_api: HousekeeperAPI
+    context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
+    """Return a cg config."""
     cg_config = CGConfig(**context_config)
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
-
-
-@pytest.fixture(name="observation_input_files_raw")
-def fixture_observation_input_files_raw(case_id: str, filled_file: Path) -> dict:
-    """Raw observations input files."""
-    return {
-        "case_id": case_id,
-        "pedigree": filled_file,
-        "snv_gbcf": filled_file,
-        "snv_vcf": filled_file,
-        "sv_vcf": None,
-    }

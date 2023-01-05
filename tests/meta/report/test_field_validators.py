@@ -83,13 +83,13 @@ def test_get_million_read_pairs():
 
     # GIVEN a number os sequencing reads and its representation in millions of read pairs
     sample_reads = 1_200_000_000
-    mrp = 600.0
+    expected_million_read_pairs = 600.0
 
     # WHEN obtaining the number of reds in millions of read pairs
     million_read_pairs = get_million_read_pairs(sample_reads)
 
     # THEN the expected value should match the calculated one
-    assert million_read_pairs == mrp
+    assert million_read_pairs == expected_million_read_pairs
 
 
 def test_get_million_read_pairs_zero_input():

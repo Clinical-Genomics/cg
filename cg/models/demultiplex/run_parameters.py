@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 from xml.etree import ElementTree
 
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class RunParameters:
         index_one_length: int = self.index_read_one()
         index_two_length: int = self.index_read_two()
         if index_one_length != index_two_length:
-            raise FlowcellError("Index lengths are not the same!")
+            raise FlowCellError("Index lengths are not the same!")
         return index_one_length
 
     @property
@@ -58,7 +58,7 @@ class RunParameters:
                 return flow_cell_name
         message = f"Unknown flowcell type {xml_node.text}"
         LOG.warning(message)
-        raise FlowcellError(message)
+        raise FlowCellError(message)
 
     @property
     def run_type(self) -> Literal["wgs", "fluffy"]:
@@ -73,7 +73,7 @@ class RunParameters:
         if node is None:
             message = f"Could not determine {name}"
             LOG.warning(message)
-            raise FlowcellError(message)
+            raise FlowCellError(message)
 
     def get_node_integer_value(self, node_name: str, name: str) -> int:
         xml_node = self.tree.find(node_name)

@@ -1,115 +1,111 @@
-"""
-    Module for loqusdb API
-"""
+"""Module for Loqusdb API."""
+
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Optional, Dict
 
 from cg.constants.constants import FileFormat
-from cg.exc import CaseNotFoundError
+from cg.exc import LoqusdbDeleteCaseError, CaseNotFoundError
 from cg.io.controller import ReadStream
 from cg.utils import Process
+from cg.utils.dict import get_list_from_dictionary
 
 LOG = logging.getLogger(__name__)
 
 
 class LoqusdbAPI:
+    """API for Loqusdb."""
 
-    """
-    API for loqusdb
-    """
-
-    def __init__(self, config: dict, analysis_type: str = "wgs"):
-        super(LoqusdbAPI, self).__init__()
-
-        self.analysis_type = analysis_type
-
-        self.loqusdb_config = config["loqusdb"]["config_path"]
-        self.loqusdb_binary = config["loqusdb"]["binary_path"]
-
-        if self.analysis_type == "wes":
-            self.loqusdb_config = config["loqusdb_wes"]["config_path"]
-            self.loqusdb_binary = config["loqusdb_wes"]["binary_path"]
-
-        self.process = Process(self.loqusdb_binary, self.loqusdb_config)
+    def __init__(self, binary_path: str, config_path: str):
+        self.binary_path = binary_path
+        self.config_path = config_path
+        self.process = Process(binary=self.binary_path, config=self.config_path)
 
     def load(
         self,
-        family_id: str,
-        ped_path: Path,
-        vcf_path: Path,
-        gbcf_path: Path,
-        vcf_sv_path: Path = None,
-    ) -> dict:
-        """Add observations from a VCF."""
-        load_call_parameters = [
-            "load",
-            "-c",
-            family_id,
-            "-f",
-            ped_path.as_posix(),
-            "--variant-file",
-            vcf_path.as_posix(),
-            "--check-profile",
-            gbcf_path.as_posix(),
-            "--hard-threshold",
-            "0.95",
-            "--soft-threshold",
-            "0.90",
-            "--gq-treshold",
-            "10",
-        ]
-        if self.analysis_type == "wgs" and vcf_sv_path:
-            load_call_parameters.extend(["--sv-variants", vcf_sv_path.as_posix()])
+        case_id: str,
+        snv_vcf_path: Path,
+        sv_vcf_path: Optional[Path] = None,
+        profile_vcf_path: Optional[Path] = None,
+        family_ped_path: Optional[Path] = None,
+        window_size: Optional[int] = None,
+        gq_threshold: Optional[int] = None,
+        hard_threshold: Optional[float] = None,
+        soft_threshold: Optional[float] = None,
+    ) -> Dict[str, int]:
+        """Add observations to Loqusdb from VCF files."""
+        load_params = {
+            "--case-id": case_id,
+            "--variant-file": snv_vcf_path.as_posix(),
+            "--sv-variants": sv_vcf_path.as_posix() if sv_vcf_path else None,
+            "--check-profile": profile_vcf_path.as_posix() if profile_vcf_path else None,
+            "--family-file": family_ped_path.as_posix() if family_ped_path else None,
+            "--max-window": str(window_size) if window_size else None,
+            "--gq-treshold": str(gq_threshold) if gq_threshold else None,
+            "--hard-threshold": str(hard_threshold) if hard_threshold else None,
+            "--soft-threshold": str(soft_threshold) if soft_threshold else None,
+        }
+        load_call_params: list = ["load"] + get_list_from_dictionary(load_params)
+        self.process.run_command(parameters=load_call_params)
+        return self.get_nr_of_variants_in_file()
 
-        nr_variants = 0
-        self.process.run_command(parameters=load_call_parameters)
-        for line in self.process.stderr_lines():
-            line_content = line.split("INFO")[-1].strip()
-            if "inserted" in line_content:
-                nr_variants = int(line_content.split(":")[-1].strip())
-
-        return dict(variants=nr_variants)
-
-    def get_case(self, case_id: str) -> dict:
-        """Find a case in the database by case id"""
+    def get_case(self, case_id: str) -> Optional[dict]:
+        """Return a case found in Loqusdb."""
         cases_parameters = ["cases", "-c", case_id, "--to-json"]
-
         self.process.run_command(parameters=cases_parameters)
-
-        # If case not in loqusdb, stdout of loqusdb command will be empty.
-        if not self.process.stdout:
-            raise CaseNotFoundError(f"Case {case_id} not found in loqusdb")
+        if not self.process.stdout:  # Case not in loqusdb, stdout of loqusdb command will be empty.
+            LOG.info(f"Case {case_id} not found in {repr(self)}")
+            return None
 
         return ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         )[0]
 
-    def get_duplicate(self, vcf_file: Path) -> dict:
-        """Find matching profiles in loqusdb"""
-        duplicates_params = [
-            "profile",
-            "--check-vcf",
-            vcf_file.as_posix(),
-            "--profile-threshold",
-            "0.95",
-        ]
+    def get_duplicate(self, profile_vcf_path: Path, profile_threshold: float) -> Optional[dict]:
+        """Find matching profiles in Loqusdb."""
+        duplicates_params = {
+            "--check-vcf": profile_vcf_path.as_posix(),
+            "--profile-threshold": str(profile_threshold),
+        }
+        duplicate_call_params: list = ["profile"] + get_list_from_dictionary(duplicates_params)
 
         try:
-            self.process.run_command(parameters=duplicates_params)
-        except CalledProcessError:
-            # If CalledProcessError is raised, log and raise error
-            LOG.critical("Could not run profile command")
-            raise
-
+            self.process.run_command(parameters=duplicate_call_params)
+        except CalledProcessError as exception:
+            LOG.error(f"Could not execute the profile command for: {profile_vcf_path.as_posix()}")
+            raise exception
         if not self.process.stdout:
-            LOG.info("No duplicates found")
-            return {}
+            LOG.info(f"No duplicates found for profile: {profile_vcf_path.as_posix()}")
+            return None
 
         return ReadStream.get_content_from_stream(
             file_format=FileFormat.JSON, stream=self.process.stdout
         )
 
-    def __repr__(self):
+    def delete_case(self, case_id: str) -> None:
+        """Remove a case from Loqusdb."""
+        delete_call_parameters = ["delete", "-c", case_id]
+        self.process.run_command(parameters=delete_call_parameters)
+        for line in self.process.stderr_lines():
+            if f"INFO Removing case {case_id}" in line:
+                LOG.info(f"Removing case {case_id} from {repr(self)}")
+                return
+            if f"WARNING Case {case_id} does not exist" in line:
+                LOG.error(f"Case {case_id} not found in {repr(self)}")
+                raise CaseNotFoundError
 
-        return f"LoqusdbAPI(binary={self.loqusdb_binary}," f"config={self.loqusdb_config})"
+        LOG.error(f"Could not delete case {case_id} from {repr(self)}")
+        raise LoqusdbDeleteCaseError
+
+    def get_nr_of_variants_in_file(self) -> Dict[str, int]:
+        """Return the number of variants in the uploaded to Loqusdb file."""
+        nr_of_variants: int = 0
+        for line in self.process.stderr_lines():
+            line_content: str = line.split("INFO")[-1].strip()
+            if "inserted" in line_content:
+                nr_of_variants = int(line_content.split(":")[-1].strip())
+        return {"variants": nr_of_variants}
+
+    def __repr__(self):
+        return f"LoqusdbAPI(binary_path={Path(self.binary_path).stem}, config_path={Path(self.config_path).stem})"

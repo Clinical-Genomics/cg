@@ -5,6 +5,7 @@ from cg.utils.enums import StrEnum
 
 
 class SlurmQos(StrEnum):
+    MAINTENANCE: str = "maintenance"
     LOW: str = "low"
     NORMAL: str = "normal"
     HIGH: str = "high"

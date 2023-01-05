@@ -13,23 +13,11 @@ from cg.apps.lims.samplesheet import (
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
-@pytest.fixture(name="demultiplexed_runs_dir")
-def fixture_demultiplexed_runs_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(demultiplex_fixtures, "demultiplexed-runs")
-
-
 @pytest.fixture(name="output_dirs_bcl2fastq")
-def fixture_output_dirs_bcl2fastq(demultiplexed_runs_dir: Path) -> Path:
-    """Return the output path a dir with flowcells that have finished demultiplexing using
-    bcl2fastq"""
-    return Path(demultiplexed_runs_dir, "bcl2fastq")
-
-
-@pytest.fixture(name="demux_run_dir")
-def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(demultiplex_fixtures, "flowcell-runs")
+def fixture_output_dirs_bcl2fastq(demultiplexed_runs: Path) -> Path:
+    """Return the output path a dir with flow cells that have finished demultiplexing using
+    bcl2fastq."""
+    return Path(demultiplexed_runs, "bcl2fastq")
 
 
 @pytest.fixture(name="demux_run_dir_bcl2fastq")
@@ -50,21 +38,21 @@ def fixture_index_obj() -> Index:
 
 
 @pytest.fixture(name="novaseq_dir")
-def fixture_novaseq_dir(demux_run_dir: Path, flowcell_full_name: str) -> Path:
+def fixture_novaseq_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir, flowcell_full_name)
+    return Path(demux_run_dir, flow_cell_full_name)
 
 
-@pytest.fixture(name="flowcell_dir_bcl2fastq")
-def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flowcell_full_name: str) -> Path:
+@pytest.fixture(name="flow_cell_dir_bcl2fastq")
+def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir_bcl2fastq, flowcell_full_name)
+    return Path(demux_run_dir_bcl2fastq, flow_cell_full_name)
 
 
-@pytest.fixture(name="flowcell_dir_dragen")
-def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flowcell_full_name: str) -> Path:
+@pytest.fixture(name="flow_cell_dir_dragen")
+def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir_dragen, flowcell_full_name)
+    return Path(demux_run_dir_dragen, flow_cell_full_name)
 
 
 @pytest.fixture(name="hiseq_dir")
@@ -98,10 +86,10 @@ def fixture_novaseq_run_parameters(novaseq_dir: Path) -> Path:
 
 
 @pytest.fixture(name="raw_lims_sample")
-def fixture_raw_lims_sample(flowcell_name: str) -> LimsFlowcellSample:
+def fixture_raw_lims_sample(flow_cell_name: str) -> LimsFlowcellSample:
     """Return a raw lims sample"""
     sample = {
-        "flowcell_id": flowcell_name,
+        "flowcell_id": flow_cell_name,
         "lane": 1,
         "sample_id": "ACC7628A20",
         "sample_ref": "hg19",
@@ -145,12 +133,12 @@ def fixture_novaseq_run_parameters_object(novaseq_run_parameters: Path) -> RunPa
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
-    flowcell_name: str,
+    flow_cell_id: str,
     lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
     novaseq_run_parameters_object: RunParameters,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
-        flowcell_id=flowcell_name,
+        flowcell_id=flow_cell_id,
         lims_samples=lims_novaseq_bcl2fastq_samples,
         run_parameters=novaseq_run_parameters_object,
         bcl_converter="bcl2fastq",
@@ -159,12 +147,12 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_object")
 def fixture_novaseq_dragen_sample_sheet_object(
-    flowcell_name: str,
+    flow_cell_id: str,
     lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
     novaseq_run_parameters_object: RunParameters,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
-        flowcell_id=flowcell_name,
+        flowcell_id=flow_cell_id,
         lims_samples=lims_novaseq_dragen_samples,
         run_parameters=novaseq_run_parameters_object,
         bcl_converter="dragen",

@@ -95,11 +95,11 @@ class SampleModel(BaseModel):
     Sample attributes model
 
     Attributes:
-        name: sample name; source: LIMS/sample/name
+        name: sample name; source: StatusDB/sample/name
         id: sample internal ID; source: StatusDB/sample/internal_id
         ticket: ticket number; source: StatusDB/sample/ticket_number
         status: sample status provided by the customer; source: StatusDB/family-sample/status
-        gender: sample gender provided by the customer; source: LIMS/sample/sex
+        gender: sample gender provided by the customer; source: StatusDB/sample/sex
         source: sample type/source; source: LIMS/sample/source
         tumour: whether the sample is a tumour or normal one; source: StatusDB/sample/is_tumour
         application: analysis application model

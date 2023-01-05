@@ -10,11 +10,13 @@ from cg.cli.upload.observations import observations
 from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.validate import validate
 from cg.cli.upload.coverage import coverage
+from cg.cli.upload.clinical_delivery import clinical_delivery
 from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.upload.upload_api import UploadAPI
 from cg.store import models
+from cg.apps.tb import TrailblazerAPI
 
 
 LOG = logging.getLogger(__name__)
@@ -34,6 +36,7 @@ class MipDNAUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis_obj)
 
         # Main upload
+        ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
         ctx.invoke(coverage, family_id=case_obj.internal_id, re_upload=restart)
         ctx.invoke(validate, family_id=case_obj.internal_id)
         ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)

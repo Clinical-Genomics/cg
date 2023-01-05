@@ -1,10 +1,11 @@
+"""Transfer CLI."""
 import logging
 
 import click
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.meta.transfer import PoolState, SampleState, TransferFlowcell, TransferLims
+from cg.meta.transfer import PoolState, SampleState, TransferFlowCell, TransferLims
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
@@ -19,22 +20,22 @@ def transfer_group(context: CGConfig):
     status_db: Store = context.status_db
     hk_api: HousekeeperAPI = context.housekeeper_api
     stats_api: StatsAPI = context.cg_stats_api
-    context.meta_apis["transfer_flowcell_api"] = TransferFlowcell(
+    context.meta_apis["transfer_flow_cell_api"] = TransferFlowCell(
         db=status_db, stats_api=stats_api, hk_api=hk_api
     )
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)
 
 
 @transfer_group.command()
-@click.argument("flowcell_name")
+@click.argument("flow-cell-name")
 @click.pass_obj
-def flowcell(context: CGConfig, flowcell_name: str):
-    """Populate results from a flowcell."""
+def flow_cell(context: CGConfig, flow_cell_name: str):
+    """Populate results from a flow cell."""
     status_db: Store = context.status_db
-    transfer_api = context.meta_apis["transfer_flowcell_api"]
-    new_record: models.Flowcell = transfer_api.transfer(flowcell_name)
+    transfer_api = context.meta_apis["transfer_flow_cell_api"]
+    new_record: models.Flowcell = transfer_api.transfer(flow_cell_name)
     status_db.add_commit(new_record)
-    LOG.info("flowcell added: %s", new_record)
+    LOG.info(f"flow cell added: {new_record}")
 
 
 @transfer_group.command()

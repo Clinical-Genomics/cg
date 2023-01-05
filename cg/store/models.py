@@ -1,5 +1,6 @@
 import datetime as dt
-from typing import List, Optional, Set
+import re
+from typing import List, Optional, Set, Dict
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
@@ -16,7 +17,7 @@ from cg.constants import (
     Pipeline,
 )
 
-from cg.constants.constants import CONTROL_OPTIONS
+from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
 flowcell_sample = Table(
@@ -117,10 +118,14 @@ class Application(Model):
 
     @property
     def analysis_type(self):
-        if self.prep_category == "wts":
+        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
             return self.prep_category
 
-        return "wgs" if self.prep_category == "wgs" else "wes"
+        return (
+            PrepCategory.WHOLE_GENOME_SEQUENCING.value
+            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING.value
+            else PrepCategory.WHOLE_EXOME_SEQUENCING.value
+        )
 
 
 class ApplicationVersion(Model):
@@ -336,9 +341,9 @@ class Family(Model, PriorityMixin):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @property
-    def latest_ticket(self) -> str:
+    def latest_ticket(self) -> Optional[str]:
         """Returns the last ticket the family was ordered in"""
-        return self.tickets.split(sep=",")[-1]
+        return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
     def latest_analyzed(self) -> Optional[dt.datetime]:
@@ -352,7 +357,7 @@ class Family(Model, PriorityMixin):
                 sequenced_dates.append(link.sample.ordered_at)
             elif link.sample.sequenced_at:
                 sequenced_dates.append(link.sample.sequenced_at)
-        return max(sequenced_dates) if sequenced_dates else None
+        return max(sequenced_dates, default=None)
 
     @property
     def all_samples_pass_qc(self) -> bool:
@@ -368,9 +373,47 @@ class Family(Model, PriorityMixin):
         return f"{self.internal_id} ({self.name})"
 
     @property
-    def get_samples_in_case(self) -> List[str]:
-        """Get samples in a case."""
+    def samples(self) -> List[str]:
+        """Return case samples."""
+        return self._get_samples
+
+    @property
+    def _get_samples(self) -> List[str]:
+        """Extract samples from a case."""
         return [link.sample for link in self.links]
+
+    @property
+    def tumour_samples(self) -> List[str]:
+        """Return tumour samples."""
+        return self._get_tumour_samples
+
+    @property
+    def _get_tumour_samples(self) -> List[str]:
+        """Extract tumour samples."""
+        return [link.sample for link in self.links if link.sample.is_tumour]
+
+    @property
+    def loqusdb_uploaded_samples(self) -> List[str]:
+        """Return uploaded samples to Loqusdb."""
+        return self._get_loqusdb_uploaded_samples
+
+    @property
+    def _get_loqusdb_uploaded_samples(self) -> List[str]:
+        """Extract samples uploaded to Loqusdb."""
+        return [link.sample for link in self.links if link.sample.loqusdb_id]
+
+    def get_delivery_arguments(self) -> Set[str]:
+        """Translates the case data_delivery field to pipeline specific arguments."""
+        delivery_arguments: Set[str] = set()
+        requested_deliveries: List[str] = re.split("[-_]", self.data_delivery)
+        delivery_per_pipeline_map: Dict[str, str] = {
+            DataDelivery.FASTQ: Pipeline.FASTQ,
+            DataDelivery.ANALYSIS_FILES: self.data_analysis,
+        }
+        for data_delivery, pipeline in delivery_per_pipeline_map.items():
+            if data_delivery in requested_deliveries:
+                delivery_arguments.add(pipeline)
+        return delivery_arguments
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""
@@ -565,6 +608,8 @@ class Sample(Model, PriorityMixin):
         if self.priority == Priority.express:
             one_half_of_target_reads = application.target_reads / 2
             return self.reads >= one_half_of_target_reads
+        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
+            return bool(self.reads)
         return self.reads > application.expected_reads
 
     @property

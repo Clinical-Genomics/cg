@@ -103,7 +103,7 @@ def test_compare_file_checksums_not_equal(
         )
 
     # THEN the checksum comparison should fail and an exception should be raised
-    assert error.value.message == "Checksum comparison failed!"
+    assert error.value.args[0] == "Checksum comparison failed!"
 
 
 def test_get_asymmetric_encryption_command(

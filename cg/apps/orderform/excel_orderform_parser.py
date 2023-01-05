@@ -178,8 +178,8 @@ class ExcelOrderformParser(OrderformParser):
 
         try:
             return DataDelivery(data_delivery)
-        except ValueError as e:
-            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from e
+        except ValueError as error:
+            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error
 
     def parse_data_delivery(self) -> str:
 

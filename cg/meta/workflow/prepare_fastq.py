@@ -28,7 +28,9 @@ class PrepareFastqAPI:
         compression_objects = []
         for link in case_obj.links:
             sample_id = link.sample.internal_id
-            version_obj = self.compress_api.get_latest_version(sample_id)
+            version_obj: hk_models.Version = self.compress_api.hk_api.get_latest_bundle_version(
+                bundle_name=sample_id
+            )
             compression_objects.extend(files.get_spring_paths(version_obj))
         return compression_objects
 
@@ -58,11 +60,13 @@ class PrepareFastqAPI:
         )
 
     def check_fastq_links(self, case_id: str) -> None:
-        """Check if all fastq files are linked in housekeeper"""
+        """Check if all FASTQ files are linked in Housekeeper."""
         case_obj: models.Family = self.store.family(case_id)
         for link in case_obj.links:
             sample_id = link.sample.internal_id
-            version_obj: hk_models.Version = self.compress_api.get_latest_version(sample_id)
+            version_obj: hk_models.Version = self.compress_api.hk_api.get_latest_bundle_version(
+                bundle_name=sample_id
+            )
             fastq_files: Dict[Path, hk_models.File] = files.get_hk_files_dict(
                 tags=["fastq"], version_obj=version_obj
             )

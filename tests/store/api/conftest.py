@@ -4,6 +4,7 @@ import pytest
 from typing import Iterable, List
 
 from cg.constants import Pipeline
+from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store, models
@@ -180,7 +181,15 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="rml_pool_store")
-def fixture_rml_pool_store(case_id: str, customer_id: str, helpers, store: Store, ticket: str):
+def fixture_rml_pool_store(
+    case_id: str,
+    customer_id: str,
+    helpers,
+    sample_id: str,
+    store: Store,
+    ticket: str,
+    timestamp_now: dt.datetime,
+):
     new_customer = store.add_customer(
         internal_id=customer_id,
         name="Test customer",
@@ -197,13 +206,14 @@ def fixture_rml_pool_store(case_id: str, customer_id: str, helpers, store: Store
         percent_kth=80,
         percent_reads_guaranteed=75,
         sequencing_depth=0,
+        target_reads=800,
     )
     store.add_commit(application)
 
     app_version = store.add_version(
         application=application,
         version=1,
-        valid_from=dt.datetime.today(),
+        valid_from=timestamp_now,
         prices={
             PriorityTerms.STANDARD: 12,
             PriorityTerms.PRIORITY: 222,
@@ -217,7 +227,7 @@ def fixture_rml_pool_store(case_id: str, customer_id: str, helpers, store: Store
         customer=new_customer,
         name="Test",
         order="Test",
-        ordered=dt.datetime.today(),
+        ordered=dt.datetime.now(),
         application_version=app_version,
     )
     store.add_commit(new_pool)
@@ -227,20 +237,39 @@ def fixture_rml_pool_store(case_id: str, customer_id: str, helpers, store: Store
         name=PoolSubmitter.create_case_name(ticket=ticket, pool_name="Test"),
     )
     store.add_commit(new_case)
+
+    new_sample = helpers.add_sample(
+        store=store,
+        internal_id=sample_id,
+        application_tag=application.tag,
+        application_type=application.prep_category,
+        customer_id=new_customer.id,
+    )
+    new_sample.application_version = app_version
+    store.add_commit(new_sample)
+
+    helpers.add_relationship(
+        store=store,
+        sample=new_sample,
+        case=new_case,
+    )
+
     yield store
 
 
 @pytest.fixture(name="re_sequenced_sample_store")
 def fixture_re_sequenced_sample_store(
     store: Store,
+    another_flow_cell_id: str,
     case_id: str,
     family_name: str,
-    flowcell_name,
+    flow_cell_id: str,
     sample_id: str,
     ticket: str,
+    timestamp_now: dt.datetime,
     helpers,
 ) -> Store:
-    """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells"""
+    """Populate a store with a Fluffy case, with a sample that has been sequenced on two flow cells."""
     re_sequenced_sample_store: Store = store
     store_case = helpers.add_case(
         store=re_sequenced_sample_store,
@@ -252,23 +281,25 @@ def fixture_re_sequenced_sample_store(
     store_sample = helpers.add_sample(
         internal_id=sample_id,
         is_tumour=False,
-        application_type="tgs",
+        application_type=PrepCategory.READY_MADE_LIBRARY.value,
         reads=1200000000,
         store=re_sequenced_sample_store,
         original_ticket=ticket,
-        sequenced_at=dt.datetime.now(),
+        sequenced_at=timestamp_now,
     )
 
-    now = dt.datetime.now()
-    one_day_ahead_of_now = now + dt.timedelta(days=1)
+    one_day_ahead_of_now = timestamp_now + dt.timedelta(days=1)
 
     helpers.add_flowcell(
-        store=re_sequenced_sample_store, flowcell_id="HF57HDRXY", samples=[store_sample], date=now
+        store=re_sequenced_sample_store,
+        flow_cell_id=another_flow_cell_id,
+        samples=[store_sample],
+        date=timestamp_now,
     )
 
     helpers.add_flowcell(
         store=re_sequenced_sample_store,
-        flowcell_id=flowcell_name,
+        flow_cell_id=flow_cell_id,
         samples=[store_sample],
         date=one_day_ahead_of_now,
     )
