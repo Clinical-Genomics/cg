@@ -260,12 +260,12 @@ class BackupAPI:
                     raise error
                 LOG.info(f"{pdc_no_files_mathing_search_error}")
 
-        if query:
-            return query
-        else:
+        if not query:
             raise PdcNoFilesMatchingSearchError(
                 message=f"No archived files found for pdc queries {search_patterns}"
             )
+        LOG.info(f"Found archived files for pdc queries {search_patterns}")
+        return query
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
         """Retrieve the archived file from PDC to a flow cell runs directory"""
