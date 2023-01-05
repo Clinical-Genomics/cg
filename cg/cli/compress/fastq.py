@@ -19,10 +19,10 @@ from cg.store.models import Family, Sample
 LOG = logging.getLogger(__name__)
 
 
-def get_old_cases(
+def get_cases_to_process(
     days_back: dt.datetime, store: Store, case_id: Optional[str] = None
 ) -> List[Family]:
-    """Get cases to process."""
+    """Return cases to process."""
     cases: List[Family] = []
     if case_id:
         case: Family = store.family(case_id)
@@ -34,6 +34,14 @@ def get_old_cases(
         date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
         cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
+
+
+def is_case_ignored(case_id: str) -> bool:
+    """Check if case should be skipped."""
+    if case_id in CASES_TO_IGNORE:
+        LOG.info(f"Skipping case: {case_id}")
+        return True
+    return False
 
 
 @click.command("fastq")
@@ -59,44 +67,41 @@ def fastq_cmd(
     days_back: int,
     dry_run: bool,
 ):
-    """Find cases with FASTQ files and compress into SPRING."""
+    """Get cases with FASTQ files and compress into SPRING."""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
 
-    cases: List[Family] = get_old_cases(case_id=case_id, days_back=days_back, store=store)
+    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
     case_conversion_count = 0
     ind_conversion_count = 0
     for case in cases:
-        # Keeps track on if all samples in a case have been converted
         case_converted = True
         if case_conversion_count >= number_of_conversions:
             break
-        internal_id: str = case.internal_id
-        if internal_id in CASES_TO_IGNORE:
-            LOG.info(f"Skipping case {internal_id}")
+        if is_case_ignored(case_id=case.internal_id):
             continue
 
-        LOG.info(f"Searching for FASTQ files in case {internal_id}")
+        LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
         if not case.links:
             continue
-        for link_obj in case.links:
-            sample_id: str = link_obj.sample.internal_id
-            case_converted: bool = compress_api.compress_fastq(sample_id)
+        for case_link in case.links:
+            sample_id: str = case_link.sample.internal_id
+            case_converted: bool = compress_api.compress_fastq(sample_id=sample_id)
             if not case_converted:
                 LOG.info(f"skipping individual {sample_id}")
                 continue
             ind_conversion_count += 1
         if case_converted:
             case_conversion_count += 1
-            LOG.info(f"Considering case {internal_id} converted")
+            LOG.info(f"Considering case {case.internal_id} converted")
 
     LOG.info(
-        f"{ind_conversion_count} Individuals in {case_conversion_count} (completed) cases where compressed"
+        f"{ind_conversion_count} individuals in {case_conversion_count} (completed) cases where compressed"
     )
 
 
@@ -118,18 +123,18 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: List[Family] = get_old_cases(case_id=case_id, days_back=days_back, store=store)
+    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
 
     cleaned_inds = 0
-    for case_obj in cases:
-        if case_obj.internal_id in CASES_TO_IGNORE:
+    for case in cases:
+        if is_case_ignored(case_id=case.internal_id):
             continue
-        samples: Iterable[str] = get_fastq_individuals(store=store, case_id=case_obj.internal_id)
+        samples: Iterable[str] = get_fastq_individuals(store=store, case_id=case.internal_id)
         for sample_id in samples:
-            res: bool = compress_api.clean_fastq(sample_id)
-            if not res:
+            was_cleaned: bool = compress_api.clean_fastq(sample_id=sample_id)
+            if not was_cleaned:
                 LOG.info(f"Skipping individual {sample_id}")
                 continue
             cleaned_inds += 1
@@ -158,9 +163,9 @@ def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
     """Decompress SPRING file for sample, and include links to FASTQ files in Housekeeper."""
 
     compress_api: CompressAPI = context.meta_apis["compress_api"]
-    update_compress_api(compress_api, dry_run=dry_run)
+    update_compress_api(compress_api=compress_api, dry_run=dry_run)
 
-    was_decompressed: bool = compress_api.decompress_spring(sample_id)
+    was_decompressed: bool = compress_api.decompress_spring(sample_id=sample_id)
     if not was_decompressed:
         LOG.info(f"Skipping sample {sample_id}")
         return 0
@@ -177,7 +182,7 @@ def decompress_case(context: click.Context, case_id, dry_run):
 
     store: Store = context.obj.status_db
     try:
-        samples: Iterable[str] = get_fastq_individuals(store, case_id)
+        samples: Iterable[str] = get_fastq_individuals(store=store, case_id=case_id)
         decompressed_inds = 0
         for sample_id in samples:
             decompressed_count: int = context.invoke(

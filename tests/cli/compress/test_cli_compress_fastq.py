@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 
-from cg.cli.compress.fastq import fastq_cmd, get_old_cases
+from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
 from cg.constants import Pipeline
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
@@ -13,7 +13,7 @@ from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_old_cases(
+def test_get_cases_to_process(
     populated_compress_context: CGConfig, cli_runner: CliRunner, helpers: StoreHelpers, caplog
 ):
     """Test to run get cases."""
@@ -34,7 +34,7 @@ def test_get_old_cases(
     status_db.commit()
 
     # WHEN running the compress command
-    cases: list[Family] = get_old_cases(days_back=1, store=status_db)
+    cases: list[Family] = get_cases_to_process(days_back=1, store=status_db)
 
     # THEN assert the program exits since no cases where found
     assert cases
@@ -42,7 +42,7 @@ def test_get_old_cases(
     assert cases[0].internal_id == case_id
 
 
-def test_get_old_cases_when_no_case(
+def test_get_cases_to_process_when_no_case(
     populated_compress_context: CGConfig, cli_runner: CliRunner, helpers: StoreHelpers, caplog
 ):
     """Test to run get cases."""
@@ -51,7 +51,7 @@ def test_get_old_cases_when_no_case(
     case_id = "notrealcase"
 
     # WHEN running the compress command
-    cases: list[Family] = get_old_cases(case_id=case_id, days_back=1, store=status_db)
+    cases: list[Family] = get_cases_to_process(case_id=case_id, days_back=1, store=status_db)
 
     # THEN assert the program exits since no cases where found
     assert not cases
@@ -70,7 +70,7 @@ def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: Cl
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert "Individuals in 0 (completed) cases where compressed" in caplog.text
+    assert "individuals in 0 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_case_id_no_family(
@@ -127,7 +127,7 @@ def test_compress_fastq_cli_case_id(
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Individuals in 1 (completed) cases where compressed" in caplog.text
+    assert f"individuals in 1 (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_family(
@@ -147,7 +147,7 @@ def test_compress_fastq_cli_multiple_family(
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found
-    assert f"Individuals in {nr_cases} (completed) cases where compressed" in caplog.text
+    assert f"individuals in {nr_cases} (completed) cases where compressed" in caplog.text
 
 
 def test_compress_fastq_cli_multiple_set_limit(
@@ -167,4 +167,4 @@ def test_compress_fastq_cli_multiple_set_limit(
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated no more than the limited number of cases was compressed
-    assert f"Individuals in {limit} (completed) cases where compressed" in caplog.text
+    assert f"individuals in {limit} (completed) cases where compressed" in caplog.text
