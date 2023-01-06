@@ -23,8 +23,6 @@ class MockCompressAPI(CompressAPI):
     def __init__(self):
         """initialize mock."""
         super().__init__(hk_api=None, crunchy_api=None, demux_root="")
-        self.ntasks: int = 12
-        self.mem: int = 50
         self.fastq_compression_success: bool = True
         self.spring_decompression_success: bool = True
         self.dry_run: bool = False

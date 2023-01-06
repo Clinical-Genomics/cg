@@ -67,6 +67,8 @@ def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: Cl
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, [], obj=compress_context)
 
+    print(res.output)
+
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
     # THEN assert it was communicated that no families where found

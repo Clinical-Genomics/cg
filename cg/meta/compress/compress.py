@@ -7,8 +7,6 @@ import re
 from pathlib import Path
 from typing import List, Dict
 
-from housekeeper.store import models as housekeeper_models
-
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI

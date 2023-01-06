@@ -20,7 +20,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_cases_to_process(
-    days_back: dt.datetime, store: Store, case_id: Optional[str] = None
+    days_back: int, store: Store, case_id: Optional[str] = None
 ) -> List[Family]:
     """Return cases to process."""
     cases: List[Family] = []
@@ -46,9 +46,6 @@ def is_case_ignored(case_id: str) -> bool:
 
 @click.command("fastq")
 @click.option("-c", "--case-id", type=str)
-@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
-@click.option("-t", "--ntasks", default=12, show_default=True, help="Number of tasks for slurm job")
-@click.option("-m", "--mem", default=50, show_default=True, help="Memory for slurm job")
 @click.option(
     "-b",
     "--days-back",
@@ -56,23 +53,29 @@ def is_case_ignored(case_id: str) -> bool:
     show_default=True,
     help="Threshold for how long ago family was created",
 )
+@click.option("--hours", type=int, help="Hours to allocate for slurm job")
+@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
+@click.option("-m", "--mem", type=int, help="Memory for slurm job")
+@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
 @DRY_RUN
 @click.pass_obj
 def fastq_cmd(
     context: CGConfig,
     case_id: Optional[str],
-    number_of_conversions: int,
-    ntasks: int,
-    mem: int,
     days_back: int,
+    hours: Optional[int],
     dry_run: bool,
+    mem: Optional[int],
+    ntasks: Optional[int],
+    number_of_conversions: int,
 ):
     """Get cases with FASTQ files and compress into SPRING."""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
-
+    update_compress_api(
+        compress_api=compress_api, dry_run=dry_run, hours=hours, mem=mem, ntasks=ntasks
+    )
     cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return

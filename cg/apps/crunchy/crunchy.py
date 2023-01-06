@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
 
 class CrunchyAPI:
     """
-    API for crunchy.
+    API for Crunchy.
     """
 
     def __init__(self, config: dict):
