@@ -50,7 +50,7 @@ def test_update_hk_fastq(
     """Test to update the FASTQ and SPRING paths in Housekeeper after completed compression."""
     # GIVEN real Housekeeper API populated with a Housekeeper bundle
     sample_id: str = compress_hk_fastq_bundle["name"]
-    hk_api: HousekeeperAPI = real_housekeeper_api
+    hk_api: Generator[HousekeeperAPI, None, None] = real_housekeeper_api
     helpers.ensure_hk_bundle(hk_api, compress_hk_fastq_bundle)
     compress_api.hk_api = hk_api
 

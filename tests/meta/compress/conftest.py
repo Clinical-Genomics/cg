@@ -1,6 +1,6 @@
 """Fixtures for Compress API tests."""
 import copy
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Generator
 
 import os
 from datetime import datetime
@@ -132,7 +132,9 @@ def fixture_compression_files(compression_object: CompressionData) -> Compressio
 
 
 @pytest.fixture(name="real_crunchy_api")
-def fixture_real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]) -> CrunchyAPI:
+def fixture_real_crunchy_api(
+    crunchy_config: Dict[str, Dict[str, Any]]
+) -> Generator[CrunchyAPI, None, None]:
     """Crunchy API fixture."""
     yield CrunchyAPI(crunchy_config)
 
@@ -143,7 +145,7 @@ def fixture_compress_api(
     real_crunchy_api: CrunchyAPI,
     housekeeper_api: HousekeeperAPI,
     project_dir: Path,
-) -> CompressAPI:
+) -> Generator[CompressAPI, None, None]:
     """Return Compress API."""
     yield CompressAPI(
         crunchy_api=real_crunchy_api, hk_api=housekeeper_api, demux_root=project_dir.as_posix()

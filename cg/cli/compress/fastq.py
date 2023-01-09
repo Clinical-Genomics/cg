@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 def get_cases_to_process(
     days_back: int, store: Store, case_id: Optional[str] = None
-) -> List[Family]:
+) -> Optional[List[Family]]:
     """Return cases to process."""
     cases: List[Family] = []
     if case_id:
