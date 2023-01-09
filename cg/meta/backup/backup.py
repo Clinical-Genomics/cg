@@ -241,7 +241,6 @@ class BackupAPI:
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
         """Query PDC for a given flow cell id"""
-        query: List[str] = []
         search_patterns: List[str] = [
             dir + ASTERISK + flow_cell_id + ASTERISK for dir in self.encrypt_dirs.values()
         ]
@@ -249,7 +248,7 @@ class BackupAPI:
         for search_pattern in search_patterns:
             try:
                 self.pdc.query_pdc(search_pattern=search_pattern)
-                query.append(self.pdc.process.stdout.split(NEW_LINE))
+                query: List[str] = self.pdc.process.stdout.split(NEW_LINE)
             except subprocess.CalledProcessError as error:
                 pdc_no_files_mathing_search_error: PdcNoFilesMatchingSearchError = (
                     PdcNoFilesMatchingSearchError(
