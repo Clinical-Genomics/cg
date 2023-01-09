@@ -115,6 +115,12 @@ def fixture_case_id() -> str:
     return "yellowhog"
 
 
+@pytest.fixture(name="case_id_does_not_exist")
+def fixture_case_id_does_not_exist() -> str:
+    """Return a case id that should not exist."""
+    return "case_does_not_exist"
+
+
 @pytest.fixture(name="another_case_id")
 def fixture_another_case_id() -> str:
     """Return another case id."""
@@ -274,8 +280,8 @@ def fixture_base_config_dict() -> dict:
 
 
 @pytest.fixture(name="cg_config_object")
-def cg_config_object(base_config_dict: dict) -> CGConfig:
-    """Return a CG config dict."""
+def fixture_cg_config_object(base_config_dict: dict) -> CGConfig:
+    """Return a CG config."""
     return CGConfig(**base_config_dict)
 
 
@@ -305,8 +311,8 @@ def crunchy_config() -> Dict[str, Dict[str, Any]]:
 
 
 @pytest.fixture(name="hk_config_dict")
-def hk_config_dict(root_path):
-    """Housekeeper configs"""
+def fixture_hk_config_dict(root_path: Path):
+    """Housekeeper configs."""
     return {
         "housekeeper": {
             "database": "sqlite:///:memory:",
@@ -1204,7 +1210,7 @@ def fixture_lims_api() -> MockLimsAPI:
 
 
 @pytest.fixture(name="config_root_dir")
-def fiixture_config_root_dir(tmpdir_factory) -> Path:
+def fixture_config_root_dir(tmpdir_factory) -> Path:
     """Return a path to the config root directory."""
     return Path("tests", "fixtures", "data")
 

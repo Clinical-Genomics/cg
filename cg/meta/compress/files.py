@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import Version, File
 
 from cg.constants import HK_FASTQ_TAGS, SequencingFileTag
 from cg.constants.compression import (
@@ -21,11 +21,9 @@ LOG = logging.getLogger(__name__)
 # Functions to get common files
 
 
-def get_hk_files_dict(
-    tags: List[str], version_obj: hk_models.Version
-) -> Dict[Path, hk_models.File]:
+def get_hk_files_dict(tags: List[str], version_obj: Version) -> Dict[Path, File]:
     """Fetch files from a version in Housekeeper."""
-    hk_file: Dict[Path, hk_models.File] = {}
+    hk_file: Dict[Path, File] = {}
     tags: set = set(tags)
     for version_file in version_obj.files:
         file_tags: Set[str] = {tag.name for tag in version_file.tags}

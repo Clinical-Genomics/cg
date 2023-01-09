@@ -54,8 +54,8 @@ def is_case_ignored(case_id: str) -> bool:
     help="Threshold for how long ago family was created",
 )
 @click.option("--hours", type=int, help="Hours to allocate for slurm job")
-@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
 @click.option("-m", "--mem", type=int, help="Memory for slurm job")
+@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
 @click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
 @DRY_RUN
 @click.pass_obj
