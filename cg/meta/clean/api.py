@@ -6,7 +6,7 @@ from pathlib import Path
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
-from cg.constants.tags import WORKFLOW_PROTECTED_TAGS
+from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store import Store, models
 

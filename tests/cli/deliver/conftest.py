@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.delivery import INBOX_NAME
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from housekeeper.store import models as hk_models
@@ -14,7 +15,7 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(name="delivery_inbox")
 def fixture_delivery_inbox(project_dir: Path, customer_id: Path, ticket: str) -> Path:
-    return Path(project_dir, customer_id, "inbox", ticket)
+    return Path(project_dir, customer_id, INBOX_NAME, ticket)
 
 
 @pytest.fixture(name="deliver_vcf_path")

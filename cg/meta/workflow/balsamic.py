@@ -2,14 +2,16 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from pydantic import ValidationError
 from cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
+from cg.constants.observations import ObservationsFileWildcards
+from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
 from cg.constants.constants import FileFormat
-from cg.constants.tags import BalsamicAnalysisTag
+from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -23,6 +25,7 @@ from cg.models.balsamic.metrics import (
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from cg.utils import Process
+from cg.utils.utils import get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -45,8 +48,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         self.balsamic_cache = config.balsamic.balsamic_cache
         self.email = config.balsamic.slurm.mail_user
         self.qos = config.balsamic.slurm.qos
-        self.bed_path = config.bed_path
-        self.pon_path = config.pon_path
+        self.bed_path = config.balsamic.bed_path
+        self.pon_path = config.balsamic.pon_path
+        self.loqusdb_path = config.balsamic.loqusdb_path
+        self.swegen_path = config.balsamic.swegen_path
 
     @property
     def root(self) -> str:
@@ -431,12 +436,47 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         if sample_obj:
             return sample_obj.internal_id
 
+    @staticmethod
+    def get_latest_file_by_pattern(directory: Path, pattern: str) -> Optional[str]:
+        """Returns the latest file (<file_name>-<date>-.vcf.gz) matching a pattern from a specific directory."""
+        available_files: iter = sorted(
+            Path(directory).glob(f"*{pattern}*.vcf.gz"),
+            key=lambda file: file.stem.split("-"),
+            reverse=True,
+        )
+        return str(available_files[0]) if available_files else None
+
+    def get_parsed_observation_file_paths(self, observations: List[str]) -> dict:
+        """Returns a verified {option: path} observations dictionary."""
+        verified_observations: Dict[str, str] = {}
+        for wildcard in list(ObservationsFileWildcards):
+            file_path: str = get_string_from_list_by_pattern(observations, wildcard)
+            verified_observations.update(
+                {
+                    wildcard: file_path
+                    if file_path
+                    else self.get_latest_file_by_pattern(
+                        directory=self.loqusdb_path, pattern=wildcard
+                    )
+                }
+            )
+
+        return verified_observations
+
+    def get_swegen_verified_path(self, variants: Variants) -> Optional[str]:
+        """Return verified SweGen path."""
+        swegen_file: str = self.get_latest_file_by_pattern(
+            directory=self.swegen_path, pattern=variants
+        )
+        return swegen_file
+
     def get_verified_config_case_arguments(
         self,
         case_id: str,
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
+        observations: List[str] = None,
         gender: Optional[str] = None,
     ) -> dict:
         """Takes a dictionary with per-sample parameters,
@@ -455,7 +495,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             else None
         )
 
-        return {
+        config_case: Dict[str, str] = {
             "case_id": case_id,
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
@@ -466,7 +506,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "pon_cnn": verified_pon,
             "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
             "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
+            "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
+            "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
+        config_case.update(self.get_parsed_observation_file_paths(observations))
+
+        return config_case
 
     def build_sample_id_map_string(self, case_id: str) -> str:
         """Creates sample info string for balsamic with format lims_id:tumor/normal:customer_sample_id"""
@@ -608,6 +653,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
+        observations: List[str],
         dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
@@ -617,6 +663,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
+            observations=observations,
         )
         command = ["config", "case"]
         options = self.__build_command_str(
@@ -634,6 +681,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--umi-trim-length": arguments.get("umi_trim_length"),
                 "--tumor-sample-name": arguments.get("tumor_sample_name"),
                 "--normal-sample-name": arguments.get("normal_sample_name"),
+                "--swegen-snv": arguments.get("swegen_snv"),
+                "--swegen-sv": arguments.get("swegen_sv"),
+                "--clinical-snv-observations": arguments.get("clinical_snv"),
+                "--clinical-sv-observations": arguments.get("clinical_sv"),
+                "--cancer-all-snv-observations": arguments.get("cancer_all_snv"),
+                "--cancer-somatic-snv-observations": arguments.get("cancer_somatic_snv"),
+                "--cancer-somatic-sv-observations": arguments.get("cancer_somatic_sv"),
             }
         )
         parameters = command + options

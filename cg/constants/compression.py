@@ -1,4 +1,4 @@
-"""Constants specific for compression"""
+"""Constants specific for compression."""
 import datetime
 
 from cgmodels.cg.constants import StrEnum
@@ -8,12 +8,6 @@ FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
 FLAG_PATH_SUFFIX = ".crunchy.txt"
 PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
-
-
-class CompressionHkTags(StrEnum):
-    FASTQ: str = "fastq"
-    SPRING: str = "spring"
-    SPRING_METADATA: str = "spring-metadata"
 
 
 # Number of days until fastqs counts as old
@@ -60,6 +54,10 @@ BALSAMIC_VALIDATION_CASES = [
     "suitedsnake",  # BALSAMIC validation case from cust087, tumor-only panel
     "savinghorse",  # BALSAMIC validation case from cust087, tumor-only panel
     "rightpup",  # BALSAMIC validation case from cust087, tumor-only panel
+]
+
+FLUFFY_VALIDATION_CASES = [
+    "simplesalmon",  # Chromosome 13, 18, 21 Suspected
 ]
 
 MIP_VALIDATION_CASES = [
@@ -119,7 +117,7 @@ OTHER_VALIDATION_CASES = [
     "keencalf",
     "keenviper",
     "luckyhog",
-    "maturejay",
+    "maturejay",  # sars-cov-2 case
     "meetpossum",
     "mintbaboon",
     "mintyeti",
@@ -134,6 +132,7 @@ CASES_TO_IGNORE = (
     PROBLEMATIC_CASES
     + OTHER_VALIDATION_CASES
     + BALSAMIC_VALIDATION_CASES
+    + FLUFFY_VALIDATION_CASES
     + MIP_VALIDATION_CASES
     + RNAFUSION_VALIDATION_CASES
 )

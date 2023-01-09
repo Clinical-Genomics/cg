@@ -1,16 +1,13 @@
-"""Tests the findbusinessdata part of the cg.store.api"""
+"""Tests the findbusinessdata part of the Cg store API."""
 from datetime import datetime
 
-import pytest
-
 from cg.store import Store, models
-from cgmodels.cg.constants import Pipeline
 from cg.constants.indexes import ListIndexes
 from tests.store_helpers import StoreHelpers
 
 
 def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
-    # GIVEN a case with an analysis with a startdate in the database
+    # GIVEN a case with an analysis with a start date in the database
     analysis = helpers.add_analysis(store=sample_store, started_at=datetime.now())
     assert analysis.started_at
 
@@ -19,6 +16,18 @@ def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
 
     # THEN the analysis should have been retrieved
     assert db_analysis == analysis
+
+
+def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test function to return the latest flow cell froom the database."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cell: models.Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cell.name == flow_cell_id
 
 
 def test_get_latest_flow_cell_on_case(
@@ -49,7 +58,7 @@ def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
 
 
 def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket: str):
-    """Tests if the correct ticket is returned for the given case"""
+    """Tests if the correct ticket is returned for the given case."""
     # GIVEN a populated store with a case
 
     # WHEN the function is called
@@ -60,7 +69,7 @@ def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, t
 
 
 def test_get_case_pool(case_id: str, rml_pool_store: Store):
-    """Tests if the correct pool is returned"""
+    """Tests if the correct pool is returned."""
     # GIVEN a case connected to a pool
     case_name = rml_pool_store.family(internal_id=case_id).name
     # WHEN the function is called

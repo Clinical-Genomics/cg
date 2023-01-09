@@ -23,10 +23,6 @@ from tests.apps.demultiplex.conftest import (
     fixture_novaseq_dir_dragen,
     fixture_novaseq_run_parameters,
 )
-from tests.models.demultiplexing.conftest import (
-    fixture_bcl2fastq_demux_results,
-    fixture_demultiplexed_flow_cell,
-)
 
 LOG = logging.getLogger(__name__)
 
