@@ -9,7 +9,6 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (
     correct_spring_paths,
-    get_sample_ids_from_case,
     update_compress_api,
 )
 from cg.constants.compression import CASES_TO_IGNORE
@@ -129,7 +128,7 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
     for case_obj in cases:
         if case_obj.internal_id in CASES_TO_IGNORE:
             continue
-        samples: Iterable[str] = get_sample_ids_from_case(store=store, case_id=case_obj.internal_id)
+        samples: Iterable[str] = store.get_sample_ids_by_case(case_id=case_obj.internal_id)
         for sample_id in samples:
             res: bool = compress_api.clean_fastq(sample_id)
             if not res:
@@ -180,7 +179,7 @@ def decompress_case(context: click.Context, case_id, dry_run):
 
     store: Store = context.obj.status_db
     try:
-        samples: Iterable[str] = get_sample_ids_from_case(store=store, case_id=case_id)
+        samples: Iterable[str] = store.get_sample_ids_by_case(case_id=case_id)
         decompressed_inds = 0
         for sample_id in samples:
             decompressed_count: int = context.invoke(

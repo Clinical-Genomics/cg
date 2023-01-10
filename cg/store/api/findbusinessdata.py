@@ -1,16 +1,20 @@
 """Handler to find business data objects."""
 import datetime as dt
-from typing import List, Optional
+import logging
+from typing import List, Optional, Iterator
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 from cg.constants.constants import PrepCategory
 from cg.constants.indexes import ListIndexes
+from cg.exc import CaseNotFoundError
 from cg.store import models
 from cg.store.api.base import BaseHandler
 
-from cg.store.models import Flowcell, Sample
+from cg.store.models import Flowcell, Sample, Family
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+
+LOG = logging.getLogger(__name__)
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -371,6 +375,15 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_sample_by_name(self, name: str) -> Sample:
         return self.Sample.query.filter(Sample.name == name).first()
+
+    def get_sample_ids_by_case(self, case_id: str = None) -> Iterator[str]:
+        """Return sample ids from case id."""
+        case: Family = self.family(case_id)
+        if not case:
+            LOG.error(f"Could not find case {case_id}")
+            raise CaseNotFoundError("")
+        for link in case.links:
+            yield link.sample.internal_id
 
     def get_case_pool(self, case_id: str) -> Optional[models.Pool]:
         """Returns the pool connected to the case. Returns None if no pool is found"""

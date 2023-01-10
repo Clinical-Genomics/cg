@@ -1,30 +1,15 @@
-"""Helper functions for compress cli"""
+"""Helper functions for compress cli."""
 import logging
 import os
 from pathlib import Path
 from typing import Iterator, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
-from cg.store import Store
 from housekeeper.store import models as hk_models
 
-from cg.store.models import Family
-
 LOG = logging.getLogger(__name__)
-
-
-def get_sample_ids_from_case(store: Store, case_id: str = None) -> Iterator[str]:
-    """Return sample ids from cases that are ready for SPRING compression."""
-    case: Family = store.family(case_id)
-    if not case:
-        LOG.error(f"Could not find case {case_id}")
-        raise CaseNotFoundError("")
-
-    for link in case.links:
-        yield link.sample.internal_id
 
 
 def update_compress_api(
