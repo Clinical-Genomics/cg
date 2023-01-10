@@ -172,7 +172,7 @@ class RsyncAPI(MetaAPI):
         folder_list: List[str] = []
         if sample_files_present:
             folder_list.extend(
-                [sample.name for sample in self.status_db.get_samples_by_case_id(family_id=case_id)]
+                [sample.name for sample in self.status_db.get_samples_by_case_id(case_id=case_id)]
             )
         if case_files_present:
             folder_list.append(self.status_db.family(case_id).name)

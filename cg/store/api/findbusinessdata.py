@@ -206,15 +206,16 @@ class FindBusinessDataHandler(BaseHandler):
             LOG.error(f"Could not find case {case_id}")
             raise CaseNotFoundError("")
 
-    def get_samples_by_case_id(self, family_id: str) -> List[Sample]:
-        """Get samples on a given family_id."""
+    def get_samples_by_case_id(self, case_id: str) -> List[Sample]:
+        """Get samples on a given case id."""
 
-        case: Family = self.family(internal_id=family_id)
+        case: Family = self.family(internal_id=case_id)
+        self._is_case_found(case=case, case_id=case_id)
         return case.samples if case else []
 
     def get_sample_ids_by_case_id(self, case_id: str = None) -> Iterator[str]:
         """Return sample ids from case id."""
-        case: Family = self.family(case_id)
+        case: Family = self.family(internal_id=case_id)
         self._is_case_found(case=case, case_id=case_id)
         for link in case.links:
             yield link.sample.internal_id
