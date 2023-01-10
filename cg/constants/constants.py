@@ -60,13 +60,7 @@ class FlowCellStatus(StrEnum):
     RETRIEVED: str = "retrieved"
 
 
-FLOWCELL_STATUS = (
-    FlowCellStatus.ONDISK,
-    FlowCellStatus.REMOVED,
-    FlowCellStatus.REQUESTED,
-    FlowCellStatus.PROCESSING,
-    FlowCellStatus.RETRIEVED,
-)
+FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
 
 FLOWCELL_Q30_THRESHOLD = {
     Sequencers.HISEQX: 75,

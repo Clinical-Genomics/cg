@@ -289,7 +289,7 @@ class FlowcellView(BaseView):
     column_default_sort = ("sequenced_at", True)
     column_editable_list = ["status"]
     column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name"]
+    column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
 
 
