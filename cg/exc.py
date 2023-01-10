@@ -251,7 +251,3 @@ class LoqusdbDuplicateRecordError(LoqusdbError):
 
 class PdcNoFilesMatchingSearchError(CgError):
     """Exception raised when PDC API returns no files matching the search criteria."""
-
-    def __init__(self, message: str = ""):
-        super().__init__(message)
-        self.exit_code = 8

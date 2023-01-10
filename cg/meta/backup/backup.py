@@ -12,6 +12,7 @@ from cg.constants.constants import FileExtensions, FlowCellStatus
 from cg.constants.backup import MAX_PROCESSING_FLOW_CELLS
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.indexes import ListIndexes
+from cg.constants.pdc import PDCExitCodes
 from cg.constants.process import RETURN_WARNING
 from cg.constants.symbols import ASTERISK, NEW_LINE
 from cg.exc import ChecksumFailedError, PdcNoFilesMatchingSearchError
@@ -71,13 +72,13 @@ class BackupAPI:
             return None
 
         if not flow_cell:
-            flow_cell = self.get_first_flow_cell()
+            flow_cell: Optional[models.Flowcell] = self.get_first_flow_cell()
 
         if not flow_cell:
             LOG.info("No flow cells requested")
             return None
 
-        flow_cell.status = FlowCellStatus.PROCESSING
+        flow_cell.status: FlowCellStatus = FlowCellStatus.PROCESSING
         if not self.dry_run:
             self.status.commit()
             LOG.info(f"{flow_cell.name}: retrieving from PDC")
@@ -105,9 +106,7 @@ class BackupAPI:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
         run_dir: Path = Path(self.root_dir[flow_cell.sequencer_type])
-        self.retrieve_archived_key(
-            archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir
-        )
+        self.retrieve_archived_key(archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir)
         self.retrieve_archived_flow_cell(
             archived_flow_cell=archived_flow_cell, flow_cell=flow_cell, run_dir=run_dir
         )
@@ -264,14 +263,11 @@ class BackupAPI:
                 query: List[str] = self.pdc.process.stdout.split(NEW_LINE)
                 continue
             except subprocess.CalledProcessError as error:
-                pdc_no_files_mathing_search_error: PdcNoFilesMatchingSearchError = (
-                    PdcNoFilesMatchingSearchError(
-                        message=f"No archived files found for pdc query {search_pattern}"
-                    )
-                )
-                if error.returncode != pdc_no_files_mathing_search_error.exit_code:
+                if error.returncode != PDCExitCodes.NO_FILES_FOUND:
                     raise error
-                LOG.info(f"{pdc_no_files_mathing_search_error}")
+                LOG.info(
+                    f"No archived files found for pdc query {search_patterns}, testing legacy directory"
+                )
 
         if not query:
             raise PdcNoFilesMatchingSearchError(

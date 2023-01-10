@@ -27,12 +27,12 @@ def backup(context: CGConfig):
 
 
 @backup.command("fetch-flow-cell")
-@click.option("-f", "--flow-cell", help="Retrieve a specific flow cell")
+@click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
 @click.pass_obj
-def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
+def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str]):
     """Fetch the first flow cell in the requested queue from backup"""
-    status_api: Store = context.status_db
+
     pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
     encryption_api = EncryptionAPI(binary_path=context.encryption.binary_path, dry_run=dry_run)
     tar_api = TarAPI(binary_path=context.tar.binary_path, dry_run=dry_run)
@@ -47,21 +47,21 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
     )
     backup_api: BackupAPI = context.meta_apis["backup_api"]
 
-    flow_cell: Optional[models.Flowcell] = None
-    if flow_cell:
-        flow_cell: Optional[models.Flowcell] = status_api.get_flow_cell(flow_cell)
-        if flow_cell is None:
-            LOG.error(f"{flow_cell}: not found in database")
-            raise click.Abort
+    status_api: Store = context.status_db
 
-    retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell=flow_cell)
+    if flow_cell_id:
+        flow_cell: Optional[models.Flowcell] = status_api.get_flow_cell(flow_cell_id=flow_cell_id)
+        retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell=flow_cell)
+        if not flow_cell:
+            LOG.error(f"{flow_cell_id}: not found in database")
+            raise click.Abort
+    else:
+        LOG.info("Fetching first flow cell in queue")
+        retrieval_time: Optional[float] = backup_api.fetch_flow_cell()
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60
         LOG.info(f"Retrieval time: {hours:.1}h")
-        return
-
-    if not flow_cell:
         return
 
     if not dry_run:
