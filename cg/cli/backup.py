@@ -55,7 +55,8 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
         if not flow_cell:
             LOG.error(f"{flow_cell_id}: not found in database")
             raise click.Abort
-    else:
+
+    if not flow_cell_id:
         LOG.info("Fetching first flow cell in queue")
         retrieval_time: Optional[float] = backup_api.fetch_flow_cell()
 
@@ -64,8 +65,8 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
         LOG.info(f"Retrieval time: {hours:.1}h")
         return
 
-    if not dry_run:
-        LOG.info("%s: updating flow cell status to %s", flow_cell, FlowCellStatus.REQUESTED)
+    if not dry_run and flow_cell:
+        LOG.info(f"{flow_cell}: updating flow cell status to {FlowCellStatus.REQUESTED}")
         flow_cell.status = FlowCellStatus.REQUESTED
         status_api.commit()
 
