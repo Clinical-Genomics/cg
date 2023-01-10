@@ -118,14 +118,15 @@ def store_bundles(context: click.Context, flow_cell_id: str, dry_run: bool) -> N
         LOG.info(f"No samples found for flow cell {flow_cell_id} in the database")
         return
     for sample in samples:
-        spring_metadata_file: File = compress_api.hk_api.get_file_from_latest_version(
+        spring_metadata_files: List[File] = compress_api.hk_api.get_files_from_latest_version(
             bundle_name=sample.internal_id, tags=[SequencingFileTag.SPRING_METADATA]
         )
-        if spring_metadata_file:
-            LOG.info(
-                f"Updating file paths in SPRING metadata file {spring_metadata_file.full_path}: for sample: {sample.internal_id}"
-            )
-            update_metadata_paths(
-                spring_metadata_path=spring_metadata_file.full_path,
-                new_parent_path=Path(spring_metadata_file.full_path).parent,
-            )
+        if spring_metadata_files:
+            for spring_metadata_file in spring_metadata_files:
+                LOG.info(
+                    f"Updating file paths in SPRING metadata file {spring_metadata_file.full_path}: for sample: {sample.internal_id}"
+                )
+                update_metadata_paths(
+                    spring_metadata_path=spring_metadata_file.full_path,
+                    new_parent_path=Path(spring_metadata_file.full_path).parent,
+                )

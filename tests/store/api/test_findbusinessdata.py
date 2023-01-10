@@ -59,7 +59,7 @@ def test_get_samples_from_flow_cell(
         flow_cell_id=flow_cell_id
     )
 
-    # THEN the returned sample idl should have the same id as the one in the database
+    # THEN the returned sample id should have the same id as the one in the database
     assert samples[0].internal_id == sample_id
 
 

@@ -123,13 +123,41 @@ def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: M
     # GIVEN a tag of a file that exists in HK
     assert hk_file.tags
 
-    # WHEN fetching the file with get_file
+    # WHEN fetching the file
     hk_file: File = populated_housekeeper_api.get_file_from_latest_version(
         bundle_name=case_id, tags=[hk_file.tags[0].name]
     )
 
     # THEN assert a file was returned
     assert hk_file is not None
+
+
+def test_get_files_from_latest_version(
+    case_id: str, populated_housekeeper_api: MockHousekeeperAPI, small_helpers: SmallHelpers
+):
+    """Test to get files from the database from the latest version."""
+
+    # GIVEN a Housekeeper version
+    version: Version = populated_housekeeper_api.last_version(bundle=case_id)
+
+    # GIVEN a housekeeper api with a file
+    hk_file: File = populated_housekeeper_api.files().first()
+
+    # GIVEN a tag of a file that exists in HK
+    assert hk_file.tags
+
+    # GIVEN another file with the same tag
+    populated_housekeeper_api.add_file(
+        path=Path("a_new_file.bed").as_posix(), tags=[hk_file.tags[0].name], version_obj=version
+    )
+
+    # WHEN fetching the files
+    hk_files: List[File] = populated_housekeeper_api.get_files_from_latest_version(
+        bundle_name=case_id, tags=[hk_file.tags[0].name]
+    )
+
+    # THEN assert 2 files were returned
+    assert small_helpers.length_of_iterable(hk_files) == 2
 
 
 def test_delete_file(populated_housekeeper_api: HousekeeperAPI):

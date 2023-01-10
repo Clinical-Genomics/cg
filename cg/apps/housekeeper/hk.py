@@ -327,9 +327,19 @@ class HousekeeperAPI:
         self.commit()
 
     def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
-        """Find a file in the latest version of a bundle."""
+        """Return a file in the latest version of a bundle."""
         version: Version = self.last_version(bundle=bundle_name)
         if not version:
             LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags).first()
+
+    def get_files_from_latest_version(
+        self, bundle_name: str, tags: List[str]
+    ) -> Optional[List[File]]:
+        """Return files in the latest version of a bundle."""
+        version: Version = self.last_version(bundle=bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            raise HousekeeperBundleVersionMissingError
+        return self.files(version=version.id, tags=tags)
