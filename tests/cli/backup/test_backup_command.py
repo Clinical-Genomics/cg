@@ -54,7 +54,9 @@ def test_run_fetch_flow_cell_non_existing_flow_cell(
     assert backup_context.status_db.get_flow_cell(flow_cell_id) is None
 
     # WHEN running the command with the non existing flow cell id
-    result = cli_runner.invoke(fetch_flow_cell, ["--flow-cell-id", flow_cell_id], obj=backup_context)
+    result = cli_runner.invoke(
+        fetch_flow_cell, ["--flow-cell-id", flow_cell_id], obj=backup_context
+    )
 
     # THEN assert that it exits with a non zero exit code
     assert result.exit_code != 0
