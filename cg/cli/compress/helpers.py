@@ -16,7 +16,7 @@ from cg.store.models import Family
 LOG = logging.getLogger(__name__)
 
 
-def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
+def get_sample_ids_from_case(store: Store, case_id: str = None) -> Iterator[str]:
     """Return sample ids from cases that are ready for SPRING compression."""
     case: Family = store.family(case_id)
     if not case:
