@@ -150,7 +150,7 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[m
     """Gets all samples belonging to a sample, case or flow cell id"""
     get_samples = {
         "sample": status_api.sample,
-        "case": status_api.get_samples_by_family_id,
+        "case": status_api.get_samples_by_case_id,
         "flow_cell": status_api.get_samples_from_flow_cell,
     }
     samples: Union[models.Sample, List[models.Sample]] = get_samples[object_type](identifier)

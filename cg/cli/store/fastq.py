@@ -57,7 +57,7 @@ def store_case(context: click.Context, case_id: str, dry_run: bool) -> None:
 
     status_db: Store = context.obj.status_db
     try:
-        sample_ids: Iterable[str] = status_db.get_sample_ids_by_case(case_id=case_id)
+        sample_ids: Iterable[str] = status_db.get_sample_ids_by_case_id(case_id=case_id)
         stored_individuals: int = invoke_store_samples(
             context=context, dry_run=dry_run, sample_ids=sample_ids
         )
