@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BackupAPI:
-    """Class for retrieving FCs from backup"""
+    """Class for retrieving FCs from backup."""
 
     def __init__(
         self,
@@ -54,36 +54,36 @@ class BackupAPI:
         return processing_flow_cells < MAX_PROCESSING_FLOW_CELLS
 
     def get_first_flow_cell(self) -> Optional[models.Flowcell]:
-        """Get the first flow cell from the requested queue"""
-        flow_cell_obj: Optional[models.Flowcell] = self.status.flowcells(
+        """Get the first flow cell from the requested queue."""
+        flow_cell: Optional[models.Flowcell] = self.status.flowcells(
             status=FlowCellStatus.REQUESTED
         ).first()
-        return flow_cell_obj or None
+        return flow_cell or None
 
-    def fetch_flow_cell(self, flow_cell_obj: Optional[models.Flowcell] = None) -> Optional[float]:
+    def fetch_flow_cell(self, flow_cell: Optional[models.Flowcell] = None) -> Optional[float]:
         """Start fetching a flow cell from backup if possible.
 
-        1. The processing queue is not full
-        2. The requested queue is not emtpy
+        1. The processing queue is not full.
+        2. The requested queue is not emtpy.
         """
         if self.check_processing() is False:
             LOG.info("Processing queue is full")
             return None
 
-        if not flow_cell_obj:
-            flow_cell_obj = self.get_first_flow_cell()
+        if not flow_cell:
+            flow_cell = self.get_first_flow_cell()
 
-        if not flow_cell_obj:
+        if not flow_cell:
             LOG.info("No flow cells requested")
             return None
 
-        flow_cell_obj.status = FlowCellStatus.PROCESSING
+        flow_cell.status = FlowCellStatus.PROCESSING
         if not self.dry_run:
             self.status.commit()
-            LOG.info(f"{flow_cell_obj.name}: retrieving from PDC")
+            LOG.info(f"{flow_cell.name}: retrieving from PDC")
 
         try:
-            pdc_flow_cell_query: List[str] = self.query_pdc_for_flow_cell(flow_cell_obj.name)
+            pdc_flow_cell_query: List[str] = self.query_pdc_for_flow_cell(flow_cell.name)
 
         except PdcNoFilesMatchingSearchError as error:
             LOG.error(f"PDC query failed: {error}")
@@ -94,22 +94,22 @@ class BackupAPI:
 
         if not self.dry_run:
             return self._process_flow_cell(
-                flow_cell_obj=flow_cell_obj,
+                flow_cell=flow_cell,
                 archived_key=archived_key,
                 archived_flow_cell=archived_flow_cell,
             )
 
     def _process_flow_cell(
-        self, flow_cell_obj: models.Flowcell, archived_key: Path, archived_flow_cell: Path
+        self, flow_cell: models.Flowcell, archived_key: Path, archived_flow_cell: Path
     ) -> float:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
-        run_dir: Path = Path(self.root_dir[flow_cell_obj.sequencer_type])
+        run_dir: Path = Path(self.root_dir[flow_cell.sequencer_type])
         self.retrieve_archived_key(
-            archived_key=archived_key, flow_cell_obj=flow_cell_obj, run_dir=run_dir
+            archived_key=archived_key, flow_cell=flow_cell, run_dir=run_dir
         )
         self.retrieve_archived_flow_cell(
-            archived_flow_cell=archived_flow_cell, flow_cell_obj=flow_cell_obj, run_dir=run_dir
+            archived_flow_cell=archived_flow_cell, flow_cell=flow_cell, run_dir=run_dir
         )
 
         try:
@@ -128,7 +128,7 @@ class BackupAPI:
         except subprocess.CalledProcessError as error:
             LOG.error(f"Decryption failed: {error.stderr}")
             if not self.dry_run:
-                flow_cell_obj.status = FlowCellStatus.REQUESTED
+                flow_cell.status: str = FlowCellStatus.REQUESTED
                 self.status.commit()
             raise error
 
@@ -141,7 +141,7 @@ class BackupAPI:
         retrieved_flow_cell: Path,
         retrieved_key: Path,
     ):
-        """Remove files after flow cell has been fetched from PDC"""
+        """Remove files after flow cell has been fetched from PDC."""
         if self.dry_run:
             return
         LOG.debug("Unlink files")
@@ -165,13 +165,13 @@ class BackupAPI:
 
     @staticmethod
     def create_rta_complete(decrypted_flow_cell: Path, run_dir: Path):
-        """Create an RTAComplete.txt file in the flow cell run directory"""
+        """Create an RTAComplete.txt file in the flow cell run directory."""
         (
             run_dir / Path(decrypted_flow_cell.stem).stem / DemultiplexingDirsAndFiles.RTACOMPLETE
         ).touch()
 
     def extract_flow_cell(self, decrypted_flow_cell, run_dir):
-        """Extract the flow cell tar archive"""
+        """Extract the flow cell tar archive."""
         extraction_command = self.tar_api.get_extract_file_command(
             input_file=decrypted_flow_cell, output_dir=run_dir
         )
@@ -181,7 +181,7 @@ class BackupAPI:
     def decrypt_flow_cell(
         self, archived_flow_cell: Path, archived_key: Path, run_dir: Path
     ) -> Tuple[Path, Path, Path, Path]:
-        """Decrypt the flow cell"""
+        """Decrypt the flow cell."""
         retrieved_key: Path = run_dir / archived_key.name
         encryption_key: Path = retrieved_key.with_suffix(FileExtensions.NO_EXTENSION)
         decryption_command: List[str] = self.encryption_api.get_asymmetric_decryption_command(
@@ -201,9 +201,9 @@ class BackupAPI:
         return decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
 
     def retrieve_archived_key(
-        self, archived_key: Path, flow_cell_obj: models.Flowcell, run_dir: Path
+        self, archived_key: Path, flow_cell: models.Flowcell, run_dir: Path
     ) -> None:
-        """Attempt to retrieve an archived key"""
+        """Attempt to retrieve an archived key."""
         try:
             self.retrieve_archived_file(
                 archived_file=archived_key,
@@ -212,48 +212,48 @@ class BackupAPI:
         except subprocess.CalledProcessError as error:
             if error.returncode == RETURN_WARNING:
                 LOG.warning(
-                    f"WARNING for retrieval of encryption key of flow cell {flow_cell_obj.name}, please check "
+                    f"WARNING for retrieval of encryption key of flow cell {flow_cell.name}, please check "
                     "dsmerror.log"
                 )
             else:
-                LOG.error(f"{flow_cell_obj.name}: key retrieval failed")
+                LOG.error(f"{flow_cell.name}: key retrieval failed")
                 if not self.dry_run:
-                    flow_cell_obj.status = FlowCellStatus.REQUESTED
+                    flow_cell.status = FlowCellStatus.REQUESTED
                     self.status.commit()
                 raise error
 
     def retrieve_archived_flow_cell(
-        self, archived_flow_cell: Path, flow_cell_obj: models.Flowcell, run_dir: Path
+        self, archived_flow_cell: Path, flow_cell: models.Flowcell, run_dir: Path
     ):
-        """Attempt to retrieve an archived flow cell"""
+        """Attempt to retrieve an archived flow cell."""
         try:
             self.retrieve_archived_file(
                 archived_file=archived_flow_cell,
                 run_dir=run_dir,
             )
             if not self.dry_run:
-                self._set_flow_cell_status_to_retrieved(flow_cell_obj)
+                self._set_flow_cell_status_to_retrieved(flow_cell)
         except subprocess.CalledProcessError as error:
             if error.returncode == RETURN_WARNING:
                 LOG.warning(
-                    f"WARNING for retrieval of flow cell {flow_cell_obj.name}, please check dsmerror.log"
+                    f"WARNING for retrieval of flow cell {flow_cell.name}, please check dsmerror.log"
                 )
                 if not self.dry_run:
-                    self._set_flow_cell_status_to_retrieved(flow_cell_obj)
+                    self._set_flow_cell_status_to_retrieved(flow_cell)
             else:
-                LOG.error(f"{flow_cell_obj.name}: run directory retrieval failed")
+                LOG.error(f"{flow_cell.name}: run directory retrieval failed")
                 if not self.dry_run:
-                    flow_cell_obj.status = FlowCellStatus.REQUESTED
+                    flow_cell.status = FlowCellStatus.REQUESTED
                     self.status.commit()
                 raise error
 
-    def _set_flow_cell_status_to_retrieved(self, flow_cell_obj: models.Flowcell):
-        flow_cell_obj.status = FlowCellStatus.RETRIEVED
+    def _set_flow_cell_status_to_retrieved(self, flow_cell: models.Flowcell):
+        flow_cell.status = FlowCellStatus.RETRIEVED
         self.status.commit()
-        LOG.info(f"Status for flow cell {flow_cell_obj.name} set to {flow_cell_obj.status}")
+        LOG.info(f"Status for flow cell {flow_cell.name} set to {flow_cell.status}")
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:
-        """Query PDC for a given flow cell id"""
+        """Query PDC for a given flow cell id."""
         search_patterns: List[str] = [
             dir + ASTERISK + flow_cell_id + ASTERISK for dir in self.encrypt_dir.values()
         ]
@@ -281,7 +281,7 @@ class BackupAPI:
         return query
 
     def retrieve_archived_file(self, archived_file: Path, run_dir: Path) -> None:
-        """Retrieve the archived file from PDC to a flow cell runs directory"""
+        """Retrieve the archived file from PDC to a flow cell runs directory."""
         retrieved_file: Path = run_dir / archived_file.name
         LOG.debug(f"Retrieving file {archived_file} to {retrieved_file}")
         self.pdc.retrieve_file_from_pdc(
@@ -289,7 +289,7 @@ class BackupAPI:
         )
 
     def get_archived_flow_cell_path(self, query: list) -> Path:
-        """Get the path of the archived flow cell from a PDC query"""
+        """Get the path of the archived flow cell from a PDC query."""
         flow_cell_query: str = [
             row
             for row in query
@@ -304,12 +304,12 @@ class BackupAPI:
                 re_archived_flow_cell_path, flow_cell_query
             )
             if arhived_flow_cell:
-                archived_flow_cell_path = Path(arhived_flow_cell.group())
+                archived_flow_cell_path: Path = Path(arhived_flow_cell.group())
                 LOG.info(f"Flow cell found: {archived_flow_cell_path}")
                 return archived_flow_cell_path
 
     def get_archived_encryption_key_path(self, query: list) -> Path:
-        """Get the encryption key for the archived flow cell from a PDC query"""
+        """Get the encryption key for the archived flow cell from a PDC query."""
         encryption_key_query: str = [
             row for row in query if FileExtensions.KEY in row and FileExtensions.GPG in row
         ][ListIndexes.FIRST.value]
@@ -320,13 +320,13 @@ class BackupAPI:
                 re_archived_encryption_key_path, encryption_key_query
             )
             if archived_encryption_key:
-                archived_encryption_key_path = Path(archived_encryption_key.group())
+                archived_encryption_key_path: Path = Path(archived_encryption_key.group())
                 LOG.info(f"Encryption key found: {archived_encryption_key_path}")
                 return archived_encryption_key_path
 
 
 class SpringBackupAPI:
-    """Class for handling PDC backup and retrieval of spring compressed fastq files"""
+    """Class for handling PDC backup and retrieval of spring compressed fastq files."""
 
     def __init__(
         self,
@@ -341,7 +341,7 @@ class SpringBackupAPI:
         self.dry_run = dry_run
 
     def encrypt_and_archive_spring_file(self, spring_file_path: Path) -> None:
-        """Encrypts and archives a spring file and its decryption key"""
+        """Encrypts and archives a spring file and its decryption key."""
         LOG.debug(f"*** START BACKUP PROCESS OF SPRING FILE {spring_file_path} ***")
         if self.is_compression_ongoing(spring_file_path):
             LOG.info(
@@ -382,7 +382,7 @@ class SpringBackupAPI:
             LOG.debug("*** CHECKSUM PROCESS FAILED! ***")
 
     def retrieve_and_decrypt_spring_file(self, spring_file_path: Path) -> None:
-        """Retrieves and decrypts a spring file and its decryption key"""
+        """Retrieves and decrypts a spring file and its decryption key."""
         LOG.info(f"*** START RETRIEVAL PROCESS OF SPRING FILE {spring_file_path} ***")
         try:
             self.pdc.retrieve_file_from_pdc(
@@ -403,7 +403,7 @@ class SpringBackupAPI:
 
     def mark_file_as_archived(self, spring_file_path: Path) -> None:
         """Set the field 'to_archive' of the file in Housekeeper to mark that it has been
-        archived to PDC"""
+        archived to PDC."""
         if self.dry_run:
             LOG.info(f"Dry run, no changes made to {spring_file_path}")
             return
@@ -412,23 +412,23 @@ class SpringBackupAPI:
         self.hk_api.set_to_archive(file=hk_spring_file, value=True)
 
     def is_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
-        """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted"""
+        """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted."""
         return (
             self.hk_api.files(path=str(spring_file_path)).first().to_archive
             and not spring_file_path.exists()
         )
 
     def remove_archived_spring_file(self, spring_file_path: Path) -> None:
-        """Removes all files related to spring PDC archiving"""
+        """Removes all files related to spring PDC archiving."""
         if not self.dry_run:
             LOG.info(f"Removing spring file {spring_file_path} from disk")
             spring_file_path.unlink()
 
     def is_spring_file_archived(self, spring_file_path: Path) -> bool:
-        """Checks if a spring file is marked as archived in Housekeeper"""
+        """Checks if a spring file is marked as archived in Housekeeper."""
         return self.hk_api.files(path=str(spring_file_path)).first().to_archive
 
     @staticmethod
     def is_compression_ongoing(spring_file_path: Path) -> bool:
-        """Determines if (de)compression of the spring file ongoing"""
+        """Determines if (de)compression of the spring file ongoing."""
         return CompressionData(spring_file_path).pending_exists()

@@ -214,7 +214,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     backup_api.get_archived_encryption_key_path.return_value = archived_key
     backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(flow_cell_obj=None)
+    result = backup_api.fetch_flow_cell(flow_cell=None)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text
@@ -276,7 +276,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     backup_api.get_archived_encryption_key_path.return_value = archived_key
     backup_api.get_archived_flow_cell_path.return_value = archived_flow_cell
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(mock_flow_cell)
+    result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
 
     # THEN no flow cell is taken form statusdb
     mock_get_first_flow_cell.assert_not_called()
@@ -345,7 +345,7 @@ def test_fetch_flow_cell_pdc_retrieval_failed(
     # WHEN the retrieval process fails
     mock_pdc.retrieve_file_from_pdc.side_effect = subprocess.CalledProcessError(1, "echo")
     with pytest.raises(subprocess.CalledProcessError):
-        backup_api.fetch_flow_cell(mock_flow_cell)
+        backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
 
     # THEN the failure to retrieve is logged
     assert "retrieval failed" in caplog.text
@@ -389,7 +389,7 @@ def test_fetch_flow_cell_integration(
     mock_query.return_value = pdc_query
 
     backup_api.tar_api.run_tar_command.return_value = None
-    result = backup_api.fetch_flow_cell(mock_flow_cell)
+    result = backup_api.fetch_flow_cell(flow_cell=mock_flow_cell)
 
     # THEN the process to retrieve the flow cell from PDC is started
     assert "retrieving from PDC" in caplog.text

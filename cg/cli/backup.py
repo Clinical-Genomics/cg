@@ -47,14 +47,14 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
     )
     backup_api: BackupAPI = context.meta_apis["backup_api"]
 
-    flow_cell_obj: Optional[models.Flowcell] = None
+    flow_cell: Optional[models.Flowcell] = None
     if flow_cell:
-        flow_cell_obj: Optional[models.Flowcell] = status_api.get_flow_cell(flow_cell)
-        if flow_cell_obj is None:
+        flow_cell: Optional[models.Flowcell] = status_api.get_flow_cell(flow_cell)
+        if flow_cell is None:
             LOG.error(f"{flow_cell}: not found in database")
             raise click.Abort
 
-    retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell_obj=flow_cell_obj)
+    retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell=flow_cell)
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60
@@ -66,7 +66,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell: str):
 
     if not dry_run:
         LOG.info("%s: updating flow cell status to %s", flow_cell, FlowCellStatus.REQUESTED)
-        flow_cell_obj.status = FlowCellStatus.REQUESTED
+        flow_cell.status = FlowCellStatus.REQUESTED
         status_api.commit()
 
 
