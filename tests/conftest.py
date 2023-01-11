@@ -1330,6 +1330,18 @@ def fixture_microsalt_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("microsalt")
 
 
+@pytest.fixture()
+def current_encryption_dir() -> Path:
+    """Return a temporary directory for current encryption testing."""
+    return Path("/home/ENCRYPT/")
+
+
+@pytest.fixture()
+def legacy_encryption_dir() -> Path:
+    """Return a temporary directory for current encryption testing."""
+    return Path("/home/TO_PDC/")
+
+
 @pytest.fixture(name="cg_uri")
 def fixture_cg_uri() -> str:
     """Return a cg URI."""
@@ -1373,7 +1385,10 @@ def fixture_context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": "/home/ENCRYPT/",
+            "encrypt_dir": {
+                "current": str(current_encryption_dir),
+                "legacy": str(legacy_encryption_dir),
+            },
             "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
         },
         "balsamic": {
