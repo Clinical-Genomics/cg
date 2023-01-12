@@ -247,3 +247,7 @@ class LoqusdbDeleteCaseError(LoqusdbError):
 
 class LoqusdbDuplicateRecordError(LoqusdbError):
     """Exception related to duplicate records in Loqusdb."""
+
+
+class PdcNoFilesMatchingSearchError(CgError):
+    """Exception raised when PDC API returns no files matching the search criteria."""

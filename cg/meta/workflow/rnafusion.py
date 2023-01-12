@@ -53,6 +53,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 binary=self.config.rnafusion.binary_path,
                 environment=self.conda_env,
                 conda_binary=self.conda_binary,
+                launch_directory=self.config.rnafusion.launch_directory,
             )
         return self._process
 
@@ -63,6 +64,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+
+    def get_variables_to_export(self, case_id) -> Dict[str, str]:
+        return NextflowAnalysisAPI.get_variables_to_export(case_id=case_id, root_dir=self.root_dir)
 
     def verify_analysis_finished(self, case_id):
         return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
@@ -252,6 +256,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             + NextflowAnalysisAPI.get_nextflow_stdout_stderr(
                 case_id=case_id, root_dir=self.root_dir
             )
+        )
+        self.process.export_variables(
+            export=self.get_variables_to_export(case_id),
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
