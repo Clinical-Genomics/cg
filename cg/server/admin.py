@@ -253,6 +253,14 @@ class FamilyView(BaseView):
         self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
 
     @action(
+        "set_cancel",
+        "Set action to cancel",
+        "Are you sure you want to set the action for selected families to cancel?",
+    )
+    def action_set_cancel(self, ids: List[str]):
+        self.set_action_for_batch(action=CaseActions.CANCEL, entry_ids=ids)
+
+    @action(
         "set_empty",
         "Set action to Empty",
         "Are you sure you want to set the action for selected families to Empty?",
