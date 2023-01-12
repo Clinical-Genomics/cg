@@ -18,7 +18,7 @@ from tests.cli.compress.conftest import MockCompressAPI
 from tests.store_helpers import StoreHelpers
 
 
-class CompressionData:
+class MockCompressionData:
     """Class to hold compression files."""
 
     def __init__(self, **kwargs):
@@ -73,7 +73,7 @@ class CompressionData:
     def spring_metadata_file(self) -> Path:
         """Return the path to an existing SPRING metadata file."""
 
-        spring_metadata: List[dict] = CompressionData._spring_metadata(
+        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path
         )
         WriteFile.write_file_from_content(
@@ -86,7 +86,7 @@ class CompressionData:
     @property
     def updated_spring_metadata_file(self) -> Path:
         """Return the path to an existing updated SPRING metadata file."""
-        spring_metadata: List[dict] = CompressionData._spring_metadata(
+        spring_metadata: List[dict] = MockCompressionData._spring_metadata(
             self.fastq_first, self.fastq_second, self.spring_path, True
         )
         WriteFile.write_file_from_content(
@@ -107,7 +107,7 @@ class CompressionData:
         """Return the path to an existing first read FASTQ file."""
         self.fastq_first.touch()
         if old:
-            CompressionData.make_old(self.fastq_first)
+            MockCompressionData.make_old(self.fastq_first)
         return self.fastq_first
 
     @property
@@ -115,14 +115,14 @@ class CompressionData:
         """Return the path to an existing second read FASTQ file."""
         self.fastq_second.touch()
         if old:
-            CompressionData.make_old(self.fastq_second)
+            MockCompressionData.make_old(self.fastq_second)
         return self.fastq_second
 
 
 @pytest.fixture(name="compression_files")
-def fixture_compression_files(compression_object: CompressionData) -> CompressionData:
+def fixture_compression_files(compression_object: MockCompressionData) -> MockCompressionData:
     """Return a CompressionData class with files."""
-    return CompressionData(
+    return MockCompressionData(
         spring_path=compression_object.spring_path,
         spring_metadata_path=compression_object.spring_metadata_path,
         fastq_first=compression_object.fastq_first,
@@ -177,13 +177,13 @@ def fixture_sample():
 
 
 @pytest.fixture(name="spring_path")
-def fixture_spring_path(compression_object: CompressionData) -> Path:
+def fixture_spring_path(compression_object: MockCompressionData) -> Path:
     """Return the path to a non-existing spring file."""
     return compression_object.spring_path
 
 
 @pytest.fixture(name="spring_metadata_path")
-def fixture_spring_metadata_path(compression_object: CompressionData) -> Path:
+def fixture_spring_metadata_path(compression_object: MockCompressionData) -> Path:
     """Return the path to a non-existing spring metadata file."""
     return compression_object.spring_metadata_path
 
@@ -217,7 +217,7 @@ def fixture_multi_linked_file(spring_path: Path, project_dir: Path) -> Path:
 
 
 @pytest.fixture(name="fastq_paths")
-def fixture_fastq_paths(compression_object: CompressionData) -> Dict[str, Path]:
+def fixture_fastq_paths(compression_object: MockCompressionData) -> Dict[str, Path]:
     """Return temporary fastq-files."""
     return {
         "fastq_first_path": compression_object.fastq_first,

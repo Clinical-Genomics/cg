@@ -11,12 +11,14 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.compress import files
 from tests.cli.compress.conftest import MockCompressAPI
-from tests.meta.compress.conftest import CompressionData
+from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
 
 
 @pytest.mark.compress_meta
-def test_remove_fastqs(compress_api: MockCompressAPI, compression_object: CompressionData, caplog):
+def test_remove_fastqs(
+    compress_api: MockCompressAPI, compression_object: MockCompressionData, caplog
+):
     """Test remove_fastq method."""
     caplog.set_level(logging.DEBUG)
     # GIVEN existing FASTQ and flag file
@@ -89,7 +91,9 @@ def test_update_hk_fastq(
 @pytest.mark.compress_meta
 @pytest.mark.clean_fastq
 def test_cli_clean_fastqs_removed(
-    populated_compress_fastq_api: MockCompressAPI, compression_files: CompressionData, sample: str
+    populated_compress_fastq_api: MockCompressAPI,
+    compression_files: MockCompressionData,
+    sample: str,
 ):
     """Test to clean FASTQs after a successful FASTQ compression."""
     spring_file: Path = compression_files.spring_file
@@ -120,7 +124,9 @@ def test_cli_clean_fastqs_removed(
 @pytest.mark.compress_meta
 @pytest.mark.clean_fastq
 def test_cli_clean_fastqs_no_spring_metadata(
-    populated_compress_fastq_api: MockCompressAPI, compression_files: CompressionData, sample: str
+    populated_compress_fastq_api: MockCompressAPI,
+    compression_files: MockCompressionData,
+    sample: str,
 ):
     """Test to clean FASTQs when SPRING compression is not finished."""
     spring_file: Path = compression_files.spring_file
@@ -148,7 +154,9 @@ def test_cli_clean_fastqs_no_spring_metadata(
 @pytest.mark.compress_meta
 @pytest.mark.clean_fastq
 def test_cli_clean_fastqs_pending_compression_metadata(
-    populated_compress_fastq_api: MockCompressAPI, compression_files: CompressionData, sample: str
+    populated_compress_fastq_api: MockCompressAPI,
+    compression_files: MockCompressionData,
+    sample: str,
 ):
     """Test to clean FASTQs when SPRING compression is pending."""
     spring_file: Path = compression_files.spring_file

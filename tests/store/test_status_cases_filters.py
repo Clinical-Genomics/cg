@@ -477,7 +477,7 @@ def test_filter_inactive_analysis_cases_when_not_completed(
 
 
 def test_filter_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_weeks: datetime):
-    """Test that old case is returned when a future date is supplied."""
+    """Test that an old case is returned when a future date is supplied."""
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
