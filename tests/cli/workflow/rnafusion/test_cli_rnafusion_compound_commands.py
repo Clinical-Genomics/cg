@@ -170,6 +170,7 @@ def test_store_available(
     mocker,
     hermes_deliverables,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones."""
@@ -182,16 +183,7 @@ def test_store_available(
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
-    # Ensure the config is mocked to run compound command
-    Path.mkdir(
-        Path(
-            rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)
-        ).parent,
-        exist_ok=True,
-    )
-    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)).touch(
-        exist_ok=True
-    )
+    # GIVEN a mocked config
 
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
