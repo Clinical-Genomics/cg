@@ -1,17 +1,37 @@
 """Helper functions for compress cli"""
+import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Optional, List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
+from cg.store.models import Family
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
+
+
+def get_cases_to_process(
+    days_back: int, store: Store, case_id: Optional[str] = None
+) -> Optional[List[Family]]:
+    """Return cases to process."""
+    cases: List[Family] = []
+    if case_id:
+        case: Family = store.family(case_id)
+        if not case:
+            LOG.warning(f"Could not find case {case_id}")
+            return
+        cases.append(case)
+    else:
+        date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
+        cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+    return cases
 
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
@@ -25,18 +45,29 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
         yield link_obj.sample.internal_id
 
 
-def update_compress_api(
-    compress_api: CompressAPI, dry_run: bool, ntasks: int = None, mem: int = None
-) -> None:
-    """Update parameters in compress api"""
+def is_case_ignored(case_id: str) -> bool:
+    """Check if case should be skipped."""
+    if case_id in CASES_TO_IGNORE:
+        LOG.debug(f"Skipping case: {case_id}")
+        return True
+    return False
 
-    compress_api.set_dry_run(dry_run)
-    if ntasks:
-        LOG.info("Set ntasks to %s", ntasks)
-        compress_api.ntasks = ntasks
+
+def update_compress_api(
+    compress_api: CompressAPI, dry_run: bool, hours: int = None, mem: int = None, ntasks: int = None
+) -> None:
+    """Update parameters in Compress API."""
+
+    compress_api.set_dry_run(dry_run=dry_run)
     if mem:
-        LOG.info("Set mem to %s", ntasks)
-        compress_api.mem = mem
+        LOG.info(f"Set Crunchy API SLURM mem to {mem}")
+        compress_api.crunchy_api.slurm_memory = mem
+    if hours:
+        LOG.info(f"Set Crunchy API SLURM hours to {hours}")
+        compress_api.crunchy_api.slurm_hours = hours
+    if ntasks:
+        LOG.info(f"Set Crunchy API SLURM number of tasks to {ntasks}")
+        compress_api.crunchy_api.slurm_number_tasks = ntasks
 
 
 # Functions to fix problematic spring files

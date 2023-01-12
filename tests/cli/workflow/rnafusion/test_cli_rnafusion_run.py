@@ -98,5 +98,8 @@ def test_with_config(
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
 
-    # THEN command should NOT execute successfully
+    # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
+
+    # THEN command should include resume flag
+    assert "-resume" in caplog.text

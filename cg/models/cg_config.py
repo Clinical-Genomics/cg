@@ -56,7 +56,10 @@ class CleanConfig(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
+    hours: Optional[int]
     mail_user: EmailStr
+    memory: Optional[int]
+    number_tasks: Optional[int]
     conda_env: Optional[str]
     qos: SlurmQos = SlurmQos.LOW
 
