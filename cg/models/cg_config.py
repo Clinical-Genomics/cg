@@ -31,13 +31,18 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
+class EncryptionDirs(BaseModel):
+    current: str
+    legacy: str
+
+
 class FlowCellRunDirs(Sequencers):
     pass
 
 
 class BackupConfig(BaseModel):
     root: Sequencers
-    encrypt_dir: str
+    encrypt_dir: EncryptionDirs
 
 
 class CleanDirs(BaseModel):
@@ -152,6 +157,7 @@ class RnafusionConfig(CommonAppConfig):
     conda_env: str
     profile: str
     conda_binary: Optional[str] = None
+    launch_directory: str
 
 
 class CGStatsConfig(BaseModel):
