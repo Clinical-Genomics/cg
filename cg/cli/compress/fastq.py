@@ -69,7 +69,7 @@ def fastq_cmd(
     ntasks: Optional[int],
     number_of_conversions: int,
 ):
-    """Get cases with FASTQ files and compress into SPRING."""
+    """Compress old FASTQ files into SPRING."""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
