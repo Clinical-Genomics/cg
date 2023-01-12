@@ -1,8 +1,6 @@
 """Constants specific for compression."""
 import datetime
 
-from cgmodels.cg.constants import StrEnum
-
 # Constants for crunchy
 FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
 FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
@@ -10,10 +8,8 @@ FLAG_PATH_SUFFIX = ".crunchy.txt"
 PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
 
 
-# Number of days until fastqs counts as old
+# Number of days until FASTQs counts as old
 FASTQ_DELTA = 21
-
-# Get the fastq delta in datetime format
 FASTQ_DATETIME_DELTA = datetime.timedelta(days=FASTQ_DELTA)
 
 PROBLEMATIC_CASES = [
