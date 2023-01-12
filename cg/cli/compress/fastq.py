@@ -39,7 +39,7 @@ def get_cases_to_process(
 def is_case_ignored(case_id: str) -> bool:
     """Check if case should be skipped."""
     if case_id in CASES_TO_IGNORE:
-        LOG.info(f"Skipping case: {case_id}")
+        LOG.debug(f"Skipping case: {case_id}")
         return True
     return False
 
