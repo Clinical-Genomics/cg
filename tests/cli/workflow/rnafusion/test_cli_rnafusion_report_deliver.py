@@ -72,14 +72,7 @@ def test_dry_run(
     caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id: str = rnafusion_case_id
-    # WHEN ensuring case config and analysis_finish exist where they should be stored
-    Path.mkdir(
-        Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
-        exist_ok=True,
-    )
-    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
-        exist_ok=True
-    )
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(report_deliver, [case_id, "--dry-run"], obj=rnafusion_context)
     # THEN command should execute successfully

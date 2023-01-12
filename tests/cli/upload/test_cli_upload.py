@@ -1,11 +1,15 @@
 """Test CG CLI upload module."""
+import logging
 from datetime import datetime, timedelta
 
-from cg.cli.upload.base import upload
-from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from _pytest.logging import LogCaptureFixture
+from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
+from cg.cli.upload.base import upload
+from cg.constants import DataDelivery
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
 
 
@@ -32,8 +36,11 @@ def test_upload_started_long_time_ago_raises_exception(
     assert result.exception
 
 
-def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
+def test_upload_force_restart(
+    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, caplog: LogCaptureFixture
+):
     """Test that a case that is already uploading can be force restarted."""
+    caplog.set_level(logging.INFO)
 
     # GIVEN an analysis that is already uploading
     disk_store: Store = base_context.status_db
@@ -46,4 +53,38 @@ def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, hel
     result = cli_runner.invoke(upload, ["-f", case_id, "-r"], obj=base_context)
 
     # THEN it tries to restart the upload
+    assert "already started" not in result.output
+
+
+def test_upload_rnafusion(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    helpers: StoreHelpers,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test that a case that is already uploading can be force restarted."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an analysis that is already uploading
+    disk_store: Store = base_context.status_db
+    case: models.Family = helpers.add_case(
+        store=disk_store,
+        data_analysis=Pipeline.RNAFUSION,
+    )
+    case_id: str = rnafusion_case_id
+
+    helpers.add_analysis(
+        disk_store,
+        case=case,
+        pipeline=Pipeline.RNAFUSION,
+        data_delivery=DataDelivery.SCOUT,
+        completed_at=datetime.now(),
+    )
+
+    # WHEN trying to upload it again with the force restart flag
+    result = cli_runner.invoke(upload, ["-f", case_id], obj=base_context, catch_exceptions=True)
+    a = result.output
+    # THEN it tries to restart the upload    assert "already started" not in result.output
+
     assert "already started" not in result.output

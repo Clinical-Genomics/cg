@@ -167,9 +167,9 @@ def fixture_deliverables_data(
             {
                 "path": f"{rnafusion_dir}/{rnafusion_case_id}/multiqc/multiqc_report.html",
                 "path_index": "",
-                "step": "multiqc",
-                "tag": ["qc"],
-                "id": rnafusion_sample_id,
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": rnafusion_case_id,
                 "format": "html",
                 "mandatory": True,
             },
@@ -236,5 +236,17 @@ def mock_analysis_finish(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     """Create analysis_finish file for testing"""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
     Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+
+
+@pytest.fixture
+def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+    """Create samplesheet.csv file for testing"""
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
         exist_ok=True
     )

@@ -128,6 +128,7 @@ def test_start_available(
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones."""
@@ -137,15 +138,6 @@ def test_start_available(
     case_id_success: str = rnafusion_case_id
 
     # Ensure the config is mocked to run compound command
-    Path.mkdir(
-        Path(
-            rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)
-        ).parent,
-        exist_ok=True,
-    )
-    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)).touch(
-        exist_ok=True
-    )
 
     # GIVEN decompression is not needed
     mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
