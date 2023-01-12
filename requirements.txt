@@ -23,7 +23,6 @@ sendmail-container
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
-alive_progress
 ansi
 cgmodels>=0.10.5
 coloredlogs
