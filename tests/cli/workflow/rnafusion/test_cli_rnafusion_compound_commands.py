@@ -34,6 +34,7 @@ def test_start(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
@@ -44,12 +45,17 @@ def test_start(
     # GIVEN decompression is not needed
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
 
+    # GIVEN a mocked config
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
+
+    # THEN command should not include resume flag
+    assert "-resume" not in caplog.text
 
 
 def test_store_success(
@@ -128,6 +134,7 @@ def test_start_available(
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones."""
@@ -136,16 +143,7 @@ def test_start_available(
     # GIVEN CASE ID of sample where read counts pass threshold
     case_id_success: str = rnafusion_case_id
 
-    # Ensure the config is mocked to run compound command
-    Path.mkdir(
-        Path(
-            rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)
-        ).parent,
-        exist_ok=True,
-    )
-    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)).touch(
-        exist_ok=True
-    )
+    # GIVEN a mocked config
 
     # GIVEN decompression is not needed
     mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")

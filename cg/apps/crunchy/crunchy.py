@@ -31,17 +31,20 @@ LOG = logging.getLogger(__name__)
 
 class CrunchyAPI:
     """
-    API for crunchy.
+    API for Crunchy.
     """
 
     def __init__(self, config: dict):
         self.conda_binary: Optional[str] = config["crunchy"]["conda_binary"] or None
         self.crunchy_env: str = config["crunchy"]["slurm"]["conda_env"]
         self.dry_run: bool = False
-        self.mail_user: str = config["crunchy"]["slurm"]["mail_user"]
         self.reference_path: str = config["crunchy"]["cram_reference"]
-        self.slurm_account: str = config["crunchy"]["slurm"]["account"]
         self.slurm_api: SlurmAPI = SlurmAPI()
+        self.slurm_account: str = config["crunchy"]["slurm"]["account"]
+        self.slurm_hours: int = config["crunchy"]["slurm"]["hours"]
+        self.slurm_mail_user: str = config["crunchy"]["slurm"]["mail_user"]
+        self.slurm_memory: int = config["crunchy"]["slurm"]["memory"]
+        self.slurm_number_tasks: int = config["crunchy"]["slurm"]["number_tasks"]
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Update dry run."""
@@ -234,13 +237,13 @@ class CrunchyAPI:
         sbatch_parameters: Sbatch = Sbatch(
             account=self.slurm_account,
             commands=commands,
-            email=self.mail_user,
+            email=self.slurm_mail_user,
             error=error_function,
-            hours=24,
+            hours=self.slurm_hours,
             job_name="_".join([sample_id, compression_obj.run_name, "fastq_to_spring"]),
             log_dir=log_dir.as_posix(),
-            memory=50,
-            number_tasks=12,
+            memory=self.slurm_memory,
+            number_tasks=self.slurm_number_tasks,
             quality_of_service=SlurmQos.MAINTENANCE,
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(
@@ -289,13 +292,13 @@ class CrunchyAPI:
         sbatch_parameters: Sbatch = Sbatch(
             account=self.slurm_account,
             commands=commands,
-            email=self.mail_user,
+            email=self.slurm_mail_user,
             error=error_function,
-            hours=24,
+            hours=self.slurm_hours,
             job_name="_".join([sample_id, compression_obj.run_name, "spring_to_fastq"]),
             log_dir=log_dir.as_posix(),
-            memory=50,
-            number_tasks=12,
+            memory=self.slurm_memory,
+            number_tasks=self.slurm_number_tasks,
             quality_of_service=SlurmQos.LOW,
         )
         sbatch_content: str = self.slurm_api.generate_sbatch_content(sbatch_parameters)
