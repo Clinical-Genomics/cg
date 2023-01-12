@@ -8,7 +8,7 @@ from cg.io.controller import ReadFile, WriteFile
 
 
 def test_is_spring_decompression_done_all_files_exist(
-    crunchy_config, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is done when FASTQ files are unarchived
 
@@ -48,7 +48,7 @@ def test_is_spring_decompression_done_all_files_exist(
 
 
 def test_is_spring_decompression_done_missing_fastq_files(
-    crunchy_config, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is done when FASTQ files are missing
 
@@ -76,7 +76,7 @@ def test_is_spring_decompression_done_missing_fastq_files(
 
 
 def test_is_spring_decompression_done_all_files_exist_not_updated(
-    crunchy_config, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is done when FASTQ files are not unarchived
 
@@ -111,7 +111,7 @@ def test_is_spring_decompression_done_all_files_exist_not_updated(
 
 
 def test_is_spring_decompression_done_missing_metadata_file(
-    crunchy_config, compression_object, caplog
+    crunchy_config: dict, compression_object, caplog
 ):
     """Test if SPRING decompression is done when SPRING metadata file is missing
 
@@ -133,7 +133,7 @@ def test_is_spring_decompression_done_missing_metadata_file(
 
 
 def test_is_spring_decompression_done_empty_metadata_file(
-    crunchy_config, compression_object, caplog
+    crunchy_config: dict, compression_object, caplog
 ):
     """Test if SPRING decompression is done when SPRING metadata file has no content
 
@@ -153,7 +153,9 @@ def test_is_spring_decompression_done_empty_metadata_file(
         assert "Malformed metadata content" in caplog.text
 
 
-def test_is_spring_decompression_possible(crunchy_config, compression_object, spring_metadata_file):
+def test_is_spring_decompression_possible(
+    crunchy_config: dict, compression_object, spring_metadata_file
+):
     """Test if SPRING decompression is possible when decompression is already done
 
     The function should return False since decompression is already done
@@ -188,7 +190,7 @@ def test_is_spring_decompression_possible(crunchy_config, compression_object, sp
 
 
 def test_is_spring_decompression_possible_decompression_pending(
-    crunchy_config, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is possible when decompression is pending
 
@@ -210,7 +212,7 @@ def test_is_spring_decompression_possible_decompression_pending(
 
 
 def test_is_spring_decompression_possible(
-    crunchy_config, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is possible
 

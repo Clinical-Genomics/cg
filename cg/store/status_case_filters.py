@@ -20,7 +20,7 @@ def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     return cases.filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
 
 
-def filter_completed_analysis_cases(cases: Query, **kwargs) -> Query:
+def filter_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     """Return cases which are not set or on hold."""
     return cases.filter(
         or_(
@@ -106,7 +106,6 @@ def apply_case_filter(
 ):
     """Apply filtering functions and return filtered results."""
     filter_map = {
-        "completed_analysis_cases": filter_completed_analysis_cases,
         "cases_has_sequence": filter_cases_has_sequence,
         "cases_with_pipeline": filter_cases_with_pipeline,
         "cases_with_loqusdb_supported_pipeline": filter_cases_with_loqusdb_supported_pipeline,
@@ -114,6 +113,7 @@ def apply_case_filter(
         "filter_cases_for_analysis": filter_cases_for_analysis,
         "cases_with_scout_data_delivery": filter_cases_with_scout_data_delivery,
         "filter_report_cases_with_valid_data_delivery": filter_report_supported_data_delivery_cases,
+        "inactive_analysis_cases": filter_inactive_analysis_cases,
         "new_cases": filter_new_cases,
     }
     return filter_map[function](cases=cases, date=date, pipeline=pipeline)

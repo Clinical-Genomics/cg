@@ -26,7 +26,7 @@ def test_get_cases_to_process(
 
     # GIVEN a context with a case that can be compressed
 
-    valid_compressable_case = helpers.add_case(
+    valid_compressable_case: Family = helpers.add_case(
         store=status_db,
         name=case_id,
         internal_id=case_id,
@@ -114,7 +114,7 @@ def test_compress_fastq_cli_case_id(
 
     # GIVEN a context with a case that can be compressed
 
-    valid_compressable_case = helpers.add_case(
+    valid_compressable_case: Family = helpers.add_case(
         store=status_db,
         name=case_id,
         internal_id=case_id,
@@ -139,6 +139,7 @@ def test_compress_fastq_cli_case_id(
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=populated_compress_context)
 
+    print(res.output)
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
 

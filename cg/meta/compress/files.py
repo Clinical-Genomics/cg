@@ -30,7 +30,7 @@ def get_hk_files_dict(tags: List[str], version_obj: Version) -> Dict[Path, File]
         if not file_tags.intersection(tags):
             continue
         LOG.info(f"Found file {version_file.path}")
-        path_obj = Path(version_file.full_path)
+        path_obj: Path = Path(version_file.full_path)
         hk_file[path_obj] = version_file
     return hk_file
 
@@ -45,7 +45,9 @@ def is_file_in_version(version_obj: Version, path: Path) -> bool:
 
 def get_spring_paths(version_obj: Version) -> List[CompressionData]:
     """Get all SPRING paths for a sample."""
-    hk_files_dict = get_hk_files_dict(tags=[SequencingFileTag.SPRING], version_obj=version_obj)
+    hk_files_dict: Dict[Path, File] = get_hk_files_dict(
+        tags=[SequencingFileTag.SPRING], version_obj=version_obj
+    )
     spring_paths: list = []
 
     if hk_files_dict is None:

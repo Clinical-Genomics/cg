@@ -1,17 +1,37 @@
 """Helper functions for compress cli"""
+import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Optional, List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.compression import CASES_TO_IGNORE
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
+from cg.store.models import Family
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
+
+
+def get_cases_to_process(
+    days_back: int, store: Store, case_id: Optional[str] = None
+) -> Optional[List[Family]]:
+    """Return cases to process."""
+    cases: List[Family] = []
+    if case_id:
+        case: Family = store.family(case_id)
+        if not case:
+            LOG.warning(f"Could not find case {case_id}")
+            return
+        cases.append(case)
+    else:
+        date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
+        cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+    return cases
 
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
@@ -23,6 +43,14 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
 
     for link_obj in case_obj.links:
         yield link_obj.sample.internal_id
+
+
+def is_case_ignored(case_id: str) -> bool:
+    """Check if case should be skipped."""
+    if case_id in CASES_TO_IGNORE:
+        LOG.debug(f"Skipping case: {case_id}")
+        return True
+    return False
 
 
 def update_compress_api(

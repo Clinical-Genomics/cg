@@ -219,7 +219,7 @@ class StatusHandler(BaseHandler):
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
         filter_functions: List[str] = [
-            "completed_analysis_cases",
+            "inactive_analysis_cases",
             "new_cases",
         ]
         for filter_function in filter_functions:

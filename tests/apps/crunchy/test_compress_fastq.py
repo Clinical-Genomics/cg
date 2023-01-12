@@ -85,7 +85,7 @@ def test_get_spring_metadata_wrong_number_files(
 
 
 def test_fastq_to_spring_sbatch(
-    crunchy_config,
+    crunchy_config: dict,
     compression_object: CompressionData,
     sbatch_process: Process,
     sbatch_job_number: int,
@@ -121,7 +121,7 @@ def test_fastq_to_spring_sbatch(
 def test_spring_to_fastq(
     compression_object: CompressionData,
     spring_metadata_file: Path,
-    crunchy_config,
+    crunchy_config: dict,
     mocker,
 ):
     """Test SPRING to FASTQ method
