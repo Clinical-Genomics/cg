@@ -45,8 +45,10 @@ def public(route_function):
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if not request.is_secure:
-        return make_response(
-            jsonify(message="Only https requests accepted"), http.HTTPStatus.FORBIDDEN
+        return abort(
+            make_response(
+                jsonify(message="Only https requests accepted"), http.HTTPStatus.FORBIDDEN
+            )
         )
 
     if request.method == "OPTIONS":
