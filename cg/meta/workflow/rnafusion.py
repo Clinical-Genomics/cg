@@ -243,7 +243,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 root_dir=self.root_dir,
                 log=log,
                 bg=True,
-                q=True,
+                quiet=True,
             ),
             exclude_true=True,
         )

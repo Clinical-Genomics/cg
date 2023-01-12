@@ -104,14 +104,14 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_verified_arguments_nextflow(
-        cls, case_id: str, pipeline: str, root_dir: str, log: Path, bg: bool, q: bool
+        cls, case_id: str, pipeline: str, root_dir: str, log: Path, bg: bool, quiet: bool
     ) -> dict:
         """Transforms click argument related to nextflow that were left empty
         into defaults constructed with case_id paths."""
 
         return {
             "-bg": bg,
-            "-q": q,
+            "-quiet": quiet,
             "-log": cls.get_log_path(case_id, pipeline, root_dir, log),
         }
 
