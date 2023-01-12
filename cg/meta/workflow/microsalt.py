@@ -85,7 +85,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         )
 
         return next(
-            (path for path in self.get_case_path(case_id=case_id) if lims_project + "_" in str(path)),
+            (
+                path
+                for path in self.get_case_path(case_id=case_id)
+                if lims_project + "_" in str(path)
+            ),
             None,
         )
 
