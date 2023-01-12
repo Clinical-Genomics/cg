@@ -130,7 +130,7 @@ class NextflowAnalysisAPI:
         into defaults constructed with case_id paths."""
 
         return {
-            "-w": cls.get_workdir_path(case_id, root_dir, work_dir),
+            "-w": cls.get_workdir_path(case_id=case_id, root_dir=root_dir, work_dir=work_dir),
             "-resume": resume,
             "-profile": profile,
             "-with-tower": with_tower,
