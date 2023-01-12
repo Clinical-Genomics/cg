@@ -160,6 +160,7 @@ class RnafusionConfig(CommonAppConfig):
     conda_env: str
     profile: str
     conda_binary: Optional[str] = None
+    launch_directory: str
 
 
 class CGStatsConfig(BaseModel):
