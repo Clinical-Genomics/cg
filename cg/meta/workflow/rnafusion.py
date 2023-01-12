@@ -183,13 +183,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
-        if dry_run:
-            LOG.info(DRY_RUN_MESSAGE)
-
         NextflowAnalysisAPI.make_case_folder(
             case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
         )
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
+
+        if dry_run:
+            LOG.info("Dry run: Samplesheet will not be written")
+            return
+
         LOG.info("Samplesheet written")
 
     def run_analysis(
