@@ -204,13 +204,13 @@ def test_get_latest_case_path(
         MicrosaltAnalysisAPI,
         "get_case_path",
         return_value=[
-            "tests/fixtures/analysis/microsalt/ACC12345A2_2023",
-            "tests/fixtures/analysis/microsalt/ACC12345_2022",
-            "tests/fixtures/analysis/microsalt/ACC12345A1_2023",
+            Path("tests/fixtures/analysis/microsalt/ACC12345A2_2023"),
+            Path("tests/fixtures/analysis/microsalt/ACC12345_2022"),
+            Path("tests/fixtures/analysis/microsalt/ACC12345A1_2023"),
         ],
     )
     # WHEN getting the latest case path
     path = microsalt_api.get_latest_case_path(case_id=microsalt_case_qc_pass)
 
     # THEN the first case path should be returned
-    assert "tests/fixtures/analysis/microsalt/ACC12345_2022" == path
+    assert Path("tests/fixtures/analysis/microsalt/ACC12345_2022") == path
