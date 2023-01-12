@@ -120,6 +120,7 @@ def run(
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    resume = False if from_start else True
     try:
         analysis_api.verify_case_id_in_statusdb(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
@@ -129,7 +130,7 @@ def run(
             case_id=case_id,
             log=log,
             work_dir=work_dir,
-            resume=not from_start,
+            resume=resume,
             profile=profile,
             with_tower=with_tower,
             stub=stub,
