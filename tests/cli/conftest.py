@@ -1,5 +1,6 @@
 """Fixtures for cli tests."""
 from pathlib import Path
+from typing import Dict, Any
 
 import pytest
 
@@ -135,9 +136,9 @@ def fixture_populated_compress_context(
 
 
 @pytest.fixture(name="real_crunchy_api")
-def fixture_real_crunchy_api(crunchy_config_dict):
+def fixture_real_crunchy_api(crunchy_config: Dict[str, Dict[str, Any]]):
     """Return Crunchy API."""
-    _api = CrunchyAPI(crunchy_config_dict)
+    _api = CrunchyAPI(crunchy_config)
     _api.set_dry_run(True)
     yield _api
 
