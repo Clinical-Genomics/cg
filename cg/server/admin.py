@@ -246,8 +246,8 @@ class FamilyView(BaseView):
 
     @action(
         "set_hold",
-        "Set action to HOLD",
-        "Are you sure you want to set the action for selected families to HOLD?",
+        "Set action to hold",
+        "Are you sure you want to set the action for selected families to hold?",
     )
     def action_set_hold(self, ids: List[str]):
         self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
@@ -255,7 +255,7 @@ class FamilyView(BaseView):
     @action(
         "set_empty",
         "Set action to Empty",
-        "Are you sure you want to set the action for selected families to empty?",
+        "Are you sure you want to set the action for selected families to Empty?",
     )
     def action_set_empty(self, ids: List[str]):
         self.set_action_for_batch(action=None, entry_ids=ids)
@@ -288,7 +288,7 @@ class FlowcellView(BaseView):
     column_default_sort = ("sequenced_at", True)
     column_editable_list = ["status"]
     column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name"]
+    column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
 
 
