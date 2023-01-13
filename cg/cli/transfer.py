@@ -9,7 +9,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.transfer import PoolState, SampleState, TransferFlowCell, TransferLims
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -37,7 +38,9 @@ def transfer_group(context: CGConfig):
     required=True,
     help="Path to demultiplexed flow cells output directory",
 )
-@click.option("--store/--no-store", default=True, help="Store sample bundles of flow cell in Housekeeper")
+@click.option(
+    "--store/--no-store", default=True, help="Store sample bundles of flow cell in Housekeeper"
+)
 @click.pass_obj
 def flow_cell(
     context: CGConfig, demultiplexed_flow_cell_dir: Path, flow_cell_name: str, store: bool = True
