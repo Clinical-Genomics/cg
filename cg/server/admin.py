@@ -436,7 +436,7 @@ class SampleView(BaseView):
     )
     def cancel_samples(self, entry_ids: List[str]):
         self.write_cancel_comment(entry_ids)
-        self.remove_family_samples()
+        self.remove_family_samples(entry_ids)
 
     def write_cancel_comment(self, entry_ids: List[str]):
         try:
