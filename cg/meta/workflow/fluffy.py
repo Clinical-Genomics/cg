@@ -151,13 +151,13 @@ class FluffyAnalysisAPI(AnalysisAPI):
         return pd.read_csv(samplesheet_housekeeper_path, index_col=None, header=header_lines + 1)
 
     def add_samplesheet_column(
-        self, samplesheet_df: pd.DataFrame, newColumn: str, toAdd: list
+        self, samplesheet_df: pd.DataFrame, new_column: str, to_add: list
     ) -> pd.DataFrame:
         """Add columns to the samplesheet
         Returns:
             pd.DataFrame: Samplesheet DataFrame
         """
-        samplesheet_df[newColumn] = toAdd
+        samplesheet_df[new_column] = to_add
         return samplesheet_df
 
     def add_concentrations_to_samplesheet(
@@ -183,40 +183,40 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
         samplesheet_df = self.add_samplesheet_column(
             samplesheet_df=samplesheet_df,
-            newColumn="SampleName",
-            toAdd=samplesheet_df[sample_id_column_alias].apply(
+            new_column="SampleName",
+            to_add=samplesheet_df[sample_id_column_alias].apply(
                 lambda x: self.get_sample_name_from_lims_id(lims_id=x)
             ),
         )
 
         samplesheet_df = self.add_samplesheet_column(
             samplesheet_df=samplesheet_df,
-            newColumn="Library_nM",
-            toAdd=samplesheet_df[sample_id_column_alias].apply(
+            new_column="Library_nM",
+            to_add=samplesheet_df[sample_id_column_alias].apply(
                 lambda x: self.get_concentrations_from_lims(sample_id=x)
             ),
         )
 
         samplesheet_df = self.add_samplesheet_column(
             samplesheet_df=samplesheet_df,
-            newColumn="SequencingDate",
-            toAdd=samplesheet_df[sample_id_column_alias].apply(
+            new_column="SequencingDate",
+            to_add=samplesheet_df[sample_id_column_alias].apply(
                 lambda x: self.get_sample_sequenced_date(sample_id=x)
             ),
         )
 
         samplesheet_df = self.add_samplesheet_column(
             samplesheet_df=samplesheet_df,
-            newColumn=sample_project_column_alias,
-            toAdd=samplesheet_df[sample_id_column_alias].apply(
+            new_column=sample_project_column_alias,
+            to_add=samplesheet_df[sample_id_column_alias].apply(
                 lambda x: self.get_sample_starlims_id(sample_id=x)
             ),
         )
 
         samplesheet_df = self.add_samplesheet_column(
             samplesheet_df=samplesheet_df,
-            newColumn="Exclude",
-            toAdd=samplesheet_df[sample_id_column_alias].apply(
+            new_column="Exclude",
+            to_add=samplesheet_df[sample_id_column_alias].apply(
                 lambda x: self.get_sample_control_status(sample_id=x)
             ),
         )
