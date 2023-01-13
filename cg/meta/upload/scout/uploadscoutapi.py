@@ -2,16 +2,17 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, TypedDict
+from typing import Dict, List, Optional, Set, Tuple
 
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import Pipeline
+from cg.constants import Pipeline, HK_MULTIQC_HTML_TAG
 from cg.constants.constants import FileFormat
 from cg.constants.constants import PrepCategory
+from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.exc import HousekeeperBundleVersionMissingError, CgDataError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -106,11 +107,19 @@ class UploadScoutAPI:
         LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
 
-    def get_multiqc_html_report(self, case_id: str) -> Tuple[str, Optional[hk_models.File]]:
+    def get_multiqc_html_report(
+        self, case_id: str, pipeline: Pipeline
+    ) -> Tuple[ScoutCustomCaseReportTags, Optional[hk_models.File]]:
         """Get a multiqc report for case in housekeeper."""
-
-        multiqc_tag = "multiqc-html"
-        return (multiqc_tag, self.housekeeper.files(bundle=case_id, tags=[multiqc_tag]).first())
+        if pipeline == Pipeline.MIP_RNA:
+            return (
+                ScoutCustomCaseReportTags.MUTLIQC_RNA,
+                self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
+            )
+        return (
+            ScoutCustomCaseReportTags.MULTIQC,
+            self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
+        )
 
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[hk_models.File]:
         """Get a fusion report for case in housekeeper."""
@@ -144,26 +153,20 @@ class UploadScoutAPI:
 
         return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
 
-
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique dna cases related to a RNA case"""
         case_obj: models.Family = self.status_db.family(case_id)
-        rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = self.create_rna_dna_sample_case_map(rna_case=case_obj)
+        rna_dna_sample_case_map: Dict[
+            str, Dict[str, List[str]]
+        ] = self.create_rna_dna_sample_case_map(rna_case=case_obj)
         dna_sample_case_dict: Dict[str, List[str]]
         unique_dna_cases_related_to_rna_case: Set[str] = set()
-        for dna_sample_case_dict in rna_dna_sample_case_map:
+        for dna_sample_case_dict in rna_dna_sample_case_map.values():
             case_list: List[str]
             for case_list in dna_sample_case_dict.values():
-                for case in case_list:
-                    unique_dna_cases_related_to_rna_case.update(case)
+                unique_dna_cases_related_to_rna_case.update(case_list)
 
-
-        return {
-            dna_case
-            for dna_case_dict in self.create_rna_dna_sample_case_map(rna_case=case_obj).values()
-            for case_list in dna_case_dict.values()
-            for dna_case in case_list
-        }
+        return unique_dna_cases_related_to_rna_case
 
     def upload_fusion_report_to_scout(
         self, dry_run: bool, case_id: str, research: bool = False, update: bool = False
@@ -197,7 +200,7 @@ class UploadScoutAPI:
 
         LOG.info(f"Upload {report_type} fusion report finished!")
 
-    def upload_rna_report_scout(
+    def upload_rna_report_to_scout(
         self,
         dry_run: bool,
         report_type: str,
@@ -232,7 +235,6 @@ class UploadScoutAPI:
             report_type=report_type,
         )
         LOG.info(f"Uploaded {report_type} report")
-
         LOG.info(f"Upload {report_type} report finished!")
 
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
@@ -324,7 +326,6 @@ class UploadScoutAPI:
         """Upload RNA junctions splice files to Scout."""
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
-
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
 

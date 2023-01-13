@@ -7,7 +7,9 @@ import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
@@ -167,7 +169,7 @@ def upload_rna_to_scout(
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
-    context.invoke(upload_multiqc_rna_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(
         upload_rna_fusion_report_to_scout,
         case_id=case_id,
@@ -220,22 +222,34 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
         raise error from error
 
 
-@click.command(name="multiqc-rna-to-scout")
+@click.command(name="multiqc-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
-def upload_multiqc_rna_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
+def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
     """Upload RNA multiqc report to Scout."""
     LOG.info("----------------- UPLOAD MULTIQC RNA TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    report_type, multiqc_rna_report = scout_upload_api.get_multiqc_html_report(case_id=case_id)
+    status_db: Store = context.status_db
+    case: Family = status_db.family(case_id)
+    scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
+        case_id=case_id, pipeline=case.data_analysis
+    )
     try:
-        scout_upload_api.upload_report_to_scout(
-            dry_run=dry_run,
-            case_id=case_id,
-            report_type=report_type,
-            report_file=multiqc_rna_report,
-        )
+        if case.pipeline == Pipeline.MIP_RNA:
+            scout_upload_api.upload_rna_report_to_scout(
+                dry_run=dry_run,
+                rna_case_id=case_id,
+                report_type=scout_report_type,
+                report_file=multiqc_report,
+            )
+        else:
+            scout_upload_api.upload_report_to_scout(
+                dry_run=dry_run,
+                case_id=case_id,
+                report_type=scout_report_type,
+                report_file=multiqc_report,
+            )
     except (CgDataError, ScoutUploadError) as error:
         raise error from error

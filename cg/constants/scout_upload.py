@@ -1,3 +1,5 @@
+from cg.utils.enums import StrEnum
+
 MIP_CASE_TAGS = dict(
     snv_vcf={"vcf-snv-clinical"},
     snv_research_vcf={"vcf-snv-research"},
@@ -52,3 +54,12 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
     bam_file={"umi-bam"},
     alignment_file={"umi-cram"},
 )
+
+class ScoutCustomCaseReportTags(StrEnum):
+    DELIVERY: str = "delivery_report"
+    CNV: str = "cnv_report"
+    COV_QC: str = "coverage_qc_report"
+    MULTIQC: str = "multiqc"
+    MULTIQC_RNA: str = "multiqc_rna"
+    GENE_FUSION: str = "gene_fusion_report"
+    GENE_FUSION_RESEARCH: str = "gene_fusion_report_research"

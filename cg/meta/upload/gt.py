@@ -133,9 +133,10 @@ class UploadGenotypesAPI(object):
         """Check if a cancer case is contains WGS and normal sample."""
 
         samples: List[models.Sample] = case_obj.samples
-        for sample in samples:
-            sample_prep_category: str = sample.prep_category
-            return (
+        return any(
+            (
                 not sample.is_tumour
-                and PrepCategory.WHOLE_GENOME_SEQUENCING == sample_prep_category
+                and PrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category
             )
+            for sample in samples
+        )

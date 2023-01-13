@@ -13,6 +13,7 @@ class SequencingFileTag(StrEnum):
     SPRING: str = "spring"
     SPRING_METADATA: str = "spring-metadata"
 
+HK_MULTIQC_HTML_TAG = ["multiqc-html"]
 
 HK_FASTQ_TAGS = [SequencingFileTag.FASTQ]
 
