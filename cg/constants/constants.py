@@ -166,4 +166,3 @@ class MicrosaltAppTags:
 
 
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
-
