@@ -12,7 +12,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants.constants import DataDelivery, Pipeline, CaseActions
 from cg.server.ext import db
-from cg.store.models import Family, Sample
+from cg.store.models import Family, Sample, FamilySample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -435,6 +435,10 @@ class SampleView(BaseView):
         "Are you sure you want to cancel the selected samples?",
     )
     def cancel_samples(self, entry_ids: List[str]):
+        self.write_cancel_comment(entry_ids)
+        self.remove_family_samples()
+
+    def write_cancel_comment(self, entry_ids: List[str]):
         try:
             username = db.user(session.get("user_email")).name
             date = datetime.now().strftime("%Y-%m-%d")
@@ -456,8 +460,17 @@ class SampleView(BaseView):
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
-
             flash(gettext(f"Failed to set sample action. {str(ex)}"))
+
+    def remove_family_samples(self, entry_ids: List[str]):
+        try:
+            query: Query = db.Sample.query.filter(db.FamilySample.sample_id.in_(entry_ids))
+            query.delete()
+            db.commit()
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+            flash(gettext(f"Failed to delete family samples. {str(ex)}"))
 
 
 class DeliveryView(BaseView):
