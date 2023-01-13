@@ -55,6 +55,7 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
     alignment_file={"umi-cram"},
 )
 
+
 class ScoutCustomCaseReportTags(StrEnum):
     DELIVERY: str = "delivery_report"
     CNV: str = "cnv_report"
