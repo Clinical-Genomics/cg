@@ -430,30 +430,25 @@ class SampleView(BaseView):
         )
 
     @action(
-        "set_cancel",
-        "Set action to cancel",
-        "Are you sure you want to set the action for selected samples to cancel?",
+        "cancel_samples",
+        "Cancel samples",
+        "Are you sure you want to cancel the selected samples?",
     )
-    def action_set_cancel(self, ids: List[str]):
-        self.set_action_for_batch(action=CaseActions.CANCEL, entry_ids=ids)
-
-
-    def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
+    def cancel_samples(self, entry_ids: List[str]):
         try:
             username = db.user(session.get("user_email")).name
             date = datetime.now().strftime("%Y-%m-%d")
-            comment = f"{date} {username}"
+            comment = f"Cancelled {date} {username}"
 
             query: Query = db.Sample.query.filter(db.Sample.id.in_(entry_ids))
             sample: Sample
             for sample in query.all():
-                sample.action = action
                 sample.comment = comment
 
             flash(
                 ngettext(
-                    f"Samples were set to {action}.",
-                    f"{len(entry_ids)} samples were set to {action}.",
+                    f"Samples were cancelled.",
+                    f"{len(entry_ids)} samples were cancelled.",
                     len(entry_ids),
                 )
             )

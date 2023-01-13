@@ -33,7 +33,6 @@ class CaseActions(StrEnum):
     ANALYZE: str = "analyze"
     HOLD: str = "hold"
     RUNNING: str = "running"
-    CANCEL: str = "cancel"
 
 
 CASE_ACTIONS = [action.value for action in CaseActions]
