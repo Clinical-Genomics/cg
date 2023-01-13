@@ -608,6 +608,8 @@ class Sample(Model, PriorityMixin):
         if self.priority == Priority.express:
             one_half_of_target_reads = application.target_reads / 2
             return self.reads >= one_half_of_target_reads
+        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
+            return bool(self.reads)
         return self.reads > application.expected_reads
 
     @property

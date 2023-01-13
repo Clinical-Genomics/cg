@@ -9,7 +9,7 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 
 from cg.constants.constants import FileFormat
-from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR
+from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR, NXF_PID_FILE_ENV
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 
@@ -36,6 +36,15 @@ class NextflowAnalysisAPI:
         return Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
 
     @classmethod
+    def get_case_nextflow_pid_path(cls, case_id: str, root_dir: str) -> Path:
+        """Generates a path where the Nextflow pid file for the case_id should be located."""
+        # If not specified with the NXF_PID_FILE variable, a .nextflow.pid is created in the launch directory when
+        # running nextflow in the background (with the bg option)
+        return Path(
+            (cls.get_case_path(case_id=case_id, root_dir=root_dir)), f"{case_id}_nextflow.pid"
+        )
+
+    @classmethod
     def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
         return Path(
             (cls.get_case_path(case_id, root_dir)), "pipeline_info", "software_versions.yml"
@@ -54,6 +63,15 @@ class NextflowAnalysisAPI:
             return "0.0.0"
 
     @classmethod
+    def get_variables_to_export(cls, case_id: str, root_dir: str) -> Dict[str, str]:
+        """Generates a dictionary with variables that needs to be exported."""
+        return {
+            NXF_PID_FILE_ENV: cls.get_case_nextflow_pid_path(
+                case_id=case_id, root_dir=root_dir
+            ).as_posix()
+        }
+
+    @classmethod
     def verify_analysis_finished(cls, case_id: str, root_dir: str) -> None:
         if not Path(cls.get_software_version_path(case_id=case_id, root_dir=root_dir)).exists():
             raise ValueError(
@@ -61,9 +79,10 @@ class NextflowAnalysisAPI:
             )
 
     @classmethod
-    def make_case_folder(cls, case_id: str, root_dir: str) -> None:
+    def make_case_folder(cls, case_id: str, root_dir: str, dry_run: bool = False) -> None:
         """Make the case folder where analysis should be located."""
-        os.makedirs(cls.get_case_path(case_id, root_dir), exist_ok=True)
+        if not dry_run:
+            os.makedirs(cls.get_case_path(case_id=case_id, root_dir=root_dir), exist_ok=True)
 
     @classmethod
     def extract_read_files(cls, read_nb: int, metadata: list) -> List[str]:
@@ -86,13 +105,37 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_verified_arguments_nextflow(
-        cls, case_id: str, log: Path, pipeline: str, root_dir: str
+        cls, case_id: str, pipeline: str, root_dir: str, log: Path, bg: bool, quiet: bool
     ) -> dict:
         """Transforms click argument related to nextflow that were left empty
         into defaults constructed with case_id paths."""
 
         return {
-            "-log": NextflowAnalysisAPI.get_log_path(case_id, pipeline, root_dir, log),
+            "-bg": bg,
+            "-quiet": quiet,
+            "-log": cls.get_log_path(case_id, pipeline, root_dir, log),
+        }
+
+    @classmethod
+    def get_verified_arguments_run(
+        cls,
+        case_id: str,
+        root_dir: str,
+        work_dir: str,
+        resume: bool,
+        profile: bool,
+        with_tower: bool,
+        stub: bool,
+    ) -> dict:
+        """Transforms click argument related to nextflow run that were left empty
+        into defaults constructed with case_id paths."""
+
+        return {
+            "-w": cls.get_workdir_path(case_id=case_id, root_dir=root_dir, work_dir=work_dir),
+            "-resume": resume,
+            "-profile": profile,
+            "-with-tower": with_tower,
+            "-stub": stub,
         }
 
     @classmethod

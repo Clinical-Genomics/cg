@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
@@ -34,12 +33,15 @@ def test_start(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN case id for which we created a config file
+    # GIVEN case id
     case_id: str = rnafusion_case_id
+
+    # GIVEN a mocked config
 
     # GIVEN decompression is not needed
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
@@ -50,6 +52,9 @@ def test_start(
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
     assert case_id in caplog.text
+
+    # THEN command should not include resume flag
+    assert "-resume" not in caplog.text
 
 
 def test_store_success(
@@ -128,6 +133,7 @@ def test_start_available(
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones."""
@@ -136,16 +142,7 @@ def test_start_available(
     # GIVEN CASE ID of sample where read counts pass threshold
     case_id_success: str = rnafusion_case_id
 
-    # Ensure the config is mocked to run compound command
-    Path.mkdir(
-        Path(
-            rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)
-        ).parent,
-        exist_ok=True,
-    )
-    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id_success)).touch(
-        exist_ok=True
-    )
+    # GIVEN a mocked config
 
     # GIVEN decompression is not needed
     mocker.patch.object(RnafusionAnalysisAPI, "resolve_decompression")
@@ -172,6 +169,7 @@ def test_store_available(
     mocker,
     hermes_deliverables,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones."""
@@ -183,7 +181,9 @@ def test_store_available(
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-    #
+
+    # GIVEN a mocked config
+
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
     rnafusion_context.status_db.family(case_id_success).action = "running"
