@@ -163,3 +163,7 @@ class MicrosaltQC:
 class MicrosaltAppTags:
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
+
+
+DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
+

@@ -1,14 +1,16 @@
 import datetime as dt
 import logging
 import os
-import click
+import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
-import shutil
+
+import click
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, Pipeline, Priority
+from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -16,9 +18,6 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
-from housekeeper.store.models import Bundle, Version
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def verify_case_config_file_exists(self, case_id: str):
+    def verify_case_config_file_exists(self, case_id: str) -> None:
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 
