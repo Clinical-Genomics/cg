@@ -546,6 +546,7 @@ class Pool(Model):
 
 
 class Sample(Model, PriorityMixin):
+    action = Column(types.Enum(*CASE_ACTIONS))
     age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(

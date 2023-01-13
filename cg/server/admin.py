@@ -1,4 +1,5 @@
 """Module for Flask-Admin views"""
+from datetime import datetime
 from gettext import ngettext, gettext
 from typing import List, Union
 
@@ -11,7 +12,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants.constants import DataDelivery, Pipeline, CaseActions
 from cg.server.ext import db
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -253,14 +254,6 @@ class FamilyView(BaseView):
         self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
 
     @action(
-        "set_cancel",
-        "Set action to cancel",
-        "Are you sure you want to set the action for selected families to cancel?",
-    )
-    def action_set_cancel(self, ids: List[str]):
-        self.set_action_for_batch(action=CaseActions.CANCEL, entry_ids=ids)
-
-    @action(
         "set_empty",
         "Set action to Empty",
         "Are you sure you want to set the action for selected families to Empty?",
@@ -435,6 +428,41 @@ class SampleView(BaseView):
             if model.sample
             else ""
         )
+
+    @action(
+        "set_cancel",
+        "Set action to cancel",
+        "Are you sure you want to set the action for selected samples to cancel?",
+    )
+    def action_set_cancel(self, ids: List[str]):
+        self.set_action_for_batch(action=CaseActions.CANCEL, entry_ids=ids)
+
+
+    def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
+        try:
+            username = db.user(session.get("user_email")).name
+            date = datetime.now().strftime("%Y-%m-%d")
+            comment = f"{date} {username}"
+
+            query: Query = db.Sample.query.filter(db.Sample.id.in_(entry_ids))
+            sample: Sample
+            for sample in query.all():
+                sample.action = action
+                sample.comment = comment
+
+            flash(
+                ngettext(
+                    f"Samples were set to {action}.",
+                    f"{len(entry_ids)} samples were set to {action}.",
+                    len(entry_ids),
+                )
+            )
+            db.commit()
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+
+            flash(gettext(f"Failed to set sample action. {str(ex)}"))
 
 
 class DeliveryView(BaseView):
