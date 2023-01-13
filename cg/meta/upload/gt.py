@@ -136,7 +136,8 @@ class UploadGenotypesAPI(object):
         return any(
             (
                 not sample.is_tumour
-                and PrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category
+                and PrepCategory.WHOLE_GENOME_SEQUENCING
+                == sample.application_version.application.prep_category
             )
             for sample in samples
         )

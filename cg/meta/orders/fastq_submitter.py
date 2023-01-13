@@ -11,6 +11,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.store import models
 from cg.constants.priority import Priority
+from cg.constants.constants import PrepCategory
 
 
 class FastqSubmitter(Submitter):
@@ -111,7 +112,10 @@ class FastqSubmitter(Submitter):
                         priority=case["priority"],
                         ticket=ticket,
                     )
-                if not new_sample.is_tumour and new_sample.prep_category == "wgs":
+                if (
+                    not new_sample.is_tumour
+                    and new_sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
+                ):
                     self.create_maf_case(sample_obj=new_sample)
                 case_obj.customer = customer_obj
                 new_relationship = self.status.relate_sample(
