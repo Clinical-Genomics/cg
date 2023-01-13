@@ -157,7 +157,12 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Returns:
             pd.DataFrame: Samplesheet DataFrame
         """
-        samplesheet_df[new_column] = to_add
+        try:
+            samplesheet_df[new_column] = to_add
+        except ValueError:
+            LOG.error(
+                f"Error when trying to add the column: {new_column} to samplesheet with data: {to_add}."
+            )
         return samplesheet_df
 
     def add_concentrations_to_samplesheet(
