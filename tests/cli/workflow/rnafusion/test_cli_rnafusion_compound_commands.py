@@ -73,6 +73,7 @@ def test_store_housekeeper_dry_run(
     caplog: LogCaptureFixture,
     mocker: MockFixture,
     rnafusion_case_id: str,
+    hermes_deliverables: dict,
 ):
     """Test to ensure all parts of store command are run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
@@ -82,9 +83,11 @@ def test_store_housekeeper_dry_run(
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
 
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id, "--dry-run"], obj=rnafusion_context)
+
     # THEN bundle should be successfully added to HK and STATUSDB
     assert result.exit_code == EXIT_SUCCESS
     assert "Dry-run: Housekeeper changes will not be commited" in caplog.text
