@@ -5,6 +5,7 @@ import datetime as dt
 import logging
 import pandas as pd
 import shutil
+from csv import reader
 
 from cg.constants import Pipeline
 from cg.exc import CgError
@@ -129,6 +130,36 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_obj: models.Sample = self.status_db.sample(sample_id)
         return bool(sample_obj.control)
 
+    def determine_samplesheet_header_and_read(
+        self,
+        samplesheet_housekeeper_path: Path,
+    ) -> pd.DataFrame:
+        """
+        Dynamically determine the header size in fluffy samplesheet and read the file.
+        Any lines before and including the line starting with [Data] is considered the header.
+
+        Returns:
+        pd.DataFrame: The Data from the samplesheet as dataframe
+        """
+        with open(samplesheet_housekeeper_path, "r") as read_obj:
+            csv_reader = reader(read_obj)
+            header_lines = 0
+            for row in csv_reader:
+                if "[Data]" in row:
+                    break
+                header_lines += 1
+        return pd.read_csv(samplesheet_housekeeper_path, index_col=None, header=header_lines + 1)
+
+    def add_samplesheet_column(
+        self, samplesheet_df: pd.DataFrame, newColumn: str, toAdd: list
+    ) -> pd.DataFrame:
+        """Add columns to the samplesheet
+        Returns:
+            pd.DataFrame: Samplesheet DataFrame
+        """
+        samplesheet_df[newColumn] = toAdd
+        return samplesheet_df
+
     def add_concentrations_to_samplesheet(
         self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
     ) -> None:
@@ -139,8 +170,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
         """
 
-        samplesheet_df = pd.read_csv(
-            samplesheet_housekeeper_path, index_col=None, header=0, skiprows=4
+        samplesheet_df = self.determine_samplesheet_header_and_read(
+            samplesheet_housekeeper_path=samplesheet_housekeeper_path
         )
         LOG.info(samplesheet_df)
         sample_id_column_alias = (
@@ -149,21 +180,47 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_project_column_alias = (
             "Sample_Project" if "Sample_Project" in samplesheet_df.columns else "Project"
         )
-        samplesheet_df["SampleName"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_name_from_lims_id(lims_id=x)
+
+        samplesheet_df = self.add_samplesheet_column(
+            samplesheet_df=samplesheet_df,
+            newColumn="SampleName",
+            toAdd=samplesheet_df[sample_id_column_alias].apply(
+                lambda x: self.get_sample_name_from_lims_id(lims_id=x)
+            ),
         )
-        samplesheet_df["Library_nM"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_concentrations_from_lims(sample_id=x)
+
+        samplesheet_df = self.add_samplesheet_column(
+            samplesheet_df=samplesheet_df,
+            newColumn="Library_nM",
+            toAdd=samplesheet_df[sample_id_column_alias].apply(
+                lambda x: self.get_concentrations_from_lims(sample_id=x)
+            ),
         )
-        samplesheet_df["SequencingDate"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_sequenced_date(sample_id=x)
+
+        samplesheet_df = self.add_samplesheet_column(
+            samplesheet_df=samplesheet_df,
+            newColumn="SequencingDate",
+            toAdd=samplesheet_df[sample_id_column_alias].apply(
+                lambda x: self.get_sample_sequenced_date(sample_id=x)
+            ),
         )
-        samplesheet_df[sample_project_column_alias] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_starlims_id(sample_id=x)
+
+        samplesheet_df = self.add_samplesheet_column(
+            samplesheet_df=samplesheet_df,
+            newColumn=sample_project_column_alias,
+            toAdd=samplesheet_df[sample_id_column_alias].apply(
+                lambda x: self.get_sample_starlims_id(sample_id=x)
+            ),
         )
-        samplesheet_df["Exclude"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_control_status(sample_id=x)
+
+        samplesheet_df = self.add_samplesheet_column(
+            samplesheet_df=samplesheet_df,
+            newColumn="Exclude",
+            toAdd=samplesheet_df[sample_id_column_alias].apply(
+                lambda x: self.get_sample_control_status(sample_id=x)
+            ),
         )
+
         samplesheet_df.to_csv(
             samplesheet_workdir_path,
             sep=",",
