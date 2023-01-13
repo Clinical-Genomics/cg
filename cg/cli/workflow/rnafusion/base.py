@@ -56,20 +56,22 @@ rnafusion.add_command(resolve_compression)
 @rnafusion.command("config-case")
 @ARGUMENT_CASE_ID
 @OPTION_STRANDEDNESS
+@DRY_RUN
 @click.pass_obj
 def config_case(
     context: CGConfig,
     case_id: str,
     strandedness: str,
+    dry_run: bool,
 ) -> None:
     """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
 
+    LOG.info(f"Creating samplesheet file for {case_id}.")
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
-        LOG.info(f"Creating samplesheet file for {case_id}.")
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.config_case(case_id=case_id, strandedness=strandedness)
+        analysis_api.config_case(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create samplesheet: {error}")
         raise click.Abort()
@@ -147,16 +149,14 @@ def run(
             arriba=arriba,
             dry_run=dry_run,
         )
-        if dry_run:
-            LOG.info("Did not run analysis: dry-run")
-            return
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as error:
+        if not dry_run:
+            analysis_api.set_statusdb_action(case_id=case_id, action="running")
+    except (CgError, ValueError) as error:
         LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
+        raise click.Abort() from error
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
+        raise click.Abort() from error
 
 
 @rnafusion.command("start")
@@ -202,36 +202,35 @@ def start(
 ) -> None:
     """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
+
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-        context.invoke(
-            config_case,
-            case_id=case_id,
-        )
-        context.invoke(
-            run,
-            case_id=case_id,
-            log=log,
-            work_dir=work_dir,
-            from_start=True,
-            profile=profile,
-            with_tower=with_tower,
-            stub=stub,
-            input=input,
-            outdir=outdir,
-            genomes_base=genomes_base,
-            trim=trim,
-            fusioninspector_filter=fusioninspector_filter,
-            all=all,
-            pizzly=pizzly,
-            squid=squid,
-            starfusion=starfusion,
-            fusioncatcher=fusioncatcher,
-            arriba=arriba,
-            dry_run=dry_run,
-        )
     except DecompressionNeededError as error:
         LOG.error(error)
+        raise click.Abort() from error
+    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(
+        run,
+        case_id=case_id,
+        log=log,
+        work_dir=work_dir,
+        from_start=True,
+        profile=profile,
+        with_tower=with_tower,
+        stub=stub,
+        input=input,
+        outdir=outdir,
+        genomes_base=genomes_base,
+        trim=trim,
+        fusioninspector_filter=fusioninspector_filter,
+        all=all,
+        pizzly=pizzly,
+        squid=squid,
+        starfusion=starfusion,
+        fusioncatcher=fusioncatcher,
+        arriba=arriba,
+        dry_run=dry_run,
+    )
 
 
 @rnafusion.command("start-available")
