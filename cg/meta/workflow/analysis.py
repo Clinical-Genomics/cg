@@ -62,7 +62,7 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def verify_case_config_file_exists(self, case_id: str):
+    def verify_case_config_file_exists(self, case_id: str) -> None:
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 

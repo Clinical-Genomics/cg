@@ -2,6 +2,7 @@
 from gettext import ngettext, gettext
 from typing import List, Union
 
+from cgmodels.cg.constants import Pipeline
 from flask import redirect, request, session, url_for, flash
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
@@ -9,7 +10,7 @@ from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import DataDelivery, Pipeline, CaseActions
+from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
 from cg.store.models import Family
 from cg.utils.flask.enum import SelectEnumField
@@ -246,8 +247,8 @@ class FamilyView(BaseView):
 
     @action(
         "set_hold",
-        "Set action to HOLD",
-        "Are you sure you want to set the action for selected families to HOLD?",
+        "Set action to hold",
+        "Are you sure you want to set the action for selected families to hold?",
     )
     def action_set_hold(self, ids: List[str]):
         self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
@@ -255,7 +256,7 @@ class FamilyView(BaseView):
     @action(
         "set_empty",
         "Set action to Empty",
-        "Are you sure you want to set the action for selected families to empty?",
+        "Are you sure you want to set the action for selected families to Empty?",
     )
     def action_set_empty(self, ids: List[str]):
         self.set_action_for_batch(action=None, entry_ids=ids)
@@ -288,7 +289,7 @@ class FlowcellView(BaseView):
     column_default_sort = ("sequenced_at", True)
     column_editable_list = ["status"]
     column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name"]
+    column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
 
 
