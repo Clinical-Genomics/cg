@@ -464,7 +464,7 @@ class SampleView(BaseView):
 
     def remove_family_samples(self, entry_ids: List[str]):
         try:
-            query: Query = db.Sample.query.filter(db.FamilySample.sample_id.in_(entry_ids))
+            query: Query = db.FamilySample.query.filter(db.FamilySample.sample_id.in_(entry_ids))
             query.delete()
             db.commit()
         except Exception as ex:
