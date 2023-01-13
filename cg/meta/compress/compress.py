@@ -151,7 +151,7 @@ class CompressAPI:
         for run_name in sample_fastq:
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
 
-            if not self.crunchy_api.is_fastq_compression_done(compression_obj=compression):
+            if not self.crunchy_api.is_fastq_compression_done(compression=compression):
                 LOG.info(f"FASTQ compression not done for sample {sample_id}, run {run_name}")
                 all_cleaned = False
                 continue

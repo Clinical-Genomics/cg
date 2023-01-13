@@ -200,6 +200,5 @@ def test_store_bundles(
     # WHEN running the store ticket command
     res = cli_runner.invoke(store_bundles, [flow_cell_id], obj=real_populated_compress_context)
 
-    print(res.output)
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS

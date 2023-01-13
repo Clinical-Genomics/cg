@@ -139,7 +139,6 @@ def test_compress_fastq_cli_case_id(
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=populated_compress_context)
 
-    print(res.output)
     # THEN assert the program exits since no cases where found
     assert res.exit_code == 0
 

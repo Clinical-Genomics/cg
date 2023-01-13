@@ -117,7 +117,7 @@ class CrunchyAPI:
         return True
 
     @staticmethod
-    def is_fastq_compression_done(compression_obj: CompressionData) -> bool:
+    def is_fastq_compression_done(compression: CompressionData) -> bool:
         """Check if FASTQ compression is finished.
 
         This is checked by controlling that the SPRING files that are produced after FASTQ
@@ -135,35 +135,37 @@ class CrunchyAPI:
 
         """
         LOG.info("Check if FASTQ compression is finished")
-        LOG.info("Check if SPRING file %s exists", compression_obj.spring_path)
-        if not compression_obj.spring_exists():
-            LOG.info("No SPRING file for %s", compression_obj.run_name)
+        LOG.info(f"Check if SPRING file {compression.spring_path} exists")
+        if not compression.spring_exists():
+            LOG.info(
+                f"No SPRING file for {compression.run_name}",
+            )
             return False
         LOG.info("SPRING file found")
 
-        LOG.info("Check if SPRING metadata file %s exists", compression_obj.spring_metadata_path)
-        if not compression_obj.metadata_exists():
+        LOG.info(f"Check if SPRING metadata file {compression.spring_metadata_path} exists")
+        if not compression.metadata_exists():
             LOG.info("No metadata file found")
             return False
         LOG.info("SPRING metadata file found")
 
         # We want this to raise exception if file is malformed
         crunchy_metadata: CrunchyMetadata = files.get_crunchy_metadata(
-            compression_obj.spring_metadata_path
+            compression.spring_metadata_path
         )
 
         # Check if the SPRING archive has been unarchived
         updated_at: Optional[datetime.date] = files.get_file_updated_at(crunchy_metadata)
         if updated_at is None:
-            LOG.info("FASTQ compression is done for %s", compression_obj.run_name)
+            LOG.info(f"FASTQ compression is done for {compression.run_name}")
             return True
 
-        LOG.info("Files where unpacked %s", updated_at)
+        LOG.info(f"Files where unpacked {updated_at}")
 
         if not CrunchyAPI.check_if_update_spring(updated_at):
             return False
 
-        LOG.info("FASTQ compression is done for %s", compression_obj.run_name)
+        LOG.info(f"FASTQ compression is done for {compression.run_name}")
 
         return True
 

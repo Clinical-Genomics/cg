@@ -2,9 +2,9 @@
 from datetime import datetime
 from typing import List
 
-from cg.store import Store, models
+from cg.store import Store
 from cg.constants.indexes import ListIndexes
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Sample, Flowcell, ApplicationVersion, Application
 from tests.store_helpers import StoreHelpers
 
 
@@ -69,7 +69,7 @@ def test_get_latest_flow_cell_on_case(
     """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell_obj: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
+    latest_flow_cell: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
         Flowcell.name == flow_cell_id
     ).first()
 
@@ -79,7 +79,7 @@ def test_get_latest_flow_cell_on_case(
     )
 
     # THEN the fetched flow cell should have the same name as the other
-    assert latest_flow_cell_obj.name == latest_flow_cell_on_case.name
+    assert latest_flow_cell.name == latest_flow_cell_on_case.name
 
 
 def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
@@ -116,7 +116,7 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
     """Test if the correct number of expected reads is returned."""
 
     # GIVEN a case with a sample with an application version
-    application_version: models.ApplicationVersion = (
+    application_version: ApplicationVersion = (
         rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
     )
 
@@ -130,12 +130,12 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
 def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     """Test that the correct application is returned on a case."""
     # GIVEN a case with a sample with an application version
-    application_version: models.ApplicationVersion = (
+    application_version: ApplicationVersion = (
         rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
     )
 
     # WHEN the application is fetched from the case
-    application: models.Application = rml_pool_store.get_application_by_case(case_id=case_id)
+    application: Application = rml_pool_store.get_application_by_case(case_id=case_id)
 
     # THEN the fetched application should be equal to the application version application
     assert application_version.application == application
