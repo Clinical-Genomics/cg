@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
@@ -39,13 +38,13 @@ def test_start(
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN case id for which we created a config file
+    # GIVEN case id
     case_id: str = rnafusion_case_id
+
+    # GIVEN a mocked config
 
     # GIVEN decompression is not needed
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
-
-    # GIVEN a mocked config
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=rnafusion_context)
