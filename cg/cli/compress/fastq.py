@@ -12,6 +12,7 @@ from cg.cli.compress.helpers import (
     update_compress_api,
     is_case_ignored,
     get_cases_to_process,
+    set_mem_according_to_reads,
 )
 from cg.constants.compression import CASES_TO_IGNORE
 from cg.constants.constants import DRY_RUN
@@ -53,9 +54,6 @@ def fastq_cmd(
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    update_compress_api(
-        compress_api=compress_api, dry_run=dry_run, hours=hours, mem=mem, ntasks=ntasks
-    )
     cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
@@ -74,6 +72,13 @@ def fastq_cmd(
             continue
         for case_link in case.links:
             sample_id: str = case_link.sample.internal_id
+            if not mem:
+                mem: int = set_mem_according_to_reads(
+                    sample_id=sample_id, sample_reads=case_link.sample.reads
+                )
+            update_compress_api(
+                compress_api=compress_api, dry_run=dry_run, hours=hours, mem=mem, ntasks=ntasks
+            )
             case_converted: bool = compress_api.compress_fastq(sample_id=sample_id)
             if not case_converted:
                 LOG.info(f"skipping individual {sample_id}")

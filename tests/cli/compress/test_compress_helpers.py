@@ -1,10 +1,22 @@
-"""Tests for helper functions in cg compress cli"""
+"""Tests for helper functions in Cg Compress cli."""
 
 import os
 from pathlib import Path
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import helpers
+from cg.cli.compress.helpers import set_mem_according_to_reads
+
+
+def test_set_mem_according_to_reads(sample_id: str):
+    """Test setting memory according to reads"""
+    # GIVEN a sample id and reads
+
+    # WHEN setting memory according to reads
+    memory: int = set_mem_according_to_reads(sample_id=sample_id, sample_reads=1)
+
+    # THEN memory should be 1
+    assert memory == 1
 
 
 def test_get_true_dir_no_symlinks(project_dir: Path):

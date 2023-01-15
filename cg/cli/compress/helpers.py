@@ -2,11 +2,13 @@
 import datetime as dt
 import logging
 import os
+from math import ceil
 from pathlib import Path
 from typing import Iterator, Optional, List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CASES_TO_IGNORE
+from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB
+from cg.constants.slurm import Slurm
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
@@ -51,6 +53,17 @@ def is_case_ignored(case_id: str) -> bool:
         LOG.debug(f"Skipping case: {case_id}")
         return True
     return False
+
+
+def set_mem_according_to_reads(sample_id: str, sample_reads: Optional[int] = None) -> int:
+    """Set SLURM memory depending on number of sample reads."""
+    if not sample_reads:
+        LOG.debug(f"No reads recorded for sample: {sample_id}")
+        return
+    mem: int = ceil((sample_reads / MAX_READS_PER_GB))
+    if 1 <= mem < Slurm.MAX_NODE_MEMORY.value:
+        return mem
+    return Slurm.MAX_NODE_MEMORY
 
 
 def update_compress_api(
