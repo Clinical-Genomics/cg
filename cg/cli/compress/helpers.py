@@ -57,7 +57,7 @@ def is_case_ignored(case_id: str) -> bool:
     return False
 
 
-def set_mem_according_to_reads(sample_id: str, sample_reads: Optional[int] = None) -> int:
+def set_mem_according_to_reads(sample_id: str, sample_reads: Optional[int] = None) -> Optional[int]:
     """Set SLURM memory depending on number of sample reads."""
     if not sample_reads:
         LOG.debug(f"No reads recorded for sample: {sample_id}")

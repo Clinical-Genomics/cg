@@ -41,7 +41,7 @@ def test_set_mem_according_to_reads_when_few_reads(sample_id: str):
 
 
 def test_set_mem_according_to_reads_when_many_reads(sample_id: str):
-    """Test setting memory according to reads when many reads"""
+    """Test setting memory according to reads when many reads."""
     # GIVEN a sample id and reads
 
     # WHEN setting memory according to reads
@@ -54,7 +54,7 @@ def test_set_mem_according_to_reads_when_many_reads(sample_id: str):
 
 
 def test_set_mem_according_to_reads(sample_id: str):
-    """Test setting memory according to reads when many reads"""
+    """Test setting memory according to reads."""
     # GIVEN a sample id and reads
 
     # WHEN setting memory according to reads

@@ -73,7 +73,7 @@ def fastq_cmd(
         for case_link in case.links:
             sample_id: str = case_link.sample.internal_id
             if not mem:
-                mem: int = set_mem_according_to_reads(
+                mem: Optional[int] = set_mem_according_to_reads(
                     sample_id=sample_id, sample_reads=case_link.sample.reads
                 )
             update_compress_api(
