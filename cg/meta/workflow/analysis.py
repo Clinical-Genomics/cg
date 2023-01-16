@@ -161,17 +161,22 @@ class AnalysisAPI(MetaAPI):
     def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
+        bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
         bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
-            bundle_data=self.get_hermes_transformed_deliverables(case_id)
+            bundle_data=bundle_data
         )
         if not bundle_result:
             LOG.info("Bundle already added to Housekeeper!")
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
-        self.housekeeper_api.include(bundle_version)
         if dry_run:
             LOG.info("Dry-run: Housekeeper changes will not be commited")
+            LOG.info(
+                "The following files would be stored:\n%s",
+                "\n".join([f["path"] for f in bundle_data["files"]]),
+            )
             return
+        self.housekeeper_api.include(bundle_version)
         self.housekeeper_api.add_commit(bundle_object, bundle_version)
         LOG.info(
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
