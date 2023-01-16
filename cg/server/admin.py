@@ -437,18 +437,30 @@ class SampleView(BaseView):
     )
     def cancel_samples(self, entry_ids: List[str]):
         self.write_cancel_comment(entry_ids)
-        self.remove_family_samples(entry_ids)
+        families = self.remove_family_samples(entry_ids)
+        self.handle_families_with_multiple_samples(families)
+
+    def handle_families_with_multiple_samples(self, families: List[Family]):
+        family_ids = [family.internal_id for family in families]
+
+        flash(
+            ngettext(
+                f"The cancelled sample was present in families containing other samples",
+                f"Family names: {family_ids}"
+            )
+        )
 
     def write_cancel_comment(self, entry_ids: List[str]):
         try:
             username = db.user(session.get("user_email")).name
             date = datetime.now().strftime("%Y-%m-%d")
-            comment = f"Cancelled {date} {username}"
+            comment = f"Cancelled {date} by {username}"
 
             query: Query = db.Sample.query.filter(db.Sample.id.in_(entry_ids))
             sample: Sample
             for sample in query.all():
                 sample.comment = comment
+            db.commit()
 
             flash(
                 ngettext(
@@ -457,11 +469,36 @@ class SampleView(BaseView):
                     len(entry_ids),
                 )
             )
-            db.commit()
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
             flash(gettext(f"Failed to set sample action. {str(ex)}"))
+
+
+    def remove_families(self, entry_ids: List[str]):
+        query: Query = db.Sample.query.filter(db.Sample.id.in_(entry_ids))
+        families_with_multiple_samples = []
+
+        family: Family
+        for family in query.all():
+            if self.family_contains_one_sample(family):
+                self.remove_family(family.id)
+            else:
+                families_with_multiple_samples.append(family)
+        return families_with_multiple_samples
+
+    def family_contains_one_sample(family: Family):
+        return len(family.samples) == 1       
+
+    def remove_family(self, family_id):
+        try:
+            stmt = delete(db.Family).where(db.Family.id == family_id)
+            db.session.execute(stmt)
+            db.session.commit()
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+            flash(gettext(f"Failed to delete family. {str(ex)}"))
 
     def remove_family_samples(self, entry_ids: List[str]):
         try:
