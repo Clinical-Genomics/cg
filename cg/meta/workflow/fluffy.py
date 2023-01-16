@@ -242,7 +242,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 lambda x: self.get_sample_control_status(sample_id=x)
             ),
         )
-
+        LOG.info(samplesheet_df)
         samplesheet_df.to_csv(
             samplesheet_workdir_path,
             sep=",",
