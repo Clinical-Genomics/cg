@@ -322,12 +322,16 @@ def fixture_balsamic_context(
 
     # Create tgs application version
     helpers.ensure_application_version(
-        store=status_db, application_tag="TGSA", application_type=PrepCategory.TARGETED_GENOME_SEQUENCING
+        store=status_db,
+        application_tag="TGSA",
+        application_type=PrepCategory.TARGETED_GENOME_SEQUENCING,
     )
 
     # Create wes application version
     helpers.ensure_application_version(
-        store=status_db, application_tag="WESA", application_type=PrepCategory.WHOLE_EXOME_SEQUENCING
+        store=status_db,
+        application_tag="WESA",
+        application_type=PrepCategory.WHOLE_EXOME_SEQUENCING,
     )
 
     # Create textbook case for WGS PAIRED with enough reads
