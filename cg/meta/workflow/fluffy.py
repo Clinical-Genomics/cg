@@ -149,7 +149,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 if SAMPLE_SHEET_DATA_HEADER in row:
                     break
                 header_lines += 1
-        return header_lines
+        return header_lines += 1
 
     def read_samplesheet_data(self, samplesheet_housekeeper_path: Path) -> pd.DataFrame:
         """
