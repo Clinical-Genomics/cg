@@ -9,6 +9,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy.orm import Query
+from sqlalchemy import delete
 
 from cg.constants.constants import DataDelivery, Pipeline, CaseActions
 from cg.server.ext import db
@@ -464,9 +465,9 @@ class SampleView(BaseView):
 
     def remove_family_samples(self, entry_ids: List[str]):
         try:
-            query: Query = db.FamilySample.query.filter(db.FamilySample.sample_id.in_(entry_ids))
-            query.delete()
-            db.commit()
+            stmt = delete(db.FamilySample).where(db.FamilySample.sample_id.in_(entry_ids))
+            db.session.execute(stmt)
+            db.session.commit()
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
