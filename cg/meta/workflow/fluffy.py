@@ -8,6 +8,7 @@ import shutil
 from csv import reader
 
 from cg.constants import Pipeline
+from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -130,25 +131,40 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_obj: models.Sample = self.status_db.sample(sample_id)
         return bool(sample_obj.control)
 
-    def determine_samplesheet_header_and_read(
+    def determine_samplesheet_header(
         self,
         samplesheet_housekeeper_path: Path,
-    ) -> pd.DataFrame:
+    ) -> int:
         """
         Dynamically determine the header size in fluffy samplesheet and read the file.
         Any lines before and including the line starting with [Data] is considered the header.
 
         Returns:
-        pd.DataFrame: The Data from the samplesheet as dataframe
+        int: The number of lines before the SAMPLE_SHEET_DATA_HEADER
         """
-        with open(samplesheet_housekeeper_path, "r") as read_obj:
+        with samplesheet_housekeeper_path.open("r") as read_obj:
             csv_reader = reader(read_obj)
             header_lines = 0
             for row in csv_reader:
-                if "[Data]" in row:
+                if SAMPLE_SHEET_DATA_HEADER in row:
                     break
                 header_lines += 1
-        return pd.read_csv(samplesheet_housekeeper_path, index_col=None, header=header_lines + 1)
+        return header_lines
+
+    def read_samplesheet_data(self, samplesheet_housekeeper_path: Path) -> pd.DataFrame:
+        """
+        Read in a samplesheet starting from the SAMPLE_SHEET_DATA_HEADER
+
+        Args:
+            samplesheet_housekeeper_path (Path): Path to the housekeeper samplesheet file
+
+        Returns:
+            pd.DataFrame: A pandas dataframe of the samplesheet
+        """
+        header_lines = self.determine_samplesheet_header(
+            samplesheet_housekeeper_path=samplesheet_housekeeper_path
+        )
+        return pd.read_csv(samplesheet_housekeeper_path, index_col=None, header=header_lines)
 
     def add_samplesheet_column(
         self, samplesheet_df: pd.DataFrame, new_column: str, to_add: list
@@ -175,9 +191,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
         """
 
-        samplesheet_df = self.determine_samplesheet_header_and_read(
+        samplesheet_df = self.read_samplesheet_data(
             samplesheet_housekeeper_path=samplesheet_housekeeper_path
         )
+
         LOG.info(samplesheet_df)
         sample_id_column_alias = (
             "Sample_ID" if "Sample_ID" in samplesheet_df.columns else "SampleID"
