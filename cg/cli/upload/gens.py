@@ -28,10 +28,10 @@ def gens(context: CGConfig, case_id: Optional[str]):
     if not case_id:
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
-    
+
     family_obj: models.Family = status_db.family(case_id)
     analysis_obj: models.Analysis = family_obj.analyses[0]
-    
+
     for link_obj in family_obj.links:
         analysis_date = analysis_obj.started_at or analysis_obj.completed_at
         hk_version = housekeeper_api.version(case_id, analysis_date)
@@ -46,6 +46,5 @@ def gens(context: CGConfig, case_id: Optional[str]):
             genome_build=analysis_obj.genome_build,
             baf_path=hk_fracsnp.full_path,
             coverage_path=hk_coverage.full_path,
-            case_id=case_id
+            case_id=case_id,
         )
-    

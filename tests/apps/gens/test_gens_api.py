@@ -41,7 +41,7 @@ def test_gens_api_load(
         genome_build=genome_build,
         baf_path=baf_path,
         coverage_path=coverage_path,
-        case_id=case_id
+        case_id=case_id,
     )
 
     # THEN run_command should be called with the list
@@ -61,4 +61,3 @@ def test_gens_api_load(
             case_id,
         ]
     )
-
