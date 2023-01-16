@@ -446,7 +446,7 @@ class SampleView(BaseView):
         flash(
             ngettext(
                 f"The cancelled sample was present in families containing other samples",
-                f"Family names: {family_ids}"
+                f"Family names: {family_ids}",
             )
         )
 
@@ -474,7 +474,6 @@ class SampleView(BaseView):
                 raise
             flash(gettext(f"Failed to set sample action. {str(ex)}"))
 
-
     def remove_families(self, entry_ids: List[str]):
         query: Query = db.Sample.query.filter(db.Sample.id.in_(entry_ids))
         families_with_multiple_samples = []
@@ -488,7 +487,7 @@ class SampleView(BaseView):
         return families_with_multiple_samples
 
     def family_contains_one_sample(family: Family):
-        return len(family.samples) == 1       
+        return len(family.samples) == 1
 
     def remove_family(self, family_id):
         try:
