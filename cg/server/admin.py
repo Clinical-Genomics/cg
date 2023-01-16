@@ -486,7 +486,7 @@ class SampleView(BaseView):
                 families_with_multiple_samples.append(family)
         return families_with_multiple_samples
 
-    def family_contains_one_sample(family: Family):
+    def family_contains_one_sample(self, family: Family):
         return len(family.samples) == 1
 
     def remove_family(self, family_id):
