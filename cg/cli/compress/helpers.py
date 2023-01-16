@@ -6,6 +6,9 @@ from math import ceil
 from pathlib import Path
 from typing import Iterator, Optional, List
 
+
+from housekeeper.store.models import Version, Bundle
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB
 from cg.constants.slurm import Slurm
@@ -14,7 +17,6 @@ from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
 from cg.store.models import Family
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +65,7 @@ def set_mem_according_to_reads(sample_id: str, sample_reads: Optional[int] = Non
     mem: int = ceil((sample_reads / MAX_READS_PER_GB))
     if 1 <= mem < Slurm.MAX_NODE_MEMORY.value:
         return mem
-    return Slurm.MAX_NODE_MEMORY
+    return Slurm.MAX_NODE_MEMORY.value
 
 
 def update_compress_api(
@@ -86,32 +88,32 @@ def update_compress_api(
 # Functions to fix problematic spring files
 
 
-def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[hk_models.Version]:
-    """Generates versions from hk bundles
+def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Version]:
+    """Generates versions from hk bundles.
 
-    If no bundle name is given generate latest version for every bundle
+    If no bundle name is given generate latest version for every bundle.
     """
     if bundle_name:
-        bundle = hk_api.bundle(bundle_name)
+        bundle: Bundle = hk_api.bundle(bundle_name)
         if not bundle:
-            LOG.info("Could not find bundle %s", bundle_name)
+            LOG.info(f"Could not find bundle {bundle_name}")
             return
-        bundles = [bundle]
+        bundles: List[Bundle] = [bundle]
     else:
-        bundles = hk_api.bundles()
+        bundles: List[Bundle] = hk_api.bundles()
 
     for bundle in bundles:
-        LOG.debug("Check for versions in %s", bundle.name)
-        last_version = hk_api.last_version(bundle.name)
+        LOG.debug(f"Check for versions in {bundle.name}")
+        last_version: Version = hk_api.last_version(bundle.name)
         if not last_version:
-            LOG.warning("No bundle found for %s in housekeeper", bundle.name)
+            LOG.warning(f"No bundle found for {bundle.name} in Housekeeper")
             return
         yield last_version
 
 
-def get_true_dir(dir_path: Path) -> Path:
+def get_true_dir(dir_path: Path) -> Optional[Path]:
     """Loop over the files in a directory, if any symlinks are found return the parent dir of the
-    origin file"""
+    origin file."""
     # Check if there are any links to fastq files in the directory
     for fastq_path in dir_path.rglob("*"):
         # Check if there are fastq symlinks that points to the directory where the spring
@@ -126,7 +128,7 @@ def get_true_dir(dir_path: Path) -> Path:
 def correct_spring_paths(
     hk_api: HousekeeperAPI, bundle_name: str = None, dry_run: bool = False
 ) -> None:
-    """Function that will be used as a one off thing
+    """Function that will be used as a one off thing.
 
     There has been a problem when there are symlinked fastq files that are sent for compression.
     In these cases the spring archive has been created in the same place as that the symlinks are
