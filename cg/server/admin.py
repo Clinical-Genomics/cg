@@ -447,6 +447,7 @@ class SampleView(BaseView):
             ngettext(
                 f"The cancelled sample was present in families containing other samples",
                 f"Family names: {family_ids}",
+                len(family_ids),
             )
         )
 
