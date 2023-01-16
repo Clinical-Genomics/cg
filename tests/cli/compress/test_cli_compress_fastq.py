@@ -12,6 +12,8 @@ from cg.store.models import Family
 
 from tests.store_helpers import StoreHelpers
 
+MOCK_SET_MEM_ACCORDING_TO_READS_PATH: str = "cg.cli.compress.helpers.set_mem_according_to_reads"
+
 
 def test_get_cases_to_process(
     case_id: str,
@@ -138,7 +140,7 @@ def test_compress_fastq_cli_case_id(
     status_db.commit()
 
     # GIVEN no adjusting according to readsa
-    mocker.patch("cg.cli.compress.fastq.set_mem_according_to_reads", return_value=None)
+    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--case-id", case_id], obj=populated_compress_context)
@@ -160,7 +162,7 @@ def test_compress_fastq_cli_multiple_family(
     assert nr_cases > 1
 
     # GIVEN no adjusting according to readsa
-    mocker.patch("cg.cli.compress.fastq.set_mem_according_to_reads", return_value=None)
+    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(
@@ -185,7 +187,7 @@ def test_compress_fastq_cli_multiple_set_limit(
     assert nr_cases > limit
 
     # GIVEN no adjusting according to readsa
-    mocker.patch("cg.cli.compress.fastq.set_mem_according_to_reads", return_value=None)
+    mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)
 
     # WHEN running the compress command
     res = cli_runner.invoke(fastq_cmd, ["--number-of-conversions", limit], obj=compress_context)

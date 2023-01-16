@@ -6,7 +6,6 @@ from math import ceil
 from pathlib import Path
 from typing import Iterator, Optional, List
 
-
 from housekeeper.store.models import Version, Bundle
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -16,7 +15,7 @@ from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -57,8 +56,12 @@ def is_case_ignored(case_id: str) -> bool:
     return False
 
 
-def set_mem_according_to_reads(sample_id: str, sample_reads: Optional[int] = None) -> Optional[int]:
-    """Set SLURM memory depending on number of sample reads."""
+def set_mem_according_to_reads(
+    sample_id: str, sample_reads: Optional[int] = None, mem: Optional[int] = None
+) -> Optional[int]:
+    """Set SLURM memory depending on number of sample reads if mem is not set."""
+    if mem:
+        return mem
     if not sample_reads:
         LOG.debug(f"No reads recorded for sample: {sample_id}")
         return
@@ -123,6 +126,50 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
             return true_dir
     LOG.info("Could not find any symlinked files")
     return None
+
+
+def compress_sample_fastqs_in_cases(
+    compress_api: CompressAPI,
+    cases: List[Family],
+    dry_run: bool,
+    number_of_conversions: int,
+    hours: int = None,
+    mem: int = None,
+    ntasks: int = None,
+) -> None:
+    """Compress sample FASTQs for samples in cases."""
+    case_conversion_count: int = 0
+    individuals_conversion_count: int = 0
+    for case in cases:
+        case_converted = True
+        if case_conversion_count >= number_of_conversions:
+            break
+        if is_case_ignored(case_id=case.internal_id):
+            continue
+
+        LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
+        if not case.links:
+            continue
+        for case_link in case.links:
+            mem: Optional[int] = set_mem_according_to_reads(
+                mem=mem, sample_id=case_link.sample.internal_id, sample_reads=case_link.sample.reads
+            )
+            update_compress_api(
+                compress_api=compress_api, dry_run=dry_run, hours=hours, mem=mem, ntasks=ntasks
+            )
+            case_converted: bool = compress_api.compress_fastq(
+                sample_id=case_link.sample.internal_id
+            )
+            if not case_converted:
+                LOG.info(f"skipping individual {case_link.sample.internal_id}")
+                continue
+            individuals_conversion_count += 1
+        if case_converted:
+            case_conversion_count += 1
+            LOG.info(f"Considering case {case.internal_id} converted")
+    LOG.info(
+        f"{individuals_conversion_count} individuals in {case_conversion_count} (completed) cases where compressed"
+    )
 
 
 def correct_spring_paths(
