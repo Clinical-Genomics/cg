@@ -21,6 +21,11 @@ class GensAPI:
         self.binary_path = binary_path
         self.config_path = config_path
         self.process = Process(binary=self.binary_path, config=self.config_path)
+        self.dry_run = False
+
+    def set_dry_run(self, dry_run: bool) -> None:
+        """Set the dry run state"""
+        self.dry_run = dry_run
 
     def load(
         self,
@@ -39,7 +44,7 @@ class GensAPI:
             "--case-id": case_id,
         }
         load_call_params: list = ["load", "sample"] + get_list_from_dictionary(load_params)
-        self.process.run_command(parameters=load_call_params)
+        self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
 
     def __repr__(self):
         return f"GensAPI(binary_path={Path(self.binary_path).stem}, config_path={Path(self.config_path).stem})"
