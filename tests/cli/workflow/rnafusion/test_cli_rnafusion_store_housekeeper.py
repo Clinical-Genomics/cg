@@ -5,6 +5,7 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from pydantic import ValidationError
+from pytest_mock import MockFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -22,7 +23,7 @@ def test_without_options(cli_runner: CliRunner, rnafusion_context: CGConfig):
     """Test command without case_id argument."""
     # GIVEN no case_id
 
-    # WHEN dry running without anything specified
+    # WHEN running without anything specified
     result = cli_runner.invoke(store_housekeeper, obj=rnafusion_context)
 
     # THEN command should NOT execute successfully
@@ -66,7 +67,7 @@ def test_case_not_finished(
     # GIVEN case-id
     case_id: str = rnafusion_case_id
 
-    # WHEN dry running with dry specified
+    # WHEN running
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
 
     # THEN command should NOT execute successfully
@@ -105,7 +106,7 @@ def test_case_with_malformed_deliverables_file(
         # GIVEN case-id
         case_id: str = rnafusion_case_id
 
-        # WHEN dry running with dry specified
+        # WHEN running
         result = cli_runner.invoke(store_housekeeper, [case_id], obj=rnafusion_context)
 
         # THEN command should NOT execute successfully
@@ -189,3 +190,44 @@ def test_valid_case_already_added(
 
     # THEN user should be informed that bundle was already added
     assert "Bundle already added" in caplog.text
+
+
+def test_dry_run(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    mock_deliverable: None,
+    mock_analysis_finish: None,
+    caplog: LogCaptureFixture,
+    mocker: MockFixture,
+    rnafusion_case_id: str,
+    hermes_deliverables: dict,
+    real_housekeeper_api: HousekeeperAPI,
+):
+    """Test dry run given a successfully finished and delivered case."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN case-id for which we created a config file, deliverables file, and analysis_finish file
+    case_id: str = rnafusion_case_id
+
+    # Set Housekeeper to an empty real Housekeeper store
+    rnafusion_context.housekeeper_api_: HousekeeperAPI = real_housekeeper_api
+    rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
+
+    # GIVEN that HermesAPI returns a deliverables output
+    mocker.patch.object(HermesApi, "convert_deliverables")
+    HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
+
+    # Make sure the bundle was not present in hk
+    assert not rnafusion_context.housekeeper_api.bundle(case_id)
+
+    # Make sure analysis not already stored in status_db
+    assert not rnafusion_context.status_db.family(case_id).analyses
+
+    # WHEN running command
+    result = cli_runner.invoke(store_housekeeper, [case_id, "--dry-run"], obj=rnafusion_context)
+
+    # THEN bundle should not be added to HK nor STATUSDB
+    assert result.exit_code == EXIT_SUCCESS
+    assert "Dry-run: Housekeeper changes will not be commited" in caplog.text
+    assert "Dry-run: StatusDB changes will not be commited" in caplog.text
+    assert not rnafusion_context.housekeeper_api.bundle(case_id)
