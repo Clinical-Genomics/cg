@@ -435,80 +435,64 @@ class SampleView(BaseView):
         "Cancel samples",
         "Are you sure you want to cancel the selected samples?",
     )
-    def cancel_samples(self, entry_ids: List[str]):
-        self.write_cancel_comment(entry_ids)
-        families = self.remove_family_samples(entry_ids)
-        self.handle_families_with_multiple_samples(families)
+    def cancel_samples(self, sample_ids: List[str]) -> None:
+        self.write_cancel_comments(sample_ids)
+        self.delete_cases(sample_ids)
+        self.delete_case_samples(sample_ids)
+        self.display_cancel_confirmation()
 
-    def handle_families_with_multiple_samples(self, families: List[Family]):
-        family_ids = [family.internal_id for family in families]
-
-        flash(
-            ngettext(
-                f"The cancelled sample was present in families containing other samples",
-                f"Family names: {family_ids}",
-                len(family_ids),
-            )
-        )
-
-    def write_cancel_comment(self, entry_ids: List[str]):
+    def write_cancel_comments(self, sample_ids: List[str]) -> None:
         try:
             username = db.user(session.get("user_email")).name
             date = datetime.now().strftime("%Y-%m-%d")
             comment = f"Cancelled {date} by {username}"
 
-            query: Query = db.Sample.query.filter(db.Sample.id.in_(entry_ids))
+            query: Query = db.Sample.query.filter(db.Sample.id.in_(sample_ids))
             sample: Sample
             for sample in query.all():
                 sample.comment = comment
             db.commit()
 
-            flash(
-                ngettext(
-                    f"Samples were cancelled.",
-                    f"{len(entry_ids)} samples were cancelled.",
-                    len(entry_ids),
-                )
-            )
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
-            flash(gettext(f"Failed to set sample action. {str(ex)}"))
 
-    def remove_families(self, entry_ids: List[str]):
-        query: Query = db.Sample.query.filter(db.Sample.id.in_(entry_ids))
-        families_with_multiple_samples = []
+    def get_cases_associated_with_samples():
+        pass
 
-        family: Family
-        for family in query.all():
-            if self.family_contains_one_sample(family):
-                self.remove_family(family.id)
-            else:
-                families_with_multiple_samples.append(family)
-        return families_with_multiple_samples
+    def delete_cases(self, sample_ids: List[str]) -> None:
+        """Delete each case only associated with the samples being cancelled."""
+        for sample_id in sample_ids:
+            sample: Sample = db.Sample.query.filter(db.Sample.id == sample_id).first()
 
-    def family_contains_one_sample(self, family: Family):
-        return len(family.samples) == 1
+            for case in sample.cases:
+                case_sample_ids = [case_sample.id for case_sample in case.samples]
 
-    def remove_family(self, family_id):
+                if set(case_sample_ids) == set(sample_ids):
+                    self.delete_case(case.id)
+
+    def delete_case(self, case_id) -> None:
         try:
-            stmt = delete(db.Family).where(db.Family.id == family_id)
+            stmt = delete(db.Family).where(db.Family.id == case_id)
             db.session.execute(stmt)
             db.session.commit()
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
-            flash(gettext(f"Failed to delete family. {str(ex)}"))
 
-    def remove_family_samples(self, entry_ids: List[str]):
+    def delete_case_samples(self, sample_ids: List[str]) -> None:
+        """Delete relation between cases and samples."""
         try:
-            stmt = delete(db.FamilySample).where(db.FamilySample.sample_id.in_(entry_ids))
+            stmt = delete(db.FamilySample).where(db.FamilySample.sample_id.in_(sample_ids))
             db.session.execute(stmt)
             db.session.commit()
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
             flash(gettext(f"Failed to delete family samples. {str(ex)}"))
+
+    def display_cancel_confirmation(self) -> None:
+        flash(ngettext("Cancelled samples... Add info here"))
 
 
 class DeliveryView(BaseView):
