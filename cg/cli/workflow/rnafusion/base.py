@@ -149,8 +149,7 @@ def run(
             arriba=arriba,
             dry_run=dry_run,
         )
-        if not dry_run:
-            analysis_api.set_statusdb_action(case_id=case_id, action="running")
+        analysis_api.set_statusdb_action(case_id=case_id, action="running", dry_run=dry_run)
     except (CgError, ValueError) as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
@@ -281,21 +280,21 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @rnafusion.command("store-housekeeper")
 @ARGUMENT_CASE_ID
+@DRY_RUN
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str) -> None:
+def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
     try:
-
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_analysis_finished(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id)
-        analysis_api.upload_bundle_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
+        analysis_api.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
+        analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
@@ -317,7 +316,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate Housekeeper report for CASE ID and store in Housekeeper."""
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id)
+    context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
 
 
 @rnafusion.command("store-available")
