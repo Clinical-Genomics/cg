@@ -457,9 +457,6 @@ class SampleView(BaseView):
             if not self.handle_view_exception(ex):
                 raise
 
-    def get_cases_associated_with_samples():
-        pass
-
     def delete_cases(self, sample_ids: List[str]) -> None:
         """Delete each case only associated with the samples being cancelled."""
         for sample_id in sample_ids:
