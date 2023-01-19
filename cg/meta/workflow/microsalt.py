@@ -73,7 +73,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         case_directories: List[Path] = [
             Path(path)
-            for path in glob.glob(f"{self.root_dir}/results/{lims_project}*", recursive=True)
+            lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
+            for path in glob.glob(f"{lims_project_dir_path}*", recursive=True)
         ]
 
         return sorted(case_directories, key=os.path.getctime, reverse=True)
@@ -247,7 +248,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return self.lims_api.get_sample_project(sample_id)
 
     def get_cases_to_store(self) -> List[Family]:
-        """Retrieve a list of cases where analysis finished successfully,
+        """Return a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper."""
         cases_qc_ready: List[Family] = self.get_completed_cases()
         cases_to_store: List[Family] = []
@@ -288,7 +289,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_completed_cases(self) -> List[Family]:
         """Retrieve a list of cases that are completed in trailblazer."""
         return [
-            case_object
+            case
             for case_object in self.get_running_cases()
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
@@ -377,7 +378,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         qc_pass: bool = True
 
         for sample in failed_samples:
-            sample_obj: sample = self.get_samples(case_id=case_id, sample_id=sample)[0]
+            sample: Sample = self.get_samples(case_id=case_id, sample_id=sample)[0]
             if sample_obj.control == ControlEnum.negative:
                 qc_pass = False
             if sample_obj.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:

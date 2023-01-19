@@ -21,7 +21,7 @@ def test_qc_check_fail(
 ):
     """QC check for a microsalt case that should fail."""
     caplog.set_level(logging.INFO)
-    store = qc_microsalt_context.status_db
+    store: Store = qc_microsalt_context.status_db
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
@@ -53,7 +53,7 @@ def test_qc_check_pass(
 ):
     """QC check for a microsalt case that should pass."""
     caplog.set_level(logging.INFO)
-    store = qc_microsalt_context.status_db
+    store: Store = qc_microsalt_context.status_db
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
