@@ -56,18 +56,18 @@ def is_case_ignored(case_id: str) -> bool:
     return False
 
 
-def set_mem_according_to_reads(
-    sample_id: str, sample_reads: Optional[int] = None, mem: Optional[int] = None
+def set_memory_according_to_reads(
+    sample_id: str, sample_reads: Optional[int] = None, sample_process_mem: Optional[int] = None
 ) -> Optional[int]:
-    """Set SLURM memory depending on number of sample reads if mem is not set."""
-    if mem:
-        return mem
+    """Set SLURM sample process memory depending on number of sample reads if sample_process_mem is not set."""
+    if sample_process_mem:
+        return sample_process_mem
     if not sample_reads:
         LOG.debug(f"No reads recorded for sample: {sample_id}")
         return
-    mem: int = ceil((sample_reads / MAX_READS_PER_GB))
-    if 1 <= mem < Slurm.MAX_NODE_MEMORY.value:
-        return mem
+    sample_process_mem: int = ceil((sample_reads / MAX_READS_PER_GB))
+    if 1 <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
+        return sample_process_mem
     return Slurm.MAX_NODE_MEMORY.value
 
 
@@ -151,11 +151,17 @@ def compress_sample_fastqs_in_cases(
         if not case.links:
             continue
         for case_link in case.links:
-            mem: Optional[int] = set_mem_according_to_reads(
-                mem=mem, sample_id=case_link.sample.internal_id, sample_reads=case_link.sample.reads
+            sample_process_mem: Optional[int] = set_memory_according_to_reads(
+                sample_process_mem=mem,
+                sample_id=case_link.sample.internal_id,
+                sample_reads=case_link.sample.reads,
             )
             update_compress_api(
-                compress_api=compress_api, dry_run=dry_run, hours=hours, mem=mem, ntasks=ntasks
+                compress_api=compress_api,
+                dry_run=dry_run,
+                hours=hours,
+                mem=sample_process_mem,
+                ntasks=ntasks,
             )
             case_converted: bool = compress_api.compress_fastq(
                 sample_id=case_link.sample.internal_id
