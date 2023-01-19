@@ -12,7 +12,7 @@ from cg.store.models import Family
 
 from tests.store_helpers import StoreHelpers
 
-MOCK_SET_MEM_ACCORDING_TO_READS_PATH: str = "cg.cli.compress.helpers.set_mem_according_to_reads"
+MOCK_SET_MEM_ACCORDING_TO_READS_PATH: str = "cg.cli.compress.helpers.set_memory_according_to_reads"
 
 
 def test_get_cases_to_process(

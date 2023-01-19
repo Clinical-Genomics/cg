@@ -8,19 +8,19 @@ from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import helpers
-from cg.cli.compress.helpers import set_mem_according_to_reads
+from cg.cli.compress.helpers import set_memory_according_to_reads
 from cg.constants.compression import MAX_READS_PER_GB
 from cg.constants.slurm import Slurm
 
 
-def test_set_mem_according_to_reads_when_no_reads(caplog, sample_id: str):
+def test_set_memory_according_to_reads_when_no_reads(caplog, sample_id: str):
     """Test setting memory according to reads when no sample reads."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a sample id and no reads supplied
 
     # WHEN setting memory according to reads
-    memory: int = set_mem_according_to_reads(sample_id=sample_id, sample_reads=0)
+    memory: int = set_memory_according_to_reads(sample_id=sample_id, sample_reads=0)
 
     # THEN we should log
     assert f"No reads recorded for sample: {sample_id}" in caplog.text
@@ -29,23 +29,23 @@ def test_set_mem_according_to_reads_when_no_reads(caplog, sample_id: str):
     assert memory is None
 
 
-def test_set_mem_according_to_reads_when_few_reads(sample_id: str):
+def test_set_memory_according_to_reads_when_few_reads(sample_id: str):
     """Test setting memory according to reads when few reads."""
     # GIVEN a sample id and reads
 
     # WHEN setting memory according to reads
-    memory: int = set_mem_according_to_reads(sample_id=sample_id, sample_reads=1)
+    memory: int = set_memory_according_to_reads(sample_id=sample_id, sample_reads=1)
 
     # THEN memory should be 1
     assert memory == 1
 
 
-def test_set_mem_according_to_reads_when_many_reads(sample_id: str):
+def test_set_memory_according_to_reads_when_many_reads(sample_id: str):
     """Test setting memory according to reads when many reads."""
     # GIVEN a sample id and reads
 
     # WHEN setting memory according to reads
-    memory: int = set_mem_according_to_reads(
+    memory: int = set_memory_according_to_reads(
         sample_id=sample_id, sample_reads=MAX_READS_PER_GB**10
     )
 
@@ -53,12 +53,12 @@ def test_set_mem_according_to_reads_when_many_reads(sample_id: str):
     assert memory == 180
 
 
-def test_set_mem_according_to_reads(sample_id: str):
+def test_set_memory_according_to_reads(sample_id: str):
     """Test setting memory according to reads."""
     # GIVEN a sample id and reads
 
     # WHEN setting memory according to reads
-    memory: int = set_mem_according_to_reads(
+    memory: int = set_memory_according_to_reads(
         sample_id=sample_id, sample_reads=MAX_READS_PER_GB * 10
     )
 
