@@ -29,7 +29,7 @@ def transfer_group(context: CGConfig):
     context.meta_apis["transfer_lims_api"] = TransferLims(status=status_db, lims=lims_api)
 
 
-@transfer_group.command()
+@transfer_group.command("flow-cell")
 @click.argument("flow-cell-id")
 @click.option(
     "-d",
