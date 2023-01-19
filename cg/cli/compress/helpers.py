@@ -157,7 +157,11 @@ def compress_sample_fastqs_in_cases(
                 sample_reads=case_link.sample.reads,
             )
             update_compress_api(
-                compress_api=compress_api, dry_run=dry_run, hours=hours, mem=mem, ntasks=ntasks
+                compress_api=compress_api,
+                dry_run=dry_run,
+                hours=hours,
+                mem=sample_process_mem,
+                ntasks=ntasks,
             )
             case_converted: bool = compress_api.compress_fastq(
                 sample_id=case_link.sample.internal_id
@@ -166,7 +170,6 @@ def compress_sample_fastqs_in_cases(
                 LOG.info(f"skipping individual {case_link.sample.internal_id}")
                 continue
             individuals_conversion_count += 1
-            sample_process_mem = None
         if case_converted:
             case_conversion_count += 1
             LOG.info(f"Considering case {case.internal_id} converted")
