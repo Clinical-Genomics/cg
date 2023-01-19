@@ -166,7 +166,7 @@ def compress_sample_fastqs_in_cases(
                 LOG.info(f"skipping individual {case_link.sample.internal_id}")
                 continue
             individuals_conversion_count += 1
-            sample_process = None
+            sample_process_mem = None
         if case_converted:
             case_conversion_count += 1
             LOG.info(f"Considering case {case.internal_id} converted")
