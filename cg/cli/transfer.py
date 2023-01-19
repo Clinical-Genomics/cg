@@ -1,7 +1,6 @@
 """Transfer CLI."""
 import logging
 import click
-import pathlib
 
 from pathlib import Path
 
@@ -35,7 +34,7 @@ def transfer_group(context: CGConfig):
 @click.option(
     "-d",
     "--demultiplexed-flow-cell-dir",
-    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
+    type=click.Path(exists=True, file_okay=False),
     required=True,
     help="Path to demultiplexed flow cells output directory",
 )
@@ -47,6 +46,11 @@ def flow_cell(
     context: CGConfig, demultiplexed_flow_cell_dir: Path, flow_cell_id: str, store: bool = True
 ):
     """Populate results from a flow cell."""
+    
+    LOG.info(f"command -d is of type {type(demultiplexed_flow_cell_dir)}") 
+    LOG.info(f"converted command -d is of type {type(Path(demultiplexed_flow_cell_dir))}") 
+    
+    
     status_db: Store = context.status_db
     transfer_api = context.meta_apis["transfer_flow_cell_api"]
     new_record: Flowcell = transfer_api.transfer(
