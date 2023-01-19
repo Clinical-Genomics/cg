@@ -70,11 +70,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Returns all paths associated with the case or single sample analysis."""
         case_obj: models.Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
+        lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
 
         case_directories: List[Path] = [
-            Path(path)
-            lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
-            for path in glob.glob(f"{lims_project_dir_path}*", recursive=True)
+            Path(path) for path in glob.glob(f"{lims_project_dir_path}*", recursive=True)
         ]
 
         return sorted(case_directories, key=os.path.getctime, reverse=True)
@@ -377,11 +376,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Perform the final QC check for a microbial case based on failed samples."""
         qc_pass: bool = True
 
-        for sample in failed_samples:
-            sample: Sample = self.get_samples(case_id=case_id, sample_id=sample)[0]
-            if sample_obj.control == ControlEnum.negative:
+        for sample_id in failed_samples:
+            sample: Sample = self.get_samples(case_id=case_id, sample_id=sample_id)[0]
+            if sample.control == ControlEnum.negative:
                 qc_pass = False
-            if sample_obj.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
+            if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
                 qc_pass = False
 
         # Check if more than 10% of MWX samples failed
