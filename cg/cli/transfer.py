@@ -43,13 +43,13 @@ def transfer_group(context: CGConfig):
 )
 @click.pass_obj
 def flow_cell(
-    context: CGConfig, demultiplexed_flow_cell_dir: Path, flow_cell_name: str, store: bool = True
+    context: CGConfig, demultiplexed_flow_cell_dir: Path, flow_cell_id: str, store: bool = True
 ):
     """Populate results from a flow cell."""
     status_db: Store = context.status_db
     transfer_api = context.meta_apis["transfer_flow_cell_api"]
     new_record: Flowcell = transfer_api.transfer(
-        flow_cell_dir=demultiplexed_flow_cell_dir, flow_cell_id=flow_cell_name, store=store
+        flow_cell_dir=demultiplexed_flow_cell_dir, flow_cell_id=flow_cell_id, store=store
     )
     status_db.add_commit(new_record)
     LOG.info(f"flow cell added: {new_record}")
