@@ -47,7 +47,7 @@ def flow_cell(
 ):
     """Populate results from a flow cell."""
     
-    ## small typecasting test
+
     demultiplexed_flow_cell_dir = Path(demultiplexed_flow_cell_dir)
     
     status_db: Store = context.status_db
