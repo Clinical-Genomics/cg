@@ -1,6 +1,7 @@
 """Transfer CLI."""
 import logging
 import click
+import pathlib
 
 from pathlib import Path
 
@@ -34,7 +35,7 @@ def transfer_group(context: CGConfig):
 @click.option(
     "-d",
     "--demultiplexed-flow-cell-dir",
-    type=click.Path(exists=True, file_okay=False,path_type=Path),
+    type=click.Path(exists=True, file_okay=False, path_type=pathlib.Path),
     required=True,
     help="Path to demultiplexed flow cells output directory",
 )
