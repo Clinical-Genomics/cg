@@ -47,9 +47,7 @@ def flow_cell(
 ):
     """Populate results from a flow cell."""
     
-
     demultiplexed_flow_cell_dir = Path(demultiplexed_flow_cell_dir)
-    
     status_db: Store = context.status_db
     transfer_api = context.meta_apis["transfer_flow_cell_api"]
     new_record: Flowcell = transfer_api.transfer(
