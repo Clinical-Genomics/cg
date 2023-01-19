@@ -34,7 +34,7 @@ def transfer_group(context: CGConfig):
 @click.option(
     "-d",
     "--demultiplexed-flow-cell-dir",
-    type=click.Path(exists=True, file_okay=False),
+    type=Path(exists=True, file_okay=False),
     required=True,
     help="Path to demultiplexed flow cells output directory",
 )
