@@ -205,7 +205,6 @@ def upload_rna_fusion_report_to_scout(
 
 
 @click.command(name="rna-junctions-to-scout")
-@click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
@@ -222,7 +221,7 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
-def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
+def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Upload RNA multiqc report to Scout."""
     LOG.info("----------------- UPLOAD MULTIQC RNA TO SCOUT -----------------------")
 
