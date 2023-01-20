@@ -37,13 +37,20 @@ class DeleteDataHandler(BaseHandler):
                 case_sample.flush()
             self.commit()
 
-    def delete_case_sample_relationships(self, sample_entry_ids: List[int]):
-        """Delete association entries between all cases and the provided samples."""
+    def delete_case_sample_relationships(self, sample_entry_id: int):
+        """Delete association between all cases and the provided sample."""
         case_samples: List[FamilySample] = self.FamilySample.query.filter(
-            self.Sample.id.in_(sample_entry_ids)
+            self.Sample.id == sample_entry_id
         ).all()
         if case_samples:
             for case_sample in case_samples:
                 case_sample.delete()
                 case_sample.flush()
             self.commit()
+
+    def delete_cases_without_samples(self, case_ids) -> List[str]:
+        """Delete cases without samples."""
+        for case_id in case_ids:
+            case: Family = self.Family.query.filter(Family.internal_id == case_id).first()
+            if not case.samples:
+                self.delete_case(case_id)

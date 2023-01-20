@@ -37,21 +37,21 @@ def test_store_api_delete_case(case_id: str, rml_pool_store: Store):
     assert not results
 
 
-def test_store_api_delete_single_case_sample(sample_id: str, rml_pool_store: Store):
+def test_store_api_delete_single_case_sample(sample_id: str, case_id: str, rml_pool_store: Store):
     """Test function to delete association between a sample and a single case given a sample id in Store"""
 
     # GIVEN a database containing a case associated with a sample
-    case_samples: List[FamilySample] = rml_pool_store.sample_cases(sample_id=sample_id)
+    case_samples: List[FamilySample] = rml_pool_store.get_cases_from_sample(sample_id=sample_id)
 
     assert case_samples and case_samples[0]
 
     sample_entry_id = case_samples[0].sample_id
 
     # WHEN removing said association
-    rml_pool_store.delete_case_sample_relationships(sample_entry_ids=[sample_entry_id])
+    rml_pool_store.delete_case_sample_relationships(sample_entry_id=sample_entry_id)
 
     # THEN no entry should be found for said association
-    results: List[FamilySample] = rml_pool_store.sample_cases(sample_id=sample_id)
+    results: List[FamilySample] = rml_pool_store.get_cases_from_sample(sample_id=sample_id)
 
     assert not results
 
@@ -62,7 +62,7 @@ def test_store_api_delete_all_case_samples_for_a_case(case_id: str, rml_pool_sto
     # GIVEN a database containing a case associated with a sample
     case: Family = rml_pool_store.family(case_id)
     case_samples: FamilySample = rml_pool_store.family_samples(case_id)
- 
+
     assert case
     assert case_samples != [] and case_samples[0]
 

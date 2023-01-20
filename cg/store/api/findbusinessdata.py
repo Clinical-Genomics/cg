@@ -10,7 +10,7 @@ from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
 
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, FamilySample, Family
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 
 
@@ -166,13 +166,24 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def sample_cases(self, sample_id: str) -> List[models.FamilySample]:
+    def get_cases_from_sample(self, sample_id: str) -> List[models.FamilySample]:
         """Find cases related to a given sample."""
         return (
             self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
             .filter(models.Sample.internal_id == sample_id)
             .all()
         )
+
+    def get_cases_with_samples(self, case_ids) -> List[str]:
+        """Find cases associated with samples"""
+        cases_with_samples = set()
+        for case_id in case_ids:
+            case: Family = self.Family.query.filter(
+                Family.internal_id == case_id
+            ).first()
+            if case.samples:
+                cases_with_samples.add(case_id)
+        return list(cases_with_samples)
 
     def get_cases_from_ticket(self, ticket: str) -> Query:
         return self.Family.query.filter(models.Family.tickets.contains(ticket))

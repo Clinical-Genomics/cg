@@ -1,5 +1,6 @@
 """Tests the findbusinessdata part of the Cg store API."""
 from datetime import datetime
+from typing import List
 
 from cg.store import Store, models
 from cg.constants.indexes import ListIndexes
@@ -106,3 +107,19 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
 
     # THEN the fetched application should be equal to the application version application
     assert application_version.application == application
+
+def test_find_samples_associated_with_case(case_id: str, sample_id: str, rml_pool_store: Store):
+    """Test that cases associated with a sample can be found."""
+
+    # GIVEN a database containing a case associated with a sample
+    case_samples: List[models.FamilySample] = rml_pool_store.get_cases_from_sample(sample_id=sample_id)
+
+    assert case_samples
+
+    sample_entry_id = case_samples[0].sample_id
+
+    # WHEN the cases associated with the samples is fetched
+    cases = rml_pool_store.get_cases_from_sample(sample_entry_id=sample_entry_id)
+
+    # THEN the associated cases should contain the case id.
+    assert set([case_id]) == cases

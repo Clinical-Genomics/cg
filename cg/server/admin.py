@@ -435,61 +435,49 @@ class SampleView(BaseView):
         "Cancel samples",
         "Are you sure you want to cancel the selected samples?",
     )
-    def cancel_samples(self, sample_ids: List[str]) -> None:
-        self.write_cancel_comments(sample_ids)
-        self.delete_cases(sample_ids)
-        self.delete_case_samples(sample_ids)
-        self.display_cancel_confirmation()
+    def cancel_samples(self, entry_ids: List[str]) -> None:
+        all_associated_cases = set()
 
-    def write_cancel_comments(self, sample_ids: List[str]) -> None:
+        for entry_id in entry_ids:
+            self.write_cancel_comment(sample_entry_id=entry_id)
+
+            case_samples = db.get_cases_from_sample(sample_entry_id=entry_id)
+            case_ids = [case.family.internal_id for case in case_samples]
+            all_associated_cases.add(case_ids)
+
+            db.delete_case_sample_relationships(entry_id)
+            self.write_cancel_comment(sample_entry_id=entry_id)
+
+        case_ids = list(all_associated_cases)
+        db.delete_cases_without_samples(case_ids=case_ids)
+        cases_with_remaining_samples = db.get_cases_with_samples(case_ids=case_ids)
+
+        # TODO: Extract somewhere else.
+        self.display_cancel_confirmation(entry_ids, cases_with_remaining_samples)
+
+    def write_cancel_comment(self, sample_entry_id: str) -> None:
         try:
             username = db.user(session.get("user_email")).name
             date = datetime.now().strftime("%Y-%m-%d")
             comment = f"Cancelled {date} by {username}"
 
-            query: Query = db.Sample.query.filter(db.Sample.id.in_(sample_ids))
-            sample: Sample
-            for sample in query.all():
-                sample.comment = comment
+            sample: Sample = db.Sample.query.filter(db.Sample.id == sample_entry_id).first()
+            sample.comment = comment
             db.commit()
 
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
 
-    def delete_cases(self, sample_ids: List[str]) -> None:
-        """Delete each case only associated with the samples being cancelled."""
-        for sample_id in sample_ids:
-            sample: Sample = db.Sample.query.filter(db.Sample.id == sample_id).first()
-
-            for case in sample.cases:
-                case_sample_ids = [case_sample.id for case_sample in case.samples]
-
-                if set(case_sample_ids) == set(sample_ids):
-                    self.delete_case(case.id)
-
-    def delete_case(self, case_id) -> None:
-        try:
-            stmt = delete(db.Family).where(db.Family.id == case_id)
-            db.session.execute(stmt)
-            db.session.commit()
-        except Exception as ex:
-            if not self.handle_view_exception(ex):
-                raise
-
-    def delete_case_samples(self, sample_ids: List[str]) -> None:
-        """Delete relation between cases and samples."""
-        try:
-            stmt = delete(db.FamilySample).where(db.FamilySample.sample_id.in_(sample_ids))
-            db.session.execute(stmt)
-            db.session.commit()
-        except Exception as ex:
-            if not self.handle_view_exception(ex):
-                raise
-            flash(gettext(f"Failed to delete family samples. {str(ex)}"))
-
-    def display_cancel_confirmation(self) -> None:
-        flash(ngettext("Cancelled samples... Add info here"))
+    def display_cancel_confirmation(self, entry_ids, remaining_cases) -> None:
+        # TODO: Fix formatting.
+        flash(
+            ngettext(
+                f"Cancelled {len(entry_ids)} samples.",
+                f"{len(remaining_cases)} cases containing other samples were found: {remaining_cases}",
+                len(entry_ids),
+            )
+        )
 
 
 class DeliveryView(BaseView):
