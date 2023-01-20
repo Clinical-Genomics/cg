@@ -6,6 +6,7 @@ from typing import List
 import pytest
 from cgmodels.cg.constants import Pipeline
 
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from tests.conftest import fixture_base_store
 from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
@@ -81,15 +82,19 @@ def fixture_spring_fastq_mix(compression_object: CompressionData) -> dict:
 
 
 @pytest.fixture(name="microsalt_qc_pass_run_dir_path")
-def microsalt_qc_pass_run_dir_path(microsalt_qc_pass_lims_project: str) -> Path:
+def microsalt_qc_pass_run_dir_path(
+    microsalt_qc_pass_lims_project: str, microsalt_analysis_dir: Path
+) -> Path:
     """Return a microsalt run dir path fixture that passes QC."""
-    return Path("tests/fixtures/analysis/microsalt", microsalt_qc_pass_lims_project)
+    return Path(microsalt_analysis_dir, microsalt_qc_pass_lims_project)
 
 
 @pytest.fixture(name="microsalt_qc_fail_run_dir_path")
-def microsalt_qc_fail_run_dir_path(microsalt_qc_fail_lims_project: str) -> Path:
+def microsalt_qc_fail_run_dir_path(
+    microsalt_qc_fail_lims_project: str, microsalt_analysis_dir: Path
+) -> Path:
     """Return a microsalt run dir path fixture that fails QC."""
-    return Path("tests/fixtures/analysis/microsalt", microsalt_qc_fail_lims_project)
+    return Path(microsalt_analysis_dir, microsalt_qc_fail_lims_project)
 
 
 @pytest.fixture(name="microsalt_qc_pass_lims_project")
@@ -155,9 +160,9 @@ def qc_microsalt_context(
         sample_to_add: Sample = helpers.add_sample(
             store=store,
             internal_id=sample,
-            application_tag="MWRNXTR003",
-            application_type="mic",
-            reads=6000000,
+            application_tag=MicrosaltAppTags.MWRNXTR003,
+            application_type=MicrosaltAppTags.APP_TYPE,
+            reads=MicrosaltQC.TARGET_READS,
             sequenced_at=datetime.datetime.now(),
         )
 
@@ -175,17 +180,17 @@ def qc_microsalt_context(
         sample_to_add: Sample = helpers.add_sample(
             store=store,
             internal_id=sample,
-            application_tag="MWXNXTR003",
-            application_type="mic",
-            reads=6000000,
+            application_tag=MicrosaltAppTags.MWXNXTR003,
+            application_type=MicrosaltAppTags.APP_TYPE,
+            reads=MicrosaltQC.TARGET_READS,
             sequenced_at=datetime.datetime.now(),
         )
 
         helpers.add_relationship(store=store, case=microsalt_case_qc_fail, sample=sample_to_add)
 
     # Setting the target reads to correspond with statusDB
-    store.application(tag="MWRNXTR003").target_reads = 6000000
-    store.application(tag="MWXNXTR003").target_reads = 6000000
+    store.application(tag=MicrosaltAppTags.MWRNXTR003).target_reads = MicrosaltQC.TARGET_READS
+    store.application(tag=MicrosaltAppTags.MWXNXTR003).target_reads = MicrosaltQC.TARGET_READS
 
     cg_context.meta_apis["analysis_api"] = analysis_api
 

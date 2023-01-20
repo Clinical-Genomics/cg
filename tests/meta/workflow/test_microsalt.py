@@ -7,7 +7,7 @@ from cg.models.cg_config import CGConfig
 from pathlib import Path
 import logging
 
-
+from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Family
 
 
@@ -58,7 +58,7 @@ def test_qc_check_pass(
 
     # GIVEN a case that is to be stored
     microsalt_case: Family = store.family(microsalt_case_qc_pass)
-    microsalt_case.samples[1].control = "negative"
+    microsalt_case.samples[1].control = ControlEnum.negative
     microsalt_case.samples[1].reads = 1100000
 
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
@@ -194,6 +194,7 @@ def test_get_latest_case_path(
     mocker,
     qc_microsalt_context: CGConfig,
     microsalt_case_qc_pass: str,
+    microsalt_analysis_dir: Path,
 ):
     """Test get_latest_case_path return the first case path and not single sample path"""
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
@@ -204,13 +205,13 @@ def test_get_latest_case_path(
         MicrosaltAnalysisAPI,
         "get_case_path",
         return_value=[
-            Path("tests/fixtures/analysis/microsalt/ACC12345A2_2023"),
-            Path("tests/fixtures/analysis/microsalt/ACC12345_2022"),
-            Path("tests/fixtures/analysis/microsalt/ACC12345A1_2023"),
+            Path(microsalt_analysis_dir, "ACC12345A2_2023"),
+            Path(microsalt_analysis_dir, "ACC12345_2022"),
+            Path(microsalt_analysis_dir, "ACC12345A1_2023"),
         ],
     )
     # WHEN getting the latest case path
     path = microsalt_api.get_latest_case_path(case_id=microsalt_case_qc_pass)
 
     # THEN the first case path should be returned
-    assert Path("tests/fixtures/analysis/microsalt/ACC12345_2022") == path
+    assert Path(microsalt_analysis_dir, "ACC12345_2022") == path
