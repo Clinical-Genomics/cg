@@ -17,7 +17,6 @@ from cg.constants.constants import (
     DataDelivery,
     FileExtensions,
     FlowCellStatus,
-    Pipeline,
 )
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.gene_panel import GenePanelMasterList
