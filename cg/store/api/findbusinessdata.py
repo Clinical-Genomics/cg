@@ -176,7 +176,7 @@ class FindBusinessDataHandler(BaseHandler):
         samples_by_subject_id: List[models.Sample] = self.samples_by_subject_id(
             customer_id=customer_id, subject_id=subject_id, is_tumour=is_tumour
         )
-        cases_with_subject_id: Set[models.Family] = {}
+        cases_with_subject_id: Set[models.Family] = set()
         for sample in samples_by_subject_id:
             cases_with_subject_id.update([link.family for link in sample.links])
 
