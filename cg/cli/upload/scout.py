@@ -231,7 +231,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
         case_id=case_id, pipeline=case.data_analysis
     )
-    if case.pipeline == Pipeline.MIP_RNA:
+    if case.data_analysis == Pipeline.MIP_RNA:
         scout_upload_api.upload_rna_report_to_scout(
             dry_run=dry_run,
             rna_case_id=case_id,
