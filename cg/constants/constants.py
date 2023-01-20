@@ -1,6 +1,6 @@
-"""Constants for cg"""
+"""Constants for cg."""
 import click
-from cgmodels.cg.constants import Pipeline, StrEnum
+from cgmodels.cg.constants import StrEnum
 
 from cg.constants.sequencing import Sequencers
 from cg.utils.date import get_date
@@ -60,13 +60,7 @@ class FlowCellStatus(StrEnum):
     RETRIEVED: str = "retrieved"
 
 
-FLOWCELL_STATUS = (
-    FlowCellStatus.ONDISK,
-    FlowCellStatus.REMOVED,
-    FlowCellStatus.REQUESTED,
-    FlowCellStatus.PROCESSING,
-    FlowCellStatus.RETRIEVED,
-)
+FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
 
 FLOWCELL_Q30_THRESHOLD = {
     Sequencers.HISEQX: 75,
@@ -158,3 +152,5 @@ SKIP_CONFIRMATION = click.option(
     default=False,
     help="Skip confirmation",
 )
+
+DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
