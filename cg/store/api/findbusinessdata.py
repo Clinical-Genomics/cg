@@ -166,6 +166,14 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
+    def sample_cases(self, sample_id: str) -> List[models.FamilySample]:
+        """Find cases related to a given sample."""
+        return (
+            self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
+            .filter(models.Sample.internal_id == sample_id)
+            .all()
+        )
+
     def get_cases_from_ticket(self, ticket: str) -> Query:
         return self.Family.query.filter(models.Family.tickets.contains(ticket))
 

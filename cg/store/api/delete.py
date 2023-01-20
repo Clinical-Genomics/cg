@@ -1,6 +1,7 @@
 """Handler to delete data objects"""
 
-from cg.store import models
+from typing import List
+from cg.store.models import Flowcell, Family, FamilySample
 from cg.store.api.base import BaseHandler
 
 
@@ -8,10 +9,41 @@ class DeleteDataHandler(BaseHandler):
     """Contains methods to delete business data model instances"""
 
     def delete_flowcell(self, flowcell_name: str):
-        flowcell: models.Flowcell = self.Flowcell.query.filter(
-            models.Flowcell.name == flowcell_name
-        ).first()
+        flowcell: Flowcell = self.Flowcell.query.filter(Flowcell.name == flowcell_name).first()
         if flowcell:
             flowcell.delete()
             flowcell.flush()
+            self.commit()
+
+    def delete_case(self, case_id: str) -> None:
+        """Delete a case and all associations with samples."""
+        self.delete_all_case_sample_relationships(case_id=case_id)
+        case: Family = self.Family.query.filter(Family.internal_id == case_id).first()
+        if case:
+            case.delete()
+            case.flush()
+            self.commit()
+
+    def delete_all_case_sample_relationships(self, case_id: str) -> None:
+        """Delete association entries between a case and its samples."""
+        case_samples: List[FamilySample] = (
+            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
+            .filter(Family.internal_id == case_id)
+            .all()
+        )
+        if case_samples:
+            for case_sample in case_samples:
+                case_sample.delete()
+                case_sample.flush()
+            self.commit()
+
+    def delete_case_sample_relationships(self, sample_entry_ids: List[int]):
+        """Delete association entries between all cases and the provided samples."""
+        case_samples: List[FamilySample] = self.FamilySample.query.filter(
+            self.Sample.id.in_(sample_entry_ids)
+        ).all()
+        if case_samples:
+            for case_sample in case_samples:
+                case_sample.delete()
+                case_sample.flush()
             self.commit()
