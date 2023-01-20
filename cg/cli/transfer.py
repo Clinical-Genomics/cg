@@ -43,7 +43,7 @@ def transfer_group(context: CGConfig):
 )
 @click.pass_obj
 def flow_cell(
-    context: CGConfig, demultiplexed_flow_cell_dir: Path, flow_cell_id: str, store: bool = True
+    context: CGConfig, demultiplexed_flow_cell_dir: str, flow_cell_id: str, store: bool = True
 ):
     """Populate results from a flow cell."""
     demultiplexed_flow_cell_dir = Path(demultiplexed_flow_cell_dir)
