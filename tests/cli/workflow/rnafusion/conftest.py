@@ -238,3 +238,12 @@ def mock_analysis_finish(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )
+
+
+@pytest.fixture
+def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+    """Create samplesheet.csv file for testing"""
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
