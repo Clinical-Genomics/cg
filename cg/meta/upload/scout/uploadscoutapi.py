@@ -113,7 +113,7 @@ class UploadScoutAPI:
         """Get a multiqc report for case in housekeeper."""
         if pipeline == Pipeline.MIP_RNA:
             return (
-                ScoutCustomCaseReportTags.MUTLIQC_RNA,
+                ScoutCustomCaseReportTags.MULTIQC_RNA,
                 self.housekeeper.files(bundle=case_id, tags=HK_MULTIQC_HTML_TAG).first(),
             )
         return (
