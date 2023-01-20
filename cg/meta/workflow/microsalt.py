@@ -413,7 +413,9 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                 return {"Passed QC Reads": reads_pass}
         else:
             reads_pass: bool = sample.sequencing_qc
-            coverage_10x_pass: bool = self.check_coverage_10x(sample.internal_id, sample_qc)
+            coverage_10x_pass: bool = self.check_coverage_10x(
+                sample_name=sample.internal_id, sample_qc=sample_qc
+            )
             if not reads_pass or not coverage_10x_pass:
                 LOG.warning(f"Sample {sample.internal_id} failed QC.")
                 return {"Passed QC Reads": reads_pass, "Passed Coverage 10X": coverage_10x_pass}
