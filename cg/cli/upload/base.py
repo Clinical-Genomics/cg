@@ -20,6 +20,7 @@ from cg.cli.upload.scout import (
     create_scout_load_config,
     scout,
     upload_case_to_scout,
+    upload_multiqc_to_scout,
     upload_rna_fusion_report_to_scout,
     upload_rna_to_scout,
     upload_rna_junctions_to_scout,
@@ -124,6 +125,7 @@ upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_rna_fusion_report_to_scout)
 upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)
+upload.add_command(upload_multiqc_to_scout)
 upload.add_command(observations)
 upload.add_command(available_observations)
 upload.add_command(validate)

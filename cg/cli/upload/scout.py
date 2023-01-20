@@ -205,6 +205,7 @@ def upload_rna_fusion_report_to_scout(
 
 
 @click.command(name="rna-junctions-to-scout")
+@click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
