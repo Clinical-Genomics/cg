@@ -3,6 +3,8 @@ from cgmodels.cg.constants import Pipeline, StrEnum
 
 class OrderType(StrEnum):
     BALSAMIC: str = str(Pipeline.BALSAMIC)
+    BALSAMIC_QC: str = str(Pipeline.BALSAMIC_QC)
+    BALSAMIC_UMI: str = str(Pipeline.BALSAMIC_UMI)
     FASTQ: str = str(Pipeline.FASTQ)
     FLUFFY: str = str(Pipeline.FLUFFY)
     METAGENOME: str = "metagenome"

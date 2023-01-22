@@ -1,15 +1,15 @@
 """Code for talking to Scout regarding uploads"""
 
-import json
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional
 
-import yaml
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
+from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.exc import ScoutUploadError
+from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.utils.commands import Process
 
@@ -28,9 +28,11 @@ class ScoutAPI:
 
     def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
         """Load analysis of a new family into Scout."""
-        with open(scout_load_config, "r") as stream:
-            data = yaml.safe_load(stream)
-        scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**data)
+
+        scout_config: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=scout_load_config
+        )
+        scout_load_config_object: ScoutLoadConfig = ScoutLoadConfig(**scout_config)
         existing_case: Optional[ScoutExportCase] = self.get_case(
             case_id=scout_load_config_object.family
         )
@@ -131,7 +133,9 @@ class ScoutAPI:
             LOG.warning("Could not find case %s in scout", case_id)
             return []
         variants: List[Variant] = []
-        for variant_info in json.loads(self.process.stdout):
+        for variant_info in ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.process.stdout
+        ):
             variants.append(Variant(**variant_info))
         return variants
 
@@ -177,11 +181,12 @@ class ScoutAPI:
             LOG.info("Could not find cases")
             return []
 
-        cases = []
-        for case_export in json.loads(self.process.stdout):
+        cases: List[ScoutExportCase] = []
+        for case_export in ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.process.stdout
+        ):
             LOG.info("Validating case %s", case_export.get("_id"))
-            case_obj = ScoutExportCase(**case_export)
-            cases.append(case_obj)
+            cases.append(ScoutExportCase(**case_export))
         return cases
 
     def get_solved_cases(self, days_ago: int) -> List[ScoutExportCase]:
@@ -256,13 +261,13 @@ class ScoutAPI:
         except CalledProcessError:
             raise ScoutUploadError("Something went wrong when uploading fusion report")
 
-    def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id):
-        """Load a splice junctions bed file into a case in the database
+    def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
+        """Load a splice junctions bed file into a case in the database.
 
         Args:
             file_path           (string):       Path to delivery report
             case_id             (string):       Case identifier
-            customer_sample_id  (bool):         Customers sample identifier
+            customer_sample_id  (string):       Customers sample identifier
         Returns:
             updated_case(dict)
 
@@ -294,7 +299,7 @@ class ScoutAPI:
         Args:
             file_path           (string):       Path to delivery report
             case_id             (string):       Case identifier
-            customer_sample_id  (bool):         Customers sample identifier
+            customer_sample_id  (string):       Customers sample identifier
         Returns:
             updated_case(dict)
 

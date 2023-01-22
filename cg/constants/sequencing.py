@@ -3,27 +3,6 @@ from enum import Enum
 
 from cgmodels.cg.constants import StrEnum
 
-sequencer_types = {
-    "D00134": "hiseqga",
-    "D00410": "hiseqga",
-    "D00415": "hiseqga",
-    "D00450": "hiseqga",
-    "D00456": "hiseqga",
-    "D00483": "hiseqga",
-    "M03284": "hiseqga",
-    "SN1025": "hiseqga",
-    "SN7001298": "hiseqga",
-    "SN7001301": "hiseqga",
-    "ST-E00198": "hiseqx",
-    "ST-E00201": "hiseqx",
-    "ST-E00214": "hiseqx",
-    "ST-E00266": "hiseqx",
-    "ST-E00269": "hiseqx",
-    "A00187": "novaseq",
-    "A00621": "novaseq",
-    "A00689": "novaseq",
-}
-
 
 class SequencingMethod(str, Enum):
     ILLUMINA = "illumina"
@@ -40,6 +19,47 @@ class PreparationCategory(str, Enum):
 
 
 class Sequencers(StrEnum):
-    NOVASEQ: str = "novaseq"
-    HISEQGA: str = "hiseqga"
+    """Sequencer instruments."""
+
     HISEQX: str = "hiseqx"
+    HISEQGA: str = "hiseqga"
+    NOVASEQ: str = "novaseq"
+    ALL: str = "all"
+
+
+sequencer_types = {
+    "D00134": Sequencers.HISEQGA,
+    "D00410": Sequencers.HISEQGA,
+    "D00415": Sequencers.HISEQGA,
+    "D00450": Sequencers.HISEQGA,
+    "D00456": Sequencers.HISEQGA,
+    "D00483": Sequencers.HISEQGA,
+    "M03284": Sequencers.HISEQGA,
+    "SN1025": Sequencers.HISEQGA,
+    "SN7001298": Sequencers.HISEQGA,
+    "SN7001301": Sequencers.HISEQGA,
+    "ST-E00198": Sequencers.HISEQX,
+    "ST-E00201": Sequencers.HISEQX,
+    "ST-E00214": Sequencers.HISEQX,
+    "ST-E00266": Sequencers.HISEQX,
+    "ST-E00269": Sequencers.HISEQX,
+    "A00187": Sequencers.NOVASEQ,
+    "A00621": Sequencers.NOVASEQ,
+    "A00689": Sequencers.NOVASEQ,
+}
+
+
+class SequencingMethod(StrEnum):
+    """Sequencing method types."""
+
+    TGS: str = "tgs"
+    WES: str = "wes"
+    WGS: str = "wgs"
+    WTS: str = "wts"
+
+
+class Variants(StrEnum):
+    """Type of variants."""
+
+    SNV: str = "snv"
+    SV: str = "sv"

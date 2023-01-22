@@ -7,11 +7,12 @@ from cg.models.orders.sample_base import OrderSample
 
 # Class for holding information about cases in order
 class OrderCase(BaseModel):
+    cohorts: Optional[List[str]]
     name: str
-    samples: List[OrderSample]
-    require_qcok: bool = False
-    priority: str
     panels: Optional[List[str]]
+    priority: str
+    samples: List[OrderSample]
+    synopsis: Optional[str]
 
 
 class OrderPool(BaseModel):

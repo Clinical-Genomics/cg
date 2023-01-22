@@ -1,165 +1,55 @@
-import datetime as dt
+from typing import List, Generator
 
 import pytest
-from cg.apps.cgstats.db import models as stats_models
-from cg.apps.cgstats.stats import StatsAPI
-from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.lims import LimsAPI
+
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.meta.transfer import TransferLims
-from cg.meta.transfer.flowcell import TransferFlowcell
-from cg.store import Store, models
+from cg.store import Store
 from pathlib import Path
 
-
-@pytest.fixture(name="data")
-def fixture_data() -> dict:
-    return {
-        "samples": [
-            {
-                "name": "ADM1136A3",
-                "index": "ACGTACAT",
-                "flowcell": "HJKMYBCXX",
-                "type": "hiseqx",
-            }
-        ]
-    }
+from tests.mocks.limsmock import MockLimsAPI
 
 
-@pytest.fixture(scope="function")
-def store_stats() -> StatsAPI:
-    """Setup base CGStats store."""
-    _store = StatsAPI({"cgstats": {"database": "sqlite://", "root": "tests/fixtures/DEMUX"}})
-    _store.create_all()
-    yield _store
-    _store.drop_all()
-
-
-@pytest.fixture(scope="function")
-def base_store_stats(store_stats: StatsAPI, data: dict) -> StatsAPI:
-    """Setup CGStats store with sample data."""
-    demuxes = {}
-    for sample_data in data["samples"]:
-        project: stats_models.Project = store_stats.Project(
-            projectname="test", time=dt.datetime.now()
-        )
-        sample: stats_models.Sample = store_stats.Sample(
-            samplename=sample_data["name"],
-            barcode=sample_data["index"],
-            limsid=sample_data["name"],
-        )
-        sample.project = project
-        unaligned: stats_models.Unaligned = store_stats.Unaligned(
-            readcounts=300000000, q30_bases_pct=85
-        )
-        unaligned.sample = sample
-
-        if sample_data["flowcell"] in demuxes:
-            demux = demuxes[sample_data["flowcell"]]
-        else:
-            flowcell: stats_models.Flowcell = store_stats.Flowcell(
-                flowcellname=sample_data["flowcell"],
-                flowcell_pos="A",
-                hiseqtype=sample_data["type"],
-                time=dt.datetime.now(),
-            )
-            supportparams: stats_models.Supportparams = store_stats.Supportparams(
-                document_path="NA", idstring="NA"
-            )
-            datasource: stats_models.Datasource = store_stats.Datasource(
-                document_path="NA", document_type="html"
-            )
-            datasource.supportparams = supportparams
-            demux = store_stats.Demux()
-            demux.flowcell = flowcell
-            demux.datasource = datasource
-            demuxes[sample_data["flowcell"]] = demux
-
-        unaligned.demux = demux
-        store_stats.add(unaligned)
-    store_stats.commit()
-    yield store_stats
-
-
-@pytest.fixture(scope="function")
-def flowcell_store(base_store: Store, data: dict) -> Store:
-    """Setup store with sample data for testing flowcell transfer."""
-    for sample_data in data["samples"]:
-        customer_obj: models.Customer = base_store.customers().first()
-        application_version: models.ApplicationVersion = base_store.application(
-            "WGSPCFC030"
-        ).versions[0]
-        sample: models.Sample = base_store.add_sample(
-            name="NA", sex="male", internal_id=sample_data["name"]
-        )
-        sample.customer = customer_obj
-        sample.application_version = application_version
-        sample.received_at = dt.datetime.now()
-        base_store.add(sample)
-    base_store.commit()
-    yield base_store
-
-
-@pytest.fixture(scope="function")
-def transfer_flowcell_api(
-    flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
-) -> TransferFlowcell:
-    """Setup flowcell transfer API."""
-    transfer_api = TransferFlowcell(
-        db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api
-    )
-    yield transfer_api
-
-
-@pytest.fixture(scope="function")
-def transfer_lims_api(sample_store: Store) -> TransferLims:
-    """Setup flowcell transfer API"""
-    yield TransferLims(sample_store, MockLims(config=""))
-
-
-class MockLims(LimsAPI):
-    def __init__(self, config):
-        pass
-
-    _received_at = None
-    _delivered_at = None
-    _prepared_date = None
-    _samples = []
-
-    def get_received_date(self, lims_id: str):
-
-        received_date = None
-        for sample in self._samples:
-            if sample.internal_id == lims_id:
-                received_date = sample.received_at
-        return received_date
-
-    def mock_set_samples(self, samples):
-        self._samples = samples
-
-
-@pytest.fixture(scope="function")
-def lims_api():
-
-    _lims_api = MockLims(config="")
-    return _lims_api
+@pytest.fixture(name="transfer_lims_api")
+def fixture_transfer_lims_api(sample_store: Store) -> Generator[TransferLims, None, None]:
+    """Setup LIMS transfer API."""
+    yield TransferLims(sample_store, MockLimsAPI(config=""))
 
 
 @pytest.fixture(name="external_data_directory", scope="session")
 def external_data_directory(
-    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket_nr
+    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket: str
 ) -> Path:
-    """Fixture that returns a customer folder with fastq.gz files in sample-directories"""
-    sample1: str = cust_sample_id + "1"
-    sample2: str = cust_sample_id + "2"
-    cust_folder = tmpdir_factory.mktemp(customer_id, numbered=False)
-    ticket_folder = cust_folder / str(ticket_nr)
+    """Returns a customer folder with fastq.gz files in sample-directories."""
+    cust_folder: Path = tmpdir_factory.mktemp(customer_id, numbered=False)
+    ticket_folder: Path = Path(cust_folder, ticket)
     ticket_folder.mkdir()
-    Path(ticket_folder, sample1).mkdir(exist_ok=True, parents=True)
-    Path(ticket_folder, sample2).mkdir(exist_ok=True, parents=True)
-    Path(ticket_folder, sample1, sample1 + "_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(ticket_folder, sample1, sample1 + "_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(ticket_folder, sample1, sample1 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
-    Path(ticket_folder, sample2, sample2 + "_fastq_1.fastq.gz").touch(exist_ok=True)
-    Path(ticket_folder, sample2, sample2 + "_fastq_2.fastq.gz").touch(exist_ok=True)
-    Path(ticket_folder, sample2, sample2 + "_fastq_2.fastq.gz.md5").touch(exist_ok=True)
+    samples: List[str] = [f"{cust_sample_id}1", f"{cust_sample_id}2"]
+    for sample in samples:
+        Path(ticket_folder, sample).mkdir(exist_ok=True, parents=True)
+        for read in [1, 2]:
+            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz").touch(exist_ok=True)
+            Path(ticket_folder, sample, f"{sample}_fastq_{read}.fastq.gz.md5").touch(exist_ok=True)
     return Path(ticket_folder)
+
+
+@pytest.fixture(name="sample_sheet_path")
+def fixture_sample_sheet_path(tmpdir_factory) -> Generator[Path, None, None]:
+    """Create and return path to sample sheet."""
+    sample_sheet_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
+    sample_sheet_path_dir.mkdir(parents=True, exist_ok=True)
+    sample_sheet_path: Path = Path(
+        sample_sheet_path_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
+    sample_sheet_path.touch()
+    yield sample_sheet_path
+
+
+@pytest.fixture(name="cgstats_log_path")
+def fixture_cgstats_log_path(tmpdir_factory) -> Generator[Path, None, None]:
+    """Create and return path to cgstats log file."""
+    cgstats_log_path_dir: Path = Path(tmpdir_factory.mktemp("DEMUX"), "HVKJCDRXX", "NAADM1")
+    cgstats_log_path_dir.mkdir(parents=True, exist_ok=True)
+    cgstats_log_path: Path = Path(cgstats_log_path_dir, "stats-121087-flow-cell-id.txt")
+    cgstats_log_path.touch()
+    yield cgstats_log_path

@@ -3,11 +3,15 @@ import datetime as dt
 from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Query
-
+from sqlalchemy.orm import Query, load_only
+from cg.constants.constants import PrepCategory
+from cg.constants.indexes import ListIndexes
 from cg.store import models
 from cg.store.api.base import BaseHandler
 from cgmodels.cg.constants import Pipeline
+
+from cg.store.models import Flowcell
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -66,6 +70,15 @@ class FindBusinessDataHandler(BaseHandler):
             return True
         return False
 
+    def get_application_by_case(self, case_id: str) -> models.Application:
+        """Return the application of a case."""
+
+        return (
+            self.family(case_id)
+            .links[ListIndexes.FIRST.value]
+            .sample.application_version.application
+        )
+
     def analyses_ready_for_vogue_upload(
         self,
         completed_after: Optional[dt.date],
@@ -112,16 +125,19 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Delivery.query
 
     def families(
-        self, *, customers: [models.Customer] = None, enquiry: str = None, action: str = None
+        self,
+        *,
+        action: Optional[str] = None,
+        data_analysis: Optional[str] = None,
+        customers: List[models.Customer] = None,
+        enquiry: Optional[str] = None,
     ) -> Query:
         """Fetch families."""
 
         records = self.Family.query
 
         if customers:
-            customer_ids = []
-            for customer in customers:
-                customer_ids.append(customer.id)
+            customer_ids = [customer.id for customer in customers]
             records = records.filter(models.Family.customer_id.in_(customer_ids))
 
         records = (
@@ -134,33 +150,8 @@ class FindBusinessDataHandler(BaseHandler):
             if enquiry
             else records
         )
-
         records = records.filter_by(action=action) if action else records
-        return records.order_by(models.Family.created_at.desc())
-
-    def families_in_customer_group(
-        self, *, customers: List[models.Customer] = None, enquiry: str = None
-    ) -> Query:
-        """Fetch all families including those from collaborating customers."""
-        records = self.Family.query.join(models.Family.customer, models.Customer.customer_group)
-
-        if customers:
-            customer_group_ids = []
-            for customer in customers:
-                customer_group_ids.append(customer.customer_group_id)
-            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
-
-        records = (
-            records.filter(
-                or_(
-                    models.Family.name.like(f"%{enquiry}%"),
-                    models.Family.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
-
+        records = records.filter_by(data_analysis=data_analysis) if data_analysis else records
         return records.order_by(models.Family.created_at.desc())
 
     def family(self, internal_id: str) -> models.Family:
@@ -175,38 +166,32 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def families_by_subject_id(
-        self,
-        customer_id: str,
-        subject_id: str,
-        data_analyses: [Pipeline] = None,
-        is_tumour: bool = None,
-    ) -> Set[models.Family]:
-        """Get all cases that have a sample for a subject_id.
+    def get_cases_from_ticket(self, ticket: str) -> Query:
+        return self.Family.query.filter(models.Family.tickets.contains(ticket))
 
-        Args:
-            customer_id     (str):                 Customer-id of customer owning the cases
-            subject_id      (str):                 Subject-id to search for
-            data_analyses   (list[Pipeline]):      Optional list of data_analysis values to filter on
-            is_tumour       (bool):                Optional is_tumour value to filter on
-        Returns:
-            set containing the matching cases set(models.Family)
-        """
-        cases: set[models.Family] = set()
-        samples: [models.Sample] = self.samples_by_subject_id(
-            customer_id=customer_id, subject_id=subject_id, is_tumour=is_tumour
+    def get_customer_id_from_ticket(self, ticket: str) -> str:
+        """Returns the customer related to given ticket"""
+        return (
+            self.Family.query.filter(models.Family.tickets.contains(ticket))
+            .first()
+            .customer.internal_id
         )
-        sample: models.Sample
-        for sample in samples:
-            link: models.FamilySample
-            for link in sample.links:
-                case: models.Family = link.family
 
-                if data_analyses and case.data_analysis not in data_analyses:
-                    continue
+    def get_samples_from_ticket(self, ticket: str) -> List[models.Sample]:
+        return (
+            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
+            .filter(models.Family.tickets.contains(ticket))
+            .all()
+        )
 
-                cases.add(case)
-        return cases
+    def get_samples_from_flowcell(self, flowcell_name: str) -> List[models.Sample]:
+        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_name).first()
+        if flowcell:
+            return flowcell.samples
+
+    def get_latest_ticket_from_case(self, case_id: str) -> str:
+        """Returns the ticket from the most recent sample in a case"""
+        return self.family(case_id).latest_ticket
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> models.Flowcell:
         """Fetch the latest sequenced flow cell related to a sample on a case"""
@@ -218,12 +203,13 @@ class FindBusinessDataHandler(BaseHandler):
         return flow_cells_on_case[-1]
 
     def get_samples_by_family_id(self, family_id: str) -> List[models.Sample]:
-        """Get samples on a given family_id"""
+        """Get samples on a given family_id."""
+
         case: models.Family = self.family(internal_id=family_id)
-        return [link.sample for link in case.links] if case else []
+        return case.samples if case else []
 
     def get_sequenced_samples(self, family_id: str) -> List[models.Sample]:
-        """Get sequenced samples by family_id"""
+        """Get sequenced samples by family_id."""
 
         samples: List[models.Sample] = self.get_samples_by_family_id(family_id)
         return [sample for sample in samples if sample.sequencing_qc]
@@ -240,9 +226,11 @@ class FindBusinessDataHandler(BaseHandler):
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
-    def flowcell(self, name: str) -> models.Flowcell:
-        """Fetch a flowcell."""
-        return self.Flowcell.query.filter(models.Flowcell.name == name).first()
+    def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
+        """Return flow cell."""
+        return apply_flow_cell_filter(
+            flow_cells=self.Flowcell.query, flow_cell_id=flow_cell_id, function="flow_cell_has_id"
+        )
 
     def flowcells(
         self, *, status: str = None, family: models.Family = None, enquiry: str = None
@@ -286,22 +274,6 @@ class FindBusinessDataHandler(BaseHandler):
             .first()
         )
 
-    def links(self, case_id: str, sample_id: str, ticket: int) -> Query:
-        """Find a link between a family and a sample."""
-
-        query = self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-
-        if case_id:
-            query = query.filter(models.Family.internal_id == case_id)
-
-        if sample_id:
-            query = query.filter(models.Sample.internal_id == sample_id)
-
-        if ticket:
-            query = query.filter(models.Sample.ticket_number == ticket)
-
-        return query
-
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
         query = self.Invoice.query.all()
@@ -333,6 +305,19 @@ class FindBusinessDataHandler(BaseHandler):
     def pool(self, pool_id: int) -> models.Pool:
         """Fetch a pool."""
         return self.Pool.get(pool_id)
+
+    def get_ready_made_library_expected_reads(self, case_id: str) -> int:
+        """Return the target reads of a ready made library case."""
+
+        application: models.Application = self.get_application_by_case(case_id)
+
+        if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
+
+            raise ValueError(
+                f"{case_id} is not a ready made library, found prep category: "
+                f"{application.prep_category}"
+            )
+        return application.expected_reads
 
     def sample(self, internal_id: str) -> models.Sample:
         """Fetch a sample by lims id."""
@@ -377,7 +362,7 @@ class FindBusinessDataHandler(BaseHandler):
         query: Query = self.Sample.query.join(models.Customer).filter(
             models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
         )
-        if is_tumour is not None:
+        if is_tumour:
             query: Query = query.filter(models.Sample.is_tumour == is_tumour)
         return query
 
@@ -393,27 +378,11 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_by_name(self, name: str) -> models.Sample:
         return self.Sample.query.filter(models.Sample.name == name).first()
 
-    def samples_in_customer_group(
-        self, *, customers: Optional[List[models.Customer]] = None, enquiry: str = None
-    ) -> Query:
-        """Fetch all samples including those from collaborating customers."""
+    def get_case_pool(self, case_id: str) -> Optional[models.Pool]:
+        """Returns the pool connected to the case. Returns None if no pool is found"""
+        case: models.Family = self.family(internal_id=case_id)
+        pool_name: str = case.name.split("-", 1)[-1]
+        return self.pools(customers=[case.customer], enquiry=pool_name).first()
 
-        records = self.Sample.query.join(models.Sample.customer, models.Customer.customer_group)
-
-        if customers:
-            customer_group_ids = []
-            for customer in customers:
-                customer_group_ids.append(customer.customer_group_id)
-            records = records.filter(models.CustomerGroup.id.in_(customer_group_ids))
-
-        records = (
-            records.filter(
-                or_(
-                    models.Sample.name.like(f"%{enquiry}%"),
-                    models.Sample.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
-        )
-        return records.order_by(models.Sample.created_at.desc())
+    def is_pool(self, case_id: str) -> bool:
+        return bool(self.get_case_pool(case_id=case_id))

@@ -1,17 +1,17 @@
 """Interactions with the gisaid cli upload_results_to_gisaid"""
-import json
 import logging
 import re
 from pathlib import Path
 from typing import List, Dict, Optional
 import pandas as pd
 
-from cg.constants.constants import SARS_COV_REGEX
+from cg.constants.constants import SARS_COV_REGEX, FileFormat
 from housekeeper.store.models import File
 import tempfile
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
+from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
 from cg.store import models, Store
 from cg.utils import Process
@@ -147,7 +147,7 @@ class GisaidAPI:
             return
 
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            case_id=case_id, file=gisaid_fasta_path, tags=["gisaid-fasta", case_id]
+            bundle_name=case_id, file=gisaid_fasta_path, tags=["gisaid-fasta", case_id]
         )
 
     def create_gisaid_csv(self, gisaid_samples: List[GisaidSample], case_id: str) -> None:
@@ -171,7 +171,7 @@ class GisaidAPI:
             return
 
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            case_id=case_id, file=gisaid_csv_path, tags=["gisaid-csv", case_id]
+            bundle_name=case_id, file=gisaid_csv_path, tags=["gisaid-csv", case_id]
         )
 
     def create_gisaid_log_file(self, case_id: str) -> None:
@@ -189,7 +189,7 @@ class GisaidAPI:
         if not log_file_path.exists():
             log_file_path.touch()
         self.housekeeper_api.add_and_include_file_to_latest_version(
-            case_id=case_id, file=log_file_path, tags=["gisaid-log", case_id]
+            bundle_name=case_id, file=log_file_path, tags=["gisaid-log", case_id]
         )
 
     def create_gisaid_files_in_housekeeper(self, case_id: str) -> None:
@@ -253,16 +253,18 @@ class GisaidAPI:
 
     def append_log(self, temp_log: Path, gisaid_log: Path) -> None:
         """Appends temp log to gisaid log and delete temp file"""
+        new_log_data: List = ReadFile.get_content_from_file(
+            file_format=FileFormat.JSON, file_path=temp_log.absolute()
+        )
+        if gisaid_log.stat().st_size != 0:
+            old_log_data: List = ReadFile.get_content_from_file(
+                file_format=FileFormat.JSON, file_path=gisaid_log.absolute()
+            )
+            new_log_data.extend(old_log_data)
 
-        with open(str(temp_log.absolute()), "r") as open_temp_log:
-            new_log_data: List = json.load(open_temp_log)
-            if gisaid_log.stat().st_size != 0:
-                with open(str(gisaid_log.absolute()), "r") as open_gisaid_log:
-                    old_log_data: List = json.load(open_gisaid_log)
-                    new_log_data.extend(old_log_data)
-
-        with open(str(gisaid_log.absolute()), "w") as open_gisaid_log:
-            json.dump(new_log_data, open_gisaid_log)
+        WriteFile.write_file_from_content(
+            content=new_log_data, file_format=FileFormat.JSON, file_path=gisaid_log.absolute()
+        )
         temp_log.unlink()
 
     def get_accession_numbers(self, case_id: str) -> Dict[str, str]:
@@ -276,20 +278,21 @@ class GisaidAPI:
             .full_path
         )
         if log_file.stat().st_size != 0:
-            with open(str(log_file.absolute())) as log_file:
-                log_data = json.load(log_file)
-                for log in log_data:
-                    if log.get("code") == "epi_isl_id":
-                        log_message = log.get("msg")
-                    elif log.get("code") == "validation_error" and "existing_ids" in log.get("msg"):
-                        log_message = (
-                            f'{log.get("msg").split(";")[0]}; '
-                            f'{re.findall(UPLOADED_REGEX_MATCH, log.get("msg"))[0]}'
-                        )
-                    else:
-                        continue
-                    accession_obj = GisaidAccession(log_message=log_message)
-                    accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
+            log_data = ReadFile.get_content_from_file(
+                file_format=FileFormat.JSON, file_path=log_file.absolute()
+            )
+            for log in log_data:
+                if log.get("code") == "epi_isl_id":
+                    log_message = log.get("msg")
+                elif log.get("code") == "validation_error" and "existing_ids" in log.get("msg"):
+                    log_message = (
+                        f'{log.get("msg").split(";")[0]}; '
+                        f'{re.findall(UPLOADED_REGEX_MATCH, log.get("msg"))[0]}'
+                    )
+                else:
+                    continue
+                accession_obj = GisaidAccession(log_message=log_message)
+                accession_numbers[accession_obj.sample_id] = accession_obj.accession_nr
         return accession_numbers
 
     def update_completion_file(self, case_id: str) -> None:

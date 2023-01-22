@@ -7,6 +7,7 @@ from cg.constants.priority import SlurmQos
 
 
 class Sbatch(BaseModel):
+    use_login_shell: Optional[str] = ""
     job_name: str
     account: str
     log_dir: str

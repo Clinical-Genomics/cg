@@ -146,6 +146,7 @@
         "has_strvariants": true,
         "is_migrated": false,
         "track": "rare",
-        "causatives": ["4c7d5c70d955875504db72ef8e1abe77"]
+        "causatives": ["4c7d5c70d955875504db72ef8e1abe77"],
+        "diagnosis_phenotypes": [{"disease_nr": 607208, "disease_id": "OMIM:607208", "description": "Dravet syndrome"}]
     }
 ]

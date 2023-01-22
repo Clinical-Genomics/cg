@@ -1,32 +1,41 @@
 """Schemas for scout serialisation"""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from pydantic import BaseModel, Field, validator
 from typing_extensions import Literal
+
+from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.subject import (
+    PlinkGender,
+    Gender,
+    PlinkPhenotypeStatus,
+    RelationshipStatus,
+)
+from cg.constants.pedigree import Pedigree
 
 
 class Individual(BaseModel):
     bam_file: Optional[str] = None
     individual_id: str
-    sex: Literal["0", "1", "2", "other"]
+    sex: Literal[PlinkGender.UNKNOWN, PlinkGender.MALE, PlinkGender.FEMALE, Gender.OTHER]
     father: Optional[str]
     mother: Optional[str]
-    phenotype: Literal[1, 2, 0]
+    phenotype: PlinkPhenotypeStatus
     analysis_type: str = "wgs"
 
-    @validator("father", "mother")
-    def convert_to_zero(cls, v):
-        if v is None:
-            return "0"
-        return v
+    @validator(Pedigree.FATHER, Pedigree.MOTHER)
+    def convert_to_zero(cls, value):
+        if value is None:
+            return RelationshipStatus.HAS_NO_PARENT
+        return value
 
-    @validator("sex")
-    def convert_sex_to_zero(cls, v):
-        if v == "other":
-            return "0"
-        return v
+    @validator(Pedigree.SEX)
+    def convert_sex_to_zero(cls, value):
+        if value == Gender.OTHER:
+            return PlinkGender.UNKNOWN
+        return value
 
 
 class Panel(BaseModel):
@@ -47,6 +56,13 @@ class Gene(BaseModel):
     polyphen_prediction: Optional[str]
 
 
+class DiagnosisPhenotypes(BaseModel):
+    disease_nr: int
+    disease_id: str
+    description: str
+    individuals: Optional[List[Dict[str, str]]]
+
+
 class ScoutExportCase(BaseModel):
     id: str = Field(str, alias="_id")
     analysis_date: datetime
@@ -61,14 +77,14 @@ class ScoutExportCase(BaseModel):
     rank_score_threshold: int = 5
     phenotype_terms: Optional[List[Phenotype]]
     phenotype_groups: Optional[List[Phenotype]]
-    diagnosis_phenotypes: Optional[List[int]]
+    diagnosis_phenotypes: Optional[List[DiagnosisPhenotypes]]
     diagnosis_genes: Optional[List[int]]
 
     @validator("genome_build")
-    def convert_genome_build(cls, v):
-        if v is None:
-            return "37"
-        return v
+    def convert_genome_build(cls, value):
+        if value is None:
+            return GENOME_BUILD_37
+        return value
 
 
 class Genotype(BaseModel):

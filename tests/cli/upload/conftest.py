@@ -1,5 +1,7 @@
-"""Fixtures for cli balsamic tests"""
-import json
+"""Fixtures for cli balsamic tests."""
+
+from typing import Union
+
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -11,10 +13,11 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.constants.delivery import MIP_DNA_ANALYSIS_CASE_TAGS, PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.constants import FileFormat
+from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
+from cg.constants.housekeeper_tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
-from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.rsync import RsyncAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -22,9 +25,11 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store, models
-from tests.meta.upload.scout.conftest import fixture_mip_load_config
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.report import MockMipDNAReportAPI
+
+from tests.meta.upload.scout.conftest import fixture_mip_load_config
 
 LOG = logging.getLogger(__name__)
 
@@ -67,9 +72,9 @@ def fixture_upload_genotypes_hk_bundle(
             {
                 "path": str(case_qc_metrics_deliverables),
                 "archive": False,
-                "tags": [HkMipAnalysisTag.QC_METRICS],
+                "tags": HkMipAnalysisTag.QC_METRICS,
             },
-            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf"]},
+            {"path": str(bcf_file), "archive": False, "tags": ["snv-gbcf", "genotype"]},
         ],
     }
 
@@ -268,12 +273,15 @@ class MockLims:
         self.lims = self
 
     @staticmethod
-    def lims_samples():
+    def lims_samples() -> dict:
         """Return LIMS-like case samples"""
-        lims_family = json.load(open("tests/fixtures/report/lims_family.json"))
-        return lims_family["samples"]
+        lims_case: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.JSON,
+            file_path=Path("tests", "fixtures", "report", "lims_family.json"),
+        )
+        return lims_case["samples"]
 
-    def sample(self, sample_id):
+    def sample(self, sample_id) -> Union[str, None]:
         """Returns a lims sample matching the provided sample_id"""
         for sample in self.lims_samples():
             if sample["id"] == sample_id:
@@ -285,7 +293,7 @@ class MockLims:
 def upload_context(cg_context: CGConfig) -> CGConfig:
     analysis_api = MipDNAAnalysisAPI(config=cg_context)
     cg_context.meta_apis["analysis_api"] = analysis_api
-    cg_context.meta_apis["report_api"] = MipDNAReportAPI(cg_context, analysis_api)
+    cg_context.meta_apis["report_api"] = MockMipDNAReportAPI(cg_context, analysis_api)
     cg_context.meta_apis["scout_upload_api"] = UploadScoutAPI(
         hk_api=cg_context.housekeeper_api,
         scout_api=cg_context.scout_api,

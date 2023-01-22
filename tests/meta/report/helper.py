@@ -2,13 +2,13 @@
 
 
 def recursive_assert(data):
-    """Dictionary recursive assert test"""
+    """Dictionary recursive assert test."""
 
-    for k, v in data.items():
-        if isinstance(v, dict):
-            recursive_assert(dict(v))
-        if isinstance(v, list):
-            for e in v:
-                recursive_assert(dict(e))
+    for key, value in data.items():
+        if isinstance(value, dict):
+            recursive_assert(dict(value))
+        if isinstance(value, list):
+            for element in value:
+                recursive_assert(dict(element))
         else:
-            assert v, f"{k} value is missing"
+            assert value or isinstance(value, (int, float, bool)), f"{key} field is missing"

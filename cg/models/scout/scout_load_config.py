@@ -6,8 +6,6 @@ from typing import List, Optional
 from pydantic import BaseModel, validator
 from typing_extensions import Literal
 
-# Individual classes
-
 
 class ChromographImages(BaseModel):
     autozygous: Optional[str] = None
@@ -16,18 +14,27 @@ class ChromographImages(BaseModel):
     upd_sites: Optional[str] = None
 
 
+class Reviewer(BaseModel):
+    alignment: Optional[str] = None
+    alignment_index: Optional[str] = None
+    vcf: Optional[str] = None
+    catalog: Optional[str] = None
+
+
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
-    analysis_type: Literal["wgs", "wes", "mixed", "unknown", "panel", "external"] = None
+    analysis_type: Literal[
+        "wgs", "wes", "mixed", "unknown", "panel", "panel-umi", "external"
+    ] = None
     capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
     confirmed_sex: Optional[bool] = None
     father: Optional[str] = None
     mother: Optional[str] = None
-    phenotype: Literal["affected", "unaffected", "unknown"] = None
+    phenotype: Optional[str] = None
     sample_id: str = None
     sample_name: Optional[str] = None
-    sex: Literal["male", "female", "unknown"] = None
+    sex: Optional[str] = None
     subject_id: Optional[str] = None
     tissue_type: Optional[str] = None
 
@@ -44,6 +51,7 @@ class ScoutIndividual(BaseModel):
 class ScoutMipIndividual(ScoutIndividual):
     mt_bam: Optional[str] = None
     chromograph_images: ChromographImages = ChromographImages()
+    reviewer: Reviewer = Reviewer()
     rhocall_bed: Optional[str] = None
     rhocall_wig: Optional[str] = None
     tiddit_coverage_wig: Optional[str] = None
@@ -57,6 +65,7 @@ class ScoutBalsamicIndividual(ScoutIndividual):
     tmb: Optional[str] = None
     msi: Optional[str] = None
     tumor_purity: float = 0
+    vcf2cytosure: Optional[str] = None
 
 
 class ScoutLoadConfig(BaseModel):
@@ -108,6 +117,10 @@ class BalsamicLoadConfig(ScoutLoadConfig):
         return v
 
 
+class BalsamicUmiLoadConfig(BalsamicLoadConfig):
+    pass
+
+
 class MipLoadConfig(ScoutLoadConfig):
     smn_tsv: Optional[str] = None
     chromograph_image_files: Optional[List[str]]
@@ -122,6 +135,7 @@ class MipLoadConfig(ScoutLoadConfig):
     peddy_check: Optional[str] = None
     madeline: Optional[str] = None
     samples: List[ScoutMipIndividual] = []
+    variant_catalog: Optional[str] = None
 
     @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
     def check_mandatory_files(cls, v):

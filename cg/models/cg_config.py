@@ -16,9 +16,9 @@ from cg.apps.loqus import LoqusdbAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.apps.shipping import ShippingAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
+from cg.constants.observations import LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.store import Store
 
@@ -31,12 +31,18 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
+class EncryptionDirs(BaseModel):
+    current: str
+    legacy: str
+
+
 class FlowCellRunDirs(Sequencers):
     pass
 
 
 class BackupConfig(BaseModel):
     root: Sequencers
+    encrypt_dir: EncryptionDirs
 
 
 class CleanDirs(BaseModel):
@@ -50,7 +56,10 @@ class CleanConfig(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
+    hours: Optional[int]
     mail_user: EmailStr
+    memory: Optional[int]
+    number_tasks: Optional[int]
     conda_env: Optional[str]
     qos: SlurmQos = SlurmQos.LOW
 
@@ -84,7 +93,6 @@ class StatinaConfig(BaseModel):
 class CommonAppConfig(BaseModel):
     binary_path: str
     config_path: Optional[str]
-    deploy_config: Optional[str]
 
 
 class FluffyUploadConfig(BaseModel):
@@ -107,6 +115,7 @@ class LimsConfig(BaseModel):
 
 
 class CrunchyConfig(BaseModel):
+    conda_binary: Optional[str] = None
     cram_reference: str
     slurm: SlurmConfig
 
@@ -116,20 +125,26 @@ class MutaccAutoConfig(CommonAppConfig):
 
 
 class BalsamicConfig(CommonAppConfig):
-    root: str
     balsamic_cache: str
+    bed_path: str
     binary_path: str
     conda_env: str
+    loqusdb_path: str
+    pon_path: str
+    root: str
     slurm: SlurmConfig
+    swegen_path: str
 
 
 class MutantConfig(BaseModel):
-    root: str
     binary_path: str
+    conda_binary: Optional[str] = None
     conda_env: str
+    root: str
 
 
 class MipConfig(BaseModel):
+    conda_binary: Optional[str] = None
     conda_env: str
     mip_config: str
     pipeline: str
@@ -137,16 +152,29 @@ class MipConfig(BaseModel):
     script: str
 
 
+class RnafusionConfig(CommonAppConfig):
+    root: str
+    references: str
+    binary_path: str
+    pipeline_path: str
+    conda_env: str
+    profile: str
+    conda_binary: Optional[str] = None
+    launch_directory: str
+
+
 class CGStatsConfig(BaseModel):
+    binary_path: str
     database: str
     root: str
 
 
 class MicrosaltConfig(BaseModel):
-    root: str
-    queries_path: str
     binary_path: str
+    conda_binary: Optional[str] = None
     conda_env: str
+    queries_path: str
+    root: str
 
 
 class GisaidConfig(CommonAppConfig):
@@ -155,10 +183,6 @@ class GisaidConfig(CommonAppConfig):
     logwatch_email: EmailStr
     upload_password: str
     upload_cid: str
-
-
-class ShippingConfig(CommonAppConfig):
-    host_config: str
 
 
 class DataDeliveryConfig(BaseModel):
@@ -196,7 +220,6 @@ class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
-    bed_path: str
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings
@@ -218,6 +241,7 @@ class CGConfig(BaseModel):
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
+    encryption: Optional[CommonAppConfig] = None
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
@@ -225,16 +249,18 @@ class CGConfig(BaseModel):
     hermes_api_: HermesApi = None
     lims: LimsConfig = None
     lims_api_: LimsAPI = None
-    loqusdb: CommonAppConfig = None
+    loqusdb: CommonAppConfig = Field(None, alias=LoqusdbInstance.WGS.value)
     loqusdb_api_: LoqusdbAPI = None
-    loqusdb_wes: CommonAppConfig = Field(None, alias="loqusdb-wes")
+    loqusdb_wes: CommonAppConfig = Field(None, alias=LoqusdbInstance.WES.value)
+    loqusdb_somatic: CommonAppConfig = Field(None, alias=LoqusdbInstance.SOMATIC.value)
+    loqusdb_tumor: CommonAppConfig = Field(None, alias=LoqusdbInstance.TUMOR.value)
     madeline_api_: MadelineAPI = None
     mutacc_auto: MutaccAutoConfig = Field(None, alias="mutacc-auto")
     mutacc_auto_api_: MutaccAutoAPI = None
+    pdc: Optional[CommonAppConfig] = None
     scout: CommonAppConfig = None
     scout_api_: ScoutAPI = None
-    shipping: ShippingConfig = None
-    shipping_api_: ShippingAPI = None
+    tar: Optional[CommonAppConfig] = None
     trailblazer: TrailblazerConfig = None
     trailblazer_api_: TrailblazerAPI = None
     vogue: CommonAppConfig = None
@@ -250,6 +276,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}
@@ -269,7 +296,6 @@ class CGConfig(BaseModel):
             "madeline_api_": "madeline_api",
             "mutacc_auto_api_": "mutacc_auto_api",
             "scout_api_": "scout_api",
-            "shipping_api_": "shipping_api",
             "status_db_": "status_db",
             "trailblazer_api_": "trailblazer_api",
             "vogue_api_": "vogue_api",
@@ -352,7 +378,9 @@ class CGConfig(BaseModel):
         api = self.__dict__.get("loqusdb_api_")
         if api is None:
             LOG.debug("Instantiating loqusdb api")
-            api = LoqusdbAPI(config=self.dict())
+            api: LoqusdbAPI = LoqusdbAPI(
+                binary_path=self.loqusdb.binary_path, config_path=self.loqusdb.config_path
+            )
             self.loqusdb_api_ = api
         return api
 
@@ -381,15 +409,6 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating scout api")
             api = ScoutAPI(config=self.dict())
             self.scout_api_ = api
-        return api
-
-    @property
-    def shipping_api(self) -> ShippingAPI:
-        api = self.__dict__.get("shipping_api_")
-        if api is None:
-            LOG.debug("Instantiating shipping api")
-            api = ShippingAPI(config=self.shipping.dict())
-            self.shipping_api_ = api
         return api
 
     @property

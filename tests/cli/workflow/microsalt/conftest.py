@@ -96,12 +96,6 @@ def fixture_microbial_sample_name():
     return "microbial_sample_name"
 
 
-@pytest.fixture(name="microbial_ticket")
-def fixture_microbial_ticket():
-    """Define a ticket for a microbial order"""
-    return "123456"
-
-
 @pytest.fixture(scope="function")
 def invalid_ticket_number() -> str:
     return "1234560000"

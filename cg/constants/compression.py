@@ -1,23 +1,16 @@
-"""Constants specific for compression"""
+"""Constants specific for compression."""
 import datetime
-from cgmodels.cg.constants import StrEnum
 
 # Constants for crunchy
-FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
-FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
-SPRING_SUFFIX = ".spring"
+FASTQ_FIRST_READ_SUFFIX: str = "_R1_001.fastq.gz"
+FASTQ_SECOND_READ_SUFFIX: str = "_R2_001.fastq.gz"
+FLAG_PATH_SUFFIX: str = ".crunchy.txt"
+MAX_READS_PER_GB: int = 18_000_000
+PENDING_PATH_SUFFIX: str = ".crunchy.pending.txt"
 
 
-class CompressionHkTags(StrEnum):
-    FASTQ: str = "fastq"
-    SPRING: str = "spring"
-    SPRING_METADATA: str = "spring-metadata"
-
-
-# Number of days until fastqs counts as old
+# Number of days until FASTQs counts as old
 FASTQ_DELTA = 21
-
-# Get the fastq delta in datetime format
 FASTQ_DATETIME_DELTA = datetime.timedelta(days=FASTQ_DELTA)
 
 PROBLEMATIC_CASES = [
@@ -37,16 +30,31 @@ PROBLEMATIC_CASES = [
 
 # List of cases used for validation that we should skip
 BALSAMIC_VALIDATION_CASES = [
-    "bosssponge",  # BALSAMIC validation case tumor-only panel
-    "civilsole",  # BALSAMIC validation case tumor-only wgs
-    "fleetjay",  # BALSAMIC validation case tumor-normal wgs
-    "moralgoat",  # BALSAMIC validation case tumor-normal wgs
+    "setamoeba",  # BALSAMIC validation case tumor-only panel
     "sweetelf",  # BALSAMIC positive control tumor-only panel
-    "unitedbeagle",  # BALSAMIC validation case tumor-normal panel
+    "poeticghoul",  # BALSAMIC positive control tumor-only panel
     "equalbug",  # UMI seracare validation case (AF 0.5%) tumor-normal panel
     "stableraven",  # UMI seracare validation case (AF 1%) tumor-normal panel
-    "sunnyiguana",  # UMI seracare validation case (AF 0.1%) tumor-normal panel
     "uphippo",  # UMI seracare validation case (AF 0.5%) tumor-only panel
+    "cleanfowl",  # BALSAMIC validation case, HD829 reference for FLT3 Ascertation
+    "proudsquid",  # BALSAMIC validation case, HD829 reference for FLT3 Ascertation
+    "modestjaguar",  # BALSAMIC validation case, HD829 reference for FLT3 Ascertation
+    "dearmarmot",  # BALSAMIC validation case, HD829 reference for FLT3 Ascertation
+    "holykid",  # BALSAMIC validation case, HD829 reference for FLT3 Ascertation
+    "civilsole",  # BALSAMIC validation case tumor-only wgs
+    "fleetjay",  # BALSAMIC validation case tumor-normal wgs
+    "grandmarmot",  # BALSAMIC validation case tumor-normal wgs
+    "unitedbeagle",  # BALSAMIC validation case tumor-normal panel
+    "eagerox",  # BALSAMIC validation case from cust087, tumor-only panel
+    "casualweasel",  # BALSAMIC validation case from cust087, tumor-only panel
+    "acetuna",  # BALSAMIC validation case from cust087, tumor-only panel
+    "suitedsnake",  # BALSAMIC validation case from cust087, tumor-only panel
+    "savinghorse",  # BALSAMIC validation case from cust087, tumor-only panel
+    "rightpup",  # BALSAMIC validation case from cust087, tumor-only panel
+]
+
+FLUFFY_VALIDATION_CASES = [
+    "simplesalmon",  # Chromosome 13, 18, 21 Suspected
 ]
 
 MIP_VALIDATION_CASES = [
@@ -91,6 +99,11 @@ MIP_VALIDATION_CASES = [
     "vitalmouse",  # DNA rare disease positive control
 ]
 
+# List of cases used for validation that we should skip
+RNAFUSION_VALIDATION_CASES = [
+    "solidfawn",  # RNAFUSION seracare commercial sample
+]
+
 OTHER_VALIDATION_CASES = [
     "bigdrum",
     "busycolt",
@@ -101,6 +114,7 @@ OTHER_VALIDATION_CASES = [
     "keencalf",
     "keenviper",
     "luckyhog",
+    "maturejay",  # sars-cov-2 case
     "meetpossum",
     "mintbaboon",
     "mintyeti",
@@ -108,8 +122,14 @@ OTHER_VALIDATION_CASES = [
     "propercoral",
     "pumpedcat",
     "strongman",
+    "truecoyote",
 ]
 
 CASES_TO_IGNORE = (
-    PROBLEMATIC_CASES + OTHER_VALIDATION_CASES + BALSAMIC_VALIDATION_CASES + MIP_VALIDATION_CASES
+    PROBLEMATIC_CASES
+    + OTHER_VALIDATION_CASES
+    + BALSAMIC_VALIDATION_CASES
+    + FLUFFY_VALIDATION_CASES
+    + MIP_VALIDATION_CASES
+    + RNAFUSION_VALIDATION_CASES
 )

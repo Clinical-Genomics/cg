@@ -1,4 +1,3 @@
-import json
 import logging
 import tempfile
 from datetime import datetime
@@ -6,6 +5,8 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile, ReadStream, WriteStream, WriteFile
 from cg.utils.date import get_date
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
@@ -20,12 +21,12 @@ def get_log_dir(file_path: Path) -> Path:
 
 def get_fastq_to_spring_sbatch_path(log_dir: Path, run_name: str = None) -> Path:
     """Return the path to where compression sbatch should be printed"""
-    return log_dir / "_".join([run_name, "compress_fastq.sh"])
+    return Path(log_dir, "_".join([run_name, "compress_fastq.sh"]))
 
 
 def get_spring_to_fastq_sbatch_path(log_dir: Path, run_name: str = None) -> Path:
     """Return the path to where decompression sbatch should be printed"""
-    return log_dir / "_".join([run_name, "decompress_spring.sh"])
+    return Path(log_dir, "_".join([run_name, "decompress_spring.sh"]))
 
 
 def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
@@ -41,13 +42,14 @@ def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
 def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
     """Validate content of metadata file and return mapped content"""
     LOG.info("Fetch SPRING metadata from %s", metadata_path)
-    with open(metadata_path, "r") as infile:
-        try:
-            content: List[Dict[str, str]] = json.load(infile)
-        except JSONDecodeError:
-            message = "No content in SPRING metadata file"
-            LOG.warning(message)
-            raise SyntaxError(message)
+    try:
+        content: List[Dict[str, str]] = ReadFile.get_content_from_file(
+            file_format=FileFormat.JSON, file_path=metadata_path
+        )
+    except JSONDecodeError:
+        message = "No content in SPRING metadata file"
+        LOG.warning(message)
+        raise SyntaxError(message)
     metadata = CrunchyMetadata(files=content)
 
     if len(metadata.files) != 3:
@@ -89,6 +91,9 @@ def update_metadata_date(spring_metadata_path: Path) -> None:
     for file_info in spring_metadata.files:
         file_info.updated = now.date()
 
-    content: dict = json.loads(spring_metadata.json(exclude_none=True))
-    with open(spring_metadata_path, "w") as outfile:
-        outfile.write(json.dumps(content["files"]))
+    content: dict = ReadStream.get_content_from_stream(
+        file_format=FileFormat.JSON, stream=spring_metadata.json(exclude_none=True)
+    )
+    WriteFile.write_file_from_content(
+        content=content["files"], file_format=FileFormat.JSON, file_path=spring_metadata_path
+    )

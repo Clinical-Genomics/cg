@@ -2,9 +2,10 @@
     Module for vogue API
 """
 
-import json
 import logging
 
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteStream
 from cg.utils.commands import Process
 
 LOG = logging.getLogger(__name__)
@@ -23,9 +24,15 @@ class VogueAPI:
         self.process = Process(binary=self.vogue_binary, config=self.vogue_config)
 
     def load_genotype_data(self, genotype_dict: dict) -> None:
-        """Load genotype data from a dict."""
-
-        load_call = ["load", "genotype", "-s", json.dumps(genotype_dict)]
+        """Load genotype data from a dict"""
+        load_call = [
+            "load",
+            "genotype",
+            "-s",
+            WriteStream.write_stream_from_content(
+                content=genotype_dict, file_format=FileFormat.JSON
+            ),
+        ]
         self.process.run_command(parameters=load_call)
 
         # Execute command and print its stdout+stderr as it executes
@@ -34,7 +41,11 @@ class VogueAPI:
 
     def load_apptags(self, apptag_list: list) -> None:
         """Add observations from a VCF."""
-        load_call = ["load", "apptag", json.dumps(apptag_list)]
+        load_call = [
+            "load",
+            "apptag",
+            WriteStream.write_stream_from_content(content=apptag_list, file_format=FileFormat.JSON),
+        ]
         self.process.run_command(parameters=load_call)
 
         # Execute command and print its stdout+stderr as it executes

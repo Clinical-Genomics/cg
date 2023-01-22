@@ -258,3 +258,50 @@ class MutantFastqHandler(FastqHandler):
     def get_concatenated_name(linked_fastq_name: str) -> str:
         """ "Create a name for the concatenated file from multiple lanes"""
         return "_".join(linked_fastq_name.split("_")[2:])
+
+    @staticmethod
+    def get_nanopore_header_info(line: str) -> dict:
+        fastq_meta = {"flowcell": None}
+        header_metadata: list = line.split(" ")
+        flowcell = header_metadata[5].split("=")
+        fastq_meta["flowcell"] = flowcell[1]
+        return fastq_meta
+
+    @staticmethod
+    def create_nanopore_fastq_name(
+        flowcell: str,
+        sample: str,
+        filenr: str,
+        meta: Optional[str] = None,
+    ) -> str:
+        return f"{flowcell}_{sample}_{meta}_{filenr}.fastq.gz"
+
+    @staticmethod
+    def parse_nanopore_file_data(fastq_path: Path) -> dict:
+        with gzip.open(fastq_path) as handle:
+            header_line = handle.readline().decode()
+            header_info: dict = MutantFastqHandler.get_nanopore_header_info(line=header_line)
+            data = {
+                "path": fastq_path,
+                "flowcell": header_info["flowcell"],
+            }
+            return data
+
+
+class RnafusionFastqHandler(FastqHandler):
+    @staticmethod
+    def create_fastq_name(
+        lane: str,
+        flow_cell: str,
+        sample: str,
+        read: str,
+        date: dt.datetime = DEFAULT_DATE_STR,
+        index: str = DEFAULT_INDEX,
+        undetermined: Optional[str] = None,
+        meta: Optional[str] = None,
+    ) -> str:
+        """Name a FASTQ file following MIP conventions,
+        no naming constrains from pipeline."""
+        flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
+        date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
+        return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"

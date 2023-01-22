@@ -5,6 +5,7 @@ from typing import List, Set
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
+from cg.constants.constants import CaseActions
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -69,7 +70,7 @@ class CaseSubmitter(Submitter):
             existing_sample: models.Sample = self.status.sample(sample.internal_id)
             data_customer: models.Customer = self.status.customer(customer_id)
 
-            if existing_sample.customer.customer_group_id != data_customer.customer_group_id:
+            if existing_sample.customer not in data_customer.collaborators:
                 raise OrderError(f"Sample not available: {sample.name}")
 
     def _validate_case_names_are_unique(
@@ -81,7 +82,7 @@ class CaseSubmitter(Submitter):
         sample: Of1508Sample
         for sample in samples:
 
-            if self._rerun_of_existing_case(sample):
+            if self._is_rerun_of_existing_case(sample):
                 continue
 
             if self.status.find_family(customer=customer_obj, name=sample.family_name):
@@ -95,7 +96,7 @@ class CaseSubmitter(Submitter):
             status_samples = [
                 link_obj.sample
                 for link_obj in case_obj.links
-                if link_obj.sample.ticket_number == order.ticket
+                if link_obj.sample.original_ticket == order.ticket
             ]
             self._add_missing_reads(status_samples)
         return result
@@ -136,34 +137,33 @@ class CaseSubmitter(Submitter):
             cases[case_id].append(sample)
         return cases
 
-    @classmethod
-    def _get_single_value(cls, case_name, case_samples, value_key, value_default=None):
+    @staticmethod
+    def _get_single_value(case_name, case_samples, value_key, value_default=None):
         values = set(getattr(sample, value_key) or value_default for sample in case_samples)
         if len(values) > 1:
             raise ValueError(f"different sample {value_key} values: {case_name} - {values}")
         single_value = values.pop()
         return single_value
 
-    @classmethod
-    def order_to_status(cls, order: OrderIn) -> dict:
+    @staticmethod
+    def order_to_status(order: OrderIn) -> dict:
         """Converts order input to status interface input for MIP-DNA, MIP-RNA and Balsamic."""
         status_data = {"customer": order.customer, "order": order.name, "families": []}
-        cases = cls._group_cases(order.samples)
+        cases = CaseSubmitter._group_cases(order.samples)
 
         for case_name, case_samples in cases.items():
 
+            case_internal_id: str = CaseSubmitter._get_single_value(
+                case_name, case_samples, "case_internal_id"
+            )
             cohorts: Set[str] = {
                 cohort for sample in case_samples for cohort in sample.cohorts if cohort
             }
-            synopsis: str = ", ".join(set(sample.synopsis or "" for sample in case_samples))
-
-            case_internal_id: str = cls._get_single_value(
-                case_name, case_samples, "case_internal_id"
+            data_analysis = CaseSubmitter._get_single_value(
+                case_name, case_samples, "data_analysis"
             )
-            data_analysis = cls._get_single_value(case_name, case_samples, "data_analysis")
-            data_delivery = cls._get_single_value(case_name, case_samples, "data_delivery")
-            priority = cls._get_single_value(
-                case_name, case_samples, "priority", Priority.standard.name
+            data_delivery = CaseSubmitter._get_single_value(
+                case_name, case_samples, "data_delivery"
             )
 
             panels: Set[str] = set()
@@ -172,8 +172,13 @@ class CaseSubmitter(Submitter):
                     panel for sample in case_samples for panel in sample.panels if panel
                 }
 
+            priority = CaseSubmitter._get_single_value(
+                case_name, case_samples, "priority", Priority.standard.name
+            )
+            synopsis: str = CaseSubmitter._get_single_value(case_name, case_samples, "synopsis")
+
             case = {
-                "cohorts": cohorts,
+                "cohorts": list(cohorts),
                 "data_analysis": data_analysis,
                 "data_delivery": data_delivery,
                 "internal_id": case_internal_id,
@@ -186,16 +191,19 @@ class CaseSubmitter(Submitter):
                         "application": sample.application,
                         "capture_kit": sample.capture_kit,
                         "comment": sample.comment,
+                        "control": sample.control,
                         "father": sample.father,
                         "internal_id": sample.internal_id,
                         "mother": sample.mother,
                         "name": sample.name,
                         "phenotype_groups": list(sample.phenotype_groups),
                         "phenotype_terms": list(sample.phenotype_terms),
+                        "reference_genome": sample.reference_genome
+                        if hasattr(sample, "reference_genome")
+                        else None,
                         "sex": sample.sex,
                         "status": sample.status if hasattr(sample, "status") else None,
                         "subject_id": sample.subject_id,
-                        "time_point": sample.time_point if hasattr(sample, "time_point") else None,
                         "tumour": sample.tumour,
                     }
                     for sample in case_samples
@@ -207,7 +215,7 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
 
@@ -216,16 +224,19 @@ class CaseSubmitter(Submitter):
         for case in items:
             case_obj = self.status.family(case["internal_id"])
             if not case_obj:
-                case_obj = self.create_case(case, customer_obj)
+                case_obj = self._create_case(case, customer_obj, ticket)
                 new_families.append(case_obj)
+            else:
+                self._append_ticket(ticket=ticket, case=case_obj)
+                self._update_action(action=CaseActions.ANALYZE, case=case_obj)
 
-            self.update_case(case, case_obj)
+            self._update_case(case, case_obj)
 
             family_samples = {}
             for sample in case["samples"]:
                 sample_obj = self.status.sample(sample["internal_id"])
                 if not sample_obj:
-                    sample_obj = self.create_sample(
+                    sample_obj = self._create_sample(
                         case, customer_obj, order, ordered, sample, ticket
                     )
 
@@ -237,24 +248,36 @@ class CaseSubmitter(Submitter):
                 with self.status.session.no_autoflush:
                     link_obj = self.status.link(case_obj.internal_id, sample["internal_id"])
                 if not link_obj:
-                    link_obj = self.create_link(
+                    link_obj = self._create_link(
                         case_obj, family_samples, father_obj, mother_obj, sample
                     )
 
-                self.update_relationship(father_obj, link_obj, mother_obj, sample)
+                self._update_relationship(father_obj, link_obj, mother_obj, sample)
 
             self.status.add_commit(new_families)
         return new_families
 
-    def update_case(self, case, case_obj):
+    @staticmethod
+    def _update_case(case, case_obj):
         case_obj.panels = case["panels"]
 
-    def update_relationship(self, father_obj, link_obj, mother_obj, sample):
+    @staticmethod
+    def _append_ticket(ticket: str, case: models.Family) -> None:
+        """Add a ticket to the case."""
+        case.tickets = f"{case.tickets},{ticket}"
+
+    @staticmethod
+    def _update_action(action: str, case: models.Family) -> None:
+        """Update action of a case."""
+        case.action = action
+
+    @staticmethod
+    def _update_relationship(father_obj, link_obj, mother_obj, sample):
         link_obj.status = sample["status"] or link_obj.status
         link_obj.mother = mother_obj or link_obj.mother
         link_obj.father = father_obj or link_obj.father
 
-    def create_link(self, case_obj, family_samples, father_obj, mother_obj, sample):
+    def _create_link(self, case_obj, family_samples, father_obj, mother_obj, sample):
         link_obj = self.status.relate_sample(
             family=case_obj,
             sample=family_samples[sample["name"]],
@@ -265,23 +288,24 @@ class CaseSubmitter(Submitter):
         self.status.add(link_obj)
         return link_obj
 
-    def create_sample(self, case, customer_obj, order, ordered, sample, ticket):
+    def _create_sample(self, case, customer_obj, order, ordered, sample, ticket):
         sample_obj = self.status.add_sample(
-            age_at_sampling=sample["age_at_sampling"],
-            capture_kit=sample["capture_kit"],
-            comment=sample["comment"],
-            internal_id=sample["internal_id"],
             name=sample["name"],
+            comment=sample["comment"],
+            control=sample["control"],
+            internal_id=sample["internal_id"],
             order=order,
             ordered=ordered,
+            original_ticket=ticket,
+            tumour=sample["tumour"],
+            age_at_sampling=sample["age_at_sampling"],
+            capture_kit=sample["capture_kit"],
             phenotype_groups=sample["phenotype_groups"],
             phenotype_terms=sample["phenotype_terms"],
             priority=case["priority"],
+            reference_genome=sample["reference_genome"],
             sex=sample["sex"],
             subject_id=sample["subject_id"],
-            ticket=ticket,
-            time_point=sample["time_point"],
-            tumour=sample["tumour"],
         )
         sample_obj.customer = customer_obj
         with self.status.session.no_autoflush:
@@ -294,7 +318,7 @@ class CaseSubmitter(Submitter):
         self.status.add(new_delivery)
         return sample_obj
 
-    def create_case(self, case, customer_obj):
+    def _create_case(self, case: dict, customer_obj: models.Customer, ticket: str):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
             data_analysis=Pipeline(case["data_analysis"]),
@@ -302,10 +326,11 @@ class CaseSubmitter(Submitter):
             name=case["name"],
             priority=case["priority"],
             synopsis=case["synopsis"],
+            ticket=ticket,
         )
         case_obj.customer = customer_obj
         return case_obj
 
     @staticmethod
-    def _rerun_of_existing_case(sample: Of1508Sample) -> bool:
+    def _is_rerun_of_existing_case(sample: Of1508Sample) -> bool:
         return sample.case_internal_id is not None

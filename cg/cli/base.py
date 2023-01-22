@@ -1,4 +1,6 @@
 """ Start of CLI """
+from pathlib import Path
+
 import logging
 import sys
 from typing import Optional
@@ -6,36 +8,35 @@ from typing import Optional
 import cg
 import click
 import coloredlogs
-import yaml
 from cg.cli.delete.base import delete
 from cg.cli.set.base import set_cmd
+from cg.constants.constants import FileFormat
 from cg.cli.store.store import store as store_cmd
+from cg.io.controller import ReadFile
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
-from .add import add as add_cmd
-from .backup import backup
-from .clean import clean
-from .compress.base import compress, decompress
-from .deliver.base import deliver as deliver_cmd
-from .demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
-from .deploy.base import deploy as deploy_cmd
-from .export import export
-from .get import get
-from .import_cmd import import_cmd
-from .reset import reset_cmd
-from .status import status
-from .transfer import transfer_group
-from .upload.base import upload
-from .workflow.base import workflow as workflow_cmd
-from .generate.base import generate as generate_cmd
+from cg.cli.add import add as add_cmd
+from cg.cli.backup import backup
+from cg.cli.clean import clean
+from cg.cli.compress.base import compress, decompress
+from cg.cli.deliver.base import deliver as deliver_cmd
+from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
+from cg.cli.export import export
+from cg.cli.get import get
+from cg.cli.import_cmd import import_cmd
+from cg.cli.status import status
+from cg.cli.transfer import transfer_group
+from cg.cli.upload.base import upload
+from cg.cli.workflow.base import workflow as workflow_cmd
+from cg.cli.generate.base import generate as generate_cmd
 
 LOG = logging.getLogger(__name__)
 LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 
 
 @click.group()
-@click.option("-c", "--config", type=click.File(), help="path to config file")
+@click.option("-c", "--config", type=click.Path(exists=True), help="path to config file")
 @click.option("-d", "--database", help="path/URI of the SQL database")
 @click.option(
     "-l", "--log-level", type=click.Choice(LEVELS), default="INFO", help="lowest level to log at"
@@ -45,7 +46,7 @@ LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR"]
 @click.pass_context
 def base(
     context: click.Context,
-    config: click.File,
+    config: click.Path,
     database: Optional[str],
     log_level: str,
     verbose: bool,
@@ -57,8 +58,12 @@ def base(
         log_format = "%(message)s" if sys.stdout.isatty() else None
 
     coloredlogs.install(level=log_level, fmt=log_format)
-    raw_configs: dict = yaml.full_load(config) if config else {"database": database}
-    context.obj = CGConfig(**raw_configs)
+    raw_config: dict = (
+        ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=Path(config))
+        if config
+        else {"database": database}
+    )
+    context.obj = CGConfig(**raw_config)
 
 
 @base.command()
@@ -91,14 +96,12 @@ base.add_command(delete)
 base.add_command(export)
 base.add_command(get)
 base.add_command(import_cmd)
-base.add_command(reset_cmd)
 base.add_command(set_cmd)
 base.add_command(status)
 base.add_command(transfer_group)
 base.add_command(upload)
 base.add_command(workflow_cmd)
 base.add_command(store_cmd)
-base.add_command(deploy_cmd)
 base.add_command(deliver_cmd)
 base.add_command(demultiplex_cmd)
 base.add_command(generate_cmd)

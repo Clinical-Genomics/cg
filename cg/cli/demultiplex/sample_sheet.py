@@ -14,9 +14,9 @@ from cg.apps.lims.samplesheet import (
     flowcell_samples,
 )
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
-from cg.exc import FlowcellError
+from cg.exc import FlowCellError
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flowcell import Flowcell
+from cg.models.demultiplex.flow_cell import FlowCell
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 
 LOG = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group(name="samplesheet")
 def sample_sheet_commands():
-    """Command group for the sample sheet commands"""
+    """Command group for the sample sheet commands."""
 
 
 @sample_sheet_commands.command(name="validate")
@@ -32,65 +32,66 @@ def sample_sheet_commands():
 @OPTION_BCL_CONVERTER
 def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
     """Command to validate a sample sheet"""
-    LOG.info("Validating sample sheet %s", sheet)
+    LOG.info(
+        f"Validating sample sheet {sheet}",
+    )
     sheet: Path = Path(str(sheet))
     if sheet.suffix != ".csv":
-        LOG.warning("File %s seems to be in wrong format", sheet)
-        LOG.warning("Suffix %s is not '.csv'", sheet.suffix)
+        LOG.warning(f"File {sheet} seems to be in wrong format")
+        LOG.warning(f"Suffix {sheet.suffix} is not '.csv'")
         raise click.Abort
     try:
         get_sample_sheet_from_file(infile=sheet, sheet_type="S4", bcl_converter=bcl_converter)
-    except ValidationError as err:
-        LOG.warning(err)
-        raise click.Abort
+    except ValidationError as error:
+        LOG.warning(error)
+        raise click.Abort from error
     LOG.info("Sample sheet looks fine")
 
 
 @sample_sheet_commands.command(name="create")
-@click.argument("flowcell-name")
+@click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def create_sheet(context: CGConfig, flowcell_name: str, bcl_converter: str, dry_run: bool):
-    """Command to create a sample sheet
-    flowcell-name is the flowcell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+def create_sheet(context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool):
+    """Command to create a sample sheet.
+    flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
 
-    Search the flowcell in the directory specified in config
+    Search the flow cell in the directory specified in config.
     """
 
-    LOG.info("Creating sample sheet for flowcell %s", flowcell_name)
+    LOG.info(f"Creating sample sheet for flowcell {flow_cell_name}")
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flowcell_path: Path = demultiplex_api.run_dir / flowcell_name
+    flowcell_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
     if not flowcell_path.exists():
-        LOG.warning("Could not find flowcell %s", flowcell_path)
+        LOG.warning(f"Could not find flow cell {flowcell_path}")
         raise click.Abort
     try:
-        flowcell_object = Flowcell(flowcell_path=flowcell_path, bcl_converter=bcl_converter)
-    except FlowcellError:
-        raise click.Abort
+        flow_cell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
+    except FlowCellError as error:
+        raise click.Abort from error
     lims_samples: List[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]] = list(
         flowcell_samples(
             lims=context.lims_api,
-            flowcell_id=flowcell_object.flowcell_id,
+            flowcell_id=flow_cell.id,
             bcl_converter=bcl_converter,
         )
     )
     if not lims_samples:
-        LOG.warning("Could not find any samples in lims for %s", flowcell_object.flowcell_id)
+        LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
         raise click.Abort
-
     try:
         sample_sheet: str = create_sample_sheet(
-            flowcell=flowcell_object, lims_samples=lims_samples, bcl_converter=bcl_converter
+            flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
         )
-    except (FileNotFoundError, FileExistsError):
-        raise click.Abort
+    except (FileNotFoundError, FileExistsError) as error:
+        raise click.Abort from error
 
     if dry_run:
         click.echo(sample_sheet)
         return
-    LOG.info("Writing sample sheet to %s", flowcell_object.sample_sheet_path.resolve())
-    with open(flowcell_object.sample_sheet_path, "w") as outfile:
+    LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
+    with open(flow_cell.sample_sheet_path, "w") as outfile:
         outfile.write(sample_sheet)
 
 
@@ -99,39 +100,39 @@ def create_sheet(context: CGConfig, flowcell_name: str, bcl_converter: str, dry_
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
 def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
-    """Command to create sample sheets for all flowcells that lack a sample sheet
+    """Command to create sample sheets for all flow cells that lack a sample sheet.
 
-    Search flowcell directories for run parameters and create a sample sheets based on the
-    information
+    Search flow cell directories for run parameters and create a sample sheets based on the
+    information.
     """
     demux_api: DemultiplexingAPI = context.demultiplex_api
-    flowcells: Path = demux_api.run_dir
-    for sub_dir in flowcells.iterdir():
+    flow_cells: Path = demux_api.run_dir
+    for sub_dir in flow_cells.iterdir():
         if not sub_dir.is_dir():
             continue
-        LOG.info("Found directory %s", sub_dir)
+        LOG.info(f"Found directory {sub_dir}")
         try:
-            flowcell_object = Flowcell(flowcell_path=sub_dir, bcl_converter=bcl_converter)
-        except FlowcellError:
+            flow_cell = FlowCell(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
+        except FlowCellError:
             continue
-        if flowcell_object.sample_sheet_exists():
+        if flow_cell.sample_sheet_exists():
             LOG.info("Sample sheet already exists")
             continue
-        LOG.info("Creating sample sheet for flowcell %s", flowcell_object.flowcell_id)
+        LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
         lims_samples: List[LimsFlowcellSample] = list(
             flowcell_samples(
                 lims=context.lims_api,
-                flowcell_id=flowcell_object.flowcell_id,
+                flowcell_id=flow_cell.id,
                 bcl_converter=bcl_converter,
             )
         )
         if not lims_samples:
-            LOG.warning("Could not find any samples in lims for %s", flowcell_object.flowcell_id)
+            LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
             continue
 
         try:
             sample_sheet: str = create_sample_sheet(
-                flowcell=flowcell_object, lims_samples=lims_samples, bcl_converter=bcl_converter
+                flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
             )
         except (FileNotFoundError, FileExistsError):
             continue
@@ -139,6 +140,6 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
         if dry_run:
             click.echo(sample_sheet)
             return
-        LOG.info("Writing sample sheet to %s", flowcell_object.sample_sheet_path.resolve())
-        with open(flowcell_object.sample_sheet_path, "w") as outfile:
+        LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
+        with open(flow_cell.sample_sheet_path, "w") as outfile:
             outfile.write(sample_sheet)

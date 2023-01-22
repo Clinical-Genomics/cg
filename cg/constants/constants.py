@@ -1,8 +1,16 @@
-"""Constants for cg"""
+"""Constants for cg."""
 from enum import Enum
-
 import click
-from cgmodels.cg.constants import Pipeline, StrEnum
+from cgmodels.cg.constants import StrEnum
+
+from cg.constants.sequencing import Sequencers
+from cg.utils.date import get_date
+
+VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
+
+MAX_ITEMS_TO_RETRIEVE = 50
+
+SCALE_TO_MILLION_READ_PAIRS = 2_000_000
 
 ANALYSIS_TYPES = ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
 
@@ -22,13 +30,13 @@ CAPTUREKIT_OPTIONS = (
 )
 
 
-class CaseAction(str, Enum):
-    ANALYZE = "analyze"
-    RUNNING = "running"
-    HOLD = "hold"
+class CaseActions(StrEnum):
+    ANALYZE: str = "analyze"
+    HOLD: str = "hold"
+    RUNNING: str = "running"
 
 
-CASE_ACTIONS = ("analyze", "running", "hold")
+CASE_ACTIONS = [action.value for action in CaseActions]
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
@@ -44,13 +52,33 @@ CONTROL_OPTIONS = ("", "negative", "positive")
 
 DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
-FLOWCELL_STATUS = ("ondisk", "removed", "requested", "processing", "retrieved")
+
+class FlowCellStatus(StrEnum):
+    ONDISK: str = "ondisk"
+    REMOVED: str = "removed"
+    REQUESTED: str = "requested"
+    PROCESSING: str = "processing"
+    RETRIEVED: str = "retrieved"
+
+
+FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
 
 FLOWCELL_Q30_THRESHOLD = {
-    "hiseqx": 75,
-    "hiseqga": 80,
-    "novaseq": 75,
+    Sequencers.HISEQX: 75,
+    Sequencers.HISEQGA: 80,
+    Sequencers.NOVASEQ: 75,
 }
+
+
+class PrepCategory(StrEnum):
+    COVID: str = "cov"
+    MICROBIAL: str = "mic"
+    READY_MADE_LIBRARY: str = "rml"
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+
 
 PREP_CATEGORIES = ("cov", "mic", "rml", "tgs", "wes", "wgs", "wts")
 
@@ -61,43 +89,53 @@ SARS_COV_REGEX = "^[0-9]{2}CS[0-9]{6}$"
 STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
+class FileFormat(StrEnum):
+    JSON: str = "json"
+    YAML: str = "yaml"
+
+
+class GenomeVersion(StrEnum):
+    hg19: str = "hg19"
+    hg38: str = "hg38"
+    canfam3: str = "canfam3"
+
+
 class DataDelivery(StrEnum):
-    ANALYSIS_BAM_FILES: str = "analysis-bam"
     ANALYSIS_FILES: str = "analysis"
+    ANALYSIS_SCOUT: str = "analysis-scout"
     FASTQ: str = "fastq"
+    FASTQ_SCOUT: str = "fastq-scout"
     FASTQ_QC: str = "fastq_qc"
+    FASTQ_ANALYSIS: str = "fastq-analysis"
     FASTQ_QC_ANALYSIS: str = "fastq_qc-analysis"
-    FASTQ_QC_ANALYSIS_CRAM: str = "fastq_qc-analysis-cram"
-    FASTQ_QC_ANALYSIS_CRAM_SCOUT: str = "fastq_qc-analysis-cram-scout"
+    FASTQ_ANALYSIS_SCOUT: str = "fastq-analysis-scout"
     NIPT_VIEWER: str = "nipt-viewer"
+    NO_DELIVERY: str = "no-delivery"
     SCOUT: str = "scout"
     STATINA: str = "statina"
 
 
-class FlowCellStatus(StrEnum):
-    ONDISK: str = "ondisk"
-    REMOVED: str = "removed"
-    REQUESTED: str = "requested"
-    PROCESSING: str = "processing"
-    RETRIEVED: str = "retrieved"
-
-
-class HousekeeperTags(StrEnum):
-    FASTQ: str = "fastq"
-    SAMPLESHEET: str = "samplesheet"
-    SPRING: str = "spring"
-    ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
-
-
-class Sequencers(StrEnum):
-    HISEQX: str = "hiseqx"
-    HISEQGA: str = "hiseqga"
-    NOVASEQ: str = "novaseq"
-    ALL: str = "all"
-
-
 class HastaSlurmPartitions(StrEnum):
     DRAGEN: str = "dragen"
+
+
+class FileExtensions(StrEnum):
+    GPG: str = ".gpg"
+    GZIP: str = ".gz"
+    JSON: str = ".json"
+    KEY: str = ".key"
+    NO_EXTENSION: str = ""
+    SPRING: str = ".spring"
+    TAR: str = ".tar"
+    TMP: str = ".tmp"
+
+
+class APIMethods(StrEnum):
+    POST: str = "POST"
+    PUT: str = "PUT"
+    GET: str = "GET"
+    DELETE: str = "DELETE"
+    PATCH: str = "PATCH"
 
 
 DRY_RUN = click.option(
@@ -107,3 +145,13 @@ DRY_RUN = click.option(
     default=False,
     help="Runs the command without making any changes",
 )
+
+SKIP_CONFIRMATION = click.option(
+    "-y",
+    "--yes",
+    is_flag=True,
+    default=False,
+    help="Skip confirmation",
+)
+
+DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"

@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, List
 
 from cg.constants import DataDelivery, Pipeline
 from cg.models.orders.sample_base import OrderSample
@@ -7,12 +7,14 @@ from pydantic import constr, validator
 
 class JsonSample(OrderSample):
 
+    cohorts: Optional[List[str]]
     concentration: Optional[str]
     concentration_sample: Optional[str]
     control: Optional[str]
     data_analysis: Pipeline = Pipeline.MIP_DNA
     data_delivery: DataDelivery = DataDelivery.SCOUT
     index: Optional[str]
+    panels: Optional[List[str]]
     quantity: Optional[str]
     synopsis: Optional[str]
     well_position: Optional[constr(regex=r"[A-H]:[0-9]+")]

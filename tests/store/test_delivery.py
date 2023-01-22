@@ -1,6 +1,24 @@
 """Tests for the samples to deliver api"""
 
 import datetime as dt
+from typing import Set
+
+from cgmodels.cg.constants import Pipeline
+
+from cg.constants import DataDelivery
+from cg.store import models
+
+
+def test_get_delivery_arguments(case_obj: models.Family):
+    """Testing the parsing of delivery arguments from the case data_delivery."""
+    # GIVEN a DataDelivery
+    case_obj.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
+
+    # WHEN parsing the delivery types
+    delivery_types: Set[str] = case_obj.get_delivery_arguments()
+
+    # THEN the correct delivery types should be returned
+    assert delivery_types == {Pipeline.MIP_DNA, Pipeline.FASTQ}
 
 
 def test_list_samples_to_deliver(base_store, helpers):

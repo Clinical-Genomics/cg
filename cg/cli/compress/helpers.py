@@ -1,17 +1,40 @@
 """Helper functions for compress cli"""
+import datetime as dt
 import logging
 import os
+from math import ceil
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Optional, List
+
+from housekeeper.store.models import Version, Bundle
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB
+from cg.constants.slurm import Slurm
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
-from housekeeper.store import models as hk_models
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
+
+
+def get_cases_to_process(
+    days_back: int, store: Store, case_id: Optional[str] = None
+) -> Optional[List[Family]]:
+    """Return cases to process."""
+    cases: List[Family] = []
+    if case_id:
+        case: Family = store.family(case_id)
+        if not case:
+            LOG.warning(f"Could not find case {case_id}")
+            return
+        cases.append(case)
+    else:
+        date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
+        cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
+    return cases
 
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
@@ -25,49 +48,75 @@ def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
         yield link_obj.sample.internal_id
 
 
-def update_compress_api(
-    compress_api: CompressAPI, dry_run: bool, ntasks: int = None, mem: int = None
-) -> None:
-    """Update parameters in compress api"""
+def is_case_ignored(case_id: str) -> bool:
+    """Check if case should be skipped."""
+    if case_id in CASES_TO_IGNORE:
+        LOG.debug(f"Skipping case: {case_id}")
+        return True
+    return False
 
-    compress_api.set_dry_run(dry_run)
-    if ntasks:
-        LOG.info("Set ntasks to %s", ntasks)
-        compress_api.ntasks = ntasks
+
+def set_memory_according_to_reads(
+    sample_id: str, sample_reads: Optional[int] = None, sample_process_mem: Optional[int] = None
+) -> Optional[int]:
+    """Set SLURM sample process memory depending on number of sample reads if sample_process_mem is not set."""
+    if sample_process_mem:
+        return sample_process_mem
+    if not sample_reads:
+        LOG.debug(f"No reads recorded for sample: {sample_id}")
+        return
+    sample_process_mem: int = ceil((sample_reads / MAX_READS_PER_GB))
+    if 1 <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
+        return sample_process_mem
+    return Slurm.MAX_NODE_MEMORY.value
+
+
+def update_compress_api(
+    compress_api: CompressAPI, dry_run: bool, hours: int = None, mem: int = None, ntasks: int = None
+) -> None:
+    """Update parameters in Compress API."""
+
+    compress_api.set_dry_run(dry_run=dry_run)
     if mem:
-        LOG.info("Set mem to %s", ntasks)
-        compress_api.mem = mem
+        LOG.info(f"Set Crunchy API SLURM mem to {mem}")
+        compress_api.crunchy_api.slurm_memory = mem
+    if hours:
+        LOG.info(f"Set Crunchy API SLURM hours to {hours}")
+        compress_api.crunchy_api.slurm_hours = hours
+    if ntasks:
+        LOG.info(f"Set Crunchy API SLURM number of tasks to {ntasks}")
+        compress_api.crunchy_api.slurm_number_tasks = ntasks
 
 
 # Functions to fix problematic spring files
 
 
-def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[hk_models.Version]:
-    """Generates versions from hk bundles
+def get_versions(hk_api: HousekeeperAPI, bundle_name: str = None) -> Iterator[Version]:
+    """Generates versions from hk bundles.
 
-    If no bundle name is given generate latest version for every bundle
+    If no bundle name is given generate latest version for every bundle.
     """
     if bundle_name:
-        bundle = hk_api.bundle(bundle_name)
+        bundle: Bundle = hk_api.bundle(bundle_name)
         if not bundle:
-            LOG.info("Could not find bundle %s", bundle_name)
+            LOG.info(f"Could not find bundle {bundle_name}")
             return
-        bundles = [bundle]
+        bundles: List[Bundle] = [bundle]
     else:
-        bundles = hk_api.bundles()
+        bundles: List[Bundle] = hk_api.bundles()
 
     for bundle in bundles:
-        LOG.debug("Check for versions in %s", bundle.name)
-        last_version = hk_api.last_version(bundle.name)
+        LOG.debug(f"Check for versions in {bundle.name}")
+        last_version: Version = hk_api.last_version(bundle.name)
         if not last_version:
-            LOG.warning("No bundle found for %s in housekeeper", bundle.name)
+            LOG.warning(f"No bundle found for {bundle.name} in Housekeeper")
             return
         yield last_version
 
 
-def get_true_dir(dir_path: Path) -> Path:
+def get_true_dir(dir_path: Path) -> Optional[Path]:
     """Loop over the files in a directory, if any symlinks are found return the parent dir of the
-    origin file"""
+    origin file."""
     # Check if there are any links to fastq files in the directory
     for fastq_path in dir_path.rglob("*"):
         # Check if there are fastq symlinks that points to the directory where the spring
@@ -79,10 +128,60 @@ def get_true_dir(dir_path: Path) -> Path:
     return None
 
 
+def compress_sample_fastqs_in_cases(
+    compress_api: CompressAPI,
+    cases: List[Family],
+    dry_run: bool,
+    number_of_conversions: int,
+    hours: int = None,
+    mem: int = None,
+    ntasks: int = None,
+) -> None:
+    """Compress sample FASTQs for samples in cases."""
+    case_conversion_count: int = 0
+    individuals_conversion_count: int = 0
+    for case in cases:
+        case_converted = True
+        if case_conversion_count >= number_of_conversions:
+            break
+        if is_case_ignored(case_id=case.internal_id):
+            continue
+
+        LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
+        if not case.links:
+            continue
+        for case_link in case.links:
+            sample_process_mem: Optional[int] = set_memory_according_to_reads(
+                sample_process_mem=mem,
+                sample_id=case_link.sample.internal_id,
+                sample_reads=case_link.sample.reads,
+            )
+            update_compress_api(
+                compress_api=compress_api,
+                dry_run=dry_run,
+                hours=hours,
+                mem=sample_process_mem,
+                ntasks=ntasks,
+            )
+            case_converted: bool = compress_api.compress_fastq(
+                sample_id=case_link.sample.internal_id
+            )
+            if not case_converted:
+                LOG.info(f"skipping individual {case_link.sample.internal_id}")
+                continue
+            individuals_conversion_count += 1
+        if case_converted:
+            case_conversion_count += 1
+            LOG.info(f"Considering case {case.internal_id} converted")
+    LOG.info(
+        f"{individuals_conversion_count} individuals in {case_conversion_count} (completed) cases where compressed"
+    )
+
+
 def correct_spring_paths(
     hk_api: HousekeeperAPI, bundle_name: str = None, dry_run: bool = False
 ) -> None:
-    """Function that will be used as a one off thing
+    """Function that will be used as a one off thing.
 
     There has been a problem when there are symlinked fastq files that are sent for compression.
     In these cases the spring archive has been created in the same place as that the symlinks are

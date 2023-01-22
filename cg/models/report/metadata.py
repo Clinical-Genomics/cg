@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 from pydantic import BaseModel, validator
-from cg.models.report.validators import validate_empty_field, validate_float
+from cg.models.report.validators import validate_empty_field, validate_float, validate_gender
 
 
 class SampleMetadataModel(BaseModel):
@@ -39,9 +39,8 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
     mean_target_coverage: Union[None, float, str]
     pct_10x: Union[None, float, str]
 
-    _str_values_mip = validator("bait_set", "gender", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
+    _bait_set = validator("bait_set", always=True, allow_reuse=True)(validate_empty_field)
+    _gender = validator("gender", always=True, allow_reuse=True)(validate_gender)
 
     _float_values_mip = validator(
         "mapped_reads", "mean_target_coverage", "pct_10x", always=True, allow_reuse=True

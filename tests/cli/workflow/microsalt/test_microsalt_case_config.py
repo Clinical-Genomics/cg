@@ -96,9 +96,7 @@ def test_dry_sample(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dry_order(
-    cli_runner: CliRunner, base_context: CGConfig, microbial_ticket, snapshot: Snapshot
-):
+def test_dry_order(cli_runner: CliRunner, base_context: CGConfig, ticket, snapshot: Snapshot):
     """Test working dry command for a order"""
 
     # GIVEN
@@ -106,7 +104,7 @@ def test_dry_order(
     # WHEN dry running a sample name
     result = cli_runner.invoke(
         config_case,
-        [microbial_ticket, "-t", "-d"],
+        [ticket, "-t", "-d"],
         obj=base_context,
     )
 

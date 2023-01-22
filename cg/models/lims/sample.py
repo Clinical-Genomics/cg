@@ -34,6 +34,7 @@ class Udf(BaseModel):
     pool: Optional[str]
     post_formalin_fixation_time: Optional[str]
     pre_processing_method: Optional[str]
+    primer: Optional[str]
     priority: str = Priority.standard.name
     quantity: Optional[str]
     reference_genome: Optional[str]

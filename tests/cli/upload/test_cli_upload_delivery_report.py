@@ -1,9 +1,7 @@
 """Tests the cli for uploading delivery reports"""
 
-import logging
-
+from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.cli.upload.delivery_report import mip_dna
 from cg.meta.report.mip_dna import MipDNAReportAPI
 
 
@@ -15,13 +13,12 @@ def test_delivery_report_to_scout_no_params(upload_context, cli_runner):
 
     # WHEN invoking the delivery report upload without parameters
     result = cli_runner.invoke(
-        mip_dna,
-        ["delivery-report-to-scout"],
+        upload_delivery_report_to_scout,
         obj=upload_context,
     )
 
     # THEN the command should fail due to a missing case ID
-    assert "There are no reports to upload to Scout" in result.output
+    assert "There are no valid cases to perform delivery report actions" in result.output
     assert result.exit_code == EXIT_FAIL
 
 
@@ -33,8 +30,8 @@ def test_delivery_report_to_scout(upload_context, cli_runner, upload_report_hk_a
 
     # WHEN uploading the delivery report
     result = cli_runner.invoke(
-        mip_dna,
-        ["delivery-report-to-scout", case_id],
+        upload_delivery_report_to_scout,
+        [case_id],
         obj=upload_context,
     )
 

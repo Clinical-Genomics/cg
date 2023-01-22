@@ -1,11 +1,12 @@
 import datetime as dt
+from unittest.mock import patch
 
 import pytest
 from cgmodels.cg.constants import Pipeline
 from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
-from cg.exc import OrderError
+from cg.exc import OrderError, TicketCreationError
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
@@ -34,6 +35,7 @@ def test_too_long_order_name():
         OrderIn(name=long_name, customer="", comment="", samples=[])
 
 
+@patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -49,12 +51,13 @@ def test_too_long_order_name():
     ],
 )
 def test_submit(
+    mail_patch,
     all_orders_to_submit: dict,
     base_store: Store,
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -72,11 +75,13 @@ def test_submit(
 
     # THEN the result should contain the ticket number for the order
     for record in result["records"]:
-        if isinstance(record, (models.Pool, models.Sample)):
-            assert record.ticket_number == ticket_number
+        if isinstance(record, models.Pool):
+            assert record.ticket == ticket
+        elif isinstance(record, models.Sample):
+            assert record.original_ticket == ticket
         elif isinstance(record, models.Family):
             for link_obj in record.links:
-                assert link_obj.sample.ticket_number == ticket_number
+                assert link_obj.sample.original_ticket == ticket
 
 
 def monkeypatch_process_lims(monkeypatch, order_data):
@@ -93,13 +98,44 @@ def monkeypatch_process_lims(monkeypatch, order_data):
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
+def test_submit_ticketexception(
+    all_orders_to_submit,
+    base_store: Store,
+    monkeypatch,
+    orders_api: OrdersAPI,
+    order_type: OrderType,
+    user_mail: str,
+    user_name: str,
+):
+    # GIVEN an order that does not have a name (ticket_nr)
+    order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
+    order_data.name = "dummy_name"
+    with patch("cg.apps.osticket.OsTicket") as os_mock:
+        orders_api.ticket_handler.osticket = os_mock.return_value
+        orders_api.ticket_handler.osticket.open_ticket.side_effect = TicketCreationError("ERROR")
+
+    # WHEN the order is submitted and a TicketCreationError raised
+    # THEN the TicketCreationError is not excepted
+    with pytest.raises(TicketCreationError):
+        orders_api.submit(
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
+        )
+
+
+@pytest.mark.parametrize(
+    "order_type",
+    [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
+)
 def test_submit_illegal_sample_customer(
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -109,14 +145,11 @@ def test_submit_illegal_sample_customer(
 
     # GIVEN we have an order with a customer that is not in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
-    sample_store.add_commit(customer_group)
     new_customer = sample_store.add_customer(
         "customer999",
         "customer 999",
         scout_access=True,
         invoice_address="dummy street",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
     sample_store.add_commit(new_customer)
@@ -131,21 +164,25 @@ def test_submit_illegal_sample_customer(
     # THEN an OrderError should be raised on illegal customer
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
+@patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.MIP_DNA, OrderType.MIP_RNA, OrderType.BALSAMIC],
 )
 def test_submit_scout_legal_sample_customer(
+    mail_patch,
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
     user_mail: str,
     user_name: str,
 ):
@@ -154,14 +191,13 @@ def test_submit_scout_legal_sample_customer(
     monkeypatch_process_lims(monkeypatch, order_data)
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
-    customer_group = sample_store.add_customer_group("customer999only", "customer 999 only group")
-    sample_store.add_commit(customer_group)
+    collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
+    sample_store.add_commit(collaboration)
     sample_customer = sample_store.add_customer(
         "customer1",
         "customer 1",
         scout_access=True,
         invoice_address="dummy street 1",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
     order_customer = sample_store.add_customer(
@@ -169,9 +205,10 @@ def test_submit_scout_legal_sample_customer(
         "customer 2",
         scout_access=True,
         invoice_address="dummy street 2",
-        customer_group=customer_group,
         invoice_reference="dummy nr",
     )
+    sample_customer.collaborations.append(collaboration)
+    order_customer.collaborations.append(collaboration)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
     existing_sample = sample_store.samples().first()
@@ -199,7 +236,7 @@ def test_submit_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -215,6 +252,7 @@ def test_submit_duplicate_sample_case_name(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
+                ticket=ticket,
             )
             case_obj.customer = customer_obj
             store.add_commit(case_obj)
@@ -226,20 +264,25 @@ def test_submit_duplicate_sample_case_name(
     # THEN an OrderError should be raised on duplicate case name
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
+@patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [OrderType.FLUFFY],
 )
 def test_submit_fluffy_duplicate_sample_case_name(
+    mail_patch,
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -255,14 +298,19 @@ def test_submit_fluffy_duplicate_sample_case_name(
     # THEN an OrderError should be raised on duplicate case name
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
+@patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
 def test_submit_unique_sample_case_name(
+    mail_patch,
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,
-    ticket_number: int,
+    ticket: str,
     user_name: str,
     user_mail: str,
     monkeypatch,
@@ -282,7 +330,10 @@ def test_submit_unique_sample_case_name(
 
     # WHEN calling submit
     orders_api.submit(
-        project=OrderType.MIP_DNA, order_in=order_data, user_name=user_name, user_mail=user_mail
+        project=OrderType.MIP_DNA,
+        order_in=order_data,
+        user_name=user_name,
+        user_mail=user_mail,
     )
 
     # Then no exception about duplicate names should be thrown
@@ -408,6 +459,7 @@ def test_validate_sex_unknown_new_sex(
     # THEN no OrderError should be raised on non-matching sex
 
 
+@patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [
@@ -423,11 +475,12 @@ def test_validate_sex_unknown_new_sex(
     ],
 )
 def test_submit_unique_sample_name(
+    mail_patch,
     all_orders_to_submit: dict,
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_number: int,
+    ticket: str,
     user_mail: str,
     user_name: str,
 ):
@@ -448,7 +501,7 @@ def test_submit_unique_sample_name(
 
 @pytest.mark.parametrize(
     "order_type",
-    [OrderType.SARS_COV_2],
+    [OrderType.SARS_COV_2, OrderType.METAGENOME],
 )
 def test_sarscov2_submit_duplicate_sample_name(
     all_orders_to_submit: dict,
@@ -457,7 +510,6 @@ def test_sarscov2_submit_duplicate_sample_name(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
     user_mail: str,
     user_name: str,
 ):
@@ -470,7 +522,10 @@ def test_sarscov2_submit_duplicate_sample_name(
     # THEN an OrderError should be raised on duplicate sample name
     with pytest.raises(OrderError):
         orders_api.submit(
-            project=order_type, order_in=order_data, user_name=user_name, user_mail=user_mail
+            project=order_type,
+            order_in=order_data,
+            user_name=user_name,
+            user_mail=user_mail,
         )
 
 
@@ -485,12 +540,12 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
             store.add_commit(sample_obj)
 
 
+@patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)
 @pytest.mark.parametrize(
     "order_type",
     [
         OrderType.BALSAMIC,
         OrderType.FASTQ,
-        OrderType.METAGENOME,
         OrderType.MICROSALT,
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
@@ -498,13 +553,13 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     ],
 )
 def test_not_sarscov2_submit_duplicate_sample_name(
+    mail_patch,
     all_orders_to_submit: dict,
     helpers: StoreHelpers,
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_number: int,
     user_mail: str,
     user_name: str,
 ):

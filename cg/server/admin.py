@@ -1,11 +1,18 @@
 """Module for Flask-Admin views"""
-from flask import redirect, request, session, url_for
+from gettext import ngettext, gettext
+from typing import List, Union
+
+from cgmodels.cg.constants import Pipeline
+from flask import redirect, request, session, url_for, flash
+from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
+from sqlalchemy.orm import Query
 
-from cg.constants.constants import DataDelivery, Pipeline
+from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
+from cg.store.models import Family
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -154,33 +161,33 @@ class CustomerView(BaseView):
     """Admin view for Model.Customer"""
 
     column_editable_list = [
-        "scout_access",
-        "loqus_upload",
-        "return_samples",
-        "primary_contact",
-        "delivery_contact",
-        "priority",
-        "customer_group",
+        "collaborations",
         "comment",
+        "delivery_contact",
+        "loqus_upload",
+        "primary_contact",
+        "priority",
+        "return_samples",
+        "scout_access",
     ]
     column_list = [
+        "comment",
+        "delivery_contact",
         "internal_id",
         "name",
-        "priority",
         "primary_contact",
-        "delivery_contact",
-        "scout_access",
-        "return_samples",
+        "priority",
         "project_account_KI",
         "project_account_kth",
-        "comment",
+        "return_samples",
+        "scout_access",
     ]
     column_filters = ["priority", "scout_access"]
     column_searchable_list = ["internal_id", "name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
-class CustomerGroupView(BaseView):
+class CollaborationView(BaseView):
     """Admin view for Model.CustomerGroup"""
 
     column_editable_list = ["name"]
@@ -202,12 +209,18 @@ class FamilyView(BaseView):
         "action",
         "data_analysis",
         "data_delivery",
+        "tickets",
     ]
     column_formatters = {
         "internal_id": view_family_sample_link,
         "priority": view_priority,
     }
-    column_searchable_list = ["internal_id", "name", "customer.internal_id"]
+    column_searchable_list = [
+        "internal_id",
+        "name",
+        "customer.internal_id",
+        "tickets",
+    ]
     form_excluded_columns = [
         "analyses",
         "_cohorts",
@@ -232,6 +245,43 @@ class FamilyView(BaseView):
 
         return markup
 
+    @action(
+        "set_hold",
+        "Set action to hold",
+        "Are you sure you want to set the action for selected families to hold?",
+    )
+    def action_set_hold(self, ids: List[str]):
+        self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
+
+    @action(
+        "set_empty",
+        "Set action to Empty",
+        "Are you sure you want to set the action for selected families to Empty?",
+    )
+    def action_set_empty(self, ids: List[str]):
+        self.set_action_for_batch(action=None, entry_ids=ids)
+
+    def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
+        try:
+            query: Query = db.Family.query.filter(db.Family.id.in_(entry_ids))
+            family: Family
+            for family in query.all():
+                family.action = action
+
+            flash(
+                ngettext(
+                    f"Families were set to {action}.",
+                    f"{len(entry_ids)} families were set to {action}.",
+                    len(entry_ids),
+                )
+            )
+            db.commit()
+        except Exception as ex:
+            if not self.handle_view_exception(ex):
+                raise
+
+            flash(gettext(f"Failed to set family action. {str(ex)}"))
+
 
 class FlowcellView(BaseView):
     """Admin view for Model.Flowcell"""
@@ -239,7 +289,7 @@ class FlowcellView(BaseView):
     column_default_sort = ("sequenced_at", True)
     column_editable_list = ["status"]
     column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name"]
+    column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
 
 
@@ -315,10 +365,10 @@ class PoolView(BaseView):
     """Admin view for Model.Pool"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["ticket_number"]
+    column_editable_list = ["ticket"]
     column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {"invoice": InvoiceView.view_invoice_link}
-    column_searchable_list = ["name", "order", "ticket_number", "customer.internal_id"]
+    column_searchable_list = ["name", "order", "ticket", "customer.internal_id"]
 
 
 class SampleView(BaseView):
@@ -337,7 +387,6 @@ class SampleView(BaseView):
         "is_tumour",
         "sequenced_at",
         "sex",
-        "ticket_number",
     ]
     column_filters = ["customer.internal_id", "priority", "sex", "application_version.application"]
     column_formatters = {
@@ -350,8 +399,8 @@ class SampleView(BaseView):
         "internal_id",
         "name",
         "subject_id",
-        "ticket_number",
         "customer.internal_id",
+        "original_ticket",
     ]
     form_excluded_columns = [
         "age_at_sampling",

@@ -7,43 +7,6 @@ import requests
 
 from cg.utils.commands import Process
 
-# File fixtures for the apps
-
-
-@pytest.fixture
-def balsamic_orderform(orderforms: Path) -> str:
-    """Orderform fixture for Balsamic samples"""
-    _file = orderforms / "1508.25.balsamic.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
-def fastq_orderform(orderforms: Path):
-    """Orderform fixture for fastq samples"""
-    _file = orderforms / "1508.25.fastq.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
-def metagenome_orderform(orderforms: Path) -> str:
-    """Orderform fixture for metagenome samples"""
-    _file = orderforms / "1605.9.metagenome.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
-def mip_orderform(orderforms: Path) -> str:
-    """Orderform fixture for MIP samples"""
-    _file = orderforms / "1508.25.mip.xlsx"
-    return str(_file)
-
-
-@pytest.fixture
-def mip_rna_orderform(orderforms: Path) -> str:
-    """Orderform fixture for MIP RNA samples"""
-    _file = orderforms / "1508.25.mip_rna.xlsx"
-    return str(_file)
-
 
 @pytest.fixture
 def response():

@@ -32,4 +32,4 @@ def test_run_rsync_command_no_case(cg_context: CGConfig, cli_runner, helpers, ca
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN process generates error message that case cant be found
-    assert "Could not find any cases for ticket_id" in caplog.text
+    assert "Could not find any cases for ticket" in caplog.text

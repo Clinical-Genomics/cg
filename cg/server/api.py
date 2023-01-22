@@ -1,6 +1,6 @@
 import http
-import json
 import logging
+import json
 import tempfile
 from functools import wraps
 from pathlib import Path
@@ -10,10 +10,16 @@ import requests
 from sqlalchemy.exc import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError
 
+from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
+from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.exc import OrderError, OrderFormError
+from cg.constants.constants import FileFormat
+from cg.exc import OrderError, OrderFormError, TicketCreationError
+from cg.server.ext import db, lims, osticket
+from cg.io.controller import WriteStream, ReadStream
 from cg.meta.orders import OrdersAPI
 from cg.models.orders.order import OrderIn, OrderType
+from cg.models.orders.orderform_schema import Orderform
 from cg.store import models
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
@@ -21,11 +27,6 @@ from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
-
-from ..apps.orderform.excel_orderform_parser import ExcelOrderformParser
-from ..apps.orderform.json_orderform_parser import JsonOrderformParser
-from ..models.orders.orderform_schema import Orderform
-from .ext import db, lims, osticket
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -86,7 +87,12 @@ def submit_order(order_type):
     error_message: str
     try:
         request_json = request.get_json()
-        LOG.info("processing order: %s", request_json)
+        LOG.info(
+            "processing order: %s",
+            WriteStream.write_stream_from_content(
+                content=request_json, file_format=FileFormat.JSON
+            ),
+        )
         project: OrderType = OrderType(order_type)
         order_in: OrderIn = OrderIn.parse_obj(request_json, project=project)
 
@@ -114,6 +120,7 @@ def submit_order(order_type):
         NewConnectionError,
         MaxRetryError,
         TimeoutError,
+        TicketCreationError,
         TypeError,
     ) as error:
         LOG.exception(error)
@@ -158,14 +165,15 @@ def families():
     return jsonify(families=cases_data, total=count)
 
 
-@BLUEPRINT.route("/families_in_customer_group")
-def families_in_customer_group():
-    """Fetch families in customer_group."""
-    customer_objs: Optional[models.Customer] = (
-        None if g.current_user.is_admin else g.current_user.customers
-    )
-    families_q: Query = db.families_in_customer_group(
-        enquiry=request.args.get("enquiry"), customers=customer_objs
+@BLUEPRINT.route("/families_in_collaboration")
+def families_in_collaboration():
+    """Fetch families in collaboration."""
+    order_customer: models.Customer = db.customer(request.args.get("customer"))
+    data_analysis: str = request.args.get("data_analysis")
+    families_q: Query = db.families(
+        enquiry=request.args.get("enquiry"),
+        customers=order_customer.collaborators,
+        data_analysis=data_analysis,
     )
     count = families_q.count()
     records = families_q.limit(30)
@@ -186,18 +194,13 @@ def family(family_id):
     return jsonify(**data)
 
 
-@BLUEPRINT.route("/families_in_customer_group/<family_id>")
-def family_in_customer_group(family_id):
+@BLUEPRINT.route("/families_in_collaboration/<family_id>")
+def family_in_collaboration(family_id):
     """Fetch a family with links."""
     case_obj = db.family(family_id)
-    if case_obj is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (
-        case_obj.customer.customer_group
-        not in set(customer.customer_group for customer in g.current_user.customers)
-    ):
+    order_customer = db.customer(request.args.get("customer"))
+    if case_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-
     data = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
@@ -223,14 +226,12 @@ def samples():
     return jsonify(samples=data, total=samples_q.count())
 
 
-@BLUEPRINT.route("/samples_in_customer_group")
-def samples_in_customer_group():
+@BLUEPRINT.route("/samples_in_collaboration")
+def samples_in_collaboration():
     """Fetch samples in a customer group."""
-    customer_objs: Optional[models.Customer] = (
-        None if g.current_user.is_admin else g.current_user.customers
-    )
-    samples_q = db.samples_in_customer_group(
-        enquiry=request.args.get("enquiry"), customers=customer_objs
+    order_customer = db.customer(request.args.get("customer"))
+    samples_q = db.samples(
+        enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
@@ -249,16 +250,12 @@ def sample(sample_id):
     return jsonify(**data)
 
 
-@BLUEPRINT.route("/samples_in_customer_group/<sample_id>")
-def sample_in_customer_group(sample_id):
+@BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
+def sample_in_collaboration(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
-    if sample_obj is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (
-        sample_obj.customer.customer_group
-        not in set(customer.customer_group for customer in g.current_user.customers)
-    ):
+    order_customer = db.customer(request.args.get("customer"))
+    if sample_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
@@ -297,7 +294,7 @@ def flowcells():
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def flowcell(flowcell_id):
     """Fetch a single flowcell."""
-    record = db.flowcell(flowcell_id)
+    record = db.get_flow_cell(flowcell_id)
     if record is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**record.to_dict(samples=True))
@@ -329,13 +326,11 @@ def options():
         if not application_obj.versions:
             LOG.debug("Skipping application %s that doesn't have a price", application)
             continue
-
         if application_obj.is_external:
             apptag_groups["ext"].append(application_obj.tag)
-        else:
-            if application_obj.prep_category not in apptag_groups:
-                apptag_groups[application_obj.prep_category] = []
-            apptag_groups[application_obj.prep_category].append(application_obj.tag)
+        if application_obj.prep_category not in apptag_groups:
+            apptag_groups[application_obj.prep_category] = []
+        apptag_groups[application_obj.prep_category].append(application_obj.tag)
 
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 

@@ -46,7 +46,6 @@ class OrderSample(BaseModel):
     age_at_sampling: Optional[str]
     application: constr(max_length=models.Application.tag.property.columns[0].type.length)
     capture_kit: Optional[str]
-    cohorts: Optional[List[str]]
     collection_date: Optional[str]
     comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
     concentration: Optional[float]
@@ -92,7 +91,6 @@ class OrderSample(BaseModel):
     organism_other: Optional[str]
     original_lab: Optional[str]
     original_lab_address: Optional[str]
-    panels: Optional[List[constr(max_length=models.Panel.abbrev.property.columns[0].type.length)]]
     phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
     pool: Optional[constr(max_length=models.Pool.name.property.columns[0].type.length)]
@@ -117,8 +115,6 @@ class OrderSample(BaseModel):
             regex=NAME_PATTERN, max_length=models.Sample.subject_id.property.columns[0].type.length
         )
     ]
-    synopsis: Optional[str]
-    time_point: Optional[NonNegativeInt]
     tissue_block_size: Optional[str]
     tumour: bool = False
     tumour_purity: Optional[int]

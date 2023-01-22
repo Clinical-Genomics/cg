@@ -1,5 +1,6 @@
 import datetime as dt
-from typing import List, Optional
+import re
+from typing import List, Optional, Set, Dict
 
 import alchy
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
@@ -16,11 +17,9 @@ from cg.constants import (
     Pipeline,
 )
 
-from cg.constants.constants import CONTROL_OPTIONS
+from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
 
 Model = alchy.make_declarative_base(Base=alchy.ModelBase)
-
-
 flowcell_sample = Table(
     "flowcell_sample",
     Model.metadata,
@@ -35,6 +34,14 @@ customer_user = Table(
     Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
     Column("user_id", types.Integer, ForeignKey("user.id"), nullable=False),
     UniqueConstraint("customer_id", "user_id", name="_customer_user_uc"),
+)
+
+customer_collaboration = Table(
+    "customer_collaboration",
+    Model.metadata,
+    Column("customer_id", types.Integer, ForeignKey("customer.id"), nullable=False),
+    Column("collaboration_id", types.Integer, ForeignKey("collaboration.id"), nullable=False),
+    UniqueConstraint("customer_id", "collaboration_id", name="_customer_collaboration_uc"),
 )
 
 
@@ -111,11 +118,14 @@ class Application(Model):
 
     @property
     def analysis_type(self):
-
-        if self.prep_category == "wts":
+        if self.prep_category == PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value:
             return self.prep_category
 
-        return "wgs" if self.prep_category == "wgs" else "wes"
+        return (
+            PrepCategory.WHOLE_GENOME_SEQUENCING.value
+            if self.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING.value
+            else PrepCategory.WHOLE_EXOME_SEQUENCING.value
+        )
 
 
 class ApplicationVersion(Model):
@@ -221,7 +231,6 @@ class BedVersion(Model):
 
 
 class Customer(Model):
-
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
     comment = Column(types.Text)
@@ -239,7 +248,7 @@ class Customer(Model):
     scout_access = Column(types.Boolean, nullable=False, default=False)
     uppmax_account = Column(types.String(32))
 
-    customer_group_id = Column(ForeignKey("customer_group.id"), nullable=False)
+    collaborations = orm.relationship("Collaboration", secondary=customer_collaboration)
     delivery_contact_id = Column(ForeignKey("user.id"))
     delivery_contact = orm.relationship("User", foreign_keys=[delivery_contact_id])
     invoice_contact_id = Column(ForeignKey("user.id"))
@@ -250,16 +259,35 @@ class Customer(Model):
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
+    @property
+    def collaborators(self) -> Set["Customer"]:
+        """All customers that the current customer collaborates with (including itself)"""
+        customers = {
+            customer
+            for collaboration in self.collaborations
+            for customer in collaboration.customers
+        }
+        customers.add(self)
+        return customers
 
-class CustomerGroup(Model):
+
+class Collaboration(Model):
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
-
-    customers = orm.relationship(Customer, backref="customer_group", order_by="-Customer.id")
+    customers = orm.relationship(Customer, secondary=customer_collaboration)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
+
+    def to_dict(self):
+        """Represent as dictionary"""
+        return {
+            "customers": [customer.internal_id for customer in self.customers],
+            "id": self.id,
+            "name": self.name,
+            "internal_id": self.internal_id,
+        }
 
 
 class Delivery(Model):
@@ -292,6 +320,7 @@ class Family(Model, PriorityMixin):
 
     priority = Column(types.Enum(Priority), default=Priority.standard, nullable=False)
     synopsis = Column(types.Text)
+    tickets = Column(types.VARCHAR)
 
     @property
     def cohorts(self) -> List[str]:
@@ -312,6 +341,11 @@ class Family(Model, PriorityMixin):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @property
+    def latest_ticket(self) -> Optional[str]:
+        """Returns the last ticket the family was ordered in"""
+        return self.tickets.split(sep=",")[-1] if self.tickets else None
+
+    @property
     def latest_analyzed(self) -> Optional[dt.datetime]:
         return self.analyses[0].completed_at if self.analyses else None
 
@@ -323,7 +357,7 @@ class Family(Model, PriorityMixin):
                 sequenced_dates.append(link.sample.ordered_at)
             elif link.sample.sequenced_at:
                 sequenced_dates.append(link.sample.sequenced_at)
-        return max(sequenced_dates) if sequenced_dates else None
+        return max(sequenced_dates, default=None)
 
     @property
     def all_samples_pass_qc(self) -> bool:
@@ -338,8 +372,51 @@ class Family(Model, PriorityMixin):
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
+    @property
+    def samples(self) -> List[str]:
+        """Return case samples."""
+        return self._get_samples
+
+    @property
+    def _get_samples(self) -> List[str]:
+        """Extract samples from a case."""
+        return [link.sample for link in self.links]
+
+    @property
+    def tumour_samples(self) -> List[str]:
+        """Return tumour samples."""
+        return self._get_tumour_samples
+
+    @property
+    def _get_tumour_samples(self) -> List[str]:
+        """Extract tumour samples."""
+        return [link.sample for link in self.links if link.sample.is_tumour]
+
+    @property
+    def loqusdb_uploaded_samples(self) -> List[str]:
+        """Return uploaded samples to Loqusdb."""
+        return self._get_loqusdb_uploaded_samples
+
+    @property
+    def _get_loqusdb_uploaded_samples(self) -> List[str]:
+        """Extract samples uploaded to Loqusdb."""
+        return [link.sample for link in self.links if link.sample.loqusdb_id]
+
+    def get_delivery_arguments(self) -> Set[str]:
+        """Translates the case data_delivery field to pipeline specific arguments."""
+        delivery_arguments: Set[str] = set()
+        requested_deliveries: List[str] = re.split("[-_]", self.data_delivery)
+        delivery_per_pipeline_map: Dict[str, str] = {
+            DataDelivery.FASTQ: Pipeline.FASTQ,
+            DataDelivery.ANALYSIS_FILES: self.data_analysis,
+        }
+        for data_delivery, pipeline in delivery_per_pipeline_map.items():
+            if data_delivery in requested_deliveries:
+                delivery_arguments.add(pipeline)
+        return delivery_arguments
+
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
-        """Represent as dictionary"""
+        """Represent as dictionary."""
         data = super(Family, self).to_dict()
         data["panels"] = self.panels
         data["priority"] = self.priority_human
@@ -432,7 +509,6 @@ class Organism(Model):
 
 
 class Panel(Model):
-
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -466,11 +542,10 @@ class Pool(Model):
     order = Column(types.String(64), nullable=False)
     ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
-    ticket_number = Column(types.Integer)
+    ticket = Column(types.String(32))
 
 
 class Sample(Model, PriorityMixin):
-
     age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(
@@ -499,6 +574,7 @@ class Sample(Model, PriorityMixin):
     ordered_at = Column(types.DateTime, nullable=False)
     organism_id = Column(ForeignKey("organism.id"))
     organism = orm.relationship("Organism", foreign_keys=[organism_id])
+    original_ticket = Column(types.String(32))
     _phenotype_groups = Column(types.Text)
     _phenotype_terms = Column(types.Text)
     prepared_at = Column(types.DateTime)
@@ -511,8 +587,6 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
-    ticket_number = Column(types.Integer)
-    time_point = Column(types.Integer)
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -534,6 +608,8 @@ class Sample(Model, PriorityMixin):
         if self.priority == Priority.express:
             one_half_of_target_reads = application.target_reads / 2
             return self.reads >= one_half_of_target_reads
+        if self.application_version.application.prep_category == PrepCategory.READY_MADE_LIBRARY:
+            return bool(self.reads)
         return self.reads > application.expected_reads
 
     @property

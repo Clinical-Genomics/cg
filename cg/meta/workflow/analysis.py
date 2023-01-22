@@ -1,27 +1,30 @@
 import datetime as dt
 import logging
 import os
+import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
 
+import click
+from housekeeper.store.models import Bundle, Version
+
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, Pipeline, Priority
-from cg.constants.priority import SlurmQos, PRIORITY_TO_SLURM_QOS
+from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
-from housekeeper.store.models import Bundle, Version
 
 LOG = logging.getLogger(__name__)
 
 
 class AnalysisAPI(MetaAPI):
     """
-    Parent class containing all methods that are either shared or overridden by other workflow APIs.
+    Parent class containing all methods that are either shared or overridden by other workflow APIs
     """
 
     def __init__(self, pipeline: Pipeline, config: CGConfig):
@@ -47,11 +50,19 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
+    @staticmethod
+    def get_help(context):
+        """
+        If no argument is passed, print help text
+        """
+        if context.invoked_subcommand is None:
+            click.echo(context.get_help())
+
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def verify_case_config_file_exists(self, case_id: str):
+    def verify_case_config_file_exists(self, case_id: str) -> None:
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 
@@ -73,9 +84,10 @@ class AnalysisAPI(MetaAPI):
             raise CgError(f"Analysis still ongoing in Trailblazer for case {case_id}")
 
     def verify_case_path_exists(self, case_id: str) -> None:
+        """Check if case path exists."""
         if not self.get_case_path(case_id=case_id).exists():
-            LOG.error("Working directory path for %s does not exist", case_id)
-            raise CgError()
+            LOG.info(f"No working directory for {case_id} exists")
+            raise FileNotFoundError(f"No working directory for {case_id} exists")
 
     def all_flowcells_on_disk(self, case_id: str) -> bool:
         """Check if flowcells are on disk for sample before starting the analysis.
@@ -105,8 +117,8 @@ class AnalysisAPI(MetaAPI):
         priority: int = self.get_priority_for_case(case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
-    def get_case_path(self, case_id: str) -> Path:
-        """Path to case working directory"""
+    def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
+        """Path to case working directory."""
         raise NotImplementedError
 
     def get_case_config_path(self, case_id) -> Path:
@@ -146,23 +158,31 @@ class AnalysisAPI(MetaAPI):
             return analysis_type.lower()
         return "other"
 
-    def upload_bundle_housekeeper(self, case_id: str) -> None:
+    def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
-
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
+        bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
         bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
-            bundle_data=self.get_hermes_transformed_deliverables(case_id)
+            bundle_data=bundle_data
         )
         if not bundle_result:
+            LOG.info("Bundle already added to Housekeeper!")
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
+        if dry_run:
+            LOG.info("Dry-run: Housekeeper changes will not be commited")
+            LOG.info(
+                "The following files would be stored:\n%s",
+                "\n".join([f["path"] for f in bundle_data["files"]]),
+            )
+            return
         self.housekeeper_api.include(bundle_version)
         self.housekeeper_api.add_commit(bundle_object, bundle_version)
         LOG.info(
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
 
-    def upload_bundle_statusdb(self, case_id: str) -> None:
+    def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
         """Storing analysis bundle in StatusDB for CASE_ID"""
 
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
@@ -177,6 +197,9 @@ class AnalysisAPI(MetaAPI):
             primary=(len(case_obj.analyses) == 0),
         )
         new_analysis.family = case_obj
+        if dry_run:
+            LOG.info("Dry-run: StatusDB changes will not be commited")
+            return
         self.status_db.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
@@ -197,6 +220,7 @@ class AnalysisAPI(MetaAPI):
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
+            ticket=self.status_db.get_latest_ticket_from_case(case_id),
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
@@ -222,10 +246,15 @@ class AnalysisAPI(MetaAPI):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
             return "0.0.0"
 
-    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
+    def set_statusdb_action(
+        self, case_id: str, action: Optional[str], dry_run: bool = False
+    ) -> None:
         """
         Set one of the allowed actions on a case in StatusDB.
         """
+        if dry_run:
+            LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
+            return
         if action in [None, *CASE_ACTIONS]:
             case_obj: models.Family = self.status_db.family(case_id)
             case_obj.action = action
@@ -423,3 +452,31 @@ class AnalysisAPI(MetaAPI):
         """Parses output analysis files"""
 
         raise NotImplementedError
+
+    def clean_analyses(self, case_id: str) -> None:
+        """Add a cleaned at date for all analyses related to a case."""
+        analyses: list = self.status_db.family(case_id).analyses
+        LOG.info(f"Adding a cleaned at date for case {case_id}")
+        for analysis_obj in analyses:
+            analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
+            self.status_db.commit()
+
+    def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
+        """Remove workflow run directory."""
+
+        try:
+            self.verify_case_path_exists(case_id=case_id)
+        except FileNotFoundError:
+            self.clean_analyses(case_id)
+
+        if yes or click.confirm(f"Are you sure you want to remove all files in {case_path}?"):
+            if case_path.is_symlink():
+                LOG.warning(
+                    f"Will not automatically delete symlink: {case_path}, delete it manually",
+                )
+                return EXIT_FAIL
+
+            shutil.rmtree(case_path, ignore_errors=True)
+            LOG.info(f"Cleaned {case_path}")
+            self.clean_analyses(case_id=case_id)
+            return EXIT_SUCCESS

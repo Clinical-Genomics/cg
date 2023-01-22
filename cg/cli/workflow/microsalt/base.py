@@ -1,7 +1,6 @@
 """CLI support to start microsalt"""
 
 import datetime as dt
-import json
 import logging
 from pathlib import Path
 from typing import Any, List, Optional
@@ -9,11 +8,14 @@ from typing import Any, List, Optional
 import click
 from cg.cli.workflow.commands import resolve_compression, store, store_available
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Pipeline
+from cg.constants.constants import FileFormat
 from cg.exc import CgError
+from cg.io.controller import WriteStream, WriteFile
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import File
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -42,9 +44,7 @@ ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=cli
 @click.pass_context
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
     context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
         config=context.obj,
     )
@@ -102,10 +102,13 @@ def config_case(
     filename: str = sample_id or case_id
     config_case_path: Path = analysis_api.get_config_path(filename=filename)
     if dry_run:
-        click.echo(json.dumps(parameters, indent=4, sort_keys=True))
+        click.echo(
+            WriteStream.write_stream_from_content(content=parameters, file_format=FileFormat.JSON)
+        )
         return
-    with open(config_case_path, "w") as outfile:
-        json.dump(parameters, outfile, indent=4, sort_keys=True)
+    WriteFile.write_file_from_content(
+        content=parameters, file_format=FileFormat.JSON, file_path=config_case_path
+    )
     LOG.info("Saved config %s", config_case_path)
 
 
@@ -162,11 +165,11 @@ def run(
         return
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
-    except Exception as e:
+    except Exception as error:
         LOG.warning(
             "Trailblazer warning: Could not track analysis progress for case %s! %s",
             case_id,
-            e.__class__.__name__,
+            error.__class__.__name__,
         )
     try:
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
@@ -207,10 +210,10 @@ def start_available(context: click.Context, dry_run: bool = False):
         try:
             context.invoke(start, unique_id=case_obj.internal_id, dry_run=dry_run)
         except CgError as error:
-            LOG.error(error.message)
+            LOG.error(error)
             exit_code = EXIT_FAIL
-        except Exception as e:
-            LOG.error(f"Unspecified error occurred: %s", e)
+        except Exception as error:
+            LOG.error(f"Unspecified error occurred: %s", error)
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -284,11 +287,11 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
         unique_id: str = analysis.family.internal_id
         try:
             context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
-        except Exception as e:
+        except Exception as error:
             LOG.error(
                 "Could not upload data for %s to vogue, exception %s",
                 unique_id,
-                e.__class__.__name__,
+                error.__class__.__name__,
             )
             EXIT_CODE: int = EXIT_FAIL
 

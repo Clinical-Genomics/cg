@@ -1,11 +1,12 @@
 """API to run Vogue"""
 
 import datetime as dt
-import json
 from typing import Optional
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadStream
 from cg.store import Store, models
 
 
@@ -19,14 +20,17 @@ class UploadVogueAPI:
 
     def load_genotype(self, days: int) -> None:
         """Loading genotype data from the genotype database into the trending database"""
-        samples = self.genotype_api.export_sample(days=days)
-        samples = json.loads(samples)
+
+        samples: dict = ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.genotype_api.export_sample(days=days)
+        )
         for sample_id, sample_dict in samples.items():
             sample_dict["_id"] = sample_id
             self.vogue_api.load_genotype_data(sample_dict)
 
-        samples_analysis = self.genotype_api.export_sample_analysis(days=days)
-        samples_analysis = json.loads(samples_analysis)
+        samples_analysis: dict = ReadStream.get_content_from_stream(
+            file_format=FileFormat.JSON, stream=self.genotype_api.export_sample_analysis(days=days)
+        )
         for sample_id, sample_dict in samples_analysis.items():
             sample_dict["_id"] = sample_id
             self.vogue_api.load_genotype_data(sample_dict)

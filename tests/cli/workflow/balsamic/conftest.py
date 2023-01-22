@@ -2,7 +2,6 @@
 
 import datetime as dt
 import gzip
-import json
 from pathlib import Path
 from typing import List
 
@@ -10,6 +9,8 @@ import pytest
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -26,9 +27,14 @@ def balsamic_dir(tmpdir_factory, apps_dir: Path) -> str:
     return Path(balsamic_dir).absolute().as_posix()
 
 
+@pytest.fixture(name="balsamic_case_id")
+def fixture_balsamic_case_id() -> str:
+    return "balsamic_case_wgs_single"
+
+
 @pytest.fixture(name="balsamic_housekeeper_dir")
-def balsamic_housekeeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
-    """Return the path to the balsamic housekeeper dir"""
+def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
+    """Return the path to the balsamic housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
 
 
@@ -42,6 +48,13 @@ def balsamic_singularity_path(balsamic_dir: Path) -> str:
 @pytest.fixture(name="balsamic_reference_path")
 def balsamic_reference_path(balsamic_dir: Path) -> str:
     balsamic_reference_path = Path(balsamic_dir, "reference.json")
+    balsamic_reference_path.touch(exist_ok=True)
+    return balsamic_reference_path.as_posix()
+
+
+@pytest.fixture(name="balsamic_pon_1_path")
+def balsamic_pon_1_path(balsamic_dir: Path) -> str:
+    balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
     balsamic_reference_path.touch(exist_ok=True)
     return balsamic_reference_path.as_posix()
 
@@ -738,39 +751,35 @@ def fixture_balsamic_context(
 
 
 @pytest.fixture
-def mock_config(balsamic_dir: Path) -> None:
+def mock_config(balsamic_dir: Path, balsamic_case_id: str) -> None:
     """Create dummy config file at specified path"""
 
-    case_id = "balsamic_case_wgs_single"
     config_data = {
         "analysis": {
-            "case_id": f"{case_id}",
+            "case_id": f"{balsamic_case_id}",
             "analysis_type": "paired",
             "sequencing_type": "targeted",
             "analysis_dir": f"{balsamic_dir}",
-            "fastq_path": f"{balsamic_dir}/{case_id}/analysis/fastq/",
-            "script": f"{balsamic_dir}/{case_id}/scripts/",
-            "log": f"{balsamic_dir}/{case_id}/logs/",
-            "result": f"{balsamic_dir}/{case_id}/analysis",
-            "benchmark": f"{balsamic_dir}/{case_id}/benchmarks/",
-            "dag": f"{balsamic_dir}/{case_id}/{case_id}_BALSAMIC_4.4.0_graph.pdf",
+            "fastq_path": f"{balsamic_dir}/{balsamic_case_id}/analysis/fastq/",
+            "script": f"{balsamic_dir}/{balsamic_case_id}/scripts/",
+            "log": f"{balsamic_dir}/{balsamic_case_id}/logs/",
+            "result": f"{balsamic_dir}/{balsamic_case_id}/analysis",
+            "benchmark": f"{balsamic_dir}/{balsamic_case_id}/benchmarks/",
+            "dag": f"{balsamic_dir}/{balsamic_case_id}/{balsamic_case_id}_BALSAMIC_4.4.0_graph.pdf",
             "BALSAMIC_version": "4",
             "config_creation_date": "2020-07-15 17:35",
         }
     }
-    Path.mkdir(Path(balsamic_dir, case_id), parents=True, exist_ok=True)
-    config_path = Path(balsamic_dir, case_id, case_id + ".json")
-    json.dump(config_data, open(config_path, "w"))
-
-
-@pytest.fixture(name="balsamic_case_id")
-def fixture_balsamic_case_id() -> str:
-    return "balsamic_case_wgs_single"
+    Path.mkdir(Path(balsamic_dir, balsamic_case_id), parents=True, exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=config_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(balsamic_dir, balsamic_case_id, balsamic_case_id + ".json"),
+    )
 
 
 @pytest.fixture(name="deliverable_data")
 def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict:
-    case_id = balsamic_case_id
     samples = [
         "sample_case_wgs_single_tumor",
     ]
@@ -778,7 +787,7 @@ def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict
     return {
         "files": [
             {
-                "path": f"{balsamic_dir}/{case_id}/multiqc_report.html",
+                "path": f"{balsamic_dir}/{balsamic_case_id}/multiqc_report.html",
                 "path_index": "",
                 "step": "multiqc",
                 "tag": ["qc"],
@@ -787,7 +796,7 @@ def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict
                 "mandatory": True,
             },
             {
-                "path": f"{balsamic_dir}/{case_id}/concatenated_{samples[0]}_R_1.fp.fastq.gz",
+                "path": f"{balsamic_dir}/{balsamic_case_id}/concatenated_{samples[0]}_R_1.fp.fastq.gz",
                 "path_index": "",
                 "step": "fastp",
                 "tag": [f"concatenated_{samples[0]}_R", "qc"],
@@ -796,19 +805,19 @@ def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict
                 "mandatory": True,
             },
             {
-                "path": f"{balsamic_dir}/{case_id}/CNV.somatic.{case_id}.cnvkit.pass.vcf.gz.tbi",
+                "path": f"{balsamic_dir}/{balsamic_case_id}/CNV.somatic.{balsamic_case_id}.cnvkit.pass.vcf.gz.tbi",
                 "path_index": "",
                 "step": "vep_somatic",
                 "format": "vcf.gz.tbi",
                 "tag": [
                     "CNV",
-                    case_id,
+                    balsamic_case_id,
                     "cnvkit",
                     "annotation",
                     "somatic",
                     "index",
                 ],
-                "id": case_id,
+                "id": balsamic_case_id,
                 "mandatory": True,
             },
         ]
@@ -818,17 +827,20 @@ def fixture_deliverables_data(balsamic_dir: Path, balsamic_case_id: str) -> dict
 @pytest.fixture
 def mock_deliverable(balsamic_dir: Path, deliverable_data: dict, balsamic_case_id: str) -> None:
     """Create deliverable file with dummy data and files to deliver"""
-    case_id = balsamic_case_id
-
     Path.mkdir(
-        Path(balsamic_dir, case_id, "analysis", "delivery_report"),
+        Path(balsamic_dir, balsamic_case_id, "analysis", "delivery_report"),
         parents=True,
         exist_ok=True,
     )
     for report_entry in deliverable_data["files"]:
         Path(report_entry["path"]).touch(exist_ok=True)
-    hk_report_path = Path(balsamic_dir, case_id, "analysis", "delivery_report", case_id + ".hk")
-    json.dump(deliverable_data, open(hk_report_path, "w"))
+    WriteFile.write_file_from_content(
+        content=deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(
+            balsamic_dir, balsamic_case_id, "analysis", "delivery_report", balsamic_case_id + ".hk"
+        ),
+    )
 
 
 @pytest.fixture(name="hermes_deliverables")
@@ -856,14 +868,17 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 
 @pytest.fixture(name="balsamic_hermes_process")
 def fixture_balsamic_hermes_process(hermes_deliverables: dict, process: ProcessMock) -> ProcessMock:
-    """Return a process mock populated with some fluffy hermes output"""
-    process.set_stdout(text=json.dumps(hermes_deliverables))
+    """Return a process mock populated with some balsamic hermes output"""
+    process.set_stdout(
+        text=WriteStream.write_stream_from_content(
+            content=hermes_deliverables, file_format=FileFormat.JSON
+        )
+    )
     return process
 
 
 @pytest.fixture
-def mock_analysis_finish(balsamic_dir: Path) -> None:
+def mock_analysis_finish(balsamic_dir: Path, balsamic_case_id: str) -> None:
     """Create analysis_finish file for testing"""
-    case_id = "balsamic_case_wgs_single"
-    Path.mkdir(Path(balsamic_dir, case_id, "analysis"), parents=True, exist_ok=True)
-    Path(balsamic_dir, case_id, "analysis", "analysis_finish").touch(exist_ok=True)
+    Path.mkdir(Path(balsamic_dir, balsamic_case_id, "analysis"), parents=True, exist_ok=True)
+    Path(balsamic_dir, balsamic_case_id, "analysis", "analysis_finish").touch(exist_ok=True)

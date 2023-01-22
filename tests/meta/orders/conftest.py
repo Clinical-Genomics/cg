@@ -14,10 +14,20 @@ from cg.meta.orders.rml_submitter import RmlSubmitter
 from cg.meta.orders.ticket_handler import TicketHandler
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
+from tests.apps.orderform.conftest import (
+    balsamic_order_to_submit,
+    fastq_order_to_submit,
+    metagenome_order_to_submit,
+    microbial_order_to_submit,
+    mip_order_to_submit,
+    mip_rna_order_to_submit,
+    rml_order_to_submit,
+    sarscov2_order_to_submit,
+)
 
 
-@pytest.fixture
-def all_orders_to_submit(
+@pytest.fixture(scope="session", name="all_orders_to_submit")
+def fixture_all_orders_to_submit(
     balsamic_order_to_submit,
     fastq_order_to_submit,
     metagenome_order_to_submit,
@@ -104,10 +114,10 @@ def rml_status_data(rml_order_to_submit):
 
 
 @pytest.fixture
-def fluffy_status_data(fluffy_order_to_submit):
+def fluffy_status_data(fluffy_uploaded_json_order):
     """Parse fluffy order example."""
     project: OrderType = OrderType.FLUFFY
-    order: OrderIn = OrderIn.parse_obj(obj=fluffy_order_to_submit, project=project)
+    order: OrderIn = OrderIn.parse_obj(obj=fluffy_uploaded_json_order, project=project)
     return FluffySubmitter.order_to_status(order=order)
 
 

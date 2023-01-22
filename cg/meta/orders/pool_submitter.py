@@ -38,7 +38,7 @@ class PoolSubmitter(Submitter):
 
     @staticmethod
     def order_to_status(order: OrderIn) -> dict:
-        """Convert input to pools."""
+        """Convert input to pools"""
 
         status_data = {
             "customer": order.customer,
@@ -108,9 +108,9 @@ class PoolSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[models.Pool]:
-        """Store pools in the status database."""
+        """Store pools in the status database"""
         customer_obj: models.Customer = self.status.customer(customer)
         new_pools: List[models.Pool] = []
         new_samples: List[models.Sample] = []
@@ -131,6 +131,7 @@ class PoolSubmitter(Submitter):
                     name=case_name,
                     panels=None,
                     priority=priority,
+                    ticket=ticket,
                 )
                 case_obj.customer = customer_obj
                 self.status.add_commit(case_obj)
@@ -146,18 +147,18 @@ class PoolSubmitter(Submitter):
             sex: SexEnum = SexEnum.unknown
             for sample in pool["samples"]:
                 new_sample = self.status.add_sample(
-                    application_version=application_version,
+                    name=sample["name"],
+                    sex=sex,
                     comment=sample["comment"],
                     control=sample.get("control"),
-                    customer=customer_obj,
                     internal_id=sample.get("internal_id"),
-                    name=sample["name"],
-                    no_invoice=True,
                     order=order,
                     ordered=ordered,
+                    original_ticket=ticket,
                     priority=priority,
-                    sex=sex,
-                    ticket=ticket,
+                    application_version=application_version,
+                    customer=customer_obj,
+                    no_invoice=True,
                 )
                 new_samples.append(new_sample)
                 self.status.relate_sample(family=case_obj, sample=new_sample, status="unknown")
@@ -169,7 +170,7 @@ class PoolSubmitter(Submitter):
         return new_pools
 
     def _validate_case_names_are_available(
-        self, customer_id: str, samples: List[RmlSample], ticket: int
+        self, customer_id: str, samples: List[RmlSample], ticket: str
     ):
         """Validate that the names of all pools are unused for all samples"""
         customer_obj: models.Customer = self.status.customer(customer_id)
@@ -184,5 +185,5 @@ class PoolSubmitter(Submitter):
                 )
 
     @staticmethod
-    def create_case_name(ticket: int, pool_name: str) -> str:
+    def create_case_name(ticket: str, pool_name: str) -> str:
         return f"{ticket}-{pool_name}"

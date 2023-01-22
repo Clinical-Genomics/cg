@@ -21,7 +21,7 @@ def validate(context: CGConfig, family_id: Optional[str]):
     click.echo(click.style("----------------- VALIDATE --------------------"))
 
     if not family_id:
-        suggest_cases_to_upload(context)
+        suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
     case_obj = status_db.family(family_id)
@@ -45,4 +45,4 @@ def validate(context: CGConfig, family_id: Optional[str]):
             mean_coverage = coverage_results[sample_id]["mean_coverage"]
             click.echo(f"{sample_id}: {mean_coverage:.2f}X - {completeness:.2f}%")
         else:
-            click.echo(f"{sample_id}: sample not found in chanjo", color="yellow")
+            click.echo(click.style(f"{sample_id}: sample not found in chanjo", fg="yellow"))

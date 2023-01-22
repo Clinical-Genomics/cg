@@ -10,12 +10,20 @@ MIP_CASE_TAGS = dict(
     peddy_check={"ped-check", "peddy"},
     multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
+    str_catalog={"expansionhunter", "variant-catalog"},
 )
 
 BALSAMIC_CASE_TAGS = dict(
-    snv_vcf={"vcf-snv-clinical"},
     sv_vcf={"vcf-sv-clinical"},
-    cnv_report={"ascatngs", "visualization"},
+    snv_vcf={"vcf-snv-clinical"},
+    cnv_report={"cnv-report"},
+    multiqc_report={"multiqc-html"},
+    delivery_report={"delivery-report"},
+)
+
+BALSAMIC_UMI_CASE_TAGS = dict(
+    sv_vcf={"vcf-umi-sv-clinical"},
+    snv_vcf={"vcf-umi-snv-clinical"},
     multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
 )
@@ -29,9 +37,18 @@ MIP_SAMPLE_TAGS = dict(
     chromograph_coverage={"chromograph", "tcov"},
     chromograph_regions={"chromograph", "regions"},
     chromograph_sites={"chromograph", "sites"},
+    reviewer_alignment={"expansionhunter", "bam"},
+    reviewer_alignment_index={"expansionhunter", "bam-index"},
+    reviewer_vcf={"expansionhunter", "vcf-str"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
+    vcf2cytosure={"vcf2cytosure"},
+)
+
+BALSAMIC_UMI_SAMPLE_TAGS = dict(
+    bam_file={"umi-bam"},
+    alignment_file={"umi-cram"},
 )

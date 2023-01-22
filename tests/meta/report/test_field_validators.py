@@ -1,10 +1,14 @@
 """Tests report data validation"""
 
-from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
+from cg.meta.report.field_validators import (
+    get_missing_report_data,
+    get_empty_report_data,
+    get_million_read_pairs,
+)
 
 
 def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
-    """Tests the empty report fields retrieval"""
+    """Tests the empty report fields retrieval."""
 
     # GIVEN a report data model
     report_data = report_api_mip_dna.get_report_data(
@@ -36,7 +40,7 @@ def test_get_empty_report_data(report_api_mip_dna, case_mip_dna):
 
 
 def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
-    """Checks the missing report fields retrieval"""
+    """Checks the missing report fields retrieval."""
 
     # GIVEN a report data model
     report_data = report_api_mip_dna.get_report_data(
@@ -72,3 +76,30 @@ def test_get_missing_report_data(report_api_mip_dna, case_mip_dna):
     assert "bait_set" not in missing_fields["metadata"]["ADM1"]
     assert "bait_set" in missing_fields["metadata"]["ADM2"]
     assert "ADM3" not in missing_fields["metadata"]
+
+
+def test_get_million_read_pairs():
+    """Tests millions read pairs computation."""
+
+    # GIVEN a number os sequencing reads and its representation in millions of read pairs
+    sample_reads = 1_200_000_000
+    expected_million_read_pairs = 600.0
+
+    # WHEN obtaining the number of reds in millions of read pairs
+    million_read_pairs = get_million_read_pairs(sample_reads)
+
+    # THEN the expected value should match the calculated one
+    assert million_read_pairs == expected_million_read_pairs
+
+
+def test_get_million_read_pairs_zero_input():
+    """Tests millions read pairs computation when the sample reads number is zero."""
+
+    # GIVEN zero as number of reads
+    sample_reads = 0
+
+    # WHEN retrieving the number of reds in millions of read pairs
+    million_read_pairs = get_million_read_pairs(sample_reads)
+
+    # THEN the obtained value should be zero
+    assert million_read_pairs == 0.0

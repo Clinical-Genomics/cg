@@ -89,7 +89,13 @@ files:
     path: /path/to/rare-disease/cases/case_id/analysis/case_id/qccollect_ar/case_id_qc_metrics.yaml
     path_index: ~
     step: qccollect_ar
-    tag: ~
+    tag: audit
+  - format: meta
+    id: case_id
+    path: /path/to/rare-disease/cases/case_id/analysis/case_id_metrics_deliverables.yaml
+    path_index: ~
+    step: qccollect_ar
+    tag: deliverable
   - format: meta
     id: case_id
     path: /path/to/rare-disease/cases/case_id/analysis/case_id/version_collect_ar/case_id_vcol.yaml

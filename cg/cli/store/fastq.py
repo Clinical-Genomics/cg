@@ -57,7 +57,7 @@ def store_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
     """Include links to decompressed FASTQ files belonging to this flowcell in housekeeper"""
 
     status_db: Store = context.obj.status_db
-    samples: List[models.Sample] = status_db.get_samples_from_flowcell(flowcell_id=flowcell_id)
+    samples: List[models.Sample] = status_db.get_samples_from_flowcell(flowcell_name=flowcell_id)
     stored_individuals = 0
     for sample in samples:
         stored_count: int = context.invoke(
@@ -68,13 +68,13 @@ def store_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
 
 
 @click.command("ticket")
-@click.argument("ticket_id", type=int)
+@click.argument("ticket", type=str)
 @click.option("-d", "--dry-run", is_flag=True)
 @click.pass_context
-def store_ticket(context: click.Context, ticket_id: int, dry_run: bool):
-    """Include links to decompressed FASTQ files belonging to this ticket in housekeeper"""
+def store_ticket(context: click.Context, ticket: str, dry_run: bool):
+    """Include links to decompressed FASTQ files belonging to this ticket in Housekeeper"""
     status_db: Store = context.obj.status_db
-    samples: List[models.Sample] = status_db.get_samples_from_ticket(ticket_id=ticket_id)
+    samples: List[models.Sample] = status_db.get_samples_from_ticket(ticket=ticket)
     stored_individuals = 0
     for sample in samples:
         stored_count: int = context.invoke(

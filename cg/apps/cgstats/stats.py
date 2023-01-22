@@ -27,7 +27,9 @@ class StatsAPI(alchy.Manager):
         LOG.info("Instantiating cgstats api")
         alchy_config = dict(SQLALCHEMY_DATABASE_URI=config["cgstats"]["database"])
         super(StatsAPI, self).__init__(config=alchy_config, Model=models.Model)
-        self.root_dir = Path(config["cgstats"]["root"])
+        self.root_dir: Path = Path(config["cgstats"]["root"])
+        self.binary: str = config["cgstats"]["binary_path"]
+        self.db_uri: str = config["cgstats"]["database"]
 
     @staticmethod
     def get_curated_sample_name(sample_name: str) -> str:
@@ -140,8 +142,7 @@ class StatsAPI(alchy.Manager):
         alt_pattern = "*{}/Unaligned*/Project_*/Sample_{}_*/*.fastq.gz"
         for fastq_pattern in (base_pattern, alt_pattern):
             pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
-            files = self.root_dir.glob(pattern)
-            yield from files
+            yield from self.root_dir.glob(pattern)
 
     def document_path(self, flowcell_name: str) -> str:
         """Get the latest document path of a flowcell from supportparams"""

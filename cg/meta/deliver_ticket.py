@@ -1,4 +1,5 @@
-"""Module for deliver and rsync customer inbox on hasta to customer inbox on caesar"""
+"""Module for deliver and rsync customer inbox on the HPC to customer inbox on the delivery
+server """
 import logging
 import os
 import re
@@ -7,6 +8,7 @@ from pathlib import Path
 import shutil
 from typing import List
 
+from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
@@ -22,21 +24,20 @@ class DeliverTicketAPI(MetaAPI):
         super().__init__(config)
         self.delivery_path: Path = Path(config.delivery_path)
 
-    def get_all_cases_from_ticket(self, ticket_id: int) -> List[models.Family]:
-        cases: List[models.Family] = self.status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
-        return cases
+    def get_all_cases_from_ticket(self, ticket: str) -> List[models.Family]:
+        return self.status_db.get_cases_from_ticket(ticket=ticket).all()
 
-    def get_inbox_path(self, ticket_id: int) -> Path:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+    def get_inbox_path(self, ticket: str) -> Path:
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             raise CgError(
-                f"The customer id was not identified since no cases for ticket_id {ticket_id} was found"
+                f"The customer id was not identified since no cases for ticket {ticket} was found"
             )
         customer_id: str = cases[0].customer.internal_id
-        return self.delivery_path / customer_id / "inbox" / str(ticket_id)
+        return Path(self.delivery_path, customer_id, INBOX_NAME, ticket)
 
-    def check_if_upload_is_needed(self, ticket_id: int) -> bool:
-        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
+    def check_if_upload_is_needed(self, ticket: str) -> bool:
+        customer_inbox: Path = self.get_inbox_path(ticket=ticket)
         LOG.info("Checking if path exist: %s", customer_inbox)
         if customer_inbox.exists():
             LOG.info("Could find path: %s", customer_inbox)
@@ -44,8 +45,8 @@ class DeliverTicketAPI(MetaAPI):
         LOG.info("Could not find path: %s", customer_inbox)
         return True
 
-    def generate_date_tag(self, ticket_id: int) -> datetime.datetime:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+    def generate_date_tag(self, ticket: str) -> datetime.datetime:
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
         return cases[0].ordered_at
 
     def generate_output_filename(
@@ -55,8 +56,7 @@ class DeliverTicketAPI(MetaAPI):
         if date:
             base_name = Path("_".join([str(date.strftime("%y%m%d")), str(base_name)]))
         fastq_file_name = base_name.with_suffix(".fastq.gz")
-        output: Path = dir_path / fastq_file_name
-        return output
+        return Path(dir_path, fastq_file_name)
 
     @staticmethod
     def sort_files(files: List[Path]) -> List[Path]:
@@ -91,18 +91,18 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Removing file: %s", file)
             file.unlink()
 
-    def get_all_samples_from_ticket(self, ticket_id: int) -> list:
+    def get_all_samples_from_ticket(self, ticket: str) -> list:
         all_samples = []
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
             for link_obj in case.links:
                 all_samples.append(link_obj.sample.name)
         return all_samples
 
-    def report_missing_samples(self, ticket_id: int, dry_run: bool) -> None:
-        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
+    def report_missing_samples(self, ticket: str, dry_run: bool) -> None:
+        customer_inbox: Path = self.get_inbox_path(ticket=ticket)
         missing_samples = []
-        all_samples: list = self.get_all_samples_from_ticket(ticket_id=ticket_id)
+        all_samples: list = self.get_all_samples_from_ticket(ticket=ticket)
         if not customer_inbox.exists() and dry_run:
             LOG.info("Dry run, will not search for missing data in: %s", customer_inbox)
             return
@@ -121,9 +121,9 @@ class DeliverTicketAPI(MetaAPI):
         else:
             LOG.info("Data has been delivered for all samples")
 
-    def concatenate(self, ticket_id: int, dry_run: bool) -> None:
-        customer_inbox: Path = self.get_inbox_path(ticket_id=ticket_id)
-        date: datetime.datetime = self.generate_date_tag(ticket_id=ticket_id)
+    def concatenate(self, ticket: str, dry_run: bool) -> None:
+        customer_inbox: Path = self.get_inbox_path(ticket=ticket)
+        date: datetime.datetime = self.generate_date_tag(ticket=ticket)
         if not customer_inbox.exists() and dry_run:
             LOG.info("Dry run, nothing will be concatenated in: %s", customer_inbox)
             return
@@ -167,8 +167,8 @@ class DeliverTicketAPI(MetaAPI):
         app_tag = samples[0].application_version.application.tag
         return app_tag
 
-    def check_if_concatenation_is_needed(self, ticket_id: int) -> bool:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket_id=ticket_id)
+    def check_if_concatenation_is_needed(self, ticket: str) -> bool:
+        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
         case_id = cases[0].internal_id
         case_obj = self.status_db.family(case_id)
         samples: List[models.Sample] = [link.sample for link in case_obj.links]

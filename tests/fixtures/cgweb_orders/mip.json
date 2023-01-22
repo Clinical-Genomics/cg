@@ -27,7 +27,7 @@
       "source": "tissue (fresh frozen)",
       "status": "affected",
       "subject_id": "subject1",
-      "synopsis":"H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis.",
+      "synopsis":"As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
       "tumour": true,
       "volume": "1",
       "well_position": "A:1"
@@ -35,9 +35,7 @@
     {
       "age_at_sampling": "2.0",
       "application": "WGSPCFC030",
-      "cohorts": [
-        ""
-      ],
+      "cohorts": ["Other"],
       "comment": "this is a sample comment",
       "container": "96 well plate",
       "container_name": "CMMS",
@@ -48,7 +46,7 @@
       "panels": [
         "IEM"
       ],
-      "synopsis":"H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis.",
+      "synopsis":"As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
       "phenotype_groups": [
         ""
       ],
@@ -68,9 +66,7 @@
     {
       "age_at_sampling": "3.0",
       "application": "WGSPCFC030",
-      "cohorts": [
-        ""
-      ],
+      "cohorts": ["Other"],
       "container": "96 well plate",
       "container_name": "CMMS",
       "data_analysis": "mip-dna",
@@ -92,7 +88,7 @@
       "source": "tissue (fresh frozen)",
       "status": "affected",
       "subject_id": "subject3",
-      "synopsis":"H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text med f\u00f6r synopsis.",
+      "synopsis":"As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
       "tumour": false,
       "volume": "3",
       "well_position": "C:1"
@@ -100,9 +96,7 @@
     {
       "age_at_sampling": "4.0",
       "application": "WGSPCFC030",
-      "cohorts": [
-        ""
-      ],
+      "cohorts": ["Other"],
       "container": "96 well plate",
       "container_name": "CMMS",
       "data_analysis": "mip-dna",
@@ -123,7 +117,8 @@
       "sex": "female",
       "source": "tissue (fresh frozen)",
       "status": "affected",
-      "synopsis": "",
+      "subject_id": "subjectsample4",
+      "synopsis": "As for the synopsis it will be this overly complex sentence to prove that the synopsis field might in fact be a very long string, which we should be prepared for.",
       "tumour": false,
       "volume": "4",
       "well_position": "D:1"

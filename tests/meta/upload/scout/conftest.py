@@ -1,6 +1,5 @@
 """Fixtures for the upload scout api tests"""
 
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -8,6 +7,9 @@ from typing import List
 
 import pytest
 from cg.constants import Pipeline, DataDelivery
+from cg.constants.constants import FileFormat
+from cg.constants.sequencing import SequencingMethod
+from cg.io.controller import ReadFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -86,6 +88,18 @@ def fixture_dna_sample_father_id() -> str:
     return "dna_father"
 
 
+@pytest.fixture(name="another_sample_id")
+def fixture_another_sample_id() -> str:
+    """Return another sample id."""
+    return "another_sample_id"
+
+
+@pytest.fixture(name="another_rna_sample_id")
+def fixture_another_rna_sample_id() -> str:
+    """Return another RNA sample id."""
+    return "another_rna_sample_id"
+
+
 @pytest.fixture(name="rna_store")
 def fixture_rna_store(
     base_store: Store,
@@ -107,12 +121,30 @@ def fixture_rna_store(
     )
     rna_case.internal_id = rna_case_id
 
-    rna_sample_son = helpers.add_sample(store=store, name="rna_son", subject_id="son")
-    rna_sample_daughter = helpers.add_sample(
-        store=store, name="rna_daughter", subject_id="daughter"
+    rna_sample_son = helpers.add_sample(
+        store=store,
+        name="rna_son",
+        subject_id="son",
+        application_type=SequencingMethod.WTS,
     )
-    rna_sample_mother = helpers.add_sample(store=store, name="rna_mother", subject_id="mother")
-    rna_sample_father = helpers.add_sample(store=store, name="rna_father", subject_id="father")
+    rna_sample_daughter = helpers.add_sample(
+        store=store,
+        name="rna_daughter",
+        subject_id="daughter",
+        application_type=SequencingMethod.WTS,
+    )
+    rna_sample_mother = helpers.add_sample(
+        store=store,
+        name="rna_mother",
+        subject_id="mother",
+        application_type=SequencingMethod.WTS,
+    )
+    rna_sample_father = helpers.add_sample(
+        store=store,
+        name="rna_father",
+        subject_id="father",
+        application_type=SequencingMethod.WTS,
+    )
     helpers.add_relationship(
         store=store,
         sample=rna_sample_son,
@@ -149,12 +181,34 @@ def fixture_rna_store(
     )
     dna_case.internal_id = dna_case_id
 
-    dna_sample_son = helpers.add_sample(store=store, name="dna_son", subject_id="son")
-    dna_sample_daughter = helpers.add_sample(
-        store=store, name="dna_daughter", subject_id="daughter"
+    dna_sample_son = helpers.add_sample(
+        store=store,
+        name="dna_son",
+        subject_id="son",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
     )
-    dna_sample_mother = helpers.add_sample(store=store, name="dna_mother", subject_id="mother")
-    dna_sample_father = helpers.add_sample(store=store, name="dna_father", subject_id="father")
+    dna_sample_daughter = helpers.add_sample(
+        store=store,
+        name="dna_daughter",
+        subject_id="daughter",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
+    )
+    dna_sample_mother = helpers.add_sample(
+        store=store,
+        name="dna_mother",
+        subject_id="mother",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
+    )
+    dna_sample_father = helpers.add_sample(
+        store=store,
+        name="dna_father",
+        subject_id="father",
+        application_tag=SequencingMethod.WGS,
+        application_type=SequencingMethod.WGS,
+    )
     helpers.add_relationship(
         store=store,
         sample=dna_sample_son,
@@ -186,9 +240,11 @@ def fixture_rna_store(
 
 
 @pytest.fixture(name="lims_family")
-def fixture_lims_family() -> dict:
+def fixture_lims_family(fixtures_dir) -> dict:
     """Returns a lims-like case of samples"""
-    return json.load(open("tests/fixtures/report/lims_family.json"))
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=Path(fixtures_dir, "report", "lims_family.json")
+    )
 
 
 @pytest.fixture(name="lims_samples")
@@ -346,6 +402,11 @@ def fixture_balsamic_analysis_hk_bundle_data(
                 "tags": ["vcf-sv-clinical"],
             },
             {
+                "path": str(balsamic_wgs_analysis_dir / "umi.sv.vcf"),
+                "archive": False,
+                "tags": ["vcf-umi-snv-clinical"],
+            },
+            {
                 "path": str(balsamic_wgs_analysis_dir / "adm1.cram"),
                 "archive": False,
                 "tags": ["cram", sample_id],
@@ -438,8 +499,20 @@ def fixture_mip_dna_analysis_obj(
 
 @pytest.fixture(name="balsamic_analysis_obj")
 def fixture_balsamic_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    analysis_obj.pipeline = Pipeline.BALSAMIC
     for link_object in analysis_obj.family.links:
         link_object.sample.application_version.application.prep_category = "wes"
+        link_object.family.data_analysis = Pipeline.BALSAMIC
+    return analysis_obj
+
+
+@pytest.fixture(name="balsamic_umi_analysis_obj")
+def fixture_balsamic_umi_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    analysis_obj.pipeline = Pipeline.BALSAMIC_UMI
+    for link_object in analysis_obj.family.links:
+        link_object.sample.application_version.application.prep_category = "wes"
+        link_object.family.data_analysis = Pipeline.BALSAMIC_UMI
+
     return analysis_obj
 
 

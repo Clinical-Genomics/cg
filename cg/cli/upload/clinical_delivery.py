@@ -1,45 +1,88 @@
 """Code that handles CLI commands to upload"""
 import datetime as dt
 import logging
-
 from pathlib import Path
+from typing import Set
 
 import click
 
-from cg.constants import Pipeline, DataDelivery
-from cg.constants.constants import DRY_RUN
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.store import Store, models
-
+from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.tb import TrailblazerAPI
+from cg.constants import Pipeline
+from cg.constants.constants import DRY_RUN
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.command("clinical-delivery")
 @click.pass_context
-def fastq(context: click.Context):
-    context.obj.meta_apis["delivery_api"] = DeliverAPI(
-        store=context.obj.status_db,
-        hk_api=context.obj.housekeeper_api,
-        case_tags=PIPELINE_ANALYSIS_TAG_MAP[DataDelivery.FASTQ]["case_tags"],
-        sample_tags=PIPELINE_ANALYSIS_TAG_MAP[DataDelivery.FASTQ]["sample_tags"],
-        delivery_type=DataDelivery.FASTQ,
-        project_base_path=Path(context.obj.delivery_path),
+@click.argument("case_id", required=True)
+@DRY_RUN
+def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
+    """Links the appropriate files for a case, based on the data_delivery, to the customer folder
+    and subsequently uses rsync to upload it to caesar."""
+
+    click.echo(click.style("----------------- Clinical-delivery -----------------"))
+
+    case_obj: models.Family = context.obj.status_db.family(case_id)
+    delivery_types: Set[str] = case_obj.get_delivery_arguments()
+    is_sample_delivery: bool
+    is_case_delivery: bool
+    is_complete_delivery: bool
+    job_id: int
+    is_sample_delivery, is_case_delivery = DeliverAPI.get_delivery_scope(
+        delivery_arguments=delivery_types
     )
-    context.obj.meta_apis["rsync_api"] = RsyncAPI(context.obj)
+    if not delivery_types:
+        LOG.info(f"No delivery of files requested for case {case_id}")
+        return
+
+    LOG.debug("Delivery types are: %s", delivery_types)
+    for delivery_type in delivery_types:
+        DeliverAPI(
+            store=context.obj.status_db,
+            hk_api=context.obj.housekeeper_api,
+            case_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["case_tags"],
+            sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
+            delivery_type=delivery_type,
+            project_base_path=Path(context.obj.delivery_path),
+        ).deliver_files(case_obj=case_obj)
+
+    rsync_api: RsyncAPI = RsyncAPI(context.obj)
+    is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(
+        case_id=case_id,
+        dry_run=dry_run,
+        sample_files_present=is_sample_delivery,
+        case_files_present=is_case_delivery,
+    )
+    RsyncAPI.write_trailblazer_config(
+        {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
+    )
+    analysis_name: str = f"{case_id}_rsync" if is_complete_delivery else f"{case_id}_partial"
+    if not dry_run:
+        context.obj.trailblazer_api.add_pending_analysis(
+            case_id=analysis_name,
+            analysis_type=AnalysisTypes.OTHER,
+            config_path=rsync_api.trailblazer_config_path.as_posix(),
+            out_dir=rsync_api.log_dir.as_posix(),
+            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case_obj.priority],
+            data_analysis=Pipeline.RSYNC,
+            ticket=case_obj.latest_ticket,
+        )
+    LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
 
 
-@fastq.command("all-available")
+@click.command("all-fastq")
 @click.pass_context
 @DRY_RUN
 def auto_fastq(context: click.Context, dry_run: bool):
     """Starts upload of all not previously uploaded cases with analysis type fastq to
-    clinical-delivery"""
+    clinical-delivery."""
 
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
@@ -60,8 +103,6 @@ def auto_fastq(context: click.Context, dry_run: bool):
                     dt.datetime.now(),
                 )
                 analysis_obj.uploaded_at = dt.datetime.now()
-                if not dry_run:
-                    status_db.commit()
             else:
                 LOG.warning(
                     "Upload to clinical-delivery for %s has already started, skipping",
@@ -69,41 +110,8 @@ def auto_fastq(context: click.Context, dry_run: bool):
                 )
             continue
         case: models.Family = analysis_obj.family
-        analysis_obj.upload_started_at = dt.datetime.now()
         LOG.info("Uploading family: %s", case.internal_id)
-        context.invoke(upload_fastq, case_id=case.internal_id, dry_run=dry_run)
-        status_db.commit()
-
-
-@fastq.command("case")
-@click.pass_context
-@click.argument("case_id", required=True)
-@DRY_RUN
-def upload_fastq(context: click.Context, case_id: str, dry_run: bool):
-    """Uploads fastq files for a case to clinical-delivery"""
-
-    status_db: Store = context.obj.status_db
-    deliver_api: DeliverAPI = context.obj.meta_apis["delivery_api"]
-    rsync_api: RsyncAPI = context.obj.meta_apis["rsync_api"]
-    trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
-
-    case: models.Family = status_db.family(internal_id=case_id)
-    deliver_api.deliver_files(case)
-    job_id: int = rsync_api.slurm_rsync_single_case(
-        case_id=case_id, dry_run=dry_run, sample_files_present=True
-    )
-    rsync_api.write_trailblazer_config(
-        {"jobs": [str(job_id)]}, config_path=rsync_api.trailblazer_config_path
-    )
-    if not dry_run:
-        trailblazer_api.add_pending_analysis(
-            case_id=case_id,
-            analysis_type=AnalysisAPI.get_application_type(
-                status_db.family(case_id).links[0].sample
-            ),
-            config_path=str(rsync_api.trailblazer_config_path),
-            out_dir=str(rsync_api.log_dir),
-            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
-            data_analysis=Pipeline.FASTQ,
-        )
-    LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
+        analysis_obj.upload_started_at = dt.datetime.now()
+        context.invoke(clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
+        if not dry_run:
+            status_db.commit()

@@ -1,7 +1,8 @@
 """Tests for the models in scout load config"""
 import pytest
-from cg.models.scout import scout_load_config
 from pydantic import ValidationError
+
+from cg.models.scout import scout_load_config
 
 
 def test_validate_individual_display_name(sample_dict):
@@ -26,6 +27,28 @@ def test_validate_mt_bam(sample_dict):
 
     # THEN assert that the mt_bam path is correct
     assert ind_obj.mt_bam == sample["mt_bam"]
+
+
+def test_validate_reviewer_alignment(sample_dict):
+    """Test to validate a reviewer alignment file for an individual."""
+    # GIVEN some sample information
+    sample = sample_dict
+    # WHEN validating the sample data
+    ind_obj = scout_load_config.ScoutMipIndividual(**sample)
+
+    # THEN assert that the reviewer alignment path is set
+    assert ind_obj.reviewer.alignment == sample["reviewer"]["alignment"]
+
+
+def test_validate_reviewer_catalog(sample_dict):
+    """Test to validate a reviewer catalogue file for an individual."""
+    # GIVEN some sample information
+    sample = sample_dict
+    # WHEN validating the sample data
+    ind_obj = scout_load_config.ScoutMipIndividual(**sample)
+
+    # THEN assert that the reviewer alignment path is set
+    assert ind_obj.reviewer.catalog == sample["reviewer"]["catalog"]
 
 
 def test_instantiate_empty_mip_config():

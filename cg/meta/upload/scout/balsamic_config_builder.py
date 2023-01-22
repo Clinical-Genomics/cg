@@ -31,13 +31,18 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_multiqc_report()
         self.include_delivery_report()
 
-    def include_sample_files(self, config_sample: ScoutBalsamicIndividual):
+    def include_sample_files(self, config_sample: ScoutBalsamicIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files")
 
-    def include_delivery_report(self) -> None:
-        LOG.info("Include coverage qc report to case")
-        self.load_config.coverage_qc_report = self.fetch_file_from_hk(
-            self.case_tags.delivery_report
+        sample_id: str = config_sample.sample_id
+        if config_sample.alignment_path:
+            if "tumor" in config_sample.alignment_path:
+                sample_id = "tumor"
+            elif "normal" in config_sample.alignment_path:
+                sample_id = "normal"
+
+        config_sample.vcf2cytosure = self.fetch_sample_file(
+            hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 
     def build_config_sample(self, db_sample: models.FamilySample) -> ScoutBalsamicIndividual:
@@ -52,14 +57,20 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             config_sample.phenotype = "unaffected"
             config_sample.sample_id = "NORMAL"
 
-        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=db_sample.sample)
+        config_sample.analysis_type = self.get_balsamic_analysis_type(db_sample.sample)
+
+        return config_sample
+
+    def get_balsamic_analysis_type(self, sample: models.Sample) -> str:
+        """Returns a formatted balsamic analysis type"""
+
+        analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=sample)
         if analysis_type == "tgs":
             analysis_type = "panel"
         if analysis_type == "wgs":
             analysis_type = "wgs"
 
-        config_sample.analysis_type = analysis_type
-        return config_sample
+        return analysis_type
 
     def build_load_config(self) -> None:
         LOG.info("Build load config for balsamic case")

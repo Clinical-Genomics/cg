@@ -25,7 +25,7 @@
       "sex": "female",
       "source": "tissue (fresh frozen)",
       "synopsis": "",
-      "time_point": "1",
+      "subject_id": "subject-sample1-rna-t1",
       "volume": "1",
       "well_position": "A:1"
     },
@@ -52,7 +52,7 @@
       "sex": "female",
       "source": "tissue (fresh frozen)",
       "synopsis": "",
-      "time_point": "2",
+      "subject_id": "subject-sample1-rna-t2",
       "volume": "2",
       "well_position": "B:1"
     }

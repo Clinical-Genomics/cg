@@ -105,30 +105,6 @@ def test_run_analysis(cli_runner: CliRunner, balsamic_context: CGConfig, caplog)
     assert "--run-analysis" in caplog.text
 
 
-def test_analysis_type_qc(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
-    """Test command with analysis-type qc option"""
-    caplog.set_level(logging.INFO)
-    # GIVEN case-id
-    case_id = "balsamic_case_wgs_single"
-    # WHEN ensuring case config exists where it should be stored
-    Path.mkdir(
-        Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
-        exist_ok=True,
-    )
-    Path(balsamic_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
-        exist_ok=True
-    )
-    # WHEN dry running with analysis type qc option specified
-    result = cli_runner.invoke(
-        run, [case_id, "--dry-run", "--analysis-type", "qc"], obj=balsamic_context
-    )
-    # THEN command should execute successfully
-    assert result.exit_code == EXIT_SUCCESS
-    # THEN dry-print should include the option
-    assert "--analysis-type" in caplog.text
-    assert "qc" in caplog.text
-
-
 def test_priority_custom(cli_runner: CliRunner, balsamic_context: CGConfig, caplog):
     """Test command with priority option"""
     caplog.set_level(logging.INFO)

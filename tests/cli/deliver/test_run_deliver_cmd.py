@@ -108,7 +108,7 @@ def test_delivery_ticket_id(
     case_id: str,
     delivery_inbox: Path,
     project_dir: Path,
-    ticket_nr: int,
+    ticket: str,
 ):
     """Test that to run the deliver command with ticket nr"""
     # GIVEN a context with a case that have files in housekeeper to deliver
@@ -121,7 +121,7 @@ def test_delivery_ticket_id(
     # WHEN running the deliver analysis command
     runner.invoke(
         deliver_analysis,
-        ["--ticket-id", ticket_nr, "--delivery-type", "mip-dna"],
+        ["--ticket", ticket, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 

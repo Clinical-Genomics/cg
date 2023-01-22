@@ -2,7 +2,7 @@
 
 import logging
 import os.path
-from typing import Optional
+from typing import Optional, List
 
 from flask import Flask
 
@@ -19,22 +19,33 @@ class MockOsTicket(OsTicket):
     def __init__(self):
         self.headers = None
         self.url = None
-        self._ticket_nr: int = 123456
+        self.osticket_email = "james.holden@scilifelab.se"
+        self.mail_container_uri = "dummy_uri"
+        self._ticket_nr: str = "123456"
         self._should_fail: bool = False
         self._return_none: bool = False
+        self.email_uri = "http://localhost:0000/sendmail"
 
-    def set_ticket_nr(self, number: int) -> None:
-        self._ticket_nr = number
+    def set_ticket_nr(self, ticket: str) -> None:
+        self._ticket_nr = ticket
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""
 
-    def setup(self, api_key: str = None, domain: str = None):
+    def setup(
+        self,
+        api_key: str = None,
+        domain: str = None,
+        osticket_email: str = None,
+        email_uri: str = None,
+    ):
         """Initialize the API."""
         self.headers = {"X-API-Key": api_key}
         self.url = os.path.join(domain, "api/tickets.json")
 
-    def open_ticket(self, name: str, email: str, subject: str, message: str) -> Optional[int]:
+    def open_ticket(
+        self, attachment: dict, email: str, message: str, name: str, subject: str
+    ) -> Optional[str]:
         """Open a new ticket through the REST API."""
         if self._should_fail:
             LOG.error("res.text: %s, reason: %s", self._ticket_nr, "Unknown reason")

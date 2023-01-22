@@ -1,4 +1,3 @@
-import json
 import logging
 from pathlib import Path
 
@@ -7,13 +6,14 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.balsamic.base import store_housekeeper
+from cg.constants import EXIT_SUCCESS
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteStream
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.utils import Process
 from click.testing import CliRunner
 from pydantic import ValidationError
-
-EXIT_SUCCESS = 0
 
 
 def test_without_options(cli_runner: CliRunner, balsamic_context: CGConfig):
@@ -99,7 +99,9 @@ def test_case_with_malformed_deliverables_file(
 
     # GIVEN that HermesAPI returns a malformed deliverables output
     mocker.patch.object(Process, "run_command")
-    Process.run_command.return_value = json.dumps(malformed_hermes_deliverables)
+    Process.run_command.return_value = WriteStream.write_stream_from_content(
+        content=malformed_hermes_deliverables, file_format=FileFormat.JSON
+    )
 
     # GIVEN that the output is malformed
     with pytest.raises(ValidationError):

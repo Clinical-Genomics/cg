@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Union
 
 from cg.models.orders.constants import OrderType
@@ -11,6 +12,7 @@ from cg.constants import (
     PRECISION,
     REPORT_SUPPORTED_PIPELINES,
     BALSAMIC_ANALYSIS_TYPE,
+    REPORT_GENDER,
 )
 
 LOG = logging.getLogger(__name__)
@@ -37,7 +39,7 @@ def validate_boolean(value: Union[bool, str]) -> str:
 def validate_float(value: Union[float, str]) -> str:
     """Returns a processed float value"""
 
-    return str(round(float(value), PRECISION)) if value else NA_FIELD
+    return str(round(float(value), PRECISION)) if value or isinstance(value, float) else NA_FIELD
 
 
 def validate_date(date: datetime) -> str:
@@ -54,6 +56,18 @@ def validate_list(value: list) -> str:
     )
 
 
+def validate_path(file_path: str) -> str:
+    """Returns the name of a specific file"""
+
+    return Path(file_path).name if file_path and Path(file_path).is_file() else NA_FIELD
+
+
+def validate_gender(value: str) -> str:
+    """Formats the provided gender"""
+
+    return validate_empty_field(REPORT_GENDER.get(value))
+
+
 def validate_rml_sample(prep_category: str) -> str:
     """Checks if a specific sample is a RML one"""
 
@@ -67,11 +81,7 @@ def validate_rml_sample(prep_category: str) -> str:
 def validate_balsamic_analysis_type(value: str) -> str:
     """Translates the BALSAMIC analysis type string to an accepted value for the delivery report"""
 
-    return (
-        BALSAMIC_ANALYSIS_TYPE.get(value)
-        if value and BALSAMIC_ANALYSIS_TYPE.get(value)
-        else NA_FIELD
-    )
+    return validate_empty_field(BALSAMIC_ANALYSIS_TYPE.get(value))
 
 
 def validate_supported_pipeline(cls, values: dict) -> dict:
@@ -94,7 +104,7 @@ def validate_supported_pipeline(cls, values: dict) -> dict:
             raise ValueError
 
     # Validates the analysis type
-    if values.get("pipeline") == Pipeline.BALSAMIC:
+    if Pipeline.BALSAMIC in values.get("pipeline"):
         values["type"] = validate_balsamic_analysis_type(values["type"])
 
     return values

@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import click
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
@@ -24,10 +24,9 @@ def add():
 @click.argument("name")
 @click.option(
     "-cg",
-    "--customer-group",
-    "customer_group_id",
-    help="internal ID for the customer group of the customer, a new group will be "
-    "created if left out",
+    "--collaboration",
+    "collaboration_internal_ids",
+    help="List of internal IDs for the collaborations the customer should belong to",
 )
 @click.option(
     "-ia",
@@ -48,30 +47,31 @@ def customer(
     context: CGConfig,
     internal_id: str,
     name: str,
-    customer_group_id: Optional[str],
+    collaboration_internal_ids: Optional[List[str]],
     invoice_address: str,
     invoice_reference: str,
 ):
     """Add a new customer with a unique INTERNAL_ID and NAME."""
+    collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
     existing: models.Customer = status_db.customer(internal_id)
     if existing:
         LOG.error(f"{existing.name}: customer already added")
         raise click.Abort
 
-    customer_group: models.CustomerGroup = status_db.customer_group(customer_group_id)
-    if not customer_group:
-        customer_group: models.CustomerGroup = status_db.add_customer_group(
-            internal_id=internal_id, name=name
-        )
+    collaborations: List[models.Collaboration] = [
+        status_db.collaboration(collaboration_internal_id)
+        for collaboration_internal_id in collaboration_internal_ids
+    ]
 
     new_customer: models.Customer = status_db.add_customer(
         internal_id=internal_id,
         name=name,
-        customer_group=customer_group,
         invoice_address=invoice_address,
         invoice_reference=invoice_reference,
     )
+    for collaboration in collaborations:
+        new_customer.collaborations.append(collaboration)
     status_db.add_commit(new_customer)
     message: str = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)
@@ -150,9 +150,9 @@ def sample(
     new_record: models.Sample = status_db.add_sample(
         name=name,
         sex=sex,
+        downsampled_to=downsampled,
         internal_id=lims_id,
         order=order,
-        downsampled_to=downsampled,
         priority=priority,
     )
     new_record.application_version = status_db.current_application_version(application)
@@ -185,6 +185,7 @@ def sample(
     required=True,
     type=EnumChoice(DataDelivery),
 )
+@click.option("-t", "--ticket", help="Ticket number", required=True)
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
@@ -196,8 +197,9 @@ def family(
     data_delivery: DataDelivery,
     customer_id: str,
     name: str,
+    ticket: str,
 ):
-    """Add a family to CUSTOMER_ID with a NAME."""
+    """Add a family with the given name and associated with the given customer"""
     status_db: Store = context.status_db
     customer_obj: models.Customer = status_db.customer(customer_id)
     if customer_obj is None:
@@ -216,6 +218,7 @@ def family(
         name=name,
         panels=list(panels),
         priority=priority,
+        ticket=ticket,
     )
     new_case.customer = customer_obj
     status_db.add_commit(new_case)
@@ -273,24 +276,25 @@ def relationship(
 @add.command()
 @click.option(
     "-t",
-    "--ticket-id",
-    type=int,
+    "--ticket",
+    type=str,
     help="Ticket id",
     required=True,
 )
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def external(context: CGConfig, ticket_id: int, dry_run: bool):
-    """Downloads external data from caesar and places it in appropriate folder on hasta"""
+def external(context: CGConfig, ticket: str, dry_run: bool):
+    """Downloads external data from the delivery server and places it in appropriate folder on
+    the HPC"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.transfer_sample_files_from_source(ticket_id=ticket_id, dry_run=dry_run)
+    external_data_api.transfer_sample_files_from_source(ticket=ticket, dry_run=dry_run)
 
 
 @add.command("external-hk")
 @click.option(
     "-t",
-    "--ticket-id",
-    type=int,
+    "--ticket",
+    type=str,
     help="Ticket id",
     required=True,
 )
@@ -299,7 +303,7 @@ def external(context: CGConfig, ticket_id: int, dry_run: bool):
     "--force", help="Overwrites any any previous samples in the customer directory", is_flag=True
 )
 @click.pass_obj
-def external_hk(context: CGConfig, ticket_id: int, dry_run: bool, force):
-    """Adds external data to housekeeper"""
+def external_hk(context: CGConfig, ticket: str, dry_run: bool, force):
+    """Adds external data to Housekeeper"""
     external_data_api = ExternalDataAPI(config=context)
-    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket_id=ticket_id, force=force)
+    external_data_api.add_transfer_to_housekeeper(dry_run=dry_run, ticket=ticket, force=force)

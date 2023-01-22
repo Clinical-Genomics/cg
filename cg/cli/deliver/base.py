@@ -23,7 +23,12 @@ DELIVERY_TYPE = click.option(
     type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
     required=True,
 )
-TICKET_ID_ARG = click.argument("ticket_id", type=int, required=True)
+FORCE_ALL = click.option(
+    "--force-all",
+    help="Deliver sample files for all samples regardles of amount of reads",
+    is_flag=True,
+)
+TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
 
 
 @click.group()
@@ -37,22 +42,24 @@ def deliver():
 @DELIVERY_TYPE
 @click.option("-c", "--case-id", help="Deliver the files for a specific case")
 @click.option(
-    "-t", "--ticket-id", type=int, help="Deliver the files for ALL cases connected to a ticket"
+    "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
 )
+@FORCE_ALL
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
     case_id: Optional[str],
-    ticket_id: Optional[int],
+    ticket: Optional[str],
     delivery_type: List[str],
     dry_run: bool,
+    force_all: bool,
 ):
     """Deliver analysis files to customer inbox
 
     Files can be delivered either on case level or for all cases connected to a ticket.
     Any of those needs to be specified.
     """
-    if not (case_id or ticket_id):
+    if not (case_id or ticket):
         LOG.info("Please provide a case-id or ticket-id")
         return
 
@@ -70,6 +77,7 @@ def deliver_analysis(
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
             project_base_path=Path(inbox),
             delivery_type=delivery,
+            force_all=force_all,
         )
         deliver_api.set_dry_run(dry_run)
         cases: List[models.Family] = []
@@ -80,9 +88,9 @@ def deliver_analysis(
                 return
             cases.append(case_obj)
         else:
-            cases = status_db.get_cases_from_ticket(ticket_id=ticket_id).all()
+            cases: List[models.Family] = status_db.get_cases_from_ticket(ticket=ticket).all()
             if not cases:
-                LOG.warning("Could not find cases for ticket_id %s", ticket_id)
+                LOG.warning("Could not find cases for ticket %s", ticket)
                 return
 
         for case_obj in cases:
@@ -93,16 +101,16 @@ def deliver_analysis(
 @DRY_RUN
 @TICKET_ID_ARG
 @click.pass_obj
-def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
+def rsync(context: CGConfig, ticket: str, dry_run: bool):
     """The folder generated using the "cg deliver analysis" command will be
-    rsynced with this function to the customers inbox on caesar.
+    rsynced with this function to the customers inbox on the delivery server
     """
     tb_api: TrailblazerAPI = context.trailblazer_api
     rsync_api: RsyncAPI = RsyncAPI(config=context)
-    slurm_id = rsync_api.run_rsync_on_slurm(ticket_id=ticket_id, dry_run=dry_run)
-    LOG.info("Rsync to caesar running as job %s", slurm_id)
+    slurm_id = rsync_api.run_rsync_on_slurm(ticket=ticket, dry_run=dry_run)
+    LOG.info("Rsync to the delivery server running as job %s", slurm_id)
     rsync_api.add_to_trailblazer_api(
-        tb_api=tb_api, slurm_job_id=slurm_id, ticket_id=ticket_id, dry_run=dry_run
+        tb_api=tb_api, slurm_job_id=slurm_id, ticket=ticket, dry_run=dry_run
     )
 
 
@@ -110,13 +118,13 @@ def rsync(context: CGConfig, ticket_id: int, dry_run: bool):
 @DRY_RUN
 @TICKET_ID_ARG
 @click.pass_context
-def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
+def concatenate(context: click.Context, ticket: str, dry_run: bool):
     """The fastq files in the folder generated using "cg deliver analysis"
-    will be concatenated into one forward and one reverse fastq file.
+    will be concatenated into one forward and one reverse fastq file
     """
     cg_context: CGConfig = context.obj
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-    deliver_ticket_api.concatenate(ticket_id=ticket_id, dry_run=dry_run)
+    deliver_ticket_api.concatenate(ticket=ticket, dry_run=dry_run)
 
 
 @deliver.command(name="ticket")
@@ -124,37 +132,43 @@ def concatenate(context: click.Context, ticket_id: int, dry_run: bool):
 @DRY_RUN
 @click.option(
     "-t",
-    "--ticket-id",
-    type=int,
+    "--ticket",
+    type=str,
     help="Deliver and rsync the files for ALL cases connected to a ticket",
     required=True,
 )
+@FORCE_ALL
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
-    ticket_id: int,
     delivery_type: List[str],
     dry_run: bool,
+    force_all: bool,
+    ticket: str,
 ):
     """Will first collect hard links in the customer inbox then
     concatenate fastq files if needed and finally send the folder
-    from customer inbox hasta to the customer inbox on caesar.
+    from customer inbox hasta to the customer inbox on the delivery server
     """
     cg_context: CGConfig = context.obj
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
-    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket_id=ticket_id)
+    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket)
     if is_upload_needed:
-        LOG.info("Delivering files to customer inbox on hasta")
+        LOG.info("Delivering files to customer inbox on the HPC")
         context.invoke(
-            deliver_analysis, ticket_id=ticket_id, delivery_type=delivery_type, dry_run=dry_run
+            deliver_analysis,
+            delivery_type=delivery_type,
+            dry_run=dry_run,
+            force_all=force_all,
+            ticket=ticket,
         )
     else:
-        LOG.info("Files already delivered to customer inbox on hasta")
+        LOG.info("Files already delivered to customer inbox on the HPC")
         return
-    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(
-        ticket_id=ticket_id
+    is_concatenation_needed: bool = deliver_ticket_api.check_if_concatenation_is_needed(
+        ticket=ticket
     )
     if is_concatenation_needed and "fastq" in delivery_type:
-        context.invoke(concatenate, ticket_id=ticket_id, dry_run=dry_run)
-    deliver_ticket_api.report_missing_samples(ticket_id=ticket_id, dry_run=dry_run)
-    context.invoke(rsync, ticket_id=ticket_id, dry_run=dry_run)
+        context.invoke(concatenate, ticket=ticket, dry_run=dry_run)
+    deliver_ticket_api.report_missing_samples(ticket=ticket, dry_run=dry_run)
+    context.invoke(rsync, ticket=ticket, dry_run=dry_run)

@@ -29,10 +29,14 @@ class LimsSample(BaseModel):
 
 
 class MockLimsAPI(LimsAPI):
-    """Mock LIMS API to get target bed from lims"""
+    """Mock LIMS API to get target bed from LIMS."""
 
-    def __init__(self, config: dict = None, samples: List[dict] = []):
+    def __init__(self, config: dict = None, samples: List[dict] = None):
+        if samples is None:
+            samples = []
         self.config = config
+        self.baseuri = "https://clinical-lims-mock.scilifelab.se"
+        self._received_at = None
         self.sample_vars = {}
         self._samples = samples
         self._prep_method = (
@@ -52,10 +56,7 @@ class MockLimsAPI(LimsAPI):
         self._prep_method = method
 
     def sample(self, sample_id: str) -> Optional[dict]:
-        for sample in self._samples:
-            if sample["id"] == sample_id:
-                return sample
-        return None
+        return next((sample for sample in self._samples if sample["id"] == sample_id), None)
 
     def add_sample(self, internal_id: str):
         self.sample_vars[internal_id] = {}
@@ -90,3 +91,17 @@ class MockLimsAPI(LimsAPI):
         self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
     ):
         pass  # This is completely mocked out
+
+    def set_samples(self, samples):
+        self._samples = samples
+
+    def cache(self):
+        pass  # This is completely mocked out
+
+    def get_received_date(self, lims_id: str):
+
+        received_date = None
+        for sample in self._samples:
+            if sample.internal_id == lims_id:
+                received_date = sample.received_at
+        return received_date

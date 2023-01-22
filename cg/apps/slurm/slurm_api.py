@@ -1,4 +1,4 @@
-"""Class to create sbatch files and communicate with slurm"""
+"""Module to create sbatch files and communicate with SLURM."""
 import logging
 from pathlib import Path
 from typing import List, Optional
@@ -8,6 +8,7 @@ from cg.apps.slurm.sbatch import (
     SBATCH_BODY_TEMPLATE,
     SBATCH_HEADER_TEMPLATE,
 )
+from cg.constants.slurm import Slurm
 from cg.models.slurm.sbatch import Sbatch
 from cg.utils import Process
 
@@ -15,18 +16,22 @@ LOG = logging.getLogger(__name__)
 
 
 class SlurmAPI:
+    """API to SLURM."""
+
     def __init__(self):
-        self.process: Process = Process("sbatch")
+        """Initialize SlurmAPI class."""
+        self.process: Process = Process(binary="sbatch")
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
-        LOG.debug("Set dry run to %s", dry_run)
+        """Set dry run."""
+        LOG.debug(f"Set dry run to {dry_run}")
         self.dry_run = dry_run
 
     @staticmethod
     def generate_sbatch_content(sbatch_parameters: Sbatch) -> str:
-        """Take a parameters object and generate a string with sbatch information"""
-        if hasattr(sbatch_parameters, "partition"):
+        """Take a parameters object and generate a string with sbatch information."""
+        if hasattr(sbatch_parameters, Slurm.PARTITION.value):
             sbatch_header: str = SlurmAPI.generate_dragen_sbatch_header(
                 sbatch_parameters=sbatch_parameters
             )

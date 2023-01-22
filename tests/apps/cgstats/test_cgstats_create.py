@@ -37,13 +37,13 @@ def test_create_data_source(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxR
 
 def test_create_flowcell(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):
     # GIVEN a api without a flowcell object
-    assert not find.get_flowcell_id(flowcell_name=bcl2fastq_demux_results.flowcell.flowcell_id)
+    assert not find.get_flowcell_id(flowcell_name=bcl2fastq_demux_results.flow_cell.id)
 
     # WHEN creating a new flowcell
     create.create_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
 
     # THEN assert that the flowcell was created
-    assert find.get_flowcell_id(flowcell_name=bcl2fastq_demux_results.flowcell.flowcell_id)
+    assert find.get_flowcell_id(flowcell_name=bcl2fastq_demux_results.flow_cell.id)
 
 
 def test_create_demux(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):

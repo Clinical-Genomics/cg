@@ -1,15 +1,16 @@
 import logging
-import yaml
 
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Type
 
 from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import COLLABORATORS, COMBOS, MASTER_LIST, Pipeline
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline
+from cg.constants.constants import FileFormat
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
+from cg.io.controller import WriteFile, ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MipFastqHandler
 from cg.models.cg_config import CGConfig
@@ -30,8 +31,9 @@ CLI_OPTIONS = {
     "skip_evaluation": {"option": "--qccollect_skip_evaluation"},
     "start_after": {"option": "--start_after_recipe"},
     "start_with": {"option": "--start_with_recipe"},
+    "use_bwa_mem": {"option": "--bwa_mem 1 --bwa_mem2 0"},
 }
-
+##TODO test this option above
 LOG = logging.getLogger(__name__)
 
 
@@ -110,8 +112,10 @@ class MipAnalysisAPI(AnalysisAPI):
         """Write the pedigree config to the the case dir"""
         out_dir = self.get_case_path(case_id=case_id)
         out_dir.mkdir(parents=True, exist_ok=True)
-        pedigree_config_path = self.get_pedigree_config_path(case_id=case_id)
-        pedigree_config_path.write_text(yaml.dump(data))
+        pedigree_config_path: Path = self.get_pedigree_config_path(case_id=case_id)
+        WriteFile.write_file_from_content(
+            content=data, file_format=FileFormat.YAML, file_path=pedigree_config_path
+        )
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
@@ -156,8 +160,9 @@ class MipAnalysisAPI(AnalysisAPI):
     def convert_panels(customer: str, default_panels: List[str]) -> List[str]:
         """Convert between default panels and all panels included in gene list."""
         # check if all default panels are part of master list
-        if customer in COLLABORATORS and all(panel in MASTER_LIST for panel in default_panels):
-            return MASTER_LIST
+        master_list: List[str] = GenePanelMasterList.get_panel_names()
+        if customer in COLLABORATORS and set(default_panels).issubset(master_list):
+            return master_list
 
         # the rest are handled the same way
         all_panels = set(default_panels)
@@ -169,17 +174,17 @@ class MipAnalysisAPI(AnalysisAPI):
                     all_panels.add(extra_panel)
 
         # add OMIM to every panel choice
-        all_panels.add("OMIM-AUTO")
+        all_panels.add(GenePanelMasterList.OMIM_AUTO)
 
         return list(all_panels)
 
-    def _get_latest_raw_file(self, family_id: str, tag: str) -> Any:
+    def _get_latest_raw_file(self, family_id: str, tags: List[str]) -> Any:
         """Get a python object file for a tag and a family ."""
 
         last_version = self.housekeeper_api.last_version(bundle=family_id)
 
         analysis_files = self.housekeeper_api.files(
-            bundle=family_id, version=last_version.id, tags=[tag]
+            bundle=family_id, version=last_version.id, tags=tags
         ).all()
 
         if analysis_files:
@@ -193,20 +198,24 @@ class MipAnalysisAPI(AnalysisAPI):
         return analysis_file_raw
 
     def _open_bundle_file(self, relative_file_path: str) -> Any:
-        """Open a bundle file and return it as an Python object."""
+        """Open a bundle file and return it as an Python object"""
 
-        full_file_path = Path(self.housekeeper_api.get_root_dir()).joinpath(relative_file_path)
-        return yaml.safe_load(open(full_file_path))
+        full_file_path: Path = Path(self.housekeeper_api.get_root_dir()).joinpath(
+            relative_file_path
+        )
+        return ReadFile.get_content_from_file(file_format=FileFormat.YAML, file_path=full_file_path)
 
     def get_latest_metadata(self, family_id: str) -> MipAnalysis:
         """Get the latest trending data for a family"""
 
-        mip_config_raw = self._get_latest_raw_file(family_id=family_id, tag=HkMipAnalysisTag.CONFIG)
+        mip_config_raw = self._get_latest_raw_file(
+            family_id=family_id, tags=HkMipAnalysisTag.CONFIG
+        )
         qc_metrics_raw = self._get_latest_raw_file(
-            family_id=family_id, tag=HkMipAnalysisTag.QC_METRICS
+            family_id=family_id, tags=HkMipAnalysisTag.QC_METRICS
         )
         sample_info_raw = self._get_latest_raw_file(
-            family_id=family_id, tag=HkMipAnalysisTag.SAMPLE_INFO
+            family_id=family_id, tags=HkMipAnalysisTag.SAMPLE_INFO
         )
         if mip_config_raw and qc_metrics_raw and sample_info_raw:
             try:
@@ -332,6 +341,8 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_pipeline_version(self, case_id: str) -> str:
         """Get MIP version from sample info file"""
         LOG.debug("Fetch pipeline version")
-        sample_info_raw = yaml.safe_load(self.get_sample_info_path(case_id).open())
+        sample_info_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=self.get_sample_info_path(case_id)
+        )
         sample_info: MipBaseSampleInfo = MipBaseSampleInfo(**sample_info_raw)
         return sample_info.mip_version

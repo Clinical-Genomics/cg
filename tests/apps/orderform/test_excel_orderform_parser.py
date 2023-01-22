@@ -35,7 +35,7 @@ def test_parse_mip_rna_orderform(mip_rna_orderform: str):
 
 
 def test_parse_balsamic_orderform(balsamic_orderform: str):
-    """Test to parse an balsamic orderform in excel format"""
+    """Test to parse a balsamic orderform in Excel format"""
     # GIVEN a orderform in excel format
     assert is_excel(Path(balsamic_orderform))
     # GIVEN a orderform API
@@ -46,6 +46,34 @@ def test_parse_balsamic_orderform(balsamic_orderform: str):
 
     # THEN assert that the project type is correct
     assert orderform_parser.project_type == OrderType.BALSAMIC
+
+
+def test_parse_balsamic_qc_orderform(balsamic_qc_orderform: str):
+    """Test to parse a balsamic QC orderform in excel format"""
+    # GIVEN a orderform in excel format
+    assert is_excel(Path(balsamic_qc_orderform))
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=balsamic_qc_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.BALSAMIC_QC
+
+
+def test_parse_balsamic_umi_orderform(balsamic_umi_orderform: str):
+    """Test to parse a balsamic orderform in excel format"""
+    # GIVEN a orderform in excel format
+    assert is_excel(Path(balsamic_umi_orderform))
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=balsamic_umi_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.BALSAMIC_UMI
 
 
 def test_parse_microbial_orderform(microbial_orderform: str):
@@ -104,8 +132,8 @@ def test_generate_mip_orderform_with_cases(mip_order_parser: ExcelOrderformParse
     case_obj = orderform.cases[0]
     assert len(case_obj.samples) == 3
     assert case_obj.name == "mipdnacase1"
-    assert case_obj.priority == "research"
-    assert set(case_obj.panels) == set(["AD-HSP", "Ataxi", "Actionable"])
+    assert case_obj.priority == "standard"
+    assert set(case_obj.panels) == set(["Actionable"])
 
 
 def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
@@ -198,3 +226,13 @@ def test_generate_parsed_rml_orderform(rml_order_parser: ExcelOrderformParser, c
     assert order.samples
     # THEN assert that no cases where found since this is an RML order
     assert not order.cases
+
+
+def test_get_data_delivery(microbial_order_parser):
+    """Tests that the data_delivery field is correctly parsed and translated to a value in the
+    data_delivery enum"""
+    # GIVEN an excel order form
+    # WHEN the function is called
+    data_delivery = microbial_order_parser.get_data_delivery()
+    # THEN no errors should be raised and a data_delivery string should be returned
+    assert data_delivery

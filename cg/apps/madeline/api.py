@@ -14,7 +14,7 @@ class MadelineAPI:
 
     def __init__(self, config: dict):
         self.madeline_binary = str(pathlib.Path(config["madeline_exe"]).absolute())
-        self.process = Process(self.madeline_binary)
+        self.process = Process(binary=self.madeline_binary)
 
     @staticmethod
     def make_ped(family_id: str, samples: List[dict]) -> Iterable[str]:

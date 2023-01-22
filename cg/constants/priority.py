@@ -1,14 +1,22 @@
-"""Priority specific constants"""
+"""Priority specific constants."""
 from enum import Enum, IntEnum
 
-from cgmodels.cg.constants import StrEnum
+from cg.utils.enums import StrEnum
 
 
 class SlurmQos(StrEnum):
+    MAINTENANCE: str = "maintenance"
     LOW: str = "low"
     NORMAL: str = "normal"
     HIGH: str = "high"
     EXPRESS: str = "express"
+
+
+class PriorityTerms(StrEnum):
+    EXPRESS: str = "express"
+    PRIORITY: str = "priority"
+    RESEARCH: str = "research"
+    STANDARD: str = "standard"
 
 
 SLURM_ACCOUNT_TO_QOS = {

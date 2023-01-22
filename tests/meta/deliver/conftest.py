@@ -6,8 +6,9 @@ import pytest
 from tests.store_helpers import StoreHelpers
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.delivery import INBOX_NAME
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store
+from cg.store import Store, models
 
 
 @pytest.fixture(scope="function", name="deliver_api")
@@ -64,25 +65,37 @@ def fixture_populated_deliver_api(
     return _deliver_api
 
 
+@pytest.fixture(name="dummy_file_name")
+def fixture_dummy_file_name() -> str:
+    """Returns a dummy file name."""
+    return "dummy_file_name"
+
+
 @pytest.fixture(name="all_samples_in_inbox")
-def fixture_all_samples_in_inbox(tmpdir_factory) -> Path:
-    """Fixture that returns a customer inbox path with all samples delivered"""
-    inbox = tmpdir_factory.mktemp("inbox")
-    Path(inbox, "sample1").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample2").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "case").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample1", "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, "sample2", "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, "case", "case_file.txt").touch(exist_ok=True)
+def fixture_all_samples_in_inbox(analysis_family, dummy_file_name: str, tmpdir_factory) -> Path:
+    """Fixture that returns a customer inbox path with all samples delivered."""
+    inbox = tmpdir_factory.mktemp(INBOX_NAME)
+    for index in range(3):
+        Path(inbox, analysis_family["samples"][index]["name"]).mkdir(exist_ok=True, parents=True)
+        Path(inbox, analysis_family["samples"][index]["name"], dummy_file_name).touch(exist_ok=True)
+    Path(inbox, analysis_family["name"]).mkdir(exist_ok=True, parents=True)
+    Path(inbox, analysis_family["name"], dummy_file_name).touch(exist_ok=True)
     return Path(inbox)
 
 
 @pytest.fixture(name="samples_missing_in_inbox")
-def fixture_samples_missing_in_inbox(tmpdir_factory) -> Path:
-    """Fixture that returns a customer inbox path with all samples delivered"""
-    inbox = tmpdir_factory.mktemp("inbox")
-    Path(inbox, "sample1").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample2").mkdir(exist_ok=True, parents=True)
-    Path(inbox, "sample1", "sample_file.txt").touch(exist_ok=True)
-    Path(inbox, "case_with_no_data").mkdir(exist_ok=True, parents=True)
-    return Path(inbox)
+def fixture_samples_missing_in_inbox(
+    all_samples_in_inbox: Path,
+    analysis_family: dict,
+    dummy_file_name: str,
+) -> Path:
+    """Fixture that returns a customer inbox path with all samples delivered."""
+    all_samples_in_inbox.joinpath(analysis_family["samples"][0]["name"], dummy_file_name).unlink()
+    return Path(all_samples_in_inbox)
+
+
+@pytest.fixture(name="deliver_api_destination_path")
+def fixture_deliver_api_destination_path(
+    customer_id: str, case_obj: models.Family, ticket: str
+) -> Path:
+    return Path(customer_id, INBOX_NAME, ticket, case_obj.name)

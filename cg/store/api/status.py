@@ -2,20 +2,21 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import Pipeline, CASE_ACTIONS
+from cg.constants import CASE_ACTIONS, Pipeline
+from cg.constants.constants import CaseActions
 from cg.store import models
+from cg.store.models import Family
+from cg.store.status_analysis_filters import apply_analysis_filter
+from cg.store.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
-from cg.utils.date import get_date
-
-VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
+from cg.store.status_sample_filters import apply_sample_filter
 
 
 class StatusHandler(BaseHandler):
-    """Handles status states for entities in the database"""
+    """Handles status states for entities in the database."""
 
     def samples_to_receive(self, external=False) -> Query:
         """Fetch incoming samples."""
@@ -65,55 +66,52 @@ class StatusHandler(BaseHandler):
             .order_by(models.Sample.received_at)
         )
 
+    def get_families_with_analyses(self) -> Query:
+        """Return all cases in the database with an analysis."""
+        return self.Family.query.outerjoin(models.Analysis).join(
+            models.Family.links,
+            models.FamilySample.sample,
+            models.ApplicationVersion,
+            models.Application,
+        )
+
+    def get_families_with_samples(self) -> Query:
+        """Return all cases in the database with samples."""
+        return self.Family.query.join(
+            models.Family.links, models.FamilySample.sample, models.Family.customer
+        )
+
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[models.Family]:
-        """Returns a list if cases ready to be analyzed or set to be reanalyzed"""
-        families_query = list(
-            self.Family.query.outerjoin(models.Analysis)
-            .join(
-                models.Family.links,
-                models.FamilySample.sample,
-                models.ApplicationVersion,
-                models.Application,
-            )
-            .filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
-            .filter(models.Family.data_analysis == str(pipeline))
-            .filter(
-                or_(
-                    models.Family.action == "analyze",
-                    and_(
-                        models.Application.is_external.isnot(True),
-                        models.Family.action.is_(None),
-                        models.Analysis.created_at.is_(None),
-                    ),
-                    and_(
-                        models.Family.action.is_(None),
-                        models.Analysis.created_at < models.Sample.sequenced_at,
-                    ),
-                )
-            )
-            .order_by(models.Family.ordered_at)
-        )
-        families_query = [
+        """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
+        cases: Query = self.get_families_with_analyses()
+        filter_functions: List[str] = [
+            "cases_has_sequence",
+            "cases_with_pipeline",
+            "filter_cases_for_analysis",
+        ]
+        for filter_function in filter_functions:
+            cases = apply_case_filter(function=filter_function, cases=cases, pipeline=pipeline)
+
+        families: List[Query] = list(cases.order_by(models.Family.ordered_at))
+        families = [
             case_obj
-            for case_obj in families_query
+            for case_obj in families
             if case_obj.latest_sequenced
             and (
-                case_obj.action == "analyze"
+                case_obj.action == CaseActions.ANALYZE
                 or not case_obj.latest_analyzed
                 or case_obj.latest_analyzed < case_obj.latest_sequenced
             )
         ]
 
         if threshold:
-            families_query = [
-                case_obj for case_obj in families_query if case_obj.all_samples_pass_qc
-            ]
-        return families_query[:limit]
+            families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
+        return families[:limit]
 
     def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
-        """Returns a list of cases that may be available to store in Housekeeper"""
+        """Returns a list of cases that may be available to store in Housekeeper."""
         families_query = (
             self.Family.query.outerjoin(models.Analysis)
             .join(models.Family.links, models.FamilySample.sample)
@@ -129,37 +127,6 @@ class StatusHandler(BaseHandler):
             .filter(models.Family.data_analysis == pipeline)
             .all()
         )
-
-    def get_cases_from_ticket(self, ticket_id: int) -> Query:
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Sample.ticket_number == ticket_id
-        )
-
-    def get_customer_id_from_ticket(self, ticket_id: int) -> str:
-        """Returns the customer related to given ticket"""
-        return (
-            self.Sample.query.filter(models.Sample.ticket_number == ticket_id)
-            .first()
-            .customer.internal_id
-        )
-
-    def get_samples_from_ticket(self, ticket_id: int) -> List[models.Sample]:
-        return self.query(models.Sample).filter(models.Sample.ticket_number == ticket_id).all()
-
-    def get_samples_from_flowcell(self, flowcell_id: str) -> List[models.Sample]:
-        flowcell = self.query(models.Flowcell).filter(models.Flowcell.name == flowcell_id).first()
-        if flowcell:
-            return flowcell.samples
-
-    def get_ticket_from_case(self, case_id: str):
-        """Returns the ticket from the most recent sample in a case"""
-        newest_sample: models.Sample = (
-            self.Sample.query.join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .order_by(models.Sample.created_at.desc())
-            .first()
-        )
-        return newest_sample.ticket_number
 
     def cases(
         self,
@@ -189,7 +156,7 @@ class StatusHandler(BaseHandler):
         exclude_delivery_reported: bool = False,
         exclude_invoiced: bool = False,
     ) -> List[models.Family]:
-        """Fetch cases with and w/o analyses"""
+        """Fetch cases with and w/o analyses."""
         case_q = self._get_filtered_case_query(
             case_action,
             customer_id,
@@ -238,12 +205,28 @@ class StatusHandler(BaseHandler):
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
     def set_case_action(self, action: Literal[CASE_ACTIONS], case_id: str) -> None:
-        """Sets the action of provided cases to None or the given action"""
+        """Sets the action of provided cases to None or the given action."""
         case_obj: models.Family = self.Family.query.filter(
             models.Family.internal_id == case_id
         ).first()
         case_obj.action = action
         self.commit()
+
+    def _get_case_query(self) -> Query:
+        """Return case query."""
+        return self.query(Family)
+
+    def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
+        """Return all cases that are ready to be compressed by SPRING."""
+        filter_functions: List[str] = [
+            "inactive_analysis_cases",
+            "new_cases",
+        ]
+        for filter_function in filter_functions:
+            cases: List[Family] = apply_case_filter(
+                function=filter_function, cases=self._get_case_query(), date=date_threshold
+            )
+        return cases
 
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:
@@ -583,13 +566,20 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[models.Analysis]:
-        """Fetch analyses that haven't been uploaded."""
-        records = self.Analysis.query.filter(
-            models.Analysis.completed_at.isnot(None), models.Analysis.uploaded_at.is_(None)
-        )
+        """Fetch analyses that have not been uploaded."""
+        records = self.Analysis.query.join(models.Analysis.family)
 
-        if pipeline:
-            records = records.filter(models.Analysis.pipeline == str(pipeline))
+        analysis_filter_functions: List[str] = [
+            "analyses_with_pipeline",
+            "completed_analyses",
+            "not_uploaded_analyses",
+            "valid_analyses_in_production",
+            "order_analyses_by_completed_at",
+        ]
+        for filter_function in analysis_filter_functions:
+            records: Query = apply_analysis_filter(
+                function=filter_function, analyses=records, pipeline=pipeline
+            )
 
         return records
 
@@ -617,7 +607,7 @@ class StatusHandler(BaseHandler):
         before: Optional[datetime] = datetime.now(),
         pipeline: Optional[Pipeline] = None,
     ) -> Query:
-        """Fetch all analyses older than certain date"""
+        """Fetch all analyses older than certain date."""
         records = self.Analysis.query.join(models.Analysis.family)
         if case_id:
             records = records.filter(models.Family.internal_id == case_id)
@@ -628,19 +618,30 @@ class StatusHandler(BaseHandler):
         records = records.filter(models.Analysis.started_at <= before)
         return records
 
-    def observations_to_upload(self):
-        """Fetch observations that haven't been uploaded."""
-
-        return self.Family.query.join(
-            models.Analysis, models.Family.links, models.FamilySample.sample
-        ).filter(models.Sample.loqusdb_id.is_(None))
-
-    def observations_uploaded(self) -> Query:
-        """Fetch observations that have been uploaded."""
-
-        return self.Family.query.join(models.Family.links, models.FamilySample.sample).filter(
-            models.Sample.loqusdb_id.isnot(None)
+    def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
+        """Fetch observations that have not been uploaded."""
+        records: Query = self.get_families_with_samples()
+        case_filter_functions: List[str] = [
+            "cases_with_loqusdb_supported_pipeline",
+            "cases_with_loqusdb_supported_sequencing_method",
+        ]
+        for filter_function in case_filter_functions:
+            records: Query = apply_case_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
+        records: Query = apply_sample_filter(
+            function="samples_not_uploaded_to_loqusdb", samples=records
         )
+        return records
+
+    def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
+        """Fetch observations that have been uploaded."""
+        records: Query = self.get_families_with_samples()
+        records: Query = apply_case_filter(
+            function="cases_with_loqusdb_supported_pipeline", cases=records, pipeline=pipeline
+        )
+        records: Query = apply_sample_filter("samples_uploaded_to_loqusdb", samples=records)
+        return records
 
     def analyses_to_deliver(self, pipeline: Pipeline = None) -> Query:
         """Fetch analyses that have been uploaded but not delivered."""
@@ -655,33 +656,57 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
-        """Fetch analyses that needs the delivery report to be regenerated."""
+        """Fetches analyses that need a delivery report to be regenerated."""
 
-        analyses_query = self.latest_analyses()
+        records = self.Analysis.query.join(models.Analysis.family)
 
-        analyses_query = (
-            analyses_query.filter(models.Analysis.uploaded_at)
-            .filter(VALID_DATA_IN_PRODUCTION < models.Analysis.started_at)
-            .join(models.Family, models.Family.links, models.FamilySample.sample)
-            .filter(
-                or_(
-                    models.Family.data_analysis.is_(None),
-                    models.Family.data_analysis == str(pipeline),
-                )
+        case_filter_functions: List[str] = [
+            "filter_report_cases_with_valid_data_delivery",
+        ]
+        for filter_function in case_filter_functions:
+            records: Query = apply_case_filter(
+                function=filter_function, cases=records, pipeline=pipeline
             )
-            .filter(
-                models.Sample.delivered_at.isnot(None),
-                or_(
-                    models.Analysis.delivery_report_created_at.is_(None),
-                    and_(
-                        models.Analysis.delivery_report_created_at.isnot(None),
-                        models.Analysis.delivery_report_created_at < models.Sample.delivered_at,
-                    ),
-                ),
+
+        analysis_filter_functions: List[str] = [
+            "filter_report_analyses_by_pipeline",
+            "analyses_without_delivery_report",
+            "valid_analyses_in_production",
+            "order_analyses_by_completed_at",
+        ]
+        for filter_function in analysis_filter_functions:
+            records: Query = apply_analysis_filter(
+                function=filter_function, analyses=records, pipeline=pipeline
             )
-            .order_by(models.Analysis.uploaded_at.desc())
-        )
-        return analyses_query
+
+        return records
+
+    def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
+        """Fetches analyses that need a delivery report to be uploaded."""
+
+        records = self.Analysis.query.join(models.Analysis.family)
+
+        case_filter_functions: List[str] = [
+            "cases_with_scout_data_delivery",
+        ]
+        for filter_function in case_filter_functions:
+            records: Query = apply_case_filter(
+                function=filter_function, cases=records, pipeline=pipeline
+            )
+
+        analysis_filter_functions: List[str] = [
+            "filter_report_analyses_by_pipeline",
+            "analyses_with_delivery_report",
+            "not_uploaded_analyses",
+            "valid_analyses_in_production",
+            "order_analyses_by_completed_at",
+        ]
+        for filter_function in analysis_filter_functions:
+            records: Query = apply_analysis_filter(
+                function=filter_function, analyses=records, pipeline=pipeline
+            )
+
+        return records
 
     def samples_to_deliver(self) -> Query:
         """Fetch samples that have been sequenced but not delivered."""
@@ -786,7 +811,7 @@ class StatusHandler(BaseHandler):
         analysis_uploaded_at,
         samples_delivered_at,
     ) -> timedelta:
-        """Calculated estimated turnaround-time"""
+        """Calculated estimated turnaround-time."""
         if samples_received_at and samples_delivered_at:
             return self._calculate_date_delta(None, samples_received_at, samples_delivered_at)
 

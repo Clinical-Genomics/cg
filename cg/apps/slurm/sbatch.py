@@ -1,4 +1,4 @@
-SBATCH_HEADER_TEMPLATE = """#! /bin/bash
+SBATCH_HEADER_TEMPLATE = """#! /bin/bash {use_login_shell}
 #SBATCH --job-name={job_name}
 #SBATCH --account={account}
 #SBATCH --ntasks={number_tasks}
@@ -24,6 +24,7 @@ log "Running on: $(hostname)"
 DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --partition=dragen
+#SBATCH --nodelist=cg-dragen
 #SBATCH --account={account}
 #SBATCH --cpus-per-task=24
 #SBATCH --nodes=1

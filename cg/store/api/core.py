@@ -5,7 +5,6 @@ import alchy
 from cg.store import models
 from cg.store.api.delete import DeleteDataHandler
 from cg.store.api.findbusinessdata import FindBusinessDataHandler
-from cg.store.api.reset import ResetHandler
 
 from .add import AddHandler
 from .findbasicdata import FindBasicDataHandler
@@ -19,10 +18,9 @@ class CoreHandler(
     DeleteDataHandler,
     FindBasicDataHandler,
     FindBusinessDataHandler,
-    ResetHandler,
     StatusHandler,
 ):
-    """Aggregating class for the store api handlers"""
+    """Aggregating class for the store api handlers."""
 
     pass
 

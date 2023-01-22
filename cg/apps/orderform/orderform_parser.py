@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set, Hashable, Iterable
 
 from pydantic import constr, BaseModel
 
@@ -81,25 +81,65 @@ class OrderformParser(BaseModel):
 
         return [pools[pool_name] for pool_name in pools]
 
-    def expand_case(self, case_id: str, case_samples: List[OrderSample]) -> OrderCase:
+    @staticmethod
+    def _get_single_value(
+        items_id: str, items: Iterable, attr: str, default_value: Hashable = None
+    ) -> Hashable:
+        """
+        Get single value from a bunch of items, will raise if value not same on all items
+        @param items_id:        id of items group (e.g. case-id)
+        @param items:           some items (e.g. samples)
+        @param attr:            one attribute of item containing a value (e.g. synopsis)
+        @param default_value:   default value to use if item has an empty value of attr
+        @return:                a value with the attribute of item in items
+        """
+        values: Set[Hashable] = set(getattr(item, attr, default_value) for item in items)
+        if len(values) > 1:
+            raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
+
+        return values.pop()
+
+    @staticmethod
+    def _get_single_set(items_id: str, items: Iterable, attr: str) -> Set[Hashable]:
+        """
+        Get single value (set) from a bunch of items, will raise if value not same on all items
+        @param items_id: id of items group (e.g. case-id)
+        @param items:    some items (e.g. samples)
+        @param attr:     one attribute of item containing a list (e.g. panels)
+        @return:         a set with the attribute of item in items
+        """
+        values: Set[Hashable] = set()
+        for item_idx, item in enumerate(items):
+            if item_idx == 0:
+                values = set(getattr(item, attr)) if getattr(item, attr) else set()
+            elif values != set(getattr(item, attr)) if getattr(item, attr) else set():
+                raise OrderFormError(f"multiple values [{values}] for '{attr}' for '{items_id}'")
+        return values
+
+    @staticmethod
+    def expand_case(case_id: str, case_samples: List[OrderSample]) -> OrderCase:
         """Fill-in information about case."""
 
-        priorities = {sample.priority for sample in case_samples if sample.priority}
-        if len(priorities) != 1:
-            raise OrderFormError(f"multiple values for 'Priority' for case: {case_id}")
-
-        gene_panels = set()
-        for sample in case_samples:
-            if not sample.panels:
-                continue
-            gene_panels.update(set(sample.panels))
+        priority: Hashable[str] = OrderformParser._get_single_value(
+            items_id=case_id, items=case_samples, attr="priority"
+        )
+        synopsis: Hashable[str] = OrderformParser._get_single_value(
+            items_id=case_id, items=case_samples, attr="synopsis"
+        )
+        cohorts: Set[Hashable[str]] = OrderformParser._get_single_set(
+            items_id=case_id, items=case_samples, attr="cohorts"
+        )
+        panels: Set[Hashable[str]] = OrderformParser._get_single_set(
+            items_id=case_id, items=case_samples, attr="panels"
+        )
 
         return OrderCase(
+            cohorts=list(cohorts),
             name=case_id,
             samples=case_samples,
-            require_qcok=any(sample.require_qcok for sample in case_samples),
-            priority=priorities.pop(),
-            panels=list(gene_panels),
+            priority=priority,
+            panels=list(panels),
+            synopsis=synopsis,
         )
 
     def generate_orderform(self) -> Orderform:

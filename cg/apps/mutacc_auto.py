@@ -3,9 +3,11 @@
 """
 
 import copy
-import json
 import logging
 import subprocess
+
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteStream
 
 LOG = logging.getLogger(__name__)
 
@@ -37,17 +39,15 @@ class MutaccAutoAPI:
 
         extract_call = copy.deepcopy(self.base_call)
 
-        def json_default_decoder(obj):
-            """decode to str if object is not serializable"""
-            return str(obj)
-
         extract_call.extend(
             [
                 "extract",
                 "--variants",
-                json.dumps(variants, default=json_default_decoder),
+                WriteStream.write_stream_from_content(
+                    content=variants, file_format=FileFormat.JSON
+                ),
                 "--case",
-                json.dumps(case, default=json_default_decoder),
+                WriteStream.write_stream_from_content(content=case, file_format=FileFormat.JSON),
                 "--padding",
                 str(self.mutacc_padding),
             ]

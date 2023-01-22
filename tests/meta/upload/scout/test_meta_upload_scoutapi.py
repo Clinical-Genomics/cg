@@ -2,13 +2,11 @@
 from pathlib import Path
 
 import pytest
-import yaml
-from cgmodels.cg.constants import Pipeline
 
+from cg.io.yaml import is_valid_yaml_file
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
-from cg.store import models, Store
 
 
 def test_unlinked_family_is_linked(mip_config_builder: MipConfigBuilder):
@@ -46,22 +44,6 @@ def test_family_is_linked(mip_config_builder: MipConfigBuilder):
     assert res is True
 
 
-def _file_exists_on_disk(file_path: Path):
-    """Returns if the file exists on disk"""
-    return file_path.exists()
-
-
-def _file_is_yaml(file_path):
-    """Returns if the file successfully was loaded as yaml"""
-    data = None
-    with open(file_path, "r") as stream:
-        try:
-            data = yaml.safe_load(stream)
-        except yaml.YAMLError:
-            return False
-    return data is not None
-
-
 def test_save_config_creates_file(
     upload_scout_api: UploadScoutAPI, mip_load_config: ScoutLoadConfig, tmp_file
 ):
@@ -73,11 +55,11 @@ def test_save_config_creates_file(
     upload_scout_api.save_config_file(upload_config=mip_load_config, file_path=tmp_file)
 
     # THEN the config should exist on disk
-    assert _file_exists_on_disk(tmp_file)
+    assert tmp_file.exists()
 
 
 def test_save_config_creates_yaml(
-    upload_scout_api: UploadScoutAPI, mip_load_config: ScoutLoadConfig, tmp_file
+    upload_scout_api: UploadScoutAPI, mip_load_config: ScoutLoadConfig, tmp_file: Path
 ):
     """Tests that the file created by save_config_file create a yaml"""
 
@@ -87,7 +69,7 @@ def test_save_config_creates_yaml(
     upload_scout_api.save_config_file(upload_config=mip_load_config, file_path=tmp_file)
 
     # THEN the should be of yaml type
-    assert _file_is_yaml(tmp_file)
+    assert is_valid_yaml_file(file_path=tmp_file)
 
 
 def test_add_scout_config_to_hk(upload_scout_api: UploadScoutAPI, tmp_file):

@@ -140,7 +140,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
 
         samplesheet_df = pd.read_csv(
-            samplesheet_housekeeper_path, index_col=None, header=0, skiprows=1
+            samplesheet_housekeeper_path, index_col=None, header=0, skiprows=4
         )
         LOG.info(samplesheet_df)
         sample_id_column_alias = (
@@ -207,7 +207,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 samplesheet_workdir_path=samplesheet_workdir_path,
             )
 
-    def run_fluffy(self, case_id: str, dry_run: bool) -> None:
+    def run_fluffy(
+        self, case_id: str, dry_run: bool, workflow_config: str, external_ref: bool = False
+    ) -> None:
         """
         Call fluffy with the configured command-line arguments
         """
@@ -216,9 +218,15 @@ class FluffyAnalysisAPI(AnalysisAPI):
             LOG.info("Old working directory found, cleaning!")
             if not dry_run:
                 shutil.rmtree(output_path, ignore_errors=True)
+        if not workflow_config:
+            workflow_config = self.fluffy_config.as_posix()
+        if not external_ref:
+            batch_ref_flag = "--batch-ref"
+        else:
+            batch_ref_flag = ""
         command_args = [
             "--config",
-            self.fluffy_config.as_posix(),
+            workflow_config,
             "--sample",
             self.get_samplesheet_path(case_id=case_id).as_posix(),
             "--project",
@@ -226,7 +234,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             "--out",
             self.get_output_path(case_id=case_id).as_posix(),
             "--analyse",
-            "--batch-ref",
+            batch_ref_flag,
             "--slurm_params",
             self.get_slurm_param_qos(case_id=case_id),
         ]

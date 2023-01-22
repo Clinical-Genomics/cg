@@ -85,7 +85,7 @@ def _register_admin_views():
     ext.admin.add_view(admin.BedView(models.Bed, ext.db.session))
     ext.admin.add_view(admin.BedVersionView(models.BedVersion, ext.db.session))
     ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
-    ext.admin.add_view(admin.CustomerGroupView(models.CustomerGroup, ext.db.session))
+    ext.admin.add_view(admin.CollaborationView(models.Collaboration, ext.db.session))
     ext.admin.add_view(admin.OrganismView(models.Organism, ext.db.session))
     ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(models.User, ext.db.session))

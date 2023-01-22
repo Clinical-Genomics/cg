@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-import yaml
-
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.models.mip.mip_config import MipBaseConfig
 
 
@@ -23,8 +23,9 @@ def test_instantiate_mip_config(mip_analysis_config_dna_raw: dict):
 def test_mip_config(mip_case_config_dna: Path):
     """Test to parse the content of a real MIP DNA config file"""
     # GIVEN the path to a file with config metadata content
-    with open(mip_case_config_dna, "r") as config_handle:
-        raw_config = yaml.full_load(config_handle)
+    raw_config: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=mip_case_config_dna
+    )
 
     # WHEN instantiating a MipBaseSampleInfo object
     config_object = MipBaseConfig(**raw_config)

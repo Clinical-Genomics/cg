@@ -4,6 +4,7 @@
   "comment": "",
   "samples": [
     {
+      "age_at_sampling": "17.18192",
       "application": "WGSPCFC030",
       "capture_kit": "other",
       "cohorts": [
@@ -13,7 +14,7 @@
       "container": "96 well plate",
       "container_name": "p1",
       "data_analysis": "balsamic",
-      "data_delivery": "fastq_qc-analysis-cram-scout",
+      "data_delivery": "fastq-analysis-scout",
       "elution_buffer": "Other (specify in 'Comments')",
       "family_name": "family1",
       "formalin_fixation_time": "1",

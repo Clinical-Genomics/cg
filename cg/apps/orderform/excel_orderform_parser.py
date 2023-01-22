@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
 import openpyxl
 from openpyxl.cell.cell import Cell
@@ -14,7 +14,7 @@ from cg.exc import OrderFormError
 from cg.models.orders.excel_sample import ExcelSample
 from cg.models.orders.order import OrderType
 
-from cg.constants.orderforms import Orderform
+from cg.constants.orderforms import Orderform, ORDERFORM_VERSIONS
 
 LOG = logging.getLogger(__name__)
 
@@ -24,16 +24,16 @@ class ExcelOrderformParser(OrderformParser):
     NO_VALUE: str = "no_value"
     SHEET_NAMES: List[str] = ["Orderform", "orderform", "order form"]
     VALID_ORDERFORMS: List[str] = [
-        f"{Orderform.MIP_DNA}:25",  # Orderform MIP, Balsamic, sequencing only, MIP RNA
-        f"{Orderform.MICROSALT}:11",  # Microbial WGS
-        f"{Orderform.RML}:14",  # Orderform Ready made libraries (RML)
-        f"{Orderform.METAGENOME}:9",  # Microbial meta genomes
-        f"{Orderform.SARS_COV_2}:5",  # Orderform SARS-CoV-2
+        f"{Orderform.MIP_DNA}:{ORDERFORM_VERSIONS[Orderform.MIP_DNA]}",  # Orderform MIP-DNA, Balsamic, sequencing only, MIP-RNA
+        f"{Orderform.MICROSALT}:{ORDERFORM_VERSIONS[Orderform.MICROSALT]}",  # Microbial WGS
+        f"{Orderform.RML}:{ORDERFORM_VERSIONS[Orderform.RML]}",  # Orderform Ready made libraries (RML)
+        f"{Orderform.METAGENOME}:{ORDERFORM_VERSIONS[Orderform.METAGENOME]}",  # Microbial meta genomes
+        f"{Orderform.SARS_COV_2}:{ORDERFORM_VERSIONS[Orderform.SARS_COV_2]}",  # Orderform SARS-CoV-2
     ]
     samples: List[ExcelSample] = []
 
     def check_orderform_version(self, document_title: str) -> None:
-        """Raise an error if the orderform is too new or too old for the order portal."""
+        """Raise an error if the orderform is too new or too old for the order portal"""
         LOG.info("Validating that %s is a correct orderform version", document_title)
         for valid_orderform in self.VALID_ORDERFORMS:
             if valid_orderform in document_title:
@@ -171,50 +171,26 @@ class ExcelOrderformParser(OrderformParser):
 
         return data_analyses.pop().lower().replace(" ", "-")
 
-    def is_from_orderform_without_data_delivery(self, data_delivery: str) -> bool:
-        return data_delivery == self.NO_VALUE
-
-    def default_delivery_type(self, project_type: OrderType) -> str:
-        """Returns the default delivery type for a project type"""
-
-        if project_type == OrderType.METAGENOME:
-            return DataDelivery.FASTQ
-        if project_type == OrderType.MICROSALT:
-            if self.parse_data_analysis() in ["custom", "fastq"]:
-                return DataDelivery.FASTQ_QC
-
-        raise OrderFormError(f"Could not determine value for Data Delivery")
-
-    def get_data_delivery(self, project_type: OrderType) -> str:
-        """Determine the order_data delivery type."""
+    def get_data_delivery(self) -> str:
+        """Determine the order_data delivery type"""
 
         data_delivery: str = self.parse_data_delivery()
 
-        if self.is_from_orderform_without_data_delivery(data_delivery):
-            return self.default_delivery_type(project_type)
-
-        if data_delivery == "fastq-qc":
-            return DataDelivery.FASTQ_QC
-        if data_delivery == "fastq-qc-+-analysis":
-            return DataDelivery.FASTQ_QC_ANALYSIS
-        if data_delivery == "fastq-qc-+-analysis-+-cram":
-            return DataDelivery.FASTQ_QC_ANALYSIS_CRAM
-        if data_delivery == "fastq-qc-+-analysis-+-cram-+-scout":
-            return DataDelivery.FASTQ_QC_ANALYSIS_CRAM_SCOUT
-
         try:
             return DataDelivery(data_delivery)
-        except ValueError:
-            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}")
+        except ValueError as error:
+            raise OrderFormError(f"Unsupported Data Delivery: {data_delivery}") from error
 
     def parse_data_delivery(self) -> str:
 
-        data_deliveries = {sample.data_delivery or self.NO_VALUE for sample in self.samples}
+        data_deliveries: Set[str] = {
+            sample.data_delivery or self.NO_VALUE for sample in self.samples
+        }
 
         if len(data_deliveries) > 1:
             raise OrderFormError(f"mixed 'Data Delivery' types: {', '.join(data_deliveries)}")
 
-        return data_deliveries.pop().lower().replace(" ", "-")
+        return self._transform_data_delivery(data_deliveries.pop())
 
     def get_customer_id(self) -> str:
         """Set the customer id"""
@@ -225,7 +201,7 @@ class ExcelOrderformParser(OrderformParser):
         return customers.pop()
 
     def parse_orderform(self, excel_path: str) -> None:
-        """Parse out information from an order form."""
+        """Parse out information from an order form"""
 
         LOG.info("Open excel workbook from file %s", excel_path)
         workbook: Workbook = openpyxl.load_workbook(
@@ -248,6 +224,11 @@ class ExcelOrderformParser(OrderformParser):
 
         self.samples: List[ExcelSample] = parse_obj_as(List[ExcelSample], raw_samples)
         self.project_type: str = self.get_project_type(document_title)
-        self.delivery_type = self.get_data_delivery(project_type=OrderType(self.project_type))
+        self.delivery_type = self.get_data_delivery()
         self.customer_id = self.get_customer_id()
         self.order_name = Path(excel_path).stem
+
+    @staticmethod
+    def _transform_data_delivery(data_delivery: str) -> str:
+        """Transforms the data-delivery parsed in the excel file, to the ones used in cg"""
+        return data_delivery.lower().replace(" + ", "-").replace(" ", "_")

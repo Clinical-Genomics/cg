@@ -9,6 +9,7 @@ from cg.models.report.validators import (
     validate_boolean,
     validate_rml_sample,
     validate_date,
+    validate_gender,
 )
 
 
@@ -22,8 +23,8 @@ class ApplicationModel(BaseModel):
         prep_category: library preparation category; source: StatusDB/application/prep_category
         description: analysis description; source: StatusDB/application/description
         limitations: application limitations; source: StatusDB/application/limitations
-        accredited: if the sample associated process is accredited or not; ; source: StatusDB/application/is_accredited
-
+        accredited: if the sample associated process is accredited or not; source: StatusDB/application/is_accredited
+        external: whether the app tag is external or not; source: StatusDB/application/is_external
     """
 
     tag: Optional[str]
@@ -32,6 +33,7 @@ class ApplicationModel(BaseModel):
     description: Optional[str]
     limitations: Optional[str]
     accredited: Optional[bool]
+    external: Optional[bool]
 
     _prep_category = validator("prep_category", always=True, allow_reuse=True)(validate_rml_sample)
     _values = validator(
@@ -71,29 +73,21 @@ class TimestampModel(BaseModel):
         received_at: arrival date; source: StatusDB/sample/received_at
         prepared_at: library preparation date; source: StatusDB/sample/prepared_at
         sequenced_at: sequencing date; source: StatusDB/sample/sequenced_at
-        delivered_at: delivery date; source: StatusDB/sample/delivered_at
-        processing_days: days between sample arrival and delivery; source: CG workflow
     """
 
     ordered_at: Union[None, datetime, str]
     received_at: Union[None, datetime, str]
     prepared_at: Union[None, datetime, str]
     sequenced_at: Union[None, datetime, str]
-    delivered_at: Union[None, datetime, str]
-    processing_days: Union[None, int, str]
 
     _values = validator(
         "ordered_at",
         "received_at",
         "prepared_at",
         "sequenced_at",
-        "delivered_at",
         always=True,
         allow_reuse=True,
     )(validate_date)
-    _processing_days = validator("processing_days", always=True, allow_reuse=True)(
-        validate_empty_field
-    )
 
 
 class SampleModel(BaseModel):
@@ -101,11 +95,11 @@ class SampleModel(BaseModel):
     Sample attributes model
 
     Attributes:
-        name: sample name; source: LIMS/sample/name
+        name: sample name; source: StatusDB/sample/name
         id: sample internal ID; source: StatusDB/sample/internal_id
         ticket: ticket number; source: StatusDB/sample/ticket_number
         status: sample status provided by the customer; source: StatusDB/family-sample/status
-        gender: sample gender provided by the customer; source: LIMS/sample/sex
+        gender: sample gender provided by the customer; source: StatusDB/sample/sex
         source: sample type/source; source: LIMS/sample/source
         tumour: whether the sample is a tumour or normal one; source: StatusDB/sample/is_tumour
         application: analysis application model
@@ -127,6 +121,7 @@ class SampleModel(BaseModel):
     timestamps: TimestampModel
 
     _tumour = validator("tumour", always=True, allow_reuse=True)(validate_boolean)
-    _values = validator(
-        "name", "id", "ticket", "status", "gender", "source", always=True, allow_reuse=True
-    )(validate_empty_field)
+    _gender = validator("gender", always=True, allow_reuse=True)(validate_gender)
+    _values = validator("name", "id", "ticket", "status", "source", always=True, allow_reuse=True)(
+        validate_empty_field
+    )

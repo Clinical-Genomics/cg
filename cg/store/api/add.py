@@ -4,11 +4,12 @@ from typing import List, Optional
 
 import petname
 
-from cg.constants import DataDelivery, Pipeline
+from cg.constants import DataDelivery, Pipeline, FlowCellStatus
 from cg.store import models
 from cg.store.api.base import BaseHandler
 
 from cg.constants import Priority
+from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -26,7 +27,6 @@ class AddHandler(BaseHandler):
         self,
         internal_id: str,
         name: str,
-        customer_group: models.CustomerGroup,
         invoice_address: str,
         invoice_reference: str,
         scout_access: bool = False,
@@ -39,16 +39,15 @@ class AddHandler(BaseHandler):
             internal_id=internal_id,
             name=name,
             scout_access=scout_access,
-            customer_group=customer_group,
             invoice_address=invoice_address,
             invoice_reference=invoice_reference,
             **kwargs,
         )
 
-    def add_customer_group(self, internal_id: str, name: str, **kwargs) -> models.CustomerGroup:
+    def add_collaboration(self, internal_id: str, name: str, **kwargs) -> models.Collaboration:
         """Build a new customer group record."""
 
-        return self.CustomerGroup(internal_id=internal_id, name=name, **kwargs)
+        return self.Collaboration(internal_id=internal_id, name=name, **kwargs)
 
     def add_user(
         self, customer: models.Customer, email: str, name: str, is_admin: bool = False
@@ -71,7 +70,7 @@ class AddHandler(BaseHandler):
     ) -> models.Application:
         """Build a new application  record."""
 
-        new_record = self.Application(
+        return self.Application(
             tag=tag,
             prep_category=category,
             description=description,
@@ -80,7 +79,6 @@ class AddHandler(BaseHandler):
             percent_reads_guaranteed=percent_reads_guaranteed,
             **kwargs,
         )
-        return new_record
 
     def add_version(
         self,
@@ -105,9 +103,7 @@ class AddHandler(BaseHandler):
 
     def add_bed(self, name: str, **kwargs) -> models.Bed:
         """Build a new bed record."""
-
-        new_record = self.Bed(name=name, **kwargs)
-        return new_record
+        return self.Bed(name=name, **kwargs)
 
     def add_bed_version(
         self, bed: models.Bed, version: int, filename: str, **kwargs
@@ -130,7 +126,7 @@ class AddHandler(BaseHandler):
         ordered: dt.datetime = None,
         priority: Priority = None,
         received: dt.datetime = None,
-        ticket: int = None,
+        original_ticket: str = None,
         tumour: bool = False,
         **kwargs,
     ) -> models.Sample:
@@ -147,10 +143,10 @@ class AddHandler(BaseHandler):
             name=name,
             order=order,
             ordered_at=ordered or dt.datetime.now(),
+            original_ticket=original_ticket,
             priority=priority,
             received_at=received,
             sex=sex,
-            ticket_number=ticket,
             **kwargs,
         )
 
@@ -159,6 +155,7 @@ class AddHandler(BaseHandler):
         data_analysis: Pipeline,
         data_delivery: DataDelivery,
         name: str,
+        ticket: str,
         panels: Optional[List[str]] = None,
         cohorts: Optional[List[str]] = None,
         priority: Optional[Priority] = Priority.standard,
@@ -174,7 +171,7 @@ class AddHandler(BaseHandler):
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
 
-        new_case = self.Family(
+        return self.Family(
             cohorts=cohorts,
             data_analysis=str(data_analysis),
             data_delivery=str(data_delivery),
@@ -183,8 +180,8 @@ class AddHandler(BaseHandler):
             panels=panels,
             priority=priority,
             synopsis=synopsis,
+            tickets=ticket,
         )
-        return new_case
 
     def relate_sample(
         self,
@@ -203,15 +200,22 @@ class AddHandler(BaseHandler):
         new_record.father = father
         return new_record
 
-    def add_flowcell(
-        self, name: str, sequencer: str, sequencer_type: str, date: dt.datetime
-    ) -> models.Flowcell:
+    def add_flow_cell(
+        self,
+        flow_cell_id: str,
+        sequencer_name: str,
+        sequencer_type: str,
+        date: dt.datetime,
+        flow_cell_status: Optional[str] = FlowCellStatus.ONDISK,
+    ) -> Flowcell:
         """Build a new Flowcell record."""
-
-        new_record = self.Flowcell(
-            name=name, sequencer_name=sequencer, sequencer_type=sequencer_type, sequenced_at=date
+        return self.Flowcell(
+            name=flow_cell_id,
+            sequencer_name=sequencer_name,
+            sequencer_type=sequencer_type,
+            sequenced_at=date,
+            status=flow_cell_status,
         )
-        return new_record
 
     def add_analysis(
         self,
@@ -224,8 +228,7 @@ class AddHandler(BaseHandler):
         **kwargs,
     ) -> models.Analysis:
         """Build a new Analysis record."""
-
-        new_record = self.Analysis(
+        return self.Analysis(
             pipeline=str(pipeline),
             pipeline_version=version,
             completed_at=completed_at,
@@ -234,7 +237,6 @@ class AddHandler(BaseHandler):
             started_at=started_at,
             **kwargs,
         )
-        return new_record
 
     def add_panel(
         self,
@@ -260,7 +262,7 @@ class AddHandler(BaseHandler):
         order: str,
         ordered: dt.datetime,
         application_version: models.ApplicationVersion,
-        ticket: int = None,
+        ticket: str = None,
         comment: str = None,
         received: dt.datetime = None,
         capture_kit: str = None,
@@ -271,7 +273,7 @@ class AddHandler(BaseHandler):
             name=name,
             ordered_at=ordered or dt.datetime.now(),
             order=order,
-            ticket_number=ticket,
+            ticket=ticket,
             received_at=received,
             comment=comment,
             capture_kit=capture_kit,
@@ -330,12 +332,10 @@ class AddHandler(BaseHandler):
         **kwargs,
     ) -> models.Organism:
         """Build a new Organism record."""
-
-        new_organism = self.Organism(
+        return self.Organism(
             internal_id=internal_id,
             name=name,
             reference_genome=reference_genome,
             verified=verified,
             **kwargs,
         )
-        return new_organism

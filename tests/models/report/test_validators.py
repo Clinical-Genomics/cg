@@ -1,7 +1,9 @@
 """Tests delivery report models validators"""
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants import NA_FIELD, YES_FIELD
+from cg.constants import NA_FIELD, YES_FIELD, REPORT_GENDER
+from cg.constants.subject import Gender
+from cg.models.orders.constants import OrderType
 from cg.models.report.validators import (
     validate_empty_field,
     validate_boolean,
@@ -9,6 +11,7 @@ from cg.models.report.validators import (
     validate_list,
     validate_rml_sample,
     validate_supported_pipeline,
+    validate_gender,
 )
 
 
@@ -60,6 +63,22 @@ def test_validate_float():
     assert validated_str_value == "12.35"
 
 
+def test_validate_float_zero_input():
+    """Tests the validation of a float value"""
+
+    # GIVEN a valid float input (float and string format)
+    float_value = 0.0
+    str_value = "0.0"
+
+    # WHEN performing the validation
+    validated_float_value = validate_float(float_value)
+    validated_str_value = validate_float(str_value)
+
+    # THEN check if the input values were formatted correctly
+    assert validated_float_value == "0.0"
+    assert validated_str_value == "0.0"
+
+
 def test_validate_list():
     """Tests if a list is transformed into a string of comma separated values"""
 
@@ -77,7 +96,7 @@ def test_validate_rml_sample(caplog):
     """Performs validation on a preparation category"""
 
     # GIVEN an invalid prep category
-    prep_category = "rml"
+    prep_category = OrderType.RML
 
     # WHEN performing the validation
     try:
@@ -86,6 +105,22 @@ def test_validate_rml_sample(caplog):
     # THEN check if an exception was raised
     except ValueError:
         assert "The delivery report generation does not support RML samples" in caplog.text
+
+
+def test_validate_gender(caplog):
+    """Tests report gender parsing"""
+
+    # GIVEN an invalid gender category
+    gender = Gender.FEMALE
+    invalid_gender = "not_a_gender"
+
+    # WHEN performing the validation
+    validated_gender = validate_gender(gender)
+    validated_invalid_gender = validate_gender(invalid_gender)
+
+    # THEN check if the gender has been correctly formatted
+    assert validated_gender == REPORT_GENDER.get("female")
+    assert validated_invalid_gender == NA_FIELD
 
 
 def test_validate_supported_pipeline_match_error(caplog):

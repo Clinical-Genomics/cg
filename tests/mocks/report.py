@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 
 from cg.apps.coverage import ChanjoAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -26,7 +26,45 @@ class MockMipDNAAnalysisAPI(MipDNAAnalysisAPI):
         return "/root/path"
 
 
-class MockMipDNAReportAPI(MipDNAReportAPI):
+class MockHousekeeperMipDNAReportAPI(MipDNAReportAPI):
+    """Mock ReportAPI for CLI tests overwriting HK methods"""
+
+    def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
+        super().__init__(config, analysis_api)
+
+    def add_delivery_report_to_hk(
+        self, delivery_report_file: Path, case_id: str, analysis_date: datetime
+    ):
+        """docstring for add_delivery_report_to_hk"""
+
+        LOG.info(
+            "add_delivery_report_to_hk called with the following args: delivery_report_file=%s, case=%s, "
+            "analysis_date=%s",
+            delivery_report_file,
+            case_id,
+            analysis_date,
+        )
+
+    def get_delivery_report_from_hk(self, case_id: str) -> str:
+        """docstring for get_delivery_report_from_hk"""
+
+        LOG.info(f"get_delivery_report_from_hk called with the following args: case={case_id}")
+
+        return "/path/to/delivery_report.html"
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """docstring for get_scout_uploaded_file_from_hk"""
+
+        LOG.info(
+            "add_delivery_report_to_hk called with the following args: case=%s, scout_tag=%s",
+            case_id,
+            scout_tag,
+        )
+
+        return f"path/to/{scout_tag}"
+
+
+class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
     """Mock ReportAPI for CLI tests"""
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
@@ -57,19 +95,6 @@ class MockMipDNAReportAPI(MipDNAReportAPI):
         )
 
         return file_path
-
-    def add_delivery_report_to_hk(
-        self, delivery_report_file: Path, case_id: str, analysis_date: datetime
-    ):
-        """docstring for add_delivery_report_to_hk"""
-
-        LOG.info(
-            "add_delivery_report_to_hk called with the following args: delivery_report_file=%s, case=%s, "
-            "analysis_date=%s",
-            delivery_report_file,
-            case_id,
-            analysis_date,
-        )
 
 
 class MockDB(Store):

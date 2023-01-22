@@ -3,9 +3,13 @@
 from pathlib import Path
 
 import pytest
-from tests.mocks.process_mock import ProcessMock
 
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants.constants import FileFormat
+from cg.constants.pedigree import Pedigree
+from cg.constants.subject import Gender, PhenotypeStatus, RelationshipStatus
+from cg.io.controller import ReadFile
+from tests.mocks.process_mock import ProcessMock
 
 
 class MockScoutApi(ScoutAPI):
@@ -19,56 +23,68 @@ class MockScoutApi(ScoutAPI):
 def fixture_sample_dict() -> dict:
     sample_dict = {
         "analysis_type": "wgs",
-        "bam_path": "/path/to/sample.bam",
-        "mt_bam": "/path/to/reduced_mt.bam",
+        "bam_path": Path("path", "to", "sample.bam").as_posix(),
+        "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
+        "reviewer": {
+            "alignment": Path("path", "to", "expansionhunter.bam").as_posix(),
+            "alignment_index": Path("path", "to", "expansionhunter.bam.bai").as_posix(),
+            "vcf": Path("path", "to", "expansionhunter.vcf").as_posix(),
+            "catalog": Path("path", "to", "variant_catalog.json").as_posix(),
+        },
         "capture_kit": None,
-        "father": "0",
-        "mother": "0",
+        Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
+        Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
         "sample_id": "sample_id",
         "sample_name": "sample_name",
-        "sex": "male",
+        Pedigree.SEX: Gender.MALE,
         "tissue_type": "unknown",
-        "phenotype": "affected",
+        Pedigree.PHENOTYPE: PhenotypeStatus.AFFECTED,
     }
     return dict(sample_dict)
+
+
+@pytest.fixture(name="omim_disease_nr")
+def fixture_omim_disease_nr() -> int:
+    return 607208
 
 
 @pytest.fixture(name="scout_dir")
 def fixture_scout_dir(apps_dir: Path) -> Path:
     """Return the path to the scout fixtures dir"""
-    return apps_dir / "scout"
+    return Path(apps_dir, "scout")
 
 
 @pytest.fixture(name="causatives_file")
 def fixture_causatives_file(scout_dir: Path) -> Path:
     """Return the path to a file with causatives output"""
-    return scout_dir / "export_causatives.json"
+    return Path(scout_dir, "export_causatives.json")
 
 
 @pytest.fixture(name="cases_file")
 def fixture_cases_file(scout_dir: Path) -> Path:
     """Return the path to a file with export cases output"""
-    return scout_dir / "case_export.json"
+    return Path(scout_dir, "case_export.json")
 
 
 @pytest.fixture(name="none_case_file")
 def fixture_none_case_file(scout_dir: Path) -> Path:
     """Return the path to a file with export cases output where mandatory fields are None"""
-    return scout_dir / "none_case_export.json"
+    return Path(scout_dir, "none_case_export.json")
 
 
 @pytest.fixture(name="other_sex_case_file")
 def fixture_other_sex_case_file(scout_dir: Path) -> Path:
     """Return the path to a file with export cases output where sex is 'other0'"""
-    return scout_dir / "other_sex_case.json"
+    return Path(scout_dir, "other_sex_case.json")
 
 
-@pytest.fixture(name="none_case_output")
-def fixture_none_case_output(none_case_file: Path) -> str:
-    """Return the content of a export causatives run with scout"""
-    with open(none_case_file, "r") as infile:
-        content = infile.read()
-    return content
+@pytest.fixture(name="none_case_raw")
+def fixture_none_case_raw(none_case_file: Path) -> dict:
+    """Return a single case of a export causatives run with scout"""
+    cases: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=none_case_file
+    )
+    return cases[0]
 
 
 @pytest.fixture(name="other_sex_case_output")

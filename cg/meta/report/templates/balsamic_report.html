@@ -107,7 +107,6 @@
                 <th>Sekvensering</th>
                 <th>Sekvenserad</th>
                 <th>Bioinformatisk analys</th>
-                <th>Svarsdatum</th>
               </tr>
             </thead>
             <tbody>
@@ -120,7 +119,7 @@
                   {% if "panelsekvensering" in case.data_analysis.type %}
                     <td>
                      {{ sample.metadata.bait_set }}
-                     {% if sample.metadata.bait_set_version != 'N/A' %}
+                     {% if sample.metadata.bait_set != 'N/A' and sample.metadata.bait_set_version != 'N/A' %}
                        (version: {{ sample.metadata.bait_set_version }})
                      {% endif %}
                    </td>
@@ -128,12 +127,6 @@
                   <td>{{ sample.methods.sequencing }}</td>
                   <td>{{ sample.timestamps.sequenced_at }}</td>
                   <td>{{ case.data_analysis.pipeline }}</td>
-                  <td>
-                    {{ sample.timestamps.delivered_at }}
-                    {% if sample.timestamps.processing_days != 'N/A' %}
-                      ({{ sample.timestamps.processing_days }} dagar)
-                    {% endif %}
-                  </td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -160,8 +153,8 @@
             </tbody>
             <caption>
               <strong>Tillämpade filter för variantanrop</strong>: {{ case.data_analysis.variant_callers }}<br>
-              <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html#balsamic-variant-calling-algorithms">
-                https://balsamic.readthedocs.io/en/latest/balsamic_filters.html#balsamic-variant-calling-algorithms
+              <a href="https://balsamic.readthedocs.io/en/latest/balsamic_filters.html">
+                https://balsamic.readthedocs.io/en/latest/balsamic_filters.html
               </a>
             </caption>
           </table>
@@ -230,11 +223,27 @@
           <div class="card-body">* Information given av kund</div>
         </div>
 
-        {% if customer.scout_access %}
-          <p class="card-block">
-            Varianter finns uppladdade i Scout:
-            <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a>
-          </p>
+        {% if customer.scout_access and "scout" in case.data_analysis.data_delivery %}
+          <div class="card-block">
+            <h4 class="card-title">Scout</h4>
+            <div class="card-text">
+              <p>Varianter finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
+              <ul>
+                {% if case.data_analysis.scout_files.snv_vcf != 'N/A' %}
+                  <li><strong>Clinical somatic SNV and INDELs fil</strong> : <em>{{ case.data_analysis.scout_files.snv_vcf.replace(case.id, case.name) }}</em></li>
+                {% endif %}
+                {% if case.data_analysis.scout_files.snv_research_vcf != 'N/A' %}
+                  <li><strong>Research somatic SNV and INDELs fil</strong>: <em>{{ case.data_analysis.scout_files.snv_research_vcf.replace(case.id, case.name) }}</em></li>
+                {% endif %}
+                {% if case.data_analysis.scout_files.sv_vcf != 'N/A' %}
+                  <li><strong>Clinical somatic structural variants fil</strong>: <em>{{ case.data_analysis.scout_files.sv_vcf.replace(case.id, case.name) }}</em></li>
+                {% endif %}
+                {% if case.data_analysis.scout_files.sv_research_vcf != 'N/A' %}
+                  <li><strong>Research somatic structural variants fil</strong>: <em>{{ case.data_analysis.scout_files.sv_research_vcf.replace(case.id, case.name) }}</em></li>
+                {% endif %}
+                </ul>
+            </div>
+          </div>
         {% endif %}
 
         {% for application in case.applications %}

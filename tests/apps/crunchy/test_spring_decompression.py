@@ -1,13 +1,14 @@
 """Tests for SPRING decompression methods"""
-import json
 import logging
 
 import pytest
 from cg.apps.crunchy import CrunchyAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile, WriteFile
 
 
 def test_is_spring_decompression_done_all_files_exist(
-    crunchy_config_dict, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is done when FASTQ files are unarchived
 
@@ -16,7 +17,7 @@ def test_is_spring_decompression_done_all_files_exist(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the FASTQ paths exists
     compression_object.fastq_first.touch()
     compression_object.fastq_second.touch()
@@ -26,13 +27,16 @@ def test_is_spring_decompression_done_all_files_exist(
     # GIVEN a existing flag file
     # GIVEN that the files have an updated tag
     old_date = "2019-01-01"
-    with open(spring_metadata_file, "r") as infile:
-        content = json.load(infile)
+    content = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
+
     # GIVEN that the files where updated more than three weeks ago
     for file_info in content:
         file_info["updated"] = old_date
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(content))
+    WriteFile.write_file_from_content(
+        content=content, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN checking if SPRING decompression is done
     result = crunchy_api.is_spring_decompression_done(compression_object)
@@ -44,7 +48,7 @@ def test_is_spring_decompression_done_all_files_exist(
 
 
 def test_is_spring_decompression_done_missing_fastq_files(
-    crunchy_config_dict, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is done when FASTQ files are missing
 
@@ -52,7 +56,7 @@ def test_is_spring_decompression_done_missing_fastq_files(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the FASTQ paths does not exist
     compression_object.fastq_first.unlink()
     compression_object.fastq_second.unlink()
@@ -72,7 +76,7 @@ def test_is_spring_decompression_done_missing_fastq_files(
 
 
 def test_is_spring_decompression_done_all_files_exist_not_updated(
-    crunchy_config_dict, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is done when FASTQ files are not unarchived
 
@@ -80,7 +84,7 @@ def test_is_spring_decompression_done_all_files_exist_not_updated(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the FASTQ paths exists
     compression_object.fastq_first.touch()
     compression_object.fastq_second.touch()
@@ -89,8 +93,10 @@ def test_is_spring_decompression_done_all_files_exist_not_updated(
 
     # GIVEN a existing flag file
     # GIVEN that the files are missing the updated tag
-    with open(spring_metadata_file, "r") as infile:
-        content = json.load(infile)
+    content = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
+
     # GIVEN that the files where updated more than three weeks ago
     for file_info in content:
         assert "updated" not in file_info
@@ -105,7 +111,7 @@ def test_is_spring_decompression_done_all_files_exist_not_updated(
 
 
 def test_is_spring_decompression_done_missing_metadata_file(
-    crunchy_config_dict, compression_object, caplog
+    crunchy_config: dict, compression_object, caplog
 ):
     """Test if SPRING decompression is done when SPRING metadata file is missing
 
@@ -113,7 +119,7 @@ def test_is_spring_decompression_done_missing_metadata_file(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the SPRING metadata file is missing
     assert not compression_object.spring_metadata_path.exists()
 
@@ -127,7 +133,7 @@ def test_is_spring_decompression_done_missing_metadata_file(
 
 
 def test_is_spring_decompression_done_empty_metadata_file(
-    crunchy_config_dict, compression_object, caplog
+    crunchy_config: dict, compression_object, caplog
 ):
     """Test if SPRING decompression is done when SPRING metadata file has no content
 
@@ -135,7 +141,7 @@ def test_is_spring_decompression_done_empty_metadata_file(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the SPRING metadata file has no content
     compression_object.spring_metadata_path.touch()
 
@@ -148,14 +154,14 @@ def test_is_spring_decompression_done_empty_metadata_file(
 
 
 def test_is_spring_decompression_possible(
-    crunchy_config_dict, compression_object, spring_metadata_file
+    crunchy_config: dict, compression_object, spring_metadata_file
 ):
     """Test if SPRING decompression is possible when decompression is already done
 
     The function should return False since decompression is already done
     """
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the FASTQ paths exists
     compression_object.fastq_first.touch()
     compression_object.fastq_second.touch()
@@ -165,13 +171,16 @@ def test_is_spring_decompression_possible(
     # GIVEN a existing flag file
     # GIVEN that the files have an updated tag
     old_date = "2019-01-01"
-    with open(spring_metadata_file, "r") as infile:
-        content = json.load(infile)
+    content = ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
+
     # GIVEN that the files where updated more than three weeks ago
     for file_info in content:
         file_info["updated"] = old_date
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(content))
+    WriteFile.write_file_from_content(
+        content=content, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN checking if SPRING decompression is done
     result = crunchy_api.is_spring_decompression_possible(compression_object)
@@ -181,7 +190,7 @@ def test_is_spring_decompression_possible(
 
 
 def test_is_spring_decompression_possible_decompression_pending(
-    crunchy_config_dict, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is possible when decompression is pending
 
@@ -189,7 +198,7 @@ def test_is_spring_decompression_possible_decompression_pending(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing pending file
     compression_object.pending_path.touch()
 
@@ -203,7 +212,7 @@ def test_is_spring_decompression_possible_decompression_pending(
 
 
 def test_is_spring_decompression_possible(
-    crunchy_config_dict, compression_object, spring_metadata_file, caplog
+    crunchy_config: dict, compression_object, spring_metadata_file, caplog
 ):
     """Test if SPRING decompression is possible
 
@@ -211,7 +220,7 @@ def test_is_spring_decompression_possible(
     """
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN a existing SPRING file
     compression_object.spring_path.touch()
     # GIVEN that the FASTQ files does not exist

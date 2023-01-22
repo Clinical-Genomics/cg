@@ -1,6 +1,9 @@
 from pathlib import Path
 import pytest
-import yaml
+
+
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 
 
 @pytest.fixture(name="balsamic_config_path")
@@ -21,9 +24,9 @@ def fixture_balsamic_metrics_path(fixtures_dir) -> Path:
 def fixture_balsamic_config(balsamic_config_path) -> dict:
     """Return BALSAMIC config file as a dictionary"""
 
-    with open(Path(balsamic_config_path), "r") as stream:
-        config = yaml.safe_load(stream)
-
+    config: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=balsamic_config_path
+    )
     return config
 
 
@@ -31,7 +34,7 @@ def fixture_balsamic_config(balsamic_config_path) -> dict:
 def fixture_balsamic_metrics(balsamic_metrics_path) -> dict:
     """Return BALSAMIC metrics file as a dictionary"""
 
-    with open(Path(balsamic_metrics_path), "r") as stream:
-        metrics = yaml.safe_load(stream)
-
+    metrics: dict = ReadFile.get_content_from_file(
+        file_format=FileFormat.YAML, file_path=balsamic_metrics_path
+    )
     return metrics

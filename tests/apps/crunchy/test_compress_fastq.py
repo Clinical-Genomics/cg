@@ -1,5 +1,4 @@
 """Test methods for compressing FASTQ"""
-import json
 import logging
 from pathlib import Path
 from typing import Dict, List
@@ -13,6 +12,8 @@ from cg.apps.crunchy.files import (
     get_spring_archive_files,
 )
 from cg.apps.slurm.slurm_api import SlurmAPI
+from cg.constants.constants import FileFormat
+from cg.io.controller import WriteFile
 from cg.models import CompressionData
 from cg.utils import Process
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
@@ -57,8 +58,9 @@ def test_get_spring_metadata_malformed_info(
     """Test the method that fetches the SPRING metadata from a file when file is malformed"""
     # GIVEN a SPRING metadata file with missing information
     spring_metadata[0].pop("path")
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata))
+    WriteFile.write_file_from_content(
+        content=spring_metadata, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN fetching the content of the file
     with pytest.raises(ValidationError):
@@ -72,8 +74,9 @@ def test_get_spring_metadata_wrong_number_files(
     """Test the method that fetches the SPRING metadata from a file when a file is missing"""
     # GIVEN a SPRING metadata file with missing file
     spring_metadata = spring_metadata[1:]
-    with open(spring_metadata_file, "w") as outfile:
-        outfile.write(json.dumps(spring_metadata))
+    WriteFile.write_file_from_content(
+        content=spring_metadata, file_format=FileFormat.JSON, file_path=spring_metadata_file
+    )
 
     # WHEN fetching the content of the file
     with pytest.raises(ValidationError):
@@ -82,7 +85,7 @@ def test_get_spring_metadata_wrong_number_files(
 
 
 def test_fastq_to_spring_sbatch(
-    crunchy_config_dict: dict,
+    crunchy_config: dict,
     compression_object: CompressionData,
     sbatch_process: Process,
     sbatch_job_number: int,
@@ -92,12 +95,13 @@ def test_fastq_to_spring_sbatch(
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
 
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     crunchy_api.slurm_api.process = sbatch_process
     spring_path: Path = compression_object.spring_path
     log_path: Path = get_log_dir(spring_path)
     run_name: str = compression_object.run_name
     sbatch_path: Path = get_fastq_to_spring_sbatch_path(log_dir=log_path, run_name=run_name)
+
     # GIVEN that the sbatch file does not exist
     assert not sbatch_path.is_file()
     # GIVEN that the pending path does not exist
@@ -117,7 +121,7 @@ def test_fastq_to_spring_sbatch(
 def test_spring_to_fastq(
     compression_object: CompressionData,
     spring_metadata_file: Path,
-    crunchy_config_dict: dict,
+    crunchy_config: dict,
     mocker,
 ):
     """Test SPRING to FASTQ method
@@ -128,7 +132,7 @@ def test_spring_to_fastq(
     # GIVEN a crunchy-api given an existing SPRING metadata file
     assert spring_metadata_file.exists()
     mocker_submit_sbatch = mocker.patch.object(SlurmAPI, "submit_sbatch")
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the pending path does not exist
     assert compression_object.pending_exists() is False
 
