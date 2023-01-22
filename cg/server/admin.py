@@ -10,7 +10,7 @@ from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import DataDelivery, CaseActions
+from cg.constants.constants import DataDelivery, CaseAction
 from cg.server.ext import db
 from cg.store.models import Family
 from cg.utils.flask.enum import SelectEnumField
@@ -251,7 +251,7 @@ class FamilyView(BaseView):
         "Are you sure you want to set the action for selected families to hold?",
     )
     def action_set_hold(self, ids: List[str]):
-        self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
+        self.set_action_for_batch(action=CaseAction.HOLD, entry_ids=ids)
 
     @action(
         "set_empty",
@@ -261,7 +261,7 @@ class FamilyView(BaseView):
     def action_set_empty(self, ids: List[str]):
         self.set_action_for_batch(action=None, entry_ids=ids)
 
-    def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
+    def set_action_for_batch(self, action: Union[CaseAction, None], entry_ids: List[str]):
         try:
             query: Query = db.Family.query.filter(db.Family.id.in_(entry_ids))
             family: Family

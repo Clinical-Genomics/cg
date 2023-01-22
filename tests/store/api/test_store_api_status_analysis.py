@@ -5,7 +5,7 @@ from alchy import Query
 from datetime import datetime
 
 from cg.constants import Pipeline
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseAction
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
@@ -25,7 +25,7 @@ def test_get_families_with_extended_models(
     )
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.family.action: str = CaseAction.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
@@ -142,7 +142,7 @@ def test_external_sample_to_re_analyse(
     assert test_analysis.completed_at
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.family.action: str = CaseAction.ANALYZE
 
     # GIVEN a database with a case with one not sequenced external sample
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
@@ -189,7 +189,7 @@ def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_
     )
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.family.action: str = CaseAction.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
@@ -217,7 +217,7 @@ def test_all_samples_and_analysis_completed(
     test_analysis: models.Analysis = helpers.add_analysis(base_store, completed_at=timestamp_now)
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.family.action: str = CaseAction.ANALYZE
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)

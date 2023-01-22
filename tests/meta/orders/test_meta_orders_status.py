@@ -4,7 +4,7 @@ from copy import deepcopy
 import pytest
 
 from cg.constants import DataDelivery, Pipeline
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseAction
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
@@ -741,4 +741,4 @@ def test_store_existing_case(
 
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
     assert rerun_cases[0].tickets == f"{ticket},{ticket}"
-    assert rerun_cases[0].action == CaseActions.ANALYZE
+    assert rerun_cases[0].action == CaseAction.ANALYZE

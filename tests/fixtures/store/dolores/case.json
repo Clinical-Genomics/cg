@@ -17,7 +17,7 @@
   "customer_id": "cust000",
   "customer_case_id": "a_customer_case_id",
   "data_analysis": "mip-dna",
-  "data_delivery": "fastq_qc-analysis-cram-scout",
+  "data_delivery": "fastq-analysis-scout",
   "gene_panels": ["IEM", "EP"],
   "order_id": 123,
   "priority": "standard"

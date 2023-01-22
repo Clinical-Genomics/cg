@@ -30,13 +30,13 @@ CAPTUREKIT_OPTIONS = (
 )
 
 
-class CaseActions(StrEnum):
+class CaseAction(StrEnum):
     ANALYZE: str = "analyze"
     HOLD: str = "hold"
     RUNNING: str = "running"
 
 
-CASE_ACTIONS = [action.value for action in CaseActions]
+CASE_ACTIONS = [action.value for action in CaseAction]
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 

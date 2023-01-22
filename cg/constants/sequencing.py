@@ -1,10 +1,12 @@
-"""Constants related to all things sequencing"""
+"""Constants related to all things sequencing."""
 from enum import Enum
 
 from cgmodels.cg.constants import StrEnum
 
 
-class SequencingMethod(str, Enum):
+class SequencingPlatform(str, Enum):
+    """Sequencing platform"""
+
     ILLUMINA = "illumina"
 
 
@@ -16,6 +18,15 @@ class PreparationCategory(str, Enum):
     WHOLE_EXOME_SEQUENCING = "wes"
     WHOLE_GENOME_SEQUENCING = "wgs"
     WHOLE_TRANSCRIPTOME_SEQUENCING = "wts"
+
+
+class SequencingMethod(StrEnum):
+    """Sequencing method types."""
+
+    TGS: str = "tgs"
+    WES: str = "wes"
+    WGS: str = "wgs"
+    WTS: str = "wts"
 
 
 class Sequencers(StrEnum):
@@ -47,15 +58,6 @@ sequencer_types = {
     "A00621": Sequencers.NOVASEQ,
     "A00689": Sequencers.NOVASEQ,
 }
-
-
-class SequencingMethod(StrEnum):
-    """Sequencing method types."""
-
-    TGS: str = "tgs"
-    WES: str = "wes"
-    WGS: str = "wgs"
-    WTS: str = "wts"
 
 
 class Variants(StrEnum):

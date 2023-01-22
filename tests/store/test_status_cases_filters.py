@@ -4,7 +4,7 @@ from alchy import Query
 from cgmodels.cg.constants import Pipeline
 from datetime import datetime
 
-from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.constants import CaseAction, DataDelivery
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store, models
@@ -266,7 +266,7 @@ def test_filter_cases_for_analysis(
     )
 
     # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    test_analysis.family.action: str = CaseAction.ANALYZE
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
@@ -444,7 +444,7 @@ def test_filter_inactive_analysis_cases_when_on_hold(base_store: Store, helpers:
     """Test that an inactivated case is returned when there is case which has action set to hold."""
 
     # GIVEN a case
-    test_case = helpers.add_case(base_store, action=CaseActions.HOLD)
+    test_case = helpers.add_case(base_store, action=CaseAction.HOLD)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_case_query()
@@ -464,7 +464,7 @@ def test_filter_inactive_analysis_cases_when_not_completed(
     """Test that no case is returned when there is case which action set to running."""
 
     # GIVEN a case
-    helpers.add_case(base_store, action=CaseActions.RUNNING)
+    helpers.add_case(base_store, action=CaseAction.RUNNING)
 
     # GIVEN a cases Query
     cases: Query = base_store._get_case_query()

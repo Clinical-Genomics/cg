@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseAction
 from cg.store import models
 from cg.store.models import Family
 from cg.store.status_analysis_filters import apply_analysis_filter
@@ -100,7 +100,7 @@ class StatusHandler(BaseHandler):
             for case_obj in families
             if case_obj.latest_sequenced
             and (
-                case_obj.action == CaseActions.ANALYZE
+                case_obj.action == CaseAction.ANALYZE
                 or not case_obj.latest_analyzed
                 or case_obj.latest_analyzed < case_obj.latest_sequenced
             )

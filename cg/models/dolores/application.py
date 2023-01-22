@@ -3,7 +3,7 @@ from typing import Any, Optional, List
 
 from pydantic import BaseModel, validator
 
-from cg.constants.sequencing import PreparationCategory, SequencingMethod
+from cg.constants.sequencing import PreparationCategory, SequencingMethod, SequencingPlatform
 from cg.models.dolores.event import EventComment
 
 
@@ -31,7 +31,7 @@ class Application(BaseModel):
     min_required_sample_concentration: int
     max_required_sample_concentration: int
     percent_reads_guaranteed: float
-    sequencing_method: SequencingMethod = SequencingMethod.ILLUMINA
+    sequencing_platform: SequencingPlatform = SequencingPlatform.ILLUMINA
     preparation_category: PreparationCategory
     priority_processing: bool
     sample_concentration_unit: str

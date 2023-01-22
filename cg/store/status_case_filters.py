@@ -6,7 +6,7 @@ from cgmodels.cg.constants import Pipeline
 from sqlalchemy import and_, or_
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
-from cg.constants.constants import CaseActions, DataDelivery
+from cg.constants.constants import CaseAction, DataDelivery
 from cg.constants.observations import (
     LOQUSDB_SUPPORTED_PIPELINES,
     LOQUSDB_MIP_SEQUENCING_METHODS,
@@ -25,7 +25,7 @@ def filter_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(
         or_(
             models.Family.action.is_(None),
-            models.Family.action.is_(CaseActions.HOLD),
+            models.Family.action.is_(CaseAction.HOLD),
         )
     )
 
@@ -77,7 +77,7 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """
     return cases.filter(
         or_(
-            models.Family.action == CaseActions.ANALYZE,
+            models.Family.action == CaseAction.ANALYZE,
             and_(
                 models.Application.is_external.isnot(True),
                 models.Family.action.is_(None),

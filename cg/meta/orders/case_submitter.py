@@ -5,7 +5,7 @@ from typing import List, Set
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseAction
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -228,7 +228,7 @@ class CaseSubmitter(Submitter):
                 new_families.append(case_obj)
             else:
                 self._append_ticket(ticket=ticket, case=case_obj)
-                self._update_action(action=CaseActions.ANALYZE, case=case_obj)
+                self._update_action(action=CaseAction.ANALYZE, case=case_obj)
 
             self._update_case(case, case_obj)
 
