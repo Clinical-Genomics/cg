@@ -225,15 +225,15 @@ class HousekeeperAPI:
         LOG.debug(f"Found Housekeeper version object for {bundle_name}: {repr(last_version)}")
         return last_version
 
-    def get_create_version(self, bundle: str) -> Version:
+    def get_create_version(self, bundle_name: str) -> Version:
         """Returns the latest version of a bundle if it exists. If not creates a bundle and
         returns its version."""
-        last_version: Version = self.last_version(bundle=bundle)
+        last_version: Version = self.last_version(bundle=bundle_name)
         if not last_version:
-            LOG.info("Creating bundle for sample %s in housekeeper", bundle)
+            LOG.info(f"Creating bundle for sample {bundle_name} in housekeeper")
             bundle_result: Tuple[Bundle, Version] = self.add_bundle(
                 bundle_data={
-                    "name": bundle,
+                    "name": bundle_name,
                     "created_at": dt.datetime.now(),
                     "expires_at": None,
                     "files": [],
@@ -305,7 +305,7 @@ class HousekeeperAPI:
 
     def include_files_to_latest_version(self, bundle_name: str) -> None:
         """Include all files in the latest version on a bundle."""
-        bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
+        bundle_version: Version = self.get_create_version(bundle_name=bundle_name)
         if not bundle_version:
             return None
         if bundle_version.included_at:
