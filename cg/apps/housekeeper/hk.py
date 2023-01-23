@@ -305,7 +305,7 @@ class HousekeeperAPI:
 
     def include_files_to_latest_version(self, bundle_name: str) -> None:
         """Include all files in the latest version on a bundle."""
-        bundle_version: Version = self.get_create_version(bundle_name=bundle_name)
+        bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
         if not bundle_version:
             return None
         if bundle_version.included_at:
