@@ -1,4 +1,4 @@
-"""Code for uploading to Gens via CLI"""
+"""Module for uploading to Gens via CLI."""
 import logging
 from typing import Optional
 
@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.command()
-@click.argument("case_id", required=False)
+@click.argument("case-id", required=False)
 @click.pass_obj
 def gens(context: CGConfig, case_id: Optional[str]):
     """Upload data from an analysis to Gens."""

@@ -1,5 +1,3 @@
-"""
-    conftest for GensAPI
-"""
+"""Conftest for Gens."""
 
 import pytest

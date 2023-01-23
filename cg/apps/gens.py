@@ -24,7 +24,7 @@ class GensAPI:
         self.dry_run = False
 
     def set_dry_run(self, dry_run: bool) -> None:
-        """Set the dry run state"""
+        """Set the dry run state."""
         self.dry_run = dry_run
 
     def load(
