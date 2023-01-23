@@ -11,8 +11,8 @@ from cg.cli.compress.helpers import (
     update_compress_api,
     is_case_ignored,
     get_cases_to_process,
+    compress_sample_fastqs_in_cases,
 )
-from cg.constants.compression import CASES_TO_IGNORE
 from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
@@ -52,38 +52,17 @@ def fastq_cmd(
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    update_compress_api(
-        compress_api=compress_api, dry_run=dry_run, hours=hours, mem=mem, ntasks=ntasks
-    )
     cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
         return
-
-    case_conversion_count = 0
-    individuals_conversion_count = 0
-    for case in cases:
-        case_converted = True
-        if case_conversion_count >= number_of_conversions:
-            break
-        if is_case_ignored(case_id=case.internal_id):
-            continue
-
-        LOG.info(f"Searching for FASTQ files in case {case.internal_id}")
-        if not case.links:
-            continue
-        for case_link in case.links:
-            sample_id: str = case_link.sample.internal_id
-            case_converted: bool = compress_api.compress_fastq(sample_id=sample_id)
-            if not case_converted:
-                LOG.info(f"skipping individual {sample_id}")
-                continue
-            individuals_conversion_count += 1
-        if case_converted:
-            case_conversion_count += 1
-            LOG.info(f"Considering case {case.internal_id} converted")
-
-    LOG.info(
-        f"{individuals_conversion_count} individuals in {case_conversion_count} (completed) cases where compressed"
+    compress_sample_fastqs_in_cases(
+        compress_api=compress_api,
+        cases=cases,
+        dry_run=dry_run,
+        number_of_conversions=number_of_conversions,
+        hours=hours,
+        mem=mem,
+        ntasks=ntasks,
     )
 
 

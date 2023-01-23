@@ -1,13 +1,20 @@
 import logging
-from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
+from pytest_mock import MockFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
+from cg.cli.workflow.rnafusion.base import (
+    rnafusion,
+    start,
+    start_available,
+    store,
+    store_available,
+    store_housekeeper,
+)
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -39,13 +46,13 @@ def test_start(
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN case id for which we created a config file
+    # GIVEN case id
     case_id: str = rnafusion_case_id
+
+    # GIVEN a mocked config
 
     # GIVEN decompression is not needed
     RnafusionAnalysisAPI.resolve_decompression.return_value = None
-
-    # GIVEN a mocked config
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=rnafusion_context)
@@ -170,6 +177,7 @@ def test_store_available(
     mocker,
     hermes_deliverables,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test to ensure all parts of compound store-available command are executed given ideal conditions
     Test that sore-available picks up eligible cases and does not pick up ineligible ones."""
@@ -181,7 +189,9 @@ def test_store_available(
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
-    #
+
+    # GIVEN a mocked config
+
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
     rnafusion_context.status_db.family(case_id_success).action = "running"
