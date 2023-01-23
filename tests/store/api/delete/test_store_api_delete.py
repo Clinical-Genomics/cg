@@ -37,7 +37,7 @@ def test_store_api_delete_case(case_id: str, rml_pool_store: Store):
     assert not results
 
 
-def test_store_api_delete_single_case_sample(sample_id: str, case_id: str, rml_pool_store: Store):
+def test_store_api_delete_single_case_sample(rml_pool_store: Store):
     """Test function to delete association between a sample and a single case given a sample id in Store"""
 
     # GIVEN a database containing a case associated with a sample

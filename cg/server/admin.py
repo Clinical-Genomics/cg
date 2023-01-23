@@ -439,13 +439,11 @@ class SampleView(BaseView):
         all_associated_cases = set()
 
         for entry_id in entry_ids:
-            self.write_cancel_comment(sample_entry_id=entry_id)
-
             case_samples = db.get_cases_from_sample(sample_entry_id=entry_id)
             case_ids = [case.family.internal_id for case in case_samples]
-            all_associated_cases.add(case_ids)
+            all_associated_cases.update(case_ids)
 
-            db.delete_case_sample_relationships(entry_id)
+            db.delete_case_sample_relationships(sample_entry_id=entry_id)
             self.write_cancel_comment(sample_entry_id=entry_id)
 
         case_ids = list(all_associated_cases)

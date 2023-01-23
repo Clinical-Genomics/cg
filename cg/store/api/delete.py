@@ -1,7 +1,7 @@
 """Handler to delete data objects"""
 
 from typing import List
-from cg.store.models import Flowcell, Family, FamilySample
+from cg.store.models import Flowcell, Family, FamilySample, Sample
 from cg.store.api.base import BaseHandler
 
 
@@ -49,5 +49,5 @@ class DeleteDataHandler(BaseHandler):
         """Delete cases without samples."""
         for case_id in case_ids:
             case: Family = self.Family.query.filter(Family.internal_id == case_id).first()
-            if not case.samples:
+            if not case.links:
                 self.delete_case(case_id)
