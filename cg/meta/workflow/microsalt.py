@@ -267,6 +267,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     self.trailblazer_api.set_analysis_status(
                         case_id=case.internal_id, status=AnalysisStatus.FAILED
                     )
+                    self.trailblazer_api.add_comment(case_id=case.internal_id, comment="QC failed")
             else:
                 cases_to_store.append(case)
 
