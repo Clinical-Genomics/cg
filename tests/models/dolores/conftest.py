@@ -1,8 +1,9 @@
 import datetime
 from pathlib import Path
 
-import json
 import pytest
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 
 
 def get_dict_from_json(file_path: Path) -> dict:
@@ -32,7 +33,9 @@ def fixture_dolores_analysis_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_analysis_raw")
 def fixture_dolores_analysis_raw(dolores_analysis_json_path: Path) -> dict:
     """Load an example of json dolores analysis"""
-    return get_dict_from_json(file_path=dolores_analysis_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_analysis_json_path
+    )
 
 
 @pytest.fixture(name="dolores_application_json_path")
@@ -44,7 +47,9 @@ def fixture_dolores_application_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_application_raw")
 def fixture_dolores_application_raw(dolores_application_json_path: Path) -> dict:
     """Load an example of json dolores application"""
-    return get_dict_from_json(file_path=dolores_application_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_application_json_path
+    )
 
 
 @pytest.fixture(name="dolores_case_json_path")
@@ -56,7 +61,9 @@ def fixture_dolores_case_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_case_raw")
 def fixture_dolores_case_raw(dolores_case_json_path: Path) -> dict:
     """Load an example of json dolores case"""
-    return get_dict_from_json(file_path=dolores_case_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_case_json_path
+    )
 
 
 @pytest.fixture(name="dolores_case_relation_json_path")
@@ -68,7 +75,9 @@ def fixture_dolores_case_relation_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_case_relation_raw")
 def fixture_dolores_case_relation_raw(dolores_case_relation_json_path: Path) -> dict:
     """Load an example of json dolores case_relation"""
-    return get_dict_from_json(file_path=dolores_case_relation_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_case_relation_json_path
+    )
 
 
 @pytest.fixture(name="dolores_event_json_path")
@@ -80,7 +89,9 @@ def fixture_dolores_event_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_event_raw")
 def fixture_dolores_event_raw(dolores_event_json_path: Path) -> dict:
     """Load an example of json dolores event"""
-    return get_dict_from_json(file_path=dolores_event_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_event_json_path
+    )
 
 
 @pytest.fixture(name="dolores_experiment_design_json_path")
@@ -92,7 +103,9 @@ def fixture_dolores_experiment_design_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_experiment_design_raw")
 def fixture_dolores_experiment_design_raw(dolores_experiment_design_json_path: Path) -> dict:
     """Load an example of json dolores experiment_design"""
-    return get_dict_from_json(file_path=dolores_experiment_design_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_experiment_design_json_path
+    )
 
 
 @pytest.fixture(name="dolores_sample_json_path")
@@ -104,7 +117,9 @@ def fixture_dolores_sample_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_sample_raw")
 def fixture_dolores_sample_raw(dolores_sample_json_path: Path) -> dict:
     """Load an example of json dolores sample"""
-    return get_dict_from_json(file_path=dolores_sample_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_sample_json_path
+    )
 
 
 @pytest.fixture(name="dolores_sequencing_json_path")
@@ -116,7 +131,9 @@ def fixture_dolores_sequencing_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_sequencing_raw")
 def fixture_dolores_sequencing_raw(dolores_sequencing_json_path: Path) -> dict:
     """Load an example of json dolores sequencing"""
-    return get_dict_from_json(file_path=dolores_sequencing_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_sequencing_json_path
+    )
 
 
 @pytest.fixture(name="dolores_subject_json_path")
@@ -128,4 +145,6 @@ def fixture_dolores_subject_json_path(fixtures_dir) -> Path:
 @pytest.fixture(name="dolores_subject_raw")
 def fixture_dolores_subject_raw(dolores_subject_json_path: Path) -> dict:
     """Load an example of json dolores subject"""
-    return get_dict_from_json(file_path=dolores_subject_json_path)
+    return ReadFile.get_content_from_file(
+        file_format=FileFormat.JSON, file_path=dolores_subject_json_path
+    )

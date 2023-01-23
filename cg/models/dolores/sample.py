@@ -58,6 +58,8 @@ class Sample(BaseModel):
 
 class SampleCancer(Sample):
     is_tumour: bool
+    loqusdb_id: Optional[str]
+    loqusdb_name: Optional[str]
 
 
 class SampleRareDisease(Sample):
