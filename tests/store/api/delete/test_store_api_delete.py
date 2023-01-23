@@ -43,7 +43,9 @@ def test_store_api_delete_single_case_sample(sample_id: str, case_id: str, rml_p
     # GIVEN a database containing a case associated with a sample
     samples = rml_pool_store.samples().all()
     entry_id = samples[0].id
-    case_samples: List[FamilySample] = rml_pool_store.get_cases_from_sample(sample_entry_id=entry_id)
+    case_samples: List[FamilySample] = rml_pool_store.get_cases_from_sample(
+        sample_entry_id=entry_id
+    )
 
     assert case_samples
 
