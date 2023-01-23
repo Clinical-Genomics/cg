@@ -389,7 +389,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         if not qc_pass:
             LOG.warning(
-                f"Case {case_id} failed QC, see {run_dir_path}/QC_done.txt for more information."
+                f"Case {case_id} failed QC, see {run_dir_path}/QC_done.json for more information."
             )
         else:
             LOG.info(f"Case {case_id} passed QC.")
