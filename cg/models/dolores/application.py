@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Dict
 
 from pydantic import BaseModel, validator
 
@@ -42,7 +42,7 @@ class Application(BaseModel):
     expected_reads: Optional[int]
 
     @validator("required_sample_concentration", always=True)
-    def set_required_sample_concentration(cls, value: str, values: dict[str, Any]) -> str:
+    def set_required_sample_concentration(cls, value: str, values: Dict[str, Any]) -> str:
         if isinstance(value, str):
             return value
         required_sample_concentration_terms: list = [
@@ -54,7 +54,7 @@ class Application(BaseModel):
         return " ".join(map(str, required_sample_concentration_terms))
 
     @validator("expected_reads", always=True)
-    def set_expected_reads(cls, _, values: dict[str, Any]) -> int:
+    def set_expected_reads(cls, _, values: Dict[str, Any]) -> int:
         return int(
             values.get("target_sequence_reads") * values.get("percent_reads_guaranteed") / 100
         )

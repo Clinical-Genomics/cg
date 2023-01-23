@@ -1,4 +1,4 @@
-from typing import Optional, Union, List, Any
+from typing import Optional, Union, List, Any, Dict
 
 from datetime import datetime
 
@@ -46,7 +46,7 @@ class Sample(BaseModel):
         return value
 
     @validator("total_nr_sequencing_reads", always=True)
-    def set_total_nr_sequencing_reads(cls, _, values: dict[str, Any]) -> int:
+    def set_total_nr_sequencing_reads(cls, _, values: Dict[str, Any]) -> int:
         total_nr_sequencing_reads: int = 0
         if not values.get("sequencing"):
             return total_nr_sequencing_reads
