@@ -211,6 +211,13 @@ class StatusHandler(BaseHandler):
         case_obj.action = action
         self.commit()
 
+    def set_sample_comment(self, sample_entry_id: int, comment: str):
+        sample_obj: models.Sample = self.Sample.query.filter(
+            models.Sample.id == sample_entry_id
+        ).first()
+        sample_obj.comment = comment
+        self.commit()
+
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:
         return {

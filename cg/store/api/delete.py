@@ -21,7 +21,6 @@ class DeleteDataHandler(BaseHandler):
         case: Family = self.Family.query.filter(Family.internal_id == case_id).first()
         if case:
             case.delete()
-            case.flush()
             self.commit()
 
     def delete_all_case_sample_relationships(self, case_id: str) -> None:
@@ -34,7 +33,6 @@ class DeleteDataHandler(BaseHandler):
         if case_samples:
             for case_sample in case_samples:
                 case_sample.delete()
-                case_sample.flush()
             self.commit()
 
     def delete_case_sample_relationships(self, sample_entry_id: int):
@@ -45,7 +43,6 @@ class DeleteDataHandler(BaseHandler):
         if case_samples:
             for case_sample in case_samples:
                 case_sample.delete()
-                case_sample.flush()
             self.commit()
 
     def delete_cases_without_samples(self, case_ids) -> List[str]:

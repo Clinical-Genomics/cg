@@ -452,7 +452,6 @@ class SampleView(BaseView):
         db.delete_cases_without_samples(case_ids=case_ids)
         cases_with_remaining_samples = db.get_cases_with_samples(case_ids=case_ids)
 
-        # TODO: Extract somewhere else.
         self.display_cancel_confirmation(entry_ids, cases_with_remaining_samples)
 
     def write_cancel_comment(self, sample_entry_id: str) -> None:
@@ -461,9 +460,7 @@ class SampleView(BaseView):
             date = datetime.now().strftime("%Y-%m-%d")
             comment = f"Cancelled {date} by {username}"
 
-            sample: Sample = db.Sample.query.filter(db.Sample.id == sample_entry_id).first()
-            sample.comment = comment
-            db.commit()
+            db.set_sample_comment(sample_entry_id=sample_entry_id, comment=comment)
 
         except Exception as ex:
             if not self.handle_view_exception(ex):

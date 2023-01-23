@@ -106,7 +106,3 @@ class FindBasicDataHandler(BaseHandler):
     def user(self, email: str) -> models.User:
         """Fetch a user from the store."""
         return self.User.query.filter_by(email=email).first()
-
-    def sample(self, sample_entry_id: int):
-        """Find sample by id."""
-        return self.Sample.query.filter(self.Sample.id == sample_entry_id).first()
