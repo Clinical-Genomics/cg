@@ -289,7 +289,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """Retrieve a list of cases that are completed in trailblazer."""
         return [
             case
-            for case_object in self.get_running_cases()
+            for case in self.get_running_cases()
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
 
