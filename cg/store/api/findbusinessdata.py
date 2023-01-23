@@ -166,11 +166,11 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def get_cases_from_sample(self, sample_id: str) -> List[models.FamilySample]:
+    def get_cases_from_sample(self, sample_entry_id: str) -> List[models.FamilySample]:
         """Find cases related to a given sample."""
         return (
             self.FamilySample.query.join(models.FamilySample.family, models.FamilySample.sample)
-            .filter(models.Sample.internal_id == sample_id)
+            .filter(models.Sample.id == sample_entry_id)
             .all()
         )
 
