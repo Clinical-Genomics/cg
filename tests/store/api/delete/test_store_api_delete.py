@@ -41,17 +41,17 @@ def test_store_api_delete_single_case_sample(sample_id: str, case_id: str, rml_p
     """Test function to delete association between a sample and a single case given a sample id in Store"""
 
     # GIVEN a database containing a case associated with a sample
-    case_samples: List[FamilySample] = rml_pool_store.get_cases_from_sample(sample_id=sample_id)
+    samples = rml_pool_store.samples().all()
+    entry_id = samples[0].id
+    case_samples: List[FamilySample] = rml_pool_store.get_cases_from_sample(sample_entry_id=entry_id)
 
-    assert case_samples and case_samples[0]
-
-    sample_entry_id = case_samples[0].sample_id
+    assert case_samples
 
     # WHEN removing said association
-    rml_pool_store.delete_case_sample_relationships(sample_entry_id=sample_entry_id)
+    rml_pool_store.delete_case_sample_relationships(sample_entry_id=entry_id)
 
     # THEN no entry should be found for said association
-    results: List[FamilySample] = rml_pool_store.get_cases_from_sample(sample_id=sample_id)
+    results: List[FamilySample] = rml_pool_store.get_cases_from_sample(sample_entry_id=entry_id)
 
     assert not results
 
