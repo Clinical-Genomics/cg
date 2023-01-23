@@ -290,7 +290,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return [
             case
             for case in self.get_running_cases()
-            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
     def resolve_case_sample_id(
