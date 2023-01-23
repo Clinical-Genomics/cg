@@ -2,10 +2,11 @@
 import datetime
 
 # Constants for crunchy
-FASTQ_FIRST_READ_SUFFIX = "_R1_001.fastq.gz"
-FASTQ_SECOND_READ_SUFFIX = "_R2_001.fastq.gz"
-FLAG_PATH_SUFFIX = ".crunchy.txt"
-PENDING_PATH_SUFFIX = ".crunchy.pending.txt"
+FASTQ_FIRST_READ_SUFFIX: str = "_R1_001.fastq.gz"
+FASTQ_SECOND_READ_SUFFIX: str = "_R2_001.fastq.gz"
+FLAG_PATH_SUFFIX: str = ".crunchy.txt"
+MAX_READS_PER_GB: int = 18_000_000
+PENDING_PATH_SUFFIX: str = ".crunchy.pending.txt"
 
 
 # Number of days until FASTQs counts as old
