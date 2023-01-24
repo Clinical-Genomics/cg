@@ -17,9 +17,9 @@ LOG = logging.getLogger(__name__)
 class GensAPI:
     """API for Gens."""
 
-    def __init__(self, binary_path: str, config_path: str):
-        self.binary_path = binary_path
-        self.config_path = config_path
+    def __init__(self, config: Dict[str, Dict[str, str]]):
+        self.binary_path = config["gens"]["binary_path"]
+        self.config_path = config["gens"]["config_path"]
         self.process = Process(binary=self.binary_path, config=self.config_path)
         self.dry_run = False
 
@@ -46,5 +46,5 @@ class GensAPI:
         load_call_params: list = ["load", "sample"] + get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
 
-    def __repr__(self):
-        return f"GensAPI(binary_path={Path(self.binary_path).stem}, config_path={Path(self.config_path).stem})"
+    def __str__(self):
+        return f"GensAPI(dry_run: {self.dry_run})"

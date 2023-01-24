@@ -8,15 +8,20 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 
-from .utils import suggest_cases_to_upload
+from cg.cli.upload.utils import suggest_cases_to_upload
+from cg.cli.workflow.commands import (
+    ARGUMENT_CASE_ID,
+    OPTION_DRY,
+)
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command()
-@click.argument("case-id", required=False)
+@ARGUMENT_CASE_ID
+@OPTION_DRY
 @click.pass_obj
-def gens(context: CGConfig, case_id: Optional[str]):
+def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
     """Upload data from an analysis to Gens."""
 
     status_db: Store = context.status_db
@@ -29,21 +34,26 @@ def gens(context: CGConfig, case_id: Optional[str]):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    family_obj: models.Family = status_db.family(case_id)
-    analysis_obj: models.Analysis = family_obj.analyses[0]
+    family: models.Family = status_db.family(case_id)
+    analysis: models.Analysis = family.analyses[0]
 
-    for link_obj in family_obj.links:
-        analysis_date = analysis_obj.started_at or analysis_obj.completed_at
+    for link in family.links:
+        analysis_date = analysis.started_at or analysis.completed_at
         hk_version = housekeeper_api.version(case_id, analysis_date)
         hk_fracsnp = housekeeper_api.files(
-            version=hk_version.id, tags=[link_obj.sample.internal_id, "gens", "fracsnp", "bed"]
+            version=hk_version.id, tags=[link.sample.internal_id, "gens", "fracsnp", "bed"]
         ).first()
         hk_coverage = housekeeper_api.files(
-            version=hk_version.id, tags=[link_obj.sample.internal_id, "gens", "coverage", "bed"]
+            version=hk_version.id, tags=[link.sample.internal_id, "gens", "coverage", "bed"]
         ).first()
+
+        if dry_run:
+            LOG.info(f"Dry run. Would upload data for {family.internal_id} to Gens.")
+            return
+
         gens_api.load(
-            sample_id=link_obj.sample.internal_id,
-            genome_build=analysis_obj.genome_build,
+            sample_id=link.sample.internal_id,
+            genome_build=analysis.genome_build,
             baf_path=hk_fracsnp.full_path,
             coverage_path=hk_coverage.full_path,
             case_id=case_id,
