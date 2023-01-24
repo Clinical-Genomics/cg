@@ -85,7 +85,7 @@ def test_get_spring_metadata_wrong_number_files(
 
 
 def test_fastq_to_spring_sbatch(
-    crunchy_config_dict: dict,
+    crunchy_config: dict,
     compression_object: CompressionData,
     sbatch_process: Process,
     sbatch_job_number: int,
@@ -95,7 +95,7 @@ def test_fastq_to_spring_sbatch(
     caplog.set_level(logging.DEBUG)
     # GIVEN a crunchy-api, and FASTQ paths
 
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     crunchy_api.slurm_api.process = sbatch_process
     spring_path: Path = compression_object.spring_path
     log_path: Path = get_log_dir(spring_path)
@@ -121,7 +121,7 @@ def test_fastq_to_spring_sbatch(
 def test_spring_to_fastq(
     compression_object: CompressionData,
     spring_metadata_file: Path,
-    crunchy_config_dict: dict,
+    crunchy_config: dict,
     mocker,
 ):
     """Test SPRING to FASTQ method
@@ -132,7 +132,7 @@ def test_spring_to_fastq(
     # GIVEN a crunchy-api given an existing SPRING metadata file
     assert spring_metadata_file.exists()
     mocker_submit_sbatch = mocker.patch.object(SlurmAPI, "submit_sbatch")
-    crunchy_api = CrunchyAPI(crunchy_config_dict)
+    crunchy_api = CrunchyAPI(crunchy_config)
     # GIVEN that the pending path does not exist
     assert compression_object.pending_exists() is False
 

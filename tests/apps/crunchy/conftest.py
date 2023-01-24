@@ -41,7 +41,7 @@ def fixture_spring_metadata(compression_object: CompressionData) -> List[dict]:
 
 @pytest.fixture(name="crunchy_metadata_object")
 def fixture_crunchy_metadata_object(spring_metadata: List[dict]) -> CrunchyMetadata:
-    """Return the parsed metadata."""
+    """Return Crunchy metadata."""
     return CrunchyMetadata(files=spring_metadata)
 
 
@@ -51,35 +51,34 @@ def fixture_spring_metadata_file(
 ) -> Path:
     """Return the path to a populated SPRING metadata file."""
     metadata_path = compression_object.spring_metadata_path
-
     WriteFile.write_file_from_content(
         content=spring_metadata, file_format=FileFormat.JSON, file_path=metadata_path
     )
     return metadata_path
 
 
-@pytest.fixture(scope="function", name="fastq_first_file")
+@pytest.fixture(name="fastq_first_file")
 def fixture_fastq_first_file(fastq_first_path: Path) -> Path:
     """Creates an existing FASTQ path."""
     fastq_first_path.touch()
     return fastq_first_path
 
 
-@pytest.fixture(scope="function", name="fastq_second_file")
+@pytest.fixture(name="fastq_second_file")
 def fixture_fastq_second_file(fastq_second_path: Path) -> Path:
     """Creates an existing FASTQ path."""
     fastq_second_path.touch()
     return fastq_second_path
 
 
-@pytest.fixture(scope="function", name="spring_file")
+@pytest.fixture(name="spring_file")
 def fixture_spring_file(spring_path: Path) -> Path:
     """Creates an existing SPRING file."""
     spring_path.touch()
     return spring_path
 
 
-@pytest.fixture(scope="function", name="fastq_paths")
+@pytest.fixture(name="fastq_paths")
 def fixture_fastq_paths(fastq_first_path: Path, fastq_second_path: Path) -> Dict[str, Path]:
     """Creates FASTQ paths."""
     return {
@@ -88,7 +87,7 @@ def fixture_fastq_paths(fastq_first_path: Path, fastq_second_path: Path) -> Dict
     }
 
 
-@pytest.fixture(scope="function", name="existing_fastq_paths")
+@pytest.fixture(name="existing_fastq_paths")
 def fixture_existing_fastq_paths(
     fastq_first_file: Path, fastq_second_file: Path
 ) -> Dict[str, Path]:

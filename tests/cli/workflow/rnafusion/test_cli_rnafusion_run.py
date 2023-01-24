@@ -82,21 +82,20 @@ def test_with_config(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
+    mock_config,
 ):
     """Test command with case_id and config file."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id: str = rnafusion_case_id
-    # WHEN ensuring case config exists where it should be stored
-    Path.mkdir(
-        Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id)).parent,
-        exist_ok=True,
-    )
-    Path(rnafusion_context.meta_apis["analysis_api"].get_case_config_path(case_id)).touch(
-        exist_ok=True
-    )
+
+    # GIVEN a mocked config
+
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
 
-    # THEN command should NOT execute successfully
+    # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
+
+    # THEN command should include resume flag
+    assert "-resume" in caplog.text
