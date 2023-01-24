@@ -31,6 +31,7 @@ def fixture_sample_dict() -> dict:
             "vcf": Path("path", "to", "expansionhunter.vcf").as_posix(),
             "catalog": Path("path", "to", "variant_catalog.json").as_posix(),
         },
+        "mitodel_file": Path("path", "to", "mitodel.txt").as_posix(),
         "capture_kit": None,
         Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
         Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,

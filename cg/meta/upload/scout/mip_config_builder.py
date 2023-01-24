@@ -142,6 +142,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
         )
         config_sample.reviewer.catalog = self.fetch_file_from_hk(hk_tags=self.case_tags.str_catalog)
+        config_sample.mitodel_file = self.fetch_sample_file(
+            hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
+        )
 
     @staticmethod
     def extract_generic_filepath(file_path: Optional[str]) -> Optional[str]:
