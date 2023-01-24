@@ -303,14 +303,14 @@ class MockHousekeeperAPI:
         """Fetch a version"""
         return self._version_obj
 
-    def get_create_version(self, bundle: str):
+    def get_create_version(self, bundle_name: str):
         """Returns the latest version of a bundle if it exists. If no creates a bundle and returns its version"""
-        last_version = self.last_version(bundle=bundle)
+        last_version = self.last_version(bundle=bundle_name)
         if not last_version:
-            LOG.info("Creating bundle for sample %s in housekeeper", bundle)
+            LOG.info(f"Creating bundle for sample {bundle_name} in housekeeper")
             bundle_result = self.add_bundle(
                 bundle_data={
-                    "name": bundle,
+                    "name": bundle_name,
                     "created": datetime.datetime.now(),
                     "expires": None,
                     "files": [],
