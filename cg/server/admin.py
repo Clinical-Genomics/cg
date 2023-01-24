@@ -9,7 +9,6 @@ from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy.orm import Query
-from sqlalchemy import delete
 
 from cg.constants.constants import DataDelivery, Pipeline, CaseActions
 from cg.server.ext import db
@@ -460,11 +459,22 @@ class SampleView(BaseView):
 
         db.set_sample_comment(sample=sample, comment=comment)
 
-    def display_cancel_confirmation(self, entry_ids, remaining_cases) -> None:
+    def display_cancel_confirmation(self, entry_ids, remaining_cases):
+        message = f"Cancelled {len(entry_ids)} samples. No case contained additional samples."
+        case_message = ""
+
+        for case_id in remaining_cases:
+            case_message + f" {case_id},"
+        
+        case_message.strip(",")
+
+        if remaining_cases:
+            message = f"Cancelled {len(entry_ids)} samples. Found {len(remaining_cases)} cases with additional samples: {case_message}."
+
         flash(
             ngettext(
-                f"Cancelled {len(entry_ids)} samples.",
-                f"{len(remaining_cases)} cases containing other samples were found: {remaining_cases}",
+                message,
+                message,
                 len(entry_ids),
             )
         )
