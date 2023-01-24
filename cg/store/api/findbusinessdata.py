@@ -182,12 +182,12 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def get_cases_with_samples(self, case_ids) -> List[str]:
+    def get_cases_with_samples(self, case_ids: List[str]) -> List[str]:
         """Find cases associated with samples"""
         cases_with_samples = set()
         for case_id in case_ids:
             case: Family = self.Family.query.filter(Family.internal_id == case_id).first()
-            if case.samples:
+            if case and case.links:
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
 

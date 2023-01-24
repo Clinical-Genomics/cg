@@ -44,25 +44,6 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     assert existing_relationships
 
 
-def test_store_api_delete_all_case_samples_for_a_case(
-    case_id_with_multiple_samples: str, dummy_store: Store
-):
-    """Test function to delete all associations between a case and its samples."""
-
-    # GIVEN a database containing a case associated with a sample
-    case: Family = dummy_store.family(case_id_with_multiple_samples)
-
-    assert case
-
-    # WHEN removing all relationships between the case and its samples
-    dummy_store.delete_relationships_case(case=case)
-
-    # THEN no entry should be found for a relationship between the case and a sample.
-    results: FamilySample = dummy_store.family_samples(case_id_with_multiple_samples)
-
-    assert not results
-
-
 def test_store_api_delete_all_empty_cases(
     case_id_without_samples: str, case_id_with_multiple_samples: str, dummy_store: Store
 ):
@@ -86,3 +67,22 @@ def test_store_api_delete_all_empty_cases(
 
     assert not result
     assert case_with_samples
+
+def test_store_api_delete_non_existing_case(dummy_store: Store):
+    """Test that nothing happens when trying to delete a case that does not exist."""
+
+    # GIVEN a database containing some cases but not a specific case
+    case_id = "some_case"
+    case = dummy_store.family(case_id)
+    existing_cases = dummy_store.families().all()
+
+    assert not case
+    assert existing_cases
+
+    # WHEN removing empty cases, specifying the non existing case
+    dummy_store.delete_cases_without_samples(case_ids=[case_id])
+
+    # THEN no case has been deleted and nothing happens
+    remaining_cases = dummy_store.families().all()
+
+    assert len(remaining_cases) == len(existing_cases)
