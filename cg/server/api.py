@@ -44,6 +44,13 @@ def public(route_function):
 @BLUEPRINT.before_request
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
+    if not request.is_secure:
+        return abort(
+            make_response(
+                jsonify(message="Only https requests accepted"), http.HTTPStatus.FORBIDDEN
+            )
+        )
+
     if request.method == "OPTIONS":
         return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
 
