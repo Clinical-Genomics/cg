@@ -185,16 +185,23 @@ class HousekeeperAPI:
 
     def include_file(self, file_obj: File, version_obj: Version) -> File:
         """Call the include version function to import related assets."""
-        global_root_dir = Path(self.get_root_dir())
+        global_root_dir: Path = Path(self.get_root_dir())
 
-        new_path = self.get_included_path(global_root_dir, version_obj, file_obj)
+        new_path: Path = self.get_included_path(
+            root_dir=global_root_dir, version_obj=version_obj, file_obj=file_obj
+        )
         if file_obj.to_archive:
             # calculate sha1 checksum if file is to be archived
             file_obj.checksum = HousekeeperAPI.checksum(file_obj.path)
+        if new_path.exists():
+            LOG.warning(
+                f"Another file with identical included file path: {new_path} already exist. Skip linking of: {file_obj.path}"
+            )
+            return file_obj
         # hardlink file to the internal structure
         os.link(file_obj.path, new_path)
         LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
-        file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
+        file_obj.path: str = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 
     def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None) -> Version:
