@@ -68,6 +68,10 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch a customer by id number from the store."""
         return self.Customer.query.filter_by(id=id_).first()
 
+    def sample_by_id(self, id_: int) -> models.Sample:
+        """Fetch a sample by id number from the store."""
+        return self.Sample.query.filter_by(id=id_).first()
+
     def current_application_version(self, tag: str) -> models.ApplicationVersion:
         """Fetch the current application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()

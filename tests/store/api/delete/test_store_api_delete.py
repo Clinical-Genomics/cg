@@ -1,4 +1,3 @@
-from typing import List
 from cg.store import Store
 from cg.store.models import Flowcell, Family, FamilySample
 
@@ -33,7 +32,7 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     assert sample_in_multiple_cases
 
     # WHEN removing the relationships between one sample and its cases
-    dummy_store.delete_case_sample_relationships(sample_entry_id=sample_in_single_case.id)
+    dummy_store.delete_relationships_sample(sample=sample_in_single_case)
 
     # THEN it should no longer be associated with any cases, but other relationships should remain
     results = dummy_store.get_cases_from_sample(sample_entry_id=sample_in_single_case.id)
@@ -52,35 +51,16 @@ def test_store_api_delete_all_case_samples_for_a_case(
 
     # GIVEN a database containing a case associated with a sample
     case: Family = dummy_store.family(case_id_with_multiple_samples)
-    case_samples: FamilySample = dummy_store.family_samples(case_id_with_multiple_samples)
 
     assert case
-    assert case_samples != [] and case_samples[0]
 
     # WHEN removing all relationships between the case and its samples
-    dummy_store.delete_all_case_sample_relationships(case_id=case_id_with_multiple_samples)
+    dummy_store.delete_relationships_case(case=case)
 
     # THEN no entry should be found for a relationship between the case and a sample.
     results: FamilySample = dummy_store.family_samples(case_id_with_multiple_samples)
 
     assert not results
-
-
-def test_store_api_delete_case_with_sample(case_id_with_single_sample: str, dummy_store: Store):
-    """Test function to delete a case associated with a single sample in Store"""
-
-    # GIVEN a database containing a case associated with a single sample
-    case: Family = dummy_store.family(case_id_with_single_sample)
-
-    assert case
-
-    # WHEN removing said case
-    dummy_store.delete_case(case_id=case_id_with_single_sample)
-
-    # THEN no entry should be found for said case
-    case_results: Family = dummy_store.family(case_id_with_single_sample)
-
-    assert not case_results
 
 
 def test_store_api_delete_all_empty_cases(
@@ -100,9 +80,9 @@ def test_store_api_delete_all_empty_cases(
         [case_id_without_samples, case_id_with_multiple_samples]
     )
 
-    # THEN no entry should be found for the empty case
-    results: FamilySample = dummy_store.family_samples(case_id_without_samples)
+    # THEN no entry should be found for the empty case, but the one with samples should remain.
+    result = dummy_store.family_samples(case_id_without_samples)
     case_with_samples = dummy_store.family_samples(case_id_with_multiple_samples)
 
-    assert not results
+    assert not result
     assert case_with_samples

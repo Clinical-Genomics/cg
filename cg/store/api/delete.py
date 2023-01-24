@@ -15,41 +15,22 @@ class DeleteDataHandler(BaseHandler):
             flowcell.flush()
             self.commit()
 
-    def delete_case(self, case_id: str) -> None:
-        """Delete a case and all associations with samples."""
-        self.delete_all_case_sample_relationships(case_id=case_id)
-        case: Family = self.Family.query.filter(Family.internal_id == case_id).first()
-        if case:
-            case.delete()
-            self.commit()
-
-    def delete_all_case_sample_relationships(self, case_id: str) -> None:
+    def delete_relationships_case(self, case: Family) -> None:
         """Delete association entries between a case and its samples."""
-        case_samples: List[FamilySample] = (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Family.internal_id == case_id)
-            .all()
-        )
-        if case_samples:
-            for case_sample in case_samples:
-                case_sample.delete()
-            self.commit()
+        for case_sample in case.links:
+            case_sample.delete()
+        self.commit()
 
-    def delete_case_sample_relationships(self, sample_entry_id: int):
+    def delete_relationships_sample(self, sample: Sample):
         """Delete association between all cases and the provided sample."""
-        case_samples: List[FamilySample] = (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Sample.id == sample_entry_id)
-            .all()
-        )
-        if case_samples:
-            for case_sample in case_samples:
-                case_sample.delete()
-            self.commit()
+        for case_sample in sample.links:
+            case_sample.delete()
+        self.commit()
 
-    def delete_cases_without_samples(self, case_ids) -> List[str]:
+    def delete_cases_without_samples(self, case_ids: List[str]) -> List[str]:
         """Delete cases without samples."""
         for case_id in case_ids:
             case: Family = self.Family.query.filter(Family.internal_id == case_id).first()
             if not case.links:
-                self.delete_case(case_id)
+                case.delete()
+        self.commit()

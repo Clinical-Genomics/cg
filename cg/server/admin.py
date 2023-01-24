@@ -436,32 +436,31 @@ class SampleView(BaseView):
         "Are you sure you want to cancel the selected samples?",
     )
     def cancel_samples(self, entry_ids: List[str]) -> None:
-        all_associated_cases = set()
+        all_associated_case_ids = set()
 
         for entry_id in entry_ids:
-            case_samples: List[FamilySample] = db.get_cases_from_sample(sample_entry_id=entry_id)
+            sample = db.sample_by_id(id_=entry_id)
 
-            case_ids = [case_sample.family.internal_id for case_sample in case_samples]
-            all_associated_cases.update(case_ids)
+            sample_case_ids = [case_sample.family.internal_id for case_sample in sample.links]
+            all_associated_case_ids.update(sample_case_ids)
 
-            db.delete_case_sample_relationships(sample_entry_id=entry_id)
-            self.write_cancel_comment(sample_entry_id=entry_id)
+            db.delete_relationships_sample(sample=sample)
+            self.write_cancel_comment(sample=sample)
 
-        case_ids = list(all_associated_cases)
+        case_ids = list(all_associated_case_ids)
         db.delete_cases_without_samples(case_ids=case_ids)
         cases_with_remaining_samples = db.get_cases_with_samples(case_ids=case_ids)
 
         self.display_cancel_confirmation(entry_ids, cases_with_remaining_samples)
 
-    def write_cancel_comment(self, sample_entry_id: str) -> None:
+    def write_cancel_comment(self, sample: Sample) -> None:
         username = db.user(session.get("user_email")).name
         date = datetime.now().strftime("%Y-%m-%d")
         comment = f"Cancelled {date} by {username}"
 
-        db.set_sample_comment(sample_entry_id=sample_entry_id, comment=comment)
+        db.set_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(self, entry_ids, remaining_cases) -> None:
-        # TODO: Fix formatting.
         flash(
             ngettext(
                 f"Cancelled {len(entry_ids)} samples.",
