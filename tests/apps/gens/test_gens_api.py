@@ -7,7 +7,7 @@ from cg.apps.gens import GensAPI
 from cg.utils.commands import Process
 
 
-def test_instantiate(gens_config: Dict[str, Dict[str, str]],):
+def test_instantiate(gens_config: Dict[str, Dict[str, str]]):
     """Test to instantiate GensAPI."""
     # GIVEN a Gens API config dictionary
 
@@ -34,7 +34,7 @@ def test_gens_api_load(
     # WHEN uploading a sample with the API, using a mocked Process.run_command method
     api = GensAPI(gens_config)
     mocked_run_command = mocker.patch.object(Process, "run_command")
-    api.upload(
+    api.load(
         sample_id=sample_id,
         genome_build=genome_build,
         baf_path=baf_path,
