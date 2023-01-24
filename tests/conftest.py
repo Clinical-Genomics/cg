@@ -320,6 +320,17 @@ def fixture_genotype_config() -> dict:
     }
 
 
+@pytest.fixture(name="gens_config")
+def fixture_gens_config() -> Dict[str, Dict[str, str]]:
+    """Gens config fixture."""
+    return {
+        "gens": {
+            "config_path": "config/path",
+            "binary_path": "gens",
+        }
+    }
+
+
 # Api fixtures
 
 
