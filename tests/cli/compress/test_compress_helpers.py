@@ -36,7 +36,7 @@ def test_set_memory_according_to_reads_when_few_reads(sample_id: str):
     # WHEN setting memory according to reads
     memory: int = set_memory_according_to_reads(sample_id=sample_id, sample_reads=1)
 
-    # THEN memory should be 1
+    # THEN memory should be set to the minimum
     assert memory == CRUNCHY_MIN_GB_PER_PROCESS
 
 
