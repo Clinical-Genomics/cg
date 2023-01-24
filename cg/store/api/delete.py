@@ -37,9 +37,11 @@ class DeleteDataHandler(BaseHandler):
 
     def delete_case_sample_relationships(self, sample_entry_id: int):
         """Delete association between all cases and the provided sample."""
-        case_samples: List[FamilySample] = self.FamilySample.query.filter(
-            self.Sample.id == sample_entry_id
-        ).all()
+        case_samples: List[FamilySample] = (
+            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
+            .filter(Sample.id == sample_entry_id)
+            .all()
+        )
         if case_samples:
             for case_sample in case_samples:
                 case_sample.delete()

@@ -109,20 +109,28 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     assert application_version.application == application
 
 
-def test_find_samples_associated_with_case(case_id: str, rml_pool_store: Store):
+def test_find_single_case_for_sample(sample_id_in_single_case: str, dummy_store: Store):
     """Test that cases associated with a sample can be found."""
 
-    # GIVEN a database containing a case associated with a sample
-    samples = rml_pool_store.samples().all()
-    entry_id = samples[0].id
-    case_samples: List[models.FamilySample] = rml_pool_store.get_cases_from_sample(
-        sample_entry_id=entry_id
-    )
+    # GIVEN a database containing a sample associated with a single case
+    sample: models.Sample = dummy_store.sample(internal_id=sample_id_in_single_case)
 
-    assert case_samples
+    assert sample
 
-    # WHEN the cases associated with the samples is fetched
-    cases = rml_pool_store.get_cases_from_sample(sample_entry_id=entry_id)
+    # WHEN the cases associated with the sample is fetched
+    cases: List[models.FamilySample] = dummy_store.get_cases_from_sample(sample_entry_id=sample.id)
 
-    # THEN the associated cases should contain the case id.
-    assert case_id == cases[0].family.internal_id
+    # THEN only one case is found
+    assert cases and len(cases) == 1
+
+
+def test_find_multiple_cases_for_sample(sample_id_in_multiple_cases: str, dummy_store: Store):
+    # GIVEN a database containing a sample associated with multiple cases
+    sample: models.Sample = dummy_store.sample(internal_id=sample_id_in_multiple_cases)
+    assert sample
+
+    # WHEN the cases associated with the sample is fetched
+    cases: List[models.FamilySample] = dummy_store.get_cases_from_sample(sample_entry_id=sample.id)
+
+    # THEN multiple cases are found
+    assert cases and len(cases) > 1

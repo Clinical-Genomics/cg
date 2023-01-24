@@ -439,8 +439,9 @@ class SampleView(BaseView):
         all_associated_cases = set()
 
         for entry_id in entry_ids:
-            case_samples = db.get_cases_from_sample(sample_entry_id=entry_id)
-            case_ids = [case.family.internal_id for case in case_samples]
+            case_samples: List[FamilySample] = db.get_cases_from_sample(sample_entry_id=entry_id)
+
+            case_ids = [case_sample.family.internal_id for case_sample in case_samples]
             all_associated_cases.update(case_ids)
 
             db.delete_case_sample_relationships(sample_entry_id=entry_id)
@@ -453,16 +454,11 @@ class SampleView(BaseView):
         self.display_cancel_confirmation(entry_ids, cases_with_remaining_samples)
 
     def write_cancel_comment(self, sample_entry_id: str) -> None:
-        try:
-            username = db.user(session.get("user_email")).name
-            date = datetime.now().strftime("%Y-%m-%d")
-            comment = f"Cancelled {date} by {username}"
+        username = db.user(session.get("user_email")).name
+        date = datetime.now().strftime("%Y-%m-%d")
+        comment = f"Cancelled {date} by {username}"
 
-            db.set_sample_comment(sample_entry_id=sample_entry_id, comment=comment)
-
-        except Exception as ex:
-            if not self.handle_view_exception(ex):
-                raise
+        db.set_sample_comment(sample_entry_id=sample_entry_id, comment=comment)
 
     def display_cancel_confirmation(self, entry_ids, remaining_cases) -> None:
         # TODO: Fix formatting.
