@@ -113,7 +113,7 @@ def fixture_compress_case_info(
 @pytest.fixture(name="populated_compress_store")
 def fixture_populated_compress_store(store, helpers, compress_case_info, analysis_family):
     """Return a store populated with a completed analysis."""
-    # Make sure that there is a case where anaylsis is completer
+    # Make sure that there is a case where analysis is completed
     helpers.ensure_case_from_dict(
         store,
         case_info=analysis_family,
@@ -171,7 +171,7 @@ def fixture_real_populated_compress_context(
     populated_compress_store: Store,
     cg_config_object: CGConfig,
 ) -> CGConfig:
-    """Return a compress context populated with a completed analysis"""
+    """Return a compress context populated with a completed analysis."""
     # Make sure that there is a case where analysis is completed
     cg_config_object.meta_apis["compress_api"] = real_populated_compress_fastq_api
     cg_config_object.status_db_ = populated_compress_store
