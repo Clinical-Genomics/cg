@@ -464,9 +464,9 @@ class SampleView(BaseView):
         case_message = ""
 
         for case_id in remaining_cases:
-            case_message + f" {case_id},"
+            case_message = case_message + f" {case_id},"
         
-        case_message.strip(",")
+        case_message = case_message.strip(",")
 
         if remaining_cases:
             message = f"Cancelled {len(entry_ids)} samples. Found {len(remaining_cases)} cases with additional samples: {case_message}."
