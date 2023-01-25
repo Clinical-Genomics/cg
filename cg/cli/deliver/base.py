@@ -44,6 +44,13 @@ def deliver():
 @click.option(
     "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
 )
+@click.option(
+    "-i",
+    "--ignore-errors",
+    help="Ignore errors due to missing case bundles",
+    is_flag=True,
+    default=False,
+)
 @FORCE_ALL
 @click.pass_obj
 def deliver_analysis(
@@ -53,6 +60,7 @@ def deliver_analysis(
     delivery_type: List[str],
     dry_run: bool,
     force_all: bool,
+    ignore_errors: bool,
 ):
     """Deliver analysis files to customer inbox
 
@@ -78,6 +86,7 @@ def deliver_analysis(
             project_base_path=Path(inbox),
             delivery_type=delivery,
             force_all=force_all,
+            ignore_missing_bundles=ignore_errors,
         )
         deliver_api.set_dry_run(dry_run)
         cases: List[models.Family] = []
