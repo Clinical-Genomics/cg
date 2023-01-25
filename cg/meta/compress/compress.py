@@ -151,7 +151,7 @@ class CompressAPI:
         for run_name in sample_fastq:
             compression: CompressionData = sample_fastq[run_name]["compression_data"]
 
-            if not self.crunchy_api.is_fastq_compression_done(compression_obj=compression):
+            if not self.crunchy_api.is_fastq_compression_done(compression=compression):
                 LOG.info(f"FASTQ compression not done for sample {sample_id}, run {run_name}")
                 all_cleaned = False
                 continue
@@ -176,19 +176,19 @@ class CompressAPI:
             )
         return all_cleaned
 
-    def add_decompressed_fastq(self, sample_obj: Sample) -> bool:
+    def add_decompressed_fastq(self, sample: Sample) -> bool:
         """Adds unpacked FASTQ files to Housekeeper."""
-        LOG.info(f"Adds FASTQ to Housekeeper for {sample_obj.internal_id}")
-        version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample_obj.internal_id)
+        LOG.info(f"Adds FASTQ to Housekeeper for {sample.internal_id}")
+        version: Version = self.hk_api.get_latest_bundle_version(bundle_name=sample.internal_id)
         if not version:
             return False
 
         spring_paths: List[CompressionData] = files.get_spring_paths(version_obj=version)
         if not spring_paths:
-            LOG.warning(f"Could not find any spring paths for {sample_obj.internal_id}")
+            LOG.warning(f"Could not find any spring paths for {sample.internal_id}")
         for compression in spring_paths:
             if not self.crunchy_api.is_spring_decompression_done(compression):
-                LOG.info(f"SPRING to FASTQ decompression not finished {sample_obj.internal_id}")
+                LOG.info(f"SPRING to FASTQ decompression not finished {sample.internal_id}")
                 return False
 
             fastq_first: Path = compression.fastq_first
@@ -200,12 +200,10 @@ class CompressAPI:
                 continue
 
             LOG.info(
-                f"Adding decompressed FASTQ files to Housekeeper for sample {sample_obj.internal_id}"
+                f"Adding decompressed FASTQ files to Housekeeper for sample {sample.internal_id}"
             )
 
-            self.add_fastq_hk(
-                sample_obj=sample_obj, fastq_first=fastq_first, fastq_second=fastq_second
-            )
+            self.add_fastq_hk(sample_obj=sample, fastq_first=fastq_first, fastq_second=fastq_second)
         return True
 
     def delete_fastq_housekeeper(self, hk_fastq_first: File, hk_fastq_second: File) -> None:

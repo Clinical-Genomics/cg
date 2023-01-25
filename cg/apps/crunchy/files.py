@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from cg.constants.constants import FileFormat
-from cg.io.controller import ReadFile, ReadStream, WriteStream, WriteFile
+from cg.io.controller import ReadFile, ReadStream, WriteFile
 from cg.utils.date import get_date
 from cgmodels.crunchy.metadata import CrunchyFile, CrunchyMetadata
 
 LOG = logging.getLogger(__name__)
 
+NR_OF_FILES_IN_METADATA = 3
 
 # Methods to get file information
 def get_log_dir(file_path: Path) -> Path:
@@ -40,8 +41,8 @@ def get_tmp_dir(prefix: str, suffix: str, base: str = None) -> str:
 
 
 def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
-    """Validate content of metadata file and return mapped content"""
-    LOG.info("Fetch SPRING metadata from %s", metadata_path)
+    """Validate content of metadata file and return mapped content."""
+    LOG.info(f"Fetch SPRING metadata from {metadata_path}")
     try:
         content: List[Dict[str, str]] = ReadFile.get_content_from_file(
             file_format=FileFormat.JSON, file_path=metadata_path
@@ -52,9 +53,11 @@ def get_crunchy_metadata(metadata_path: Path) -> CrunchyMetadata:
         raise SyntaxError(message)
     metadata = CrunchyMetadata(files=content)
 
-    if len(metadata.files) != 3:
-        LOG.warning("Wrong number of files in SPRING metadata file: %s", metadata_path)
-        LOG.info("Found %s files, should always be 3 files", len(metadata.files))
+    if len(metadata.files) != NR_OF_FILES_IN_METADATA:
+        LOG.warning(f"Wrong number of files in SPRING metadata file: {metadata_path}")
+        LOG.info(
+            f"Found {len(metadata.files)} files, should always be {NR_OF_FILES_IN_METADATA} files"
+        )
         raise SyntaxError
 
     return metadata
@@ -82,18 +85,34 @@ def get_spring_archive_files(crunchy_metadata: CrunchyMetadata) -> Dict[str, Cru
     return archive_files
 
 
-def update_metadata_date(spring_metadata_path: Path) -> None:
-    """Update date in the SPRING metadata file to today date"""
-
-    now: datetime = get_date()
-    spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_path)
-    LOG.info("Adding today date to SPRING metadata file")
-    for file_info in spring_metadata.files:
-        file_info.updated = now.date()
-
+def write_metadata_content(spring_metadata: CrunchyMetadata, spring_metadata_path: Path) -> None:
+    """Update the file on disk."""
     content: dict = ReadStream.get_content_from_stream(
         file_format=FileFormat.JSON, stream=spring_metadata.json(exclude_none=True)
     )
     WriteFile.write_file_from_content(
         content=content["files"], file_format=FileFormat.JSON, file_path=spring_metadata_path
+    )
+
+
+def update_metadata_date(spring_metadata_path: Path) -> None:
+    """Update date in the SPRING metadata file to today date"""
+    now: datetime = get_date()
+    spring_metadata: CrunchyMetadata = get_crunchy_metadata(spring_metadata_path)
+    LOG.info("Adding today date to SPRING metadata file")
+    for file_info in spring_metadata.files:
+        file_info.updated = now.date()
+    write_metadata_content(
+        spring_metadata=spring_metadata, spring_metadata_path=spring_metadata_path
+    )
+
+
+def update_metadata_paths(spring_metadata_path: Path, new_parent_path: Path) -> None:
+    """Update paths for file in SPRING metadata file."""
+    spring_metadata: CrunchyMetadata = get_crunchy_metadata(metadata_path=spring_metadata_path)
+    LOG.info(f"Updating file paths in SPRING metadata file: {spring_metadata_path}")
+    for file in spring_metadata.files:
+        file.path = Path(new_parent_path, Path(file.path).name)
+    write_metadata_content(
+        spring_metadata=spring_metadata, spring_metadata_path=spring_metadata_path
     )

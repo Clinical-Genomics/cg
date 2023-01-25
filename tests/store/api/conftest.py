@@ -35,42 +35,34 @@ class StoreCheckers:
 
     @staticmethod
     def version_exists_in_store(store: Store, application: ApplicationVersionSchema):
-        """Check if the given raw version exists in the store"""
+        """Check if the given raw version exists in the store."""
         db_versions: List[models.Application] = StoreCheckers.get_versions_from_store(
             store=store, application_tag=application.app_tag
         )
-
-        for db_version in db_versions:
-            if versions_are_same(version_obj=db_version, application_version=application):
-                return True
-
-        return False
+        return any(
+            versions_are_same(version_obj=db_version, application_version=application)
+            for db_version in db_versions
+        )
 
     @staticmethod
     def all_versions_exist_in_store(store: Store, excel_path: str):
-        """Check if all versions in the excel exists in the store"""
+        """Check if all versions in the Excel exists in the store."""
         applications: Iterable[ApplicationVersionSchema] = parse_application_versions(
             excel_path=excel_path
         )
-
-        for application in applications:
-            if not StoreCheckers.version_exists_in_store(store=store, application=application):
-                return False
-
-        return True
+        return all(
+            StoreCheckers.version_exists_in_store(store=store, application=application)
+            for application in applications
+        )
 
     @staticmethod
     def all_applications_exists(store: Store, applications_file: str):
-        """Check if all applications in the excel exists in the store"""
+        """Check if all applications in the Excel exists in the store."""
         applications: Iterable[ApplicationSchema] = parse_applications(excel_path=applications_file)
-
-        for application in applications:
-            if not StoreCheckers.exists_application_in_store(
-                store=store, application_tag=application.tag
-            ):
-                return False
-
-        return True
+        return all(
+            StoreCheckers.exists_application_in_store(store=store, application_tag=application.tag)
+            for application in applications
+        )
 
     @staticmethod
     def exists_application_in_store(store: Store, application_tag: str):

@@ -127,6 +127,7 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+    VCF: str = ".vcf"
 
 
 class APIMethods(StrEnum):
