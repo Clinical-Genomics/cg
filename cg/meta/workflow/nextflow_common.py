@@ -79,9 +79,10 @@ class NextflowAnalysisAPI:
             )
 
     @classmethod
-    def make_case_folder(cls, case_id: str, root_dir: str) -> None:
+    def make_case_folder(cls, case_id: str, root_dir: str, dry_run: bool = False) -> None:
         """Make the case folder where analysis should be located."""
-        os.makedirs(cls.get_case_path(case_id, root_dir), exist_ok=True)
+        if not dry_run:
+            os.makedirs(cls.get_case_path(case_id=case_id, root_dir=root_dir), exist_ok=True)
 
     @classmethod
     def extract_read_files(cls, read_nb: int, metadata: list) -> List[str]:
@@ -104,13 +105,37 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_verified_arguments_nextflow(
-        cls, case_id: str, log: Path, pipeline: str, root_dir: str
+        cls, case_id: str, pipeline: str, root_dir: str, log: Path, bg: bool, quiet: bool
     ) -> dict:
         """Transforms click argument related to nextflow that were left empty
         into defaults constructed with case_id paths."""
 
         return {
-            "-log": NextflowAnalysisAPI.get_log_path(case_id, pipeline, root_dir, log),
+            "-bg": bg,
+            "-quiet": quiet,
+            "-log": cls.get_log_path(case_id, pipeline, root_dir, log),
+        }
+
+    @classmethod
+    def get_verified_arguments_run(
+        cls,
+        case_id: str,
+        root_dir: str,
+        work_dir: str,
+        resume: bool,
+        profile: bool,
+        with_tower: bool,
+        stub: bool,
+    ) -> dict:
+        """Transforms click argument related to nextflow run that were left empty
+        into defaults constructed with case_id paths."""
+
+        return {
+            "-w": cls.get_workdir_path(case_id=case_id, root_dir=root_dir, work_dir=work_dir),
+            "-resume": resume,
+            "-profile": profile,
+            "-with-tower": with_tower,
+            "-stub": stub,
         }
 
     @classmethod

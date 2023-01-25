@@ -8,6 +8,7 @@ from typing_extensions import Literal
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.constants.constants import CaseActions
 from cg.store import models
+from cg.store.models import Family
 from cg.store.status_analysis_filters import apply_analysis_filter
 from cg.store.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
@@ -214,6 +215,22 @@ class StatusHandler(BaseHandler):
     def set_sample_comment(self, sample: models.Sample, comment: str) -> None:
         sample.comment = comment
         self.commit()
+
+    def _get_case_query(self) -> Query:
+        """Return case query."""
+        return self.query(Family)
+
+    def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
+        """Return all cases that are ready to be compressed by SPRING."""
+        filter_functions: List[str] = [
+            "inactive_analysis_cases",
+            "new_cases",
+        ]
+        for filter_function in filter_functions:
+            cases: List[Family] = apply_case_filter(
+                function=filter_function, cases=self._get_case_query(), date=date_threshold
+            )
+        return cases
 
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:

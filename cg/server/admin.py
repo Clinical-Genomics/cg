@@ -3,6 +3,7 @@ from datetime import datetime
 from gettext import ngettext, gettext
 from typing import List, Union
 
+from cgmodels.cg.constants import Pipeline
 from flask import redirect, request, session, url_for, flash
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
@@ -10,7 +11,7 @@ from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import DataDelivery, Pipeline, CaseActions
+from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
 from cg.store.models import Family, Sample
 from cg.utils.flask.enum import SelectEnumField
