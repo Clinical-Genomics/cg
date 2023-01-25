@@ -9,7 +9,7 @@ from housekeeper.store.models import Version
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import helpers
 from cg.cli.compress.helpers import set_memory_according_to_reads
-from cg.constants.compression import MAX_READS_PER_GB
+from cg.constants.compression import MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
 from cg.constants.slurm import Slurm
 
 
@@ -36,8 +36,8 @@ def test_set_memory_according_to_reads_when_few_reads(sample_id: str):
     # WHEN setting memory according to reads
     memory: int = set_memory_according_to_reads(sample_id=sample_id, sample_reads=1)
 
-    # THEN memory should be 1
-    assert memory == 1
+    # THEN memory should be set to the minimum
+    assert memory == CRUNCHY_MIN_GB_PER_PROCESS
 
 
 def test_set_memory_according_to_reads_when_many_reads(sample_id: str):
@@ -59,11 +59,11 @@ def test_set_memory_according_to_reads(sample_id: str):
 
     # WHEN setting memory according to reads
     memory: int = set_memory_according_to_reads(
-        sample_id=sample_id, sample_reads=MAX_READS_PER_GB * 10
+        sample_id=sample_id, sample_reads=MAX_READS_PER_GB * 100
     )
 
     # THEN memory should be adjusted
-    assert memory == 10
+    assert memory == 100
 
 
 def test_get_true_dir_no_symlinks(project_dir: Path):
