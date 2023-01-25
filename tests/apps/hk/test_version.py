@@ -119,7 +119,7 @@ def test_get_latest_bundle_version_no_housekeeper_bundle(
     assert res is None
 
     # THEN assert that no bundle is found
-    assert f"No bundle found for {case_id} in housekeeper" in caplog.text
+    assert f"No bundle found for {case_id} in Housekeeper" in caplog.text
 
 
 def test_get_latest_bundle_version_with_housekeeper_bundle(
