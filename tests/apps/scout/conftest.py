@@ -11,6 +11,27 @@ from cg.constants.subject import Gender, PhenotypeStatus, RelationshipStatus
 from cg.io.controller import ReadFile
 from tests.mocks.process_mock import ProcessMock
 
+SCOUT_INDIVIDUAL_DICT = {
+    "alignment_path": Path("path", "to", "sample.bam").as_posix(),
+    "analysis_type": "wgs",
+    "capture_kit": None,
+    "mitodel_file": Path("path", "to", "mitodel.txt").as_posix(),
+    "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
+    "reviewer": {
+        "alignment": Path("path", "to", "expansionhunter.bam").as_posix(),
+        "alignment_index": Path("path", "to", "expansionhunter.bam.bai").as_posix(),
+        "catalog": Path("path", "to", "variant_catalog.json").as_posix(),
+        "vcf": Path("path", "to", "expansionhunter.vcf").as_posix(),
+    },
+    "sample_id": "sample_id",
+    "sample_name": "sample_name",
+    "tissue_type": "unknown",
+    Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
+    Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
+    Pedigree.PHENOTYPE: PhenotypeStatus.AFFECTED,
+    Pedigree.SEX: Gender.MALE,
+}
+
 
 class MockScoutApi(ScoutAPI):
     def __init__(self, config: dict):
@@ -19,29 +40,10 @@ class MockScoutApi(ScoutAPI):
         self.process = ProcessMock(binary=binary_path, config=config_path)
 
 
-@pytest.fixture(name="sample_dict")
-def fixture_sample_dict() -> dict:
-    sample_dict = {
-        "analysis_type": "wgs",
-        "bam_path": Path("path", "to", "sample.bam").as_posix(),
-        "mt_bam": Path("path", "to", "reduced_mt.bam").as_posix(),
-        "reviewer": {
-            "alignment": Path("path", "to", "expansionhunter.bam").as_posix(),
-            "alignment_index": Path("path", "to", "expansionhunter.bam.bai").as_posix(),
-            "vcf": Path("path", "to", "expansionhunter.vcf").as_posix(),
-            "catalog": Path("path", "to", "variant_catalog.json").as_posix(),
-        },
-        "mitodel_file": Path("path", "to", "mitodel.txt").as_posix(),
-        "capture_kit": None,
-        Pedigree.FATHER: RelationshipStatus.HAS_NO_PARENT,
-        Pedigree.MOTHER: RelationshipStatus.HAS_NO_PARENT,
-        "sample_id": "sample_id",
-        "sample_name": "sample_name",
-        Pedigree.SEX: Gender.MALE,
-        "tissue_type": "unknown",
-        Pedigree.PHENOTYPE: PhenotypeStatus.AFFECTED,
-    }
-    return dict(sample_dict)
+@pytest.fixture(name="scout_individual_dict")
+def fixture_scout_individual_dict() -> dict:
+    """Returns a dict template for a ScoutIndividual."""
+    return SCOUT_INDIVIDUAL_DICT
 
 
 @pytest.fixture(name="omim_disease_nr")
