@@ -6,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from cg.models.scout import scout_load_config
-from cg.models.scout.scout_load_config import ScoutMipIndividual, MipLoadConfig
+from cg.models.scout.scout_load_config import MipLoadConfig, ScoutMipIndividual
 from tests.apps.scout.conftest import SCOUT_INDIVIDUAL_DICT
 
 
