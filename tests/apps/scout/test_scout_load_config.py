@@ -17,10 +17,14 @@ def test_validate_individual_display_name(sample_dict):
     # THEN assert that the display name is correct
     assert ind_obj.sample_name == sample["sample_name"]
 
+
 @pytest.mark.parametrize(
     "key, value",
     [
-        ("mt_bam", Path("path", "to", "reduced_mt.bam").as_posix(),),
+        (
+            "mt_bam",
+            Path("path", "to", "reduced_mt.bam").as_posix(),
+        ),
     ],
 )
 def test_validate_mt_bam(sample_dict, key, value):
@@ -34,6 +38,7 @@ def test_validate_mt_bam(sample_dict, key, value):
     # THEN assert that the mt_bam path is correct
     assert getattr(ind_obj, key) == value
 
+
 def test_validate_mitodel_file(sample_dict):
     """Test to validate an individual"""
     # GIVEN some sample information
@@ -44,6 +49,7 @@ def test_validate_mitodel_file(sample_dict):
 
     # THEN assert that the mmitodel path is correct
     assert ind_obj.mitodel_file == sample["mitodel_file"]
+
 
 def test_validate_reviewer_alignment(sample_dict):
     """Test to validate a reviewer alignment file for an individual."""
