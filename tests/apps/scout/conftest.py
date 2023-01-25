@@ -40,10 +40,10 @@ class MockScoutApi(ScoutAPI):
         self.process = ProcessMock(binary=binary_path, config=config_path)
 
 
-@pytest.fixture(name="scout_individual_dict")
-def fixture_scout_individual_dict() -> dict:
+@pytest.fixture(name="scout_individual")
+def fixture_scout_individual() -> dict:
     """Returns a dict template for a ScoutIndividual."""
-    return SCOUT_INDIVIDUAL_DICT
+    return SCOUT_INDIVIDUAL
 
 
 @pytest.fixture(name="omim_disease_nr")

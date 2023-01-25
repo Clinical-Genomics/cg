@@ -7,15 +7,15 @@ from pydantic import ValidationError
 
 from cg.models.scout import scout_load_config
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutMipIndividual
-from tests.apps.scout.conftest import SCOUT_INDIVIDUAL_DICT
+from tests.apps.scout.conftest import SCOUT_INDIVIDUAL
 
 
-@pytest.mark.parametrize("key, value", list(SCOUT_INDIVIDUAL_DICT.items()))
-def test_validate_scout_individual_attributes(scout_individual_dict: dict, key: str, value: Any):
+@pytest.mark.parametrize("key, value", list(SCOUT_INDIVIDUAL.items()))
+def test_validate_scout_individual_attributes(scout_individual: dict, key: str, value: Any):
     """Test to validate that all attributes of a ScoutMipIndividual are correctly set."""
     # GIVEN some sample information
     # WHEN instantiating a ScoutMipIndividual
-    ind_obj: ScoutMipIndividual = scout_load_config.ScoutMipIndividual(**scout_individual_dict)
+    ind_obj: ScoutMipIndividual = scout_load_config.ScoutMipIndividual(**scout_individual)
 
     # THEN assert that the attribute is set correctly
     assert getattr(ind_obj, key) == value
