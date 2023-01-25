@@ -68,6 +68,7 @@ def test_store_api_delete_all_empty_cases(
     assert not result
     assert case_with_samples
 
+
 def test_store_api_delete_non_existing_case(dummy_store: Store):
     """Test that nothing happens when trying to delete a case that does not exist."""
 

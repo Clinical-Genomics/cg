@@ -135,9 +135,10 @@ def test_find_multiple_cases_for_sample(sample_id_in_multiple_cases: str, dummy_
     # THEN multiple cases are found
     assert cases and len(cases) > 1
 
+
 def test_find_cases_for_non_existing_case(dummy_store: Store):
     """Test that nothing happens when trying to find a case that does not exist."""
-    
+
     # GIVEN a database containing some cases but not a specific case
     case_id = "some_case"
     case = dummy_store.family(case_id)
