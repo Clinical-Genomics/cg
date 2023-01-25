@@ -131,7 +131,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_obj: models.Sample = self.status_db.sample(sample_id)
         return bool(sample_obj.control)
 
-    def determine_samplesheet_header(
+    def get_nr_of_header_lines_in_sample_sheet(
         self,
         samplesheet_housekeeper_path: Path,
     ) -> int:
