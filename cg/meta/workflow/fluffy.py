@@ -144,7 +144,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         with samplesheet_housekeeper_path.open("r") as read_obj:
             csv_reader = reader(read_obj)
-            header_lines = 1
+            header_line_count: int = 1
             for row in csv_reader:
                 if SAMPLE_SHEET_DATA_HEADER in row:
                     break
