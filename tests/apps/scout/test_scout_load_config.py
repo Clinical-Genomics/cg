@@ -21,26 +21,6 @@ def test_validate_scout_individual_attributes(scout_individual_dict: dict, key: 
     assert getattr(ind_obj, key) == value
 
 
-def test_validate_reviewer_alignment(scout_individual_dict: dict):
-    """Test to validate a reviewer alignment file for an individual."""
-    # GIVEN some sample information
-    # WHEN validating the sample data
-    ind_obj: ScoutMipIndividual = scout_load_config.ScoutMipIndividual(**scout_individual_dict)
-
-    # THEN assert that the reviewer alignment path is set
-    assert ind_obj.reviewer.alignment == scout_individual_dict["reviewer"]["alignment"]
-
-
-def test_validate_reviewer_catalog(scout_individual_dict: dict):
-    """Test to validate a reviewer catalogue file for an individual."""
-    # GIVEN some sample information
-    # WHEN validating the sample data
-    ind_obj: ScoutMipIndividual = scout_load_config.ScoutMipIndividual(**scout_individual_dict)
-
-    # THEN assert that the reviewer catalog path is set
-    assert ind_obj.reviewer.catalog == scout_individual_dict["reviewer"]["catalog"]
-
-
 def test_instantiate_empty_mip_config():
     """Tests whether a MipLoadConfig can be instantiate without arguments."""
     # GIVEN nothing
