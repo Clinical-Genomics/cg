@@ -95,11 +95,11 @@ def store_ticket(context: click.Context, ticket: str, dry_run: bool) -> None:
     LOG.info(f"Stored fastq files for {stored_individuals} samples")
 
 
-@click.command("bundles")
+@click.command("demultiplexed-flow-cell")
 @click.argument("flow-cell-id", type=str)
 @DRY_RUN
 @click.pass_obj
-def store_bundles(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
+def store_demultiplexed_flow_cell(context: click.Context, flow_cell_id: str, dry_run: bool) -> None:
     """Include all files in a flow cell bundle and its corresponding sequencing files. Updates SPRING metadata file"""
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     status_db: Store = context.status_db

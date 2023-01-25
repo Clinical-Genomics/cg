@@ -4,11 +4,11 @@ from click.testing import CliRunner
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.store.fastq import (
-    store_sample,
     store_case,
+    store_demultiplexed_flow_cell,
     store_flow_cell,
+    store_sample,
     store_ticket,
-    store_bundles,
 )
 from cg.constants import EXIT_SUCCESS
 from cg.meta.compress import CompressAPI
@@ -176,7 +176,7 @@ def test_store_ticket(
     assert f"Stored fastq files for {sample_id}" in caplog.text
 
 
-def test_store_bundles(
+def test_store_store_demultiplexed_flow_cell(
     caplog,
     cli_runner: CliRunner,
     flow_cell_id: str,
@@ -185,7 +185,7 @@ def test_store_bundles(
     real_populated_compress_context: CGConfig,
     sample_id: str,
 ):
-    """Test to run store ticket command."""
+    """Test to run store demultiplexed flow cell command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
     sample: Sample = real_populated_compress_context.status_db.sample(sample_id)
@@ -197,8 +197,10 @@ def test_store_bundles(
     # GIVEN an updated metadata file
     mocker.patch("cg.cli.store.fastq.update_metadata_paths", return_value=None)
 
-    # WHEN running the store ticket command
-    res = cli_runner.invoke(store_bundles, [flow_cell_id], obj=real_populated_compress_context)
+    # WHEN running the store demultiplexed flow cell command
+    res = cli_runner.invoke(
+        store_demultiplexed_flow_cell, [flow_cell_id], obj=real_populated_compress_context
+    )
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
