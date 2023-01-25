@@ -11,17 +11,3 @@
     <a href="{{ url_for('google.login') }}">Login</a>
   {% endif %}
 {% endblock %}
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for category, message in messages %}
-      {% if category == "message" %}
-        <li style="color:green">{{ message }}</li>
-      {% else %}
-        <li style="color:yellow">{{ message }}</li>
-      {% endif %}
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}

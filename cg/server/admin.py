@@ -12,7 +12,7 @@ from sqlalchemy.orm import Query
 
 from cg.constants.constants import DataDelivery, Pipeline, CaseActions
 from cg.server.ext import db
-from cg.store.models import Family, Sample, FamilySample
+from cg.store.models import Family, Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -462,7 +462,6 @@ class SampleView(BaseView):
     def display_cancel_confirmation(self, entry_ids, remaining_cases):
         samples = "sample" if len(entry_ids) == 1 else "samples"
         cases = "case" if len(remaining_cases) == 1 else "cases"
-        category = "message"
 
         message = f"Cancelled {len(entry_ids)} {samples}. "
         case_message = ""
@@ -476,11 +475,10 @@ class SampleView(BaseView):
             message += (
                 f"Found {len(remaining_cases)} {cases} with additional samples: {case_message}."
             )
-            category = "warning"
         else:
             message += "No case contained additional samples."
 
-        flash(message=message, category=category)
+        flash(message=message)
 
 
 class DeliveryView(BaseView):
