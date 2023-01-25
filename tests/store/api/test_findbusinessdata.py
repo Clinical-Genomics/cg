@@ -135,8 +135,8 @@ def test_find_multiple_cases_for_sample(sample_id_in_multiple_cases: str, dummy_
     # THEN multiple cases are found
     assert cases and len(cases) > 1
 
-def test_find_samples_for_non_existing_case(dummy_store: Store):
-    """Test that nothing happens when trying to find samples for a case that does not exist."""
+def test_find_cases_for_non_existing_case(dummy_store: Store):
+    """Test that nothing happens when trying to find a case that does not exist."""
     
     # GIVEN a database containing some cases but not a specific case
     case_id = "some_case"
@@ -144,8 +144,8 @@ def test_find_samples_for_non_existing_case(dummy_store: Store):
 
     assert not case
 
-    # WHEN fetching samples for the non existing case
+    # WHEN trying to find cases with samples given the non existing case id
     cases = dummy_store.get_cases_with_samples(case_ids=[case_id])
 
-    # THEN no samples are found
+    # THEN no cases are found
     assert not cases
