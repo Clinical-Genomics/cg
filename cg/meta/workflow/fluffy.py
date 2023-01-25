@@ -136,7 +136,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         samplesheet_housekeeper_path: Path,
     ) -> int:
         """
-        Dynamically determine the header size in fluffy samplesheet and read the file.
+        Return the number of header lines in a Fluffy sample sheet.
         Any lines before and including the line starting with [Data] is considered the header.
 
         Returns:
