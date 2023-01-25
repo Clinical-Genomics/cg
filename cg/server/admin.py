@@ -460,24 +460,27 @@ class SampleView(BaseView):
         db.set_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(self, entry_ids, remaining_cases):
-        message = f"Cancelled {len(entry_ids)} samples. No case contained additional samples."
+        samples = "sample" if len(entry_ids) == 1 else "samples"
+        cases = "case" if len(remaining_cases) == 1 else "cases"
+        category = "message"
+
+        message = f"Cancelled {len(entry_ids)} {samples}. "
         case_message = ""
 
         for case_id in remaining_cases:
             case_message = case_message + f" {case_id},"
-        
+
         case_message = case_message.strip(",")
 
         if remaining_cases:
-            message = f"Cancelled {len(entry_ids)} samples. Found {len(remaining_cases)} cases with additional samples: {case_message}."
-
-        flash(
-            ngettext(
-                message,
-                message,
-                len(entry_ids),
+            message += (
+                f"Found {len(remaining_cases)} {cases} with additional samples: {case_message}."
             )
-        )
+            category = "warning"
+        else:
+            message += "No case contained additional samples."
+
+        flash(message=message, category=category)
 
 
 class DeliveryView(BaseView):
