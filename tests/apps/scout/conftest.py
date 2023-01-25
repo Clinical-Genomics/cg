@@ -11,7 +11,7 @@ from cg.constants.subject import Gender, PhenotypeStatus, RelationshipStatus
 from cg.io.controller import ReadFile
 from tests.mocks.process_mock import ProcessMock
 
-SCOUT_INDIVIDUAL_DICT = {
+SCOUT_INDIVIDUAL: dict = {
     "alignment_path": Path("path", "to", "sample.bam").as_posix(),
     "analysis_type": "wgs",
     "capture_kit": None,
