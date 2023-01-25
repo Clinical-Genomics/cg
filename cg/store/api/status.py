@@ -211,7 +211,7 @@ class StatusHandler(BaseHandler):
         case_obj.action = action
         self.commit()
 
-    def set_sample_comment(self, sample: models.Sample, comment: str):
+    def set_sample_comment(self, sample: models.Sample, comment: str) -> None:
         sample.comment = comment
         self.commit()
 

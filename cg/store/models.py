@@ -644,16 +644,6 @@ class Sample(Model, PriorityMixin):
 
         return f"Ordered {self.ordered_at.date()}"
 
-    @property
-    def cases(self) -> List[str]:
-        """Return sample cases."""
-        return self._get_cases
-
-    @property
-    def _get_cases(self) -> List[str]:
-        """Extract cases from a sample."""
-        return [link.family for link in self.links]
-
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
         data = super(Sample, self).to_dict()

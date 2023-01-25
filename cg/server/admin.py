@@ -459,7 +459,7 @@ class SampleView(BaseView):
 
         db.set_sample_comment(sample=sample, comment=comment)
 
-    def display_cancel_confirmation(self, entry_ids, remaining_cases):
+    def display_cancel_confirmation(self, entry_ids: List[str], remaining_cases: List[str]) -> None:
         samples = "sample" if len(entry_ids) == 1 else "samples"
         cases = "case" if len(remaining_cases) == 1 else "cases"
 
