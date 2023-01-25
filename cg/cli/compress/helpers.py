@@ -9,7 +9,7 @@ from typing import Iterator, Optional, List
 from housekeeper.store.models import Version, Bundle
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB
+from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
 from cg.constants.slurm import Slurm
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
@@ -66,7 +66,9 @@ def set_memory_according_to_reads(
         LOG.debug(f"No reads recorded for sample: {sample_id}")
         return
     sample_process_mem: int = ceil((sample_reads / MAX_READS_PER_GB))
-    if 1 <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
+    if sample_process_mem < CRUNCHY_MIN_GB_PER_PROCESS:
+        return CRUNCHY_MIN_GB_PER_PROCESS
+    if CRUNCHY_MIN_GB_PER_PROCESS <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
         return sample_process_mem
     return Slurm.MAX_NODE_MEMORY.value
 
