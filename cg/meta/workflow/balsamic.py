@@ -277,26 +277,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_tumor_path(sample_data: dict) -> str:
-        """Takes a dict with samples and attributes, and returns the path
-        of tumor sample.
-        If the number of paths is exactly 1, the path is returned.
-        Raises BalsamicStartError:
-            When there are no tumor samples, or more than one tumor sample
-        """
-        tumor_paths = [
-            val["concatenated_path"]
-            for key, val in sample_data.items()
-            if val["tissue_type"] == "tumor"
-        ]
-        if len(tumor_paths) != 1:
-            raise BalsamicStartError(
-                f"Invalid number of tumor samples: {len(tumor_paths)}, "
-                f"BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
-            )
-        return tumor_paths[0]
-
-    @staticmethod
     def get_verified_gender(sample_data: dict) -> Union[Gender.FEMALE, Gender.MALE]:
         """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer"""
 
@@ -315,6 +295,26 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         else:
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
+
+    @staticmethod
+    def get_verified_tumor_path(sample_data: dict) -> str:
+        """Takes a dict with samples and attributes, and returns the path
+        of tumor sample.
+        If the number of paths is exactly 1, the path is returned.
+        Raises BalsamicStartError:
+            When there are no tumor samples, or more than one tumor sample
+        """
+        tumor_paths = [
+            val["concatenated_path"]
+            for key, val in sample_data.items()
+            if val["tissue_type"] == "tumor"
+        ]
+        if len(tumor_paths) != 1:
+            raise BalsamicStartError(
+                f"Invalid number of tumor samples: {len(tumor_paths)}, "
+                f"BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
+            )
+        return tumor_paths[0]
 
     @staticmethod
     def get_verified_normal_path(sample_data: dict) -> Optional[str]:
