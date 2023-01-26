@@ -178,3 +178,23 @@ class TrailblazerAPI:
         self.query_trailblazer(
             command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
+
+    def set_analysis_status(self, case_id: str, status: str) -> datetime:
+        """Set an analysis to failed."""
+        request_body = {"case_id": case_id, "status": status}
+
+        LOG.debug(f"Request body: {request_body}")
+        LOG.info(f"Setting analysis status to failed for case {case_id}")
+        self.query_trailblazer(
+            command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
+        )
+
+    def add_comment(self, case_id: str, comment: str):
+        """Adding a comment to a trailblazer analysis."""
+        request_body = {"case_id": case_id, "comment": comment}
+
+        LOG.debug(f"Request body: {request_body}")
+        LOG.info(f"Adding comment: {comment} to case {case_id}")
+        self.query_trailblazer(
+            command="add-comment", request_body=request_body, method=APIMethods.PUT
+        )

@@ -11,10 +11,10 @@ def test_instantiate_mip_analysis(mip_analysis_raw: dict):
     # GIVEN a dictionary with the some metrics
 
     # WHEN instantiating a MipAnalysis object
-    mip_dna_analysis_object = MipAnalysis(**mip_analysis_raw)
+    mip_dna_analysis = MipAnalysis(**mip_analysis_raw)
 
     # THEN assert that it was successfully created
-    assert isinstance(mip_dna_analysis_object, MipAnalysis)
+    assert isinstance(mip_dna_analysis, MipAnalysis)
 
 
 def test_instantiate_parse_mip_analysis(
@@ -30,11 +30,11 @@ def test_instantiate_parse_mip_analysis(
     mip_analysis_api = MipAnalysisAPI(cg_context, Pipeline.MIP_DNA)
 
     # WHEN instantiating a MipAnalysis object
-    mip_dna_analysis_object = mip_analysis_api.parse_analysis(
+    mip_dna_analysis = mip_analysis_api.parse_analysis(
         config_raw=mip_analysis_config_dna_raw,
         qc_metrics_raw=mip_metrics_deliverables_raw,
         sample_info_raw=sample_info_dna_raw,
     )
 
     # THEN assert that it was successfully created
-    assert isinstance(mip_dna_analysis_object, MipAnalysis)
+    assert isinstance(mip_dna_analysis, MipAnalysis)

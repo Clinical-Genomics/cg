@@ -184,7 +184,7 @@ class ExternalDataAPI(MetaAPI):
                 self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
             )
             last_version: Version = self.housekeeper_api.get_create_version(
-                bundle=sample.internal_id
+                bundle_name=sample.internal_id
             )
             fastq_paths_to_add: List[Path] = self.get_fastq_paths_to_add(
                 customer=cust, hk_version=last_version, lims_sample_id=sample.internal_id
