@@ -1,15 +1,15 @@
 from alchy import Query
-from cg.store import models
+from cg.store.models import Sample
 
 
 def get_samples_with_loqusdb_id(samples: Query, **kwargs) -> Query:
     """Fetches samples with a loqusdb ID."""
-    return samples.filter(models.Sample.loqusdb_id.isnot(None))
+    return samples.filter(Sample.loqusdb_id.isnot(None))
 
 
 def get_samples_without_loqusdb_id(samples: Query, **kwargs) -> Query:
     """Fetches samples without a loqusdb ID."""
-    return samples.filter(models.Sample.loqusdb_id.is_(None))
+    return samples.filter(Sample.loqusdb_id.is_(None))
 
 
 def apply_sample_filter(function: str, samples: Query) -> Query:
