@@ -181,8 +181,8 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="case_id_with_single_sample")
-def case_id_with_single_sample():
-    return "screamingtiger"
+def case_id_with_single_sample(case_id: str):
+    return case_id
 
 
 @pytest.fixture(name="case_id_with_multiple_samples")
@@ -251,10 +251,7 @@ def store_with_multiple_cases_and_samples(
             case=new_case,
         )
 
-        # Add association between new case and sample that should be present in multiple cases.
         helpers.add_relationship(store=store, sample=sample_in_multiple_cases, case=new_case)
-
-        # Add association between case that should have multiple samples with the new sample.
         helpers.add_relationship(store=store, sample=new_sample, case=case_with_multiple_samples)
 
     case_without_samples = helpers.add_case(

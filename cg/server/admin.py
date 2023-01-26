@@ -445,7 +445,7 @@ class SampleView(BaseView):
         all_associated_case_ids: set = set()
 
         for entry_id in entry_ids:
-            sample: Sample = db.sample_by_id(id_=entry_id)
+            sample: Sample = db.get_sample_by_id(id_=entry_id)
 
             sample_case_ids: List[str] = [
                 case_sample.family.internal_id for case_sample in sample.links
