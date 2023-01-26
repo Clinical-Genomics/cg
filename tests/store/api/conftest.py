@@ -182,26 +182,31 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 @pytest.fixture(name="case_id_with_single_sample")
 def case_id_with_single_sample(case_id: str):
+    """Return a case id that should only be associated with one sample."""
     return case_id
 
 
 @pytest.fixture(name="case_id_with_multiple_samples")
 def case_id_with_multiple_samples():
+    """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
 @pytest.fixture(name="case_id_without_samples")
 def case_id_without_samples():
+    """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
 @pytest.fixture(name="sample_id_in_single_case")
 def sample_id_in_single_case():
+    """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
 @pytest.fixture(name="sample_id_in_multiple_cases")
 def sample_id_in_multiple_cases():
+    """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
 
 
@@ -215,6 +220,7 @@ def store_with_multiple_cases_and_samples(
     helpers,
     store: Store,
 ):
+    """Return a store that should contain multiple cases and samples."""
     sample_in_multiple_cases = helpers.add_sample(
         store=store, internal_id=sample_id_in_multiple_cases
     )
