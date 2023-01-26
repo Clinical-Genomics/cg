@@ -1,18 +1,19 @@
 """Handler to delete data objects"""
 
 from typing import List
-from cg.store.models import Flowcell, Family, FamilySample, Sample
+from cg.store.models import Flowcell, Family, Sample
 from cg.store.api.base import BaseHandler
 
 
 class DeleteDataHandler(BaseHandler):
     """Contains methods to delete business data model instances"""
 
-    def delete_flowcell(self, flowcell_name: str) -> None:
-        flowcell: Flowcell = self.Flowcell.query.filter(Flowcell.name == flowcell_name).first()
-        if flowcell:
-            flowcell.delete()
-            flowcell.flush()
+    def delete_flow_cell(self, flow_cell_name: str) -> None:
+        flow_cell: Flowcell = self.Flowcell.query.filter(Flowcell.name == flow_cell_name).first()
+
+        if flow_cell:
+            flow_cell.delete()
+            flow_cell.flush()
             self.commit()
 
     def delete_relationships_sample(self, sample: Sample) -> None:

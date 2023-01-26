@@ -212,8 +212,12 @@ class StatusHandler(BaseHandler):
         case_obj.action = action
         self.commit()
 
-    def set_sample_comment(self, sample: models.Sample, comment: str) -> None:
-        sample.comment = comment
+    def add_sample_comment(self, sample: models.Sample, comment: str) -> None:
+        """Update comment on sample with the provided comment."""
+        if sample.comment:
+            sample.comment = sample.commnent + " " + comment
+        else:
+            sample.comment = comment
         self.commit()
 
     def _get_case_query(self) -> Query:

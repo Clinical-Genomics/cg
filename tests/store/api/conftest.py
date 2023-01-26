@@ -1,7 +1,7 @@
 import datetime as dt
 import pytest
 
-from typing import Iterable, List
+from typing import Iterable, List, Tuple
 
 from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
@@ -205,8 +205,8 @@ def sample_id_in_multiple_cases():
     return "ASM2"
 
 
-@pytest.fixture(name="dummy_store")
-def fixture_dummy_store(
+@pytest.fixture(name="store_with_multiple_cases_and_samples")
+def store_with_multiple_cases_and_samples(
     case_id_without_samples: str,
     case_id_with_single_sample: str,
     case_id_with_multiple_samples: str,
@@ -229,15 +229,15 @@ def fixture_dummy_store(
         store=store, sample=sample_in_multiple_cases, case=case_with_multiple_samples
     )
 
-    seed_data = [
+    case_and_sample_relations: List[Tuple[str, str, str]] = [
         ("angrypanda", "AAM5", "case_1"),
         ("jealousbutterfly", "AAM6", "case_2"),
         ("lonesomespider", "AAM7", "case_3"),
         ("happysnail", "AAM8", "case_4"),
     ]
 
-    for data in seed_data:
-        case_id, sample_id, case_name = data
+    for case_and_sample_relation in case_and_sample_relations:
+        case_id, sample_id, case_name = case_and_sample_relation
 
         new_case = helpers.add_case(store=store, internal_id=case_id, name=case_name)
         store.add_commit(new_case)

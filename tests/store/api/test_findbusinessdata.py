@@ -109,44 +109,56 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     assert application_version.application == application
 
 
-def test_find_single_case_for_sample(sample_id_in_single_case: str, dummy_store: Store):
+def test_find_single_case_for_sample(
+    sample_id_in_single_case: str, store_with_multiple_cases_and_samples: Store
+):
     """Test that cases associated with a sample can be found."""
 
     # GIVEN a database containing a sample associated with a single case
-    sample: models.Sample = dummy_store.sample(internal_id=sample_id_in_single_case)
+    sample: models.Sample = store_with_multiple_cases_and_samples.sample(
+        internal_id=sample_id_in_single_case
+    )
 
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[models.FamilySample] = dummy_store.get_cases_from_sample(sample_entry_id=sample.id)
+    cases: List[models.FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+        sample_entry_id=sample.id
+    )
 
     # THEN only one case is found
     assert cases and len(cases) == 1
 
 
-def test_find_multiple_cases_for_sample(sample_id_in_multiple_cases: str, dummy_store: Store):
+def test_find_multiple_cases_for_sample(
+    sample_id_in_multiple_cases: str, store_with_multiple_cases_and_samples: Store
+):
     # GIVEN a database containing a sample associated with multiple cases
-    sample: models.Sample = dummy_store.sample(internal_id=sample_id_in_multiple_cases)
+    sample: models.Sample = store_with_multiple_cases_and_samples.sample(
+        internal_id=sample_id_in_multiple_cases
+    )
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[models.FamilySample] = dummy_store.get_cases_from_sample(sample_entry_id=sample.id)
+    cases: List[models.FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+        sample_entry_id=sample.id
+    )
 
     # THEN multiple cases are found
     assert cases and len(cases) > 1
 
 
-def test_find_cases_for_non_existing_case(dummy_store: Store):
+def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples: Store):
     """Test that nothing happens when trying to find a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
     case_id = "some_case"
-    case = dummy_store.family(case_id)
+    case = store_with_multiple_cases_and_samples.family(case_id)
 
     assert not case
 
     # WHEN trying to find cases with samples given the non existing case id
-    cases = dummy_store.get_cases_with_samples(case_ids=[case_id])
+    cases = store_with_multiple_cases_and_samples.get_cases_with_samples(case_ids=[case_id])
 
     # THEN no cases are found
     assert not cases
