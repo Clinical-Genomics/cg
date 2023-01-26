@@ -503,6 +503,12 @@ def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "balsamic")
 
 
+@pytest.fixture(name="balsamic_fastq_dir")
+def fixture_balsamic_fastq_dir(analysis_dir: Path) -> Path:
+    """Return the path to the balsamic fastq directory."""
+    return Path(analysis_dir, "fastq")
+
+
 @pytest.fixture(name="balsamic_wgs_analysis_dir")
 def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""

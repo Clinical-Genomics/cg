@@ -10,7 +10,7 @@ from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
@@ -177,11 +177,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return sample_obj.sex
 
     @staticmethod
-    def get_sample_type(sample_obj: models.Sample) -> str:
-        """Returns tissue type of a sample"""
+    def get_sample_type(sample_obj: models.Sample) -> SampleType:
+        """Returns tissue type of sample."""
         if sample_obj.is_tumour:
-            return "tumor"
-        return "normal"
+            return SampleType.TUMOR
+        return SampleType.NORMAL
 
     def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
         """Returns the verified capture kit path or extracts the derived panel bed"""
@@ -296,47 +296,54 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    @staticmethod
-    def get_verified_tumor_path(sample_data: dict) -> str:
-        """Takes a dict with samples and attributes, and returns the path
-        of tumor sample.
-        If the number of paths is exactly 1, the path is returned.
-        Raises BalsamicStartError:
-            When there are no tumor samples, or more than one tumor sample
-        """
-        tumor_paths = [
-            val["concatenated_path"]
-            for key, val in sample_data.items()
-            if val["tissue_type"] == "tumor"
-        ]
-        if len(tumor_paths) != 1:
-            raise BalsamicStartError(
-                f"Invalid number of tumor samples: {len(tumor_paths)}, "
-                f"BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
+    def get_verified_samples(self, case_id: str, sample_data: dict) -> dict:
+        """Return a verified tumor and normal sample dictionary."""
+        tumor_name: str = self.status_db.get_sample_name_by_type(
+            case_id=case_id, sample_type=SampleType.TUMOR
+        )
+        tumor_path: str = self.get_verified_sample_path(
+            sample_data=sample_data, sample_type=SampleType.TUMOR
+        )
+        normal_name: str = self.status_db.get_sample_name_by_type(
+            case_id=case_id, sample_type=SampleType.NORMAL
+        )
+        normal_path: str = self.get_verified_sample_path(
+            sample_data=sample_data, sample_type=SampleType.NORMAL
+        )
+
+        if not tumor_path and not normal_path:
+            LOG.error(f"No tumor or normal samples were found for case {case_id}.")
+            raise BalsamicStartError
+
+        if normal_path and not tumor_path:
+            LOG.warning(
+                f"Only a normal sample was found for case {case_id}. "
+                f"Balsamic analysis will treat it as a {SampleType.TUMOR.value} sample."
             )
-        return tumor_paths[0]
+            tumor_name, tumor_path = normal_name, normal_path
+
+        return {
+            "tumor_sample_name": tumor_name,
+            "tumor": tumor_path,
+            "normal_sample_name": normal_name,
+            "normal": normal_path,
+        }
 
     @staticmethod
-    def get_verified_normal_path(sample_data: dict) -> Optional[str]:
-        """Takes a dict with samples and attributes, and retrieves the path
-        of normal sample.
-        If the number of paths is exactly 1, the path is returned.
-        If there are no paths, then the sample is not paired, and None is returned.
-        Raises BalsamicStartError:
-            When there is more than one normal sample.
-        """
-        normal_paths = [
+    def get_verified_sample_path(sample_data: dict, sample_type: SampleType) -> Optional[str]:
+        """Return a verified tumor or normal sample path."""
+        sample_path: Optional[list] = [
             val["concatenated_path"]
             for key, val in sample_data.items()
-            if val["tissue_type"] == "normal"
+            if val["tissue_type"] == sample_type
         ]
-        if len(normal_paths) > 1:
-            raise BalsamicStartError(
-                f"Invalid number of normal samples: {len(normal_paths)}, only up to 1 allowed!!"
+        if len(sample_path) > 1:
+            LOG.error(
+                f"Invalid number of {sample_type.value} samples: {len(sample_path)}."
+                f"Balsamic analysis requires a single {sample_type.value} sample per case to run successfully."
             )
-        if not normal_paths:
-            return None
-        return normal_paths[0]
+            raise BalsamicStartError
+        return sample_path[0] if sample_path else None
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
@@ -413,29 +420,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return metrics
 
-    def get_tumor_sample_name(self, case_id: str) -> Optional[str]:
-        sample_obj = (
-            self.status_db.query(models.Sample)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .filter(models.Sample.is_tumour == True)
-            .first()
-        )
-        if sample_obj:
-            return sample_obj.internal_id
-
-    def get_normal_sample_name(self, case_id: str) -> Optional[str]:
-
-        sample_obj = (
-            self.status_db.query(models.Sample)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .filter(models.Sample.is_tumour == False)
-            .first()
-        )
-        if sample_obj:
-            return sample_obj.internal_id
-
     @staticmethod
     def get_latest_file_by_pattern(directory: Path, pattern: str) -> Optional[str]:
         """Returns the latest file (<file_name>-<date>-.vcf.gz) matching a pattern from a specific directory."""
@@ -500,15 +484,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
             "gender": gender or self.get_verified_gender(sample_data=sample_data),
-            "normal": self.get_verified_normal_path(sample_data=sample_data),
-            "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
-            "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
-            "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
+        config_case.update(self.get_verified_samples(case_id=case_id, sample_data=sample_data))
         config_case.update(self.get_parsed_observation_file_paths(observations))
 
         return config_case
@@ -575,7 +556,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         sample_data = {
             link_object.sample.internal_id: {
                 "gender": self.get_gender(link_object.sample),
-                "tissue_type": self.get_sample_type(link_object.sample),
+                "tissue_type": self.get_sample_type(link_object.sample).value,
                 "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
@@ -674,8 +655,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gender": arguments.get("gender"),
                 "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--genome-version": arguments.get("genome_version"),
-                "--normal": arguments.get("normal"),
-                "--tumor": arguments.get("tumor"),
+                "--normal": arguments.get(SampleType.NORMAL.value),
+                "--tumor": arguments.get(SampleType.TUMOR.value),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),

@@ -4,7 +4,7 @@ from typing import List, Optional, Set
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query, load_only
-from cg.constants.constants import PrepCategory
+from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.store import models
 from cg.store.api.base import BaseHandler
@@ -378,8 +378,22 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_by_name(self, name: str) -> models.Sample:
         return self.Sample.query.filter(models.Sample.name == name).first()
 
+    def get_sample_name_by_type(self, case_id: str, sample_type: SampleType) -> Optional[str]:
+        """Extract sample name given a tissue type."""
+        is_tumour: bool = sample_type == SampleType.TUMOR
+        sample_obj: models.Sample = (
+            self.Sample.query.join(
+                models.Family.links,
+                models.FamilySample.sample,
+            )
+            .filter(models.Family.internal_id == case_id)
+            .filter(models.Sample.is_tumour == is_tumour)
+            .first()
+        )
+        return sample_obj.internal_id if sample_obj else None
+
     def get_case_pool(self, case_id: str) -> Optional[models.Pool]:
-        """Returns the pool connected to the case. Returns None if no pool is found"""
+        """Returns the pool connected to the case. Returns None if no pool is found."""
         case: models.Family = self.family(internal_id=case_id)
         pool_name: str = case.name.split("-", 1)[-1]
         return self.pools(customers=[case.customer], enquiry=pool_name).first()

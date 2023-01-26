@@ -1,9 +1,12 @@
 """Tests for BALSAMIC analysis"""
-
+import logging
 from pathlib import Path
+from typing import Dict
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 
+from cg.constants.constants import SampleType
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
@@ -11,6 +14,49 @@ from cg.exc import BalsamicStartError
 
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
+
+
+def test_get_verified_sample_path(
+    cg_context: CGConfig,
+    balsamic_sample_data: Dict[str, dict],
+    sample_id: str,
+    fastq_file_l_1_r_1: str,
+    caplog: LogCaptureFixture,
+):
+    """Tests get sample path from sample dictionary."""
+
+    # GIVEN a Balsamic analysis API, a sample data dictionary and the expected verified sample path
+    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
+
+    # WHEN getting the verified tumor sample paths
+    verified_sample_path: str = balsamic_analysis_api.get_verified_sample_path(
+        sample_data=balsamic_sample_data, sample_type=SampleType.TUMOR
+    )
+
+    # THEN only the tumor sample path should be retrieved
+    assert verified_sample_path == fastq_file_l_1_r_1
+
+
+def test_get_verified_sample_path_multiple_samples(
+    cg_context: CGConfig,
+    balsamic_sample_data: Dict[str, dict],
+    sample_id: str,
+    caplog: LogCaptureFixture,
+):
+    """Tests get sample path from sample dictionary."""
+    caplog.set_level(logging.ERROR)
+
+    # GIVEN a Balsamic analysis API and a sample data dictionary
+    balsamic_analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(cg_context)
+
+    # WHEN getting the verified normal sample paths
+
+    # THEN an error should be raised indicating the incorrect number of samples
+    with pytest.raises(BalsamicStartError):
+        balsamic_analysis_api.get_verified_sample_path(
+            sample_data=balsamic_sample_data, sample_type=SampleType.NORMAL
+        )
+    assert "Invalid number of normal samples" in caplog.text
 
 
 def test_get_verified_gender():

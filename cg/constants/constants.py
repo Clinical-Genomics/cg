@@ -99,6 +99,11 @@ class GenomeVersion(StrEnum):
     canfam3: str = "canfam3"
 
 
+class SampleType(StrEnum):
+    TUMOR: str = "tumor"
+    NORMAL: str = "normal"
+
+
 class DataDelivery(StrEnum):
     ANALYSIS_FILES: str = "analysis"
     ANALYSIS_SCOUT: str = "analysis-scout"

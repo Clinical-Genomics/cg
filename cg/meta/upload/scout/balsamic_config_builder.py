@@ -1,7 +1,9 @@
 import logging
 
 from cg.apps.lims import LimsAPI
+from cg.constants.constants import SampleType
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS
+from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -36,10 +38,10 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         sample_id: str = config_sample.sample_id
         if config_sample.alignment_path:
-            if "tumor" in config_sample.alignment_path:
-                sample_id = "tumor"
-            elif "normal" in config_sample.alignment_path:
-                sample_id = "normal"
+            if SampleType.TUMOR.value in config_sample.alignment_path:
+                sample_id = SampleType.TUMOR.value
+            elif SampleType.NORMAL.value in config_sample.alignment_path:
+                sample_id = SampleType.NORMAL.value
 
         config_sample.vcf2cytosure = self.fetch_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
@@ -50,12 +52,12 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutBalsamicIndividual()
 
         self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
-        if BalsamicAnalysisAPI.get_sample_type(db_sample.sample) == "tumor":
-            config_sample.phenotype = "affected"
-            config_sample.sample_id = "TUMOR"
+        if BalsamicAnalysisAPI.get_sample_type(db_sample.sample) == SampleType.TUMOR:
+            config_sample.phenotype = PhenotypeStatus.AFFECTED.value
+            config_sample.sample_id = SampleType.TUMOR.value.upper()
         else:
-            config_sample.phenotype = "unaffected"
-            config_sample.sample_id = "NORMAL"
+            config_sample.phenotype = PhenotypeStatus.UNAFFECTED.value
+            config_sample.sample_id = SampleType.NORMAL.value.upper()
 
         config_sample.analysis_type = self.get_balsamic_analysis_type(db_sample.sample)
 
