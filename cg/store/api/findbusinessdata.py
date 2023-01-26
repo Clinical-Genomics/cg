@@ -22,6 +22,7 @@ from cg.store.models import (
     Invoice,
 )
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+from cg.store.status_sample_filters import apply_sample_filter
 
 LOG = logging.getLogger(__name__)
 
@@ -386,17 +387,14 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_sample_name_by_type(self, case_id: str, sample_type: SampleType) -> Optional[str]:
         """Extract sample name given a tissue type."""
-        is_tumour: bool = sample_type == SampleType.TUMOR
-        sample_obj: Sample = (
-            self.Sample.query.join(
-                Family.links,
-                FamilySample.sample,
+        records: Query = self.Sample.query.join(Family.links, FamilySample.sample)
+        sample_filter_functions: List[str] = ["samples_with_case_id", "samples_with_type"]
+        for filter_function in sample_filter_functions:
+            records: Query = apply_sample_filter(
+                function=filter_function, samples=records, case_id=case_id, sample_type=sample_type
             )
-            .filter(Family.internal_id == case_id)
-            .filter(Sample.is_tumour == is_tumour)
-            .first()
-        )
-        return sample_obj.internal_id if sample_obj else None
+        sample: Sample = records.first()
+        return sample.internal_id if sample else None
 
     def get_case_pool(self, case_id: str) -> Optional[Pool]:
         """Returns the pool connected to the case. Returns None if no pool is found."""
