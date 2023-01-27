@@ -207,16 +207,14 @@ class FluffyAnalysisAPI(AnalysisAPI):
             "SampleName": lambda x: self.get_sample_name_from_lims_id(lims_id=x),
             "Library_nM": lambda x: self.get_concentrations_from_lims(sample_id=x),
             "SequencingDate": lambda x: self.get_sample_sequenced_date(sample_id=x),
-             sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
-            }
+            sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
+        }
 
         for column, value in column_to_value_map.items():
-                 samplesheet_df = self.add_samplesheet_column(
+            samplesheet_df = self.add_samplesheet_column(
                 samplesheet_df=samplesheet_df,
                 new_column=column,
-                to_add=samplesheet_df[sample_id_column_alias].apply(
-                    value
-                ),
+                to_add=samplesheet_df[sample_id_column_alias].apply(value),
             )
 
         LOG.info(samplesheet_df)
