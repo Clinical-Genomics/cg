@@ -5,10 +5,11 @@ from cgmodels.cg.constants import StrEnum
 class Sequencers(StrEnum):
     """Sequencer instruments."""
 
+    ALL: str = "all"
     HISEQX: str = "hiseqx"
     HISEQGA: str = "hiseqga"
     NOVASEQ: str = "novaseq"
-    ALL: str = "all"
+    OTHER: str = "other"
 
 
 sequencer_types = {
