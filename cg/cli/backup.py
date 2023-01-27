@@ -30,7 +30,7 @@ def backup(context: CGConfig):
 @click.option("-f", "--flow-cell-id", help="Retrieve a specific flow cell, ex. 'HCK2KDSXX'")
 @DRY_RUN
 @click.pass_obj
-def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str]):
+def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str] = None):
     """Fetch the first flow cell in the requested queue from backup"""
 
     pdc_api = PdcAPI(binary_path=context.pdc.binary_path, dry_run=dry_run)
@@ -48,17 +48,18 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     backup_api: BackupAPI = context.meta_apis["backup_api"]
 
     status_api: Store = context.status_db
+    flow_cell: Optional[models.Flowcell] = (
+        status_api.get_flow_cell(flow_cell_id=flow_cell_id) if flow_cell_id else None
+    )
 
-    if flow_cell_id:
-        flow_cell: Optional[models.Flowcell] = status_api.get_flow_cell(flow_cell_id=flow_cell_id)
-        retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell=flow_cell)
-        if not flow_cell:
-            LOG.error(f"{flow_cell_id}: not found in database")
-            raise click.Abort
+    if not flow_cell and flow_cell_id:
+        LOG.error(f"{flow_cell_id}: not found in database")
+        raise click.Abort
 
     if not flow_cell_id:
         LOG.info("Fetching first flow cell in queue")
-        retrieval_time: Optional[float] = backup_api.fetch_flow_cell()
+
+    retrieval_time: Optional[float] = backup_api.fetch_flow_cell(flow_cell=flow_cell)
 
     if retrieval_time:
         hours = retrieval_time / 60 / 60
@@ -151,8 +152,8 @@ def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[m
     """Gets all samples belonging to a sample, case or flow cell id"""
     get_samples = {
         "sample": status_api.sample,
-        "case": status_api.get_samples_by_family_id,
-        "flow_cell": status_api.get_samples_from_flowcell,
+        "case": status_api.get_samples_by_case_id,
+        "flow_cell": status_api.get_samples_from_flow_cell,
     }
     samples: Union[models.Sample, List[models.Sample]] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
