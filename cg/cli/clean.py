@@ -7,6 +7,7 @@ from typing import List, Optional
 import click
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
+from housekeeper.store.models import File, Version
 from tabulate import tabulate
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
@@ -33,7 +34,6 @@ from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from housekeeper.store import models as hk_models
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -114,7 +114,7 @@ def hk_alignment_files(
 @click.pass_context
 def scout_finished_cases(
     context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
-):
+) -> None:
     """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
     bundles: List[str] = []
@@ -141,13 +141,13 @@ def scout_finished_cases(
 )
 @DRY_RUN
 @click.pass_context
-def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False):
-    """Clean up all non-protected files for all pipelines"""
+def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False) -> None:
+    """Clean up all non-protected files for all pipelines."""
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
     clean_api: CleanAPI = CleanAPI(status_db=context.obj.status_db, housekeeper_api=housekeeper_api)
 
     size_cleaned: int = 0
-    version_file: hk_models.File
+    version_file: File
     for version_file in clean_api.get_unprotected_existing_bundle_files(
         before=get_date_days_ago(days_ago=days_old)
     ):
@@ -155,19 +155,19 @@ def hk_case_bundle_files(context: CGConfig, days_old: int, dry_run: bool = False
         file_size: int = file_path.stat().st_size
         size_cleaned += file_size
         if dry_run:
-            LOG.info("Dry run: %s. Keeping file %s", dry_run, file_path)
+            LOG.info(f"Dry run: {dry_run}. Keeping file {file_path}")
             continue
 
         file_path.unlink()
-        housekeeper_api.delete_file(version_file.id)
+        housekeeper_api.delete_file(file_id=version_file.id)
         housekeeper_api.commit()
-        LOG.info("Removed file %s. Dry run: %s", file_path, dry_run)
+        LOG.info(f"Removed file {file_path}. Dry run: {dry_run}")
 
-    LOG.info("Process freed %s GB. Dry run: %s", round(size_cleaned * 0.0000000001, 2), dry_run)
+    LOG.info(f"Process freed {round(size_cleaned * 0.0000000001, 2)} GB. Dry run: {dry_run}")
 
 
 @clean.command("hk-bundle-files")
-@click.option("-c", "--case_id", type=str, required=False)
+@click.option("-c", "--case-id", type=str, required=False)
 @click.option("-p", "--pipeline", type=Pipeline, required=False)
 @click.option("-t", "--tags", multiple=True, required=True)
 @click.option("-o", "--days-old", type=int, default=30)
@@ -181,7 +181,7 @@ def hk_bundle_files(
     pipeline: Optional[Pipeline],
     dry_run: bool,
 ):
-    """Remove files found in housekeeper bundles"""
+    """Remove files found in Housekeeper bundles."""
 
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
@@ -191,11 +191,11 @@ def hk_bundle_files(
     analyses: Query = status_db.get_analyses_before_date(
         case_id=case_id, before=date_threshold, pipeline=pipeline
     )
-    size_cleaned = 0
+    size_cleaned: int = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
         bundle_name: str = analysis.family.internal_id
-        hk_bundle_version: Optional[hk_models.Version] = housekeeper_api.version(
+        hk_bundle_version: Optional[Version] = housekeeper_api.version(
             bundle=bundle_name, date=analysis.started_at
         )
         if not hk_bundle_version:
@@ -213,7 +213,7 @@ def hk_bundle_files(
             f"pipeline: {analysis.pipeline}; "
             f"date {analysis.started_at}"
         )
-        version_files: List[hk_models.File] = housekeeper_api.get_files(
+        version_files: List[File] = housekeeper_api.get_files(
             bundle=analysis.family.internal_id, tags=tags, version=hk_bundle_version.id
         ).all()
         for version_file in version_files:
@@ -247,32 +247,32 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
     sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
     checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
-    search = f"%{demux_api.out_dir}%"
+    search: str = f"%{demux_api.out_dir}%"
     fastq_files_in_housekeeper: Query = housekeeper_api.files(
         tags=[SequencingFileTag.FASTQ]
-    ).filter(hk_models.File.path.like(search))
+    ).filter(File.path.like(search))
     spring_files_in_housekeeper: Query = housekeeper_api.files(
         tags=[SequencingFileTag.SPRING]
-    ).filter(hk_models.File.path.like(search))
+    ).filter(File.path.like(search))
     for flow_cell_dir in demux_api.out_dir.iterdir():
-        flow_cell_obj: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
-            flow_cell_dir,
-            status_db,
-            housekeeper_api,
-            trailblazer_api,
-            sample_sheets_dir,
-            fastq_files_in_housekeeper,
-            spring_files_in_housekeeper,
+        flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
+            flow_cell_path=flow_cell_dir,
+            status_db=status_db,
+            housekeeper_api=housekeeper_api,
+            trailblazer_api=trailblazer_api,
+            sample_sheets_dir=sample_sheets_dir,
+            fastq_files=fastq_files_in_housekeeper,
+            spring_files=spring_files_in_housekeeper,
         )
-        if not flow_cell_obj.is_demultiplexing_ongoing_or_started_and_not_completed:
-            LOG.info("Found flow cell ready to be checked: %s!", flow_cell_obj.path)
-            checked_flow_cells.append(flow_cell_obj)
-            if not flow_cell_obj.passed_check:
-                LOG.warning("Invalid flow cell directory found: %s", flow_cell_obj.path)
+        if not flow_cell.is_demultiplexing_ongoing_or_started_and_not_completed:
+            LOG.info(f"Found flow cell ready to be checked: {flow_cell.path}!")
+            checked_flow_cells.append(flow_cell)
+            if not flow_cell.passed_check:
+                LOG.warning(f"Invalid flow cell directory found: {flow_cell.path}")
                 if dry_run:
                     continue
-                LOG.warning("Removing %s!", flow_cell_obj.path)
-                flow_cell_obj.remove_failed_flow_cell()
+                LOG.warning(f"Removing {flow_cell.path}!")
+                flow_cell.remove_failed_flow_cell()
         else:
             LOG.warning("Skipping check!")
 
@@ -310,7 +310,7 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
 @DRY_RUN
 @click.pass_obj
 def fix_flow_cell_status(context: CGConfig, dry_run: bool):
-    """set correct flow cell statuses in statusdb"""
+    """set correct flow cell statuses in Statusdb."""
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -321,34 +321,30 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
         if flow_cell.status in [FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
     ]
     LOG.info(
-        "Number of flow cells with status 'ondisk' or 'removed' in statusdb: %s",
-        len(flow_cells_in_statusdb),
+        f"Number of flow cells with status {FlowCellStatus.ONDISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
     )
     physical_ondisk_flow_cell_names = [
         DemultiplexedRunsFlowCell(
-            flow_cell_dir,
-            status_db,
-            housekeeper_api,
+            flow_cell_path=flow_cell_dir,
+            status_db=status_db,
+            housekeeper_api=housekeeper_api,
         ).id
         for flow_cell_dir in demux_api.out_dir.iterdir()
     ]
     for flow_cell in flow_cells_in_statusdb:
         status_db_flow_cell_status = flow_cell.status
-        new_status = (
+        new_status: str = (
             FlowCellStatus.ONDISK
             if flow_cell.name in physical_ondisk_flow_cell_names
             else FlowCellStatus.REMOVED
         )
         if status_db_flow_cell_status != new_status:
             LOG.info(
-                "Setting status of flow cell %s from %s to %s",
-                flow_cell.name,
-                status_db_flow_cell_status,
-                new_status,
+                f"Setting status of flow cell {flow_cell.name} from: {status_db_flow_cell_status} to {new_status}"
             )
             if dry_run:
                 continue
-            flow_cell.status = new_status
+            flow_cell.status: str = new_status
             status_db.commit()
 
 
@@ -371,53 +367,59 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
 @click.pass_obj
 def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: int, dry_run: bool):
     """Removes flow cells from flow cell run dir based on the sequencing date and
-    the sequencer type, if specified"""
+    the sequencer type, if specified."""
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     if sequencer == Sequencers.ALL:
         LOG.info("Checking flow cells for all sequencers!")
         for sequencer, run_directory in context.clean.flow_cells.flow_cell_run_dirs:
-            LOG.info("Checking directory %s of sequencer %s:", run_directory, sequencer)
+            LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
             clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db)
 
     else:
-        run_directory = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
-        LOG.info(
-            "Checking directory %s of sequencer %s:",
-            run_directory,
-            sequencer,
+        run_directory: dict = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
+        LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
+        clean_run_directories(
+            days_old=days_old,
+            dry_run=dry_run,
+            housekeeper_api=housekeeper_api,
+            run_directory=run_directory,
+            status_db=status_db,
         )
-        clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db)
 
 
-def clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db):
-    """Cleans up all flow cell directories in the specified run directory"""
-    flow_cell_dirs: List[Path] = [item for item in Path(run_directory).iterdir() if item.is_dir()]
+def clean_run_directories(
+    days_old: int,
+    dry_run: bool,
+    housekeeper_api: HousekeeperAPI,
+    run_directory: dict,
+    status_db: Store,
+):
+    """Cleans up all flow cell directories in the specified run directory."""
+    flow_cell_dirs: List[Path] = [
+        flow_cell_dir for flow_cell_dir in Path(run_directory).iterdir() if flow_cell_dir.is_dir()
+    ]
     for flow_cell_dir in flow_cell_dirs:
-        LOG.info("Checking flow cell %s", flow_cell_dir.name)
-        run_dir_flow_cell = RunDirFlowCell(flow_cell_dir, status_db, housekeeper_api)
+        LOG.info(f"Checking flow cell {flow_cell_dir.name}", flow_cell_dir.name)
+        run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
+            flow_cell_dir=flow_cell_dir, status_db=status_db, housekeeper_api=housekeeper_api
+        )
         if run_dir_flow_cell.exists_in_statusdb and run_dir_flow_cell.is_retrieved_from_pdc:
             LOG.info(
-                "Skipping removal of flow cell %s, PDC retrieval status is '%s'!",
-                flow_cell_dir,
-                run_dir_flow_cell.flow_cell_status,
+                f"Skipping removal of flow cell {flow_cell_dir}, PDC retrieval status is '{run_dir_flow_cell.flow_cell_status}'!"
             )
             continue
         if run_dir_flow_cell.age < days_old:
             LOG.info(
-                "Flow cell %s is %s days old and will NOT be removed.",
-                flow_cell_dir,
-                run_dir_flow_cell.age,
+                f"Flow cell {flow_cell_dir} is {run_dir_flow_cell.age} days old and will NOT be removed."
             )
             continue
         LOG.info(
-            "Flow cell %s is %s days old and will be removed.",
-            flow_cell_dir,
-            run_dir_flow_cell.age,
+            f"Flow cell {flow_cell_dir} is {run_dir_flow_cell.age} days old and will be removed."
         )
         if dry_run:
             continue
-        LOG.info("Removing flow cell run directory %s.", run_dir_flow_cell.flow_cell_dir)
+        LOG.info(f"Removing flow cell run directory {run_dir_flow_cell.flow_cell_dir}.")
         run_dir_flow_cell.archive_sample_sheet()
         run_dir_flow_cell.remove_run_directory()
 
