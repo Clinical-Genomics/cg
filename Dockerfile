@@ -12,7 +12,7 @@ ENV CG_SQL_DATABASE_URI="sqlite:///:memory:"
 ENV CG_ENABLE_ADMIN="1"
 ENV CG_SECRET_KEY="key"
 
-ENV ALLOWED_ORIGINS=["https://some_site.com"]
+ENV CORS_ORIGINS="https://some_site.com"
 
 ENV LIMS_HOST="mocklims.scilifelab.se"
 ENV LIMS_USERNAME="limsadmin"
