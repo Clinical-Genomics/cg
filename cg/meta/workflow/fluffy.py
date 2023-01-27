@@ -211,7 +211,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             }
 
         for column, value in column_to_value_map.items():
-                samplesheet_df = self.add_samplesheet_column(
+                 samplesheet_df = self.add_samplesheet_column(
                 samplesheet_df=samplesheet_df,
                 new_column=column,
                 to_add=samplesheet_df[sample_id_column_alias].apply(
