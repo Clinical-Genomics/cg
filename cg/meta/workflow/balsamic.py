@@ -321,6 +321,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 f"Balsamic analysis will treat it as a tumor sample."
             )
             tumor_name, tumor_path = normal_name, normal_path
+            normal_name, normal_path = None, None
 
         return {
             "tumor_sample_name": tumor_name,
