@@ -1,6 +1,6 @@
 """cg module for cleaning databases and files."""
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
@@ -24,9 +24,10 @@ from cg.cli.workflow.commands import (
     microsalt_past_run_dirs,
 )
 from cg.constants import FlowCellStatus
-from cg.constants.constants import DRY_RUN
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.sequencing import Sequencers
-from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS
+from cg.datetime.utils import get_date_days_ago
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
@@ -50,64 +51,55 @@ FLOW_CELL_OUTPUT_HEADERS = [
 
 @click.group()
 def clean():
-    """Clean up processes"""
+    """Clean up processes."""
     return
 
 
-clean.add_command(balsamic_past_run_dirs)
-clean.add_command(fluffy_past_run_dirs)
-clean.add_command(mip_past_run_dirs)
-clean.add_command(mutant_past_run_dirs)
-clean.add_command(rnafusion_past_run_dirs)
-clean.add_command(rsync_past_run_dirs)
-clean.add_command(microsalt_past_run_dirs)
-
-
-def get_date_days_ago(days_ago: int) -> datetime:
-    """Calculate the date 'days_ago'"""
-    return datetime.now() - timedelta(days=days_ago)
+for sub_cmd in [
+    balsamic_past_run_dirs,
+    fluffy_past_run_dirs,
+    mip_past_run_dirs,
+    mutant_past_run_dirs,
+    rnafusion_past_run_dirs,
+    rsync_past_run_dirs,
+    microsalt_past_run_dirs,
+]:
+    clean.add_command(sub_cmd)
 
 
 @clean.command("hk-alignment-files")
 @click.argument("bundle")
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
 @DRY_RUN
+@SKIP_CONFIRMATION
 @click.pass_obj
-def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False):
-    """Clean up alignment files in Housekeeper bundle"""
+def hk_alignment_files(
+    context: CGConfig, bundle: str, yes: bool = False, dry_run: bool = False
+) -> None:
+    """Clean up alignment files in Housekeeper bundle."""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
-    for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
+    for tag in ALIGNMENT_FILE_TAGS:
 
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:
             LOG.warning(
-                "Could not find any files ready for cleaning for bundle %s and tag %s", bundle, tag
+                f"Could not find any files ready for cleaning for bundle {bundle} and tag {tag}"
             )
 
-        for file_obj in tag_files:
-            if not (yes or click.confirm(_get_confirm_question(bundle, file_obj))):
+        for hk_file in tag_files:
+            if not (yes or click.confirm(_get_confirm_question(bundle, hk_file))):
                 continue
 
-            file_path: Path = Path(file_obj.full_path)
-            if file_obj.is_included and file_path.exists():
-                LOG.info("Unlinking %s", file_path)
+            file_path: Path = Path(hk_file.full_path)
+            if hk_file.is_included and file_path.exists():
+                LOG.info(f"Unlinking {file_path}")
                 if not dry_run:
                     file_path.unlink()
 
-            LOG.info("Deleting %s from database", file_path)
+            LOG.info(f"Deleting {file_path} from database")
             if not dry_run:
-                file_obj.delete()
+                hk_file.delete()
                 housekeeper_api.commit()
-
-
-def _get_confirm_question(bundle, file_obj) -> str:
-    """Return confirmation question."""
-    return (
-        f"{bundle}: remove file from file system and database: {file_obj.full_path}"
-        if file_obj.is_included
-        else f"{bundle}: remove file from database: {file_obj.full_path}"
-    )
 
 
 @clean.command("scout-finished-cases")
@@ -428,3 +420,12 @@ def clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, sta
         LOG.info("Removing flow cell run directory %s.", run_dir_flow_cell.flow_cell_dir)
         run_dir_flow_cell.archive_sample_sheet()
         run_dir_flow_cell.remove_run_directory()
+
+
+def _get_confirm_question(bundle, file_obj) -> str:
+    """Return confirmation question."""
+    return (
+        f"{bundle}: remove file from file system and database: {file_obj.full_path}"
+        if file_obj.is_included
+        else f"{bundle}: remove file from database: {file_obj.full_path}"
+    )

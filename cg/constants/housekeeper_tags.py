@@ -1,8 +1,22 @@
 """File tags for files in Housekeeper."""
-
+from enum import Enum
 from typing import List
 
 from cgmodels.cg.constants import Pipeline, StrEnum
+
+
+class AlignmentFileTag(str, Enum):
+    """Tags for alignment files."""
+
+    BAM: str = "bam"
+    BAM_BAI: str = "bai"
+    BAM_INDEX: str = "bam-index"
+    CRAM: str = "cram"
+    CRAM_CRAI: str = "crai"
+    CRAM_INDEX: str = "cram-index"
+
+
+ALIGNMENT_FILE_TAGS: List[str] = [tag.value for tag in AlignmentFileTag]
 
 
 class SequencingFileTag(StrEnum):
