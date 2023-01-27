@@ -1,6 +1,6 @@
 """cg module for cleaning databases and files."""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 
@@ -26,8 +26,8 @@ from cg.cli.workflow.commands import (
 from cg.constants import FlowCellStatus
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.sequencing import Sequencers
-from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS
-from cg.datetime.utils import get_date_days_ago
+from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS, ScoutTag
+from cg.datetime.utils import get_date_days_ago, get_timedelta_from_date
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
@@ -109,24 +109,24 @@ def hk_alignment_files(
     default=300,
     help="Clean alignment files with analysis dates older then given number of days",
 )
-@click.option("-y", "--yes", is_flag=True, help="Skip confirmation")
+@SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_context
 def scout_finished_cases(
     context: click.Context, days_old: int, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of solved and archived scout cases"""
+    """Clean up of solved and archived Scout cases."""
     scout_api: ScoutAPI = context.obj.scout_api
     bundles: List[str] = []
-    for status in ["archived", "solved"]:
+    for status in [ScoutTag.ARCHIVED.value, ScoutTag.SOLVED.value]:
         cases: List[ScoutExportCase] = scout_api.get_cases(status=status, reruns=False)
-        cases_added = 0
+        cases_added: int = 0
         for case in cases:
-            x_days_ago = datetime.now() - case.analysis_date
-            if x_days_ago.days > days_old:
+            analysis_time_delta: timedelta = get_timedelta_from_date(date=case.analysis_date)
+            if analysis_time_delta.days > days_old:
                 bundles.append(case.id)
                 cases_added += 1
-        LOG.info("%s cases marked for bam removal", cases_added)
+        LOG.info(f"{cases_added} cases marked for alignment files removal")
 
     for bundle in bundles:
         context.invoke(hk_alignment_files, bundle=bundle, yes=yes, dry_run=dry_run)

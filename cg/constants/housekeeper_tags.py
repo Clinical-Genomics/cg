@@ -19,7 +19,22 @@ class AlignmentFileTag(str, Enum):
 ALIGNMENT_FILE_TAGS: List[str] = [tag.value for tag in AlignmentFileTag]
 
 
+class ArchiveTag(str, Enum):
+    """Tags for archived status."""
+
+    ARCHIVED: str = "archived"
+
+
+class ScoutTag(str, Enum):
+    """Tags for Scout."""
+
+    ARCHIVED: str = "archived"
+    SOLVED: str = "solved"
+
+
 class SequencingFileTag(StrEnum):
+    """Tags for sequencing files."""
+
     ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
     CGSTATS_LOG: str = "log"
     FASTQ: str = "fastq"
