@@ -178,7 +178,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def get_sample_type(sample_obj: models.Sample) -> SampleType:
-        """Returns tissue type of sample."""
+        """Return the tissue type of the sample."""
         if sample_obj.is_tumour:
             return SampleType.TUMOR
         return SampleType.NORMAL
@@ -296,7 +296,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_verified_samples(self, case_id: str, sample_data: dict) -> dict:
+    def get_verified_samples(self, case_id: str, sample_data: dict) -> Dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
         tumor_name: str = self.status_db.get_sample_name_by_type(
             case_id=case_id, sample_type=SampleType.TUMOR
@@ -312,13 +312,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
         if not tumor_path and not normal_path:
-            LOG.error(f"No tumor or normal samples were found for case {case_id}.")
+            LOG.error(f"No tumor or normal samples were found for case {case_id}")
             raise BalsamicStartError
 
         if normal_path and not tumor_path:
             LOG.warning(
                 f"Only a normal sample was found for case {case_id}. "
-                f"Balsamic analysis will treat it as a {SampleType.TUMOR.value} sample."
+                f"Balsamic analysis will treat it as a tumor sample."
             )
             tumor_name, tumor_path = normal_name, normal_path
 

@@ -1,4 +1,4 @@
-"""Fixtures for the prepare_fastq api tests."""
+"""Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
 from typing import List, Dict
@@ -221,23 +221,23 @@ def fixture_balsamic_sample_data(
     return {
         sample_id: {
             "gender": Gender.FEMALE,
-            "tissue_type": SampleType.TUMOR,
+            "tissue_type": SampleType.TUMOR.value,
             "concatenated_path": fastq_file_l_1_r_1,
-            "application_type": SequencingMethod.TGS,
+            "application_type": SequencingMethod.TGS.value,
             "target_bed": bed_file,
         },
         cust_sample_id: {
             "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL,
+            "tissue_type": SampleType.NORMAL.value,
             "concatenated_path": fastq_file_l_2_r_1,
-            "application_type": SequencingMethod.TGS,
+            "application_type": SequencingMethod.TGS.value,
             "target_bed": bed_file,
         },
         another_sample_id: {
             "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL,
+            "tissue_type": SampleType.NORMAL.value,
             "concatenated_path": fastq_file_l_2_r_2,
-            "application_type": SequencingMethod.TGS,
+            "application_type": SequencingMethod.TGS.value,
             "target_bed": bed_file,
         },
     }

@@ -43,7 +43,7 @@ def test_get_verified_sample_path_multiple_samples(
     sample_id: str,
     caplog: LogCaptureFixture,
 ):
-    """Tests get sample path from sample dictionary."""
+    """Tests get sample path when there are multiple normal samples."""
     caplog.set_level(logging.ERROR)
 
     # GIVEN a Balsamic analysis API and a sample data dictionary
