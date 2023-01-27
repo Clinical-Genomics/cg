@@ -217,64 +217,33 @@ def store_with_multiple_cases_and_samples(
     case_id_with_multiple_samples: str,
     sample_id_in_single_case: str,
     sample_id_in_multiple_cases: str,
-    helpers,
+    case_id: str,
+    helpers: StoreHelpers,
     store: Store,
 ):
-    """Return a store that should contain multiple cases and samples."""
-    sample_in_multiple_cases = helpers.add_sample(
-        store=store, internal_id=sample_id_in_multiple_cases
-    )
-    store.add_commit(sample_in_multiple_cases)
+    """Return a store containing multiple cases and samples."""
 
-    case_with_multiple_samples = helpers.add_case(
-        store=store, internal_id=case_id_with_multiple_samples, name="case_5"
-    )
-    store.add_commit(case_with_multiple_samples)
-
-    helpers.add_relationship(
-        store=store, sample=sample_in_multiple_cases, case=case_with_multiple_samples
+    helpers.add_case_with_samples(
+        base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
 
-    case_and_sample_relations: List[Tuple[str, str, str]] = [
-        ("angrypanda", "AAM5", "case_1"),
-        ("jealousbutterfly", "AAM6", "case_2"),
-        ("lonesomespider", "AAM7", "case_3"),
-        ("happysnail", "AAM8", "case_4"),
-    ]
-
-    for case_and_sample_relation in case_and_sample_relations:
-        case_id, sample_id, case_name = case_and_sample_relation
-
-        new_case = helpers.add_case(store=store, internal_id=case_id, name=case_name)
-        store.add_commit(new_case)
-
-        new_sample = helpers.add_sample(store=store, internal_id=sample_id)
-        store.add_commit(new_sample)
-
-        helpers.add_relationship(
-            store=store,
-            sample=new_sample,
-            case=new_case,
-        )
-
-        helpers.add_relationship(store=store, sample=sample_in_multiple_cases, case=new_case)
-        helpers.add_relationship(store=store, sample=new_sample, case=case_with_multiple_samples)
-
-    case_without_samples = helpers.add_case(
-        store=store, internal_id=case_id_without_samples, name="case_6"
+    helpers.add_case_with_sample(
+        base_store=store,
+        case_id=case_id_with_multiple_samples,
+        sample_id=sample_id_in_multiple_cases,
     )
-    store.add_commit(case_without_samples)
 
-    case_with_single_sample = helpers.add_case(
-        store=store, internal_id=case_id_with_single_sample, name="case_7"
+    helpers.add_case_with_sample(
+        base_store=store,
+        case_id=case_id,
+        sample_id=sample_id_in_multiple_cases,
     )
-    store.add_commit(case_with_single_sample)
 
-    sample_in_single_case = helpers.add_sample(store=store, internal_id=sample_id_in_single_case)
-    store.add_commit(sample_in_single_case)
-    helpers.add_relationship(
-        store=store, sample=sample_in_single_case, case=case_with_single_sample
+    helpers.add_case_with_sample(
+        base_store=store, case_id=case_id_with_single_sample, sample_id=sample_id_in_single_case
     )
+
+    helpers.add_case(store=store, internal_id=case_id_without_samples)
 
     yield store
 
