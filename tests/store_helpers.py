@@ -241,6 +241,7 @@ class StoreHelpers:
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
+        internal_id: str = None,
         reads: int = None,
         name: str = "sample_test",
         original_ticket: str = None,
@@ -257,6 +258,12 @@ class StoreHelpers:
             is_rna=is_rna,
         )
         application_version_id = application_version.id
+
+        if internal_id:
+            existing_sample: models.Sample = store.sample(internal_id=internal_id)
+            if existing_sample:
+                return existing_sample
+
         sample = store.add_sample(
             name=name,
             sex=gender,
@@ -264,6 +271,7 @@ class StoreHelpers:
             original_ticket=original_ticket,
             tumour=is_tumour,
             reads=reads,
+            internal_id=internal_id,
         )
 
         sample.application_version_id = application_version_id
@@ -609,23 +617,30 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, family: str, samples: List[str]):
+    def relate_samples(cls, base_store: Store, case: models.Family, samples: List[models.Sample]):
         """Utility function to relate many samples to one case"""
 
         for sample in samples:
-            base_store.relate_sample(family, sample, PhenotypeStatus.UNKNOWN)
+            link = base_store.relate_sample(
+                family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            )
+            base_store.add_commit(link)
 
     @classmethod
     def add_case_with_samples(
-        cls, base_store: Store, case_name: str, nr_samples: int, sequenced_at: datetime
+        cls,
+        base_store: Store,
+        case_id: str,
+        nr_samples: int,
+        sequenced_at: datetime = datetime.now(),
     ) -> models.Family:
         """Utility function to add one case with many samples and return the case"""
 
-        samples: List[models.Sample] = cls.add_samples(base_store, nr_samples)
+        samples: List[models.Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
             sample.sequenced_at: datetime = sequenced_at
-        case: models.Family = cls.add_case(base_store, case_name)
-        cls.relate_samples(base_store, case, samples)
+        case: models.Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+        cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
 
     @classmethod
@@ -641,3 +656,15 @@ class StoreHelpers:
             )
             cases.append(case)
         return cases
+
+    @classmethod
+    def add_case_with_sample(
+        self, base_store: Store, case_id: str, sample_id: str
+    ) -> models.Family:
+        """Utility function to add a case associated with a sample with the given ids."""
+
+        case = self.add_case(store=base_store, internal_id=case_id, name=case_id)
+        sample = self.add_sample(store=base_store, internal_id=sample_id)
+        self.add_relationship(store=base_store, sample=sample, case=case)
+
+        return case
