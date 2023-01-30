@@ -21,6 +21,7 @@ from cg.store.models import (
     Sample,
 )
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+from cg.store.status_case_sample_filters import apply_case_sample_filter
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -161,29 +162,33 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
+    def _get_case_sample_query(self) -> Query:
+        """Return case sample query."""
+        return self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
+
     def family_samples(self, family_id: str) -> List[FamilySample]:
-        """Find the samples of a family."""
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Family.internal_id == family_id)
-            .all()
-        )
+        """Find the samples associated with a case."""
+        return apply_case_sample_filter(
+            function="get_samples_associated_with_case",
+            case_id=family_id,
+            case_samples=self._get_case_sample_query(),
+        ).all()
 
     def get_sample_cases(self, sample_id: str) -> List[FamilySample]:
         """Return the cases associated with a sample."""
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Sample.internal_id == sample_id)
-            .all()
-        )
+        return apply_case_sample_filter(
+            function="get_cases_associated_with_sample",
+            sample_id=sample_id,
+            case_samples=self._get_case_sample_query(),
+        ).all()
 
     def get_cases_from_sample(self, sample_entry_id: str) -> List[FamilySample]:
         """Find cases related to a given sample."""
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Sample.id == sample_entry_id)
-            .all()
-        )
+        return apply_case_sample_filter(
+            function="get_cases_associated_with_sample_by_entry_id",
+            sample_entry_id=sample_entry_id,
+            case_samples=self._get_case_sample_query(),
+        ).all()
 
     def get_cases_with_samples(self, case_ids: List[str]) -> List[str]:
         """Return cases associated with samples"""
