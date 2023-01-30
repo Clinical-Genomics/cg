@@ -359,7 +359,7 @@ class HousekeeperAPI:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
                 try:
-                    if self.get_files(bundle=bundle_name, tags=[tag]):
+                    if self.get_file_from_latest_version(bundle_name=bundle_name, tags=[tag]):
                         sequencing_files_in_hk[bundle_name] = True
                 except FileNotFoundError as error:
                     LOG.warning(error)

@@ -4,9 +4,10 @@ from pathlib import Path
 from typing import List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import Version, File, Bundle
 
 from tests.small_helpers import SmallHelpers
 
@@ -327,3 +328,107 @@ def test_get_tag_names_from_file(populated_housekeeper_api: MockHousekeeperAPI):
     # THEN the return type is a list of strings
     assert isinstance(tag_names, list)
     assert all(isinstance(elem, str) for elem in tag_names)
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_none(
+    populated_housekeeper_api: MockHousekeeperAPI,
+    case_id: str,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when no files are present."""
+    # GIVEN a populated housekeeper api with some files
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(bundle_names=[case_id])
+
+    # THEN assert all file were not present in all bundles
+    assert not was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles(
+    populated_housekeeper_api: MockHousekeeperAPI,
+    case_id: str,
+    madeline_output: Path,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when files are present."""
+    # GIVEN a populated housekeeper api with some files
+    version: Version = populated_housekeeper_api.last_version(case_id)
+
+    # GIVEN a FASTQ file tag in the bundle
+    populated_housekeeper_api.add_file(
+        path=madeline_output, version_obj=version, tags=[SequencingFileTag.FASTQ]
+    )
+    populated_housekeeper_api.commit()
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(bundle_names=[case_id])
+
+    # THEN assert all file were present in all bundles
+    assert was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_missing(
+    populated_housekeeper_api: MockHousekeeperAPI,
+    case_id: str,
+    sample_id: str,
+    madeline_output: Path,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when not all bundles have files present."""
+    # GIVEN a populated housekeeper api with some files
+    version: Version = populated_housekeeper_api.last_version(case_id)
+
+    # GIVEN a FASTQ file tag in the bundle
+    populated_housekeeper_api.add_file(
+        path=madeline_output, version_obj=version, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # GIVEN an empty bundle
+    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+
+    populated_housekeeper_api.commit()
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
+        bundle_names=[case_id, sample_id]
+    )
+
+    # THEN assert all file were not present in all bundles
+    assert not was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
+    populated_housekeeper_api: MockHousekeeperAPI,
+    case_id: str,
+    sample_id: str,
+    madeline_output: Path,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present."""
+    # GIVEN a populated housekeeper api with some files
+    version: Version = populated_housekeeper_api.last_version(case_id)
+
+    # GIVEN a FASTQ file tag in the bundle
+    populated_housekeeper_api.add_file(
+        path=madeline_output, version_obj=version, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # GIVEN an empty bundle
+    sample_bundle: Bundle = populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+
+    # GIVEN a SPRING file tag in the bundle
+    populated_housekeeper_api.add_file(
+        path=Path("file.txt"),
+        version_obj=sample_bundle.versions[0],
+        tags=[SequencingFileTag.SPRING_METADATA],
+    )
+    populated_housekeeper_api.commit()
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
+        bundle_names=[case_id, sample_id]
+    )
+
+    # THEN assert all file were present in all bundles
+    assert was_true

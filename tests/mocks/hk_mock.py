@@ -5,9 +5,10 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Iterable
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
 from cg.store import models
 
@@ -499,6 +500,19 @@ class MockHousekeeperAPI:
         bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
         self.include(version_obj=bundle_version)
         self.commit()
+
+    def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
+        """Return bool of fastq or spring present in all bundles."""
+        sequencing_files_in_hk: Dict[str, Iterable[File]] = {}
+        for bundle_name in bundle_names:
+            sequencing_files_in_hk[bundle_name] = False
+            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
+                try:
+                    if self.get_files(bundle=bundle_name, tags=[tag]):
+                        sequencing_files_in_hk[bundle_name] = True
+                except FileNotFoundError as error:
+                    LOG.warning(error)
+        return all(sequencing_files_in_hk.values())
 
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:
