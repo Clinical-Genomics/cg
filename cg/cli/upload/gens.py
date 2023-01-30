@@ -24,11 +24,15 @@ LOG = logging.getLogger(__name__)
 def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
     """Upload data from an analysis to Gens."""
 
+    click.echo(click.style("----------------- GENS -------------------"))
+
+    if dry_run:
+        LOG.info(f"Dry run. Would upload data for {case_id} to Gens.")
+        return 0
+
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     gens_api: GensAPI = context.gens_api
-
-    click.echo(click.style("----------------- GENS -------------------"))
 
     if not case_id:
         suggest_cases_to_upload(status_db=status_db)
@@ -47,10 +51,6 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
             version=hk_version.id, tags=[link.sample.internal_id, "gens", "coverage", "bed"]
         ).first()
 
-        if dry_run:
-            LOG.info(f"Dry run. Would upload data for {family.internal_id} to Gens.")
-            return
-
         gens_api.load(
             sample_id=link.sample.internal_id,
             genome_build=analysis.genome_build,
@@ -58,3 +58,5 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
             coverage_path=hk_coverage.full_path,
             case_id=case_id,
         )
+
+    return 0

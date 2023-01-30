@@ -23,9 +23,9 @@ def test_gens_api_load(
     gens_config: Dict[str, Dict[str, str]],
     mocker,
     sample_id: str,
-    genome_build: str,
-    baf_path: Path,
-    coverage_path: Path,
+    gens_genome_build: str,
+    gens_fracsnp_path: Path,
+    gens_coverage_path: Path,
     case_id: str,
 ):
     """Test load sample method."""
@@ -36,26 +36,27 @@ def test_gens_api_load(
     mocked_run_command = mocker.patch.object(Process, "run_command")
     api.load(
         sample_id=sample_id,
-        genome_build=genome_build,
-        baf_path=baf_path,
-        coverage_path=coverage_path,
+        genome_build=gens_genome_build,
+        baf_path=gens_fracsnp_path,
+        coverage_path=gens_coverage_path,
         case_id=case_id,
     )
 
     # THEN run_command should be called with the list
     mocked_run_command.assert_called_once_with(
+        dry_run=False,
         parameters=[
             "load",
             "sample",
             "--sample-id",
             sample_id,
             "--genome-build",
-            genome_build,
+            gens_genome_build,
             "--baf",
-            baf_path.as_posix(),
+            gens_fracsnp_path.as_posix(),
             "--coverage",
-            coverage_path.as_posix(),
+            gens_coverage_path.as_posix(),
             "--case-id",
             case_id,
-        ]
+        ],
     )
