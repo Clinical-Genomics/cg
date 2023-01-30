@@ -212,7 +212,7 @@ def test_delivering_ticket_with_missing_bundle_ignoring_errors(
     delivery_inbox: Path,
     ticket: str,
 ):
-    """Test that it is possible to deliver a ticket with a missing bundle using the --ignore-errors flag."""
+    """Test that it is possible to deliver a ticket with a missing bundle using the --ignore-missing-bundles flag."""
     # GIVEN a context without files in housekeeper to deliver.
     # GIVEN a cli runner
     runner = CliRunner()
