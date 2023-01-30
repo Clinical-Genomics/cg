@@ -361,7 +361,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     "--days-old",
     type=int,
     default=21,
-    help="Specify the age in days of the flow cells to be removed. Default is 21 days.",
+    help="Specify the age in days of the flow cells to be removed.",
 )
 @DRY_RUN
 @click.pass_obj
@@ -374,10 +374,16 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
         LOG.info("Checking flow cells for all sequencers!")
         for sequencer, run_directory in context.clean.flow_cells.flow_cell_run_dirs:
             LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
-            clean_run_directories(days_old, dry_run, housekeeper_api, run_directory, status_db)
+            clean_run_directories(
+                days_old=days_old,
+                dry_run=dry_run,
+                housekeeper_api=housekeeper_api,
+                run_directory=run_directory,
+                status_db=status_db,
+            )
 
     else:
-        run_directory: dict = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
+        run_directory: str = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
         LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
         clean_run_directories(
             days_old=days_old,
@@ -388,11 +394,63 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
         )
 
 
+@clean.command("remove-old-demutliplexed-run-dirs")
+@click.option(
+    "-o",
+    "--days-old",
+    type=int,
+    default=21,
+    help="Specify the age in days of the flow cells to be removed.",
+)
+@DRY_RUN
+@click.pass_obj
+def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run: bool):
+    """Removes flow cells from demultiplexed run directory."""
+    status_db: Store = context.status_db
+    demux_api: DemultiplexingAPI = context.demultiplex_api
+    housekeeper_api: HousekeeperAPI = context.housekeeper_api
+    trailblazer_api: TrailblazerAPI = context.trailblazer_api
+    sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
+    checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
+    search: str = f"%{demux_api.out_dir}%"
+    fastq_files_in_housekeeper: Query = housekeeper_api.files(
+        tags=[SequencingFileTag.FASTQ]
+    ).filter(File.path.like(search))
+    spring_files_in_housekeeper: Query = housekeeper_api.files(
+        tags=[SequencingFileTag.SPRING]
+    ).filter(File.path.like(search))
+    for flow_cell_dir in demux_api.out_dir.iterdir():
+        flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
+            flow_cell_path=flow_cell_dir,
+            status_db=status_db,
+            housekeeper_api=housekeeper_api,
+            trailblazer_api=trailblazer_api,
+            sample_sheets_dir=sample_sheets_dir,
+            fastq_files=fastq_files_in_housekeeper,
+            spring_files=spring_files_in_housekeeper,
+        )
+        if not flow_cell.is_demultiplexing_ongoing_or_started_and_not_completed:
+            LOG.info(f"Found flow cell ready to be processed: {flow_cell.path}!")
+            checked_flow_cells.append(flow_cell)
+            if flow_cell.passed_check:
+                LOG.warning(f"Flow cell directory ready to be removed: {flow_cell.path}")
+                if dry_run:
+                    continue
+                LOG.warning(f"Removing {flow_cell.path}!")
+                clean_run_directories(
+                    days_old=days_old,
+                    dry_run=dry_run,
+                    housekeeper_api=housekeeper_api,
+                    run_directory=flow_cell.path.as_posix(),
+                    status_db=status_db,
+                )
+
+
 def clean_run_directories(
     days_old: int,
     dry_run: bool,
     housekeeper_api: HousekeeperAPI,
-    run_directory: dict,
+    run_directory: str,
     status_db: Store,
 ):
     """Cleans up all flow cell directories in the specified run directory."""

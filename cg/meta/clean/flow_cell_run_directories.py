@@ -18,7 +18,7 @@ from cg.store import Store
 from cg.store.models import Flowcell
 
 FLOW_CELL_DATE_POSITION = 0
-FLOW_CELL_IDENTIFIER_POSITION = 3
+FLOW_CELL_IDENTIFIER_POSITION = -1
 LOG = logging.getLogger(__name__)
 PDC_RETRIEVAL_STATUSES = [FlowCellStatus.PROCESSING, FlowCellStatus.RETRIEVED]
 
