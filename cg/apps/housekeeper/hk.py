@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, List, Optional, Set, Tuple
+from typing import Iterable, List, Optional, Set, Tuple, Dict
 
 from alchy import Query
 from housekeeper.exc import VersionIncludedError
@@ -12,6 +12,7 @@ from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Bundle, File, Version
 
+from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
 
 LOG = logging.getLogger(__name__)
@@ -350,3 +351,16 @@ class HousekeeperAPI:
             LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
         return self.files(version=version.id, tags=tags)
+
+    def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
+        """Return bool of fastq or spring present in all bundles."""
+        sequencing_files_in_hk: Dict[str, Iterable[File]] = {}
+        for bundle_name in bundle_names:
+            sequencing_files_in_hk[bundle_name] = False
+            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
+                try:
+                    if self.get_files(bundle=bundle_name, tags=[tag]):
+                        sequencing_files_in_hk[bundle_name] = True
+                except FileNotFoundError as error:
+                    LOG.warning(error)
+        return all(sequencing_files_in_hk.values())
