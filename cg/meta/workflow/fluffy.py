@@ -1,12 +1,12 @@
-from alchy import Query
-from pathlib import Path
-from typing import List, Optional
 import datetime as dt
 import logging
-import pandas as pd
 import shutil
 from csv import reader
+from pathlib import Path
+from typing import List, Optional
 
+import pandas as pd
+from alchy import Query
 from cg.constants import Pipeline
 from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.exc import CgError
@@ -148,8 +148,8 @@ class FluffyAnalysisAPI(AnalysisAPI):
             for line in csv_reader:
                 if SAMPLE_SHEET_DATA_HEADER in line:
                     break
-                header_lines += 1
-        return header_lines
+                header_line_count += 1
+        return header_line_count
 
     def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
         """
@@ -161,17 +161,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Returns:
             pd.DataFrame: A pandas dataframe of the sample sheet
         """
-<<<<<<< HEAD
         header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
             sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
         )
         return pd.read_csv(sample_sheet_housekeeper_path, index_col=None, header=header_line_count)
-=======
-        header_line_count: int = self.determine_samplesheet_header(
-            samplesheet_housekeeper_path=samplesheet_housekeeper_path
-        )
-        return pd.read_csv(samplesheet_housekeeper_path, index_col=None, header=header_lines)
->>>>>>> parent of 781ff85d (implemented suggested changes)
 
     def add_sample_sheet_column(
         self, sample_sheet_df: pd.DataFrame, new_column: str, to_add: list
@@ -227,7 +220,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_project_column_alias = self.get_column_alias(
             sample_sheet_df=sample_sheet_df, alias="Sample_Project", alternative="Project"
         )
-<<<<<<< HEAD
 
         column_to_value_map: dict = {
             "Exclude": lambda x: self.get_sample_control_status(sample_id=x),
@@ -237,70 +229,16 @@ class FluffyAnalysisAPI(AnalysisAPI):
             sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
         }
 
-=======
-column_to_value_map: dict = {"Exclude": lambda x: self.get_sample_control_status(sample_id=x),
-                                    "SampleName": lambda x: self.get_sample_name_from_lims_id(lims_id=x),
-                                     "Library_nM": lambda x: self.get_concentrations_from_lims(sample_id=x),
-                                     "SequencingDate": lambda x: self.get_sample_sequenced_date(sample_id=x),
-                                     sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
-                                     }
->>>>>>> parent of 781ff85d (implemented suggested changes)
         for column, value in column_to_value_map.items():
             sample_sheet_df = self.add_sample_sheet_column(
                 sample_sheet_df=sample_sheet_df,
                 new_column=column,
                 to_add=sample_sheet_df[sample_id_column_alias].apply(value),
             )
-        samplesheet_df = self.add_samplesheet_column(
-            samplesheet_df=samplesheet_df,
-            new_column="SampleName",
-            to_add=samplesheet_df[sample_id_column_alias].apply(
-                lambda x: self.get_sample_name_from_lims_id(lims_id=x)
-            ),
-        )
 
-<<<<<<< HEAD
         LOG.info(sample_sheet_df)
         self.write_sample_sheet_csv(
             sample_sheet_df=sample_sheet_df, sample_sheet_workdir_path=sample_sheet_workdir_path
-=======
-        samplesheet_df = self.add_samplesheet_column(
-            samplesheet_df=samplesheet_df,
-            new_column="Library_nM",
-            to_add=samplesheet_df[sample_id_column_alias].apply(
-                lambda x: self.get_concentrations_from_lims(sample_id=x)
-            ),
-        )
-
-        samplesheet_df = self.add_samplesheet_column(
-            samplesheet_df=samplesheet_df,
-            new_column="SequencingDate",
-            to_add=samplesheet_df[sample_id_column_alias].apply(
-                lambda x: self.get_sample_sequenced_date(sample_id=x)
-            ),
-        )
-
-        samplesheet_df = self.add_samplesheet_column(
-            samplesheet_df=samplesheet_df,
-            new_column=sample_project_column_alias,
-            to_add=samplesheet_df[sample_id_column_alias].apply(
-                lambda x: self.get_sample_starlims_id(sample_id=x)
-            ),
-        )
-
-        samplesheet_df = self.add_samplesheet_column(
-            samplesheet_df=samplesheet_df,
-            new_column="Exclude",
-            to_add=samplesheet_df[sample_id_column_alias].apply(
-                lambda x: self.get_sample_control_status(sample_id=x)
-            ),
-        )
-        LOG.info(samplesheet_df)
-        samplesheet_df.to_csv(
-            samplesheet_workdir_path,
-            sep=",",
-            index=False,
->>>>>>> parent of 781ff85d (implemented suggested changes)
         )
 
     def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
