@@ -146,6 +146,13 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
     help="Deliver and rsync the files for ALL cases connected to a ticket",
     required=True,
 )
+@click.option(
+    "-i",
+    "--ignore-missing-bundles",
+    help="Ignore errors due to missing case bundles",
+    is_flag=True,
+    default=False,
+)
 @FORCE_ALL
 @click.pass_context
 def deliver_ticket(
@@ -154,6 +161,7 @@ def deliver_ticket(
     dry_run: bool,
     force_all: bool,
     ticket: str,
+    ignore_missing_bundles: bool,
 ):
     """Will first collect hard links in the customer inbox then
     concatenate fastq files if needed and finally send the folder
@@ -170,6 +178,7 @@ def deliver_ticket(
             dry_run=dry_run,
             force_all=force_all,
             ticket=ticket,
+            ignore_missing_bundles=ignore_missing_bundles,
         )
     else:
         LOG.info("Files already delivered to customer inbox on the HPC")
