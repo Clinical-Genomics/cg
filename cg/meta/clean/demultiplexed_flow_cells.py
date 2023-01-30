@@ -26,7 +26,7 @@ SEQUENCER_IDENTIFIER_POSITION = 1
 class DemultiplexedRunsFlowCell:
     """Class to check if a given flow cell in demultiplexed-runs is valid, or can be removed. A
     valid flow cell is named correctly, has the correct status ('ondisk') in Statusdb,
-    and has FASTQ files in Housekeeper.
+    and has FASTQ and/oor SPRING files in Housekeeper.
 
     A flow cell that is correctly named has four segments divided by underscores:
     <run_date>_<sequencer>_<run_number>_<identifier>. The identifier consists of the position of
@@ -187,10 +187,9 @@ class DemultiplexedRunsFlowCell:
 
     @property
     def is_demultiplexing_ongoing_or_started_and_not_completed(self) -> bool:
-        """Checks demultiplexing status for a flow cell. A flow cell can only be deleted if
-        demultiplexing has not started or is not ongoing. Completed flow cells can be deleted."""
+        """Checks demultiplexing status for a flow cell."""
         if self._is_demultiplexing_ongoing_or_started_and_not_completed is None:
-            LOG.info(f"Checking demultiplexing status for flowcell {self.id}:")
+            LOG.info(f"Checking demultiplexing status for flow cell {self.id}:")
             self._is_demultiplexing_ongoing_or_started_and_not_completed: bool = (
                 self.tb.has_latest_analysis_started(case_id=self.id)
                 or self.tb.is_latest_analysis_ongoing(case_id=self.id)
@@ -199,7 +198,6 @@ class DemultiplexedRunsFlowCell:
                 LOG.warning(f"Demultiplexing not fully completed for flow cell {self.id}!")
             else:
                 LOG.info("Demultiplexing fully completed!")
-
         return self._is_demultiplexing_ongoing_or_started_and_not_completed
 
     @property

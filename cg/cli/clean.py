@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple, Iterable, Dict
 
 import click
 from alchy import Query
@@ -29,11 +29,14 @@ from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.sequencing import Sequencers
 from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS, ScoutTag
 from cg.datetime.utils import get_date_days_ago, get_timedelta_from_date
+from cg.exc import FlowCellError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
+from cg.store.models import Sample
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -394,6 +397,22 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
         )
 
 
+def get_fastq_or_spring_from_housekepper(
+    housekeeper_api: HousekeeperAPI, samples: List[Sample]
+) -> bool:
+    """Return fastq or spring query per sample."""
+    sequencing_files_in_hk: Dict[str, Iterable[File]] = {}
+    for sample in samples:
+        for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
+            try:
+                sequencing_files_in_hk[sample] = housekeeper_api.get_files(
+                    bundle=sample.internal_id, tags=[tag]
+                )
+            except FileNotFoundError as error:
+                LOG.warning(error)
+    return all(sequencing_files_in_hk.values())
+
+
 @clean.command("remove-old-demutliplexed-run-dirs")
 @click.option(
     "-o",
@@ -410,40 +429,35 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
-    sample_sheets_dir: str = context.clean.flow_cells.sample_sheets_dir_name
-    checked_flow_cells: List[DemultiplexedRunsFlowCell] = []
-    search: str = f"%{demux_api.out_dir}%"
-    fastq_files_in_housekeeper: Query = housekeeper_api.files(
-        tags=[SequencingFileTag.FASTQ]
-    ).filter(File.path.like(search))
-    spring_files_in_housekeeper: Query = housekeeper_api.files(
-        tags=[SequencingFileTag.SPRING]
-    ).filter(File.path.like(search))
-    for flow_cell_dir in demux_api.out_dir.iterdir():
-        flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
+    for flow_cell_dir in demux_api.get_all_demultiplexed_flow_cell_dirs():
+        try:
+            flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_dir)
+        except FlowCellError:
+            return
+        samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)
+        are_sequencing_files_in_hk: bool = get_fastq_or_spring_from_housekepper(samples=samples)
+        demux_runs_flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
             flow_cell_path=flow_cell_dir,
             status_db=status_db,
             housekeeper_api=housekeeper_api,
             trailblazer_api=trailblazer_api,
-            sample_sheets_dir=sample_sheets_dir,
-            fastq_files=fastq_files_in_housekeeper,
-            spring_files=spring_files_in_housekeeper,
+            sample_sheets_dir=context.clean.flow_cells.sample_sheets_dir_name,
         )
-        if not flow_cell.is_demultiplexing_ongoing_or_started_and_not_completed:
-            LOG.info(f"Found flow cell ready to be processed: {flow_cell.path}!")
-            checked_flow_cells.append(flow_cell)
-            if flow_cell.passed_check:
-                LOG.warning(f"Flow cell directory ready to be removed: {flow_cell.path}")
-                if dry_run:
-                    continue
-                LOG.warning(f"Removing {flow_cell.path}!")
-                clean_run_directories(
-                    days_old=days_old,
-                    dry_run=dry_run,
-                    housekeeper_api=housekeeper_api,
-                    run_directory=flow_cell.path.as_posix(),
-                    status_db=status_db,
-                )
+        if (
+            not demux_runs_flow_cell.is_demultiplexing_ongoing_or_started_and_not_completed
+            and are_sequencing_files_in_hk
+        ):
+            LOG.info(f"Found flow cell ready to be removed: {demux_runs_flow_cell.path}!")
+            if dry_run:
+                continue
+            LOG.warning(f"Removing {demux_runs_flow_cell.path}!")
+            clean_run_directories(
+                days_old=days_old,
+                dry_run=dry_run,
+                housekeeper_api=housekeeper_api,
+                run_directory=demux_runs_flow_cell.path.as_posix(),
+                status_db=status_db,
+            )
 
 
 def clean_run_directories(
