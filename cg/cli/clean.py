@@ -400,7 +400,7 @@ def clean_run_directories(
         flow_cell_dir for flow_cell_dir in Path(run_directory).iterdir() if flow_cell_dir.is_dir()
     ]
     for flow_cell_dir in flow_cell_dirs:
-        LOG.info(f"Checking flow cell {flow_cell_dir.name}", flow_cell_dir.name)
+        LOG.info(f"Checking flow cell {flow_cell_dir.name}")
         run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
             flow_cell_dir=flow_cell_dir, status_db=status_db, housekeeper_api=housekeeper_api
         )

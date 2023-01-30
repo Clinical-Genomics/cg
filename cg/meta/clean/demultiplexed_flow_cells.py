@@ -56,17 +56,17 @@ class DemultiplexedRunsFlowCell:
         self.identifier: str = self.split_name[FLOW_CELL_IDENTIFIER_POSITION]
         self.sequencer_serial_number: str = self.split_name[SEQUENCER_IDENTIFIER_POSITION]
         self.id: str = self.identifier[1:]
-        self._hk_fastq_files: list = None
-        self._hk_spring_files: list = None
-        self._is_correctly_named: bool = None
-        self._exists_in_statusdb: bool = None
-        self._fastq_files_exist_in_housekeeper: bool = None
-        self._spring_files_exist_in_housekeeper: bool = None
-        self._files_exist_in_housekeeper: bool = None
-        self._files_exist_on_disk: bool = None
-        self._passed_check: bool = None
-        self._sequencer_type: str = None
-        self._is_demultiplexing_ongoing_or_started_and_not_completed: bool = None
+        self._hk_fastq_files: Optional[list] = None
+        self._hk_spring_files: Optional[list] = None
+        self._is_correctly_named: Optional[bool] = None
+        self._exists_in_statusdb: Optional[bool] = None
+        self._fastq_files_exist_in_housekeeper: Optional[bool] = None
+        self._spring_files_exist_in_housekeeper: Optional[bool] = None
+        self._files_exist_in_housekeeper: Optional[bool] = None
+        self._files_exist_on_disk: Optional[bool] = None
+        self._passed_check: Optional[bool] = None
+        self._sequencer_type: Optional[str] = None
+        self._is_demultiplexing_ongoing_or_started_and_not_completed: Optional[bool] = None
 
     @property
     def sequencer_type(self) -> str:

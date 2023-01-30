@@ -61,8 +61,7 @@ class RunDirFlowCell:
                 self._sequenced_date: datetime = flow_cell.sequenced_at
             else:
                 LOG.info(
-                    f"Flow cell {self.id} NOT found in Statusdb, deriving sequenced date from run dir name!",
-                    self.id,
+                    f"Flow cell {self.id} NOT found in Statusdb, deriving sequenced date from run dir name!"
                 )
                 self._sequenced_date: datetime = self.derived_date
         return self._sequenced_date
