@@ -9,6 +9,7 @@ class DeleteDataHandler(BaseHandler):
     """Contains methods to delete business data model instances"""
 
     def delete_flow_cell(self, flow_cell_name: str) -> None:
+        """Delete flow cell."""
         flow_cell: Flowcell = self.Flowcell.query.filter(Flowcell.name == flow_cell_name).first()
 
         if flow_cell:

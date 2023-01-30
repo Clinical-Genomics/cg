@@ -170,7 +170,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
 
     def family_samples(self, family_id: str) -> List[FamilySample]:
-        """Find the samples associated with a case."""
+        """Find the case-sample links associated with a case."""
         return apply_case_sample_filter(
             function="get_samples_associated_with_case",
             case_id=family_id,
@@ -178,7 +178,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_sample_cases(self, sample_id: str) -> List[FamilySample]:
-        """Return the cases associated with a sample."""
+        """Return the case-sample links associated with a sample."""
         return apply_case_sample_filter(
             function="get_cases_associated_with_sample",
             sample_id=sample_id,

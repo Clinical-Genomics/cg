@@ -1,7 +1,7 @@
 import datetime as dt
 import pytest
 
-from typing import Iterable, List, Tuple
+from typing import Iterable, List
 
 from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
