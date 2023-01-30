@@ -181,9 +181,9 @@ def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="case_id_with_single_sample")
-def case_id_with_single_sample(case_id: str):
+def case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
-    return case_id
+    return "exhaustedcrocodile"
 
 
 @pytest.fixture(name="case_id_with_multiple_samples")
@@ -223,27 +223,20 @@ def store_with_multiple_cases_and_samples(
 ):
     """Return a store containing multiple cases and samples."""
 
+    helpers.add_case(store=store, internal_id=case_id_without_samples)
     helpers.add_case_with_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
 
-    helpers.add_case_with_sample(
-        base_store=store,
-        case_id=case_id_with_multiple_samples,
-        sample_id=sample_id_in_multiple_cases,
-    )
+    case_samples: List[Tuple[str, str]] = [
+        (case_id_with_multiple_samples, sample_id_in_multiple_cases),
+        (case_id, sample_id_in_multiple_cases),
+        (case_id_with_single_sample, sample_id_in_single_case),
+    ]
 
-    helpers.add_case_with_sample(
-        base_store=store,
-        case_id=case_id,
-        sample_id=sample_id_in_multiple_cases,
-    )
-
-    helpers.add_case_with_sample(
-        base_store=store, case_id=case_id_with_single_sample, sample_id=sample_id_in_single_case
-    )
-
-    helpers.add_case(store=store, internal_id=case_id_without_samples)
+    for case_sample in case_samples:
+        case_id, sample_id = case_sample
+        helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
 
     yield store
 

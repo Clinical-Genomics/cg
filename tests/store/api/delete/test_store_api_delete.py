@@ -1,5 +1,6 @@
+from typing import List
 from cg.store import Store
-from cg.store.models import Flowcell, Family, FamilySample
+from cg.store.models import Flowcell, Family, FamilySample, Sample
 
 
 def test_store_api_delete_flowcell(flow_cell_id: str, populated_flow_cell_store: Store):
@@ -27,10 +28,10 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     """Test function to delete association between a sample and a case in store."""
 
     # GIVEN a store containing multiple samples associated with different cases
-    sample_in_single_case = store_with_multiple_cases_and_samples.sample(
+    sample_in_single_case: Sample = store_with_multiple_cases_and_samples.sample(
         internal_id=sample_id_in_single_case
     )
-    sample_in_multiple_cases = store_with_multiple_cases_and_samples.sample(
+    sample_in_multiple_cases: Sample = store_with_multiple_cases_and_samples.sample(
         internal_id=sample_id_in_multiple_cases
     )
 
@@ -41,10 +42,12 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     store_with_multiple_cases_and_samples.delete_relationships_sample(sample=sample_in_single_case)
 
     # THEN it should no longer be associated with any cases, but other relationships should remain
-    results = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    results: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample_in_single_case.id
     )
-    existing_relationships = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    existing_relationships: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample_in_multiple_cases.id
     )
 
@@ -60,10 +63,10 @@ def test_store_api_delete_all_empty_cases(
     """Test function to delete cases that are not associated with any samples"""
 
     # GIVEN a database containing a case without samples and a case with samples
-    case_without_samples = store_with_multiple_cases_and_samples.family_samples(
+    case_without_samples: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
         case_id_without_samples
     )
-    case_with_samples = store_with_multiple_cases_and_samples.family_samples(
+    case_with_samples: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
         case_id_with_multiple_samples
     )
 
@@ -76,8 +79,10 @@ def test_store_api_delete_all_empty_cases(
     )
 
     # THEN no entry should be found for the empty case, but the one with samples should remain.
-    result = store_with_multiple_cases_and_samples.family_samples(case_id_without_samples)
-    case_with_samples = store_with_multiple_cases_and_samples.family_samples(
+    result: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
+        case_id_without_samples
+    )
+    case_with_samples: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
         case_id_with_multiple_samples
     )
 
@@ -91,8 +96,8 @@ def test_store_api_delete_non_existing_case(
     """Test that nothing happens when trying to delete a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
-    case = store_with_multiple_cases_and_samples.family(case_id_does_not_exist)
-    existing_cases = store_with_multiple_cases_and_samples.families().all()
+    case: Family = store_with_multiple_cases_and_samples.family(case_id_does_not_exist)
+    existing_cases: List[Family] = store_with_multiple_cases_and_samples.families().all()
 
     assert not case
     assert existing_cases
@@ -103,6 +108,6 @@ def test_store_api_delete_non_existing_case(
     )
 
     # THEN no case has been deleted and nothing happens
-    remaining_cases = store_with_multiple_cases_and_samples.families().all()
+    remaining_cases: List[Family] = store_with_multiple_cases_and_samples.families().all()
 
     assert len(remaining_cases) == len(existing_cases)

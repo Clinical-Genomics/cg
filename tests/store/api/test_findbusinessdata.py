@@ -2,7 +2,8 @@
 from datetime import datetime
 from typing import List
 
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Application, ApplicationVersion, Flowcell, Sample, FamilySample, Family
 from cg.constants.indexes import ListIndexes
 from tests.store_helpers import StoreHelpers
 
@@ -25,7 +26,7 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: models.Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
+    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id
@@ -37,13 +38,13 @@ def test_get_latest_flow_cell_on_case(
     """Test function to fetch the latest sequenced flow cell on a case"""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell_obj: models.Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
-        models.Flowcell.name == flow_cell_id
+    latest_flow_cell_obj: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
+        Flowcell.name == flow_cell_id
     ).first()
 
     # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
-    latest_flow_cell_on_case: models.Flowcell = (
-        re_sequenced_sample_store.get_latest_flow_cell_on_case(family_id=case_id)
+    latest_flow_cell_on_case: Flowcell = re_sequenced_sample_store.get_latest_flow_cell_on_case(
+        family_id=case_id
     )
 
     # THEN the fetched flow cell should have the same name as the other
@@ -84,7 +85,7 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
     """Test if the correct number of expected reads is returned."""
 
     # GIVEN a case with a sample with an application version
-    application_version: models.ApplicationVersion = (
+    application_version: ApplicationVersion = (
         rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
     )
 
@@ -98,12 +99,12 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
 def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     """Test that the correct application is returned on a case."""
     # GIVEN a case with a sample with an application version
-    application_version: models.ApplicationVersion = (
+    application_version: ApplicationVersion = (
         rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
     )
 
     # WHEN the application is fetched from the case
-    application: models.Application = rml_pool_store.get_application_by_case(case_id=case_id)
+    application: Application = rml_pool_store.get_application_by_case(case_id=case_id)
 
     # THEN the fetched application should be equal to the application version application
     assert application_version.application == application
@@ -115,14 +116,14 @@ def test_find_single_case_for_sample(
     """Test that cases associated with a sample can be found."""
 
     # GIVEN a database containing a sample associated with a single case
-    sample: models.Sample = store_with_multiple_cases_and_samples.sample(
+    sample: Sample = store_with_multiple_cases_and_samples.sample(
         internal_id=sample_id_in_single_case
     )
 
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[models.FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample.id
     )
 
@@ -134,13 +135,13 @@ def test_find_multiple_cases_for_sample(
     sample_id_in_multiple_cases: str, store_with_multiple_cases_and_samples: Store
 ):
     # GIVEN a database containing a sample associated with multiple cases
-    sample: models.Sample = store_with_multiple_cases_and_samples.sample(
+    sample: Sample = store_with_multiple_cases_and_samples.sample(
         internal_id=sample_id_in_multiple_cases
     )
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[models.FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample.id
     )
 
@@ -152,8 +153,8 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
     """Test that nothing happens when trying to find a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
-    case_id = "some_case"
-    case = store_with_multiple_cases_and_samples.family(case_id)
+    case_id: str = "some_case"
+    case: Family = store_with_multiple_cases_and_samples.family(case_id)
 
     assert not case
 
