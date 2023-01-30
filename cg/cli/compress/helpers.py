@@ -1,4 +1,4 @@
-"""Helper functions for compress cli"""
+"""Helper functions for compress cli."""
 import datetime as dt
 import logging
 import os
@@ -124,8 +124,7 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
         # Check if there are fastq symlinks that points to the directory where the spring
         # path is located
         if fastq_path.is_symlink():
-            true_dir = Path(os.readlink(fastq_path)).parent
-            return true_dir
+            return Path(os.readlink(fastq_path)).parent
     LOG.info("Could not find any symlinked files")
     return None
 
@@ -200,7 +199,6 @@ def correct_spring_paths(
             if spring_path.exists():
                 continue
 
-            spring_config_path = compression_obj.spring_metadata_path
             # true_dir is where the spring paths actually exists
             true_dir = get_true_dir(spring_path.parent)
             if not true_dir:
@@ -220,6 +218,6 @@ def correct_spring_paths(
             if not dry_run:
                 # We know from above that the spring path does not exist
                 true_spring_path.replace(spring_path)
-                true_spring_config_path.replace(spring_config_path)
+                true_spring_config_path.replace(compression_obj.spring_metadata_path)
         if i == 0:
             LOG.debug("Could not find any spring files")

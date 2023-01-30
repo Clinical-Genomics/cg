@@ -1,17 +1,17 @@
-"""Set data in the status database and LIMS"""
+"""Set data in the status database and LIMS."""
 import datetime
 import getpass
 import logging
 from typing import Iterable, List, Optional
 
 import click
+from cg.cli.set.families import families
+from cg.cli.set.family import family
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-
-from .families import families
-from .family import family
+from cg.store import Store
+from cg.store.models import Sample, Customer, ApplicationVersion, Flowcell
 
 CONFIRM = "Continue?"
 HELP_KEY_VALUE = "Give a property on sample and the value to set it to, e.g. -kv name Prov52"
@@ -99,15 +99,13 @@ def samples(
         )
 
 
-def _get_samples(
-    case_id: str, identifiers: click.Tuple([str, str]), store: Store
-) -> List[models.Sample]:
-    """Get samples that match both case_id and identifiers if given"""
+def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Store) -> List[Sample]:
+    """Get samples that match both case_id and identifiers if given."""
     samples_by_case_id = None
     samples_by_id = None
 
     if case_id:
-        samples_by_case_id = _get_samples_by_case_id(case_id, store)
+        samples_by_case_id: List[Sample] = store.get_samples_by_case_id(case_id=case_id)
 
     if identifiers:
         samples_by_id = _get_samples_by_identifiers(identifiers, store)
@@ -120,10 +118,8 @@ def _get_samples(
     return sample_objs
 
 
-def _get_samples_by_identifiers(
-    identifiers: click.Tuple([str, str]), store: Store
-) -> List[models.Sample]:
-    """Get samples matched by given set of identifiers"""
+def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> List[Sample]:
+    """Get samples matched by given set of identifiers."""
     identifier_args = {
         identifier_name: identifier_value for identifier_name, identifier_value in identifiers
     }
@@ -131,29 +127,23 @@ def _get_samples_by_identifiers(
     return list(store.samples_by_ids(**identifier_args))
 
 
-def _get_samples_by_case_id(case_id: str, store: Store) -> List[models.Sample]:
-    """Get samples on a given case-id"""
-    case: models.Family = store.family(internal_id=case_id)
-    return [link.sample for link in case.links] if case else []
-
-
 def is_locked_attribute_on_sample(key: str, skip_attributes: List[str]) -> bool:
-    """Returns true if the attribute is private or in the skip list"""
+    """Returns true if the attribute is private or in the skip list."""
     return is_private_attribute(key) or key in skip_attributes
 
 
 def is_private_attribute(key: str) -> bool:
-    """Returns true if key has name indicating it is private"""
+    """Returns true if key has name indicating it is private."""
     return key.startswith("_")
 
 
 def list_changeable_sample_attributes(
-    sample: Optional[models.Sample] = None, skip_attributes: List[str] = []
+    sample: Optional[Sample] = None, skip_attributes: List[str] = []
 ) -> None:
-    """List changeable attributes on sample and its current value"""
+    """List changeable attributes on sample and its current value."""
     LOG.info(f"Below is a set of changeable sample attributes, to combine with -kv flag:\n")
 
-    sample_attributes: Iterable[str] = models.Sample.__dict__.keys()
+    sample_attributes: Iterable[str] = Sample.__dict__.keys()
     for attribute in sample_attributes:
         if is_locked_attribute_on_sample(attribute, skip_attributes):
             continue
@@ -172,7 +162,7 @@ def list_keys(
 ):
     """List all available modifiable keys."""
     status_db: Store = context.status_db
-    sample: models.Sample = status_db.sample(internal_id=sample_id)
+    sample: Sample = status_db.sample(internal_id=sample_id)
     list_changeable_sample_attributes(
         sample=sample, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES
     )
@@ -208,7 +198,7 @@ def sample(
 
     """
     status_db: Store = context.status_db
-    sample: models.Sample = status_db.sample(internal_id=sample_id)
+    sample: Sample = status_db.sample(internal_id=sample_id)
 
     if sample is None:
         LOG.error(f"Can't find sample {sample_id}")
@@ -234,9 +224,9 @@ def sample(
                 if isinstance(value, str) and not value.isdigit():
                     new_key = "priority_human"
             elif key == "customer":
-                new_value: models.Customer = status_db.customer(value)
+                new_value: Customer = status_db.customer(value)
             elif key == "application_version":
-                new_value: models.ApplicationVersion = status_db.current_application_version(value)
+                new_value: ApplicationVersion = status_db.current_application_version(value)
 
             if not new_value:
                 LOG.error(f"{key} {value} not found, aborting")
@@ -276,7 +266,7 @@ def sample(
 
 
 def _generate_comment(what, old_value, new_value):
-    """Generate a comment that can be used in the comment field to describe updated value"""
+    """Generate a comment that can be used in the comment field to describe updated value."""
     return f"\n{what} changed from {str(old_value)} to {str(new_value)}."
 
 
@@ -295,12 +285,12 @@ def _update_comment(comment, obj):
 @click.argument("flowcell_name")
 @click.pass_obj
 def flowcell(context: CGConfig, flowcell_name: str, status: Optional[str]):
-    """Update information about a flowcell."""
+    """Update information about a flow cell."""
     status_db: Store = context.status_db
-    flowcell_obj: models.Flowcell = status_db.get_flow_cell(flowcell_name)
+    flowcell_obj: Flowcell = status_db.get_flow_cell(flowcell_name)
 
     if flowcell_obj is None:
-        LOG.warning(f"flowcell not found: {flowcell_name}")
+        LOG.warning(f"flow cell not found: {flowcell_name}")
         raise click.Abort
     prev_status: str = flowcell_obj.status
     flowcell_obj.status = status
