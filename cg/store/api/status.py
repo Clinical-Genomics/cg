@@ -215,7 +215,7 @@ class StatusHandler(BaseHandler):
     def add_sample_comment(self, sample: models.Sample, comment: str) -> None:
         """Update comment on sample with the provided comment."""
         if sample.comment:
-            sample.comment = sample.commnent + " " + comment
+            sample.comment = sample.comment + " " + comment
         else:
             sample.comment = comment
         self.commit()
