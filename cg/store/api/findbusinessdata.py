@@ -339,10 +339,6 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def sample(self, internal_id: str) -> Sample:
-        """Fetch a sample by lims id."""
-        return self.Sample.query.filter_by(internal_id=internal_id).first()
-
     def samples(self, *, customers: Optional[List[Customer]] = None, enquiry: str = None) -> Query:
         records = self.Sample.query
 

@@ -8,7 +8,7 @@ from typing_extensions import Literal
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.constants.constants import CaseActions
 from cg.store import models
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 from cg.store.status_analysis_filters import apply_analysis_filter
 from cg.store.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
@@ -235,6 +235,24 @@ class StatusHandler(BaseHandler):
                 function=filter_function, cases=self._get_case_query(), date=date_threshold
             )
         return cases
+
+    def _get_sample_query(self) -> Query:
+        """Return sample query."""
+        return self.query(Sample)
+
+    def get_sample_by_id(self, entry_id: int) -> Sample:
+        """Fetch a sample by entry id."""
+        sample: Sample = apply_sample_filter(
+            function="get_sample_by_entry_id", samples=self._get_sample_query(), entry_id=entry_id
+        ).first()
+        return sample
+
+    def sample(self, internal_id: str) -> Sample:
+        """Fetch a sample by lims id."""
+        sample: Sample = apply_sample_filter(
+            function="sample", samples=self._get_sample_query(), internal_id=internal_id
+        ).first()
+        return sample
 
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:
