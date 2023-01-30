@@ -1,12 +1,13 @@
-"""Handler to find business data objects"""
+"""Handler to find business data objects."""
 import datetime as dt
-from typing import List, Optional
+import logging
+from typing import List, Optional, Iterator
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 from cg.constants.constants import PrepCategory
 from cg.constants.indexes import ListIndexes
-from cg.store import models
+from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
 
 from cg.store.models import (
@@ -22,6 +23,8 @@ from cg.store.models import (
 )
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 from cg.store.status_case_sample_filters import apply_case_sample_filter
+
+LOG = logging.getLogger(__name__)
 
 
 class FindBusinessDataHandler(BaseHandler):
@@ -215,11 +218,6 @@ class FindBusinessDataHandler(BaseHandler):
             .all()
         )
 
-    def get_samples_from_flowcell(self, flowcell_name: str) -> List[Sample]:
-        flowcell = self.query(Flowcell).filter(Flowcell.name == flowcell_name).first()
-        if flowcell:
-            return flowcell.samples
-
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
         return self.family(case_id).latest_ticket
@@ -230,19 +228,32 @@ class FindBusinessDataHandler(BaseHandler):
         samples_on_case = case_obj.links
         flow_cells_on_case: List[Flowcell] = samples_on_case[0].sample.flowcells
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
-        # .sort() sorts by ascending order by default
         return flow_cells_on_case[-1]
 
-    def get_samples_by_family_id(self, family_id: str) -> List[Sample]:
-        """Get samples on a given family_id."""
+    def _is_case_found(self, case: Family, case_id: str) -> None:
+        """Raise error if case is false."""
+        if not case:
+            LOG.error(f"Could not find case {case_id}")
+            raise CaseNotFoundError("")
 
-        case: Family = self.family(internal_id=family_id)
+    def get_samples_by_case_id(self, case_id: str) -> List[Sample]:
+        """Get samples on a given case id."""
+
+        case: Family = self.family(internal_id=case_id)
+        self._is_case_found(case=case, case_id=case_id)
         return case.samples if case else []
+
+    def get_sample_ids_by_case_id(self, case_id: str = None) -> Iterator[str]:
+        """Return sample ids from case id."""
+        case: Family = self.family(internal_id=case_id)
+        self._is_case_found(case=case, case_id=case_id)
+        for link in case.links:
+            yield link.sample.internal_id
 
     def get_sequenced_samples(self, family_id: str) -> List[Sample]:
         """Get sequenced samples by family_id."""
 
-        samples: List[Sample] = self.get_samples_by_family_id(family_id)
+        samples: List[Sample] = self.get_samples_by_case_id(family_id)
         return [sample for sample in samples if sample.sequencing_qc]
 
     def find_family(self, customer: Customer, name: str) -> Family:
@@ -264,7 +275,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
     def flowcells(self, *, status: str = None, family: Family = None, enquiry: str = None) -> Query:
-        """Fetch all flowcells."""
+        """Fetch all flow cells."""
         records = self.Flowcell.query
         if family:
             records = records.join(Flowcell.samples, Sample.links).filter(
@@ -276,14 +287,19 @@ class FindBusinessDataHandler(BaseHandler):
             records = records.filter(Flowcell.name.like(f"%{enquiry}%"))
         return records.order_by(Flowcell.sequenced_at.desc())
 
+    def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
+        """Return samples present on flow cell."""
+        flow_cell: Flowcell = self.get_flow_cell(flow_cell_id=flow_cell_id)
+        if flow_cell:
+            return flow_cell.samples
+
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
         query = self.Invoice.query
         if invoiced:
-            query = query.filter(Invoice.invoiced_at.isnot(None))
+            return query.filter(Invoice.invoiced_at.isnot(None))
         else:
-            query = query.filter(Invoice.invoiced_at.is_(None))
-        return query
+            return query.filter(Invoice.invoiced_at.is_(None))
 
     def invoice(self, invoice_id: int) -> Invoice:
         """Fetch an invoice."""
@@ -314,9 +330,7 @@ class FindBusinessDataHandler(BaseHandler):
         records = self.Pool.query
 
         if customers:
-            customer_ids = []
-            for customer in customers:
-                customer_ids.append(customer.id)
+            customer_ids = [customer.id for customer in customers]
             records = records.filter(Pool.customer_id.in_(customer_ids))
 
         records = (
@@ -348,9 +362,7 @@ class FindBusinessDataHandler(BaseHandler):
         records = self.Sample.query
 
         if customers:
-            customer_ids = []
-            for customer in customers:
-                customer_ids.append(customer.id)
+            customer_ids = [customer.id for customer in customers]
             records = records.filter(Sample.customer_id.in_(customer_ids))
 
         records = (

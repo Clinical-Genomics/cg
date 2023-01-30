@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Union
 
 import pytest
-from housekeeper.store import models as hk_models
 from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
@@ -39,6 +38,8 @@ from .mocks.scout import MockScoutAPI
 from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
+
+from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -811,10 +812,10 @@ def fixture_populated_housekeeper_api(
     return hk_api
 
 
-@pytest.fixture(name="hk_version_obj")
-def fixture_hk_version_obj(
+@pytest.fixture(name="hk_version")
+def fixture_hk_version(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
-) -> hk_models.Version:
+) -> Version:
     """Get a Housekeeper version object."""
     return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 

@@ -5,12 +5,16 @@ from typing import List
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion, Flowcell, Sample, FamilySample, Family
 from cg.constants.indexes import ListIndexes
+from cg.store.models import Sample, Flowcell, ApplicationVersion, Application
 from tests.store_helpers import StoreHelpers
 
 
-def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
+def test_find_analysis_via_date(
+    sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test returning an analysis using a date."""
     # GIVEN a case with an analysis with a start date in the database
-    analysis = helpers.add_analysis(store=sample_store, started_at=datetime.now())
+    analysis = helpers.add_analysis(store=sample_store, started_at=timestamp_now)
     assert analysis.started_at
 
     # WHEN getting analysis via case_id and start date
@@ -21,7 +25,7 @@ def test_find_analysis_via_date(sample_store: Store, helpers: StoreHelpers):
 
 
 def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
-    """Test function to return the latest flow cell froom the database."""
+    """Test function to return the latest flow cell from the database."""
 
     # GIVEN a store with two flow cells
 
@@ -32,13 +36,41 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     assert flow_cell.name == flow_cell_id
 
 
+def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cell.name == flow_cell_id
+
+
+def test_get_samples_from_flow_cell(
+    flow_cell_id: str, sample_id: str, re_sequenced_sample_store: Store
+):
+    """Test returning samples present on the latest flow cell from the database."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the samples from the latest flow cell
+    samples: List[Sample] = re_sequenced_sample_store.get_samples_from_flow_cell(
+        flow_cell_id=flow_cell_id
+    )
+
+    # THEN the returned sample id should have the same id as the one in the database
+    assert samples[0].internal_id == sample_id
+
+
 def test_get_latest_flow_cell_on_case(
     re_sequenced_sample_store: Store, case_id: str, flow_cell_id: str
 ):
-    """Test function to fetch the latest sequenced flow cell on a case"""
+    """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell_obj: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
+    latest_flow_cell: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
         Flowcell.name == flow_cell_id
     ).first()
 
@@ -48,11 +80,11 @@ def test_get_latest_flow_cell_on_case(
     )
 
     # THEN the fetched flow cell should have the same name as the other
-    assert latest_flow_cell_obj.name == latest_flow_cell_on_case.name
+    assert latest_flow_cell.name == latest_flow_cell_on_case.name
 
 
 def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
-    """Tests if the function in fact returns the correct customer"""
+    """Tests if the function in fact returns the correct customer."""
     # Given a store with a ticket
 
     # Then the function should return the customer connected to the ticket
