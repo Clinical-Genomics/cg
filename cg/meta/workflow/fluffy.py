@@ -162,7 +162,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             pd.DataFrame: A pandas dataframe of the sample sheet
         """
         header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
-            samplesample_sheetsheet_housekeeper_path=sample_sheet_housekeeper_path
+            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
         )
         return pd.read_csv(sample_sheet_housekeeper_path, index_col=None, header=header_line_count)
 
