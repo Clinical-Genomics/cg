@@ -393,6 +393,12 @@ def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     return Path(fixtures_dir, "analysis")
 
 
+@pytest.fixture(name="microsalt_analysis_dir")
+def fixture_microsalt_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the analysis dir."""
+    return Path(analysis_dir, "microsalt")
+
+
 @pytest.fixture(name="apps_dir")
 def fixture_apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir."""
