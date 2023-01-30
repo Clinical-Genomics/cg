@@ -105,9 +105,7 @@ def test_delivery_path_created(
 
 def test_delivery_ticket_id(
     populated_mip_context: CGConfig,
-    case_id: str,
     delivery_inbox: Path,
-    project_dir: Path,
     ticket: str,
 ):
     """Test that to run the deliver command with ticket nr"""
@@ -132,8 +130,6 @@ def test_delivery_ticket_id(
 def test_run_deliver_multiple_delivery_flags(
     populated_mip_context: CGConfig,
     case_id: str,
-    delivery_inbox: Path,
-    project_dir: Path,
     deliver_vcf_path: Path,
     deliver_fastq_path: Path,
     caplog,
@@ -166,10 +162,7 @@ def test_run_deliver_multiple_delivery_flags(
 def test_case_file_is_delivered(
     populated_mip_context: CGConfig,
     case_id: str,
-    delivery_inbox: Path,
-    project_dir: Path,
     deliver_vcf_path: Path,
-    caplog,
 ):
     """Test that the a case file is delivered when running the delivery command"""
     # GIVEN a context with a case that have files in housekeeper to deliver
@@ -187,3 +180,52 @@ def test_case_file_is_delivered(
 
     # THEN assert that the case file was delivered to the inbox
     assert deliver_vcf_path.exists() is True
+
+
+def test_delivering_ticket_with_missing_bundle_errors(
+    empty_context: CGConfig,
+    delivery_inbox: Path,
+    ticket: str,
+):
+    """Test that the deliver command fails when a bundle is missing."""
+    # GIVEN a context with a case that does not have files in housekeeper to deliver.
+    # GIVEN a cli runner
+    runner = CliRunner()
+
+    # GIVEN that the delivery file does not exist
+    assert delivery_inbox.exists() is False
+
+    # WHEN running the deliver analysis command
+    result = runner.invoke(
+        deliver_analysis,
+        ["--ticket", ticket, "--delivery-type", "mip-dna"],
+        obj=empty_context,
+    )
+
+    # THEN assert that the path to the delivery folder was not created and that the command failed
+    assert not delivery_inbox.exists()
+    assert result.exit_code != 0
+
+
+def test_delivering_ticket_with_missing_bundle_ignoring_errors(
+    empty_context: CGConfig,
+    delivery_inbox: Path,
+    ticket: str,
+):
+    """Test that it is possible to deliver a ticket with a missing bundle using the --ignore-errors flag."""
+    # GIVEN a context without files in housekeeper to deliver.
+    # GIVEN a cli runner
+    runner = CliRunner()
+
+    # GIVEN that the delivery file does not exist
+    assert delivery_inbox.exists() is False
+
+    # WHEN running the deliver analysis command
+    runner.invoke(
+        deliver_analysis,
+        ["--ticket", ticket, "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
+        obj=empty_context,
+    )
+
+    # THEN assert that the path to the delivery folder was created
+    assert delivery_inbox.exists() is True

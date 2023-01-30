@@ -98,3 +98,16 @@ def fixture_populated_mip_context(
     base_context.status_db_ = analysis_store
     base_context.delivery_path = str(project_dir)
     return base_context
+
+
+@pytest.fixture(name="empty_context")
+def fixture_empty_context(
+    base_context: CGConfig,
+    analysis_store: Store,
+    real_housekeeper_api: HousekeeperAPI,
+    project_dir: Path,
+) -> CGConfig:
+    base_context.housekeeper_api_ = real_housekeeper_api
+    base_context.status_db_ = analysis_store
+    base_context.delivery_path = str(project_dir)
+    return base_context
