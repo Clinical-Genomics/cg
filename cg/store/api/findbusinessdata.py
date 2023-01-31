@@ -385,16 +385,15 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_by_name(self, name: str) -> Sample:
         return self.Sample.query.filter(Sample.name == name).first()
 
-    def get_sample_name_by_type(self, case_id: str, sample_type: SampleType) -> Optional[str]:
-        """Extract sample internal ID given a tissue type."""
+    def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
+        """Extract samples given a tissue type."""
         samples: Query = self.Sample.query.join(Family.links, FamilySample.sample)
         sample_filter_functions: List[str] = ["samples_with_case_id", "samples_with_type"]
         for filter_function in sample_filter_functions:
             samples: Query = apply_sample_filter(
                 function=filter_function, samples=samples, case_id=case_id, sample_type=sample_type
             )
-        sample: Sample = samples.first()
-        return sample.internal_id if sample else None
+        return samples.all() if samples else None
 
     def get_case_pool(self, case_id: str) -> Optional[Pool]:
         """Returns the pool connected to the case. Returns None if no pool is found."""

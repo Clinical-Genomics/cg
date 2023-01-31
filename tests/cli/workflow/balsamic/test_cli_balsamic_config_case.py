@@ -281,7 +281,7 @@ def test_error_two_tumor(
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Invalid number of tumor samples" in caplog.text
+    assert f"Case {case_id} has an invalid number of samples" in caplog.text
 
 
 def test_error_mixed_application(
@@ -347,7 +347,7 @@ def test_error_two_normal(
     # THEN command is NOT generated successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN log warning should be printed
-    assert "Invalid number of normal samples" in caplog.text
+    assert f"Case {case_id} has an invalid number of samples" in caplog.text
 
 
 def test_error_wes_panel(

@@ -202,7 +202,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return panel_bed
 
     def get_verified_bed(self, panel_bed: str, sample_data: dict) -> Optional[str]:
-        """ "Takes a dict with samples and attributes.
+        """Takes a dict with samples and attributes.
         Retrieves unique attributes for application type and target_bed.
         Verifies that those attributes are the same across multiple samples,
         where applicable.
@@ -297,55 +297,43 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_verified_samples(self, case_id: str, sample_data: dict) -> Dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
 
-        samples: List[Sample] = self.status_db.get_samples_by_case_id(case_id)
-
-        tumor_name: str = self.status_db.get_sample_name_by_type(
+        tumor_samples: List[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.TUMOR
         )
-        tumor_path: str = self.get_verified_sample_path(
-            sample_data=sample_data, sample_type=SampleType.TUMOR
-        )
-        normal_name: str = self.status_db.get_sample_name_by_type(
+        normal_samples: List[Sample] = self.status_db.get_samples_by_type(
             case_id=case_id, sample_type=SampleType.NORMAL
         )
-        normal_path: str = self.get_verified_sample_path(
-            sample_data=sample_data, sample_type=SampleType.NORMAL
-        )
-
-        if not tumor_path and not normal_path:
-            LOG.error(f"No tumor or normal samples were found for case {case_id}")
+        if (
+            not tumor_samples
+            and not normal_samples
+            or len(tumor_samples) > 1
+            or len(normal_samples) > 1
+        ):
+            LOG.error(f"Case {case_id} has an invalid number of samples")
             raise BalsamicStartError
 
-        if normal_path and not tumor_path:
+        tumor_sample_id: str = tumor_samples[0].internal_id if tumor_samples else None
+        normal_sample_id: str = normal_samples[0].internal_id if normal_samples else None
+        tumor_sample_path: str = (
+            sample_data.get(tumor_sample_id).get("concatenated_path") if tumor_sample_id else None
+        )
+        normal_sample_path: str = (
+            sample_data.get(normal_sample_id).get("concatenated_path") if normal_sample_id else None
+        )
+        if normal_sample_id and not tumor_sample_id:
             LOG.warning(
                 f"Only a normal sample was found for case {case_id}. "
                 f"Balsamic analysis will treat it as a tumor sample."
             )
-            tumor_name, tumor_path = normal_name, normal_path
-            normal_name, normal_path = None, None
+            tumor_sample_id, tumor_sample_path = normal_sample_id, normal_sample_path
+            normal_sample_id, normal_sample_path = None, None
 
         return {
-            "tumor_sample_name": tumor_name,
-            "tumor": tumor_path,
-            "normal_sample_name": normal_name,
-            "normal": normal_path,
+            "tumor_sample_name": tumor_sample_id,
+            "tumor": tumor_sample_path,
+            "normal_sample_name": normal_sample_id,
+            "normal": normal_sample_path,
         }
-
-    @staticmethod
-    def get_verified_sample_path(sample_data: dict, sample_type: SampleType) -> Optional[str]:
-        """Return a verified tumor or normal sample path."""
-        sample_path: Optional[list] = [
-            val["concatenated_path"]
-            for key, val in sample_data.items()
-            if val["tissue_type"] == sample_type
-        ]
-        if len(sample_path) > 1:
-            LOG.error(
-                f"Invalid number of {sample_type.value} samples: {len(sample_path)}."
-                f"Balsamic analysis requires a single {sample_type.value} sample per case to run successfully."
-            )
-            raise BalsamicStartError
-        return sample_path[0] if sample_path else None
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
