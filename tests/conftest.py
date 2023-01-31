@@ -5,10 +5,9 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Any, Dict, Generator, List, Union
 
 import pytest
-from housekeeper.store import models as hk_models
 from housekeeper.store.models import File
 
 from cg.apps.gt import GenotypeAPI
@@ -39,6 +38,8 @@ from .mocks.scout import MockScoutAPI
 from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
+
+from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -113,6 +114,12 @@ def fixture_email_adress() -> str:
 def fixture_case_id() -> str:
     """Return a case id."""
     return "yellowhog"
+
+
+@pytest.fixture(name="case_id_does_not_exist")
+def fixture_case_id_does_not_exist() -> str:
+    """Return a case id that should not exist."""
+    return "case_does_not_exist"
 
 
 @pytest.fixture(name="another_case_id")
@@ -275,31 +282,38 @@ def fixture_base_config_dict() -> dict:
 
 @pytest.fixture(name="cg_config_object")
 def fixture_cg_config_object(base_config_dict: dict) -> CGConfig:
-    """Return a CG config dict."""
+    """Return a CG config."""
     return CGConfig(**base_config_dict)
 
 
 @pytest.fixture(name="chanjo_config")
 def fixture_chanjo_config() -> Dict[str, Dict[str, str]]:
-    """Chanjo configs"""
+    """Return Chanjo config."""
     return {"chanjo": {"config_path": "chanjo_config", "binary_path": "chanjo"}}
 
 
-@pytest.fixture
-def crunchy_config_dict():
-    """Crunchy configs."""
+@pytest.fixture(name="crunchy_config")
+def crunchy_config() -> Dict[str, Dict[str, Any]]:
+    """Return Crunchy config."""
     return {
         "crunchy": {
             "conda_binary": "a conda binary",
             "cram_reference": "/path/to/fasta",
-            "slurm": {"account": "mock_account", "mail_user": "mock_mail", "conda_env": "mock_env"},
+            "slurm": {
+                "account": "mock_account",
+                "conda_env": "mock_env",
+                "hours": 1,
+                "mail_user": "mock_mail",
+                "memory": 1,
+                "number_tasks": 1,
+            },
         }
     }
 
 
 @pytest.fixture(name="hk_config_dict")
-def fixture_hk_config_dict(root_path):
-    """Crunchy configs."""
+def fixture_hk_config_dict(root_path: Path):
+    """Housekeeper configs."""
     return {
         "housekeeper": {
             "database": "sqlite:///:memory:",
@@ -378,6 +392,12 @@ def fixture_fixtures_dir() -> Path:
 def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(fixtures_dir, "analysis")
+
+
+@pytest.fixture(name="microsalt_analysis_dir")
+def fixture_microsalt_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the analysis dir."""
+    return Path(analysis_dir, "microsalt")
 
 
 @pytest.fixture(name="apps_dir")
@@ -781,7 +801,7 @@ def fixture_housekeeper_api(hk_config_dict: dict) -> MockHousekeeperAPI:
 
 
 @pytest.fixture(name="real_housekeeper_api")
-def fixture_real_housekeeper_api(hk_config_dict: dict) -> HousekeeperAPI:
+def fixture_real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperAPI, None, None]:
     """Setup a real Housekeeper store."""
     _api = HousekeeperAPI(hk_config_dict)
     _api.initialise_db()
@@ -798,10 +818,10 @@ def fixture_populated_housekeeper_api(
     return hk_api
 
 
-@pytest.fixture(name="hk_version_obj")
-def fixture_hk_version_obj(
+@pytest.fixture(name="hk_version")
+def fixture_hk_version(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
-) -> hk_models.Version:
+) -> Version:
     """Get a Housekeeper version object."""
     return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
@@ -975,7 +995,7 @@ def fixture_wgs_application_info(wgs_application_tag: str) -> dict:
 
 @pytest.fixture(name="store")
 def fixture_store() -> Store:
-    """Fixture with a CG store."""
+    """Return a CG store."""
     _store = Store(uri="sqlite:///")
     _store.create_all()
     yield _store
@@ -1192,7 +1212,7 @@ def sample_store(base_store: Store) -> Store:
 
 @pytest.fixture(name="trailblazer_api")
 def fixture_trailblazer_api() -> MockTB:
-    """Return a mock traailblazer API."""
+    """Return a mock Trailblazer API."""
     return MockTB()
 
 
@@ -1203,42 +1223,42 @@ def fixture_lims_api() -> MockLimsAPI:
 
 
 @pytest.fixture(name="config_root_dir")
-def config_root_dir(tmpdir_factory) -> Path:
+def fixture_config_root_dir(tmpdir_factory) -> Path:
     """Return a path to the config root directory."""
-    return Path("tests/fixtures/data")
+    return Path("tests", "fixtures", "data")
 
 
-@pytest.fixture()
-def housekeeper_dir(tmpdir_factory):
+@pytest.fixture(name="housekeeper_dir")
+def fixture_housekeeper_dir(tmpdir_factory):
     """Return a temporary directory for Housekeeper testing."""
     return tmpdir_factory.mktemp("housekeeper")
 
 
-@pytest.fixture()
-def mip_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="mip_dir")
+def fixture_mip_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for MIP testing."""
     return tmpdir_factory.mktemp("mip")
 
 
-@pytest.fixture()
-def fluffy_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="fluffy_dir")
+def fixture_fluffy_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Fluffy testing."""
     return tmpdir_factory.mktemp("fluffy")
 
 
-@pytest.fixture()
-def balsamic_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="balsamic_dir")
+def fixture_balsamic_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Balsamic testing."""
     return tmpdir_factory.mktemp("balsamic")
 
 
-@pytest.fixture(scope="function")
-def rnafusion_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="rnafusion_dir")
+def fixture_rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
 
 
-@pytest.fixture()
-def cg_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="cg_dir")
+def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
 
@@ -1317,10 +1337,22 @@ def fixture_custom_observations_clinical_snv_file_path(observations_dir: Path) -
     return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
-@pytest.fixture()
-def microsalt_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="microsalt_dir")
+def fixture_microsalt_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Microsalt testing."""
     return tmpdir_factory.mktemp("microsalt")
+
+
+@pytest.fixture()
+def current_encryption_dir() -> Path:
+    """Return a temporary directory for current encryption testing."""
+    return Path("/home/ENCRYPT/")
+
+
+@pytest.fixture()
+def legacy_encryption_dir() -> Path:
+    """Return a temporary directory for current encryption testing."""
+    return Path("/home/TO_PDC/")
 
 
 @pytest.fixture(name="cg_uri")
@@ -1366,7 +1398,10 @@ def fixture_context_config(
         "madeline_exe": "echo",
         "pon_path": str(cg_dir),
         "backup": {
-            "encrypt_dir": "/home/ENCRYPT/",
+            "encrypt_dir": {
+                "current": str(current_encryption_dir),
+                "legacy": str(legacy_encryption_dir),
+            },
             "root": {"hiseqx": "flowcells/hiseqx", "hiseqga": "RUNS/", "novaseq": "runs/"},
         },
         "balsamic": {
@@ -1392,7 +1427,10 @@ def fixture_context_config(
             "slurm": {
                 "account": "development",
                 "conda_env": "S_crunchy",
+                "hours": 1,
                 "mail_user": "an@scilifelab.se",
+                "memory": 1,
+                "number_tasks": 1,
             },
         },
         "data-delivery": {
@@ -1486,11 +1524,13 @@ def fixture_context_config(
             "root": str(mip_dir),
         },
         "rnafusion": {
-            "binary_path": "/path/to/bin",
+            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_RNAFUSION",
-            "pipeline_path": "/pipeline/path",
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pipeline_path": Path("pipeline", "path").as_posix(),
             "profile": "myprofile",
-            "references": "/path/to/references",
+            "references": Path("path", "to", "references").as_posix(),
             "root": str(rnafusion_dir),
         },
         "pdc": {"binary_path": "/bin/dsmc"},

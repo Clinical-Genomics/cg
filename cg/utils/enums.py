@@ -9,3 +9,8 @@ class StrEnum(str, Enum):
 
 class ListEnum(list, Enum):
     pass
+
+
+class IntEnum(int, Enum):
+    def __int__(self) -> int:
+        return int.__int__(self)

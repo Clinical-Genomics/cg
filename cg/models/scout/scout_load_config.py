@@ -58,6 +58,7 @@ class ScoutMipIndividual(ScoutIndividual):
     upd_regions_bed: Optional[str] = None
     upd_sites_bed: Optional[str] = None
     vcf2cytosure: Optional[str] = None
+    mitodel_file: Optional[str] = None
 
 
 class ScoutBalsamicIndividual(ScoutIndividual):

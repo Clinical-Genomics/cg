@@ -44,6 +44,7 @@ MIP_SAMPLE_TAGS = dict(
     reviewer_alignment={"expansionhunter", "bam"},
     reviewer_alignment_index={"expansionhunter", "bam-index"},
     reviewer_vcf={"expansionhunter", "vcf-str"},
+    mitodel_file={"mitodel"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(

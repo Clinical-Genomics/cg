@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
+from cg.constants.constants import DRY_RUN_MESSAGE
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import RNAFUSION_SAMPLESHEET_HEADERS, RNAFUSION_STRANDEDNESS_HEADER
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -54,6 +55,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 binary=self.config.rnafusion.binary_path,
                 environment=self.conda_env,
                 conda_binary=self.conda_binary,
+                launch_directory=self.config.rnafusion.launch_directory,
             )
         return self._process
 
@@ -64,6 +66,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+
+    def get_variables_to_export(self, case_id) -> Dict[str, str]:
+        return NextflowAnalysisAPI.get_variables_to_export(case_id=case_id, root_dir=self.root_dir)
 
     def verify_analysis_finished(self, case_id):
         return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
@@ -103,7 +108,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         }
         return samplesheet_content
 
-    def write_samplesheet(self, case_id: str, strandedness: str) -> None:
+    def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
         case_obj = self.status_db.family(case_id)
         if len(case_obj.links) != 1:
@@ -119,25 +124,22 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id, fastq_r1, fastq_r2, strandedness
             )
             LOG.info(samplesheet_content)
+            if dry_run:
+                continue
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content,
                 RNAFUSION_SAMPLESHEET_HEADERS,
                 NextflowAnalysisAPI.get_case_config_path(case_id, self.root_dir),
             )
 
-    def get_references_path(self, genomes_bases: Optional[Path] = None) -> Path:
-        if genomes_bases:
-            return genomes_bases
+    def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
+        if genomes_base:
+            return genomes_base
         return Path(self.references)
 
     def get_verified_arguments(
         self,
         case_id: str,
-        work_dir: Path,
-        resume: bool,
-        profile: str,
-        with_tower: bool,
-        stub: bool,
         input: Path,
         outdir: Path,
         genomes_base: Path,
@@ -153,14 +155,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Transforms click argument related to rnafusion that were left empty into
         defaults constructed with case_id paths or from config."""
         return {
-            "-w": NextflowAnalysisAPI.get_workdir_path(case_id, self.root_dir, work_dir),
-            "-resume": resume,
-            "-profile": self.get_profile(profile=profile),
-            "-with-tower": with_tower,
-            "-stub": stub,
-            "--input": NextflowAnalysisAPI.get_input_path(case_id, self.root_dir, input),
-            "--outdir": NextflowAnalysisAPI.get_outdir_path(case_id, self.root_dir, outdir),
-            "--genomes_base": self.get_references_path(genomes_base),
+            "--input": NextflowAnalysisAPI.get_input_path(
+                case_id=case_id, root_dir=self.root_dir, input=input
+            ),
+            "--outdir": NextflowAnalysisAPI.get_outdir_path(
+                case_id=case_id, root_dir=self.root_dir, outdir=outdir
+            ),
+            "--genomes_base": self.get_references_path(genomes_base=genomes_base),
             "--trim": trim,
             "--fusioninspector_filter": fusioninspector_filter,
             "--all": all,
@@ -172,22 +173,33 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         }
 
     @staticmethod
-    def __build_command_str(options: dict) -> List[str]:
+    def __build_command_str(options: dict, exclude_true: bool = False) -> List[str]:
         formatted_options: list = []
         for key, val in options.items():
-            if val:
+            if exclude_true and val is True:
+                formatted_options.append(str(key))
+            elif val:
                 formatted_options.append(str(key))
                 formatted_options.append(str(val))
+
         return formatted_options
 
     def config_case(
         self,
         case_id: str,
         strandedness: str,
+        dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
-        NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
-        self.write_samplesheet(case_id, strandedness)
+        NextflowAnalysisAPI.make_case_folder(
+            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
+        )
+        self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
+
+        if dry_run:
+            LOG.info("Dry run: Samplesheet will not be written")
+            return
+
         LOG.info("Samplesheet written")
 
     def run_analysis(
@@ -213,14 +225,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         dry_run: bool = False,
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
-        options: List[str] = self.__build_command_str(
-            self.get_verified_arguments(
+
+        rnafusion_options: List[str] = self.__build_command_str(
+            options=self.get_verified_arguments(
                 case_id=case_id,
-                work_dir=work_dir,
-                resume=resume,
-                profile=profile,
-                with_tower=with_tower,
-                stub=stub,
                 input=input,
                 outdir=outdir,
                 genomes_base=genomes_base,
@@ -234,20 +242,42 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 arriba=arriba,
             )
         )
+        run_options: List[str] = self.__build_command_str(
+            options=NextflowAnalysisAPI.get_verified_arguments_run(
+                case_id=case_id,
+                root_dir=self.root_dir,
+                work_dir=work_dir,
+                resume=resume,
+                profile=self.get_profile(profile=profile),
+                with_tower=with_tower,
+                stub=stub,
+            ),
+            exclude_true=True,
+        )
+
         nextflow_options: List[str] = self.__build_command_str(
-            NextflowAnalysisAPI.get_verified_arguments_nextflow(
-                case_id=case_id, pipeline=self.pipeline, root_dir=self.root_dir, log=log
-            )
+            options=NextflowAnalysisAPI.get_verified_arguments_nextflow(
+                case_id=case_id,
+                pipeline=self.pipeline,
+                root_dir=self.root_dir,
+                log=log,
+                bg=True,
+                quiet=True,
+            ),
+            exclude_true=True,
         )
         command: List[str] = ["run", self.nfcore_pipeline_path]
         parameters = (
             nextflow_options
-            + ["-bg", "-q"]
             + command
-            + options
+            + run_options
+            + rnafusion_options
             + NextflowAnalysisAPI.get_nextflow_stdout_stderr(
                 case_id=case_id, root_dir=self.root_dir
             )
+        )
+        self.process.export_variables(
+            export=self.get_variables_to_export(case_id),
         )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 

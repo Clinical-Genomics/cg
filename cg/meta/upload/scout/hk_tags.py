@@ -44,3 +44,4 @@ class SampleTags(BaseModel):
     reviewer_alignment: Set[str] = None
     reviewer_alignment_index: Set[str] = None
     reviewer_vcf: Set[str] = None
+    mitodel_file: Set[str] = None

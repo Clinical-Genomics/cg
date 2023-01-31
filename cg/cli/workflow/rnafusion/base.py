@@ -12,7 +12,6 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_LOG,
     OPTION_OUTDIR,
     OPTION_PROFILE,
-    OPTION_RESUME,
     OPTION_STUB,
     OPTION_TOWER,
     OPTION_WORKDIR,
@@ -20,6 +19,7 @@ from cg.cli.workflow.nextflow.options import (
 from cg.cli.workflow.rnafusion.options import (
     OPTION_ALL,
     OPTION_ARRIBA,
+    OPTION_FROM_START,
     OPTION_FUSIONCATCHER,
     OPTION_FUSIONINSPECTOR_FILTER,
     OPTION_PIZZLY,
@@ -56,20 +56,22 @@ rnafusion.add_command(resolve_compression)
 @rnafusion.command("config-case")
 @ARGUMENT_CASE_ID
 @OPTION_STRANDEDNESS
+@DRY_RUN
 @click.pass_obj
 def config_case(
     context: CGConfig,
     case_id: str,
     strandedness: str,
+    dry_run: bool,
 ) -> None:
     """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
 
+    LOG.info(f"Creating samplesheet file for {case_id}.")
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
-        LOG.info(f"Creating samplesheet file for {case_id}.")
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.config_case(case_id=case_id, strandedness=strandedness)
+        analysis_api.config_case(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create samplesheet: {error}")
         raise click.Abort()
@@ -79,7 +81,7 @@ def config_case(
 @ARGUMENT_CASE_ID
 @OPTION_LOG
 @OPTION_WORKDIR
-@OPTION_RESUME
+@OPTION_FROM_START
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
@@ -101,7 +103,7 @@ def run(
     case_id: str,
     log: str,
     work_dir: str,
-    resume: bool,
+    from_start: bool,
     profile: str,
     with_tower: bool,
     stub: bool,
@@ -120,6 +122,7 @@ def run(
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    resume = False if from_start else True
     try:
         analysis_api.verify_case_id_in_statusdb(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
@@ -146,23 +149,19 @@ def run(
             arriba=arriba,
             dry_run=dry_run,
         )
-        if dry_run:
-            LOG.info("Did not run analysis: dry-run")
-            return
-        analysis_api.set_statusdb_action(case_id=case_id, action="running")
-    except CgError as error:
+        analysis_api.set_statusdb_action(case_id=case_id, action="running", dry_run=dry_run)
+    except (CgError, ValueError) as error:
         LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
+        raise click.Abort() from error
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
-        raise click.Abort()
+        raise click.Abort() from error
 
 
 @rnafusion.command("start")
 @ARGUMENT_CASE_ID
 @OPTION_LOG
 @OPTION_WORKDIR
-@OPTION_RESUME
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
@@ -184,7 +183,6 @@ def start(
     case_id: str,
     log: str,
     work_dir: str,
-    resume: bool,
     profile: str,
     with_tower: bool,
     stub: bool,
@@ -203,36 +201,35 @@ def start(
 ) -> None:
     """Start full workflow for CASE ID."""
     LOG.info(f"Starting analysis for {case_id}")
+
     try:
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
-        context.invoke(
-            config_case,
-            case_id=case_id,
-        )
-        context.invoke(
-            run,
-            case_id=case_id,
-            log=log,
-            work_dir=work_dir,
-            resume=resume,
-            profile=profile,
-            with_tower=with_tower,
-            stub=stub,
-            input=input,
-            outdir=outdir,
-            genomes_base=genomes_base,
-            trim=trim,
-            fusioninspector_filter=fusioninspector_filter,
-            all=all,
-            pizzly=pizzly,
-            squid=squid,
-            starfusion=starfusion,
-            fusioncatcher=fusioncatcher,
-            arriba=arriba,
-            dry_run=dry_run,
-        )
     except DecompressionNeededError as error:
         LOG.error(error)
+        raise click.Abort() from error
+    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(
+        run,
+        case_id=case_id,
+        log=log,
+        work_dir=work_dir,
+        from_start=True,
+        profile=profile,
+        with_tower=with_tower,
+        stub=stub,
+        input=input,
+        outdir=outdir,
+        genomes_base=genomes_base,
+        trim=trim,
+        fusioninspector_filter=fusioninspector_filter,
+        all=all,
+        pizzly=pizzly,
+        squid=squid,
+        starfusion=starfusion,
+        fusioncatcher=fusioncatcher,
+        arriba=arriba,
+        dry_run=dry_run,
+    )
 
 
 @rnafusion.command("start-available")
@@ -283,21 +280,21 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
 @rnafusion.command("store-housekeeper")
 @ARGUMENT_CASE_ID
+@DRY_RUN
 @click.pass_obj
-def store_housekeeper(context: CGConfig, case_id: str) -> None:
+def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
     try:
-
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_analysis_finished(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
-        analysis_api.upload_bundle_housekeeper(case_id=case_id)
-        analysis_api.upload_bundle_statusdb(case_id=case_id)
-        analysis_api.set_statusdb_action(case_id=case_id, action=None)
+        analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)
+        analysis_api.upload_bundle_statusdb(case_id=case_id, dry_run=dry_run)
+        analysis_api.set_statusdb_action(case_id=case_id, action=None, dry_run=dry_run)
     except ValidationError as error:
         LOG.warning("Deliverables file is malformed")
         raise error
@@ -319,7 +316,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
     """Generate Housekeeper report for CASE ID and store in Housekeeper."""
     LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
-    context.invoke(store_housekeeper, case_id=case_id)
+    context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
 
 
 @rnafusion.command("store-available")

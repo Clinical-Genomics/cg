@@ -92,16 +92,16 @@ def test_generate_rnafusion_load_config(
 @pytest.mark.parametrize("result_key", RESULT_KEYS)
 def test_generate_config_adds_meta_result_key(
     result_key: str,
-    mip_dna_analysis_obj: models.Analysis,
+    mip_dna_analysis: models.Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that generate config adds the expected result keys"""
     # GIVEN a status db and hk with an analysis
-    assert mip_dna_analysis_obj
+    assert mip_dna_analysis
 
     # WHEN generating the scout config for the analysis
     result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(
-        analysis_obj=mip_dna_analysis_obj
+        analysis_obj=mip_dna_analysis
     )
 
     # THEN the config should contain the rank model version used
@@ -110,16 +110,14 @@ def test_generate_config_adds_meta_result_key(
 
 def test_generate_config_adds_sample_paths(
     sample_id: str,
-    mip_dna_analysis_obj: models.Analysis,
+    mip_dna_analysis: models.Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that generate config adds vcf2cytosure file"""
     # GIVEN a status db and hk with an analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(
-        mip_dna_analysis_obj
-    )
+    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_dna_analysis)
 
     # THEN the config should contain the sample file path for each sample
     sample: ScoutMipIndividual
@@ -130,16 +128,14 @@ def test_generate_config_adds_sample_paths(
 
 def test_generate_config_adds_case_paths(
     sample_id: str,
-    mip_dna_analysis_obj: Store.Analysis,
+    mip_dna_analysis: Store.Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that generate config adds case file paths"""
     # GIVEN a status db and hk with an analysis
 
     # WHEN generating the scout config for the analysis
-    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(
-        mip_dna_analysis_obj
-    )
+    result_data: ScoutLoadConfig = upload_mip_analysis_scout_api.generate_config(mip_dna_analysis)
 
     # THEN the config should contain the multiqc file path
     assert result_data.multiqc
