@@ -38,9 +38,9 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
         sample_id: str = config_sample.sample_id
         if config_sample.alignment_path:
-            if SampleType.TUMOR.value in config_sample.alignment_path:
+            if SampleType.TUMOR in config_sample.alignment_path:
                 sample_id = SampleType.TUMOR.value
-            elif SampleType.NORMAL.value in config_sample.alignment_path:
+            elif SampleType.NORMAL in config_sample.alignment_path:
                 sample_id = SampleType.NORMAL.value
 
         config_sample.vcf2cytosure = self.fetch_sample_file(
