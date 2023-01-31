@@ -658,13 +658,11 @@ class StoreHelpers:
         return cases
 
     @classmethod
-    def add_case_with_sample(
-        self, base_store: Store, case_id: str, sample_id: str
-    ) -> models.Family:
+    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> models.Family:
         """Helper function to add a case associated with a sample with the given ids."""
 
-        case = self.add_case(store=base_store, internal_id=case_id, name=case_id)
-        sample = self.add_sample(store=base_store, internal_id=sample_id)
-        self.add_relationship(store=base_store, sample=sample, case=case)
+        case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+        sample = cls.add_sample(store=base_store, internal_id=sample_id)
+        cls.add_relationship(store=base_store, sample=sample, case=case)
 
         return case

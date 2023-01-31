@@ -1,6 +1,6 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import desc
 
@@ -77,7 +77,7 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch a customer by id number from the store."""
         return self.Customer.query.filter_by(id=id_).first()
 
-    def current_application_version(self, tag: str) -> ApplicationVersion:
+    def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
         """Fetch the current application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
         if not application_obj:
@@ -89,7 +89,7 @@ class FindBasicDataHandler(BaseHandler):
 
         return records.first()
 
-    def latest_version(self, tag: str) -> ApplicationVersion:
+    def latest_version(self, tag: str) -> Optional[ApplicationVersion]:
         """Fetch the latest application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
         return (
