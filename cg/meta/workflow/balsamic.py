@@ -23,7 +23,7 @@ from cg.models.balsamic.metrics import (
     BalsamicMetricsBase,
 )
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import ApplicationVersion, Family, FamilySample, Sample
 from cg.utils import Process
 from cg.utils.utils import get_string_from_list_by_pattern
 
@@ -81,8 +81,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> List[models.Family]:
-        cases_query: List[models.Family] = self.status_db.cases_to_analyze(
+    def get_cases_to_analyze(self) -> List[Family]:
+        cases_query: List[Family] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
         cases_to_analyze = []
@@ -139,9 +139,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def get_sample_fastq_destination_dir(
-        self, case_obj: models.Family, sample_obj: models.Sample = None
-    ) -> Path:
+    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample = None) -> Path:
         return self.get_case_path(case_obj.internal_id) / "fastq"
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
@@ -151,7 +149,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 case_obj=case_obj, sample_obj=link.sample, concatenate=True
             )
 
-    def get_concatenated_fastq_path(self, link_object: models.FamilySample) -> Path:
+    def get_concatenated_fastq_path(self, link_object: FamilySample) -> Path:
         """Returns path to the concatenated FASTQ file of a sample"""
         file_collection: List[dict] = self.gather_file_metadata_for_sample(link_object.sample)
         fastq_data = file_collection[0]
@@ -171,13 +169,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def get_gender(sample_obj: models.Sample) -> str:
+    def get_gender(sample_obj: Sample) -> str:
         """Returns the gender associated to a specific sample"""
 
         return sample_obj.sex
 
     @staticmethod
-    def get_sample_type(sample_obj: models.Sample) -> SampleType:
+    def get_sample_type(sample_obj: Sample) -> SampleType:
         """Return the tissue type of the sample."""
         if sample_obj.is_tumour:
             return SampleType.TUMOR
@@ -298,6 +296,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
     def get_verified_samples(self, case_id: str, sample_data: dict) -> Dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
+
+        samples: List[Sample] = self.status_db.get_samples_by_case_id(case_id)
+
         tumor_name: str = self.status_db.get_sample_name_by_type(
             case_id=case_id, sample_type=SampleType.TUMOR
         )
@@ -509,10 +510,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def build_case_id_map_string(self, case_id: str) -> Optional[str]:
         """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
 
-        case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: models.Sample = case_obj.links[0].sample
+        case_obj: Family = self.status_db.family(case_id)
+        sample_obj: Sample = case_obj.links[0].sample
         if sample_obj.from_sample:
-            sample_obj: models.Sample = self.status_db.sample(sample_obj.from_sample)
+            sample_obj: Sample = self.status_db.sample(sample_obj.from_sample)
         capture_kit = self.lims_api.capture_kit(sample_obj.internal_id)
         if capture_kit:
             panel_shortname = self.status_db.bed_version(capture_kit).shortname
@@ -521,8 +522,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         else:
             return
         application_tag = (
-            self.status_db.query(models.ApplicationVersion)
-            .filter(models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
+            self.status_db.query(ApplicationVersion)
+            .filter(ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
             .first()
             .application.tag
         )
@@ -578,7 +579,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return application_types.pop().lower()
 
     def resolve_target_bed(
-        self, panel_bed: Optional[str], link_object: models.FamilySample
+        self, panel_bed: Optional[str], link_object: FamilySample
     ) -> Optional[str]:
         if panel_bed:
             return panel_bed
@@ -597,15 +598,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
         This check is only applied to filter jobs which start automatically"""
         query = (
-            self.status_db.query(models.Sample)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .filter(models.Family.data_analysis == self.pipeline)
+            self.status_db.query(Sample)
+            .join(Family.links, FamilySample.sample)
+            .filter(Family.internal_id == case_id)
+            .filter(Family.data_analysis == self.pipeline)
         )
         return all(
             [
-                len(query.filter(models.Sample.is_tumour == False).all()) <= 1,
-                len(query.filter(models.Sample.is_tumour == True).all()) == 1,
+                len(query.filter(Sample.is_tumour == False).all()) <= 1,
+                len(query.filter(Sample.is_tumour == True).all()) == 1,
             ]
         )
 
