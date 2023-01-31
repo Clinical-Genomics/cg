@@ -8,6 +8,7 @@ from cg.constants.delivery import INBOX_NAME
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from housekeeper.store import models as hk_models
+from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
 # Paths
@@ -100,14 +101,17 @@ def fixture_populated_mip_context(
     return base_context
 
 
-@pytest.fixture(name="empty_context")
-def fixture_empty_context(
-    base_context: CGConfig,
+@pytest.fixture(name="context_with_missing_bundle")
+def fixture_context_with_missing_bundle(
+    cg_context: CGConfig,
     analysis_store: Store,
-    real_housekeeper_api: HousekeeperAPI,
+    mip_dna_housekeeper: HousekeeperAPI,
     project_dir: Path,
+    helpers: StoreHelpers,
+    ticket: str,
 ) -> CGConfig:
-    base_context.housekeeper_api_ = real_housekeeper_api
-    base_context.status_db_ = analysis_store
-    base_context.delivery_path = str(project_dir)
-    return base_context
+    cg_context.housekeeper_api_ = mip_dna_housekeeper
+    helpers.add_case(store=analysis_store, ticket=ticket)
+    cg_context.status_db_ = analysis_store
+    cg_context.delivery_path = str(project_dir)
+    return cg_context

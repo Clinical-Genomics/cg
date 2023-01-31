@@ -3,10 +3,13 @@
 import logging
 from pathlib import Path
 
-from cg.cli.deliver.base import deliver_analysis
+from cg.cli.deliver.base import deliver_analysis, deliver_ticket
+from cg.constants.process import EXIT_SUCCESS
+from cg.meta.deliver_ticket import DeliverTicketAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
+from cg.cli.deliver.base import deliver as deliver_cmd
 
 
 def test_run_deliver_with_help(base_context: CGConfig):
@@ -182,8 +185,8 @@ def test_case_file_is_delivered(
     assert deliver_vcf_path.exists() is True
 
 
-def test_delivering_ticket_with_missing_bundle_errors(
-    empty_context: CGConfig,
+def test_delivering_analysis_with_missing_bundle_errors(
+    context_with_missing_bundle: CGConfig,
     delivery_inbox: Path,
     ticket: str,
 ):
@@ -199,20 +202,20 @@ def test_delivering_ticket_with_missing_bundle_errors(
     result = runner.invoke(
         deliver_analysis,
         ["--ticket", ticket, "--delivery-type", "mip-dna"],
-        obj=empty_context,
+        obj=context_with_missing_bundle,
     )
 
     # THEN assert that the path to the delivery folder was not created and that the command failed
     assert not delivery_inbox.exists()
-    assert result.exit_code != 0
+    assert result.exit_code is not EXIT_SUCCESS
 
 
-def test_delivering_ticket_with_missing_bundle_ignoring_errors(
-    empty_context: CGConfig,
+def test_delivering_analysis_with_missing_bundle_ignoring_errors(
+    context_with_missing_bundle: CGConfig,
     delivery_inbox: Path,
     ticket: str,
 ):
-    """Test that it is possible to deliver a ticket with a missing bundle using the --ignore-missing-bundles flag."""
+    """Test that it is possible to deliver analysis with a missing bundle using the --ignore-missing-bundles flag."""
     # GIVEN a context without files in housekeeper to deliver.
     # GIVEN a cli runner
     runner = CliRunner()
@@ -224,8 +227,26 @@ def test_delivering_ticket_with_missing_bundle_ignoring_errors(
     runner.invoke(
         deliver_analysis,
         ["--ticket", ticket, "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
-        obj=empty_context,
+        obj=context_with_missing_bundle,
     )
 
     # THEN assert that the path to the delivery folder was created
     assert delivery_inbox.exists() is True
+
+
+def test_deliver_ticket_with_missing_bundle(context_with_missing_bundle: CGConfig, caplog, ticket):
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a cli runner
+    runner = CliRunner()
+
+    # WHEN running cg deliver ticket
+    result = runner.invoke(
+        deliver_ticket,
+        ["--ticket", ticket, "--dry-run", "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
+        obj=context_with_missing_bundle,
+    )
+
+    # THEN assert that the command succeeded and files are delivered
+    assert result.exit_code is EXIT_SUCCESS
+    assert "Delivering files to customer inbox on the HPC" in caplog.text
