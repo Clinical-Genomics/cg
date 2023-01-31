@@ -34,7 +34,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_delivery_report()
 
     def include_sample_files(self, config_sample: ScoutBalsamicIndividual) -> None:
-        LOG.info("Including BALSAMIC specific sample level files")
+        LOG.info("Including BALSAMIC specific sample level files.")
 
         sample_id: str = config_sample.sample_id
         if config_sample.alignment_path:
@@ -48,7 +48,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         )
 
     def build_config_sample(self, db_sample: models.FamilySample) -> ScoutBalsamicIndividual:
-        """Build a sample with balsamic specific information"""
+        """Build a sample with balsamic specific information."""
         config_sample = ScoutBalsamicIndividual()
 
         self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
