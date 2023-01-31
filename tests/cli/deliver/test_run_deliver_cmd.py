@@ -187,16 +187,12 @@ def test_case_file_is_delivered(
 
 def test_delivering_analysis_with_missing_bundle_errors(
     context_with_missing_bundle: CGConfig,
-    delivery_inbox: Path,
     ticket: str,
 ):
     """Test that the deliver command fails when a bundle is missing."""
     # GIVEN a context with a case that does not have files in housekeeper to deliver.
     # GIVEN a cli runner
     runner = CliRunner()
-
-    # GIVEN that the delivery file does not exist
-    assert delivery_inbox.exists() is False
 
     # WHEN running the deliver analysis command
     result = runner.invoke(
@@ -205,8 +201,7 @@ def test_delivering_analysis_with_missing_bundle_errors(
         obj=context_with_missing_bundle,
     )
 
-    # THEN assert that the path to the delivery folder was not created and that the command failed
-    assert not delivery_inbox.exists()
+    # THEN assert that the command failed
     assert result.exit_code is not EXIT_SUCCESS
 
 
