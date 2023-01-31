@@ -661,7 +661,8 @@ class StoreHelpers:
     def add_case_with_sample(
         self, base_store: Store, case_id: str, sample_id: str
     ) -> models.Family:
-        """Utility function to add a case associated with a sample with the given ids."""
+        """Helper function to add a case associated with a sample with the given ids."""
+
 
         case = self.add_case(store=base_store, internal_id=case_id, name=case_id)
         sample = self.add_sample(store=base_store, internal_id=sample_id)
