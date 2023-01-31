@@ -435,7 +435,7 @@ class SampleView(BaseView):
         "Cancel samples",
         "Are you sure you want to cancel the selected samples?",
     )
-    def cancel_samples(self, entry_ids: List[int]) -> None:
+    def cancel_samples(self, entry_ids: List[str]) -> None:
         """
         Action for cancelling samples:
             - Comments each sample being cancelled with date and user.
@@ -445,7 +445,7 @@ class SampleView(BaseView):
         all_associated_case_ids: set = set()
 
         for entry_id in entry_ids:
-            sample: Sample = db.get_sample_by_id(entry_id=entry_id)
+            sample: Sample = db.get_sample_by_id(entry_id=int(entry_id))
 
             sample_case_ids: List[str] = [
                 case_sample.family.internal_id for case_sample in sample.links
@@ -472,7 +472,7 @@ class SampleView(BaseView):
         db.add_sample_comment(sample=sample, comment=comment)
 
     def display_cancel_confirmation(
-        self, sample_entry_ids: List[int], remaining_cases: List[str]
+        self, sample_entry_ids: List[str], remaining_cases: List[str]
     ) -> None:
         """Show a summary of the cancelled samples and any cases in which other samples were present."""
         samples: str = "sample" if len(sample_entry_ids) == 1 else "samples"
