@@ -193,8 +193,8 @@ class FindBusinessDataHandler(BaseHandler):
             case_samples=self._get_case_sample_query(),
         ).all()
 
-    def get_cases_with_samples(self, case_ids: List[str]) -> List[str]:
-        """Return cases associated with samples"""
+    def filter_cases_with_samples(self, case_ids: List[str]) -> List[str]:
+        """Return case id:s associated with samples."""
         cases_with_samples = set()
         for case_id in case_ids:
             case: Family = self.family(internal_id=case_id)

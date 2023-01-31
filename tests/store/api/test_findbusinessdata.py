@@ -191,7 +191,7 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
     assert not case
 
     # WHEN trying to find cases with samples given the non existing case id
-    cases = store_with_multiple_cases_and_samples.get_cases_with_samples(case_ids=[case_id])
+    cases = store_with_multiple_cases_and_samples.filter_cases_with_samples(case_ids=[case_id])
 
     # THEN no cases are found
     assert not cases
