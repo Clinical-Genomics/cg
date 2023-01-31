@@ -47,19 +47,19 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 
-    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutBalsamicIndividual:
+    def build_config_sample(self, family_sample: models.FamilySample) -> ScoutBalsamicIndividual:
         """Build a sample with balsamic specific information."""
         config_sample = ScoutBalsamicIndividual()
 
-        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
-        if BalsamicAnalysisAPI.get_sample_type(sample_obj=db_sample.sample) == SampleType.TUMOR:
+        self.add_common_sample_info(config_sample=config_sample, family_sample=family_sample)
+        if BalsamicAnalysisAPI.get_sample_type(sample_obj=family_sample.sample) == SampleType.TUMOR:
             config_sample.phenotype = PhenotypeStatus.AFFECTED.value
             config_sample.sample_id = SampleType.TUMOR.value.upper()
         else:
             config_sample.phenotype = PhenotypeStatus.UNAFFECTED.value
             config_sample.sample_id = SampleType.NORMAL.value.upper()
 
-        config_sample.analysis_type = self.get_balsamic_analysis_type(sample=db_sample.sample)
+        config_sample.analysis_type = self.get_balsamic_analysis_type(sample=family_sample.sample)
 
         return config_sample
 
@@ -86,4 +86,4 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         db_sample: models.FamilySample
 
         for db_sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
+            self.load_config.samples.append(self.build_config_sample(family_sample=db_sample))

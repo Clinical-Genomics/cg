@@ -64,7 +64,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         LOG.info("Building samples")
         db_sample: models.FamilySample
         for db_sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
+            self.load_config.samples.append(self.build_config_sample(family_sample=db_sample))
         self.include_pedigree_picture()
 
     def include_pedigree_picture(self) -> None:
@@ -77,13 +77,13 @@ class MipConfigBuilder(ScoutConfigBuilder):
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
 
-    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutMipIndividual:
+    def build_config_sample(self, family_sample: models.FamilySample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
 
         config_sample = ScoutMipIndividual()
-        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
-        config_sample.father = db_sample.father.internal_id if db_sample.father else "0"
-        config_sample.mother = db_sample.mother.internal_id if db_sample.mother else "0"
+        self.add_common_sample_info(config_sample=config_sample, family_sample=family_sample)
+        config_sample.father = family_sample.father.internal_id if family_sample.father else "0"
+        config_sample.mother = family_sample.mother.internal_id if family_sample.mother else "0"
 
         return config_sample
 

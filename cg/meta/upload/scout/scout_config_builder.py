@@ -43,10 +43,10 @@ class ScoutConfigBuilder:
     def add_common_sample_info(
         self,
         config_sample: ScoutIndividual,
-        db_sample: models.FamilySample,
+        family_sample: models.FamilySample,
     ) -> None:
         """Add the information to a sample that is common for different analysis types"""
-        sample_id: str = db_sample.sample.internal_id
+        sample_id: str = family_sample.sample.internal_id
         LOG.info("Building sample %s", sample_id)
         lims_sample = dict()
         try:
@@ -55,17 +55,19 @@ class ScoutConfigBuilder:
             LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
 
         config_sample.sample_id = sample_id
-        config_sample.sex = db_sample.sample.sex
-        config_sample.phenotype = db_sample.status
-        config_sample.analysis_type = db_sample.sample.application_version.application.analysis_type
-        config_sample.sample_name = db_sample.sample.name
+        config_sample.sex = family_sample.sample.sex
+        config_sample.phenotype = family_sample.status
+        config_sample.analysis_type = (
+            family_sample.sample.application_version.application.analysis_type
+        )
+        config_sample.sample_name = family_sample.sample.name
         config_sample.tissue_type = lims_sample.get("source", "unknown")
-        config_sample.subject_id = db_sample.sample.subject_id
+        config_sample.subject_id = family_sample.sample.subject_id
 
         self.include_sample_alignment_file(config_sample=config_sample)
         self.include_sample_files(config_sample=config_sample)
 
-    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutIndividual:
+    def build_config_sample(self, family_sample: models.FamilySample) -> ScoutIndividual:
         """Build a sample for the scout load config"""
         raise NotImplementedError
 
