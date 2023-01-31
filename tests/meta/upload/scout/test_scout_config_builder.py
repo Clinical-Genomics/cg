@@ -60,15 +60,15 @@ def test_balsamic_config_builder(
 
 
 def test_rnafusion_config_builder(
-    hk_version_obj: hk_models.Version,
-    rnafusion_analysis_obj: models.Analysis,
+    hk_version: Version,
+    rnafusion_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
 ):
     # GIVEN a rnafusion file handler
 
     # WHEN instantiating
     file_handler = RnafusionConfigBuilder(
-        hk_version_obj=hk_version_obj, analysis_obj=rnafusion_analysis_obj, lims_api=lims_api
+        hk_version_obj=hk_version, analysis_obj=rnafusion_analysis_obj, lims_api=lims_api
     )
 
     # THEN assert that the correct case tags was used
