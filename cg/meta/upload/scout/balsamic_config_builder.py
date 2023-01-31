@@ -52,14 +52,14 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         config_sample = ScoutBalsamicIndividual()
 
         self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
-        if BalsamicAnalysisAPI.get_sample_type(db_sample.sample) == SampleType.TUMOR:
+        if BalsamicAnalysisAPI.get_sample_type(sample_obj=db_sample.sample) == SampleType.TUMOR:
             config_sample.phenotype = PhenotypeStatus.AFFECTED.value
             config_sample.sample_id = SampleType.TUMOR.value.upper()
         else:
             config_sample.phenotype = PhenotypeStatus.UNAFFECTED.value
             config_sample.sample_id = SampleType.NORMAL.value.upper()
 
-        config_sample.analysis_type = self.get_balsamic_analysis_type(db_sample.sample)
+        config_sample.analysis_type = self.get_balsamic_analysis_type(sample=db_sample.sample)
 
         return config_sample
 
