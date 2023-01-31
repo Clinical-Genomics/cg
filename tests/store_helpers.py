@@ -663,7 +663,6 @@ class StoreHelpers:
     ) -> models.Family:
         """Helper function to add a case associated with a sample with the given ids."""
 
-
         case = self.add_case(store=base_store, internal_id=case_id, name=case_id)
         sample = self.add_sample(store=base_store, internal_id=sample_id)
         self.add_relationship(store=base_store, sample=sample, case=case)
