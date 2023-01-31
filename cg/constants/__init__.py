@@ -17,7 +17,6 @@ from cg.constants.constants import (
     DataDelivery,
     FileExtensions,
     FlowCellStatus,
-    Pipeline,
     ReportTypes,
 )
 from cg.constants.gene_panel import GenePanelMasterList
