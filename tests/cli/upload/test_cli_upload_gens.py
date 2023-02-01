@@ -18,12 +18,12 @@ from cgmodels.cg.constants import Pipeline
 from tests.store_helpers import StoreHelpers
 
 def test_upload_gens(
-    upload_context: CGConfig,
+    caplog,
     case_id: str,
     cli_runner: CliRunner,
-    helpers: StoreHelpers,
     gens_config: Dict[str, Dict[str, str]],
-    caplog,
+    helpers: StoreHelpers,
+    upload_context: CGConfig,
 ):
     """Test for Gens upload via the CLI."""
     caplog.set_level(logging.DEBUG)

@@ -20,13 +20,13 @@ def test_instantiate(gens_config: Dict[str, Dict[str, str]]):
 
 
 def test_gens_api_load(
+    case_id: str,
     gens_config: Dict[str, Dict[str, str]],
+    gens_coverage_path: Path,
+    gens_fracsnp_path: Path,
+    gens_genome_build: str,
     mocker,
     sample_id: str,
-    gens_genome_build: str,
-    gens_fracsnp_path: Path,
-    gens_coverage_path: Path,
-    case_id: str,
 ):
     """Test load sample method."""
     # GIVEN sample_id, genome_build, baf_path, coverage_path, and case_id

@@ -29,11 +29,11 @@ class GensAPI:
 
     def load(
         self,
-        sample_id: str,
-        genome_build: str,
         baf_path: Path,
-        coverage_path: Path,
         case_id: str,
+        coverage_path: Path,
+        genome_build: str,
+        sample_id: str,
     ) -> None:
         """Load Gens sample file paths into database."""
         load_params: Dict[str, str] = {
