@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict
 
 from cg.apps.gens import GensAPI
+from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.utils.commands import Process
 
 
@@ -24,12 +25,12 @@ def test_gens_api_load(
     gens_config: Dict[str, Dict[str, str]],
     gens_coverage_path: Path,
     gens_fracsnp_path: Path,
-    gens_genome_build: str,
     mocker,
     sample_id: str,
 ):
     """Test load sample method."""
     # GIVEN sample_id, genome_build, baf_path, coverage_path, and case_id
+    gens_genome_build: str = GENOME_BUILD_37
 
     # WHEN uploading a sample with the API, using a mocked Process.run_command method
     api: GensAPI = GensAPI(gens_config)
