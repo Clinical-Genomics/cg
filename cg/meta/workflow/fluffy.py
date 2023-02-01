@@ -1,12 +1,14 @@
-from alchy import Query
-from pathlib import Path
-from typing import List, Optional
 import datetime as dt
 import logging
-import pandas as pd
 import shutil
+from csv import reader
+from pathlib import Path
+from typing import List, Optional
 
+import pandas as pd
+from alchy import Query
 from cg.constants import Pipeline
+from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -43,9 +45,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
     def get_case_path(self, case_id: str) -> Path:
         return Path(self.root_dir, case_id)
 
-    def get_samplesheet_path(self, case_id: str) -> Path:
+    def get_sample_sheet_path(self, case_id: str) -> Path:
         """
-        Location in case folder where samplesheet is expected to be stored. Samplesheet is used as a config
+        Location in case folder where sample sheet is expected to be stored. Sample sheet is used as a config
         required to run Fluffy
         """
         starlims_id: str = self.status_db.family(case_id).links[0].sample.order
@@ -129,8 +131,83 @@ class FluffyAnalysisAPI(AnalysisAPI):
         sample_obj: models.Sample = self.status_db.sample(sample_id)
         return bool(sample_obj.control)
 
-    def add_concentrations_to_samplesheet(
-        self, samplesheet_housekeeper_path: Path, samplesheet_workdir_path: Path
+    def get_nr_of_header_lines_in_sample_sheet(
+        self,
+        sample_sheet_housekeeper_path: Path,
+    ) -> int:
+        """
+        Return the number of header lines in a Fluffy sample sheet.
+        Any lines before and including the line starting with [Data] is considered the header.
+
+        Returns:
+        int: The number of lines before the SAMPLE_SHEET_DATA_HEADER
+        """
+        with sample_sheet_housekeeper_path.open("r") as read_obj:
+            csv_reader = reader(read_obj)
+            header_line_count: int = 1
+            for line in csv_reader:
+                if SAMPLE_SHEET_DATA_HEADER in line:
+                    break
+                header_line_count += 1
+        return header_line_count
+
+    def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
+        """
+        Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER.
+
+        Args:
+                        sample_sheet_housekeeper_path (Path): Path to the housekeeper sample sheet file
+
+        Returns:
+                        pd.DataFrame: A pandas dataframe of the sample sheet
+        """
+        header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
+            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
+        )
+        return pd.read_csv(sample_sheet_housekeeper_path, index_col=None, header=header_line_count)
+
+    def add_sample_sheet_column(
+        self, sample_sheet_df: pd.DataFrame, new_column: str, to_add: list
+    ) -> pd.DataFrame:
+        """Add columns to the sample sheet.
+        Returns:
+                        pd.DataFrame: Sample sheet pd.DataFrame.
+        """
+        try:
+            sample_sheet_df[new_column] = to_add
+        except ValueError:
+            LOG.error(
+                f"Error when trying to add the column: {new_column} to sample sheet with data: {to_add}."
+            )
+        return sample_sheet_df
+
+    def column_has_alias(self, sample_sheet_df: pd.DataFrame, alias: str) -> bool:
+        return alias in sample_sheet_df.columns
+
+    def set_column_alias(self, sample_sheet_df: pd.DataFrame, alias: str, alternative: str) -> str:
+        """Return column alias from the sample sheet or set to alternative.
+        Returns: str: column name alias
+        """
+        return (
+            alias
+            if self.column_has_alias(sample_sheet_df=sample_sheet_df, alias=alias)
+            else alternative
+        )
+
+    def write_sample_sheet_csv(
+        self, sample_sheet_df: pd.DataFrame, sample_sheet_workdir_path: Path
+    ):
+        """
+        Write the sample sheet as a csv file
+        """
+        sample_sheet_df.to_csv(
+            sample_sheet_workdir_path,
+            sep=",",
+            index=False,
+        )
+
+    def populate_sample_sheet(
+        self, sample_sheet_housekeeper_path: Path, sample_sheet_workdir_path: Path
     ) -> None:
         """
         Reads the fluffy samplesheet *.csv file as found in Housekeeper.
@@ -138,73 +215,72 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Edits column 'Sample_Project or Project' to include customer sample starlims id.
         Adds columns Library_nM, SequencingDate, Exclude and populates with orderform values
         """
-
-        samplesheet_df = pd.read_csv(
-            samplesheet_housekeeper_path, index_col=None, header=0, skiprows=4
-        )
-        LOG.info(samplesheet_df)
-        sample_id_column_alias = (
-            "Sample_ID" if "Sample_ID" in samplesheet_df.columns else "SampleID"
-        )
-        sample_project_column_alias = (
-            "Sample_Project" if "Sample_Project" in samplesheet_df.columns else "Project"
-        )
-        samplesheet_df["SampleName"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_name_from_lims_id(lims_id=x)
-        )
-        samplesheet_df["Library_nM"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_concentrations_from_lims(sample_id=x)
-        )
-        samplesheet_df["SequencingDate"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_sequenced_date(sample_id=x)
-        )
-        samplesheet_df[sample_project_column_alias] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_starlims_id(sample_id=x)
-        )
-        samplesheet_df["Exclude"] = samplesheet_df[sample_id_column_alias].apply(
-            lambda x: self.get_sample_control_status(sample_id=x)
-        )
-        samplesheet_df.to_csv(
-            samplesheet_workdir_path,
-            sep=",",
-            index=False,
+        sample_sheet_df = self.read_sample_sheet_data(
+            sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
         )
 
-    def get_samplesheet_housekeeper_path(self, flowcell_name: str) -> Path:
+        sample_id_column_alias = self.set_column_alias(
+            sample_sheet_df=sample_sheet_df, alias="Sample_ID", alternative="SampleID"
+        )
+
+        sample_project_column_alias = self.set_column_alias(
+            sample_sheet_df=sample_sheet_df, alias="Sample_Project", alternative="Project"
+        )
+
+        column_to_value_map: dict = {
+            "Exclude": lambda x: self.get_sample_control_status(sample_id=x),
+            "SampleName": lambda x: self.get_sample_name_from_lims_id(lims_id=x),
+            "Library_nM": lambda x: self.get_concentrations_from_lims(sample_id=x),
+            "SequencingDate": lambda x: self.get_sample_sequenced_date(sample_id=x),
+            sample_project_column_alias: lambda x: self.get_sample_starlims_id(sample_id=x),
+        }
+
+        for column, value in column_to_value_map.items():
+            sample_sheet_df = self.add_sample_sheet_column(
+                sample_sheet_df=sample_sheet_df,
+                new_column=column,
+                to_add=sample_sheet_df[sample_id_column_alias].apply(value),
+            )
+
+        self.write_sample_sheet_csv(
+            sample_sheet_df=sample_sheet_df, sample_sheet_workdir_path=sample_sheet_workdir_path
+        )
+
+    def get_sample_sheet_housekeeper_path(self, flowcell_name: str) -> Path:
         """
         Returns the path to original samplesheet file that is added to Housekeeper
         """
-        samplesheet_query: list = self.housekeeper_api.files(
+        sample_sheet_query: list = self.housekeeper_api.files(
             bundle=flowcell_name, tags=["samplesheet"]
         ).all()
-        if not samplesheet_query:
+        if not sample_sheet_query:
             LOG.error(
                 "Samplesheet file for flowcell %s could not be found in Housekeeper!", flowcell_name
             )
             raise CgError
-        return Path(samplesheet_query[0].full_path)
+        return Path(sample_sheet_query[0].full_path)
 
-    def make_samplesheet(self, case_id: str, dry_run: bool) -> None:
+    def make_sample_sheet(self, case_id: str, dry_run: bool) -> None:
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
         latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
             family_id=case_id
         )
-        samplesheet_housekeeper_path = self.get_samplesheet_housekeeper_path(
+        sample_sheet_housekeeper_path = self.get_sample_sheet_housekeeper_path(
             flowcell_name=latest_flow_cell.name
         )
-        samplesheet_workdir_path = Path(self.get_samplesheet_path(case_id=case_id))
+        sample_sheet_workdir_path = Path(self.get_sample_sheet_path(case_id=case_id))
         LOG.info(
             "Writing modified csv from %s to %s",
-            samplesheet_housekeeper_path,
-            samplesheet_workdir_path,
+            sample_sheet_housekeeper_path,
+            sample_sheet_workdir_path,
         )
         if not dry_run:
             Path(self.root_dir, case_id).mkdir(parents=True, exist_ok=True)
-            self.add_concentrations_to_samplesheet(
-                samplesheet_housekeeper_path=samplesheet_housekeeper_path,
-                samplesheet_workdir_path=samplesheet_workdir_path,
+            self.populate_sample_sheet(
+                sample_sheet_housekeeper_path=sample_sheet_housekeeper_path,
+                sample_sheet_workdir_path=sample_sheet_workdir_path,
             )
 
     def run_fluffy(
@@ -228,7 +304,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
             "--config",
             workflow_config,
             "--sample",
-            self.get_samplesheet_path(case_id=case_id).as_posix(),
+            self.get_sample_sheet_path(case_id=case_id).as_posix(),
             "--project",
             self.get_workdir_path(case_id=case_id).as_posix(),
             "--out",
