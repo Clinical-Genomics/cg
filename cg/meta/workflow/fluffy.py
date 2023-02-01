@@ -181,11 +181,14 @@ class FluffyAnalysisAPI(AnalysisAPI):
             )
         return sample_sheet_df
 
-    def get_column_alias(self, sample_sheet_df: pd.DataFrame, alias: str, alternative: str):
-        """Determine column alias from the sample sheet or set to alternative.
+    def column_has_alias(self, sample_sheet_df: pd.DataFrame, alias: str) -> bool:
+        return alias in sample_sheet_df.columns
+    def set_column_alias(self, sample_sheet_df: pd.DataFrame, alias: str, alternative: str) -> str:
+        """Return column alias from the sample sheet or set to alternative.
         Returns: str: column name alias
         """
-        return alias if alias in sample_sheet_df.columns else alternative
+        return alias if self.column_has_alias(sample_sheet_df=sample_sheet_df,
+                                              alias=alias) else alternative
 
     def write_sample_sheet_csv(
         self, sample_sheet_df: pd.DataFrame, sample_sheet_workdir_path: Path
