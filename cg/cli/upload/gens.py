@@ -8,6 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family, Analysis
+from cg.constants.housekeeper_tags import GensAnalysisTag
 
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.workflow.commands import (
@@ -44,10 +45,10 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
         analysis_date = analysis.started_at or analysis.completed_at
         hk_version = housekeeper_api.version(case_id, analysis_date)
         hk_fracsnp = housekeeper_api.files(
-            version=hk_version.id, tags=[link.sample.internal_id, "gens", "fracsnp", "bed"]
+            version=hk_version.id, tags=[link.sample.internal_id] + GensAnalysisTag.FRACSNP
         ).first()
         hk_coverage = housekeeper_api.files(
-            version=hk_version.id, tags=[link.sample.internal_id, "gens", "coverage", "bed"]
+            version=hk_version.id, tags=[link.sample.internal_id] + GensAnalysisTag.COVERAGE
         ).first()
 
         gens_api.load(

@@ -30,6 +30,11 @@ class BalsamicAnalysisTag(StrEnum):
     QC_METRICS: str = "qc-metrics"
 
 
+class GensAnalysisTag:
+    COVERAGE: List[str] = ["gens", "coverage", "bed"]
+    FRACSNP: List[str] = ["gens", "fracsnp", "bed"]
+
+
 WORKFLOW_PROTECTED_TAGS = {
     str(Pipeline.BALSAMIC): [],
     str(Pipeline.FASTQ): [],
