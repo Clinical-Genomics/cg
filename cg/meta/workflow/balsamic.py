@@ -425,7 +425,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return sample_obj.internal_id
 
     def get_normal_sample_name(self, case_id: str) -> Optional[str]:
-
         sample_obj = (
             self.status_db.query(models.Sample)
             .join(models.Family.links, models.FamilySample.sample)
@@ -568,7 +567,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("")
 
     def get_sample_params(self, case_id: str, panel_bed: Optional[str]) -> dict:
-
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
 

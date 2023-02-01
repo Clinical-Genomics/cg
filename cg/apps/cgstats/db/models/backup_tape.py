@@ -7,7 +7,6 @@ from .base import Model
 
 
 class Backuptape(Model):
-
     backuptape_id = Column(types.Integer, primary_key=True)
     tapedir = Column(types.String(255))
     nametext = Column(types.String(255))

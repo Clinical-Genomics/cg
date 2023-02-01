@@ -2,7 +2,6 @@ from cg.store import Store
 
 
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):
-
     # GIVEN a store with a Microbial sample
     sample_obj = helpers.add_microbial_sample(microbial_store)
     microbial_store.add_commit(sample_obj)

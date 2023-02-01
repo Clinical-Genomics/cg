@@ -362,7 +362,6 @@ class UploadScoutAPI:
                 return sample
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
-
         config_builders = {
             Pipeline.BALSAMIC: BalsamicConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
@@ -421,7 +420,6 @@ class UploadScoutAPI:
     def _link_rna_sample_to_dna_sample(
         self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
     ) -> models.Sample:
-
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"

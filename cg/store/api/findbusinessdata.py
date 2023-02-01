@@ -351,7 +351,6 @@ class FindBusinessDataHandler(BaseHandler):
         application: Application = self.get_application_by_case(case_id)
 
         if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
-
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"

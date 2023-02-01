@@ -15,7 +15,6 @@ class MockCrunchyAPI(CrunchyAPI):
     """
 
     def __init__(self, config: dict = None):
-
         self.config = config
         self.dry_run = False
         self._compression_pending_files = {}

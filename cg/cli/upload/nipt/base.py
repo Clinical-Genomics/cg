@@ -68,7 +68,6 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
 
     all_good = True
     for analysis_obj in nipt_upload_api.get_all_upload_analyses():
-
         internal_id = analysis_obj.family.internal_id
 
         if nipt_upload_api.flowcell_passed_qc_value(

@@ -63,7 +63,6 @@ class ExcelSample(OrderSample):
 
     @validator("data_analysis")
     def validate_data_analysis(cls, value):
-
         data_analysis_alternatives = [
             "Balsamic",  # OF 1508
             "Balsamic QC",  # OF 1508

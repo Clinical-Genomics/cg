@@ -6,7 +6,6 @@ from pydantic import constr, validator
 
 
 class JsonSample(OrderSample):
-
     cohorts: Optional[List[str]]
     concentration: Optional[str]
     concentration_sample: Optional[str]

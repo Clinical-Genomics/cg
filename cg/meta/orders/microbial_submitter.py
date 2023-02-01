@@ -82,7 +82,6 @@ class MicrobialSubmitter(Submitter):
         new_samples = []
 
         with self.status.session.no_autoflush:
-
             for sample_data in items:
                 case_obj = self.status.find_family(customer=customer_obj, name=ticket)
 
