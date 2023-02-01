@@ -58,7 +58,6 @@ def upgrade():
 
 
 def switch_priority_int_to_enum(session, table_name, model):
-
     print(f"Add column priority_enum to {table_name}")
     op.add_column(table_name, Column("priority_enum", priority_enum))
     print(f"Column priority_enum added to {table_name}")

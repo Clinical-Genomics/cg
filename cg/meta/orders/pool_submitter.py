@@ -70,7 +70,6 @@ class PoolSubmitter(Submitter):
 
         # each pool must only have same of some values
         for pool in pools.values():
-
             applications = pool["applications"]
             priorities = pool["priorities"]
             pool_name = pool["name"]
@@ -80,7 +79,6 @@ class PoolSubmitter(Submitter):
                 raise OrderError(f"different priorities in pool: {pool_name} - {priorities}")
 
         for pool in pools.values():
-
             pool_name = pool["name"]
             applications = pool["applications"]
             application = applications.pop()

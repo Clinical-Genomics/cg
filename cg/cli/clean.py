@@ -77,7 +77,6 @@ def hk_alignment_files(context: CGConfig, bundle: str, yes: bool = False, dry_ru
     """Clean up alignment files in Housekeeper bundle"""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     for tag in ["bam", "bai", "bam-index", "cram", "crai", "cram-index"]:
-
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:

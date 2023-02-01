@@ -11,7 +11,6 @@ import datetime as dt
 def test_start_available_dry(
     cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
 ):
-
     caplog.set_level("INFO")
 
     # GIVEN a case_id that does exist in database

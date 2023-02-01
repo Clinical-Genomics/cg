@@ -7,7 +7,6 @@ from .base import Model
 
 
 class Supportparams(Model):
-
     supportparams_id = Column(types.Integer, primary_key=True)
     document_path = Column(types.String(255), nullable=False, unique=True)
     systempid = Column(types.String(255))

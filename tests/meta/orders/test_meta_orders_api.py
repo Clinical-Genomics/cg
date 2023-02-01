@@ -139,7 +139,6 @@ def test_submit_illegal_sample_customer(
     user_mail: str,
     user_name: str,
 ):
-
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -186,7 +185,6 @@ def test_submit_scout_legal_sample_customer(
     user_mail: str,
     user_name: str,
 ):
-
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     monkeypatch_process_lims(monkeypatch, order_data)
     # GIVEN we have an order with a customer that is in the same customer group as customer
