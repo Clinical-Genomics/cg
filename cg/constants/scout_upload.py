@@ -29,7 +29,13 @@ BALSAMIC_UMI_CASE_TAGS = dict(
 )
 
 RNAFUSION_CASE_TAGS = dict(
-    multiqc_report={"multiqc-html"},
+    multiqc_report={"multiqc-html", "rna"},
+    genefusion_report={"arriba-visualisation", "clinical"},
+    genefusion_report_research={"arriba-visualisation", "research"},
+    rnafusion_report={"fusionreport", "clinical"},
+    rnafusion_report_research={"fusionreport", "research"},
+    rnafusion_inspector={"fusioninspector-html", "clinical"},
+    rnafusion_inspector_research={"fusioninspector-html", "research"},
 )
 
 MIP_SAMPLE_TAGS = dict(

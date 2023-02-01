@@ -150,32 +150,6 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     LOG.info("Case loaded successfully to Scout")
 
 
-@click.command(name="upload-report-to-scout")
-@click.option("-t", "--report-type", type=str, required=True, help="Type of report")
-@click.option("--dry-run", is_flag=True)
-@click.argument("case_id")
-@click.pass_obj
-def upload_report_to_scout(context: CGConfig, report_type: bool, dry_run: bool, case_id: str):
-    """Upload report to Scout."""
-
-    LOG.info("----------------- UPLOAD REPORT TO SCOUT -----------------------")
-
-    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    try:
-        report_file = scout_upload_api.get_report_file(report_type=report_type, case_id=case_id)
-    except (ValueError, HousekeeperDataError) as error:
-        raise click.Abort from error
-    try:
-        scout_upload_api.upload_report_to_scout(
-            dry_run=dry_run,
-            case_id=case_id,
-            report_type=report_type,
-            report_file=report_file,
-        )
-    except (CgDataError, ScoutUploadError) as error:
-        raise error from error
-
-
 @click.command(name="rna-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")

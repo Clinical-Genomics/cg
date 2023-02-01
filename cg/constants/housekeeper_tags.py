@@ -4,8 +4,6 @@ from typing import List
 
 from cgmodels.cg.constants import Pipeline, StrEnum
 
-from cg.constants import ReportTypes
-
 
 class SequencingFileTag(StrEnum):
     ARCHIVED_SAMPLE_SHEET: str = "archived_sample_sheet"
@@ -110,12 +108,4 @@ WORKFLOW_PROTECTED_TAGS = {
         ["gisaid-log"],
         ["gisaid-csv"],
     ],
-}
-
-
-REPORT_TAGS = {
-    str(ReportTypes.MULTIQC_RNA_REPORT): ["multiqc-html", "rna"],
-    str(ReportTypes.GENE_FUSION_REPORT): ["arriba-visualisation"],
-    str(ReportTypes.RNAFUSION_REPORT): ["fusionreport"],
-    str(ReportTypes.RNAFUSION_INSPECTOR_REPORT): ["fusioninspector-html"],
 }

@@ -153,4 +153,11 @@ class MipLoadConfig(ScoutLoadConfig):
 
 
 class RnafusionLoadConfig(ScoutLoadConfig):
+    multiqc_rna: Optional[str] = None
+    gene_fusion: Optional[str] = None
+    gene_fusion_research: Optional[str] = None
+    RNAfusion_inspector: Optional[str] = None
+    RNAfusion_inspector_research: Optional[str] = None
+    RNAfusion_report: Optional[str] = None
+    RNAfusion_report_research: Optional[str] = None
     samples: List[ScoutRnafusionIndividual] = []

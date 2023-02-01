@@ -13,9 +13,8 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.housekeeper_tags import REPORT_TAGS
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import CgDataError, HousekeeperBundleVersionMissingError, HousekeeperDataError
+from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
@@ -107,18 +106,6 @@ class UploadScoutAPI:
 
         LOG.info("Added scout load config to housekeeper: %s", config_file_path)
         return file_obj
-
-    def get_report_file(self, report_type: str, case_id: str) -> Path:
-        """Get a report file for a case in housekeeper."""
-        hk_tags = REPORT_TAGS.get(report_type, None)
-        if hk_tags is None:
-            LOG.error(f"No tags associated to report type {report_type}")
-            raise ValueError
-        report_file = self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=hk_tags)
-        if report_file:
-            return report_file
-        else:
-            raise HousekeeperDataError(f"{report_type} was not found in housekeeper for {case_id}")
 
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[hk_models.File]:
         """Get a fusion report for case in housekeeper
@@ -239,28 +226,6 @@ class UploadScoutAPI:
             LOG.info("Uploaded %s fusion report", report_type)
 
         LOG.info("Upload %s fusion report finished!", report_type)
-
-    def upload_report_to_scout(
-        self,
-        dry_run: bool,
-        case_id: str,
-        report_type: str,
-        report_file: hk_models.File,
-    ) -> None:
-        """Upload report file a case to Scout."""
-
-        LOG.info(f"Uploading {report_type} report to scout for case {case_id}")
-
-        if dry_run:
-            return
-        self.scout.upload_report(
-            case_id=case_id,
-            report_path=report_file.full_path,
-            report_type=report_type,
-        )
-        LOG.info(f"Uploaded {report_type} report")
-
-        LOG.info(f"Upload {report_type} report finished!")
 
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
         """Upload rna_coverage_bigwig file for a case to Scout.

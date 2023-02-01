@@ -37,8 +37,23 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
 
     def include_case_files(self):
+        """Include case level files for rnafusion case."""
         LOG.info("Including RNAFUSION specific case level files")
-        pass
+        self.load_config.multiqc_rna = self.fetch_file_from_hk(self.case_tags.multiqc_report)
+        self.load_config.gene_fusion = self.fetch_file_from_hk(self.case_tags.genefusion_report)
+        self.load_config.gene_fusion_research = self.fetch_file_from_hk(
+            self.case_tags.genefusion_report_research
+        )
+        self.load_config.RNAfusion_inspector = self.fetch_file_from_hk(
+            self.case_tags.rnafusion_inspector
+        )
+        self.load_config.RNAfusion_inspector_research = self.fetch_file_from_hk(
+            self.case_tags.rnafusion_inspector_research
+        )
+        self.load_config.RNAfusion_report = self.fetch_file_from_hk(self.case_tags.rnafusion_report)
+        self.load_config.RNAfusion_report_research = self.fetch_file_from_hk(
+            self.case_tags.rnafusion_report_research
+        )
 
     def build_config_sample(self, db_sample: models.FamilySample) -> ScoutRnafusionIndividual:
         """Build a sample with rnafusion specific information."""
@@ -55,3 +70,15 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         config_sample.analysis_type = "wts"
 
         return config_sample
+
+    def include_report(self) -> None:
+        LOG.info("Include delivery report to case")
+        self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
+
+    def include_rnafusion_report(self) -> None:
+        LOG.info("Include delivery report to case")
+        self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
+        self.include_multiqc_rna_report()
+        self.include_rnafusion_report()
+        self.include_rnafusion_inspector_report()
+        self.include_arriba_report()

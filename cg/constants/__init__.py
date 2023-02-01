@@ -17,7 +17,6 @@ from cg.constants.constants import (
     DataDelivery,
     FileExtensions,
     FlowCellStatus,
-    ReportTypes,
 )
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.housekeeper_tags import HK_FASTQ_TAGS, SequencingFileTag
