@@ -1,4 +1,4 @@
-"""Test the Gens upload command"""
+"""Test the Gens upload command."""
 
 import logging
 from click.testing import CliRunner
@@ -25,7 +25,7 @@ def test_upload_gens(
     gens_config: Dict[str, Dict[str, str]],
     caplog,
 ):
-    """Test for Gens upload via the CLI"""
+    """Test for Gens upload via the CLI."""
     caplog.set_level(logging.DEBUG)
     store: Store = upload_context.status_db
     upload_context.gens_api_ = GensAPI(gens_config)
