@@ -8,6 +8,7 @@ from housekeeper.store import models as hk_models
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
+from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
@@ -82,8 +83,16 @@ class MipConfigBuilder(ScoutConfigBuilder):
 
         config_sample = ScoutMipIndividual()
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
-        config_sample.father = case_sample.father.internal_id if case_sample.father else "0"
-        config_sample.mother = case_sample.mother.internal_id if case_sample.mother else "0"
+        config_sample.father = (
+            case_sample.father.internal_id
+            if case_sample.father
+            else RelationshipStatus.HAS_NO_PARENT.value
+        )
+        config_sample.mother = (
+            case_sample.mother.internal_id
+            if case_sample.mother
+            else RelationshipStatus.HAS_NO_PARENT.value
+        )
 
         return config_sample
 
