@@ -49,7 +49,7 @@ class DeliverAPI:
         self.ticket: str = ""
         self.dry_run = False
         self.delivery_type: str = delivery_type
-        self.skip_missing_bundle = (
+        self.skip_missing_bundle: bool = (
             self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
         )
         self.deliver_failed_samples = force_all

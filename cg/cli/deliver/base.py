@@ -30,6 +30,14 @@ FORCE_ALL = click.option(
 )
 TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
 
+IGNORE_MISSING_BUNDLES = click.option(
+    "-i",
+    "--ignore-missing-bundles",
+    help="Ignore errors due to missing case bundles",
+    is_flag=True,
+    default=False,
+)
+
 
 @click.group()
 def deliver():
@@ -44,14 +52,8 @@ def deliver():
 @click.option(
     "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
 )
-@click.option(
-    "-i",
-    "--ignore-missing-bundles",
-    help="Ignore errors due to missing case bundles",
-    is_flag=True,
-    default=False,
-)
 @FORCE_ALL
+@IGNORE_MISSING_BUNDLES
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
@@ -139,6 +141,8 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
 @deliver.command(name="ticket")
 @DELIVERY_TYPE
 @DRY_RUN
+@FORCE_ALL
+@IGNORE_MISSING_BUNDLES
 @click.option(
     "-t",
     "--ticket",
@@ -146,14 +150,6 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
     help="Deliver and rsync the files for ALL cases connected to a ticket",
     required=True,
 )
-@click.option(
-    "-i",
-    "--ignore-missing-bundles",
-    help="Ignore errors due to missing case bundles",
-    is_flag=True,
-    default=False,
-)
-@FORCE_ALL
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
