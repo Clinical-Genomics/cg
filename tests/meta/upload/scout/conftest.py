@@ -440,7 +440,12 @@ def fixture_rnafusion_analysis_hk_bundle_data(
             {
                 "path": str(rnafusion_analysis_dir / "multiqc.html"),
                 "archive": False,
-                "tags": ["multiqc-html", sample_id],
+                "tags": ["multiqc-html", "rna"],
+            },
+            {
+                "path": Path(rnafusion_analysis_dir, "rnafusion_report.html").as_posix(),
+                "archive": False,
+                "tags": ["fusionreport", "research"],
             },
         ],
     }
@@ -562,6 +567,7 @@ def fixture_rnafusion_analysis_obj(analysis_obj: models.Analysis) -> models.Anal
     for link_object in analysis_obj.family.links:
         link_object.sample.application_version.application.prep_category = "wts"
         link_object.family.data_analysis = Pipeline.RNAFUSION
+        link_object.family.panels = None
     return analysis_obj
 
 
