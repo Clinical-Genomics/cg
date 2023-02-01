@@ -1,7 +1,9 @@
 """Module for Flask-Admin views"""
+from datetime import datetime
 from gettext import ngettext, gettext
 from typing import List, Union
 
+from cgmodels.cg.constants import Pipeline
 from flask import redirect, request, session, url_for, flash
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
@@ -9,9 +11,9 @@ from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy.orm import Query
 
-from cg.constants.constants import DataDelivery, Pipeline, CaseActions
+from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 from cg.utils.flask.enum import SelectEnumField
 
 
@@ -246,8 +248,8 @@ class FamilyView(BaseView):
 
     @action(
         "set_hold",
-        "Set action to HOLD",
-        "Are you sure you want to set the action for selected families to HOLD?",
+        "Set action to hold",
+        "Are you sure you want to set the action for selected families to hold?",
     )
     def action_set_hold(self, ids: List[str]):
         self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
@@ -255,7 +257,7 @@ class FamilyView(BaseView):
     @action(
         "set_empty",
         "Set action to Empty",
-        "Are you sure you want to set the action for selected families to empty?",
+        "Are you sure you want to set the action for selected families to Empty?",
     )
     def action_set_empty(self, ids: List[str]):
         self.set_action_for_batch(action=None, entry_ids=ids)
@@ -288,7 +290,7 @@ class FlowcellView(BaseView):
     column_default_sort = ("sequenced_at", True)
     column_editable_list = ["status"]
     column_exclude_list = ["archived_at"]
-    column_filters = ["sequencer_type", "sequencer_name"]
+    column_filters = ["sequencer_type", "sequencer_name", "status"]
     column_searchable_list = ["name"]
 
 
@@ -427,6 +429,71 @@ class SampleView(BaseView):
             if model.sample
             else ""
         )
+
+    @action(
+        "cancel_samples",
+        "Cancel samples",
+        "Are you sure you want to cancel the selected samples?",
+    )
+    def cancel_samples(self, entry_ids: List[str]) -> None:
+        """
+        Action for cancelling samples:
+            - Comments each sample being cancelled with date and user.
+            - Deletes any relationship between the cancelled samples and cases.
+            - Deletes any cases that only contain samples being cancelled.
+        """
+        all_associated_case_ids: set = set()
+
+        for entry_id in entry_ids:
+            sample: Sample = db.get_sample_by_id(entry_id=int(entry_id))
+
+            sample_case_ids: List[str] = [
+                case_sample.family.internal_id for case_sample in sample.links
+            ]
+            all_associated_case_ids.update(sample_case_ids)
+
+            db.delete_relationships_sample(sample=sample)
+            self.write_cancel_comment(sample=sample)
+
+        case_ids: List[str] = list(all_associated_case_ids)
+        db.delete_cases_without_samples(case_ids=case_ids)
+        cases_with_remaining_samples: List[str] = db.filter_cases_with_samples(case_ids=case_ids)
+
+        self.display_cancel_confirmation(
+            sample_entry_ids=entry_ids, remaining_cases=cases_with_remaining_samples
+        )
+
+    def write_cancel_comment(self, sample: Sample) -> None:
+        """Add comment to sample with date and user cancelling the sample."""
+        username: str = db.user(session.get("user_email")).name
+        date: str = datetime.now().strftime("%Y-%m-%d")
+        comment: str = f"Cancelled {date} by {username}"
+
+        db.add_sample_comment(sample=sample, comment=comment)
+
+    def display_cancel_confirmation(
+        self, sample_entry_ids: List[str], remaining_cases: List[str]
+    ) -> None:
+        """Show a summary of the cancelled samples and any cases in which other samples were present."""
+        samples: str = "sample" if len(sample_entry_ids) == 1 else "samples"
+        cases: str = "case" if len(remaining_cases) == 1 else "cases"
+
+        message: str = f"Cancelled {len(sample_entry_ids)} {samples}. "
+        case_message: str = ""
+
+        for case_id in remaining_cases:
+            case_message = f"{case_message} {case_id},"
+
+        case_message = case_message.strip(",")
+
+        if remaining_cases:
+            message += (
+                f"Found {len(remaining_cases)} {cases} with additional samples: {case_message}."
+            )
+        else:
+            message += "No case contained additional samples."
+
+        flash(message=message)
 
 
 class DeliveryView(BaseView):

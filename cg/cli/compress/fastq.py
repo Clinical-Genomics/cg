@@ -1,29 +1,30 @@
-"""CLI function to compress FASTQ files into SPRING archives"""
+"""CLI function to compress FASTQ files into SPRING archives."""
 
-import datetime as dt
 import logging
 from typing import Iterable, List, Optional
 
 import click
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.compress.helpers import correct_spring_paths, get_fastq_individuals, update_compress_api
-from cg.constants.compression import CASES_TO_IGNORE
+from cg.cli.compress.helpers import (
+    correct_spring_paths,
+    update_compress_api,
+    is_case_ignored,
+    get_cases_to_process,
+    compress_sample_fastqs_in_cases,
+)
+from cg.constants.constants import DRY_RUN
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
-
-# There is a list of problematic cases that we should skip
 
 
 @click.command("fastq")
 @click.option("-c", "--case-id", type=str)
-@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
-@click.option("-t", "--ntasks", default=12, show_default=True, help="Number of tasks for slurm job")
-@click.option("-m", "--mem", default=50, show_default=True, help="Memory for slurm job")
 @click.option(
     "-b",
     "--days-back",
@@ -31,64 +32,37 @@ LOG = logging.getLogger(__name__)
     show_default=True,
     help="Threshold for how long ago family was created",
 )
-@click.option("-d", "--dry-run", is_flag=True)
+@click.option("--hours", type=int, help="Hours to allocate for slurm job")
+@click.option("-m", "--mem", type=int, help="Memory for slurm job")
+@click.option("-t", "--ntasks", type=int, help="Number of tasks for slurm job")
+@click.option("-n", "--number-of-conversions", default=5, type=int, show_default=True)
+@DRY_RUN
 @click.pass_obj
 def fastq_cmd(
     context: CGConfig,
     case_id: Optional[str],
-    number_of_conversions: int,
-    ntasks: int,
-    mem: int,
     days_back: int,
+    hours: Optional[int],
     dry_run: bool,
+    mem: Optional[int],
+    ntasks: Optional[int],
+    number_of_conversions: int,
 ):
-    """Find cases with FASTQ files and compress into SPRING"""
+    """Compress old FASTQ files into SPRING."""
     LOG.info("Running compress FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
-    update_compress_api(compress_api, dry_run=dry_run, ntasks=ntasks, mem=mem)
-
-    cases: List[models.Family] = []
-    if case_id:
-        case_obj: models.Family = store.family(case_id)
-        if not case_obj:
-            LOG.warning("Could not find case %s", case_id)
-            return
-        cases.append(case_obj)
-    else:
-        date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
-        cases = compress_api.get_cases_to_compress(store, date_threshold=date_threshold)
-
-    case_conversion_count = 0
-    ind_conversion_count = 0
-    for case in cases:
-        # Keeps track on if all samples in a case have been converted
-        case_converted = True
-        if case_conversion_count >= number_of_conversions:
-            break
-        internal_id: str = case.internal_id
-        if internal_id in CASES_TO_IGNORE:
-            LOG.info("Skipping case %s", internal_id)
-            continue
-
-        LOG.info("Searching for FASTQ files in case %s", internal_id)
-        if not case.links:
-            continue
-        for link_obj in case.links:
-            sample_id: str = link_obj.sample.internal_id
-            case_converted: bool = compress_api.compress_fastq(sample_id)
-            if not case_converted:
-                LOG.info("skipping individual %s", sample_id)
-                continue
-            ind_conversion_count += 1
-        if case_converted:
-            case_conversion_count += 1
-            LOG.info("Considering case %s converted", internal_id)
-
-    LOG.info(
-        "%s Individuals in %s (completed) cases where compressed",
-        ind_conversion_count,
-        case_conversion_count,
+    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    if not cases:
+        return
+    compress_sample_fastqs_in_cases(
+        compress_api=compress_api,
+        cases=cases,
+        dry_run=dry_run,
+        number_of_conversions=number_of_conversions,
+        hours=hours,
+        mem=mem,
+        ntasks=ntasks,
     )
 
 
@@ -101,48 +75,41 @@ def fastq_cmd(
     show_default=True,
     help="Threshold for how long ago family was created",
 )
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_run: bool):
-    """Remove compressed FASTQ files, and update links in housekeeper to SPRING files"""
+    """Remove compressed FASTQ files, and update links in Housekeeper to SPRING files."""
     LOG.info("Running compress clean FASTQ")
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     store: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
 
-    cases: List[models.Family] = []
-    if case_id:
-        case_obj: models.Family = store.family(case_id)
-        if not case_obj:
-            LOG.warning("Could not find case %s", case_id)
-            return
-        cases.append(case_obj)
-    else:
-        date_threshold = dt.datetime.now() - dt.timedelta(days=days_back)
-        cases = compress_api.get_cases_to_compress(store, date_threshold=date_threshold)
+    cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
+    if not cases:
+        return
 
     cleaned_inds = 0
-    for case_obj in cases:
-        if case_obj.internal_id in CASES_TO_IGNORE:
+    for case in cases:
+        if is_case_ignored(case_id=case.internal_id):
             continue
-        samples: Iterable[str] = get_fastq_individuals(store=store, case_id=case_obj.internal_id)
+        samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
         for sample_id in samples:
-            res: bool = compress_api.clean_fastq(sample_id)
-            if not res:
-                LOG.info("Skipping individual %s", sample_id)
+            was_cleaned: bool = compress_api.clean_fastq(sample_id=sample_id)
+            if not was_cleaned:
+                LOG.info(f"Skipping individual {sample_id}")
                 continue
             cleaned_inds += 1
 
-    LOG.info("Cleaned fastqs in %s individuals", cleaned_inds)
+    LOG.info(f"Cleaned fastqs in {cleaned_inds} individuals")
 
 
 @click.command("fix-spring")
 @click.option("-b", "--bundle-name")
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def fix_spring(context: CGConfig, bundle_name: Optional[str], dry_run: bool):
-    """Check if bundle(s) have non existing SPRING files and correct these"""
-    LOG.info("Running compress clean FASTQ")
+    """Check if bundle(s) have non-existing SPRING files and correct these."""
+    LOG.info("Running fix spring")
     compress_api = context.meta_apis["compress_api"]
     update_compress_api(compress_api, dry_run=dry_run)
     hk_api: HousekeeperAPI = compress_api.hk_api
@@ -151,15 +118,15 @@ def fix_spring(context: CGConfig, bundle_name: Optional[str], dry_run: bool):
 
 @click.command("sample")
 @click.argument("sample-id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_obj
 def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
-    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+    """Decompress SPRING file for sample, and include links to FASTQ files in Housekeeper."""
 
     compress_api: CompressAPI = context.meta_apis["compress_api"]
-    update_compress_api(compress_api, dry_run=dry_run)
+    update_compress_api(compress_api=compress_api, dry_run=dry_run)
 
-    was_decompressed: bool = compress_api.decompress_spring(sample_id)
+    was_decompressed: bool = compress_api.decompress_spring(sample_id=sample_id)
     if not was_decompressed:
         LOG.info(f"Skipping sample {sample_id}")
         return 0
@@ -169,55 +136,55 @@ def decompress_sample(context: CGConfig, sample_id: str, dry_run: bool):
 
 @click.command("case")
 @click.argument("case-id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_context
 def decompress_case(context: click.Context, case_id, dry_run):
-    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+    """Decompress SPRING file for case, and include links to FASTQ files in Housekeeper."""
 
     store: Store = context.obj.status_db
     try:
-        samples: Iterable[str] = get_fastq_individuals(store, case_id)
-        decompressed_inds = 0
+        samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case_id)
+        decompressed_individuals = 0
         for sample_id in samples:
             decompressed_count: int = context.invoke(
                 decompress_sample, sample_id=sample_id, dry_run=dry_run
             )
-            decompressed_inds += decompressed_count
+            decompressed_individuals += decompressed_count
     except CaseNotFoundError:
         return
-    LOG.info(f"Decompressed spring archives in {decompressed_inds} samples")
+    LOG.info(f"Decompressed spring archives in {decompressed_individuals} samples")
 
 
-@click.command("flowcell")
-@click.argument("flowcell_id", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@click.command("flow-cell")
+@click.argument("flow-cell-id", type=str)
+@DRY_RUN
 @click.pass_obj
-def decompress_flowcell(context: click.Context, flowcell_id: str, dry_run: bool):
-    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+def decompress_flowcell(context: click.Context, flow_cell_id: str, dry_run: bool):
+    """Decompress SPRING files for flow cell, and include links to FASTQ files in Housekeeper."""
 
     store: Store = context.obj.status_db
-    samples: Iterable[models.Sample] = store.get_samples_from_flowcell(flowcell_name=flowcell_id)
-    decompressed_inds = 0
+    samples: Iterable[Sample] = store.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
+    decompressed_individuals = 0
     for sample in samples:
         decompressed_count = context.invoke(
             decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
-        decompressed_inds += decompressed_count
-    LOG.info(f"Decompressed spring archives in {decompressed_inds} samples")
+        decompressed_individuals += decompressed_count
+    LOG.info(f"Decompressed spring archives in {decompressed_individuals} samples")
 
 
 @click.command("ticket")
 @click.argument("ticket", type=str)
-@click.option("-d", "--dry-run", is_flag=True)
+@DRY_RUN
 @click.pass_context
 def decompress_ticket(context: click.Context, ticket: str, dry_run: bool):
-    """Decompress SPRING file, and include links to FASTQ files in housekeeper"""
+    """Decompress SPRING file for ticket, and include links to FASTQ files in Housekeeper."""
     store: Store = context.obj.status_db
-    samples: Iterable[models.Sample] = store.get_samples_from_ticket(ticket=ticket)
-    decompressed_inds = 0
+    samples: Iterable[Sample] = store.get_samples_from_ticket(ticket=ticket)
+    decompressed_individuals = 0
     for sample in samples:
         decompressed_count = context.invoke(
             decompress_sample, sample_id=sample.internal_id, dry_run=dry_run
         )
-        decompressed_inds += decompressed_count
-    LOG.info(f"Decompressed spring archives in {decompressed_inds} samples")
+        decompressed_individuals += decompressed_count
+    LOG.info(f"Decompressed spring archives in {decompressed_individuals} samples")

@@ -1,4 +1,4 @@
-"""Tests for the transfer of external data"""
+"""Tests for the transfer of external data."""
 import logging
 from pathlib import Path
 from typing import List
@@ -12,9 +12,11 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
+from housekeeper.store.models import Version
+
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket: str):
-    """Test generating the directory for logging"""
+    """Test generating the directory for logging."""
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
@@ -24,7 +26,7 @@ def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket: str)
     assert "Would have created path" in caplog.text
 
     # THEN the created path should start with 2 dirs and then the ticket id
-    assert str(log_dir).startswith("/another/path/123456")
+    assert str(log_dir).startswith(f"/another/path/{ticket}")
 
 
 def test_get_source_path(
@@ -33,7 +35,7 @@ def test_get_source_path(
     external_data_api: ExternalDataAPI,
     ticket: str,
 ):
-    """Test generating the source path"""
+    """Test generating the source path."""
     # GIVEN a ticket number a customer and a customer sample id
 
     # WHEN the function is called and assigned
@@ -52,7 +54,7 @@ def test_get_destination_path(
     external_data_api: ExternalDataAPI,
     sample_id: str,
 ):
-    """Test generating the destination path"""
+    """Test generating the destination path."""
     # GIVEN a customer and an internal sample id
     # WHEN the function creates the destination path
     destination_path = external_data_api.get_destination_path(
@@ -124,21 +126,20 @@ def test_get_failed_fastq_paths(external_data_api: ExternalDataAPI, fastq_file: 
 
 
 def test_add_files_to_bundles(
-    external_data_api: ExternalDataAPI, fastq_file: Path, hk_version_obj, sample_id: str
+    external_data_api: ExternalDataAPI, fastq_file: Path, hk_version: Version, sample_id: str
 ):
-    """Tests adding files to housekeeper"""
+    """Tests adding files to Housekeeper."""
     # GIVEN a file to be added
-    to_be_added = [fastq_file]
 
     # WHEN the files are added.
     external_data_api.add_files_to_bundles(
-        fastq_paths=to_be_added,
-        last_version=hk_version_obj,
+        fastq_paths=[fastq_file],
+        last_version=hk_version,
         lims_sample_id=sample_id,
     )
 
-    # THEN the function should return True and the file should be added.
-    assert str(fastq_file.absolute()) in [idx.path for idx in hk_version_obj.files]
+    # THEN the function should return True and the file should have benn added.
+    assert str(fastq_file.absolute()) in [idx.path for idx in hk_version.files]
 
 
 def test_add_transfer_to_housekeeper(

@@ -37,7 +37,6 @@ class MipDNAUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis_obj)
 
         # Main upload
-        ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
         ctx.invoke(coverage, family_id=case_obj.internal_id, re_upload=restart)
         ctx.invoke(validate, family_id=case_obj.internal_id)
         ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
@@ -47,6 +46,9 @@ class MipDNAUploadAPI(UploadAPI):
         # Delivery report generation
         if case_obj.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
             ctx.invoke(delivery_report, case_id=case_obj.internal_id)
+
+        # Clinical delivery upload
+        ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:

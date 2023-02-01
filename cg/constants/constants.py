@@ -1,6 +1,6 @@
-"""Constants for cg"""
+"""Constants for cg."""
 import click
-from cgmodels.cg.constants import Pipeline, StrEnum
+from cgmodels.cg.constants import StrEnum
 
 from cg.constants.sequencing import Sequencers
 from cg.utils.date import get_date
@@ -35,7 +35,7 @@ class CaseActions(StrEnum):
     RUNNING: str = "running"
 
 
-CASE_ACTIONS = (CaseActions.ANALYZE, CaseActions.RUNNING, CaseActions.HOLD)
+CASE_ACTIONS = [action.value for action in CaseActions]
 
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
@@ -60,13 +60,7 @@ class FlowCellStatus(StrEnum):
     RETRIEVED: str = "retrieved"
 
 
-FLOWCELL_STATUS = (
-    FlowCellStatus.ONDISK,
-    FlowCellStatus.REMOVED,
-    FlowCellStatus.REQUESTED,
-    FlowCellStatus.PROCESSING,
-    FlowCellStatus.RETRIEVED,
-)
+FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
 
 FLOWCELL_Q30_THRESHOLD = {
     Sequencers.HISEQX: 75,
@@ -133,6 +127,7 @@ class FileExtensions(StrEnum):
     SPRING: str = ".spring"
     TAR: str = ".tar"
     TMP: str = ".tmp"
+    VCF: str = ".vcf"
 
 
 class APIMethods(StrEnum):
@@ -158,3 +153,19 @@ SKIP_CONFIRMATION = click.option(
     default=False,
     help="Skip confirmation",
 )
+
+
+class MicrosaltQC:
+    QC_PERCENT_THRESHOLD_MWX: float = 0.1
+    COVERAGE_10X_THRESHOLD: float = 0.75
+    NEGATIVE_CONTROL_READS_THRESHOLD: float = 0.2
+    TARGET_READS: int = 6000000
+
+
+class MicrosaltAppTags(StrEnum):
+    MWRNXTR003: str = "MWRNXTR003"
+    MWXNXTR003: str = "MWXNXTR003"
+    APP_TYPE: str = "mic"
+
+
+DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
