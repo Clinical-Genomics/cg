@@ -9,7 +9,6 @@ from cg.apps.vogue import VogueAPI
 
 
 def test_instatiate(vogue_config):
-
     """Test to instantiate a vogue api"""
 
     # GIVEN a vogue api with a config
@@ -22,7 +21,6 @@ def test_instatiate(vogue_config):
 
 
 def test_load_bioinfo_sample(vogue_config, caplog):
-
     """Test load bioinfo sample upload in vogue api"""
 
     # GIVEN a vogue api and a vogue config
@@ -53,7 +51,6 @@ def test_load_bioinfo_sample(vogue_config, caplog):
 
 
 def test_load_bioinfo_raw(vogue_config, caplog):
-
     """Test load bioinfo raw upload in vogue api"""
 
     # GIVEN a vogue api and a vogue config
@@ -105,7 +102,6 @@ def test_load_bioinfo_raw(vogue_config, caplog):
 
 
 def test_load_bioinfo_process(vogue_config, caplog):
-
     """Test load bioinfo process upload in vogue api"""
 
     # GIVEN a vogue api and a vogue config

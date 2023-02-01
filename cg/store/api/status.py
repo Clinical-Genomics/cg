@@ -178,7 +178,6 @@ class StatusHandler(BaseHandler):
         cases = []
 
         for case_obj in case_q:
-
             case_data = self._calculate_case_data(case_obj)
 
             skip_case = self._should_be_skipped(
@@ -577,7 +576,6 @@ class StatusHandler(BaseHandler):
         samples_prepared_at: datetime,
         samples_sequenced_at: datetime,
     ) -> bool:
-
         return (
             (len(case_obj.analyses) > 0)
             or (samples_received_at and samples_received_at < case_obj.ordered_at)

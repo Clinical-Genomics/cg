@@ -381,6 +381,7 @@ def fixture_os_ticket(ticket: str) -> MockOsTicket:
 
 # Files fixtures
 
+
 # Common file fixtures
 @pytest.fixture(scope="session", name="fixtures_dir")
 def fixture_fixtures_dir() -> Path:

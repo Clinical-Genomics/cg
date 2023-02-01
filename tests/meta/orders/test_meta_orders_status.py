@@ -72,7 +72,6 @@ def test_samples_to_status(fastq_order_to_submit):
 
 
 def test_metagenome_to_status(metagenome_order_to_submit):
-
     # GIVEN metagenome order with two samples
     order = OrderIn.parse_obj(metagenome_order_to_submit, OrderType.METAGENOME)
 
@@ -143,7 +142,6 @@ def test_sarscov2_samples_to_status(sarscov2_order_to_submit):
 
 
 def test_cases_to_status(mip_order_to_submit):
-
     # GIVEN a scout order with a trio case
     project: OrderType = OrderType.MIP_DNA
     order = OrderIn.parse_obj(mip_order_to_submit, project=project)
@@ -646,7 +644,6 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
 def test_store_existing_single_sample_from_trio(
     orders_api, base_store, mip_status_data, ticket: str
 ):
-
     # GIVEN a stored trio case
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
     new_families = submitter.store_items_in_status(

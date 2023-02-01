@@ -35,7 +35,6 @@ def import_application_versions(
     )
 
     for application_version in application_versions:
-
         application_obj: models.Application = store.application(application_version.app_tag)
 
         if not application_obj:

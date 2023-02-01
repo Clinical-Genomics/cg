@@ -31,7 +31,7 @@ def test_validate_submitted_order(
 
     # WHEN validating the order
     # THEN it should be regarded as invalid
-    with (pytest.raises(OrderError)):
+    with pytest.raises(OrderError):
         SarsCov2Submitter(status=base_store, lims=None).validate_order(order=order)
 
 

@@ -153,7 +153,6 @@ class TrailblazerAPI:
         data_analysis: Pipeline = None,
         ticket: str = None,
     ) -> TrailblazerAnalysis:
-
         request_body = {
             "case_id": case_id,
             "email": email,
