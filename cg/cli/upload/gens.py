@@ -26,13 +26,11 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
 
     click.echo(click.style("----------------- GENS -------------------"))
 
-    if dry_run:
-        LOG.info(f"Dry run. Would upload data for {case_id} to Gens.")
-        return 0
-
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     gens_api: GensAPI = context.gens_api
+
+    gens_api.set_dry_run(dry_run=dry_run)
 
     if not case_id:
         suggest_cases_to_upload(status_db=status_db)
@@ -58,5 +56,3 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
             coverage_path=hk_coverage.full_path,
             case_id=case_id,
         )
-
-    return 0

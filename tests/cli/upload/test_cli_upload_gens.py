@@ -1,21 +1,43 @@
 """Test the Gens upload command"""
 
 import logging
-
-from cg.constants import EXIT_SUCCESS
-from cg.cli.upload.gens import gens as upload_gens_cmd
-from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 
+from typing import Dict
+from datetime import datetime, timedelta
+
+from cg.constants import EXIT_SUCCESS
+from cg.constants.sequencing import SequencingMethod
+from cg.constants.subject import PhenotypeStatus
+from cg.apps.gens import GensAPI
+from cg.cli.upload.gens import gens as upload_gens_cmd
+from cg.models.cg_config import CGConfig
+from cg.store import Store, models
+from cgmodels.cg.constants import Pipeline
+from tests.store_helpers import StoreHelpers
 
 def test_upload_gens(
     upload_context: CGConfig,
     case_id: str,
     cli_runner: CliRunner,
+    helpers: StoreHelpers,
+    gens_config: Dict[str, Dict[str, str]],
     caplog,
 ):
     """Test for Gens upload via the CLI"""
     caplog.set_level(logging.DEBUG)
+    store: Store = upload_context.status_db
+    upload_context.gens_api_ = GensAPI(gens_config)
+
+    # GIVEN a case ready to be uploaded to Gens
+    case: models.Family = helpers.add_case(store=store, internal_id=case_id)
+    sample: models.Sample = helpers.add_sample(store=store, application_type=SequencingMethod.WGS)
+    store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
+
+    # GIVEN an analysis ready to be uploaded to Gens
+    completed_at: datetime = datetime.now()
+    started_at = completed_at - timedelta(hours=100)
+    helpers.add_analysis(store=store, case=case, pipeline=Pipeline.MIP_DNA, started_at=started_at, completed_at=completed_at)
 
     # WHEN uploading to Gens
     result = cli_runner.invoke(upload_gens_cmd, [case_id, "--dry-run"], obj=upload_context)
@@ -24,4 +46,3 @@ def test_upload_gens(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN assert the correct information is communicated
-    assert f"Dry run. Would upload data for {case_id} to Gens." in caplog.text

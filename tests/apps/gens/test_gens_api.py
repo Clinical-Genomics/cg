@@ -32,7 +32,7 @@ def test_gens_api_load(
     # GIVEN sample_id, genome_build, baf_path, coverage_path, and case_id
 
     # WHEN uploading a sample with the API, using a mocked Process.run_command method
-    api = GensAPI(gens_config)
+    api: GensAPI = GensAPI(gens_config)
     mocked_run_command = mocker.patch.object(Process, "run_command")
     api.load(
         sample_id=sample_id,
