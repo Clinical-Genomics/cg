@@ -294,7 +294,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    def get_verified_samples(self, case_id: str, sample_data: dict) -> Dict[str, str]:
+    def get_verified_samples(
+        self, case_id: str, sample_data: dict, force_normal: bool
+    ) -> Dict[str, str]:
         """Return a verified tumor and normal sample dictionary."""
 
         tumor_samples: List[Sample] = self.status_db.get_samples_by_type(
@@ -320,7 +322,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         normal_sample_path: str = (
             sample_data.get(normal_sample_id).get("concatenated_path") if normal_sample_id else None
         )
-        if normal_sample_id and not tumor_sample_id:
+        if normal_sample_id and not tumor_sample_id and force_normal:
             LOG.warning(
                 f"Only a normal sample was found for case {case_id}. "
                 f"Balsamic analysis will treat it as a tumor sample."
@@ -450,6 +452,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
+        force_normal: bool = False,
         observations: List[str] = None,
         gender: Optional[str] = None,
     ) -> dict:
@@ -479,7 +482,11 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
-        config_case.update(self.get_verified_samples(case_id=case_id, sample_data=sample_data))
+        config_case.update(
+            self.get_verified_samples(
+                case_id=case_id, sample_data=sample_data, force_normal=force_normal
+            )
+        )
         config_case.update(self.get_parsed_observation_file_paths(observations))
 
         return config_case
@@ -625,6 +632,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: List[str],
+        force_normal: bool,
         dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
@@ -635,6 +643,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
             observations=observations,
+            force_normal=force_normal,
         )
         command = ["config", "case"]
         options = self.__build_command_str(
