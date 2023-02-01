@@ -6,7 +6,8 @@ import click
 from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Analysis
 
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.workflow.commands import (
@@ -36,8 +37,8 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    family: models.Family = status_db.family(case_id)
-    analysis: models.Analysis = family.analyses[0]
+    family: Family = status_db.family(case_id)
+    analysis: Analysis = family.analyses[0]
 
     for link in family.links:
         analysis_date = analysis.started_at or analysis.completed_at

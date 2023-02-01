@@ -12,7 +12,8 @@ from cg.constants.subject import PhenotypeStatus
 from cg.apps.gens import GensAPI
 from cg.cli.upload.gens import gens as upload_gens_cmd
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 from cgmodels.cg.constants import Pipeline
 from tests.store_helpers import StoreHelpers
 
@@ -30,8 +31,8 @@ def test_upload_gens(
     upload_context.gens_api_ = GensAPI(gens_config)
 
     # GIVEN a case ready to be uploaded to Gens
-    case: models.Family = helpers.add_case(store=store, internal_id=case_id)
-    sample: models.Sample = helpers.add_sample(store=store, application_type=SequencingMethod.WGS)
+    case: Family = helpers.add_case(store=store, internal_id=case_id)
+    sample: Sample = helpers.add_sample(store=store, application_type=SequencingMethod.WGS)
     store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
 
     # GIVEN an analysis ready to be uploaded to Gens
