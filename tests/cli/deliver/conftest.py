@@ -8,7 +8,6 @@ from cg.constants.delivery import INBOX_NAME
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from housekeeper.store import models as hk_models
-from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
 # Paths
