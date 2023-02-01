@@ -1,3 +1,5 @@
+from typing import Dict, Set
+
 MIP_CASE_TAGS = dict(
     snv_vcf={"vcf-snv-clinical"},
     snv_research_vcf={"vcf-snv-research"},
@@ -28,7 +30,7 @@ BALSAMIC_UMI_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
 )
 
-RNAFUSION_CASE_TAGS = dict(
+RNAFUSION_CASE_TAGS: Dict[str, Set[str]] = dict(
     multiqc_report={"multiqc-html", "rna"},
     genefusion_report={"arriba-visualisation", "clinical"},
     genefusion_report_research={"arriba-visualisation", "research"},

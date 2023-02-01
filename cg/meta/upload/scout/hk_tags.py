@@ -26,9 +26,27 @@ class CaseTags(BaseModel):
     peddy_ped: Set[str] = Field(None, description="Ped info from peddy, only for rare disease")
     peddy_sex: Set[str] = Field(None, description="Peddy sex check, only for rare disease")
     peddy_check: Set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
-    multiqc_report: Set[str]
+    multiqc_report: Set[str] = Field(None, description="MultiQC report")
     delivery_report: Set[str] = Field(None, description="Delivery report for cancer")
     str_catalog: Set[str] = Field(None, description="Variant catalog used with expansionhunter")
+    genefusion_report: Set[str] = Field(
+        None, description="Arriba report for RNA fusions containing only clinical fusions"
+    )
+    genefusion_report_research: Set[str] = Field(
+        None, description="Arriba report for RNA fusions containing all fusions"
+    )
+    rnafusion_report: Set[str] = Field(
+        None, description="Main RNA fusion report containing only clinical fusions"
+    )
+    rnafusion_report_research: Set[str] = Field(
+        None, description="Main RNA fusion report containing all fusions"
+    )
+    rnafusion_inspector: Set[str] = Field(
+        None, description="RNAfusion inspector report containing only clinical fusions"
+    )
+    rnafusion_inspector_research: Set[str] = Field(
+        None, description="RNAfusion inspector report containing all fusions"
+    )
 
 
 class SampleTags(BaseModel):

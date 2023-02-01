@@ -21,7 +21,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
         )
         self.case_tags: CaseTags = CaseTags(**RNAFUSION_CASE_TAGS)
-        self.sample_tags: SampleTags = SampleTags(*RNAFUSION_SAMPLE_TAGS)
+        self.sample_tags: SampleTags = SampleTags(**RNAFUSION_SAMPLE_TAGS)
         self.load_config: RnafusionLoadConfig = RnafusionLoadConfig(track="cancer")
 
     def build_load_config(self) -> None:
@@ -70,15 +70,3 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         config_sample.analysis_type = "wts"
 
         return config_sample
-
-    def include_report(self) -> None:
-        LOG.info("Include delivery report to case")
-        self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
-
-    def include_rnafusion_report(self) -> None:
-        LOG.info("Include delivery report to case")
-        self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
-        self.include_multiqc_rna_report()
-        self.include_rnafusion_report()
-        self.include_rnafusion_inspector_report()
-        self.include_arriba_report()
