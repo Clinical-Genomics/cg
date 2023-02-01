@@ -362,12 +362,10 @@ class HousekeeperAPI:
                 hk_files: Optional[List[File]] = self.get_files_from_latest_version(
                     bundle_name=bundle_name, tags=[tag]
                 )
-                try:
-                    sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
-                    if sample_file_in_hk:
-                        break
-                finally:
-                    sequencing_files_in_hk[bundle_name] = (
-                        all(sample_file_in_hk) if sample_file_in_hk else False
-                    )
+                sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
+                if sample_file_in_hk:
+                    break
+            sequencing_files_in_hk[bundle_name] = (
+                all(sample_file_in_hk) if sample_file_in_hk else False
+            )
         return all(sequencing_files_in_hk.values())
