@@ -353,7 +353,7 @@ class HousekeeperAPI:
         return self.files(version=version.id, tags=tags)
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
-        """Return bool of fastq or spring present in all bundles."""
+        """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
         sequencing_files_in_hk: Dict[str, bool] = {}
         for bundle_name in bundle_names:
             sequencing_files_in_hk[bundle_name] = False

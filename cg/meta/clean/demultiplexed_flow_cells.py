@@ -26,7 +26,7 @@ SEQUENCER_IDENTIFIER_POSITION = 1
 class DemultiplexedRunsFlowCell:
     """Class to check if a given flow cell in demultiplexed-runs is valid, or can be removed. A
     valid flow cell is named correctly, has the correct status ('ondisk') in Statusdb,
-    and has FASTQ and/oor SPRING files in Housekeeper.
+    and has FASTQ and/or SPRING files in Housekeeper.
 
     A flow cell that is correctly named has four segments divided by underscores:
     <run_date>_<sequencer>_<run_number>_<identifier>. The identifier consists of the position of

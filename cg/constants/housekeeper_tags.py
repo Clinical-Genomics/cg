@@ -5,7 +5,7 @@ from typing import List
 from cgmodels.cg.constants import Pipeline, StrEnum
 
 
-class AlignmentFileTag(str, Enum):
+class AlignmentFileTag(StrEnum):
     """Tags for alignment files."""
 
     BAM: str = "bam"
@@ -19,13 +19,13 @@ class AlignmentFileTag(str, Enum):
 ALIGNMENT_FILE_TAGS: List[str] = [tag.value for tag in AlignmentFileTag]
 
 
-class ArchiveTag(str, Enum):
+class ArchiveTag(StrEnum):
     """Tags for archived status."""
 
     ARCHIVED: str = "archived"
 
 
-class ScoutTag(str, Enum):
+class ScoutTag(StrEnum):
     """Tags for Scout."""
 
     ARCHIVED: str = "archived"
