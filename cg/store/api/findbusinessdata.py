@@ -11,17 +11,18 @@ from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
 
 from cg.store.models import (
+    Analysis,
+    Application,
+    Customer,
     Flowcell,
-    Sample,
     Family,
     FamilySample,
-    Analysis,
-    Customer,
-    Pool,
-    Application,
     Invoice,
+    Pool,
+    Sample,
 )
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+from cg.store.status_case_sample_filters import apply_case_sample_filter
 
 LOG = logging.getLogger(__name__)
 
@@ -164,13 +165,42 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
+    def _get_case_sample_query(self) -> Query:
+        """Return case sample query."""
+        return self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
+
     def family_samples(self, family_id: str) -> List[FamilySample]:
-        """Find the samples of a family."""
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Family.internal_id == family_id)
-            .all()
-        )
+        """Find the case-sample links associated with a case."""
+        return apply_case_sample_filter(
+            function="get_samples_associated_with_case",
+            case_id=family_id,
+            case_samples=self._get_case_sample_query(),
+        ).all()
+
+    def get_sample_cases(self, sample_id: str) -> List[FamilySample]:
+        """Return the case-sample links associated with a sample."""
+        return apply_case_sample_filter(
+            function="get_cases_associated_with_sample",
+            sample_id=sample_id,
+            case_samples=self._get_case_sample_query(),
+        ).all()
+
+    def get_cases_from_sample(self, sample_entry_id: str) -> List[FamilySample]:
+        """Find cases related to a given sample."""
+        return apply_case_sample_filter(
+            function="get_cases_associated_with_sample_by_entry_id",
+            sample_entry_id=sample_entry_id,
+            case_samples=self._get_case_sample_query(),
+        ).all()
+
+    def filter_cases_with_samples(self, case_ids: List[str]) -> List[str]:
+        """Return case id:s associated with samples."""
+        cases_with_samples = set()
+        for case_id in case_ids:
+            case: Family = self.family(internal_id=case_id)
+            if case and case.links:
+                cases_with_samples.add(case_id)
+        return list(cases_with_samples)
 
     def get_cases_from_ticket(self, ticket: str) -> Query:
         return self.Family.query.filter(Family.tickets.contains(ticket))
@@ -246,7 +276,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def flowcells(self, *, status: str = None, family: Family = None, enquiry: str = None) -> Query:
         """Fetch all flow cells."""
-
         records = self.Flowcell.query
         if family:
             records = records.join(Flowcell.samples, Sample.links).filter(
@@ -328,10 +357,6 @@ class FindBusinessDataHandler(BaseHandler):
                 f"{application.prep_category}"
             )
         return application.expected_reads
-
-    def sample(self, internal_id: str) -> Sample:
-        """Fetch a sample by lims id."""
-        return self.Sample.query.filter_by(internal_id=internal_id).first()
 
     def samples(self, *, customers: Optional[List[Customer]] = None, enquiry: str = None) -> Query:
         records = self.Sample.query
