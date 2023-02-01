@@ -13,7 +13,6 @@ from tests.store.api.conftest import fixture_re_sequenced_sample_store
 def fixture_nipt_upload_api_context(
     cg_context: CGConfig, nipt_stats_api: StatsAPI, re_sequenced_sample_store: Store
 ) -> CGConfig:
-
     cg_context.status_db_ = re_sequenced_sample_store
     cg_context.cg_stats_api_ = nipt_stats_api
 
@@ -24,7 +23,6 @@ def fixture_nipt_upload_api_context(
 def fixture_nipt_upload_api_failed_fc_context(
     nipt_upload_api_context: CGConfig, sample_id: str
 ) -> CGConfig:
-
     nipt_upload_api_failed_fc_context: CGConfig = nipt_upload_api_context
     stats_api = nipt_upload_api_context.cg_stats_api
     status_db = nipt_upload_api_context.status_db

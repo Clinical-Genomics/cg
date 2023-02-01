@@ -41,5 +41,5 @@ def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helper
 
     # WHEN validating the order
     # THEN it should be regarded as invalid
-    with (pytest.raises(OrderError)):
+    with pytest.raises(OrderError):
         PoolSubmitter(status=base_store, lims=None).validate_order(order=order)

@@ -7,7 +7,6 @@ from .base import Model
 
 
 class Demux(Model):
-
     __table_args__ = (UniqueConstraint("flowcell_id", "basemask", name="demux_ibuk_1"),)
 
     demux_id = Column(types.Integer, primary_key=True)
