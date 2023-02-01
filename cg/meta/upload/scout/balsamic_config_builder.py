@@ -8,16 +8,14 @@ from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.scout.scout_load_config import BalsamicLoadConfig, ScoutBalsamicIndividual
-from cg.store import models
-from housekeeper.store import models as hk_models
+from cg.store.models import Analysis, FamilySample, Sample
+from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
 
 class BalsamicConfigBuilder(ScoutConfigBuilder):
-    def __init__(
-        self, hk_version_obj: hk_models.Version, analysis_obj: models.Analysis, lims_api: LimsAPI
-    ):
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
         super().__init__(
             hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
         )
@@ -47,23 +45,23 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 
-    def build_config_sample(self, family_sample: models.FamilySample) -> ScoutBalsamicIndividual:
+    def build_config_sample(self, case_sample: FamilySample) -> ScoutBalsamicIndividual:
         """Build a sample with balsamic specific information."""
         config_sample = ScoutBalsamicIndividual()
 
-        self.add_common_sample_info(config_sample=config_sample, family_sample=family_sample)
-        if BalsamicAnalysisAPI.get_sample_type(sample_obj=family_sample.sample) == SampleType.TUMOR:
+        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
+        if BalsamicAnalysisAPI.get_sample_type(sample_obj=case_sample.sample) == SampleType.TUMOR:
             config_sample.phenotype = PhenotypeStatus.AFFECTED.value
             config_sample.sample_id = SampleType.TUMOR.value.upper()
         else:
             config_sample.phenotype = PhenotypeStatus.UNAFFECTED.value
             config_sample.sample_id = SampleType.NORMAL.value.upper()
 
-        config_sample.analysis_type = self.get_balsamic_analysis_type(sample=family_sample.sample)
+        config_sample.analysis_type = self.get_balsamic_analysis_type(sample=case_sample.sample)
 
         return config_sample
 
-    def get_balsamic_analysis_type(self, sample: models.Sample) -> str:
+    def get_balsamic_analysis_type(self, sample: Sample) -> str:
         """Returns a formatted balsamic analysis type"""
 
         analysis_type: str = BalsamicAnalysisAPI.get_application_type(sample_obj=sample)
@@ -83,7 +81,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        db_sample: models.FamilySample
+        db_sample: FamilySample
 
         for db_sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(family_sample=db_sample))
+            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
