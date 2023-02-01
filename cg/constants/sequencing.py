@@ -31,6 +31,7 @@ sequencer_types = {
     "A00187": Sequencers.NOVASEQ,
     "A00621": Sequencers.NOVASEQ,
     "A00689": Sequencers.NOVASEQ,
+    "A01901": Sequencers.NOVASEQ,
 }
 
 

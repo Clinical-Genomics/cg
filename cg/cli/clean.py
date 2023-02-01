@@ -325,7 +325,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     LOG.info(
         f"Number of flow cells with status {FlowCellStatus.ONDISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
     )
-    physical_ondisk_flow_cell_names = [
+    flow_cells_on_disk = [
         DemultiplexedRunsFlowCell(
             flow_cell_path=flow_cell_dir,
             status_db=status_db,
@@ -337,7 +337,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
         status_db_flow_cell_status = flow_cell.status
         new_status: str = (
             FlowCellStatus.ONDISK
-            if flow_cell.name in physical_ondisk_flow_cell_names
+            if flow_cell.name in flow_cells_on_disk
             else FlowCellStatus.REMOVED
         )
         if status_db_flow_cell_status != new_status:
