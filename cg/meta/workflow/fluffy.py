@@ -156,10 +156,10 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER.
 
         Args:
-            sample_sheet_housekeeper_path (Path): Path to the housekeeper sample sheet file
+                sample_sheet_housekeeper_path (Path): Path to the housekeeper sample sheet file
 
         Returns:
-            pd.DataFrame: A pandas dataframe of the sample sheet
+                pd.DataFrame: A pandas dataframe of the sample sheet
         """
         header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet(
             sample_sheet_housekeeper_path=sample_sheet_housekeeper_path
@@ -171,7 +171,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
     ) -> pd.DataFrame:
         """Add columns to the sample sheet.
         Returns:
-            pd.DataFrame: Sample sheet pd.DataFrame.
+                pd.DataFrame: Sample sheet pd.DataFrame.
         """
         try:
             sample_sheet_df[new_column] = to_add
@@ -242,7 +242,6 @@ class FluffyAnalysisAPI(AnalysisAPI):
                 to_add=sample_sheet_df[sample_id_column_alias].apply(value),
             )
 
-        LOG.info(sample_sheet_df)
         self.write_sample_sheet_csv(
             sample_sheet_df=sample_sheet_df, sample_sheet_workdir_path=sample_sheet_workdir_path
         )
