@@ -10,6 +10,7 @@ from cg.cli.upload.base import upload
 from cg.constants import DataDelivery
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
+from tests.cli.workflow.rnafusion.conftest import fixture_rnafusion_case_id
 from tests.store_helpers import StoreHelpers
 
 
@@ -61,7 +62,7 @@ def test_upload_rnafusion(
     base_context: CGConfig,
     helpers: StoreHelpers,
     caplog: LogCaptureFixture,
-    rnafusion_case_id: str,
+    case_id: str = fixture_rnafusion_case_id,
 ):
     """Test that a case that is already uploading can be force restarted."""
     caplog.set_level(logging.INFO)
@@ -72,7 +73,7 @@ def test_upload_rnafusion(
         store=disk_store,
         data_analysis=Pipeline.RNAFUSION,
     )
-    case_id: str = rnafusion_case_id
+    # case_id: str = case.internal_id
 
     helpers.add_analysis(
         disk_store,
@@ -82,7 +83,7 @@ def test_upload_rnafusion(
         completed_at=datetime.now(),
     )
 
-    # WHEN trying to upload it again with the force restart flag
+    # WHEN trying to upload
     result = cli_runner.invoke(upload, ["-f", case_id], obj=base_context, catch_exceptions=True)
     a = result.output
     # THEN it tries to restart the upload    assert "already started" not in result.output
