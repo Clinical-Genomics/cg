@@ -416,7 +416,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
     # GIVEN an empty bundle
     populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
 
-    # GIVEN a SPRING file tag in the bundle
+    # GIVEN a SPRING an existing file
     compression_object.spring_metadata_path.touch()
 
     # GIVEN a SPRING file tag with a file included the bundle
@@ -424,6 +424,49 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
         file=compression_object.spring_metadata_path,
         bundle_name=sample_id,
         tags=[SequencingFileTag.SPRING_METADATA],
+    )
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
+        bundle_names=[case_id, sample_id]
+    )
+
+    # THEN assert all file were present in all bundles
+    assert was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
+    case_id: str,
+    compression_object: MockCompressionData,
+    populated_housekeeper_api: MockHousekeeperAPI,
+    madeline_output: Path,
+    sample_id: str,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present and some both FASTQ and SPRING."""
+    # GIVEN a populated housekeeper api with some files
+
+    # GIVEN a FASTQ file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # GIVEN an empty bundle
+    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+
+    # GIVEN a SPRING an existing file
+    compression_object.spring_metadata_path.touch()
+
+    # GIVEN a SPRING file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=compression_object.spring_metadata_path,
+        bundle_name=sample_id,
+        tags=[SequencingFileTag.SPRING_METADATA],
+    )
+
+    # GIVEN a FASTQ file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
     )
 
     # WHEN fetching all files
