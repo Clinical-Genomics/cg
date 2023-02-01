@@ -90,7 +90,7 @@ def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker,
     DeliverTicketAPI.check_if_concatenation_is_needed.return_value = True
 
     # WHEN running cg deliver ticket
-    result = cli_runner.invoke(
+    cli_runner.invoke(
         deliver_cmd,
         ["ticket", "--dry-run", "--ticket", ticket, "--delivery-type", "fastq"],
         obj=cg_context,
