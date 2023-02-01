@@ -47,7 +47,6 @@ class User(Base):
 
 
 def upgrade():
-
     bind = op.get_bind()
     session = sa.orm.Session(bind=bind)
 
@@ -68,7 +67,6 @@ def upgrade():
 
     # Change direct connection user->customer into user<-user_customer->customer
     for user in session.query(User):
-
         user.customer.users.append(user)
         print(f"connecting user {user.id} to customer {user.customer.id} ")
 
@@ -91,9 +89,7 @@ def downgrade():
 
     # Change user<-user_customer->customer into direct connection user->customer
     for customer in session.query(Customer):
-
         for user in customer.users:
-
             user.customer = customer
             print(f"connecting user {user.id} directly to customer {user.customer.id} ")
 

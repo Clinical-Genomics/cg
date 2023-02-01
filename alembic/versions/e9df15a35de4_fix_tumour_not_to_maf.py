@@ -115,7 +115,6 @@ def upgrade():
         .filter(Family.data_analysis == Pipeline.MIP_DNA)
         .filter(Family.priority == "research")
     ):
-
         if len(family.links) > 1:
             print(f"skipping case that has more than one link: {family}")
             continue
@@ -130,7 +129,6 @@ def upgrade():
                 sample.application_version.application.prep_category == "wgs"
                 and sample.name == family.name
             ):
-
                 print(f"changing data analysis from MIP to FASTQ for: {family}")
                 family.data_analysis = Pipeline.FASTQ
                 count += 1
@@ -151,7 +149,6 @@ def downgrade():
         .filter(Family.data_analysis == Pipeline.FASTQ)
         .filter(Family.priority == "research")
     ):
-
         if len(family.links) > 1:
             print(f"skipping case that has more than one link: {family}")
             continue

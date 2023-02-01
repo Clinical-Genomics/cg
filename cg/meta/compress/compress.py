@@ -31,7 +31,6 @@ class CompressAPI:
         backup_api: SpringBackupAPI = None,
         dry_run: bool = False,
     ):
-
         self.hk_api: HousekeeperAPI = hk_api
         self.crunchy_api: CrunchyAPI = crunchy_api
         self.backup_api: SpringBackupAPI = backup_api

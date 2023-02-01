@@ -26,9 +26,7 @@ def fixture_deliver_vcf_path(
 
 
 @pytest.fixture(name="deliver_fastq_path")
-def fixture_deliver_fastq_path(
-    delivery_inbox: Path, family_name: str, case_id: str, fastq_file: Path, cust_sample_id: str
-) -> Path:
+def fixture_deliver_fastq_path(delivery_inbox: Path, cust_sample_id: str) -> Path:
     return Path(delivery_inbox, cust_sample_id, "dummy_run_R1_001.fastq.gz")
 
 
@@ -37,7 +35,7 @@ def fixture_base_context(
     base_context: CGConfig, project_dir: Path, real_housekeeper_api: HousekeeperAPI
 ) -> CGConfig:
     base_context.housekeeper_api_ = real_housekeeper_api
-    base_context.delivery_path = str(project_dir)
+    base_context.delivery_path: str = project_dir.as_posix()
     return base_context
 
 
@@ -96,5 +94,21 @@ def fixture_populated_mip_context(
 ) -> CGConfig:
     base_context.housekeeper_api_ = mip_dna_housekeeper
     base_context.status_db_ = analysis_store
-    base_context.delivery_path = str(project_dir)
+    base_context.delivery_path: str = project_dir.as_posix()
     return base_context
+
+
+@pytest.fixture(name="context_with_missing_bundle")
+def fixture_context_with_missing_bundle(
+    cg_context: CGConfig,
+    analysis_store: Store,
+    mip_dna_housekeeper: HousekeeperAPI,
+    project_dir: Path,
+    helpers: StoreHelpers,
+    ticket: str,
+) -> CGConfig:
+    cg_context.housekeeper_api_ = mip_dna_housekeeper
+    helpers.add_case(store=analysis_store, ticket=ticket)
+    cg_context.status_db_ = analysis_store
+    cg_context.delivery_path: str = project_dir.as_posix()
+    return cg_context

@@ -7,7 +7,6 @@ from cg.store import Store
 
 
 def test_order_to_status_control_exists(sarscov2_order_to_submit: dict, base_store: Store):
-
     # GIVEN sarscov2 order with three samples
     order: OrderIn = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
@@ -21,7 +20,6 @@ def test_order_to_status_control_exists(sarscov2_order_to_submit: dict, base_sto
 
 
 def test_order_to_status_control_has_input_value(sarscov2_order_to_submit: dict, base_store: Store):
-
     # GIVEN sarscov2 order with three samples with control value set
     control_value = ControlEnum.positive
     order: OrderIn = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)

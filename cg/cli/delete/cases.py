@@ -23,7 +23,6 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Fa
     samples_by_id = _get_samples_by_identifiers(identifiers, store)
     _cases = set()
     for sample in samples_by_id:
-
         for link in sample.links:
             _cases.add(link.family)
 

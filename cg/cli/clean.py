@@ -81,7 +81,6 @@ def hk_alignment_files(
     """Clean up alignment files in Housekeeper bundle."""
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     for tag in ALIGNMENT_FILE_TAGS:
-
         tag_files = set(housekeeper_api.get_files(bundle=bundle, tags=[tag]))
 
         if not tag_files:

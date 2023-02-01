@@ -97,7 +97,6 @@ def test_export_sample_no_output(genotype_api: GenotypeAPI, caplog):
 def test_export_sample_analysis(
     genotype_api: GenotypeAPI, genotype_export_sample_analysis_output: str, caplog
 ):
-
     """Test that get_trending calls the genotype API with correct command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a genotype api and argument days

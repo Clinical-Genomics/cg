@@ -7,7 +7,6 @@ from .base import Model
 
 
 class Project(Model):
-
     project_id = Column(types.Integer, primary_key=True)
     projectname = Column(types.String(255), nullable=False)
     comment = Column(types.Text)
