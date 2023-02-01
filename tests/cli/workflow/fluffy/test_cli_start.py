@@ -50,10 +50,6 @@ def test_start_available(
     mocker.patch.object(FluffyAnalysisAPI, "run_fluffy")
     FluffyAnalysisAPI.run_fluffy.return_value = None
 
-    # GIVEN an existing samplesheet in Housekeeper
-    mocker.patch.object(FluffyAnalysisAPI, "get_samplesheet_housekeeper_path")
-    FluffyAnalysisAPI.get_samplesheet_housekeeper_path.return_value = samplesheet_fixture_path
-
     # GIVEN Concentrations are set in LIMS on sample level
     mocker.patch.object(FluffyAnalysisAPI, "get_concentrations_from_lims")
     FluffyAnalysisAPI.get_concentrations_from_lims.return_value = "20"
