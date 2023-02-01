@@ -325,7 +325,7 @@ def fixture_gens_config() -> Dict[str, Dict[str, str]]:
     """Gens config fixture."""
     return {
         "gens": {
-            "config_path": "config/path",
+            "config_path": Path("config", "path").as_posix(),
             "binary_path": "gens",
         }
     }

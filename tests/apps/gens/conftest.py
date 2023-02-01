@@ -14,10 +14,10 @@ def fixture_gens_genome_build() -> str:
 @pytest.fixture(name="gens_fracsnp_path")
 def fixture_gens_fracsnp_path(analysis_dir: Path, sample_id: str) -> Path:
     """Path to Gens fracsnp/baf bed file."""
-    return analysis_dir / f"{sample_id}.baf.bed.gz"
+    return Path(analysis_dir, f"{sample_id}.baf.bed.gz")
 
 
 @pytest.fixture(name="gens_coverage_path")
 def fixture_gens_coverage_path(analysis_dir: Path, sample_id: str) -> Path:
     """Path to Gens coverage bed file."""
-    return analysis_dir / f"{sample_id}.cov.bed.gz"
+    return Path(analysis_dir, f"{sample_id}.cov.bed.gz")
