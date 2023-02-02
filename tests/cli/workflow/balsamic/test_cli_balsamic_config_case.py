@@ -89,7 +89,7 @@ def test_genome_version(
     )
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
-    # THEN dry-print should include the the option key and value
+    # THEN dry-print should include the option key and value
     assert option_key in caplog.text
     assert option_value in caplog.text
 
