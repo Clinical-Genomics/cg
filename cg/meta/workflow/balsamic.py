@@ -322,13 +322,19 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         normal_sample_path: str = (
             sample_data.get(normal_sample_id).get("concatenated_path") if normal_sample_id else None
         )
-        if normal_sample_id and not tumor_sample_id and force_normal:
-            LOG.warning(
-                f"Only a normal sample was found for case {case_id}. "
-                f"Balsamic analysis will treat it as a tumor sample."
-            )
-            tumor_sample_id, tumor_sample_path = normal_sample_id, normal_sample_path
-            normal_sample_id, normal_sample_path = None, None
+        if normal_sample_id and not tumor_sample_id:
+            if force_normal:
+                LOG.warning(
+                    f"Only a normal sample was found for case {case_id}. "
+                    f"Balsamic analysis will treat it as a tumor sample."
+                )
+                tumor_sample_id, tumor_sample_path = normal_sample_id, normal_sample_path
+                normal_sample_id, normal_sample_path = None, None
+            else:
+                LOG.error(
+                    f"Case {case_id} only has a normal sample. Use the --force-normal flag to treat it as a tumor."
+                )
+                raise BalsamicStartError
 
         return {
             "tumor_sample_name": tumor_sample_id,
