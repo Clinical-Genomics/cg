@@ -93,7 +93,11 @@ class InvoiceAPI:
     def _discount_price(self, record, discount: int = 0):
         """Get discount price for a sample or pool."""
 
-        if self.record_type == "Pool" or record.priority_human == "clinical trials":
+        if (
+            self.record_type == "Pool"
+            and not self.customer_obj.internal_id == "cust032"
+            or record.priority_human == "clinical trials"
+        ):
             priority = "research"
         else:
             priority = record.priority_human

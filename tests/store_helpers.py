@@ -1,4 +1,5 @@
 """Utility functions to simply add test data in a cg store"""
+import datetime
 import logging
 from datetime import datetime
 from typing import List, Optional
@@ -641,3 +642,92 @@ class StoreHelpers:
             )
             cases.append(case)
         return cases
+
+    @classmethod
+    def add_pool(
+        cls,
+        store: Store,
+        customer_id: str = "cust000",
+        name: str = "",
+        ticket: str = "987654",
+        no_invoice: bool = False,
+        application_tag: str = "dummy_tag",
+        application_type: str = "tgs",
+        is_external: bool = False,
+        is_rna: bool = False,
+    ) -> models.Pool:
+        customer_id = customer_id or "cust000"
+        customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
+        application_version = StoreHelpers.ensure_application_version(
+            store=store,
+            application_tag=application_tag,
+            application_type=application_type,
+            is_external=is_external,
+            is_rna=is_rna,
+        )
+        application_version_id = application_version.id
+        pool = store.add_pool(
+            name=name,
+            ticket=ticket,
+            ordered=datetime.now(),
+            application_version=application_version,
+            customer=customer,
+            order="test_order",
+        )
+        pool.customer_id = customer_id
+        pool.application_version_id = application_version_id
+        pool.customer = customer
+        pool.order = "test_order"
+        pool.ordered_at = datetime.now()
+        pool.delivered_at = datetime.now()
+        pool.created_at = datetime.now()
+        pool.invoice_id = 99999
+        pool.no_invoice = no_invoice
+        pool.comment = "test_pool"
+        store.add_commit(pool)
+        return pool
+
+    @classmethod
+    def add_invoice(
+        cls,
+        store: Store,
+        id: int = 1,
+        customer_id: str = "cust000",
+        discount: int = 0,
+        price: int = 100000,
+        type: str = "Sample",
+    ) -> models.Invoice:
+        """Utility function to create an invoice to use in tests"""
+
+        customer_obj = cls.ensure_customer(store, customer_id=customer_id)
+        invoice = store.add_invoice(
+            customer=customer_obj,
+        )
+        # add a sample or pool to invoice
+        if type == "Sample":
+            sample = cls.add_sample(store, customer_id=customer_id)
+            pool = None
+        else:
+            pool = cls.add_pool(store, customer_id=customer_id)
+            sample = None
+
+        invoice.id = id
+        invoice.customer_id = customer_id
+        invoice.customer = customer_obj
+        invoice.created_at = datetime.now()
+        invoice.updated_at = datetime.now()
+        invoice.invoiced_at = datetime.now()
+        invoice.comment = "just a test invoice"
+        invoice.discount = discount
+        invoice.excel_kth = None
+        invoice.excel_ki = None
+
+        invoice.price = price
+        invoice.record_type = ""
+
+        invoice.sample = sample
+        invoice.pool = pool
+
+        store.add_commit(invoice)
+
+        return invoice
