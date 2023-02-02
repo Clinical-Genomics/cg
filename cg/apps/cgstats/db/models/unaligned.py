@@ -7,7 +7,6 @@ from .base import Model
 
 
 class Unaligned(Model):
-
     unaligned_id = Column(types.Integer, primary_key=True)
     sample_id = Column(ForeignKey("sample.sample_id", ondelete="CASCADE"), nullable=False)
     demux_id = Column(ForeignKey("demux.demux_id", ondelete="CASCADE"), nullable=False)

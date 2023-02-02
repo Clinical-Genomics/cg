@@ -38,7 +38,6 @@ CASE_HEADERS_MEDIUM = []
 CASE_HEADERS_SHORT = []
 
 for header in CASE_HEADERS_LONG:
-
     if header not in ALWAYS_LONG_HEADERS:
         header = header[:3]
 
@@ -215,7 +214,6 @@ def cases(
         case_header = CASE_HEADERS_LONG
 
     for case in records:
-
         tat_number = case.get("tat")
         max_tat = case.get("max_tat")
 

@@ -546,7 +546,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("")
 
     def get_sample_params(self, case_id: str, panel_bed: Optional[str]) -> dict:
-
         """Returns a dictionary of attributes for each sample in given family,
         where SAMPLE ID is used as key"""
 

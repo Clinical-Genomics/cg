@@ -81,7 +81,6 @@ class TransferLims(object):
             lims_date = self._date_functions[status_type](sample_obj.internal_id)
             statusdb_date = getattr(sample_obj, f"{status_type.value}_at")
             if lims_date:
-
                 if statusdb_date and statusdb_date.date() == lims_date:
                     continue
 

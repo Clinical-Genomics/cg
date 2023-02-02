@@ -58,7 +58,6 @@ def upgrade():
     for customer in session.query(Customer):
         if customer.delivery_contact_email:
             for user in session.query(User).filter(User.email == customer.delivery_contact_email):
-
                 customer.delivery_contact_name = user.name
                 print(
                     f"setting {user.name} to customer.delivery_contact_name for customer {customer.id} "
@@ -85,7 +84,6 @@ def upgrade():
 
 
 def downgrade():
-
     op.drop_column("customer", "delivery_contact_name")
     op.drop_column("customer", "invoice_contact_name")
     op.drop_column("customer", "primary_contact_name")

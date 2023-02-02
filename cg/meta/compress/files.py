@@ -105,7 +105,6 @@ def get_fastq_files(sample_id: str, version_obj: Version) -> Dict[str, dict]:
         return None
 
     for compression_obj in compression_objects:
-
         if not check_fastqs(compression_obj):
             LOG.info(f"Skipping run {compression_obj.run_name}")
             continue

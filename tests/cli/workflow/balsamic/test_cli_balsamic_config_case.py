@@ -247,6 +247,30 @@ def test_error_single_wgs_panel_arg(
     assert "Cannot set panel_bed for WGS sample" in caplog.text
 
 
+def test_normal_only_force_flag(
+    balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
+):
+    """Test with case_id that has only one NORMAL sample but the run is forced."""
+    caplog.set_level(logging.WARNING)
+
+    # GIVEN case_id containing one normal sample
+    case_id = "balsamic_case_tgs_single_error"
+
+    # WHEN dry running
+    result = cli_runner.invoke(
+        config_case, [case_id, "--dry-run", "--force-normal"], obj=balsamic_context
+    )
+
+    # THEN command should be generated successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN a log warning should be printed specifying that a normal sample will be used as tumor for Balsamic analysis
+    assert (
+        f"Only a normal sample was found for case {case_id}. Balsamic analysis will treat it as a tumor sample."
+        in caplog.text
+    )
+
+
 def test_error_normal_only(
     balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):

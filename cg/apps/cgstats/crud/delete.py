@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 
 def delete_flowcell(manager: StatsAPI, flowcell_name: str):
-
     flowcell_id: Optional[int] = get_flowcell_id(flowcell_name=flowcell_name)
 
     if flowcell_id:
