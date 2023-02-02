@@ -38,6 +38,15 @@ def test_add_invoice(base_store, helpers):
     # THEN there should be
     assert invoice_sample.sample
 
+    # THEN there should be a customer
+    assert invoice_sample.customer
+
+    # THEN customer should have an id
+
+    assert invoice_sample.customer_id
+
+    # THEN there should not be a pool
+    assert not invoice_sample.pool
     # WHEN using the helper to add an invoice with a pool
     invoice_pool = helpers.add_invoice(base_store, type="Pool", id=2)
 
@@ -46,3 +55,6 @@ def test_add_invoice(base_store, helpers):
 
     # THEN there should be a pool
     assert invoice_pool.pool
+
+    # THEN there should not be a sample
+    assert not invoice_pool.sample

@@ -150,7 +150,11 @@ class InvoiceAPI:
         order = record.order
         ticket = record.ticket if self.record_type == "Pool" else record.original_ticket
         lims_id = None if self.record_type == "Pool" else record.internal_id
-        priority = "research" if self.record_type == "Pool" else record.priority_human
+        priority = (
+            "research"
+            if self.record_type == "Pool" and not self.customer_obj.internal_id == "cust032"
+            else record.priority_human
+        )
 
         invoice_info = {
             "name": record.name,

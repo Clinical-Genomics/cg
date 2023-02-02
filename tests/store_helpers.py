@@ -699,7 +699,10 @@ class StoreHelpers:
     ) -> models.Invoice:
         """Utility function to create an invoice to use in tests"""
 
-        customer_obj = cls.ensure_customer(store, customer_id=customer_id)
+        customer_obj = cls.ensure_customer(
+            store,
+            customer_id=customer_id,
+        )
         invoice = store.add_invoice(
             customer=customer_obj,
         )
