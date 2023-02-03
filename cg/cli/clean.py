@@ -416,7 +416,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
         try:
             flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_dir)
         except FlowCellError:
-            return
+            continue
         samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)
         are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
             bundle_names=[sample.internal_id for sample in samples]
