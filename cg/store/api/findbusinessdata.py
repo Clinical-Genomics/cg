@@ -409,11 +409,16 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_by_name(self, name: str) -> Sample:
         return self.Sample.query.filter(Sample.name == name).first()
 
+    def _get_sample_case_query(self) -> Query:
+        """Return a sample case relationship query."""
+        return self.Sample.query.join(Family.links, FamilySample.sample)
+
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Extract samples given a tissue type."""
-        case_samples: Query = self.Sample.query.join(Family.links, FamilySample.sample)
         samples: Query = apply_case_sample_filter(
-            function="get_samples_associated_with_case", case_samples=case_samples, case_id=case_id
+            function="get_samples_associated_with_case",
+            case_samples=self._get_sample_case_query(),
+            case_id=case_id,
         )
         samples: Query = apply_sample_filter(
             function="get_samples_with_type", samples=samples, tissue_type=sample_type
