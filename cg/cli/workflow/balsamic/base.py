@@ -187,6 +187,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_RUN_ANALYSIS
+@OPTION_FORCE_NORMAL
 @click.pass_context
 def start(
     context: click.Context,
@@ -197,6 +198,7 @@ def start(
     pon_cnn: str,
     slurm_quality_of_service: str,
     run_analysis: bool,
+    force_normal: bool,
     dry_run: bool,
 ):
     """Start full workflow for CASE ID"""
@@ -211,6 +213,7 @@ def start(
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
+            force_normal=force_normal,
             dry_run=dry_run,
         )
         context.invoke(
