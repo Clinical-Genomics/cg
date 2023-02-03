@@ -502,16 +502,21 @@ class MockHousekeeperAPI:
         self.commit()
 
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
-        """Return bool of fastq or spring present in all bundles."""
-        sequencing_files_in_hk: Dict[str, Iterable[File]] = {}
+        """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
+        sequencing_files_in_hk: Dict[str, bool] = {}
         for bundle_name in bundle_names:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
-                try:
-                    if self.get_files(bundle=bundle_name, tags=[tag]):
-                        sequencing_files_in_hk[bundle_name] = True
-                except FileNotFoundError as error:
-                    LOG.warning(error)
+                sample_file_in_hk: List[bool] = []
+                hk_files: Optional[List[File]] = self.get_files_from_latest_version(
+                    bundle_name=bundle_name, tags=[tag]
+                )
+                sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
+                if sample_file_in_hk:
+                    break
+            sequencing_files_in_hk[bundle_name] = (
+                all(sample_file_in_hk) if sample_file_in_hk else False
+            )
         return all(sequencing_files_in_hk.values())
 
     @staticmethod
