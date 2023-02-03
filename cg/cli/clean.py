@@ -376,24 +376,36 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
         LOG.info("Checking flow cells for all sequencers!")
         for sequencer, run_directory in context.clean.flow_cells.flow_cell_run_dirs:
             LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
-            clean_run_directories(
-                days_old=days_old,
-                dry_run=dry_run,
-                housekeeper_api=housekeeper_api,
-                run_directory=run_directory,
-                status_db=status_db,
-            )
+            flow_cell_dirs: List[Path] = [
+                flow_cell_dir
+                for flow_cell_dir in Path(run_directory).iterdir()
+                if flow_cell_dir.is_dir()
+            ]
+            for flow_cell_dir in flow_cell_dirs:
+                clean_run_directories(
+                    days_old=days_old,
+                    dry_run=dry_run,
+                    housekeeper_api=housekeeper_api,
+                    run_directory=flow_cell_dir,
+                    status_db=status_db,
+                )
 
     else:
         run_directory: str = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
         LOG.info(f"Checking directory {run_directory} of sequencer {sequencer}:")
-        clean_run_directories(
-            days_old=days_old,
-            dry_run=dry_run,
-            housekeeper_api=housekeeper_api,
-            run_directory=run_directory,
-            status_db=status_db,
-        )
+        flow_cell_dirs: List[Path] = [
+            flow_cell_dir
+            for flow_cell_dir in Path(run_directory).iterdir()
+            if flow_cell_dir.is_dir()
+        ]
+        for flow_cell_dir in flow_cell_dirs:
+            clean_run_directories(
+                days_old=days_old,
+                dry_run=dry_run,
+                housekeeper_api=housekeeper_api,
+                run_directory=flow_cell_dir,
+                status_db=status_db,
+            )
 
 
 @clean.command("remove-old-demutliplexed-run-dirs")
@@ -440,7 +452,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
                 days_old=days_old,
                 dry_run=dry_run,
                 housekeeper_api=housekeeper_api,
-                run_directory=demux_runs_flow_cell.path.as_posix(),
+                run_directory=demux_runs_flow_cell.path,
                 status_db=status_db,
             )
 
@@ -449,36 +461,30 @@ def clean_run_directories(
     days_old: int,
     dry_run: bool,
     housekeeper_api: HousekeeperAPI,
-    run_directory: str,
+    run_directory: Path,
     status_db: Store,
 ):
     """Cleans up all flow cell directories in the specified run directory."""
-    flow_cell_dirs: List[Path] = [
-        flow_cell_dir for flow_cell_dir in Path(run_directory).iterdir() if flow_cell_dir.is_dir()
-    ]
-    for flow_cell_dir in flow_cell_dirs:
-        LOG.info(f"Checking flow cell {flow_cell_dir.name}")
-        run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
-            flow_cell_dir=flow_cell_dir, status_db=status_db, housekeeper_api=housekeeper_api
-        )
-        if run_dir_flow_cell.exists_in_statusdb and run_dir_flow_cell.is_retrieved_from_pdc:
-            LOG.info(
-                f"Skipping removal of flow cell {flow_cell_dir}, PDC retrieval status is '{run_dir_flow_cell.flow_cell_status}'!"
-            )
-            continue
-        if run_dir_flow_cell.age < days_old:
-            LOG.info(
-                f"Flow cell {flow_cell_dir} is {run_dir_flow_cell.age} days old and will NOT be removed."
-            )
-            continue
+    LOG.info(f"Checking flow cell {run_directory.name}")
+    run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
+        flow_cell_dir=run_directory, status_db=status_db, housekeeper_api=housekeeper_api
+    )
+    if run_dir_flow_cell.exists_in_statusdb and run_dir_flow_cell.is_retrieved_from_pdc:
         LOG.info(
-            f"Flow cell {flow_cell_dir} is {run_dir_flow_cell.age} days old and will be removed."
+            f"Skipping removal of flow cell {run_directory}, PDC retrieval status is '{run_dir_flow_cell.flow_cell_status}'!"
         )
-        if dry_run:
-            continue
-        LOG.info(f"Removing flow cell run directory {run_dir_flow_cell.flow_cell_dir}.")
-        run_dir_flow_cell.archive_sample_sheet()
-        run_dir_flow_cell.remove_run_directory()
+        return
+    if run_dir_flow_cell.age < days_old:
+        LOG.info(
+            f"Flow cell {run_directory} is {run_dir_flow_cell.age} days old and will NOT be removed."
+        )
+        return
+    LOG.info(f"Flow cell {run_directory} is {run_dir_flow_cell.age} days old and will be removed.")
+    if dry_run:
+        return
+    LOG.info(f"Removing flow cell run directory {run_dir_flow_cell.flow_cell_dir}.")
+    run_dir_flow_cell.archive_sample_sheet()
+    run_dir_flow_cell.remove_run_directory()
 
 
 def _get_confirm_question(bundle, file_obj) -> str:
