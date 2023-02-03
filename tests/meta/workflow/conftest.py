@@ -20,12 +20,7 @@ from tests.store_helpers import StoreHelpers
 from tests.conftest import fixture_base_store
 from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 from tests.meta.upload.scout.conftest import fixture_another_sample_id
-from tests.cli.workflow.balsamic.conftest import (
-    fastq_file_l_1_r_1,
-    fastq_file_l_2_r_1,
-    fastq_file_l_2_r_2,
-    balsamic_housekeeper_dir,
-)
+from tests.cli.workflow.balsamic.conftest import balsamic_housekeeper_dir
 
 
 @pytest.fixture(scope="function", name="populated_compress_spring_api")
@@ -212,9 +207,6 @@ def fixture_balsamic_sample_data(
     sample_id: str,
     cust_sample_id: str,
     another_sample_id: str,
-    fastq_file_l_1_r_1: str,
-    fastq_file_l_2_r_1: str,
-    fastq_file_l_2_r_2: str,
     bed_file: str,
 ) -> Dict[str, dict]:
     """Balsamic sample data dictionary."""
@@ -222,21 +214,18 @@ def fixture_balsamic_sample_data(
         sample_id: {
             "gender": Gender.FEMALE,
             "tissue_type": SampleType.TUMOR.value,
-            "concatenated_path": fastq_file_l_1_r_1,
             "application_type": SequencingMethod.TGS.value,
             "target_bed": bed_file,
         },
         cust_sample_id: {
             "gender": Gender.FEMALE,
             "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_1,
             "application_type": SequencingMethod.TGS.value,
             "target_bed": bed_file,
         },
         another_sample_id: {
             "gender": Gender.FEMALE,
             "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_2,
             "application_type": SequencingMethod.TGS.value,
             "target_bed": bed_file,
         },
