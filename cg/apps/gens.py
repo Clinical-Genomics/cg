@@ -29,9 +29,9 @@ class GensAPI:
 
     def load(
         self,
-        baf_path: Path,
+        baf_path: str,
         case_id: str,
-        coverage_path: Path,
+        coverage_path: str,
         genome_build: str,
         sample_id: str,
     ) -> None:
@@ -39,8 +39,8 @@ class GensAPI:
         load_params: Dict[str, str] = {
             "--sample-id": sample_id,
             "--genome-build": genome_build,
-            "--baf": baf_path.as_posix(),
-            "--coverage": coverage_path.as_posix(),
+            "--baf": baf_path,
+            "--coverage": coverage_path,
             "--case-id": case_id,
         }
         load_call_params: list[str] = ["load", "sample"] + get_list_from_dictionary(load_params)

@@ -38,8 +38,8 @@ def test_gens_api_load(
     api.load(
         sample_id=sample_id,
         genome_build=gens_genome_build,
-        baf_path=gens_fracsnp_path,
-        coverage_path=gens_coverage_path,
+        baf_path=gens_fracsnp_path.as_posix(),
+        coverage_path=gens_coverage_path.as_posix(),
         case_id=case_id,
     )
 

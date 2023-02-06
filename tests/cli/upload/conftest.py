@@ -9,13 +9,14 @@ from tempfile import tempdir
 
 import pytest
 from cgmodels.cg.constants import Pipeline
+from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
-from cg.constants.housekeeper_tags import HkMipAnalysisTag, HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HkMipAnalysisTag, GensAnalysisTag, HK_DELIVERY_REPORT_TAG
 from cg.io.controller import ReadFile
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
@@ -111,6 +112,61 @@ def fixture_upload_genotypes_context(
     """Create a upload genotypes context"""
     base_context.genotype_api_ = genotype_api
     base_context.housekeeper_api_ = upload_genotypes_hk_api
+    base_context.status_db_ = analysis_store_trio
+    return base_context
+
+
+@pytest.fixture(name="upload_gens_hk_bundle")
+def fixture_upload_gens_hk_bundle(
+    case_id: str,
+    gens_coverage_path: Path,
+    gens_fracsnp_path: Path,
+    sample_id: str,
+) -> dict:
+    """Returns a dictionary in hk format with files used in upload gens process"""
+    return {
+        "name": case_id,
+        "created": datetime.now(),
+        "expires": datetime.now(),
+        "files": [
+            {
+                "path": str(gens_coverage_path),
+                "archive": False,
+                "tags": [sample_id] + GensAnalysisTag.COVERAGE,
+            },
+            {
+                "path": str(gens_fracsnp_path),
+                "archive": False,
+                "tags": [sample_id] + GensAnalysisTag.FRACSNP,
+            },
+        ],
+    }
+
+
+@pytest.fixture(name="upload_gens_hk_api")
+def fixture_upload_gens_hk_api(
+    case_id: str,
+    helpers,
+    real_housekeeper_api: HousekeeperAPI,
+    upload_gens_hk_bundle: dict,
+) -> HousekeeperAPI:
+    """Add and include files from upload gens hk bundle"""
+    helpers.ensure_hk_bundle(real_housekeeper_api, upload_gens_hk_bundle)
+    hk_version = real_housekeeper_api.last_version(case_id)
+    real_housekeeper_api.include(hk_version)
+    return real_housekeeper_api
+
+
+@pytest.fixture(name="upload_gens_context")
+def fixture_upload_gens_context(
+    analysis_store_trio: Store,
+    base_context: CGConfig,
+    gens_api: GensAPI,
+    upload_gens_hk_api: HousekeeperAPI,
+) -> CGConfig:
+    """Create a upload gens context"""
+    base_context.gens_api_ = gens_api
+    base_context.housekeeper_api_ = upload_gens_hk_api
     base_context.status_db_ = analysis_store_trio
     return base_context
 

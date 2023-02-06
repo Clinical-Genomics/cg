@@ -5,10 +5,12 @@ from typing import Optional
 import click
 from cg.apps.gens import GensAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.housekeeper_tags import GensAnalysisTag
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Analysis
-from cg.constants.housekeeper_tags import GensAnalysisTag
+from cg.store.models import Family, Sample
+from housekeeper.store.models import File, Version
 
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.workflow.commands import (
@@ -39,22 +41,22 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
         raise click.Abort
 
     family: Family = status_db.family(case_id)
-    analysis: Analysis = family.analyses[0]
 
-    for link in family.links:
-        analysis_date = analysis.started_at or analysis.completed_at
-        hk_version = housekeeper_api.version(case_id, analysis_date)
-        hk_fracsnp = housekeeper_api.files(
-            version=hk_version.id, tags=[link.sample.internal_id] + GensAnalysisTag.FRACSNP
+    for sample in family.samples:
+        hk_version: Version = housekeeper_api.last_version(case_id)
+        hk_coverage: File = housekeeper_api.files(
+            version=hk_version.id, tags=[sample.internal_id] + GensAnalysisTag.COVERAGE
         ).first()
-        hk_coverage = housekeeper_api.files(
-            version=hk_version.id, tags=[link.sample.internal_id] + GensAnalysisTag.COVERAGE
+        hk_fracsnp: File = housekeeper_api.files(
+            version=hk_version.id, tags=[sample.internal_id] + GensAnalysisTag.FRACSNP
         ).first()
 
-        gens_api.load(
-            sample_id=link.sample.internal_id,
-            genome_build=analysis.genome_build,
-            baf_path=hk_fracsnp.full_path,
-            coverage_path=hk_coverage.full_path,
-            case_id=case_id,
-        )
+        if hk_fracsnp and hk_coverage:
+            test = hk_fracsnp.full_path
+            gens_api.load(
+                baf_path=hk_fracsnp.full_path,
+                case_id=case_id,
+                coverage_path=hk_coverage.full_path,
+                genome_build=GENOME_BUILD_37,
+                sample_id=sample.internal_id,
+            )
