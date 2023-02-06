@@ -7,6 +7,7 @@ from cg.constants import EXIT_SUCCESS
 from cg.cli.upload.gens import gens as upload_gens_cmd
 from cg.models.cg_config import CGConfig
 
+
 def test_upload_gens(
     caplog,
     case_id: str,
