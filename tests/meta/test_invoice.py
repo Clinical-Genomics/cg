@@ -2,14 +2,16 @@ from tests.store_helpers import StoreHelpers
 from cg.meta.invoice import InvoiceAPI
 from cg.apps.lims import api as limsAPI
 import cg.store as Store
+from cg.store import models
 
 
 def test_invoice_api(store: Store, lims_api: limsAPI, helpers: StoreHelpers):
     # GIVEN a invoice
-    invoice = helpers.add_invoice(store, type="Sample", customer_id="cust032")
-    # GIVEN customer in store
-    customer_obj = helpers.ensure_customer(store, customer_id="cust032")
-    store.add_user(customer=customer_obj, email="test@testing.com", name="tester", is_admin=False)
+    invoice = helpers.ensure_invoice(
+        store,
+        record_type="Sample",
+        customer_id="cust032",
+    )
 
     # THEN calling InvoiceAPI should return an API
     api = InvoiceAPI(store, lims_api, invoice)

@@ -688,16 +688,20 @@ class StoreHelpers:
         """Utility function to create an invoice with pools or samples to use in tests"""
         invoice = store.invoice(invoice_id=invoice_id)
         if not invoice:
-            customer_obj = cls.ensure_customer(
+            ## some error happens here
+            customer_obj = StoreHelpers.ensure_customer(
                 store,
                 customer_id=customer_id,
             )
+            pool = []
+            sample = []
+
             if type == "Sample":
-                sample = cls.add_sample(store, customer_id=customer_id)
-                pool = None
+                sample = StoreHelpers.add_sample(store, customer_id=customer_id)
+
             else:
-                pool = cls.add_pool(store, customer_id=customer_id)
-                sample = None
+                pool = StoreHelpers.add_pool(store, customer_id=customer_id)
+
             invoice = store.add_invoice(
                 customer=customer_obj,
                 samples=sample,
