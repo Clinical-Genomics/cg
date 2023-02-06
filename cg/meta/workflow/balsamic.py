@@ -10,7 +10,7 @@ from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, SampleType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
@@ -23,7 +23,7 @@ from cg.models.balsamic.metrics import (
     BalsamicMetricsBase,
 )
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import ApplicationVersion, Family, FamilySample, Sample
 from cg.utils import Process
 from cg.utils.utils import get_string_from_list_by_pattern
 
@@ -81,8 +81,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns a path where the Balsamic case for the case_id should be located"""
         return Path(self.root_dir, case_id)
 
-    def get_cases_to_analyze(self) -> List[models.Family]:
-        cases_query: List[models.Family] = self.status_db.cases_to_analyze(
+    def get_cases_to_analyze(self) -> List[Family]:
+        cases_query: List[Family] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
         cases_to_analyze = []
@@ -139,9 +139,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def get_sample_fastq_destination_dir(
-        self, case_obj: models.Family, sample_obj: models.Sample = None
-    ) -> Path:
+    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample = None) -> Path:
         return self.get_case_path(case_obj.internal_id) / "fastq"
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
@@ -151,7 +149,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 case_obj=case_obj, sample_obj=link.sample, concatenate=True
             )
 
-    def get_concatenated_fastq_path(self, link_object: models.FamilySample) -> Path:
+    def get_concatenated_fastq_path(self, link_object: FamilySample) -> Path:
         """Returns path to the concatenated FASTQ file of a sample"""
         file_collection: List[dict] = self.gather_file_metadata_for_sample(link_object.sample)
         fastq_data = file_collection[0]
@@ -171,17 +169,17 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def get_gender(sample_obj: models.Sample) -> str:
+    def get_gender(sample_obj: Sample) -> str:
         """Returns the gender associated to a specific sample"""
 
         return sample_obj.sex
 
     @staticmethod
-    def get_sample_type(sample_obj: models.Sample) -> str:
-        """Returns tissue type of a sample"""
+    def get_sample_type(sample_obj: Sample) -> SampleType:
+        """Return the tissue type of the sample."""
         if sample_obj.is_tumour:
-            return "tumor"
-        return "normal"
+            return SampleType.TUMOR
+        return SampleType.NORMAL
 
     def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
         """Returns the verified capture kit path or extracts the derived panel bed"""
@@ -204,7 +202,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return panel_bed
 
     def get_verified_bed(self, panel_bed: str, sample_data: dict) -> Optional[str]:
-        """ "Takes a dict with samples and attributes.
+        """Takes a dict with samples and attributes.
         Retrieves unique attributes for application type and target_bed.
         Verifies that those attributes are the same across multiple samples,
         where applicable.
@@ -277,26 +275,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return sorted_pon_files[0].as_posix() if sorted_pon_files else None
 
     @staticmethod
-    def get_verified_tumor_path(sample_data: dict) -> str:
-        """Takes a dict with samples and attributes, and returns the path
-        of tumor sample.
-        If the number of paths is exactly 1, the path is returned.
-        Raises BalsamicStartError:
-            When there are no tumor samples, or more than one tumor sample
-        """
-        tumor_paths = [
-            val["concatenated_path"]
-            for key, val in sample_data.items()
-            if val["tissue_type"] == "tumor"
-        ]
-        if len(tumor_paths) != 1:
-            raise BalsamicStartError(
-                f"Invalid number of tumor samples: {len(tumor_paths)}, "
-                f"BALSAMIC analysis requires exactly 1 tumor sample per case to run successfully!"
-            )
-        return tumor_paths[0]
-
-    @staticmethod
     def get_verified_gender(sample_data: dict) -> Union[Gender.FEMALE, Gender.MALE]:
         """Takes a dict with samples and attributes, and returns a verified case gender provided by the customer"""
 
@@ -316,27 +294,54 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             LOG.error(f"Unable to retrieve a valid gender from samples: {sample_data.keys()}")
             raise BalsamicStartError
 
-    @staticmethod
-    def get_verified_normal_path(sample_data: dict) -> Optional[str]:
-        """Takes a dict with samples and attributes, and retrieves the path
-        of normal sample.
-        If the number of paths is exactly 1, the path is returned.
-        If there are no paths, then the sample is not paired, and None is returned.
-        Raises BalsamicStartError:
-            When there is more than one normal sample.
-        """
-        normal_paths = [
-            val["concatenated_path"]
-            for key, val in sample_data.items()
-            if val["tissue_type"] == "normal"
-        ]
-        if len(normal_paths) > 1:
-            raise BalsamicStartError(
-                f"Invalid number of normal samples: {len(normal_paths)}, only up to 1 allowed!!"
-            )
-        if not normal_paths:
-            return None
-        return normal_paths[0]
+    def get_verified_samples(
+        self, case_id: str, sample_data: dict, force_normal: bool
+    ) -> Dict[str, str]:
+        """Return a verified tumor and normal sample dictionary."""
+
+        tumor_samples: List[Sample] = self.status_db.get_samples_by_type(
+            case_id=case_id, sample_type=SampleType.TUMOR
+        )
+        normal_samples: List[Sample] = self.status_db.get_samples_by_type(
+            case_id=case_id, sample_type=SampleType.NORMAL
+        )
+        if (
+            not tumor_samples
+            and not normal_samples
+            or len(tumor_samples) > 1
+            or len(normal_samples) > 1
+        ):
+            LOG.error(f"Case {case_id} has an invalid number of samples")
+            raise BalsamicStartError
+
+        tumor_sample_id: str = tumor_samples[0].internal_id if tumor_samples else None
+        normal_sample_id: str = normal_samples[0].internal_id if normal_samples else None
+        tumor_sample_path: str = (
+            sample_data.get(tumor_sample_id).get("concatenated_path") if tumor_sample_id else None
+        )
+        normal_sample_path: str = (
+            sample_data.get(normal_sample_id).get("concatenated_path") if normal_sample_id else None
+        )
+        if normal_sample_id and not tumor_sample_id:
+            if force_normal:
+                LOG.warning(
+                    f"Only a normal sample was found for case {case_id}. "
+                    f"Balsamic analysis will treat it as a tumor sample."
+                )
+                tumor_sample_id, tumor_sample_path = normal_sample_id, normal_sample_path
+                normal_sample_id, normal_sample_path = None, None
+            else:
+                LOG.error(
+                    f"Case {case_id} only has a normal sample. Use the --force-normal flag to treat it as a tumor."
+                )
+                raise BalsamicStartError
+
+        return {
+            "tumor_sample_name": tumor_sample_id,
+            "tumor": tumor_sample_path,
+            "normal_sample_name": normal_sample_id,
+            "normal": normal_sample_path,
+        }
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
         """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
@@ -413,28 +418,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return metrics
 
-    def get_tumor_sample_name(self, case_id: str) -> Optional[str]:
-        sample_obj = (
-            self.status_db.query(models.Sample)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .filter(models.Sample.is_tumour == True)
-            .first()
-        )
-        if sample_obj:
-            return sample_obj.internal_id
-
-    def get_normal_sample_name(self, case_id: str) -> Optional[str]:
-        sample_obj = (
-            self.status_db.query(models.Sample)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .filter(models.Sample.is_tumour == False)
-            .first()
-        )
-        if sample_obj:
-            return sample_obj.internal_id
-
     @staticmethod
     def get_latest_file_by_pattern(directory: Path, pattern: str) -> Optional[str]:
         """Returns the latest file (<file_name>-<date>-.vcf.gz) matching a pattern from a specific directory."""
@@ -475,6 +458,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
+        force_normal: bool = False,
         observations: List[str] = None,
         gender: Optional[str] = None,
     ) -> dict:
@@ -499,15 +483,16 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             "analysis_workflow": self.pipeline,
             "genome_version": genome_version,
             "gender": gender or self.get_verified_gender(sample_data=sample_data),
-            "normal": self.get_verified_normal_path(sample_data=sample_data),
-            "tumor": self.get_verified_tumor_path(sample_data=sample_data),
             "panel_bed": verified_panel_bed,
             "pon_cnn": verified_pon,
-            "tumor_sample_name": self.get_tumor_sample_name(case_id=case_id),
-            "normal_sample_name": self.get_normal_sample_name(case_id=case_id),
             "swegen_snv": self.get_swegen_verified_path(Variants.SNV),
             "swegen_sv": self.get_swegen_verified_path(Variants.SV),
         }
+        config_case.update(
+            self.get_verified_samples(
+                case_id=case_id, sample_data=sample_data, force_normal=force_normal
+            )
+        )
         config_case.update(self.get_parsed_observation_file_paths(observations))
 
         return config_case
@@ -526,10 +511,10 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def build_case_id_map_string(self, case_id: str) -> Optional[str]:
         """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
 
-        case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: models.Sample = case_obj.links[0].sample
+        case_obj: Family = self.status_db.family(case_id)
+        sample_obj: Sample = case_obj.links[0].sample
         if sample_obj.from_sample:
-            sample_obj: models.Sample = self.status_db.sample(sample_obj.from_sample)
+            sample_obj: Sample = self.status_db.sample(sample_obj.from_sample)
         capture_kit = self.lims_api.capture_kit(sample_obj.internal_id)
         if capture_kit:
             panel_shortname = self.status_db.bed_version(capture_kit).shortname
@@ -538,8 +523,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         else:
             return
         application_tag = (
-            self.status_db.query(models.ApplicationVersion)
-            .filter(models.ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
+            self.status_db.query(ApplicationVersion)
+            .filter(ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
             .first()
             .application.tag
         )
@@ -573,7 +558,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         sample_data = {
             link_object.sample.internal_id: {
                 "gender": self.get_gender(link_object.sample),
-                "tissue_type": self.get_sample_type(link_object.sample),
+                "tissue_type": self.get_sample_type(link_object.sample).value,
                 "concatenated_path": self.get_concatenated_fastq_path(link_object).as_posix(),
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
@@ -594,7 +579,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             return application_types.pop().lower()
 
     def resolve_target_bed(
-        self, panel_bed: Optional[str], link_object: models.FamilySample
+        self, panel_bed: Optional[str], link_object: FamilySample
     ) -> Optional[str]:
         if panel_bed:
             return panel_bed
@@ -613,15 +598,15 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
         This check is only applied to filter jobs which start automatically"""
         query = (
-            self.status_db.query(models.Sample)
-            .join(models.Family.links, models.FamilySample.sample)
-            .filter(models.Family.internal_id == case_id)
-            .filter(models.Family.data_analysis == self.pipeline)
+            self.status_db.query(Sample)
+            .join(Family.links, FamilySample.sample)
+            .filter(Family.internal_id == case_id)
+            .filter(Family.data_analysis == self.pipeline)
         )
         return all(
             [
-                len(query.filter(models.Sample.is_tumour == False).all()) <= 1,
-                len(query.filter(models.Sample.is_tumour == True).all()) == 1,
+                len(query.filter(Sample.is_tumour == False).all()) <= 1,
+                len(query.filter(Sample.is_tumour == True).all()) == 1,
             ]
         )
 
@@ -652,6 +637,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         panel_bed: str,
         pon_cnn: str,
         observations: List[str],
+        force_normal: bool,
         dry_run: bool = False,
     ) -> None:
         """Create config file for BALSAMIC analysis"""
@@ -662,6 +648,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
             observations=observations,
+            force_normal=force_normal,
         )
         command = ["config", "case"]
         options = self.__build_command_str(
@@ -672,8 +659,8 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--gender": arguments.get("gender"),
                 "--analysis-workflow": arguments.get("analysis_workflow"),
                 "--genome-version": arguments.get("genome_version"),
-                "--normal": arguments.get("normal"),
-                "--tumor": arguments.get("tumor"),
+                "--normal": arguments.get(SampleType.NORMAL.value),
+                "--tumor": arguments.get(SampleType.TUMOR.value),
                 "--panel-bed": arguments.get("panel_bed"),
                 "--pon-cnn": arguments.get("pon_cnn"),
                 "--umi-trim-length": arguments.get("umi_trim_length"),

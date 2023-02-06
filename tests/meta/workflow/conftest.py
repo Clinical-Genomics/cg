@@ -1,28 +1,38 @@
-"""Fixtures for the prepare_fastq api tests"""
+"""Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 import pytest
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, SampleType
+from cg.constants.sequencing import SequencingMethod
+from cg.constants.subject import Gender
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
-from tests.conftest import fixture_base_store
-from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 
 from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CompressionData
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Sample, Application
+from cg.store.models import Family, Sample
 from tests.store_helpers import StoreHelpers
+
+from tests.conftest import fixture_base_store
+from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
+from tests.meta.upload.scout.conftest import fixture_another_sample_id
+from tests.cli.workflow.balsamic.conftest import (
+    fastq_file_l_1_r_1,
+    fastq_file_l_2_r_1,
+    fastq_file_l_2_r_2,
+    balsamic_housekeeper_dir,
+)
 
 
 @pytest.fixture(scope="function", name="populated_compress_spring_api")
 def fixture_populated_compress_spring_api(
     compress_api: CompressAPI, only_spring_bundle: dict, helpers
 ) -> CompressAPI:
-    """Populated compress api fixture with only spring compressed fastq"""
+    """Populated compress api fixture with only spring compressed fastq."""
     helpers.ensure_hk_bundle(compress_api.hk_api, only_spring_bundle)
 
     return compress_api
@@ -32,7 +42,7 @@ def fixture_populated_compress_spring_api(
 def fixture_populated_compress_api_fastq_spring(
     compress_api: CompressAPI, spring_fastq_mix: dict, helpers
 ) -> CompressAPI:
-    """Populated compress api fixture with both spring and fastq"""
+    """Populated compress api fixture with both spring and fastq."""
     helpers.ensure_hk_bundle(compress_api.hk_api, spring_fastq_mix)
 
     return compress_api
@@ -40,7 +50,7 @@ def fixture_populated_compress_api_fastq_spring(
 
 @pytest.fixture(name="only_spring_bundle")
 def fixture_only_spring_bundle() -> dict:
-    """Return a dictionary with bundle info in the correct format"""
+    """Return a dictionary with bundle info in the correct format."""
     return {
         "name": "ADM1",
         "created": "2019-12-24",
@@ -56,7 +66,7 @@ def fixture_only_spring_bundle() -> dict:
 
 @pytest.fixture(name="spring_fastq_mix")
 def fixture_spring_fastq_mix(compression_object: CompressionData) -> dict:
-    """Return a dictionary with bundle info including both fastq and spring files"""
+    """Return a dictionary with bundle info including both fastq and spring files."""
 
     return {
         "name": "ADM1",
@@ -195,3 +205,39 @@ def qc_microsalt_context(
     cg_context.meta_apis["analysis_api"] = analysis_api
 
     return cg_context
+
+
+@pytest.fixture(name="balsamic_sample_data")
+def fixture_balsamic_sample_data(
+    sample_id: str,
+    cust_sample_id: str,
+    another_sample_id: str,
+    fastq_file_l_1_r_1: str,
+    fastq_file_l_2_r_1: str,
+    fastq_file_l_2_r_2: str,
+    bed_file: str,
+) -> Dict[str, dict]:
+    """Balsamic sample data dictionary."""
+    return {
+        sample_id: {
+            "gender": Gender.FEMALE,
+            "tissue_type": SampleType.TUMOR.value,
+            "concatenated_path": fastq_file_l_1_r_1,
+            "application_type": SequencingMethod.TGS.value,
+            "target_bed": bed_file,
+        },
+        cust_sample_id: {
+            "gender": Gender.FEMALE,
+            "tissue_type": SampleType.NORMAL.value,
+            "concatenated_path": fastq_file_l_2_r_1,
+            "application_type": SequencingMethod.TGS.value,
+            "target_bed": bed_file,
+        },
+        another_sample_id: {
+            "gender": Gender.FEMALE,
+            "tissue_type": SampleType.NORMAL.value,
+            "concatenated_path": fastq_file_l_2_r_2,
+            "application_type": SequencingMethod.TGS.value,
+            "target_bed": bed_file,
+        },
+    }

@@ -12,33 +12,33 @@ from cg.constants.observations import (
     LOQUSDB_MIP_SEQUENCING_METHODS,
     LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
 )
-from cg.store import models
+from cg.store.models import Analysis, Application, Customer, Family, Sample
 
 
 def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Return cases that is not sequenced according to record in StatusDB."""
-    return cases.filter(or_(models.Application.is_external, models.Sample.sequenced_at.isnot(None)))
+    return cases.filter(or_(Application.is_external, Sample.sequenced_at.isnot(None)))
 
 
 def filter_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     """Return cases which are not set or on hold."""
     return cases.filter(
         or_(
-            models.Family.action.is_(None),
-            models.Family.action.is_(CaseActions.HOLD),
+            Family.action.is_(None),
+            Family.action.is_(CaseActions.HOLD),
         )
     )
 
 
 def filter_new_cases(cases: Query, date: datetime, **kwargs) -> Query:
     """Return old cases compared to date."""
-    cases = cases.filter(models.Family.created_at < date)
-    return cases.order_by(models.Family.created_at.asc())
+    cases = cases.filter(Family.created_at < date)
+    return cases.order_by(Family.created_at.asc())
 
 
 def filter_cases_with_pipeline(cases: Query, pipeline: str = None, **kwargs) -> Query:
     """Return cases with pipeline."""
-    return cases.filter(models.Family.data_analysis == pipeline) if pipeline else cases
+    return cases.filter(Family.data_analysis == pipeline) if pipeline else cases
 
 
 def filter_cases_with_loqusdb_supported_pipeline(
@@ -46,12 +46,12 @@ def filter_cases_with_loqusdb_supported_pipeline(
 ) -> Query:
     """Return Loqusdb related cases with pipeline."""
     records: Query = (
-        cases.filter(models.Family.data_analysis == pipeline)
+        cases.filter(Family.data_analysis == pipeline)
         if pipeline
-        else cases.filter(models.Family.data_analysis.in_(LOQUSDB_SUPPORTED_PIPELINES))
+        else cases.filter(Family.data_analysis.in_(LOQUSDB_SUPPORTED_PIPELINES))
     )
 
-    return records.filter(models.Customer.loqus_upload == True)
+    return records.filter(Customer.loqus_upload == True)
 
 
 def filter_cases_with_loqusdb_supported_sequencing_method(
@@ -63,7 +63,7 @@ def filter_cases_with_loqusdb_supported_sequencing_method(
         Pipeline.BALSAMIC: LOQUSDB_BALSAMIC_SEQUENCING_METHODS,
     }
     return (
-        cases.filter(models.Application.prep_category.in_(supported_sequencing_methods[pipeline]))
+        cases.filter(Application.prep_category.in_(supported_sequencing_methods[pipeline]))
         if pipeline
         else cases
     )
@@ -77,15 +77,15 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
     """
     return cases.filter(
         or_(
-            models.Family.action == CaseActions.ANALYZE,
+            Family.action == CaseActions.ANALYZE,
             and_(
-                models.Application.is_external.isnot(True),
-                models.Family.action.is_(None),
-                models.Analysis.created_at.is_(None),
+                Application.is_external.isnot(True),
+                Family.action.is_(None),
+                Analysis.created_at.is_(None),
             ),
             and_(
-                models.Family.action.is_(None),
-                models.Analysis.created_at < models.Sample.sequenced_at,
+                Family.action.is_(None),
+                Analysis.created_at < Sample.sequenced_at,
             ),
         )
     )
@@ -93,12 +93,12 @@ def filter_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 def filter_cases_with_scout_data_delivery(cases: Query, **kwargs) -> Query:
     """Return cases containing Scout as a data delivery option."""
-    return cases.filter(models.Family.data_delivery.contains(DataDelivery.SCOUT))
+    return cases.filter(Family.data_delivery.contains(DataDelivery.SCOUT))
 
 
 def filter_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
     """Extracts cases with a valid data delivery for delivery report generation."""
-    return cases.filter(models.Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
+    return cases.filter(Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
 
 
 def apply_case_filter(
