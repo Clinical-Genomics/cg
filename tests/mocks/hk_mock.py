@@ -5,9 +5,10 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Iterable
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
 from cg.store import models
 
@@ -499,6 +500,24 @@ class MockHousekeeperAPI:
         bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
         self.include(version_obj=bundle_version)
         self.commit()
+
+    def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
+        """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
+        sequencing_files_in_hk: Dict[str, bool] = {}
+        for bundle_name in bundle_names:
+            sequencing_files_in_hk[bundle_name] = False
+            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
+                sample_file_in_hk: List[bool] = []
+                hk_files: Optional[List[File]] = self.get_files_from_latest_version(
+                    bundle_name=bundle_name, tags=[tag]
+                )
+                sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
+                if sample_file_in_hk:
+                    break
+            sequencing_files_in_hk[bundle_name] = (
+                all(sample_file_in_hk) if sample_file_in_hk else False
+            )
+        return all(sequencing_files_in_hk.values())
 
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:

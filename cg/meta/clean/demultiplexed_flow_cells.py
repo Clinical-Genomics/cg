@@ -25,13 +25,13 @@ SEQUENCER_IDENTIFIER_POSITION = 1
 
 class DemultiplexedRunsFlowCell:
     """Class to check if a given flow cell in demultiplexed-runs is valid, or can be removed. A
-    valid flow cell is named correctly, has the correct status ('ondisk') in statusdb,
-    and has fastq files in Housekeeper.
+    valid flow cell is named correctly, has the correct status ('ondisk') in Statusdb,
+    and has FASTQ and/or SPRING files in Housekeeper.
 
     A flow cell that is correctly named has four segments divided by underscores:
     <run_date>_<sequencer>_<run_number>_<identifier>. The identifier consists of the position of
     the flow cell on the sequencer in the first position (either A or B), and the flow cell id in
-    the rest of the identifier. Flow cell id is the naming convention used in statusdb and other
+    the rest of the identifier. Flow cell id is the naming convention used in Statusdb and other
     systems"""
 
     def __init__(
@@ -56,28 +56,30 @@ class DemultiplexedRunsFlowCell:
         self.identifier: str = self.split_name[FLOW_CELL_IDENTIFIER_POSITION]
         self.sequencer_serial_number: str = self.split_name[SEQUENCER_IDENTIFIER_POSITION]
         self.id: str = self.identifier[1:]
-        self._hk_fastq_files = None
-        self._hk_spring_files = None
-        self._is_correctly_named = None
-        self._exists_in_statusdb = None
-        self._fastq_files_exist_in_housekeeper = None
-        self._spring_files_exist_in_housekeeper = None
-        self._files_exist_in_housekeeper = None
-        self._files_exist_on_disk = None
-        self._passed_check = None
-        self._sequencer_type = None
-        self._is_demultiplexing_ongoing_or_started_and_not_completed = None
+        self._hk_fastq_files: Optional[list] = None
+        self._hk_spring_files: Optional[list] = None
+        self._is_correctly_named: Optional[bool] = None
+        self._exists_in_statusdb: Optional[bool] = None
+        self._fastq_files_exist_in_housekeeper: Optional[bool] = None
+        self._spring_files_exist_in_housekeeper: Optional[bool] = None
+        self._files_exist_in_housekeeper: Optional[bool] = None
+        self._files_exist_on_disk: Optional[bool] = None
+        self._passed_check: Optional[bool] = None
+        self._sequencer_type: Optional[str] = None
+        self._is_demultiplexing_ongoing_or_started_and_not_completed: Optional[bool] = None
 
     @property
     def sequencer_type(self) -> str:
-        """The type of sequencer a flow cell has been sequenced on"""
+        """The type of sequencer a flow cell has been sequenced on."""
         if self._sequencer_type is None:
-            self._sequencer_type = sequencer_types.get(self.sequencer_serial_number, "other")
+            self._sequencer_type: str = sequencer_types.get(
+                self.sequencer_serial_number, Sequencers.OTHER
+            )
         return self._sequencer_type
 
     @property
     def hk_fastq_files(self) -> list:
-        """All fastq files in Housekeeper for a particular flow cell"""
+        """All FASTQ files in Housekeeper for a particular flow cell."""
         if self._hk_fastq_files is None:
             self._hk_fastq_files = [
                 fastq_file for fastq_file in self.all_fastq_files if self.id in fastq_file.path
@@ -96,79 +98,72 @@ class DemultiplexedRunsFlowCell:
     @property
     def is_correctly_named(self) -> bool:
         """Checks if the flow cell directory is correctly named: it should end with the flow cell
-        id"""
+        id."""
         if self._is_correctly_named is None:
             self._is_correctly_named: bool = self.split_name[-1] == self.identifier
             if not self._is_correctly_named:
-                LOG.warning("Flow cell not correctly named!: %s", self.path)
+                LOG.warning(f"Flow cell not correctly named!: {self.path}")
         return self._is_correctly_named
 
     @property
     def exists_in_statusdb(self) -> bool:
-        """Checks if flow cell exists in statusdb"""
+        """Checks if flow cell exists in Statusdb."""
         if self._exists_in_statusdb is None:
             self._exists_in_statusdb: bool = self.status_db.get_flow_cell(self.id) is not None
             if not self._exists_in_statusdb:
-                LOG.warning("Flow cell %s does not exist in statusdb!", self.id)
+                LOG.warning(f"Flow cell {self.id} does not exist in Statusdb!")
         return self._exists_in_statusdb
 
     @property
     def fastq_files_exist_in_housekeeper(self) -> bool:
-        """Checks if the flow cell has any fastq files in Housekeeper"""
+        """Checks if the flow cell has any FASTQ files in Housekeeper."""
         if self._fastq_files_exist_in_housekeeper is None:
             self._fastq_files_exist_in_housekeeper: bool = len(self.hk_fastq_files) > 0
             if not self._fastq_files_exist_in_housekeeper:
-                LOG.warning("Flow cell %s does not have any fastq files in Housekeeper!", self.id)
+                LOG.warning(f"Flow cell {self.id} does not have any FASTQ files in Housekeeper!")
         return self._fastq_files_exist_in_housekeeper
 
     @property
     def spring_files_exist_in_housekeeper(self) -> bool:
-        """Checks if the flow cell has any spring files in Housekeeper"""
+        """Checks if the flow cell has any SPRING files in Housekeeper."""
         if self._spring_files_exist_in_housekeeper is None:
             self._spring_files_exist_in_housekeeper: bool = len(self.hk_spring_files) > 0
             if not self._spring_files_exist_in_housekeeper:
-                LOG.warning("Flow cell %s does not have any spring files in Housekeeper!", self.id)
+                LOG.warning(f"Flow cell {self.id} does not have any SPRING files in Housekeeper!")
         return self._spring_files_exist_in_housekeeper
 
     @property
     def files_exist_in_housekeeper(self) -> bool:
-        """Checks if the flow cell has any files, either fastq or spring, in Housekeeper"""
+        """Checks if the flow cell has any files, either FASTQ or SPRING, in Housekeeper."""
         if self._files_exist_in_housekeeper is None:
             self._files_exist_in_housekeeper: bool = (
                 self.fastq_files_exist_in_housekeeper or self.spring_files_exist_in_housekeeper
             )
             if not self._files_exist_in_housekeeper:
                 LOG.warning(
-                    "Flow cell %s has neither fastq files nor spring files in Housekeeper!", self.id
+                    f"Flow cell {self.id} has neither FASTQ files nor SPRING files in Housekeeper!"
                 )
         return self._files_exist_in_housekeeper
 
     @staticmethod
     def _check_files_existence(files: list) -> List[bool]:
-        """Checks file existence and handles permission errors"""
+        """Checks file existence and handles permission errors."""
         files_exist: List[bool] = []
         for file in files:
             try:
                 files_exist.append(Path(file.path).exists())
             except PermissionError:
-                LOG.warning("Can't check file %s, no permission!", file)
+                LOG.warning(f"Can't check file {file}, no permission!")
                 continue
         return files_exist
 
     @property
     def files_exist_on_disk(self) -> bool:
-        """Checks if the spring or fastq files that are in Housekeeper are actually present on
-        disk"""
+        """Checks if the SPRING or FASTQ files that are in Housekeeper are actually present on
+        disk."""
 
         if self._files_exist_on_disk is None:
-            if not self.files_exist_in_housekeeper:
-                LOG.warning(
-                    "Flow cell %s has no fastq files or spring files in Housekeeper, skipping "
-                    "disk check",
-                    self.id,
-                )
-                self._files_exist_on_disk = False
-            else:
+            if self.files_exist_in_housekeeper:
                 if self.fastq_files_exist_in_housekeeper:
                     fastq_files_exist_on_disk: List[bool] = self._check_files_existence(
                         self.hk_fastq_files
@@ -180,32 +175,36 @@ class DemultiplexedRunsFlowCell:
                     )
                     self._files_exist_on_disk: bool = all(spring_files_exist_on_disk)
                 if not self._files_exist_on_disk:
-                    LOG.warning("Flow cell %s has no fastq files or spring files on disk!", self.id)
+                    LOG.warning(f"Flow cell {self.id} has no fastq files or spring files on disk!")
 
+            else:
+                LOG.warning(
+                    f"Flow cell {self.id} has no FASTQ files or SPRING files in Housekeeper, skipping "
+                    "disk check"
+                )
+                self._files_exist_on_disk = False
         return self._files_exist_on_disk
 
     @property
     def is_demultiplexing_ongoing_or_started_and_not_completed(self) -> bool:
-        """Checks demultiplexing status for a flow cell. A flow cell can only be deleted if
-        demultiplexing has not started or is not ongoing. Completed flow cells can be deleted"""
+        """Checks demultiplexing status for a flow cell."""
         if self._is_demultiplexing_ongoing_or_started_and_not_completed is None:
-            LOG.info("Checking demultiplexing status for flowcell %s:", self.id)
+            LOG.info(f"Checking demultiplexing status for flow cell {self.id}:")
             self._is_demultiplexing_ongoing_or_started_and_not_completed: bool = (
                 self.tb.has_latest_analysis_started(case_id=self.id)
                 or self.tb.is_latest_analysis_ongoing(case_id=self.id)
             ) and not self.tb.is_latest_analysis_completed(case_id=self.id)
             if self._is_demultiplexing_ongoing_or_started_and_not_completed:
-                LOG.warning("Demultiplexing not fully completed for flow cell %s!", self.id)
+                LOG.warning(f"Demultiplexing not fully completed for flow cell {self.id}!")
             else:
                 LOG.info("Demultiplexing fully completed!")
-
         return self._is_demultiplexing_ongoing_or_started_and_not_completed
 
     @property
     def passed_check(self) -> bool:
-        """Indicates if all checks have passed"""
+        """Indicates if all checks have passed."""
         if self._passed_check is None:
-            LOG.info("Checking %s:", self.path)
+            LOG.info(f"Checking {self.path}:")
             self._passed_check = all(
                 [
                     self.is_correctly_named,
@@ -215,15 +214,13 @@ class DemultiplexedRunsFlowCell:
                 ]
             )
             LOG.info(
-                "Flow cell %s has passed all checks, setting flag to True!", self.id
+                f"Flow cell {self.id} has passed all checks, setting flag to True!"
             ) if self._passed_check else LOG.error(
-                "Flow cell %s failed one or more tests, setting flag to %s!",
-                self.id,
-                self._passed_check,
+                f"Flow cell {self.id} failed one or more tests, setting flag to {self._passed_check}!"
             )
         return self._passed_check
 
-    def remove_files_from_housekeeper(self):
+    def remove_files_from_housekeeper(self) -> None:
         """Remove fastq files and the sample sheet from Housekeeper when deleting a
         flow cell from demultiplexed-runs."""
         if self.fastq_files_exist_in_housekeeper:
@@ -236,8 +233,8 @@ class DemultiplexedRunsFlowCell:
                 self.hk.delete_file(sample_sheet.id)
         self.hk.commit()
 
-    def remove_from_demultiplexed_runs(self):
-        """Removes a flow cell directory completely from demultiplexed-runs"""
+    def remove_from_demultiplexed_runs(self) -> None:
+        """Removes a flow cell directory completely from demultiplexed-runs."""
         if self.is_correctly_named:
             self.archive_sample_sheet()
         shutil.rmtree(self.path, ignore_errors=True)
@@ -245,24 +242,23 @@ class DemultiplexedRunsFlowCell:
             self.status_db.get_flow_cell(self.id).status = FlowCellStatus.REMOVED
         self.status_db.commit()
 
-    def remove_failed_flow_cell(self):
-        """Performs the two removal actions for failed flow cells"""
+    def remove_failed_flow_cell(self) -> None:
+        """Performs the two removal actions for failed flow cells."""
         self.remove_from_demultiplexed_runs()
         if self.files_exist_in_housekeeper and self.is_correctly_named:
             self.remove_files_from_housekeeper()
 
-    def archive_sample_sheet(self):
+    def archive_sample_sheet(self) -> None:
         """Archives a sample sheet to /home/proj/production/sample_sheets and adds it to
-        Housekeeper with an appropriate tag"""
-        LOG.info("Archiving sample sheet for flow cell %s", self.run_name)
+        Housekeeper with an appropriate tag."""
+        LOG.info(f"Archiving sample sheet for flow cell {self.run_name}")
         globbed_unaligned_paths: Path.glob = Path(self.path).glob(
             DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME + ASTERISK
         )
         globbed_unaligned_paths_list: list = list(globbed_unaligned_paths)
         if not globbed_unaligned_paths_list:
             LOG.warning(
-                "No Unaligned directory found for flow cell %s! No sample sheet to archive!",
-                self.run_name,
+                f"No Unaligned directory found for flow cell {self.run_nam}! No sample sheet to archive!"
             )
             return
         unaligned_path: Path = globbed_unaligned_paths_list[0]
@@ -281,18 +277,18 @@ class DemultiplexedRunsFlowCell:
         )
 
         sample_sheet_run_dir.mkdir(parents=True, exist_ok=True)
-        LOG.info("Sample sheet directory created for flow cell directory %s", self.run_name)
+        LOG.info(f"Sample sheet directory created for flow cell directory {self.run_name}")
 
         try:
             shutil.move(original_sample_sheet, archived_sample_sheet)
             self.add_sample_sheet_to_housekeeper(archived_sample_sheet)
             self.hk.commit()
         except FileNotFoundError:
-            LOG.warning("No sample sheet found in flow cell directory %s!", self.run_name)
+            LOG.warning(f"No sample sheet found in flow cell directory {self.run_name}!")
             shutil.rmtree(sample_sheet_run_dir, ignore_errors=True)
 
     def add_sample_sheet_to_housekeeper(self, sample_sheet_path: Path):
-        """Adds an archive sample sheet to Housekeeper"""
+        """Adds an archive sample sheet to Housekeeper."""
 
         hk_bundle: hk_models.Bundle = self.hk.bundle(self.id)
         if hk_bundle is None:
