@@ -716,7 +716,8 @@ class StoreHelpers:
                 customer_id=customer_id,
             )
 
-            user = StoreHelpers.ensure_user(store=store, customer=customer_obj)
+            user_obj: models.User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
+            customer_obj.invoice_contact: models.User = user_obj
 
             pool = []
             sample = []
