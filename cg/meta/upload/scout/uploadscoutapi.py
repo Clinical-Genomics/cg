@@ -368,7 +368,7 @@ class UploadScoutAPI:
 
     def _map_rna_sample(
         self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]]
-    ) -> Dict[str, Dict[str, List[str]]]:
+    ) -> None:
         """Create a dictionary of all DNA samples, and their related cases, related to a RNA sample."""
         dna_sample: models.Sample = self._map_dna_samples_related_to_rna_sample(
             rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
@@ -378,7 +378,6 @@ class UploadScoutAPI:
             rna_dna_sample_case_map=rna_dna_sample_case_map,
             rna_sample=rna_sample,
         )
-        return rna_dna_sample_case_map
 
     def _map_dna_samples_related_to_rna_sample(
         self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]]
