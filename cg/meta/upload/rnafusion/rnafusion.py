@@ -28,6 +28,7 @@ class RnafusionUploadAPI(UploadAPI):
         analysis_obj: models.Analysis = case_obj.analyses[0]
         self.update_upload_started_at(analysis_obj)
 
+        # TODO: Update once delivery report is supported
         # Main upload
         # ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
 
@@ -39,4 +40,4 @@ class RnafusionUploadAPI(UploadAPI):
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
 
-        self.update_uploaded_at(analysis_obj)
+        # self.update_uploaded_at(analysis_obj) #TODO: Update once Trailblazer is supported
