@@ -160,19 +160,25 @@ class StoreHelpers:
             store.add_commit(version)
         return version
 
+
+
+    @staticmethod
+    def ensure_collaboration(store: Store,
+                             collaboration_id: str = "all_customers"):
+        collaboration = store.collaboration(collaboration_id)
+        if not collaboration:
+            collaboration = store.add_collaboration(collaboration_id, collaboration_id)
+        return collaboration
+
     @staticmethod
     def ensure_customer(
         store: Store,
         customer_id: str = "cust000",
         name: str = "Production",
         scout_access: bool = False,
-        collaboration_id: str = "all_customers",
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests"""
-        collaboration = store.collaboration(collaboration_id)
-        if not collaboration:
-            collaboration = store.add_collaboration(collaboration_id, collaboration_id)
-
+        collaboration = StoreHelpers.ensure_collaboration(store)
         customer = store.customer(customer_id)
 
         if not customer:
@@ -644,11 +650,11 @@ class StoreHelpers:
         return cases
 
     @classmethod
-    def add_pool(
+    def ensure_pool(
         cls,
         store: Store,
         customer_id: str = "cust000",
-        name: str = "",
+        name: str = "test_pool",
         ticket: str = "987654",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
@@ -656,7 +662,10 @@ class StoreHelpers:
         is_rna: bool = False,
     ) -> models.Pool:
         customer_id = customer_id or "cust000"
-        customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
+        customer = store.customer(customer_id)
+        if not customer:
+            customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
+
         application_version = StoreHelpers.ensure_application_version(
             store=store,
             application_tag=application_tag,
@@ -664,10 +673,9 @@ class StoreHelpers:
             is_external=is_external,
             is_rna=is_rna,
         )
-        application_version_id = application_version.id
+
         pool = store.add_pool(
             name=name,
-            ticket=ticket,
             ordered=datetime.now(),
             application_version=application_version,
             customer=customer,
@@ -676,11 +684,26 @@ class StoreHelpers:
         store.add_commit(pool)
         return pool
 
+
+    @classmethod
+    def ensure_user(cls,
+                    store: Store,
+                    customer: models.Customer,
+                    email: str = "Bob@bobmail.com",
+                    name: str = "Bob",
+                    is_admin: bool = False
+                    ) -> models.User:
+        user = store.user(email=email)
+        if not user:
+            user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+            store.add_commit(user)
+        return user
+
     @classmethod
     def ensure_invoice(
         cls,
         store: Store,
-        invoice_id: int = 1,
+        invoice_id: int = 0,
         customer_id: str = "cust000",
         discount: int = 0,
         record_type: str = "Sample",
@@ -688,19 +711,21 @@ class StoreHelpers:
         """Utility function to create an invoice with pools or samples to use in tests"""
         invoice = store.invoice(invoice_id=invoice_id)
         if not invoice:
-            ## some error happens here
             customer_obj = StoreHelpers.ensure_customer(
-                store,
+                store=store,
                 customer_id=customer_id,
             )
+
+            user = StoreHelpers.ensure_user(store=store, customer=customer_obj)
+
             pool = []
             sample = []
-
-            if type == "Sample":
-                sample = StoreHelpers.add_sample(store, customer_id=customer_id)
-
+            if record_type == "Sample":
+                sample.append(StoreHelpers.add_sample(store=store, customer_id=customer_id))
+                pool = None
             else:
-                pool = StoreHelpers.add_pool(store, customer_id=customer_id)
+                pool.append(StoreHelpers.ensure_pool(store, customer_id=customer_id, name=customer_id))
+                sample = None
 
             invoice = store.add_invoice(
                 customer=customer_obj,
@@ -710,6 +735,6 @@ class StoreHelpers:
                 discount=discount,
                 record_type=record_type,
             )
-        store.add_commit(invoice)
+            store.add_commit(invoice)
 
         return invoice
