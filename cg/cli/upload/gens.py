@@ -43,13 +43,12 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
     family: Family = status_db.family(case_id)
 
     for sample in family.samples:
-        hk_version: Version = housekeeper_api.last_version(case_id)
-        hk_coverage: File = housekeeper_api.files(
-            version=hk_version.id, tags=[sample.internal_id] + GensAnalysisTag.COVERAGE
-        ).first()
-        hk_fracsnp: File = housekeeper_api.files(
-            version=hk_version.id, tags=[sample.internal_id] + GensAnalysisTag.FRACSNP
-        ).first()
+        hk_coverage: File = housekeeper_api.get_file_from_latest_version(
+            bundle_name=case_id, tags=[sample.internal_id] + GensAnalysisTag.COVERAGE
+        )
+        hk_fracsnp: File = housekeeper_api.get_file_from_latest_version(
+            bundle_name=case_id, tags=[sample.internal_id] + GensAnalysisTag.FRACSNP
+        )
 
         if hk_fracsnp and hk_coverage:
             gens_api.load(
