@@ -52,7 +52,6 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
         ).first()
 
         if hk_fracsnp and hk_coverage:
-            test = hk_fracsnp.full_path
             gens_api.load(
                 baf_path=hk_fracsnp.full_path,
                 case_id=case_id,
