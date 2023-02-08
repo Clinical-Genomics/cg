@@ -74,13 +74,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
 
     @staticmethod
-    def get_sample_type(sample_obj: models.Sample) -> str:
-        """Returns tissue type of a sample"""
-        if sample_obj.is_tumour:
-            return "tumor"
-        return "normal"
-
-    @staticmethod
     def build_samplesheet_content(
         case_id: str, fastq_r1: List[str], fastq_r2: List[str], strandedness: str
     ) -> Dict[str, List[str]]:

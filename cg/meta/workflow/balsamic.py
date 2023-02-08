@@ -2,25 +2,26 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
 from pydantic import ValidationError
+
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat, SampleType
+from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender
-from cg.constants.constants import FileFormat, SampleType
-from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.exc import BalsamicStartError, CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.metrics import (
+    BalsamicMetricsBase,
     BalsamicTargetedQCMetrics,
     BalsamicWGSQCMetrics,
-    BalsamicMetricsBase,
 )
 from cg.models.cg_config import CGConfig
 from cg.store.models import ApplicationVersion, Family, FamilySample, Sample
@@ -173,13 +174,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Returns the gender associated to a specific sample"""
 
         return sample_obj.sex
-
-    @staticmethod
-    def get_sample_type(sample_obj: Sample) -> SampleType:
-        """Return the tissue type of the sample."""
-        if sample_obj.is_tumour:
-            return SampleType.TUMOR
-        return SampleType.NORMAL
 
     def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
         """Returns the verified capture kit path or extracts the derived panel bed"""
