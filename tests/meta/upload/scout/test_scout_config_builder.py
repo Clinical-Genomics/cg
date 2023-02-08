@@ -1,20 +1,12 @@
 """Tests for the file handlers."""
 import logging
 
-from housekeeper.store import models as hk_models
 from housekeeper.store.models import Version
 
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
-from cg.models.scout.scout_load_config import (
-    BalsamicLoadConfig,
-    MipLoadConfig,
-    ScoutLoadConfig,
-    ScoutMipIndividual,
-)
-from cg.store import models
 from cg.store.models import Analysis
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI

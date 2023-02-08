@@ -17,8 +17,10 @@ LOG = logging.getLogger(__name__)
 class RnafusionConfigBuilder(ScoutConfigBuilder):
     """Class for handling rnafusion information and files to be included in Scout upload."""
 
-    def __init__(self, hk_version: Version, analysis: Analysis, lims_api: LimsAPI):
-        super().__init__(hk_version_obj=hk_version, analysis_obj=analysis, lims_api=lims_api)
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+        super().__init__(
+            hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
+        )
         self.case_tags: CaseTags = CaseTags(**RNAFUSION_CASE_TAGS)
         self.sample_tags: SampleTags = SampleTags(**RNAFUSION_SAMPLE_TAGS)
         self.load_config: RnafusionLoadConfig = RnafusionLoadConfig(track="cancer")
