@@ -352,6 +352,7 @@ class CGConfig(BaseModel):
 
     @property
     def gens_api(self) -> GensAPI:
+        """Returns Gens API after making sure it has been instantiated."""
         api = self.__dict__.get("gens_api_")
         if api is None:
             LOG.debug("Instantiating gens api")
