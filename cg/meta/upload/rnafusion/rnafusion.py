@@ -1,4 +1,4 @@
-"""RNAFUSION upload API"""
+"""RNAFUSION upload API."""
 
 import logging
 
@@ -16,28 +16,17 @@ LOG = logging.getLogger(__name__)
 
 
 class RnafusionUploadAPI(UploadAPI):
-    """RNAFUSION upload API"""
+    """RNAFUSION upload API."""
 
     def __init__(self, config: CGConfig):
         self.analysis_api: RnafusionAnalysisAPI = RnafusionAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
-        """Uploads RNAFUSION analysis data and files"""
+        """Uploads RNAFUSION analysis data and files."""
 
         analysis_obj: models.Analysis = case_obj.analyses[0]
         self.update_upload_started_at(analysis_obj)
 
-        # TODO: Update once delivery report is supported
-        # Main upload
-        # ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)
-
-        # Delivery report generation
-        # if case_obj.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
-        #    ctx.invoke(delivery_report, case_id=case_obj.internal_id)
-
-        # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
-
-        # self.update_uploaded_at(analysis_obj) #TODO: Update once Trailblazer is supported

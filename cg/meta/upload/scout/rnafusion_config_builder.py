@@ -14,6 +14,8 @@ LOG = logging.getLogger(__name__)
 
 
 class RnafusionConfigBuilder(ScoutConfigBuilder):
+    """Class for handling rnafusion information and files to be included in Scout upload."""
+
     def __init__(
         self, hk_version_obj: hk_models.Version, analysis_obj: models.Analysis, lims_api: LimsAPI
     ):
@@ -25,9 +27,10 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         self.load_config: RnafusionLoadConfig = RnafusionLoadConfig(track="cancer")
 
     def build_load_config(self) -> None:
+        """Build a load config for uploading a case to scout."""
         LOG.info("Build load config for rnafusion case")
         self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = "38"  # TODO: adapt
+        self.load_config.human_genome_build = "38"
         self.include_case_files()
 
         LOG.info("Building samples")

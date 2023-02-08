@@ -64,6 +64,7 @@ def test_rnafusion_config_builder(
     rnafusion_analysis_obj: Analysis,
     lims_api: MockLimsAPI,
 ):
+    """Test RNAfusion config builder class."""
     # GIVEN a rnafusion file handler
 
     # WHEN instantiating

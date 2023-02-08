@@ -63,15 +63,12 @@ class ScoutConfigBuilder:
         config_sample.tissue_type = lims_sample.get("source", "unknown")
         config_sample.subject_id = db_sample.sample.subject_id
 
-        # self.include_sample_alignment_file(config_sample=config_sample)
-        # self.include_sample_files(config_sample=config_sample)
-
     def add_common_sample_files(
         self,
         config_sample: ScoutIndividual,
         db_sample: models.FamilySample,
     ) -> None:
-        """Add common sample files for different analysis types"""
+        """Add common sample files for different analysis types."""
         sample_id: str = db_sample.sample.internal_id
         LOG.info("Adding common files for sample %s", sample_id)
         self.include_sample_alignment_file(config_sample=config_sample)

@@ -429,9 +429,9 @@ def fixture_balsamic_analysis_hk_bundle_data(
 
 @pytest.fixture(scope="function", name="rnafusion_analysis_hk_bundle_data")
 def fixture_rnafusion_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path, sample_id: str
+    case_id: str, timestamp: datetime, rnafusion_analysis_dir: Path
 ) -> dict:
-    """Get some bundle data for housekeeper"""
+    """Get some bundle data for housekeeper."""
     return {
         "name": case_id,
         "created": timestamp,
@@ -498,7 +498,7 @@ def fixture_balsamic_analysis_hk_api(
 def fixture_rnafusion_analysis_hk_api(
     housekeeper_api: MockHousekeeperAPI, rnafusion_analysis_hk_bundle_data: dict, helpers
 ) -> MockHousekeeperAPI:
-    """Return a housekeeper api populated with some mip analysis files"""
+    """Return a housekeeper api populated with some rnafusion analysis files"""
     helpers.ensure_hk_version(housekeeper_api, rnafusion_analysis_hk_bundle_data)
     return housekeeper_api
 
@@ -563,9 +563,12 @@ def fixture_balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 @pytest.fixture(name="rnafusion_analysis_obj")
 def fixture_rnafusion_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+    """Return a RNAfusion analysis object."""
     analysis_obj.pipeline = Pipeline.RNAFUSION
     for link_object in analysis_obj.family.links:
-        link_object.sample.application_version.application.prep_category = "wts"
+        link_object.sample.application_version.application.prep_category = (
+            PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING
+        )
         link_object.family.data_analysis = Pipeline.RNAFUSION
         link_object.family.panels = None
     return analysis_obj
@@ -702,7 +705,7 @@ def fixture_upload_rnafusion_analysis_scout_api(
     rnafusion_analysis_hk_api: MockHousekeeperAPI,
     store: Store,
 ) -> UploadScoutAPI:
-    """Fixture for upload_scout_api"""
+    """Fixture for upload_scout_api."""
     analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
@@ -715,4 +718,4 @@ def fixture_upload_rnafusion_analysis_scout_api(
         status_db=store,
     )
 
-    yield _api
+    return _api

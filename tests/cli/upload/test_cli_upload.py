@@ -37,11 +37,8 @@ def test_upload_started_long_time_ago_raises_exception(
     assert result.exception
 
 
-def test_upload_force_restart(
-    cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, caplog: LogCaptureFixture
-):
+def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
     """Test that a case that is already uploading can be force restarted."""
-    caplog.set_level(logging.INFO)
 
     # GIVEN an analysis that is already uploading
     disk_store: Store = base_context.status_db

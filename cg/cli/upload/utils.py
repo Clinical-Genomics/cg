@@ -1,4 +1,4 @@
-"""Utility functions for the upload cli commands"""
+"""Utility functions for the upload cli commands."""
 
 import logging
 from pathlib import Path

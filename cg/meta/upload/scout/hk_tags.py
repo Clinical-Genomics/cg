@@ -1,6 +1,6 @@
 """Maps tag info from housekeeper tags to scout load config"""
 
-from typing import Set
+from typing import Optional, Set
 
 from pydantic import BaseModel, Field
 
@@ -51,15 +51,15 @@ class CaseTags(BaseModel):
 
 class SampleTags(BaseModel):
     # If cram does not exist
-    bam_file: Set[str] = None
-    alignment_file: Set[str] = None
-    vcf2cytosure: Set[str] = None
-    mt_bam: Set[str] = None
-    chromograph_autozyg: Set[str] = None
-    chromograph_coverage: Set[str] = None
-    chromograph_regions: Set[str] = None
-    chromograph_sites: Set[str] = None
-    reviewer_alignment: Set[str] = None
-    reviewer_alignment_index: Set[str] = None
-    reviewer_vcf: Set[str] = None
-    mitodel_file: Set[str] = None
+    bam_file: Optional[Set[str]] = None
+    alignment_file: Optional[Set[str]] = None
+    vcf2cytosure: Optional[Set[str]] = None
+    mt_bam: Optional[Set[str]] = None
+    chromograph_autozyg: Optional[Set[str]] = None
+    chromograph_coverage: Optional[Set[str]] = None
+    chromograph_regions: Optional[Set[str]] = None
+    chromograph_sites: Optional[Set[str]] = None
+    reviewer_alignment: Optional[Set[str]] = None
+    reviewer_alignment_index: Optional[Set[str]] = None
+    reviewer_vcf: Optional[Set[str]] = None
+    mitodel_file: Optional[Set[str]] = None

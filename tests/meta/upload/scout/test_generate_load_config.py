@@ -75,13 +75,14 @@ def test_generate_balsamic_umi_load_config(
 def test_generate_rnafusion_load_config(
     rnafusion_analysis_obj: models.Analysis, upload_rnafusion_analysis_scout_api: UploadScoutAPI
 ):
+    """Test that a rnafusion config is generated."""
     # GIVEN an analysis object that have been run with rnafusion
     assert rnafusion_analysis_obj.pipeline == Pipeline.RNAFUSION
 
     # GIVEN an upload scout api with some rnafusion information
 
     # WHEN generating a load config
-    config = upload_rnafusion_analysis_scout_api.generate_config(
+    config: ScoutLoadConfig = upload_rnafusion_analysis_scout_api.generate_config(
         analysis_obj=rnafusion_analysis_obj
     )
 
