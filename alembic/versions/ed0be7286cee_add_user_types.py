@@ -79,9 +79,7 @@ def upgrade():
     count = 0
     # replace email addresses on customers with connection between customer and user using users email
     for customer in session.query(Customer):
-
         if customer.delivery_contact_email:
-
             user = session.query(User).filter(User.email == customer.delivery_contact_email).first()
             if user:
                 customer.delivery_contact_id = user.id
@@ -95,7 +93,6 @@ def upgrade():
                 )
 
         if customer.invoice_contact_email:
-
             user = session.query(User).filter(User.email == customer.invoice_contact_email).first()
             if user:
                 customer.invoice_contact_id = user.id
@@ -109,7 +106,6 @@ def upgrade():
                 )
 
         if customer.primary_contact_email:
-
             user = session.query(User).filter(User.email == customer.primary_contact_email).first()
             if user:
                 customer.primary_contact_id = user.id
@@ -163,7 +159,6 @@ def upgrade():
 
 
 def downgrade():
-
     op.add_column("customer", Column("delivery_contact_email", String(128), nullable=True))
     op.add_column("customer", Column("invoice_contact_email", String(128), nullable=True))
     op.add_column("customer", Column("primary_contact_email", String(128), nullable=True))

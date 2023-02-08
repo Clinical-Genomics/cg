@@ -11,7 +11,6 @@ def test_rename_demux_result(
     demultiplex_context: CGConfig,
     flow_cell: FlowCell,
 ):
-
     # GIVEN that this is the location of the demultiplex api
     demultiplex_context.demultiplex_api_.out_dir = demultiplexed_flow_cell_working_directory
     post_demux_api: DemuxPostProcessingNovaseqAPI = DemuxPostProcessingNovaseqAPI(

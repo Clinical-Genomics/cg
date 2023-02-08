@@ -134,7 +134,7 @@ class DeleteDemuxAPI:
         if self.dry_run:
             log.info(f"DeleteDemuxAPI-StatusDB: Would remove {self.flow_cell_name}")
         else:
-            self.status_db.delete_flowcell(flowcell_name=self.flow_cell_name)
+            self.status_db.delete_flow_cell(flow_cell_name=self.flow_cell_name)
             log.info(f"DeleteDemuxAPI-StatusDB: Deleted flowcell {self.flow_cell_name}")
 
     def delete_flow_cell_cgstats(self) -> None:

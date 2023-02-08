@@ -161,7 +161,6 @@ def fixture_rnafusion_context(
 def fixture_deliverables_data(
     rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_sample_id: str
 ) -> dict:
-
     return {
         "files": [
             {

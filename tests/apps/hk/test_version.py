@@ -146,7 +146,6 @@ def test_get_create_version(
     populated_housekeeper_api: MockHousekeeperAPI,
     case_id: str,
 ):
-
     # Given a populated housekeeper_api with a bundle
     version_obj = populated_housekeeper_api.bundle(case_id).versions[0]
 

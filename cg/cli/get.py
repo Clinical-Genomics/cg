@@ -81,7 +81,6 @@ def analysis(context: CGConfig, case_id: str):
     LOG.debug("%s: get info about case analysis", case_obj.internal_id)
 
     for analysis_obj in case_obj.analyses:
-
         row = [
             analysis_obj.started_at,
             analysis_obj.pipeline,
@@ -104,7 +103,6 @@ def relations(context: CGConfig, family_id: str):
     LOG.debug("%s: get info about family relations", case_obj.internal_id)
 
     for link_obj in case_obj.links:
-
         row = [
             link_obj.sample.internal_id if link_obj.sample else "",
             link_obj.mother.internal_id if link_obj.mother else "",

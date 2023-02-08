@@ -8,7 +8,6 @@ from .base import Model
 
 
 class Backup(Model):
-
     runname = Column(types.String(255), primary_key=True)
     startdate = Column(types.Date, nullable=False)
     nas = Column(types.String(255))

@@ -4,9 +4,11 @@ from pathlib import Path
 from typing import List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import SequencingFileTag
+from tests.meta.compress.conftest import MockCompressionData
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
-from housekeeper.store.models import Version, File
+from housekeeper.store.models import Version, File, Bundle
 
 from tests.small_helpers import SmallHelpers
 
@@ -327,3 +329,150 @@ def test_get_tag_names_from_file(populated_housekeeper_api: MockHousekeeperAPI):
     # THEN the return type is a list of strings
     assert isinstance(tag_names, list)
     assert all(isinstance(elem, str) for elem in tag_names)
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_none(
+    populated_housekeeper_api: MockHousekeeperAPI,
+    case_id: str,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when no files are present."""
+    # GIVEN a populated housekeeper api with some files
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(bundle_names=[case_id])
+
+    # THEN assert all file were not present in all bundles
+    assert not was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles(
+    populated_housekeeper_api: MockHousekeeperAPI,
+    case_id: str,
+    madeline_output: Path,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when files are present."""
+    # GIVEN a populated housekeeper api with some files
+
+    # GIVEN a FASTQ file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(bundle_names=[case_id])
+
+    # THEN assert all file were present in all bundles
+    assert was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_missing(
+    populated_housekeeper_api: MockHousekeeperAPI,
+    case_id: str,
+    sample_id: str,
+    madeline_output: Path,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when not all bundles have files present."""
+    # GIVEN a populated housekeeper api with some files
+    version: Version = populated_housekeeper_api.last_version(case_id)
+
+    # GIVEN a FASTQ file tag in the bundle
+    populated_housekeeper_api.add_file(
+        path=madeline_output, version_obj=version, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # GIVEN an empty bundle
+    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+
+    populated_housekeeper_api.commit()
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
+        bundle_names=[case_id, sample_id]
+    )
+
+    # THEN assert all file were not present in all bundles
+    assert not was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
+    case_id: str,
+    compression_object: MockCompressionData,
+    populated_housekeeper_api: MockHousekeeperAPI,
+    madeline_output: Path,
+    sample_id: str,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present."""
+    # GIVEN a populated housekeeper api with some files
+
+    # GIVEN a FASTQ file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # GIVEN an empty bundle
+    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+
+    # GIVEN a SPRING an existing file
+    compression_object.spring_metadata_path.touch()
+
+    # GIVEN a SPRING file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=compression_object.spring_metadata_path,
+        bundle_name=sample_id,
+        tags=[SequencingFileTag.SPRING_METADATA],
+    )
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
+        bundle_names=[case_id, sample_id]
+    )
+
+    # THEN assert all file were present in all bundles
+    assert was_true
+
+
+def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
+    case_id: str,
+    compression_object: MockCompressionData,
+    populated_housekeeper_api: MockHousekeeperAPI,
+    madeline_output: Path,
+    sample_id: str,
+    tags: List[str],
+):
+    """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present and some both FASTQ and SPRING."""
+    # GIVEN a populated housekeeper api with some files
+
+    # GIVEN a FASTQ file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # GIVEN an empty bundle
+    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
+
+    # GIVEN a SPRING an existing file
+    compression_object.spring_metadata_path.touch()
+
+    # GIVEN a SPRING file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=compression_object.spring_metadata_path,
+        bundle_name=sample_id,
+        tags=[SequencingFileTag.SPRING_METADATA],
+    )
+
+    # GIVEN a FASTQ file tag with a file included the bundle
+    populated_housekeeper_api.add_and_include_file_to_latest_version(
+        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
+    )
+
+    # WHEN fetching all files
+    was_true = populated_housekeeper_api.is_fastq_or_spring_in_all_bundles(
+        bundle_names=[case_id, sample_id]
+    )
+
+    # THEN assert all file were present in all bundles
+    assert was_true
