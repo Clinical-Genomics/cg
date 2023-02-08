@@ -14,11 +14,11 @@ from . import admin, api, ext, invoices
 def create_app():
     """Generate a flask application."""
     app = Flask(__name__, template_folder="templates")
-    csrf = CSRFProtect()
+    _load_config(app)
     _configure_extensions(app)
     _register_blueprints(app)
+    csrf = CSRFProtect()
     csrf.init_app(app)
-    _load_config(app)
     return app
 
 
