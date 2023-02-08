@@ -10,7 +10,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import get_analysis_root_dir, suggest_cases_to_upload
 from cg.constants.constants import FileFormat
-from cg.exc import CgDataError, HousekeeperDataError, ScoutUploadError
+from cg.exc import CgDataError, ScoutUploadError
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
