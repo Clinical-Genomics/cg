@@ -30,7 +30,7 @@ def test_add_invoice(base_store, helpers):
     # GIVEN a base_store
 
     # WHEN using the helper to add an invoice with a sample
-    invoice_sample = helpers.add_invoice(base_store, type="Sample", id=1)
+    invoice_sample = helpers.ensure_invoice(base_store, type="Sample", id=1)
 
     # THEN there should be an invoice
     assert invoice_sample

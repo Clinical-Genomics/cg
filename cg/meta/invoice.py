@@ -13,6 +13,9 @@ class InvoiceAPI:
         self.record_type = ""
         self.raw_records = []
         self._set_record_type()
+        self.genologics_lims = genologics_lims
+        self.invoice_info = ""
+
 
     def _set_record_type(self):
         """Define the record_type based on the invoice object.
@@ -62,7 +65,7 @@ class InvoiceAPI:
 
         for raw_record in self.raw_records:
             if self.record_type == "Pool":
-                pooled_samples += genologics_lims.samples_in_pools(
+                pooled_samples += self.genologics_lims.samples_in_pools(
                     raw_record.name, raw_record.ticket
                 )
             record = self.prepare_record(
@@ -92,12 +95,9 @@ class InvoiceAPI:
 
     def _discount_price(self, record, discount: int = 0):
         """Get discount price for a sample or pool."""
-
-        if (
-            self.record_type == "Pool"
-            and not self.customer_obj.internal_id == "cust032"
-            or record.priority_human == "clinical trials"
-        ):
+        if self.customer_obj.internal_id == "cust032":
+            priority = "standard"
+        elif self.record_type == "Pool" or record.priority_human == "clinical trials":
             priority = "research"
         else:
             priority = record.priority_human
@@ -150,11 +150,13 @@ class InvoiceAPI:
         order = record.order
         ticket = record.ticket if self.record_type == "Pool" else record.original_ticket
         lims_id = None if self.record_type == "Pool" else record.internal_id
-        priority = (
-            "research"
-            if self.record_type == "Pool" and not self.customer_obj.internal_id == "cust032"
-            else record.priority_human
-        )
+        if self.customer_obj.internal_id == "cust032":
+            priority = "standard"
+        elif self.record_type == "Pool":
+            priority = "research"
+        else:
+            priority = record.priority_human
+
 
         invoice_info = {
             "name": record.name,
@@ -172,6 +174,8 @@ class InvoiceAPI:
             )
             invoice_info["price_kth"] = price_kth
             invoice_info["total_price"] = discounted_price
+
+        self.invoice_info = invoice_info
         return invoice_info
 
     def total_price(self) -> float:
