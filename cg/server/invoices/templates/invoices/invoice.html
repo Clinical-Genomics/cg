@@ -15,6 +15,7 @@
           <div class="form-group">
             <input type="hidden" name="new_invoice_updates" value=1>
             <input type="hidden" name="invoice_id" value={{invoice.id}}>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="row">
               <div class="col">
                 <div class="card">
@@ -116,6 +117,7 @@
                     <input type="hidden" name="invoice_id" value={{ invoice.id }}>
                     <input type="hidden" name="record_type" value={{ record_type }}>
                     <input type="hidden" name="undo" value=1>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                   </div>
                   </div>
                   </form> 

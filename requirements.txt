@@ -15,6 +15,7 @@ Flask-CORS
 Flask-Dance
 Flask-SQLAlchemy==2.1
 Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
+flask_wtf
 google-auth
 gunicorn
 requests[security]

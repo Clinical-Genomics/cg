@@ -4,6 +4,7 @@ from flask import Flask, redirect, session, url_for
 from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
+from flask_wtf.csrf import CSRFProtect
 
 from cg.store import models
 
@@ -13,6 +14,8 @@ from . import admin, api, ext, invoices
 def create_app():
     """Generate a flask application."""
     app = Flask(__name__, template_folder="templates")
+    csrf = CSRFProtect()
+    csrf.init_app(app)
     _load_config(app)
     _configure_extensions(app)
     _register_blueprints(app)

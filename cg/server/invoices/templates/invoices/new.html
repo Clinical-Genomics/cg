@@ -6,6 +6,7 @@
   <br>
   <form action="{{ url_for('invoices.new', record_type=record_type) }}">
     <input type="hidden" name="record_type" value="{{ record_type }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="row">
       <div class="col">
         <select name="customer" class="form-control" required>
@@ -25,6 +26,7 @@
   <form name="listForm" action="{{ url_for('invoices.index')}}" method="POST" class="mt-3">
     <input type="hidden" name="customer" value="{{ args.customer }}">
     <input type="hidden" name="record_type" value="{{record_type}}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <label>Discount (%)</label>
     <input type="number" class="form-control" name="discount" value="0">
     <div class="form-group">
