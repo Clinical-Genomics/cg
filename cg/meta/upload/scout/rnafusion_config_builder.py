@@ -3,6 +3,7 @@ import logging
 from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
+from cg.constants.constants import PrepCategory
 from cg.constants.scout_upload import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
@@ -33,7 +34,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         db_sample: FamilySample
 
         for db_sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
+            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
 
     def include_case_files(self):
         """Include case level files for rnafusion case."""
@@ -54,18 +55,12 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             self.case_tags.rnafusion_report_research
         )
 
-    def build_config_sample(self, db_sample: FamilySample) -> ScoutRnafusionIndividual:
+    def build_config_sample(self, case_sample: FamilySample) -> ScoutRnafusionIndividual:
         """Build a sample with rnafusion specific information."""
         config_sample = ScoutRnafusionIndividual()
 
-        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
-        if RnafusionAnalysisAPI.get_sample_type(db_sample.sample) == "tumor":
-            config_sample.phenotype = "affected"
-            config_sample.sample_id = "TUMOR"
-        else:
-            config_sample.phenotype = "unaffected"
-            config_sample.sample_id = "NORMAL"
+        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
 
-        config_sample.analysis_type = "wts"
+        config_sample.analysis_type = PrepCategory.WHOLE_TRANSCRIPTOME_SEQUENCING.value
 
         return config_sample
