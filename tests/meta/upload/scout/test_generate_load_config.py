@@ -13,7 +13,8 @@ from cg.models.scout.scout_load_config import (
     ScoutLoadConfig,
     ScoutMipIndividual,
 )
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis
 
 RESULT_KEYS = [
     "family",
@@ -25,10 +26,9 @@ RESULT_KEYS = [
 SAMPLE_FILE_PATHS = ["alignment_path", "chromograph", "vcf2cytosure"]
 
 
-def test_add_mandatory_info_to_mip_config(
-    analysis_obj: models.Analysis, mip_config_builder: MipConfigBuilder
-):
+def test_add_mandatory_info_to_mip_config(analysis: Analysis, mip_config_builder: MipConfigBuilder):
     # GIVEN an cg analysis object
+
     # GIVEN a mip load config object
     assert mip_config_builder.load_config.owner is None
     # GIVEN a file handler with some housekeeper version data
@@ -41,49 +41,47 @@ def test_add_mandatory_info_to_mip_config(
 
 
 def test_generate_balsamic_load_config(
-    balsamic_analysis_obj: models.Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
+    balsamic_analysis: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic
-    assert balsamic_analysis_obj.pipeline == Pipeline.BALSAMIC
+    assert balsamic_analysis.pipeline == Pipeline.BALSAMIC
 
     # GIVEN an upload scout api with some balsamic information
 
     # WHEN generating a load config
-    config = upload_balsamic_analysis_scout_api.generate_config(analysis_obj=balsamic_analysis_obj)
+    config = upload_balsamic_analysis_scout_api.generate_config(analysis_obj=balsamic_analysis)
 
     # THEN assert that the config is a balsamic config
     assert isinstance(config, BalsamicLoadConfig)
 
 
 def test_generate_balsamic_umi_load_config(
-    balsamic_umi_analysis_obj: models.Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
+    balsamic_umi_analysis: Analysis, upload_balsamic_analysis_scout_api: UploadScoutAPI
 ):
     # GIVEN an analysis object that have been run with balsamic-umi
-    assert balsamic_umi_analysis_obj.pipeline == Pipeline.BALSAMIC_UMI
+    assert balsamic_umi_analysis.pipeline == Pipeline.BALSAMIC_UMI
 
     # GIVEN an upload scout api with some balsamic information
 
     # WHEN generating a load config
-    config = upload_balsamic_analysis_scout_api.generate_config(
-        analysis_obj=balsamic_umi_analysis_obj
-    )
+    config = upload_balsamic_analysis_scout_api.generate_config(analysis_obj=balsamic_umi_analysis)
 
     # THEN assert that the config is a balsamic-umi config
     assert isinstance(config, BalsamicUmiLoadConfig)
 
 
 def test_generate_rnafusion_load_config(
-    rnafusion_analysis_obj: models.Analysis, upload_rnafusion_analysis_scout_api: UploadScoutAPI
+    rnafusion_analysis: Analysis, upload_rnafusion_analysis_scout_api: UploadScoutAPI
 ):
     """Test that a rnafusion config is generated."""
     # GIVEN an analysis object that have been run with rnafusion
-    assert rnafusion_analysis_obj.pipeline == Pipeline.RNAFUSION
+    assert rnafusion_analysis.pipeline == Pipeline.RNAFUSION
 
     # GIVEN an upload scout api with some rnafusion information
 
     # WHEN generating a load config
     config: ScoutLoadConfig = upload_rnafusion_analysis_scout_api.generate_config(
-        analysis_obj=rnafusion_analysis_obj
+        analysis_obj=rnafusion_analysis
     )
 
     # THEN assert that the config is a rnafusion config
@@ -93,7 +91,7 @@ def test_generate_rnafusion_load_config(
 @pytest.mark.parametrize("result_key", RESULT_KEYS)
 def test_generate_config_adds_meta_result_key(
     result_key: str,
-    mip_dna_analysis: models.Analysis,
+    mip_dna_analysis: Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that generate config adds the expected result keys"""
@@ -111,7 +109,7 @@ def test_generate_config_adds_meta_result_key(
 
 def test_generate_config_adds_sample_paths(
     sample_id: str,
-    mip_dna_analysis: models.Analysis,
+    mip_dna_analysis: Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that generate config adds vcf2cytosure file"""

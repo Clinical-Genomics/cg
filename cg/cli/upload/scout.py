@@ -8,7 +8,7 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.cli.upload.utils import get_root_dir, suggest_cases_to_upload
+from cg.cli.upload.utils import get_analysis_root_dir, suggest_cases_to_upload
 from cg.constants.constants import FileFormat
 from cg.exc import CgDataError, HousekeeperDataError, ScoutUploadError
 from cg.io.controller import WriteStream
@@ -74,7 +74,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         raise click.Abort from error
     LOG.info("Found load config %s", scout_load_config)
     try:
-        root_dir: Path = get_root_dir(case_obj=case_obj, context=context)
+        root_dir: Path = get_analysis_root_dir(case_obj=case_obj, context=context)
     except ValueError as error:
         LOG.error(f"{error}")
         raise click.Abort from error

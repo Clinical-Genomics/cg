@@ -2,14 +2,14 @@
 import logging
 from datetime import datetime, timedelta
 
-from _pytest.logging import LogCaptureFixture
 from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
 from cg.cli.upload.base import upload
 from cg.constants import DataDelivery
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family
 from tests.cli.workflow.rnafusion.conftest import fixture_rnafusion_case_id
 from tests.store_helpers import StoreHelpers
 
@@ -42,7 +42,7 @@ def test_upload_force_restart(cli_runner: CliRunner, base_context: CGConfig, hel
 
     # GIVEN an analysis that is already uploading
     disk_store: Store = base_context.status_db
-    case: models.Family = helpers.add_case(disk_store)
+    case: Family = helpers.add_case(disk_store)
     case_id: str = case.internal_id
 
     helpers.add_analysis(disk_store, case=case, uploading=True)

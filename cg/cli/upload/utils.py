@@ -22,7 +22,7 @@ def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = Non
         click.echo(case_obj)
 
 
-def get_root_dir(case_obj: Family, context):
+def get_analysis_root_dir(case_obj: Family, context):
     if Pipeline.BALSAMIC in case_obj.data_analysis:
         return Path(context.balsamic.root)
     if Pipeline.MIP_DNA in case_obj.data_analysis:
