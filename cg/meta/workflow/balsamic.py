@@ -555,32 +555,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         return config_data["analysis"]["BALSAMIC_version"]
 
-    def family_has_correct_number_tumor_normal_samples(self, case_id: str) -> bool:
-        """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
-        This check is only applied to filter jobs which start automatically"""
-        query = (
-            self.status_db.query(Sample)
-            .join(Family.links, FamilySample.sample)
-            .filter(Family.internal_id == case_id)
-            .filter(Family.data_analysis == self.pipeline)
-        )
-        return all(
-            [
-                len(query.filter(Sample.is_tumour == False).all()) <= 1,
-                len(query.filter(Sample.is_tumour == True).all()) == 1,
-            ]
-        )
-
-    def get_valid_cases_to_analyze(self) -> list:
-        """Retrieve a list of balsamic cases without analysis,
-        where samples have enough reads to be analyzed"""
-
-        return [
-            case_object.internal_id
-            for case_object in self.get_cases_to_analyze()
-            if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
-        ]
-
     @staticmethod
     def __build_command_str(options: dict) -> List[str]:
         formatted_options = []
