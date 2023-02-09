@@ -7,8 +7,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.models.scout.scout_load_config import ScoutIndividual, ScoutLoadConfig
-from cg.store import models
-from housekeeper.store import models as hk_models
+from cg.store.models import Analysis, FamilySample, Sample
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -18,11 +18,9 @@ LOG = logging.getLogger(__name__)
 class ScoutConfigBuilder:
     """Base class for handling files that should be included in Scout upload"""
 
-    def __init__(
-        self, hk_version_obj: hk_models.Version, analysis_obj: models.Analysis, lims_api: LimsAPI
-    ):
-        self.hk_version_obj: hk_models.Version = hk_version_obj
-        self.analysis_obj: models.Analysis = analysis_obj
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
+        self.hk_version_obj: Version = hk_version_obj
+        self.analysis_obj: Analysis = analysis_obj
         self.lims_api: LimsAPI = lims_api
         self.case_tags: CaseTags
         self.sample_tags: SampleTags
@@ -41,12 +39,10 @@ class ScoutConfigBuilder:
         self.include_phenotype_terms()
 
     def add_common_sample_info(
-        self,
-        config_sample: ScoutIndividual,
-        db_sample: models.FamilySample,
+        self, config_sample: ScoutIndividual, case_sample: FamilySample
     ) -> None:
         """Add the information to a sample that is common for different analysis types"""
-        sample_id: str = db_sample.sample.internal_id
+        sample_id: str = case_sample.sample.internal_id
         LOG.info("Building sample %s", sample_id)
         lims_sample = dict()
         try:
@@ -55,17 +51,19 @@ class ScoutConfigBuilder:
             LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
 
         config_sample.sample_id = sample_id
-        config_sample.sex = db_sample.sample.sex
-        config_sample.phenotype = db_sample.status
-        config_sample.analysis_type = db_sample.sample.application_version.application.analysis_type
-        config_sample.sample_name = db_sample.sample.name
+        config_sample.sex = case_sample.sample.sex
+        config_sample.phenotype = case_sample.status
+        config_sample.analysis_type = (
+            case_sample.sample.application_version.application.analysis_type
+        )
+        config_sample.sample_name = case_sample.sample.name
         config_sample.tissue_type = lims_sample.get("source", "unknown")
-        config_sample.subject_id = db_sample.sample.subject_id
+        config_sample.subject_id = case_sample.sample.subject_id
 
         self.include_sample_alignment_file(config_sample=config_sample)
         self.include_sample_files(config_sample=config_sample)
 
-    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutIndividual:
+    def build_config_sample(self, case_sample: FamilySample) -> ScoutIndividual:
         """Build a sample for the scout load config"""
         raise NotImplementedError
 
@@ -84,9 +82,9 @@ class ScoutConfigBuilder:
     def include_phenotype_terms(self) -> None:
         LOG.info("Adding phenotype terms to scout load config")
         phenotype_terms: Set[str] = set()
-        link_obj: models.FamilySample
+        link_obj: FamilySample
         for link_obj in self.analysis_obj.family.links:
-            sample_obj: models.Sample = link_obj.sample
+            sample_obj: Sample = link_obj.sample
             for phenotype_term in sample_obj.phenotype_terms:
                 LOG.debug(
                     "Adding term %s from sample %s to phenotype terms",
@@ -100,9 +98,9 @@ class ScoutConfigBuilder:
     def include_phenotype_groups(self) -> None:
         LOG.info("Adding phenotype groups to scout load config")
         phenotype_groups: Set[str] = set()
-        link_obj: models.FamilySample
+        link_obj: FamilySample
         for link_obj in self.analysis_obj.family.links:
-            sample_obj: models.Sample = link_obj.sample
+            sample_obj: Sample = link_obj.sample
             for phenotype_group in sample_obj.phenotype_groups:
                 LOG.debug(
                     "Adding group %s from sample %s to phenotype groups",
@@ -168,7 +166,7 @@ class ScoutConfigBuilder:
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
             return None
-        hk_file: Optional[hk_models.File] = HousekeeperAPI.fetch_file_from_version(
+        hk_file: Optional[File] = HousekeeperAPI.fetch_file_from_version(
             version_obj=self.hk_version_obj, tags=hk_tags
         )
         if hk_file is None:

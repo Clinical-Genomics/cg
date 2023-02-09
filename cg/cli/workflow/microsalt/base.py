@@ -297,3 +297,21 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
 
     if EXIT_CODE:
         raise click.Abort
+
+
+@microsalt.command("qc-microsalt")
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_context
+def qc_microsalt(context: click.Context, unique_id: str) -> None:
+    """Perform QC on a microsalt case."""
+    analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    try:
+        analysis_api.microsalt_qc(
+            case_id=unique_id,
+            run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
+            lims_project=analysis_api.get_project(
+                analysis_api.status_db.family(internal_id=unique_id).samples[0].internal_id
+            ),
+        )
+    except IndexError:
+        LOG.error(f"No existing analysis directories found for case {unique_id}.")

@@ -8,7 +8,6 @@ from cg.meta.upload.vogue import UploadVogueAPI
 
 
 def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
-
     """Test load_genotype"""
 
     # GIVEN UploadVogueAPI and a genotype_return_sample
@@ -35,7 +34,6 @@ def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
 
 
 def test_load_apptags(vogue_api, genotype_api, store, mocker):
-
     """Test load application tags"""
     # GIVEN UploadVogueAPI and a set of application tags
     apptags = store.applications().apptag_list
@@ -87,7 +85,6 @@ def test_update_analysis_uploaded_to_vogue_date_now(
         "__defaults__",
         (timestamp_now,),
     ):
-
         result = UploadVogueAPI(
             mock_genotype_api, mock_vogue_api, mock_store
         ).update_analysis_uploaded_to_vogue_date(mock_analysis)

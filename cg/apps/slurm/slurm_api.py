@@ -61,7 +61,6 @@ class SlurmAPI:
 
     @staticmethod
     def write_sbatch_file(sbatch_content: str, sbatch_path: Path, dry_run: bool) -> None:
-
         if dry_run:
             LOG.info("Write sbatch content to path %s: \n%s", sbatch_path, sbatch_content)
             return

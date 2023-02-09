@@ -329,7 +329,6 @@ def options():
 
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):
-
         if not application_obj.versions:
             LOG.debug("Skipping application %s that doesn't have a price", application)
             continue

@@ -73,7 +73,6 @@ def test_cli_workflow_clean_rnafusion(
     base_context: CGConfig,
     before_date: str,
 ):
-
     # GIVEN a before string
 
     # WHEN running command in dry-run
@@ -88,7 +87,6 @@ def test_cli_workflow_clean_microsalt(
     base_context: CGConfig,
     before_date: str,
 ):
-
     # Given a before string
 
     # WHEN running command in dry-run
