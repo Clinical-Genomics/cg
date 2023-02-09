@@ -40,11 +40,11 @@ def test_invoice_api_pool_cust032(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    record_type: str = RecordType,
+    record_type: str = RecordType.Pool,
     customer_id: str = "cust032",
 ):
     # GIVEN a invoice
-    invoice_cust032 = helpers.ensure_invoice(
+    invoice = helpers.ensure_invoice(
         store,
         invoice_id=invoice_id,
         record_type=record_type,
@@ -52,7 +52,7 @@ def test_invoice_api_pool_cust032(
     )
 
     # THEN calling InvoiceAPI should return an API
-    api = InvoiceAPI(store, lims_api, invoice_cust032)
+    api = InvoiceAPI(store, lims_api, invoice)
     assert api
     # THEN record_type should be Sample
     api.genologics_lims = mock.MagicMock()
@@ -67,7 +67,7 @@ def test_invoice_pool_generic_customer(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    record_type: str = "Pool",
+    record_type: str = RecordType.Pool,
     customer_id: str = "cust132",
 ):
 

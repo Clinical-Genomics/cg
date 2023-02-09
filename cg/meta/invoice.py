@@ -38,7 +38,9 @@ class InvoiceAPI:
             return None
         return user
 
-    def get_contact(self, customer: models.Customer, user: models.User or None, msg: str) -> dict or None:
+    def get_contact(
+        self, customer: models.Customer, user: models.User or None, msg: str
+    ) -> dict or None:
         contact = {
             "name": user.name,
             "email": user.email,
@@ -108,7 +110,9 @@ class InvoiceAPI:
             return None
         return round(full_price * discount_factor)
 
-    def _cost_center_split_factor(self, price: int, costcenter: str, percent_kth: , tag: str, version: str):
+    def _cost_center_split_factor(
+        self, price: int, costcenter: str, percent_kth, tag: str, version: str
+    ):
         """Split price based on cost center"""
         if price:
             try:
@@ -146,7 +150,7 @@ class InvoiceAPI:
             costcenter=costcenter,
             application_info=application_info,
         )
-        self.set_invoice_info()
+
         return invoice_info
 
     def get_application_info(self, record, discount: int) -> dict or None:
@@ -202,14 +206,14 @@ class InvoiceAPI:
             price_kth = self._cost_center_split_factor(
                 price=application_info["discounted_price"],
                 costcenter="kth",
-                percent_kth=["percent_kth"],
+                percent_kth=application_info["percent_kth"],
                 tag=application_info["tag"],
                 version=application_info["version"],
             )
             invoice_info["price_kth"] = price_kth
             invoice_info["total_price"] = application_info["discounted_price"]
-
-        return self.invoice_info
+            self.set_invoice_info(invoice_info=invoice_info)
+        return invoice_info
 
     def set_invoice_info(self, invoice_info: dict):
         """Set invoice_info"""
