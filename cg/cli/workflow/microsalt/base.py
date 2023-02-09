@@ -15,6 +15,7 @@ from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import models
 from housekeeper.store.models import File
+from cg.meta.workflow.analysis import AnalysisAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -43,9 +44,7 @@ ARGUMENT_UNIQUE_IDENTIFIER = click.argument("unique_id", required=True, type=cli
 @click.pass_context
 def microsalt(context: click.Context) -> None:
     """Microbial workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
     context.obj.meta_apis["analysis_api"] = MicrosaltAnalysisAPI(
         config=context.obj,
     )
@@ -298,3 +297,21 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
 
     if EXIT_CODE:
         raise click.Abort
+
+
+@microsalt.command("qc-microsalt")
+@ARGUMENT_UNIQUE_IDENTIFIER
+@click.pass_context
+def qc_microsalt(context: click.Context, unique_id: str) -> None:
+    """Perform QC on a microsalt case."""
+    analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
+    try:
+        analysis_api.microsalt_qc(
+            case_id=unique_id,
+            run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
+            lims_project=analysis_api.get_project(
+                analysis_api.status_db.family(internal_id=unique_id).samples[0].internal_id
+            ),
+        )
+    except IndexError:
+        LOG.error(f"No existing analysis directories found for case {unique_id}.")

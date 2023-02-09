@@ -14,6 +14,8 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.meta.workflow.analysis import AnalysisAPI
+
 
 LOG = logging.getLogger(__name__)
 
@@ -22,9 +24,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def mutant(context: click.Context) -> None:
     """Covid analysis workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(
         config=context.obj,
     )
@@ -72,7 +72,6 @@ def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None
 def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str) -> None:
     """Start full analysis workflow for a case"""
     try:
-
         context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, dry_run=dry_run)
         context.invoke(run, case_id=case_id, dry_run=dry_run, config_artic=config_artic)

@@ -25,7 +25,6 @@ def _load_config(app):
 
 
 def _configure_extensions(app: Flask):
-
     _initialize_logging(app)
     certs_resp = requests.get("https://www.googleapis.com/oauth2/v1/certs")
     app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
@@ -43,7 +42,6 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-
     if not app.config["CG_ENABLE_ADMIN"]:
         return
 

@@ -81,7 +81,6 @@ class CaseSubmitter(Submitter):
 
         sample: Of1508Sample
         for sample in samples:
-
             if self._is_rerun_of_existing_case(sample):
                 continue
 
@@ -152,7 +151,6 @@ class CaseSubmitter(Submitter):
         cases = CaseSubmitter._group_cases(order.samples)
 
         for case_name, case_samples in cases.items():
-
             case_internal_id: str = CaseSubmitter._get_single_value(
                 case_name, case_samples, "case_internal_id"
             )

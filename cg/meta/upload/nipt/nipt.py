@@ -16,6 +16,7 @@ from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
+from cg.apps.tb import TrailblazerAPI
 
 LOG = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class NiptUploadAPI:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.status_db: Store = config.status_db
         self.dry_run: bool = False
+        self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run"""
@@ -69,8 +71,8 @@ class NiptUploadAPI:
         if not tags:
             tags: List[str] = self.RESULT_FILE_TAGS
 
-        hk_all_results_file: hk_models.File = self.housekeeper_api.find_file_in_latest_version(
-            case_id=case_id, tags=tags
+        hk_all_results_file: hk_models.File = self.housekeeper_api.get_file_from_latest_version(
+            bundle_name=case_id, tags=tags
         )
 
         if not hk_all_results_file:
@@ -129,6 +131,9 @@ class NiptUploadAPI:
         if not self.dry_run:
             analysis_obj.uploaded_at = dt.datetime.now()
             self.status_db.commit()
+            self.trailblazer_api.set_analysis_uploaded(
+                case_id=case_id, uploaded_at=analysis_obj.uploaded_at
+            )
 
         return analysis_obj
 
@@ -145,7 +150,7 @@ class NiptUploadAPI:
         return analysis_obj
 
     def get_statina_files(self, case_id: str) -> StatinaUploadFiles:
-        """Get statina files from from housekeeper."""
+        """Get statina files from housekeeper."""
 
         hk_results_file: str = self.get_housekeeper_results_file(
             case_id=case_id, tags=["nipt", "metrics"]

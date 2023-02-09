@@ -1,13 +1,16 @@
 import datetime as dt
 import logging
 import os
+import shutil
 from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Optional, Tuple, Union
-import shutil
+
+import click
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, Pipeline, Priority
+from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -15,10 +18,6 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
-from housekeeper.store.models import Bundle, Version
-from cg.utils import click
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-
 
 LOG = logging.getLogger(__name__)
 
@@ -51,11 +50,19 @@ class AnalysisAPI(MetaAPI):
     def fastq_handler(self):
         return FastqHandler
 
+    @staticmethod
+    def get_help(context):
+        """
+        If no argument is passed, print help text
+        """
+        if context.invoked_subcommand is None:
+            click.echo(context.get_help())
+
     def verify_deliverables_file_exists(self, case_id: str) -> None:
         if not Path(self.get_deliverables_file_path(case_id=case_id)).exists():
             raise CgError(f"No deliverables file found for case {case_id}")
 
-    def verify_case_config_file_exists(self, case_id: str):
+    def verify_case_config_file_exists(self, case_id: str) -> None:
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 
@@ -151,23 +158,31 @@ class AnalysisAPI(MetaAPI):
             return analysis_type.lower()
         return "other"
 
-    def upload_bundle_housekeeper(self, case_id: str) -> None:
+    def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
-
         LOG.info(f"Storing bundle data in Housekeeper for {case_id}")
+        bundle_data: dict = self.get_hermes_transformed_deliverables(case_id)
         bundle_result: Tuple[Bundle, Version] = self.housekeeper_api.add_bundle(
-            bundle_data=self.get_hermes_transformed_deliverables(case_id)
+            bundle_data=bundle_data
         )
         if not bundle_result:
+            LOG.info("Bundle already added to Housekeeper!")
             raise BundleAlreadyAddedError("Bundle already added to Housekeeper!")
         bundle_object, bundle_version = bundle_result
+        if dry_run:
+            LOG.info("Dry-run: Housekeeper changes will not be commited")
+            LOG.info(
+                "The following files would be stored:\n%s",
+                "\n".join([f["path"] for f in bundle_data["files"]]),
+            )
+            return
         self.housekeeper_api.include(bundle_version)
         self.housekeeper_api.add_commit(bundle_object, bundle_version)
         LOG.info(
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
 
-    def upload_bundle_statusdb(self, case_id: str) -> None:
+    def upload_bundle_statusdb(self, case_id: str, dry_run: bool = False) -> None:
         """Storing analysis bundle in StatusDB for CASE_ID"""
 
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
@@ -182,6 +197,9 @@ class AnalysisAPI(MetaAPI):
             primary=(len(case_obj.analyses) == 0),
         )
         new_analysis.family = case_obj
+        if dry_run:
+            LOG.info("Dry-run: StatusDB changes will not be commited")
+            return
         self.status_db.add_commit(new_analysis)
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
@@ -228,10 +246,15 @@ class AnalysisAPI(MetaAPI):
             LOG.warning("Could not retrieve %s workflow version!", self.pipeline)
             return "0.0.0"
 
-    def set_statusdb_action(self, case_id: str, action: Optional[str]) -> None:
+    def set_statusdb_action(
+        self, case_id: str, action: Optional[str], dry_run: bool = False
+    ) -> None:
         """
         Set one of the allowed actions on a case in StatusDB.
         """
+        if dry_run:
+            LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
+            return
         if action in [None, *CASE_ACTIONS]:
             case_obj: models.Family = self.status_db.family(case_id)
             case_obj.action = action

@@ -23,7 +23,20 @@ DELIVERY_TYPE = click.option(
     type=click.Choice(PIPELINE_ANALYSIS_OPTIONS),
     required=True,
 )
+FORCE_ALL = click.option(
+    "--force-all",
+    help="Deliver sample files for all samples regardles of amount of reads",
+    is_flag=True,
+)
 TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
+
+IGNORE_MISSING_BUNDLES = click.option(
+    "-i",
+    "--ignore-missing-bundles",
+    help="Ignore errors due to missing case bundles",
+    is_flag=True,
+    default=False,
+)
 
 
 @click.group()
@@ -39,6 +52,8 @@ def deliver():
 @click.option(
     "-t", "--ticket", type=str, help="Deliver the files for ALL cases connected to a ticket"
 )
+@FORCE_ALL
+@IGNORE_MISSING_BUNDLES
 @click.pass_obj
 def deliver_analysis(
     context: CGConfig,
@@ -46,6 +61,8 @@ def deliver_analysis(
     ticket: Optional[str],
     delivery_type: List[str],
     dry_run: bool,
+    force_all: bool,
+    ignore_missing_bundles: bool,
 ):
     """Deliver analysis files to customer inbox
 
@@ -70,6 +87,8 @@ def deliver_analysis(
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery]["sample_tags"],
             project_base_path=Path(inbox),
             delivery_type=delivery,
+            force_all=force_all,
+            ignore_missing_bundles=ignore_missing_bundles,
         )
         deliver_api.set_dry_run(dry_run)
         cases: List[models.Family] = []
@@ -122,6 +141,8 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
 @deliver.command(name="ticket")
 @DELIVERY_TYPE
 @DRY_RUN
+@FORCE_ALL
+@IGNORE_MISSING_BUNDLES
 @click.option(
     "-t",
     "--ticket",
@@ -132,9 +153,11 @@ def concatenate(context: click.Context, ticket: str, dry_run: bool):
 @click.pass_context
 def deliver_ticket(
     context: click.Context,
-    ticket: str,
     delivery_type: List[str],
     dry_run: bool,
+    force_all: bool,
+    ticket: str,
+    ignore_missing_bundles: bool,
 ):
     """Will first collect hard links in the customer inbox then
     concatenate fastq files if needed and finally send the folder
@@ -146,7 +169,12 @@ def deliver_ticket(
     if is_upload_needed:
         LOG.info("Delivering files to customer inbox on the HPC")
         context.invoke(
-            deliver_analysis, ticket=ticket, delivery_type=delivery_type, dry_run=dry_run
+            deliver_analysis,
+            delivery_type=delivery_type,
+            dry_run=dry_run,
+            force_all=force_all,
+            ticket=ticket,
+            ignore_missing_bundles=ignore_missing_bundles,
         )
     else:
         LOG.info("Files already delivered to customer inbox on the HPC")

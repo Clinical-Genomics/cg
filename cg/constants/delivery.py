@@ -20,16 +20,19 @@ BALSAMIC_ANALYSIS_CASE_TAGS = [
     {"metrics"},
     {"visualization"},
     {"coverage"},
-    {"vcf-sv-clinical"},
-    {"vcf-sv-clinical-index"},
+    {"germline"},
+    {"vcf-sv"},
+    {"vcf-sv-index"},
     {"vcf-sv-research"},
     {"vcf-sv-research-index"},
-    {"vcf-snv-clinical"},
-    {"vcf-snv-clinical-index"},
+    {"vcf-sv-clinical"},
+    {"vcf-sv-clinical-index"},
+    {"vcf-snv"},
+    {"vcf-snv-index"},
     {"vcf-snv-research"},
     {"vcf-snv-research-index"},
-    {"germline", "vcf"},
-    {"germline", "vcf-index"},
+    {"vcf-snv-clinical"},
+    {"vcf-snv-clinical-index"},
     {"vcf2cytosure"},
 ]
 
@@ -48,10 +51,12 @@ BALSAMIC_QC_ANALYSIS_SAMPLE_TAGS = [
 ]
 
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS = [
-    {"vcf-umi-snv-clinical"},
-    {"vcf-umi-snv-clinical-index"},
+    {"vcf-umi-snv"},
+    {"vcf-umi-snv-index"},
     {"vcf-umi-snv-research"},
     {"vcf-umi-snv-research-index"},
+    {"vcf-umi-snv-clinical"},
+    {"vcf-umi-snv-clinical-index"},
 ]
 
 BALSAMIC_UMI_ANALYSIS_CASE_TAGS.extend(BALSAMIC_ANALYSIS_CASE_TAGS)
@@ -167,3 +172,6 @@ PIPELINE_ANALYSIS_TAG_MAP = {
 }
 
 PIPELINE_ANALYSIS_OPTIONS = PIPELINE_ANALYSIS_TAG_MAP.keys()
+
+INBOX_NAME = "inbox"
+OUTBOX_NAME = "outbox"

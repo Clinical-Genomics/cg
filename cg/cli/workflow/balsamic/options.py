@@ -42,3 +42,17 @@ OPTION_PON_CNN = click.option(
     required=False,
     help="Panel of normal reference (.cnn) for CNVkit",
 )
+OPTION_OBSERVATIONS = click.option(
+    "--observations",
+    type=click.Path(exists=True),
+    multiple=True,
+    required=False,
+    help="VCF paths of clinical and/or cancer SNVs and SVs observations (WGS analysis only). Set this option to "
+    "override the latest Loqusdb dump files.",
+)
+OPTION_FORCE_NORMAL = click.option(
+    "--force-normal",
+    is_flag=True,
+    default=False,
+    help="Force Balsamic analysis on a normal sample",
+)

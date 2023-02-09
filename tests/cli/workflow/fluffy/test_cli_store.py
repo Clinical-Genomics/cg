@@ -39,7 +39,6 @@ def test_cli_store(
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
@@ -169,7 +168,6 @@ def test_cli_store_available_case_not_running(
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 

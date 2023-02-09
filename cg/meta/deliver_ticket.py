@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 from typing import List
 
+from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
@@ -32,7 +33,7 @@ class DeliverTicketAPI(MetaAPI):
                 f"The customer id was not identified since no cases for ticket {ticket} was found"
             )
         customer_id: str = cases[0].customer.internal_id
-        return Path(self.delivery_path, customer_id, "inbox", ticket)
+        return Path(self.delivery_path, customer_id, INBOX_NAME, ticket)
 
     def check_if_upload_is_needed(self, ticket: str) -> bool:
         customer_inbox: Path = self.get_inbox_path(ticket=ticket)

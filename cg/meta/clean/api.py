@@ -6,7 +6,7 @@ from pathlib import Path
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
-from cg.constants.tags import WORKFLOW_PROTECTED_TAGS
+from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.store import Store, models
 
@@ -62,7 +62,6 @@ class CleanAPI:
 
         _has_protected_tags: bool = False
         for protected_tags in protected_tags_lists:
-
             if set(protected_tags).issubset(set(file_tags)):
                 LOG.debug(
                     "File %s has the protected tag(s) %s, skipping.",
@@ -81,7 +80,6 @@ class CleanAPI:
 
         pipeline: Pipeline
         for pipeline in Pipeline:
-
             protected_tags_lists = WORKFLOW_PROTECTED_TAGS.get(pipeline)
             if not protected_tags_lists:
                 LOG.debug("No protected tags defined for %s, skipping", pipeline)

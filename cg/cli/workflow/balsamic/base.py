@@ -1,6 +1,7 @@
-"""CLI support to create config and/or start BALSAMIC """
+"""CLI support to create config and/or start BALSAMIC."""
 
 import logging
+from typing import List
 
 import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -11,6 +12,8 @@ from cg.cli.workflow.balsamic.options import (
     OPTION_GENOME_VERSION,
     OPTION_PON_CNN,
     OPTION_GENDER,
+    OPTION_OBSERVATIONS,
+    OPTION_FORCE_NORMAL,
 )
 from cg.cli.workflow.commands import link, resolve_compression, ARGUMENT_CASE_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -29,9 +32,8 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 def balsamic(context: click.Context):
     """Cancer analysis workflow"""
-    if context.invoked_subcommand is None:
-        click.echo(context.get_help())
-        return None
+    AnalysisAPI.get_help(context)
+
     config = context.obj
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(
         config=config,
@@ -48,6 +50,8 @@ balsamic.add_command(link)
 @OPTION_GENOME_VERSION
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
+@OPTION_OBSERVATIONS
+@OPTION_FORCE_NORMAL
 @DRY_RUN
 @click.pass_obj
 def config_case(
@@ -57,9 +61,11 @@ def config_case(
     genome_version: str,
     panel_bed: str,
     pon_cnn: click.Path,
+    observations: List[click.Path],
+    force_normal: bool,
     dry_run: bool,
 ):
-    """Create config file for BALSAMIC analysis for a given CASE_ID"""
+    """Create config file for BALSAMIC analysis for a given CASE_ID."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     try:
@@ -71,6 +77,8 @@ def config_case(
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
+            observations=observations,
+            force_normal=force_normal,
             dry_run=dry_run,
         )
     except CgError as error:
@@ -179,6 +187,7 @@ def store_housekeeper(context: CGConfig, case_id: str):
 @OPTION_PANEL_BED
 @OPTION_PON_CNN
 @OPTION_RUN_ANALYSIS
+@OPTION_FORCE_NORMAL
 @click.pass_context
 def start(
     context: click.Context,
@@ -189,6 +198,7 @@ def start(
     pon_cnn: str,
     slurm_quality_of_service: str,
     run_analysis: bool,
+    force_normal: bool,
     dry_run: bool,
 ):
     """Start full workflow for CASE ID"""
@@ -203,6 +213,7 @@ def start(
             genome_version=genome_version,
             panel_bed=panel_bed,
             pon_cnn=pon_cnn,
+            force_normal=force_normal,
             dry_run=dry_run,
         )
         context.invoke(

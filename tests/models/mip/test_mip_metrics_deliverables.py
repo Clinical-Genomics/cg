@@ -152,7 +152,6 @@ def test_instantiate_mip_metrics_set_sample_id_metrics(mip_metrics_deliverables_
 
     # WHEN looping through sample_id metrics
     for sample_id_metric in metrics_object.sample_id_metrics:
-
         # THEN assert that sample_id metrics was successfully created
         assert isinstance(sample_id_metric, MIPParsedMetrics)
 

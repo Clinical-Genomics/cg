@@ -17,9 +17,8 @@ from cg.constants.constants import (
     DataDelivery,
     FileExtensions,
     FlowCellStatus,
-    HousekeeperTags,
-    Pipeline,
 )
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.constants.gene_panel import GenePanelMasterList
 from cg.constants.paths import TMP_DIR
 from cg.constants.priority import Priority
@@ -27,4 +26,4 @@ from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS, RETURN_SUCCESS
 from cg.constants.report import *
 from cg.constants.sample_sources import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.symbols import NO_PARENT, SINGLE_QUOTE, SPACE
-from cg.constants.tags import HK_FASTQ_TAGS
+from cg.constants.housekeeper_tags import HK_FASTQ_TAGS

@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import List
 
 from cg.constants.indexes import ListIndexes
 from cg.exc import BalsamicStartError
@@ -31,6 +32,8 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         genome_version: str,
         panel_bed: str,
         pon_cnn: str,
+        observations: List[str],
+        force_normal: bool,
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis"""

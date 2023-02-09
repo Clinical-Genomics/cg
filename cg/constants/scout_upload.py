@@ -10,12 +10,13 @@ MIP_CASE_TAGS = dict(
     peddy_check={"ped-check", "peddy"},
     multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
+    str_catalog={"expansionhunter", "variant-catalog"},
 )
 
 BALSAMIC_CASE_TAGS = dict(
     sv_vcf={"vcf-sv-clinical"},
     snv_vcf={"vcf-snv-clinical"},
-    cnv_report={"ascatngs", "visualization"},
+    cnv_report={"cnv-report"},
     multiqc_report={"multiqc-html"},
     delivery_report={"delivery-report"},
 )
@@ -36,6 +37,10 @@ MIP_SAMPLE_TAGS = dict(
     chromograph_coverage={"chromograph", "tcov"},
     chromograph_regions={"chromograph", "regions"},
     chromograph_sites={"chromograph", "sites"},
+    reviewer_alignment={"expansionhunter", "bam"},
+    reviewer_alignment_index={"expansionhunter", "bam-index"},
+    reviewer_vcf={"expansionhunter", "vcf-str"},
+    mitodel_file={"mitodel"},
 )
 
 BALSAMIC_SAMPLE_TAGS = dict(

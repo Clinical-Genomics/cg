@@ -1,11 +1,13 @@
 """
-Code to handle communications to the shell from CG
+Code to handle communications to the shell from CG.
 """
 
 import copy
 import logging
 import subprocess
+from pathlib import Path
 from subprocess import CalledProcessError
+from typing import Dict, List
 
 from cg.constants.process import RETURN_SUCCESS
 
@@ -13,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Process:
-    """Class to handle communication with other programs via the shell
+    """Class to handle communication with other programs via the shell.
 
     The other parts of the code should not need to have any knowledge about how the processes are
     called, that will be handled in this module.Output form stdout and stdin will be handled here.
@@ -26,6 +28,7 @@ class Process:
         config: str = None,
         config_parameter: str = "--config",
         environment: str = None,
+        launch_directory: str = None,
     ):
         """
         Args:
@@ -34,23 +37,35 @@ class Process:
             environment(str): Activate conda environment before executing binary
         """
         super(Process, self).__init__()
-        self.binary = binary
-        self.conda_binary = conda_binary
-        self.config = config
-        self.environment = environment
+        self.binary: str = binary
+        self.conda_binary: str = conda_binary
+        self.config: str = config
+        self.environment: str = environment
+        self.launch_directory: str = launch_directory
         LOG.debug("Initialising Process with binary: %s", self.binary)
-        self.base_call = [self.binary]
+        self.base_call: List[str] = [self.binary]
+
         if conda_binary:
-            LOG.debug("Activating environment with conda run for binary: %s", self.conda_binary)
+            LOG.debug(f"Activating environment with conda run for binary: {self.conda_binary}")
             self.base_call.insert(0, f"{self.conda_binary} run --name {self.environment}")
         elif environment:
-            LOG.debug("Activating environment with: %s", self.environment)
+            LOG.debug(f"Activating environment with: {self.environment}")
             self.base_call.insert(0, f"source activate {self.environment};")
         if config:
             self.base_call.extend([config_parameter, config])
-        LOG.debug("Use base call %s", self.base_call)
+        if launch_directory:
+            self.base_call.insert(0, f"cd {self.launch_directory};")
+
+        LOG.debug(f"Use base call {self.base_call}")
         self._stdout = ""
         self._stderr = ""
+
+    def export_variables(self, export: Dict[str, str]) -> None:
+        """Export variables prior to execution."""
+        if export:
+            self.base_call.insert(
+                0, " ".join([f"export {variable}={value};" for variable, value in export.items()])
+            )
 
     def run_command(self, parameters: list = None, dry_run: bool = False) -> int:
         """Execute a command in the shell.

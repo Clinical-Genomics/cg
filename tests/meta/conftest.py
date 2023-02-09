@@ -1,6 +1,7 @@
 """Fixtures for the meta tests."""
 import datetime as dt
 from datetime import datetime
+from pathlib import Path
 from typing import Generator
 
 import pytest
@@ -8,10 +9,14 @@ import pytest
 from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.tags import HkMipAnalysisTag
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import HkMipAnalysisTag
+from cg.constants.sequencing import Sequencers
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
+from cg.store.models import Flowcell, Customer, ApplicationVersion
+from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 
 
@@ -95,6 +100,7 @@ def fixture_mip_hk_store(
 
 @pytest.fixture()
 def mip_analysis_api(context_config, mip_hk_store, analysis_store):
+    """Return a MIP analysis API."""
     analysis_api = MipDNAAnalysisAPI(context_config)
     analysis_api.housekeeper_api = mip_hk_store
     analysis_api.status_db = analysis_store
@@ -103,25 +109,33 @@ def mip_analysis_api(context_config, mip_hk_store, analysis_store):
 
 @pytest.fixture(name="binary_path")
 def fixture_binary_path() -> str:
-    """Return the string of a path to a (fake) binary"""
-    return "/usr/bin/binary"
+    """Return the string of a path to a (fake) binary."""
+    return Path("usr", "bin", "binary").as_posix()
+
+
+@pytest.fixture(name="yet_another_flow_cell_id")
+def fixture_yet_another_flow_cell_id() -> str:
+    """Return flow cell id."""
+    return "HJKMYBCXX"
 
 
 @pytest.fixture(name="stats_sample_data")
-def fixture_stats_sample_data(sample_id: str, flow_cell_id: str) -> dict:
+def fixture_stats_sample_data(
+    sample_id: str, flow_cell_id: str, yet_another_flow_cell_id: str
+) -> dict:
     return {
         "samples": [
             {
                 "name": sample_id,
                 "index": "ACGTACAT",
                 "flowcell": flow_cell_id,
-                "type": "hiseqx",
+                "type": Sequencers.HISEQX,
             },
             {
                 "name": "ADM1136A3",
                 "index": "ACGTACAT",
-                "flowcell": "HJKMYBCXX",
-                "type": "hiseqx",
+                "flowcell": yet_another_flow_cell_id,
+                "type": Sequencers.HISEQX,
             },
         ]
     }
@@ -198,10 +212,8 @@ def fixture_flowcell_store(
 ) -> Generator[Store, None, None]:
     """Setup store with sample data for testing flow cell transfer."""
     for sample_data in stats_sample_data["samples"]:
-        customer_obj: models.Customer = base_store.customers().first()
-        application_version: models.ApplicationVersion = base_store.application(
-            "WGSPCFC030"
-        ).versions[0]
+        customer_obj: Customer = base_store.customers().first()
+        application_version: ApplicationVersion = base_store.application("WGSPCFC030").versions[0]
         sample: models.Sample = base_store.add_sample(
             name="NA", sex="male", internal_id=sample_data["name"]
         )
@@ -215,7 +227,7 @@ def fixture_flowcell_store(
 
 @pytest.fixture(name="transfer_flow_cell_api")
 def fixture_transfer_flow_cell_api(
-    flowcell_store: Store, housekeeper_api: HousekeeperAPI, base_store_stats: StatsAPI
+    flowcell_store: Store, housekeeper_api: MockHousekeeperAPI, base_store_stats: StatsAPI
 ) -> Generator[TransferFlowCell, None, None]:
-    """Setup flow cell transfer API."""
+    """Setup transfer flow cell API."""
     yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)

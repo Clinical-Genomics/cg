@@ -118,9 +118,9 @@ class HousekeeperFileMissingError(CgError):
         self.errors = errors
 
 
-class HousekeeperVersionMissingError(CgError):
+class HousekeeperBundleVersionMissingError(CgError):
     """
-    Exception raised when family version is missing in Housekeeper.
+    Exception raised when bundle version is missing in Housekeeper.
     """
 
 
@@ -178,6 +178,12 @@ class PedigreeConfigError(CgError):
 class PipelineUnknownError(CgError):
     """
     Exception raised when a sample in a case has no data analysis type.
+    """
+
+
+class RnafusionStartError(CgError):
+    """
+    Exception raised when rnafusion fails to start
     """
 
 
@@ -241,3 +247,7 @@ class LoqusdbDeleteCaseError(LoqusdbError):
 
 class LoqusdbDuplicateRecordError(LoqusdbError):
     """Exception related to duplicate records in Loqusdb."""
+
+
+class PdcNoFilesMatchingSearchError(CgError):
+    """Exception raised when PDC API returns no files matching the search criteria."""

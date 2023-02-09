@@ -16,7 +16,7 @@ from cg.exc import DeliveryReportError
 from cg.io.controller import WriteStream
 from cg.meta.report.field_validators import get_missing_report_data, get_empty_report_data
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.constants.tags import HK_DELIVERY_REPORT_TAG
+from cg.constants.housekeeper_tags import HK_DELIVERY_REPORT_TAG
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI

@@ -41,7 +41,6 @@ def process_solved(
 
     number_processed = 0
     for case in finished_cases:
-
         number_processed += 1
         if customers and case.owner not in customers:
             LOG.info("skipping %s: Not valid customer %s", case.id, case.owner)

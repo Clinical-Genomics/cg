@@ -9,6 +9,7 @@ from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.constants.constants import FileFormat
+from cg.constants.delivery import INBOX_NAME
 from cg.constants.priority import SlurmQos, SLURM_ACCOUNT_TO_QOS
 from cg.exc import CgError
 from cg.io.controller import WriteFile
@@ -79,7 +80,7 @@ class RsyncAPI(MetaAPI):
         """Concatenates the rsync commands for each folder to be transferred."""
         commands = ""
         for folder in folder_list:
-            source_path: Path = source_and_destination_paths["delivery_source_path"] / folder
+            source_path: Path = Path(source_and_destination_paths["delivery_source_path"], folder)
             destination_path: Path = Path(
                 source_and_destination_paths["rsync_destination_path"], ticket
             )
@@ -107,10 +108,10 @@ class RsyncAPI(MetaAPI):
             raise CgError()
         customer_id: str = cases[0].customer.internal_id
         source_and_destination_paths["delivery_source_path"]: Path = Path(
-            self.delivery_path, customer_id, "inbox", ticket
+            self.delivery_path, customer_id, INBOX_NAME, ticket
         )
         source_and_destination_paths["rsync_destination_path"]: Path = Path(
-            self.destination_path, customer_id, "inbox"
+            self.destination_path, customer_id, INBOX_NAME
         )
         return source_and_destination_paths
 
@@ -171,10 +172,7 @@ class RsyncAPI(MetaAPI):
         folder_list: List[str] = []
         if sample_files_present:
             folder_list.extend(
-                [
-                    sample.name
-                    for sample in self.status_db.get_samples_by_family_id(family_id=case_id)
-                ]
+                [sample.name for sample in self.status_db.get_samples_by_case_id(case_id=case_id)]
             )
         if case_files_present:
             folder_list.append(self.status_db.family(case_id).name)
@@ -196,22 +194,23 @@ class RsyncAPI(MetaAPI):
         self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
 
-        folder_list: List[str] = self.get_folders_to_deliver(
+        folders: List[str] = self.get_folders_to_deliver(
             case_id=case_id,
             sample_files_present=sample_files_present,
             case_files_present=case_files_present,
         )
-        existing_folder_list: List[str] = [
+        existing_folders: List[str] = [
             folder
-            for folder in folder_list
-            if (source_and_destination_paths["delivery_source_path"].joinpath(folder).exists())
+            for folder in folders
+            if Path(source_and_destination_paths["delivery_source_path"], folder).exists()
         ]
         commands: str = RsyncAPI.concatenate_rsync_commands(
-            folder_list=existing_folder_list,
+            folder_list=existing_folders,
             source_and_destination_paths=source_and_destination_paths,
             ticket=ticket,
         )
-        return folder_list == existing_folder_list, self.sbatch_rsync_commands(
+        is_complete_delivery: bool = folders == existing_folders
+        return is_complete_delivery, self.sbatch_rsync_commands(
             commands=commands, job_prefix=case_id, dry_run=dry_run
         )
 

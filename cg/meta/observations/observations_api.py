@@ -2,19 +2,22 @@
 
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional, Union
 
 from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.loqus import LoqusdbAPI
-from cg.constants.observations import LoqusdbInstance
+from cg.constants.observations import LoqusdbInstance, LoqusdbBalsamicCustomers, LoqusdbMipCustomers
+from cg.exc import LoqusdbUploadCaseError
 from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.models.observations.input_files import (
     MipDNAObservationsInputFiles,
     BalsamicObservationsInputFiles,
 )
 from cg.store import Store, models
+from cg.store.models import Customer
 
 LOG = logging.getLogger(__name__)
 
@@ -32,6 +35,7 @@ class ObservationsAPI:
 
     def upload(self, case: models.Family) -> None:
         """Upload observations to Loqusdb."""
+        self.check_customer_loqusdb_permissions(case.customer)
         input_files: Union[
             MipDNAObservationsInputFiles, BalsamicObservationsInputFiles
         ] = self.get_observations_input_files(case)
@@ -70,6 +74,24 @@ class ObservationsAPI:
         }
         return loqusdb_apis[loqusdb_instance]
 
+    @staticmethod
+    def is_duplicate(
+        case: models.Family,
+        loqusdb_api: LoqusdbAPI,
+        profile_vcf_path: Optional[Path],
+        profile_threshold: Optional[float],
+    ) -> bool:
+        """Check if a case has already been uploaded to Loqusdb."""
+        loqusdb_case: dict = loqusdb_api.get_case(case_id=case.internal_id)
+        duplicate = (
+            loqusdb_api.get_duplicate(
+                profile_vcf_path=profile_vcf_path, profile_threshold=profile_threshold
+            )
+            if profile_vcf_path and profile_threshold
+            else None
+        )
+        return bool(loqusdb_case or duplicate or case.loqusdb_uploaded_samples)
+
     def update_statusdb_loqusdb_id(
         self, samples: List[models.Family], loqusdb_id: Optional[str]
     ) -> None:
@@ -77,6 +99,19 @@ class ObservationsAPI:
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
         self.store.commit()
+
+    def check_customer_loqusdb_permissions(self, customer: Customer) -> None:
+        """Verifies that the customer is whitelisted for Loqusdb uploads."""
+        if customer.internal_id not in [cust_id.value for cust_id in self.get_loqusdb_customers()]:
+            LOG.error(
+                f"Customer {customer.internal_id} is not whitelisted for Loqusdb uploads. Cancelling upload."
+            )
+            raise LoqusdbUploadCaseError
+        LOG.info(f"Valid customer {customer.internal_id} for Loqusdb uploads")
+
+    def get_loqusdb_customers(self) -> Union[LoqusdbMipCustomers, LoqusdbBalsamicCustomers]:
+        """Returns the customers that are entitled to Loqusdb uploads."""
+        raise NotImplementedError
 
     def load_observations(
         self,

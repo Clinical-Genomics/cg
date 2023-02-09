@@ -8,6 +8,7 @@ from typing import Iterable, List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.cgstats.stats import StatsAPI
+from cg.constants import SequencingFileTag
 from cg.exc import DeleteDemuxError
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -99,14 +100,12 @@ class DeleteDemuxAPI:
             log.info(f"Could not find {tag} for {sample.internal_id}")
         else:
             for housekeeper_file in housekeeper_files:
-                self.housekeeper_api.delete_file_if_related(
-                    stem=self.demultiplexing_path.as_posix(), hk_file=housekeeper_file
-                )
+                self.housekeeper_api.delete_file(file_id=housekeeper_file.id)
 
     def _delete_fastq_and_spring_housekeeper(self) -> None:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
 
-        tags = ["fastq", "spring"]
+        tags = [SequencingFileTag.FASTQ, SequencingFileTag.SPRING]
         for tag, sample in itertools.product(tags, self.samples_on_flow_cell):
             self._delete_files_if_related_in_housekeeper_by_tag(sample=sample, tag=tag)
 
@@ -135,7 +134,7 @@ class DeleteDemuxAPI:
         if self.dry_run:
             log.info(f"DeleteDemuxAPI-StatusDB: Would remove {self.flow_cell_name}")
         else:
-            self.status_db.delete_flowcell(flowcell_name=self.flow_cell_name)
+            self.status_db.delete_flow_cell(flow_cell_name=self.flow_cell_name)
             log.info(f"DeleteDemuxAPI-StatusDB: Deleted flowcell {self.flow_cell_name}")
 
     def delete_flow_cell_cgstats(self) -> None:
@@ -173,7 +172,7 @@ class DeleteDemuxAPI:
             )
             return
         if demultiplexing_dir and run_dir and self.status_db_presence:
-            flow_cell_obj: Flowcell = self.status_db.flowcell(self.flow_cell_name)
+            flow_cell_obj: Flowcell = self.status_db.get_flow_cell(self.flow_cell_name)
             flow_cell_obj.status = "removed"
             self.status_db.commit()
         if demultiplexing_dir and self.demultiplexing_path.exists():

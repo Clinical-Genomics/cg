@@ -31,13 +31,18 @@ class Sequencers(BaseModel):
     novaseq: str
 
 
+class EncryptionDirs(BaseModel):
+    current: str
+    legacy: str
+
+
 class FlowCellRunDirs(Sequencers):
     pass
 
 
 class BackupConfig(BaseModel):
     root: Sequencers
-    encrypt_dir: str
+    encrypt_dir: EncryptionDirs
 
 
 class CleanDirs(BaseModel):
@@ -51,7 +56,10 @@ class CleanConfig(BaseModel):
 
 class SlurmConfig(BaseModel):
     account: str
+    hours: Optional[int]
     mail_user: EmailStr
+    memory: Optional[int]
+    number_tasks: Optional[int]
     conda_env: Optional[str]
     qos: SlurmQos = SlurmQos.LOW
 
@@ -117,11 +125,15 @@ class MutaccAutoConfig(CommonAppConfig):
 
 
 class BalsamicConfig(CommonAppConfig):
-    root: str
     balsamic_cache: str
+    bed_path: str
     binary_path: str
     conda_env: str
+    loqusdb_path: str
+    pon_path: str
+    root: str
     slurm: SlurmConfig
+    swegen_path: str
 
 
 class MutantConfig(BaseModel):
@@ -138,6 +150,17 @@ class MipConfig(BaseModel):
     pipeline: str
     root: str
     script: str
+
+
+class RnafusionConfig(CommonAppConfig):
+    root: str
+    references: str
+    binary_path: str
+    pipeline_path: str
+    conda_env: str
+    profile: str
+    conda_binary: Optional[str] = None
+    launch_directory: str
 
 
 class CGStatsConfig(BaseModel):
@@ -197,8 +220,6 @@ class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
     madeline_exe: str
-    bed_path: str
-    pon_path: str
     delivery_path: str
     max_flowcells: Optional[int]
     email_base_settings: EmailBaseSettings
@@ -255,6 +276,7 @@ class CGConfig(BaseModel):
     mip_rd_dna: MipConfig = Field(None, alias="mip-rd-dna")
     mip_rd_rna: MipConfig = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig = None
+    rnafusion: RnafusionConfig = Field(None, alias="rnafusion")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}

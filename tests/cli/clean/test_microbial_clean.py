@@ -2,6 +2,8 @@ import datetime as dt
 import logging
 from pathlib import Path
 
+import pytest
+
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import clean_run_dir
 from cg.constants import Pipeline

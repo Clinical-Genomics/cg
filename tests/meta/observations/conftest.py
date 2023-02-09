@@ -5,7 +5,9 @@ from typing import Optional
 import pytest
 
 from cg.apps.loqus import LoqusdbAPI
+from cg.constants.observations import LOQUSDB_ID
 from cg.constants.sequencing import SequencingMethod
+from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
 from cg.models.cg_config import CGConfig
 
@@ -21,6 +23,8 @@ from tests.apps.loqus.conftest import (
 from tests.models.observations.conftest import (
     fixture_observations_input_files_raw,
     fixture_observations_input_files,
+    fixture_balsamic_observations_input_files_raw,
+    fixture_balsamic_observations_input_files,
 )
 
 
@@ -42,7 +46,7 @@ class MockLoqusdbAPI(LoqusdbAPI):
         """Mock get_case method."""
         _ = args
         _ = kwargs
-        return {"case_id": "case_id", "_id": "123"}
+        return {"case_id": "case_id", LOQUSDB_ID: "123"}
 
     @staticmethod
     def get_duplicate(*args, **kwargs) -> Optional[dict]:
@@ -59,13 +63,13 @@ class MockLoqusdbAPI(LoqusdbAPI):
         return None
 
 
-@pytest.fixture(scope="function", name="mock_loqusdb_api")
+@pytest.fixture(name="mock_loqusdb_api")
 def fixture_mock_loqusdb_api(filled_file) -> MockLoqusdbAPI:
     """Mock Loqusdb API."""
     return MockLoqusdbAPI(binary_path=filled_file, config_path=filled_file)
 
 
-@pytest.fixture(scope="function", name="mip_dna_observations_api")
+@pytest.fixture(name="mip_dna_observations_api")
 def fixture_mip_dna_observations_api(
     cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI
 ) -> MipDNAObservationsAPI:
@@ -73,3 +77,14 @@ def fixture_mip_dna_observations_api(
     mip_dna_observations_api = MipDNAObservationsAPI(cg_config_object, SequencingMethod.WGS)
     mip_dna_observations_api.loqusdb_api = mock_loqusdb_api
     return mip_dna_observations_api
+
+
+@pytest.fixture(name="balsamic_observations_api")
+def fixture_balsamic_observations_api(
+    cg_config_object: CGConfig, mock_loqusdb_api: MockLoqusdbAPI
+) -> BalsamicObservationsAPI:
+    """Rare diseases observations API fixture."""
+    balsamic_observations_api = BalsamicObservationsAPI(cg_config_object, SequencingMethod.WGS)
+    balsamic_observations_api.loqusdb_somatic_api = mock_loqusdb_api
+    balsamic_observations_api.loqusdb_tumor_api = mock_loqusdb_api
+    return balsamic_observations_api

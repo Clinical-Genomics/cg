@@ -81,7 +81,6 @@ def analysis(context: CGConfig, case_id: str):
     LOG.debug("%s: get info about case analysis", case_obj.internal_id)
 
     for analysis_obj in case_obj.analyses:
-
         row = [
             analysis_obj.started_at,
             analysis_obj.pipeline,
@@ -104,7 +103,6 @@ def relations(context: CGConfig, family_id: str):
     LOG.debug("%s: get info about family relations", case_obj.internal_id)
 
     for link_obj in case_obj.links:
-
         row = [
             link_obj.sample.internal_id if link_obj.sample else "",
             link_obj.mother.internal_id if link_obj.mother else "",
@@ -176,7 +174,7 @@ def family(
 def flowcell(context: click.Context, samples: bool, flowcell_id: str):
     """Get information about a flowcell and the samples on it."""
     status_db: Store = context.obj.status_db
-    flowcell_obj: models.Flowcell = status_db.flowcell(flowcell_id)
+    flowcell_obj: models.Flowcell = status_db.get_flow_cell(flowcell_id)
     if flowcell_obj is None:
         LOG.error(f"{flowcell_id}: flowcell not found")
         raise click.Abort

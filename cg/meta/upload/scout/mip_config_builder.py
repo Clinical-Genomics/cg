@@ -3,16 +3,18 @@ import re
 from pathlib import Path
 from typing import Optional
 
+from housekeeper.store import models as hk_models
+
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.constants.scout_upload import MIP_CASE_TAGS, MIP_SAMPLE_TAGS
+from cg.constants.subject import RelationshipStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig, ScoutMipIndividual
-from cg.store import models
-from housekeeper.store import models as hk_models
+from cg.store.models import Analysis, Family, FamilySample
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def __init__(
         self,
         hk_version_obj: hk_models.Version,
-        analysis_obj: models.Analysis,
+        analysis_obj: Analysis,
         mip_analysis_api: MipAnalysisAPI,
         lims_api: LimsAPI,
         madeline_api: MadelineAPI,
@@ -61,9 +63,9 @@ class MipConfigBuilder(ScoutConfigBuilder):
         self.include_case_files()
 
         LOG.info("Building samples")
-        db_sample: models.FamilySample
+        db_sample: FamilySample
         for db_sample in self.analysis_obj.family.links:
-            self.load_config.samples.append(self.build_config_sample(db_sample=db_sample))
+            self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
         self.include_pedigree_picture()
 
     def include_pedigree_picture(self) -> None:
@@ -76,13 +78,21 @@ class MipConfigBuilder(ScoutConfigBuilder):
         else:
             LOG.info("family of 1 sample - skip pedigree graph")
 
-    def build_config_sample(self, db_sample: models.FamilySample) -> ScoutMipIndividual:
+    def build_config_sample(self, case_sample: FamilySample) -> ScoutMipIndividual:
         """Build a sample with mip specific information"""
 
         config_sample = ScoutMipIndividual()
-        self.add_common_sample_info(config_sample=config_sample, db_sample=db_sample)
-        config_sample.father = db_sample.father.internal_id if db_sample.father else "0"
-        config_sample.mother = db_sample.mother.internal_id if db_sample.mother else "0"
+        self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
+        config_sample.father = (
+            case_sample.father.internal_id
+            if case_sample.father
+            else RelationshipStatus.HAS_NO_PARENT.value
+        )
+        config_sample.mother = (
+            case_sample.mother.internal_id
+            if case_sample.mother
+            else RelationshipStatus.HAS_NO_PARENT.value
+        )
 
         return config_sample
 
@@ -131,6 +141,19 @@ class MipConfigBuilder(ScoutConfigBuilder):
                 hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
             )
         )
+        config_sample.reviewer.alignment = self.fetch_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment, sample_id=sample_id
+        )
+        config_sample.reviewer.alignment_index = self.fetch_sample_file(
+            hk_tags=self.sample_tags.reviewer_alignment_index, sample_id=sample_id
+        )
+        config_sample.reviewer.vcf = self.fetch_sample_file(
+            hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
+        )
+        config_sample.reviewer.catalog = self.fetch_file_from_hk(hk_tags=self.case_tags.str_catalog)
+        config_sample.mitodel_file = self.fetch_sample_file(
+            hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
+        )
 
     @staticmethod
     def extract_generic_filepath(file_path: Optional[str]) -> Optional[str]:
@@ -156,7 +179,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def is_multi_sample_case(load_config: ScoutLoadConfig) -> bool:
         return len(load_config.samples) > 1
 
-    def run_madeline(self, family_obj: models.Family) -> Path:
+    def run_madeline(self, family_obj: Family) -> Path:
         """Generate a madeline file for an analysis. Use customer sample names"""
         samples = [
             {

@@ -6,16 +6,14 @@ from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
-from cgmodels.cg.constants import Pipeline
 
 
-def test_run_base_help():
+def test_run_base_help(cli_runner: CliRunner):
     """Test to run the deliver base command with --help"""
     # GIVEN a cli runner
-    runner = CliRunner()
 
     # WHEN running cg deliver help
-    result = runner.invoke(deliver_cmd, ["--help"])
+    result = cli_runner.invoke(deliver_cmd, ["--help"])
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
@@ -23,14 +21,13 @@ def test_run_base_help():
     assert "Deliver files with CG" in result.output
 
 
-def test_run_deliver_analysis_help(base_context: CGConfig):
+def test_run_deliver_analysis_help(cli_runner: CliRunner, base_context: CGConfig):
     """Test to run the deliver base command with --help"""
     # GIVEN a cli runner
-    runner = CliRunner()
     # GIVEN a context with store and housekeeper information
 
     # WHEN running cg deliver help
-    result = runner.invoke(deliver_cmd, ["analysis", "--help"], obj=base_context)
+    result = cli_runner.invoke(deliver_cmd, ["analysis", "--help"], obj=base_context)
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
@@ -38,14 +35,13 @@ def test_run_deliver_analysis_help(base_context: CGConfig):
     assert "Deliver analysis files to customer inbox" in result.output
 
 
-def test_run_deliver_ticket_help(base_context: CGConfig):
+def test_run_deliver_ticket_help(cli_runner: CliRunner, base_context: CGConfig):
     """Test to run the deliver base command with --help"""
     # GIVEN a cli runner
-    runner = CliRunner()
     # GIVEN a context with store and housekeeper information
 
     # WHEN running cg deliver help
-    result = runner.invoke(deliver_cmd, ["ticket", "--help"], obj=base_context)
+    result = cli_runner.invoke(deliver_cmd, ["ticket", "--help"], obj=base_context)
 
     # THEN assert the command exists without problems
     assert result.exit_code == EXIT_SUCCESS
@@ -53,19 +49,20 @@ def test_run_deliver_ticket_help(base_context: CGConfig):
     assert "Will first collect hard links" in result.output
 
 
-def test_run_deliver_delivered_ticket(cg_context: CGConfig, mocker, caplog, helpers, ticket):
+def test_run_deliver_delivered_ticket(
+    cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket
+):
     """Test for when files are already delivered to customer inbox the HPC"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a cli runner
-    runner = CliRunner()
 
     # GIVEN uploading data to the delivery server is not needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
     DeliverTicketAPI.check_if_upload_is_needed.return_value = False
 
     # WHEN running cg deliver ticket
-    result = runner.invoke(
+    result = cli_runner.invoke(
         deliver_cmd,
         ["ticket", "--dry-run", "--ticket", ticket, "--delivery-type", "fastq"],
         obj=cg_context,
@@ -78,12 +75,11 @@ def test_run_deliver_delivered_ticket(cg_context: CGConfig, mocker, caplog, help
     assert "Files already delivered to customer inbox on the HPC" in caplog.text
 
 
-def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers, ticket):
+def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket):
     """Test for delivering tu customer inbox"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a cli runner
-    runner = CliRunner()
 
     # GIVEN uploading data to the delivery server is needed
     mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
@@ -92,7 +88,7 @@ def test_run_deliver_ticket(cg_context: CGConfig, mocker, caplog, helpers, ticke
     # GIVEN data needs to be concatenated
 
     # WHEN running cg deliver ticket
-    result = runner.invoke(
+    cli_runner.invoke(
         deliver_cmd,
         ["ticket", "--dry-run", "--ticket", ticket, "--delivery-type", "fastq"],
         obj=cg_context,

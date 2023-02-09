@@ -14,7 +14,6 @@ def has_same_received_at(lims, sample_obj):
 def test_transfer_samples_received_at_overwriteable(
     transfer_lims_api: TransferLims, timestamp_now: dt.datetime
 ):
-
     # GIVEN a sample that exists in statusdb and it has a received_at date but no delivered_at date,
     # there is a sample in lims with the same internal id and another received_at date
     lims_api: LimsAPI = transfer_lims_api.lims
@@ -39,7 +38,6 @@ def test_transfer_samples_received_at_overwriteable(
 
 
 def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt.datetime):
-
     # GIVEN a sample exists in statusdb and it has a received_at date but no delivered_at date,
     # there is a sample in lims with the same internal id and another received_at date
     lims_api = transfer_lims_api.lims
@@ -63,7 +61,6 @@ def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt
 
 
 def test_transfer_samples_include_unset_received_at(transfer_lims_api: TransferLims):
-
     sample_store = transfer_lims_api.status
     samples = sample_store.samples()
     assert samples.count() >= 2
