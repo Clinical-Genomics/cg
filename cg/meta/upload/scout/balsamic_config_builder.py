@@ -31,18 +31,20 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_multiqc_report()
         self.include_delivery_report()
 
+    @staticmethod
+    def _get_sample_id(config_sample: ScoutBalsamicIndividual) -> str:
+        """Return sample id."""
+        if not config_sample.alignment_path:
+            return config_sample.sample_id
+        for sample_type in [SampleType.TUMOR, SampleType.NORMAL]:
+            if sample_type in config_sample.alignment_path:
+                return sample_type.value
+        return config_sample.sample_id
+
     def include_sample_files(self, config_sample: ScoutBalsamicIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
-
-        sample_id: str = config_sample.sample_id
-        if config_sample.alignment_path:
-            if SampleType.TUMOR in config_sample.alignment_path:
-                sample_id = SampleType.TUMOR.value
-            elif SampleType.NORMAL in config_sample.alignment_path:
-                sample_id = SampleType.NORMAL.value
-
         config_sample.vcf2cytosure = self.fetch_sample_file(
-            hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
+            hk_tags=self.sample_tags.vcf2cytosure, sample_id=self._get_sample_id(config_sample)
         )
 
     def build_config_sample(self, case_sample: FamilySample) -> ScoutBalsamicIndividual:

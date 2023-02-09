@@ -1,5 +1,9 @@
 """Tests for the file handlers."""
 import logging
+from pathlib import Path
+
+from cg.constants.constants import SampleType
+from cg.models.scout.scout_load_config import ScoutBalsamicIndividual
 
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
@@ -11,6 +15,8 @@ from housekeeper.store.models import Version
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
+
+from tests.apps.scout.conftest import fixture_scout_individual
 
 
 def test_mip_config_builder(
@@ -212,3 +218,35 @@ def test_extract_generic_filepath(mip_config_builder: MipConfigBuilder):
     # THEN
     assert mip_config_builder.extract_generic_filepath(file_path1) == generic_path
     assert mip_config_builder.extract_generic_filepath(file_path2) == generic_path
+
+
+def test_get_sample_id(
+    sample_id: str, scout_individual: dict, balsamic_config_builder: BalsamicConfigBuilder
+):
+    """Test get sample id given a Scout individual when no alignment path is provided."""
+
+    # GIVEN a scout individual
+    config_sample: ScoutBalsamicIndividual = ScoutBalsamicIndividual(**scout_individual)
+    config_sample.alignment_path = None
+
+    # WHEN getting the sample ID
+    balsamic_sample_id: str = balsamic_config_builder._get_sample_id(config_sample)
+
+    # THEN the sample ID should match the expected one
+    assert balsamic_sample_id == sample_id
+
+
+def test_get_sample_id_no_alignment_path(
+    scout_individual: dict, balsamic_config_builder: BalsamicConfigBuilder
+):
+    """Test get sample id given a Scout individual with a tumor alignment path."""
+
+    # GIVEN a scout individual with a tumor sample alignment bam
+    config_sample: ScoutBalsamicIndividual = ScoutBalsamicIndividual(**scout_individual)
+    config_sample.alignment_path = Path("path", "to", "tumor_sample.bam").as_posix()
+
+    # WHEN getting the sample ID
+    balsamic_sample_id: str = balsamic_config_builder._get_sample_id(config_sample)
+
+    # THEN the sample ID should be "tumor"
+    assert balsamic_sample_id == SampleType.TUMOR.value
