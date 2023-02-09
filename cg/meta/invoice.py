@@ -1,8 +1,8 @@
 from cg.apps.lims import LimsAPI
 from cg.server.ext import lims as genologics_lims
 from cg.store import Store, models
-
-
+from cg.constants.priority import PriorityTerms
+from cg.constants.record_type import RecordType
 class InvoiceAPI:
     def __init__(self, db: Store, lims_api: LimsAPI, invoice_obj: models.Invoice):
         self.db = db
@@ -21,9 +21,9 @@ class InvoiceAPI:
         It can only be either pool or sample"""
         if self.invoice_obj.pools:
             self.raw_records = self.invoice_obj.pools
-            self.record_type = "Pool"
+            self.record_type = RecordType.Pool
         elif self.invoice_obj.samples:
-            self.record_type = "Sample"
+            self.record_type = RecordType.Sample
             self.raw_records = self.invoice_obj.samples
 
     def get_customer(self, costcenter: str):
@@ -34,7 +34,8 @@ class InvoiceAPI:
             self.log.append(msg)
             return None
         return user
-    def get_contact(self,customer,user) -> dict or None:
+
+    def get_contact(self,customer: models.Customer, user) -> dict or None:
         contact = {
             "name": user.name,
             "email": user.email,
@@ -66,7 +67,7 @@ class InvoiceAPI:
         pooled_samples = []
 
         for raw_record in self.raw_records:
-            if self.record_type == "Pool":
+            if self.record_type == RecordType.Pool:
                 pooled_samples += self.genologics_lims.samples_in_pools(
                     raw_record.name, raw_record.ticket
                 )
@@ -150,16 +151,16 @@ class InvoiceAPI:
         return application_info
 
     def get_ticket(self,record) -> str:
-        return record.ticket if self.record_type == "Pool" else record.original_ticket
+        return record.ticket if self.record_type == RecordType.Pool else record.original_ticket
 
     def get_lims_id(self,record) -> str:
-        return None if self.record_type == "Pool" else record.internal_id
+        return None if self.record_type == RecordType.Pool else record.internal_id
 
     def get_priority(self,record, for_discount_price: bool = False) -> str:
         if self.customer_obj.internal_id == "cust032":
-            priority = "standard"
-        elif self.record_type == "Pool" or (record.priority_human == "clinical trials" and for_discount_price):
-            priority = "research"
+            priority = PriorityTerms.STANDARD
+        elif self.record_type == RecordType.Pool or (record.priority_human == "clinical trials" and for_discount_price):
+            priority = PriorityTerms.RESEARCH
         else:
             priority = record.priority_human
         return priority
