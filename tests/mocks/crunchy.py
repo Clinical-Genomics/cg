@@ -15,7 +15,6 @@ class MockCrunchyAPI(CrunchyAPI):
     """
 
     def __init__(self, config: dict = None):
-
         self.config = config
         self.dry_run = False
         self._compression_pending_files = {}
@@ -92,7 +91,7 @@ class MockCrunchyAPI(CrunchyAPI):
         print(f"Compression possible {compression_possible}")
         return compression_possible
 
-    def is_fastq_compression_done(self, compression_obj: CompressionData) -> bool:
+    def is_fastq_compression_done(self, compression: CompressionData) -> bool:
         """Check if spring compression if finished"""
         return self._compression_done_all
 

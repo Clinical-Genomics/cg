@@ -125,8 +125,8 @@ class UploadScoutAPI:
         else:
             tags.add("clinical")
 
-        fusion_report: Optional[hk_models.File] = self.housekeeper.find_file_in_latest_version(
-            case_id=case_id, tags=tags
+        fusion_report: Optional[hk_models.File] = self.housekeeper.get_file_from_latest_version(
+            bundle_name=case_id, tags=tags
         )
 
         return fusion_report
@@ -146,8 +146,8 @@ class UploadScoutAPI:
         tags: {str} = {"junction", "bed", sample_id}
         splice_junctions_bed: Optional[hk_models.File]
         try:
-            splice_junctions_bed = self.housekeeper.find_file_in_latest_version(
-                case_id=case_id, tags=tags
+            splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
+                bundle_name=case_id, tags=tags
             )
         except HousekeeperBundleVersionMissingError:
             LOG.debug("Could not find bundle for case %s", case_id)
@@ -170,7 +170,7 @@ class UploadScoutAPI:
 
         rna_coverage_bigwig: Optional[
             hk_models.File
-        ] = self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
+        ] = self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
         return rna_coverage_bigwig
 
@@ -362,7 +362,6 @@ class UploadScoutAPI:
                 return sample
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
-
         config_builders = {
             Pipeline.BALSAMIC: BalsamicConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
@@ -421,7 +420,6 @@ class UploadScoutAPI:
     def _link_rna_sample_to_dna_sample(
         self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
     ) -> models.Sample:
-
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"

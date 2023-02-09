@@ -248,7 +248,6 @@ class MetagenomeSample(OrderInSample):
 
 
 class MicrobialSample(OrderInSample):
-
     # 1603 Orderform Microbial WGS
     # "These fields are required"
     organism: constr(max_length=models.Organism.internal_id.property.columns[0].type.length)

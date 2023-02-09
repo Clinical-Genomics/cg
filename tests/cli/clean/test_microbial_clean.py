@@ -109,17 +109,3 @@ def test_clean_run(
     # THEN the analysis should no longer be in the analyses_to_clean query
     assert isinstance(analysis_to_clean.cleaned_at, dt.datetime)
     assert analysis_to_clean not in base_store.analyses_to_clean(pipeline=Pipeline.MICROSALT)
-
-
-def test_verify_case_paths_age(
-    clean_context_microsalt: CGConfig, microsalt_case_clean: str, tmpdir_factory
-):
-    # GIVEN a list of run_dir paths for a microsalt case
-    run_dir = [tmpdir_factory.mktemp("microsalt_case")]
-
-    # WHEN at least one of the paths is younger than 21 days
-    with pytest.raises(FileNotFoundError):
-        # THEN a FileNotFoundError should be raised
-        clean_context_microsalt.meta_apis["analysis_api"].verify_case_paths_age(
-            run_dir, microsalt_case_clean
-        )
