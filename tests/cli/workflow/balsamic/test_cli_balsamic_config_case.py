@@ -296,7 +296,7 @@ def test_normal_only_force_flag(
 def test_error_two_tumor(
     balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
-    """Test with case_id that requires WGS analysis but has TWO tumor ONE normal samples."""
+    """Test with case_id that requires WGS analysis but has TWO tumor, and ONE normal samples."""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id containing TWO tumor, ONE normal, TGS application
     case_id = "balsamic_case_tgs_paired_error"
@@ -377,7 +377,7 @@ def test_error_two_normal(
 def test_error_wes_panel(
     balsamic_context: CGConfig, cli_runner: CliRunner, caplog: LogCaptureFixture
 ):
-    """Test with case_id containing ONE tumor and TWO normal samples."""
+    """Test with WES case_id when no panel is found."""
     caplog.set_level(logging.ERROR)
     case_id = "balsamic_case_wes_panel_error"
     # WHEN dry running
