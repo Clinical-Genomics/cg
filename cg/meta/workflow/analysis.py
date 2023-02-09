@@ -134,13 +134,6 @@ class AnalysisAPI(MetaAPI):
         sample_obj: models.Sample = self.status_db.sample(lims_id)
         return sample_obj.name
 
-    @staticmethod
-    def get_sample_type(sample_obj: models.Sample) -> str:
-        """Returns tissue type of a sample"""
-        if sample_obj.is_tumour:
-            return "tumor"
-        return "normal"
-
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
         Links fastq files from Housekeeper to case working directory

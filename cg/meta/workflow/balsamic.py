@@ -175,6 +175,13 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         return sample_obj.sex
 
+    @staticmethod
+    def get_sample_type(sample_obj: Sample) -> SampleType:
+        """Return the tissue type of the sample."""
+        if sample_obj.is_tumour:
+            return SampleType.TUMOR
+        return SampleType.NORMAL
+
     def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
         """Returns the verified capture kit path or extracts the derived panel bed"""
 
