@@ -2,67 +2,86 @@ import mock
 from tests.store_helpers import StoreHelpers
 from cg.meta.invoice import InvoiceAPI
 from tests.mocks.limsmock import MockLimsAPI
-from cg.server.ext import lims as genologics_lims
 
 from cg.store import Store, models
 
 
-
-def return_samples_in_pools_mock():
-    pass
-
-def test_invoice_api_sample(store: Store, lims_api: MockLimsAPI, helpers: StoreHelpers):
-    # GIVEN a invoice
+def test_invoice_api_sample(
+    store: Store,
+    lims_api: MockLimsAPI,
+    helpers: StoreHelpers,
+    invioce_id: int = 0,
+    record_type: str = "Sample",
+    customer_id: str = "cust032",
+):
+    # GIVEN an invoice
     invoice = helpers.ensure_invoice(
         store,
-        invoice_id=0,
-        record_type="Sample",
-        customer_id="cust032",
+        invoice_id=invioce_id,
+        record_type=record_type,
+        customer_id=customer_id,
     )
 
     # THEN calling InvoiceAPI should return an API
     api = InvoiceAPI(store, lims_api, invoice)
     assert api
     # THEN record_type should be Sample
-    assert api.record_type == "Sample"
+    assert api.record_type == record_type
     # THEN prepare should return customer information with customer id cust999
 
     cust032_inv: dict = api.prepare("ki")
-    assert cust032_inv["customer_id"] == "cust032"
+    assert cust032_inv["customer_id"] == customer_id
 
 
-def test_invoice_api_pool(store: Store, lims_api: MockLimsAPI, helpers: StoreHelpers):
+def test_invoice_api_pool_cust032(
+    store: Store,
+    lims_api: MockLimsAPI,
+    helpers: StoreHelpers,
+    invoice_id: int = 0,
+    record_type: str = "Pool",
+    customer_id: str = "cust032",
+):
     # GIVEN a invoice
     invoice_cust032 = helpers.ensure_invoice(
         store,
-        invoice_id=0,
-        record_type="Pool",
-        customer_id="cust032",
+        invoice_id=invoice_id,
+        record_type=record_type,
+        customer_id=customer_id,
     )
 
     # THEN calling InvoiceAPI should return an API
-    api_cust032 = InvoiceAPI(store, lims_api, invoice_cust032)
-    assert api_cust032
+    api = InvoiceAPI(store, lims_api, invoice_cust032)
+    assert api
     # THEN record_type should be Sample
-    api_cust032.genologics_lims = mock.MagicMock()
-    assert api_cust032.record_type == "Pool"
+    api.genologics_lims = mock.MagicMock()
+    assert api.record_type == record_type
     # THEN prepare should return customer information with customer id cust999
-    api_cust032.prepare("ki")
-    assert api_cust032.invoice_info["priority"] == "standard"
+    api.prepare("ki")
+    assert api.invoice_info["priority"] == "standard"
 
-    invoice_cust032 = helpers.ensure_invoice(
+
+def test_invoice_pool_generic_customer(
+    store: Store,
+    lims_api: MockLimsAPI,
+    helpers: StoreHelpers,
+    invoice_id: int = 0,
+    record_type: str = "Pool",
+    customer_id: str = "cust132",
+):
+
+    invoice = helpers.ensure_invoice(
         store,
-        invoice_id=0,
-        record_type="Pool",
-        customer_id="cust132",
+        invoice_id=invoice_id,
+        record_type=record_type,
+        customer_id=customer_id,
     )
 
     # THEN calling InvoiceAPI should return an API
-    api_cust132 = InvoiceAPI(store, lims_api, invoice_cust132)
-    assert api_cust132
+    api = InvoiceAPI(store, lims_api, invoice)
+    assert api
     # THEN record_type should be Sample
-    api_cust132.genologics_lims = mock.MagicMock()
-    assert api_cust132.record_type == "Pool"
+    api.genologics_lims = mock.MagicMock()
+    assert api.record_type == record_type
     # THEN prepare should return customer information with customer id cust999
-    api_cust132.prepare("ki")
-    assert api_cust132.invoice_info["priority"] == "research"
+    api.prepare("ki")
+    assert api.invoice_info["priority"] == "research"

@@ -14,13 +14,11 @@ class InvoiceAPI:
         self.raw_records = []
         self._set_record_type()
         self.genologics_lims = genologics_lims
-        self.invoice_info = ""
-
+        self.invoice_info = dict()
 
     def _set_record_type(self):
         """Define the record_type based on the invoice object.
         It can only be either pool or sample"""
-
         if self.invoice_obj.pools:
             self.raw_records = self.invoice_obj.pools
             self.record_type = "Pool"
@@ -28,21 +26,15 @@ class InvoiceAPI:
             self.record_type = "Sample"
             self.raw_records = self.invoice_obj.samples
 
-    def prepare_contact_info(self, costcenter):
-        """Function to prepare contact info for a customer"""
-
-        msg = (
-            f"Could not open/generate invoice. Contact information missing in database for "
-            f"customer {self.customer_obj.internal_id}. See log files."
-        )
-
-        customer = self.db.customer("cust999") if costcenter.lower() == "kth" else self.customer_obj
+    def get_customer(self, costcenter: str):
+        return self.db.customer("cust999") if costcenter.lower() == "kth" else self.customer_obj
+    def get_user(self,customer: models.Customer):
         user = customer.invoice_contact
-
         if not user:
             self.log.append(msg)
             return None
-
+        return user
+    def get_contact(self,customer,user) -> dict or None:
         contact = {
             "name": user.name,
             "email": user.email,
@@ -50,11 +42,21 @@ class InvoiceAPI:
             "reference": customer.invoice_reference,
             "address": customer.invoice_address,
         }
-
         if None in contact.values():
             self.log.append(msg)
             return None
+        return contact
 
+    def prepare_contact_info(self, costcenter: str):
+        """Function to prepare contact info for a customer"""
+
+        msg = (
+            f"Could not open/generate invoice. Contact information missing in database for "
+            f"customer {self.customer_obj.internal_id}. See log files."
+        )
+        customer = self.get_customer(costcenter=costcenter)
+        user = self.get_user(customer=customer)
+        contact = self.get_contact(user=user, customer=customer)
         return contact
 
     def prepare(self, costcenter: str) -> dict:
@@ -95,16 +97,9 @@ class InvoiceAPI:
 
     def _discount_price(self, record, discount: int = 0):
         """Get discount price for a sample or pool."""
-        if self.customer_obj.internal_id == "cust032":
-            priority = "standard"
-        elif self.record_type == "Pool" or record.priority_human == "clinical trials":
-            priority = "research"
-        else:
-            priority = record.priority_human
-
+        priority = self.get_priority(record,for_discount_price=True)
         full_price = getattr(record.application_version, f"price_{priority}")
         discount_factor = 1 - discount / 100
-
         if not full_price:
             return None
         return round(full_price * discount_factor)
@@ -133,30 +128,48 @@ class InvoiceAPI:
 
     def prepare_record(self, costcenter: str, discount: int, record):
         """Get invoice information for a specific sample or pool"""
+        application_info = self.get_application_info(record=record, discount=discount)
+        split_discounted_price = self._cost_center_split_factor(
+            price = application_info["discounted_price"], costcenter=costcenter, application_info["percent_kth"], application_info["tag"], application_info["version"]
+        )
+        invoice_info = self.get_invoice_info(record=record, split_discounted_price=split_discounted_price,costcenter=costcenter,application_info=application_info)
+        self.set_invoice_info()
+        return invoice_info
 
+    def get_application_info(self,record, discount: int) -> dict or None:
+        """Get the application information"""
+        application_info = {}
         try:
-            tag = record.application_version.application.tag
-            version = str(record.application_version.version)
-            percent_kth = record.application_version.application.percent_kth
-            discounted_price = self._discount_price(record, discount)
+            application_info["tag"] = record.application_version.application.tag
+            application_info["version"] = str(record.application_version.version)
+            application_info["percent_kth"] = record.application_version.application.percent_kth
+            application_info["discounted_price"] = self._discount_price(record, discount)
         except ValueError:
             self.log.append(f"Application tag/version seems to be missing for sample {record.id}.")
             return None
+        return application_info
 
-        split_discounted_price = self._cost_center_split_factor(
-            discounted_price, costcenter, percent_kth, tag, version
-        )
+    def get_ticket(self,record) -> str:
+        return record.ticket if self.record_type == "Pool" else record.original_ticket
 
-        order = record.order
-        ticket = record.ticket if self.record_type == "Pool" else record.original_ticket
-        lims_id = None if self.record_type == "Pool" else record.internal_id
+    def get_lims_id(self,record) -> str:
+        return None if self.record_type == "Pool" else record.internal_id
+
+    def get_priority(self,record, for_discount_price: bool = False) -> str:
         if self.customer_obj.internal_id == "cust032":
             priority = "standard"
-        elif self.record_type == "Pool":
+        elif self.record_type == "Pool" or (record.priority_human == "clinical trials" and for_discount_price):
             priority = "research"
         else:
             priority = record.priority_human
+        return priority
 
+    def get_invoice_info(self, record, split_discounted_price: int, costcenter: str, application_info: dict) -> dict:
+        """Generate the invoice_info"""
+        order = record.order
+        ticket = self.get_ticket(record)
+        lims_id = self.get_lims_id(record)
+        priority = self.get_priority(record)
 
         invoice_info = {
             "name": record.name,
@@ -170,13 +183,16 @@ class InvoiceAPI:
         }
         if costcenter == "ki":
             price_kth = self._cost_center_split_factor(
-                discounted_price, "kth", percent_kth, tag, version
+                price=application_info["discounted_price"], costcenter="kth", percent_kth=["percent_kth"], tag=application_info["tag"], version=application_info["version"],
             )
             invoice_info["price_kth"] = price_kth
-            invoice_info["total_price"] = discounted_price
+            invoice_info["total_price"] = application_info["discounted_price"]
 
+        return self.invoice_info
+
+    def set_invoice_info(self, invoice_info: dict):
+        """Set invoice_info"""
         self.invoice_info = invoice_info
-        return invoice_info
 
     def total_price(self) -> float:
         """Get the total price for all records in the invoice"""
