@@ -39,10 +39,10 @@ class ScoutIndividual(BaseModel):
     tissue_type: Optional[str] = None
 
     @validator("sample_id", "sex", "analysis_type")
-    def field_not_none(cls, v):
-        if v is None:
+    def field_not_none(cls, value):
+        if value is None:
             raise ValueError("sample_id, sex and analysis_type can not be None")
-        return v
+        return value
 
     class Config:
         validate_assignment = True
@@ -101,10 +101,10 @@ class ScoutLoadConfig(BaseModel):
     track: Literal["rare", "cancer"] = "rare"
 
     @validator("owner", "family")
-    def field_not_none(cls, v):
-        if v is None:
+    def field_not_none(cls, value):
+        if value is None:
             raise ValueError("Owner and family can not be None")
-        return v
+        return value
 
     class Config:
         validate_assignment = True
@@ -119,10 +119,10 @@ class BalsamicLoadConfig(ScoutLoadConfig):
     samples: List[ScoutBalsamicIndividual] = []
 
     @validator("vcf_cancer")
-    def check_mandatory_files(cls, v):
-        if v is None:
+    def check_mandatory_files(cls, vcf):
+        if vcf is None:
             raise ValueError("Vcf can not be none")
-        return v
+        return vcf
 
 
 class BalsamicUmiLoadConfig(BalsamicLoadConfig):
@@ -146,10 +146,10 @@ class MipLoadConfig(ScoutLoadConfig):
     variant_catalog: Optional[str] = None
 
     @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
-    def check_mandatory_files(cls, v):
-        if v is None:
+    def check_mandatory_files(cls, vcf):
+        if vcf is None:
             raise ValueError("Mandatory vcf can not be None")
-        return v
+        return vcf
 
 
 class RnafusionLoadConfig(ScoutLoadConfig):
