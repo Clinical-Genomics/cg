@@ -4,6 +4,8 @@ from cg.meta.invoice import InvoiceAPI
 from tests.mocks.limsmock import MockLimsAPI
 
 from cg.store import Store, models
+from cg.constants.record_type import RecordType
+from cg.constants.priority import PriorityTerms
 
 
 def test_invoice_api_sample(
@@ -11,7 +13,7 @@ def test_invoice_api_sample(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invioce_id: int = 0,
-    record_type: str = "Sample",
+    record_type: str = RecordType.Sample,
     customer_id: str = "cust032",
 ):
     # GIVEN an invoice
@@ -38,7 +40,7 @@ def test_invoice_api_pool_cust032(
     lims_api: MockLimsAPI,
     helpers: StoreHelpers,
     invoice_id: int = 0,
-    record_type: str = "Pool",
+    record_type: str = RecordType,
     customer_id: str = "cust032",
 ):
     # GIVEN a invoice
@@ -57,7 +59,7 @@ def test_invoice_api_pool_cust032(
     assert api.record_type == record_type
     # THEN prepare should return customer information with customer id cust999
     api.prepare("ki")
-    assert api.invoice_info["priority"] == "standard"
+    assert api.invoice_info["priority"] == PriorityTerms.STANDARD
 
 
 def test_invoice_pool_generic_customer(
@@ -84,4 +86,4 @@ def test_invoice_pool_generic_customer(
     assert api.record_type == record_type
     # THEN prepare should return customer information with customer id cust999
     api.prepare("ki")
-    assert api.invoice_info["priority"] == "research"
+    assert api.invoice_info["priority"] == PriorityTerms.RESEARCH
