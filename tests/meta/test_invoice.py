@@ -16,6 +16,7 @@ def test_invoice_api_sample(
     record_type: str = RecordType.Sample,
     customer_id: str = "cust032",
 ):
+    """Test that the invoice records the right record_type"""
     # GIVEN an invoice
     invoice = helpers.ensure_invoice(
         store,
@@ -30,9 +31,8 @@ def test_invoice_api_sample(
     # THEN record_type should be Sample
     assert api.record_type == record_type
     # THEN prepare should return customer information with customer id cust999
-
-    cust032_inv: dict = api.prepare("ki")
-    assert cust032_inv["customer_id"] == customer_id
+    api.prepare("ki")
+    assert api.invoice_info"customer_id"] == customer_id
 
 
 def test_invoice_api_pool_cust032(

@@ -28,10 +28,14 @@ class InvoiceAPI:
             self.record_type = RecordType.Sample
             self.raw_records = self.invoice_obj.samples
 
-    def get_customer(self, costcenter: str):
+    def get_customer(self, costcenter: str) -> models.Customer or str:
+        """Return the costumer"""
         return self.db.customer("cust999") if costcenter.lower() == "kth" else self.customer_obj
 
-    def get_user(self, customer: models.Customer, msg: str):
+    def get_user(
+        self, customer: models.Customer, msg: str
+    ) -> models.Customer.invoice_contact or None:
+        """Return the user"""
         user = customer.invoice_contact
         if not user:
             self.log.append(msg)
@@ -41,6 +45,7 @@ class InvoiceAPI:
     def get_contact(
         self, customer: models.Customer, user: models.User or None, msg: str
     ) -> dict or None:
+        """Return the contact information"""
         contact = {
             "name": user.name,
             "email": user.email,
@@ -53,7 +58,7 @@ class InvoiceAPI:
             return None
         return contact
 
-    def prepare_contact_info(self, costcenter: str):
+    def prepare_contact_info(self, costcenter: str) -> dict:
         """Function to prepare contact info for a customer"""
 
         msg = (
@@ -101,7 +106,7 @@ class InvoiceAPI:
             "record_type": self.record_type,
         }
 
-    def _discount_price(self, record, discount: int = 0):
+    def _discount_price(self, record, discount: int = 0) -> int or None:
         """Get discount price for a sample or pool."""
         priority = self.get_priority(record, for_discount_price=True)
         full_price = getattr(record.application_version, f"price_{priority}")
@@ -112,7 +117,7 @@ class InvoiceAPI:
 
     def _cost_center_split_factor(
         self, price: int, costcenter: str, percent_kth, tag: str, version: str
-    ):
+    ) -> int or None:
         """Split price based on cost center"""
         if price:
             try:
@@ -134,9 +139,10 @@ class InvoiceAPI:
             return None
         return split_price
 
-    def prepare_record(self, costcenter: str, discount: int, record):
+    def prepare_record(self, costcenter: str, discount: int, record) -> dict:
         """Get invoice information for a specific sample or pool"""
         application_info = self.get_application_info(record=record, discount=discount)
+
         split_discounted_price = self._cost_center_split_factor(
             price=application_info["discounted_price"],
             costcenter=costcenter,
@@ -167,12 +173,15 @@ class InvoiceAPI:
         return application_info
 
     def get_ticket(self, record) -> str:
+        """Return ticket"""
         return record.ticket if self.record_type == RecordType.Pool else record.original_ticket
 
     def get_lims_id(self, record) -> str:
+        """Return Lims id or None"""
         return None if self.record_type == RecordType.Pool else record.internal_id
 
     def get_priority(self, record, for_discount_price: bool = False) -> str:
+        """Return the priority"""
         if self.customer_obj.internal_id == "cust032":
             priority = PriorityTerms.STANDARD
         elif self.record_type == RecordType.Pool or (
