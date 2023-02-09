@@ -4,7 +4,7 @@ from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import PrepCategory
-from cg.constants.scout_upload import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS
+from cg.constants.scout_upload import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS, GenomeBuild
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -29,7 +29,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         """Build a rnafusion-specific load config for uploading a case to scout."""
         LOG.info("Build load config for rnafusion case")
         self.add_common_info_to_load_config()
-        self.load_config.human_genome_build = "38"
+        self.load_config.human_genome_build = GenomeBuild.hg38
         self.include_case_files()
 
         LOG.info("Building samples")

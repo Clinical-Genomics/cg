@@ -8,7 +8,6 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
-from cg.constants.constants import DRY_RUN_MESSAGE
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import RNAFUSION_SAMPLESHEET_HEADERS, RNAFUSION_STRANDEDNESS_HEADER
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -17,7 +16,6 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
-from cg.store import models
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)

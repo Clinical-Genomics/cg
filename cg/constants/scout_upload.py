@@ -1,5 +1,13 @@
 from typing import Dict, Set
 
+from cgmodels.cg.constants import StrEnum
+
+
+class GenomeBuild(StrEnum):
+    hg19: str = "37"
+    hg38: str = "38"
+
+
 MIP_CASE_TAGS = dict(
     snv_vcf={"vcf-snv-clinical"},
     snv_research_vcf={"vcf-snv-research"},
