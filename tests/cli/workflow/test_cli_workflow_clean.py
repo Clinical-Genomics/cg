@@ -68,6 +68,7 @@ def test_cli_workflow_clean_mip_rna(
     # THEN command should terminate successfully
     assert result.exit_code == EXIT_SUCCESS
 
+
 def test_cli_workflow_clean_mutant(
     cli_runner: CliRunner,
     base_context: CGConfig,
