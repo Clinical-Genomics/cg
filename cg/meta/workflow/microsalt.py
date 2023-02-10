@@ -39,7 +39,6 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     """API to manage Microsalt Analyses"""
 
     def __init__(self, config: CGConfig, pipeline: Pipeline = Pipeline.MICROSALT):
-
         super().__init__(pipeline, config)
         self.root_dir = config.microsalt.root
         self.queries_path = config.microsalt.queries_path

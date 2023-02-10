@@ -72,7 +72,6 @@ def run(context: CGConfig, dry_run: bool, case_id: str, config_artic: str = None
 def start(context: click.Context, dry_run: bool, case_id: str, config_artic: str) -> None:
     """Start full analysis workflow for a case"""
     try:
-
         context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(config_case, case_id=case_id, dry_run=dry_run)
         context.invoke(run, case_id=case_id, dry_run=dry_run, config_artic=config_artic)

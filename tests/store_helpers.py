@@ -1,5 +1,4 @@
 """Utility functions to simply add test data in a cg store"""
-import datetime
 import logging
 from datetime import datetime
 from typing import List, Optional
@@ -245,6 +244,7 @@ class StoreHelpers:
         is_external: bool = False,
         is_rna: bool = False,
         is_tumour: bool = False,
+        internal_id: str = None,
         reads: int = None,
         name: str = "sample_test",
         original_ticket: str = None,
@@ -261,6 +261,12 @@ class StoreHelpers:
             is_rna=is_rna,
         )
         application_version_id = application_version.id
+
+        if internal_id:
+            existing_sample: models.Sample = store.sample(internal_id=internal_id)
+            if existing_sample:
+                return existing_sample
+
         sample = store.add_sample(
             name=name,
             sex=gender,
@@ -268,6 +274,7 @@ class StoreHelpers:
             original_ticket=original_ticket,
             tumour=is_tumour,
             reads=reads,
+            internal_id=internal_id,
         )
 
         sample.application_version_id = application_version_id
@@ -613,23 +620,30 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, family: str, samples: List[str]):
+    def relate_samples(cls, base_store: Store, case: models.Family, samples: List[models.Sample]):
         """Utility function to relate many samples to one case"""
 
         for sample in samples:
-            base_store.relate_sample(family, sample, PhenotypeStatus.UNKNOWN)
+            link = base_store.relate_sample(
+                family=case, sample=sample, status=PhenotypeStatus.UNKNOWN
+            )
+            base_store.add_commit(link)
 
     @classmethod
     def add_case_with_samples(
-        cls, base_store: Store, case_name: str, nr_samples: int, sequenced_at: datetime
+        cls,
+        base_store: Store,
+        case_id: str,
+        nr_samples: int,
+        sequenced_at: datetime = datetime.now(),
     ) -> models.Family:
         """Utility function to add one case with many samples and return the case"""
 
-        samples: List[models.Sample] = cls.add_samples(base_store, nr_samples)
+        samples: List[models.Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
             sample.sequenced_at: datetime = sequenced_at
-        case: models.Family = cls.add_case(base_store, case_name)
-        cls.relate_samples(base_store, case, samples)
+        case: models.Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+        cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
 
     @classmethod
@@ -647,96 +661,107 @@ class StoreHelpers:
         return cases
 
     @classmethod
-    def ensure_pool(
-        cls,
-        store: Store,
-        customer_id: str = "cust000",
-        name: str = "test_pool",
-        ticket: str = "987654",
-        application_tag: str = "dummy_tag",
-        application_type: str = "tgs",
-        is_external: bool = False,
-        is_rna: bool = False,
-    ) -> models.Pool:
-        """Utility function to add a pool that can be used in tests"""
-        customer_id = customer_id or "cust000"
-        customer = store.customer(customer_id)
-        if not customer:
-            customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
+    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> models.Family:
+        """Helper function to add a case associated with a sample with the given ids."""
 
-        application_version = StoreHelpers.ensure_application_version(
+        case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+        sample = cls.add_sample(store=base_store, internal_id=sample_id)
+        cls.add_relationship(store=base_store, sample=sample, case=case)
+
+        return case
+
+
+@classmethod
+def ensure_pool(
+    cls,
+    store: Store,
+    customer_id: str = "cust000",
+    name: str = "test_pool",
+    ticket: str = "987654",
+    application_tag: str = "dummy_tag",
+    application_type: str = "tgs",
+    is_external: bool = False,
+    is_rna: bool = False,
+) -> models.Pool:
+    """Utility function to add a pool that can be used in tests"""
+    customer_id = customer_id or "cust000"
+    customer = store.customer(customer_id)
+    if not customer:
+        customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
+
+    application_version = StoreHelpers.ensure_application_version(
+        store=store,
+        application_tag=application_tag,
+        application_type=application_type,
+        is_external=is_external,
+        is_rna=is_rna,
+    )
+
+    pool = store.add_pool(
+        name=name,
+        ordered=datetime.now(),
+        application_version=application_version,
+        customer=customer,
+        order="test_order",
+    )
+    store.add_commit(pool)
+    return pool
+
+
+@classmethod
+def ensure_user(
+    cls,
+    store: Store,
+    customer: models.Customer,
+    email: str = "Bob@bobmail.com",
+    name: str = "Bob",
+    is_admin: bool = False,
+) -> models.User:
+    """Utility function to add a user that can be used in tets"""
+    user = store.user(email=email)
+    if not user:
+        user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+        store.add_commit(user)
+    return user
+
+
+@classmethod
+def ensure_invoice(
+    cls,
+    store: Store,
+    invoice_id: int = 0,
+    customer_id: str = "cust000",
+    discount: int = 0,
+    record_type: str = "Sample",
+) -> models.Invoice:
+    """Utility function to create an invoice with a costumer and samples or pools"""
+    invoice = store.invoice(invoice_id=invoice_id)
+    if not invoice:
+        customer_obj = StoreHelpers.ensure_customer(
             store=store,
-            application_tag=application_tag,
-            application_type=application_type,
-            is_external=is_external,
-            is_rna=is_rna,
+            customer_id=customer_id,
         )
 
-        pool = store.add_pool(
-            name=name,
-            ordered=datetime.now(),
-            application_version=application_version,
-            customer=customer,
-            order="test_order",
+        user_obj: models.User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
+        customer_obj.invoice_contact: models.User = user_obj
+
+        pool = []
+        sample = []
+        if record_type == "Sample":
+            sample.append(StoreHelpers.add_sample(store=store, customer_id=customer_id))
+            pool = None
+        else:
+            pool.append(StoreHelpers.ensure_pool(store, customer_id=customer_id, name=customer_id))
+            sample = None
+
+        invoice = store.add_invoice(
+            customer=customer_obj,
+            samples=sample,
+            pools=pool,
+            comment="just a test invoice",
+            discount=discount,
+            record_type=record_type,
         )
-        store.add_commit(pool)
-        return pool
+        store.add_commit(invoice)
 
-    @classmethod
-    def ensure_user(
-        cls,
-        store: Store,
-        customer: models.Customer,
-        email: str = "Bob@bobmail.com",
-        name: str = "Bob",
-        is_admin: bool = False,
-    ) -> models.User:
-        """Utility function to add a user that can be used in tets"""
-        user = store.user(email=email)
-        if not user:
-            user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
-            store.add_commit(user)
-        return user
-
-    @classmethod
-    def ensure_invoice(
-        cls,
-        store: Store,
-        invoice_id: int = 0,
-        customer_id: str = "cust000",
-        discount: int = 0,
-        record_type: str = "Sample",
-    ) -> models.Invoice:
-        """Utility function to create an invoice with a costumer and samples or pools"""
-        invoice = store.invoice(invoice_id=invoice_id)
-        if not invoice:
-            customer_obj = StoreHelpers.ensure_customer(
-                store=store,
-                customer_id=customer_id,
-            )
-
-            user_obj: models.User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
-            customer_obj.invoice_contact: models.User = user_obj
-
-            pool = []
-            sample = []
-            if record_type == "Sample":
-                sample.append(StoreHelpers.add_sample(store=store, customer_id=customer_id))
-                pool = None
-            else:
-                pool.append(
-                    StoreHelpers.ensure_pool(store, customer_id=customer_id, name=customer_id)
-                )
-                sample = None
-
-            invoice = store.add_invoice(
-                customer=customer_obj,
-                samples=sample,
-                pools=pool,
-                comment="just a test invoice",
-                discount=discount,
-                record_type=record_type,
-            )
-            store.add_commit(invoice)
-
-        return invoice
+    return invoice

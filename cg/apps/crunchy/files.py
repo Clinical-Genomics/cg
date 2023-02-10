@@ -14,6 +14,7 @@ LOG = logging.getLogger(__name__)
 
 NR_OF_FILES_IN_METADATA = 3
 
+
 # Methods to get file information
 def get_log_dir(file_path: Path) -> Path:
     """Return the path to where logs should be stored"""

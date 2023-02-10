@@ -81,7 +81,6 @@ class MockLimsAPI(LimsAPI):
         return self._delivery_method
 
     def get_sample_project(self, sample_id: str) -> str:
-
         return self.sample(sample_id).get("project").get("id")
 
     def get_sample_comment(self, sample_id: str) -> str:
@@ -99,7 +98,6 @@ class MockLimsAPI(LimsAPI):
         pass  # This is completely mocked out
 
     def get_received_date(self, lims_id: str):
-
         received_date = None
         for sample in self._samples:
             if sample.internal_id == lims_id:
