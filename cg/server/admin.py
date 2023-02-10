@@ -7,6 +7,7 @@ from cgmodels.cg.constants import Pipeline
 from flask import redirect, request, session, url_for, flash
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.form import SecureForm
 from flask_dance.contrib.google import google
 from markupsafe import Markup
 from sqlalchemy.orm import Query
@@ -19,6 +20,8 @@ from cg.utils.flask.enum import SelectEnumField
 
 class BaseView(ModelView):
     """Base for the specific views."""
+
+    form_base_class = SecureForm  # Protect against CSRF
 
     def is_accessible(self):
         user_obj = db.user(session.get("user_email"))
