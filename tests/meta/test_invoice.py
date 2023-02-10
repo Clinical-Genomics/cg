@@ -120,7 +120,6 @@ def test_invoice_pool_generic_customer(
     record_type: str = RecordType.Pool,
     customer_id: str = "cust132",
 ):
-
     invoice = helpers.ensure_invoice(
         store,
         invoice_id=invoice_id,

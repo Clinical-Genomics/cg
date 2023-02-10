@@ -670,98 +670,97 @@ class StoreHelpers:
 
         return case
 
+    @classmethod
+    def ensure_pool(
+        cls,
+        store: Store,
+        customer_id: str = "cust000",
+        name: str = "test_pool",
+        ticket: str = "987654",
+        application_tag: str = "dummy_tag",
+        application_type: str = "tgs",
+        is_external: bool = False,
+        is_rna: bool = False,
+    ) -> models.Pool:
+        """Utility function to add a pool that can be used in tests"""
+        customer_id = customer_id or "cust000"
+        customer = store.customer(customer_id)
+        if not customer:
+            customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
 
-@classmethod
-def ensure_pool(
-    cls,
-    store: Store,
-    customer_id: str = "cust000",
-    name: str = "test_pool",
-    ticket: str = "987654",
-    application_tag: str = "dummy_tag",
-    application_type: str = "tgs",
-    is_external: bool = False,
-    is_rna: bool = False,
-) -> models.Pool:
-    """Utility function to add a pool that can be used in tests"""
-    customer_id = customer_id or "cust000"
-    customer = store.customer(customer_id)
-    if not customer:
-        customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
-
-    application_version = StoreHelpers.ensure_application_version(
-        store=store,
-        application_tag=application_tag,
-        application_type=application_type,
-        is_external=is_external,
-        is_rna=is_rna,
-    )
-
-    pool = store.add_pool(
-        name=name,
-        ordered=datetime.now(),
-        application_version=application_version,
-        customer=customer,
-        order="test_order",
-    )
-    store.add_commit(pool)
-    return pool
-
-
-@classmethod
-def ensure_user(
-    cls,
-    store: Store,
-    customer: models.Customer,
-    email: str = "Bob@bobmail.com",
-    name: str = "Bob",
-    is_admin: bool = False,
-) -> models.User:
-    """Utility function to add a user that can be used in tets"""
-    user = store.user(email=email)
-    if not user:
-        user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
-        store.add_commit(user)
-    return user
-
-
-@classmethod
-def ensure_invoice(
-    cls,
-    store: Store,
-    invoice_id: int = 0,
-    customer_id: str = "cust000",
-    discount: int = 0,
-    record_type: str = "Sample",
-) -> models.Invoice:
-    """Utility function to create an invoice with a costumer and samples or pools"""
-    invoice = store.invoice(invoice_id=invoice_id)
-    if not invoice:
-        customer_obj = StoreHelpers.ensure_customer(
+        application_version = StoreHelpers.ensure_application_version(
             store=store,
-            customer_id=customer_id,
+            application_tag=application_tag,
+            application_type=application_type,
+            is_external=is_external,
+            is_rna=is_rna,
         )
 
-        user_obj: models.User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
-        customer_obj.invoice_contact: models.User = user_obj
-
-        pool = []
-        sample = []
-        if record_type == "Sample":
-            sample.append(StoreHelpers.add_sample(store=store, customer_id=customer_id))
-            pool = None
-        else:
-            pool.append(StoreHelpers.ensure_pool(store, customer_id=customer_id, name=customer_id))
-            sample = None
-
-        invoice = store.add_invoice(
-            customer=customer_obj,
-            samples=sample,
-            pools=pool,
-            comment="just a test invoice",
-            discount=discount,
-            record_type=record_type,
+        pool = store.add_pool(
+            name=name,
+            ordered=datetime.now(),
+            application_version=application_version,
+            customer=customer,
+            order="test_order",
         )
-        store.add_commit(invoice)
+        store.add_commit(pool)
+        return pool
 
-    return invoice
+    @classmethod
+    def ensure_user(
+        cls,
+        store: Store,
+        customer: models.Customer,
+        email: str = "Bob@bobmail.com",
+        name: str = "Bob",
+        is_admin: bool = False,
+    ) -> models.User:
+        """Utility function to add a user that can be used in tets"""
+        user = store.user(email=email)
+        if not user:
+            user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+            store.add_commit(user)
+        return user
+
+    @classmethod
+    def ensure_invoice(
+        cls,
+        store: Store,
+        invoice_id: int = 0,
+        customer_id: str = "cust000",
+        discount: int = 0,
+        record_type: str = "Sample",
+    ) -> models.Invoice:
+        """Utility function to create an invoice with a costumer and samples or pools"""
+        invoice = store.invoice(invoice_id=invoice_id)
+        if not invoice:
+            customer_obj = StoreHelpers.ensure_customer(
+                store=store,
+                customer_id=customer_id,
+            )
+
+            user_obj: models.User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
+            customer_obj.invoice_contact: models.User = user_obj
+
+            pool = []
+            sample = []
+            if record_type == "Sample":
+                sample.append(StoreHelpers.add_sample(store=store, customer_id=customer_id))
+                pool = None
+            else:
+                pool.append(
+                    StoreHelpers.ensure_pool(store, customer_id=customer_id, name=customer_id)
+                )
+                sample = None
+
+            invoice = store.add_invoice(
+                customer=customer_obj,
+                samples=sample,
+                pools=pool,
+                comment="just a test invoice",
+                discount=discount,
+                record_type=record_type,
+            )
+            store.add_commit(invoice)
+
+        return invoice
