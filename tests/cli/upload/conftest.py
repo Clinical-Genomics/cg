@@ -29,6 +29,7 @@ from cg.store import Store, models
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
+from tests.store_helpers import StoreHelpers
 
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
 
@@ -121,21 +122,23 @@ def fixture_upload_gens_hk_bundle(
     case_id: str,
     gens_coverage_path: Path,
     gens_fracsnp_path: Path,
+    later_timestamp: datetime,
     sample_id: str,
+    timestamp: datetime,
 ) -> dict:
     """Returns a dictionary in hk format with files used in upload gens process"""
     return {
         "name": case_id,
-        "created": datetime.now(),
-        "expires": datetime.now(),
+        "created": timestamp,
+        "expires": later_timestamp,
         "files": [
             {
-                "path": str(gens_coverage_path),
+                "path": gens_coverage_path.as_posix(),
                 "archive": False,
                 "tags": [sample_id] + GensAnalysisTag.COVERAGE,
             },
             {
-                "path": str(gens_fracsnp_path),
+                "path": gens_fracsnp_path.as_posix(),
                 "archive": False,
                 "tags": [sample_id] + GensAnalysisTag.FRACSNP,
             },
@@ -146,12 +149,12 @@ def fixture_upload_gens_hk_bundle(
 @pytest.fixture(name="upload_gens_hk_api")
 def fixture_upload_gens_hk_api(
     case_id: str,
-    helpers,
+    helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     upload_gens_hk_bundle: dict,
 ) -> HousekeeperAPI:
     """Add and include files from upload gens hk bundle"""
-    helpers.ensure_hk_bundle(real_housekeeper_api, upload_gens_hk_bundle)
+    helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
     hk_version = real_housekeeper_api.last_version(case_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
