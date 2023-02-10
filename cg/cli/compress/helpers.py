@@ -11,7 +11,7 @@ from housekeeper.store.models import Version, Bundle
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
 from cg.constants.slurm import Slurm
-from cg.datetime.utils import get_date_days_ago
+from cg.utils.date import get_date_days_ago
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths

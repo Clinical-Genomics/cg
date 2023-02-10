@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from cg.datetime.utils import get_date_days_ago, get_timedelta_from_date
+from cg.utils.date import get_timedelta_from_date, get_date_days_ago
 
 
 def test_get_date_days_ago(timestamp_now: datetime):
