@@ -71,7 +71,7 @@ def fastq_cmd(
 @click.option(
     "-b",
     "--days-back",
-    default=60,
+    default=21,
     show_default=True,
     help="Threshold for how long ago family was created",
 )
