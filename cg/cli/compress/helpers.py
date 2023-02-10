@@ -11,6 +11,7 @@ from housekeeper.store.models import Version, Bundle
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
 from cg.constants.slurm import Slurm
+from cg.datetime.utils import get_date_days_ago
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
@@ -32,7 +33,7 @@ def get_cases_to_process(
             return
         cases.append(case)
     else:
-        date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
+        date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
         cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
 
