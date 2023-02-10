@@ -126,7 +126,7 @@ def fixture_upload_gens_hk_bundle(
     sample_id: str,
     timestamp: datetime,
 ) -> dict:
-    """Returns a dictionary in hk format with files used in upload gens process"""
+    """Returns a dictionary in Housekeeper format with files used in upload gens process."""
     return {
         "name": case_id,
         "created": timestamp,
@@ -153,7 +153,7 @@ def fixture_upload_gens_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_gens_hk_bundle: dict,
 ) -> HousekeeperAPI:
-    """Add and include files from upload gens hk bundle"""
+    """Add and include files from upload_gens_hk_bundle."""
     helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
     hk_version = real_housekeeper_api.last_version(case_id)
     real_housekeeper_api.include(hk_version)
@@ -167,7 +167,7 @@ def fixture_upload_gens_context(
     gens_api: GensAPI,
     upload_gens_hk_api: HousekeeperAPI,
 ) -> CGConfig:
-    """Create a upload gens context"""
+    """Create a gens upload context."""
     base_context.gens_api_ = gens_api
     base_context.housekeeper_api_ = upload_gens_hk_api
     base_context.status_db_ = analysis_store_trio
