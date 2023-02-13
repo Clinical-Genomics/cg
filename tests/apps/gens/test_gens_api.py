@@ -29,15 +29,12 @@ def test_gens_api_load(
     sample_id: str,
 ):
     """Test load sample method."""
-    # GIVEN sample_id, genome_build, baf_path, coverage_path, and case_id
-    gens_genome_build: str = GENOME_BUILD_37
-
     # WHEN uploading a sample with the API, using a mocked Process.run_command method
     api: GensAPI = GensAPI(gens_config)
     mocked_run_command = mocker.patch.object(Process, "run_command")
     api.load(
         sample_id=sample_id,
-        genome_build=gens_genome_build,
+        genome_build=GENOME_BUILD_37,
         baf_path=gens_fracsnp_path.as_posix(),
         coverage_path=gens_coverage_path.as_posix(),
         case_id=case_id,
@@ -52,7 +49,7 @@ def test_gens_api_load(
             "--sample-id",
             sample_id,
             "--genome-build",
-            gens_genome_build,
+            GENOME_BUILD_37,
             "--baf",
             gens_fracsnp_path.as_posix(),
             "--coverage",
