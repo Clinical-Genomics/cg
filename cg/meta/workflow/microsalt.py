@@ -349,42 +349,40 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def microsalt_qc(self, case_id: str, run_dir_path: Path, lims_project: str) -> bool:
         """Check if given microSALT case passes QC check."""
-        samples: List[Sample] = self.get_samples(case_id=case_id)
         failed_samples: Dict = {}
         case_qc: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
-        for sample in samples:
-            if not sample.sequenced_at:
-                continue
+        for sample_id in case_qc:
+            sample: Sample = self.status_db.sample(internal_id=sample_id)
             sample_check: Union[Dict, None] = self.qc_sample_check(
                 sample=sample,
-                sample_qc=case_qc[sample.internal_id],
+                sample_qc=case_qc[sample_id],
             )
             if sample_check is not None:
-                failed_samples[sample.internal_id] = sample_check
+                failed_samples[sample_id] = sample_check
 
         return self.qc_case_check(
             case_id=case_id,
             failed_samples=failed_samples,
-            samples=samples,
+            number_of_samples=len(case_qc),
             run_dir_path=run_dir_path,
         )
 
     def qc_case_check(
-        self, case_id: str, samples: List[Sample], failed_samples: Dict, run_dir_path: Path
+        self, case_id: str, failed_samples: Dict, number_of_samples: int, run_dir_path: Path
     ) -> bool:
         """Perform the final QC check for a microbial case based on failed samples."""
         qc_pass: bool = True
 
         for sample_id in failed_samples:
-            sample: Sample = self.get_samples(case_id=case_id, sample_id=sample_id)[0]
+            sample: Sample = self.status_db.sample(internal_id=sample_id)
             if sample.control == ControlEnum.negative:
                 qc_pass = False
             if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:
                 qc_pass = False
 
         # Check if more than 10% of MWX samples failed
-        if len(failed_samples) / len(samples) > MicrosaltQC.QC_PERCENT_THRESHOLD_MWX:
+        if len(failed_samples) / number_of_samples > MicrosaltQC.QC_PERCENT_THRESHOLD_MWX:
             qc_pass = False
 
         if not qc_pass:
