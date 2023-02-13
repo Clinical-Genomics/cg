@@ -1,4 +1,4 @@
-"""MIP-DNA upload API"""
+"""MIP-RNA upload API"""
 
 import logging
 
@@ -12,7 +12,7 @@ from cg.cli.upload.validate import validate
 from cg.cli.upload.coverage import coverage
 from cg.cli.upload.clinical_delivery import clinical_delivery
 from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.upload.upload_api import UploadAPI
 from cg.store import models
@@ -21,11 +21,11 @@ from cg.store import models
 LOG = logging.getLogger(__name__)
 
 
-class MipDNAUploadAPI(UploadAPI):
-    """MIP-DNA upload API"""
+class MipRNAUploadAPI(UploadAPI):
+    """MIP-RNA upload API"""
 
     def __init__(self, config: CGConfig):
-        self.analysis_api: MipDNAAnalysisAPI = MipDNAAnalysisAPI(config)
+        self.analysis_api: MipRNAAnalysisAPI = MipRNAAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
