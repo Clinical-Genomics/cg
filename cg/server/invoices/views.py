@@ -147,7 +147,7 @@ def new(record_type):
     )
 
 
-@BLUEPRINT.route("/<int:invoice_id>", methods=["POST"])
+@BLUEPRINT.route("/<int:invoice_id>", methods=["GET"])
 def invoice(invoice_id):
     """Save comments and uploaded modified invoices."""
     invoice_obj = db.invoice(invoice_id)
