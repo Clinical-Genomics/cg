@@ -9,8 +9,8 @@ from cg.constants import CASE_ACTIONS, Pipeline
 from cg.constants.constants import CaseActions
 from cg.store.models import (
     Analysis,
-    ApplicationVersion,
     Application,
+    ApplicationVersion,
     Customer,
     Family,
     FamilySample,
@@ -222,6 +222,10 @@ class StatusHandler(BaseHandler):
         else:
             sample.comment = comment
         self.commit()
+
+    def _get_analysis_case_query(self) -> Query:
+        """Return analysis query."""
+        return self.Analysis.query.join(Analysis.family)
 
     def _get_case_query(self) -> Query:
         """Return case query."""
@@ -593,8 +597,7 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Fetch analyses that have not been uploaded."""
-        records = self.Analysis.query.join(Analysis.family)
-
+        records: Query = self._get_analysis_case_query()
         analysis_filter_functions: List[str] = [
             "analyses_with_pipeline",
             "completed_analyses",
@@ -606,7 +609,6 @@ class StatusHandler(BaseHandler):
             records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
-
         return records
 
     def analyses_to_clean(
@@ -634,7 +636,7 @@ class StatusHandler(BaseHandler):
         pipeline: Optional[Pipeline] = None,
     ) -> Query:
         """Fetch all analyses older than certain date."""
-        records = self.Analysis.query.join(Analysis.family)
+        records: Query = self._get_analysis_case_query()
         if case_id:
             records = records.filter(Family.internal_id == case_id)
         if pipeline:
@@ -683,9 +685,7 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Fetches analyses that need a delivery report to be regenerated."""
-
-        records = self.Analysis.query.join(Analysis.family)
-
+        records = self._get_analysis_case_query()
         case_filter_functions: List[str] = [
             "filter_report_cases_with_valid_data_delivery",
         ]
@@ -693,7 +693,6 @@ class StatusHandler(BaseHandler):
             records: Query = apply_case_filter(
                 function=filter_function, cases=records, pipeline=pipeline
             )
-
         analysis_filter_functions: List[str] = [
             "filter_report_analyses_by_pipeline",
             "analyses_without_delivery_report",
@@ -704,22 +703,16 @@ class StatusHandler(BaseHandler):
             records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
-
         return records
 
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
         """Fetches analyses that need a delivery report to be uploaded."""
-
-        records = self.Analysis.query.join(Analysis.family)
-
-        case_filter_functions: List[str] = [
-            "cases_with_scout_data_delivery",
-        ]
+        records = self._get_analysis_case_query()
+        case_filter_functions: List[str] = ["cases_with_scout_data_delivery"]
         for filter_function in case_filter_functions:
             records: Query = apply_case_filter(
                 function=filter_function, cases=records, pipeline=pipeline
             )
-
         analysis_filter_functions: List[str] = [
             "filter_report_analyses_by_pipeline",
             "analyses_with_delivery_report",
@@ -731,7 +724,6 @@ class StatusHandler(BaseHandler):
             records: Query = apply_analysis_filter(
                 function=filter_function, analyses=records, pipeline=pipeline
             )
-
         return records
 
     def samples_to_deliver(self) -> Query:
