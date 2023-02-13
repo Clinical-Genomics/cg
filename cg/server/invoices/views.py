@@ -100,9 +100,19 @@ def upload_invoice_news_to_db():
     return url_for("invoices.invoice", invoice_id=invoice_id)
 
 
-@BLUEPRINT.route("/", methods=["GET", "POST"])
+@BLUEPRINT.route("/")
 def index():
-    """Show invoices."""
+    """Retrieve invoices."""
+    invoices = {
+        "sent_invoices": db.invoices(invoiced=True),
+        "pending_invoices": db.invoices(invoiced=False),
+    }
+    return render_template("invoices/index.html", invoices=invoices)
+
+
+@BLUEPRINT.route("/", methods=["POST"])
+def update_invoices():
+    """Update invoices."""
     if request.form.get("new_invoice_updates"):
         url = upload_invoice_news_to_db()
         return redirect(url)
@@ -110,15 +120,9 @@ def index():
         invoice_id = request.form.get("invoice_id")
         url = undo_invoice(invoice_id)
         return redirect(url)
-    elif request.method == "POST":
+    else:
         url = make_new_invoice()
         return redirect(url)
-    else:
-        invoices = {
-            "sent_invoices": db.invoices(invoiced=True),
-            "pending_invoices": db.invoices(invoiced=False),
-        }
-        return render_template("invoices/index.html", invoices=invoices)
 
 
 @BLUEPRINT.route("/new/<record_type>")
@@ -143,7 +147,7 @@ def new(record_type):
     )
 
 
-@BLUEPRINT.route("/<int:invoice_id>", methods=["GET", "POST"])
+@BLUEPRINT.route("/<int:invoice_id>", methods=["POST"])
 def invoice(invoice_id):
     """Save comments and uploaded modified invoices."""
     invoice_obj = db.invoice(invoice_id)
