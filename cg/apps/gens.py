@@ -20,7 +20,9 @@ class GensAPI:
     def __init__(self, config: Dict[str, Dict[str, str]]):
         self.binary_path: str = config["gens"]["binary_path"]
         self.config_path: str = config["gens"]["config_path"]
-        self.process: Process = Process(binary=self.binary_path, config=self.config_path)
+        self.process: Process = Process(
+            binary=self.binary_path, config=self.config_path, config_parameter="--env-file"
+        )
         self.dry_run: bool = False
 
     def set_dry_run(self, dry_run: bool) -> None:
