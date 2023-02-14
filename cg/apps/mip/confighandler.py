@@ -1,7 +1,8 @@
 import logging
 from copy import deepcopy
 
-from cg.constants import DEFAULT_CAPTURE_KIT, NO_PARENT
+from cg.constants import DEFAULT_CAPTURE_KIT
+from cg.constants.subject import RelationshipStatus
 from cg.exc import PedigreeConfigError
 from marshmallow import Schema, fields, validate
 
@@ -22,8 +23,8 @@ class SampleSchema(Schema):
             ]
         ),
     )
-    father = fields.Str(default=NO_PARENT)
-    mother = fields.Str(default=NO_PARENT)
+    father = fields.Str(default=RelationshipStatus.HAS_NO_PARENT.value)
+    mother = fields.Str(default=RelationshipStatus.HAS_NO_PARENT.value)
     phenotype = fields.Str(
         required=True,
         validate=validate.OneOf(choices=["affected", "unaffected", "unknown"]),
@@ -78,8 +79,12 @@ class ConfigHandler:
             LOG.info("setting 'unknown' phenotype to 'unaffected'")
             data_copy["samples"][0]["phenotype"] = "unaffected"
         for sample_data in data_copy["samples"]:
-            sample_data["mother"] = sample_data.get("mother") or NO_PARENT
-            sample_data["father"] = sample_data.get("father") or NO_PARENT
+            sample_data["mother"] = (
+                sample_data.get("mother") or RelationshipStatus.HAS_NO_PARENT.value
+            )
+            sample_data["father"] = (
+                sample_data.get("father") or RelationshipStatus.HAS_NO_PARENT.value
+            )
             if sample_data["analysis_type"] == "wgs" and sample_data.get("capture_kit") is None:
                 sample_data["capture_kit"] = DEFAULT_CAPTURE_KIT
         return data_copy
