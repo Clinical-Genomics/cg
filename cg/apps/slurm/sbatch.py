@@ -24,7 +24,6 @@ log "Running on: $(hostname)"
 DRAGEN_SBATCH_HEADER_TEMPLATE = """#! /bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --partition=dragen
-#SBATCH --nodelist=cg-dragen
 #SBATCH --account={account}
 #SBATCH --cpus-per-task=24
 #SBATCH --nodes=1

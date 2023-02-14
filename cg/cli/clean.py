@@ -18,7 +18,8 @@ from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     fluffy_past_run_dirs,
-    mip_past_run_dirs,
+    mip_dna_past_run_dirs,
+    mip_rna_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
@@ -61,7 +62,8 @@ def clean():
 for sub_cmd in [
     balsamic_past_run_dirs,
     fluffy_past_run_dirs,
-    mip_past_run_dirs,
+    mip_dna_past_run_dirs,
+    mip_rna_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,

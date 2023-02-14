@@ -20,6 +20,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -239,17 +240,32 @@ def fluffy_past_run_dirs(
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
-@click.command("mip-past-run-dirs")
+@click.command("mip-dna-past-run-dirs")
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
-def mip_past_run_dirs(
+def mip_dna_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" MIP case run dirs."""
+    """Clean up of "old" MIP_DNA case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("mip-rna-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def mip_rna_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" MIP_RNA case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = MipRNAAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
