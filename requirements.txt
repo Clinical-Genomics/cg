@@ -15,6 +15,7 @@ Flask-CORS
 Flask-Dance
 Flask-SQLAlchemy==2.1
 Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
+flask_wtf
 google-auth
 gunicorn
 requests[security]
@@ -30,7 +31,7 @@ email-validator
 lxml
 marshmallow>3               # due to code expects behaviour from >3
 markupsafe<2.1            # due to soft_unicode import error from markupsafe
-openpyxl
+openpyxl==3.0.10
 packaging
 pandas
 paramiko
