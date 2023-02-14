@@ -7,7 +7,6 @@ from .base import Model
 
 
 class Sample(Model):
-
     sample_id = Column(types.Integer, primary_key=True)
     project_id = Column(ForeignKey("project.project_id", ondelete="CASCADE"), nullable=False)
     samplename = Column(types.String(255), nullable=False)

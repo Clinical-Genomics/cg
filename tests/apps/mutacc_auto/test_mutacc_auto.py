@@ -70,7 +70,6 @@ def test_import_reads(mutacc_auto_api, mocker):
 
 
 def test_run_command(mock_failed_process, mocker):
-
     """
     Test run_command function
     """
@@ -82,5 +81,4 @@ def test_run_command(mock_failed_process, mocker):
 
     # Then Error subprocess.CalledProcessError is raised
     with pytest.raises(subprocess.CalledProcessError):
-
         run_command(["command"])

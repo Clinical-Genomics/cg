@@ -14,7 +14,6 @@ LOG = logging.getLogger(__name__)
 
 
 class StatsAPI(alchy.Manager):
-
     Project = models.Project
     Sample = models.Sample
     Unaligned = models.Unaligned

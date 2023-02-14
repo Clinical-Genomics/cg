@@ -14,7 +14,6 @@ def test_cli_link_no_case(
     fluffy_context: CGConfig,
     caplog,
 ):
-
     caplog.set_level("ERROR")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
 
@@ -45,7 +44,6 @@ def test_cli_link(
     fastq_file_fixture_path,
     caplog,
 ):
-
     caplog.set_level("INFO")
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN that a fastq path does not exist

@@ -5,7 +5,7 @@ from typing import List, Optional, Iterator
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
-from cg.constants.constants import PrepCategory
+from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
@@ -23,6 +23,7 @@ from cg.store.models import (
 )
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 from cg.store.status_case_sample_filters import apply_case_sample_filter
+from cg.store.status_sample_filters import apply_sample_filter
 
 LOG = logging.getLogger(__name__)
 
@@ -351,7 +352,6 @@ class FindBusinessDataHandler(BaseHandler):
         application: Application = self.get_application_by_case(case_id)
 
         if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
-
             raise ValueError(
                 f"{case_id} is not a ready made library, found prep category: "
                 f"{application.prep_category}"
@@ -409,8 +409,24 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_by_name(self, name: str) -> Sample:
         return self.Sample.query.filter(Sample.name == name).first()
 
+    def _get_sample_case_query(self) -> Query:
+        """Return a sample case relationship query."""
+        return self.Sample.query.join(Family.links, FamilySample.sample)
+
+    def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
+        """Extract samples given a tissue type."""
+        samples: Query = apply_case_sample_filter(
+            function="get_samples_associated_with_case",
+            case_samples=self._get_sample_case_query(),
+            case_id=case_id,
+        )
+        samples: Query = apply_sample_filter(
+            function="get_samples_with_type", samples=samples, tissue_type=sample_type
+        )
+        return samples.all() if samples else None
+
     def get_case_pool(self, case_id: str) -> Optional[Pool]:
-        """Returns the pool connected to the case. Returns None if no pool is found"""
+        """Returns the pool connected to the case. Returns None if no pool is found."""
         case: Family = self.family(internal_id=case_id)
         pool_name: str = case.name.split("-", 1)[-1]
         return self.pools(customers=[case.customer], enquiry=pool_name).first()

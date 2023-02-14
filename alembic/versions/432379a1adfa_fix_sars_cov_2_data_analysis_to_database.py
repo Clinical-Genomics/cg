@@ -57,7 +57,6 @@ def upgrade():
         .filter(Family.data_delivery == str(DataDelivery.FASTQ))
         .filter(Family.data_analysis == "")
     ):
-
         print(f"Altering family: {str(family)}")
         family.data_analysis = str(Pipeline.SARS_COV_2)
         print(f"Altered family: {str(family)}")

@@ -205,7 +205,6 @@ def sample(
         raise click.Abort
 
     for key, value in kwargs:
-
         if is_locked_attribute_on_sample(key, NOT_CHANGEABLE_SAMPLE_ATTRIBUTES):
             LOG.warning(f"{key} is not a changeable attribute on sample")
             continue
@@ -248,9 +247,7 @@ def sample(
         status_db.commit()
 
     if not skip_lims:
-
         for key, value in kwargs:
-
             new_key = "application" if key == "application_version" else key
             new_value = sample.priority_human if key == "priority" else value
             LOG.info(f"Would set {new_key} to {new_value} for {sample.internal_id} in LIMS")

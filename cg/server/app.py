@@ -25,12 +25,12 @@ def _load_config(app):
 
 
 def _configure_extensions(app: Flask):
-
     _initialize_logging(app)
     certs_resp = requests.get("https://www.googleapis.com/oauth2/v1/certs")
     app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
 
     ext.cors.init_app(app)
+    ext.csrf.init_app(app)
     ext.db.init_app(app)
     ext.lims.init_app(app)
     if app.config["OSTICKET_API_KEY"]:
@@ -43,7 +43,6 @@ def _initialize_logging(app):
 
 
 def _register_blueprints(app: Flask):
-
     if not app.config["CG_ENABLE_ADMIN"]:
         return
 
@@ -62,10 +61,11 @@ def _register_blueprints(app: Flask):
         session["user_email"] = user_data["email"]
 
     app.register_blueprint(api.BLUEPRINT)
-    _register_admin_views()
     app.register_blueprint(invoices.BLUEPRINT, url_prefix="/invoices")
-
     app.register_blueprint(oauth_bp, url_prefix="/login")
+    _register_admin_views()
+
+    ext.csrf.exempt(api.BLUEPRINT)  # Protected with Auth header already
 
     @app.route("/")
     def index():

@@ -24,7 +24,6 @@ def test_validate_config_invalid_analysis_type(invalid_config_analysis_type):
 
     # WHEN validating the config
     with pytest.raises(PedigreeConfigError):
-
         # THEN assert a config error is raised
         ConfigHandler.validate_config(invalid_config_analysis_type)
 
@@ -56,7 +55,6 @@ def test_validate_config_unknown_field_and_missing_sample_id(
 
     # WHEN validating the config
     with pytest.raises(PedigreeConfigError):
-
         # THEN assert a config error is raised
         ConfigHandler.validate_config(invalid_config_unknown_field_sample_id)
 
@@ -71,6 +69,5 @@ def test_validate_config_unknown_field_and_invalid_analysis_type(
 
     # WHEN validating the config
     with pytest.raises(PedigreeConfigError):
-
         # THEN assert a config error is raised
         ConfigHandler.validate_config(invalid_config_unknown_field_analysis_type)
