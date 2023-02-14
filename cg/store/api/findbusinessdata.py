@@ -3,8 +3,8 @@ import datetime as dt
 import logging
 from typing import List, Optional, Iterator
 
+from alchy import Query
 from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Query
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
@@ -269,15 +269,33 @@ class FindBusinessDataHandler(BaseHandler):
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
+    def _get_flow_cell_query(self) -> Query:
+        """Return flow cell query."""
+        return self.Flowcell.query
+
     def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
         """Return flow cell."""
         return apply_flow_cell_filter(
-            flow_cells=self.Flowcell.query, flow_cell_id=flow_cell_id, function="flow_cell_has_id"
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_id=flow_cell_id,
+            function="flow_cell_has_id",
+        )
+
+    def get_flow_cells(self) -> List[Flowcell]:
+        """Return all flow cells."""
+        return self._get_flow_cell_query()
+
+    def get_flow_cells_by_status(self, flow_cell_status: str) -> List[Flowcell]:
+        """Return flow cells with supplied status."""
+        return apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_status=flow_cell_status,
+            function="flow_cells_with_status",
         )
 
     def flowcells(self, *, status: str = None, family: Family = None, enquiry: str = None) -> Query:
         """Fetch all flow cells."""
-        records = self.Flowcell.query
+        records = self._get_flow_cell_query()
         if family:
             records = records.join(Flowcell.samples, Sample.links).filter(
                 FamilySample.family == family

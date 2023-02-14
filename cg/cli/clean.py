@@ -314,14 +314,14 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
 @DRY_RUN
 @click.pass_obj
 def fix_flow_cell_status(context: CGConfig, dry_run: bool):
-    """set correct flow cell statuses in Statusdb."""
+    """Set correct flow cell statuses in Statusdb."""
     status_db: Store = context.status_db
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
     flow_cells_in_statusdb = [
         flow_cell
-        for flow_cell in status_db.flowcells()
+        for flow_cell in status_db.get_flow_cells()
         if flow_cell.status in [FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
     ]
     LOG.info(

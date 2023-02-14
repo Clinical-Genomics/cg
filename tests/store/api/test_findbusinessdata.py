@@ -2,8 +2,11 @@
 from datetime import datetime
 from typing import List
 
+from sqlalchemy.orm import Query
+
+from cg.constants import FlowCellStatus
 from cg.store import Store
-from cg.store.models import Application, ApplicationVersion, Flowcell, Sample, FamilySample, Family
+from cg.store.models import FamilySample, Family
 from cg.constants.indexes import ListIndexes
 from cg.store.models import Sample, Flowcell, ApplicationVersion, Application
 from tests.store_helpers import StoreHelpers
@@ -24,16 +27,31 @@ def test_find_analysis_via_date(
     assert db_analysis == analysis
 
 
-def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
-    """Test function to return the latest flow cell from the database."""
+def test_get_flow_cell_query(re_sequenced_sample_store: Store):
+    """Test function to return the flow cell query from the database."""
 
     # GIVEN a store with two flow cells
 
-    # WHEN fetching the latest flow cell
-    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
+    # WHEN getting the query for the flow cells
+    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_query()
 
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == flow_cell_id
+    # THEN a query should be returned
+    assert isinstance(flow_cell_query, Query)
+
+
+def test_get_flow_cells(re_sequenced_sample_store: Store):
+    """Test function to return the flow cells from the database."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the flow cells
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+
+    # THEN a flow cells should be returned
+    assert flow_cells
+
+    # THEN a flow cell model should be returned
+    assert isinstance(flow_cells[0], Flowcell)
 
 
 def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
@@ -46,6 +64,38 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id
+
+
+def test_get_flow_cells_by_status(another_flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database by status."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_status(
+        flow_cell_status=FlowCellStatus.ONDISK
+    )
+
+    # THEN the flow cell status should be "ondisk"
+    for flow_cell in flow_cells:
+        assert flow_cell.status == FlowCellStatus.ONDISK
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cells[0].name == another_flow_cell_id
+
+
+def test_get_flow_cells_by_status_when_incorrect_status(re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database when no flow cell with status."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_status(
+        flow_cell_status="does_not_exist"
+    )
+
+    # THEN no flow cells should be returned
+    assert len(list(flow_cells)) == 0
 
 
 def test_get_samples_from_flow_cell(
