@@ -96,8 +96,10 @@ def fixture_rna_mip_context(
     apptag_rna: str,
     case_id: str,
     housekeeper_api: HousekeeperAPI,
+    tb_api,
 ) -> CGConfig:
     cg_context.housekeeper_api_ = housekeeper_api
+    cg_context.trailblazer_api_ = tb_api
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
     if not cg_context.status_db.family(case_id):
         helpers.ensure_case_from_dict(
