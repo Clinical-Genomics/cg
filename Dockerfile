@@ -28,7 +28,7 @@ ENV GOOGLE_OAUTH_CLIENT_SECRET="1"
 
 
 WORKDIR /home/src/app
-COPY . /home/src/app
+COPY cg MANIFEST.in pyproject.toml requirements* setup.py templates ./
 
 
 RUN pip install -r requirements.txt
