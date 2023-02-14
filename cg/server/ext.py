@@ -1,6 +1,7 @@
 from flask_admin import Admin
 from flask_alchy import Alchy
 from flask_cors import CORS
+from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
@@ -28,6 +29,7 @@ class FlaskLims(LimsAPI):
 
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+csrf = CSRFProtect()
 db = CgAlchy(Model=models.Model)
 admin = Admin(name="Clinical Genomics")
 lims = FlaskLims()
