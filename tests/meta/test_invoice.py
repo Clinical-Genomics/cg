@@ -7,7 +7,7 @@ from cg.meta.invoice import InvoiceAPI
 from tests.mocks.limsmock import MockLimsAPI
 
 from cg.store import Store, models
-from cg.constants.record_type import RecordType
+from cg.constants.sequencing import RecordType
 from cg.constants.priority import PriorityTerms
 
 

@@ -25,3 +25,28 @@ class Prepare(StrEnum):
     records: str = "records"
     pooled_samples: str = "pooled_samples"
     record_type: str = "record_type"
+
+
+class CustomerNames(StrEnum):
+    cust999: str = "cust999"
+    cust032: str = "cust032"
+
+
+class Costcenters(StrEnum):
+    ki: str = "ki"
+    kth: str = "kth"
+
+
+class ContactInvoice(StrEnum):
+    name: str = "name"
+    email: str = "email"
+    customer_name: str = "customer_name"
+    reference: str = "reference"
+    address: str = "address"
+
+
+class ApplicationInfo(StrEnum):
+    version: str = "version"
+    tag: str = "tag"
+    discounted_price: str = "discounted_price"
+    percent_kth: str = "percent_kth"

@@ -2,12 +2,15 @@ from cg.apps.lims import LimsAPI
 from cg.server.ext import lims as genologics_lims
 from cg.store import Store, models
 from cg.constants.priority import PriorityTerms
-from cg.constants.record_type import RecordType
-from cg.constants.customers import CustomerNames
-from cg.constants.application_info import ApplicationInfo
-from cg.constants.costcenters import Costcenters
-from cg.constants.contact import ContactInvoice
-from cg.constants.invoice import InvoiceInfo, Prepare
+from cg.constants.sequencing import RecordType
+from cg.constants.invoice import (
+    InvoiceInfo,
+    Prepare,
+    ContactInvoice,
+    Costcenters,
+    ApplicationInfo,
+    CustomerNames,
+)
 
 
 class InvoiceAPI:
