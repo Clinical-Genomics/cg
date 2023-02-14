@@ -33,7 +33,7 @@ class InvoiceAPI:
             self.record_type = RecordType.Sample
             self.raw_records = self.invoice_obj.samples
 
-    def get_customer(self, costcenter: str) -> models.Customer or str:
+    def get_customer_by_cost_center(self, cost_center: str) -> Union[Customer, str]:
         """Return the costumer"""
         return (
             self.db.customer(CustomerNames.cust999)
