@@ -31,7 +31,7 @@ email-validator
 lxml
 marshmallow>3               # due to code expects behaviour from >3
 markupsafe<2.1            # due to soft_unicode import error from markupsafe
-openpyxl
+openpyxl==3.0.10
 packaging
 pandas
 paramiko
