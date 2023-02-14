@@ -3,8 +3,8 @@ import datetime as dt
 import logging
 from typing import List, Optional, Iterator
 
-from alchy import Query
 from sqlalchemy import and_, func, or_
+from sqlalchemy.orm import Query
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
