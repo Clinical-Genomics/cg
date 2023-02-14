@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-b",
     "--days-back",
-    default=21,
+    default=60,
     show_default=True,
     help="Threshold for how long ago family was created",
 )
@@ -71,7 +71,7 @@ def fastq_cmd(
 @click.option(
     "-b",
     "--days-back",
-    default=21,
+    default=60,
     show_default=True,
     help="Threshold for how long ago family was created",
 )
