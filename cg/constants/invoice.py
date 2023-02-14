@@ -15,7 +15,7 @@ class InvoiceInfo(StrEnum):
 
 
 class Prepare(StrEnum):
-    costcenter: str = "costcenter"
+    cost_center: str = "cost_center"
     project_number: str = "project_number"
     customer_id: str = "customer_id"
     customer_name: str = "customer_name"
@@ -30,6 +30,8 @@ class Prepare(StrEnum):
 class CustomerNames(StrEnum):
     cust999: str = "cust999"
     cust032: str = "cust032"
+    cust001: str = "cust001"
+    cust132: str = "cust132"
 
 
 class Costcenters(StrEnum):

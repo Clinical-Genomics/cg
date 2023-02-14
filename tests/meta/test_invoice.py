@@ -6,7 +6,8 @@ from tests.store_helpers import StoreHelpers
 from cg.meta.invoice import InvoiceAPI
 from tests.mocks.limsmock import MockLimsAPI
 
-from cg.store import Store, models
+from cg.store import Store
+from cg.constants.invoice import Costcenters, CustomerNames, InvoiceInfo
 from cg.constants.sequencing import RecordType
 from cg.constants.priority import PriorityTerms
 
@@ -17,7 +18,7 @@ def test_assert_invoice_api(
     helpers: StoreHelpers,
     invoice_id: int = 0,
     record_type: str = RecordType.Sample,
-    customer_id: str = "cust001",
+    customer_id: str = CustomerNames.cust001,
 ):
     # GIVEN an invoice
     invoice = helpers.ensure_invoice(
@@ -37,7 +38,7 @@ def test_invoice_api_sample(
     helpers: StoreHelpers,
     invoice_id: int = 0,
     record_type: str = RecordType.Sample,
-    customer_id: str = "cust132",
+    customer_id: str = CustomerNames.cust132,
 ):
     """Test that the invoice records the right record_type"""
     # GIVEN an invoice
@@ -54,8 +55,8 @@ def test_invoice_api_sample(
     # THEN record_type should be Sample
     assert api.record_type == record_type
     # THEN prepare should set an invoice_info dictionary
-    api.prepare("ki")
-    assert api.invoice_info["priority"] == PriorityTerms.STANDARD
+    api.prepare(Costcenters.ki)
+    assert api.invoice_info[InvoiceInfo.priority] == PriorityTerms.STANDARD
 
 
 def test_invoice_api_pool_cust032(
@@ -64,7 +65,7 @@ def test_invoice_api_pool_cust032(
     helpers: StoreHelpers,
     invoice_id: int = 0,
     record_type: str = RecordType.Pool,
-    customer_id: str = "cust032",
+    customer_id: str = CustomerNames.cust032,
 ):
     # GIVEN a invoice
     invoice = helpers.ensure_invoice(
@@ -81,8 +82,8 @@ def test_invoice_api_pool_cust032(
     api.genologics_lims = mock.MagicMock()
     assert api.record_type == record_type
     # THEN prepare should set priority to standard
-    api.prepare("ki")
-    assert api.invoice_info["priority"] == PriorityTerms.STANDARD
+    api.prepare(Costcenters.ki)
+    assert api.invoice_info[InvoiceInfo.priority] == PriorityTerms.STANDARD
 
 
 def test_invoice_pool_generic_customer(
@@ -91,7 +92,7 @@ def test_invoice_pool_generic_customer(
     helpers: StoreHelpers,
     invoice_id: int = 0,
     record_type: str = RecordType.Pool,
-    customer_id: str = "cust132",
+    customer_id: str = CustomerNames.cust132,
 ):
     invoice = helpers.ensure_invoice(
         store,
@@ -107,5 +108,5 @@ def test_invoice_pool_generic_customer(
     api.genologics_lims = mock.MagicMock()
     assert api.record_type == record_type
     # THEN prepare should set priority to research
-    api.prepare("ki")
-    assert api.invoice_info["priority"] == PriorityTerms.RESEARCH
+    api.prepare(Costcenters.ki)
+    assert api.invoice_info[InvoiceInfo.priority] == PriorityTerms.RESEARCH
