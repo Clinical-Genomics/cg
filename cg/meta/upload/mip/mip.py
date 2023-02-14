@@ -1,4 +1,4 @@
-"""MIP-DNA upload API"""
+"""MIP upload API parent class"""
 
 import logging
 
@@ -12,7 +12,7 @@ from cg.cli.upload.validate import validate
 from cg.cli.upload.coverage import coverage
 from cg.cli.upload.clinical_delivery import clinical_delivery
 from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.upload.upload_api import UploadAPI
 from cg.store import models
@@ -21,12 +21,11 @@ from cg.store import models
 LOG = logging.getLogger(__name__)
 
 
-class MipDNAUploadAPI(UploadAPI):
-    """MIP-DNA upload API"""
+class MipUploadAPI(UploadAPI):
+    """MIP upload API"""
 
-    def __init__(self, config: CGConfig):
-        self.analysis_api: MipDNAAnalysisAPI = MipDNAAnalysisAPI(config)
-        super().__init__(config=config, analysis_api=self.analysis_api)
+    def __init__(self, config: CGConfig, analysis_api: MipAnalysisAPI):
+        super().__init__(config=config, analysis_api=analysis_api)
 
     def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
         """Uploads MIP-DNA analysis data and files"""
