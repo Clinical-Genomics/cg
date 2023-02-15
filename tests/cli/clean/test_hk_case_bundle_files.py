@@ -8,7 +8,7 @@ from cg.store import Store
 from cg.store import models
 from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
-from cg.datetime.utils import get_date_days_ago
+from cg.utils.date import get_date_days_ago
 
 from tests.store_helpers import StoreHelpers
 
