@@ -39,6 +39,18 @@ def test_get_flow_cell_query(re_sequenced_sample_store: Store):
     assert isinstance(flow_cell_query, Query)
 
 
+def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
+    """Test function to return the flow cell query from the database."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN getting the query for the flow cells
+    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_sample_links_query()
+
+    # THEN a query should be returned
+    assert isinstance(flow_cell_query, Query)
+
+
 def test_get_flow_cells(re_sequenced_sample_store: Store):
     """Test function to return the flow cells from the database."""
 
@@ -64,6 +76,33 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id
+
+
+def test_get_flow_cells_by_case(
+    base_store: Store,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_obj: Family,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test returning the latest flow cell from the database by case."""
+
+    # GIVEN a store with two flow cell
+    helpers.add_flowcell(store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj])
+
+    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case_obj)
+
+    # THEN the flow cell samples for the case should be returned
+    for flow_cell in flow_cells:
+        for sample in flow_cell.samples:
+            assert sample in case_obj.samples
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cells[0].name == flow_cell_id
 
 
 def test_get_flow_cells_by_statuses(another_flow_cell_id: str, re_sequenced_sample_store: Store):

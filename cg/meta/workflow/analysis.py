@@ -18,6 +18,7 @@ from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
 from cg.store import models
+from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
 
@@ -93,8 +94,11 @@ class AnalysisAPI(MetaAPI):
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
-        flow_cells = self.status_db.flowcells(family=self.status_db.family(case_id))
-        statuses = []
+        flow_cells: Optional[Flowcell] = self.status_db.get_flow_cells_by_case(
+            case=self.status_db.family(case_id)
+        )
+        print(flow_cells)
+        statuses: List[str] = []
         for flow_cell in flow_cells:
             LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
             LOG.info(f"{flow_cell.name}: status is {flow_cell.status}")

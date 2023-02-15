@@ -12,7 +12,7 @@ from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
 from housekeeper.store import models as hk_models
 
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -524,7 +524,7 @@ class StoreHelpers:
         flow_cell_id: str = "flowcell_test",
         archived_at: datetime = None,
         sequencer_type: str = Sequencers.HISEQX,
-        samples: list = None,
+        samples: List[Sample] = None,
         status: str = None,
         date: datetime = datetime.now(),
     ) -> Flowcell:
