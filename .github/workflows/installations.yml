@@ -15,11 +15,11 @@ jobs:
 
     # Check out cg code
     - name: Check out git repository
-      uses: actions/checkout@v2.5.0
+      uses: actions/checkout@v3
 
     # Set up python
     - name: Set up Python ${{ matrix.python-version}}
-      uses: actions/setup-python@v4.3.1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version}}
 
