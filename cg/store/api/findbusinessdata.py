@@ -305,11 +305,9 @@ class FindBusinessDataHandler(BaseHandler):
             case=case,
         )
 
-    def flowcells(self, *, status: str = None, family: Family = None, enquiry: str = None) -> Query:
+    def flowcells(self, *, status: str = None, enquiry: str = None) -> Query:
         """Fetch all flow cells."""
         records = self._get_flow_cell_query()
-        if family:
-            records = self._get_flow_cell_sample_links_query().filter(FamilySample.family == family)
         if status:
             records = records.filter_by(status=status)
         if enquiry:

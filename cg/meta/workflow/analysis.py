@@ -97,7 +97,6 @@ class AnalysisAPI(MetaAPI):
         flow_cells: Optional[Flowcell] = self.status_db.get_flow_cells_by_case(
             case=self.status_db.family(case_id)
         )
-        print(flow_cells)
         statuses: List[str] = []
         for flow_cell in flow_cells:
             LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
