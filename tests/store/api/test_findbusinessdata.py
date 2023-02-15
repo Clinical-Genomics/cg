@@ -66,14 +66,14 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     assert flow_cell.name == flow_cell_id
 
 
-def test_get_flow_cells_by_status(another_flow_cell_id: str, re_sequenced_sample_store: Store):
-    """Test returning the latest flow cell from the database by status."""
+def test_get_flow_cells_by_statuses(another_flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database by statuses."""
 
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_status(
-        flow_cell_status=FlowCellStatus.ONDISK
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REQUESTED]
     )
 
     # THEN the flow cell status should be "ondisk"
@@ -84,14 +84,41 @@ def test_get_flow_cells_by_status(another_flow_cell_id: str, re_sequenced_sample
     assert flow_cells[0].name == another_flow_cell_id
 
 
-def test_get_flow_cells_by_status_when_incorrect_status(re_sequenced_sample_store: Store):
+def test_get_flow_cells_by_statuses_when_multiple_matches(
+    another_flow_cell_id: str, flow_cell_id: str, re_sequenced_sample_store: Store
+):
+    """Test returning the latest flow cell from the database by statuses when multiple matches."""
+
+    # GIVEN a store with two flow cells
+
+    # GIVEN a flow cell that exist in status db with status "requested"
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells[0].status = FlowCellStatus.REQUESTED
+    re_sequenced_sample_store.add_commit(flow_cells[0])
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REQUESTED]
+    )
+
+    # THEN the flow cell status should be "ondisk" or "requested"
+    for flow_cell in flow_cells:
+        assert flow_cell.status in [FlowCellStatus.ONDISK, FlowCellStatus.REQUESTED]
+
+    # THEN the returned flow cell should have the same status as the ones in the database
+    assert flow_cells[0].status == FlowCellStatus.REQUESTED
+
+    assert flow_cells[1].status == FlowCellStatus.ONDISK
+
+
+def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database when no flow cell with status."""
 
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_status(
-        flow_cell_status="does_not_exist"
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=["does_not_exist"]
     )
 
     # THEN no flow cells should be returned

@@ -285,12 +285,12 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all flow cells."""
         return self._get_flow_cell_query()
 
-    def get_flow_cells_by_status(self, flow_cell_status: str) -> List[Flowcell]:
-        """Return flow cells with supplied status."""
+    def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> List[Flowcell]:
+        """Return flow cells with supplied statuses."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
-            flow_cell_status=flow_cell_status,
-            function="flow_cells_with_status",
+            flow_cell_statuses=flow_cell_statuses,
+            function="flow_cells_with_statuses",
         )
 
     def flowcells(self, *, status: str = None, family: Family = None, enquiry: str = None) -> Query:

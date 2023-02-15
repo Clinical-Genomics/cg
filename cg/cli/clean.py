@@ -319,11 +319,10 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
-    flow_cells_in_statusdb = [
-        flow_cell
-        for flow_cell in status_db.get_flow_cells()
-        if flow_cell.status in [FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
-    ]
+    flow_cells_in_statusdb: List[FlowCell] = status_db.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
+    )
+
     LOG.info(
         f"Number of flow cells with status {FlowCellStatus.ONDISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
     )
