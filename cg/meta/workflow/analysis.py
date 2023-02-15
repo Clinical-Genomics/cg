@@ -10,7 +10,7 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, FlowCellStatus
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -89,23 +89,23 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
 
-    def all_flowcells_on_disk(self, case_id: str) -> bool:
+    def all_flow_cells_on_disk(self, case_id: str) -> bool:
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
-        flowcells = self.status_db.flowcells(family=self.status_db.family(case_id))
+        flow_cells = self.status_db.flowcells(family=self.status_db.family(case_id))
         statuses = []
-        for flowcell_obj in flowcells:
-            LOG.info(f"{flowcell_obj.name}: checking if flowcell is on disk")
-            LOG.info(f"{flowcell_obj.name}: status is {flowcell_obj.status}")
-            statuses.append(flowcell_obj.status or "ondisk")
-            if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
-                flowcell_obj.status = "requested"
-            elif flowcell_obj.status != "ondisk":
-                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
+        for flow_cell in flow_cells:
+            LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
+            LOG.info(f"{flow_cell.name}: status is {flow_cell.status}")
+            statuses.append(flow_cell.status or FlowCellStatus.ONDISK)
+            if flow_cell.status == FlowCellStatus.REMOVED:
+                LOG.info(f"{flow_cell.name}: flow cell not on disk, requesting")
+                flow_cell.status = FlowCellStatus.REQUESTED
+            elif flow_cell.status != FlowCellStatus.ONDISK:
+                LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
         self.status_db.commit()
-        return all(status == "ondisk" for status in statuses)
+        return all(status == FlowCellStatus.ONDISK for status in statuses)
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""

@@ -51,7 +51,7 @@ def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
     """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if not analysis_api.all_flowcells_on_disk(case_id=case_id):
+    if not analysis_api.all_flow_cells_on_disk(case_id=case_id):
         raise FlowcellsNeededError(
             "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
         )
