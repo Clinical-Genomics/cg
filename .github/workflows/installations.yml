@@ -3,43 +3,40 @@ name: CG Installation tests
 on: ["pull_request"]
 
 jobs:
-
   installations:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.7]
 
     steps:
+      # Check out cg code
+      - name: Check out git repository
+        uses: actions/checkout@v3
 
-    # Check out cg code
-    - name: Check out git repository
-      uses: actions/checkout@v3
+      # Set up python
+      - name: Set up Python ${{ matrix.python-version}}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version}}
 
-    # Set up python
-    - name: Set up Python ${{ matrix.python-version}}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version}}
+      - name: Intall pip
+        # Make sure that we have correct python version and pip version
+        # For details see .github/workflows/server_info.md
+        run: |
+          python -m pip install --upgrade pip
+          echo $PYTHON_VERSION
+          pip --version
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version}}
+          OLD_VERSION: 3.7
 
-    - name: Intall pip
-      # Make sure that we have correct python version and pip version
-      # For details see .github/workflows/server_info.md
-      run: |
-        python -m pip install --upgrade pip
-        echo $PYTHON_VERSION
-        pip --version
-      env:
-        PYTHON_VERSION: ${{ matrix.python-version}}
-        OLD_VERSION: 3.7
+      - name: Production Dependencies
+        run: |
+          pip install .
+          pip check
 
-    - name: Production Dependencies
-      run: |
-        pip install .
-        pip check
-
-    - name: Development Dependencies
-      run: |
-        pip install -r requirements-dev.txt
-        pip check
+      - name: Development Dependencies
+        run: |
+          pip install -r requirements-dev.txt
+          pip check
