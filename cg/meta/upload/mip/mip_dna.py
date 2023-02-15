@@ -11,6 +11,7 @@ from cg.cli.upload.genotype import genotypes
 from cg.cli.upload.validate import validate
 from cg.cli.upload.coverage import coverage
 from cg.cli.upload.clinical_delivery import clinical_delivery
+from cg.cli.upload.gens import gens
 from cg.constants import DataDelivery, REPORT_SUPPORTED_DATA_DELIVERY
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -41,6 +42,7 @@ class MipDNAUploadAPI(UploadAPI):
         ctx.invoke(validate, family_id=case_obj.internal_id)
         ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
         ctx.invoke(observations, case_id=case_obj.internal_id)
+        ctx.invoke(gens, case_id=case_obj.internal_id)
 
         # Clinical delivery upload
         ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)

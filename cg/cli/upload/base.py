@@ -12,6 +12,7 @@ from cg.cli.upload.coverage import coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
 from cg.cli.upload.genotype import genotypes
+from cg.cli.upload.gens import gens
 from cg.cli.upload.gisaid import gisaid
 from cg.cli.upload.mutacc import process_solved, processed_solved
 from cg.cli.upload.nipt import nipt
@@ -117,6 +118,7 @@ upload.add_command(coverage)
 upload.add_command(create_scout_load_config)
 upload.add_command(fohm)
 upload.add_command(genotypes)
+upload.add_command(gens)
 upload.add_command(gisaid)
 upload.add_command(nipt)
 upload.add_command(process_solved)
