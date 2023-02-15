@@ -90,8 +90,8 @@ class AnalysisAPI(MetaAPI):
             raise FileNotFoundError(f"No working directory for {case_id} exists")
 
     def all_flowcells_on_disk(self, case_id: str) -> bool:
-        """Check if flowcells are on disk for sample before starting the analysis.
-        Flowcells not on disk will be requested
+        """Check if flow cells are on disk for sample before starting the analysis.
+        Flow cells not on disk will be requested.
         """
         flowcells = self.status_db.flowcells(family=self.status_db.family(case_id))
         statuses = []

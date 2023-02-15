@@ -98,7 +98,9 @@ def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     )
 
     # WHEN there are no flow cells requested to be retrieved from PDC
-    mock_store.flowcells(status=FlowCellStatus.REQUESTED).first.return_value = None
+    mock_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.REQUESTED]
+    ).first.return_value = None
 
     popped_flow_cell = backup_api.get_first_flow_cell()
 
