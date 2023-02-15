@@ -32,7 +32,9 @@ def test_maximum_processing_queue_full(mock_store):
     )
 
     # WHEN there's already a flow cell being retrieved from PDC
-    mock_store.flowcells(status=FlowCellStatus.PROCESSING).count.return_value = 1
+    mock_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.PROCESSING]
+    ).count.return_value = 1
 
     # THEN this method should return False
     assert backup_api.check_processing() is False
@@ -51,7 +53,9 @@ def test_maximum_processing_queue_not_full(mock_store):
         root_dir=mock.Mock(),
     )
     # WHEN there are no flow cells being retrieved from PDC
-    mock_store.flowcells(status=FlowCellStatus.PROCESSING).count.return_value = 0
+    mock_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.PROCESSING]
+    ).count.return_value = 0
 
     # THEN this method should return True
     assert backup_api.check_processing() is True
@@ -385,7 +389,7 @@ def test_fetch_flow_cell_integration(
     )
     mock_flow_cell.status = FlowCellStatus.REQUESTED
     mock_flow_cell.sequencer_type = Sequencers.NOVASEQ
-    mock_store.flowcells.return_value.count.return_value = 0
+    mock_store.get_flow_cells_by_statuses.return_value.count.return_value = 0
     mock_query.return_value = pdc_query
 
     backup_api.tar_api.run_tar_command.return_value = None

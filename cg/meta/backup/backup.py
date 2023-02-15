@@ -49,9 +49,11 @@ class BackupAPI:
 
     def check_processing(self) -> bool:
         """Check if the processing queue for flow cells is not full."""
-        processing_flow_cells = self.status.flowcells(status=FlowCellStatus.PROCESSING).count()
-        LOG.debug(f"Processing flow cells: {processing_flow_cells}")
-        return processing_flow_cells < MAX_PROCESSING_FLOW_CELLS
+        processing_flow_cells_count: int = self.status.get_flow_cells_by_statuses(
+            flow_cell_statuses=[FlowCellStatus.PROCESSING]
+        ).count()
+        LOG.debug(f"Processing flow cells: {processing_flow_cells_count}")
+        return processing_flow_cells_count < MAX_PROCESSING_FLOW_CELLS
 
     def get_first_flow_cell(self) -> Optional[models.Flowcell]:
         """Get the first flow cell from the requested queue."""
