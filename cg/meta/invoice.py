@@ -1,18 +1,16 @@
 from cg.apps.lims import LimsAPI
 from cg.server.ext import lims as genologics_lims
 from cg.store import Store
-from typing import Optional, Union
+from typing import Optional, Union, List, Any
 from cg.store.models import Invoice, Customer, User
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
 from cg.constants.invoice import (
-    InvoiceInfo,
-    Prepare,
-    ContactInvoice,
-    Costcenters,
-    ApplicationInfo,
+    CostCenters,
     CustomerNames,
 )
+from cg.models.invoice.invoice import Contact, Application, InvoiceReport, InvoiceInfo
+from pydantic import ValidationError
 
 
 class InvoiceAPI:
@@ -26,7 +24,7 @@ class InvoiceAPI:
         self.raw_records = []
         self._set_record_type()
         self.genologics_lims = genologics_lims
-        self.invoice_info = dict()
+        self.invoice_info: Optional[InvoiceInfo] = None
 
     def _set_record_type(self):
         """Define the record_type based on the invoice object.
@@ -42,49 +40,55 @@ class InvoiceAPI:
         """Return the costumer based on cost center."""
         return (
             self.db.customer(CustomerNames.cust999)
-            if cost_center.lower() == Costcenters.kth
+            if cost_center.lower() == CostCenters.kth
             else self.customer_obj
         )
 
-    def get_customer_invoice_contact(
-        self, customer: Customer, msg: str
-    ) -> Optional[Customer.invoice_contact]:
+    def get_customer_invoice_contact(self, customer: Customer, msg: str) -> Any:
         """Return the customer invoice contact"""
         if not customer.invoice_contact:
             self.log.append(msg)
             return None
         return customer.invoice_contact
 
-    def get_contact(self, customer: Customer, user: Optional[User], msg: str) -> Optional[dict]:
+    def get_contact(
+        self, customer: Customer, customer_invoice_contact: Optional[User], msg: str
+    ) -> Optional[Contact]:
         """Return the contact information."""
-        contact = {
-            ContactInvoice.name: user.name,
-            ContactInvoice.email: user.email,
-            ContactInvoice.customer_name: customer.name,
-            ContactInvoice.reference: customer.invoice_reference,
-            ContactInvoice.address: customer.invoice_address,
-        }
-        if None in contact.values():
+        try:
+            contact = Contact(
+                **{
+                    "name": customer_invoice_contact.name,
+                    "email": customer_invoice_contact.email,
+                    "customer_name": customer.name,
+                    "reference": customer.invoice_reference,
+                    "address": customer.invoice_address,
+                }
+            )
+        except ValidationError as e:
             self.log.append(msg)
+            self.log.append(e)
             return None
         return contact
 
-    def prepare_contact_info(self, cost_center: str) -> dict:
+    def prepare_contact_info(self, cost_center: str) -> Optional[Contact]:
         """Return contact info for a customer."""
 
         msg = (
             f"Could not open/generate invoice. Contact information missing in database for "
             f"customer {self.customer_obj.internal_id}. See log files."
         )
-        customer = self.get_customer(cost_center=cost_center)
-        user = self.get_user(customer=customer, msg=msg)
-        return cself.get_contact(user=user, customer=customer, msg=msg)
+        customer = self.get_customer_by_cost_center(cost_center=cost_center)
+        customer_invoice_contact = self.get_customer_invoice_contact(customer=customer, msg=msg)
+        return self.get_contact(
+            customer_invoice_contact=customer_invoice_contact, customer=customer, msg=msg
+        )
 
-    def prepare(self, cost_center: str) -> dict:
-        """Get information about an invoice to generate Excel report."""
+    def prepare_invoice_report(self, cost_center: str) -> Optional[dict]:
+        """Return invoice information as dictionary to generate Excel report."""
 
-        records = []
-        pooled_samples = []
+        records: List[dict] = []
+        pooled_samples: List = []
 
         for raw_record in self.raw_records:
             if self.record_type == RecordType.Pool:
@@ -95,7 +99,7 @@ class InvoiceAPI:
                 cost_center=cost_center.lower(),
                 discount=self.invoice_obj.discount,
                 record=raw_record,
-            )
+            ).dict()
             if record:
                 records.append(record)
             else:
@@ -105,18 +109,29 @@ class InvoiceAPI:
         contact = self.prepare_contact_info(cost_center)
         if not contact:
             return None
-        return {
-            Prepare.cost_center: cost_center,
-            Prepare.project_number: getattr(customer_obj, f"project_account_{cost_center.lower()}"),
-            Prepare.customer_id: customer_obj.internal_id,
-            Prepare.customer_name: customer_obj.name,
-            Prepare.agreement: customer_obj.agreement_registration,
-            Prepare.invoice_id: self.invoice_obj.id,
-            Prepare.contact: contact,
-            Prepare.records: records,
-            Prepare.pooled_samples: pooled_samples,
-            Prepare.record_type: self.record_type,
-        }
+
+        try:
+            invoice_report = InvoiceReport(
+                **{
+                    "cost_center": cost_center,
+                    "project_number": getattr(
+                        customer_obj, f"project_account_{cost_center.lower()}"
+                    ),
+                    "customer_id": customer_obj.internal_id,
+                    "customer_name": customer_obj.name,
+                    "agreement": customer_obj.agreement_registration,
+                    "invoice_id": self.invoice_obj.id,
+                    "contact": contact.dict(),
+                    "records": records,
+                    "pooled_samples": pooled_samples,
+                    "record_type": self.record_type,
+                }
+            )
+        except ValidationError as e:
+            self.log.append(e)
+            return None
+
+        return invoice_report.dict()
 
     def _discount_price(self, record, discount: int = 0) -> Optional[int]:
         """Get discount price for a sample or pool."""
@@ -128,12 +143,12 @@ class InvoiceAPI:
         return round(full_price * discount_factor)
 
     def _cost_center_split_factor(
-        self, price: int, cost_center: str, percent_kth, tag: str, version: str
+        self, price: int, cost_center: str, percent_kth: int, tag: str, version: str
     ) -> Optional[int]:
         """Split price based on cost center."""
         if price:
             try:
-                if cost_center == cost_centers.kth:
+                if cost_center == CostCenters.kth:
                     split_factor = percent_kth / 100
                 else:
                     split_factor = 1 - percent_kth / 100
@@ -151,16 +166,16 @@ class InvoiceAPI:
             return None
         return split_price
 
-    def prepare_record(self, cost_center: str, discount: int, record) -> dict:
+    def prepare_record(self, cost_center: str, discount: int, record) -> InvoiceInfo:
         """Get invoice information for a specific sample or pool."""
-        application = self.get_application_info(record=record, discount=discount)
+        application = self.get_application(record=record, discount=discount)
 
         split_discounted_price = self._cost_center_split_factor(
-            price=application[ApplicationInfo.discounted_price],
+            price=application.discounted_price,
             cost_center=cost_center,
-            percent_kth=application[ApplicationInfo.percent_kth],
-            tag=application[ApplicationInfo.tag],
-            version=application[ApplicationInfo.version],
+            percent_kth=application.percent_kth,
+            tag=application.tag,
+            version=application.version,
         )
         invoice_info = self.get_invoice_info(
             record=record,
@@ -171,18 +186,20 @@ class InvoiceAPI:
 
         return invoice_info
 
-    def get_application(self, record, discount: int) -> dict or None:
+    def get_application(self, record, discount: int) -> Optional[Application]:
         """Get the application information."""
-        application = {}
         try:
-            application[ApplicationInfo.tag] = record.application_version.application.tag
-            application[ApplicationInfo.version] = str(record.application_version.version)
-            application[
-                ApplicationInfo.percent_kth
-            ] = record.application_version.application.percent_kth
-            application[ApplicationInfo.discounted_price] = self._discount_price(record, discount)
-        except ValueError:
+            application = Application(
+                **{
+                    "tag": record.application_version.application.tag,
+                    "version": record.application_version.version,
+                    "percent_kth": record.application_version.application.percent_kth,
+                    "discounted_price": self._discount_price(record, discount),
+                }
+            )
+        except ValidationError as e:
             self.log.append(f"Application tag/version seems to be missing for sample {record.id}.")
+            self.log.append(e)
             return None
         return application
 
@@ -207,42 +224,48 @@ class InvoiceAPI:
         return priority
 
     def get_invoice_info(
-        self, record, split_discounted_price: int, cost_center: str, application: dict
-    ) -> dict:
+        self, record, split_discounted_price: int, cost_center: str, application: Application
+    ) -> InvoiceInfo:
         """Generate the invoice_info."""
         order = record.order
         ticket = self.get_ticket(record)
         lims_id = self.get_lims_id(record)
         priority = self.get_priority(record)
-
-        invoice_info = {
-            InvoiceInfo.name: record.name,
-            InvoiceInfo.lims_id: lims_id,
-            InvoiceInfo.id: record.id,
-            InvoiceInfo.application_tag: record.application_version.application.tag,
-            InvoiceInfo.project: f"{order or 'NA'} ({ticket or 'NA'})",
-            InvoiceInfo.date: record.received_at.date() if record.received_at else "",
-            InvoiceInfo.price: split_discounted_price,
-            InvoiceInfo.priority: priority,
-        }
-        if cost_center == Costcenters.ki:
-            price_kth = self._cost_center_split_factor(
-                price=application[ApplicationInfo.discounted_price],
-                cost_center=Costcenters.kth,
-                percent_kth=application[ApplicationInfo.percent_kth],
-                tag=application[ApplicationInfo.tag],
-                version=application[ApplicationInfo.version],
+        try:
+            invoice_info = InvoiceInfo(
+                **{
+                    "name": record.name,
+                    "lims_id": lims_id,
+                    "id": record.id,
+                    "application_tag": record.application_version.application.tag,
+                    "project": f"{order or 'NA'} ({ticket or 'NA'})",
+                    "date": record.received_at.date() if record.received_at else "",
+                    "price": split_discounted_price,
+                    "priority": priority,
+                }
             )
-            invoice_info[InvoiceInfo.price_kth] = price_kth
-            invoice_info[InvoiceInfo.total_price] = application[ApplicationInfo.discounted_price]
-            self.set_invoice_info(invoice_info=invoice_info)
+
+        except ValidationError as e:
+            self.log.append(e)
+
+        if cost_center == CostCenters.ki:
+            price_kth: int = self._cost_center_split_factor(
+                price=application.discounted_price,
+                cost_center=CostCenters.kth,
+                percent_kth=application.percent_kth,
+                tag=application.tag,
+                version=application.version,
+            )
+            invoice_info.price_kth = price_kth
+            invoice_info.total_price = application.discounted_price
+        self.set_invoice_info(invoice_info=invoice_info)
         return invoice_info
 
-    def set_invoice_info(self, invoice_info: dict):
+    def set_invoice_info(self, invoice_info: InvoiceInfo):
         """Set invoice_info."""
         self.invoice_info = invoice_info
 
-    def total_price(self) -> float:
+    def total_price(self) -> Optional[float]:
         """Get the total price for all records in the invoice."""
 
         discount = self.invoice_obj.discount
