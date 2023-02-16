@@ -716,7 +716,7 @@ def test_get_multiqc_html_report(
 ):
     """Test that the multiqc html report is returned."""
 
-    # GIVEN an DNA case with a multiqc-htlm report
+    # GIVEN an DNA case with a multiqc-htlml report
     case: models.Family = rna_store.family(dna_case_id)
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
@@ -727,7 +727,7 @@ def test_get_multiqc_html_report(
         case_id=dna_case_id, pipeline=case.data_analysis
     )
 
-    # THEN the multiqc html report should be returned
+    # THEN the multiqc html report should be returned and the correct report type
     assert multiqc_report.full_path == multiqc_file.full_path
     assert report_type == ScoutCustomCaseReportTags.MULTIQC
 
@@ -738,14 +738,15 @@ def test_upload_report_to_scout(
     upload_mip_analysis_scout_api: UploadScoutAPI,
     mip_dna_analysis_hk_api: MockHousekeeperAPI,
 ):
-    """Test that the report is uploaded to Scout."""
+    """Test that the uploaded of a report to Scout is possible."""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN an DNA case with a multiqc-htlm report
+    # GIVEN an DNA case with a multiqc-htlml report
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
+    assert multiqc_file
 
     # WHEN uploading a report to Scout
     upload_mip_analysis_scout_api.upload_report_to_scout(
@@ -770,10 +771,12 @@ def test_upload_rna_report_to_scout(
 ):
     """Test that the report is uploaded to Scout."""
 
-    upload_mip_analysis_scout_api.status_db = rna_store
     caplog.set_level(logging.INFO)
 
-    # GIVEN an RNA case with a multiqc-htlm report
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_mip_analysis_scout_api.status_db = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
     multiqc_file: File = mip_rna_analysis_hk_api.files(
         bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
@@ -785,10 +788,15 @@ def test_upload_rna_report_to_scout(
         report_type=ScoutCustomCaseReportTags.MULTIQC,
         report_file=multiqc_file,
     )
+
     # WHEN finding the related DNA case
     dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
         case_id=rna_case_id
     )
+
+    # THEN the api should know that it should find related DNA cases
+
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
 
     # THEN the report should be uploaded to Scout
     for case_id in dna_case_ids:
