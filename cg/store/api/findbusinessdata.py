@@ -330,11 +330,6 @@ class FindBusinessDataHandler(BaseHandler):
             case=case,
         )
 
-    def flowcells(self) -> Query:
-        """Fetch all flow cells."""
-        records = self._get_flow_cell_query()
-        return records.order_by(Flowcell.sequenced_at.desc())
-
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
         flow_cell: Flowcell = self.get_flow_cell(flow_cell_id=flow_cell_id)

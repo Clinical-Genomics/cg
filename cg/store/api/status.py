@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
-from cg.constants import CASE_ACTIONS, Pipeline
+from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
 from cg.store.models import (
     Analysis,
@@ -483,20 +483,14 @@ class StatusHandler(BaseHandler):
             case_data.flowcells_status = [
                 flow_cell.status for flow_cell in self.get_flow_cells_by_case(case=case_obj)
             ]
+            case_data.flowcells_on_disk = len(
+                [status for status in case_data.flowcells_status if status == FlowCellStatus.ONDISK]
+            )
 
             if case_data.flowcells < case_data.total_samples:
                 case_data.flowcells_status.append("new")
 
             case_data.flowcells_status = ", ".join(case_data.flowcells_status)
-
-            case_data.flowcells_on_disk = len(
-                [
-                    flowcell.status
-                    for link in case_obj.links
-                    for flowcell in link.sample.flowcells
-                    if flowcell.status == "ondisk"
-                ]
-            )
 
             case_data.flowcells_on_disk_bool = (
                 case_data.flowcells_on_disk == case_data.total_samples

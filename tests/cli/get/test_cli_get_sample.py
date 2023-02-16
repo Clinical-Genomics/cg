@@ -1,9 +1,13 @@
 """This script tests the cli methods to get samples in status-db"""
+from typing import List
 
 from cg.cli.get import get
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
+
+from cg.store.models import Flowcell
 from tests.store_helpers import StoreHelpers
 
 
@@ -200,30 +204,35 @@ def test_hide_sample_flowcells_without_flowcell(
     """Test that we can query samples and hide flow cell even when there are none."""
     # GIVEN a database with a sample without related flow cell
     sample = helpers.add_sample(disk_store)
-    sample_id = sample.internal_id
-    assert not disk_store.Flowcell.query.first()
+    returned_flow_cell: List[Flowcell] = disk_store.get_flow_cells()
+    assert not list(returned_flow_cell)
 
-    # WHEN getting a sample with the --flowcells flag
-    result = cli_runner.invoke(get, ["sample", sample_id, "--hide-flowcell"], obj=base_context)
+    # WHEN getting a sample with the --hide-flowcell flag
+    result = cli_runner.invoke(
+        get, ["sample", sample.internal_id, "--hide-flowcell"], obj=base_context
+    )
 
-    # THEN everything is fine
-    assert result.exit_code == 0
+    # THEN process should exit successfully
+    assert result.exit_code == EXIT_SUCCESS
 
 
 def test_get_sample_flowcells_with_flowcell(
     cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers
 ):
-    """Test that we can query samples and hide flow cell, ensuring that no flow cell name is in the output."""
+    """Test query samples and hide flow cell, ensuring that no flow cell name is in the output."""
     # GIVEN a database with a sample and a related flow cell
     flow_cell = helpers.add_flowcell(disk_store)
     sample = helpers.add_sample(disk_store, flowcell=flow_cell)
-    assert flow_cell in disk_store.Sample.query.first().flowcells
-    sample_id = sample.internal_id
+    returned_flow_cell: Flowcell = disk_store.get_flow_cell(flow_cell_id=flow_cell.name)
+    assert sample in returned_flow_cell.samples
 
-    # WHEN getting a sample with the --flowcells flag
-    result = cli_runner.invoke(get, ["sample", sample_id, "--hide-flowcell"], obj=base_context)
+    # WHEN getting a sample with the --hide-flowcell     flag
+    result = cli_runner.invoke(
+        get, ["sample", sample.internal_id, "--hide-flowcell"], obj=base_context
+    )
+
+    # THEN the process should exit successfully
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN the related flow cell should be listed in the output
-    assert result.exit_code == 0
-    for flow_cell in disk_store.Sample.query.first().flowcells:
-        assert flow_cell.name not in result.output
+    assert flow_cell.name not in result.output

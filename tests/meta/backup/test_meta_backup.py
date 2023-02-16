@@ -76,7 +76,9 @@ def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
     )
 
     # WHEN a flow cell is requested to be retrieved from PDC
-    mock_store.flowcells(status=FlowCellStatus.REQUESTED).first.return_value = mock_flow_cell
+    mock_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.REQUESTED]
+    ).first.return_value = mock_flow_cell
 
     popped_flow_cell = backup_api.get_first_flow_cell()
 
