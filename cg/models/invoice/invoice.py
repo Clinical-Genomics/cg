@@ -43,10 +43,10 @@ class InvoiceReport(BaseModel):
     """Class that collects information used to create the invoice Excel sheet."""
 
     cost_center: str
-    project_number: str
+    project_number: Optional[str]
     customer_id: str
     customer_name: str
-    agreement: str
+    agreement: Optional[str]
     invoice_id: int
     contact: dict
     records: List[dict]

@@ -74,6 +74,13 @@ def test_assert_invoice_api(get_invoice_api_sample):
     assert isinstance(get_invoice_api_sample, InvoiceAPI)
 
 
+def test_assert_invoice_api(get_invoice_api_sample):
+    # GIVEN an invoice API
+    api = get_invoice_api_sample
+    # THEN a report should be generated
+    report = api.get_invoice_report("ki")
+
+
 def test_invoice_api_sample(get_invoice_api_sample, record_type: str = "Sample"):
     """Test that the invoice records the right record_type"""
     # THEN calling InvoiceAPI should return an API
