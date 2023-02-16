@@ -226,11 +226,21 @@ class InvoiceAPI:
     def get_invoice_info(
         self, record, split_discounted_price: int, cost_center: str, application: Application
     ) -> InvoiceInfo:
-        """Generate the invoice_info."""
+        """Generate the invoice_info to be used in the invoice report."""
         order = record.order
         ticket = self.get_ticket(record)
         lims_id = self.get_lims_id(record)
         priority = self.get_priority(record)
+        price_kth: int = 0
+        if cost_center == CostCenters.ki:
+            price_kth: int = self._cost_center_split_factor(
+                price=application.discounted_price,
+                cost_center=CostCenters.kth,
+                percent_kth=application.percent_kth,
+                tag=application.tag,
+                version=application.version,
+            )
+
         try:
             invoice_info = InvoiceInfo(
                 **{
@@ -242,24 +252,17 @@ class InvoiceAPI:
                     "date": record.received_at.date() if record.received_at else "",
                     "price": split_discounted_price,
                     "priority": priority,
+                    "price_kth": price_kth if cost_center == CostCenters.ki else None,
+                    "total_price": application.discounted_price
+                    if cost_center == CostCenters.ki
+                    else None,
                 }
             )
+            self.set_invoice_info(invoice_info=invoice_info)
+            return invoice_info
 
         except ValidationError as e:
             self.log.append(e)
-
-        if cost_center == CostCenters.ki:
-            price_kth: int = self._cost_center_split_factor(
-                price=application.discounted_price,
-                cost_center=CostCenters.kth,
-                percent_kth=application.percent_kth,
-                tag=application.tag,
-                version=application.version,
-            )
-            invoice_info.price_kth = price_kth
-            invoice_info.total_price = application.discounted_price
-        self.set_invoice_info(invoice_info=invoice_info)
-        return invoice_info
 
     def set_invoice_info(self, invoice_info: InvoiceInfo):
         """Set invoice_info."""
@@ -277,5 +280,4 @@ class InvoiceAPI:
                 total_price += discount_price
             else:
                 return None
-
         return total_price

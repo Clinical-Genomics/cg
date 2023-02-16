@@ -2,8 +2,12 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
+"""Module for modelling Invoices."""
+
 
 class Contact(BaseModel):
+    """Class for collection contact information used in the invoice."""
+
     name: str
     email: str
     customer_name: str
@@ -12,6 +16,8 @@ class Contact(BaseModel):
 
 
 class Application(BaseModel):
+    """Class to collect Application information used in the invoice."""
+
     version: str
     tag: str
     discounted_price: int
@@ -19,12 +25,14 @@ class Application(BaseModel):
 
 
 class InvoiceInfo(BaseModel):
+    """Class to collect invoice information used in the invoice report."""
+
     name: str
-    lims_id: str
+    lims_id: Optional[str]
     id: str
     application_tag: str
     project: str
-    date: Optional[datetime]
+    date: str
     price: int
     priority: str
     price_kth: Optional[int]
@@ -32,6 +40,8 @@ class InvoiceInfo(BaseModel):
 
 
 class InvoiceReport(BaseModel):
+    """Class that collects information used to create the invoice Excel sheet."""
+
     cost_center: str
     project_number: str
     customer_id: str
