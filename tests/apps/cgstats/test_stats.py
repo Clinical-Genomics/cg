@@ -7,7 +7,6 @@ from cg.apps.cgstats.stats import StatsAPI
 def test_flow_cell_reads_and_q30_summary(
     nipt_stats_api: StatsAPI, flow_cell_id: str, sample_id: str
 ):
-
     # GIVEN a flow cell with only one sample on it with 90% Q30 and 1200000000 yield
     sample_obj: stats_model.Sample = nipt_stats_api.Sample.query.filter(
         stats_model.Sample.limsid == sample_id

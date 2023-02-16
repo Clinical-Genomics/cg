@@ -7,7 +7,6 @@ from click.testing import CliRunner
 def test_cli_run_dry(
     cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
 ):
-
     caplog.set_level("INFO")
 
     # GIVEN a case_id that does exist in database
@@ -46,7 +45,6 @@ def test_cli_run_dry_no_case(
 def test_cli_run(
     cli_runner: CliRunner, fluffy_case_id_existing: str, fluffy_context: CGConfig, caplog
 ):
-
     caplog.set_level("INFO")
 
     # GIVEN a case_id that does exist in database

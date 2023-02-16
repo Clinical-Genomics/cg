@@ -21,7 +21,6 @@ class ScoutAPI:
     """Interface to Scout."""
 
     def __init__(self, config):
-
         binary_path = config["scout"]["binary_path"]
         config_path = config["scout"]["config_path"]
         self.process = Process(binary=binary_path, config=config_path)

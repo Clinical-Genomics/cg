@@ -19,7 +19,6 @@ class MutaccAutoAPI:
     """
 
     def __init__(self, config: dict):
-
         self.mutacc_auto_config = config["mutacc_auto"]["config_path"]
         self.mutacc_auto_binary = config["mutacc_auto"]["binary_path"]
         self.mutacc_padding = config["mutacc_auto"]["padding"]
@@ -56,7 +55,6 @@ class MutaccAutoAPI:
         run_command(extract_call)
 
     def import_reads(self):
-
         """
         Upload the cases and extracted reads to mutacc DB
         """
@@ -68,7 +66,6 @@ class MutaccAutoAPI:
 
 
 def run_command(command: list):
-
     """
     Use subprocess.run to run command
 

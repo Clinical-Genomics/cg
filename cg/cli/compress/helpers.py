@@ -1,4 +1,4 @@
-"""Helper functions for compress cli"""
+"""Helper functions for compress cli."""
 import datetime as dt
 import logging
 import os
@@ -9,8 +9,9 @@ from typing import Iterator, Optional, List
 from housekeeper.store.models import Version, Bundle
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB
+from cg.constants.compression import CASES_TO_IGNORE, MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
 from cg.constants.slurm import Slurm
+from cg.utils.date import get_date_days_ago
 from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
@@ -32,7 +33,7 @@ def get_cases_to_process(
             return
         cases.append(case)
     else:
-        date_threshold: dt.datetime = dt.datetime.now() - dt.timedelta(days=days_back)
+        date_threshold: dt.datetime = get_date_days_ago(days_ago=days_back)
         cases: List[Family] = store.get_cases_to_compress(date_threshold=date_threshold)
     return cases
 
@@ -66,7 +67,9 @@ def set_memory_according_to_reads(
         LOG.debug(f"No reads recorded for sample: {sample_id}")
         return
     sample_process_mem: int = ceil((sample_reads / MAX_READS_PER_GB))
-    if 1 <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
+    if sample_process_mem < CRUNCHY_MIN_GB_PER_PROCESS:
+        return CRUNCHY_MIN_GB_PER_PROCESS
+    if CRUNCHY_MIN_GB_PER_PROCESS <= sample_process_mem < Slurm.MAX_NODE_MEMORY.value:
         return sample_process_mem
     return Slurm.MAX_NODE_MEMORY.value
 
@@ -122,8 +125,7 @@ def get_true_dir(dir_path: Path) -> Optional[Path]:
         # Check if there are fastq symlinks that points to the directory where the spring
         # path is located
         if fastq_path.is_symlink():
-            true_dir = Path(os.readlink(fastq_path)).parent
-            return true_dir
+            return Path(os.readlink(fastq_path)).parent
     LOG.info("Could not find any symlinked files")
     return None
 
@@ -198,7 +200,6 @@ def correct_spring_paths(
             if spring_path.exists():
                 continue
 
-            spring_config_path = compression_obj.spring_metadata_path
             # true_dir is where the spring paths actually exists
             true_dir = get_true_dir(spring_path.parent)
             if not true_dir:
@@ -218,6 +219,6 @@ def correct_spring_paths(
             if not dry_run:
                 # We know from above that the spring path does not exist
                 true_spring_path.replace(spring_path)
-                true_spring_config_path.replace(spring_config_path)
+                true_spring_config_path.replace(compression_obj.spring_metadata_path)
         if i == 0:
             LOG.debug("Could not find any spring files")

@@ -138,8 +138,8 @@ class UploadScoutAPI:
         tags: Set[str] = {"junction", "bed", sample_id}
         splice_junctions_bed: Optional[hk_models.File]
         try:
-            splice_junctions_bed = self.housekeeper.find_file_in_latest_version(
-                case_id=case_id, tags=tags
+            splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
+                bundle_name=case_id, tags=tags
             )
         except HousekeeperBundleVersionMissingError:
             LOG.debug("Could not find bundle for case %s", case_id)
@@ -151,7 +151,7 @@ class UploadScoutAPI:
 
         tags: Set[str] = {"coverage", "bigwig", sample_id}
 
-        return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
+        return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique dna cases related to a RNA case"""
@@ -329,7 +329,6 @@ class UploadScoutAPI:
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
-
         config_builders = {
             Pipeline.BALSAMIC: BalsamicConfigBuilder(
                 hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims

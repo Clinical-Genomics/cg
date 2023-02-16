@@ -3,14 +3,16 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from typing import Iterable, List, Optional, Set, Tuple
+from typing import Iterable, List, Optional, Set, Tuple, Dict
 
 from alchy import Query
+from housekeeper.exc import VersionIncludedError
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
 from housekeeper.store.models import Bundle, File, Version
 
+from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
 
 LOG = logging.getLogger(__name__)
@@ -184,16 +186,23 @@ class HousekeeperAPI:
 
     def include_file(self, file_obj: File, version_obj: Version) -> File:
         """Call the include version function to import related assets."""
-        global_root_dir = Path(self.get_root_dir())
+        global_root_dir: Path = Path(self.get_root_dir())
 
-        new_path = self.get_included_path(global_root_dir, version_obj, file_obj)
+        new_path: Path = self.get_included_path(
+            root_dir=global_root_dir, version_obj=version_obj, file_obj=file_obj
+        )
         if file_obj.to_archive:
             # calculate sha1 checksum if file is to be archived
             file_obj.checksum = HousekeeperAPI.checksum(file_obj.path)
+        if new_path.exists():
+            LOG.warning(
+                f"Another file with identical included file path: {new_path} already exist. Skip linking of: {file_obj.path}"
+            )
+            return file_obj
         # hardlink file to the internal structure
         os.link(file_obj.path, new_path)
-        LOG.info("Linked file: %s -> %s", file_obj.path, new_path)
-        file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
+        LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
+        file_obj.path: str = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 
     def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None) -> Version:
@@ -207,7 +216,7 @@ class HousekeeperAPI:
 
     def last_version(self, bundle: str) -> Version:
         """Gets the latest version of a bundle."""
-        LOG.info("Fetch latest version from bundle %s", bundle)
+        LOG.info(f"Fetch latest version from bundle {bundle}")
         return (
             self._store.Version.query.join(Version.bundle)
             .filter(Bundle.name == bundle)
@@ -219,20 +228,20 @@ class HousekeeperAPI:
         """Get the latest version of a Housekeeper bundle."""
         last_version: Version = self.last_version(bundle_name)
         if not last_version:
-            LOG.warning("No bundle found for %s in housekeeper", bundle_name)
+            LOG.warning(f"No bundle found for {bundle_name} in Housekeeper")
             return None
-        LOG.debug("Found version obj for %s: %s", bundle_name, repr(last_version))
+        LOG.debug(f"Found Housekeeper version object for {bundle_name}: {repr(last_version)}")
         return last_version
 
-    def get_create_version(self, bundle: str) -> Version:
+    def get_create_version(self, bundle_name: str) -> Version:
         """Returns the latest version of a bundle if it exists. If not creates a bundle and
         returns its version."""
-        last_version: Version = self.last_version(bundle=bundle)
+        last_version: Version = self.last_version(bundle=bundle_name)
         if not last_version:
-            LOG.info("Creating bundle for sample %s in housekeeper", bundle)
+            LOG.info(f"Creating bundle for sample {bundle_name} in housekeeper")
             bundle_result: Tuple[Bundle, Version] = self.add_bundle(
                 bundle_data={
-                    "name": bundle,
+                    "name": bundle_name,
                     "created_at": dt.datetime.now(),
                     "expires_at": None,
                     "files": [],
@@ -302,11 +311,61 @@ class HousekeeperAPI:
         self.include_file(version_obj=version, file_obj=hk_file)
         self.commit()
 
-    def find_file_in_latest_version(self, case_id: str, tags: list) -> Optional[File]:
-        """Find a file in the latest version of a case bundle."""
-        version_obj: Version = self.last_version(case_id)
-        if not version_obj:
-            LOG.info("Case ID: %s not found in housekeeper", case_id)
+    def include_files_to_latest_version(self, bundle_name: str) -> None:
+        """Include all files in the latest version on a bundle."""
+        bundle_version: Version = self.get_latest_bundle_version(bundle_name=bundle_name)
+        if not bundle_version:
+            return None
+        if bundle_version.included_at:
+            LOG.info(
+                f"Bundle: {bundle_name}, version: {bundle_version} already included at {bundle_version.included_at}"
+            )
+            return
+        for hk_file in bundle_version.files:
+            if not hk_file.is_included:
+                try:
+                    self.include_file(version_obj=bundle_version, file_obj=hk_file)
+                except FileExistsError as error:
+                    LOG.error(error)
+                continue
+            LOG.warning(
+                f"File is already included in Housekeeper for bundle: {bundle_name}, version: {bundle_version}"
+            )
+        bundle_version.included_at = dt.datetime.now()
+        self.commit()
+
+    def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
+        """Return a file in the latest version of a bundle."""
+        version: Version = self.last_version(bundle=bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
             raise HousekeeperBundleVersionMissingError
-        file: File = self.files(version=version_obj.id, tags=tags).first()
-        return file
+        return self.files(version=version.id, tags=tags).first()
+
+    def get_files_from_latest_version(
+        self, bundle_name: str, tags: List[str]
+    ) -> Optional[List[File]]:
+        """Return files in the latest version of a bundle."""
+        version: Version = self.last_version(bundle=bundle_name)
+        if not version:
+            LOG.info(f"Bundle: {bundle_name} not found in Housekeeper")
+            raise HousekeeperBundleVersionMissingError
+        return self.files(version=version.id, tags=tags)
+
+    def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
+        """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
+        sequencing_files_in_hk: Dict[str, bool] = {}
+        for bundle_name in bundle_names:
+            sequencing_files_in_hk[bundle_name] = False
+            for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
+                sample_file_in_hk: List[bool] = []
+                hk_files: Optional[List[File]] = self.get_files_from_latest_version(
+                    bundle_name=bundle_name, tags=[tag]
+                )
+                sample_file_in_hk += [True for hk_file in hk_files if hk_file.is_included]
+                if sample_file_in_hk:
+                    break
+            sequencing_files_in_hk[bundle_name] = (
+                all(sample_file_in_hk) if sample_file_in_hk else False
+            )
+        return all(sequencing_files_in_hk.values())

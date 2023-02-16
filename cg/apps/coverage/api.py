@@ -15,7 +15,6 @@ class ChanjoAPI:
     """Interface to Chanjo, the coverage analysis tool"""
 
     def __init__(self, config: dict):
-
         self.chanjo_config = config["chanjo"]["config_path"]
         self.chanjo_binary = config["chanjo"]["binary_path"]
         self.process = Process(binary=self.chanjo_binary, config=self.chanjo_config)

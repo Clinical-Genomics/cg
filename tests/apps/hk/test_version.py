@@ -119,7 +119,7 @@ def test_get_latest_bundle_version_no_housekeeper_bundle(
     assert res is None
 
     # THEN assert that no bundle is found
-    assert f"No bundle found for {case_id} in housekeeper" in caplog.text
+    assert f"No bundle found for {case_id} in Housekeeper" in caplog.text
 
 
 def test_get_latest_bundle_version_with_housekeeper_bundle(
@@ -146,7 +146,6 @@ def test_get_create_version(
     populated_housekeeper_api: MockHousekeeperAPI,
     case_id: str,
 ):
-
     # Given a populated housekeeper_api with a bundle
     version_obj = populated_housekeeper_api.bundle(case_id).versions[0]
 

@@ -4,7 +4,6 @@ from .base import Model
 
 
 class Version(Model):
-
     __table_args__ = (
         UniqueConstraint("name", "major", "minor", "patch", name="name_major_minor_patch_uc"),
     )

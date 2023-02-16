@@ -248,7 +248,6 @@ class DemuxResults:
         )
 
     def get_bcl2fastq_logfile_parameters(self):
-
         log_path: Path = self.stderr_log_path
 
         LOG.info("Parse log file %s", log_path)

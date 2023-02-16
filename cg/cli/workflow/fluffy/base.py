@@ -45,7 +45,7 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
     """
     analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    analysis_api.make_samplesheet(case_id=case_id, dry_run=dry_run)
+    analysis_api.make_sample_sheet(case_id=case_id, dry_run=dry_run)
 
 
 @fluffy.command()
