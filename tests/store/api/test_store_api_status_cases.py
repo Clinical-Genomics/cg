@@ -1273,7 +1273,7 @@ def test_analysis_completed_at(base_store: Store, helpers):
     analysis = helpers.add_analysis(base_store, completed_at=datetime.now())
     assert analysis.completed_at is not None
     assert base_store.families().count() == 1
-    assert base_store.analyses().count() == 1
+    assert base_store.get_analyses().count() == 1
 
     # WHEN getting active cases
     cases = base_store.cases()

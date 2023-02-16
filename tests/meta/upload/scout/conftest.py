@@ -255,31 +255,38 @@ def fixture_lims_samples(lims_family: dict) -> List[dict]:
 
 @pytest.fixture(scope="function", name="mip_dna_analysis_hk_bundle_data")
 def fixture_mip_dna_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, mip_dna_analysis_dir: Path, sample_id: str
+    case_id: str,
+    timestamp: datetime,
+    mip_dna_analysis_dir: Path,
+    sample_id: str,
+    snv_vcf_file: str,
+    sv_vcf_file: str,
+    snv_research_vcf_file: str,
+    sv_research_vcf_file: str,
 ) -> dict:
     """Get some bundle data for housekeeper"""
-    data = {
+    return {
         "name": case_id,
         "created": timestamp,
         "expires": timestamp,
         "files": [
             {
-                "path": str(mip_dna_analysis_dir / "snv.vcf"),
+                "path": str(mip_dna_analysis_dir / snv_vcf_file),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": str(mip_dna_analysis_dir / "sv.vcf"),
+                "path": str(mip_dna_analysis_dir / sv_vcf_file),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
             {
-                "path": str(mip_dna_analysis_dir / "snv_research.vcf"),
+                "path": str(mip_dna_analysis_dir / snv_research_vcf_file),
                 "archive": False,
                 "tags": ["vcf-snv-research"],
             },
             {
-                "path": str(mip_dna_analysis_dir / "sv_research.vcf"),
+                "path": str(mip_dna_analysis_dir / sv_research_vcf_file),
                 "archive": False,
                 "tags": ["vcf-sv-research"],
             },
@@ -320,7 +327,6 @@ def fixture_mip_dna_analysis_hk_bundle_data(
             },
         ],
     }
-    return data
 
 
 @pytest.fixture(scope="function", name="mip_rna_analysis_hk_bundle_data")
@@ -383,7 +389,12 @@ def fixture_mip_rna_analysis_hk_bundle_data(
 
 @pytest.fixture(scope="function", name="balsamic_analysis_hk_bundle_data")
 def fixture_balsamic_analysis_hk_bundle_data(
-    case_id: str, timestamp: datetime, balsamic_wgs_analysis_dir: Path, sample_id: str
+    case_id: str,
+    timestamp: datetime,
+    balsamic_wgs_analysis_dir: Path,
+    sample_id: str,
+    snv_vcf_file: str,
+    sv_vcf_file: str,
 ) -> dict:
     """Get some bundle data for housekeeper"""
     return {
@@ -392,12 +403,12 @@ def fixture_balsamic_analysis_hk_bundle_data(
         "expires": timestamp,
         "files": [
             {
-                "path": str(balsamic_wgs_analysis_dir / "snv.vcf"),
+                "path": str(balsamic_wgs_analysis_dir / snv_vcf_file),
                 "archive": False,
                 "tags": ["vcf-snv-clinical"],
             },
             {
-                "path": str(balsamic_wgs_analysis_dir / "sv.vcf"),
+                "path": str(balsamic_wgs_analysis_dir / sv_vcf_file),
                 "archive": False,
                 "tags": ["vcf-sv-clinical"],
             },
@@ -603,7 +614,7 @@ def fixture_upload_mip_analysis_scout_api(
     analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
-    yield UploadScoutAPI(
+    return UploadScoutAPI(
         hk_api=mip_dna_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
@@ -625,7 +636,7 @@ def fixture_upload_balsamic_analysis_scout_api(
     analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
-    _api = UploadScoutAPI(
+    return UploadScoutAPI(
         hk_api=balsamic_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
@@ -633,8 +644,6 @@ def fixture_upload_balsamic_analysis_scout_api(
         lims_api=lims_api,
         status_db=store,
     )
-
-    yield _api
 
 
 @pytest.fixture(name="rna_dna_sample_case_map")

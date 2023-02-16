@@ -1,5 +1,6 @@
 import datetime as dt
 import logging
+from sqlalchemy.orm import Query
 from typing import List, Set
 
 from cgmodels.cg.constants import Pipeline
@@ -44,7 +45,7 @@ class CaseSubmitter(Submitter):
             new_gender: str = sample.sex
             if new_gender == "unknown":
                 continue
-            existing_samples: List[models.Sample] = self.status.samples_by_subject_id(
+            existing_samples: Query = self.status.samples_by_subject_id(
                 customer_id=customer_id, subject_id=subject_id
             )
             existing_sample: models.Sample

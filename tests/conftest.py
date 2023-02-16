@@ -380,6 +380,32 @@ def fixture_os_ticket(ticket: str) -> MockOsTicket:
 
 # Files fixtures
 
+# Common file name fixtures
+
+@pytest.fixture(name="snv_vcf_file")
+def fixture_snv_vcf_file() -> str:
+    """Return a snv file name."""
+    return "snv.vcf"
+
+
+@pytest.fixture(name="sv_vcf_file")
+def fixture_snv_vcf_file() -> str:
+    """Return a snv file name."""
+    return "sv.vcf"
+
+
+@pytest.fixture(name="snv_research_vcf_file")
+def fixture_snv_research_vcf_file() -> str:
+    """Return a snv file name."""
+    return "snv_research.vcf"
+
+
+@pytest.fixture(name="sv_research_vcf_file")
+def fixture_sv_research_vcf_file() -> str:
+    """Return a snv file name."""
+    return "sv_research.vcf"
+
+
 # Common file fixtures
 @pytest.fixture(scope="session", name="fixtures_dir")
 def fixture_fixtures_dir() -> Path:

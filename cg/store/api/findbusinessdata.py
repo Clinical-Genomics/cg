@@ -17,8 +17,8 @@ from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
-        """Fetch multiple analyses."""
+    def get_analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
+        """Get many multiple analyses, related to a family or before a specific time - else return all objects."""
         records = self.Analysis.query
         if family:
             query_family = family
@@ -46,29 +46,15 @@ class FindBusinessDataHandler(BaseHandler):
     def active_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
         sample: models.Sample = self.sample(internal_id=internal_id)
-        if any(
-            [
-                self.family(
-                    internal_id=self.Family.query.filter(
-                        models.Family.id == family_sample.family_id
-                    )
-                    .first()
-                    .internal_id
-                ).action
-                == "analyze"
-                or self.family(
-                    internal_id=self.Family.query.filter(
-                        models.Family.id == family_sample.family_id
-                    )
-                    .first()
-                    .internal_id
-                ).action
-                == "running"
-                for family_sample in sample.links
-            ]
-        ):
-            return True
-        return False
+        return any(
+            self.family(
+                internal_id=self.Family.query.filter(models.Family.id == family_sample.family_id)
+                .first()
+                .internal_id
+            ).action
+            in ["analyze", "running"]
+            for family_sample in sample.links
+        )
 
     def get_application_by_case(self, case_id: str) -> models.Application:
         """Return the application of a case."""
@@ -361,23 +347,15 @@ class FindBusinessDataHandler(BaseHandler):
 
     def samples_by_subject_id(
         self, customer_id: str, subject_id: str, is_tumour: Optional[bool] = None
-    ) -> List[models.Sample]:
-        """Get samples of customer with given subject_id.
-
-        Args:
-            customer_id  (str):               Internal-id of customer
-            subject_id   (str):               Subject id
-            is_tumour    (bool):              (Optional) match on is_tumour
-        Returns:
-            matching samples (list of models.Sample)
-        """
+    ) -> Query:
+        """Get samples of customer with given subject_id."""
 
         query: Query = self.Sample.query.join(models.Customer).filter(
             models.Customer.internal_id == customer_id, models.Sample.subject_id == subject_id
         )
         if is_tumour:
             query: Query = query.filter(models.Sample.is_tumour == is_tumour)
-        return query.all()
+        return query
 
     def samples_by_ids(self, **identifiers) -> Query:
         records = self.Sample.query
