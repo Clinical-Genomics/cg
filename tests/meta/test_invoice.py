@@ -50,8 +50,8 @@ def test_invoice_api_sample(
     assert api
     # THEN record_type should be Sample
     assert api.record_type == record_type
-    # THEN prepare should set an invoice_info dictionary
-    api.prepare_invoice_report(CostCenters.ki)
+    # THEN prepare_invoice_report should set priority to standard
+    api.get_invoice_report(CostCenters.ki)
     assert api.invoice_info.priority == PriorityTerms.STANDARD
 
 
@@ -77,8 +77,8 @@ def test_invoice_api_pool_cust032(
     # THEN record_type should be a Pool
     api.genologics_lims = mock.MagicMock()
     assert api.record_type == record_type
-    # THEN prepare should set priority to standard
-    api.prepare_invoice_report(CostCenters.ki)
+    # THEN prepare_invoice_report should set priority to standard if customer is cust032
+    api.get_invoice_report(CostCenters.ki)
     assert api.invoice_info.priority == PriorityTerms.STANDARD
 
 
@@ -103,6 +103,6 @@ def test_invoice_pool_generic_customer(
     # THEN record_type should be Pool
     api.genologics_lims = mock.MagicMock()
     assert api.record_type == record_type
-    # THEN prepare should set priority to research
-    api.prepare_invoice_report(CostCenters.ki)
+    # THEN prepare_invoice_report should set priority to research if not customer cust032
+    api.get_invoice_report(CostCenters.ki)
     assert api.invoice_info.priority == PriorityTerms.RESEARCH
