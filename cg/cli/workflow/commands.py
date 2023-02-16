@@ -48,7 +48,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def ensure_flow_cells_ondisk(context: CGConfig, case_id: str):
-    """Check if flowc ells are on disk for given case. If not, request flowc ells and raise FlowcellsNeededError."""
+    """Check if flow cells are on disk for given case. If not, request flow cells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not analysis_api.all_flow_cells_on_disk(case_id=case_id):

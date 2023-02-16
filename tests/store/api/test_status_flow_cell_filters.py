@@ -95,7 +95,7 @@ def test_filter_flow_cell_has_id_by_enquiry(
         flow_cells=base_store._get_flow_cell_query(), flow_cell_id=flow_cell_id[:4]
     )
 
-    # THEN returned flow cell should be the original flow cell
+    # THEN a list of flow cells should be returned
     assert isinstance(returned_flow_cell[0], Flowcell)
 
     assert flow_cell is returned_flow_cell[0]
