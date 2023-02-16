@@ -335,7 +335,7 @@ def fixture_mip_rna_analysis_hk_bundle_data(
 ) -> dict:
     """Get some bundle data for housekeeper"""
 
-    files: [dict] = [
+    files: List[dict] = [
         {
             "path": str(mip_dna_analysis_dir / f"{rna_case_id}_report.selected.pdf"),
             "archive": False,
@@ -603,7 +603,7 @@ def fixture_upload_mip_analysis_scout_api(
     analysis_mock = MockMipAnalysis()
     lims_api = MockLimsAPI(samples=lims_samples)
 
-    _api = UploadScoutAPI(
+    yield UploadScoutAPI(
         hk_api=mip_dna_analysis_hk_api,
         scout_api=scout_api,
         madeline_api=madeline_api,
@@ -611,8 +611,6 @@ def fixture_upload_mip_analysis_scout_api(
         lims_api=lims_api,
         status_db=store,
     )
-
-    yield _api
 
 
 @pytest.fixture(name="upload_balsamic_analysis_scout_api")

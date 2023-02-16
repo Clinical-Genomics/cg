@@ -207,7 +207,7 @@ class ScoutAPI:
         upload_command: List[str] = ["load", "report", "-t", report_type, case_id, report_path]
 
         try:
-            LOG.info(f"Uploading multiqc report {case_id} to case {report_path}")
+            LOG.info(f"Uploading {report_type} report to case {case_id}")
             self.process.run_command(upload_command)
         except CalledProcessError:
             LOG.warning("Something went wrong when uploading multiqc report")

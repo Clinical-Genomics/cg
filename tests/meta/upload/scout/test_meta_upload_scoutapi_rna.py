@@ -1,6 +1,7 @@
 """Tests for RNA part of the scout upload API"""
 import logging
-from typing import Dict, Generator, List
+from typing import Dict, Generator, List, Set
+from pathlib import Path
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -9,11 +10,13 @@ from alchy import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
+from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.store import Store, models
 from tests.store_helpers import StoreHelpers
-
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from housekeeper.store.models import File
 
 def set_is_tumour_on_case(store: Store, case_id: str, is_tumour: bool):
     for link in store.family(case_id).links:
@@ -703,3 +706,76 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
         dna_case.internal_id
         not in rna_dna_sample_case_map[rna_sample.internal_id][dna_sample_son_id]
     )
+
+
+def test_get_multiqc_html_report(
+    dna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_dna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the multiqc html report is returned."""
+
+    # GIVEN an DNA case with a multiqc-htlm report
+    case: models.Family = rna_store.family(dna_case_id)
+    multiqc_file: File = mip_dna_analysis_hk_api.files(bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC])[0]
+
+    # WHEN getting the multiqc html report
+    report_type, multiqc_report = upload_mip_analysis_scout_api.get_multiqc_html_report(case_id=dna_case_id, pipeline=case.data_analysis)
+
+    # THEN the multiqc html report should be returned
+    assert multiqc_report.full_path == multiqc_file.full_path
+    assert report_type == ScoutCustomCaseReportTags.MULTIQC
+
+def test_upload_report_to_scout(
+    caplog,
+    dna_case_id: str,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_dna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an DNA case with a multiqc-htlm report
+    multiqc_file: File = mip_dna_analysis_hk_api.files(bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC])[0]
+
+    # WHEN uploading a report to Scout
+    upload_mip_analysis_scout_api.upload_report_to_scout(
+        dry_run=False,
+        case_id=dna_case_id,
+        report_type=ScoutCustomCaseReportTags.MULTIQC,
+        report_file=multiqc_file
+    )
+
+    # THEN the report should be uploaded to Scout
+    assert f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to case {dna_case_id}" in caplog.text
+
+def test_upload_rna_report_to_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_rna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    upload_mip_analysis_scout_api.status_db = rna_store
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case with a multiqc-htlm report
+    multiqc_file: File = mip_rna_analysis_hk_api.files(bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC])[0]
+
+    # WHEN uploading a report to Scout
+    upload_mip_analysis_scout_api.upload_rna_report_to_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.MULTIQC,
+        report_file=multiqc_file
+    )
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str]  = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(case_id=rna_case_id)
+
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to scout for case {case_id}" in caplog.text

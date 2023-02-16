@@ -208,6 +208,7 @@ class UploadScoutAPI:
         rna_case_id: str,
     ) -> None:
         """Upload report file to DNA cases related to a RNA case in scout."""
+        LOG.info(f"Finding DNA cases related to RNA case {rna_case_id}")
         for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(rna_case_id):
             self.upload_report_to_scout(
                 dry_run=dry_run,
