@@ -322,7 +322,7 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return flow_cells
 
-    def get_flow_cells_by_case(self, case: Family) -> Optional[Flowcell]:
+    def get_flow_cells_by_case(self, case: Family) -> Optional[List[Flowcell]]:
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),

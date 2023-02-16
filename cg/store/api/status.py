@@ -21,6 +21,7 @@ from cg.store.models import (
 from cg.store.status_analysis_filters import apply_analysis_filter
 from cg.store.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter
 from cg.store.status_sample_filters import apply_sample_filter
 
 
@@ -231,6 +232,18 @@ class StatusHandler(BaseHandler):
     def _get_case_query(self) -> Query:
         """Return case query."""
         return self.query(Family)
+
+    def _get_flow_cell_sample_links_query(self) -> Query:
+        """Return flow cell query."""
+        return self.Flowcell.query.join(Flowcell.samples, Sample.links)
+
+    def get_flow_cells_by_case(self, case: Family) -> List[Flowcell]:
+        """Return flow cells for case."""
+        return apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_sample_links_query(),
+            function="flow_cells_by_case",
+            case=case,
+        )
 
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
@@ -466,19 +479,10 @@ class StatusHandler(BaseHandler):
                     if link.sample.invoice and link.sample.invoice.invoiced_at
                 )
 
-            case_data.flowcells = len(
-                [flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells]
-            )
-            # case_data.flowcells = len(
-            #   [flowcell.status for link in case_obj.links for flowcell in link.sample.get_flow_cells]
-            # )
-
-            case_data.flowcells_status = list(
-                {flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells}
-            )
-            # case_data.flowcells_status = list(
-            #   {flowcell.status for link in case_obj.links for flowcell in link.sample.get_flow_cells}
-            # )
+            case_data.flowcells = len(list(self.get_flow_cells_by_case(case=case_obj)))
+            case_data.flowcells_status = [
+                flow_cell.status for flow_cell in self.get_flow_cells_by_case(case=case_obj)
+            ]
 
             if case_data.flowcells < case_data.total_samples:
                 case_data.flowcells_status.append("new")
