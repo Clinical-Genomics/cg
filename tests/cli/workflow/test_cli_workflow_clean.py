@@ -4,7 +4,8 @@ from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
     fluffy_past_run_dirs,
     microsalt_past_run_dirs,
-    mip_past_run_dirs,
+    mip_dna_past_run_dirs,
+    mip_rna_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
 )
@@ -40,7 +41,7 @@ def test_cli_workflow_clean_fluffy(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_cli_workflow_clean_mip(
+def test_cli_workflow_clean_mip_dna(
     cli_runner: CliRunner,
     base_context: CGConfig,
     before_date: str,
@@ -48,7 +49,21 @@ def test_cli_workflow_clean_mip(
     # GIVEN a before string
 
     # WHEN running command in dry-run
-    result = cli_runner.invoke(mip_past_run_dirs, [before_date], obj=base_context)
+    result = cli_runner.invoke(mip_dna_past_run_dirs, [before_date], obj=base_context)
+
+    # THEN command should terminate successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+
+def test_cli_workflow_clean_mip_rna(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    before_date: str,
+):
+    # GIVEN a before string
+
+    # WHEN running command in dry-run
+    result = cli_runner.invoke(mip_rna_past_run_dirs, [before_date], obj=base_context)
 
     # THEN command should terminate successfully
     assert result.exit_code == EXIT_SUCCESS
