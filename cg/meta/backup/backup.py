@@ -39,7 +39,6 @@ class BackupAPI:
         root_dir: Dict[str, str],
         dry_run: bool = False,
     ):
-
         self.encryption_api = encryption_api
         self.encrypt_dir = encrypt_dir
         self.status: Store = status

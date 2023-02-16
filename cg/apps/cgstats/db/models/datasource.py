@@ -7,7 +7,6 @@ from .base import Model
 
 
 class Datasource(Model):
-
     datasource_id = Column(types.Integer, primary_key=True)
     supportparams_id = Column(
         ForeignKey("supportparams.supportparams_id", ondelete="CASCADE"), nullable=False

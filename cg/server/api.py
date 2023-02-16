@@ -44,6 +44,13 @@ def public(route_function):
 @BLUEPRINT.before_request
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
+    if not request.is_secure:
+        return abort(
+            make_response(
+                jsonify(message="Only https requests accepted"), http.HTTPStatus.FORBIDDEN
+            )
+        )
+
     if request.method == "OPTIONS":
         return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
 
@@ -322,7 +329,6 @@ def options():
 
     apptag_groups = {"ext": []}
     for application_obj in db.applications(archived=False):
-
         if not application_obj.versions:
             LOG.debug("Skipping application %s that doesn't have a price", application)
             continue

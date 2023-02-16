@@ -28,6 +28,7 @@ class DeliverAPI:
         project_base_path: Path,
         delivery_type: str,
         force_all: bool = False,
+        ignore_missing_bundles: bool = False,
     ):
         """Initialize a delivery api
 
@@ -48,7 +49,9 @@ class DeliverAPI:
         self.ticket: str = ""
         self.dry_run = False
         self.delivery_type: str = delivery_type
-        self.skip_missing_bundle = self.delivery_type in constants.SKIP_MISSING
+        self.skip_missing_bundle: bool = (
+            self.delivery_type in constants.SKIP_MISSING or ignore_missing_bundles
+        )
         self.deliver_failed_samples = force_all
 
     def set_dry_run(self, dry_run: bool) -> None:

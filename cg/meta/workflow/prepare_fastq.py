@@ -78,7 +78,7 @@ class PrepareFastqAPI:
                         "Adding %s to sample %s in housekeeper"
                         % (compression_obj.fastq_first, sample_id)
                     )
-                    result: bool = self.compress_api.add_decompressed_fastq(sample_obj=link.sample)
+                    result: bool = self.compress_api.add_decompressed_fastq(sample=link.sample)
                 else:
                     LOG.info(
                         "%s from sample %s is already in housekeeper"
@@ -89,7 +89,7 @@ class PrepareFastqAPI:
                         "Adding %s to sample %s in housekeeper"
                         % (compression_obj.fastq_first, sample_id)
                     )
-                    result: bool = self.compress_api.add_decompressed_fastq(sample_obj=link.sample)
+                    result: bool = self.compress_api.add_decompressed_fastq(sample=link.sample)
                 else:
                     LOG.info(
                         "%s from sample %s is already in housekeeper"

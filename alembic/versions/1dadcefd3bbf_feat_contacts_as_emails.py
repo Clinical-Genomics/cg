@@ -91,7 +91,6 @@ def upgrade():
 
 
 def downgrade():
-
     op.add_column(
         "customer",
         Column("delivery_contact_id", mysql.INTEGER(display_width=11), autoincrement=False),
@@ -111,10 +110,8 @@ def downgrade():
     count = 0
     # replace email addresses on customers with connection between customer and user using users email
     for customer in session.query(Customer):
-
         # delivery contact
         if customer.delivery_contact_email:
-
             # get user with that email
             user = session.query(User).filter(User.email == customer.delivery_contact_email).first()
             if user:
@@ -130,7 +127,6 @@ def downgrade():
 
         # invoice contact
         if customer.invoice_contact_email:
-
             # get user with that email
             user = session.query(User).filter(User.email == customer.invoice_contact_email).first()
             if user:
@@ -146,7 +142,6 @@ def downgrade():
 
         # primary contact
         if customer.primary_contact_email:
-
             # get user with that email
             user = session.query(User).filter(User.email == customer.primary_contact_email).first()
             if user:

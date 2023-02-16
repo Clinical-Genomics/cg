@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Union
 
 import pytest
-from housekeeper.store import models as hk_models
 from housekeeper.store.models import File
 
+from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Pipeline, FileExtensions
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -39,6 +39,8 @@ from .mocks.scout import MockScoutAPI
 from .mocks.tb_mock import MockTB
 from .small_helpers import SmallHelpers
 from .store_helpers import StoreHelpers
+
+from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -333,6 +335,17 @@ def fixture_genotype_config() -> dict:
     }
 
 
+@pytest.fixture(name="gens_config")
+def fixture_gens_config() -> Dict[str, Dict[str, str]]:
+    """Gens config fixture."""
+    return {
+        "gens": {
+            "config_path": Path("config", "path").as_posix(),
+            "binary_path": "gens",
+        }
+    }
+
+
 # Api fixtures
 
 
@@ -354,6 +367,14 @@ def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     _genotype_api = GenotypeAPI(genotype_config)
     _genotype_api.set_dry_run(True)
     return _genotype_api
+
+
+@pytest.fixture(name="gens_api")
+def fixture_gens_api(gens_config: dict) -> GensAPI:
+    """Gens API fixture."""
+    _gens_api = GensAPI(gens_config)
+    _gens_api.set_dry_run(True)
+    return _gens_api
 
 
 @pytest.fixture()
@@ -385,25 +406,25 @@ def fixture_os_ticket(ticket: str) -> MockOsTicket:
 @pytest.fixture(name="snv_vcf_file")
 def fixture_snv_vcf_file() -> str:
     """Return a snv file name."""
-    return "snv.vcf"
+    return f"snv{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="sv_vcf_file")
 def fixture_snv_vcf_file() -> str:
     """Return a snv file name."""
-    return "sv.vcf"
+    return f"sv{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="snv_research_vcf_file")
 def fixture_snv_research_vcf_file() -> str:
     """Return a snv file name."""
-    return "snv_research.vcf"
+    return f"snv_research{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="sv_research_vcf_file")
 def fixture_sv_research_vcf_file() -> str:
     """Return a snv file name."""
-    return "sv_research.vcf"
+    return f"sv_research{FileExtensions.VCF}"
 
 
 # Common file fixtures
@@ -417,6 +438,12 @@ def fixture_fixtures_dir() -> Path:
 def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(fixtures_dir, "analysis")
+
+
+@pytest.fixture(name="microsalt_analysis_dir")
+def fixture_microsalt_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the analysis dir."""
+    return Path(analysis_dir, "microsalt")
 
 
 @pytest.fixture(name="apps_dir")
@@ -527,6 +554,12 @@ def fixture_mip_analysis_dir(analysis_dir: Path) -> Path:
 def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
     return Path(analysis_dir, "balsamic")
+
+
+@pytest.fixture(name="balsamic_fastq_dir")
+def fixture_balsamic_fastq_dir(analysis_dir: Path) -> Path:
+    """Return the path to the balsamic fastq directory."""
+    return Path(analysis_dir, "fastq")
 
 
 @pytest.fixture(name="balsamic_wgs_analysis_dir")
@@ -713,6 +746,21 @@ def fixture_bcf_file(apps_dir: Path) -> Path:
     return Path(apps_dir, "gt", "yellowhog.bcf")
 
 
+# Gens file fixtures
+
+
+@pytest.fixture(name="gens_fracsnp_path")
+def fixture_gens_fracsnp_path(mip_dna_analysis_dir: Path, sample_id: str) -> Path:
+    """Path to Gens fracsnp/baf bed file."""
+    return Path(mip_dna_analysis_dir, f"{sample_id}.baf.bed.gz")
+
+
+@pytest.fixture(name="gens_coverage_path")
+def fixture_gens_coverage_path(mip_dna_analysis_dir: Path, sample_id: str) -> Path:
+    """Path to Gens coverage bed file."""
+    return Path(mip_dna_analysis_dir, f"{sample_id}.cov.bed.gz")
+
+
 # Housekeeper, Chanjo file fixtures
 
 
@@ -831,10 +879,10 @@ def fixture_populated_housekeeper_api(
     return hk_api
 
 
-@pytest.fixture(name="hk_version_obj")
-def fixture_hk_version_obj(
+@pytest.fixture(name="hk_version")
+def fixture_hk_version(
     housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
-) -> hk_models.Version:
+) -> Version:
     """Get a Housekeeper version object."""
     return helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
@@ -1578,3 +1626,64 @@ def fixture_cg_context(
     cg_config.status_db_ = base_store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
+
+
+@pytest.fixture(name="case_id_with_single_sample")
+def case_id_with_single_sample():
+    """Return a case id that should only be associated with one sample."""
+    return "exhaustedcrocodile"
+
+
+@pytest.fixture(name="case_id_with_multiple_samples")
+def case_id_with_multiple_samples():
+    """Return a case id that should be associated with multiple samples."""
+    return "righteouspanda"
+
+
+@pytest.fixture(name="case_id_without_samples")
+def case_id_without_samples():
+    """Return a case id that should not be associated with any samples."""
+    return "confusedtrout"
+
+
+@pytest.fixture(name="sample_id_in_single_case")
+def sample_id_in_single_case():
+    """Return a sample id that should be associated with a single case."""
+    return "ASM1"
+
+
+@pytest.fixture(name="sample_id_in_multiple_cases")
+def sample_id_in_multiple_cases():
+    """Return a sample id that should be associated with multiple cases."""
+    return "ASM2"
+
+
+@pytest.fixture(name="store_with_multiple_cases_and_samples")
+def store_with_multiple_cases_and_samples(
+    case_id_without_samples: str,
+    case_id_with_single_sample: str,
+    case_id_with_multiple_samples: str,
+    sample_id_in_single_case: str,
+    sample_id_in_multiple_cases: str,
+    case_id: str,
+    helpers: StoreHelpers,
+    store: Store,
+):
+    """Return a store containing multiple cases and samples."""
+
+    helpers.add_case(store=store, internal_id=case_id_without_samples)
+    helpers.add_case_with_samples(
+        base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
+    )
+
+    case_samples: List[Tuple[str, str]] = [
+        (case_id_with_multiple_samples, sample_id_in_multiple_cases),
+        (case_id, sample_id_in_multiple_cases),
+        (case_id_with_single_sample, sample_id_in_single_case),
+    ]
+
+    for case_sample in case_samples:
+        case_id, sample_id = case_sample
+        helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
+
+    yield store

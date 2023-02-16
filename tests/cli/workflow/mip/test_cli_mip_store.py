@@ -38,7 +38,6 @@ def test_cli_store(
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
     mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
 
@@ -87,7 +86,6 @@ def test_cli_store_bundle_already_added(
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
     mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
 
@@ -189,7 +187,6 @@ def test_cli_store_available_case_not_running(
     caplog,
     mocker,
 ):
-
     caplog.set_level("INFO")
     mip_analysis_api: MipDNAAnalysisAPI = dna_mip_context.meta_apis["analysis_api"]
 

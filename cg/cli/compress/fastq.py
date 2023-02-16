@@ -8,7 +8,6 @@ import click
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress.helpers import (
     correct_spring_paths,
-    get_fastq_individuals,
     update_compress_api,
     is_case_ignored,
     get_cases_to_process,
@@ -93,7 +92,7 @@ def clean_fastq(context: CGConfig, case_id: Optional[str], days_back: int, dry_r
     for case in cases:
         if is_case_ignored(case_id=case.internal_id):
             continue
-        samples: Iterable[str] = get_fastq_individuals(store=store, case_id=case.internal_id)
+        samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case.internal_id)
         for sample_id in samples:
             was_cleaned: bool = compress_api.clean_fastq(sample_id=sample_id)
             if not was_cleaned:
@@ -144,7 +143,7 @@ def decompress_case(context: click.Context, case_id, dry_run):
 
     store: Store = context.obj.status_db
     try:
-        samples: Iterable[str] = get_fastq_individuals(store=store, case_id=case_id)
+        samples: Iterable[str] = store.get_sample_ids_by_case_id(case_id=case_id)
         decompressed_individuals = 0
         for sample_id in samples:
             decompressed_count: int = context.invoke(
@@ -164,7 +163,7 @@ def decompress_flowcell(context: click.Context, flow_cell_id: str, dry_run: bool
     """Decompress SPRING files for flow cell, and include links to FASTQ files in Housekeeper."""
 
     store: Store = context.obj.status_db
-    samples: Iterable[Sample] = store.get_samples_from_flowcell(flowcell_name=flow_cell_id)
+    samples: Iterable[Sample] = store.get_samples_from_flow_cell(flow_cell_id=flow_cell_id)
     decompressed_individuals = 0
     for sample in samples:
         decompressed_count = context.invoke(

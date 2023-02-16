@@ -88,7 +88,6 @@ def gisaid_case_id():
 
 @pytest.fixture
 def four_gisaid_samples(gisaid_case_id: str, temp_result_file: Path) -> List[GisaidSample]:
-
     return [
         GisaidSample(
             case_id=gisaid_case_id,
@@ -119,7 +118,6 @@ def get_sample_attribute(lims_id: str, key: str):
 
 @pytest.fixture
 def dummy_gisaid_sample(temp_result_file: Path) -> GisaidSample:
-
     return GisaidSample(
         case_id="dummy_id",
         cg_lims_id=f"dummy_sample",

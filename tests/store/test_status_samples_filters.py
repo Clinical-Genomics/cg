@@ -1,7 +1,9 @@
 from alchy import Query
 
 from cg.constants.subject import PhenotypeStatus
-from cg.store import models, Store
+
+from cg.store import Store
+from cg.store.models import Sample
 from cg.store.status_sample_filters import (
     get_samples_with_loqusdb_id,
     get_samples_without_loqusdb_id,
@@ -67,3 +69,27 @@ def test_sample_prep_category(sample_store: Store, helpers, sample_id: str):
 
     # THEN the obtained sample prep category should match the expected one
     assert prep_category == "wgs"
+
+
+def test_get_sample_by_entry_id(sample_store: Store):
+    """Test retrieving sample by entry id."""
+    # GIVEN a store containing samples
+    # WHEN retrieving a sample by its entry id
+    sample: Sample = sample_store.get_sample_by_id(entry_id=1)
+
+    # THEN a sample should be returned
+    assert sample
+
+
+def test_get_sample_by_internal_id(
+    store_with_multiple_cases_and_samples: Store, sample_id_in_single_case: str
+):
+    # GIVEN a store containing a sample
+    # WHEN retrieving the sample by its internal id
+    sample: Sample = store_with_multiple_cases_and_samples.sample(
+        internal_id=sample_id_in_single_case
+    )
+
+    # THEN it is returned
+    assert sample
+

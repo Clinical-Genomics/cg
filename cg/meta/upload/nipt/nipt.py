@@ -71,8 +71,8 @@ class NiptUploadAPI:
         if not tags:
             tags: List[str] = self.RESULT_FILE_TAGS
 
-        hk_all_results_file: hk_models.File = self.housekeeper_api.find_file_in_latest_version(
-            case_id=case_id, tags=tags
+        hk_all_results_file: hk_models.File = self.housekeeper_api.get_file_from_latest_version(
+            bundle_name=case_id, tags=tags
         )
 
         if not hk_all_results_file:

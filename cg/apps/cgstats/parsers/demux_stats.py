@@ -54,7 +54,7 @@ class DemuxStats:
     def parse_file(self) -> None:
         """Parse a XML file with demux statistics"""
         LOG.info("Parsing demux stats file %s", self.demux_stats_path)
-        for (event, node) in iterparse(str(self.demux_stats_path), ["start", "end"]):
+        for event, node in iterparse(str(self.demux_stats_path), ["start", "end"]):
             if event == "start":
                 self.evaluate_start_event(node)
                 continue
