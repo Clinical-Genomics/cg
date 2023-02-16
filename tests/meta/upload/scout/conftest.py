@@ -660,6 +660,7 @@ def fixture_upload_balsamic_analysis_scout_api(
         status_db=store,
     )
 
+
 @pytest.fixture(name="rna_dna_sample_case_map")
 def fixture_rna_dna_sample_case_map(
     rna_sample_son_id: str,

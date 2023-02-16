@@ -403,6 +403,7 @@ def fixture_os_ticket(ticket: str) -> MockOsTicket:
 
 # Common file name fixtures
 
+
 @pytest.fixture(name="snv_vcf_file")
 def fixture_snv_vcf_file() -> str:
     """Return a snv file name."""
