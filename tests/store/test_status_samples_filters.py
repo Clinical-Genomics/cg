@@ -92,4 +92,3 @@ def test_get_sample_by_internal_id(
 
     # THEN it is returned
     assert sample
-
