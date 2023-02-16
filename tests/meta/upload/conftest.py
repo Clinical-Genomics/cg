@@ -15,7 +15,7 @@ from cg.store import Store
 from cg.store.models import Family, Analysis
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.cli.workflow.mip.conftest import (
-    fixture_rna_mip_context,
+    fixture_mip_rna_context,
     fixture_dna_mip_context,
     fixture_mip_case_ids,
     fixture_mip_case_id,
@@ -97,13 +97,13 @@ def fixture_genotype_analysis_sex() -> dict:
     return {"ADM1": "male", "ADM2": "male", "ADM3": "female"}
 
 
-@pytest.fixture(name="dna_mip_case")
-def fixture_dna_mip_case(dna_mip_context, helpers) -> Family:
+@pytest.fixture(name="mip_dna_case")
+def fixture_mip_dna_case(mip_dna_context, helpers) -> Family:
     """Return a MIP DNA case."""
 
-    store = dna_mip_context.status_db
+    store = mip_dna_context.status_db
 
-    dna_mip_case = helpers.add_case(
+    mip_dna_case = helpers.add_case(
         store=store,
         internal_id="dna-mip-case",
         name="dna-mip-case",
@@ -114,24 +114,24 @@ def fixture_dna_mip_case(dna_mip_context, helpers) -> Family:
         internal_id="dna-mip-case",
         application_type="wgs",
     )
-    helpers.add_relationship(store, case=dna_mip_case, sample=dna_mip_sample)
+    helpers.add_relationship(store, case=mip_dna_case, sample=dna_mip_sample)
 
     helpers.add_analysis(
         store,
-        case=dna_mip_case,
+        case=mip_dna_case,
         pipeline=Pipeline.MIP_DNA,
     )
 
-    return dna_mip_case
+    return mip_dna_case
 
 
-@pytest.fixture(name="rna_mip_case")
-def fixture_rna_mip_case(rna_mip_context, helpers) -> Family:
+@pytest.fixture(name="mip_rna_case")
+def fixture_mip_rna_case(mip_rna_context, helpers) -> Family:
     """Return a MIP RNA case."""
 
-    store = rna_mip_context.status_db
+    store = mip_rna_context.status_db
 
-    rna_mip_case = helpers.add_case(
+    mip_rna_case = helpers.add_case(
         store=store,
         internal_id="rna-mip-case",
         name="rna-mip-case",
@@ -142,12 +142,12 @@ def fixture_rna_mip_case(rna_mip_context, helpers) -> Family:
         internal_id="rna-mip-case",
         application_type="wts",
     )
-    helpers.add_relationship(store, case=rna_mip_case, sample=rna_mip_sample)
+    helpers.add_relationship(store, case=mip_rna_case, sample=rna_mip_sample)
 
     helpers.add_analysis(
         store,
-        case=rna_mip_case,
+        case=mip_rna_case,
         pipeline=Pipeline.MIP_RNA,
     )
 
-    return rna_mip_case
+    return mip_rna_case

@@ -70,7 +70,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
         # Update the upload API based on the data analysis type (MIP-DNA by default)
         if Pipeline.BALSAMIC in case_obj.data_analysis:
             upload_api = BalsamicUploadAPI(config=config_object)
-        elif case_obj.data_analysis == Pipeline.MIP_RNA :
+        elif case_obj.data_analysis == Pipeline.MIP_RNA:
             upload_api = MipRNAUploadAPI(config=config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api

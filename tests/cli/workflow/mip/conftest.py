@@ -88,8 +88,8 @@ def fixture_mip_dna_hermes_deliverables_response_data(
     )
 
 
-@pytest.fixture(name="rna_mip_context")
-def fixture_rna_mip_context(
+@pytest.fixture(name="mip_rna_context")
+def fixture_mip_rna_context(
     cg_context: CGConfig,
     analysis_family_single_case: dict,
     helpers: StoreHelpers,
@@ -109,7 +109,7 @@ def fixture_rna_mip_context(
     return cg_context
 
 
-@pytest.fixture(name="dna_mip_context")
+@pytest.fixture(name="mip_dna_context")
 def fixture_dna_mip_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,

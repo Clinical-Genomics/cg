@@ -10,14 +10,14 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_mip_dna_update_uploaded_at(
-    dna_mip_context: CGConfig, helpers: StoreHelpers, dna_mip_case: Family
+    mip_dna_context: CGConfig, helpers: StoreHelpers, mip_dna_case: Family
 ):
     """Test setting uploaded at for a finished analysis."""
     # GIVEN an analysis that should be uploaded
     upload_api: UploadAPI = UploadAPI(
-        config=dna_mip_context, analysis_api=dna_mip_context.meta_apis["analysis_api"]
+        config=mip_dna_context, analysis_api=mip_dna_context.meta_apis["analysis_api"]
     )
-    dna_mip_analysis: Analysis = dna_mip_case.analyses[0]
+    dna_mip_analysis: Analysis = mip_dna_case.analyses[0]
     assert dna_mip_analysis.uploaded_at is None
 
     # WHEN setting the uploaded at
@@ -28,14 +28,14 @@ def test_mip_dna_update_uploaded_at(
 
 
 def test_mip_rna_update_uploaded_at(
-    rna_mip_context: CGConfig, helpers: StoreHelpers, rna_mip_case: Family
+    mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Family
 ):
     """Test setting uploaded at for a finished analysis."""
     # GIVEN an analysis that should be uploaded
     upload_api: UploadAPI = UploadAPI(
-        config=rna_mip_context, analysis_api=rna_mip_context.meta_apis["analysis_api"]
+        config=mip_rna_context, analysis_api=mip_rna_context.meta_apis["analysis_api"]
     )
-    rna_mip_analysis: Analysis = rna_mip_case.analyses[0]
+    rna_mip_analysis: Analysis = mip_rna_case.analyses[0]
     assert rna_mip_analysis.uploaded_at is None
 
     # WHEN setting the uploaded at

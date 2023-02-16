@@ -12,13 +12,13 @@ from cg.store.api.status import StatusHandler
 
 
 def test_spring_decompression_needed_and_started(
-    mocker, cli_runner, caplog, dna_mip_context, case_id
+    mocker, cli_runner, caplog, mip_dna_context, case_id
 ):
     """Tests starting the MIP analysis when decompression is needed"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context.meta_apis["analysis_api"]
+    mip_api = mip_dna_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -46,7 +46,7 @@ def test_spring_decompression_needed_and_started(
     CompressAPI.decompress_spring.return_value = True
 
     # WHEN an MIP analysis is started
-    result = cli_runner.invoke(start_available, obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0
@@ -60,14 +60,14 @@ def test_spring_decompression_needed_and_start_failed(
     mocker,
     cli_runner,
     caplog,
-    dna_mip_context,
+    mip_dna_context,
     case_id,
 ):
     """Tests starting the MIP analysis when decompression is needed but fail to start"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context.meta_apis["analysis_api"]
+    mip_api = mip_dna_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -91,7 +91,7 @@ def test_spring_decompression_needed_and_start_failed(
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
 
     # WHEN an MIP analysis is started
-    result = cli_runner.invoke(start_available, obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0
@@ -101,13 +101,13 @@ def test_spring_decompression_needed_and_start_failed(
 
 
 def test_spring_decompression_needed_and_cant_start(
-    mocker, cli_runner, caplog, dna_mip_context, case_id
+    mocker, cli_runner, caplog, mip_dna_context, case_id
 ):
     """Tests starting the MIP analysis when decompression is needed but can't start"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context.meta_apis["analysis_api"]
+    mip_api = mip_dna_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -135,7 +135,7 @@ def test_spring_decompression_needed_and_cant_start(
     PrepareFastqAPI.is_spring_decompression_running.return_value = False
 
     # WHEN an MIP analysis is started
-    result = cli_runner.invoke(start_available, obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0
@@ -145,13 +145,13 @@ def test_spring_decompression_needed_and_cant_start(
 
 
 def test_decompression_cant_start_and_is_running(
-    mocker, cli_runner, caplog, dna_mip_context, case_id
+    mocker, cli_runner, caplog, mip_dna_context, case_id
 ):
     """Tests starting the MIP analysis when decompression is needed but can't start"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context.meta_apis["analysis_api"]
+    mip_api = mip_dna_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -179,7 +179,7 @@ def test_decompression_cant_start_and_is_running(
     PrepareFastqAPI.is_spring_decompression_running.return_value = True
 
     # WHEN an MIP analysis is started
-    result = cli_runner.invoke(start_available, obj=dna_mip_context)
+    result = cli_runner.invoke(start_available, obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0
@@ -188,12 +188,12 @@ def test_decompression_cant_start_and_is_running(
     assert f"Decompression is running for" in caplog.text
 
 
-def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_context):
+def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, mip_dna_context):
     """Test starting MIP when files are decompressed but not stored in housekeeper"""
     caplog.set_level(logging.INFO)
 
     # GIVEN a case to analyze
-    mip_api = dna_mip_context.meta_apis["analysis_api"]
+    mip_api = mip_dna_context.meta_apis["analysis_api"]
     case_object = mip_api.status_db.family(case_id)
 
     # GIVEN a case is available for analysis
@@ -228,7 +228,7 @@ def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_co
     MipDNAAnalysisAPI.panel.return_value = "bla"
 
     # WHEN MIP analysis is started
-    result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=dna_mip_context)
+    result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=mip_dna_context)
 
     # THEN command should run without errors
     assert result.exit_code == 0
