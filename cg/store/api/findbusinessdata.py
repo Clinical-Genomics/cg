@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import List, Optional, Iterator
+from typing import List, Optional, Iterator, Set
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def get_analyses(self, *, family: models.Family = None, before: dt.datetime = None) -> Query:
+    def get_analyses(self, *, family: Family = None, before: dt.datetime = None) -> Query:
         """Get many multiple analyses, related to a family or before a specific time - else return all objects."""
         records = self.Analysis.query
         if family:
@@ -59,10 +59,10 @@ class FindBusinessDataHandler(BaseHandler):
 
     def active_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
-        sample: models.Sample = self.sample(internal_id=internal_id)
+        sample: Sample = self.sample(internal_id=internal_id)
         return any(
             self.family(
-                internal_id=self.Family.query.filter(models.Family.id == family_sample.family_id)
+                internal_id=self.Family.query.filter(Family.id == family_sample.family_id)
                 .first()
                 .internal_id
             ).action
@@ -198,12 +198,12 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_cases_with_subject_id(
         self, customer_id: str, subject_id: str, is_tumour: Optional[bool] = None
-    ) -> List[models.Family]:
+    ) -> List[Family]:
         """Fetch all cases related to samples with a specific subject id."""
-        samples_by_subject_id: List[models.Sample] = self.samples_by_subject_id(
+        samples_by_subject_id: List[Sample] = self.samples_by_subject_id(
             customer_id=customer_id, subject_id=subject_id, is_tumour=is_tumour
         )
-        cases_with_subject_id: Set[models.Family] = set()
+        cases_with_subject_id: Set[Family] = set()
         for sample in samples_by_subject_id:
             cases_with_subject_id.update([link.family for link in sample.links])
 
@@ -389,7 +389,7 @@ class FindBusinessDataHandler(BaseHandler):
             Customer.internal_id == customer_id, Sample.subject_id == subject_id
         )
         if is_tumour:
-            query: Query = query.filter(models.Sample.is_tumour == is_tumour)
+            query: Query = query.filter(Sample.is_tumour == is_tumour)
         return query.all()
 
     def samples_by_ids(self, **identifiers) -> Query:
