@@ -110,7 +110,7 @@ def fixture_mip_rna_context(
 
 
 @pytest.fixture(name="mip_dna_context")
-def fixture_dna_mip_context(
+def fixture_mip_dna_context(
     cg_context: CGConfig,
     helpers: StoreHelpers,
     mip_case_ids: dict,

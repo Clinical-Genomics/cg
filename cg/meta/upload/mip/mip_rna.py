@@ -18,8 +18,9 @@ LOG = logging.getLogger(__name__)
 class MipRNAUploadAPI(UploadAPI):
     """MIP-RNA upload API"""
 
-    def __init__(self, config: CGConfig, analysis_api: MipRNAAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(self, config: CGConfig):
+        self.analysis_api: MipRNAAnalysisAPI = MipRNAAnalysisAPI(config)
+        super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
         """Uploads MIP-RNA analysis data and files"""

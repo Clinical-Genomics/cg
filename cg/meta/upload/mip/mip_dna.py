@@ -24,8 +24,9 @@ LOG = logging.getLogger(__name__)
 class MipDNAUploadAPI(UploadAPI):
     """MIP-DNA upload API"""
 
-    def __init__(self, config: CGConfig, analysis_api: MipDNAAnalysisAPI):
-        super().__init__(config=config, analysis_api=analysis_api)
+    def __init__(self, config: CGConfig):
+        self.analysis_api: MipDNAAnalysisAPI = MipDNAAnalysisAPI(config)
+        super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
         """Uploads MIP-DNA analysis data and files"""
@@ -33,16 +34,16 @@ class MipDNAUploadAPI(UploadAPI):
         analysis_obj: models.Analysis = case_obj.analyses[0]
         self.update_upload_started_at(analysis_obj)
 
-        # Delivery report generation
-        if case_obj.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
-            ctx.invoke(delivery_report, case_id=case_obj.internal_id)
-
         # Main upload
         ctx.invoke(coverage, family_id=case_obj.internal_id, re_upload=restart)
         ctx.invoke(validate, family_id=case_obj.internal_id)
         ctx.invoke(genotypes, family_id=case_obj.internal_id, re_upload=restart)
         ctx.invoke(observations, case_id=case_obj.internal_id)
         ctx.invoke(gens, case_id=case_obj.internal_id)
+
+        # Delivery report generation
+        if case_obj.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
+            ctx.invoke(delivery_report, case_id=case_obj.internal_id)
 
         # Clinical delivery upload
         ctx.invoke(clinical_delivery, case_id=case_obj.internal_id)

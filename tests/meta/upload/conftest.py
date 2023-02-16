@@ -16,7 +16,7 @@ from cg.store.models import Family, Analysis
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.cli.workflow.mip.conftest import (
     fixture_mip_rna_context,
-    fixture_dna_mip_context,
+    fixture_mip_dna_context,
     fixture_mip_case_ids,
     fixture_mip_case_id,
 )
@@ -105,13 +105,13 @@ def fixture_mip_dna_case(mip_dna_context, helpers) -> Family:
 
     mip_dna_case = helpers.add_case(
         store=store,
-        internal_id="dna-mip-case",
-        name="dna-mip-case",
+        internal_id="mip-dna-case",
+        name="mip-dna-case",
         data_analysis=Pipeline.MIP_DNA,
     )
     dna_mip_sample = helpers.add_sample(
         store,
-        internal_id="dna-mip-case",
+        internal_id="mip-dna-case",
         application_type="wgs",
     )
     helpers.add_relationship(store, case=mip_dna_case, sample=dna_mip_sample)
@@ -133,13 +133,13 @@ def fixture_mip_rna_case(mip_rna_context, helpers) -> Family:
 
     mip_rna_case = helpers.add_case(
         store=store,
-        internal_id="rna-mip-case",
-        name="rna-mip-case",
+        internal_id="mip-rna-case",
+        name="mip-rna-case",
         data_analysis=Pipeline.MIP_RNA,
     )
     rna_mip_sample = helpers.add_sample(
         store,
-        internal_id="rna-mip-case",
+        internal_id="mip-rna-case",
         application_type="wts",
     )
     helpers.add_relationship(store, case=mip_rna_case, sample=rna_mip_sample)
