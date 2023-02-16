@@ -1,3 +1,4 @@
+"""Module for common workflow commands."""
 import logging
 from typing import List
 
@@ -30,7 +31,7 @@ LOG = logging.getLogger(__name__)
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
-    """Generate a config for the case_id"""
+    """Generate a config for the case id."""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     try:
@@ -51,7 +52,7 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def panel(context: CGConfig, case_id: str, dry_run: bool):
-    """Write aggregated gene panel file exported from Scout"""
+    """Write aggregated gene panel file exported from Scout."""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -87,7 +88,7 @@ def run(
     start_with: str = None,
     use_bwa_mem: bool = False,
 ):
-    """Run the analysis for a case"""
+    """Run the analysis for a case."""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
 
@@ -123,7 +124,7 @@ def run(
     try:
         analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
         analysis_api.set_statusdb_action(case_id=case_id, action="running")
-        LOG.info("%s run started!", analysis_api.pipeline)
+        LOG.info(f"{analysis_api.pipeline} run started!")
     except CgError as error:
         LOG.error(error)
         raise click.Abort
@@ -154,12 +155,12 @@ def start(
     start_with: str,
     use_bwa_mem: bool,
 ):
-    """Start full MIP analysis workflow for a case"""
+    """Start full analysis workflow for a case."""
 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    LOG.info("Starting full MIP analysis workflow for case %s", case_id)
+    LOG.info(f"Starting full MIP analysis workflow for case {case_id}")
     try:
         context.invoke(ensure_flow_cells_ondisk, case_id=case_id)
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
@@ -186,7 +187,7 @@ def start(
 @OPTION_DRY
 @click.pass_context
 def start_available(context: click.Context, dry_run: bool = False):
-    """Start full MIP analysis workflow for all cases ready for analysis"""
+    """Start full analysis workflow for all cases ready for analysis."""
 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
@@ -198,7 +199,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error(f"Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
