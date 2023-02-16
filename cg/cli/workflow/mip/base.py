@@ -3,7 +3,7 @@ from typing import List
 
 import click
 from cg.apps.environ import environ_email
-from cg.cli.workflow.commands import ensure_flowcells_ondisk, link, resolve_compression
+from cg.cli.workflow.commands import ensure_flow_cells_ondisk, link, resolve_compression
 from cg.cli.workflow.mip.options import (
     ARGUMENT_CASE_ID,
     EMAIL_OPTION,
@@ -17,7 +17,7 @@ from cg.cli.workflow.mip.options import (
     START_WITH_PROGRAM,
 )
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.exc import CgError, DecompressionNeededError, FlowcellsNeededError
+from cg.exc import CgError, DecompressionNeededError, FlowCellsNeededError
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -161,7 +161,7 @@ def start(
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     LOG.info("Starting full MIP analysis workflow for case %s", case_id)
     try:
-        context.invoke(ensure_flowcells_ondisk, case_id=case_id)
+        context.invoke(ensure_flow_cells_ondisk, case_id=case_id)
         context.invoke(resolve_compression, case_id=case_id, dry_run=dry_run)
         context.invoke(link, case_id=case_id, dry_run=dry_run)
         context.invoke(panel, case_id=case_id, dry_run=dry_run)
@@ -178,7 +178,7 @@ def start(
             skip_evaluation=skip_evaluation,
             use_bwa_mem=use_bwa_mem,
         )
-    except (FlowcellsNeededError, DecompressionNeededError) as error:
+    except (FlowCellsNeededError, DecompressionNeededError) as error:
         LOG.error(error)
 
 

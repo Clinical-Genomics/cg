@@ -12,7 +12,7 @@ from cgmodels.cg.constants import Pipeline
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import FlowcellsNeededError, DecompressionNeededError
+from cg.exc import FlowCellsNeededError, DecompressionNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
@@ -44,15 +44,15 @@ OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
 LOG = logging.getLogger(__name__)
 
 
-@click.command("ensure-flowcells-ondisk")
+@click.command("ensure-flow-cells-ondisk")
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
-    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError."""
+def ensure_flow_cells_ondisk(context: CGConfig, case_id: str):
+    """Check if flowc ells are on disk for given case. If not, request flowc ells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not analysis_api.all_flow_cells_on_disk(case_id=case_id):
-        raise FlowcellsNeededError(
+        raise FlowCellsNeededError(
             "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
         )
     LOG.info("All flowcells present on disk")

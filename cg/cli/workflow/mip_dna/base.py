@@ -4,7 +4,7 @@ import logging
 
 import click
 from cg.cli.workflow.commands import (
-    ensure_flowcells_ondisk,
+    ensure_flow_cells_ondisk,
     link,
     resolve_compression,
     store,
@@ -29,7 +29,7 @@ def mip_dna(
 
 
 mip_dna.add_command(config_case)
-mip_dna.add_command(ensure_flowcells_ondisk)
+mip_dna.add_command(ensure_flow_cells_ondisk)
 mip_dna.add_command(link)
 mip_dna.add_command(panel)
 mip_dna.add_command(resolve_compression)
