@@ -358,7 +358,8 @@ class UploadScoutAPI:
         self, rna_case: models.Family
     ) -> Dict[str, Dict[str, List[str]]]:
         """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
-        subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}."""
+        subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
+        """
         rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
         for link in rna_case.links:
             self._map_rna_sample(
