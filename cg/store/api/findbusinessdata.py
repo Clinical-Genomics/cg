@@ -293,6 +293,18 @@ class FindBusinessDataHandler(BaseHandler):
             function="flow_cell_has_id_by_enquiry",
         )
 
+    def get_flow_cells(self) -> List[Flowcell]:
+        """Return all flow cells."""
+        return self._get_flow_cell_query()
+
+    def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
+        """Return flow cells with supplied statuses."""
+        return apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_statuses=flow_cell_statuses,
+            function="flow_cells_with_statuses",
+        )
+
     def get_flow_cell_by_enquiry_and_status(
         self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
     ) -> list[Flowcell]:
@@ -310,18 +322,6 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return flow_cells
 
-    def get_flow_cells(self) -> List[Flowcell]:
-        """Return all flow cells."""
-        return self._get_flow_cell_query()
-
-    def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
-        """Return flow cells with supplied statuses."""
-        return apply_flow_cell_filter(
-            flow_cells=self._get_flow_cell_query(),
-            flow_cell_statuses=flow_cell_statuses,
-            function="flow_cells_with_statuses",
-        )
-
     def get_flow_cells_by_case(self, case: Family) -> Optional[Flowcell]:
         """Return flow cells for case."""
         return apply_flow_cell_filter(
@@ -330,13 +330,9 @@ class FindBusinessDataHandler(BaseHandler):
             case=case,
         )
 
-    def flowcells(self, *, status: str = None, enquiry: str = None) -> Query:
+    def flowcells(self) -> Query:
         """Fetch all flow cells."""
         records = self._get_flow_cell_query()
-        if status:
-            records = records.filter_by(status=status)
-        if enquiry:
-            records = records.filter(Flowcell.name.like(f"%{enquiry}%"))
         return records.order_by(Flowcell.sequenced_at.desc())
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
