@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime
+from typing import List, Optional, Any
+
 
 """Module for modelling Invoices."""
 
@@ -43,12 +43,12 @@ class InvoiceReport(BaseModel):
     """Class that collects information used to create the invoice Excel sheet."""
 
     cost_center: str
-    project_number: Optional[str]
+    project_number: Optional[Any]
     customer_id: str
     customer_name: str
     agreement: Optional[str]
     invoice_id: int
     contact: dict
     records: List[dict]
-    pooled_samples: List
+    pooled_samples: Optional[Any]
     record_type: str

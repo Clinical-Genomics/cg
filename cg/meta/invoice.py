@@ -96,13 +96,13 @@ class InvoiceAPI:
                 pooled_samples += self.genologics_lims.samples_in_pools(
                     raw_record.name, raw_record.ticket
                 )
-            record = self.get_record(
+            record = self.get_invoice_entity_record(
                 cost_center=cost_center.lower(),
                 discount=self.invoice_obj.discount,
                 record=raw_record,
-            ).dict()
+            )
             if record:
-                records.append(record)
+                records.append(record.dict())
             else:
                 return None
 
@@ -166,7 +166,7 @@ class InvoiceAPI:
             return None
         return split_price
 
-    def get_record(self, cost_center: str, discount: int, record) -> InvoiceInfo:
+    def get_invoice_entity_record(self, cost_center: str, discount: int, record) -> InvoiceInfo:
         """Return invoice information for a specific sample or pool."""
         application = self.get_application(record=record, discount=discount)
 
