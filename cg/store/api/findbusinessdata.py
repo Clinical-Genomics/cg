@@ -224,10 +224,10 @@ class FindBusinessDataHandler(BaseHandler):
         return self.family(case_id).latest_ticket
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
-        """Fetch the latest sequenced flow cell related to a sample on a case"""
-        case_obj: Family = self.family(family_id)
-        samples_on_case = case_obj.links
-        flow_cells_on_case: List[Flowcell] = samples_on_case[0].sample.flowcells
+        """Fetch the latest sequenced flow cell related to a sample on a case."""
+        flow_cells_on_case: List[Flowcell] = list(
+            self.get_flow_cells_by_case(case=self.family(family_id))
+        )
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
         return flow_cells_on_case[-1]
 
@@ -307,7 +307,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_flow_cell_by_enquiry_and_status(
         self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
-    ) -> list[Flowcell]:
+    ) -> List[Flowcell]:
         """Return flow cell enquiry snd status."""
         filter_functions: List[str] = [
             "flow_cells_with_statuses",

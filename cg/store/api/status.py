@@ -16,6 +16,7 @@ from cg.store.models import (
     FamilySample,
     Pool,
     Sample,
+    Flowcell,
 )
 from cg.store.status_analysis_filters import apply_analysis_filter
 from cg.store.status_case_filters import apply_case_filter
@@ -468,10 +469,16 @@ class StatusHandler(BaseHandler):
             case_data.flowcells = len(
                 [flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells]
             )
+            # case_data.flowcells = len(
+            #   [flowcell.status for link in case_obj.links for flowcell in link.sample.get_flow_cells]
+            # )
 
             case_data.flowcells_status = list(
                 {flowcell.status for link in case_obj.links for flowcell in link.sample.flowcells}
             )
+            # case_data.flowcells_status = list(
+            #   {flowcell.status for link in case_obj.links for flowcell in link.sample.get_flow_cells}
+            # )
 
             if case_data.flowcells < case_data.total_samples:
                 case_data.flowcells_status.append("new")
