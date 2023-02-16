@@ -67,9 +67,8 @@ class InvoiceAPI:
             )
             return contact
 
-        except ValidationError as e:
+        except ValidationError:
             self.log.append(msg)
-            self.log.append(e)
             return None
 
     def get_contact_info(self, cost_center: str) -> Optional[Contact]:
@@ -129,8 +128,8 @@ class InvoiceAPI:
                 }
             )
             return invoice_report.dict()
-        except ValidationError as e:
-            self.log.append(e)
+        except ValidationError:
+            self.log.append("ValidationError in InvoiceReport class.")
             return None
 
     def _discount_price(self, record, discount: int = 0) -> Optional[int]:
@@ -199,9 +198,9 @@ class InvoiceAPI:
             )
             return application
 
-        except ValidationError as e:
+        except ValidationError:
             self.log.append(f"Application tag/version seems to be missing for sample {record.id}.")
-            self.log.append(e)
+
             return None
 
     def get_ticket(self, record) -> str:
@@ -262,8 +261,8 @@ class InvoiceAPI:
             self.set_invoice_info(invoice_info=invoice_info)
             return invoice_info
 
-        except ValidationError as e:
-            self.log.append(e)
+        except ValidationError:
+            self.log.append("Validation error in InvoiceInfo class.")
 
     def set_invoice_info(self, invoice_info: InvoiceInfo):
         """Set invoice_info."""

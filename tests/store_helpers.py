@@ -731,6 +731,7 @@ class StoreHelpers:
         customer_id: str = "cust000",
         discount: int = 0,
         record_type: str = "Sample",
+        internal_id: str = "savedkitten",
     ) -> models.Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
         invoice = store.invoice(invoice_id=invoice_id)
@@ -746,7 +747,11 @@ class StoreHelpers:
             pool = []
             sample = []
             if record_type == "Sample":
-                sample.append(StoreHelpers.add_sample(store=store, customer_id=customer_id))
+                sample.append(
+                    StoreHelpers.add_sample(
+                        store=store, customer_id=customer_id, internal_id=internal_id
+                    )
+                )
                 pool = None
             else:
                 pool.append(

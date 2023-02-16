@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import List, Optional, Any
-
+from cg.constants.priority import PriorityTerms
+from cg.constants.invoice import CostCenters
+from cg.constants.sequencing import RecordType
 
 """Module for modelling Invoices."""
 
@@ -28,13 +30,12 @@ class InvoiceInfo(BaseModel):
     """Class to collect invoice information used in the invoice report."""
 
     name: str
-    lims_id: Optional[str]
     id: str
     application_tag: str
     project: str
-    date: str
+    date: Optional[Any]
     price: int
-    priority: str
+    priority: PriorityTerms
     price_kth: Optional[int]
     total_price: Optional[int]
 
@@ -43,12 +44,12 @@ class InvoiceReport(BaseModel):
     """Class that collects information used to create the invoice Excel sheet."""
 
     cost_center: str
-    project_number: Optional[Any]
+    project_number: Optional[str]
     customer_id: str
     customer_name: str
     agreement: Optional[str]
     invoice_id: int
     contact: dict
-    records: List[dict]
+    records: List
     pooled_samples: Optional[Any]
-    record_type: str
+    record_type: RecordType
