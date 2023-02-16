@@ -285,6 +285,31 @@ class FindBusinessDataHandler(BaseHandler):
             function="flow_cell_has_id",
         )
 
+    def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Flowcell:
+        """Return flow cell enquiry."""
+        return apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_id=flow_cell_id_enquiry,
+            function="flow_cell_has_id_by_enquiry",
+        )
+
+    def get_flow_cell_by_enquiry_and_status(
+        self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
+    ) -> list[Flowcell]:
+        """Return flow cell enquiry snd status."""
+        filter_functions: List[str] = [
+            "flow_cells_with_statuses",
+            "flow_cell_has_id_by_enquiry",
+        ]
+        for filter_function in filter_functions:
+            flow_cells: List[Flowcell] = apply_flow_cell_filter(
+                flow_cells=self._get_flow_cell_query(),
+                flow_cell_id=flow_cell_id_enquiry,
+                flow_cell_statuses=flow_cell_statuses,
+                function=filter_function,
+            )
+        return flow_cells
+
     def get_flow_cells(self) -> List[Flowcell]:
         """Return all flow cells."""
         return self._get_flow_cell_query()

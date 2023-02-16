@@ -15,6 +15,13 @@ def filter_flow_cell_has_id(flow_cells: Query, flow_cell_id: str, **kwargs) -> F
     return flow_cells.filter(Flowcell.name == flow_cell_id).first()
 
 
+def filter_flow_cell_has_id_by_enquiry(
+    flow_cells: Query, flow_cell_id: str, **kwargs
+) -> List[Flowcell]:
+    """Return flow cell by flow cell id enquiry"""
+    return flow_cells.filter(Flowcell.name.like(f"%{flow_cell_id}%"))
+
+
 def filter_flow_cells_with_statuses(
     flow_cells: Query, flow_cell_statuses: List[str], **kwargs
 ) -> Optional[Query]:
@@ -33,6 +40,7 @@ def apply_flow_cell_filter(
     filter_map = {
         "flow_cells_by_case": filter_flow_cells_by_case,
         "flow_cell_has_id": filter_flow_cell_has_id,
+        "flow_cell_has_id_by_enquiry": filter_flow_cell_has_id_by_enquiry,
         "flow_cells_with_statuses": filter_flow_cells_with_statuses,
     }
     return filter_map[function](

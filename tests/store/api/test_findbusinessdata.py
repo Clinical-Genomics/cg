@@ -78,6 +78,20 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     assert flow_cell.name == flow_cell_id
 
 
+def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database by enquiry."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry(
+        flow_cell_id_enquiry=flow_cell_id[:4]
+    )
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cell[0].name == flow_cell_id
+
+
 def test_get_flow_cells_by_case(
     base_store: Store,
     flow_cell_id: str,
@@ -162,6 +176,20 @@ def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_st
 
     # THEN no flow cells should be returned
     assert len(list(flow_cells)) == 0
+
+
+def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database by enquiry and status."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry_and_status(
+        flow_cell_statuses=[FlowCellStatus.ONDISK], flow_cell_id_enquiry=flow_cell_id[:4]
+    )
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cell[0].name == flow_cell_id
 
 
 def test_get_samples_from_flow_cell(
