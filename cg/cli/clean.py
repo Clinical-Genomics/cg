@@ -318,8 +318,10 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
-    flow_cells_in_statusdb: List[Flowcell] = status_db.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
+    flow_cells_in_statusdb: List[Flowcell] = list(
+        status_db.get_flow_cells_by_statuses(
+            flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
+        )
     )
 
     LOG.info(
@@ -327,11 +329,19 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     )
 
     for flow_cell in flow_cells_in_statusdb:
+        sample_bundle_names: List[str] = [sample.internal_id for sample in flow_cell.samples]
         are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
-            bundle_names=[sample.internal_id for sample in flow_cell.samples]
+            bundle_names=sample_bundle_names
+        )
+        are_sequencing_files_on_disk: bool = (
+            housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
+                bundle_names=sample_bundle_names
+            )
         )
         new_status: str = (
-            FlowCellStatus.ONDISK if are_sequencing_files_in_hk else FlowCellStatus.REMOVED
+            FlowCellStatus.ONDISK
+            if are_sequencing_files_in_hk and are_sequencing_files_on_disk
+            else FlowCellStatus.REMOVED
         )
 
         if flow_cell.status != new_status:
