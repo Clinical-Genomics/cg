@@ -31,6 +31,7 @@ class InvoiceInfo(BaseModel):
 
     name: str
     id: str
+    lims_id: Optional[str]
     application_tag: str
     project: str
     date: Optional[Any]
