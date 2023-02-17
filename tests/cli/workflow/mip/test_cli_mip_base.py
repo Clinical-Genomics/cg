@@ -8,6 +8,7 @@ from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.store.api.findbusinessdata import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
 
 
@@ -44,6 +45,10 @@ def test_spring_decompression_needed_and_started(
     # GIVEN there is spring files that can be decompressed
     mocker.patch.object(CompressAPI, "decompress_spring")
     CompressAPI.decompress_spring.return_value = True
+
+    # GIVEN there is flow cells for the case
+    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
+    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
@@ -90,6 +95,10 @@ def test_spring_decompression_needed_and_start_failed(
     mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
 
+    # GIVEN there is flow cells for the case
+    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
+    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
+
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
 
@@ -134,6 +143,10 @@ def test_spring_decompression_needed_and_cant_start(
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
     PrepareFastqAPI.is_spring_decompression_running.return_value = False
 
+    # GIVEN there is flow cells for the case
+    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
+    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
+
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
 
@@ -177,6 +190,10 @@ def test_decompression_cant_start_and_is_running(
     # GIVEN spring decompression is running
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
     PrepareFastqAPI.is_spring_decompression_running.return_value = True
+
+    # GIVEN there is flow cells for the case
+    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
+    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
@@ -225,7 +242,11 @@ def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_co
 
     # GIVEN a panel file is created
     mocker.patch.object(MipDNAAnalysisAPI, "panel")
-    MipDNAAnalysisAPI.panel.return_value = "bla"
+    MipDNAAnalysisAPI.panel.return_value = "a_string"
+
+    # GIVEN there is flow cells for the case
+    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
+    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
 
     # WHEN MIP analysis is started
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=dna_mip_context)

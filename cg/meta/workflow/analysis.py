@@ -90,26 +90,6 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
 
-    def all_flow_cells_on_disk(self, case_id: str) -> bool:
-        """Check if flow cells are on disk for sample before starting the analysis.
-        Flow cells not on disk will be requested.
-        """
-        flow_cells: Optional[Flowcell] = self.status_db.get_flow_cells_by_case(
-            case=self.status_db.family(case_id)
-        )
-        statuses: List[str] = []
-        for flow_cell in flow_cells:
-            LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
-            LOG.info(f"{flow_cell.name}: status is {flow_cell.status}")
-            statuses.append(flow_cell.status or FlowCellStatus.ONDISK)
-            if flow_cell.status == FlowCellStatus.REMOVED:
-                LOG.info(f"{flow_cell.name}: flow cell not on disk, requesting")
-                flow_cell.status = FlowCellStatus.REQUESTED
-            elif flow_cell.status != FlowCellStatus.ONDISK:
-                LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
-        self.status_db.commit()
-        return all(status == FlowCellStatus.ONDISK for status in statuses)
-
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
         case_obj: models.Family = self.status_db.family(case_id)

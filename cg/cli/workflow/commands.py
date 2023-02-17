@@ -44,18 +44,19 @@ OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
 LOG = logging.getLogger(__name__)
 
 
-@click.command("ensure-flow-cells-ond-isk")
+@click.command("ensure-flow-cells-on-disk")
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
     """Check if flow cells are on disk for given case. If not, request flow cells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if not analysis_api.all_flow_cells_on_disk(case_id=case_id):
+    if not status_db.all_flow_cells_on_disk(case_id=case_id):
         raise FlowCellsNeededError(
-            "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
+            "Analysis cannot be started: all flow cells need to be on disk to run the analysis"
         )
-    LOG.info("All flowcells present on disk")
+    LOG.info("All flow cells present on disk")
 
 
 @click.command("resolve-compression")

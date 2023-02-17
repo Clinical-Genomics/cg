@@ -1,4 +1,5 @@
 """Tests the findbusinessdata part of the Cg store API."""
+import logging
 from datetime import datetime
 from typing import List
 
@@ -225,6 +226,128 @@ def test_get_latest_flow_cell_on_case(
 
     # THEN the fetched flow cell should have the same name as the other
     assert latest_flow_cell.name == latest_flow_cell_on_case.name
+
+
+def test_all_flow_cells_on_disk_when_no_flow_cell(
+    base_store: Store,
+    caplog,
+    case_id: str,
+):
+    """Test check if all flow cells for samples on a case is on disk when no flow cells."""
+    caplog.set_level(logging.DEBUG)
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return false
+    assert is_on_disk is False
+
+    # THEN log no flow cells found
+    assert "No flow cells found" in caplog.text
+
+
+def test_all_flow_cells_on_disk_when_not_on_disk(
+    base_store: Store,
+    caplog,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_id: str,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test check if all flow cells for samples on a case is on disk when not on disk."""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a store with two flow cell
+    flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.PROCESSING,
+    )
+
+    another_flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=another_flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.RETRIEVED,
+    )
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return false
+    assert is_on_disk is False
+
+    # THEN log the status of the flow cell
+    assert f"{flow_cell.name}: {flow_cell.status}" in caplog.text
+    assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
+
+
+def test_all_flow_cells_on_disk_when_requested(
+    base_store: Store,
+    caplog,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_id: str,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test check if all flow cells for samples on a case is on disk when requested."""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a store with two flow cell
+    flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.REMOVED,
+    )
+
+    another_flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=another_flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.REQUESTED,
+    )
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return false
+    assert is_on_disk is False
+
+    # THEN log the requesting the flow cell
+    assert f"{flow_cell.name}: flow cell not on disk, requesting" in caplog.text
+
+    # THEN log the status of the flow cell
+    assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
+
+
+def test_all_flow_cells_on_disk(
+    base_store: Store,
+    caplog,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_id: str,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test check if all flow cells for samples on a case is on disk."""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a store with two flow cell
+    flow_cell = helpers.add_flowcell(
+        store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj]
+    )
+
+    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return true
+    assert is_on_disk is True
+
+    # THEN log the status of the flow cell
+    assert f"{flow_cell.name}: status is {flow_cell.status}" in caplog.text
 
 
 def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):

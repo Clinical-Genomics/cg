@@ -5,6 +5,8 @@ from typing import List, Optional, Iterator
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
+
+from cg.constants import FlowCellStatus
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
@@ -334,6 +336,29 @@ class FindBusinessDataHandler(BaseHandler):
         flow_cell: Flowcell = self.get_flow_cell(flow_cell_id=flow_cell_id)
         if flow_cell:
             return flow_cell.samples
+
+    def all_flow_cells_on_disk(self, case_id: str) -> bool:
+        """Check if flow cells are on disk for sample before starting the analysis.
+        Flow cells not on disk will be requested.
+        """
+        flow_cells: Optional[Flowcell] = list(
+            self.get_flow_cells_by_case(case=self.family(case_id))
+        )
+        if not flow_cells:
+            LOG.info("No flow cells found")
+            return False
+        statuses: List[str] = []
+        for flow_cell in flow_cells:
+            LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
+            LOG.info(f"{flow_cell.name}: status is {flow_cell.status}")
+            statuses += [flow_cell.status] if flow_cell.status else []
+            if not flow_cell.status or flow_cell.status == FlowCellStatus.REMOVED:
+                LOG.info(f"{flow_cell.name}: flow cell not on disk, requesting")
+                flow_cell.status = FlowCellStatus.REQUESTED
+            elif flow_cell.status != FlowCellStatus.ONDISK:
+                LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
+        self.commit()
+        return all(status == FlowCellStatus.ONDISK for status in statuses)
 
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
