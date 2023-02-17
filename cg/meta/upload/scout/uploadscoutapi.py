@@ -130,7 +130,7 @@ class UploadScoutAPI:
         else:
             tags.add("clinical")
 
-        return self.housekeeper.find_file_in_latest_version(case_id=case_id, tags=tags)
+        return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
         """Get a splice junctions bed file for case in housekeeper."""

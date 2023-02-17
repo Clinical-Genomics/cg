@@ -411,7 +411,7 @@ def fixture_snv_vcf_file() -> str:
 
 
 @pytest.fixture(name="sv_vcf_file")
-def fixture_snv_vcf_file() -> str:
+def fixture_sv_vcf_file() -> str:
     """Return a snv file name."""
     return f"sv{FileExtensions.VCF}"
 
