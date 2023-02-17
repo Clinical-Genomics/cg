@@ -1,4 +1,4 @@
-"""MIP-RNA upload API"""
+"""MIP-RNA upload API."""
 
 import logging
 import datetime as dt
@@ -17,7 +17,7 @@ LOG = logging.getLogger(__name__)
 
 
 class MipRNAUploadAPI(UploadAPI):
-    """MIP-RNA upload API"""
+    """MIP-RNA upload API."""
 
     def __init__(self, config: CGConfig):
         self.analysis_api: MipRNAAnalysisAPI = MipRNAAnalysisAPI(config)

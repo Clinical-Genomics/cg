@@ -3,7 +3,7 @@ from cg.cli.workflow.mip_dna.base import link
 
 
 def test_cg_workflow_mip_dna_link(cli_runner, case_id, mip_dna_context):
-    """Test print the MIP dna link command to console"""
+    """Test print the MIP DNA link command to console,"""
 
     # GIVEN a cli function
 

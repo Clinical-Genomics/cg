@@ -5,7 +5,7 @@ from cg.cli.workflow.mip_dna.base import config_case
 
 
 def test_cg_workflow_mip_dna_config_case_dry_run(cli_runner, caplog, case_id, mip_dna_context):
-    """Test print the MIP dna case config command to console"""
+    """Test print the MIP DNA case config command to console."""
 
     caplog.set_level(logging.INFO)
 
@@ -34,7 +34,7 @@ def test_cg_workflow_mip_dna_config_case(cli_runner, caplog, case_id, mip_dna_co
 
 
 def test_cg_workflow_mip_dna_config_case_error(cli_runner, caplog, case_id, mip_dna_context):
-    """Test wrong case_id with MIP dna case config command"""
+    """Test wrong case id with MIP DNA case config command."""
 
     caplog.set_level(logging.INFO)
 
