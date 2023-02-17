@@ -24,7 +24,7 @@ class MipRNAUploadAPI(UploadAPI):
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
-        """Uploads MIP-RNA analysis data and files"""
+        """Uploads MIP-RNA analysis data and files."""
 
         analysis_obj: models.Analysis = case_obj.analyses[0]
         self.update_upload_started_at(analysis_obj)
