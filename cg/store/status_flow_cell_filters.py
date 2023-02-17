@@ -1,4 +1,4 @@
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Any
 
 from sqlalchemy.orm import Query
 
@@ -30,7 +30,7 @@ def filter_flow_cells_with_statuses(
 
 
 def apply_flow_cell_filter(
-    function: str,
+    functions: List[str],
     flow_cells: Query,
     case: Optional[Family] = None,
     flow_cell_id: Optional[str] = None,
@@ -43,9 +43,11 @@ def apply_flow_cell_filter(
         "flow_cell_has_id_by_enquiry": filter_flow_cell_has_id_by_enquiry,
         "flow_cells_with_statuses": filter_flow_cells_with_statuses,
     }
-    return filter_map[function](
-        flow_cells=flow_cells,
-        case=case,
-        flow_cell_id=flow_cell_id,
-        flow_cell_statuses=flow_cell_statuses,
-    )
+    for function in functions:
+        filtered_result: Any = filter_map[function](
+            flow_cells=flow_cells,
+            case=case,
+            flow_cell_id=flow_cell_id,
+            flow_cell_statuses=flow_cell_statuses,
+        )
+    return filtered_result

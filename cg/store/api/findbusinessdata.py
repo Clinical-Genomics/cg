@@ -282,7 +282,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id,
-            function="flow_cell_has_id",
+            functions=["flow_cell_has_id"],
         )
 
     def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Flowcell:
@@ -290,7 +290,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id_enquiry,
-            function="flow_cell_has_id_by_enquiry",
+            functions=["flow_cell_has_id_by_enquiry"],
         )
 
     def get_flow_cells(self) -> List[Flowcell]:
@@ -302,7 +302,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_statuses=flow_cell_statuses,
-            function="flow_cells_with_statuses",
+            functions=["flow_cells_with_statuses"],
         )
 
     def get_flow_cell_by_enquiry_and_status(
@@ -313,20 +313,19 @@ class FindBusinessDataHandler(BaseHandler):
             "flow_cells_with_statuses",
             "flow_cell_has_id_by_enquiry",
         ]
-        for filter_function in filter_functions:
-            flow_cells: List[Flowcell] = apply_flow_cell_filter(
-                flow_cells=self._get_flow_cell_query(),
-                flow_cell_id=flow_cell_id_enquiry,
-                flow_cell_statuses=flow_cell_statuses,
-                function=filter_function,
-            )
+        flow_cells: List[Flowcell] = apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_id=flow_cell_id_enquiry,
+            flow_cell_statuses=flow_cell_statuses,
+            functions=filter_functions,
+        )
         return flow_cells
 
     def get_flow_cells_by_case(self, case: Family) -> Optional[List[Flowcell]]:
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            function="flow_cells_by_case",
+            functions=["flow_cells_by_case"],
             case=case,
         )
 
