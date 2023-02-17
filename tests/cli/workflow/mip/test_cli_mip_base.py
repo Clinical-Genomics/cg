@@ -49,7 +49,7 @@ def test_spring_decompression_needed_and_started(
     result = cli_runner.invoke(start_available, obj=mip_dna_context)
 
     # THEN command should run without errors
-    assert result.exit_code == 0
+    assert result.exit_code == EXIT_SuCCESS
 
     # THEN it should be announced that spring decompression is started
     # assert "Decompression started for" in caplog.text
