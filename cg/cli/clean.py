@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Tuple, Iterable, Dict
+from typing import List, Optional
 
 import click
 from alchy import Query
@@ -29,15 +29,15 @@ from cg.constants import FlowCellStatus
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.sequencing import Sequencers
 from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS, ScoutTag
+from cg.models.demultiplex.flow_cell import FlowCell as demultplex_FlowCell
 from cg.utils.date import get_timedelta_from_date, get_date_days_ago
 from cg.exc import FlowCellError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Sample
+from cg.store.models import Sample, Flowcell
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -316,34 +316,27 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
 def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     """Set correct flow cell statuses in Statusdb."""
     status_db: Store = context.status_db
-    demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
-    flow_cells_in_statusdb: List[FlowCell] = status_db.get_flow_cells_by_statuses(
+    flow_cells_in_statusdb: List[Flowcell] = status_db.get_flow_cells_by_statuses(
         flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
     )
 
     LOG.info(
         f"Number of flow cells with status {FlowCellStatus.ONDISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
     )
-    flow_cells_on_disk = [
-        DemultiplexedRunsFlowCell(
-            flow_cell_path=flow_cell_dir,
-            status_db=status_db,
-            housekeeper_api=housekeeper_api,
-        ).id
-        for flow_cell_dir in demux_api.out_dir.iterdir()
-    ]
+
     for flow_cell in flow_cells_in_statusdb:
-        status_db_flow_cell_status = flow_cell.status
-        new_status: str = (
-            FlowCellStatus.ONDISK
-            if flow_cell.name in flow_cells_on_disk
-            else FlowCellStatus.REMOVED
+        are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
+            bundle_names=[sample.internal_id for sample in flow_cell.samples]
         )
-        if status_db_flow_cell_status != new_status:
+        new_status: str = (
+            FlowCellStatus.ONDISK if are_sequencing_files_in_hk else FlowCellStatus.REMOVED
+        )
+
+        if flow_cell.status != new_status:
             LOG.info(
-                f"Setting status of flow cell {flow_cell.name} from: {status_db_flow_cell_status} to {new_status}"
+                f"Setting status of flow cell {flow_cell.name} from: { flow_cell.status} to {new_status}"
             )
             if dry_run:
                 continue
@@ -427,7 +420,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
     for flow_cell_dir in demux_api.get_all_demultiplexed_flow_cell_dirs():
         try:
-            flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_dir)
+            flow_cell: demultplex_FlowCell = demultplex_FlowCell(flow_cell_path=flow_cell_dir)
         except FlowCellError:
             continue
         samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)
