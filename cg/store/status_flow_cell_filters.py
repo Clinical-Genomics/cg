@@ -1,4 +1,4 @@
-from typing import Optional, List, Union, Any
+from typing import Optional, List, Any
 
 from sqlalchemy.orm import Query
 
@@ -35,7 +35,7 @@ def apply_flow_cell_filter(
     case: Optional[Family] = None,
     flow_cell_id: Optional[str] = None,
     flow_cell_statuses: Optional[List[str]] = None,
-) -> Optional[Union[Query, Flowcell]]:
+) -> Any:
     """Apply filtering functions and return filtered results."""
     filter_map = {
         "flow_cells_by_case": filter_flow_cells_by_case,
