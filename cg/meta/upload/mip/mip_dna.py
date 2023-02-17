@@ -1,6 +1,7 @@
 """MIP-DNA upload API"""
 
 import logging
+import datetime as dt
 
 import click
 
@@ -57,4 +58,7 @@ class MipDNAUploadAPI(UploadAPI):
                 f"the specified data delivery ({case_obj.data_delivery})"
             )
 
+        LOG.info(
+            f"Upload of case {case_obj.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+        )
         self.update_uploaded_at(analysis_obj)
