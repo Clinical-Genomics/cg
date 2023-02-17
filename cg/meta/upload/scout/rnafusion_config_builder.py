@@ -41,20 +41,14 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
     def include_case_files(self):
         """Include case level files for rnafusion case."""
         LOG.info("Including RNAFUSION specific case level files")
-        self.load_config.multiqc_rna = self.fetch_file_from_hk(self.case_tags.multiqc_report)
-        self.load_config.gene_fusion = self.fetch_file_from_hk(self.case_tags.genefusion_report)
-        self.load_config.gene_fusion_research = self.fetch_file_from_hk(
-            self.case_tags.genefusion_report_research
-        )
-        self.load_config.RNAfusion_inspector = self.fetch_file_from_hk(
-            self.case_tags.rnafusion_inspector
-        )
-        self.load_config.RNAfusion_inspector_research = self.fetch_file_from_hk(
-            self.case_tags.rnafusion_inspector_research
-        )
-        self.load_config.RNAfusion_report = self.fetch_file_from_hk(self.case_tags.rnafusion_report)
-        self.load_config.RNAfusion_report_research = self.fetch_file_from_hk(
-            self.case_tags.rnafusion_report_research
+        for scout_key in RNAFUSION_CASE_TAGS.keys():
+            self._include_file(scout_key)
+
+    def _include_file(self, scout_key):
+        """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
+        are found. Otherwise return None."""
+        self.load_config.__setattr__(
+            scout_key, self.fetch_file_from_hk(self.case_tags.__getattribute__(scout_key))
         )
 
     def build_config_sample(self, case_sample: FamilySample) -> ScoutRnafusionIndividual:

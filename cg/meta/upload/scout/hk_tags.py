@@ -37,24 +37,25 @@ class CaseTags(BaseModel):
     str_catalog: Optional[Set[str]] = Field(
         None, description="Variant catalog used with expansionhunter"
     )
-    genefusion_report: Set[str] = Field(
+    gene_fusion: Set[str] = Field(
         None, description="Arriba report for RNA fusions containing only clinical fusions"
     )
-    genefusion_report_research: Optional[Set[str]] = Field(
+    gene_fusion_research: Optional[Set[str]] = Field(
         None, description="Arriba report for RNA fusions containing all fusions"
     )
-    rnafusion_report: Optional[Set[str]] = Field(
+    RNAfusion_report: Optional[Set[str]] = Field(
         None, description="Main RNA fusion report containing only clinical fusions"
     )
-    rnafusion_report_research: Optional[Set[str]] = Field(
+    RNAfusion_report_research: Optional[Set[str]] = Field(
         None, description="Main RNA fusion report containing all fusions"
     )
-    rnafusion_inspector: Optional[Set[str]] = Field(
+    RNAfusion_inspector: Optional[Set[str]] = Field(
         None, description="RNAfusion inspector report containing only clinical fusions"
     )
-    rnafusion_inspector_research: Optional[Set[str]] = Field(
+    RNAfusion_inspector_research: Optional[Set[str]] = Field(
         None, description="RNAfusion inspector report containing all fusions"
     )
+    multiqc_rna: Optional[Set[str]] = Field(None, description="MultiQC report for RNA samples")
 
 
 class SampleTags(BaseModel):
