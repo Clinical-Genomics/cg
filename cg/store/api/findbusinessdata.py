@@ -341,7 +341,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
-        flow_cells: Optional[Flowcell] = list(
+        flow_cells: Optional[List[Flowcell]] = list(
             self.get_flow_cells_by_case(case=self.family(case_id))
         )
         if not flow_cells:
