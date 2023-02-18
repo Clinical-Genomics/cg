@@ -47,8 +47,8 @@ def test_spring_decompression_needed_and_started(
     CompressAPI.decompress_spring.return_value = True
 
     # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
-    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
+    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
@@ -96,8 +96,8 @@ def test_spring_decompression_needed_and_start_failed(
     PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = True
 
     # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
-    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
+    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
@@ -144,8 +144,8 @@ def test_spring_decompression_needed_and_cant_start(
     PrepareFastqAPI.is_spring_decompression_running.return_value = False
 
     # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
-    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
+    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
@@ -192,8 +192,8 @@ def test_decompression_cant_start_and_is_running(
     PrepareFastqAPI.is_spring_decompression_running.return_value = True
 
     # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
-    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
+    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=dna_mip_context)
@@ -245,8 +245,8 @@ def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, dna_mip_co
     MipDNAAnalysisAPI.panel.return_value = "a_string"
 
     # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "all_flow_cells_on_disk")
-    FindBusinessDataHandler.all_flow_cells_on_disk.return_value = True
+    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
+    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN MIP analysis is started
     result = cli_runner.invoke(start, [case_id, "--dry-run"], obj=dna_mip_context)

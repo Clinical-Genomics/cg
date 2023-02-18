@@ -228,7 +228,7 @@ def test_get_latest_flow_cell_on_case(
     assert latest_flow_cell.name == latest_flow_cell_on_case.name
 
 
-def test_all_flow_cells_on_disk_when_no_flow_cell(
+def test_is_all_flow_cells_on_disk_when_no_flow_cell(
     base_store: Store,
     caplog,
     case_id: str,
@@ -237,7 +237,7 @@ def test_all_flow_cells_on_disk_when_no_flow_cell(
     caplog.set_level(logging.DEBUG)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -246,7 +246,7 @@ def test_all_flow_cells_on_disk_when_no_flow_cell(
     assert "No flow cells found" in caplog.text
 
 
-def test_all_flow_cells_on_disk_when_not_on_disk(
+def test_is_all_flow_cells_on_disk_when_not_on_disk(
     base_store: Store,
     caplog,
     flow_cell_id: str,
@@ -273,7 +273,7 @@ def test_all_flow_cells_on_disk_when_not_on_disk(
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -283,7 +283,7 @@ def test_all_flow_cells_on_disk_when_not_on_disk(
     assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
 
 
-def test_all_flow_cells_on_disk_when_requested(
+def test_is_all_flow_cells_on_disk_when_requested(
     base_store: Store,
     caplog,
     flow_cell_id: str,
@@ -310,7 +310,7 @@ def test_all_flow_cells_on_disk_when_requested(
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -322,7 +322,7 @@ def test_all_flow_cells_on_disk_when_requested(
     assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
 
 
-def test_all_flow_cells_on_disk(
+def test_is_all_flow_cells_on_disk(
     base_store: Store,
     caplog,
     flow_cell_id: str,
@@ -341,7 +341,7 @@ def test_all_flow_cells_on_disk(
     helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return true
     assert is_on_disk is True

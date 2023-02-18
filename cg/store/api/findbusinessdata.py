@@ -337,7 +337,7 @@ class FindBusinessDataHandler(BaseHandler):
         if flow_cell:
             return flow_cell.samples
 
-    def all_flow_cells_on_disk(self, case_id: str) -> bool:
+    def is_all_flow_cells_on_disk(self, case_id: str) -> bool:
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
