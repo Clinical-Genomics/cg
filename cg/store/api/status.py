@@ -484,7 +484,11 @@ class StatusHandler(BaseHandler):
                 flow_cell.status for flow_cell in self.get_flow_cells_by_case(case=case_obj)
             ]
             case_data.flowcells_on_disk = len(
-                [status for status in case_data.flowcells_status if status == FlowCellStatus.ONDISK]
+                [
+                    status
+                    for status in case_data.flowcells_status
+                    if status == FlowCellStatus.ON_DISK
+                ]
             )
 
             if case_data.flowcells < case_data.total_samples:

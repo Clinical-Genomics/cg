@@ -53,7 +53,7 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
 class FlowCellStatus(StrEnum):
-    ONDISK: str = "ondisk"
+    ON_DISK: str = "ondisk"
     REMOVED: str = "removed"
     REQUESTED: str = "requested"
     PROCESSING: str = "processing"

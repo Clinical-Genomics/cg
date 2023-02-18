@@ -320,12 +320,12 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
 
     flow_cells_in_statusdb: List[Flowcell] = list(
         status_db.get_flow_cells_by_statuses(
-            flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
+            flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REMOVED]
         )
     )
 
     LOG.info(
-        f"Number of flow cells with status {FlowCellStatus.ONDISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
+        f"Number of flow cells with status {FlowCellStatus.ON_DISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
     )
 
     for flow_cell in flow_cells_in_statusdb:
@@ -339,7 +339,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
             )
         )
         new_status: str = (
-            FlowCellStatus.ONDISK
+            FlowCellStatus.ON_DISK
             if are_sequencing_files_in_hk and are_sequencing_files_on_disk
             else FlowCellStatus.REMOVED
         )

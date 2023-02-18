@@ -355,10 +355,10 @@ class FindBusinessDataHandler(BaseHandler):
             if not flow_cell.status or flow_cell.status == FlowCellStatus.REMOVED:
                 LOG.info(f"{flow_cell.name}: flow cell not on disk, requesting")
                 flow_cell.status = FlowCellStatus.REQUESTED
-            elif flow_cell.status != FlowCellStatus.ONDISK:
+            elif flow_cell.status != FlowCellStatus.ON_DISK:
                 LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
         self.commit()
-        return all(status == FlowCellStatus.ONDISK for status in statuses)
+        return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""

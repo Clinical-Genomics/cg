@@ -114,7 +114,7 @@ def test_filter_flow_cells_with_statuses(
     # WHEN getting flow cell
     returned_flow_cell_query: Query = filter_flow_cells_with_statuses(
         flow_cells=base_store._get_flow_cell_query(),
-        flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.PROCESSING],
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.PROCESSING],
     )
 
     # THEN a query should be returned

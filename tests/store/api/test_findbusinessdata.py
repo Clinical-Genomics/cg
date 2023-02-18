@@ -127,12 +127,12 @@ def test_get_flow_cells_by_statuses(another_flow_cell_id: str, re_sequenced_samp
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REQUESTED]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
     )
 
     # THEN the flow cell status should be "ondisk"
     for flow_cell in flow_cells:
-        assert flow_cell.status == FlowCellStatus.ONDISK
+        assert flow_cell.status == FlowCellStatus.ON_DISK
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cells[0].name == another_flow_cell_id
@@ -152,17 +152,17 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.ONDISK, FlowCellStatus.REQUESTED]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
     )
 
     # THEN the flow cell status should be "ondisk" or "requested"
     for flow_cell in flow_cells:
-        assert flow_cell.status in [FlowCellStatus.ONDISK, FlowCellStatus.REQUESTED]
+        assert flow_cell.status in [FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
 
     # THEN the returned flow cell should have the same status as the ones in the database
     assert flow_cells[0].status == FlowCellStatus.REQUESTED
 
-    assert flow_cells[1].status == FlowCellStatus.ONDISK
+    assert flow_cells[1].status == FlowCellStatus.ON_DISK
 
 
 def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_store: Store):
@@ -186,7 +186,7 @@ def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sam
 
     # WHEN fetching the latest flow cell
     flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry_and_status(
-        flow_cell_statuses=[FlowCellStatus.ONDISK], flow_cell_id_enquiry=flow_cell_id[:4]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK], flow_cell_id_enquiry=flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
