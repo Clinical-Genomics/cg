@@ -284,15 +284,15 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id,
-            functions=["flow_cell_has_id"],
+            functions=["get_flow_cell_has_id"],
         )
 
-    def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Flowcell:
+    def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Query:
         """Return flow cell enquiry."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id_enquiry,
-            functions=["flow_cell_has_id_by_enquiry"],
+            functions=["get_flow_cell_has_id_by_enquiry"],
         )
 
     def get_flow_cells(self) -> List[Flowcell]:
@@ -304,7 +304,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_statuses=flow_cell_statuses,
-            functions=["flow_cells_with_statuses"],
+            functions=["get_flow_cells_with_statuses"],
         )
 
     def get_flow_cell_by_enquiry_and_status(
@@ -312,8 +312,8 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Flowcell]:
         """Return flow cell enquiry snd status."""
         filter_functions: List[str] = [
-            "flow_cells_with_statuses",
-            "flow_cell_has_id_by_enquiry",
+            "get_flow_cells_with_statuses",
+            "get_flow_cell_has_id_by_enquiry",
         ]
         flow_cells: List[Flowcell] = apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
@@ -327,7 +327,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            functions=["flow_cells_by_case"],
+            functions=["get_flow_cells_by_case"],
             case=case,
         )
 

@@ -6,15 +6,15 @@ from cg.constants import FlowCellStatus
 from cg.store import Store
 from cg.store.models import Flowcell, Family, Sample
 from cg.store.status_flow_cell_filters import (
-    filter_flow_cell_has_id,
-    filter_flow_cells_with_statuses,
-    filter_flow_cells_by_case,
-    filter_flow_cell_has_id_by_enquiry,
+    get_flow_cell_has_id,
+    get_flow_cells_with_statuses,
+    get_flow_cells_by_case,
+    get_flow_cell_has_id_by_enquiry,
 )
 from tests.store_helpers import StoreHelpers
 
 
-def test_filter_flow_cells_by_case(
+def test_get_flow_cells_by_case(
     base_store: Store,
     case_id: str,
     case_obj: Family,
@@ -30,7 +30,7 @@ def test_filter_flow_cells_by_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Optional[List[Flowcell]] = filter_flow_cells_by_case(
+    returned_flow_cell: Optional[List[Flowcell]] = get_flow_cells_by_case(
         flow_cells=base_store._get_flow_cell_sample_links_query(), case=case_obj
     )
 
@@ -40,7 +40,7 @@ def test_filter_flow_cells_by_case(
     assert returned_flow_cell[0].name == flow_cell_id
 
 
-def test_filter_flow_cells_by_case_when_no_flow_cell_for_case(
+def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
     base_store: Store,
     case_id: str,
     case_obj: Family,
@@ -53,7 +53,7 @@ def test_filter_flow_cells_by_case_when_no_flow_cell_for_case(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Optional[List[Flowcell]] = filter_flow_cells_by_case(
+    returned_flow_cell: Optional[List[Flowcell]] = get_flow_cells_by_case(
         flow_cells=base_store._get_flow_cell_sample_links_query(), case=case_obj
     )
 
@@ -61,7 +61,7 @@ def test_filter_flow_cells_by_case_when_no_flow_cell_for_case(
     assert len(list(returned_flow_cell)) == 0
 
 
-def test_filter_flow_cell_has_id(base_store: Store, helpers: StoreHelpers, flow_cell_id: str):
+def test_get_flow_cell_has_id(base_store: Store, helpers: StoreHelpers, flow_cell_id: str):
     """Test that a flow cell is returned when there is a flow cell with matching flow cell id."""
 
     # GIVEN a flow cell that exist in status db
@@ -70,7 +70,7 @@ def test_filter_flow_cell_has_id(base_store: Store, helpers: StoreHelpers, flow_
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: Flowcell = filter_flow_cell_has_id(
+    returned_flow_cell: Flowcell = get_flow_cell_has_id(
         flow_cells=base_store._get_flow_cell_query(), flow_cell_id=flow_cell_id
     )
 
@@ -80,7 +80,7 @@ def test_filter_flow_cell_has_id(base_store: Store, helpers: StoreHelpers, flow_
     assert flow_cell is returned_flow_cell
 
 
-def test_filter_flow_cell_has_id_by_enquiry(
+def test_get_flow_cell_has_id_by_enquiry(
     base_store: Store, helpers: StoreHelpers, flow_cell_id: str
 ):
     """Test that a flow cell is returned when there is a flow cell with enquiry flow cell id."""
@@ -91,7 +91,7 @@ def test_filter_flow_cell_has_id_by_enquiry(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: List[Flowcell] = filter_flow_cell_has_id_by_enquiry(
+    returned_flow_cell: List[Flowcell] = get_flow_cell_has_id_by_enquiry(
         flow_cells=base_store._get_flow_cell_query(), flow_cell_id=flow_cell_id[:4]
     )
 
@@ -101,9 +101,7 @@ def test_filter_flow_cell_has_id_by_enquiry(
     assert flow_cell is returned_flow_cell[0]
 
 
-def test_filter_flow_cells_with_statuses(
-    base_store: Store, helpers: StoreHelpers, flow_cell_id: str
-):
+def test_get_flow_cells_with_statuses(base_store: Store, helpers: StoreHelpers, flow_cell_id: str):
     """Test that a flow cell is returned when there is a flow cell with matching flow cell id."""
 
     # GIVEN a flow cell that exist in status db
@@ -112,7 +110,7 @@ def test_filter_flow_cells_with_statuses(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell_query: Query = filter_flow_cells_with_statuses(
+    returned_flow_cell_query: Query = get_flow_cells_with_statuses(
         flow_cells=base_store._get_flow_cell_query(),
         flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.PROCESSING],
     )
