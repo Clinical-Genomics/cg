@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Any
+from typing import Optional, List
 
 from cgmodels.cg.constants import Pipeline
 from sqlalchemy import and_, or_
@@ -97,7 +97,7 @@ def get_cases_with_scout_data_delivery(cases: Query, **kwargs) -> Query:
 
 
 def get_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
-    """Extracts cases with a valid data delivery for delivery report generation."""
+    """Return cases with a valid data delivery for delivery report generation."""
     return cases.filter(Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
 
 
@@ -120,5 +120,5 @@ def apply_case_filter(
         "get_report_cases_with_valid_data_delivery": get_report_supported_data_delivery_cases,
     }
     for function in functions:
-        cases: Any = filter_map[function](cases=cases, date=date, pipeline=pipeline)
+        cases: Query = filter_map[function](cases=cases, date=date, pipeline=pipeline)
     return cases

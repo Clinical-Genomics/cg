@@ -598,7 +598,7 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
-        """Fetch analyses that have not been uploaded."""
+        """Return analyses that have not been uploaded."""
         analysis_filter_functions: List[str] = [
             "get_analyses_with_pipeline",
             "get_completed_analyses",
@@ -648,7 +648,7 @@ class StatusHandler(BaseHandler):
         return records
 
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
-        """Get observations that have not been uploaded."""
+        """Return observations that have not been uploaded."""
         case_filter_functions: List[str] = [
             "get_cases_with_loqusdb_supported_pipeline",
             "get_cases_with_loqusdb_supported_sequencing_method",
@@ -661,7 +661,7 @@ class StatusHandler(BaseHandler):
         return apply_sample_filter(functions=["get_samples_without_loqusdb_id"], samples=records)
 
     def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
-        """Get observations that have been uploaded."""
+        """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
             functions=["get_cases_with_loqusdb_supported_pipeline"],
             cases=self.get_families_with_samples(),
@@ -685,7 +685,7 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
-        """Get analyses that need a delivery report to be regenerated."""
+        """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
             functions=["get_report_cases_with_valid_data_delivery"],
             cases=self._get_analysis_case_query(),

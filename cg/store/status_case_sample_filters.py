@@ -1,4 +1,4 @@
-from typing import Optional, List, Any
+from typing import Optional, List
 
 from sqlalchemy.orm import Query
 
@@ -36,7 +36,7 @@ def apply_case_sample_filter(
         "get_samples_associated_with_case": get_samples_associated_with_case,
     }
     for function in functions:
-        case_samples: Any = filter_map[function](
+        case_samples: Query = filter_map[function](
             case_samples=case_samples,
             case_id=case_id,
             sample_entry_id=sample_entry_id,

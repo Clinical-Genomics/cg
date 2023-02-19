@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import List
 
 from sqlalchemy.orm import Query
 
@@ -85,5 +85,5 @@ def apply_analysis_filter(
         "order_analyses_by_uploaded_at": order_analyses_by_uploaded_at,
     }
     for function in functions:
-        analyses: Any = filter_map[function](analyses=analyses, pipeline=pipeline)
+        analyses: Query = filter_map[function](analyses=analyses, pipeline=pipeline)
     return analyses

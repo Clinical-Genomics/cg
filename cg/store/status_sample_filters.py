@@ -1,4 +1,4 @@
-from typing import Optional, List, Any
+from typing import Optional, List
 
 from sqlalchemy.orm import Query
 
@@ -12,7 +12,7 @@ def get_sample_by_sample_id(internal_id: str, samples: Query, **kwargs) -> Query
 
 
 def get_samples_with_type(samples: Query, tissue_type: SampleType, **kwargs) -> Query:
-    """Return samples by sample type."""
+    """Return samples with sample type."""
     is_tumour: bool = tissue_type == SampleType.TUMOR
     return samples.filter(Sample.is_tumour == is_tumour)
 
@@ -48,7 +48,7 @@ def apply_sample_filter(
         "get_samples_without_loqusdb_id": get_samples_without_loqusdb_id,
     }
     for function in functions:
-        samples: Any = filter_map[function](
+        samples: Query = filter_map[function](
             entry_id=entry_id, internal_id=internal_id, samples=samples, tissue_type=tissue_type
         )
     return samples
