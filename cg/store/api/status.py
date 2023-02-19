@@ -92,9 +92,9 @@ class StatusHandler(BaseHandler):
     ) -> List[Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: List[str] = [
-            "cases_has_sequence",
-            "cases_with_pipeline",
-            "filter_cases_for_analysis",
+            "get_cases_has_sequence",
+            "get_cases_with_pipeline",
+            "get_cases_for_analysis",
         ]
         cases = apply_case_filter(
             functions=case_filter_functions,
@@ -236,8 +236,8 @@ class StatusHandler(BaseHandler):
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
         csse_filter_functions: List[str] = [
-            "inactive_analysis_cases",
-            "new_cases",
+            "get_inactive_analysis_cases",
+            "get_new_cases",
         ]
         return apply_case_filter(
             functions=csse_filter_functions, cases=self._get_case_query(), date=date_threshold
@@ -258,7 +258,9 @@ class StatusHandler(BaseHandler):
     def sample(self, internal_id: str) -> Sample:
         """Return a sample by lims id."""
         return apply_sample_filter(
-            functions=["sample"], samples=self._get_sample_query(), internal_id=internal_id
+            functions=["get_sample_by_sample_id"],
+            samples=self._get_sample_query(),
+            internal_id=internal_id,
         ).first()
 
     @staticmethod
@@ -597,15 +599,17 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Fetch analyses that have not been uploaded."""
-        filter_functions: List[str] = [
-            "analyses_with_pipeline",
-            "completed_analyses",
-            "not_uploaded_analyses",
-            "valid_analyses_in_production",
+        analysis_filter_functions: List[str] = [
+            "get_analyses_with_pipeline",
+            "get_completed_analyses",
+            "get_not_uploaded_analyses",
+            "get_valid_analyses_in_production",
             "order_analyses_by_completed_at",
         ]
         return apply_analysis_filter(
-            functions=filter_functions, analyses=self._get_analysis_case_query(), pipeline=pipeline
+            functions=analysis_filter_functions,
+            analyses=self._get_analysis_case_query(),
+            pipeline=pipeline,
         )
 
     def analyses_to_clean(
@@ -646,25 +650,25 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Get observations that have not been uploaded."""
         case_filter_functions: List[str] = [
-            "cases_with_loqusdb_supported_pipeline",
-            "cases_with_loqusdb_supported_sequencing_method",
+            "get_cases_with_loqusdb_supported_pipeline",
+            "get_cases_with_loqusdb_supported_sequencing_method",
         ]
         records: Query = apply_case_filter(
             functions=case_filter_functions,
             cases=self.get_families_with_samples(),
             pipeline=pipeline,
         )
-        return apply_sample_filter(functions=["samples_not_uploaded_to_loqusdb"], samples=records)
+        return apply_sample_filter(functions=["get_samples_without_loqusdb_id"], samples=records)
 
     def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
         """Get observations that have been uploaded."""
         records: Query = apply_case_filter(
-            functions=["cases_with_loqusdb_supported_pipeline"],
+            functions=["get_cases_with_loqusdb_supported_pipeline"],
             cases=self.get_families_with_samples(),
             pipeline=pipeline,
         )
         records: Query = apply_sample_filter(
-            functions=["samples_uploaded_to_loqusdb"], samples=records
+            functions=["get_samples_with_loqusdb_id"], samples=records
         )
         return records
 
@@ -683,14 +687,14 @@ class StatusHandler(BaseHandler):
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Get analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
-            functions=["filter_report_cases_with_valid_data_delivery"],
+            functions=["get_report_cases_with_valid_data_delivery"],
             cases=self._get_analysis_case_query(),
             pipeline=pipeline,
         )
         analysis_filter_functions: List[str] = [
-            "filter_report_analyses_by_pipeline",
-            "analyses_without_delivery_report",
-            "valid_analyses_in_production",
+            "get_report_analyses_by_pipeline",
+            "get_analyses_without_delivery_report",
+            "get_valid_analyses_in_production",
             "order_analyses_by_completed_at",
         ]
         return apply_analysis_filter(
@@ -698,17 +702,17 @@ class StatusHandler(BaseHandler):
         )
 
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
-        """Get analyses that need a delivery report to be uploaded."""
+        """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
-            functions=["cases_with_scout_data_delivery"],
+            functions=["get_cases_with_scout_data_delivery"],
             cases=self._get_analysis_case_query(),
             pipeline=pipeline,
         )
         analysis_filter_functions: List[str] = [
-            "filter_report_analyses_by_pipeline",
-            "analyses_with_delivery_report",
-            "not_uploaded_analyses",
-            "valid_analyses_in_production",
+            "get_report_analyses_by_pipeline",
+            "get_analyses_with_delivery_report",
+            "get_not_uploaded_analyses",
+            "get_valid_analyses_in_production",
             "order_analyses_by_completed_at",
         ]
         return apply_analysis_filter(
