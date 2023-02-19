@@ -416,7 +416,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles(
     # GIVEN an empty bundle
     populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
 
-    # GIVEN an existing SPRING file
+    # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
 
     # GIVEN a SPRING file tag with a file included the bundle
@@ -454,7 +454,7 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     # GIVEN an empty bundle
     populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
 
-    # GIVEN an existing SPRING file
+    # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
 
     # GIVEN a SPRING file tag with a file included the bundle
@@ -483,7 +483,7 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_none(
     case_id: str,
     tags: List[str],
 ):
-    """Test checking if all FASTQ or SPRING files are on disk in bundles when no files are not on disk."""
+    """Test checking if all FASTQ or SPRING files are on disk in bundles when no files are on disk."""
     # GIVEN a populated housekeeper api with some files
 
     # WHEN fetching all files
@@ -491,7 +491,7 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_none(
         bundle_names=[case_id]
     )
 
-    # THEN assert all file were not present in all bundles
+    # THEN assert all file were not on disk in all bundles
     assert not was_true
 
 
@@ -518,14 +518,14 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles(
     assert was_true
 
 
-def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing(
+def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing_file(
     populated_housekeeper_api: MockHousekeeperAPI,
     case_id: str,
     sample_id: str,
     madeline_output: Path,
     tags: List[str],
 ):
-    """Test checking if all FASTQ or SPRING files are on disk in bundles when not all bundles have files are on disk."""
+    """Test checking if all FASTQ or SPRING files are on disk in bundles when not all bundles have files on disk."""
     # GIVEN a populated housekeeper api with some files
     version: Version = populated_housekeeper_api.last_version(case_id)
 
@@ -549,46 +549,8 @@ def test_is_fastq_or_spring_on_disk_in_all_bundles_when_missing(
         bundle_names=[case_id, sample_id]
     )
 
-    # THEN assert all file were not oon disk in all bundles
+    # THEN assert all file were not on disk in all bundles
     assert not was_true
-
-
-def test_is_fastq_or_spring_on_disk_in_all_bundles(
-    case_id: str,
-    compression_object: MockCompressionData,
-    populated_housekeeper_api: MockHousekeeperAPI,
-    madeline_output: Path,
-    sample_id: str,
-    tags: List[str],
-):
-    """Test checking if all FASTQ or SPRING files are on disk in bundles when all bundles have files on disk."""
-    # GIVEN a populated housekeeper api with some files
-
-    # GIVEN a FASTQ file tag with a file included the bundle
-    populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
-    )
-
-    # GIVEN an empty bundle
-    populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
-
-    # GIVEN an existing SPRING file
-    compression_object.spring_metadata_path.touch()
-
-    # GIVEN a SPRING file tag with a file included the bundle
-    populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=compression_object.spring_metadata_path,
-        bundle_name=sample_id,
-        tags=[SequencingFileTag.SPRING_METADATA],
-    )
-
-    # WHEN fetching all files
-    was_true = populated_housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
-        bundle_names=[case_id, sample_id]
-    )
-
-    # THEN assert all file were on disk in all bundles
-    assert was_true
 
 
 def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
@@ -610,7 +572,7 @@ def testis_fastq_or_spring_on_disk_in_all_bundles_when_multiple_bundles(
     # GIVEN an empty bundle
     populated_housekeeper_api.create_new_bundle_and_version(name=sample_id)
 
-    # GIVEN an existing SPRING file
+    # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
 
     # GIVEN a SPRING file tag with a file included the bundle

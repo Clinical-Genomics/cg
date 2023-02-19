@@ -1,4 +1,4 @@
-from typing import Optional, List, Any, Union
+from typing import Optional, List, Union
 
 from sqlalchemy.orm import Query
 
@@ -16,7 +16,7 @@ def get_flow_cell_has_id(flow_cells: Query, flow_cell_id: str, **kwargs) -> Flow
 
 
 def get_flow_cell_has_id_by_enquiry(flow_cells: Query, flow_cell_id: str, **kwargs) -> Query:
-    """Return flow cell by flow cell id enquiry"""
+    """Return flow cell by flow cell id enquiry."""
     return flow_cells.filter(Flowcell.name.like(f"%{flow_cell_id}%"))
 
 
@@ -42,7 +42,7 @@ def apply_flow_cell_filter(
         "get_flow_cells_with_statuses": get_flow_cells_with_statuses,
     }
     for function in functions:
-        flow_cells: Any = filter_map[function](
+        flow_cells: Union[Query, Flowcell] = filter_map[function](
             flow_cells=flow_cells,
             case=case,
             flow_cell_id=flow_cell_id,

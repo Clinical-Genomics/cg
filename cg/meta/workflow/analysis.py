@@ -10,15 +10,14 @@ import click
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
-from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority, FlowCellStatus
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
+from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.store import models
-from cg.store.models import Flowcell
+from cg.store.models import Family, Sample, BedVersion, FamilySample, Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ class AnalysisAPI(MetaAPI):
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """Passes silently if case exists in StatusDB, raises error if case is missing"""
 
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
@@ -92,7 +91,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         return case_obj.priority.value or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
@@ -114,7 +113,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
         """Retrieve sample name provided by customer for specific sample"""
-        sample_obj: models.Sample = self.status_db.sample(lims_id)
+        sample_obj: Sample = self.status_db.sample(lims_id)
         return sample_obj.name
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
@@ -127,17 +126,13 @@ class AnalysisAPI(MetaAPI):
         return None
 
     @staticmethod
-    def get_application_type(sample_obj: models.Sample) -> str:
+    def get_application_type(sample_obj: Sample) -> str:
         """
         Gets application type for sample. Only application types supported by trailblazer (or other)
         are valid outputs
         """
         analysis_type: str = sample_obj.application_version.application.prep_category
-        if analysis_type and analysis_type.lower() in [
-            "wgs",
-            "wes",
-            "tgs",
-        ]:
+        if analysis_type and analysis_type.lower() in {"wgs", "wes", "tgs"}:
             return analysis_type.lower()
         return "other"
 
@@ -169,10 +164,10 @@ class AnalysisAPI(MetaAPI):
         """Storing analysis bundle in StatusDB for CASE_ID"""
 
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
-        new_analysis: models.Family = self.status_db.add_analysis(
+        new_analysis: Family = self.status_db.add_analysis(
             pipeline=self.pipeline,
             version=pipeline_version,
             started_at=analysis_start,
@@ -239,7 +234,7 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
         if action in [None, *CASE_ACTIONS]:
-            case_obj: models.Family = self.status_db.family(case_id)
+            case_obj: Family = self.status_db.family(case_id)
             case_obj.action = action
             self.status_db.commit()
             LOG.info("Action %s set for case %s", action, case_id)
@@ -248,19 +243,19 @@ class AnalysisAPI(MetaAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> List[models.Analysis]:
+    def get_analyses_to_clean(self, before: dt.datetime) -> List[Analysis]:
         analyses_to_clean = self.status_db.analyses_to_clean(pipeline=self.pipeline, before=before)
         return analyses_to_clean.all()
 
-    def get_cases_to_analyze(self) -> List[models.Family]:
+    def get_cases_to_analyze(self) -> List[Family]:
         return self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
 
-    def get_running_cases(self) -> List[models.Family]:
+    def get_running_cases(self) -> List[Family]:
         return self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
 
-    def get_cases_to_store(self) -> List[models.Family]:
+    def get_cases_to_store(self) -> List[Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
         return [
@@ -269,10 +264,10 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
+    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample):
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: models.Sample) -> List[dict]:
+    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> List[dict]:
         return [
             self.fastq_handler.parse_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
@@ -281,7 +276,7 @@ class AnalysisAPI(MetaAPI):
         ]
 
     def link_fastq_files_for_sample(
-        self, case_obj: models.Family, sample_obj: models.Sample, concatenate: bool = False
+        self, case_obj: Family, sample_obj: Sample, concatenate: bool = False
     ) -> None:
         """
         Link FASTQ files for a sample to working directory.
@@ -326,16 +321,14 @@ class AnalysisAPI(MetaAPI):
 
     def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
         """Get target bed filename from lims"""
-        case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: models.Sample = case_obj.links[0].sample
+        case_obj: Family = self.status_db.family(case_id)
+        sample_obj: Sample = case_obj.links[0].sample
         if sample_obj.from_sample:
-            sample_obj: models.Sample = self.status_db.sample(sample_obj.from_sample)
+            sample_obj: Sample = self.status_db.sample(sample_obj.from_sample)
         target_bed_shortname: str = self.lims_api.capture_kit(sample_obj.internal_id)
         if not target_bed_shortname:
             return target_bed_shortname
-        bed_version_obj: Optional[models.BedVersion] = self.status_db.bed_version(
-            target_bed_shortname
-        )
+        bed_version_obj: Optional[BedVersion] = self.status_db.bed_version(target_bed_shortname)
         if not bed_version_obj:
             raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
         return bed_version_obj.filename
@@ -369,8 +362,8 @@ class AnalysisAPI(MetaAPI):
         if not decompression_possible:
             self.decompression_running(case_id=case_id)
             return
-        case_obj: models.Family = self.status_db.family(case_id)
-        link: models.FamilySample
+        case_obj: Family = self.status_db.family(case_id)
+        link: FamilySample
         any_decompression_started = False
         for link in case_obj.links:
             sample_id: str = link.sample.internal_id
@@ -421,7 +414,7 @@ class AnalysisAPI(MetaAPI):
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
+    def get_additional_naming_metadata(self, sample_obj: Sample) -> Optional[str]:
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:

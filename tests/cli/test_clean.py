@@ -15,6 +15,5 @@ def test_fix_flow_cell_status(
     # WHEN running command
     result = cli_runner.invoke(fix_flow_cell_status, obj=base_context)
 
-    print(result.exc_info)
     # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS

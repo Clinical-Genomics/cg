@@ -41,7 +41,7 @@ def test_get_flow_cell_query(re_sequenced_sample_store: Store):
 
 
 def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
-    """Test function to return the flow cell query from the database."""
+    """Test function to return the flow cell sample links query from the database."""
 
     # GIVEN a store with two flow cells
 
@@ -166,7 +166,7 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
 
 
 def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_store: Store):
-    """Test returning the latest flow cell from the database when no flow cell with status."""
+    """Test returning the latest flow cell from the database when no flow cell with incorrect status."""
 
     # GIVEN a store with two flow cells
 
@@ -176,7 +176,7 @@ def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_st
     )
 
     # THEN no flow cells should be returned
-    assert len(list(flow_cells)) == 0
+    assert not list(flow_cells)
 
 
 def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sample_store: Store):
@@ -191,6 +191,9 @@ def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sam
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell[0].name == flow_cell_id
+
+    # THEN the returned flow cell should have the same status as the query
+    assert flow_cell[0].status == FlowCellStatus.ON_DISK
 
 
 def test_get_samples_from_flow_cell(
