@@ -1,5 +1,5 @@
 """This script tests the cli methods to add cases to status-db"""
-from typing import List
+from typing import List, Union
 
 from alchy import Query
 from datetime import datetime
@@ -217,7 +217,7 @@ def test_all_samples_and_analysis_completed(
     test_analysis: models.Analysis = helpers.add_analysis(base_store, completed_at=timestamp_now)
 
     # Given a completed analysis
-    test_analysis.family.action: str = None
+    test_analysis.family.action: Union[None, str] = None
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
