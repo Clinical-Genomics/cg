@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Any
 from alchy import Query
 from cg.store.models import Family, Sample
 
@@ -21,7 +21,7 @@ def get_cases_associated_with_sample_by_entry_id(
 
 
 def apply_case_sample_filter(
-    function: str,
+    functions: List[str],
     case_samples: Query,
     case_id: Optional[str] = None,
     sample_id: Optional[str] = None,
@@ -33,9 +33,11 @@ def apply_case_sample_filter(
         "get_cases_associated_with_sample": get_cases_associated_with_sample,
         "get_cases_associated_with_sample_by_entry_id": get_cases_associated_with_sample_by_entry_id,
     }
-    return filter_map[function](
-        case_samples=case_samples,
-        case_id=case_id,
-        sample_id=sample_id,
-        sample_entry_id=sample_entry_id,
-    )
+    for function in functions:
+        case_samples: Any = filter_map[function](
+            case_samples=case_samples,
+            case_id=case_id,
+            sample_entry_id=sample_entry_id,
+            sample_id=sample_id,
+        )
+    return case_samples

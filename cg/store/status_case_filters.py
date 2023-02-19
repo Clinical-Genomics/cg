@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Any
 
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
@@ -102,7 +102,10 @@ def filter_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query
 
 
 def apply_case_filter(
-    function: str, cases: Query, date: Optional[datetime] = None, pipeline: Optional[str] = None
+    functions: List[str],
+    cases: Query,
+    date: Optional[datetime] = None,
+    pipeline: Optional[str] = None,
 ):
     """Apply filtering functions and return filtered results."""
     filter_map = {
@@ -116,4 +119,6 @@ def apply_case_filter(
         "inactive_analysis_cases": filter_inactive_analysis_cases,
         "new_cases": filter_new_cases,
     }
-    return filter_map[function](cases=cases, date=date, pipeline=pipeline)
+    for function in functions:
+        cases: Any = filter_map[function](cases=cases, date=date, pipeline=pipeline)
+    return cases

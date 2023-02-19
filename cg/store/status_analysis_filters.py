@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from alchy import Query
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
@@ -7,7 +9,7 @@ from cgmodels.cg.constants import Pipeline
 
 
 def filter_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
-    """Fetches analyses with a valid data in production."""
+    """Return analyses with a valid data in production."""
     return analyses.filter(VALID_DATA_IN_PRODUCTION < Analysis.completed_at)
 
 
@@ -27,12 +29,12 @@ def filter_not_completed_analyses(analyses: Query, **kwargs) -> Query:
 
 
 def filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
-    """Fetches analyses that have been already uploaded."""
+    """Return analyses that have been already uploaded."""
     return analyses.filter(Analysis.uploaded_at.isnot(None))
 
 
 def filter_not_uploaded_analyses(analyses: Query, **kwargs) -> Query:
-    """Fetches analyses that have not been uploaded."""
+    """Return analyses that have not been uploaded."""
     return analyses.filter(Analysis.uploaded_at.is_(None))
 
 
@@ -49,7 +51,7 @@ def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
 def filter_report_analyses_by_pipeline(
     analyses: Query, pipeline: Pipeline = None, **kwargs
 ) -> Query:
-    """Fetches the delivery report related analyses associated to the provided or supported pipelines."""
+    """Return the delivery report related analyses associated to the provided or supported pipelines."""
     return (
         analyses.filter(Analysis.pipeline == str(pipeline))
         if pipeline
@@ -67,7 +69,9 @@ def order_analyses_by_uploaded_at(analyses: Query, **kwargs) -> Query:
     return analyses.order_by(Analysis.uploaded_at.asc())
 
 
-def apply_analysis_filter(function: str, analyses: Query, pipeline: Pipeline = None) -> Query:
+def apply_analysis_filter(
+    functions: List[str], analyses: Query, pipeline: Pipeline = None
+) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
 
     filter_map = {
@@ -83,5 +87,6 @@ def apply_analysis_filter(function: str, analyses: Query, pipeline: Pipeline = N
         "order_analyses_by_completed_at": order_analyses_by_completed_at,
         "order_analyses_by_uploaded_at": order_analyses_by_uploaded_at,
     }
-
-    return filter_map[function](analyses=analyses, pipeline=pipeline)
+    for function in functions:
+        analyses: Any = filter_map[function](analyses=analyses, pipeline=pipeline)
+    return analyses

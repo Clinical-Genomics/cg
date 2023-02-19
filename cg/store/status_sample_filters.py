@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Any
 
 from alchy import Query
 
@@ -31,7 +31,7 @@ def get_sample_by_entry_id(samples: Query, entry_id: int, **kwargs) -> Query:
 
 
 def apply_sample_filter(
-    function: str,
+    functions: List[str],
     samples: Query,
     internal_id: Optional[str] = None,
     entry_id: Optional[int] = None,
@@ -45,6 +45,8 @@ def apply_sample_filter(
         "samples_not_uploaded_to_loqusdb": get_samples_without_loqusdb_id,
         "get_sample_by_entry_id": get_sample_by_entry_id,
     }
-    return filter_map[function](
-        samples=samples, internal_id=internal_id, entry_id=entry_id, tissue_type=tissue_type
-    )
+    for function in functions:
+        samples: Any = filter_map[function](
+            entry_id=entry_id, internal_id=internal_id, samples=samples, tissue_type=tissue_type
+        )
+    return samples
