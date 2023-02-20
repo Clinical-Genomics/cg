@@ -130,28 +130,18 @@ def fixture_mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Fa
 
 
 @pytest.fixture(name="mip_rna_case")
-def fixture_mip_rna_case(mip_rna_context: CGConfig, helpers: StoreHelpers) -> Family:
+def fixture_mip_rna_case(mip_rna_context: CGConfig, case_id: str):
     """Return a MIP RNA case."""
+    return mip_rna_context.status_db.family(internal_id=case_id)
 
-    store: Store = mip_rna_context.status_db
 
-    mip_rna_case: Family = helpers.add_case(
-        store=store,
-        internal_id="mip-rna-case",
-        name="mip-rna-case",
-        data_analysis=Pipeline.MIP_RNA,
-    )
-    rna_mip_sample: Sample = helpers.add_sample(
-        store=store,
-        internal_id="mip-rna-case",
-        application_type="wts",
-    )
-    helpers.add_relationship(store=store, case=mip_rna_case, sample=rna_mip_sample)
-
-    helpers.add_analysis(
-        store=store,
+@pytest.fixture(name="mip_rna_analysis")
+def fixture_mip_rna_analysis(
+    mip_rna_context: CGConfig, helpers: StoreHelpers, mip_rna_case: Family
+) -> Family:
+    """Return a MIP RNA analysis."""
+    return helpers.add_analysis(
+        store=mip_rna_context.status_db,
         case=mip_rna_case,
         pipeline=Pipeline.MIP_RNA,
     )
-
-    return mip_rna_case
