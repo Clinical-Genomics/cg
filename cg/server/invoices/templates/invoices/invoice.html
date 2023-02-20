@@ -13,6 +13,7 @@
         <br>
         <form action="{{ url_for('invoices.index') }}" method="POST" enctype="multipart/form-data">
           <div class="form-group">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="new_invoice_updates" value=1>
             <input type="hidden" name="invoice_id" value={{invoice.id}}>
             <div class="row">
@@ -112,6 +113,7 @@
                   <form action="{{ url_for('invoices.index') }}" method="POST" enctype="multipart/form-data">
                     <div class="col-sm-9">
                     <button class="btn btn-primary" type="submit">Undo Invoice</button> 
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <input type="hidden" name="samples" value={{ invoice_dict.records }}>
                     <input type="hidden" name="invoice_id" value={{ invoice.id }}>
                     <input type="hidden" name="record_type" value={{ record_type }}>

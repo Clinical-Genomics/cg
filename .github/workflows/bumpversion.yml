@@ -1,9 +1,9 @@
-name: 'Bump2version-CI'
+name: "Bump2version-CI"
 on:
   push:
     branches:
-      - 'master'
-      - 'main'
+      - "master"
+      - "main"
 jobs:
   bump-version:
     runs-on: ubuntu-latest

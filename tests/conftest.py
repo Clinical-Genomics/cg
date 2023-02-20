@@ -10,6 +10,7 @@ from typing import Any, Dict, Generator, List, Union
 import pytest
 from housekeeper.store.models import File
 
+from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -334,6 +335,17 @@ def fixture_genotype_config() -> dict:
     }
 
 
+@pytest.fixture(name="gens_config")
+def fixture_gens_config() -> Dict[str, Dict[str, str]]:
+    """Gens config fixture."""
+    return {
+        "gens": {
+            "config_path": Path("config", "path").as_posix(),
+            "binary_path": "gens",
+        }
+    }
+
+
 # Api fixtures
 
 
@@ -355,6 +367,14 @@ def fixture_genotype_api(genotype_config: dict) -> GenotypeAPI:
     _genotype_api = GenotypeAPI(genotype_config)
     _genotype_api.set_dry_run(True)
     return _genotype_api
+
+
+@pytest.fixture(name="gens_api")
+def fixture_gens_api(gens_config: dict) -> GensAPI:
+    """Gens API fixture."""
+    _gens_api = GensAPI(gens_config)
+    _gens_api.set_dry_run(True)
+    return _gens_api
 
 
 @pytest.fixture()
@@ -705,6 +725,21 @@ def fixture_bcl2fastq_demux_results(
 def fixture_bcf_file(apps_dir: Path) -> Path:
     """Return the path to a BCF file."""
     return Path(apps_dir, "gt", "yellowhog.bcf")
+
+
+# Gens file fixtures
+
+
+@pytest.fixture(name="gens_fracsnp_path")
+def fixture_gens_fracsnp_path(mip_dna_analysis_dir: Path, sample_id: str) -> Path:
+    """Path to Gens fracsnp/baf bed file."""
+    return Path(mip_dna_analysis_dir, f"{sample_id}.baf.bed.gz")
+
+
+@pytest.fixture(name="gens_coverage_path")
+def fixture_gens_coverage_path(mip_dna_analysis_dir: Path, sample_id: str) -> Path:
+    """Path to Gens coverage bed file."""
+    return Path(mip_dna_analysis_dir, f"{sample_id}.cov.bed.gz")
 
 
 # Housekeeper, Chanjo file fixtures
