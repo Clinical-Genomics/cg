@@ -61,19 +61,19 @@ class ScoutMipIndividual(ScoutIndividual):
     mitodel_file: Optional[str] = None
 
 
-class ScoutBalsamicIndividual(ScoutIndividual):
+class ScoutCancerIndividual(ScoutIndividual):
     tumor_type: Optional[str] = None
     tmb: Optional[str] = None
     msi: Optional[str] = None
     tumor_purity: float = 0
+
+
+class ScoutBalsamicIndividual(ScoutCancerIndividual):
     vcf2cytosure: Optional[str] = None
 
 
-class ScoutRnafusionIndividual(ScoutIndividual):
-    tumor_type: Optional[str] = None
-    tmb: Optional[str] = None
-    msi: Optional[str] = None
-    tumor_purity: float = 0
+class ScoutRnafusionIndividual(ScoutCancerIndividual):
+    pass
 
 
 class ScoutLoadConfig(BaseModel):
