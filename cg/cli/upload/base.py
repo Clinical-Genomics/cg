@@ -30,7 +30,9 @@ from cg.cli.upload.validate import validate
 from cg.constants import Pipeline
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
-from cg.meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
+from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -51,7 +53,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
-    upload_api = MipDNAUploadAPI(config=config_object)  # default upload API
+    upload_api: UploadAPI = MipDNAUploadAPI(config=config_object)  # default upload API
 
     LOG.info("----------------- UPLOAD -----------------")
 
@@ -68,7 +70,9 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
 
         # Update the upload API based on the data analysis type (MIP-DNA by default)
         if Pipeline.BALSAMIC in case_obj.data_analysis:
-            upload_api = BalsamicUploadAPI(config=config_object)
+            upload_api: UploadAPI = BalsamicUploadAPI(config=config_object)
+        elif case_obj.data_analysis == Pipeline.MIP_RNA:
+            upload_api: UploadAPI = MipRNAUploadAPI(config=config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case_obj=case_obj, restart=restart)

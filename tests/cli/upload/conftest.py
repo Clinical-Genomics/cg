@@ -32,6 +32,12 @@ from tests.mocks.report import MockMipDNAReportAPI
 from tests.store_helpers import StoreHelpers
 
 from tests.meta.upload.scout.conftest import fixture_mip_load_config
+from tests.cli.workflow.mip.conftest import (
+    fixture_mip_rna_context,
+    fixture_mip_dna_context,
+    fixture_mip_case_ids,
+    fixture_mip_case_id,
+)
 
 LOG = logging.getLogger(__name__)
 
