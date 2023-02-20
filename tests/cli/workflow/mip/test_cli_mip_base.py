@@ -2,17 +2,27 @@
 
 import logging
 
+from _pytest.logging import LogCaptureFixture
+from pytest_mock import MockFixture
+
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.mip_dna.base import start, start_available
+from cg.constants.process import EXIT_SUCCESS
 from cg.meta.compress import CompressAPI
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
+from cg.models.cg_config import CGConfig
 from cg.store.api.status import StatusHandler
+from click.testing import CliRunner
 
 
 def test_spring_decompression_needed_and_started(
-    mocker, cli_runner, caplog, mip_dna_context, case_id
+    mocker: MockFixture,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+    mip_dna_context: CGConfig,
+    case_id: str,
 ):
     """Tests starting the MIP analysis when decompression is needed"""
     caplog.set_level(logging.INFO)
@@ -49,7 +59,7 @@ def test_spring_decompression_needed_and_started(
     result = cli_runner.invoke(start_available, obj=mip_dna_context)
 
     # THEN command should run without errors
-    assert result.exit_code == EXIT_SuCCESS
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should be announced that spring decompression is started
     # assert "Decompression started for" in caplog.text
@@ -57,11 +67,11 @@ def test_spring_decompression_needed_and_started(
 
 
 def test_spring_decompression_needed_and_start_failed(
-    mocker,
-    cli_runner,
-    caplog,
-    mip_dna_context,
-    case_id,
+    mocker: MockFixture,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+    mip_dna_context: CGConfig,
+    case_id: str,
 ):
     """Tests starting the MIP analysis when decompression is needed but fail to start"""
     caplog.set_level(logging.INFO)
@@ -101,7 +111,11 @@ def test_spring_decompression_needed_and_start_failed(
 
 
 def test_spring_decompression_needed_and_cant_start(
-    mocker, cli_runner, caplog, mip_dna_context, case_id
+    mocker: MockFixture,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+    mip_dna_context: CGConfig,
+    case_id: str,
 ):
     """Tests starting the MIP analysis when decompression is needed but can't start"""
     caplog.set_level(logging.INFO)
@@ -145,7 +159,11 @@ def test_spring_decompression_needed_and_cant_start(
 
 
 def test_decompression_cant_start_and_is_running(
-    mocker, cli_runner, caplog, mip_dna_context, case_id
+    mocker: MockFixture,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+    mip_dna_context: CGConfig,
+    case_id: str,
 ):
     """Tests starting the MIP analysis when decompression is needed but can't start"""
     caplog.set_level(logging.INFO)
@@ -188,7 +206,13 @@ def test_decompression_cant_start_and_is_running(
     assert f"Decompression is running for" in caplog.text
 
 
-def test_case_needs_to_be_stored(mocker, cli_runner, caplog, case_id, mip_dna_context):
+def test_case_needs_to_be_stored(
+    mocker: MockFixture,
+    cli_runner: CliRunner,
+    caplog: LogCaptureFixture,
+    mip_dna_context: CGConfig,
+    case_id: str,
+):
     """Test starting MIP when files are decompressed but not stored in housekeeper"""
     caplog.set_level(logging.INFO)
 
