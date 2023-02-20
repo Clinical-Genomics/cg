@@ -1,14 +1,22 @@
 from pathlib import Path
+from typing import Any, Callable
 
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.housekeeper.models import InputBundle
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
+from cg.meta.compress import CompressAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
+from cg.store.api.status import StatusHandler
+from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
+from tests.store.conftest import fixture_case_obj
 
 
 @pytest.fixture(name="mip_dna_fixture_config_path")
@@ -145,3 +153,44 @@ def fixture_mip_dna_context(
             helpers.add_relationship(store=_store, sample=sample, case=case_obj, status="affected")
     cg_context.meta_apis["analysis_api"] = mip_analysis_api
     return cg_context
+
+
+def setup_mocks(
+    mocker,
+    can_at_least_one_sample_be_decompressed: bool = False,
+    case_to_analyze: Family = None,
+    decompress_spring: bool = False,
+    has_latest_analysis_started: bool = False,
+    is_dna_only_case: bool = False,
+    is_spring_decompression_needed: bool = False,
+    is_spring_decompression_running: bool = False,
+) -> None:
+    """Helper function to setup the necessary mocks for the decompression logics."""
+    mocker.patch.object(StatusHandler, "cases_to_analyze")
+    StatusHandler.cases_to_analyze.return_value = [case_to_analyze]
+
+    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
+    PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
+
+    mocker.patch.object(MipAnalysisAPI, "is_dna_only_case")
+    MipAnalysisAPI.is_dna_only_case.return_value = is_dna_only_case
+
+    mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
+    TrailblazerAPI.has_latest_analysis_started.return_value = has_latest_analysis_started
+
+    mocker.patch.object(PrepareFastqAPI, "can_at_least_one_sample_be_decompressed")
+    PrepareFastqAPI.can_at_least_one_sample_be_decompressed.return_value = (
+        can_at_least_one_sample_be_decompressed
+    )
+
+    mocker.patch.object(CompressAPI, "decompress_spring")
+    CompressAPI.decompress_spring.return_value = decompress_spring
+
+    mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_running")
+    PrepareFastqAPI.is_spring_decompression_running.return_value = is_spring_decompression_running
+
+    mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
+    PrepareFastqAPI.check_fastq_links.return_value = None
+
+    mocker.patch.object(MipDNAAnalysisAPI, "resolve_panel_bed")
+    MipDNAAnalysisAPI.resolve_panel_bed.return_value = "bla"
