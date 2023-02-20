@@ -75,7 +75,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
             upload_api = RnafusionUploadAPI(config=config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
-        upload_api.upload(ctx=context, case_obj=case_obj, restart=restart)
+        upload_api.upload(ctx=context, case=case_obj, restart=restart)
         click.echo(click.style(f"{family_id} analysis has been successfully uploaded", fg="green"))
     else:
         suggest_cases_to_upload(status_db=upload_api.status_db)
