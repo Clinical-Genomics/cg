@@ -38,13 +38,13 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         for db_sample in self.analysis_obj.family.links:
             self.load_config.samples.append(self.build_config_sample(case_sample=db_sample))
 
-    def include_case_files(self):
+    def include_case_files(self) -> None:
         """Include case level files for rnafusion case."""
         LOG.info("Including RNAFUSION specific case level files")
         for scout_key in RNAFUSION_CASE_TAGS.keys():
             self._include_file(scout_key)
 
-    def _include_file(self, scout_key):
+    def _include_file(self, scout_key) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
         self.load_config.__setattr__(
