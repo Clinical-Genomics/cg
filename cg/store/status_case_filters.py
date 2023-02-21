@@ -36,13 +36,13 @@ def get_new_cases(cases: Query, date: datetime, **kwargs) -> Query:
     return cases.order_by(Family.created_at.asc())
 
 
-def get_cases_with_pipeline(cases: Query, pipeline: str = None, **kwargs) -> Query:
+def get_cases_with_pipeline(cases: Query, pipeline: Pipeline = None, **kwargs) -> Query:
     """Return cases with pipeline."""
     return cases.filter(Family.data_analysis == pipeline) if pipeline else cases
 
 
 def get_cases_with_loqusdb_supported_pipeline(
-    cases: Query, pipeline: str = None, **kwargs
+    cases: Query, pipeline: Pipeline = None, **kwargs
 ) -> Query:
     """Return Loqusdb related cases with pipeline."""
     records: Query = (
@@ -55,7 +55,7 @@ def get_cases_with_loqusdb_supported_pipeline(
 
 
 def get_cases_with_loqusdb_supported_sequencing_method(
-    cases: Query, pipeline: str = None, **kwargs
+    cases: Query, pipeline: Pipeline = None, **kwargs
 ) -> Query:
     """Return cases with Loqusdb supported sequencing method."""
     supported_sequencing_methods = {
@@ -105,7 +105,7 @@ def apply_case_filter(
     cases: Query,
     functions: List[str],
     date: Optional[datetime] = None,
-    pipeline: Optional[str] = None,
+    pipeline: Optional[Pipeline] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     filter_map = {

@@ -88,7 +88,7 @@ class StatusHandler(BaseHandler):
         return self.Family.query.join(Family.links, FamilySample.sample, Family.customer)
 
     def cases_to_analyze(
-        self, pipeline: str = None, threshold: bool = False, limit: int = None
+        self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: List[str] = [
