@@ -61,21 +61,21 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
     elif family_id:  # Provided case ID without a subcommand: upload everything
         try:
             upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
-            case_obj: models.Family = upload_api.status_db.family(family_id)
-            upload_api.verify_analysis_upload(case_obj=case_obj, restart=restart)
+            case: models.Family = upload_api.status_db.family(family_id)
+            upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
             return
 
         # Update the upload API based on the data analysis type (MIP-DNA by default)
         # Upload for balsamic, balsamic-umi and balsamic-qc
-        if Pipeline.BALSAMIC in case_obj.data_analysis:
+        if Pipeline.BALSAMIC in case.data_analysis:
             upload_api = BalsamicUploadAPI(config=config_object)
-        if case_obj.data_analysis == Pipeline.RNAFUSION:
+        if case.data_analysis == Pipeline.RNAFUSION:
             upload_api = RnafusionUploadAPI(config=config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
-        upload_api.upload(ctx=context, case_obj=case_obj, restart=restart)
+        upload_api.upload(ctx=context, case=case, restart=restart)
         click.echo(click.style(f"{family_id} analysis has been successfully uploaded", fg="green"))
     else:
         suggest_cases_to_upload(status_db=upload_api.status_db)
