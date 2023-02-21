@@ -46,8 +46,10 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
     def _include_file(self, scout_key) -> None:
         """Include the file path associated to a scout configuration parameter if the corresponding housekeeper tags
         are found. Otherwise return None."""
-        self.load_config.__setattr__(
-            scout_key, self.fetch_file_from_hk(self.case_tags.__getattribute__(scout_key))
+        setattr(
+            self.load_config,
+            scout_key,
+            self.fetch_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
     def build_config_sample(self, case_sample: FamilySample) -> ScoutRnafusionIndividual:
