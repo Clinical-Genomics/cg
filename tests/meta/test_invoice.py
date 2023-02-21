@@ -28,8 +28,7 @@ def fixture_invoice_api_sample(
         record_type=record_type,
         customer_id=customer_id,
     )
-    api = InvoiceAPI(store, lims_api, invoice)
-    return api
+    return = InvoiceAPI(store, lims_api, invoice)i
 
 
 @pytest.fixture(name="get_invoice_api_nipt_customer")
@@ -73,8 +72,13 @@ def fixture_invoice_api_pool_generic_customer(
 
 
 def test_assert_invoice_api(get_invoice_api_sample):
-    # ASSERT that an API can be initiated
-    assert isinstance(get_invoice_api_sample, InvoiceAPI)
+    # GIVEN a sample invoice api
+    
+    # When instantiating
+    sample_invoice_api: InvoiceAPI = get_invoice_api_sample
+   
+     # THEN return an InvoiceAPI instance
+    assert isinstance(sample_invoice_api, InvoiceAPI)
 
 
 def test_assert_invoice_api(get_invoice_api_sample):
