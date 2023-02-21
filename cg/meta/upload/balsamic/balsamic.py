@@ -1,7 +1,7 @@
 """Balsamic upload API"""
 
-import logging
 import datetime as dt
+import logging
 
 import click
 
@@ -64,6 +64,6 @@ class BalsamicUploadAPI(UploadAPI):
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Observations upload")
 
         LOG.info(
-            f"Upload of case {case_obj.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+            f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
         )
         self.update_uploaded_at(analysis_obj)
