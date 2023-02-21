@@ -1,5 +1,6 @@
 """MIP-DNA upload API"""
 
+import datetime as dt
 import logging
 
 import click
@@ -52,5 +53,13 @@ class MipDNAUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             ctx.invoke(scout, case_id=case.internal_id, re_upload=restart)
+        else:
+            LOG.warning(
+                f"There is nothing to upload to Scout for case {case.internal_id} and "
+                f"the specified data delivery ({case.data_delivery})"
+            )
 
+        LOG.info(
+            f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+        )
         self.update_uploaded_at(analysis_obj)

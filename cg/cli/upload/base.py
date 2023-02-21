@@ -30,8 +30,10 @@ from cg.cli.upload.validate import validate
 from cg.constants import Pipeline
 from cg.exc import AnalysisAlreadyUploadedError
 from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
-from cg.meta.upload.mip_dna.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
+from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
 from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
+from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from cg.utils.click.EnumChoice import EnumChoice
@@ -52,7 +54,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
-    upload_api = MipDNAUploadAPI(config=config_object)  # default upload API
+    upload_api: UploadAPI = MipDNAUploadAPI(config=config_object)  # default upload API
 
     LOG.info("----------------- UPLOAD -----------------")
 

@@ -6,11 +6,9 @@ from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
 from cg.cli.upload.base import upload
-from cg.constants import DataDelivery
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family
-from tests.cli.workflow.rnafusion.conftest import fixture_rnafusion_case_id
 from tests.store_helpers import StoreHelpers
 
 
