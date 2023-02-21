@@ -46,6 +46,12 @@
   path_index: ~
   step: report
   tag: fusioninspector
+- format: html
+  id: CASEID
+  path: PATHTOCASE/fusioninspector/CASEID.fusion_inspector_web.html
+  path_index: ~
+  step: report
+  tag: fusioninspector-html
 - format: pdf
   id: CASEID
   path: PATHTOCASE/arriba_visualisation/CASEID.pdf
