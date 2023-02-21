@@ -24,8 +24,8 @@ class RnafusionUploadAPI(UploadAPI):
     def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
         """Uploads RNAFUSION analysis data and files."""
 
-        analysis_obj: Analysis = case.analyses[0]
-        self.update_upload_started_at(analysis_obj)
+        analysis: Analysis = case.analyses[0]
+        self.update_upload_started_at(analysis)
 
         if DataDelivery.SCOUT in case.data_delivery:
             ctx.invoke(scout, case_id=case.internal_id, re_upload=restart)
