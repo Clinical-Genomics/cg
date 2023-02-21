@@ -30,6 +30,7 @@ def test_spring_decompression_needed_and_started(
     # GIVEN spring decompression is needed
     # GIVEN there is spring files that can be decompressed
     # GIVEN there is spring files that can be decompressed
+    # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=True,
         case_to_analyze=case_obj,
@@ -39,10 +40,6 @@ def test_spring_decompression_needed_and_started(
         is_spring_decompression_needed=True,
         mocker=mocker,
     )
-
-    # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
-    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=mip_dna_context)
@@ -70,6 +67,7 @@ def test_spring_decompression_needed_and_start_failed(
     # GIVEN the latest analysis has not started
     # GIVEN spring decompression is needed
     # GIVEN there is spring files that can be decompressed
+    # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=True,
         case_to_analyze=case_obj,
@@ -79,10 +77,6 @@ def test_spring_decompression_needed_and_start_failed(
         is_spring_decompression_needed=True,
         mocker=mocker,
     )
-
-    # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
-    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=mip_dna_context)
@@ -110,6 +104,7 @@ def test_spring_decompression_needed_and_cant_start(
     # GIVEN spring decompression is needed
     # GIVEN no spring files can be decompressed
     # GIVEN spring decompression is not running
+    # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
         case_to_analyze=case_obj,
@@ -120,10 +115,6 @@ def test_spring_decompression_needed_and_cant_start(
         is_spring_decompression_running=False,
         mocker=mocker,
     )
-
-    # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
-    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=mip_dna_context)
@@ -151,6 +142,7 @@ def test_decompression_cant_start_and_is_running(
     # GIVEN spring decompression is needed
     # GIVEN no spring files can be decompressed
     # GIVEN spring decompression is running
+    # GIVEN there is flow cells for the case
     setup_mocks(
         can_at_least_one_sample_be_decompressed=False,
         case_to_analyze=case_obj,
@@ -161,10 +153,6 @@ def test_decompression_cant_start_and_is_running(
         is_spring_decompression_running=True,
         mocker=mocker,
     )
-
-    # GIVEN there is flow cells for the case
-    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
-    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True
 
     # WHEN an MIP analysis is started
     result = cli_runner.invoke(start_available, obj=mip_dna_context)
