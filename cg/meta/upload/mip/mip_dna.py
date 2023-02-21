@@ -1,6 +1,7 @@
 """MIP-DNA upload API"""
 
 import logging
+import datetime as dt
 
 import click
 
@@ -17,8 +18,6 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.upload.upload_api import UploadAPI
 from cg.store import models
-from cg.apps.tb import TrailblazerAPI
-
 
 LOG = logging.getLogger(__name__)
 
@@ -53,5 +52,13 @@ class MipDNAUploadAPI(UploadAPI):
         # Scout specific upload
         if DataDelivery.SCOUT in case_obj.data_delivery:
             ctx.invoke(scout, case_id=case_obj.internal_id, re_upload=restart)
+        else:
+            LOG.warning(
+                f"There is nothing to upload to Scout for case {case_obj.internal_id} and "
+                f"the specified data delivery ({case_obj.data_delivery})"
+            )
 
+        LOG.info(
+            f"Upload of case {case_obj.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+        )
         self.update_uploaded_at(analysis_obj)

@@ -5,7 +5,6 @@ from cg.cli.upload.base import upload
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
 from click.testing import CliRunner
-
 from tests.store_helpers import StoreHelpers
 
 
