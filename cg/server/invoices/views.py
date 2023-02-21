@@ -2,7 +2,7 @@ import http
 import os
 import tempfile
 from datetime import date
-
+from cg.constants.invoice import CostCenters
 from flask import (
     Blueprint,
     current_app,
@@ -152,8 +152,8 @@ def invoice(invoice_id):
     """Save comments and uploaded modified invoices."""
     invoice_obj = db.invoice(invoice_id)
     api = InvoiceAPI(db, lims, invoice_obj)
-    kth_inv = api.get_invoice_report("KTH")
-    ki_inv = api.get_invoice_report("KI")
+    kth_inv = api.get_invoice_report(CostCenters.kth)
+    ki_inv = api.get_invoice_report(CostCenters.kth)
 
     if not (kth_inv and ki_inv):
         flash(" ,".join(list(set(api.log))))

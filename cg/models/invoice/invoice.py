@@ -6,8 +6,7 @@ from cg.constants.invoice import CostCenters
 from cg.constants.sequencing import RecordType
 
 
-
-class Contact(BaseModel):
+class InvoiceContact(BaseModel):
     """Class for collection contact information used in the invoice."""
 
     name: str
@@ -17,7 +16,7 @@ class Contact(BaseModel):
     address: str
 
 
-class Application(BaseModel):
+class InvoiceApplication(BaseModel):
     """Class to collect Application information used in the invoice."""
 
     version: str

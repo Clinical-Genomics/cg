@@ -1,15 +1,16 @@
 from cg.apps.lims import LimsAPI
 from cg.server.ext import lims as genologics_lims
+from cg.server.ext import FlaskLims
 from cg.store import Store
 from typing import Optional, Union, List, Any
-from cg.store.models import Invoice, Customer, User
+from cg.store.models import Invoice, Customer, User, Sample, Pool
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import RecordType
 from cg.constants.invoice import (
     CostCenters,
     CustomerNames,
 )
-from cg.models.invoice.invoice import Contact, Application, InvoiceReport, InvoiceInfo
+from cg.models.invoice.invoice import InvoiceContact, InvoiceApplication, InvoiceReport, InvoiceInfo
 from pydantic import ValidationError
 
 
@@ -23,7 +24,7 @@ class InvoiceAPI:
         self.record_type = ""
         self.raw_records = []
         self._set_record_type()
-        self.genologics_lims = genologics_lims
+        self.genologics_lims: FlaskLims = genologics_lims
         self.invoice_info: Optional[InvoiceInfo] = None
 
     def _set_record_type(self):
@@ -53,17 +54,15 @@ class InvoiceAPI:
 
     def get_contact(
         self, customer: Customer, customer_invoice_contact: Optional[User], msg: str
-    ) -> Optional[Contact]:
+    ) -> Optional[InvoiceContact]:
         """Return the contact information."""
         try:
-            contact = Contact(
-                **{
-                    "name": customer_invoice_contact.name,
-                    "email": customer_invoice_contact.email,
-                    "customer_name": customer.name,
-                    "reference": customer.invoice_reference,
-                    "address": customer.invoice_address,
-                }
+            contact = InvoiceContact(
+                name=customer_invoice_contact.name,
+                email=customer_invoice_contact.email,
+                customer_name=customer.name,
+                reference=customer.invoice_reference,
+                address=customer.invoice_address,
             )
             return contact
 
@@ -71,7 +70,7 @@ class InvoiceAPI:
             self.log.append(msg)
             return None
 
-    def get_contact_info(self, cost_center: str) -> Optional[Contact]:
+    def get_contact_info(self, cost_center: str) -> Optional[InvoiceContact]:
         """Return contact info for a customer."""
 
         msg = (
@@ -112,27 +111,23 @@ class InvoiceAPI:
 
         try:
             invoice_report = InvoiceReport(
-                **{
-                    "cost_center": cost_center,
-                    "project_number": getattr(
-                        customer_obj, f"project_account_{cost_center.lower()}"
-                    ),
-                    "customer_id": customer_obj.internal_id,
-                    "customer_name": customer_obj.name,
-                    "agreement": customer_obj.agreement_registration,
-                    "invoice_id": self.invoice_obj.id,
-                    "contact": contact.dict(),
-                    "records": records,
-                    "pooled_samples": pooled_samples,
-                    "record_type": self.record_type,
-                }
+                cost_center=cost_center,
+                project_number=getattr(customer_obj, f"project_account_{cost_center.lower()}"),
+                customer_id=customer_obj.internal_id,
+                customer_name=customer_obj.name,
+                agreement=customer_obj.agreement_registration,
+                invoice_id=self.invoice_obj.id,
+                contact=contact.dict(),
+                records=records,
+                pooled_samples=pooled_samples,
+                record_type=self.record_type,
             )
             return invoice_report.dict()
         except ValidationError:
             self.log.append("ValidationError in InvoiceReport class.")
             return None
 
-    def _discount_price(self, record, discount: int = 0) -> Optional[int]:
+    def _discount_price(self, record: Sample or Pool, discount: int = 0) -> Optional[int]:
         """Return discount price for a sample or pool."""
         priority = self.get_priority(record, for_discount_price=True)
         full_price = getattr(record.application_version, f"price_{priority}")
@@ -165,7 +160,9 @@ class InvoiceAPI:
             return None
         return split_price
 
-    def get_invoice_entity_record(self, cost_center: str, discount: int, record) -> InvoiceInfo:
+    def get_invoice_entity_record(
+        self, cost_center: str, discount: int, record: Sample or Pool
+    ) -> InvoiceInfo:
         """Return invoice information for a specific sample or pool."""
         application = self.get_application(record=record, discount=discount)
 
@@ -185,16 +182,16 @@ class InvoiceAPI:
 
         return invoice_info
 
-    def get_application(self, record, discount: int) -> Optional[Application]:
+    def get_application(
+        self, record: Sample or Pool, discount: int
+    ) -> Optional[InvoiceApplication]:
         """Return the application information."""
         try:
-            application = Application(
-                **{
-                    "tag": record.application_version.application.tag,
-                    "version": record.application_version.version,
-                    "percent_kth": record.application_version.application.percent_kth,
-                    "discounted_price": self._discount_price(record, discount),
-                }
+            application = InvoiceApplication(
+                tag=record.application_version.application.tag,
+                version=record.application_version.version,
+                percent_kth=record.application_version.application.percent_kth,
+                discounted_price=self._discount_price(record, discount),
             )
             return application
 
@@ -203,15 +200,15 @@ class InvoiceAPI:
 
             return None
 
-    def get_ticket(self, record) -> str:
+    def get_ticket(self, record: Sample or Pool) -> str:
         """Return ticket."""
         return record.ticket if self.record_type == RecordType.Pool else record.original_ticket
 
-    def get_lims_id(self, record) -> str:
+    def get_lims_id(self, record: Sample or Pool) -> str:
         """Return Lims id."""
         return None if self.record_type == RecordType.Pool else record.internal_id
 
-    def get_priority(self, record, for_discount_price: bool = False) -> str:
+    def get_priority(self, record: Sample or Pool, for_discount_price: bool = False) -> str:
         """Return the priority."""
         if self.customer_obj.internal_id == CustomerNames.cust032:
             priority = PriorityTerms.STANDARD
@@ -224,7 +221,7 @@ class InvoiceAPI:
         return priority
 
     def get_invoice_info(
-        self, record, split_discounted_price: int, cost_center: str, application: Application
+        self, record, split_discounted_price: int, cost_center: str, application: InvoiceApplication
     ) -> InvoiceInfo:
         """Return the invoice_info to be used in the invoice report."""
         order = record.order
@@ -243,20 +240,16 @@ class InvoiceAPI:
 
         try:
             invoice_info = InvoiceInfo(
-                **{
-                    "name": record.name,
-                    "lims_id": lims_id,
-                    "id": record.id,
-                    "application_tag": record.application_version.application.tag,
-                    "project": f"{order or 'NA'} ({ticket or 'NA'})",
-                    "date": record.received_at.date() if record.received_at else "",
-                    "price": split_discounted_price,
-                    "priority": priority,
-                    "price_kth": price_kth if cost_center == CostCenters.ki else None,
-                    "total_price": application.discounted_price
-                    if cost_center == CostCenters.ki
-                    else None,
-                }
+                name=record.name,
+                lims_id=lims_id,
+                id=record.id,
+                application_tag=record.application_version.application.tag,
+                project=f"{order or 'NA'} ({ticket or 'NA'})",
+                date=record.received_at.date() if record.received_at else "",
+                price=split_discounted_price,
+                priority=priority,
+                price_kth=price_kth if cost_center == CostCenters.ki else None,
+                total_price=application.discounted_price if cost_center == CostCenters.ki else None,
             )
             self.set_invoice_info(invoice_info=invoice_info)
             return invoice_info
