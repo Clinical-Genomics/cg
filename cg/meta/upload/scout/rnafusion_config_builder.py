@@ -7,7 +7,7 @@ from cg.constants.constants import PrepCategory
 from cg.constants.scout_upload import RNAFUSION_CASE_TAGS, RNAFUSION_SAMPLE_TAGS, GenomeBuild
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.models.scout.scout_load_config import RnafusionLoadConfig, ScoutRnafusionIndividual
+from cg.models.scout.scout_load_config import RnafusionLoadConfig, ScoutCancerIndividual
 from cg.store.models import Analysis, FamilySample
 
 LOG = logging.getLogger(__name__)
@@ -52,9 +52,9 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
             self.fetch_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutRnafusionIndividual:
+    def build_config_sample(self, case_sample: FamilySample) -> ScoutCancerIndividual:
         """Build a sample with rnafusion specific information."""
-        config_sample = ScoutRnafusionIndividual()
+        config_sample = ScoutCancerIndividual()
 
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
 

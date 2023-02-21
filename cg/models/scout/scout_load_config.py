@@ -24,7 +24,14 @@ class Reviewer(BaseModel):
 class ScoutIndividual(BaseModel):
     alignment_path: Optional[str] = None
     analysis_type: Literal[
-        "wgs", "wes", "mixed", "unknown", "panel", "panel-umi", "external", "wts"
+        "external",
+        "mixed",
+        "panel",
+        "panel-umi",
+        "unknown",
+        "wes",
+        "wgs",
+        "wts",
     ] = None
     capture_kit: Optional[str] = None
     confirmed_parent: Optional[bool] = None
@@ -66,14 +73,7 @@ class ScoutCancerIndividual(ScoutIndividual):
     tmb: Optional[str] = None
     msi: Optional[str] = None
     tumor_purity: float = 0
-
-
-class ScoutBalsamicIndividual(ScoutCancerIndividual):
     vcf2cytosure: Optional[str] = None
-
-
-class ScoutRnafusionIndividual(ScoutCancerIndividual):
-    pass
 
 
 class ScoutLoadConfig(BaseModel):
@@ -116,7 +116,7 @@ class BalsamicLoadConfig(ScoutLoadConfig):
     vcf_cancer_sv: Optional[str] = None
     vcf_cancer_research: Optional[str] = None
     vcf_cancer_sv_research: Optional[str] = None
-    samples: List[ScoutBalsamicIndividual] = []
+    samples: List[ScoutCancerIndividual] = []
 
     @validator("vcf_cancer")
     def check_mandatory_files(cls, vcf):
@@ -160,4 +160,4 @@ class RnafusionLoadConfig(ScoutLoadConfig):
     RNAfusion_inspector_research: Optional[str] = None
     RNAfusion_report: Optional[str] = None
     RNAfusion_report_research: Optional[str] = None
-    samples: List[ScoutRnafusionIndividual] = []
+    samples: List[ScoutCancerIndividual] = []

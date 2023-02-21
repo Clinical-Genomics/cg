@@ -68,7 +68,7 @@ class ScoutConfigBuilder:
     ) -> None:
         """Add common sample files for different analysis types."""
         sample_id: str = case_sample.sample.internal_id
-        LOG.info("Adding common files for sample %s", sample_id)
+        LOG.info(f"Adding common files for sample {sample_id}")
         self.include_sample_alignment_file(config_sample=config_sample)
         self.include_sample_files(config_sample=config_sample)
 
