@@ -755,7 +755,7 @@ class StoreHelpers:
                 pools=pool,
                 comment="just a test invoice",
                 discount=discount,
-                record_type=record_t,
+                record_type=record_type,
             )
             store.add_commit(invoice)
 
