@@ -255,7 +255,7 @@ class InvoiceAPI:
             return invoice_info
 
         except ValidationError:
-            self.log.append("Validation error in InvoiceInfo class.")
+            self.log.append("ValidationError in InvoiceInfo class.")
 
     def set_invoice_info(self, invoice_info: InvoiceInfo):
         """Set invoice_info."""
