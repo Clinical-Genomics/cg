@@ -668,7 +668,6 @@ class StoreHelpers:
         case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         sample = cls.add_sample(store=base_store, internal_id=sample_id)
         cls.add_relationship(store=base_store, sample=sample, case=case)
-
         return case
 
     @classmethod
