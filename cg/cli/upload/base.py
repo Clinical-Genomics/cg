@@ -74,8 +74,10 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
         # Upload for balsamic, balsamic-umi and balsamic-qc
         if Pipeline.BALSAMIC in case.data_analysis:
             upload_api = BalsamicUploadAPI(config=config_object)
-        if case.data_analysis == Pipeline.RNAFUSION:
+        elif case.data_analysis == Pipeline.RNAFUSION:
             upload_api = RnafusionUploadAPI(config=config_object)
+        elif case.data_analysis == Pipeline.MIP_RNA:
+            upload_api: UploadAPI = MipRNAUploadAPI(config=config_object)
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)
