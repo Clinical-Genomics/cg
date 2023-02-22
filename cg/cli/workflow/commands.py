@@ -165,7 +165,6 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     """Remove workflow run directory."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
     analysis_path: Union[List[Path], Path] = analysis_api.get_case_path(case_id)
