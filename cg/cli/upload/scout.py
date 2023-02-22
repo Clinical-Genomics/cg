@@ -4,22 +4,21 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
+from cg.cli.upload.utils import suggest_cases_to_upload
+from cg.exc import CgDataError, ScoutUploadError
 from cg.io.controller import WriteStream
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Family
-from housekeeper.store import models as hk_models
-
-from .utils import suggest_cases_to_upload
-from ...exc import CgDataError, ScoutUploadError
 
 LOG = logging.getLogger(__name__)
 
@@ -76,12 +75,9 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         LOG.warning("%s", error)
         raise click.Abort from error
     LOG.info("Found load config %s", scout_load_config)
-    if scout_load_config.track == "cancer":
-        root_dir: Path = Path(context.balsamic.root)
-    else:
-        root_dir: Path = Path(context.mip_rd_dna.root)
+    root_dir: str = context.meta_apis["upload_api"].analysis_api.root
     LOG.info("Set root dir to %s", root_dir)
-    file_path: Path = root_dir / case_id / "scout_load.yaml"
+    file_path: Path = Path(root_dir, case_id, "scout_load.yaml")
 
     if print_console:
         click.echo(

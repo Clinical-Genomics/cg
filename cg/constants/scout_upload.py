@@ -1,5 +1,23 @@
 from cg.utils.enums import StrEnum
 
+from typing import Dict, Set
+
+
+class GenomeBuild(StrEnum):
+    hg19: str = "37"
+    hg38: str = "38"
+
+
+class ScoutCustomCaseReportTags(StrEnum):
+    DELIVERY: str = "delivery_report"
+    CNV: str = "cnv_report"
+    COV_QC: str = "coverage_qc_report"
+    MULTIQC: str = "multiqc"
+    MULTIQC_RNA: str = "multiqc_rna"
+    GENE_FUSION: str = "gene_fusion_report"
+    GENE_FUSION_RESEARCH: str = "gene_fusion_report_research"
+
+
 MIP_CASE_TAGS = dict(
     snv_vcf={"vcf-snv-clinical"},
     snv_research_vcf={"vcf-snv-research"},
@@ -30,6 +48,16 @@ BALSAMIC_UMI_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
 )
 
+RNAFUSION_CASE_TAGS: Dict[str, Set[str]] = dict(
+    multiqc_rna={"multiqc-html", "rna"},
+    gene_fusion={"arriba-visualisation", "clinical"},
+    gene_fusion_research={"arriba-visualisation", "research"},
+    RNAfusion_report={"fusionreport", "clinical"},
+    RNAfusion_report_research={"fusionreport", "research"},
+    RNAfusion_inspector={"fusioninspector-html", "clinical"},
+    RNAfusion_inspector_research={"fusioninspector-html", "research"},
+)
+
 MIP_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -57,11 +85,5 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
 )
 
 
-class ScoutCustomCaseReportTags(StrEnum):
-    DELIVERY: str = "delivery_report"
-    CNV: str = "cnv_report"
-    COV_QC: str = "coverage_qc_report"
-    MULTIQC: str = "multiqc"
-    MULTIQC_RNA: str = "multiqc_rna"
-    GENE_FUSION: str = "gene_fusion_report"
-    GENE_FUSION_RESEARCH: str = "gene_fusion_report_research"
+RNAFUSION_SAMPLE_TAGS = dict()
+
