@@ -592,31 +592,6 @@ def test_add_dna_cases_to_dna_sample(
     assert dna_case.internal_id in case_names
 
 
-def test_add_dna_cases_to_dna_sample(
-    dna_case_id: str,
-    dna_sample_son_id: str,
-    rna_sample_son_id: str,
-    rna_store: Store,
-    upload_scout_api: UploadScoutAPI,
-):
-    """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
-
-    # GIVEN an RNA sample, a DNA sample, and a DNA case
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
-    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
-    dna_case: models.Family = rna_store.families(enquiry=dna_case_id).first()
-
-    # WHEN adding the RNA sample rna_dna_case_map
-    rna_dna_case_map: dict = {}
-    upload_scout_api._map_rna_sample(
-        rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
-    )
-
-    # THEN the rna_dna_case_map should contain the DNA_case name associated with the DNA sample
-    case_names: list = rna_dna_case_map[rna_sample.internal_id][dna_sample.name]
-    assert dna_case.internal_id in case_names
-
-
 def test_map_dna_cases_to_dna_sample(
     rna_store: Store,
     upload_scout_api: UploadScoutAPI,
