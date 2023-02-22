@@ -3,15 +3,15 @@ import logging
 from pathlib import Path
 
 from cg.constants.constants import SampleType
-from cg.models.scout.scout_load_config import ScoutBalsamicIndividual
+from cg.models.scout.scout_load_config import ScoutCancerIndividual
+
+from housekeeper.store.models import Version
 
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.hk_tags import CaseTags
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.store.models import Analysis
-
-from housekeeper.store.models import Version
-
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
@@ -51,6 +51,23 @@ def test_balsamic_config_builder(
     # WHEN instantiating
     file_handler = BalsamicConfigBuilder(
         hk_version_obj=hk_version, analysis_obj=balsamic_analysis_obj, lims_api=lims_api
+    )
+
+    # THEN assert that the correct case tags was used
+    assert isinstance(file_handler.case_tags, CaseTags)
+
+
+def test_rnafusion_config_builder(
+    hk_version: Version,
+    rnafusion_analysis_obj: Analysis,
+    lims_api: MockLimsAPI,
+):
+    """Test RNAfusion config builder class."""
+    # GIVEN a rnafusion file handler
+
+    # WHEN instantiating
+    file_handler = RnafusionConfigBuilder(
+        hk_version_obj=hk_version, analysis_obj=rnafusion_analysis_obj, lims_api=lims_api
     )
 
     # THEN assert that the correct case tags was used
@@ -226,7 +243,7 @@ def test_get_sample_id(
     """Test get sample id given a Scout individual when no alignment path is provided."""
 
     # GIVEN a scout individual
-    config_sample: ScoutBalsamicIndividual = ScoutBalsamicIndividual(**scout_individual)
+    config_sample: ScoutCancerIndividual = ScoutCancerIndividual(**scout_individual)
     config_sample.alignment_path = None
 
     # WHEN getting the sample ID
@@ -242,7 +259,7 @@ def test_get_sample_id_no_alignment_path(
     """Test get sample id given a Scout individual with a tumor alignment path."""
 
     # GIVEN a scout individual with a tumor sample alignment bam
-    config_sample: ScoutBalsamicIndividual = ScoutBalsamicIndividual(**scout_individual)
+    config_sample: ScoutCancerIndividual = ScoutCancerIndividual(**scout_individual)
     config_sample.alignment_path = Path("path", "to", "tumor_sample.bam").as_posix()
 
     # WHEN getting the sample ID
