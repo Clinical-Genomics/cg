@@ -1,3 +1,13 @@
+from typing import Dict, Set
+
+from cgmodels.cg.constants import StrEnum
+
+
+class GenomeBuild(StrEnum):
+    hg19: str = "37"
+    hg38: str = "38"
+
+
 MIP_CASE_TAGS = dict(
     snv_vcf={"vcf-snv-clinical"},
     snv_research_vcf={"vcf-snv-research"},
@@ -28,6 +38,16 @@ BALSAMIC_UMI_CASE_TAGS = dict(
     delivery_report={"delivery-report"},
 )
 
+RNAFUSION_CASE_TAGS: Dict[str, Set[str]] = dict(
+    multiqc_rna={"multiqc-html", "rna"},
+    gene_fusion={"arriba-visualisation", "clinical"},
+    gene_fusion_research={"arriba-visualisation", "research"},
+    RNAfusion_report={"fusionreport", "clinical"},
+    RNAfusion_report_research={"fusionreport", "research"},
+    RNAfusion_inspector={"fusioninspector-html", "clinical"},
+    RNAfusion_inspector_research={"fusioninspector-html", "research"},
+)
+
 MIP_SAMPLE_TAGS = dict(
     bam_file={"bam"},
     alignment_file={"cram"},
@@ -53,3 +73,5 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
     bam_file={"umi-bam"},
     alignment_file={"umi-cram"},
 )
+
+RNAFUSION_SAMPLE_TAGS = dict()
