@@ -662,15 +662,6 @@ class StoreHelpers:
         return cases
 
     @classmethod
-    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> models.Family:
-        """Helper function to add a case associated with a sample with the given ids."""
-
-        case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
-        sample = cls.add_sample(store=base_store, internal_id=sample_id)
-        cls.add_relationship(store=base_store, sample=sample, case=case)
-        return case
-
-    @classmethod
     def ensure_pool(
         cls,
         store: Store,
@@ -764,8 +755,17 @@ class StoreHelpers:
                 pools=pool,
                 comment="just a test invoice",
                 discount=discount,
-                record_type=record_type,
+                record_type=record_t,
             )
             store.add_commit(invoice)
 
         return invoice
+
+    @classmethod
+    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> models.Family:
+        """Helper function to add a case associated with a sample with the given ids."""
+
+        case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+        sample = cls.add_sample(store=base_store, internal_id=sample_id)
+        cls.add_relationship(store=base_store, sample=sample, case=case)
+        return case
