@@ -223,7 +223,6 @@ def balsamic_past_run_dirs(
     """Clean up of "old" Balsamic case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -238,7 +237,6 @@ def balsamic_qc_past_run_dirs(
     """Clean up of "old" Balsamic qc case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -253,7 +251,6 @@ def balsamic_umi_past_run_dirs(
     """Clean up of "old" Balsamic umi case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -268,7 +265,6 @@ def balsamic_pon_past_run_dirs(
     """Clean up of "old" Balsamic pon case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicPonAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -283,7 +279,6 @@ def fluffy_past_run_dirs(
     """Clean up of "old" Fluffy case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -298,7 +293,6 @@ def mip_dna_past_run_dirs(
     """Clean up of "old" MIP_DNA case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -313,7 +307,6 @@ def mip_rna_past_run_dirs(
     """Clean up of "old" MIP_RNA case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipRNAAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -328,7 +321,6 @@ def mutant_past_run_dirs(
     """Clean up of "old" MUTANT case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -343,7 +335,6 @@ def rnafusion_past_run_dirs(
     """Clean up of "old" RNAFUSION case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -358,5 +349,4 @@ def microsalt_past_run_dirs(
     """Clean up of "old" microSALT case run dirs."""
 
     context.obj.meta_apis["analysis_api"]: MicrosaltAnalysisAPI = MicrosaltAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
