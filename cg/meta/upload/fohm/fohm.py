@@ -253,8 +253,8 @@ class FOHMUploadAPI:
                 sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
                 LOG.info(f"Finished sending {file}")
                 file.unlink()  # Delete file
-            except:
-                LOG.error(f"Failed sending {file}")
+            except Exception as ex:
+                LOG.error(f"Failed sending {file} with error: {ex}")
 
         sftp.close()
         transport.close()
