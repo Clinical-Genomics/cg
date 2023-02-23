@@ -25,7 +25,7 @@ def get_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(
         or_(
             Family.action.is_(None),
-            Family.action.is_(CaseActions.HOLD),
+            Family.action == CaseActions.HOLD,
         )
     )
 
