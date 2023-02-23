@@ -16,6 +16,9 @@ from cg.exc import FlowcellsNeededError, DecompressionNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
@@ -220,6 +223,51 @@ def balsamic_past_run_dirs(
     """Clean up of "old" Balsamic case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("balsamic-qc-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_qc_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic qc case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("balsamic-umi-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_umi_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic umi case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(context.obj)
+
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("balsamic-pon-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_pon_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic pon case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicPonAnalysisAPI(context.obj)
 
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
