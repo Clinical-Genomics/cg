@@ -101,6 +101,7 @@ def preprocess_all(
     fohm_api.send_mail_reports()
     for case_id in upload_cases:
         fohm_api.update_uploaded_at(case_id=case_id)
+    fohm_api.delete_empty_directories()
     LOG.info("Upload to FOHM completed")
 
 

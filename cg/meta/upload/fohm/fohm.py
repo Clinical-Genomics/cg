@@ -2,6 +2,7 @@ import logging
 import getpass
 import paramiko
 import shutil
+import os
 from pathlib import Path
 from typing import List, Optional
 import datetime as dt
@@ -227,16 +228,22 @@ class FOHMUploadAPI:
             )
             if self._dry_run:
                 return
-            send_mail(
-                EmailInfo(
-                    receiver_email=self.config.fohm.email_recipient,
-                    sender_email=self.config.fohm.email_sender,
-                    smtp_server=self.config.fohm.email_host,
-                    subject=file.name,
-                    message=" ",
-                    file=file,
+
+            try:
+                send_mail(
+                    EmailInfo(
+                        receiver_email=self.config.fohm.email_recipient,
+                        sender_email=self.config.fohm.email_sender,
+                        smtp_server=self.config.fohm.email_host,
+                        subject=file.name,
+                        message=" ",
+                        file=file,
+                    )
                 )
-            )
+                file.unlink()  # Delete report
+
+            except Exception as ex:
+                LOG.error(f"Failed sending email report {file} with error: {ex}")
 
     def sync_files_sftp(self) -> None:
         self.check_username()
@@ -252,7 +259,7 @@ class FOHMUploadAPI:
             try:
                 sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
                 LOG.info(f"Finished sending {file}")
-                file.unlink()  # Delete file
+                file.unlink()  # Delete raw data file
             except Exception as ex:
                 LOG.error(f"Failed sending {file} with error: {ex}")
 
@@ -274,3 +281,12 @@ class FOHMUploadAPI:
         case_obj: models.Family = self.status_db.family(case_id)
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.commit()
+
+    def delete_empty_directories(self):
+        """Delete any empty directories in the fohm directory."""
+        fohm_root = self._daily_bundle_path.parent.absolute().as_posix()
+        directories = list(os.walk(fohm_root))
+
+        for path, _, _ in directories[::-1]:
+            if os.listdir(path) == []:
+                os.rmdir(path)
