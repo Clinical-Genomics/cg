@@ -3,6 +3,8 @@ import logging
 from datetime import datetime
 from typing import List, Optional
 
+from housekeeper.store import models as hk_models
+
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
 from cg.constants.pedigree import Pedigree
@@ -10,8 +12,6 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
-from housekeeper.store import models as hk_models
-
 from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
