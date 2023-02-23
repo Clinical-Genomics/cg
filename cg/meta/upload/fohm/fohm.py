@@ -248,14 +248,12 @@ class FOHMUploadAPI:
             LOG.info(f"Sending {file} via SFTP, dry-run {self.dry_run}")
             if self._dry_run:
                 continue
-            upload_succeeded: bool = sftp.put(
-                file.as_posix(), f"/till-fohm/{file.name}", confirm=True
-            )
 
-            if upload_succeeded:
+            try:
+                sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
                 LOG.info(f"Finished sending {file}")
                 file.unlink()  # Delete file
-            else:
+            except:
                 LOG.error(f"Failed sending {file}")
 
         sftp.close()
