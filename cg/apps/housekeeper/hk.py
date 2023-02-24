@@ -355,6 +355,8 @@ class HousekeeperAPI:
     def is_fastq_or_spring_in_all_bundles(self, bundle_names: List[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are included for the given bundles."""
         sequencing_files_in_hk: Dict[str, bool] = {}
+        if not bundle_names:
+            return False
         for bundle_name in bundle_names:
             sequencing_files_in_hk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
@@ -373,6 +375,8 @@ class HousekeeperAPI:
     def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: List[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are on disk for the given bundles."""
         sequencing_files_on_disk: Dict[str, bool] = {}
+        if not bundle_names:
+            return False
         for bundle_name in bundle_names:
             sequencing_files_on_disk[bundle_name] = False
             for tag in [SequencingFileTag.FASTQ, SequencingFileTag.SPRING_METADATA]:
