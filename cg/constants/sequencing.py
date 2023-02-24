@@ -49,3 +49,8 @@ class Variants(StrEnum):
 
     SNV: str = "snv"
     SV: str = "sv"
+
+
+class RecordType(StrEnum):
+    Sample: str = "Sample"
+    Pool: str = "Pool"
