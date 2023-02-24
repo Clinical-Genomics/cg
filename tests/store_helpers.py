@@ -174,7 +174,7 @@ class StoreHelpers:
         scout_access: bool = False,
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests."""
-        collaboration = StoreHelpers.ensure_collaboration(store)
+        collaboration: models.Collaboration = StoreHelpers.ensure_collaboration(store)
         customer = store.customer(customer_id)
 
         if not customer:
