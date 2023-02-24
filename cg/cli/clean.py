@@ -351,7 +351,6 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
             LOG.warning(
                 f"Cannot find sample bundle in Housekeeper for sample on flow cell: {flow_cell.name}"
             )
-            LOG.error(error)
         new_status: str = (
             FlowCellStatus.ON_DISK
             if are_sequencing_files_in_hk and are_sequencing_files_on_disk
