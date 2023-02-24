@@ -34,7 +34,7 @@ from cg.constants.sequencing import Sequencers
 from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS, ScoutTag
 from cg.models.demultiplex.flow_cell import FlowCell as demultplex_FlowCell
 from cg.utils.date import get_timedelta_from_date, get_date_days_ago
-from cg.exc import FlowCellError
+from cg.exc import FlowCellError, HousekeeperBundleVersionMissingError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
@@ -336,14 +336,20 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
 
     for flow_cell in flow_cells_in_statusdb:
         sample_bundle_names: List[str] = [sample.internal_id for sample in flow_cell.samples]
-        are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
-            bundle_names=sample_bundle_names
-        )
-        are_sequencing_files_on_disk: bool = (
-            housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
+        try:
+            are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
                 bundle_names=sample_bundle_names
             )
-        )
+            are_sequencing_files_on_disk: bool = (
+                housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
+                    bundle_names=sample_bundle_names
+                )
+            )
+        except HousekeeperBundleVersionMissingError as error:
+            LOG.warning(
+                f"Cannot find sample bundle in Housekeeper for sample on flow cell: {flow_cell.name}"
+            )
+            LOG.error(error)
         new_status: str = (
             FlowCellStatus.ON_DISK
             if are_sequencing_files_in_hk and are_sequencing_files_on_disk
