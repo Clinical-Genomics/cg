@@ -148,9 +148,9 @@ class TrailblazerAPI:
         analysis_type: str,
         config_path: str,
         out_dir: str,
-        slurm_quality_of_service: str,
+        slurm_quality_of_service: SlurmQos,
         email: str = None,
-        data_analysis: str = None,
+        data_analysis: Pipeline = None,
         ticket: str = None,
     ) -> TrailblazerAnalysis:
         request_body = {
