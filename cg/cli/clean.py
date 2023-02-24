@@ -336,6 +336,8 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
 
     for flow_cell in flow_cells_in_statusdb:
         sample_bundle_names: List[str] = [sample.internal_id for sample in flow_cell.samples]
+        are_sequencing_files_in_hk: bool = False
+        are_sequencing_files_on_disk: bool = False
         try:
             are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
                 bundle_names=sample_bundle_names
