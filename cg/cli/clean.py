@@ -17,6 +17,9 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
+    balsamic_qc_past_run_dirs,
+    balsamic_umi_past_run_dirs,
+    balsamic_pon_past_run_dirs,
     fluffy_past_run_dirs,
     mip_dna_past_run_dirs,
     mip_rna_past_run_dirs,
@@ -61,6 +64,9 @@ def clean():
 
 for sub_cmd in [
     balsamic_past_run_dirs,
+    balsamic_qc_past_run_dirs,
+    balsamic_umi_past_run_dirs,
+    balsamic_pon_past_run_dirs,
     fluffy_past_run_dirs,
     mip_dna_past_run_dirs,
     mip_rna_past_run_dirs,
