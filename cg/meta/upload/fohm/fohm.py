@@ -139,8 +139,8 @@ class FOHMUploadAPI:
         self._cases_to_aggregate = cases
 
     def create_daily_delivery_folders(self) -> None:
-        LOG.info(f"Creating direcroty: {self.daily_rawdata_path}")
-        LOG.info(f"Creating direcroty: {self.daily_report_path}")
+        LOG.info(f"Creating directory: {self.daily_rawdata_path}")
+        LOG.info(f"Creating directory: {self.daily_report_path}")
         if self._dry_run:
             return
         self.daily_rawdata_path.mkdir(parents=True, exist_ok=True)
