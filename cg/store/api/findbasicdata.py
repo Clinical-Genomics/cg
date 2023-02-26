@@ -58,9 +58,11 @@ class FindBasicDataHandler(BaseHandler):
         """Returns all beds."""
         return self._get_bed_query()
 
-    def get_bed_by_name(self) -> Bed:
+    def get_bed_by_name(self, bed_name: str) -> Bed:
         """Return bed by name."""
-        return apply_bed_filter(beds=self._get_bed_query(), functions=["get_beds_by_name"])
+        return apply_bed_filter(
+            beds=self._get_bed_query(), bed_name=bed_name, functions=["get_beds_by_name"]
+        ).first()
 
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""

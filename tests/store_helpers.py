@@ -12,7 +12,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, Bed, BedVersion
 
 LOG = logging.getLogger(__name__)
 
@@ -146,16 +146,18 @@ class StoreHelpers:
         return application
 
     @staticmethod
-    def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> models.ApplicationVersion:
+    def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
         """Utility function to return existing or create bed version for tests."""
-        bed = store.bed(name=bed_name)
+        bed: Bed = store.get_bed_by_name(bed_name=bed_name)
         if not bed:
-            bed = store.add_bed(name=bed_name)
+            bed: Bed = store.add_bed(name=bed_name)
             store.add_commit(bed)
 
-        version = store.latest_bed_version(bed_name)
+        version: BedVersion = store.latest_bed_version(name=bed_name)
         if not version:
-            version = store.add_bed_version(bed, 1, "dummy_filename", shortname=bed_name)
+            version: BedVersion = store.add_bed_version(
+                bed=bed, version=1, filename="dummy_filename", shortname=bed_name
+            )
             store.add_commit(version)
         return version
 

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Query
 
@@ -23,6 +23,7 @@ def order_beds_by_name(beds: Query, **kwargs) -> Query:
 def apply_bed_filter(
     beds: Query,
     functions: List[str],
+    bed_name: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     filter_map = {
@@ -33,5 +34,6 @@ def apply_bed_filter(
     for function in functions:
         beds: Query = filter_map[function](
             beds=beds,
+            bed_name=bed_name,
         )
     return beds
