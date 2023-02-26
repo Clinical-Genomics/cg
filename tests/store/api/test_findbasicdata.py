@@ -7,7 +7,7 @@ from cg.store.models import Bed, BedVersion
 
 
 def test_get_bed_query(base_store: Store):
-    """Test function to return the bed query from the database."""
+    """Test function to return the bed query."""
 
     # GIVEN a store with bed records
 
@@ -19,7 +19,7 @@ def test_get_bed_query(base_store: Store):
 
 
 def test_get_beds(base_store: Store):
-    """Test returning bed records from the database."""
+    """Test returning bed records query."""
 
     # GIVEN a store with beds
 

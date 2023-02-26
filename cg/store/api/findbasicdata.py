@@ -50,7 +50,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return bed query."""
         return self.Bed.query
 
-    def get_beds(self) -> Bed:
+    def get_beds(self) -> Query:
         """Returns all beds."""
         return self._get_bed_query()
 

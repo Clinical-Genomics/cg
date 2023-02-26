@@ -27,7 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer
+from cg.store.models import Customer, BedVersion, Bed
 
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -1205,9 +1205,9 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
     ]
     store.add_commit(versions)
 
-    beds = [store.add_bed(name=bed_name)]
+    beds: list[Bed] = [store.add_bed(name=bed_name)]
     store.add_commit(beds)
-    bed_versions = [
+    bed_versions: List[BedVersion] = [
         store.add_bed_version(bed=bed, version=1, filename=bed_name + FileExtensions.BED)
         for bed in beds
     ]
