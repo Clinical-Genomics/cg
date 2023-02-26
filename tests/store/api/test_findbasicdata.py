@@ -1,7 +1,9 @@
+from typing import Optional
+
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed
+from cg.store.models import Bed, BedVersion
 
 
 def test_get_bed_query(base_store: Store):
@@ -66,7 +68,34 @@ def test_get_bed_by_name(base_store: Store, bed_name: str):
     # GIVEN a store with beds
 
     # WHEN fetching beds
-    bed: Bed = base_store.get_bed_by_name(bed_name=bed_name)
+    bed: Optional[Bed] = base_store.get_bed_by_name(bed_name=bed_name)
+
+    # THEN return a bed
+    assert bed
 
     # THEN return a bed with the supplied bed name
     assert bed.name == bed_name
+
+
+def test_get_bed_by_name_when_no_match(base_store: Store):
+    """Test returning a bed record by name from the database when no match."""
+
+    # GIVEN a store with beds
+
+    # WHEN fetching beds
+    bed: Optional[Bed] = base_store.get_bed_by_name(bed_name="does_not_exist")
+
+    # THEN do not return a bed
+    assert not bed
+
+
+def test_get_latest_bed_version(base_store: Store, bed_name: str):
+    """Test returning a bed version by bed name from the database."""
+
+    # GIVEN a store with beds
+
+    # WHEN fetching beds
+    bed_version: BedVersion = base_store.get_latest_bed_version(bed_name=bed_name)
+
+    # THEN return a bed version with the supplied bed name
+    assert bed_version.version == 1

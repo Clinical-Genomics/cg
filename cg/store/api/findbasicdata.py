@@ -54,7 +54,7 @@ class FindBasicDataHandler(BaseHandler):
         """Returns all beds."""
         return self._get_bed_query()
 
-    def get_bed_by_name(self, bed_name: str) -> Bed:
+    def get_bed_by_name(self, bed_name: str) -> Optional[Bed]:
         """Return bed by name."""
         return apply_bed_filter(
             beds=self._get_bed_query(), bed_name=bed_name, functions=["get_beds_by_name"]
@@ -65,10 +65,10 @@ class FindBasicDataHandler(BaseHandler):
         bed_filter_functions: List[str] = ["get_not_archived_beds", "order_beds_by_name"]
         return apply_bed_filter(beds=self._get_bed_query(), functions=bed_filter_functions)
 
-    def latest_bed_version(self, name: str) -> BedVersion:
-        """Fetch the latest bed version for a bed name."""
-        bed_obj = self.Bed.query.filter_by(name=name).first()
-        return bed_obj.versions[-1] if bed_obj and bed_obj.versions else None
+    def get_latest_bed_version(self, bed_name: str) -> Optional[BedVersion]:
+        """Return the latest bed version for a bed by supplied name."""
+        bed: Optional[Bed] = self.get_bed_by_name(bed_name=bed_name)
+        return bed.versions[-1] if bed and bed.versions else None
 
     def customer(self, internal_id: str) -> Customer:
         """Fetch a customer by internal id from the store."""
