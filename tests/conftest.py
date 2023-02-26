@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
 from housekeeper.store.models import File
@@ -29,16 +29,16 @@ from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
 from cg.store.models import Customer
 
-from .mocks.crunchy import MockCrunchyAPI
-from .mocks.hk_mock import MockHousekeeperAPI
-from .mocks.limsmock import MockLimsAPI
-from .mocks.madeline import MockMadelineAPI
-from .mocks.osticket import MockOsTicket
-from .mocks.process_mock import ProcessMock
-from .mocks.scout import MockScoutAPI
-from .mocks.tb_mock import MockTB
-from .small_helpers import SmallHelpers
-from .store_helpers import StoreHelpers
+from tests.mocks.crunchy import MockCrunchyAPI
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.osticket import MockOsTicket
+from tests.mocks.process_mock import ProcessMock
+from tests.mocks.scout import MockScoutAPI
+from tests.mocks.tb_mock import MockTB
+from tests.small_helpers import SmallHelpers
+from tests.store_helpers import StoreHelpers
 
 from housekeeper.store.models import Version
 
@@ -1397,13 +1397,13 @@ def fixture_microsalt_dir(tmpdir_factory) -> Path:
 @pytest.fixture()
 def current_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
-    return Path("/home/ENCRYPT/")
+    return Path("home", "ENCRYPT")
 
 
 @pytest.fixture()
 def legacy_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
-    return Path("/home/TO_PDC/")
+    return Path("home", "TO_PDC")
 
 
 @pytest.fixture(name="cg_uri")
