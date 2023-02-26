@@ -14,7 +14,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Pipeline, FileExtensions
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -1050,8 +1050,14 @@ def fixture_apptag_rna() -> str:
     return "RNAPOAR025"
 
 
+@pytest.fixture(name="bed_name")
+def fixture_bed_name() -> str:
+    """Return a bed model name attribute."""
+    return "Bed"
+
+
 @pytest.fixture(name="base_store")
-def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store:
+def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: Store) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration("all_customers", "all customers")
 
@@ -1199,9 +1205,12 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
     ]
     store.add_commit(versions)
 
-    beds = [store.add_bed("Bed")]
+    beds = [store.add_bed(name=bed_name)]
     store.add_commit(beds)
-    bed_versions = [store.add_bed_version(bed, 1, "Bed.bed") for bed in beds]
+    bed_versions = [
+        store.add_bed_version(bed=bed, version=1, filename=bed_name + FileExtensions.BED)
+        for bed in beds
+    ]
     store.add_commit(bed_versions)
 
     organism = store.add_organism("C. jejuni", "C. jejuni")

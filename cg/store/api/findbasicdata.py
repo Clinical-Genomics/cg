@@ -58,18 +58,14 @@ class FindBasicDataHandler(BaseHandler):
         """Returns all beds."""
         return self._get_bed_query()
 
+    def get_bed_by_name(self) -> Bed:
+        """Return bed by name."""
+        return apply_bed_filter(beds=self._get_bed_query(), functions=["get_beds_by_name"])
+
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
         bed_filter_functions: List[str] = ["get_not_archived_beds", "order_beds_by_name"]
         return apply_bed_filter(beds=self._get_bed_query(), functions=bed_filter_functions)
-
-    def beds(self, hide_archived: bool = False):
-        """Returns all beds."""
-        bed_q = self._get_bed_query()
-        if hide_archived:
-            bed_q = bed_q.filter(self.Bed.is_archived.is_(False))
-
-        return bed_q.order_by(Bed.name)
 
     def latest_bed_version(self, name: str) -> BedVersion:
         """Fetch the latest bed version for a bed name."""
