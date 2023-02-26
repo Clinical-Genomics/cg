@@ -3,6 +3,7 @@ import datetime as dt
 from typing import List, Optional
 
 from sqlalchemy import desc
+from sqlalchemy.orm import Query
 
 from cg.store.models import (
     Application,
@@ -17,6 +18,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
+from cg.store.status_bed_filters import apply_bed_filter
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -48,9 +50,21 @@ class FindBasicDataHandler(BaseHandler):
         """Find a bed version by shortname."""
         return self.BedVersion.query.filter_by(shortname=shortname).first()
 
+    def _get_bed_query(self) -> Query:
+        """Return bed query."""
+        return self.Bed.query
+
+    def get_beds(self) -> Bed:
+        """Returns all beds."""
+        return self._get_bed_query()
+
+    def get_active_beds(self) -> Query:
+        """Get all beds which are not archived."""
+        return apply_bed_filter(beds=self._get_bed_query(), functions=["get_not_archived_beds"])
+
     def beds(self, hide_archived: bool = False):
         """Returns all beds."""
-        bed_q = self.Bed.query
+        bed_q = self._get_bed_query()
         if hide_archived:
             bed_q = bed_q.filter(self.Bed.is_archived.is_(False))
 

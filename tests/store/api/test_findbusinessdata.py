@@ -2,8 +2,18 @@
 from datetime import datetime
 from typing import List
 
+from sqlalchemy.orm import Query
+
 from cg.store import Store
-from cg.store.models import Application, ApplicationVersion, Flowcell, Sample, FamilySample, Family
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Flowcell,
+    Sample,
+    FamilySample,
+    Family,
+    Bed,
+)
 from cg.constants.indexes import ListIndexes
 from cg.store.models import Sample, Flowcell, ApplicationVersion, Application
 from tests.store_helpers import StoreHelpers
@@ -24,6 +34,18 @@ def test_find_analysis_via_date(
     assert db_analysis == analysis
 
 
+def test_get_bed_query(base_store: Store):
+    """Test function to return the bed query from the database."""
+
+    # GIVEN a store with bed records
+
+    # WHEN getting the query for the flow cells
+    bed_query: Query = base_store._get_bed_query()
+
+    # THEN a query should be returned
+    assert isinstance(bed_query, Query)
+
+
 def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     """Test function to return the latest flow cell from the database."""
 
@@ -34,6 +56,34 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id
+
+
+def test_get_beds(base_store: Store):
+    """Test returning bed records from the database."""
+
+    # GIVEN a store with beds
+
+    # WHEN fetching beds
+    beds: Query = base_store.get_beds()
+
+    # THEN beds should have be returned
+    assert beds
+
+
+def test_get_active_beds(base_store: Store):
+    """Test returning not archived bed records from the database."""
+
+    # GIVEN a store with beds
+
+    # WHEN fetching beds
+    beds: Query = base_store.get_beds()
+
+    # THEN beds should have be returned
+    assert beds
+
+    # THEN the bed records should not be archived
+    for bed in beds:
+        assert bed.is_archived is False
 
 
 def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
