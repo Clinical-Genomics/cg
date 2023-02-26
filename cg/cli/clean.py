@@ -359,7 +359,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
 
         if flow_cell.status != new_status:
             LOG.info(
-                f"Setting status of flow cell {flow_cell.name} from: { flow_cell.status} to {new_status}"
+                f"Setting status of flow cell {flow_cell.name} from: {flow_cell.status} to {new_status}"
             )
             if dry_run:
                 continue
