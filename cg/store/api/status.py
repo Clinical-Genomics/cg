@@ -21,7 +21,7 @@ from cg.store.models import (
 from cg.store.status_analysis_filters import apply_analysis_filter
 from cg.store.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
-from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
 from cg.store.status_sample_filters import apply_sample_filter
 
 
@@ -243,7 +243,7 @@ class StatusHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            functions=["]get_flow_cells_by_case"],
+            functions=[FlowCellFilters.get_flow_cells_by_case],
             case=case,
         )
 
