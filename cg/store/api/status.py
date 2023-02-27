@@ -750,36 +750,6 @@ class StatusHandler(BaseHandler):
         """Fetch all samples that are not down sampled."""
         return self.Sample.query.filter(Sample.downsampled_to.is_(None))
 
-    def get_microbial_sample_records(self):
-        """Fetch microbial samples that have been delivered but not invoiced"""
-        analysis_filter_functions: List[str] = [
-            "get_sample_by_analysis",
-            "get_sample_delivered",
-            "get_sample_not_invoice_id",
-        ]
-        for filter_function in analysis_filter_functions:
-            records: Query = apply_sample_filter(
-                samples=self._get_sample_query(),
-                function=filter_function,
-                data_analysis=str(Pipeline.MICROSALT),
-            )
-        return records
-
-    def microbial_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
-        """Fetch microbial samples that should be invoiced.
-
-        Returns microbial samples that have been delivered but not invoiced.
-        """
-        records = self.Sample.query.filter(
-            str(Pipeline.MICROSALT) in self.Family.data_analysis,  # getsamplebyabalysis
-            Sample.delivered_at is not None,
-            Sample.invoice_id.is_(None),
-        )
-        customers_to_invoice = list({case_obj.customer for case_obj in records.all()})
-        if customer:
-            records = records.join(Family).filter(Family.customer_id == customer.id)
-        return records, customers_to_invoice
-
     def samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
         """Fetch samples that should be invoiced.
 
