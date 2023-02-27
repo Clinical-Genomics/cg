@@ -4,7 +4,7 @@ import json
 import tempfile
 from functools import wraps
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Any
 
 import requests
 from sqlalchemy.exc import IntegrityError
@@ -27,6 +27,8 @@ from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
+
+from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -291,11 +293,14 @@ def pool(pool_id):
 
 
 @BLUEPRINT.route("/flowcells")
-def flowcells():
-    """Fetch flowcells."""
-    query = db.flowcells(status=request.args.get("status"), enquiry=request.args.get("enquiry"))
-    data = [record.to_dict() for record in query.limit(50)]
-    return jsonify(flowcells=data, total=query.count())
+def flowcells() -> Any:
+    """Fetch flow cells."""
+    flow_cells: List[Flowcell] = db.get_flow_cell_by_enquiry_and_status(
+        flow_cell_statuses=[request.args.get("status")],
+        flow_cell_id_enquiry=request.args.get("enquiry"),
+    )
+    parsed_flow_cells: List[dict] = [flow_cell.to_dict() for flow_cell in flow_cells.limit(50)]
+    return jsonify(flowcells=parsed_flow_cells, total=flow_cells.count())
 
 
 @BLUEPRINT.route("/flowcells/<flowcell_id>")

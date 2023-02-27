@@ -134,7 +134,7 @@ class TransferFlowCell:
                 sequencer_name=cgstats_flow_cell.sequencer,
                 sequencer_type=cgstats_flow_cell.sequencer_type,
                 date=cgstats_flow_cell.date,
-                flow_cell_status=FlowCellStatus.ONDISK,
+                flow_cell_status=FlowCellStatus.ON_DISK,
             )
         return flow_cell
 

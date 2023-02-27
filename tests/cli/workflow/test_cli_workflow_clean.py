@@ -21,12 +21,13 @@ def test_cli_workflow_clean_balsamic(
     base_context: CGConfig,
     before_date: str,
 ):
+    """Test clean Balsamic workflow."""
     # GIVEN a before string
 
-    # WHEN running command in dry-run
+    # WHEN running command
     result = cli_runner.invoke(balsamic_past_run_dirs, [before_date], obj=base_context)
 
-    # THEN command should terminate successfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
@@ -77,12 +78,13 @@ def test_cli_workflow_clean_fluffy(
     base_context: CGConfig,
     before_date: str,
 ):
+    """Test clean Fluffy workflow."""
     # GIVEN a before string
 
-    # WHEN running command in dry-run
+    # WHEN running command
     result = cli_runner.invoke(fluffy_past_run_dirs, [before_date], obj=base_context)
 
-    # THEN command should terminate successfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
@@ -91,12 +93,13 @@ def test_cli_workflow_clean_mip_dna(
     base_context: CGConfig,
     before_date: str,
 ):
+    """Test clean MIP DNA workflow."""
     # GIVEN a before string
 
-    # WHEN running command in dry-run
+    # WHEN running command
     result = cli_runner.invoke(mip_dna_past_run_dirs, [before_date], obj=base_context)
 
-    # THEN command should terminate successfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
@@ -105,12 +108,13 @@ def test_cli_workflow_clean_mip_rna(
     base_context: CGConfig,
     before_date: str,
 ):
+    """Test clean MIP RNA workflow."""
     # GIVEN a before string
 
-    # WHEN running command in dry-run
+    # WHEN running command
     result = cli_runner.invoke(mip_rna_past_run_dirs, [before_date], obj=base_context)
 
-    # THEN command should terminate successfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
@@ -119,12 +123,13 @@ def test_cli_workflow_clean_mutant(
     base_context: CGConfig,
     before_date: str,
 ):
+    """Test clean Mutan workflow."""
     # GIVEN a before string
 
-    # WHEN running command in dry-run
+    # WHEN running command
     result = cli_runner.invoke(mutant_past_run_dirs, [before_date], obj=base_context)
 
-    # THEN command should terminate successfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
 
 
@@ -133,9 +138,10 @@ def test_cli_workflow_clean_rnafusion(
     base_context: CGConfig,
     before_date: str,
 ):
+    """Test clean RNAFusion workflow."""
     # GIVEN a before string
 
-    # WHEN running command in dry-run
+    # WHEN running command
     result = cli_runner.invoke(rnafusion_past_run_dirs, [before_date], obj=base_context)
 
     # THEN command should exit successfully
@@ -147,10 +153,11 @@ def test_cli_workflow_clean_microsalt(
     base_context: CGConfig,
     before_date: str,
 ):
+    """Test clean Micrsalt workflow."""
     # Given a before string
 
-    # WHEN running command in dry-run
+    # WHEN running command
     result = cli_runner.invoke(microsalt_past_run_dirs, [before_date], obj=base_context)
 
-    # THEN command should terminate successfully
+    # THEN command should exit successfully
     assert result.exit_code == EXIT_SUCCESS
