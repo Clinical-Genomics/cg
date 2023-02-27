@@ -24,14 +24,14 @@ def test_add_flowcell(
         sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
-        flow_cell_status=FlowCellStatus.ONDISK,
+        flow_cell_status=FlowCellStatus.ON_DISK,
     )
 
     # THEN flow cell should be returned
     assert flow_cell
 
     # THEN the flow cell status should be "ondisk"
-    assert flow_cell.status == FlowCellStatus.ONDISK
+    assert flow_cell.status == FlowCellStatus.ON_DISK
 
 
 def test_add_flowcell_status(

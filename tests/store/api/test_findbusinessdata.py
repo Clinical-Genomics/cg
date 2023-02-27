@@ -1,21 +1,14 @@
 """Tests the findbusinessdata part of the Cg store API."""
+import logging
 from datetime import datetime
 from typing import List
 
 from sqlalchemy.orm import Query
 
+from cg.constants import FlowCellStatus
 from cg.store import Store
-from cg.store.models import (
-    Application,
-    ApplicationVersion,
-    Flowcell,
-    Sample,
-    FamilySample,
-    Family,
-    Bed,
-)
 from cg.constants.indexes import ListIndexes
-from cg.store.models import Sample, Flowcell, ApplicationVersion, Application
+from cg.store.models import Application, ApplicationVersion, Flowcell, FamilySample, Family, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -34,16 +27,43 @@ def test_find_analysis_via_date(
     assert db_analysis == analysis
 
 
-def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
-    """Test function to return the latest flow cell from the database."""
+def test_get_flow_cell_query(re_sequenced_sample_store: Store):
+    """Test function to return the flow cell query from the database."""
 
     # GIVEN a store with two flow cells
 
-    # WHEN fetching the latest flow cell
-    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
+    # WHEN getting the query for the flow cells
+    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_query()
 
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == flow_cell_id
+    # THEN a query should be returned
+    assert isinstance(flow_cell_query, Query)
+
+
+def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
+    """Test function to return the flow cell sample links query from the database."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN getting the query for the flow cells
+    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_sample_links_query()
+
+    # THEN a query should be returned
+    assert isinstance(flow_cell_query, Query)
+
+
+def test_get_flow_cells(re_sequenced_sample_store: Store):
+    """Test function to return the flow cells from the database."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the flow cells
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+
+    # THEN a flow cells should be returned
+    assert flow_cells
+
+    # THEN a flow cell model should be returned
+    assert isinstance(flow_cells[0], Flowcell)
 
 
 def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
@@ -56,6 +76,123 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id
+
+
+def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database by enquiry."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry(
+        flow_cell_id_enquiry=flow_cell_id[:4]
+    )
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cell[0].name == flow_cell_id
+
+
+def test_get_flow_cells_by_case(
+    base_store: Store,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_obj: Family,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test returning the latest flow cell from the database by case."""
+
+    # GIVEN a store with two flow cell
+    helpers.add_flowcell(store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj])
+
+    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case_obj)
+
+    # THEN the flow cell samples for the case should be returned
+    for flow_cell in flow_cells:
+        for sample in flow_cell.samples:
+            assert sample in case_obj.samples
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cells[0].name == flow_cell_id
+
+
+def test_get_flow_cells_by_statuses(another_flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database by statuses."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
+    )
+
+    # THEN the flow cell status should be "ondisk"
+    for flow_cell in flow_cells:
+        assert flow_cell.status == FlowCellStatus.ON_DISK
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cells[0].name == another_flow_cell_id
+
+
+def test_get_flow_cells_by_statuses_when_multiple_matches(
+    another_flow_cell_id: str, flow_cell_id: str, re_sequenced_sample_store: Store
+):
+    """Test returning the latest flow cell from the database by statuses when multiple matches."""
+
+    # GIVEN a store with two flow cells
+
+    # GIVEN a flow cell that exist in status db with status "requested"
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells[0].status = FlowCellStatus.REQUESTED
+    re_sequenced_sample_store.add_commit(flow_cells[0])
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
+    )
+
+    # THEN the flow cell status should be "ondisk" or "requested"
+    for flow_cell in flow_cells:
+        assert flow_cell.status in [FlowCellStatus.ON_DISK, FlowCellStatus.REQUESTED]
+
+    # THEN the returned flow cell should have the same status as the ones in the database
+    assert flow_cells[0].status == FlowCellStatus.REQUESTED
+
+    assert flow_cells[1].status == FlowCellStatus.ON_DISK
+
+
+def test_get_flow_cells_by_statuses_when_incorrect_status(re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database when no flow cell with incorrect status."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
+        flow_cell_statuses=["does_not_exist"]
+    )
+
+    # THEN no flow cells should be returned
+    assert not list(flow_cells)
+
+
+def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sample_store: Store):
+    """Test returning the latest flow cell from the database by enquiry and status."""
+
+    # GIVEN a store with two flow cells
+
+    # WHEN fetching the latest flow cell
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry_and_status(
+        flow_cell_statuses=[FlowCellStatus.ON_DISK], flow_cell_id_enquiry=flow_cell_id[:4]
+    )
+
+    # THEN the returned flow cell should have the same name as the one in the database
+    assert flow_cell[0].name == flow_cell_id
+
+    # THEN the returned flow cell should have the same status as the query
+    assert flow_cell[0].status == FlowCellStatus.ON_DISK
 
 
 def test_get_samples_from_flow_cell(
@@ -91,6 +228,128 @@ def test_get_latest_flow_cell_on_case(
 
     # THEN the fetched flow cell should have the same name as the other
     assert latest_flow_cell.name == latest_flow_cell_on_case.name
+
+
+def test_is_all_flow_cells_on_disk_when_no_flow_cell(
+    base_store: Store,
+    caplog,
+    case_id: str,
+):
+    """Test check if all flow cells for samples on a case is on disk when no flow cells."""
+    caplog.set_level(logging.DEBUG)
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return false
+    assert is_on_disk is False
+
+    # THEN log no flow cells found
+    assert "No flow cells found" in caplog.text
+
+
+def test_is_all_flow_cells_on_disk_when_not_on_disk(
+    base_store: Store,
+    caplog,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_id: str,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test check if all flow cells for samples on a case is on disk when not on disk."""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a store with two flow cell
+    flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.PROCESSING,
+    )
+
+    another_flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=another_flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.RETRIEVED,
+    )
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return false
+    assert is_on_disk is False
+
+    # THEN log the status of the flow cell
+    assert f"{flow_cell.name}: {flow_cell.status}" in caplog.text
+    assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
+
+
+def test_is_all_flow_cells_on_disk_when_requested(
+    base_store: Store,
+    caplog,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_id: str,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test check if all flow cells for samples on a case is on disk when requested."""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a store with two flow cell
+    flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.REMOVED,
+    )
+
+    another_flow_cell = helpers.add_flowcell(
+        store=base_store,
+        flow_cell_id=another_flow_cell_id,
+        samples=[sample_obj],
+        status=FlowCellStatus.REQUESTED,
+    )
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return false
+    assert is_on_disk is False
+
+    # THEN log the requesting the flow cell
+    assert f"{flow_cell.name}: flow cell not on disk, requesting" in caplog.text
+
+    # THEN log the status of the flow cell
+    assert f"{another_flow_cell.name}: {another_flow_cell.status}" in caplog.text
+
+
+def test_is_all_flow_cells_on_disk(
+    base_store: Store,
+    caplog,
+    flow_cell_id: str,
+    another_flow_cell_id: str,
+    case_id: str,
+    helpers: StoreHelpers,
+    sample_obj: Sample,
+):
+    """Test check if all flow cells for samples on a case is on disk."""
+    caplog.set_level(logging.DEBUG)
+    # GIVEN a store with two flow cell
+    flow_cell = helpers.add_flowcell(
+        store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj]
+    )
+
+    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+
+    # WHEN fetching the latest flow cell
+    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+
+    # THEN return true
+    assert is_on_disk is True
+
+    # THEN log the status of the flow cell
+    assert f"{flow_cell.name}: status is {flow_cell.status}" in caplog.text
 
 
 def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
