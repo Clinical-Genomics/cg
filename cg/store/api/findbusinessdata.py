@@ -343,7 +343,7 @@ class FindBusinessDataHandler(BaseHandler):
         return records.order_by(Pool.created_at.desc())
 
     def pool(self, pool_id: int) -> Pool:
-        """Fetch a pool."""
+        """Fetch a pool by pool_id."""
         return self.Pool.get(pool_id)
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
