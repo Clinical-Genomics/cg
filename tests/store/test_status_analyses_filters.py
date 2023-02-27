@@ -6,22 +6,22 @@ from cgmodels.cg.constants import Pipeline
 from cg.constants import DataDelivery
 from cg.store import Store, models
 from cg.store.status_analysis_filters import (
-    filter_valid_analyses_in_production,
-    filter_analyses_with_pipeline,
-    filter_completed_analyses,
-    filter_not_completed_analyses,
-    filter_uploaded_analyses,
-    filter_not_uploaded_analyses,
-    filter_analyses_with_delivery_report,
-    filter_analyses_without_delivery_report,
-    filter_report_analyses_by_pipeline,
+    get_valid_analyses_in_production,
+    get_analyses_with_pipeline,
+    get_completed_analyses,
+    get_not_completed_analyses,
+    get_filter_uploaded_analyses,
+    get_not_uploaded_analyses,
+    get_analyses_with_delivery_report,
+    get_analyses_without_delivery_report,
+    get_report_analyses_by_pipeline,
     order_analyses_by_uploaded_at,
     order_analyses_by_completed_at,
 )
 from tests.store_helpers import StoreHelpers
 
 
-def test_filter_valid_analyses_in_production(
+def test_get_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
     case_obj: models.Family,
@@ -39,14 +39,14 @@ def test_filter_valid_analyses_in_production(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving valid in production analyses
-    analyses: Query = filter_valid_analyses_in_production(analyses_query)
+    analyses: Query = get_valid_analyses_in_production(analyses_query)
 
     # THEN only the up-to-date analysis should be returned
     assert analysis in analyses
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_pipeline(
+def test_get_analyses_with_pipeline(
     base_store: Store, helpers: StoreHelpers, case_obj: models.Family
 ):
     """Test analyses filtering by pipeline."""
@@ -63,16 +63,14 @@ def test_filter_analyses_with_pipeline(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN extracting the analyses
-    analyses: Query = filter_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
+    analyses: Query = get_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
 
     # THEN only the BALSAMIC analysis should be retrieved
     assert balsamic_analysis in analyses
     assert mip_analysis not in analyses
 
 
-def test_filter_completed_analyses(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
+def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
     """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
@@ -82,13 +80,13 @@ def test_filter_completed_analyses(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving the completed analyses
-    analyses: Query = filter_completed_analyses(analyses_query)
+    analyses: Query = get_completed_analyses(analyses_query)
 
     # THEN the completed analysis should be obtained
     assert analysis in analyses
 
 
-def test_filter_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
+def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of ongoing analyses."""
 
     # GIVEN a mock not completed analysis
@@ -100,13 +98,13 @@ def test_filter_not_completed_analyses(base_store: Store, helpers: StoreHelpers)
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving the not completed analyses
-    analyses: Query = filter_not_completed_analyses(analyses_query)
+    analyses: Query = get_not_completed_analyses(analyses_query)
 
     # THEN the expected analysis should be retrieved
     assert analysis_not_completed in analyses
 
 
-def test_filter_uploaded_analyses(
+def test_get_filter_uploaded_analyses(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test filtering of analysis with an uploaded_at field."""
@@ -118,13 +116,13 @@ def test_filter_uploaded_analyses(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the upload filtering function
-    analyses: Query = filter_uploaded_analyses(analyses_query)
+    analyses: Query = get_filter_uploaded_analyses(analyses_query)
 
     # THEN the uploaded analysis should be retrieved
     assert analysis in analyses
 
 
-def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
+def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of analysis that has not been uploaded."""
 
     # GIVEN a mock not uploaded analysis
@@ -136,13 +134,13 @@ def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the upload filtering function
-    analyses: Query = filter_not_uploaded_analyses(analyses_query)
+    analyses: Query = get_not_uploaded_analyses(analyses_query)
 
     # THEN the uploaded analysis should be retrieved
     assert not_uploaded_analysis in analyses
 
 
-def test_filter_analyses_with_delivery_report(
+def test_get_analyses_with_delivery_report(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test filtering of analysis with a delivery report generated."""
@@ -156,13 +154,13 @@ def test_filter_analyses_with_delivery_report(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
-    analyses: Query = filter_analyses_with_delivery_report(analyses_query)
+    analyses: Query = get_analyses_with_delivery_report(analyses_query)
 
     # THEN the analysis containing the delivery report should be extracted
     assert analysis in analyses
 
 
-def test_filter_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
+def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
     """Test filtering of analysis without a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
@@ -174,13 +172,13 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
-    analyses: Query = filter_analyses_without_delivery_report(analyses_query)
+    analyses: Query = get_analyses_without_delivery_report(analyses_query)
 
     # THEN the analysis without a delivery report should be extracted
     assert analysis_without_delivery_report in analyses
 
 
-def test_filter_report_analyses_by_pipeline(
+def test_get_report_analyses_by_pipeline(
     base_store: Store, helpers: StoreHelpers, case_obj: models.Family
 ):
     """Test filtering delivery report related analysis by pipeline."""
@@ -197,7 +195,7 @@ def test_filter_report_analyses_by_pipeline(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN filtering delivery report related analyses
-    analyses: Query = filter_report_analyses_by_pipeline(analyses_query)
+    analyses: Query = get_report_analyses_by_pipeline(analyses_query)
 
     # THEN only the delivery report supported analysis should be retrieved
     assert balsamic_analysis in analyses
