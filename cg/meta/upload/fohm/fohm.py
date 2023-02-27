@@ -245,6 +245,9 @@ class FOHMUploadAPI:
             except Exception as ex:
                 LOG.error(f"Failed sending email report {file} with error: {ex}")
 
+        if os.listdir(self.daily_report_path) == []:
+            self.daily_report_path.rmdir()
+
     def sync_files_sftp(self) -> None:
         self.check_username()
         transport = paramiko.Transport((self.config.fohm.host, self.config.fohm.port))
@@ -266,6 +269,9 @@ class FOHMUploadAPI:
         sftp.close()
         transport.close()
 
+        if os.listdir(self.daily_rawdata_path) == []:
+            self.daily_rawdata_path.rmdir()
+
     def update_upload_started_at(self, case_id: str) -> None:
         """Update timestamp for cases which started being processed as batch"""
         if self._dry_run:
@@ -281,12 +287,3 @@ class FOHMUploadAPI:
         case_obj: models.Family = self.status_db.family(case_id)
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.commit()
-
-    def delete_empty_directories(self) -> None:
-        """Delete any empty directories in the fohm directory."""
-        fohm_root = self._daily_bundle_path.parent.absolute().as_posix()
-        directories = os.walk(top=fohm_root, topdown=False)
-
-        for path, _, _ in directories:
-            if os.listdir(path) == []:
-                os.rmdir(path)
