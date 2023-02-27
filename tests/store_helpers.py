@@ -315,7 +315,7 @@ class StoreHelpers:
     def add_case(
         store: Store,
         name: str = "case_test",
-        data_analysis: Pipeline = Pipeline.MIP_DNA,
+        data_analysis: str = Pipeline.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
         action: str = None,
         internal_id: str = None,

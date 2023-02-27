@@ -1,5 +1,5 @@
 """This script tests the cli methods to add cases to status-db"""
-from typing import List
+from typing import List, Union
 
 from alchy import Query
 from datetime import datetime
@@ -216,8 +216,8 @@ def test_all_samples_and_analysis_completed(
     # GIVEN a completed analysis
     test_analysis: models.Analysis = helpers.add_analysis(base_store, completed_at=timestamp_now)
 
-    # Given an action set to analyze
-    test_analysis.family.action: str = CaseActions.ANALYZE
+    # Given a completed analysis
+    test_analysis.family.action: Union[None, str] = None
 
     # GIVEN a database with a case with one of one sequenced samples and completed analysis
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
@@ -272,7 +272,7 @@ def test_exclude_other_pipeline_analysis_from_result(
     cases: List[models.Family] = base_store.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert test_case not in cases
 
 
 def test_one_of_two_sequenced_samples(

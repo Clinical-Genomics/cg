@@ -173,9 +173,9 @@ class FindBusinessDataHandler(BaseHandler):
         return self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
 
     def family_samples(self, family_id: str) -> List[FamilySample]:
-        """Find the case-sample links associated with a case."""
+        """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            function="get_samples_associated_with_case",
+            functions=["get_samples_associated_with_case"],
             case_id=family_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -183,15 +183,15 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_cases(self, sample_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a sample."""
         return apply_case_sample_filter(
-            function="get_cases_associated_with_sample",
+            functions=["get_cases_associated_with_sample"],
             sample_id=sample_id,
             case_samples=self._get_case_sample_query(),
         ).all()
 
     def get_cases_from_sample(self, sample_entry_id: str) -> List[FamilySample]:
-        """Find cases related to a given sample."""
+        """Return cases related to a given sample."""
         return apply_case_sample_filter(
-            function="get_cases_associated_with_sample_by_entry_id",
+            functions=["get_cases_associated_with_sample_by_entry_id"],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -480,14 +480,14 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Sample.query.join(Family.links, FamilySample.sample)
 
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
-        """Extract samples given a tissue type."""
+        """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            function="get_samples_associated_with_case",
+            functions=["get_samples_associated_with_case"],
             case_samples=self._get_sample_case_query(),
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(
-            function="get_samples_with_type", samples=samples, tissue_type=sample_type
+            functions=["get_samples_with_type"], samples=samples, tissue_type=sample_type
         )
         return samples.all() if samples else None
 
