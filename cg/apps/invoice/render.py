@@ -36,7 +36,7 @@ def render_xlsx(data: dict) -> Workbook:
     """
     pkg_dir = __name__.rpartition(".")[0]
     sample_type = "pool" if data["pooled_samples"] else "sample"
-    costcenter = data["costcenter"]
+    costcenter = data["cost_center"]
     template_path = resource_filename(pkg_dir, f"templates/{costcenter}_{sample_type}_invoice.xlsx")
     workbook = load_workbook(template_path)
     if data["pooled_samples"]:
