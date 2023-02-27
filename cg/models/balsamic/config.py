@@ -30,13 +30,9 @@ class BalsamicConfigSample(BaseModel):
     """Sample attributes used for BALSAMIC analysis
 
     Attributes:
-        file_prefix: sample basename
-        sample_name: sample internal ID
         type: sample type (tumor or normal)
     """
 
-    file_prefix: str
-    sample_name: str
     type: str
 
 
