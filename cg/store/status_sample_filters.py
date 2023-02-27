@@ -111,6 +111,10 @@ def apply_sample_filter(
 
     for function in functions:
         samples: Query = filter_map[function](
-            entry_id=entry_id, internal_id=internal_id, samples=samples, tissue_type=tissue_type, data_analysis=data_analysis
+            entry_id=entry_id,
+            internal_id=internal_id,
+            samples=samples,
+            tissue_type=tissue_type,
+            data_analysis=data_analysis,
         )
     return samples

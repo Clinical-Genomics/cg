@@ -360,7 +360,7 @@ class FindBusinessDataHandler(BaseHandler):
         self.commit()
         return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
-    def invoices(self, invoiced: bool = None) -> Query:
+    def get_invoices_by_status(self, invoiced: bool = None) -> Query:
         """Fetch invoices by invoiced status."""
         query = self.Invoice.query
         if invoiced:
