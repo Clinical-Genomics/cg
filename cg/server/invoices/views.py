@@ -2,7 +2,7 @@ import http
 import os
 import tempfile
 from datetime import date
-
+from cg.constants.invoice import CostCenters
 from flask import (
     Blueprint,
     current_app,
@@ -22,6 +22,12 @@ from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
+
+
+@BLUEPRINT.before_request
+def before_request():
+    if not logged_in():
+        return redirect(url_for("admin.index"))
 
 
 def logged_in():
@@ -94,12 +100,19 @@ def upload_invoice_news_to_db():
     return url_for("invoices.invoice", invoice_id=invoice_id)
 
 
-@BLUEPRINT.route("/", methods=["GET", "POST"])
+@BLUEPRINT.route("/")
 def index():
-    """Show invoices."""
-    if not logged_in():
-        return redirect(url_for("admin.index"))
+    """Retrieve invoices."""
+    invoices = {
+        "sent_invoices": db.invoices(invoiced=True),
+        "pending_invoices": db.invoices(invoiced=False),
+    }
+    return render_template("invoices/index.html", invoices=invoices)
 
+
+@BLUEPRINT.route("/", methods=["POST"])
+def update_invoices():
+    """Update invoices."""
     if request.form.get("new_invoice_updates"):
         url = upload_invoice_news_to_db()
         return redirect(url)
@@ -107,23 +120,14 @@ def index():
         invoice_id = request.form.get("invoice_id")
         url = undo_invoice(invoice_id)
         return redirect(url)
-    elif request.method == "POST":
+    else:
         url = make_new_invoice()
         return redirect(url)
-    else:
-        invoices = {
-            "sent_invoices": db.invoices(invoiced=True),
-            "pending_invoices": db.invoices(invoiced=False),
-        }
-        return render_template("invoices/index.html", invoices=invoices)
 
 
 @BLUEPRINT.route("/new/<record_type>")
 def new(record_type):
     """Generate a new invoice."""
-    if not logged_in():
-        return redirect(url_for("admin.index"))
-
     count = request.args.get("total", 0)
     customer_id = request.args.get("customer", "cust002")
     customer_obj = db.customer(customer_id)
@@ -143,16 +147,13 @@ def new(record_type):
     )
 
 
-@BLUEPRINT.route("/<int:invoice_id>", methods=["GET", "POST"])
+@BLUEPRINT.route("/<int:invoice_id>", methods=["GET"])
 def invoice(invoice_id):
     """Save comments and uploaded modified invoices."""
-    if not logged_in():
-        return redirect(url_for("admin.index"))
-
     invoice_obj = db.invoice(invoice_id)
     api = InvoiceAPI(db, lims, invoice_obj)
-    kth_inv = api.prepare("KTH")
-    ki_inv = api.prepare("KI")
+    kth_inv = api.get_invoice_report(CostCenters.kth)
+    ki_inv = api.get_invoice_report(CostCenters.kth)
 
     if not (kth_inv and ki_inv):
         flash(" ,".join(list(set(api.log))))
@@ -177,14 +178,11 @@ def invoice(invoice_id):
 @BLUEPRINT.route("/<int:invoice_id>/excel")
 def invoice_template(invoice_id):
     """Generate invoice template"""
-    if not logged_in():
-        return redirect(url_for("admin.index"))
-
     cost_center = request.args.get("cost_center", "KTH")
     invoice_obj = db.invoice(invoice_id)
     api = InvoiceAPI(db, lims, invoice_obj)
 
-    invoice_dict = api.prepare(cost_center)
+    invoice_dict = api.get_invoice_report(cost_center)
     workbook = render_xlsx(invoice_dict)
 
     temp_dir = tempfile.gettempdir()
@@ -198,9 +196,6 @@ def invoice_template(invoice_id):
 @BLUEPRINT.route("/<int:invoice_id>/invoice_file/<cost_center>")
 def modified_invoice(invoice_id, cost_center):
     """Enables download of modified invoices saved in the database."""
-    if not logged_in():
-        return redirect(url_for("admin.index"))
-
     if cost_center not in ["KTH", "KI"]:
         return abort(http.HTTPStatus.BAD_REQUEST)
 

@@ -13,7 +13,7 @@ from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.symbols import UNDERSCORE
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.datetime.utils import get_timedelta_from_date
+from cg.utils.date import get_timedelta_from_date
 from cg.store import Store
 from cg.store.models import Flowcell
 

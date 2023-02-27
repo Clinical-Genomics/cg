@@ -2,8 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import Optional, Set, Dict, List, Any
+from typing import Any, Dict, List, Optional, Set
 
+from housekeeper.store import models as hk_models
 from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -13,17 +14,16 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import SequencingMethod
-from cg.exc import HousekeeperBundleVersionMissingError, CgDataError
+from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import models, Store
-from housekeeper.store import models as hk_models
-
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
+from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.scout.scout_load_config import ScoutLoadConfig
+from cg.store import Store, models
 
 LOG = logging.getLogger(__name__)
 
@@ -382,6 +382,9 @@ class UploadScoutAPI:
                 mip_analysis_api=self.mip_analysis_api,
                 lims_api=self.lims,
                 madeline_api=self.madeline_api,
+            ),
+            Pipeline.RNAFUSION: RnafusionConfigBuilder(
+                hk_version_obj=hk_version, analysis_obj=analysis, lims_api=self.lims
             ),
         }
 

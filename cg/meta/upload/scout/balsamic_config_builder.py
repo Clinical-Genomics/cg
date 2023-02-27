@@ -1,5 +1,7 @@
 import logging
 
+from housekeeper.store.models import Version
+
 from cg.apps.lims import LimsAPI
 from cg.constants.constants import SampleType
 from cg.constants.scout_upload import BALSAMIC_CASE_TAGS, BALSAMIC_SAMPLE_TAGS
@@ -7,9 +9,8 @@ from cg.constants.subject import PhenotypeStatus
 from cg.meta.upload.scout.hk_tags import CaseTags, SampleTags
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.models.scout.scout_load_config import BalsamicLoadConfig, ScoutBalsamicIndividual
+from cg.models.scout.scout_load_config import BalsamicLoadConfig, ScoutCancerIndividual
 from cg.store.models import Analysis, FamilySample, Sample
-from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         self.include_multiqc_report()
         self.include_delivery_report()
 
-    def include_sample_files(self, config_sample: ScoutBalsamicIndividual) -> None:
+    def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
         LOG.info("Including BALSAMIC specific sample level files.")
 
         sample_id: str = config_sample.sample_id
@@ -45,11 +46,12 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 
-    def build_config_sample(self, case_sample: FamilySample) -> ScoutBalsamicIndividual:
+    def build_config_sample(self, case_sample: FamilySample) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
-        config_sample = ScoutBalsamicIndividual()
+        config_sample = ScoutCancerIndividual()
 
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
+        self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         if BalsamicAnalysisAPI.get_sample_type(sample_obj=case_sample.sample) == SampleType.TUMOR:
             config_sample.phenotype = PhenotypeStatus.AFFECTED.value
             config_sample.sample_id = SampleType.TUMOR.value.upper()

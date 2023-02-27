@@ -17,6 +17,7 @@ class PriorityTerms(StrEnum):
     PRIORITY: str = "priority"
     RESEARCH: str = "research"
     STANDARD: str = "standard"
+    CLINICAL_TRIALS: str = "clinical_trials"
 
 
 SLURM_ACCOUNT_TO_QOS = {

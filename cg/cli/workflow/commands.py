@@ -12,14 +12,18 @@ from cgmodels.cg.constants import Pipeline
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES
-from cg.exc import FlowcellsNeededError, DecompressionNeededError
+from cg.exc import FlowCellsNeededError, DecompressionNeededError
 from cg.meta.rsync import RsyncAPI
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_pon import BalsamicPonAnalysisAPI
+from cg.meta.workflow.balsamic_qc import BalsamicQCAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.mutant import MutantAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -43,18 +47,19 @@ OPTION_LOQUSDB_SUPPORTED_PIPELINES = click.option(
 LOG = logging.getLogger(__name__)
 
 
-@click.command("ensure-flowcells-ondisk")
+@click.command("ensure-flow-cells-on-disk")
 @ARGUMENT_CASE_ID
 @click.pass_obj
-def ensure_flowcells_ondisk(context: CGConfig, case_id: str):
-    """Check if flowcells are on disk for given case. If not, request flowcells and raise FlowcellsNeededError."""
+def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
+    """Check if flow cells are on disk for given case. If not, request flow cells and raise FlowcellsNeededError."""
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if not analysis_api.all_flowcells_on_disk(case_id=case_id):
-        raise FlowcellsNeededError(
-            "Analysis cannot be started: all flowcells need to be on disk to run the analysis"
+    if not status_db.is_all_flow_cells_on_disk(case_id=case_id):
+        raise FlowCellsNeededError(
+            "Analysis cannot be started: all flow cells need to be on disk to run the analysis"
         )
-    LOG.info("All flowcells present on disk")
+    LOG.info("All flow cells present on disk")
 
 
 @click.command("resolve-compression")
@@ -164,7 +169,6 @@ def clean_run_dir(context: CGConfig, yes: bool, case_id: str, dry_run: bool = Fa
     """Remove workflow run directory."""
 
     analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
     analysis_api.check_analysis_ongoing(case_id=case_id)
 
     analysis_path: Union[List[Path], Path] = analysis_api.get_case_path(case_id)
@@ -220,7 +224,48 @@ def balsamic_past_run_dirs(
     """Clean up of "old" Balsamic case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
+
+@click.command("balsamic-qc-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_qc_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic qc case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicQCAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("balsamic-umi-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_umi_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic umi case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
+
+
+@click.command("balsamic-pon-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def balsamic_pon_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" Balsamic pon case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = BalsamicPonAnalysisAPI(context.obj)
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -235,22 +280,34 @@ def fluffy_past_run_dirs(
     """Clean up of "old" Fluffy case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = FluffyAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
-@click.command("mip-past-run-dirs")
+@click.command("mip-dna-past-run-dirs")
 @OPTION_YES
 @OPTION_DRY
 @ARGUMENT_BEFORE_STR
 @click.pass_context
-def mip_past_run_dirs(
+def mip_dna_past_run_dirs(
     context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
 ):
-    """Clean up of "old" MIP case run dirs."""
+    """Clean up of "old" MIP_DNA case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MipDNAAnalysisAPI(context.obj)
+    context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
+
+@click.command("mip-rna-past-run-dirs")
+@OPTION_YES
+@OPTION_DRY
+@ARGUMENT_BEFORE_STR
+@click.pass_context
+def mip_rna_past_run_dirs(
+    context: click.Context, before_str: str, yes: bool = False, dry_run: bool = False
+):
+    """Clean up of "old" MIP_RNA case run dirs."""
+
+    context.obj.meta_apis["analysis_api"] = MipRNAAnalysisAPI(context.obj)
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -265,7 +322,6 @@ def mutant_past_run_dirs(
     """Clean up of "old" MUTANT case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = MutantAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -280,7 +336,6 @@ def rnafusion_past_run_dirs(
     """Clean up of "old" RNAFUSION case run dirs."""
 
     context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
 
 
@@ -295,5 +350,4 @@ def microsalt_past_run_dirs(
     """Clean up of "old" microSALT case run dirs."""
 
     context.obj.meta_apis["analysis_api"]: MicrosaltAnalysisAPI = MicrosaltAnalysisAPI(context.obj)
-
     context.invoke(past_run_dirs, yes=yes, dry_run=dry_run, before_str=before_str)
