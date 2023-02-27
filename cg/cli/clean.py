@@ -347,7 +347,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
                     bundle_names=sample_bundle_names
                 )
             )
-        except HousekeeperBundleVersionMissingError as error:
+        except HousekeeperBundleVersionMissingError:
             LOG.warning(
                 f"Cannot find sample bundle in Housekeeper for sample on flow cell: {flow_cell.name}"
             )
