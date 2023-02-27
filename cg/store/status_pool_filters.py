@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List
 from alchy import Query
 from cg.store.models import Pool, Family
 
@@ -38,7 +38,7 @@ def get_pool_do_not_invoice(pools: Query) -> Query:
     return pools.filter(Pool.no_invoice.is_(True))
 
 
-def apply_pool_filter(function: str, pools: Query) -> Query:
+def apply_pool_filter(functions: List[str], pools: Query) -> Query:
     """Apply filtering functions to the pool queries and return filtered results"""
 
     filter_map = {
@@ -47,11 +47,10 @@ def apply_pool_filter(function: str, pools: Query) -> Query:
         "get_pool_is_delivered": get_pool_is_delivered,
         "get_pool_is_not_delivered": get_pool_is_not_delivered,
         "get_pool_without_invoice_id": get_pool_without_invoice_id,
-        "get_pool_with_invoice_id": get_pool_with_invoice_id,
         "get_pool_do_invoice": get_pool_do_invoice,
         "get_pool_do_not_invoice": get_pool_do_not_invoice,
     }
 
-    return filter_map[function](
-        pools=pools,
-    )
+    for function in functions:
+        pools: Query = filter_map[function](pools=pools)
+    return pools
