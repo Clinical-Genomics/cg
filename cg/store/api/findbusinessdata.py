@@ -294,8 +294,8 @@ class FindBusinessDataHandler(BaseHandler):
         if flow_cell:
             return flow_cell.samples
 
-    def invoices(self, invoiced: bool = None) -> Query:
-        """Fetch invoices."""
+    def get_invoices_by_status(self, invoiced: bool = None) -> Query:
+        """Fetch invoices by invoiced status."""
         query = self.Invoice.query
         if invoiced:
             return query.filter(Invoice.invoiced_at.isnot(None))
