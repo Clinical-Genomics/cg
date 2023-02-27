@@ -3,7 +3,7 @@ from typing import Optional
 from alchy import Query
 
 from cg.constants.constants import SampleType
-from cg.store.models import Sample
+from cg.store.models import Sample, Family
 
 
 def sample(samples: Query, internal_id: str, **kwargs) -> Query:
@@ -30,12 +30,25 @@ def get_sample_by_entry_id(samples: Query, entry_id: int, **kwargs) -> Query:
     return samples.filter_by(id=entry_id)
 
 
+def get_samples_by_analysis(samples: Query, data_analysis: str) -> Query:
+    return samples.filter(data_analysis in Family.data_analysis)
+
+
+def get_sample_delivered(samples: Query) -> Query:
+    return samples.filter(Sample.delivered_at is not None)
+
+
+def get_sample_not_invoice_id(samples: Query) -> Query:
+    return samples.filter(Sample.invoice_id.is_(None))
+
+
 def apply_sample_filter(
     function: str,
     samples: Query,
     internal_id: Optional[str] = None,
     entry_id: Optional[int] = None,
     tissue_type: Optional[SampleType] = None,
+    data_analysis: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
     filter_map = {
@@ -44,7 +57,14 @@ def apply_sample_filter(
         "samples_uploaded_to_loqusdb": get_samples_with_loqusdb_id,
         "samples_not_uploaded_to_loqusdb": get_samples_without_loqusdb_id,
         "get_sample_by_entry_id": get_sample_by_entry_id,
+        "get_sample_by_analysis": get_samples_by_analysis,
+        "get_sample_delivered": get_sample_delivered,
+        "get_sample_not_invoice_id": get_sample_not_invoice_id,
     }
     return filter_map[function](
-        samples=samples, internal_id=internal_id, entry_id=entry_id, tissue_type=tissue_type
+        samples=samples,
+        internal_id=internal_id,
+        entry_id=entry_id,
+        tissue_type=tissue_type,
+        data_analysis=data_analysis,
     )
