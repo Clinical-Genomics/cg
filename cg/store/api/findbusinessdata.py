@@ -23,7 +23,7 @@ from cg.store.models import (
     Pool,
     Sample,
 )
-from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
 from cg.store.status_case_sample_filters import apply_case_sample_filter
 from cg.store.status_sample_filters import apply_sample_filter
 
@@ -284,7 +284,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id,
-            functions=["get_flow_cell_by_id"],
+            functions=[FlowCellFilters.get_flow_cell_by_id],
         )
 
     def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Query:
@@ -292,7 +292,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id_enquiry,
-            functions=["get_flow_cell_by_id_and_by_enquiry"],
+            functions=[FlowCellFilters.get_flow_cell_by_id_and_by_enquiry],
         )
 
     def get_flow_cells(self) -> List[Flowcell]:
@@ -304,7 +304,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_statuses=flow_cell_statuses,
-            functions=["get_flow_cells_with_statuses"],
+            functions=[FlowCellFilters.get_flow_cells_with_statuses],
         )
 
     def get_flow_cell_by_enquiry_and_status(
@@ -312,8 +312,8 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Flowcell]:
         """Return flow cell enquiry snd status."""
         filter_functions: List[str] = [
-            "get_flow_cells_with_statuses",
-            "get_flow_cell_by_id_and_by_enquiry",
+            FlowCellFilters.get_flow_cells_with_statuses,
+            FlowCellFilters.get_flow_cell_by_id_and_by_enquiry,
         ]
         flow_cells: List[Flowcell] = apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
@@ -327,7 +327,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            functions=["get_flow_cells_by_case"],
+            functions=[FlowCellFilters.get_flow_cells_by_case],
             case=case,
         )
 
