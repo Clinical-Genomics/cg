@@ -35,12 +35,12 @@ def get_samples_by_analysis(samples: Query, data_analysis: str) -> Query:
     return samples.filter(data_analysis in Family.data_analysis)
 
 
-def get_sample_delivered(samples: Query) -> Query:
+def get_sample_is_delivered(samples: Query) -> Query:
     """Get delivered samples."""
     return samples.filter(Sample.delivered_at.isnot(None))
 
 
-def get_sample_not_delivered(samples: Query) -> Query:
+def get_sample_is_not_delivered(samples: Query) -> Query:
     """Get samples that are not delivered."""
     return samples.filter(Sample.delivered_at.is_(None))
 
@@ -60,12 +60,12 @@ def get_samples_down_sampled(samples: Query) -> Query:
     return samples.filter(Sample.downsampled_to.isnot(None))
 
 
-def get_sample_sequenced(samples: Query) -> Query:
+def get_sample_is_sequenced(samples: Query) -> Query:
     """Get samples that are sequenced."""
     return samples.filter(Sample.sequenced_at.isnot(None))
 
 
-def get_sample_not_sequenced(samples: Query) -> Query:
+def get_sample_is_not_sequenced(samples: Query) -> Query:
     """Get samples that are not sequenced."""
     return samples.filter(Sample.sequenced_at.is_(None))
 
@@ -96,13 +96,13 @@ def apply_sample_filter(
         "samples_not_uploaded_to_loqusdb": get_samples_without_loqusdb_id,
         "get_sample_by_entry_id": get_sample_by_entry_id,
         "get_sample_by_analysis": get_samples_by_analysis,
-        "get_sample_delivered": get_sample_delivered,
-        "get_sample_not_delivered": get_sample_not_delivered,
-        "get_sample_not_invoice_id": get_sample_not_invoice_id,
+        "get_sample_is_delivered": get_sample_is_delivered,
+        "get_sample_is_not_delivered": get_sample_is_not_delivered,
+        "get_sample_without_invoice_id": get_sample_without_invoice_id,
         "get_sample_down_sampled": get_samples_down_sampled,
         "get_sample_not_down_sampled": get_samples_not_down_sampled,
-        "get_sample_sequenced": get_sample_sequenced,
-        "get_sample_not_sequenced": get_sample_not_sequenced,
+        "get_sample_is_sequenced": get_sample_is_sequenced,
+        "get_sample_is_not_sequenced": get_sample_is_not_sequenced,
         "get_sample_do_invoice": get_sample_do_invoice,
         "get_sample_do_not_invoice": get_sample_do_not_invoice,
     }

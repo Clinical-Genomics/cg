@@ -21,6 +21,7 @@ from cg.store.status_analysis_filters import apply_analysis_filter
 from cg.store.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
 from cg.store.status_sample_filters import apply_sample_filter
+from cg.store.status_pool_filters import apply_pool_filter
 
 
 class StatusHandler(BaseHandler):
@@ -246,6 +247,10 @@ class StatusHandler(BaseHandler):
     def _get_sample_query(self) -> Query:
         """Return sample query."""
         return self.query(Sample)
+
+    def _get_pool_query(self) -> Query:
+        """Return Pool query."""
+        return self.query(Pool)
 
     def get_sample_by_id(self, entry_id: int) -> Sample:
         """Fetch a sample by entry id."""
@@ -775,8 +780,8 @@ class StatusHandler(BaseHandler):
         have been marked to skip invoicing."""
         records = self._get_sample_query()
         filter_functions: List[str] = [
-            "get_sample_delivered",
-            "get_sample_not_invoice_id",
+            "get_sample_is_delivered",
+            "get_sample_without_invoice_id",
             "get_sample_do_invoice",
             "get_sample_not_down_sampled",
         ]
@@ -801,15 +806,27 @@ class StatusHandler(BaseHandler):
         records = records.filter(Sample.customer == customer) if customer else records
         return records, customers_to_invoice
 
+    def pools_delivered_not_invoiced(self):
+        """Returns pools have been delivered but not invoiced, excluding those that
+        have been marked to skip invoicing."""
+        records = self._get_pool_query()
+        filter_functions: List[str] = [
+            "get_pool_is_delivered",
+            "get_pool_without_invoice_id",
+            "get_pool_do_invoice",
+        ]
+        for filter_function in filter_functions:
+            records: Query = apply_pool_filter(
+                function=filter_function,
+                pools=records,
+            )
+        return records
+
     def pools_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
         """
         Fetch pools that should be invoiced.
         """
-        records = self.Pool.query.filter(
-            Pool.invoice_id.is_(None),  # has no invoice_id
-            Pool.no_invoice == False,  # has_invoice
-            Pool.delivered_at.isnot(None),  # is_delivered
-        )
+        records = self.pools_delivered_not_invoiced()
 
         customers_to_invoice = [
             case_obj.customer
@@ -823,11 +840,21 @@ class StatusHandler(BaseHandler):
 
     def pools_to_receive(self) -> Query:
         """Fetch pools that have been not yet been received."""
-        return self.Pool.query.filter(Pool.received_at.is_(None))
+        return apply_pool_filter(function="get_pool_is_not_received", pools=self._get_pool_query())
 
     def pools_to_deliver(self) -> Query:
-        """Fetch pools that have been not yet been delivered."""
-        return self.Pool.query.filter(Pool.received_at.isnot(None), Pool.delivered_at.is_(None))
+        """Fetch pools that are received but have been not yet been delivered."""
+        records = self._get_pool_query()
+        filter_functions: List[str] = [
+            "get_pool_is_received",
+            "get_pool_is_not_delivered",
+        ]
+        for filter_function in filter_functions:
+            records: Query = apply_pool_filter(
+                function=filter_function,
+                pools=records,
+            )
+        return records
 
     def _calculate_estimated_turnaround_time(
         self,
