@@ -106,10 +106,11 @@ def apply_sample_filter(
         "get_sample_do_invoice": get_sample_do_invoice,
         "get_sample_do_not_invoice": get_sample_do_not_invoice,
     }
+
     return filter_map[function](
-        samples=samples,
-        internal_id=internal_id,
         entry_id=entry_id,
+        internal_id=internal_id,
+        samples=samples,
         tissue_type=tissue_type,
         data_analysis=data_analysis,
     )
