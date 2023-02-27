@@ -284,7 +284,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id,
-            functions=["get_flow_cell_has_id"],
+            functions=["get_flow_cell_by_id"],
         )
 
     def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Query:
@@ -292,7 +292,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id_enquiry,
-            functions=["get_flow_cell_has_id_by_enquiry"],
+            functions=["get_flow_cell_by_id_and_by_enquiry"],
         )
 
     def get_flow_cells(self) -> List[Flowcell]:
@@ -313,7 +313,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return flow cell enquiry snd status."""
         filter_functions: List[str] = [
             "get_flow_cells_with_statuses",
-            "get_flow_cell_has_id_by_enquiry",
+            "get_flow_cell_by_id_and_by_enquiry",
         ]
         flow_cells: List[Flowcell] = apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),

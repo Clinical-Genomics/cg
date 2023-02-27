@@ -10,12 +10,12 @@ def get_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
     return flow_cells.filter(FamilySample.family == case)
 
 
-def get_flow_cell_has_id(flow_cells: Query, flow_cell_id: str, **kwargs) -> Flowcell:
+def get_flow_cell_by_id(flow_cells: Query, flow_cell_id: str, **kwargs) -> Flowcell:
     """Return flow cell by flow cell id."""
     return flow_cells.filter(Flowcell.name == flow_cell_id).first()
 
 
-def get_flow_cell_has_id_by_enquiry(flow_cells: Query, flow_cell_id: str, **kwargs) -> Query:
+def get_flow_cell_by_id_and_by_enquiry(flow_cells: Query, flow_cell_id: str, **kwargs) -> Query:
     """Return flow cell by flow cell id enquiry."""
     return flow_cells.filter(Flowcell.name.like(f"%{flow_cell_id}%"))
 
@@ -37,8 +37,8 @@ def apply_flow_cell_filter(
     """Apply filtering functions and return filtered results."""
     filter_map = {
         "get_flow_cells_by_case": get_flow_cells_by_case,
-        "get_flow_cell_has_id": get_flow_cell_has_id,
-        "get_flow_cell_has_id_by_enquiry": get_flow_cell_has_id_by_enquiry,
+        "get_flow_cell_by_id": get_flow_cell_by_id,
+        "get_flow_cell_by_id_and_by_enquiry": get_flow_cell_by_id_and_by_enquiry,
         "get_flow_cells_with_statuses": get_flow_cells_with_statuses,
     }
     for function in functions:

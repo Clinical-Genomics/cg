@@ -1,4 +1,6 @@
 """Constants for cg."""
+from enum import Enum
+
 import click
 from cgmodels.cg.constants import StrEnum
 
@@ -67,6 +69,14 @@ FLOWCELL_Q30_THRESHOLD = {
     Sequencers.HISEQGA: 80,
     Sequencers.NOVASEQ: 75,
 }
+
+
+class AnalysisType(StrEnum):
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+    OTHER: str = "other"
 
 
 class PrepCategory(StrEnum):

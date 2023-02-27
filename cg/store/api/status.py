@@ -243,7 +243,7 @@ class StatusHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            functions="get_flow_cells_by_case",
+            functions=["]get_flow_cells_by_case"],
             case=case,
         )
 

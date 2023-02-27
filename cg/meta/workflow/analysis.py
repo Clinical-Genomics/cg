@@ -11,6 +11,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
+from cg.constants.constants import AnalysisType
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -129,12 +130,16 @@ class AnalysisAPI(MetaAPI):
     def get_application_type(sample_obj: Sample) -> str:
         """
         Gets application type for sample. Only application types supported by trailblazer (or other)
-        are valid outputs
+        are valid outputs.
         """
-        analysis_type: str = sample_obj.application_version.application.prep_category
-        if analysis_type and analysis_type.lower() in {"wgs", "wes", "tgs"}:
-            return analysis_type.lower()
-        return "other"
+        prep_category: str = sample_obj.application_version.application.prep_category
+        if prep_category and prep_category.lower() in {
+            AnalysisType.TARGETED_GENOME_SEQUENCING,
+            AnalysisType.WHOLE_EXOME_SEQUENCING,
+            AnalysisType.WHOLE_GENOME_SEQUENCING,
+        }:
+            return prep_category.lower()
+        return AnalysisType.OTHER
 
     def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
