@@ -248,6 +248,9 @@ class FOHMUploadAPI:
         if os.listdir(self.daily_report_path) == []:
             self.daily_report_path.rmdir()
 
+        if os.listdir(self.daily_bundle_path) == []:
+            self.daily_bundle_path.rmdir()
+
     def sync_files_sftp(self) -> None:
         self.check_username()
         transport = paramiko.Transport((self.config.fohm.host, self.config.fohm.port))
