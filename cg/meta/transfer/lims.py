@@ -138,7 +138,7 @@ class TransferLims(object):
         return self._sample_functions[status_type]()
 
     def _get_all_relevant_samples(self):
-        return self.status.samples_not_downsampled()
+        return self.status.samples_not_down_sampled()
 
     @staticmethod
     def _is_pool_valid(pool_obj: cg.store.models.Pool, ticket: str, number_of_samples: int) -> bool:

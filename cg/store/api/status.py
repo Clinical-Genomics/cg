@@ -728,40 +728,69 @@ class StatusHandler(BaseHandler):
 
     def samples_to_deliver(self) -> Query:
         """Fetch samples that have been sequenced but not delivered."""
-        return self.Sample.query.filter(
-            Sample.sequenced_at.isnot(None),
-            Sample.delivered_at.is_(None),
-            Sample.downsampled_to.is_(None),
-        )
+        """Fetch samples not delivered."""
+        records = self._get_sample_query()
+        filter_functions: List[str] = [
+            "get_sample_sequenced",
+            "get_sample_not_down_sampled",
+            "get_sample_not_delivered",
+        ]
+        for filter_function in filter_functions:
+            records: Query = apply_sample_filter(
+                function=filter_function,
+                samples=records,
+            )
+        return records
 
     def samples_not_delivered(self) -> Query:
         """Fetch samples not delivered."""
-        return self.Sample.query.filter(
-            Sample.delivered_at.is_(None), Sample.downsampled_to.is_(None)
-        )
+        records = self._get_sample_query()
+        filter_functions: List[str] = ["get_sample_not_down_sampled", "get_sample_not_delivered"]
+        for filter_function in filter_functions:
+            records: Query = apply_sample_filter(
+                function=filter_function,
+                samples=records,
+            )
+        return records
 
     def samples_not_invoiced(self) -> Query:
         """Fetch all samples that are not invoiced."""
-        return self.Sample.query.filter(
-            Sample.downsampled_to.is_(None), Sample.invoice_id.is_(None)
+        records = self._get_sample_query()
+        filter_functions: List[str] = ["get_sample_not_down_sampled", "get_sample_not_invoice_id"]
+        for filter_function in filter_functions:
+            records: Query = apply_sample_filter(
+                function=filter_function,
+                samples=records,
+            )
+        return records
+
+    def samples_not_down_sampled(self) -> Query:
+        """Fetch all samples that are not down sampled."""
+        return apply_sample_filter(
+            function="get_samples_not_down_sampled", samples=self._get_sample_query()
         )
 
-    def samples_not_downsampled(self) -> Query:
-        """Fetch all samples that are not down sampled."""
-        return self.Sample.query.filter(Sample.downsampled_to.is_(None))
+    def samples_delivered_not_invoiced(self) -> Query:
+        """Returns samples have been delivered but not invoiced, excluding those that
+        have been marked to skip invoicing."""
+        records = self._get_sample_query()
+        filter_functions: List[str] = [
+            "get_sample_delivered",
+            "get_sample_not_invoice_id",
+            "get_sample_do_invoice",
+            "get_sample_not_down_sampled",
+        ]
+        for filter_function in filter_functions:
+            records: Query = apply_sample_filter(
+                function=filter_function,
+                samples=records,
+            )
+        return records
 
     def samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
-        """Fetch samples that should be invoiced.
+        """Fetch samples that should be invoiced."""
+        records = self.samples_delivered_not_invoiced()
 
-        Returns samples have been delivered but not invoiced, excluding those that
-        have been marked to skip invoicing.
-        """
-        records = self.Sample.query.filter(
-            Sample.delivered_at.isnot(None),
-            Sample.invoice_id.is_(None),
-            Sample.no_invoice == False,
-            Sample.downsampled_to.is_(None),
-        )
         customers_to_invoice = [
             case_obj.customer
             for case_obj in records.all()
