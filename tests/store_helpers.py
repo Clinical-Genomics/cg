@@ -672,6 +672,10 @@ class StoreHelpers:
         application_type: str = "tgs",
         is_external: bool = False,
         is_rna: bool = False,
+        delivered_at: datetime = None,
+        received_at: datetime = None,
+        no_invoice: bool = None,
+        invoice_id: int = None,
     ) -> models.Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
@@ -693,6 +697,10 @@ class StoreHelpers:
             application_version=application_version,
             customer=customer,
             order="test_order",
+            delivered_at=delivered_at,
+            received_at=received_at,
+            no_invoice=no_invoice,
+            invoice_id=invoice_id,
         )
         store.add_commit(pool)
         return pool

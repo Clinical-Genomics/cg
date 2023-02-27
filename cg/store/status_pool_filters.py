@@ -10,7 +10,7 @@ def get_pool_is_received(pools: Query) -> Query:
 
 def get_pool_is_not_received(pools: Query) -> Query:
     """Get pools that are not received."""
-    return pools.filter(Pool.received_at.isnot(None))
+    return pools.filter(Pool.received_at.is_(None))
 
 
 def get_pool_is_delivered(pools: Query) -> Query:
@@ -21,11 +21,6 @@ def get_pool_is_delivered(pools: Query) -> Query:
 def get_pool_is_not_delivered(pools: Query) -> Query:
     """Get pools that are not delivered."""
     return pools.filter(Pool.delivered_at.is_(None))
-
-
-def get_pool_with_invoice_id(pools: Query) -> Query:
-    """Get pools with invoice_id."""
-    return pools.filter(Pool.invoice_id.isnot(None))
 
 
 def get_pool_without_invoice_id(pools: Query) -> Query:

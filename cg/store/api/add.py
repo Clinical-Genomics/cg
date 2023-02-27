@@ -263,11 +263,14 @@ class AddHandler(BaseHandler):
         name: str,
         order: str,
         ordered: dt.datetime,
+        delivered_at: dt.datetime,
         application_version: models.ApplicationVersion,
         ticket: str = None,
         comment: str = None,
-        received: dt.datetime = None,
+        received_at: dt.datetime = None,
         capture_kit: str = None,
+        invoice_id: int = None,
+        no_invoice: bool = None,
     ) -> models.Pool:
         """Build a new Pool record."""
 
@@ -276,9 +279,12 @@ class AddHandler(BaseHandler):
             ordered_at=ordered or dt.datetime.now(),
             order=order,
             ticket=ticket,
-            received_at=received,
+            received_at=received_at,
             comment=comment,
             capture_kit=capture_kit,
+            delivered_at=delivered_at,
+            invoice_id=invoice_id,
+            no_invoice=no_invoice,
         )
         new_record.customer = customer
         new_record.application_version = application_version
