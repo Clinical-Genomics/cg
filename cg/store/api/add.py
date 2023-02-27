@@ -208,7 +208,7 @@ class AddHandler(BaseHandler):
         sequencer_name: str,
         sequencer_type: str,
         date: dt.datetime,
-        flow_cell_status: Optional[str] = FlowCellStatus.ONDISK,
+        flow_cell_status: Optional[str] = FlowCellStatus.ON_DISK,
     ) -> Flowcell:
         """Build a new Flowcell record."""
         return self.Flowcell(
