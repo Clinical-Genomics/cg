@@ -240,7 +240,7 @@ class FOHMUploadAPI:
                         file=file,
                     )
                 )
-                file.unlink()  # Delete report
+                file.unlink()
 
             except Exception as ex:
                 LOG.error(f"Failed sending email report {file} with error: {ex}")
@@ -259,7 +259,7 @@ class FOHMUploadAPI:
             try:
                 sftp.put(file.as_posix(), f"/till-fohm/{file.name}")
                 LOG.info(f"Finished sending {file}")
-                file.unlink()  # Delete raw data file
+                file.unlink()
             except Exception as ex:
                 LOG.error(f"Failed sending {file} with error: {ex}")
 
@@ -282,11 +282,11 @@ class FOHMUploadAPI:
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.commit()
 
-    def delete_empty_directories(self):
+    def delete_empty_directories(self) -> None:
         """Delete any empty directories in the fohm directory."""
         fohm_root = self._daily_bundle_path.parent.absolute().as_posix()
-        directories = list(os.walk(fohm_root))
+        directories = os.walk(top=fohm_root, topdown=False)
 
-        for path, _, _ in directories[::-1]:
+        for path, _, _ in directories:
             if os.listdir(path) == []:
                 os.rmdir(path)
