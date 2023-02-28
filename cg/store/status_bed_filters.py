@@ -1,4 +1,5 @@
-from typing import List, Optional
+from enum import Enum
+from typing import List, Optional, Callable
 
 from sqlalchemy.orm import Query
 
@@ -20,19 +21,20 @@ def order_beds_by_name(beds: Query, **kwargs) -> Query:
     return beds.order_by(Bed.name)
 
 
+class BedFilters(Enum):
+    get_beds_by_name = get_beds_by_name
+    get_not_archived_beds = get_not_archived_beds
+    order_beds_by_name = order_beds_by_name
+
+
 def apply_bed_filter(
     beds: Query,
-    functions: List[str],
+    functions: List[Callable],
     bed_name: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    filter_map = {
-        "get_beds_by_name": get_beds_by_name,
-        "get_not_archived_beds": get_not_archived_beds,
-        "order_beds_by_name": order_beds_by_name,
-    }
     for function in functions:
-        beds: Query = filter_map[function](
+        beds: Query = function(
             beds=beds,
             bed_name=bed_name,
         )

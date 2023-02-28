@@ -18,7 +18,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
-from cg.store.status_bed_filters import apply_bed_filter
+from cg.store.status_bed_filters import apply_bed_filter, BedFilters
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -57,12 +57,15 @@ class FindBasicDataHandler(BaseHandler):
     def get_bed_by_name(self, bed_name: str) -> Optional[Bed]:
         """Return bed by name."""
         return apply_bed_filter(
-            beds=self._get_bed_query(), bed_name=bed_name, functions=["get_beds_by_name"]
+            beds=self._get_bed_query(), bed_name=bed_name, functions=[BedFilters.get_beds_by_name]
         ).first()
 
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
-        bed_filter_functions: List[str] = ["get_not_archived_beds", "order_beds_by_name"]
+        bed_filter_functions: List[str] = [
+            BedFilters.get_not_archived_beds,
+            BedFilters.order_beds_by_name,
+        ]
         return apply_bed_filter(beds=self._get_bed_query(), functions=bed_filter_functions)
 
     def get_latest_bed_version(self, bed_name: str) -> Optional[BedVersion]:
