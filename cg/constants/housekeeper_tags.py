@@ -65,7 +65,30 @@ class GensAnalysisTag:
 
 
 WORKFLOW_PROTECTED_TAGS = {
-    str(Pipeline.BALSAMIC): [],
+    str(Pipeline.BALSAMIC): [
+        ["balsamic-report"],
+        ["balsamic-config"],
+        ["cnvkit", "sv-vcf", "filtered"],
+        ["cnvkit", "sv-vcf-index", "filtered"],
+        ["multiqc-html"],
+        ["tumor", "scope", "vcf-snv-research"],
+        ["tumor", "scope", "vcf-snv-research-index"],
+        ["vcf", "sention", "haplotype-caller", "filtered"],
+        ["vcf-index", "sention", "haplotype-caller", "filtered"],
+        ["vcf", "tumor", "haplotype-caller"],
+        ["vcf-index", "tumor", "haplotype-caller"],
+        ["vcf-sv-research", "manta", "tumor"],
+        ["vcf-sv-research-index", "manta", "tumor"],
+        ["vcf-snv-clinical", "scope", "filtered", "sention"],
+        ["vcf-snv-clinical-index", "scope", "filtered", "sention"],
+        ["vcf-snv-clinical", "filtered"],
+        ["vcf-snv-clinical-index", "filtered"],
+        ["vcf", "filtered"],
+        ["vcf-index", "filtered"],
+    ],
+    str(Pipeline.BALSAMIC_QC): [],
+    str(Pipeline.BALSAMIC_PON): [],
+    str(Pipeline.BALSAMIC_UMI): [],
     str(Pipeline.FASTQ): [],
     str(Pipeline.FLUFFY): ["NIPT_csv", "MultiQC"],
     str(Pipeline.MICROSALT): [
