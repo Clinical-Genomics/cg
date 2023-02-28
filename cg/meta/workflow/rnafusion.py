@@ -138,14 +138,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             input=None,
             outdir=None,
             genomes_base=None,
-            trim=RnafusionDefaults.TRIM,
-            fusioninspector_filter=RnafusionDefaults.FUSIONINSPECTOR_FILTER,
-            all=RnafusionDefaults.ALL,
-            pizzly=RnafusionDefaults.PIZZLY,
-            squid=RnafusionDefaults.SQUID,
-            starfusion=RnafusionDefaults.STARFUSION,
-            fusioncatcher=RnafusionDefaults.FUSIONCATCHER,
-            arriba=RnafusionDefaults.ARRIBA,
+            trim=RnafusionDefaults.TRIM.value,
+            fusioninspector_filter=RnafusionDefaults.FUSIONINSPECTOR_FILTER.value,
+            all=RnafusionDefaults.ALL.value,
+            pizzly=RnafusionDefaults.PIZZLY.value,
+            squid=RnafusionDefaults.SQUID.value,
+            starfusion=RnafusionDefaults.STARFUSION.value,
+            fusioncatcher=RnafusionDefaults.FUSIONCATCHER.value,
+            arriba=RnafusionDefaults.ARRIBA.value,
             cli=False,
         )
         LOG.info(default_options)
@@ -162,14 +162,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
             return genomes_base
-        return Path(self.references)
+        return Path(self.references).as_posix()
 
     def get_verified_arguments(
         self,
         case_id: str,
-        input: Optional[Path],
-        outdir: Optional[Path],
-        genomes_base: Optional[Path],
+        input: Optional[str],
+        outdir: Optional[str],
+        genomes_base: Optional[str],
         trim: bool,
         fusioninspector_filter: bool,
         all: bool,
