@@ -1,6 +1,6 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 from sqlalchemy import desc
 from sqlalchemy.orm import Query
@@ -62,7 +62,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
-        bed_filter_functions: List[str] = [
+        bed_filter_functions: List[Callable] = [
             BedFilters.get_not_archived_beds,
             BedFilters.order_beds_by_name,
         ]
