@@ -133,7 +133,7 @@ def test_get_sample_files_from_version(
     hk_api = deliver_api.hk_api
     case_hk_bundle_no_files["files"] = [
         {"path": bed_file.as_posix(), "archive": False, "tags": ["case-tag"]},
-        {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
+        {"path": str(vcf_file), "archive": False, "tags": ["cram", "ADM1"]},
     ]
     helpers.ensure_hk_bundle(hk_api, bundle_data=case_hk_bundle_no_files)
     # GIVEN a version object with some files
