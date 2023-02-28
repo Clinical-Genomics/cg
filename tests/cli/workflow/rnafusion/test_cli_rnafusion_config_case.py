@@ -106,3 +106,21 @@ def test_wrong_strandedness(
     )
     # THEN command should fail
     assert result.exit_code != EXIT_SUCCESS
+
+
+def test_params_file(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test command generates default params_file."""
+    caplog.set_level(logging.INFO)
+    # GIVEN a VALID case_id and genome_version
+    case_id: str = rnafusion_case_id
+    # WHEN running config case
+    result = cli_runner.invoke(config_case, [case_id], obj=rnafusion_context)
+    # THEN command should print the rnafusion command-string
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN parameters file should be generated
+    assert "Generating parameters file" in caplog.text
