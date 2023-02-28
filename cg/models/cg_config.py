@@ -8,6 +8,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.crunchy import CrunchyAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
+from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -245,6 +246,8 @@ class CGConfig(BaseModel):
     external: ExternalConfig = None
     genotype: CommonAppConfig = None
     genotype_api_: GenotypeAPI = None
+    gens: CommonAppConfig = None
+    gens_api_: GensAPI = None
     hermes: CommonAppConfig = None
     hermes_api_: HermesApi = None
     lims: LimsConfig = None
@@ -289,6 +292,7 @@ class CGConfig(BaseModel):
             "crunchy_api_": "crunchy_api",
             "demultiplex_api_": "demultiplex_api",
             "genotype_api_": "genotype_api",
+            "gens_api_": "gens_api",
             "hermes_api_": "hermes_api",
             "housekeeper_api_": "housekeeper_api",
             "lims_api_": "lims_api",
@@ -344,6 +348,16 @@ class CGConfig(BaseModel):
             LOG.debug("Instantiating genotype api")
             api = GenotypeAPI(config=self.dict())
             self.genotype_api_ = api
+        return api
+
+    @property
+    def gens_api(self) -> GensAPI:
+        """Returns Gens API after making sure it has been instantiated."""
+        api = self.__dict__.get("gens_api_")
+        if api is None:
+            LOG.debug("Instantiating gens api")
+            api = GensAPI(config=self.dict())
+            self.gens_api_ = api
         return api
 
     @property

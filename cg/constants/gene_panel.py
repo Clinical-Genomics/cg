@@ -34,6 +34,7 @@ class GenePanelMasterList(StrEnum):
     PIDCAD: str = "PIDCAD"
     RETINA: str = "RETINA"
     OMIM_AUTO: str = "OMIM-AUTO"
+    PANELAPP_GREEN: str = "PANELAPP-GREEN"
     SKD: str = "SKD"
     SOVM: str = "SOVM"
 

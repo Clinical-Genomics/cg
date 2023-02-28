@@ -1,4 +1,4 @@
-"""Fixtures for cli tests."""
+"""Fixtures for CLI tests."""
 from pathlib import Path
 from typing import Dict, Any
 
@@ -31,7 +31,7 @@ def fixture_application_tag() -> str:
 def fixture_base_context(
     base_store: Store, housekeeper_api: HousekeeperAPI, cg_config_object: CGConfig
 ) -> CGConfig:
-    """context to use in cli"""
+    """context to use in CLI."""
     cg_config_object.status_db_ = base_store
     cg_config_object.housekeeper_api_ = housekeeper_api
     return cg_config_object

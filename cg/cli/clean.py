@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional, Tuple, Iterable, Dict
+from typing import List, Optional
 
 import click
 from alchy import Query
@@ -17,8 +17,12 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.commands import (
     balsamic_past_run_dirs,
+    balsamic_qc_past_run_dirs,
+    balsamic_umi_past_run_dirs,
+    balsamic_pon_past_run_dirs,
     fluffy_past_run_dirs,
-    mip_past_run_dirs,
+    mip_dna_past_run_dirs,
+    mip_rna_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
@@ -28,15 +32,15 @@ from cg.constants import FlowCellStatus
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.constants.sequencing import Sequencers
 from cg.constants.housekeeper_tags import SequencingFileTag, ALIGNMENT_FILE_TAGS, ScoutTag
-from cg.datetime.utils import get_date_days_ago, get_timedelta_from_date
-from cg.exc import FlowCellError
+from cg.models.demultiplex.flow_cell import FlowCell as DemultiplexFlowCell
+from cg.utils.date import get_timedelta_from_date, get_date_days_ago
+from cg.exc import FlowCellError, HousekeeperBundleVersionMissingError
 from cg.meta.clean.api import CleanAPI
 from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Sample
+from cg.store.models import Sample, Flowcell
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -60,8 +64,12 @@ def clean():
 
 for sub_cmd in [
     balsamic_past_run_dirs,
+    balsamic_qc_past_run_dirs,
+    balsamic_umi_past_run_dirs,
+    balsamic_pon_past_run_dirs,
     fluffy_past_run_dirs,
-    mip_past_run_dirs,
+    mip_dna_past_run_dirs,
+    mip_rna_past_run_dirs,
     mutant_past_run_dirs,
     rnafusion_past_run_dirs,
     rsync_past_run_dirs,
@@ -312,37 +320,46 @@ def remove_invalid_flow_cell_directories(context: CGConfig, failed_only: bool, d
 @DRY_RUN
 @click.pass_obj
 def fix_flow_cell_status(context: CGConfig, dry_run: bool):
-    """set correct flow cell statuses in Statusdb."""
+    """Set correct flow cell statuses in Statusdb."""
     status_db: Store = context.status_db
-    demux_api: DemultiplexingAPI = context.demultiplex_api
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
-    flow_cells_in_statusdb = [
-        flow_cell
-        for flow_cell in status_db.flowcells()
-        if flow_cell.status in [FlowCellStatus.ONDISK, FlowCellStatus.REMOVED]
-    ]
-    LOG.info(
-        f"Number of flow cells with status {FlowCellStatus.ONDISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
+    flow_cells_in_statusdb: List[Flowcell] = list(
+        status_db.get_flow_cells_by_statuses(
+            flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REMOVED]
+        )
     )
-    flow_cells_on_disk = [
-        DemultiplexedRunsFlowCell(
-            flow_cell_path=flow_cell_dir,
-            status_db=status_db,
-            housekeeper_api=housekeeper_api,
-        ).id
-        for flow_cell_dir in demux_api.out_dir.iterdir()
-    ]
+
+    LOG.info(
+        f"Number of flow cells with status {FlowCellStatus.ON_DISK.value} or {FlowCellStatus.REMOVED} in Statusdb: {len(flow_cells_in_statusdb)}"
+    )
+
     for flow_cell in flow_cells_in_statusdb:
-        status_db_flow_cell_status = flow_cell.status
+        sample_bundle_names: List[str] = [sample.internal_id for sample in flow_cell.samples]
+        are_sequencing_files_in_hk: bool = False
+        are_sequencing_files_on_disk: bool = False
+        try:
+            are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
+                bundle_names=sample_bundle_names
+            )
+            are_sequencing_files_on_disk: bool = (
+                housekeeper_api.is_fastq_or_spring_on_disk_in_all_bundles(
+                    bundle_names=sample_bundle_names
+                )
+            )
+        except HousekeeperBundleVersionMissingError:
+            LOG.warning(
+                f"Cannot find sample bundle in Housekeeper for sample on flow cell: {flow_cell.name}"
+            )
         new_status: str = (
-            FlowCellStatus.ONDISK
-            if flow_cell.name in flow_cells_on_disk
+            FlowCellStatus.ON_DISK
+            if are_sequencing_files_in_hk and are_sequencing_files_on_disk
             else FlowCellStatus.REMOVED
         )
-        if status_db_flow_cell_status != new_status:
+
+        if flow_cell.status != new_status:
             LOG.info(
-                f"Setting status of flow cell {flow_cell.name} from: {status_db_flow_cell_status} to {new_status}"
+                f"Setting status of flow cell {flow_cell.name} from: {flow_cell.status} to {new_status}"
             )
             if dry_run:
                 continue
@@ -426,7 +443,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
     trailblazer_api: TrailblazerAPI = context.trailblazer_api
     for flow_cell_dir in demux_api.get_all_demultiplexed_flow_cell_dirs():
         try:
-            flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_dir)
+            flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
         except FlowCellError:
             continue
         samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)

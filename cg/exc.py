@@ -100,8 +100,8 @@ class FlowCellError(CgError):
     """Raised when there is a problem with demultiplexing a flow cell."""
 
 
-class FlowcellsNeededError(CgError):
-    """Raised when fetching flowcells still needed to start analysis."""
+class FlowCellsNeededError(CgError):
+    """Raised when fetching flow cells still needed to start analysis."""
 
 
 class GisaidUploadFailedError(CgError):

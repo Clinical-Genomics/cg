@@ -1,13 +1,11 @@
 ---
-
 name: Deploy branch to staging environment
 
 on:
   workflow_dispatch:
     inputs:
       branch_name:
-        description: 'Branch name'
-
+        description: "Branch name"
 
 jobs:
   create_deployment:
