@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
 from housekeeper.store.models import File
@@ -14,7 +14,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Pipeline, FileExtensions
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -27,18 +27,18 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer
+from cg.store.models import Customer, BedVersion, Bed
 
-from .mocks.crunchy import MockCrunchyAPI
-from .mocks.hk_mock import MockHousekeeperAPI
-from .mocks.limsmock import MockLimsAPI
-from .mocks.madeline import MockMadelineAPI
-from .mocks.osticket import MockOsTicket
-from .mocks.process_mock import ProcessMock
-from .mocks.scout import MockScoutAPI
-from .mocks.tb_mock import MockTB
-from .small_helpers import SmallHelpers
-from .store_helpers import StoreHelpers
+from tests.mocks.crunchy import MockCrunchyAPI
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.osticket import MockOsTicket
+from tests.mocks.process_mock import ProcessMock
+from tests.mocks.scout import MockScoutAPI
+from tests.mocks.tb_mock import MockTB
+from tests.small_helpers import SmallHelpers
+from tests.store_helpers import StoreHelpers
 
 from housekeeper.store.models import Version
 
@@ -1050,8 +1050,14 @@ def fixture_apptag_rna() -> str:
     return "RNAPOAR025"
 
 
+@pytest.fixture(name="bed_name")
+def fixture_bed_name() -> str:
+    """Return a bed model name attribute."""
+    return "Bed"
+
+
 @pytest.fixture(name="base_store")
-def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store:
+def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: Store) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration("all_customers", "all customers")
 
@@ -1199,9 +1205,12 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
     ]
     store.add_commit(versions)
 
-    beds = [store.add_bed("Bed")]
+    beds: List[Bed] = [store.add_bed(name=bed_name)]
     store.add_commit(beds)
-    bed_versions = [store.add_bed_version(bed, 1, "Bed.bed") for bed in beds]
+    bed_versions: List[BedVersion] = [
+        store.add_bed_version(bed=bed, version=1, filename=bed_name + FileExtensions.BED)
+        for bed in beds
+    ]
     store.add_commit(bed_versions)
 
     organism = store.add_organism("C. jejuni", "C. jejuni")
@@ -1388,13 +1397,13 @@ def fixture_microsalt_dir(tmpdir_factory) -> Path:
 @pytest.fixture()
 def current_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
-    return Path("/home/ENCRYPT/")
+    return Path("home", "ENCRYPT")
 
 
 @pytest.fixture()
 def legacy_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
-    return Path("/home/TO_PDC/")
+    return Path("home", "TO_PDC")
 
 
 @pytest.fixture(name="cg_uri")
