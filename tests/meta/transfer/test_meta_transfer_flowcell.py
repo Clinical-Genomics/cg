@@ -433,7 +433,7 @@ def test_transfer(
     # GIVEN a store with a received but not sequenced sample
     housekeeper_api: HousekeeperAPI = transfer_flow_cell_api.hk
     assert flowcell_store.samples().count() == 2
-    assert flowcell_store.flowcells().count() == 0
+    assert flowcell_store.get_flow_cells().count() == 0
     assert housekeeper_api.bundles().count() == 0
 
     # GIVEN a sample sheet
@@ -446,9 +446,9 @@ def test_transfer(
             flow_cell_id=yet_another_flow_cell_id,
         )
 
-    # THEN it should create a new flowcell record
-    assert flowcell_store.flowcells().count() == 1
-    assert flow_cell.status == FlowCellStatus.ONDISK
+    # THEN it should create a new flow cell record
+    assert flowcell_store.get_flow_cells().count() == 1
+    assert flow_cell.status == FlowCellStatus.ON_DISK
     assert isinstance(flow_cell.id, int)
     assert flow_cell.name == yet_another_flow_cell_id
     status_sample = flowcell_store.samples().first()

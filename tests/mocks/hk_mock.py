@@ -12,7 +12,7 @@ from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
 from cg.store import models
 
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import File, Version, Bundle
 
 ROOT_PATH = tempfile.TemporaryDirectory().name
 
@@ -473,7 +473,7 @@ class MockHousekeeperAPI:
                 )
         return file_paths
 
-    def create_new_bundle_and_version(self, name: str):
+    def create_new_bundle_and_version(self, name: str) -> Bundle:
         """Create new bundle with version"""
         new_bundle = self.new_bundle(name=name)
         self.add_commit(new_bundle)
