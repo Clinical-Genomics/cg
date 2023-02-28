@@ -11,7 +11,7 @@ def test_get_bed_query(base_store: Store):
 
     # GIVEN a store with bed records
 
-    # WHEN getting the query for the flow cells
+    # WHEN getting the query for the beds
     bed_query: Query = base_store._get_bed_query()
 
     # THEN a query should be returned
@@ -99,3 +99,29 @@ def test_get_latest_bed_version(base_store: Store, bed_name: str):
 
     # THEN return a bed version with the supplied bed name
     assert bed_version.version == 1
+
+
+def test_get_bed_version_query(base_store: Store):
+    """Test function to return the bed version query."""
+
+    # GIVEN a store with bed versions records
+
+    # WHEN getting the query for the bed versions
+    bed_version_query: Query = base_store._get_bed_version_query()
+
+    # THEN a query should be returned
+    assert isinstance(bed_version_query, Query)
+
+
+def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
+    """Test function to return the bed version by short name."""
+
+    # GIVEN a store with bed versions records
+
+    # WHEN getting the query for the bed versions
+    bed_version: BedVersion = base_store.get_bed_version_by_short_name(
+        bed_version_short_name=bed_version_short_name
+    )
+
+    # THEN return a bed version with the supplied bed version short name
+    assert bed_version.shortname == bed_version_short_name

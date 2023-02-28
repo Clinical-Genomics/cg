@@ -106,11 +106,13 @@ class AddHandler(BaseHandler):
         return self.Bed(name=name, **kwargs)
 
     def add_bed_version(
-        self, bed: models.Bed, version: int, filename: str, **kwargs
+        self, bed: models.Bed, version: int, filename: str, shortname: str, **kwargs
     ) -> models.BedVersion:
         """Build a new bed version record."""
 
-        new_record = self.BedVersion(version=version, filename=filename, **kwargs)
+        new_record = self.BedVersion(
+            version=version, filename=filename, shortname=shortname, **kwargs
+        )
         new_record.bed = bed
         return new_record
 
