@@ -26,6 +26,7 @@ from cg.store.models import (
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
 from cg.store.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilters
 from cg.store.status_sample_filters import apply_sample_filter, SampleFilters
+from cg.store.status_invoice_filters import apply_invoice_filter, InvoiceFilters
 
 LOG = logging.getLogger(__name__)
 
@@ -370,11 +371,15 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_invoices_by_status(self, invoiced: bool = None) -> Query:
         """Fetch invoices by invoiced status."""
-        invoices = self._get_invoices()
+        invoices = self._get_invoice_query()
         if invoiced:
-            return query.filter(Invoice.invoiced_at.isnot(None))
+            return apply_invoice_filter(
+                invoices=invoices, functions=[InvoiceFilters.get_invoice_invoiced]
+            )
         else:
-            return query.filter(Invoice.invoiced_at.is_(None))
+            return apply_invoice_filter(
+                invoices=invoices, functions=[InvoiceFilters.get_invoice_not_invoiced]
+            )
 
     def invoice(self, invoice_id: int) -> Invoice:
         """Fetch an invoice."""
@@ -483,7 +488,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_by_name(self, name: str) -> Sample:
         return self.Sample.query.filter(Sample.name == name).first()
 
-    def _get_sample_case_query(self) -> Query:
+    def _join_sample_family_query(self) -> Query:
         """Return a sample case relationship query."""
         return self.Sample.query.join(Family.links, FamilySample.sample)
 
@@ -491,7 +496,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
             functions=[CaseSampleFilters.get_samples_associated_with_case],
-            case_samples=self._get_sample_case_query(),
+            case_samples=self._join_sample_family_query(),
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(

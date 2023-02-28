@@ -29,7 +29,7 @@ def get_invoice_not_invoiced(invoices: Query, **kwargs) -> Query:
     return invoices.filter(Invoice.invoiced_at.is_(None))
 
 
-def apply_sample_filter(
+def apply_invoice_filter(
     functions: List[str],
     invoices: Query,
 ) -> Query:
@@ -41,7 +41,7 @@ def apply_sample_filter(
 
 
 class InvoiceFilters(Enum):
-    get_invoice_by_id: Callable = get_invoice_by_id
+    get_invoice_by_id: Callable = get_invoice_by_invoice_id
     get_invoice_by_customer_id: Callable = get_invoice_by_customer_id
     get_invoice_by_customer_name: Callable = get_invoice_by_customer_name
     get_invoice_invoiced: Callable = get_invoice_invoiced
