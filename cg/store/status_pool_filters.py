@@ -1,6 +1,30 @@
+from enum import Enum
 from typing import List, Optional
 from alchy import Query
 from cg.store.models import Pool
+
+
+class PoolFilters(str, Enum):
+    get_pool_by_id = ("get_pool_by_id",)
+    get_pool_by_name = ("get_pool_by_name",)
+    get_pool_is_received = ("get_pool_is_received",)
+    get_pool_is_not_received = ("get_pool_is_not_received",)
+    get_pool_is_delivered = ("get_pool_is_delivered",)
+    get_pool_is_not_delivered = ("get_pool_is_not_delivered",)
+    get_pool_without_invoice_id = ("get_pool_without_invoice_id",)
+    get_pool_do_invoice = ("get_pool_do_invoice",)
+    get_pool_do_not_invoice = ("get_pool_do_not_invoice",)
+    get_pool_by_invoice_id = ("get_pool_by_invoice_id",)
+
+
+def get_pool_by_id(pools: Query, pool_id: int) -> Query:
+    """Get a pool by id."""
+    return pools.filter(Pool.id == pool_id)
+
+
+def get_pool_by_name(pools: Query, pool_name: str) -> Query:
+    """Get a pool by name."""
+    return pools.filter(Pool.name == pool_name)
 
 
 def get_pool_is_received(pools: Query) -> Query:
@@ -49,14 +73,16 @@ def apply_pool_filter(
     """Apply filtering functions to the pool queries and return filtered results"""
 
     filter_map = {
-        "get_pool_is_received": get_pool_is_received,
-        "get_pool_is_not_received": get_pool_is_not_received,
-        "get_pool_is_delivered": get_pool_is_delivered,
-        "get_pool_is_not_delivered": get_pool_is_not_delivered,
-        "get_pool_by_invoice_id": get_pool_by_invoice_id,
-        "get_pool_without_invoice_id": get_pool_without_invoice_id,
-        "get_pool_do_invoice": get_pool_do_invoice,
-        "get_pool_do_not_invoice": get_pool_do_not_invoice,
+        PoolFilters.get_pool_by_id: get_pool_by_id,
+        PoolFilters.get_pool_by_name: get_pool_by_name,
+        PoolFilters.get_pool_is_received: get_pool_is_received,
+        PoolFilters.get_pool_is_not_received: get_pool_is_not_received,
+        PoolFilters.get_pool_is_delivered: get_pool_is_delivered,
+        PoolFilters.get_pool_is_not_delivered: get_pool_is_not_delivered,
+        PoolFilters.get_pool_without_invoice_id: get_pool_without_invoice_id,
+        PoolFilters.get_pool_do_invoice: get_pool_do_invoice,
+        PoolFilters.get_pool_do_not_invoice: get_pool_do_not_invoice,
+        PoolFilters.get_pool_by_invoice_id: get_pool_by_invoice_id,
     }
 
     for function in functions:
