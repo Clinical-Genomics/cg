@@ -263,7 +263,6 @@ class AddHandler(BaseHandler):
         name: str,
         order: str,
         ordered: dt.datetime,
-        delivered_at: dt.datetime,
         application_version: models.ApplicationVersion,
         ticket: str = None,
         comment: str = None,
@@ -271,6 +270,7 @@ class AddHandler(BaseHandler):
         capture_kit: str = None,
         invoice_id: int = None,
         no_invoice: bool = None,
+        delivered_at: dt.datetime = None,
     ) -> models.Pool:
         """Build a new Pool record."""
 

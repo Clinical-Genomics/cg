@@ -16,6 +16,7 @@ from cg.store.status_sample_filters import (
     get_sample_is_not_sequenced,
     get_sample_do_invoice,
     get_sample_do_not_invoice,
+    get_sample_by_invoice_id,
 )
 from datetime import datetime
 
@@ -110,7 +111,7 @@ def test_filter_sample_is_not_delivered(
 ):
     """Test that a sample is returned when there is a sample that is not delivered."""
 
-    # GIVEN a delivered sample
+    # GIVEN a not delivered sample
     helpers.add_sample(base_store, delivered_at=timestamp_now)
 
     # GIVEN a sample Query
@@ -123,18 +124,34 @@ def test_filter_sample_is_not_delivered(
     assert samples
 
 
-def test_filter_sample_without_invoice_id(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: None
-):
-    """Test that a sample is returned when there is a sample without invoice_id."""
+def test_filter_get_sample_by_invoice_id(base_store: Store, helpers: StoreHelpers, invoice_id=5):
+    """Test that a sample is returned when there is a sample with the specified invoice_id."""
 
-    # GIVEN a delivered sample
-    helpers.add_sample(base_store, invoice_id=None)
+    # GIVEN a with an invoice_id
+    helpers.add_sample(base_store, invoice_id=invoice_id)
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting not delivered samples
+    # WHEN getting samples by invoice_id
+    samples: List[Query] = list(get_sample_by_invoice_id(samples=samples, invoice_id=invoice_id))
+
+    # THEN samples should contain the test sample
+    assert samples
+
+
+def test_filter_sample_without_invoice_id(
+    base_store: Store, helpers: StoreHelpers, invoice_id=None
+):
+    """Test that a sample is returned when there is a sample without invoice_id."""
+
+    # GIVEN a sampled without invoice_id
+    helpers.add_sample(base_store, invoice_id=invoice_id)
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting samples without invoice_id
     samples: List[Query] = list(get_sample_without_invoice_id(samples=samples))
 
     # THEN samples should contain the test sample
@@ -150,7 +167,7 @@ def test_filter_sample_down_sampled(base_store: Store, helpers: StoreHelpers, ti
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting not delivered samples
+    # WHEN getting not samples that are down sampled
     samples: List[Query] = list(get_sample_down_sampled(samples=samples))
 
     # THEN samples should contain the test sample
@@ -168,7 +185,7 @@ def test_filter_sample_not_down_sampled(
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting not delivered samples
+    # WHEN getting not samples that are not down sampled
     samples: List[Query] = list(get_sample_not_down_sampled(samples=samples))
 
     # THEN samples should contain the test sample
@@ -184,7 +201,7 @@ def test_filter_sample_is_sequenced(base_store: Store, helpers: StoreHelpers, ti
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting not delivered samples
+    # WHEN getting sequenced samples
     samples: List[Query] = list(get_sample_is_sequenced(samples=samples))
 
     # THEN samples should contain the test sample
@@ -196,13 +213,13 @@ def test_filter_sample_is_not_sequenced(
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
-    # GIVEN a delivered sample
+    # GIVEN a sample that is not sequenced
     helpers.add_sample(base_store, sequenced_at=None)
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting not delivered samples
+    # WHEN getting not sequenced samples
     samples: List[Query] = list(get_sample_is_not_sequenced(samples=samples))
 
     # THEN samples should contain the test sample
@@ -212,13 +229,13 @@ def test_filter_sample_is_not_sequenced(
 def test_filter_sample_do_invoice(base_store: Store, helpers: StoreHelpers, timestamp_now: None):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
-    # GIVEN a delivered sample
+    # GIVEN a samples marked to be invoiced
     helpers.add_sample(base_store, no_invoice=False)
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting not delivered samples
+    # WHEN getting  samples mark to be invoiced
     samples: List[Query] = list(get_sample_do_invoice(samples=samples))
 
     # THEN samples should contain the test sample
@@ -230,13 +247,13 @@ def test_filter_sample_do_not_invoice(
 ):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
-    # GIVEN a delivered sample
+    # GIVEN a  sample marked to skip invoicing
     helpers.add_sample(base_store, no_invoice=True)
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting not delivered samples
+    # WHEN getting samples that are marked to skip invoicing
     samples: List[Query] = list(get_sample_do_not_invoice(samples=samples))
 
     # THEN samples should contain the test sample

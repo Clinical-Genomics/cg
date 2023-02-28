@@ -47,6 +47,11 @@ def get_sample_is_not_delivered(samples: Query) -> Query:
     return samples.filter(Sample.delivered_at.is_(None))
 
 
+def get_sample_by_invoice_id(samples: Query, invoice_id: int) -> Query:
+    """Get samples by invoice_id"""
+    return samples.filter(Sample.invoice_id == invoice_id)
+
+
 def get_sample_without_invoice_id(samples: Query) -> Query:
     """Get samples that are not attached to an invoice."""
     return samples.filter(Sample.invoice_id.is_(None))
@@ -89,6 +94,7 @@ def apply_sample_filter(
     internal_id: Optional[str] = None,
     tissue_type: Optional[SampleType] = None,
     data_analysis: Optional[str] = None,
+    invoice_id: Optional[int] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
     filter_map = {
@@ -100,6 +106,7 @@ def apply_sample_filter(
         "get_sample_by_analysis": get_samples_by_analysis,
         "get_sample_is_delivered": get_sample_is_delivered,
         "get_sample_is_not_delivered": get_sample_is_not_delivered,
+        "get_sample_by_invoice_id": get_sample_by_invoice_id,
         "get_sample_without_invoice_id": get_sample_without_invoice_id,
         "get_sample_down_sampled": get_sample_down_sampled,
         "get_sample_not_down_sampled": get_sample_not_down_sampled,
@@ -116,5 +123,6 @@ def apply_sample_filter(
             samples=samples,
             tissue_type=tissue_type,
             data_analysis=data_analysis,
+            invoice_id=invoice_id,
         )
     return samples
