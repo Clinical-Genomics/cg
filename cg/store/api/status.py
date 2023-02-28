@@ -24,58 +24,63 @@ from cg.store.api.base import BaseHandler
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
 from cg.store.status_sample_filters import apply_sample_filter, SampleFilters
 from cg.store.status_pool_filters import apply_pool_filter, PoolFilters
+from cg.store.status_application_filter import apply_application_filter, ApplicationFilters
 
 
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database."""
 
-    def samples_to_receive(self, external=False) -> Query:
-        """Fetch incoming samples."""
-        return (
-            self.Sample.query.join(
-                Sample.application_version,
-                ApplicationVersion.application,
+    def _join_sample_application_version_query(self, query: Query) -> Query:
+        """Join sample to application version."""
+        return query.join(Sample.application_version, ApplicationVersion.application)
+
+    def samples_to_receive(self, external: bool = False) -> Query:
+        """Fetch top samples to receive."""
+        samples = self._join_sample_application_version_query(query=self._get_sample_query())
+        sample_filter_functions: List[SampleFilters] = [
+            SampleFilters.get_sample_is_not_received,
+            SampleFilters.get_sample_not_down_sampled,
+        ]
+        samples = apply_sample_filter(samples=samples, functions=sample_filter_functions)
+        if external:
+            samples = apply_application_filter(
+                applications=samples, functions=[ApplicationFilters.get_application_is_external]
             )
-            .filter(
-                Sample.received_at.is_(None),
-                Sample.downsampled_to.is_(None),
-                Application.is_external == external,
+        else:
+            samples = apply_application_filter(
+                applications=samples, functions=[ApplicationFilters.get_application_is_not_external]
             )
-            .order_by(Sample.ordered_at)
+        return samples.order_by(Sample.ordered_at)
+
+    def samples_to_prepare(self):
+        """Fetch samples to prepare."""
+        samples = self._join_sample_application_version_query(query=self._get_sample_query())
+        sample_filter_functions: List[SampleFilters] = [
+            SampleFilters.get_sample_is_received,
+            SampleFilters.get_sample_is_not_prepared,
+            SampleFilters.get_sample_not_down_sampled,
+            SampleFilters.get_sample_is_not_sequenced,
+        ]
+        samples = apply_sample_filter(samples=samples, functions=sample_filter_functions)
+        samples = apply_application_filter(
+            applications=samples, functions=[ApplicationFilters.get_application_is_not_external]
         )
 
-    def samples_to_prepare(self) -> Query:
-        """Fetch samples in lab prep queue."""
-        return (
-            self.Sample.query.join(
-                Sample.application_version,
-                ApplicationVersion.application,
-            )
-            .filter(
-                Sample.received_at.isnot(None),
-                Sample.prepared_at.is_(None),
-                Sample.downsampled_to.is_(None),
-                Application.is_external == False,
-                Sample.sequenced_at.is_(None),
-            )
-            .order_by(Sample.received_at)
-        )
+        return samples.order_by(Sample.received_at)
 
     def samples_to_sequence(self) -> Query:
         """Fetch samples in sequencing."""
-        return (
-            self.Sample.query.join(
-                Sample.application_version,
-                ApplicationVersion.application,
-            )
-            .filter(
-                Sample.prepared_at.isnot(None),
-                Sample.sequenced_at.is_(None),
-                Sample.downsampled_to.is_(None),
-                Application.is_external == False,
-            )
-            .order_by(Sample.received_at)
+        samples = self._join_sample_application_version_query(query=self._get_sample_query())
+        sample_filter_functions: List[SampleFilters] = [
+            SampleFilters.get_sample_is_prepared,
+            SampleFilters.get_sample_is_not_sequenced,
+            SampleFilters.get_sample_not_down_sampled,
+        ]
+        samples = apply_sample_filter(samples=samples, functions=sample_filter_functions)
+        samples = apply_application_filter(
+            applications=samples, functions=[ApplicationFilters.get_application_is_not_external]
         )
+        return samples.order_by(Sample.prepared_at)
 
     def get_families_with_analyses(self) -> Query:
         """Return all cases in the database with an analysis."""
@@ -770,13 +775,13 @@ class StatusHandler(BaseHandler):
         """Fetch samples that have  not been invoiced, excluding those that
         have been down sampled."""
         records = self._get_sample_query()
-        filter_functions: List[str] = [
+        sample_filter_functions: List[SampleFilters] = [
             SampleFilters.get_sample_without_invoice_id,
             SampleFilters.get_sample_not_down_sampled,
         ]
 
         records: Query = apply_sample_filter(
-            functions=filter_functions,
+            functions=sample_filter_functions,
             samples=records,
         )
         return records

@@ -6,12 +6,6 @@ from cg.constants.constants import SampleType
 from cg.store.models import Sample, Family
 
 
-def get_samples_ordered_not_received(samples: Query, **kwargs) -> Query:
-    """Return samples ordered and not received."""
-
-    return samples.filter(Sample.ordered_at.isnot(None), Sample.received_at.is_(None))
-
-
 def get_sample_by_sample_id(internal_id: str, samples: Query, **kwargs) -> Query:
     """Return sample with sample id."""
     return samples.filter_by(internal_id=internal_id)
@@ -103,6 +97,26 @@ def get_sample_by_customer_name(samples: Query, customer_name: str, **kwargs) ->
     return samples.filter(Sample.customer_name == customer_name)
 
 
+def get_sample_is_received(samples: Query, **kwargs) -> Query:
+    """Get samples that are received."""
+    return samples.filter(Sample.received_at.isnot(None))
+
+
+def get_sample_is_not_received(samples: Query, **kwargs) -> Query:
+    """Get samples that are not received."""
+    return samples.filter(Sample.received_at.is_(None))
+
+
+def get_sample_is_prepared(samples: Query, **kwargs) -> Query:
+    """Get samples that are prepared."""
+    return samples.filter(Sample.prepared_at.isnot(None))
+
+
+def get_sample_is_not_prepared(samples: Query, **kwargs) -> Query:
+    """Get samples that are not prepared."""
+    return samples.filter(Sample.prepared_at.is_(None))
+
+
 def apply_sample_filter(
     functions: List[Callable],
     samples: Query,
@@ -127,7 +141,8 @@ def apply_sample_filter(
 
 
 class SampleFilters(Enum):
-    get_samples_ordered_not_received: Callable = get_samples_ordered_not_received
+    """Enum with all sample filters."""
+
     get_sample_by_sample_id: Callable = get_sample_by_sample_id
     get_samples_with_type: Callable = get_samples_with_type
     get_samples_with_loqusdb_id: Callable = get_samples_with_loqusdb_id
@@ -146,3 +161,7 @@ class SampleFilters(Enum):
     get_sample_do_not_invoice: Callable = get_sample_do_not_invoice
     get_sample_by_customer_name: Callable = get_sample_by_customer_name
     get_sample_by_customer_id: Callable = get_sample_by_customer_id
+    get_sample_is_received: Callable = get_sample_is_received
+    get_sample_is_not_received: Callable = get_sample_is_not_received
+    get_sample_is_prepared: Callable = get_sample_is_prepared
+    get_sample_is_not_prepared: Callable = get_sample_is_not_prepared

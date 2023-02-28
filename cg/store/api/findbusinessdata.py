@@ -311,7 +311,7 @@ class FindBusinessDataHandler(BaseHandler):
         self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
     ) -> List[Flowcell]:
         """Return flow cell enquiry snd status."""
-        filter_functions: List[str] = [
+        filter_functions: List[FlowCellFilters] = [
             FlowCellFilters.get_flow_cells_with_statuses,
             FlowCellFilters.get_flow_cell_by_id_and_by_enquiry,
         ]
@@ -364,13 +364,13 @@ class FindBusinessDataHandler(BaseHandler):
         """Return invoice query."""
         return self.Invoice.query
 
-    def get_invoices(self) -> List[Invoice]:
+    def _get_invoices(self) -> List[Invoice]:
         """Fetch all invoices."""
         return self._get_invoice_query()
 
     def get_invoices_by_status(self, invoiced: bool = None) -> Query:
         """Fetch invoices by invoiced status."""
-        invoices = self.get_invoices()
+        invoices = self._get_invoices()
         if invoiced:
             return query.filter(Invoice.invoiced_at.isnot(None))
         else:
