@@ -154,7 +154,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         WriteFile.write_file_from_content(
             content=default_options,
             file_format=FileFormat.YAML,
-            file_path=NextflowAnalysisAPI.get_case_params_file_path(
+            file_path=NextflowAnalysisAPI.get_params_file_path(
                 case_id=case_id, root_dir=self.root_dir
             ),
         )
@@ -178,7 +178,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         starfusion: bool,
         fusioncatcher: bool,
         arriba: bool,
-        cli: bool = True,
+        cli: bool = False,
     ) -> Dict[str, str]:
         """Transforms click argument related to rnafusion that were left empty into
         defaults constructed with case_id paths or from config."""
@@ -225,25 +225,27 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         NextflowAnalysisAPI.make_case_folder(
             case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
         )
+        LOG.info("Generating samplesheet")
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
+        LOG.info("Generating parameters file")
         self.write_params_file(case_id=case_id, dry_run=dry_run)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
 
-        LOG.info("Samplesheet written")
+        LOG.info("Configs files written")
 
     def run_analysis(
         self,
         case_id: str,
-        log: Optional[Path],
-        work_dir: Optional[Path],
+        log: Optional[str],
+        work_dir: Optional[str],
         resume: bool,
         profile: str,
         with_tower: bool,
         stub: bool,
-        config: Optional[Path],
-        params_file: Optional[Path],
+        config: Optional[str],
+        params_file: Optional[str],
         dry_run: bool = False,
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
