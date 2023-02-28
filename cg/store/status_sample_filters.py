@@ -1,9 +1,30 @@
 from typing import Optional, List
-
+from enum import Enum
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import SampleType
 from cg.store.models import Sample, Family
+
+
+class SampleFilters(str, Enum):
+    get_sample_by_sample_id = ("get_sample_by_sample_id",)
+    get_samples_with_type = ("get_samples_with_type",)
+    get_samples_with_loqusdb_id = ("get_samples_with_loqusdb_id",)
+    get_samples_without_loqusdb_id = ("get_samples_without_loqusdb_id",)
+    get_sample_by_entry_id = ("get_sample_by_entry_id",)
+    get_samples_by_analysis = ("get_samples_by_analysis",)
+    get_sample_is_delivered = ("get_sample_is_delivered",)
+    get_sample_is_not_delivered = ("get_sample_is_not_delivered",)
+    get_sample_by_invoice_id = ("get_sample_by_invoice_id",)
+    get_sample_without_invoice_id = ("get_sample_without_invoice_id",)
+    get_sample_down_sampled = ("get_sample_down_sampled",)
+    get_sample_not_down_sampled = ("get_sample_not_down_sampled",)
+    get_sample_is_sequenced = ("get_sample_is_sequenced",)
+    get_sample_is_not_sequenced = ("get_sample_is_not_sequenced",)
+    get_sample_do_invoice = ("get_sample_do_invoice",)
+    get_sample_do_not_invoice = ("get_sample_do_not_invoice",)
+    get_sample_by_customer_id = ("get_sample_by_customer_id",)
+    get_sample_by_customer_name = ("get_sample_by_customer_name",)
 
 
 def get_sample_by_sample_id(internal_id: str, samples: Query, **kwargs) -> Query:
@@ -87,6 +108,16 @@ def get_sample_do_not_invoice(samples: Query) -> Query:
     return samples.filter(Sample.no_invoice.is_(True))
 
 
+def get_sample_by_customer_id(samples: Query, customer_id: str) -> Query:
+    """Get samples by customer id."""
+    return samples.filter(Sample.customer_id == customer_id)
+
+
+def get_sample_by_customer_name(samples: Query, customer_name: str) -> Query:
+    """Get samples by customer name."""
+    return samples.filter(Sample.customer_name == customer_name)
+
+
 def apply_sample_filter(
     functions: List[str],
     samples: Query,
@@ -98,22 +129,24 @@ def apply_sample_filter(
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
     filter_map = {
-        "get_sample_by_sample_id": get_sample_by_sample_id,
-        "get_samples_with_type": get_samples_with_type,
-        "samples_uploaded_to_loqusdb": get_samples_with_loqusdb_id,
-        "samples_not_uploaded_to_loqusdb": get_samples_without_loqusdb_id,
-        "get_sample_by_entry_id": get_sample_by_entry_id,
-        "get_sample_by_analysis": get_samples_by_analysis,
-        "get_sample_is_delivered": get_sample_is_delivered,
-        "get_sample_is_not_delivered": get_sample_is_not_delivered,
-        "get_sample_by_invoice_id": get_sample_by_invoice_id,
-        "get_sample_without_invoice_id": get_sample_without_invoice_id,
-        "get_sample_down_sampled": get_sample_down_sampled,
-        "get_sample_not_down_sampled": get_sample_not_down_sampled,
-        "get_sample_is_sequenced": get_sample_is_sequenced,
-        "get_sample_is_not_sequenced": get_sample_is_not_sequenced,
-        "get_sample_do_invoice": get_sample_do_invoice,
-        "get_sample_do_not_invoice": get_sample_do_not_invoice,
+        SampleFilters.get_sample_by_sample_id: get_sample_by_sample_id,
+        SampleFilters.get_samples_with_type: get_samples_with_type,
+        SampleFilters.get_samples_with_loqusdb_id: get_samples_with_loqusdb_id,
+        SampleFilters.get_samples_without_loqusdb_id: get_samples_without_loqusdb_id,
+        SampleFilters.get_sample_by_entry_id: get_sample_by_entry_id,
+        SampleFilters.get_samples_by_analysis: get_samples_by_analysis,
+        SampleFilters.get_sample_is_delivered: get_sample_is_delivered,
+        SampleFilters.get_sample_is_not_delivered: get_sample_is_not_delivered,
+        SampleFilters.get_sample_by_invoice_id: get_sample_by_invoice_id,
+        SampleFilters.get_sample_without_invoice_id: get_sample_without_invoice_id,
+        SampleFilters.get_sample_not_down_sampled: get_sample_not_down_sampled,
+        SampleFilters.get_sample_down_sampled: get_sample_down_sampled,
+        SampleFilters.get_sample_is_sequenced: get_sample_is_sequenced,
+        SampleFilters.get_sample_is_not_sequenced: get_sample_is_not_sequenced,
+        SampleFilters.get_sample_do_invoice: get_sample_do_invoice,
+        SampleFilters.get_sample_do_not_invoice: get_sample_do_not_invoice,
+        SampleFilters.get_sample_by_customer_id: get_sample_by_customer_id,
+        SampleFilters.get_sample_by_customer_name: get_sample_by_customer_name,
     }
 
     for function in functions:
