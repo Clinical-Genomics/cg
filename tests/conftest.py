@@ -1205,7 +1205,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
     ]
     store.add_commit(versions)
 
-    beds: list[Bed] = [store.add_bed(name=bed_name)]
+    beds: List[Bed] = [store.add_bed(name=bed_name)]
     store.add_commit(beds)
     bed_versions: List[BedVersion] = [
         store.add_bed_version(bed=bed, version=1, filename=bed_name + FileExtensions.BED)

@@ -332,7 +332,7 @@ def options():
         db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
     )
 
-    apptag_groups: Dict[str, list[str]] = {"ext": []}
+    apptag_groups: Dict[str, List[str]] = {"ext": []}
     for application in db.applications(archived=False):
         if not application.versions:
             LOG.debug(f"Skipping application {application} that doesn't have a price")
@@ -340,7 +340,7 @@ def options():
         if application.is_external:
             apptag_groups["ext"].append(application.tag)
         if application.prep_category not in apptag_groups:
-            apptag_groups[application.prep_category]: list[str] = []
+            apptag_groups[application.prep_category]: List[str] = []
         apptag_groups[application.prep_category].append(application.tag)
 
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
