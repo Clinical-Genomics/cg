@@ -208,12 +208,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def __build_command_str(options: dict, exclude_true: bool = False) -> List[str]:
         formatted_options: list = []
         for key, val in options.items():
-            if exclude_true and val is True:
-                formatted_options.append(str(key))
-            elif val:
-                formatted_options.append(str(key))
-                formatted_options.append(str(val))
-
+            if val:
+                if exclude_true and val is True:
+                    formatted_options.append(str(key))
+                elif val:
+                    formatted_options.append(str(key))
+                    formatted_options.append(str(val))
         return formatted_options
 
     def config_case(
@@ -237,14 +237,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def run_analysis(
         self,
         case_id: str,
-        log: Path,
-        work_dir: Path,
+        log: Optional[Path],
+        work_dir: Optional[Path],
         resume: bool,
         profile: str,
         with_tower: bool,
         stub: bool,
-        input: Path,
-        outdir: Path,
+        input: Optional[Path],
+        outdir: Optional[Path],
         genomes_base: Path,
         trim: bool,
         fusioninspector_filter: bool,
@@ -254,6 +254,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         starfusion: bool,
         fusioncatcher: bool,
         arriba: bool,
+        config: Optional[Path],
+        params_file: Optional[Path],
         dry_run: bool = False,
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
@@ -283,6 +285,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 profile=self.get_profile(profile=profile),
                 with_tower=with_tower,
                 stub=stub,
+                params_file=params_file,
             ),
             exclude_true=True,
         )
@@ -295,6 +298,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 log=log,
                 bg=True,
                 quiet=True,
+                config=config,
             ),
             exclude_true=True,
         )

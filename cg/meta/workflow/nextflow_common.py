@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from cg.constants.constants import FileFormat
 from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR, NXF_PID_FILE_ENV
@@ -110,7 +110,14 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_verified_arguments_nextflow(
-        cls, case_id: str, pipeline: str, root_dir: str, log: Path, bg: bool, quiet: bool
+        cls,
+        case_id: str,
+        pipeline: str,
+        root_dir: str,
+        log: Path,
+        bg: bool,
+        quiet: bool,
+        config: Optional[str],
     ) -> dict:
         """Transforms click argument related to nextflow that were left empty
         into defaults constructed with case_id paths."""
@@ -119,6 +126,7 @@ class NextflowAnalysisAPI:
             "-bg": bg,
             "-quiet": quiet,
             "-log": cls.get_log_path(case_id, pipeline, root_dir, log),
+            "-config": config,
         }
 
     @classmethod
@@ -131,9 +139,14 @@ class NextflowAnalysisAPI:
         profile: bool,
         with_tower: bool,
         stub: bool,
+        params_file: Optional[str],
     ) -> dict:
         """Transforms click argument related to nextflow run that were left empty
         into defaults constructed with case_id paths."""
+        if not params_file:
+            params_file = NextflowAnalysisAPI.get_case_params_file_path(
+                case_id=case_id, root_dir=root_dir
+            )
 
         return {
             "-w": cls.get_workdir_path(case_id=case_id, root_dir=root_dir, work_dir=work_dir),
@@ -141,6 +154,7 @@ class NextflowAnalysisAPI:
             "-profile": profile,
             "-with-tower": with_tower,
             "-stub": stub,
+            "-params-file": params_file,
         }
 
     @classmethod
