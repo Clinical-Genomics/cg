@@ -154,17 +154,17 @@ def cases():
 
 @BLUEPRINT.route("/families")
 def families():
-    """Fetch families."""
+    """Return families."""
     if request.args.get("status") == "analysis":
         records = db.cases_to_mip_analyze()
         count = len(records)
     else:
-        customer_objs: Optional[List[Customer]] = (
+        customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
         case_query = db.families(
             enquiry=request.args.get("enquiry"),
-            customers=customer_objs,
+            customers=customers,
             action=request.args.get("action"),
         )
         count = case_query.count()
