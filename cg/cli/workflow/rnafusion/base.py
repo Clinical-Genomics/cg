@@ -87,17 +87,6 @@ def config_case(
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
-@OPTION_INPUT
-@OPTION_OUTDIR
-@OPTION_REFERENCES
-@OPTION_TRIM
-@OPTION_FUSIONINSPECTOR_FILTER
-@OPTION_ALL
-@OPTION_PIZZLY
-@OPTION_SQUID
-@OPTION_STARFUSION
-@OPTION_FUSIONCATCHER
-@OPTION_ARRIBA
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @DRY_RUN
@@ -111,17 +100,6 @@ def run(
     profile: str,
     with_tower: bool,
     stub: bool,
-    input: str,
-    outdir: str,
-    genomes_base: str,
-    trim: bool,
-    fusioninspector_filter: bool,
-    all: bool,
-    pizzly: bool,
-    squid: bool,
-    starfusion: bool,
-    fusioncatcher: bool,
-    arriba: bool,
     config: str,
     params_file: str,
     dry_run: bool,
@@ -163,17 +141,8 @@ def run(
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
-@OPTION_INPUT
-@OPTION_OUTDIR
-@OPTION_REFERENCES
-@OPTION_TRIM
-@OPTION_FUSIONINSPECTOR_FILTER
-@OPTION_ALL
-@OPTION_PIZZLY
-@OPTION_SQUID
-@OPTION_STARFUSION
-@OPTION_FUSIONCATCHER
-@OPTION_ARRIBA
+@OPTION_CONFIG
+@OPTION_PARAMS_FILE
 @DRY_RUN
 @click.pass_context
 def start(
@@ -184,17 +153,8 @@ def start(
     profile: str,
     with_tower: bool,
     stub: bool,
-    input: str,
-    outdir: str,
-    genomes_base: str,
-    trim: bool,
-    fusioninspector_filter: bool,
-    all: bool,
-    pizzly: bool,
-    squid: bool,
-    starfusion: bool,
-    fusioncatcher: bool,
-    arriba: bool,
+    config: str,
+    params_file: str,
     dry_run: bool,
 ) -> None:
     """Start full workflow for CASE ID."""
@@ -215,17 +175,8 @@ def start(
         profile=profile,
         with_tower=with_tower,
         stub=stub,
-        input=input,
-        outdir=outdir,
-        genomes_base=genomes_base,
-        trim=trim,
-        fusioninspector_filter=fusioninspector_filter,
-        all=all,
-        pizzly=pizzly,
-        squid=squid,
-        starfusion=starfusion,
-        fusioncatcher=fusioncatcher,
-        arriba=arriba,
+        config=config,
+        params_file=params_file,
         dry_run=dry_run,
     )
 
