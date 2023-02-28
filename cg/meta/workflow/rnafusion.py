@@ -243,39 +243,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         profile: str,
         with_tower: bool,
         stub: bool,
-        input: Optional[Path],
-        outdir: Optional[Path],
-        genomes_base: Path,
-        trim: bool,
-        fusioninspector_filter: bool,
-        all: bool,
-        pizzly: bool,
-        squid: bool,
-        starfusion: bool,
-        fusioncatcher: bool,
-        arriba: bool,
         config: Optional[Path],
         params_file: Optional[Path],
         dry_run: bool = False,
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
 
-        rnafusion_options: List[str] = self.__build_command_str(
-            options=self.get_verified_arguments(
-                case_id=case_id,
-                input=input,
-                outdir=outdir,
-                genomes_base=genomes_base,
-                trim=trim,
-                fusioninspector_filter=fusioninspector_filter,
-                all=all,
-                pizzly=pizzly,
-                squid=squid,
-                starfusion=starfusion,
-                fusioncatcher=fusioncatcher,
-                arriba=arriba,
-            )
-        )
         run_options: List[str] = self.__build_command_str(
             options=NextflowAnalysisAPI.get_verified_arguments_run(
                 case_id=case_id,
@@ -307,7 +280,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             nextflow_options
             + command
             + run_options
-            + rnafusion_options
             + NextflowAnalysisAPI.get_nextflow_stdout_stderr(
                 case_id=case_id, root_dir=self.root_dir
             )
