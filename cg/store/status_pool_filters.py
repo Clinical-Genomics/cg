@@ -1,20 +1,20 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Callable
 from alchy import Query
 from cg.store.models import Pool
 
 
-class PoolFilters(str, Enum):
-    get_pool_by_id = ("get_pool_by_id",)
-    get_pool_by_name = ("get_pool_by_name",)
-    get_pool_is_received = ("get_pool_is_received",)
-    get_pool_is_not_received = ("get_pool_is_not_received",)
-    get_pool_is_delivered = ("get_pool_is_delivered",)
-    get_pool_is_not_delivered = ("get_pool_is_not_delivered",)
-    get_pool_without_invoice_id = ("get_pool_without_invoice_id",)
-    get_pool_do_invoice = ("get_pool_do_invoice",)
-    get_pool_do_not_invoice = ("get_pool_do_not_invoice",)
-    get_pool_by_invoice_id = ("get_pool_by_invoice_id",)
+class PoolFilters(Callable, Enum):
+    get_pool_by_id: Callable = get_pool_by_id
+    get_pool_by_name: Callable = get_pool_by_name
+    get_pool_is_received: Callable = get_pool_is_received
+    get_pool_is_not_received: Callable = get_pool_is_not_received
+    get_pool_is_delivered: Callable = get_pool_is_delivered
+    get_pool_is_not_delivered: Callable = get_pool_is_not_delivered
+    get_pool_by_invoice_id: Callable = get_pool_by_invoice_id
+    get_pool_without_invoice_id: Callable = get_pool_without_invoice_id
+    get_pool_do_invoice: Callable = get_pool_do_invoice
+    get_pool_do_not_invoice: Callable = get_pool_do_not_invoice
 
 
 def get_pool_by_id(pools: Query, pool_id: int) -> Query:
@@ -68,23 +68,10 @@ def get_pool_do_not_invoice(pools: Query) -> Query:
 
 
 def apply_pool_filter(
-    functions: List[str], pools: Query, invoice_id: Optional[int] = None
+    functions: List[Callable], pools: Query, invoice_id: Optional[int] = None
 ) -> Query:
     """Apply filtering functions to the pool queries and return filtered results"""
 
-    filter_map = {
-        PoolFilters.get_pool_by_id: get_pool_by_id,
-        PoolFilters.get_pool_by_name: get_pool_by_name,
-        PoolFilters.get_pool_is_received: get_pool_is_received,
-        PoolFilters.get_pool_is_not_received: get_pool_is_not_received,
-        PoolFilters.get_pool_is_delivered: get_pool_is_delivered,
-        PoolFilters.get_pool_is_not_delivered: get_pool_is_not_delivered,
-        PoolFilters.get_pool_without_invoice_id: get_pool_without_invoice_id,
-        PoolFilters.get_pool_do_invoice: get_pool_do_invoice,
-        PoolFilters.get_pool_do_not_invoice: get_pool_do_not_invoice,
-        PoolFilters.get_pool_by_invoice_id: get_pool_by_invoice_id,
-    }
-
     for function in functions:
-        pools: Query = filter_map[function](pools=pools, invoice_id=invoice_id)
+        pools: Query = function(pools=pools, invoice_id=invoice_id)
     return pools

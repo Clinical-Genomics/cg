@@ -1,16 +1,16 @@
 from enum import Enum
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Callable
 
 from sqlalchemy.orm import Query
 
 from cg.store.models import Flowcell, FamilySample, Family
 
 
-class FlowCellFilters(str, Enum):
-    get_flow_cells_by_case = ("get_flow_cells_by_case",)
-    get_flow_cell_by_id = ("get_flow_cell_by_id",)
-    get_flow_cell_by_id_and_by_enquiry = ("get_flow_cell_by_id_and_by_enquiry",)
-    get_flow_cells_with_statuses = ("get_flow_cells_with_statuses",)
+class FlowCellFilters(Callable, Enum):
+    get_flow_cells_by_case: Callable = get_flow_cells_by_case
+    get_flow_cell_by_id: Callable = get_flow_cell_by_id
+    get_flow_cell_by_id_and_by_enquiry: Callable = get_flow_cell_by_id_and_by_enquiry
+    get_flow_cells_with_statuses: Callable = get_flow_cells_with_statuses
 
 
 def get_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
@@ -37,20 +37,14 @@ def get_flow_cells_with_statuses(
 
 def apply_flow_cell_filter(
     flow_cells: Query,
-    functions: List[str],
+    functions: List[Callable],
     case: Optional[Family] = None,
     flow_cell_id: Optional[str] = None,
     flow_cell_statuses: Optional[List[str]] = None,
 ) -> Union[Query, Flowcell]:
     """Apply filtering functions and return filtered results."""
-    filter_map = {
-        FlowCellFilters.get_flow_cells_by_case: get_flow_cells_by_case,
-        FlowCellFilters.get_flow_cell_by_id: get_flow_cell_by_id,
-        FlowCellFilters.get_flow_cell_by_id_and_by_enquiry: get_flow_cell_by_id_and_by_enquiry,
-        FlowCellFilters.get_flow_cells_with_statuses: get_flow_cells_with_statuses,
-    }
     for function in functions:
-        flow_cells: Union[Query, Flowcell] = filter_map[function](
+        flow_cells: Union[Query, Flowcell] = function(
             flow_cells=flow_cells,
             case=case,
             flow_cell_id=flow_cell_id,

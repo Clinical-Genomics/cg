@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Callable
 from enum import Enum
 from sqlalchemy.orm import Query
 
@@ -6,25 +6,32 @@ from cg.constants.constants import SampleType
 from cg.store.models import Sample, Family
 
 
-class SampleFilters(str, Enum):
-    get_sample_by_sample_id = ("get_sample_by_sample_id",)
-    get_samples_with_type = ("get_samples_with_type",)
-    get_samples_with_loqusdb_id = ("get_samples_with_loqusdb_id",)
-    get_samples_without_loqusdb_id = ("get_samples_without_loqusdb_id",)
-    get_sample_by_entry_id = ("get_sample_by_entry_id",)
-    get_samples_by_analysis = ("get_samples_by_analysis",)
-    get_sample_is_delivered = ("get_sample_is_delivered",)
-    get_sample_is_not_delivered = ("get_sample_is_not_delivered",)
-    get_sample_by_invoice_id = ("get_sample_by_invoice_id",)
-    get_sample_without_invoice_id = ("get_sample_without_invoice_id",)
-    get_sample_down_sampled = ("get_sample_down_sampled",)
-    get_sample_not_down_sampled = ("get_sample_not_down_sampled",)
-    get_sample_is_sequenced = ("get_sample_is_sequenced",)
-    get_sample_is_not_sequenced = ("get_sample_is_not_sequenced",)
-    get_sample_do_invoice = ("get_sample_do_invoice",)
-    get_sample_do_not_invoice = ("get_sample_do_not_invoice",)
-    get_sample_by_customer_id = ("get_sample_by_customer_id",)
-    get_sample_by_customer_name = ("get_sample_by_customer_name",)
+class SampleFilters(Callable, Enum):
+    get_samples_ordered_not_received: Callable = get_samples_ordered_not_received
+    get_sample_by_sample_id: Callable = get_sample_by_sample_id
+    get_samples_with_type: Callable = get_samples_with_type
+    get_samples_with_loqusdb_id: Callable = get_samples_with_loqusdb_id
+    get_samples_without_loqusdb_id: Callable = get_samples_without_loqusdb_id
+    get_sample_by_entry_id: Callable = get_sample_by_entry_id
+    get_samples_by_analysis: Callable = get_samples_by_analysis
+    get_sample_is_delivered: Callable = get_sample_is_delivered
+    get_sample_is_not_delivered: Callable = get_sample_is_not_delivered
+    get_sample_by_invoice_id: Callable = get_sample_by_invoice_id
+    get_sample_without_invoice_id: Callable = get_sample_without_invoice_id
+    get_sample_not_down_sampled: Callable = get_sample_not_down_sampled
+    get_sample_down_sampled: Callable = get_sample_down_sampled
+    get_sample_is_sequenced: Callable = get_sample_is_sequenced
+    get_sample_is_not_sequenced: Callable = get_sample_is_not_sequenced
+    get_sample_do_invoice: Callable = get_sample_do_invoice
+    get_sample_do_not_invoice: Callable = get_sample_do_not_invoice
+    get_sample_by_customer_name: Callable = get_sample_by_customer_name
+    get_sample_by_customer_id: Callable = get_sample_by_customer_id
+
+
+def get_samples_ordered_not_received(samples: Query, **kwargs) -> Query:
+    """Return samples ordered and not received."""
+
+    return samples.filter(Sample.ordered_at.isnot(None), Sample.received_at.is_(None))
 
 
 def get_sample_by_sample_id(internal_id: str, samples: Query, **kwargs) -> Query:
@@ -119,7 +126,7 @@ def get_sample_by_customer_name(samples: Query, customer_name: str) -> Query:
 
 
 def apply_sample_filter(
-    functions: List[str],
+    functions: List[Callable],
     samples: Query,
     entry_id: Optional[int] = None,
     internal_id: Optional[str] = None,
@@ -128,29 +135,9 @@ def apply_sample_filter(
     invoice_id: Optional[int] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
-    filter_map = {
-        SampleFilters.get_sample_by_sample_id: get_sample_by_sample_id,
-        SampleFilters.get_samples_with_type: get_samples_with_type,
-        SampleFilters.get_samples_with_loqusdb_id: get_samples_with_loqusdb_id,
-        SampleFilters.get_samples_without_loqusdb_id: get_samples_without_loqusdb_id,
-        SampleFilters.get_sample_by_entry_id: get_sample_by_entry_id,
-        SampleFilters.get_samples_by_analysis: get_samples_by_analysis,
-        SampleFilters.get_sample_is_delivered: get_sample_is_delivered,
-        SampleFilters.get_sample_is_not_delivered: get_sample_is_not_delivered,
-        SampleFilters.get_sample_by_invoice_id: get_sample_by_invoice_id,
-        SampleFilters.get_sample_without_invoice_id: get_sample_without_invoice_id,
-        SampleFilters.get_sample_not_down_sampled: get_sample_not_down_sampled,
-        SampleFilters.get_sample_down_sampled: get_sample_down_sampled,
-        SampleFilters.get_sample_is_sequenced: get_sample_is_sequenced,
-        SampleFilters.get_sample_is_not_sequenced: get_sample_is_not_sequenced,
-        SampleFilters.get_sample_do_invoice: get_sample_do_invoice,
-        SampleFilters.get_sample_do_not_invoice: get_sample_do_not_invoice,
-        SampleFilters.get_sample_by_customer_id: get_sample_by_customer_id,
-        SampleFilters.get_sample_by_customer_name: get_sample_by_customer_name,
-    }
 
     for function in functions:
-        samples: Query = filter_map[function](
+        samples: Query = function(
             entry_id=entry_id,
             internal_id=internal_id,
             samples=samples,

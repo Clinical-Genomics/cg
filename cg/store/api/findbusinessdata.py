@@ -24,7 +24,7 @@ from cg.store.models import (
     Sample,
 )
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
-from cg.store.status_case_sample_filters import apply_case_sample_filter
+from cg.store.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilters
 from cg.store.status_sample_filters import apply_sample_filter
 
 LOG = logging.getLogger(__name__)
@@ -175,7 +175,7 @@ class FindBusinessDataHandler(BaseHandler):
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            functions=["get_samples_associated_with_case"],
+            functions=[CaseSampleFilters.get_samples_associated_with_case],
             case_id=family_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -183,7 +183,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_cases(self, sample_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a sample."""
         return apply_case_sample_filter(
-            functions=["get_cases_associated_with_sample"],
+            functions=[CaseSampleFilters.get_cases_associated_with_sample],
             sample_id=sample_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -191,7 +191,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_cases_from_sample(self, sample_entry_id: str) -> List[FamilySample]:
         """Return cases related to a given sample."""
         return apply_case_sample_filter(
-            functions=["get_cases_associated_with_sample_by_entry_id"],
+            functions=[CaseSampleFilters.get_cases_associated_with_sample_by_entry_id],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -490,7 +490,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            functions=["get_samples_associated_with_case"],
+            functions=[CaseSampleFilters.get_samples_associated_with_case],
             case_samples=self._get_sample_case_query(),
             case_id=case_id,
         )
