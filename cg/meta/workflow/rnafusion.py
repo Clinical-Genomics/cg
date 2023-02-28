@@ -158,7 +158,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id=case_id, root_dir=self.root_dir
             ),
         )
-        return
 
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
