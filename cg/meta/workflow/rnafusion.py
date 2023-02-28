@@ -159,7 +159,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             ),
         )
 
-    def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
+    def get_references_path(self, genomes_base: Optional[Path] = None) -> str:
         if genomes_base:
             return genomes_base
         return Path(self.references).as_posix()
