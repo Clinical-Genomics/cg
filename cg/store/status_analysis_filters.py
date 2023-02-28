@@ -8,19 +8,6 @@ from cg.store.models import Analysis
 from cgmodels.cg.constants import Pipeline
 
 
-class AnalysisFilters(Callable, Enum):
-    get_valid_analyses_in_production: Callable = get_valid_analyses_in_production
-    get_analyses_with_pipeline: Callable = get_analyses_with_pipeline
-    get_completed_analyses: Callable = get_completed_analyses
-    get_not_completed_analyses: Callable = get_not_completed_analyses
-    get_filter_uploaded_analyses: Callable = get_filter_uploaded_analyses
-    get_not_uploaded_analyses: Callable = get_not_uploaded_analyses
-    get_analyses_with_delivery_report: Callable = get_analyses_with_delivery_report
-    get_analyses_without_delivery_report: Callable = get_analyses_without_delivery_report
-    get_report_analyses_by_pipeline: Callable = get_report_analyses_by_pipeline
-    order_analyses_by_completed_at: Callable = order_analyses_by_completed_at
-
-
 def get_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
     """Return analyses with a valid data in production."""
     return analyses.filter(VALID_DATA_IN_PRODUCTION < Analysis.completed_at)
@@ -91,3 +78,16 @@ def apply_analysis_filter(
             pipeline=pipeline,
         )
     return analyses
+
+
+class AnalysisFilters(Enum):
+    get_valid_analyses_in_production: Callable = get_valid_analyses_in_production
+    get_analyses_with_pipeline: Callable = get_analyses_with_pipeline
+    get_completed_analyses: Callable = get_completed_analyses
+    get_not_completed_analyses: Callable = get_not_completed_analyses
+    get_filter_uploaded_analyses: Callable = get_filter_uploaded_analyses
+    get_not_uploaded_analyses: Callable = get_not_uploaded_analyses
+    get_analyses_with_delivery_report: Callable = get_analyses_with_delivery_report
+    get_analyses_without_delivery_report: Callable = get_analyses_without_delivery_report
+    get_report_analyses_by_pipeline: Callable = get_report_analyses_by_pipeline
+    order_analyses_by_completed_at: Callable = order_analyses_by_completed_at

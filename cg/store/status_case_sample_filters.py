@@ -5,14 +5,6 @@ from sqlalchemy.orm import Query
 from cg.store.models import Family, Sample
 
 
-class CaseSampleFilters(Enum, Callable):
-    get_samples_associated_with_case: Callable = get_samples_associated_with_case
-    get_cases_associated_with_sample: Callable = get_cases_associated_with_sample
-    get_cases_associated_with_sample_by_entry_id: Callable = (
-        get_cases_associated_with_sample_by_entry_id
-    )
-
-
 def get_samples_associated_with_case(case_samples: Query, case_id: str, **kwargs) -> Query:
     """Return samples associated with a case."""
     return case_samples.filter(Family.internal_id == case_id)
@@ -47,3 +39,11 @@ def apply_case_sample_filter(
             sample_id=sample_id,
         )
     return case_samples
+
+
+class CaseSampleFilters(Enum):
+    get_samples_associated_with_case: Callable = get_samples_associated_with_case
+    get_cases_associated_with_sample: Callable = get_cases_associated_with_sample
+    get_cases_associated_with_sample_by_entry_id: Callable = (
+        get_cases_associated_with_sample_by_entry_id
+    )

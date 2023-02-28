@@ -15,20 +15,6 @@ from cg.constants.observations import (
 from cg.store.models import Analysis, Application, Customer, Family, Sample
 
 
-class CaseFilters(Callable, Enum):
-    get_cases_has_sequence: Callable = get_cases_has_sequence
-    get_inactive_analysis_cases: Callable = get_inactive_analysis_cases
-    get_new_cases: Callable = get_new_cases
-    get_cases_with_pipeline: Callable = get_cases_with_pipeline
-    get_cases_with_loqusdb_supported_pipeline: Callable = get_cases_with_loqusdb_supported_pipeline
-    get_cases_with_loqusdb_supported_sequencing_method: Callable = (
-        get_cases_with_loqusdb_supported_sequencing_method
-    )
-    get_cases_for_analysis: Callable = get_cases_for_analysis
-    get_cases_with_scout_data_delivery: Callable = get_cases_with_scout_data_delivery
-    get_report_supported_data_delivery_cases: Callable = get_report_supported_data_delivery_cases
-
-
 def get_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Return cases that is not sequenced according to record in StatusDB."""
     return cases.filter(or_(Application.is_external, Sample.sequenced_at.isnot(None)))
@@ -125,3 +111,17 @@ def apply_case_filter(
     for function in functions:
         cases: Query = function(cases=cases, date=date, pipeline=pipeline)
     return cases
+
+
+class CaseFilters(Enum):
+    get_cases_has_sequence: Callable = get_cases_has_sequence
+    get_inactive_analysis_cases: Callable = get_inactive_analysis_cases
+    get_new_cases: Callable = get_new_cases
+    get_cases_with_pipeline: Callable = get_cases_with_pipeline
+    get_cases_with_loqusdb_supported_pipeline: Callable = get_cases_with_loqusdb_supported_pipeline
+    get_cases_with_loqusdb_supported_sequencing_method: Callable = (
+        get_cases_with_loqusdb_supported_sequencing_method
+    )
+    get_cases_for_analysis: Callable = get_cases_for_analysis
+    get_cases_with_scout_data_delivery: Callable = get_cases_with_scout_data_delivery
+    get_report_supported_data_delivery_cases: Callable = get_report_supported_data_delivery_cases

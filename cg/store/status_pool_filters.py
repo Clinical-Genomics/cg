@@ -4,19 +4,6 @@ from alchy import Query
 from cg.store.models import Pool
 
 
-class PoolFilters(Callable, Enum):
-    get_pool_by_id: Callable = get_pool_by_id
-    get_pool_by_name: Callable = get_pool_by_name
-    get_pool_is_received: Callable = get_pool_is_received
-    get_pool_is_not_received: Callable = get_pool_is_not_received
-    get_pool_is_delivered: Callable = get_pool_is_delivered
-    get_pool_is_not_delivered: Callable = get_pool_is_not_delivered
-    get_pool_by_invoice_id: Callable = get_pool_by_invoice_id
-    get_pool_without_invoice_id: Callable = get_pool_without_invoice_id
-    get_pool_do_invoice: Callable = get_pool_do_invoice
-    get_pool_do_not_invoice: Callable = get_pool_do_not_invoice
-
-
 def get_pool_by_id(pools: Query, pool_id: int) -> Query:
     """Get a pool by id."""
     return pools.filter(Pool.id == pool_id)
@@ -75,3 +62,16 @@ def apply_pool_filter(
     for function in functions:
         pools: Query = function(pools=pools, invoice_id=invoice_id)
     return pools
+
+
+class PoolFilters(Enum):
+    get_pool_by_id: Callable = get_pool_by_id
+    get_pool_by_name: Callable = get_pool_by_name
+    get_pool_is_received: Callable = get_pool_is_received
+    get_pool_is_not_received: Callable = get_pool_is_not_received
+    get_pool_is_delivered: Callable = get_pool_is_delivered
+    get_pool_is_not_delivered: Callable = get_pool_is_not_delivered
+    get_pool_by_invoice_id: Callable = get_pool_by_invoice_id
+    get_pool_without_invoice_id: Callable = get_pool_without_invoice_id
+    get_pool_do_invoice: Callable = get_pool_do_invoice
+    get_pool_do_not_invoice: Callable = get_pool_do_not_invoice

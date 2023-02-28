@@ -613,7 +613,7 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Return analyses that have not been uploaded."""
-        analysis_filter_functions: List[Callable] = [
+        analysis_filter_functions: List[AnalysisFilters] = [
             AnalysisFilters.get_analyses_with_pipeline,
             AnalysisFilters.get_completed_analyses,
             AnalysisFilters.get_not_uploaded_analyses,
@@ -703,7 +703,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
-            functions=[CaseFilters.get_report_cases_with_valid_data_delivery],
+            functions=[CaseFilters.get_report_supported_data_delivery_cases],
             cases=self._get_analysis_case_query(),
             pipeline=pipeline,
         )

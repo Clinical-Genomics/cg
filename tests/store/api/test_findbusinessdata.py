@@ -427,7 +427,7 @@ def test_find_single_case_for_sample(
     # WHEN the cases associated with the sample is fetched
     cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample.id
-    )
+    ).all()
 
     # THEN only one case is found
     assert cases and len(cases) == 1
@@ -445,7 +445,7 @@ def test_find_multiple_cases_for_sample(
     # WHEN the cases associated with the sample is fetched
     cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample.id
-    )
+    ).all()
 
     # THEN multiple cases are found
     assert cases and len(cases) > 1

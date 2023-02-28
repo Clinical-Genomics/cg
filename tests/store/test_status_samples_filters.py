@@ -107,12 +107,13 @@ def test_filter_sample_is_delivered(
 
 
 def test_filter_sample_is_not_delivered(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: None
+    base_store: Store,
+    helpers: StoreHelpers,
 ):
     """Test that a sample is returned when there is a sample that is not delivered."""
 
     # GIVEN a not delivered sample
-    helpers.add_sample(base_store, delivered_at=timestamp_now)
+    helpers.add_sample(base_store, delivered_at=None)
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()

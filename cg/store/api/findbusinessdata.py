@@ -172,29 +172,29 @@ class FindBusinessDataHandler(BaseHandler):
         """Return case sample query."""
         return self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
 
-    def family_samples(self, family_id: str) -> List[FamilySample]:
+    def family_samples(self, family_id: str) -> Query:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
             functions=[CaseSampleFilters.get_samples_associated_with_case],
             case_id=family_id,
             case_samples=self._get_case_sample_query(),
-        ).all()
+        )
 
-    def get_sample_cases(self, sample_id: str) -> List[FamilySample]:
+    def get_sample_cases(self, sample_id: str) -> Query:
         """Return the case-sample links associated with a sample."""
         return apply_case_sample_filter(
             functions=[CaseSampleFilters.get_cases_associated_with_sample],
             sample_id=sample_id,
             case_samples=self._get_case_sample_query(),
-        ).all()
+        )
 
-    def get_cases_from_sample(self, sample_entry_id: str) -> List[FamilySample]:
+    def get_cases_from_sample(self, sample_entry_id: str) -> Query:
         """Return cases related to a given sample."""
         return apply_case_sample_filter(
             functions=[CaseSampleFilters.get_cases_associated_with_sample_by_entry_id],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_case_sample_query(),
-        ).all()
+        )
 
     def filter_cases_with_samples(self, case_ids: List[str]) -> List[str]:
         """Return case id:s associated with samples."""

@@ -6,13 +6,6 @@ from sqlalchemy.orm import Query
 from cg.store.models import Flowcell, FamilySample, Family
 
 
-class FlowCellFilters(Callable, Enum):
-    get_flow_cells_by_case: Callable = get_flow_cells_by_case
-    get_flow_cell_by_id: Callable = get_flow_cell_by_id
-    get_flow_cell_by_id_and_by_enquiry: Callable = get_flow_cell_by_id_and_by_enquiry
-    get_flow_cells_with_statuses: Callable = get_flow_cells_with_statuses
-
-
 def get_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
     """Return flow cells by case id."""
     return flow_cells.filter(FamilySample.family == case)
@@ -51,3 +44,10 @@ def apply_flow_cell_filter(
             flow_cell_statuses=flow_cell_statuses,
         )
     return flow_cells
+
+
+class FlowCellFilters(Enum):
+    get_flow_cells_by_case: Callable = get_flow_cells_by_case
+    get_flow_cell_by_id: Callable = get_flow_cell_by_id
+    get_flow_cell_by_id_and_by_enquiry: Callable = get_flow_cell_by_id_and_by_enquiry
+    get_flow_cells_with_statuses: Callable = get_flow_cells_with_statuses
