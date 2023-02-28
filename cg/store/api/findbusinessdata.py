@@ -25,7 +25,7 @@ from cg.store.models import (
 )
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
 from cg.store.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilters
-from cg.store.status_sample_filters import apply_sample_filter
+from cg.store.status_sample_filters import apply_sample_filter, SampleFilters
 
 LOG = logging.getLogger(__name__)
 
@@ -495,7 +495,9 @@ class FindBusinessDataHandler(BaseHandler):
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(
-            functions=["get_samples_with_type"], samples=samples, tissue_type=sample_type
+            functions=[SampleFilters.get_samples_with_type],
+            samples=samples,
+            tissue_type=sample_type,
         )
         return samples.all() if samples else None
 
