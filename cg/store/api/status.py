@@ -36,51 +36,51 @@ class StatusHandler(BaseHandler):
 
     def samples_to_receive(self, external: bool = False) -> Query:
         """Fetch top samples to receive."""
-        samples = self._join_sample_application_version_query(query=self._get_sample_query())
+        records = self._join_sample_application_version_query(query=self._get_sample_query())
         sample_filter_functions: List[SampleFilters] = [
             SampleFilters.get_sample_is_not_received,
             SampleFilters.get_sample_not_down_sampled,
         ]
-        samples = apply_sample_filter(samples=samples, functions=sample_filter_functions)
+        records = apply_sample_filter(samples=records, functions=sample_filter_functions)
         if external:
-            samples = apply_application_filter(
-                applications=samples, functions=[ApplicationFilters.get_application_is_external]
+            records = apply_application_filter(
+                applications=records, functions=[ApplicationFilters.get_application_is_external]
             )
         else:
-            samples = apply_application_filter(
-                applications=samples, functions=[ApplicationFilters.get_application_is_not_external]
+            records = apply_application_filter(
+                applications=records, functions=[ApplicationFilters.get_application_is_not_external]
             )
-        return samples.order_by(Sample.ordered_at)
+        return records.order_by(Sample.ordered_at)
 
     def samples_to_prepare(self):
         """Fetch samples to prepare."""
-        samples = self._join_sample_application_version_query(query=self._get_sample_query())
+        records = self._join_sample_application_version_query(query=self._get_sample_query())
         sample_filter_functions: List[SampleFilters] = [
             SampleFilters.get_sample_is_received,
             SampleFilters.get_sample_is_not_prepared,
             SampleFilters.get_sample_not_down_sampled,
             SampleFilters.get_sample_is_not_sequenced,
         ]
-        samples = apply_sample_filter(samples=samples, functions=sample_filter_functions)
-        samples = apply_application_filter(
-            applications=samples, functions=[ApplicationFilters.get_application_is_not_external]
+        records = apply_sample_filter(samples=records, functions=sample_filter_functions)
+        records = apply_application_filter(
+            applications=records, functions=[ApplicationFilters.get_application_is_not_external]
         )
 
-        return samples.order_by(Sample.received_at)
+        return records.order_by(Sample.received_at)
 
     def samples_to_sequence(self) -> Query:
         """Fetch samples in sequencing."""
-        samples = self._join_sample_application_version_query(query=self._get_sample_query())
+        records = self._join_sample_application_version_query(query=self._get_sample_query())
         sample_filter_functions: List[SampleFilters] = [
             SampleFilters.get_sample_is_prepared,
             SampleFilters.get_sample_is_not_sequenced,
             SampleFilters.get_sample_not_down_sampled,
         ]
-        samples = apply_sample_filter(samples=samples, functions=sample_filter_functions)
-        samples = apply_application_filter(
-            applications=samples, functions=[ApplicationFilters.get_application_is_not_external]
+        records = apply_sample_filter(samples=records, functions=sample_filter_functions)
+        records = apply_application_filter(
+            applications=records, functions=[ApplicationFilters.get_application_is_not_external]
         )
-        return samples.order_by(Sample.prepared_at)
+        return records.order_by(Sample.prepared_at)
 
     def get_families_with_analyses(self) -> Query:
         """Return all cases in the database with an analysis."""
