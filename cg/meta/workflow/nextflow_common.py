@@ -36,6 +36,11 @@ class NextflowAnalysisAPI:
         return Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
 
     @classmethod
+    def get_case_params_file_path(cls, case_id: str, root_dir: str) -> Path:
+        """Generates a path where the Rnafusion default params_file a case_id should be located."""
+        return Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_params_file.yaml")
+
+    @classmethod
     def get_case_nextflow_pid_path(cls, case_id: str, root_dir: str) -> Path:
         """Generates a path where the Nextflow pid file for the case_id should be located."""
         # If not specified with the NXF_PID_FILE variable, a .nextflow.pid is created in the launch directory when
