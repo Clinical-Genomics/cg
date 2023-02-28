@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
 from housekeeper.store.models import File
@@ -137,19 +137,19 @@ def fixture_sample_id() -> str:
 
 @pytest.fixture(name="father_sample_id")
 def fixture_father_sample_id() -> str:
-    """Returns the fathers sample id."""
+    """Returns the sample id of the father."""
     return "ADM2"
 
 
 @pytest.fixture(name="mother_sample_id")
-def fixture_mpther_sample_id() -> str:
+def fixture_mother_sample_id() -> str:
     """Returns the mothers sample id."""
     return "ADM3"
 
 
 @pytest.fixture(name="sample_ids")
 def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
-    """Returns a sample id."""
+    """Returns a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
 
@@ -573,28 +573,30 @@ def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "rnafusion")
 
 
-@pytest.fixture(name="sample1_cram")
-def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
-    """Return the path to the cram file for sample 1."""
+@pytest.fixture(name="sample_cram")
+def fixture_sample_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for a sample."""
     return Path(mip_dna_analysis_dir, "adm1.cram")
 
 
-@pytest.fixture(name="sample2_cram")
-def fixture_sample2_cram(mip_dna_analysis_dir: Path) -> Path:
-    """Return the path to the cram file for sample 2."""
+@pytest.fixture(name="father_sample_cram")
+def fixture_father_sample_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for the father sample."""
     return Path(mip_dna_analysis_dir, "adm2.cram")
 
 
-@pytest.fixture(name="sample3_cram")
-def fixture_sample3_cram(mip_dna_analysis_dir: Path) -> Path:
-    """Return the path to the cram file for sample 3."""
+@pytest.fixture(name="mother_sample_cram")
+def fixture_mother_sample_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for the mother sample."""
     return Path(mip_dna_analysis_dir, "adm3.cram")
 
 
 @pytest.fixture(name="sample_cram_files")
-def fixture_sample_crams(sample1_cram: Path, sample2_cram: Path, sample3_cram: Path) -> List[Path]:
+def fixture_sample_crams(
+    sample_cram: Path, father_sample_cram: Path, mother_sample_cram: Path
+) -> List[Path]:
     """Return a list of cram paths for three samples."""
-    return [sample1_cram, sample2_cram, sample3_cram]
+    return [sample_cram, father_sample_cram, mother_sample_cram]
 
 
 @pytest.fixture(name="vcf_file")

@@ -31,10 +31,8 @@ def fixture_deliver_api(
 
 @pytest.fixture(name="delivery_hk_api")
 def fixture_delivery_hk_api(
-    case_hk_bundle_no_files: dict,
     mip_delivery_bundle,
     real_housekeeper_api: HousekeeperAPI,
-    vcf_file: Path,
     helpers=StoreHelpers,
 ) -> HousekeeperAPI:
     """Fixture that returns a housekeeper database with delivery data"""
