@@ -34,7 +34,7 @@ def get_sample_by_entry_id(entry_id: int, samples: Query, **kwargs) -> Query:
 
 def get_samples_by_analysis(samples: Query, data_analysis: str, **kwargs) -> Query:
     """Get samples by analysis type."""
-    return samples.filter(data_analysis in Family.data_analysis)
+    return samples.filter(Family.data_analysis == data_analysis)
 
 
 def get_sample_is_delivered(samples: Query, **kwargs) -> Query:

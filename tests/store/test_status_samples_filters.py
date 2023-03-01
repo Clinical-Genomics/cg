@@ -17,6 +17,14 @@ from cg.store.status_sample_filters import (
     get_sample_do_invoice,
     get_sample_do_not_invoice,
     get_sample_by_invoice_id,
+    get_sample_by_sample_id,
+    get_sample_by_entry_id,
+    get_samples_by_analysis,
+    get_samples_with_type,
+    get_sample_is_prepared,
+    get_sample_is_not_prepared,
+    get_sample_is_received,
+    get_sample_is_not_received,
 )
 from datetime import datetime
 
@@ -95,6 +103,10 @@ def test_filter_sample_is_delivered(
 
     # GIVEN a delivered sample
     helpers.add_sample(base_store, delivered_at=timestamp_now)
+    helpers.add_sample(base_store, delivered_at=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a cases Query
     samples: Query = base_store._get_sample_query()
@@ -103,18 +115,21 @@ def test_filter_sample_is_delivered(
     samples: List[Query] = list(get_sample_is_delivered(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
 def test_filter_sample_is_not_delivered(
     base_store: Store,
     helpers: StoreHelpers,
+    timestamp_now: datetime.now(),
 ):
     """Test that a sample is returned when there is a sample that is not delivered."""
 
-    # GIVEN a not delivered sample
+    helpers.add_sample(base_store, delivered_at=timestamp_now)
     helpers.add_sample(base_store, delivered_at=None)
 
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
@@ -122,7 +137,7 @@ def test_filter_sample_is_not_delivered(
     samples: List[Query] = list(get_sample_is_not_delivered(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
 def test_filter_get_sample_by_invoice_id(base_store: Store, helpers: StoreHelpers, invoice_id=5):
@@ -130,6 +145,10 @@ def test_filter_get_sample_by_invoice_id(base_store: Store, helpers: StoreHelper
 
     # GIVEN a with an invoice_id
     helpers.add_sample(base_store, invoice_id=invoice_id)
+    helpers.add_sample(base_store, invoice_id=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -138,16 +157,18 @@ def test_filter_get_sample_by_invoice_id(base_store: Store, helpers: StoreHelper
     samples: List[Query] = list(get_sample_by_invoice_id(samples=samples, invoice_id=invoice_id))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
-def test_filter_sample_without_invoice_id(
-    base_store: Store, helpers: StoreHelpers, invoice_id=None
-):
+def test_filter_sample_without_invoice_id(base_store: Store, helpers: StoreHelpers, invoice_id=5):
     """Test that a sample is returned when there is a sample without invoice_id."""
 
     # GIVEN a sampled without invoice_id
     helpers.add_sample(base_store, invoice_id=invoice_id)
+    helpers.add_sample(base_store, invoice_id=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -159,11 +180,15 @@ def test_filter_sample_without_invoice_id(
     assert samples
 
 
-def test_filter_sample_down_sampled(base_store: Store, helpers: StoreHelpers, timestamp_now: None):
+def test_filter_sample_down_sampled(base_store: Store, helpers: StoreHelpers, down_sampled_to=5):
     """Test that a sample is returned when there is a sample that is down sampled."""
 
     # GIVEN a delivered sample
-    helpers.add_sample(base_store, downsampled_to=5)
+    helpers.add_sample(base_store, downsampled_to=down_sampled_to)
+    helpers.add_sample(base_store, downsampled_to=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -172,16 +197,20 @@ def test_filter_sample_down_sampled(base_store: Store, helpers: StoreHelpers, ti
     samples: List[Query] = list(get_sample_down_sampled(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
 def test_filter_sample_not_down_sampled(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: None
+    base_store: Store, helpers: StoreHelpers, down_sampled_to=5
 ):
     """Test that a sample is returned when there is a sample that is down sampled."""
 
     # GIVEN a delivered sample
+    helpers.add_sample(base_store, downsampled_to=down_sampled_to)
     helpers.add_sample(base_store, downsampled_to=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -190,14 +219,18 @@ def test_filter_sample_not_down_sampled(
     samples: List[Query] = list(get_sample_not_down_sampled(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
-def test_filter_sample_is_sequenced(base_store: Store, helpers: StoreHelpers, timestamp_now: None):
+def test_filter_sample_is_sequenced(base_store: Store, helpers: StoreHelpers):
     """Test that a sample is returned when there is a sample that is sequenced."""
 
     # GIVEN a delivered sample
     helpers.add_sample(base_store, sequenced_at=datetime.now())
+    helpers.add_sample(base_store, sequenced_at=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -206,16 +239,18 @@ def test_filter_sample_is_sequenced(base_store: Store, helpers: StoreHelpers, ti
     samples: List[Query] = list(get_sample_is_sequenced(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
-def test_filter_sample_is_not_sequenced(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: None
-):
+def test_filter_sample_is_not_sequenced(base_store: Store, helpers: StoreHelpers):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
     # GIVEN a sample that is not sequenced
     helpers.add_sample(base_store, sequenced_at=None)
+    helpers.add_sample(base_store, sequenced_at=datetime.now())
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -224,14 +259,18 @@ def test_filter_sample_is_not_sequenced(
     samples: List[Query] = list(get_sample_is_not_sequenced(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
-def test_filter_sample_do_invoice(base_store: Store, helpers: StoreHelpers, timestamp_now: None):
+def test_filter_sample_do_invoice(base_store: Store, helpers: StoreHelpers):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
     # GIVEN a samples marked to be invoiced
     helpers.add_sample(base_store, no_invoice=False)
+    helpers.add_sample(base_store, no_invoice=True)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -240,16 +279,18 @@ def test_filter_sample_do_invoice(base_store: Store, helpers: StoreHelpers, time
     samples: List[Query] = list(get_sample_do_invoice(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
 
 
-def test_filter_sample_do_not_invoice(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: None
-):
+def test_filter_sample_do_not_invoice(base_store: Store, helpers: StoreHelpers):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
     # GIVEN a  sample marked to skip invoicing
     helpers.add_sample(base_store, no_invoice=True)
+    helpers.add_sample(base_store, no_invoice=False)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -258,4 +299,188 @@ def test_filter_sample_do_not_invoice(
     samples: List[Query] = list(get_sample_do_not_invoice(samples=samples))
 
     # THEN samples should contain the test sample
-    assert samples
+    assert samples and len(samples) == 1
+
+
+def test_filter_sample_is_delivered(base_store: Store, helpers: StoreHelpers):
+    """Test that a sample is returned when there is a sample that is delivered."""
+
+    # GIVEN a delivered sample
+    helpers.add_sample(base_store, delivered_at=datetime.now())
+    helpers.add_sample(base_store, delivered_at=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting delivered samples
+    samples: List[Query] = list(get_sample_is_delivered(samples=samples))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_sample_is_not_delivered(base_store: Store, helpers: StoreHelpers):
+    """Test that a sample is returned when there is a sample that is not delivered."""
+
+    # GIVEN a sample that is not delivered
+    helpers.add_sample(base_store, delivered_at=None)
+    helpers.add_sample(base_store, delivered_at=datetime.now())
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting not delivered samples
+    samples: List[Query] = list(get_sample_is_not_delivered(samples=samples))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_sample_is_received(base_store: Store, helpers: StoreHelpers):
+    """Test that a sample is returned when there is a sample that is received."""
+
+    # GIVEN a received sample
+    helpers.add_sample(base_store, received_at=datetime.now())
+    helpers.add_sample(base_store, received_at=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting received samples
+    samples: List[Query] = list(get_sample_is_received(samples=samples))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_sample_is_not_received(base_store: Store, helpers: StoreHelpers):
+    """Test that a sample is returned when there is a sample that is not received."""
+
+    # GIVEN a sample that is not received
+    helpers.add_sample(base_store, received_at=None)
+    helpers.add_sample(base_store, received_at=datetime.now())
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting not received samples
+    samples: List[Query] = list(get_sample_is_not_received(samples=samples))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_sample_is_prepared(base_store: Store, helpers: StoreHelpers):
+    """Test that a sample is returned when there is a sample that is prepared."""
+
+    # GIVEN a prepared sample
+    helpers.add_sample(base_store, prepared_at=datetime.now())
+    helpers.add_sample(base_store, prepared_at=None)
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting prepared samples
+    samples: List[Query] = list(get_sample_is_prepared(samples=samples))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_sample_is_not_prepared(base_store: Store, helpers: StoreHelpers):
+    """Test that a sample is returned when there is a sample that is not prepared."""
+
+    # GIVEN a sample that is not prepared
+    helpers.add_sample(base_store, prepared_at=None)
+    helpers.add_sample(base_store, prepared_at=datetime.now())
+
+    # Assert that there are two samples in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting not prepared samples
+    samples: List[Query] = list(get_sample_is_not_prepared(samples=samples))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_get_sample_by_sample_id(
+    base_store: Store, helpers: StoreHelpers, sample_id: str = "test_sample_id"
+):
+    """Test that a sample is returned when there is a sample with the given id."""
+
+    # GIVEN a sample
+    helpers.add_sample(base_store, internal_id=sample_id)
+    helpers.add_sample(base_store, internal_id=None)
+
+    # Assert that there is one sample in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting a sample by id
+    samples: List[Query] = list(get_sample_by_sample_id(samples=samples, internal_id=sample_id))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_get_sample_by_entry_id(base_store: Store, helpers: StoreHelpers, entry_id: id = 1):
+    """Test that a sample is returned when there is a sample with the given id."""
+
+    # GIVEN a sample
+    helpers.add_sample(base_store, id=entry_id)
+    helpers.add_sample(base_store, id=None)
+
+    # Assert that there is one sample in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting a sample by id
+    samples: List[Query] = list(get_sample_by_entry_id(samples=samples, entry_id=entry_id))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
+
+
+def test_filter_get_sample_by_analysis(
+    base_store: Store, helpers: StoreHelpers, analysis_id: id = 1
+):
+    """Test that a sample is returned when there is a sample with the given analysis id."""
+
+    # GIVEN a sample
+    helpers.add_sample(base_store, analysis_id=analysis_id)
+    helpers.add_sample(base_store, analysis_id=None)
+
+    # Assert that there is one sample in the database
+    assert base_store.samples().count() == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting a sample by analysis id
+    samples: List[Query] = list(get_sample_by_analysis(samples=samples, analysis_id=analysis_id))
+
+    # THEN samples should contain the test sample
+    assert samples and len(samples) == 1
