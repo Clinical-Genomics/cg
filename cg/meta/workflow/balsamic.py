@@ -183,24 +183,24 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return SampleType.NORMAL
 
     def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
-        """Returns the verified capture kit path or extracts the derived panel bed"""
-
-        if panel_bed:
-            if Path(panel_bed).is_file():
-                panel_bed = Path(panel_bed)
-            else:
-                derived_panel_bed = Path(
-                    self.bed_path,
-                    self.status_db.bed_version(panel_bed).filename,
-                )
-                if not derived_panel_bed.is_file():
-                    raise BalsamicStartError(
-                        f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
-                        f"Please provide absolute path to desired BED file or a valid bed shortname!"
-                    )
-                panel_bed = derived_panel_bed
-
-        return panel_bed
+        """Returns the verified capture kit path or the derived panel BED path."""
+        if not panel_bed:
+            return None
+        panel_bed: Path = Path(panel_bed)
+        if panel_bed.is_file():
+            return panel_bed
+        derived_panel_bed: Psth = Path(
+            self.bed_path,
+            self.status_db.get_bed_version_by_short_name(
+                bed_version_short_name=panel_bed.as_posix()
+            ).filename,
+        )
+        if not derived_panel_bed.is_file():
+            raise BalsamicStartError(
+                f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
+                f"Please provide absolute path to desired BED file or a valid bed shortname!"
+            )
+        return derived_panel_bed
 
     def get_verified_bed(self, panel_bed: str, sample_data: dict) -> Optional[str]:
         """Takes a dict with samples and attributes.
@@ -216,7 +216,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         - When bed file required for analysis, but is not set or cannot be retrieved.
         """
 
-        panel_bed = self.get_derived_bed(panel_bed)
+        panel_bed: Optional[Path] = self.get_derived_bed(panel_bed)
         application_types = {v["application_type"].lower() for k, v in sample_data.items()}
         target_beds = {v["target_bed"] for k, v in sample_data.items()}
 
