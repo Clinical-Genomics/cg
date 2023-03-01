@@ -1,6 +1,7 @@
 from alchy import Query
 from typing import List
 from cg.constants.subject import PhenotypeStatus
+from cg.constants.constants import SampleType
 from cg.store import Store
 from cg.store.models import Sample
 from tests.store_helpers import StoreHelpers
@@ -19,7 +20,6 @@ from cg.store.status_sample_filters import (
     get_sample_by_invoice_id,
     get_sample_by_sample_id,
     get_sample_by_entry_id,
-    get_samples_by_analysis,
     get_samples_with_type,
     get_sample_is_prepared,
     get_sample_is_not_prepared,
@@ -464,14 +464,17 @@ def test_filter_get_sample_by_entry_id(base_store: Store, helpers: StoreHelpers,
     assert samples and len(samples) == 1
 
 
-def test_filter_get_sample_by_analysis(
-    base_store: Store, helpers: StoreHelpers, analysis_id: id = 1
+def test_filter_get_samples_with_type(
+    base_store: Store,
+    helpers: StoreHelpers,
+    is_tumour: bool = True,
+    tissue_type: SampleType = SampleType.TUMOR,
 ):
-    """Test that a sample is returned when there is a sample with the given analysis id."""
+    """Test that a sample is returned when there is a sample with the given type."""
 
     # GIVEN a sample
-    helpers.add_sample(base_store, analysis_id=analysis_id)
-    helpers.add_sample(base_store, analysis_id=None)
+    helpers.add_sample(base_store, is_tumour=is_tumour, name="test_tumour")
+    helpers.add_sample(base_store, is_tumour=False, name="test_normal")
 
     # Assert that there is one sample in the database
     assert base_store.samples().count() == 2
@@ -479,8 +482,8 @@ def test_filter_get_sample_by_analysis(
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
-    # WHEN getting a sample by analysis id
-    samples: List[Query] = list(get_sample_by_analysis(samples=samples, analysis_id=analysis_id))
+    # WHEN getting a sample by type
+    samples: List[Query] = list(get_samples_with_type(samples=samples, tissue_type=tissue_type))
 
     # THEN samples should contain the test sample
     assert samples and len(samples) == 1

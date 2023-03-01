@@ -332,7 +332,7 @@ class StoreHelpers:
         """
         if not panels:
             panels: List[str] = ["panel_test"]
-        customer = StoreHelpers.ensure_customer(store, customer_id)
+        customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
         if case_obj:
             panels = case_obj.panels
         for panel_name in panels:
@@ -732,6 +732,7 @@ class StoreHelpers:
         discount: int = 0,
         record_type: str = "Sample",
         internal_id: str = "savedkitten",
+        invoiced_at: Optional[datetime] = None,
     ) -> models.Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
         invoice = store.invoice(invoice_id=invoice_id)
@@ -766,6 +767,7 @@ class StoreHelpers:
                 comment="just a test invoice",
                 discount=discount,
                 record_type=record_type,
+                invoiced_at=invoiced_at,
             )
             store.add_commit(invoice)
 

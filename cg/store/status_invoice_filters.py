@@ -9,16 +9,6 @@ def get_invoice_by_invoice_id(invoices: Query, invoice_id: int, **kwargs) -> Que
     return invoices.filter(Invoice.id == invoice_id)
 
 
-def get_invoice_by_customer_id(invoices: Query, customer_id: int, **kwargs) -> Query:
-    """Filter invoices by customer_id"""
-    return invoices.filter(Invoice.customer_id == customer_id)
-
-
-def get_invoice_by_customer_name(invoices: Query, customer_name: str, **kwargs) -> Query:
-    """Filter invoices by customer_name"""
-    return invoices.filter(Invoice.customer.name == customer_name)
-
-
 def get_invoice_invoiced(invoices: Query, **kwargs) -> Query:
     """Filter invoices by invoiced_at"""
     return invoices.filter(Invoice.invoiced_at.isnot(None))
@@ -42,7 +32,5 @@ def apply_invoice_filter(
 
 class InvoiceFilters(Enum):
     get_invoice_by_id: Callable = get_invoice_by_invoice_id
-    get_invoice_by_customer_id: Callable = get_invoice_by_customer_id
-    get_invoice_by_customer_name: Callable = get_invoice_by_customer_name
     get_invoice_invoiced: Callable = get_invoice_invoiced
     get_invoice_not_invoiced: Callable = get_invoice_not_invoiced

@@ -315,12 +315,17 @@ class AddHandler(BaseHandler):
         comment: str = None,
         discount: int = 0,
         record_type: str = None,
+        invoiced_at: Optional[dt.datetime] = None,
     ):
         """Build a new Invoice record."""
 
         new_id = self.new_invoice_id()
         new_invoice = self.Invoice(
-            comment=comment, discount=discount, id=new_id, record_type=record_type
+            comment=comment,
+            discount=discount,
+            id=new_id,
+            record_type=record_type,
+            invoiced_at=invoiced_at,
         )
         new_invoice.customer = customer
         for sample in samples or []:

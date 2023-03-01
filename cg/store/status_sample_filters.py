@@ -3,7 +3,7 @@ from enum import Enum
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import SampleType
-from cg.store.models import Sample, Family
+from cg.store.models import Sample
 
 
 def get_sample_by_sample_id(internal_id: str, samples: Query, **kwargs) -> Query:
@@ -30,11 +30,6 @@ def get_samples_without_loqusdb_id(samples: Query, **kwargs) -> Query:
 def get_sample_by_entry_id(entry_id: int, samples: Query, **kwargs) -> Query:
     """Return sample with entry id."""
     return samples.filter_by(id=entry_id)
-
-
-def get_samples_by_analysis(samples: Query, data_analysis: str, **kwargs) -> Query:
-    """Get samples by analysis type."""
-    return samples.filter(Family.data_analysis == data_analysis)
 
 
 def get_sample_is_delivered(samples: Query, **kwargs) -> Query:
@@ -148,7 +143,6 @@ class SampleFilters(Enum):
     get_samples_with_loqusdb_id: Callable = get_samples_with_loqusdb_id
     get_samples_without_loqusdb_id: Callable = get_samples_without_loqusdb_id
     get_sample_by_entry_id: Callable = get_sample_by_entry_id
-    get_samples_by_analysis: Callable = get_samples_by_analysis
     get_sample_is_delivered: Callable = get_sample_is_delivered
     get_sample_is_not_delivered: Callable = get_sample_is_not_delivered
     get_sample_by_invoice_id: Callable = get_sample_by_invoice_id
