@@ -33,7 +33,11 @@ class NextflowAnalysisAPI:
     @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
         """Generates a path where the Rnafusion sample sheet for the case_id should be located."""
-        return Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv").as_posix()
+        return (
+            Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
+            .absolute()
+            .as_posix()
+        )
 
     @classmethod
     def get_params_file_path(
@@ -41,10 +45,19 @@ class NextflowAnalysisAPI:
     ) -> str:
         """Generates a path where the Rnafusion default params_file a case_id should be located."""
         if params_file:
-            return params_file
-        return Path(
-            (cls.get_case_path(case_id, root_dir)), f"{case_id}_params_file.yaml"
-        ).as_posix()
+            return Path(params_file).absolute().as_posix()
+        return (
+            Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_params_file.yaml")
+            .absolute()
+            .as_posix()
+        )
+
+    @classmethod
+    def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> str:
+        """Generates a path where the Nextflow configurations should be located."""
+        if nextflow_config:
+            return Path(nextflow_config).absolute().as_posix()
+        return
 
     @classmethod
     def get_case_nextflow_pid_path(cls, case_id: str, root_dir: str) -> Path:
@@ -143,8 +156,10 @@ class NextflowAnalysisAPI:
         return {
             "-bg": bg,
             "-quiet": quiet,
-            "-log": cls.get_log_path(case_id, pipeline, root_dir, log),
-            "-config": config,
+            "-log": cls.get_log_path(
+                case_id=case_id, pipeline=pipeline, root_dir=root_dir, log=log
+            ),
+            "-config": cls.get_nextflow_config_path(nextflow_config=config),
         }
 
     @classmethod
