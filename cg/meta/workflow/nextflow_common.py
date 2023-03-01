@@ -51,11 +51,10 @@ class NextflowAnalysisAPI:
         ).absolute()
 
     @classmethod
-    def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> Path:
+    def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> Optional[Path]:
         """Generates a path where the Nextflow configurations should be located."""
         if nextflow_config:
             return Path(nextflow_config).absolute()
-        return
 
     @classmethod
     def get_case_nextflow_pid_path(cls, case_id: str, root_dir: str) -> Path:
