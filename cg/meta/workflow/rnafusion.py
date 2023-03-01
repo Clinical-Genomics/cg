@@ -158,10 +158,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             ),
         )
 
-    def get_references_path(self, genomes_base: Optional[Path] = None) -> str:
+    def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
             return genomes_base
-        return Path(self.references).as_posix()
+        return Path(self.references)
 
     def get_verified_arguments(
         self,
@@ -187,11 +187,11 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return {
             f"{prefix}input": NextflowAnalysisAPI.get_input_path(
                 case_id=case_id, root_dir=self.root_dir, input=input
-            ),
+            ).as_posix(),
             f"{prefix}outdir": NextflowAnalysisAPI.get_outdir_path(
                 case_id=case_id, root_dir=self.root_dir, outdir=outdir
-            ),
-            f"{prefix}genomes_base": self.get_references_path(genomes_base=genomes_base),
+            ).as_posix(),
+            f"{prefix}genomes_base": self.get_references_path(genomes_base=genomes_base).as_posix(),
             f"{prefix}trim": trim,
             f"{prefix}fusioninspector_filter": fusioninspector_filter,
             f"{prefix}all": all,

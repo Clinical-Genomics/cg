@@ -42,21 +42,19 @@ class NextflowAnalysisAPI:
     @classmethod
     def get_params_file_path(
         cls, case_id: str, root_dir: str, params_file: Optional[str] = None
-    ) -> str:
+    ) -> Path:
         """Return parameters file or a path where the Rnafusion default parameters file for a case id should be located."""
         if params_file:
-            return Path(params_file).absolute().as_posix()
-        return (
-            Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_params_file.yaml")
-            .absolute()
-            .as_posix()
-        )
+            return Path(params_file).absolute()
+        return Path(
+            (cls.get_case_path(case_id, root_dir)), f"{case_id}_params_file.yaml"
+        ).absolute()
 
     @classmethod
-    def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> str:
+    def get_nextflow_config_path(cls, nextflow_config: Optional[str] = None) -> Path:
         """Generates a path where the Nextflow configurations should be located."""
         if nextflow_config:
-            return Path(nextflow_config).absolute().as_posix()
+            return Path(nextflow_config).absolute()
         return
 
     @classmethod
@@ -188,32 +186,32 @@ class NextflowAnalysisAPI:
         }
 
     @classmethod
-    def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: str = None) -> str:
+    def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: str = None) -> Path:
         if log:
             return log
         launch_time: str = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
         return Path(
             cls.get_case_path(case_id, root_dir),
             f"{case_id}_{pipeline}_nextflow_log_{launch_time}.log",
-        ).as_posix()
+        )
 
     @classmethod
-    def get_workdir_path(cls, case_id: str, root_dir: str, work_dir: str = None) -> str:
+    def get_workdir_path(cls, case_id: str, root_dir: str, work_dir: str = None) -> Path:
         if work_dir:
             return work_dir
-        return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR).as_posix()
+        return Path(cls.get_case_path(case_id, root_dir), NFX_WORK_DIR)
 
     @classmethod
-    def get_input_path(cls, case_id: str, root_dir: str, input: str = None) -> str:
+    def get_input_path(cls, case_id: str, root_dir: str, input: str = None) -> Path:
         if input:
             return input
-        return Path(cls.get_case_config_path(case_id, root_dir)).as_posix()
+        return Path(cls.get_case_config_path(case_id, root_dir))
 
     @classmethod
-    def get_outdir_path(cls, case_id: str, root_dir: str, outdir: str = None) -> str:
+    def get_outdir_path(cls, case_id: str, root_dir: str, outdir: str = None) -> Path:
         if outdir:
             return outdir
-        return Path(cls.get_case_path(case_id, root_dir)).as_posix()
+        return Path(cls.get_case_path(case_id, root_dir))
 
     @classmethod
     def get_nextflow_stdout_stderr(cls, case_id: str, root_dir: str) -> List[str]:
