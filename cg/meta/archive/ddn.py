@@ -16,7 +16,7 @@ class DDNApi:
         self.password: str = config.password
         self.url: str = config.url
         self.archive_repository = config.archive_repository
-        self.source_repository = config.source_repository
+        self.local_storage = config.local_storage
         self.auth_token: str
         self.refresh_token: str
         self.token_expiration: datetime
@@ -57,7 +57,7 @@ class DDNApi:
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
 
     @property
-    def auth_header(self) -> dict:
+    def auth_header(self) -> Dict[str, str]:
         if datetime.now() > self.token_expiration:
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
@@ -83,7 +83,7 @@ class DDNApi:
             "osType": "linux",
             "createDirectory": "true",
         }
-        response = APIRequest.api_request_from_content(
+        response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="files/retrieve"),
             headers=self.auth_header,

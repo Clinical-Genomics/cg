@@ -222,7 +222,7 @@ class DDNConfig(BaseModel):
     user: str
     password: str
     url: str
-    source_repository: str
+    local_storage: str
     archive_repository: str
 
 
