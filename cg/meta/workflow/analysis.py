@@ -325,18 +325,20 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.remove_files(value)
 
     def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
-        """Get target bed filename from lims"""
-        case_obj: Family = self.status_db.family(case_id)
-        sample_obj: Sample = case_obj.links[0].sample
-        if sample_obj.from_sample:
-            sample_obj: Sample = self.status_db.sample(sample_obj.from_sample)
-        target_bed_shortname: str = self.lims_api.capture_kit(sample_obj.internal_id)
+        """Get target bed filename from LIMS."""
+        case: Family = self.status_db.family(internal_id=case_id)
+        sample: Sample = case.links[0].sample
+        if sample.from_sample:
+            sample: Sample = self.status_db.sample(internal_id=sample.from_sample)
+        target_bed_shortname: str = self.lims_api.capture_kit(sample.internal_id)
         if not target_bed_shortname:
-            return target_bed_shortname
-        bed_version_obj: Optional[BedVersion] = self.status_db.bed_version(target_bed_shortname)
-        if not bed_version_obj:
-            raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
-        return bed_version_obj.filename
+            return None
+        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+            bed_version_short_name=target_bed_shortname
+        )
+        if not bed_version:
+            raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
+        return bed_version.filename
 
     def decompression_running(self, case_id: str) -> None:
         """Check if decompression is running for a case"""
