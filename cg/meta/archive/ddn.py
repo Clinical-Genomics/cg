@@ -1,29 +1,34 @@
 from pathlib import Path
 from typing import Dict
 from urllib.parse import urljoin
+from requests.models import Response
 
 from datetime import datetime
 from cg.constants.constants import APIMethods, FileFormat
 from cg.io.controller import APIRequest, ReadStream
+from cg.models.cg_config import DDNConfig
 
 
 class DDNApi:
-    def __init__(self, config: Path):
-        self.config = config
-        self.url: str = "some/url"
-        self.archive_repo = "archive_name"
-        self.source_repo = "probably the HPC?"
-        self.auth_token: str = None
-        self.refresh_token: str = None
+    def __init__(self, config: DDNConfig):
+        self.database_name: str = config.database_name
+        self.user: str = config.user
+        self.password: str = config.password
+        self.url: str = config.url
+        self.archive_repository = config.archive_repository
+        self.source_repository = config.source_repository
+        self.auth_token: str
+        self.refresh_token: str
+        self.token_expiration: datetime
         self._set_auth_tokens()
 
     def _set_auth_tokens(self) -> None:
-        response = APIRequest.api_request_from_content(
+        response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token"),
             headers={"Content-Type": "application/json", "accept": "application/json"},
             json={
-                "dbName": self.db_name,
+                "dbName": self.database_name,
                 "name": self.user,
                 "password": self.password,
                 "superUser": False,
@@ -34,10 +39,10 @@ class DDNApi:
         )
         self.refresh_token: str = response_content.get("refresh")
         self.auth_token: str = response_content.get("access")
-        self.expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
+        self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
 
     def _refresh_auth_token(self) -> None:
-        response = APIRequest.api_request_from_content(
+        response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token/refresh"),
             headers={"Content-Type": "application/json", "accept": "application/json"},
@@ -49,11 +54,11 @@ class DDNApi:
             file_format=FileFormat.JSON, stream=response.content
         )
         self.auth_token: str = response_content.get("access")
-        self.expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
+        self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
 
     @property
     def auth_header(self) -> dict:
-        if datetime.now() > self.expiration:
+        if datetime.now() > self.token_expiration:
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
@@ -63,9 +68,9 @@ class DDNApi:
             "pathInfo": [self._construct_path_dict(destination=destination, source=source)],
             "osType": "linux",
             "createDirectory": "true",
-            "metadataList": [{}],
+            "metadataList": [],
         }
-        response = APIRequest.api_request_from_content(
+        response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="files/archive"),
             headers=self.auth_header,
