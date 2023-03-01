@@ -13,7 +13,7 @@ OPTION_FROM_START = click.option(
 OPTION_STRANDEDNESS = click.option(
     "--strandedness",
     type=str,
-    default=RnafusionDefaults.STRANDEDNESS.value,
+    default=RnafusionDefaults.STRANDEDNESS,
     show_default=True,
     help="Strandedness: forward, unstranded or reverse (default)",
 )
@@ -24,56 +24,56 @@ OPTION_REFERENCES = click.option(
 OPTION_TRIM = click.option(
     "--trim",
     is_flag=True,
-    default=RnafusionDefaults.TRIM.value,
+    default=RnafusionDefaults.TRIM,
     show_default=True,
     help="Preform trimming of reads to 75 bp",
 )
 OPTION_FUSIONINSPECTOR_FILTER = click.option(
     "--fusioninspector_filter",
     is_flag=True,
-    default=RnafusionDefaults.FUSIONINSPECTOR_FILTER.value,
+    default=RnafusionDefaults.FUSIONINSPECTOR_FILTER,
     show_default=True,
     help="Feed filtered fusionreport fusions to fusioninspector",
 )
 OPTION_ALL = click.option(
     "--all",
     is_flag=True,
-    default=RnafusionDefaults.ALL.value,
+    default=RnafusionDefaults.ALL,
     show_default=True,
     help="Run all analysis tools",
 )
 OPTION_PIZZLY = click.option(
     "--pizzly",
     is_flag=True,
-    default=RnafusionDefaults.PIZZLY.value,
+    default=RnafusionDefaults.PIZZLY,
     show_default=True,
     help="Run pizzly analysis tool",
 )
 OPTION_SQUID = click.option(
     "--squid",
     is_flag=True,
-    default=RnafusionDefaults.SQUID.value,
+    default=RnafusionDefaults.SQUID,
     show_default=True,
     help="Run squid analysis tool",
 )
 OPTION_STARFUSION = click.option(
     "--starfusion",
     is_flag=True,
-    default=RnafusionDefaults.STARFUSION.value,
+    default=RnafusionDefaults.STARFUSION,
     show_default=True,
     help="Run starfusion analysis tool",
 )
 OPTION_FUSIONCATCHER = click.option(
     "--fusioncatcher",
     is_flag=True,
-    default=RnafusionDefaults.FUSIONCATCHER.value,
+    default=RnafusionDefaults.FUSIONCATCHER,
     show_default=True,
     help="Run fusioncatcher analysis tool",
 )
 OPTION_ARRIBA = click.option(
     "--arriba",
     is_flag=True,
-    default=RnafusionDefaults.ARRIBA.value,
+    default=RnafusionDefaults.ARRIBA,
     show_default=True,
     help="Run arriba analysis tool",
 )

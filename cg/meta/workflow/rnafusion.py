@@ -138,22 +138,21 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             input=None,
             outdir=None,
             genomes_base=None,
-            trim=RnafusionDefaults.TRIM.value,
-            fusioninspector_filter=RnafusionDefaults.FUSIONINSPECTOR_FILTER.value,
-            all=RnafusionDefaults.ALL.value,
-            pizzly=RnafusionDefaults.PIZZLY.value,
-            squid=RnafusionDefaults.SQUID.value,
-            starfusion=RnafusionDefaults.STARFUSION.value,
-            fusioncatcher=RnafusionDefaults.FUSIONCATCHER.value,
-            arriba=RnafusionDefaults.ARRIBA.value,
+            trim=RnafusionDefaults.TRIM,
+            fusioninspector_filter=RnafusionDefaults.FUSIONINSPECTOR_FILTER,
+            all=RnafusionDefaults.ALL,
+            pizzly=RnafusionDefaults.PIZZLY,
+            squid=RnafusionDefaults.SQUID,
+            starfusion=RnafusionDefaults.STARFUSION,
+            fusioncatcher=RnafusionDefaults.FUSIONCATCHER,
+            arriba=RnafusionDefaults.ARRIBA,
             cli=False,
         )
         LOG.info(default_options)
         if dry_run:
             return
-        WriteFile.write_file_from_content(
+        NextflowAnalysisAPI.write_nextflow_yaml(
             content=default_options,
-            file_format=FileFormat.YAML,
             file_path=NextflowAnalysisAPI.get_params_file_path(
                 case_id=case_id, root_dir=self.root_dir
             ),

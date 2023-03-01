@@ -9,7 +9,7 @@ RNAFUSION_STRANDEDNESS_HEADER = "strandedness"
 RNAFUSION_SAMPLESHEET_HEADERS = NFX_SAMPLESHEET_HEADERS + [RNAFUSION_STRANDEDNESS_HEADER]
 
 
-class RnafusionDefaults(StrEnum):
+class RnafusionDefaults:
     STRANDEDNESS: str = "reverse"
     TRIM: bool = True
     FUSIONINSPECTOR_FILTER: bool = True

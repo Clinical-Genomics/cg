@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from cg.constants.constants import FileFormat
 from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR, NXF_PID_FILE_ENV
@@ -113,6 +113,20 @@ class NextflowAnalysisAPI:
             for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
                 outfile.write("\n")
                 outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
+
+    @classmethod
+    def write_nextflow_yaml(
+        cls,
+        content: Dict[str, Any],
+        file_path: str,
+    ) -> None:
+        """Write nextflow yalm file with non-quoted booleans and quoted strings."""
+        with open(file_path, "w") as outfile:
+            for key, value in content.items():
+                print(f"{key}{value}:")
+                print(type(value))
+                quotes = '"' if type(value) is str else ""
+                outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
     @classmethod
     def get_verified_arguments_nextflow(
