@@ -5,6 +5,8 @@ from typing import List, Optional, Iterator
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
+
+from cg.constants import FlowCellStatus
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
@@ -21,7 +23,7 @@ from cg.store.models import (
     Pool,
     Sample,
 )
-from cg.store.status_flow_cell_filters import apply_flow_cell_filter
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
 from cg.store.status_case_sample_filters import apply_case_sample_filter
 from cg.store.status_sample_filters import apply_sample_filter
 
@@ -171,9 +173,9 @@ class FindBusinessDataHandler(BaseHandler):
         return self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
 
     def family_samples(self, family_id: str) -> List[FamilySample]:
-        """Find the case-sample links associated with a case."""
+        """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            function="get_samples_associated_with_case",
+            functions=["get_samples_associated_with_case"],
             case_id=family_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -181,15 +183,15 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_cases(self, sample_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a sample."""
         return apply_case_sample_filter(
-            function="get_cases_associated_with_sample",
+            functions=["get_cases_associated_with_sample"],
             sample_id=sample_id,
             case_samples=self._get_case_sample_query(),
         ).all()
 
     def get_cases_from_sample(self, sample_entry_id: str) -> List[FamilySample]:
-        """Find cases related to a given sample."""
+        """Return cases related to a given sample."""
         return apply_case_sample_filter(
-            function="get_cases_associated_with_sample_by_entry_id",
+            functions=["get_cases_associated_with_sample_by_entry_id"],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -224,10 +226,10 @@ class FindBusinessDataHandler(BaseHandler):
         return self.family(case_id).latest_ticket
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
-        """Fetch the latest sequenced flow cell related to a sample on a case"""
-        case_obj: Family = self.family(family_id)
-        samples_on_case = case_obj.links
-        flow_cells_on_case: List[Flowcell] = samples_on_case[0].sample.flowcells
+        """Fetch the latest sequenced flow cell related to a sample on a case."""
+        flow_cells_on_case: List[Flowcell] = list(
+            self.get_flow_cells_by_case(case=self.family(family_id))
+        )
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
         return flow_cells_on_case[-1]
 
@@ -269,30 +271,94 @@ class FindBusinessDataHandler(BaseHandler):
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
+    def _get_flow_cell_query(self) -> Query:
+        """Return flow cell query."""
+        return self.Flowcell.query
+
+    def _get_flow_cell_sample_links_query(self) -> Query:
+        """Return flow cell query."""
+        return self.Flowcell.query.join(Flowcell.samples, Sample.links)
+
     def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
         """Return flow cell."""
         return apply_flow_cell_filter(
-            flow_cells=self.Flowcell.query, flow_cell_id=flow_cell_id, function="flow_cell_has_id"
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_id=flow_cell_id,
+            functions=[FlowCellFilters.get_flow_cell_by_id],
         )
 
-    def flowcells(self, *, status: str = None, family: Family = None, enquiry: str = None) -> Query:
-        """Fetch all flow cells."""
-        records = self.Flowcell.query
-        if family:
-            records = records.join(Flowcell.samples, Sample.links).filter(
-                FamilySample.family == family
-            )
-        if status:
-            records = records.filter_by(status=status)
-        if enquiry:
-            records = records.filter(Flowcell.name.like(f"%{enquiry}%"))
-        return records.order_by(Flowcell.sequenced_at.desc())
+    def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Query:
+        """Return flow cell enquiry."""
+        return apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_id=flow_cell_id_enquiry,
+            functions=[FlowCellFilters.get_flow_cell_by_id_and_by_enquiry],
+        )
+
+    def get_flow_cells(self) -> List[Flowcell]:
+        """Return all flow cells."""
+        return self._get_flow_cell_query()
+
+    def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
+        """Return flow cells with supplied statuses."""
+        return apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_statuses=flow_cell_statuses,
+            functions=[FlowCellFilters.get_flow_cells_with_statuses],
+        )
+
+    def get_flow_cell_by_enquiry_and_status(
+        self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
+    ) -> List[Flowcell]:
+        """Return flow cell enquiry snd status."""
+        filter_functions: List[str] = [
+            FlowCellFilters.get_flow_cells_with_statuses,
+            FlowCellFilters.get_flow_cell_by_id_and_by_enquiry,
+        ]
+        flow_cells: List[Flowcell] = apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_query(),
+            flow_cell_id=flow_cell_id_enquiry,
+            flow_cell_statuses=flow_cell_statuses,
+            functions=filter_functions,
+        )
+        return flow_cells
+
+    def get_flow_cells_by_case(self, case: Family) -> Optional[List[Flowcell]]:
+        """Return flow cells for case."""
+        return apply_flow_cell_filter(
+            flow_cells=self._get_flow_cell_sample_links_query(),
+            functions=[FlowCellFilters.get_flow_cells_by_case],
+            case=case,
+        )
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
         flow_cell: Flowcell = self.get_flow_cell(flow_cell_id=flow_cell_id)
         if flow_cell:
             return flow_cell.samples
+
+    def is_all_flow_cells_on_disk(self, case_id: str) -> bool:
+        """Check if flow cells are on disk for sample before starting the analysis.
+        Flow cells not on disk will be requested.
+        """
+        flow_cells: Optional[List[Flowcell]] = list(
+            self.get_flow_cells_by_case(case=self.family(case_id))
+        )
+        if not flow_cells:
+            LOG.info("No flow cells found")
+            return False
+        statuses: List[str] = []
+        for flow_cell in flow_cells:
+            LOG.info(f"{flow_cell.name}: checking if flow cell is on disk")
+            LOG.info(f"{flow_cell.name}: status is {flow_cell.status}")
+            statuses += [flow_cell.status] if flow_cell.status else []
+            if not flow_cell.status or flow_cell.status == FlowCellStatus.REMOVED:
+                LOG.info(f"{flow_cell.name}: flow cell not on disk, requesting")
+                flow_cell.status = FlowCellStatus.REQUESTED
+            elif flow_cell.status != FlowCellStatus.ON_DISK:
+                LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
+        self.commit()
+        return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
     def invoices(self, invoiced: bool = None) -> Query:
         """Fetch invoices."""
@@ -414,14 +480,14 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Sample.query.join(Family.links, FamilySample.sample)
 
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
-        """Extract samples given a tissue type."""
+        """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            function="get_samples_associated_with_case",
+            functions=["get_samples_associated_with_case"],
             case_samples=self._get_sample_case_query(),
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(
-            function="get_samples_with_type", samples=samples, tissue_type=sample_type
+            functions=["get_samples_with_type"], samples=samples, tissue_type=sample_type
         )
         return samples.all() if samples else None
 
