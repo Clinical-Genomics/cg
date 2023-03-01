@@ -43,7 +43,7 @@ class NextflowAnalysisAPI:
     def get_params_file_path(
         cls, case_id: str, root_dir: str, params_file: Optional[str] = None
     ) -> str:
-        """Generates a path where the Rnafusion default params_file a case_id should be located."""
+        """Return parameters file or a path where the Rnafusion default parameters file for a case id should be located."""
         if params_file:
             return Path(params_file).absolute().as_posix()
         return (
@@ -133,7 +133,7 @@ class NextflowAnalysisAPI:
         content: Dict[str, Any],
         file_path: str,
     ) -> None:
-        """Write nextflow yalm file with non-quoted booleans and quoted strings."""
+        """Write nextflow file with non-quoted booleans and quoted strings."""
         with open(file_path, "w") as outfile:
             for key, value in content.items():
                 quotes = '"' if type(value) is str else ""

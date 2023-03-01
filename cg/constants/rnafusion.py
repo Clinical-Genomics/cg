@@ -10,6 +10,8 @@ RNAFUSION_SAMPLESHEET_HEADERS = NFX_SAMPLESHEET_HEADERS + [RNAFUSION_STRANDEDNES
 
 
 class RnafusionDefaults:
+    """Rnafusion default parameters"""
+
     STRANDEDNESS: str = "reverse"
     TRIM: bool = True
     FUSIONINSPECTOR_FILTER: bool = True
