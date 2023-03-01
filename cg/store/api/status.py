@@ -24,7 +24,7 @@ from cg.store.api.base import BaseHandler
 from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
 from cg.store.status_sample_filters import apply_sample_filter, SampleFilters
 from cg.store.status_pool_filters import apply_pool_filter, PoolFilters
-from cg.store.status_application_filter import apply_application_filter, ApplicationFilters
+from cg.store.status_application_filters import apply_application_filter, ApplicationFilters
 
 
 class StatusHandler(BaseHandler):
@@ -251,7 +251,7 @@ class StatusHandler(BaseHandler):
             flow_cells=self._get_flow_cell_sample_links_query(),
             functions=[FlowCellFilters.get_flow_cells_by_case],
             case=case,
-        )
+        ).all()
 
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
@@ -261,7 +261,7 @@ class StatusHandler(BaseHandler):
         ]
         return apply_case_filter(
             functions=case_filter_functions, cases=self._get_case_query(), date=date_threshold
-        )
+        ).all()
 
     def _get_sample_query(self) -> Query:
         """Return sample query."""
@@ -629,7 +629,7 @@ class StatusHandler(BaseHandler):
             functions=analysis_filter_functions,
             analyses=self._get_analysis_case_query(),
             pipeline=pipeline,
-        )
+        ).all()
 
     def analyses_to_clean(
         self, before: datetime = datetime.now(), pipeline: Pipeline = None

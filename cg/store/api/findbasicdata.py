@@ -19,10 +19,15 @@ from cg.store.models import (
 )
 from cg.store.api.base import BaseHandler
 from cg.store.status_bed_filters import apply_bed_filter, BedFilters
+from cg.store.status_application_filters import apply_application_filter, ApplicationFilters
 
 
 class FindBasicDataHandler(BaseHandler):
     """Contains methods to find basic data model instances"""
+
+    def _get_application_query(self) -> Query:
+        """Get a query for applications."""
+        return self.query(Application)
 
     def application(self, tag: str) -> Application:
         """Fetch an application from the store."""
@@ -30,7 +35,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def applications(self, *, category=None, archived=None):
         """Fetch all applications."""
-        records = self.Application.query
+        records = self._get_application_query()
         if category:
             records = records.filter_by(prep_category=category)
         if archived is not None:
@@ -62,7 +67,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
-        bed_filter_functions: List[Callable] = [
+        bed_filter_functions: List[BedFilters] = [
             BedFilters.get_not_archived_beds,
             BedFilters.order_beds_by_name,
         ]

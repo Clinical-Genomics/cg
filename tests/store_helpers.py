@@ -54,11 +54,14 @@ class StoreHelpers:
         store: Store,
         application_tag: str = "dummy_tag",
         application_type: str = "wgs",
+        prep_category: str = "wgs",
         is_external: bool = False,
         is_rna: bool = False,
         description: str = None,
         sequencing_depth: int = None,
         is_accredited: bool = False,
+        version: int = 1,
+        **kwargs,
     ) -> models.ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
         if is_rna:
@@ -75,6 +78,8 @@ class StoreHelpers:
                 description=description,
                 is_accredited=is_accredited,
                 sequencing_depth=sequencing_depth,
+                prep_category=prep_category,
+                **kwargs,
             )
 
         prices = {
@@ -83,12 +88,14 @@ class StoreHelpers:
             PriorityTerms.EXPRESS: 30,
             PriorityTerms.RESEARCH: 5,
         }
-        version = store.application_version(application, 1)
-        if not version:
-            version = store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
+        application_version = store.application_version(application=application, version=version)
+        if not application_version:
+            application_version = store.add_version(
+                application=application, version=version, valid_from=datetime.now(), prices=prices
+            )
 
-            store.add_commit(version)
-        return version
+            store.add_commit(application_version)
+        return application_version
 
     @staticmethod
     def ensure_application(
@@ -97,6 +104,8 @@ class StoreHelpers:
         application_type: str = "wgs",
         description: str = "dummy_description",
         is_archived: bool = False,
+        prep_category: Optional[str] = "wgs",
+        **kwargs,
     ) -> models.Application:
         """Ensure that application exists in store."""
         application: models.Application = store.application(tag=tag)
@@ -107,6 +116,8 @@ class StoreHelpers:
                 application_type=application_type,
                 description=description,
                 is_archived=is_archived,
+                prep_category=prep_category,
+                **kwargs,
             )
         return application
 

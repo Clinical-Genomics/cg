@@ -14,7 +14,7 @@ def get_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
 
 
 def get_analyses_with_pipeline(analyses: Query, pipeline: Pipeline = None, **kwargs) -> Query:
-    """Return analyses with suplied pipeline."""
+    """Return analyses with supplied pipeline."""
     return analyses.filter(Analysis.pipeline == str(pipeline)) if pipeline else analyses
 
 
