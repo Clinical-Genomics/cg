@@ -12,7 +12,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
-from cg.store.models import Flowcell, Sample
+from cg.store.models import Flowcell, Bed, BedVersion, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -146,18 +146,20 @@ class StoreHelpers:
         return application
 
     @staticmethod
-    def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> models.ApplicationVersion:
-        """Utility function to return existing or create bed version for tests."""
-        bed = store.bed(name=bed_name)
+    def ensure_bed_version(store: Store, bed_name: str = "dummy_bed") -> BedVersion:
+        """Return existing or create and return bed version for tests."""
+        bed: Optional[Bed] = store.get_bed_by_name(bed_name=bed_name)
         if not bed:
-            bed = store.add_bed(name=bed_name)
+            bed: Bed = store.add_bed(name=bed_name)
             store.add_commit(bed)
 
-        version = store.latest_bed_version(bed_name)
-        if not version:
-            version = store.add_bed_version(bed, 1, "dummy_filename", shortname=bed_name)
-            store.add_commit(version)
-        return version
+        bed_version: Optional[BedVersion] = store.get_latest_bed_version(bed_name=bed_name)
+        if not bed_version:
+            bed_version: BedVersion = store.add_bed_version(
+                bed=bed, version=1, filename="dummy_filename", shortname=bed_name
+            )
+            store.add_commit(bed_version)
+        return bed_version
 
     @staticmethod
     def ensure_collaboration(store: Store, collaboration_id: str = "all_customers"):

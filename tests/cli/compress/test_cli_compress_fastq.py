@@ -2,6 +2,7 @@
 
 import datetime as dt
 import logging
+from typing import List
 
 from cg.cli.compress.fastq import fastq_cmd, get_cases_to_process
 from cg.constants import Pipeline
@@ -39,7 +40,7 @@ def test_get_cases_to_process(
     status_db.commit()
 
     # WHEN running the compress command
-    cases: list[Family] = get_cases_to_process(days_back=1, store=status_db)
+    cases: List[Family] = get_cases_to_process(days_back=1, store=status_db)
 
     # THEN assert cases are returned
     assert cases
@@ -60,7 +61,7 @@ def test_get_cases_to_process_when_no_case(
     status_db: Store = populated_compress_context.status_db
 
     # WHEN running the compress command
-    cases: list[Family] = get_cases_to_process(
+    cases: List[Family] = get_cases_to_process(
         case_id=case_id_does_not_exist, days_back=1, store=status_db
     )
 

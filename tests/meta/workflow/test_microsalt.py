@@ -8,6 +8,7 @@ from pathlib import Path
 import logging
 
 from cg.models.orders.sample_base import ControlEnum
+from cg.store import Store
 from cg.store.models import Family
 
 
@@ -91,7 +92,7 @@ def test_qc_check_negative_control_fail(
 
     # GIVEN a case that is to be stored
     microsalt_case: Family = store.family(microsalt_case_qc_fail)
-    microsalt_case.samples[0].control = "negative"
+    microsalt_case.samples[0].control = ControlEnum.negative
 
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
 
