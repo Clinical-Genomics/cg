@@ -123,8 +123,6 @@ class NextflowAnalysisAPI:
         """Write nextflow yalm file with non-quoted booleans and quoted strings."""
         with open(file_path, "w") as outfile:
             for key, value in content.items():
-                print(f"{key}{value}:")
-                print(type(value))
                 quotes = '"' if type(value) is str else ""
                 outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
