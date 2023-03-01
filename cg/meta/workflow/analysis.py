@@ -330,7 +330,7 @@ class AnalysisAPI(MetaAPI):
         sample: Sample = case.links[0].sample
         if sample.from_sample:
             sample: Sample = self.status_db.sample(internal_id=sample.from_sample)
-        target_bed_shortname: str = self.lims_api.capture_kit(sample.internal_id)
+        target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None
         bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(

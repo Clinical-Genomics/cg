@@ -52,9 +52,9 @@ class MipDNAAnalysisAPI(MipAnalysisAPI):
 
     def config_sample(
         self, link_obj: FamilySample, panel_bed: Optional[str]
-    ) -> Dict[str, Union[str, None]]:
+    ) -> Dict[str, Union[str, int, None]]:
         """Return config sample data."""
-        sample_data = self.get_sample_data(link_obj=link_obj)
+        sample_data: Dict[str, Union[str, int]] = self.get_sample_data(link_obj=link_obj)
         if sample_data["analysis_type"] == AnalysisType.WHOLE_GENOME_SEQUENCING:
             sample_data["capture_kit"]: str = panel_bed or DEFAULT_CAPTURE_KIT
         else:
