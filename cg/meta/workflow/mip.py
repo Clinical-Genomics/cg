@@ -6,7 +6,7 @@ from typing import Any, List, Optional, Type
 from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline
+from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline, FileExtensions
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
@@ -19,6 +19,7 @@ from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 from cg.store import models
+from cg.store.models import BedVersion
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -80,14 +81,18 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get case analysis sample info path"""
         return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
-    def resolve_panel_bed(self, panel_bed: Optional[str]) -> Optional[str]:
-        if panel_bed:
-            if panel_bed.endswith(".bed"):
-                return panel_bed
-            bed_version = self.status_db.bed_version(panel_bed)
-            if not bed_version:
-                raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
-            return bed_version.filename
+    def get_panel_bed(self, panel_bed: Optional[str]) -> Optional[str]:
+        """Check and return BED gene panel."""
+        if not panel_bed:
+            return None
+        if panel_bed.endswith(FileExtensions.BED):
+            return panel_bed
+        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+            bed_version_short_name=panel_bed
+        )
+        if not bed_version:
+            raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
+        return bed_version.filename
 
     def pedigree_config(self, case_id: str, panel_bed: str = None) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
