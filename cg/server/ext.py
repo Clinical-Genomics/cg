@@ -28,7 +28,7 @@ class FlaskLims(LimsAPI):
         super(FlaskLims, self).__init__(config)
 
 
-cors = CORS(supports_credentials=True)
+cors = CORS()
 csrf = CSRFProtect()
 db = CgAlchy(Model=models.Model)
 admin = Admin(name="Clinical Genomics")

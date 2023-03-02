@@ -30,7 +30,9 @@ def _configure_extensions(app: Flask):
     app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
 
     ext.cors.init_app(
-        app, resources={app.config["CORS_RESOURCES"]: {"origins": app.config["CORS_ORIGINS"]}}
+        app,
+        resources={app.config["CORS_RESOURCES"]: {"origins": app.config["CORS_ORIGINS"]}},
+        supports_credentials=True,
     )
     ext.csrf.init_app(app)
     ext.db.init_app(app)
