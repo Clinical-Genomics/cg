@@ -1,8 +1,9 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import List, Optional
+from typing import List, Optional, Callable
 
 from sqlalchemy import desc
+from sqlalchemy.orm import Query
 
 from cg.store.models import (
     Application,
@@ -17,6 +18,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
+from cg.store.status_bed_filters import apply_bed_filter, BedFilters
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -40,26 +42,36 @@ class FindBasicDataHandler(BaseHandler):
         query = self.ApplicationVersion.query.filter_by(application=application, version=version)
         return query.first()
 
-    def bed(self, name):
-        """Find a bed by name."""
-        return self.Bed.query.filter_by(name=name).first()
-
     def bed_version(self, shortname):
         """Find a bed version by shortname."""
         return self.BedVersion.query.filter_by(shortname=shortname).first()
 
-    def beds(self, hide_archived: bool = False):
+    def _get_bed_query(self) -> Query:
+        """Return bed query."""
+        return self.Bed.query
+
+    def get_beds(self) -> Query:
         """Returns all beds."""
-        bed_q = self.Bed.query
-        if hide_archived:
-            bed_q = bed_q.filter(self.Bed.is_archived.is_(False))
+        return self._get_bed_query()
 
-        return bed_q.order_by(Bed.name)
+    def get_bed_by_name(self, bed_name: str) -> Optional[Bed]:
+        """Return bed by name."""
+        return apply_bed_filter(
+            beds=self._get_bed_query(), bed_name=bed_name, functions=[BedFilters.get_beds_by_name]
+        ).first()
 
-    def latest_bed_version(self, name: str) -> BedVersion:
-        """Fetch the latest bed version for a bed name."""
-        bed_obj = self.Bed.query.filter_by(name=name).first()
-        return bed_obj.versions[-1] if bed_obj and bed_obj.versions else None
+    def get_active_beds(self) -> Query:
+        """Get all beds which are not archived."""
+        bed_filter_functions: List[Callable] = [
+            BedFilters.get_not_archived_beds,
+            BedFilters.order_beds_by_name,
+        ]
+        return apply_bed_filter(beds=self._get_bed_query(), functions=bed_filter_functions)
+
+    def get_latest_bed_version(self, bed_name: str) -> Optional[BedVersion]:
+        """Return the latest bed version for a bed by supplied name."""
+        bed: Optional[Bed] = self.get_bed_by_name(bed_name=bed_name)
+        return bed.versions[-1] if bed and bed.versions else None
 
     def customer(self, internal_id: str) -> Customer:
         """Fetch a customer by internal id from the store."""

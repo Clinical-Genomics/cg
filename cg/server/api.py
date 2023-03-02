@@ -4,7 +4,7 @@ import json
 import tempfile
 from functools import wraps
 from pathlib import Path
-from typing import List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import requests
 from sqlalchemy.exc import IntegrityError
@@ -16,11 +16,11 @@ from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
-from cg.io.controller import WriteStream, ReadStream
+from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
+from cg.store.models import Customer
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
-from cg.store import models
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
@@ -154,17 +154,17 @@ def cases():
 
 @BLUEPRINT.route("/families")
 def families():
-    """Fetch families."""
+    """Return families."""
     if request.args.get("status") == "analysis":
         records = db.cases_to_mip_analyze()
         count = len(records)
     else:
-        customer_objs: Optional[List[models.Customer]] = (
+        customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
         case_query = db.families(
             enquiry=request.args.get("enquiry"),
-            customers=customer_objs,
+            customers=customers,
             action=request.args.get("action"),
         )
         count = case_query.count()
@@ -177,7 +177,7 @@ def families():
 @BLUEPRINT.route("/families_in_collaboration")
 def families_in_collaboration():
     """Fetch families in collaboration."""
-    order_customer: models.Customer = db.customer(request.args.get("customer"))
+    order_customer: Customer = db.customer(request.args.get("customer"))
     data_analysis: str = request.args.get("data_analysis")
     families_q: Query = db.families(
         enquiry=request.args.get("enquiry"),
@@ -226,7 +226,7 @@ def samples():
     elif request.args.get("status") == "sequencing":
         samples_q = db.samples_to_sequence()
     else:
-        customer_objs: Optional[models.Customer] = (
+        customer_objs: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
         samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
@@ -273,7 +273,7 @@ def sample_in_collaboration(sample_id):
 @BLUEPRINT.route("/pools")
 def pools():
     """Fetch pools."""
-    customer_objs: Optional[models.Customer] = (
+    customer_objs: Optional[Customer] = (
         None if g.current_user.is_admin else g.current_user.customers
     )
     pools_q = db.pools(customers=customer_objs, enquiry=request.args.get("enquiry"))
@@ -328,27 +328,27 @@ def analyses():
 @BLUEPRINT.route("/options")
 def options():
     """Fetch various options."""
-    customer_objs: Optional[models.Customer] = (
+    customers: Optional[Customer] = (
         db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
     )
 
-    apptag_groups = {"ext": []}
-    for application_obj in db.applications(archived=False):
-        if not application_obj.versions:
-            LOG.debug("Skipping application %s that doesn't have a price", application)
+    apptag_groups: Dict[str, List[str]] = {"ext": []}
+    for application in db.applications(archived=False):
+        if not application.versions:
+            LOG.debug(f"Skipping application {application} that doesn't have a price")
             continue
-        if application_obj.is_external:
-            apptag_groups["ext"].append(application_obj.tag)
-        if application_obj.prep_category not in apptag_groups:
-            apptag_groups[application_obj.prep_category] = []
-        apptag_groups[application_obj.prep_category].append(application_obj.tag)
+        if application.is_external:
+            apptag_groups["ext"].append(application.tag)
+        if application.prep_category not in apptag_groups:
+            apptag_groups[application.prep_category]: List[str] = []
+        apptag_groups[application.prep_category].append(application.tag)
 
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 
     return jsonify(
         customers=[
             {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
-            for customer in customer_objs
+            for customer in customers
         ],
         applications=apptag_groups,
         panels=[panel.abbrev for panel in db.panels()],
@@ -362,7 +362,7 @@ def options():
             for organism in db.organisms()
         ],
         sources=source_groups,
-        beds=[bed.name for bed in db.beds(hide_archived=True)],
+        beds=[bed.name for bed in db.get_active_beds()],
     )
 
 

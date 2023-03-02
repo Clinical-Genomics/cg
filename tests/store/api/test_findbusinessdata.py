@@ -7,9 +7,8 @@ from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
 from cg.store import Store
-from cg.store.models import FamilySample, Family
 from cg.constants.indexes import ListIndexes
-from cg.store.models import Sample, Flowcell, ApplicationVersion, Application
+from cg.store.models import Application, ApplicationVersion, Flowcell, FamilySample, Family, Sample
 from tests.store_helpers import StoreHelpers
 
 
