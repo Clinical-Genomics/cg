@@ -580,15 +580,18 @@ def fixture_sample_cram(mip_dna_analysis_dir: Path) -> Path:
 
 
 @pytest.fixture(name="father_sample_cram")
-def fixture_father_sample_cram(mip_dna_analysis_dir: Path) -> Path:
+def fixture_father_sample_cram(
+    mip_dna_analysis_dir: Path,
+    father_sample_id: str,
+) -> Path:
     """Return the path to the cram file for the father sample."""
-    return Path(mip_dna_analysis_dir, "adm2.cram")
+    return Path(mip_dna_analysis_dir, father_sample_id + FileExtensions.CRAM)
 
 
 @pytest.fixture(name="mother_sample_cram")
-def fixture_mother_sample_cram(mip_dna_analysis_dir: Path) -> Path:
+def fixture_mother_sample_cram(mip_dna_analysis_dir: Path, mother_sample_id: str) -> Path:
     """Return the path to the cram file for the mother sample."""
-    return Path(mip_dna_analysis_dir, "adm3.cram")
+    return Path(mip_dna_analysis_dir, mother_sample_id + FileExtensions.CRAM)
 
 
 @pytest.fixture(name="sample_cram_files")

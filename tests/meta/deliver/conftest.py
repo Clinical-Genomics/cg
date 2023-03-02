@@ -5,6 +5,7 @@ import pytest
 from tests.store_helpers import StoreHelpers
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store, models
 
@@ -22,7 +23,7 @@ def fixture_deliver_api(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         case_tags=[{"case-tag"}],
-        sample_tags=[{"cram"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
     )
@@ -49,8 +50,8 @@ def fixture_populated_deliver_api(
     _deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,
-        case_tags=["case-tag"],
-        sample_tags=["cram"],
+        case_tags=[{"case-tag"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
     )
