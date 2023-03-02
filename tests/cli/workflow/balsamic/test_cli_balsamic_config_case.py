@@ -126,10 +126,13 @@ def test_target_bed_from_lims(
     caplog.set_level(logging.INFO)
     # GIVEN case that bed-version set in lims with same version existing in status db
     case_id = "balsamic_case_tgs_single"
+
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
+
     # THEN dry-print should include the bed_key and the bed_value including path
     assert "--panel-bed" in caplog.text
     assert ".bed" in caplog.text
