@@ -27,7 +27,7 @@ from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
-
+from requests import Response
 from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
@@ -46,6 +46,9 @@ def public(route_function):
 @BLUEPRINT.before_request
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
+    if request.method.lower() == "options":
+        return Response()
+
     if not request.is_secure:
         return abort(
             make_response(
