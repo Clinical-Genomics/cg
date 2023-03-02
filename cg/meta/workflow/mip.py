@@ -80,7 +80,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get case analysis sample info path"""
         return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
-    def get_panel_bed(self, panel_bed: Optional[str]) -> Optional[str]:
+    def get_panel_bed(self, panel_bed: str = None) -> Optional[str]:
         """Check and return BED gene panel."""
         if not panel_bed:
             return None
@@ -133,13 +133,14 @@ class MipAnalysisAPI(AnalysisAPI):
             "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
         }
 
-    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample) -> Path:
+        """Return the path to the FASTQ destination directory."""
         return Path(
             self.root,
-            case_obj.internal_id,
-            sample_obj.application_version.application.analysis_type,
-            sample_obj.internal_id,
-            "fastq",
+            case.internal_id,
+            sample.application_version.application.analysis_type,
+            sample.internal_id,
+            FileFormat.FASTQ,
         )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:

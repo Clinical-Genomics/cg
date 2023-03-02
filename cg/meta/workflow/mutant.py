@@ -62,12 +62,12 @@ class MutantAnalysisAPI(AnalysisAPI):
     def _is_nanopore(self, application: models.Application) -> bool:
         return application.tag[3:6] == "ONT"
 
-    def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
-        application = sample_obj.application_version.application
-        if self._is_nanopore(application):
-            return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq", sample_obj.name)
-        else:
-            return Path(self.get_case_path(case_id=case_obj.internal_id), "fastq")
+    def get_sample_fastq_destination_dir(self, case: models.Family, sample: models.Sample) -> Path:
+        """Return the path to the FASTQ destination directory."""
+        application: str = sample.application_version.application
+        if self._is_nanopore(application=application):
+            return Path(self.get_case_path(case_id=case.internal_id), FileFormat.FASTQ, sample.name)
+        return Path(self.get_case_path(case_id=case.internal_id), FileFormat.FASTQ)
 
     def get_case_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "case_config.json")
@@ -213,7 +213,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         read_paths = []
         files: List[dict] = self.get_metadata_for_nanopore_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
+        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
         for counter, fastq_data in enumerate(sorted_files):

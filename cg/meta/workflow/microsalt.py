@@ -150,10 +150,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.info("Found deliverables file %s", deliverables_file_path)
         return deliverables_file_path
 
-    def get_sample_fastq_destination_dir(
-        self, case_obj: models.Family, sample_obj: models.Sample
-    ) -> Path:
-        return Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_obj.internal_id)
+    def get_sample_fastq_destination_dir(self, case: models.Family, sample: models.Sample) -> Path:
+        return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
 
     def link_fastq_files(
         self, case_id: str, sample_id: Optional[str], dry_run: bool = False

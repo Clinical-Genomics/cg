@@ -269,7 +269,8 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample):
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):
+        """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
     def gather_file_metadata_for_sample(self, sample_obj: Sample) -> List[dict]:
@@ -291,7 +292,7 @@ class AnalysisAPI(MetaAPI):
         concatenated_paths = {1: "", 2: ""}
         files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
+        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
         for fastq_data in sorted_files:

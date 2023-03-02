@@ -140,8 +140,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample = None) -> Path:
-        return self.get_case_path(case_obj.internal_id) / "fastq"
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample = None) -> Path:
+        """Return the path to the FASTQ destination directory."""
+        return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         case_obj = self.status_db.family(case_id)
@@ -218,7 +219,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
 
         panel_bed: Optional[Path] = self.get_derived_bed(panel_bed)
         application_types = {v["application_type"].lower() for k, v in sample_data.items()}
-        target_beds = {v["target_bed"] for k, v in sample_data.items()}
+        target_beds: set = {v["target_bed"] for k, v in sample_data.items()}
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
             raise BalsamicStartError("Case application not compatible with BALSAMIC")
@@ -518,7 +519,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             sample: Sample = self.status_db.sample(internal_id=sample.from_sample)
         capture_kit: Optional[str] = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if capture_kit:
-            panel_shortname: Optional[str] = self.status_db.get_bed_version_by_short_name(
+            panel_shortname: str = self.status_db.get_bed_version_by_short_name(
                 bed_version_short_name=capture_kit
             ).shortname
         elif (
