@@ -10,6 +10,7 @@ from housekeeper.store import models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
+from cg.exc import DeliveryReportError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
@@ -187,12 +188,15 @@ class DeliverAPI:
                 LOG.info(f"Would hard link file {file_path} to {out_path}")
                 number_linked_files += 1
                 continue
-            LOG.info(f"Hard link file {file_path} to {out_path})")
+            LOG.info(f"Hard link file {file_path} to {out_path}")
             try:
                 os.link(file_path, out_path)
                 number_linked_files += 1
             except FileExistsError:
                 LOG.info(f"Path {out_path} exists, skipping")
+        if number_linked_files == 0:
+            raise DeliveryReportError(f"No files were linked for sample {sample_name}")
+
         LOG.info(f"Linked {number_linked_files} files for sample {sample_id}, case {case_id}")
 
     def get_case_files_from_version(

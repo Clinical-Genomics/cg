@@ -136,6 +136,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BED: str = ".bed"
+    CRAM: str = ".cram"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"
