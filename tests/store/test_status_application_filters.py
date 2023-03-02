@@ -2,11 +2,9 @@ from cg.store.status_application_filters import (
     get_application_by_id,
     get_application_by_prep_category,
     get_application_by_tag,
-    get_application_by_version,
     get_application_is_archived,
     get_application_is_external,
     get_application_is_not_external,
-    get_application_valid_from,
 )
 from cg.store.models import Application
 from cg.store import Store
@@ -31,10 +29,13 @@ def test_filter_get_application_by_tag(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by tag
-    application: List[Query] = list(get_application_by_tag(applications=applications, tag=tags[0]))
+    application: Query = get_application_by_tag(applications=applications, tag=tags[0])
+
+    # ASSERT that application is a query
+    assert isinstance(application, Query)
 
     # THEN assert the application was found
-    assert application and len(application) == 1
+    assert application.all() and len(application.all()) == 1
 
 
 def test_filter_get_application_by_prep_category(
@@ -52,14 +53,15 @@ def test_filter_get_application_by_prep_category(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by prep category
-    application: List[Query] = list(
-        get_application_by_prep_category(
-            applications=applications, prep_category=prep_categories[0]
-        )
+    application: Query = get_application_by_prep_category(
+        applications=applications, prep_category=prep_categories[0]
     )
 
+    # ASSERT that application is a query
+    assert isinstance(application, Query)
+
     # THEN assert the application was found
-    assert application and len(application) == 1
+    assert application.all() and len(application.all()) == 1
 
 
 def test_filter_get_application_is_archived(
@@ -77,10 +79,13 @@ def test_filter_get_application_is_archived(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by is_archived
-    application: List[Query] = list(get_application_is_archived(applications=applications))
+    application: Query = get_application_is_archived(applications=applications)
+
+    # ASSERT that application is a query
+    assert isinstance(application, Query)
 
     # THEN assert the application was found
-    assert application and len(application) == 1
+    assert application.all() and len(application.all()) == 1
 
 
 def test_filter_get_application_is_external(
@@ -98,10 +103,13 @@ def test_filter_get_application_is_external(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by is_external
-    application: List[Query] = list(get_application_is_external(applications=applications))
+    application: Query = get_application_is_external(applications=applications)
+
+    # ASSERT that application is a query
+    assert isinstance(application, Query)
 
     # THEN assert the application was found
-    assert application and len(application) == 1
+    assert application.all() and len(application.all()) == 1
 
 
 def test_filter_get_application_is_not_external(
@@ -119,10 +127,13 @@ def test_filter_get_application_is_not_external(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by is_external
-    application: List[Query] = list(get_application_is_not_external(applications=applications))
+    application: Query = get_application_is_not_external(applications=applications)
+
+    # ASSERT that application is a query
+    assert isinstance(application, Query)
 
     # THEN assert the application was found
-    assert application and len(application) == 1
+    assert application.all() and len(application.all()) == 1
 
 
 def test_filter_get_application_by_id(
@@ -143,9 +154,12 @@ def test_filter_get_application_by_id(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by id
-    application: List[Query] = list(
-        get_application_by_id(applications=applications, application_id=application_id)
+    application: Query = get_application_by_id(
+        applications=applications, application_id=application_id
     )
 
+    # ASSERT that applications is a query
+    assert isinstance(application, Query)
+
     # THEN assert the application was found
-    assert application and len(application) == 1
+    assert application.all() and len(application.all()) == 1

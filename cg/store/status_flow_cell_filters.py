@@ -11,7 +11,7 @@ def get_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
     return flow_cells.filter(FamilySample.family == case)
 
 
-def get_flow_cell_by_id(flow_cells: Query, flow_cell_id: str, **kwargs) -> Flowcell:
+def get_flow_cell_by_id(flow_cells: Query, flow_cell_id: str, **kwargs) -> Query:
     """Return flow cell by flow cell id."""
     return flow_cells.filter(Flowcell.name == flow_cell_id).first()
 
