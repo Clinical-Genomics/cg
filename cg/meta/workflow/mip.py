@@ -267,7 +267,7 @@ class MipAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def is_dna_only_case(case_obj: Family) -> bool:
-        """Returns True if all samples of a case has dna application type"""
+        """Returns True if all samples of a case has DNA application type."""
 
         return all(
             _link.sample.application_version.application.analysis_type not in "wts"
@@ -291,6 +291,7 @@ class MipAnalysisAPI(AnalysisAPI):
         return False
 
     def get_cases_to_analyze(self) -> List[Family]:
+        """Return cases to analyze."""
         cases_query: List[Family] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
