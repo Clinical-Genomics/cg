@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Union
 from pydantic import ValidationError
 
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, SampleType
+from cg.constants.constants import FileFormat, SampleType, AnalysisType
 from cg.constants.housekeeper_tags import BalsamicAnalysisTag
 from cg.constants.indexes import ListIndexes
 from cg.constants.observations import ObservationsFileWildcards
@@ -140,8 +140,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         LOG.info("Found analysis type %s", analysis_type)
         return analysis_type
 
-    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample = None) -> Path:
-        return self.get_case_path(case_obj.internal_id) / "fastq"
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample = None) -> Path:
+        """Return the path to the FASTQ destination directory."""
+        return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         case_obj = self.status_db.family(case_id)
@@ -183,24 +184,24 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return SampleType.NORMAL
 
     def get_derived_bed(self, panel_bed: str) -> Optional[Path]:
-        """Returns the verified capture kit path or extracts the derived panel bed"""
-
-        if panel_bed:
-            if Path(panel_bed).is_file():
-                panel_bed = Path(panel_bed)
-            else:
-                derived_panel_bed = Path(
-                    self.bed_path,
-                    self.status_db.bed_version(panel_bed).filename,
-                )
-                if not derived_panel_bed.is_file():
-                    raise BalsamicStartError(
-                        f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
-                        f"Please provide absolute path to desired BED file or a valid bed shortname!"
-                    )
-                panel_bed = derived_panel_bed
-
-        return panel_bed
+        """Returns the verified capture kit path or the derived panel BED path."""
+        if not panel_bed:
+            return None
+        panel_bed: Path = Path(panel_bed)
+        if panel_bed.is_file():
+            return panel_bed
+        derived_panel_bed: Path = Path(
+            self.bed_path,
+            self.status_db.get_bed_version_by_short_name(
+                bed_version_short_name=panel_bed.as_posix()
+            ).filename,
+        )
+        if not derived_panel_bed.is_file():
+            raise BalsamicStartError(
+                f"{panel_bed} or {derived_panel_bed} are not valid paths to a BED file. "
+                f"Please provide absolute path to desired BED file or a valid bed shortname!"
+            )
+        return derived_panel_bed
 
     def get_verified_bed(self, panel_bed: str, sample_data: dict) -> Optional[str]:
         """Takes a dict with samples and attributes.
@@ -216,9 +217,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         - When bed file required for analysis, but is not set or cannot be retrieved.
         """
 
-        panel_bed = self.get_derived_bed(panel_bed)
+        panel_bed: Optional[Path] = self.get_derived_bed(panel_bed)
         application_types = {v["application_type"].lower() for k, v in sample_data.items()}
-        target_beds = {v["target_bed"] for k, v in sample_data.items()}
+        target_beds: set = {v["target_bed"] for k, v in sample_data.items()}
 
         if not application_types.issubset(self.__BALSAMIC_APPLICATIONS):
             raise BalsamicStartError("Case application not compatible with BALSAMIC")
@@ -510,26 +511,30 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return tumor_string
 
     def build_case_id_map_string(self, case_id: str) -> Optional[str]:
-        """Creates case info string for balsamic with format panel_shortname:case_name:application_tag"""
+        """Creates case info string for balsamic with format panel_shortname:case_name:application_tag."""
 
-        case_obj: Family = self.status_db.family(case_id)
-        sample_obj: Sample = case_obj.links[0].sample
-        if sample_obj.from_sample:
-            sample_obj: Sample = self.status_db.sample(sample_obj.from_sample)
-        capture_kit = self.lims_api.capture_kit(sample_obj.internal_id)
+        case: Family = self.status_db.family(internal_id=case_id)
+        sample: Sample = case.links[0].sample
+        if sample.from_sample:
+            sample: Sample = self.status_db.sample(internal_id=sample.from_sample)
+        capture_kit: Optional[str] = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if capture_kit:
-            panel_shortname = self.status_db.bed_version(capture_kit).shortname
-        elif self.get_application_type(case_obj.links[0].sample) == "wgs":
-            panel_shortname = "Whole_Genome"
+            panel_shortname: str = self.status_db.get_bed_version_by_short_name(
+                bed_version_short_name=capture_kit
+            ).shortname
+        elif (
+            self.get_application_type(case.links[0].sample) == AnalysisType.WHOLE_GENOME_SEQUENCING
+        ):
+            panel_shortname: str = "Whole_Genome"
         else:
             return
         application_tag = (
             self.status_db.query(ApplicationVersion)
-            .filter(ApplicationVersion.id == case_obj.links[0].sample.application_version_id)
+            .filter(ApplicationVersion.id == case.links[0].sample.application_version_id)
             .first()
             .application.tag
         )
-        return f"{panel_shortname}:{case_obj.name}:{application_tag}"
+        return f"{panel_shortname}:{case.name}:{application_tag}"
 
     @staticmethod
     def print_sample_params(case_id: str, sample_data: dict) -> None:
