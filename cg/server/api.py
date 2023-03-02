@@ -53,6 +53,14 @@ def before_request():
             )
         )
 
+    if request.method == "OPTIONS":
+        origin = request.headers["ORIGIN"]
+
+        if origin in current_app.config["CORS_ORIGINS"]:
+            response = make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
+            response.headers["Access-Control-Allow-Origin"] = origin
+            return response
+
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
         return
