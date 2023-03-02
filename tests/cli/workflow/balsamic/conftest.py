@@ -321,14 +321,10 @@ def fixture_balsamic_context(
     status_db: Store = cg_context.status_db
 
     # Create tgs application version
-    helpers.ensure_application_version(
-        store=status_db, application_tag="TGSA", application_type="tgs"
-    )
+    helpers.ensure_application_version(store=status_db, application_tag="TGSA", prep_category="tgs")
 
     # Create wes application version
-    helpers.ensure_application_version(
-        store=status_db, application_tag="WESA", application_type="wes"
-    )
+    helpers.ensure_application_version(store=status_db, application_tag="WESA", prep_category="wes")
 
     # Create textbook case for WGS PAIRED with enough reads
     case_wgs_paired_enough_reads = helpers.add_case(

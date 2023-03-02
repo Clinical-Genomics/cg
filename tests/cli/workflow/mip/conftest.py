@@ -132,7 +132,7 @@ def fixture_mip_dna_context(
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
     # Add apptag to db
-    helpers.ensure_application_version(store=_store, application_tag="WGSA", application_type="wgs")
+    helpers.ensure_application_version(store=_store, application_tag="WGSA", prep_category="wgs")
 
     # Add sample, cases and relationships to db
 
