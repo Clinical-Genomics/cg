@@ -52,8 +52,11 @@ def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
 @click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
 @click.option("--dry-run", is_flag=True)
+@click.option("--force", is_flag=True, help="Skips the validation of the sample sheet")
 @click.pass_obj
-def create_sheet(context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool):
+def create_sheet(
+    context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool = False
+):
     """Command to create a sample sheet.
     flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
 
@@ -82,7 +85,7 @@ def create_sheet(context: CGConfig, flow_cell_name: str, bcl_converter: str, dry
         raise click.Abort
     try:
         sample_sheet: str = create_sample_sheet(
-            flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
+            bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
         )
     except (FileNotFoundError, FileExistsError) as error:
         raise click.Abort from error
