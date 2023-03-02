@@ -601,7 +601,7 @@ def fixture_sample_crams(
 
 @pytest.fixture(name="vcf_file")
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
-    """Return the path to a vcf file."""
+    """Return the path to a VCF file."""
     return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
 
 
