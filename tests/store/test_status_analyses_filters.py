@@ -3,7 +3,7 @@ from datetime import datetime
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants import DataDelivery
+
 from cg.store import Store, models
 from cg.store.status_analysis_filters import (
     get_valid_analyses_in_production,

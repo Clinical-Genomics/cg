@@ -14,7 +14,6 @@ from cg.store.status_invoice_filters import (
 def test_filter_get_invoice_by_invoice_id(
     base_store: Store, helpers: StoreHelpers, invoice_id: List[int] = [1, 2]
 ):
-
     """Test to get invoice by invoice id."""
 
     # GIVEN an Store with two invoices
@@ -37,7 +36,6 @@ def test_filter_get_invoice_by_invoice_id(
 
 
 def test_filter_get_invoice_invoiced(base_store: Store, helpers: StoreHelpers):
-
     """Test to get invoice by invoice id."""
 
     # GIVEN an Store with two invoices
@@ -58,7 +56,6 @@ def test_filter_get_invoice_invoiced(base_store: Store, helpers: StoreHelpers):
 
 
 def test_filter_get_invoice_not_invoiced(base_store: Store, helpers: StoreHelpers):
-
     """Test to get invoice by invoice id."""
 
     # GIVEN an Store with two invoices
