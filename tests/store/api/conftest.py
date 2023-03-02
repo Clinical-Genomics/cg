@@ -193,7 +193,7 @@ def fixture_rml_pool_store(
 
     application = store.add_application(
         tag="RMLP05R800",
-        category="rml",
+        prep_category="rml",
         description="Ready-made",
         percent_kth=80,
         percent_reads_guaranteed=75,
