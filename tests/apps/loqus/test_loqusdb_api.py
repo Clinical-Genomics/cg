@@ -91,7 +91,7 @@ def test_load_parameters(
     assert f"--check-profile {observations_input_files.profile_vcf_path}" in caplog.text
     assert f"--family-file {observations_input_files.family_ped_path}" in caplog.text
     assert f"--max-window" not in caplog.text
-    assert f"--gq-treshold {MipDNALoadParameters.GQ_THRESHOLD.value}" in caplog.text
+    assert f"--gq-threshold {MipDNALoadParameters.GQ_THRESHOLD.value}" in caplog.text
     assert f"--hard-threshold {MipDNALoadParameters.HARD_THRESHOLD.value}" in caplog.text
     assert f"--soft-threshold" not in caplog.text
 
