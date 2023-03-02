@@ -27,7 +27,6 @@ from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
-from requests import Response
 from cg.store.models import Flowcell
 
 LOG = logging.getLogger(__name__)
@@ -46,8 +45,6 @@ def public(route_function):
 @BLUEPRINT.before_request
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
-    if request.method.lower() == "options":
-        return Response()
 
     if not request.is_secure:
         return abort(
@@ -55,9 +52,6 @@ def before_request():
                 jsonify(message="Only https requests accepted"), http.HTTPStatus.FORBIDDEN
             )
         )
-
-    if request.method == "OPTIONS":
-        return make_response(jsonify(ok=True), http.HTTPStatus.NO_CONTENT)
 
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
