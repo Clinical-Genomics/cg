@@ -42,7 +42,7 @@ class LoqusdbAPI:
             "--check-profile": profile_vcf_path.as_posix() if profile_vcf_path else None,
             "--family-file": family_ped_path.as_posix() if family_ped_path else None,
             "--max-window": str(window_size) if window_size else None,
-            "--gq-treshold": str(gq_threshold) if gq_threshold else None,
+            "--gq-threshold": str(gq_threshold) if gq_threshold else None,
             "--hard-threshold": str(hard_threshold) if hard_threshold else None,
             "--soft-threshold": str(soft_threshold) if soft_threshold else None,
         }
