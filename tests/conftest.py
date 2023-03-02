@@ -1097,8 +1097,16 @@ def fixture_bed_name() -> str:
     return "Bed"
 
 
+@pytest.fixture(name="bed_version_short_name")
+def fixture_bed_version_short_name() -> str:
+    """Return a bed version model short name attribute."""
+    return "bed_short_name_0.0"
+
+
 @pytest.fixture(name="base_store")
-def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: Store) -> Store:
+def fixture_base_store(
+    apptag_rna: str, bed_name: str, bed_version_short_name: str, customer_id: str, store: Store
+) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration("all_customers", "all customers")
 
@@ -1249,7 +1257,12 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
     beds: List[Bed] = [store.add_bed(name=bed_name)]
     store.add_commit(beds)
     bed_versions: List[BedVersion] = [
-        store.add_bed_version(bed=bed, version=1, filename=bed_name + FileExtensions.BED)
+        store.add_bed_version(
+            bed=bed,
+            version=1,
+            filename=bed_name + FileExtensions.BED,
+            shortname=bed_version_short_name,
+        )
         for bed in beds
     ]
     store.add_commit(bed_versions)

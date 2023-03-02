@@ -12,7 +12,6 @@ from cg.store.models import (
     BedVersion,
     Customer,
     Collaboration,
-    Sample,
     Organism,
     Panel,
     User,
@@ -20,6 +19,8 @@ from cg.store.models import (
 from cg.store.api.base import BaseHandler
 from cg.store.status_bed_filters import apply_bed_filter, BedFilters
 from cg.store.status_application_filters import apply_application_filter, ApplicationFilters
+from cg.store.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
+
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -47,9 +48,17 @@ class FindBasicDataHandler(BaseHandler):
         query = self.ApplicationVersion.query.filter_by(application=application, version=version)
         return query.first()
 
-    def bed_version(self, shortname):
-        """Find a bed version by shortname."""
-        return self.BedVersion.query.filter_by(shortname=shortname).first()
+    def _get_bed_version_query(self) -> Query:
+        """Return bed version query."""
+        return self.BedVersion.query
+
+    def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
+        """Return bed version with short name."""
+        return apply_bed_version_filter(
+            bed_versions=self._get_bed_version_query(),
+            bed_version_short_name=bed_version_short_name,
+            functions=[BedVersionFilters.get_bed_version_by_short_name],
+        ).first()
 
     def _get_bed_query(self) -> Query:
         """Return bed query."""
