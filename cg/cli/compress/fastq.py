@@ -54,7 +54,8 @@ def fastq_cmd(
     store: Store = context.status_db
     cases: List[Family] = get_cases_to_process(case_id=case_id, days_back=days_back, store=store)
     if not cases:
-        return
+        LOG.info("No cases to compress")
+        return None
     compress_sample_fastqs_in_cases(
         compress_api=compress_api,
         cases=cases,
