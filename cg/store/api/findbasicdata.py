@@ -86,10 +86,6 @@ class FindBasicDataHandler(BaseHandler):
         """Return customer query."""
         return self.Customer.query
 
-    def customer(self, internal_id: str) -> Customer:
-        """Fetch a customer by internal id from the store."""
-        return self.Customer.query.filter_by(internal_id=internal_id).first()
-
     def get_customer_by_customer_id(self, customer_id: str) -> Customer:
         """Return customer with customer id."""
         return apply_customer_filter(
