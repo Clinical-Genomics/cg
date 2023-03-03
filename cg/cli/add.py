@@ -5,7 +5,8 @@ import click
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Sample, Family, Customer, Application, User, Collaboration, Panel
 from cg.utils.click.EnumChoice import EnumChoice
 
 from cg.constants import Priority
@@ -54,17 +55,17 @@ def customer(
     """Add a new customer with a unique INTERNAL_ID and NAME."""
     collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
-    existing: models.Customer = status_db.customer(internal_id)
-    if existing:
-        LOG.error(f"{existing.name}: customer already added")
+    customer: Customer = status_db.get_customer_by_customer_id(customer_id=internal_id)
+    if customer:
+        LOG.error(f"{customer.name}: customer already added")
         raise click.Abort
 
-    collaborations: List[models.Collaboration] = [
+    collaborations: List[Collaboration] = [
         status_db.collaboration(collaboration_internal_id)
         for collaboration_internal_id in collaboration_internal_ids
     ]
 
-    new_customer: models.Customer = status_db.add_customer(
+    new_customer: Customer = status_db.add_customer(
         internal_id=internal_id,
         name=name,
         invoice_address=invoice_address,
@@ -92,12 +93,12 @@ def customer(
 def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str):
     """Add a new user with an EMAIL (login) and a NAME (full)."""
     status_db: Store = context.status_db
-    customer_obj: models.Customer = status_db.customer(customer_id)
-    existing: models.User = status_db.user(email)
-    if existing:
-        LOG.error(f"{existing.name}: user already added")
+    customer_obj: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+    user: User = status_db.user(email)
+    if user:
+        LOG.error(f"{user.name}: user already added")
         raise click.Abort
-    new_user: models.User = status_db.add_user(
+    new_user: User = status_db.add_user(
         customer=customer_obj, email=email, name=name, is_admin=admin
     )
     status_db.add_commit(new_user)
@@ -115,7 +116,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     required=True,
     help="sample pedigree sex",
 )
-@click.option("-a", "--application", required=True, help="application tag name")
+@click.option("-a", "--application-tag", required=True, help="application tag name")
 @click.option(
     "-p",
     "--priority",
@@ -132,22 +133,22 @@ def sample(
     downsampled: Optional[int],
     sex: str,
     order: Optional[str],
-    application: str,
+    application_tag: str,
     priority: Priority,
     customer_id: str,
     name: str,
 ):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
-    customer_obj: models.Customer = status_db.customer(customer_id)
-    if customer_obj is None:
+    customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+    if customer is None:
         LOG.error("customer not found")
         raise click.Abort
-    application_obj: models.Application = status_db.application(application)
-    if application_obj is None:
+    application: Application = status_db.application(application_tag)
+    if application is None:
         LOG.error("application not found")
         raise click.Abort
-    new_record: models.Sample = status_db.add_sample(
+    new_record: Sample = status_db.add_sample(
         name=name,
         sex=sex,
         downsampled_to=downsampled,
@@ -155,8 +156,8 @@ def sample(
         order=order,
         priority=priority,
     )
-    new_record.application_version = status_db.current_application_version(application)
-    new_record.customer = customer_obj
+    new_record.application_version = status_db.current_application_version(application_tag)
+    new_record.customer = customer
     status_db.add_commit(new_record)
     LOG.info(f"{new_record.internal_id}: new sample added")
 
@@ -201,18 +202,18 @@ def family(
 ):
     """Add a family with the given name and associated with the given customer"""
     status_db: Store = context.status_db
-    customer_obj: models.Customer = status_db.customer(customer_id)
-    if customer_obj is None:
+    customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+    if customer is None:
         LOG.error(f"{customer_id}: customer not found")
         raise click.Abort
 
     for panel_id in panels:
-        panel_obj: models.Panel = status_db.panel(panel_id)
-        if panel_obj is None:
+        panel: Panel = status_db.panel(panel_id)
+        if panel is None:
             LOG.error(f"{panel_id}: panel not found")
             raise click.Abort
 
-    new_case: models.Family = status_db.add_case(
+    new_case: Family = status_db.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
@@ -220,7 +221,7 @@ def family(
         priority=priority,
         ticket=ticket,
     )
-    new_case.customer = customer_obj
+    new_case.customer = customer
     status_db.add_commit(new_case)
     LOG.info(f"{new_case.internal_id}: new case added")
 
@@ -242,26 +243,26 @@ def relationship(
 ):
     """Create a link between a FAMILY_ID and a SAMPLE_ID."""
     status_db: Store = context.status_db
-    mother_obj: Optional[models.Sample] = None
-    father_obj: Optional[models.Sample] = None
-    case_obj: models.Family = status_db.family(family_id)
+    mother_obj: Optional[Sample] = None
+    father_obj: Optional[Sample] = None
+    case_obj: Family = status_db.family(family_id)
     if case_obj is None:
         LOG.error("%s: family not found", family_id)
         raise click.Abort
 
-    sample_obj: models.Sample = status_db.sample(sample_id)
+    sample_obj: Sample = status_db.sample(sample_id)
     if sample_obj is None:
         LOG.error("%s: sample not found", sample_id)
         raise click.Abort
 
     if mother:
-        mother_obj: models.Sample = status_db.sample(mother)
+        mother_obj: Sample = status_db.sample(mother)
         if mother_obj is None:
             LOG.error("%s: mother not found", mother)
             raise click.Abort
 
     if father:
-        father_obj: models.Sample = status_db.sample(father)
+        father_obj: Sample = status_db.sample(father)
         if father_obj is None:
             LOG.error("%s: father not found", father)
             raise click.Abort
