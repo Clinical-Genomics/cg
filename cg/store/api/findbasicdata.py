@@ -81,6 +81,10 @@ class FindBasicDataHandler(BaseHandler):
         bed: Optional[Bed] = self.get_bed_by_name(bed_name=bed_name)
         return bed.versions[-1] if bed and bed.versions else None
 
+    def _get_customer_query(self) -> Query:
+        """Return customer query."""
+        return self.Customer.query
+
     def customer(self, internal_id: str) -> Customer:
         """Fetch a customer by internal id from the store."""
         return self.Customer.query.filter_by(internal_id=internal_id).first()

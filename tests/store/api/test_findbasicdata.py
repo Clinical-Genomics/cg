@@ -125,3 +125,15 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 
     # THEN return a bed version with the supplied bed version short name
     assert bed_version.shortname == bed_version_short_name
+
+
+def test_get_customer_query(base_store: Store):
+    """Test function to return the customer query."""
+
+    # GIVEN a store with bed records
+
+    # WHEN getting the query for the beds
+    customer_query: Query = base_store._get_customer_query()
+
+    # THEN a query should be returned
+    assert isinstance(customer_query, Query)
