@@ -98,10 +98,6 @@ class FindBasicDataHandler(BaseHandler):
         """Return costumers."""
         return self._get_customer_query().all()
 
-    def customers(self) -> List[Customer]:
-        """Fetch all customers."""
-        return self.Customer.query
-
     def collaboration(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
         return self.Collaboration.query.filter_by(internal_id=internal_id).first()

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Query
 
@@ -149,3 +149,18 @@ def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
 
     # THEN return a customer with the supplied customer internal id
     assert customer.internal_id == customer_id
+
+
+def test_get_customers(base_store: Store, customer_id: str):
+    """Test function to return customers."""
+
+    # GIVEN a store with customer records
+
+    # WHEN getting the customers
+    customers: List[Customer] = base_store.get_customers()
+
+    # THEN return customers
+    assert customers
+
+    # THEN return a customer with the database customer internal id
+    assert customers[0].internal_id == customer_id
