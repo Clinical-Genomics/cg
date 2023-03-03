@@ -328,8 +328,8 @@ def analyses():
 @BLUEPRINT.route("/options")
 def options():
     """Fetch various options."""
-    customers: Optional[Customer] = (
-        db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
+    customers: List[Optional[Customer]] = (
+        db.get_customers() if g.current_user.is_admin else g.current_user.customers
     )
 
     apptag_groups: Dict[str, List[str]] = {"ext": []}

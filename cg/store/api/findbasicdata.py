@@ -96,7 +96,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_customers(self) -> List[Customer]:
         """Return costumers."""
-        return self._get_customer_query()
+        return self._get_customer_query().all()
 
     def customers(self) -> List[Customer]:
         """Fetch all customers."""
