@@ -18,7 +18,7 @@ from cg.store.status_sample_filters import (
     get_samples_do_invoice,
     get_samples_do_not_invoice,
     get_samples_by_invoice_id,
-    get_samples_by_sample_id,
+    get_samples_by_internal_id,
     get_samples_by_entry_id,
     get_samples_with_type,
     get_samples_is_prepared,
@@ -480,7 +480,7 @@ def test_filter_get_samples_by_sample_id(
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting a sample by id
-    samples: Query = get_samples_by_sample_id(samples=samples, internal_id=sample_id)
+    samples: Query = get_samples_by_internal_id(samples=samples, internal_id=sample_id)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)

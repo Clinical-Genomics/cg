@@ -6,7 +6,7 @@ from cg.constants.constants import SampleType
 from cg.store.models import Sample
 
 
-def get_samples_by_sample_id(internal_id: str, samples: Query, **kwargs) -> Query:
+def get_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Query:
     """Return sample with sample id."""
     return samples.filter_by(internal_id=internal_id)
 
@@ -138,7 +138,7 @@ def apply_sample_filter(
 class SampleFilters(Enum):
     """Enum with all sample filters."""
 
-    get_samples_by_sample_id: Callable = get_samples_by_sample_id
+    get_samples_by_internal_id: Callable = get_samples_by_internal_id
     get_samples_with_type: Callable = get_samples_with_type
     get_samples_with_loqusdb_id: Callable = get_samples_with_loqusdb_id
     get_samples_without_loqusdb_id: Callable = get_samples_without_loqusdb_id

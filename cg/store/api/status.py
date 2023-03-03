@@ -283,7 +283,7 @@ class StatusHandler(BaseHandler):
     def sample(self, internal_id: str) -> Sample:
         """Return a sample by lims id."""
         return apply_sample_filter(
-            functions=[SampleFilters.get_samples_by_sample_id],
+            functions=[SampleFilters.get_samples_by_internal_id],
             samples=self._get_sample_query(),
             internal_id=internal_id,
         ).first()
