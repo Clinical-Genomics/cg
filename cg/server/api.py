@@ -65,6 +65,9 @@ def before_request():
             )
         )
 
+    if request.method == "OPTIONS":
+        return
+
     endpoint_func = current_app.view_functions[request.endpoint]
     if getattr(endpoint_func, "is_public", None):
         return
