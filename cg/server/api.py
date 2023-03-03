@@ -196,7 +196,9 @@ def family(family_id):
     case_obj = db.family(family_id)
     if case_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (case_obj.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (
+        case_obj.customer not in g.current_user._get_customer_query
+    ):
         return abort(http.HTTPStatus.FORBIDDEN)
 
     data = case_obj.to_dict(links=True, analyses=True)
@@ -227,7 +229,7 @@ def samples():
         samples_q = db.samples_to_sequence()
     else:
         customer_objs: Optional[Customer] = (
-            None if g.current_user.is_admin else g.current_user.customers
+            None if g.current_user.is_admin else g.current_user._get_customer_query
         )
         samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
@@ -253,7 +255,9 @@ def sample(sample_id):
     sample_obj = db.sample(sample_id)
     if sample_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (
+        sample_obj.customer not in g.current_user._get_customer_query
+    ):
         return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)
     return jsonify(**data)
@@ -274,7 +278,7 @@ def sample_in_collaboration(sample_id):
 def pools():
     """Fetch pools."""
     customer_objs: Optional[Customer] = (
-        None if g.current_user.is_admin else g.current_user.customers
+        None if g.current_user.is_admin else g.current_user._get_customer_query
     )
     pools_q = db.pools(customers=customer_objs, enquiry=request.args.get("enquiry"))
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
@@ -287,7 +291,7 @@ def pool(pool_id):
     record = db.pool(pool_id)
     if record is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (record.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (record.customer not in g.current_user._get_customer_query):
         return abort(http.HTTPStatus.FORBIDDEN)
     return jsonify(**record.to_dict())
 
@@ -329,7 +333,7 @@ def analyses():
 def options():
     """Fetch various options."""
     customers: Optional[Customer] = (
-        db.Customer.query.all() if g.current_user.is_admin else g.current_user.customers
+        db.Customer.query.all() if g.current_user.is_admin else g.current_user._get_customer_query
     )
 
     apptag_groups: Dict[str, List[str]] = {"ext": []}
@@ -369,7 +373,7 @@ def options():
 @BLUEPRINT.route("/me")
 def me():
     """Fetch information about current user."""
-    if not g.current_user.is_admin and not g.current_user.customers:
+    if not g.current_user.is_admin and not g.current_user._get_customer_query:
         LOG.error(
             "%s is not admin and is not connected to any customers, aborting", g.current_user.email
         )

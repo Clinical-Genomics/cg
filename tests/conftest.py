@@ -986,7 +986,7 @@ def fixture_analysis_store_single(
 @pytest.fixture(name="collaboration_id")
 def fixture_collaboration_id() -> str:
     """Return a default customer group."""
-    return "all_customers"
+    return "hospital_collab"
 
 
 @pytest.fixture(name="customer_production")
@@ -1105,10 +1105,15 @@ def fixture_bed_version_short_name() -> str:
 
 @pytest.fixture(name="base_store")
 def fixture_base_store(
-    apptag_rna: str, bed_name: str, bed_version_short_name: str, customer_id: str, store: Store
+    apptag_rna: str,
+    bed_name: str,
+    bed_version_short_name: str,
+    collaboration_id: str,
+    customer_id: str,
+    store: Store,
 ) -> Store:
     """Setup and example store."""
-    collaboration = store.add_collaboration("all_customers", "all customers")
+    collaboration = store.add_collaboration(collaboration_id, collaboration_id)
 
     store.add_commit(collaboration)
     customers = [
@@ -1305,7 +1310,7 @@ def sample_store(base_store: Store) -> Store:
             reads=(250 * 1000000),
         ),
     ]
-    customer = base_store.customers().first()
+    customer = base_store._get_customer_query().first()
     external_app = base_store.application("WGXCUSC000").versions[0]
     wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
