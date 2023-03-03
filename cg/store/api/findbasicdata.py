@@ -19,6 +19,7 @@ from cg.store.models import (
 from cg.store.api.base import BaseHandler
 from cg.store.status_bed_filters import apply_bed_filter, BedFilters
 from cg.store.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
+from cg.store.status_customer_version_filters import apply_customer_filter, CustomerFilters
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -88,6 +89,18 @@ class FindBasicDataHandler(BaseHandler):
     def customer(self, internal_id: str) -> Customer:
         """Fetch a customer by internal id from the store."""
         return self.Customer.query.filter_by(internal_id=internal_id).first()
+
+    def get_customer_by_customer_id(self, customer_id: str) -> Customer:
+        """Return customer with customer id."""
+        return apply_customer_filter(
+            functions=[CustomerFilters.get_customer_by_customer_id],
+            customers=self._get_customer_query(),
+            customer_id=customer_id,
+        ).first()
+
+    def get_customers(self) -> List[Customer]:
+        """Return costumers."""
+        return self._get_customer_query()
 
     def customers(self) -> List[Customer]:
         """Fetch all customers."""

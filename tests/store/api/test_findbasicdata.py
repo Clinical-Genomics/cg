@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed, BedVersion
+from cg.store.models import Bed, BedVersion, Customer
 
 
 def test_get_bed_query(base_store: Store):
@@ -137,3 +137,15 @@ def test_get_customer_query(base_store: Store):
 
     # THEN a query should be returned
     assert isinstance(customer_query, Query)
+
+
+def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
+    """Test function to return the customer by customer id."""
+
+    # GIVEN a store with customer records
+
+    # WHEN getting the query for the customer
+    customer: Customer = base_store.get_customer_by_customer_id(customer_id=customer_id)
+
+    # THEN return a customer with the supplied customer internal id
+    assert customer.internal_id == customer_id
