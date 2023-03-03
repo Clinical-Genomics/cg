@@ -10,7 +10,7 @@ def test_get_beds_by_name(base_store: Store, bed_name: str):
     # GIVEN a store containing bed
 
     # WHEN retrieving a beds by name
-    beds: List[Bed] = get_not_archived_beds(beds=base_store._get_bed_query())
+    beds: List[Bed] = get_not_archived_beds(beds=base_store._get_query(table=Bed))
 
     # THEN beds should be returned
     assert beds
@@ -24,7 +24,7 @@ def test_get_not_archived_beds(base_store: Store):
     # GIVEN a store containing bed
 
     # WHEN retrieving a beds not archived
-    beds: List[Bed] = get_not_archived_beds(beds=base_store._get_bed_query())
+    beds: List[Bed] = get_not_archived_beds(beds=base_store._get_query(table=Bed))
 
     # THEN beds should be returned
     assert beds
@@ -38,7 +38,7 @@ def test_order_beds_by_name(base_store: Store, bed_name: str):
     # GIVEN a store containing bed
 
     # WHEN retrieving a beds
-    beds: List[Bed] = order_beds_by_name(beds=base_store._get_bed_query())
+    beds: List[Bed] = order_beds_by_name(beds=base_store._get_query(table=Bed))
 
     # THEN a bed should be returned
     assert beds
