@@ -1310,7 +1310,7 @@ def sample_store(base_store: Store) -> Store:
             reads=(250 * 1000000),
         ),
     ]
-    customer = base_store._get_customer_query().first()
+    customer = base_store.customers().first()
     external_app = base_store.application("WGXCUSC000").versions[0]
     wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
