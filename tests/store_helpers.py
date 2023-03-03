@@ -272,7 +272,9 @@ class StoreHelpers:
         application_version_id = application_version.id
 
         if internal_id:
-            existing_sample: models.Sample = store.sample(internal_id=internal_id)
+            existing_sample: models.Sample = store.get_first_sample_by_internal_id(
+                internal_id=internal_id
+            )
             if existing_sample:
                 return existing_sample
 
@@ -593,7 +595,7 @@ class StoreHelpers:
         """Function for adding a phenotype group to a sample in the database."""
         if phenotype_groups is None:
             phenotype_groups = ["a phenotype group"]
-        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        sample_obj: models.Sample = store.get_first_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -608,7 +610,7 @@ class StoreHelpers:
         """Function for adding a phenotype term to a sample in the database."""
         if not phenotype_terms:
             phenotype_terms: List[str] = ["a phenotype term"]
-        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        sample_obj: models.Sample = store.get_first_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -621,7 +623,7 @@ class StoreHelpers:
         store: Store, sample_id: str, subject_id: str = "a subject_id"
     ) -> Optional[models.Sample]:
         """Function for adding a subject_id to a sample in the database."""
-        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        sample_obj: models.Sample = store.get_first_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None

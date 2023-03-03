@@ -88,7 +88,7 @@ def test_get_samples_by_internal_id(
 ):
     # GIVEN a store containing a sample
     # WHEN retrieving the sample by its internal id
-    sample: Sample = store_with_multiple_cases_and_samples.sample(
+    sample: Sample = store_with_multiple_cases_and_samples.get_first_sample_by_internal_id(
         internal_id=sample_id_in_single_case
     )
 

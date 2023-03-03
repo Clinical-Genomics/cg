@@ -64,7 +64,7 @@ def make_new_invoice():
             record_type="Pool",
         )
     elif record_type == "Sample":
-        samples = [db.sample(sample_id) for sample_id in record_ids]
+        samples = [db.get_first_sample_by_internal_id(sample_id) for sample_id in record_ids]
         new_invoice = db.add_invoice(
             customer=customer_obj,
             samples=samples,

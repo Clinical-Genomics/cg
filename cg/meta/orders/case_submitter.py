@@ -67,7 +67,9 @@ class CaseSubmitter(Submitter):
             if not sample.internal_id:
                 continue
 
-            existing_sample: models.Sample = self.status.sample(sample.internal_id)
+            existing_sample: models.Sample = self.status.get_first_sample_by_internal_id(
+                sample.internal_id
+            )
             data_customer: models.Customer = self.status.customer(customer_id)
 
             if existing_sample.customer not in data_customer.collaborators:
@@ -232,7 +234,7 @@ class CaseSubmitter(Submitter):
 
             family_samples = {}
             for sample in case["samples"]:
-                sample_obj = self.status.sample(sample["internal_id"])
+                sample_obj = self.status.get_first_sample_by_internal_id(sample["internal_id"])
                 if not sample_obj:
                     sample_obj = self._create_sample(
                         case, customer_obj, order, ordered, sample, ticket

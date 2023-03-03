@@ -44,7 +44,7 @@ def sample(context: click.Context, families: bool, hide_flowcell: bool, sample_i
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
         LOG.debug("%s: get info about sample", sample_id)
-        sample_obj: models.Sample = status_db.sample(sample_id)
+        sample_obj: models.Sample = status_db.get_first_sample_by_internal_id(sample_id)
         if sample_obj is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")
             continue

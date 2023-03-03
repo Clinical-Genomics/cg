@@ -95,7 +95,9 @@ class TransferFlowCell:
         for cgstats_sample in cgstats_flow_cell.samples:
             LOG.debug(f"Adding reads/FASTQs to sample: {cgstats_sample.name}")
 
-            status_db_sample: Sample = self.db.sample(internal_id=cgstats_sample.name)
+            status_db_sample: Sample = self.db.get_first_sample_by_internal_id(
+                internal_id=cgstats_sample.name
+            )
 
             if not status_db_sample:
                 LOG.warning(f"Unable to find sample: {cgstats_sample.name}")

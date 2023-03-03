@@ -119,7 +119,7 @@ class TicketHandler:
     ) -> str:
         if not internal_id:
             return message
-        existing_sample: models.Sample = self.status_db.sample(internal_id)
+        existing_sample: models.Sample = self.status_db.get_first_sample_by_internal_id(internal_id)
         sample_customer = ""
         if existing_sample.customer_id != customer_id:
             sample_customer = " from " + existing_sample.customer.internal_id

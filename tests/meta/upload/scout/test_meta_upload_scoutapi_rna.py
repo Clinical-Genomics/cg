@@ -127,7 +127,9 @@ def test_upload_splice_junctions_bed_to_scout(
     assert "Upload splice junctions bed file finished!" in caplog.text
 
     # THEN the customers dna samples name should have been mentioned in the logging (and used in the upload)
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
+    dna_customer_sample_name: str = rna_store.get_first_sample_by_internal_id(
+        internal_id=dna_sample_son_id
+    ).name
     assert dna_customer_sample_name in caplog.text
 
 
@@ -158,7 +160,9 @@ def test_upload_rna_coverage_bigwig_to_scout(
     assert "Upload RNA coverage bigwig file finished!" in caplog.text
 
     # THEN the customers dna samples name should have been mentioned in the logging (and used in the upload)
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
+    dna_customer_sample_name: str = rna_store.get_first_sample_by_internal_id(
+        internal_id=dna_sample_son_id
+    ).name
     assert dna_customer_sample_name in caplog.text
 
 
@@ -193,7 +197,9 @@ def test_upload_clinical_rna_fusion_report_to_scout(
     assert dna_case_id in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
+    dna_customer_sample_name: str = rna_store.get_first_sample_by_internal_id(
+        internal_id=dna_sample_son_id
+    ).name
     assert dna_customer_sample_name not in caplog.text
 
 
@@ -228,7 +234,9 @@ def test_upload_research_rna_fusion_report_to_scout(
     assert dna_case_id in caplog.text
 
     # THEN the customers dna samples name should NOT have been mentioned in the logging
-    dna_customer_sample_name: str = rna_store.sample(internal_id=dna_sample_son_id).name
+    dna_customer_sample_name: str = rna_store.get_first_sample_by_internal_id(
+        internal_id=dna_sample_son_id
+    ).name
     assert dna_customer_sample_name not in caplog.text
 
 
@@ -487,8 +495,10 @@ def test_get_application_prep_category(
     ensure_extra_rna_case_match(another_rna_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
-    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
-    another_rna_sample_id: models.Sample = rna_store.sample(another_rna_sample_id)
+    dna_sample: models.Sample = rna_store.get_first_sample_by_internal_id(dna_sample_son_id)
+    another_rna_sample_id: models.Sample = rna_store.get_first_sample_by_internal_id(
+        another_rna_sample_id
+    )
     all_son_rna_dna_samples: List[models.Sample] = [dna_sample, another_rna_sample_id]
 
     # WHEN running the method to filter a list of models.Sample objects containing RNA and DNA samples connected by subject_id
@@ -546,7 +556,7 @@ def test_link_rna_sample_to_dna_sample(
     """Test for a given RNA sample, the associated DNA sample name matches and is present in rna_dna_case_map."""
 
     # GIVEN an RNA sample
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    rna_sample: models.Sample = rna_store.get_first_sample_by_internal_id(rna_sample_son_id)
 
     # WHEN adding the RNA sample to the rna_dna_case_map
     rna_dna_case_map: dict = {}
@@ -572,8 +582,8 @@ def test_add_dna_cases_to_dna_sample(
     """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
-    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
+    rna_sample: models.Sample = rna_store.get_first_sample_by_internal_id(rna_sample_son_id)
+    dna_sample: models.Sample = rna_store.get_first_sample_by_internal_id(dna_sample_son_id)
     dna_case: models.Family = rna_store.families(enquiry=dna_case_id).first()
 
     # WHEN adding the RNA sample rna_dna_case_map

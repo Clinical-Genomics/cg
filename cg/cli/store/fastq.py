@@ -27,7 +27,7 @@ def store_sample(context: CGConfig, sample_id: str, dry_run: bool) -> int:
     compress_api: CompressAPI = context.meta_apis["compress_api"]
     status_db: Store = context.status_db
     update_compress_api(compress_api, dry_run=dry_run)
-    sample = status_db.sample(internal_id=sample_id)
+    sample = status_db.get_first_sample_by_internal_id(internal_id=sample_id)
     if not sample:
         LOG.warning(f"Could not find {sample_id}")
         return 0

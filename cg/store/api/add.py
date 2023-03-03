@@ -36,7 +36,7 @@ class AddHandler(BaseHandler):
     def generate_unique_petname(self) -> str:
         while True:
             random_id = petname.Generate(3, separator="")
-            if not self.sample(random_id):
+            if not self.get_first_sample_by_internal_id(internal_id=random_id):
                 return random_id
 
     def add_customer(

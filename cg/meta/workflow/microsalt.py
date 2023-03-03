@@ -351,7 +351,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_qc: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample_id in case_qc:
-            sample: Sample = self.status_db.sample(internal_id=sample_id)
+            sample: Sample = self.status_db.get_first_sample_by_internal_id(internal_id=sample_id)
             sample_check: Union[Dict, None] = self.qc_sample_check(
                 sample=sample,
                 sample_qc=case_qc[sample_id],
@@ -373,7 +373,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         qc_pass: bool = True
 
         for sample_id in failed_samples:
-            sample: Sample = self.status_db.sample(internal_id=sample_id)
+            sample: Sample = self.status_db.get_first_sample_by_internal_id(internal_id=sample_id)
             if sample.control == ControlEnum.negative:
                 qc_pass = False
             if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:

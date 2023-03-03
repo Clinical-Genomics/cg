@@ -130,7 +130,7 @@ def test_store_flow_cell(
     """Test to run store flow cell command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
-    sample: Sample = populated_compress_context.status_db.sample(sample_id)
+    sample: Sample = populated_compress_context.status_db.get_first_sample_by_internal_id(sample_id)
 
     # GIVEN samples objects on a flow cell
     mocker.patch.object(Store, "get_samples_from_flow_cell")
@@ -188,7 +188,9 @@ def test_store_store_demultiplexed_flow_cell(
     """Test to run store demultiplexed flow cell command."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a context with a sample
-    sample: Sample = real_populated_compress_context.status_db.sample(sample_id)
+    sample: Sample = real_populated_compress_context.status_db.get_first_sample_by_internal_id(
+        sample_id
+    )
 
     # GIVEN samples objects on a flow cell
     mocker.patch.object(Store, "get_samples_from_flow_cell")
