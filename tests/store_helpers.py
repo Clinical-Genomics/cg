@@ -53,7 +53,7 @@ class StoreHelpers:
     def ensure_application_version(
         store: Store,
         application_tag: str = "dummy_tag",
-        application_type: str = "wgs",
+        prep_category: str = "wgs",
         is_external: bool = False,
         is_rna: bool = False,
         description: str = None,
@@ -63,14 +63,14 @@ class StoreHelpers:
         """Utility function to return existing or create application version for tests."""
         if is_rna:
             application_tag = "rna_tag"
-            application_type = "wts"
+            prep_category = "wts"
 
         application = store.application(tag=application_tag)
         if not application:
             application = StoreHelpers.add_application(
                 store,
-                application_tag,
-                application_type,
+                application_tag=application_tag,
+                prep_category=prep_category,
                 is_external=is_external,
                 description=description,
                 is_accredited=is_accredited,
@@ -104,7 +104,7 @@ class StoreHelpers:
             application: models.Application = StoreHelpers.add_application(
                 store=store,
                 application_tag=tag,
-                application_type=application_type,
+                prep_category=application_type,
                 description=description,
                 is_archived=is_archived,
             )
@@ -114,7 +114,7 @@ class StoreHelpers:
     def add_application(
         store: Store,
         application_tag: str = "dummy_tag",
-        application_type: str = "wgs",
+        prep_category: str = "wgs",
         description: str = None,
         is_archived: bool = False,
         is_accredited: bool = False,
@@ -131,7 +131,7 @@ class StoreHelpers:
             description = "dummy_description"
         application = store.add_application(
             tag=application_tag,
-            category=application_type,
+            prep_category=prep_category,
             description=description,
             is_archived=is_archived,
             percent_kth=80,
@@ -258,7 +258,7 @@ class StoreHelpers:
         application_version = StoreHelpers.ensure_application_version(
             store=store,
             application_tag=application_tag,
-            application_type=application_type,
+            prep_category=application_type,
             is_external=is_external,
             is_rna=is_rna,
         )
@@ -684,7 +684,7 @@ class StoreHelpers:
         application_version = StoreHelpers.ensure_application_version(
             store=store,
             application_tag=application_tag,
-            application_type=application_type,
+            prep_category=application_type,
             is_external=is_external,
             is_rna=is_rna,
         )

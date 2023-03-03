@@ -75,7 +75,7 @@ class AddHandler(BaseHandler):
     def add_application(
         self,
         tag: str,
-        category: str,
+        prep_category: str,
         description: str,
         percent_kth: int,
         percent_reads_guaranteed: int,
@@ -86,7 +86,7 @@ class AddHandler(BaseHandler):
 
         return self.Application(
             tag=tag,
-            prep_category=category,
+            prep_category=prep_category,
             description=description,
             is_accredited=is_accredited,
             percent_kth=percent_kth,
