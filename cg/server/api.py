@@ -48,6 +48,9 @@ def after_request(response):
     origin = request.headers["ORIGIN"]
     if origin in current_app.config["CORS_ORIGINS"]:
         response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers[
+            "Access-Control-Allow-Headers"
+        ] = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
     return response
 
 
