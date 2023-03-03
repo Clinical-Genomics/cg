@@ -1,17 +1,16 @@
 from cg.store.status_application_filters import (
-    get_application_by_id,
-    get_application_by_prep_category,
-    get_application_by_tag,
-    get_application_is_archived,
-    get_application_is_external,
-    get_application_is_not_external,
+    get_applications_by_id,
+    get_applications_by_prep_category,
+    get_applications_by_tag,
+    get_applications_is_archived,
+    get_applications_is_external,
+    get_applications_is_not_external,
 )
-from cg.store.models import Application
+
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
 from typing import List
 from sqlalchemy.orm import Query
-from datetime import datetime, timedelta
 
 
 def test_filter_get_application_by_tag(
@@ -29,7 +28,7 @@ def test_filter_get_application_by_tag(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by tag
-    application: Query = get_application_by_tag(applications=applications, tag=tags[0])
+    application: Query = get_applications_by_tag(applications=applications, tag=tags[0])
 
     # ASSERT that application is a query
     assert isinstance(application, Query)
@@ -38,7 +37,7 @@ def test_filter_get_application_by_tag(
     assert application.all() and len(application.all()) == 1
 
 
-def test_filter_get_application_by_prep_category(
+def test_filter_get_applications_by_prep_category(
     store: Store, helpers: StoreHelpers, prep_categories: List[str] = ["wgs", "wes"]
 ) -> None:
     """Test to get application by prep category."""
@@ -53,7 +52,7 @@ def test_filter_get_application_by_prep_category(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by prep category
-    application: Query = get_application_by_prep_category(
+    application: Query = get_applications_by_prep_category(
         applications=applications, prep_category=prep_categories[0]
     )
 
@@ -64,7 +63,7 @@ def test_filter_get_application_by_prep_category(
     assert application.all() and len(application.all()) == 1
 
 
-def test_filter_get_application_is_archived(
+def test_filter_get_applications_is_archived(
     store: Store, helpers: StoreHelpers, tag: List[str] = ["WGTPCFC031", "WGTPCFC030"]
 ) -> None:
     """Test to get application by is_archived."""
@@ -79,7 +78,7 @@ def test_filter_get_application_is_archived(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by is_archived
-    application: Query = get_application_is_archived(applications=applications)
+    application: Query = get_applications_is_archived(applications=applications)
 
     # ASSERT that application is a query
     assert isinstance(application, Query)
@@ -88,7 +87,7 @@ def test_filter_get_application_is_archived(
     assert application.all() and len(application.all()) == 1
 
 
-def test_filter_get_application_is_external(
+def test_filter_get_applications_is_external(
     store: Store, helpers: StoreHelpers, tag: List[str] = ["WGTPCFC031", "WGTPCFC030"]
 ) -> None:
     """Test to get application by is_external."""
@@ -103,7 +102,7 @@ def test_filter_get_application_is_external(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by is_external
-    application: Query = get_application_is_external(applications=applications)
+    application: Query = get_applications_is_external(applications=applications)
 
     # ASSERT that application is a query
     assert isinstance(application, Query)
@@ -112,7 +111,7 @@ def test_filter_get_application_is_external(
     assert application.all() and len(application.all()) == 1
 
 
-def test_filter_get_application_is_not_external(
+def test_filter_get_applications_is_not_external(
     store: Store, helpers: StoreHelpers, tag: List[str] = ["WGTPCFC031", "WGTPCFC030"]
 ) -> None:
     """Test to get application by is_external."""
@@ -127,7 +126,7 @@ def test_filter_get_application_is_not_external(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by is_external
-    application: Query = get_application_is_not_external(applications=applications)
+    application: Query = get_applications_is_not_external(applications=applications)
 
     # ASSERT that application is a query
     assert isinstance(application, Query)
@@ -136,7 +135,7 @@ def test_filter_get_application_is_not_external(
     assert application.all() and len(application.all()) == 1
 
 
-def test_filter_get_application_by_id(
+def test_filter_get_applications_by_id(
     store: Store,
     helpers: StoreHelpers,
     tag: List[str] = ["WGTPCFC031", "WGTPCFC030"],
@@ -154,7 +153,7 @@ def test_filter_get_application_by_id(
     applications: Query = store._get_application_query()
 
     # WHEN getting an application by id
-    application: Query = get_application_by_id(
+    application: Query = get_applications_by_id(
         applications=applications, application_id=application_id
     )
 

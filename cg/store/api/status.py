@@ -38,17 +38,18 @@ class StatusHandler(BaseHandler):
         """Fetch top samples to receive."""
         records = self._join_sample_application_version_query(query=self._get_sample_query())
         sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.get_sample_is_not_received,
-            SampleFilters.get_sample_not_down_sampled,
+            SampleFilters.get_samples_is_not_received,
+            SampleFilters.get_samples_not_down_sampled,
         ]
         records = apply_sample_filter(samples=records, functions=sample_filter_functions)
         if external:
             records = apply_application_filter(
-                applications=records, functions=[ApplicationFilters.get_application_is_external]
+                applications=records, functions=[ApplicationFilters.get_applications_is_external]
             )
         else:
             records = apply_application_filter(
-                applications=records, functions=[ApplicationFilters.get_application_is_not_external]
+                applications=records,
+                functions=[ApplicationFilters.get_applications_is_not_external],
             )
         return records.order_by(Sample.ordered_at)
 
@@ -56,14 +57,14 @@ class StatusHandler(BaseHandler):
         """Fetch samples to prepare."""
         records = self._join_sample_application_version_query(query=self._get_sample_query())
         sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.get_sample_is_received,
-            SampleFilters.get_sample_is_not_prepared,
-            SampleFilters.get_sample_not_down_sampled,
-            SampleFilters.get_sample_is_not_sequenced,
+            SampleFilters.get_samples_is_received,
+            SampleFilters.get_samples_is_not_prepared,
+            SampleFilters.get_samples_not_down_sampled,
+            SampleFilters.get_samples_is_not_sequenced,
         ]
         records = apply_sample_filter(samples=records, functions=sample_filter_functions)
         records = apply_application_filter(
-            applications=records, functions=[ApplicationFilters.get_application_is_not_external]
+            applications=records, functions=[ApplicationFilters.get_applications_is_not_external]
         )
 
         return records.order_by(Sample.received_at)
@@ -72,13 +73,13 @@ class StatusHandler(BaseHandler):
         """Fetch samples in sequencing."""
         records = self._join_sample_application_version_query(query=self._get_sample_query())
         sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.get_sample_is_prepared,
-            SampleFilters.get_sample_is_not_sequenced,
-            SampleFilters.get_sample_not_down_sampled,
+            SampleFilters.get_samples_is_prepared,
+            SampleFilters.get_samples_is_not_sequenced,
+            SampleFilters.get_samples_not_down_sampled,
         ]
         records = apply_sample_filter(samples=records, functions=sample_filter_functions)
         records = apply_application_filter(
-            applications=records, functions=[ApplicationFilters.get_application_is_not_external]
+            applications=records, functions=[ApplicationFilters.get_applications_is_not_external]
         )
         return records.order_by(Sample.prepared_at)
 
@@ -274,7 +275,7 @@ class StatusHandler(BaseHandler):
     def get_sample_by_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
         return apply_sample_filter(
-            functions=[SampleFilters.get_sample_by_entry_id],
+            functions=[SampleFilters.get_samples_by_entry_id],
             samples=self._get_sample_query(),
             entry_id=entry_id,
         ).first()
@@ -282,7 +283,7 @@ class StatusHandler(BaseHandler):
     def sample(self, internal_id: str) -> Sample:
         """Return a sample by lims id."""
         return apply_sample_filter(
-            functions=[SampleFilters.get_sample_by_sample_id],
+            functions=[SampleFilters.get_samples_by_sample_id],
             samples=self._get_sample_query(),
             internal_id=internal_id,
         ).first()
@@ -745,9 +746,9 @@ class StatusHandler(BaseHandler):
         """Fetch samples not delivered."""
         records = self._get_sample_query()
         sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.get_sample_is_sequenced,
-            SampleFilters.get_sample_not_down_sampled,
-            SampleFilters.get_sample_is_not_delivered,
+            SampleFilters.get_samples_is_sequenced,
+            SampleFilters.get_samples_not_down_sampled,
+            SampleFilters.get_samples_is_not_delivered,
         ]
 
         records: Query = apply_sample_filter(
@@ -761,8 +762,8 @@ class StatusHandler(BaseHandler):
         """Fetch samples not delivered."""
         records = self._get_sample_query()
         sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.get_sample_not_down_sampled,
-            SampleFilters.get_sample_is_not_delivered,
+            SampleFilters.get_samples_not_down_sampled,
+            SampleFilters.get_samples_is_not_delivered,
         ]
 
         records: Query = apply_sample_filter(
@@ -776,8 +777,8 @@ class StatusHandler(BaseHandler):
         have been down sampled."""
         records = self._get_sample_query()
         sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.get_sample_without_invoice_id,
-            SampleFilters.get_sample_not_down_sampled,
+            SampleFilters.get_samples_without_invoice_id,
+            SampleFilters.get_samples_not_down_sampled,
         ]
 
         records: Query = apply_sample_filter(
@@ -789,7 +790,7 @@ class StatusHandler(BaseHandler):
     def samples_not_down_sampled(self):
         """Fetch samples that have not been down sampled."""
         return apply_sample_filter(
-            functions=[SampleFilters.get_sample_not_down_sampled], samples=self._get_sample_query()
+            functions=[SampleFilters.get_samples_not_down_sampled], samples=self._get_sample_query()
         )
 
     def samples_delivered_not_invoiced(self) -> Query:
@@ -797,10 +798,10 @@ class StatusHandler(BaseHandler):
         have been marked to skip invoicing."""
         records = self._get_sample_query()
         sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.get_sample_is_delivered,
-            SampleFilters.get_sample_without_invoice_id,
-            SampleFilters.get_sample_do_invoice,
-            SampleFilters.get_sample_not_down_sampled,
+            SampleFilters.get_samples_is_delivered,
+            SampleFilters.get_samples_without_invoice_id,
+            SampleFilters.get_samples_do_invoice,
+            SampleFilters.get_samples_not_down_sampled,
         ]
 
         records: Query = apply_sample_filter(
@@ -828,9 +829,9 @@ class StatusHandler(BaseHandler):
         have been marked to skip invoicing."""
         records = self._get_pool_query()
         pool_filter_functions: List[PoolFilters] = [
-            PoolFilters.get_pool_is_delivered,
-            PoolFilters.get_pool_without_invoice_id,
-            PoolFilters.get_pool_do_invoice,
+            PoolFilters.get_pools_is_delivered,
+            PoolFilters.get_pools_without_invoice_id,
+            PoolFilters.get_pools_do_invoice,
         ]
 
         records: Query = apply_pool_filter(
@@ -858,15 +859,15 @@ class StatusHandler(BaseHandler):
     def pools_to_receive(self) -> Query:
         """Fetch pools that have been not yet been received."""
         return apply_pool_filter(
-            functions=[PoolFilters.get_pool_is_not_received], pools=self._get_pool_query()
+            functions=[PoolFilters.get_pools_is_not_received], pools=self._get_pool_query()
         )
 
     def pools_to_deliver(self) -> Query:
         """Fetch pools that are received but have been not yet been delivered."""
         records = self._get_pool_query()
         pool_filter_functions: List[PoolFilters] = [
-            PoolFilters.get_pool_is_received,
-            PoolFilters.get_pool_is_not_delivered,
+            PoolFilters.get_pools_is_received,
+            PoolFilters.get_pools_is_not_delivered,
         ]
 
         records: Query = apply_pool_filter(

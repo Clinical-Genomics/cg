@@ -374,11 +374,11 @@ class FindBusinessDataHandler(BaseHandler):
         invoices = self._get_invoice_query()
         if invoiced:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.get_invoice_invoiced]
+                invoices=invoices, functions=[InvoiceFilters.get_invoices_invoiced]
             )
         else:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.get_invoice_not_invoiced]
+                invoices=invoices, functions=[InvoiceFilters.get_invoices_not_invoiced]
             )
 
     def invoice(self, invoice_id: int) -> Invoice:
