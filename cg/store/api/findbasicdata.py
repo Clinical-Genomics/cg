@@ -106,10 +106,6 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch a customer group by internal id from the store."""
         return self.Collaboration.query.filter_by(internal_id=internal_id).first()
 
-    def customer_by_id(self, id_: int) -> Customer:
-        """Fetch a customer by id number from the store."""
-        return self.Customer.query.filter_by(id=id_).first()
-
     def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
         """Fetch the current application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
