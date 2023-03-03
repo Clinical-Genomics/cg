@@ -4,8 +4,10 @@ from typing import Iterable, List, Optional
 
 import click
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
 from tabulate import tabulate
+
+from cg.store.models import Family, Flowcell, Customer, Sample
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
@@ -44,7 +46,7 @@ def sample(context: click.Context, families: bool, hide_flowcell: bool, sample_i
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
         LOG.debug("%s: get info about sample", sample_id)
-        sample_obj: models.Sample = status_db.sample(sample_id)
+        sample_obj: Sample = status_db.sample(sample_id)
         if sample_obj is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")
             continue
@@ -73,7 +75,7 @@ def sample(context: click.Context, families: bool, hide_flowcell: bool, sample_i
 def analysis(context: CGConfig, case_id: str):
     """Get information about case analysis."""
     status_db: Store = context.status_db
-    case_obj: models.Family = status_db.family(case_id)
+    case_obj: Family = status_db.family(case_id)
     if case_obj is None:
         LOG.error("%s: case doesn't exist", case_id)
         raise click.Abort
@@ -95,7 +97,7 @@ def analysis(context: CGConfig, case_id: str):
 def relations(context: CGConfig, family_id: str):
     """Get information about family relations."""
     status_db: Store = context.status_db
-    case_obj: models.Family = status_db.family(family_id)
+    case_obj: Family = status_db.family(family_id)
     if case_obj is None:
         LOG.error("%s: family doesn't exist", family_id)
         raise click.Abort
@@ -112,7 +114,7 @@ def relations(context: CGConfig, family_id: str):
 
 
 @get.command()
-@click.option("-c", "--customer", help="internal id for customer to filter by")
+@click.option("-c", "--customer-id", help="internal id for customer to filter by")
 @click.option("-n", "--name", is_flag=True, help="search family by name")
 @click.option("--samples/--no-samples", default=True, help="display related samples")
 @click.option("--relate/--no-relate", default=True, help="display relations to samples")
@@ -121,7 +123,7 @@ def relations(context: CGConfig, family_id: str):
 @click.pass_context
 def family(
     context: click.Context,
-    customer: str,
+    customer_id: str,
     name: bool,
     samples: bool,
     relate: bool,
@@ -130,41 +132,41 @@ def family(
 ):
     """Get information about a family."""
     status_db: Store = context.obj.status_db
-    cases: List[models.Family] = []
+    cases: List[Family] = []
     if name:
-        customer_obj: models.Customer = status_db.customer(customer)
-        if customer_obj is None:
-            LOG.error(f"{customer}: customer not found")
+        customer_id: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+        if customer_id is None:
+            LOG.error(f"{customer_id}: customer not found")
             raise click.Abort
-        cases: Iterable[models.Family] = status_db.families(
-            customers=[customer_obj], enquiry=family_ids[-1]
+        cases: Iterable[Family] = status_db.families(
+            customers=[customer_id], enquiry=family_ids[-1]
         )
     else:
         for family_id in family_ids:
-            case_obj: models.Family = status_db.family(family_id)
-            if case_obj is None:
+            case: Family = status_db.family(family_id)
+            if case is None:
                 LOG.error(f"{family_id}: family doesn't exist")
                 raise click.Abort
-            cases.append(case_obj)
+            cases.append(case)
 
-    for case_obj in cases:
-        LOG.debug(f"{case_obj.internal_id}: get info about family")
+    for case in cases:
+        LOG.debug(f"{case.internal_id}: get info about family")
         row: List[str] = [
-            case_obj.internal_id,
-            case_obj.name,
-            case_obj.customer.internal_id,
-            case_obj.priority_human,
-            ", ".join(case_obj.panels),
-            case_obj.action or "NA",
+            case.internal_id,
+            case.name,
+            case.customer.internal_id,
+            case.priority_human,
+            ", ".join(case.panels),
+            case.action or "NA",
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt="psql"))
         if relate:
-            context.invoke(relations, family_id=case_obj.internal_id)
+            context.invoke(relations, family_id=case.internal_id)
         if samples:
-            sample_ids: List[str] = [link_obj.sample.internal_id for link_obj in case_obj.links]
+            sample_ids: List[str] = [link_obj.sample.internal_id for link_obj in case.links]
             context.invoke(sample, sample_ids=sample_ids, families=False)
         if analyses:
-            context.invoke(analysis, case_id=case_obj.internal_id)
+            context.invoke(analysis, case_id=case.internal_id)
 
 
 @get.command()
@@ -174,7 +176,7 @@ def family(
 def flowcell(context: click.Context, samples: bool, flowcell_id: str):
     """Get information about a flowcell and the samples on it."""
     status_db: Store = context.obj.status_db
-    flowcell_obj: models.Flowcell = status_db.get_flow_cell(flowcell_id)
+    flowcell_obj: Flowcell = status_db.get_flow_cell(flowcell_id)
     if flowcell_obj is None:
         LOG.error(f"{flowcell_id}: flowcell not found")
         raise click.Abort
