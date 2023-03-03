@@ -42,6 +42,15 @@ def public(route_function):
     return public_endpoint
 
 
+@BLUEPRINT.after_app_request
+def after_request(response):
+    """Add CORS headers to all responses."""
+    origin = request.headers["ORIGIN"]
+    if origin in current_app.config["CORS_ORIGINS"]:
+        response.headers["Access-Control-Allow-Origin"] = origin
+    return response
+
+
 @BLUEPRINT.before_request
 def before_request():
     """Authorize API routes with JSON Web Tokens."""
