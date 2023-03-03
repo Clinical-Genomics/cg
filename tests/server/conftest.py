@@ -11,7 +11,6 @@ os.environ["LIMS_USERNAME"] = "dummy_value"
 os.environ["LIMS_PASSWORD"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_ID"] = "dummy_value"
 os.environ["GOOGLE_OAUTH_CLIENT_SECRET"] = "dummy_value"
-os.environ["CORS_ORIGINS"] = "dummy_value"
 
 
 @pytest.fixture
