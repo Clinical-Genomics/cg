@@ -1,4 +1,5 @@
 from cg.store import Store
+from cg.store.models import Customer
 
 
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):
@@ -42,7 +43,7 @@ def test_no_collaborators(base_store):
 
 def test_collaborators(base_store, customer_id):
     # GIVEN a customer with one collaboration
-    customer = base_store.customer(customer_id)
+    customer: Customer = base_store.get_customer_by_customer_id(customer_id=customer_id)
     assert all(
         customer_obj.internal_id
         in [

@@ -20,14 +20,12 @@ class MetagenomeSubmitter(Submitter):
     def _validate_sample_names_are_unique(
         self, samples: List[MetagenomeSample], customer_id: str
     ) -> None:
-        """Validate that the names of all samples are unused"""
-        customer_obj: models.Customer = self.status.customer(customer_id)
-
-        sample: MetagenomeSample
+        """Validate that the names of all samples are unused."""
+        customer: models.Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         for sample in samples:
             if sample.control:
                 continue
-            if self.status.find_samples(customer=customer_obj, name=sample.name).first():
+            if self.status.find_samples(customer=customer, name=sample.name).first():
                 raise OrderError(f"Sample name {sample.name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:

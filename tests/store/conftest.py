@@ -7,7 +7,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender
 from cg.store import Store
-from cg.store.models import Analysis, Family, Sample
+from cg.store.models import Analysis, Family, Sample, Customer
 
 
 @pytest.fixture(name="application_versions_file")
@@ -87,7 +87,9 @@ def fixture_microbial_store(
     base_store: Store, microbial_submitted_order: dict
 ) -> Generator[Store, None, None]:
     """Set up a microbial store instance."""
-    customer = base_store.customer(microbial_submitted_order["customer"])
+    customer: Customer = base_store.get_customer_by_customer_id(
+        customer_id=microbial_submitted_order["customer"]
+    )
 
     for sample_data in microbial_submitted_order["items"]:
         application_version = base_store.application(sample_data["application"]).versions[0]

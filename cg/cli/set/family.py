@@ -6,6 +6,7 @@ import click
 from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store, models
+from cg.store.models import Customer
 from cg.utils.click.EnumChoice import EnumChoice
 
 from cg.constants import Priority
@@ -59,12 +60,12 @@ def family(
         LOG.info("Update action: %s -> %s", case_obj.action or "NA", action)
         case_obj.action = action
     if customer_id:
-        customer_obj: models.Customer = status_db.customer(customer_id)
-        if customer_obj is None:
-            LOG.error("Unknown customer: %s", customer_id)
+        customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+        if customer is None:
+            LOG.error(f"Unknown customer: {customer_id}")
             raise click.Abort
         LOG.info(f"Update customer: {case_obj.customer.internal_id} -> {customer_id}")
-        case_obj.customer = customer_obj
+        case_obj.customer = customer
     if data_analysis:
         LOG.info(f"Update data_analysis: {case_obj.data_analysis or 'NA'} -> {data_analysis}")
         case_obj.data_analysis = data_analysis

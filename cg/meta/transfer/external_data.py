@@ -150,8 +150,10 @@ class ExternalDataAPI(MetaAPI):
         return fastq_paths_to_add
 
     def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
-        """Changes the name of the folder to the internal_id. If force is true replaces any previous folder"""
-        customer: models.Customer = self.status_db.customer(internal_id=cust_name)
+        """Changes the name of the folder to the internal_id. If force is true replaces any previous folder."""
+        customer: models.Customer = self.status_db.get_customer_by_customer_id(
+            customer_id=cust_name
+        )
         customer_folder: Path = sample_folder.parent
         sample: models.Sample = self.status_db.find_samples(
             customer=customer, name=sample_folder.name

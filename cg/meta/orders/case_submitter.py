@@ -68,7 +68,9 @@ class CaseSubmitter(Submitter):
                 continue
 
             existing_sample: models.Sample = self.status.sample(sample.internal_id)
-            data_customer: models.Customer = self.status.customer(customer_id)
+            data_customer: models.Customer = self.status.get_customer_by_customer_id(
+                customer_id=customer_id
+            )
 
             if existing_sample.customer not in data_customer.collaborators:
                 raise OrderError(f"Sample not available: {sample.name}")
@@ -77,7 +79,9 @@ class CaseSubmitter(Submitter):
         self, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
-        customer_obj: models.Customer = self.status.customer(customer_id)
+        customer_obj: models.Customer = self.status.get_customer_by_customer_id(
+            customer_id=customer_id
+        )
 
         sample: Of1508Sample
         for sample in samples:
@@ -217,7 +221,7 @@ class CaseSubmitter(Submitter):
     ) -> List[models.Family]:
         """Store cases and samples in the status database."""
 
-        customer_obj = self.status.customer(customer)
+        customer_obj = self.status.get_customer_by_customer_id(customer_id=customer)
         new_families = []
         for case in items:
             case_obj = self.status.family(case["internal_id"])
