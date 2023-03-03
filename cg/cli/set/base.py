@@ -223,7 +223,7 @@ def sample(
                 if isinstance(value, str) and not value.isdigit():
                     new_key = "priority_human"
             elif key == "customer":
-                new_value: Customer = status_db.customer(value)
+                new_value: Customer = status_db.get_customer_by_customer_id(customer_id=value)
             elif key == "application_version":
                 new_value: ApplicationVersion = status_db.current_application_version(value)
 

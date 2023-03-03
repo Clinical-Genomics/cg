@@ -561,7 +561,7 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=metagenome_status_data["customer"],
+        customer_id=metagenome_status_data["customer"],
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
         ticket=ticket,
@@ -588,7 +588,7 @@ def test_store_metagenome_samples_bad_apptag(
     with pytest.raises(OrderError):
         # WHEN storing the order
         submitter.store_items_in_status(
-            customer=metagenome_status_data["customer"],
+            customer_id=metagenome_status_data["customer"],
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
             ticket=ticket,

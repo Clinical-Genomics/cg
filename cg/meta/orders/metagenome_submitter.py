@@ -38,7 +38,7 @@ class MetagenomeSubmitter(Submitter):
         status_data = self.order_to_status(order)
         self._fill_in_sample_ids(status_data["families"][0]["samples"], lims_map)
         new_samples = self.store_items_in_status(
-            customer=status_data["customer"],
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
             ticket=order.ticket,
@@ -75,18 +75,18 @@ class MetagenomeSubmitter(Submitter):
 
     def store_items_in_status(
         self,
-        customer: str,
+        customer_id: str,
         order: str,
         ordered: dt.datetime,
         ticket: str,
         items: List[dict],
     ) -> List[models.Sample]:
         """Store samples in the status database."""
-        customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
+        customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        if customer is None:
+            raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
+        case_obj = self.status.find_family(customer=customer, name=str(ticket))
         case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in case["samples"]:
@@ -101,7 +101,7 @@ class MetagenomeSubmitter(Submitter):
                     original_ticket=ticket,
                     priority=sample["priority"],
                 )
-                new_sample.customer = customer_obj
+                new_sample.customer = customer
                 application_tag = sample["application"]
                 application_version = self.status.current_application_version(application_tag)
                 if application_version is None:
@@ -118,7 +118,7 @@ class MetagenomeSubmitter(Submitter):
                         priority=case["priority"],
                         ticket=ticket,
                     )
-                    case_obj.customer = customer_obj
+                    case_obj.customer = customer
                     self.status.add(case_obj)
 
                 new_relationship = self.status.relate_sample(
