@@ -255,7 +255,7 @@ class StatusHandler(BaseHandler):
         ]
         return apply_case_filter(
             functions=csse_filter_functions, cases=self._get_case_query(), date=date_threshold
-        )
+        ).all()
 
     def _get_sample_query(self) -> Query:
         """Return sample query."""

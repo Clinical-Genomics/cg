@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from cg.constants.constants import FileFormat
 from cg.exc import CaseNotFoundError
@@ -45,7 +45,7 @@ class GensAPI:
             "--coverage": coverage_path,
             "--case-id": case_id,
         }
-        load_call_params: list[str] = ["load", "sample"] + get_list_from_dictionary(load_params)
+        load_call_params: List[str] = ["load", "sample"] + get_list_from_dictionary(load_params)
         self.process.run_command(parameters=load_call_params, dry_run=self.dry_run)
 
     def __str__(self):

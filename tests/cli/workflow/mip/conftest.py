@@ -132,7 +132,7 @@ def fixture_mip_dna_context(
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
     # Add apptag to db
-    helpers.ensure_application_version(store=_store, application_tag="WGSA", application_type="wgs")
+    helpers.ensure_application_version(store=_store, application_tag="WGSA", prep_category="wgs")
 
     # Add sample, cases and relationships to db
 
@@ -193,8 +193,8 @@ def setup_mocks(
     mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
     PrepareFastqAPI.check_fastq_links.return_value = None
 
-    mocker.patch.object(MipDNAAnalysisAPI, "resolve_panel_bed")
-    MipDNAAnalysisAPI.resolve_panel_bed.return_value = "a_string"
+    mocker.patch.object(MipDNAAnalysisAPI, "get_panel_bed")
+    MipDNAAnalysisAPI.get_panel_bed.return_value = "a_string"
 
     mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
     FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True

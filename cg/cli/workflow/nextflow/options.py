@@ -47,3 +47,16 @@ OPTION_INPUT = click.option(
 OPTION_OUTDIR = click.option(
     "--outdir", type=click.Path(), help="Path to output folder containing analysis files"
 )
+
+
+OPTION_CONFIG = click.option(
+    "-config",
+    type=click.Path(),
+    help="Nextflow config file path",
+)
+
+OPTION_PARAMS_FILE = click.option(
+    "-params-file",
+    type=click.Path(),
+    help="Nextflow pipeline-specific parameter file path",
+)
