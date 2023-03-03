@@ -76,9 +76,9 @@ def test_get_flow_cell_by_id(base_store: Store, helpers: StoreHelpers, flow_cell
     )
 
     # THEN returned flow cell should be the original flow cell
-    assert isinstance(returned_flow_cell, Flowcell)
+    assert isinstance(returned_flow_cell, Query)
 
-    assert flow_cell is returned_flow_cell
+    assert flow_cell is returned_flow_cell.first()
 
 
 def test_get_flow_cell_by_id_and_by_enquiry(

@@ -89,7 +89,7 @@ def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: 
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell[0].name == flow_cell_id
+    assert flow_cell.name == flow_cell_id
 
 
 def test_get_flow_cells_by_case(

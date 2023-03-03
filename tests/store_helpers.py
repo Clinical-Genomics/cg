@@ -110,7 +110,7 @@ class StoreHelpers:
             application: models.Application = StoreHelpers.add_application(
                 store=store,
                 application_tag=tag,
-                prep_category=application_type,
+                prep_category=prep_category,
                 description=description,
                 is_archived=is_archived,
                 **kwargs,

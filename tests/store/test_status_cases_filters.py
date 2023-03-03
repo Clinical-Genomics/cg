@@ -39,7 +39,7 @@ def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timest
     cases: Query = base_store.get_families_with_analyses()
 
     # WHEN getting cases to analyse
-    cases: Query = list(get_cases_has_sequence(cases=cases))
+    cases: Query = get_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -95,7 +95,7 @@ def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: S
     assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_has_sequence_when_not_external_nor_sequenced(
@@ -124,7 +124,7 @@ def test_get_cases_has_sequence_when_not_external_nor_sequenced(
     assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_with_pipeline_when_correct_pipline(
@@ -261,7 +261,7 @@ def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
     assert isinstance(cases, Query)
 
     # THEN no cases should be returned
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
@@ -390,7 +390,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_with_scout_data_delivery(
@@ -468,7 +468,7 @@ def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     # THEN cases should contain the test case
     assert cases
 
-    assert cases[0].internal_id == test_case.internal_id
+    assert cases.all()[0].internal_id == test_case.internal_id
 
 
 def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
@@ -508,7 +508,7 @@ def test_get_inactive_analysis_cases_when_not_completed(base_store: Store, helpe
     assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_weeks: datetime):
@@ -529,7 +529,7 @@ def test_get_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     # THEN cases should contain the test case
     assert cases
 
-    assert cases[0].internal_id == test_case.internal_id
+    assert cases.all()[0].internal_id == test_case.internal_id
 
 
 def test_get_new_cases_when_too_new(
@@ -550,4 +550,4 @@ def test_get_new_cases_when_too_new(
     assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
