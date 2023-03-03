@@ -71,7 +71,7 @@ class StoreHelpers:
         if not application:
             application = StoreHelpers.add_application(
                 store,
-                application_tag,
+                application_tag=application_tag,
                 prep_category=prep_category,
                 is_external=is_external,
                 description=description,
@@ -110,7 +110,7 @@ class StoreHelpers:
             application: models.Application = StoreHelpers.add_application(
                 store=store,
                 application_tag=tag,
-                prep_category=prep_category,
+                prep_category=application_type,
                 description=description,
                 is_archived=is_archived,
                 **kwargs,
