@@ -101,7 +101,6 @@ def test_get_latest_bed_version(base_store: Store, bed_name: str):
     assert bed_version.version == 1
 
 
-
 def test_get_application_query(base_store: Store):
     """Test function to return the application query."""
 
@@ -112,6 +111,7 @@ def test_get_application_query(base_store: Store):
 
     # THEN a query should be returned
     assert isinstance(application_query, Query)
+
 
 def test_get_bed_version_query(base_store: Store):
     """Test function to return the bed version query."""
@@ -137,4 +137,3 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 
     # THEN return a bed version with the supplied bed version short name
     assert bed_version.shortname == bed_version_short_name
-

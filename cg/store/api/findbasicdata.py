@@ -18,9 +18,7 @@ from cg.store.models import (
 )
 from cg.store.api.base import BaseHandler
 from cg.store.status_bed_filters import apply_bed_filter, BedFilters
-from cg.store.status_application_filters import apply_application_filter, ApplicationFilters
 from cg.store.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
-
 
 
 class FindBasicDataHandler(BaseHandler):
