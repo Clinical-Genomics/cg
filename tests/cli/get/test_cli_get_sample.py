@@ -207,9 +207,9 @@ def test_hide_sample_flowcells_without_flowcell(
     returned_flow_cell: List[Flowcell] = disk_store.get_flow_cells()
     assert not list(returned_flow_cell)
 
-    # WHEN getting a sample with the --hide-flowcell flag
+    # WHEN getting a sample with the --hide-flow-cell flag
     result = cli_runner.invoke(
-        get, ["sample", sample.internal_id, "--hide-flowcell"], obj=base_context
+        get, ["sample", sample.internal_id, "--hide-flow-cell"], obj=base_context
     )
 
     # THEN process should exit successfully
@@ -226,9 +226,9 @@ def test_get_sample_flowcells_with_flowcell(
     returned_flow_cell: Flowcell = disk_store.get_flow_cell(flow_cell_id=flow_cell.name)
     assert sample in returned_flow_cell.samples
 
-    # WHEN getting a sample with the --hide-flowcell     flag
+    # WHEN getting a sample with the --hide-flow-cell flag
     result = cli_runner.invoke(
-        get, ["sample", sample.internal_id, "--hide-flowcell"], obj=base_context
+        get, ["sample", sample.internal_id, "--hide-flow-cell"], obj=base_context
     )
 
     # THEN the process should exit successfully

@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from cg.cli.get import get
+from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
@@ -98,16 +99,18 @@ def test_get_flowcell_samples_without_samples(
     cli_runner: CliRunner, base_context: CGConfig, disk_store: Store, helpers: StoreHelpers, caplog
 ):
     """Test that the output has the data of the flow cell."""
-    # GIVEN a database with a flowcell without related samples
-    flowcell = helpers.add_flowcell(disk_store)
+    # GIVEN a database with a flow cell without related samples
+    flow_cell = helpers.add_flowcell(disk_store)
     assert not disk_store.Flowcell.query.first().samples
 
     # WHEN getting a flowcell with the --samples flag
-    result = cli_runner.invoke(get, ["flowcell", flowcell.name, "--samples"], obj=base_context)
+    result = cli_runner.invoke(get, ["flowcell", flow_cell.name, "--samples"], obj=base_context)
+
+    # THEN exist successfully
+    assert result.exit_code == EXIT_SUCCESS
 
     # THEN a message about no samples should have been displayed
-    assert result.exit_code == 0
-    assert "no samples found on flowcell" in caplog.text
+    assert "No samples found on flow cell" in caplog.text
 
 
 def test_get_flowcell_samples(
