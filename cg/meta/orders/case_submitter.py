@@ -1,18 +1,19 @@
 import datetime as dt
 import logging
-from typing import List, Set
+from typing import List, Set, Dict
 
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
 from cg.constants.constants import CaseActions
+from cg.constants.pedigree import Pedigree
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
 from cg.constants import Priority
-from cg.store.models import Customer, Family, Sample
+from cg.store.models import Customer, Family, Sample, FamilySample
 
 LOG = logging.getLogger(__name__)
 
@@ -213,43 +214,58 @@ class CaseSubmitter(Submitter):
     def store_items_in_status(
         self, customer_id: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[Family]:
-        """Store cases and samples in the status database."""
-
-        customer_obj = self.status.get_customer_by_customer_id(customer_id=customer_id)
-        new_families = []
+        """Store cases, samples and their relationship in the Status database."""
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        new_families: List[Family] = []
         for case in items:
-            case_obj = self.status.family(case["internal_id"])
-            if not case_obj:
-                case_obj = self._create_case(case, customer_obj, ticket)
-                new_families.append(case_obj)
+            new_case: Family = self.status.family(case["internal_id"])
+            if not new_case:
+                new_case: Family = self._create_case(
+                    case=case, customer_obj=customer, ticket=ticket
+                )
+                new_families.append(new_case)
             else:
-                self._append_ticket(ticket=ticket, case=case_obj)
-                self._update_action(action=CaseActions.ANALYZE, case=case_obj)
+                self._append_ticket(ticket=ticket, case=new_case)
+                self._update_action(action=CaseActions.ANALYZE, case=new_case)
+            self._update_case(case, new_case)
 
-            self._update_case(case, case_obj)
-
-            family_samples = {}
+            family_samples: Dict[str, Sample] = {}
             for sample in case["samples"]:
-                sample_obj = self.status.sample(sample["internal_id"])
-                if not sample_obj:
-                    sample_obj = self._create_sample(
-                        case, customer_obj, order, ordered, sample, ticket
+                new_sample: Sample = self.status.sample(sample["internal_id"])
+                if not new_sample:
+                    new_sample: Sample = self._create_sample(
+                        case=case,
+                        customer_obj=customer,
+                        order=order,
+                        ordered=ordered,
+                        sample=sample,
+                        ticket=ticket,
                     )
 
-                family_samples[sample["name"]] = sample_obj
+                family_samples[sample["name"]] = new_sample
 
             for sample in case["samples"]:
-                mother_obj = family_samples.get(sample.get("mother"))
-                father_obj = family_samples.get(sample.get("father"))
+                sample_mother: Sample = family_samples.get(sample.get(Pedigree.MOTHER))
+                sample_father: Sample = family_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
-                    link_obj = self.status.link(case_obj.internal_id, sample["internal_id"])
-                if not link_obj:
-                    link_obj = self._create_link(
-                        case_obj, family_samples, father_obj, mother_obj, sample
+                    family_sample: FamilySample = self.status.link(
+                        family_id=new_case.internal_id, sample_id=sample["internal_id"]
+                    )
+                if not family_sample:
+                    family_sample = self._create_link(
+                        case_obj=new_case,
+                        family_samples=family_samples,
+                        father_obj=sample_father,
+                        mother_obj=sample_mother,
+                        sample=sample,
                     )
 
-                self._update_relationship(father_obj, link_obj, mother_obj, sample)
-
+                self._update_relationship(
+                    father_obj=sample_father,
+                    link_obj=family_sample,
+                    mother_obj=sample_mother,
+                    sample=sample,
+                )
             self.status.add_commit(new_families)
         return new_families
 
