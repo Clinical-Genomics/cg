@@ -30,7 +30,7 @@ def get(context: click.Context, identifier: Optional[str]):
             context.invoke(family, family_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
-            context.invoke(flowcell, flowcell_id=identifier)
+            context.invoke(flowcell, flow_cell_id=identifier)
         else:
             LOG.error(f"{identifier}: can't predict identifier")
             raise click.Abort
@@ -39,7 +39,7 @@ def get(context: click.Context, identifier: Optional[str]):
 @get.command()
 @click.option("--families/--no-families", default=True, help="display related families")
 @click.option("-hf", "--hide-flow-cell", is_flag=True, help="hide related flowcells")
-@click.argument("sample_ids", nargs=-1)
+@click.argument("sample-ids", nargs=-1)
 @click.pass_context
 def sample(context: click.Context, families: bool, hide_flow_cell: bool, sample_ids: List[str]):
     """Get information about a sample."""
@@ -68,7 +68,7 @@ def sample(context: click.Context, families: bool, hide_flow_cell: bool, sample_
         if not hide_flow_cell:
             for flow_cell in existing_sample.flowcells:
                 LOG.debug(f"Get info on flow cell: {flow_cell.name}")
-                context.invoke(flowcell, flowcell_id=flow_cell.name, samples=False)
+                context.invoke(flowcell, flow_cell_id=flow_cell.name, samples=False)
 
 
 @get.command()
@@ -93,14 +93,14 @@ def analysis(context: CGConfig, case_id: str):
 
 
 @get.command()
-@click.argument("family_id")
+@click.argument("case-id")
 @click.pass_obj
-def relations(context: CGConfig, family_id: str):
-    """Get information about family relations."""
+def relations(context: CGConfig, case_id: str):
+    """Get information about case relations."""
     status_db: Store = context.status_db
-    case: Family = status_db.family(family_id)
+    case: Family = status_db.family(internal_id=case_id)
     if case is None:
-        LOG.error(f"{family_id}: family doesn't exist")
+        LOG.error(f"{case_id}: family doesn't exist")
         raise click.Abort
 
     LOG.debug(f"{case.internal_id}: get info about family relations")
@@ -120,7 +120,7 @@ def relations(context: CGConfig, family_id: str):
 @click.option("--samples/--no-samples", default=True, help="display related samples")
 @click.option("--relate/--no-relate", default=True, help="display relations to samples")
 @click.option("--analyses/--no-analyses", default=True, help="display related analyses")
-@click.argument("family_ids", nargs=-1)
+@click.argument("family-ids", nargs=-1)
 @click.pass_context
 def family(
     context: click.Context,
@@ -162,7 +162,7 @@ def family(
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt="psql"))
         if relate:
-            context.invoke(relations, family_id=case.internal_id)
+            context.invoke(relations, case_id=case.internal_id)
         if samples:
             sample_ids: List[str] = [link_obj.sample.internal_id for link_obj in case.links]
             context.invoke(sample, sample_ids=sample_ids, families=False)
@@ -172,14 +172,14 @@ def family(
 
 @get.command()
 @click.option("--samples/--no-samples", default=True, help="display related samples")
-@click.argument("flowcell_id")
+@click.argument("flow-cell-id")
 @click.pass_context
-def flowcell(context: click.Context, samples: bool, flowcell_id: str):
+def flowcell(context: click.Context, samples: bool, flow_cell_id: str):
     """Get information about a flowcell and the samples on it."""
     status_db: Store = context.obj.status_db
-    flow_cell: Flowcell = status_db.get_flow_cell(flowcell_id)
+    flow_cell: Flowcell = status_db.get_flow_cell(flow_cell_id)
     if flow_cell is None:
-        LOG.error(f"{flowcell_id}: flow cell not found")
+        LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort
     row: List[str] = [
         flow_cell.name,
