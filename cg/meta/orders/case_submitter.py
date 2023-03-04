@@ -218,21 +218,25 @@ class CaseSubmitter(Submitter):
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_families: List[Family] = []
         for case in items:
-            new_case: Family = self.status.family(case["internal_id"])
-            if not new_case:
+            status_db_case: Family
+            existing_case: Family = self.status.family(case["internal_id"])
+            if not existing_case:
                 new_case: Family = self._create_case(
                     case=case, customer_obj=customer, ticket=ticket
                 )
                 new_families.append(new_case)
+                self._update_case(case, new_case)
+                status_db_case: Family = new_case
             else:
-                self._append_ticket(ticket=ticket, case=new_case)
-                self._update_action(action=CaseActions.ANALYZE, case=new_case)
-            self._update_case(case, new_case)
+                self._append_ticket(ticket=ticket, case=existing_case)
+                self._update_action(action=CaseActions.ANALYZE, case=existing_case)
+                self._update_case(case, existing_case)
+                status_db_case: Family = existing_case
 
             family_samples: Dict[str, Sample] = {}
             for sample in case["samples"]:
-                new_sample: Sample = self.status.sample(sample["internal_id"])
-                if not new_sample:
+                existing_sample: Sample = self.status.sample(sample["internal_id"])
+                if not existing_sample:
                     new_sample: Sample = self._create_sample(
                         case=case,
                         customer_obj=customer,
@@ -241,19 +245,20 @@ class CaseSubmitter(Submitter):
                         sample=sample,
                         ticket=ticket,
                     )
-
-                family_samples[sample["name"]] = new_sample
+                    family_samples[sample["name"]] = new_sample
+                else:
+                    family_samples[sample["name"]] = existing_sample
 
             for sample in case["samples"]:
                 sample_mother: Sample = family_samples.get(sample.get(Pedigree.MOTHER))
                 sample_father: Sample = family_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
                     family_sample: FamilySample = self.status.link(
-                        family_id=new_case.internal_id, sample_id=sample["internal_id"]
+                        family_id=status_db_case.internal_id, sample_id=sample["internal_id"]
                     )
                 if not family_sample:
-                    family_sample = self._create_link(
-                        case_obj=new_case,
+                    family_sample: FamilySample = self._create_link(
+                        case_obj=status_db_case,
                         family_samples=family_samples,
                         father_obj=sample_father,
                         mother_obj=sample_mother,
