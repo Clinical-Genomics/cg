@@ -46,47 +46,48 @@ def sample(context: click.Context, families: bool, hide_flow_cell: bool, sample_
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
         LOG.debug(f"Get info on sample: {sample_id}")
-        sample: Sample = status_db.sample(sample_id)
-        if sample is None:
+        existing_sample: Sample = status_db.sample(sample_id)
+        if existing_sample is None:
             LOG.warning(f"Sample: {sample_id} does not exist")
             continue
         row = [
-            sample.internal_id,
-            sample.name,
-            sample.customer.internal_id,
-            sample.application_version.application.tag,
-            sample.state,
-            sample.priority_human,
-            "Yes" if sample.application_version.application.is_external else "No",
+            existing_sample.internal_id,
+            existing_sample.name,
+            existing_sample.customer.internal_id,
+            existing_sample.application_version.application.tag,
+            existing_sample.state,
+            existing_sample.priority_human,
+            "Yes" if existing_sample.application_version.application.is_external else "No",
         ]
         click.echo(tabulate([row], headers=SAMPLE_HEADERS, tablefmt="psql"))
         if families:
-            family_ids: List[str] = [link_obj.family.internal_id for link_obj in sample.links]
+            family_ids: List[str] = [
+                link_obj.family.internal_id for link_obj in existing_sample.links
+            ]
             context.invoke(family, family_ids=family_ids, samples=False)
         if not hide_flow_cell:
-            for flow_cell in sample.flowcells:
+            for flow_cell in existing_sample.flowcells:
                 LOG.debug(f"Get info on flow cell: {flow_cell.name}")
                 context.invoke(flowcell, flowcell_id=flow_cell.name, samples=False)
 
 
 @get.command()
-@click.argument("case_id")
+@click.argument("case-id")
 @click.pass_obj
 def analysis(context: CGConfig, case_id: str):
     """Get information about case analysis."""
     status_db: Store = context.status_db
-    case_obj: Family = status_db.family(case_id)
-    if case_obj is None:
-        LOG.error("%s: case doesn't exist", case_id)
+    case: Family = status_db.family(case_id)
+    if case is None:
+        LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
+    LOG.debug(f"{case.internal_id}: get info about case analysis")
 
-    LOG.debug("%s: get info about case analysis", case_obj.internal_id)
-
-    for analysis_obj in case_obj.analyses:
+    for case_analysis in case.analyses:
         row = [
-            analysis_obj.started_at,
-            analysis_obj.pipeline,
-            analysis_obj.pipeline_version,
+            case_analysis.started_at,
+            case_analysis.pipeline,
+            case_analysis.pipeline_version,
         ]
         click.echo(tabulate([row], headers=ANALYSIS_HEADERS, tablefmt="psql"))
 
@@ -97,18 +98,18 @@ def analysis(context: CGConfig, case_id: str):
 def relations(context: CGConfig, family_id: str):
     """Get information about family relations."""
     status_db: Store = context.status_db
-    case_obj: Family = status_db.family(family_id)
-    if case_obj is None:
-        LOG.error("%s: family doesn't exist", family_id)
+    case: Family = status_db.family(family_id)
+    if case is None:
+        LOG.error(f"{family_id}: family doesn't exist")
         raise click.Abort
 
-    LOG.debug("%s: get info about family relations", case_obj.internal_id)
+    LOG.debug(f"{case.internal_id}: get info about family relations")
 
-    for link_obj in case_obj.links:
+    for case_link in case.links:
         row = [
-            link_obj.sample.internal_id if link_obj.sample else "",
-            link_obj.mother.internal_id if link_obj.mother else "",
-            link_obj.father.internal_id if link_obj.father else "",
+            case_link.sample.internal_id if case_link.sample else "",
+            case_link.mother.internal_id if case_link.mother else "",
+            case_link.father.internal_id if case_link.father else "",
         ]
         click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt="psql"))
 
