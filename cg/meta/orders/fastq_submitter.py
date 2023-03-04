@@ -26,7 +26,7 @@ class FastqSubmitter(Submitter):
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["samples"],
         )
         self._add_missing_reads(new_samples)
@@ -72,14 +72,14 @@ class FastqSubmitter(Submitter):
         self.status.add(case_obj, relationship)
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[models.Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
         customer_obj = self.status.get_customer_by_customer_id(customer_id=customer_id)
         if customer_obj is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case_obj: models.Family = self.status.find_family(customer=customer_obj, name=ticket)
+        case_obj: models.Family = self.status.find_family(customer=customer_obj, name=ticket_id)
         case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in items:
@@ -90,7 +90,7 @@ class FastqSubmitter(Submitter):
                     internal_id=sample.get("internal_id"),
                     order=order,
                     ordered=ordered,
-                    original_ticket=ticket,
+                    original_ticket=ticket_id,
                     priority=sample["priority"],
                     tumour=sample["tumour"],
                     capture_kit=sample["capture_kit"],
@@ -106,10 +106,10 @@ class FastqSubmitter(Submitter):
                     case_obj = self.status.add_case(
                         data_analysis=Pipeline(case["data_analysis"]),
                         data_delivery=DataDelivery(case["data_delivery"]),
-                        name=ticket,
+                        name=ticket_id,
                         panels=None,
                         priority=case["priority"],
-                        ticket=ticket,
+                        ticket=ticket_id,
                     )
                 if (
                     not new_sample.is_tumour

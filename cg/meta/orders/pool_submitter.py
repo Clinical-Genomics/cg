@@ -31,7 +31,7 @@ class PoolSubmitter(Submitter):
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["pools"],
         )
         return {"project": project_data, "records": new_records}
@@ -106,7 +106,7 @@ class PoolSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Pool]:
         """Store pools in the status database."""
         customer_id: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
@@ -118,7 +118,7 @@ class PoolSubmitter(Submitter):
                     pool["application"]
                 )
             priority: str = pool["priority"]
-            case_name: str = self.create_case_name(ticket=ticket, pool_name=pool["name"])
+            case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
             case: Family = self.status.find_family(customer=customer_id, name=case_name)
             if not case:
                 data_analysis: Pipeline = Pipeline(pool["data_analysis"])
@@ -129,7 +129,7 @@ class PoolSubmitter(Submitter):
                     name=case_name,
                     panels=None,
                     priority=priority,
-                    ticket=ticket,
+                    ticket=ticket_id,
                 )
                 case.customer = customer_id
                 self.status.add_commit(case)
@@ -140,7 +140,7 @@ class PoolSubmitter(Submitter):
                 name=pool["name"],
                 order=order,
                 ordered=ordered,
-                ticket=ticket,
+                ticket=ticket_id,
             )
             sex: SexEnum = SexEnum.unknown
             for sample in pool["samples"]:
@@ -152,7 +152,7 @@ class PoolSubmitter(Submitter):
                     internal_id=sample.get("internal_id"),
                     order=order,
                     ordered=ordered,
-                    original_ticket=ticket,
+                    original_ticket=ticket_id,
                     priority=priority,
                     application_version=application_version,
                     customer=customer_id,

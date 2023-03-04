@@ -208,7 +208,7 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
         customer_id=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=rml_status_data["pools"],
     )
 
@@ -253,7 +253,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data, ticket: str):
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -283,7 +283,7 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, tic
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -305,7 +305,7 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=1234348,
+        ticket_id=1234348,
         items=fastq_status_data["samples"],
     )
 
@@ -329,7 +329,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -355,7 +355,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -380,7 +380,7 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data, tic
             customer_id=fastq_status_data["customer"],
             order=fastq_status_data["order"],
             ordered=dt.datetime.now(),
-            ticket=ticket,
+            ticket_id=ticket,
             items=fastq_status_data["samples"],
         )
 
@@ -398,7 +398,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data, 
         customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -428,7 +428,7 @@ def test_store_microbial_case_data_analysis_stored(
         customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -457,7 +457,7 @@ def test_store_microbial_sample_priority(
         customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -483,7 +483,7 @@ def test_store_mip(orders_api, base_store, mip_status_data, ticket: str):
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -537,7 +537,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str)
         customer_id=mip_rna_status_data["customer"],
         order=mip_rna_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_rna_status_data["families"],
     )
 
@@ -564,7 +564,7 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         customer_id=metagenome_status_data["customer"],
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=metagenome_status_data["families"],
     )
 
@@ -591,7 +591,7 @@ def test_store_metagenome_samples_bad_apptag(
             customer_id=metagenome_status_data["customer"],
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
-            ticket=ticket,
+            ticket_id=ticket,
             items=metagenome_status_data["families"],
         )
 
@@ -611,7 +611,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
         customer_id=balsamic_status_data["customer"],
         order=balsamic_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=balsamic_status_data["families"],
     )
 
@@ -650,7 +650,7 @@ def test_store_existing_single_sample_from_trio(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -688,7 +688,7 @@ def test_store_existing_single_sample_from_trio(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -713,7 +713,7 @@ def test_store_existing_case(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -729,7 +729,7 @@ def test_store_existing_case(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 

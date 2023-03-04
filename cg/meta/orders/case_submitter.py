@@ -119,7 +119,7 @@ class CaseSubmitter(Submitter):
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["families"],
         )
         return {"project": project_data, "records": new_families}
@@ -212,23 +212,23 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer_id: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Family]:
         """Store cases, samples and their relationship in the Status database."""
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
-        new_families: List[Family] = []
+        new_cases: List[Family] = []
         for case in items:
             status_db_case: Family
             existing_case: Family = self.status.family(case["internal_id"])
             if not existing_case:
                 new_case: Family = self._create_case(
-                    case=case, customer_obj=customer, ticket=ticket
+                    case=case, customer_obj=customer, ticket=ticket_id
                 )
-                new_families.append(new_case)
+                new_cases.append(new_case)
                 self._update_case(case, new_case)
                 status_db_case: Family = new_case
             else:
-                self._append_ticket(ticket=ticket, case=existing_case)
+                self._append_ticket(ticket_id=ticket_id, case=existing_case)
                 self._update_action(action=CaseActions.ANALYZE, case=existing_case)
                 self._update_case(case, existing_case)
                 status_db_case: Family = existing_case
@@ -243,7 +243,7 @@ class CaseSubmitter(Submitter):
                         order=order,
                         ordered=ordered,
                         sample=sample,
-                        ticket=ticket,
+                        ticket=ticket_id,
                     )
                     family_samples[sample["name"]] = new_sample
                 else:
@@ -271,17 +271,17 @@ class CaseSubmitter(Submitter):
                     mother_obj=sample_mother,
                     sample=sample,
                 )
-            self.status.add_commit(new_families)
-        return new_families
+            self.status.add_commit(new_cases)
+        return new_cases
 
     @staticmethod
     def _update_case(case, case_obj):
         case_obj.panels = case["panels"]
 
     @staticmethod
-    def _append_ticket(ticket: str, case: Family) -> None:
+    def _append_ticket(ticket_id: str, case: Family) -> None:
         """Add a ticket to the case."""
-        case.tickets = f"{case.tickets},{ticket}"
+        case.tickets = f"{case.tickets},{ticket_id}"
 
     @staticmethod
     def _update_action(action: str, case: Family) -> None:

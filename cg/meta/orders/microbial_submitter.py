@@ -56,7 +56,7 @@ class MicrobialSubmitter(Submitter):
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["samples"],
             comment=status_data["comment"],
             data_analysis=Pipeline(status_data["data_analysis"]),
@@ -73,7 +73,7 @@ class MicrobialSubmitter(Submitter):
         order: str,
         ordered: dt.datetime,
         items: List[dict],
-        ticket: str,
+        ticket_id: str,
     ) -> [models.Sample]:
         """Store microbial samples in the status database."""
 
@@ -84,15 +84,15 @@ class MicrobialSubmitter(Submitter):
 
         with self.status.session.no_autoflush:
             for sample_data in items:
-                case: Family = self.status.find_family(customer=customer_id, name=ticket)
+                case: Family = self.status.find_family(customer=customer_id, name=ticket_id)
 
                 if not case:
                     case = self.status.add_case(
                         data_analysis=data_analysis,
                         data_delivery=data_delivery,
-                        name=ticket,
+                        name=ticket_id,
                         panels=None,
-                        ticket=ticket,
+                        ticket=ticket_id,
                     )
                     case.customer = customer_id
                     self.status.add_commit(case)
@@ -120,7 +120,7 @@ class MicrobialSubmitter(Submitter):
                     internal_id=sample_data.get("internal_id"),
                     order=order,
                     ordered=ordered,
-                    original_ticket=ticket,
+                    original_ticket=ticket_id,
                     priority=sample_data["priority"],
                     application_version=application_version,
                     customer=customer_id,

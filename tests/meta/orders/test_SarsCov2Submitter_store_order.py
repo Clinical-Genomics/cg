@@ -34,7 +34,7 @@ def test_store_items_in_status_control_has_stored_value(
         data_delivery=DataDelivery.FASTQ,
         order="",
         ordered=dt.datetime.now(),
-        ticket=123456,
+        ticket_id=123456,
         items=status_data.get("samples"),
     )
 

@@ -39,7 +39,7 @@ class MetagenomeSubmitter(Submitter):
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["families"],
         )
         self._add_missing_reads(new_samples)
@@ -76,7 +76,7 @@ class MetagenomeSubmitter(Submitter):
         customer_id: str,
         order: str,
         ordered: dt.datetime,
-        ticket: str,
+        ticket_id: str,
         items: List[dict],
     ) -> List[models.Sample]:
         """Store samples in the status database."""
@@ -84,7 +84,7 @@ class MetagenomeSubmitter(Submitter):
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case_obj = self.status.find_family(customer=customer, name=str(ticket))
+        case_obj = self.status.find_family(customer=customer, name=str(ticket_id))
         case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in case["samples"]:
@@ -96,7 +96,7 @@ class MetagenomeSubmitter(Submitter):
                     internal_id=sample.get("internal_id"),
                     order=order,
                     ordered=ordered,
-                    original_ticket=ticket,
+                    original_ticket=ticket_id,
                     priority=sample["priority"],
                 )
                 new_sample.customer = customer
@@ -111,10 +111,10 @@ class MetagenomeSubmitter(Submitter):
                     case_obj = self.status.add_case(
                         data_analysis=Pipeline(case["data_analysis"]),
                         data_delivery=DataDelivery(case["data_delivery"]),
-                        name=str(ticket),
+                        name=str(ticket_id),
                         panels=None,
                         priority=case["priority"],
-                        ticket=ticket,
+                        ticket=ticket_id,
                     )
                     case_obj.customer = customer
                     self.status.add(case_obj)
