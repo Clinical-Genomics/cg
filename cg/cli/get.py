@@ -38,35 +38,35 @@ def get(context: click.Context, identifier: Optional[str]):
 
 @get.command()
 @click.option("--families/--no-families", default=True, help="display related families")
-@click.option("-hf", "--hide-flowcell", is_flag=True, help="hide related flowcells")
+@click.option("-hf", "--hide-flow-cell", is_flag=True, help="hide related flowcells")
 @click.argument("sample_ids", nargs=-1)
 @click.pass_context
-def sample(context: click.Context, families: bool, hide_flowcell: bool, sample_ids: List[str]):
+def sample(context: click.Context, families: bool, hide_flow_cell: bool, sample_ids: List[str]):
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
-        LOG.debug("%s: get info about sample", sample_id)
-        sample_obj: Sample = status_db.sample(sample_id)
-        if sample_obj is None:
-            LOG.warning(f"{sample_id}: sample doesn't exist")
+        LOG.debug(f"Get info on sample: {sample_id}")
+        sample: Sample = status_db.sample(sample_id)
+        if sample is None:
+            LOG.warning(f"Sample: {sample_id} does not exist")
             continue
         row = [
-            sample_obj.internal_id,
-            sample_obj.name,
-            sample_obj.customer.internal_id,
-            sample_obj.application_version.application.tag,
-            sample_obj.state,
-            sample_obj.priority_human,
-            "Yes" if sample_obj.application_version.application.is_external else "No",
+            sample.internal_id,
+            sample.name,
+            sample.customer.internal_id,
+            sample.application_version.application.tag,
+            sample.state,
+            sample.priority_human,
+            "Yes" if sample.application_version.application.is_external else "No",
         ]
         click.echo(tabulate([row], headers=SAMPLE_HEADERS, tablefmt="psql"))
         if families:
-            family_ids: List[str] = [link_obj.family.internal_id for link_obj in sample_obj.links]
+            family_ids: List[str] = [link_obj.family.internal_id for link_obj in sample.links]
             context.invoke(family, family_ids=family_ids, samples=False)
-        if not hide_flowcell:
-            for flowcell_obj in sample_obj.flowcells:
-                LOG.debug(f"{flowcell_obj.name}: get info about flowcell")
-                context.invoke(flowcell, flowcell_id=flowcell_obj.name, samples=False)
+        if not hide_flow_cell:
+            for flow_cell in sample.flowcells:
+                LOG.debug(f"Get info on flow cell: {flow_cell.name}")
+                context.invoke(flowcell, flowcell_id=flow_cell.name, samples=False)
 
 
 @get.command()
@@ -176,22 +176,22 @@ def family(
 def flowcell(context: click.Context, samples: bool, flowcell_id: str):
     """Get information about a flowcell and the samples on it."""
     status_db: Store = context.obj.status_db
-    flowcell_obj: Flowcell = status_db.get_flow_cell(flowcell_id)
-    if flowcell_obj is None:
-        LOG.error(f"{flowcell_id}: flowcell not found")
+    flow_cell: Flowcell = status_db.get_flow_cell(flowcell_id)
+    if flow_cell is None:
+        LOG.error(f"{flowcell_id}: flow cell not found")
         raise click.Abort
     row: List[str] = [
-        flowcell_obj.name,
-        flowcell_obj.sequencer_type,
-        flowcell_obj.sequencer_name,
-        flowcell_obj.sequenced_at.date(),
-        flowcell_obj.archived_at.date() if flowcell_obj.archived_at else "No",
-        flowcell_obj.status,
+        flow_cell.name,
+        flow_cell.sequencer_type,
+        flow_cell.sequencer_name,
+        flow_cell.sequenced_at.date(),
+        flow_cell.archived_at.date() if flow_cell.archived_at else "No",
+        flow_cell.status,
     ]
     click.echo(tabulate([row], headers=FLOWCELL_HEADERS, tablefmt="psql"))
     if samples:
-        sample_ids: List[str] = [sample_obj.internal_id for sample_obj in flowcell_obj.samples]
+        sample_ids: List[str] = [sample_obj.internal_id for sample_obj in flow_cell.samples]
         if sample_ids:
             context.invoke(sample, sample_ids=sample_ids, families=False)
         else:
-            LOG.warning("no samples found on flowcell")
+            LOG.warning("No samples found on flow cell")
