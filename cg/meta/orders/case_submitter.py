@@ -115,7 +115,7 @@ class CaseSubmitter(Submitter):
             self._fill_in_sample_ids(samples, lims_map)
 
         new_families = self.store_items_in_status(
-            customer=status_data["customer"],
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
             ticket=order.ticket,
@@ -211,11 +211,11 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[Family]:
         """Store cases and samples in the status database."""
 
-        customer_obj = self.status.get_customer_by_customer_id(customer_id=customer)
+        customer_obj = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_families = []
         for case in items:
             case_obj = self.status.family(case["internal_id"])

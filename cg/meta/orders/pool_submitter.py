@@ -28,7 +28,7 @@ class PoolSubmitter(Submitter):
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
         self._fill_in_sample_ids(samples, lims_map, id_key="internal_id")
         new_records = self.store_items_in_status(
-            customer=status_data["customer"],
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
             ticket=order.ticket,
@@ -106,10 +106,10 @@ class PoolSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[Pool]:
         """Store pools in the status database."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer)
+        customer_id: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_pools: List[Pool] = []
         new_samples: List[Sample] = []
         for pool in items:
@@ -119,7 +119,7 @@ class PoolSubmitter(Submitter):
                 )
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket, pool_name=pool["name"])
-            case: Family = self.status.find_family(customer=customer, name=case_name)
+            case: Family = self.status.find_family(customer=customer_id, name=case_name)
             if not case:
                 data_analysis: Pipeline = Pipeline(pool["data_analysis"])
                 data_delivery: DataDelivery = DataDelivery(pool["data_delivery"])
@@ -131,12 +131,12 @@ class PoolSubmitter(Submitter):
                     priority=priority,
                     ticket=ticket,
                 )
-                case.customer = customer
+                case.customer = customer_id
                 self.status.add_commit(case)
 
             new_pool: Pool = self.status.add_pool(
                 application_version=application_version,
-                customer=customer,
+                customer=customer_id,
                 name=pool["name"],
                 order=order,
                 ordered=ordered,
@@ -155,7 +155,7 @@ class PoolSubmitter(Submitter):
                     original_ticket=ticket,
                     priority=priority,
                     application_version=application_version,
-                    customer=customer,
+                    customer=customer_id,
                     no_invoice=True,
                 )
                 new_samples.append(new_sample)

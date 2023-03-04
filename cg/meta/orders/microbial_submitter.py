@@ -53,7 +53,7 @@ class MicrobialSubmitter(Submitter):
 
         # submit samples to Status
         samples = self.store_items_in_status(
-            customer=status_data["customer"],
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
             ticket=order.ticket,
@@ -67,7 +67,7 @@ class MicrobialSubmitter(Submitter):
     def store_items_in_status(
         self,
         comment: str,
-        customer: str,
+        customer_id: str,
         data_analysis: Pipeline,
         data_delivery: DataDelivery,
         order: str,
@@ -79,12 +79,12 @@ class MicrobialSubmitter(Submitter):
 
         sample_objs = []
 
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer)
+        customer_id: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_samples = []
 
         with self.status.session.no_autoflush:
             for sample_data in items:
-                case: Family = self.status.find_family(customer=customer, name=ticket)
+                case: Family = self.status.find_family(customer=customer_id, name=ticket)
 
                 if not case:
                     case = self.status.add_case(
@@ -94,7 +94,7 @@ class MicrobialSubmitter(Submitter):
                         panels=None,
                         ticket=ticket,
                     )
-                    case.customer = customer
+                    case.customer = customer_id
                     self.status.add_commit(case)
 
                 application_tag = sample_data["application"]
@@ -123,7 +123,7 @@ class MicrobialSubmitter(Submitter):
                     original_ticket=ticket,
                     priority=sample_data["priority"],
                     application_version=application_version,
-                    customer=customer,
+                    customer=customer_id,
                     organism=organism,
                     reference_genome=sample_data["reference_genome"],
                 )

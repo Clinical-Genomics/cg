@@ -29,7 +29,7 @@ def test_store_items_in_status_control_has_stored_value(
     # WHEN storing the order
     submitter.store_items_in_status(
         comment="",
-        customer=order.customer,
+        customer_id=order.customer,
         data_analysis=Pipeline.SARS_COV_2,
         data_delivery=DataDelivery.FASTQ,
         order="",

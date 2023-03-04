@@ -23,7 +23,7 @@ class FastqSubmitter(Submitter):
         status_data = self.order_to_status(order)
         self._fill_in_sample_ids(status_data["samples"], lims_map)
         new_samples = self.store_items_in_status(
-            customer=status_data["customer"],
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
             ticket=order.ticket,
@@ -72,12 +72,12 @@ class FastqSubmitter(Submitter):
         self.status.add(case_obj, relationship)
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
     ) -> List[models.Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
-        customer_obj = self.status.get_customer_by_customer_id(customer_id=customer)
+        customer_obj = self.status.get_customer_by_customer_id(customer_id=customer_id)
         if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
+            raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
         case_obj: models.Family = self.status.find_family(customer=customer_obj, name=ticket)
         case: dict = items[0]
