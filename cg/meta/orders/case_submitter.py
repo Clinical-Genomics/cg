@@ -11,9 +11,8 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store import models
-
 from cg.constants import Priority
+from cg.store.models import Customer, Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -44,10 +43,10 @@ class CaseSubmitter(Submitter):
             new_gender: str = sample.sex
             if new_gender == "unknown":
                 continue
-            existing_samples: [models.Sample] = self.status.samples_by_subject_id(
+            existing_samples: [Sample] = self.status.samples_by_subject_id(
                 customer_id=customer_id, subject_id=subject_id
             )
-            existing_sample: models.Sample
+            existing_sample: Sample
             for existing_sample in existing_samples:
                 previous_gender = existing_sample.sex
                 if previous_gender == "unknown":
@@ -67,8 +66,8 @@ class CaseSubmitter(Submitter):
             if not sample.internal_id:
                 continue
 
-            existing_sample: models.Sample = self.status.sample(sample.internal_id)
-            data_customer: models.Customer = self.status.get_customer_by_customer_id(
+            existing_sample: Sample = self.status.sample(sample.internal_id)
+            data_customer: Customer = self.status.get_customer_by_customer_id(
                 customer_id=customer_id
             )
 
@@ -79,16 +78,11 @@ class CaseSubmitter(Submitter):
         self, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
-        customer_obj: models.Customer = self.status.get_customer_by_customer_id(
-            customer_id=customer_id
-        )
-
-        sample: Of1508Sample
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         for sample in samples:
             if self._is_rerun_of_existing_case(sample):
                 continue
-
-            if self.status.find_family(customer=customer_obj, name=sample.family_name):
+            if self.status.find_family(customer=customer, name=sample.family_name):
                 raise OrderError(f"Case name {sample.family_name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
@@ -218,7 +212,7 @@ class CaseSubmitter(Submitter):
 
     def store_items_in_status(
         self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
-    ) -> List[models.Family]:
+    ) -> List[Family]:
         """Store cases and samples in the status database."""
 
         customer_obj = self.status.get_customer_by_customer_id(customer_id=customer)
@@ -264,12 +258,12 @@ class CaseSubmitter(Submitter):
         case_obj.panels = case["panels"]
 
     @staticmethod
-    def _append_ticket(ticket: str, case: models.Family) -> None:
+    def _append_ticket(ticket: str, case: Family) -> None:
         """Add a ticket to the case."""
         case.tickets = f"{case.tickets},{ticket}"
 
     @staticmethod
-    def _update_action(action: str, case: models.Family) -> None:
+    def _update_action(action: str, case: Family) -> None:
         """Update action of a case."""
         case.action = action
 
@@ -320,7 +314,7 @@ class CaseSubmitter(Submitter):
         self.status.add(new_delivery)
         return sample_obj
 
-    def _create_case(self, case: dict, customer_obj: models.Customer, ticket: str):
+    def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
             data_analysis=Pipeline(case["data_analysis"]),
