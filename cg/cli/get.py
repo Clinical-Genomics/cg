@@ -37,11 +37,11 @@ def get(context: click.Context, identifier: Optional[str]):
 
 
 @get.command()
-@click.option("--families/--no-families", default=True, help="display related families")
-@click.option("-hf", "--hide-flow-cell", is_flag=True, help="hide related flowcells")
+@click.option("--cases/--no-cases", default=True, help="Display related cases")
+@click.option("-hf", "--hide-flow-cell", is_flag=True, help="Hide related flow cells")
 @click.argument("sample-ids", nargs=-1)
 @click.pass_context
-def sample(context: click.Context, families: bool, hide_flow_cell: bool, sample_ids: List[str]):
+def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids: List[str]):
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
@@ -60,11 +60,11 @@ def sample(context: click.Context, families: bool, hide_flow_cell: bool, sample_
             "Yes" if existing_sample.application_version.application.is_external else "No",
         ]
         click.echo(tabulate([row], headers=SAMPLE_HEADERS, tablefmt="psql"))
-        if families:
-            family_ids: List[str] = [
+        if cases:
+            case_ids: List[str] = [
                 link_obj.family.internal_id for link_obj in existing_sample.links
             ]
-            context.invoke(family, case_ids=family_ids, samples=False)
+            context.invoke(family, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
             for flow_cell in existing_sample.flowcells:
                 LOG.debug(f"Get info on flow cell: {flow_cell.name}")
@@ -163,7 +163,7 @@ def family(
             context.invoke(relations, case_id=case.internal_id)
         if samples:
             sample_ids: List[str] = [link_obj.sample.internal_id for link_obj in case.links]
-            context.invoke(sample, sample_ids=sample_ids, families=False)
+            context.invoke(sample, sample_ids=sample_ids, cases=False)
         if analyses:
             context.invoke(analysis, case_id=case.internal_id)
 
@@ -191,6 +191,6 @@ def flowcell(context: click.Context, samples: bool, flow_cell_id: str):
     if samples:
         sample_ids: List[str] = [sample_obj.internal_id for sample_obj in flow_cell.samples]
         if sample_ids:
-            context.invoke(sample, sample_ids=sample_ids, families=False)
+            context.invoke(sample, sample_ids=sample_ids, cases=False)
         else:
             LOG.warning("No samples found on flow cell")
