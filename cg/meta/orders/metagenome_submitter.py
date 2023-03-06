@@ -9,8 +9,8 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.models.orders.samples import OrderInSample, MetagenomeSample
-from cg.store import models
+from cg.models.orders.samples import MetagenomeSample
+from cg.store.models import Customer, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -21,7 +21,7 @@ class MetagenomeSubmitter(Submitter):
         self, samples: List[MetagenomeSample], customer_id: str
     ) -> None:
         """Validate that the names of all samples are unused."""
-        customer: models.Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         for sample in samples:
             if sample.control:
                 continue
@@ -78,7 +78,7 @@ class MetagenomeSubmitter(Submitter):
         ordered: dt.datetime,
         ticket_id: str,
         items: List[dict],
-    ) -> List[models.Sample]:
+    ) -> List[Sample]:
         """Store samples in the status database."""
         customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         if customer is None:
