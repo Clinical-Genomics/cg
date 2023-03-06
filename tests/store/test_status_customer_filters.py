@@ -1,14 +1,14 @@
 from cg.store import Store
 from cg.store.models import Customer
-from cg.store.status_customer_version_filters import get_customer_by_customer_id
+from cg.store.status_customer_version_filters import filter_customer_by_customer_id
 
 
-def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
+def test_filter_customer_by_customer_id(base_store: Store, customer_id: str):
     """Test return customer by customer internal id."""
     # GIVEN a store containing customers
 
     # WHEN retrieving a customer
-    customer: Customer = get_customer_by_customer_id(
+    customer: Customer = filter_customer_by_customer_id(
         customers=base_store._get_customer_query(),
         customer_id=customer_id,
     ).first()
