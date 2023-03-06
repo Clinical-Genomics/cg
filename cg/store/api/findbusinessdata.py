@@ -454,7 +454,7 @@ class FindBusinessDataHandler(BaseHandler):
         return application.expected_reads
 
     def get_all_samples(self) -> List[Sample]:
-        return self.Sample.query.all()
+        return self.Sample.query.order_by(Sample.created_at.desc()).all()
 
     def get_samples_by_customer_id(
         self, customers: Optional[List[Customer]] = None
