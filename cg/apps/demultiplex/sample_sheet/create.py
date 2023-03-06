@@ -11,7 +11,10 @@ LOG = logging.getLogger(__name__)
 
 
 def create_sample_sheet(
-    flow_cell: FlowCell, lims_samples: List[LimsFlowcellSample], bcl_converter: str
+    bcl_converter: str,
+    flow_cell: FlowCell,
+    lims_samples: List[LimsFlowcellSample],
+    force: bool = False,
 ) -> str:
     """Create a sample sheet for a flow cell."""
     if flow_cell.sample_sheet_path.exists():
@@ -27,9 +30,10 @@ def create_sample_sheet(
         raise FlowCellError(message=message)
 
     sample_sheet_creator = SampleSheetCreator(
+        bcl_converter=bcl_converter,
         flowcell_id=flow_cell.id,
         lims_samples=lims_samples,
         run_parameters=run_parameters,
-        bcl_converter=bcl_converter,
+        force=force,
     )
     return sample_sheet_creator.construct_sample_sheet()
