@@ -453,25 +453,22 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_all_samples(
-        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
+    def get_all_samples(self) -> List[Sample]:
+        return self.Sample.query.all()
+
+    def get_samples_by_customer_id(
+        self, customers: Optional[List[Customer]] = None
     ) -> List[Sample]:
-        # 1.
-        records = self.Sample.query
-        # 2.
-        if customers:
-            customer_ids = [customer.id for customer in customers]
-            records = records.filter(Sample.customer_id.in_(customer_ids))
-        # 3.
-        records = (
-            records.filter(
-                or_(
-                    Sample.name.like(f"%{enquiry}%"),
-                    Sample.internal_id.like(f"%{enquiry}%"),
-                )
+        customer_ids = [customer.id for customer in customers]
+        records = self.Sample.query.filter(Sample.customer_id.in_(customer_ids))
+        return records.order_by(Sample.created_at.desc()).all()
+
+    def get_samples_by_enquiry(self, enquiry: str) -> List[Sample]:
+        records = self.Sample.query.filter(
+            or_(
+                Sample.name.like(f"%{enquiry}%"),
+                Sample.internal_id.like(f"%{enquiry}%"),
             )
-            if enquiry
-            else records
         )
         return records.order_by(Sample.created_at.desc()).all()
 
