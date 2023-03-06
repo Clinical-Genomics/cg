@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from cgmodels.cg.constants import Pipeline
 
-from cg.store.models import Customer
+from cg.store.models import Customer, Family
 from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
@@ -243,20 +243,20 @@ def test_submit_duplicate_sample_case_name(
     # GIVEN we have an order with a case that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    customer_obj = store.get_customer_by_customer_id(customer_id=order_data.customer)
+    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
 
     for sample in order_data.samples:
         case_id = sample.family_name
-        if not store.find_family(customer=customer_obj, name=case_id):
-            case_obj = store.add_case(
+        if not store.find_family(customer=customer, name=case_id):
+            case: Family = store.add_case(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
                 ticket=ticket,
             )
-            case_obj.customer = customer_obj
-            store.add_commit(case_obj)
-        assert store.find_family(customer=customer_obj, name=case_id)
+            case.customer = customer
+            store.add_commit(case)
+        assert store.find_family(customer=customer, name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -323,8 +323,8 @@ def test_submit_unique_sample_case_name(
     sample: MipDnaSample
     for sample in order_data.samples:
         case_id = sample.family_name
-        customer_obj = store.get_customer_by_customer_id(customer_id=order_data.customer)
-        assert not store.find_family(customer=customer_obj, name=case_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+        assert not store.find_family(customer=customer, name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 

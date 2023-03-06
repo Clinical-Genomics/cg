@@ -130,9 +130,9 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 def test_get_customer_query(base_store: Store):
     """Test function to return the customer query."""
 
-    # GIVEN a store with bed records
+    # GIVEN a store with customer records
 
-    # WHEN getting the query for the beds
+    # WHEN getting the query for the customers
     customer_query: Query = base_store._get_customer_query()
 
     # THEN a query should be returned
