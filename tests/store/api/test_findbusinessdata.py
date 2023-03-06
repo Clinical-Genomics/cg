@@ -464,3 +464,17 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # THEN no cases are found
     assert not cases
+
+
+def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpers: StoreHelpers):
+    """Test that all pools and samples for an invoice can be fetched."""
+    # GIVEN a database with a pool and a sample
+    pool = helpers.ensure_pool(store=store, name="pool_1")
+    sample = helpers.add_sample(store=store, name="sample_1")
+    # AND an invoice with the pool and sample
+    invoice = helpers.ensure_invoice(store=store, pools=[pool], samples=[sample])
+    # WHEN fetching all pools and samples for the invoice
+    records = store.get_all_pools_and_samples_for_invoice_by_invoice_id(invoice_id=invoice.id)
+    # THEN the pool and sample should be returned
+    assert pool in records
+    assert sample in records

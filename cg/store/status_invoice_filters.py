@@ -22,15 +22,16 @@ def get_invoices_not_invoiced(invoices: Query, **kwargs) -> Query:
 def apply_invoice_filter(
     functions: List[str],
     invoices: Query,
+    invoice_id: Optional[int] = None,
 ) -> Query:
     """Apply filtering functions to the invoice queries and return filtered results."""
 
     for function in functions:
-        invoices: Query = function(invoices=invoices)
+        invoices: Query = function(invoices=invoices, invoice_id=invoice_id)
     return invoices
 
 
 class InvoiceFilters(Enum):
-    get_invoices_by_id: Callable = get_invoices_by_invoice_id
+    get_invoices_by_invoice_id: Callable = get_invoices_by_invoice_id
     get_invoices_invoiced: Callable = get_invoices_invoiced
     get_invoices_not_invoiced: Callable = get_invoices_not_invoiced

@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import List, Optional, Iterator
+from typing import List, Optional, Iterator, Union
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
@@ -27,6 +27,7 @@ from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFi
 from cg.store.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilters
 from cg.store.status_sample_filters import apply_sample_filter, SampleFilters
 from cg.store.status_invoice_filters import apply_invoice_filter, InvoiceFilters
+from cg.store.status_pool_filters import apply_pool_filter, PoolFilters
 
 LOG = logging.getLogger(__name__)
 
@@ -369,26 +370,41 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all invoices."""
         return self._get_invoice_query()
 
-    def get_invoices_by_status(self, invoiced: bool = None) -> Query:
+    def get_invoices_by_status(self, invoiced: bool = None) -> List[Invoice]:
         """Fetch invoices by invoiced status."""
         invoices = self._get_invoice_query()
         if invoiced:
             return apply_invoice_filter(
                 invoices=invoices, functions=[InvoiceFilters.get_invoices_invoiced]
-            )
+            ).all()
         else:
             return apply_invoice_filter(
                 invoices=invoices, functions=[InvoiceFilters.get_invoices_not_invoiced]
-            )
+            ).all()
 
-    def invoice(self, invoice_id: int) -> Invoice:
-        """Fetch an invoice."""
-        return self.Invoice.get(invoice_id)
+    def get_first_invoice_by_id(self, invoice_id: int) -> Invoice:
+        """Return an invoice."""
+        invoices = self._get_invoice_query()
+        return apply_invoice_filter(
+            invoices=invoices,
+            invoice_id=invoice_id,
+            functions=[InvoiceFilters.get_invoices_by_invoice_id],
+        ).first()
 
-    def invoice_samples(self, *, invoice_id: int = None) -> Query:
-        """Fetch pools and samples for an invoice"""
-        pools = self.Pool.query.filter_by(invoice_id=invoice_id).all()
-        samples = self.Sample.query.filter_by(invoice_id=invoice_id).all()
+    def get_all_pools_and_samples_for_invoice_by_invoice_id(
+        self, *, invoice_id: int = None
+    ) -> List[Union[Pool, Sample]]:
+        """Return all pools and samples for an invoice."""
+        pools = self.Pool.query
+        pools = apply_pool_filter(
+            pools=pools, invoice_id=invoice_id, functions=[PoolFilters.get_pools_by_invoice_id]
+        ).all()
+        samples = self.Sample.query
+        samples = apply_sample_filter(
+            samples=samples,
+            invoice_id=invoice_id,
+            functions=[SampleFilters.get_samples_by_invoice_id],
+        ).all()
         return pools + samples
 
     def link(self, family_id: str, sample_id: str) -> FamilySample:
@@ -401,7 +417,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
-        query = self.Invoice.query.all()
+        query = self._get_invoice_query()
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
