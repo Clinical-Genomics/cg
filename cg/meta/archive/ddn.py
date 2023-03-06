@@ -1,5 +1,6 @@
+"""Module for archiving and retrieving folders via DDN."""
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 from urllib.parse import urljoin
 from requests.models import Response
 
@@ -10,6 +11,8 @@ from cg.models.cg_config import DDNConfig
 
 
 class DDNApi:
+    """Class for archiving and retrieving folders via DDN."""
+
     def __init__(self, config: DDNConfig):
         self.database_name: str = config.database_name
         self.user: str = config.user
@@ -23,6 +26,7 @@ class DDNApi:
         self._set_auth_tokens()
 
     def _set_auth_tokens(self) -> None:
+        """Retrieves and sets auth and retrieve token from the REST-API."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token"),
@@ -42,6 +46,7 @@ class DDNApi:
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
 
     def _refresh_auth_token(self) -> None:
+        """Updates the auth token via by prviding the refresh token to the REST-API."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token/refresh"),
@@ -58,14 +63,19 @@ class DDNApi:
 
     @property
     def auth_header(self) -> Dict[str, str]:
+        """Returns an authorisation header bases on the current auth token, or updates it if
+        needed."""
         if datetime.now() > self.token_expiration:
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    # Todo add json construction logic here
-    def archive_folder(self, destination: Path, source: Path):
+    def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
+        """Archives all folders provided, to their corresponding destination, as given by the
+        dict."""
         payload: dict = {
-            "pathInfo": [self._construct_path_dict(destination=destination, source=source)],
+            "pathInfo": self._format_paths_archive(
+                sources_and_destinations=sources_and_destinations
+            ),
             "osType": "linux",
             "createDirectory": "true",
             "metadataList": [],
@@ -76,10 +86,15 @@ class DDNApi:
             headers=self.auth_header,
             json=payload,
         )
+        return response.ok
 
-    def retrieve_folder(self, destination: Path, source: Path):
+    def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
+        """Retrieves all folders provided, to their corresponding destination, as given by the
+        dict."""
         payload: dict = {
-            "pathInfo": [self._construct_path_dict(destination=destination, source=source)],
+            "pathInfo": self._format_paths_retrieve(
+                sources_and_destinations=sources_and_destinations
+            ),
             "osType": "linux",
             "createDirectory": "true",
         }
@@ -89,9 +104,30 @@ class DDNApi:
             headers=self.auth_header,
             json=payload,
         )
+        return response.ok
 
-    def _construct_path_dict(self, source, destination) -> Dict[str, str]:
-        return {
-            "source": "archive@OneOne:/Test./ada_event",
-            "destination": "nfs@Nas_1:/Miria/Binary/Adm",
-        }
+    def _format_paths_archive(
+        self, sources_and_destinations: Dict[Path, Path]
+    ) -> List[Dict[str, str]]:
+        """Formats the given archiving dict into the data structure requested by the REST-API"""
+        return [
+            {
+                "source": Path(self.local_storage, source.relative_to("/home")).as_posix(),
+                "destination": self.archive_repository + destination.as_posix(),
+            }
+            for source, destination in sources_and_destinations.items()
+        ]
+
+    def _format_paths_retrieve(
+        self, sources_and_destinations: Dict[Path, Path]
+    ) -> List[Dict[str, str]]:
+        """Formats the given retrieve dict into the data structure requested by the REST-API"""
+        return [
+            {
+                "source": self.archive_repository + source.as_posix(),
+                "destination": Path(
+                    self.local_storage, destination.relative_to("/home")
+                ).as_posix(),
+            }
+            for source, destination in sources_and_destinations.items()
+        ]
