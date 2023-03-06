@@ -230,7 +230,7 @@ def family(
 @click.option("-m", "--mother-id", help="Sample ID for mother of sample")
 @click.option("-f", "--father-id", help="Sample ID for father of sample")
 @click.option("-s", "--status", type=click.Choice(STATUS_OPTIONS), required=True)
-@click.argument("family-id")
+@click.argument("case-id")
 @click.argument("sample-id")
 @click.pass_obj
 def relationship(
@@ -238,40 +238,44 @@ def relationship(
     mother_id: Optional[str],
     father_id: Optional[str],
     status: str,
-    family_id: str,
+    case_id: str,
     sample_id: str,
 ):
-    """Create a link between a family id and a sample id."""
+    """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
     sample_mother: Optional[Sample] = None
     sample_father: Optional[Sample] = None
-    case: Family = status_db.family(family_id)
-    if case is None:
-        LOG.error(f"{family_id}: family not found")
+    case: Family = status_db.family(case_id)
+    if not case:
+        LOG.error(f"{case_id}: family not found")
         raise click.Abort
 
-    sample: Sample = status_db.sample(sample_id)
-    if sample is None:
+    existing_sample: Sample = status_db.sample(sample_id)
+    if not existing_sample:
         LOG.error(f"{sample_id}: sample not found")
         raise click.Abort
 
     if mother_id:
         sample_mother: Sample = status_db.sample(mother_id)
-        if sample_mother is None:
+        if not sample_mother:
             LOG.error(f"{mother_id}: mother not found")
             raise click.Abort
 
     if father_id:
         sample_father: Sample = status_db.sample(father_id)
-        if sample_father is None:
+        if not sample_father:
             LOG.error(f"{father_id}: father not found")
             raise click.Abort
 
     new_record = status_db.relate_sample(
-        family=case, sample=sample, status=status, mother=sample_mother, father=sample_father
+        family=case,
+        sample=existing_sample,
+        status=status,
+        mother=sample_mother,
+        father=sample_father,
     )
     status_db.add_commit(new_record)
-    LOG.info(f"Related {case.internal_id} to {sample.internal_id}")
+    LOG.info(f"Related {case.internal_id} to {existing_sample.internal_id}")
 
 
 @add.command()
