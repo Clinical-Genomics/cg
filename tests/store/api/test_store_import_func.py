@@ -310,7 +310,7 @@ def test_sync_rml_orderform_inactivate(rml_store: Store, rml_orderform: str, hel
         store=rml_store,
         application_tag="apptag_to_inactivate",
         is_archived=False,
-        application_type=prep_category,
+        prep_category=prep_category,
     )
     active_apps_from_start = rml_store.applications(category=prep_category, archived=False).count()
     inactive_apps_from_start = rml_store.applications(category=prep_category, archived=True).count()
