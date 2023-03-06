@@ -6,25 +6,25 @@ import pytest
 
 from cg.constants import Pipeline
 from cg.constants.subject import Gender
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
 
 
 @pytest.fixture(name="application_versions_file")
 def fixture_application_versions_file(fixtures_dir: Path) -> str:
     """Return application version import file."""
-    return Path(fixtures_dir, "store/api/application_versions.xlsx").as_posix()
+    return Path(fixtures_dir, "store", "api", "application_versions.xlsx").as_posix()
 
 
 @pytest.fixture(name="applications_file")
 def fixture_applications_file(fixtures_dir: Path) -> str:
     """Return application import file."""
-    return Path(fixtures_dir, "store/api/applications.xlsx").as_posix()
+    return Path(fixtures_dir, "store", "api", "applications.xlsx").as_posix()
 
 
 @pytest.fixture(name="microbial_submitted_order")
 def fixture_microbial_submitted_order() -> dict:
-    """Build an example order as it looks after submission to ."""
+    """Build an example order as it looks after submission to."""
 
     def _get_item(name: str, internal_id: str, well_position: str, organism: str) -> dict:
         """Return a item."""

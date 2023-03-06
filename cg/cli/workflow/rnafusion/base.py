@@ -8,9 +8,11 @@ from pydantic import ValidationError
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
 from cg.cli.workflow.nextflow.options import (
+    OPTION_CONFIG,
     OPTION_INPUT,
     OPTION_LOG,
     OPTION_OUTDIR,
+    OPTION_PARAMS_FILE,
     OPTION_PROFILE,
     OPTION_STUB,
     OPTION_TOWER,
@@ -85,17 +87,8 @@ def config_case(
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
-@OPTION_INPUT
-@OPTION_OUTDIR
-@OPTION_REFERENCES
-@OPTION_TRIM
-@OPTION_FUSIONINSPECTOR_FILTER
-@OPTION_ALL
-@OPTION_PIZZLY
-@OPTION_SQUID
-@OPTION_STARFUSION
-@OPTION_FUSIONCATCHER
-@OPTION_ARRIBA
+@OPTION_CONFIG
+@OPTION_PARAMS_FILE
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -107,17 +100,8 @@ def run(
     profile: str,
     with_tower: bool,
     stub: bool,
-    input: str,
-    outdir: str,
-    genomes_base: str,
-    trim: bool,
-    fusioninspector_filter: bool,
-    all: bool,
-    pizzly: bool,
-    squid: bool,
-    starfusion: bool,
-    fusioncatcher: bool,
-    arriba: bool,
+    config: str,
+    params_file: str,
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
@@ -128,6 +112,7 @@ def run(
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running RNAFUSION analysis for {case_id}")
+
         analysis_api.run_analysis(
             case_id=case_id,
             log=log,
@@ -136,17 +121,8 @@ def run(
             profile=profile,
             with_tower=with_tower,
             stub=stub,
-            input=input,
-            outdir=outdir,
-            genomes_base=genomes_base,
-            trim=trim,
-            fusioninspector_filter=fusioninspector_filter,
-            all=all,
-            pizzly=pizzly,
-            squid=squid,
-            starfusion=starfusion,
-            fusioncatcher=fusioncatcher,
-            arriba=arriba,
+            config=config,
+            params_file=params_file,
             dry_run=dry_run,
         )
         analysis_api.set_statusdb_action(case_id=case_id, action="running", dry_run=dry_run)
@@ -165,17 +141,8 @@ def run(
 @OPTION_PROFILE
 @OPTION_TOWER
 @OPTION_STUB
-@OPTION_INPUT
-@OPTION_OUTDIR
-@OPTION_REFERENCES
-@OPTION_TRIM
-@OPTION_FUSIONINSPECTOR_FILTER
-@OPTION_ALL
-@OPTION_PIZZLY
-@OPTION_SQUID
-@OPTION_STARFUSION
-@OPTION_FUSIONCATCHER
-@OPTION_ARRIBA
+@OPTION_CONFIG
+@OPTION_PARAMS_FILE
 @DRY_RUN
 @click.pass_context
 def start(
@@ -186,17 +153,8 @@ def start(
     profile: str,
     with_tower: bool,
     stub: bool,
-    input: str,
-    outdir: str,
-    genomes_base: str,
-    trim: bool,
-    fusioninspector_filter: bool,
-    all: bool,
-    pizzly: bool,
-    squid: bool,
-    starfusion: bool,
-    fusioncatcher: bool,
-    arriba: bool,
+    config: str,
+    params_file: str,
     dry_run: bool,
 ) -> None:
     """Start full workflow for CASE ID."""
@@ -217,17 +175,8 @@ def start(
         profile=profile,
         with_tower=with_tower,
         stub=stub,
-        input=input,
-        outdir=outdir,
-        genomes_base=genomes_base,
-        trim=trim,
-        fusioninspector_filter=fusioninspector_filter,
-        all=all,
-        pizzly=pizzly,
-        squid=squid,
-        starfusion=starfusion,
-        fusioncatcher=fusioncatcher,
-        arriba=arriba,
+        config=config,
+        params_file=params_file,
         dry_run=dry_run,
     )
 

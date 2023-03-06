@@ -1,4 +1,4 @@
-""" Module for retrieving FCs from backup """
+""" Module for retrieving flow cells from backup."""
 import logging
 import re
 import subprocess
@@ -20,7 +20,8 @@ from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models import CompressionData
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Flowcell
 from cg.utils.time import get_elapsed_time, get_start_time
 
 LOG = logging.getLogger(__name__)
@@ -49,18 +50,20 @@ class BackupAPI:
 
     def check_processing(self) -> bool:
         """Check if the processing queue for flow cells is not full."""
-        processing_flow_cells = self.status.flowcells(status=FlowCellStatus.PROCESSING).count()
-        LOG.debug(f"Processing flow cells: {processing_flow_cells}")
-        return processing_flow_cells < MAX_PROCESSING_FLOW_CELLS
+        processing_flow_cells_count: int = self.status.get_flow_cells_by_statuses(
+            flow_cell_statuses=[FlowCellStatus.PROCESSING]
+        ).count()
+        LOG.debug(f"Processing flow cells: {processing_flow_cells_count}")
+        return processing_flow_cells_count < MAX_PROCESSING_FLOW_CELLS
 
-    def get_first_flow_cell(self) -> Optional[models.Flowcell]:
+    def get_first_flow_cell(self) -> Optional[Flowcell]:
         """Get the first flow cell from the requested queue."""
-        flow_cell: Optional[models.Flowcell] = self.status.flowcells(
-            status=FlowCellStatus.REQUESTED
+        flow_cell: Optional[Flowcell] = self.status.get_flow_cells_by_statuses(
+            flow_cell_statuses=[FlowCellStatus.REQUESTED]
         ).first()
         return flow_cell or None
 
-    def fetch_flow_cell(self, flow_cell: Optional[models.Flowcell] = None) -> Optional[float]:
+    def fetch_flow_cell(self, flow_cell: Optional[Flowcell] = None) -> Optional[float]:
         """Start fetching a flow cell from backup if possible.
 
         1. The processing queue is not full.
@@ -71,7 +74,7 @@ class BackupAPI:
             return None
 
         if not flow_cell:
-            flow_cell: Optional[models.Flowcell] = self.get_first_flow_cell()
+            flow_cell: Optional[Flowcell] = self.get_first_flow_cell()
 
         if not flow_cell:
             LOG.info("No flow cells requested")
@@ -100,7 +103,7 @@ class BackupAPI:
             )
 
     def _process_flow_cell(
-        self, flow_cell: models.Flowcell, archived_key: Path, archived_flow_cell: Path
+        self, flow_cell: Flowcell, archived_key: Path, archived_flow_cell: Path
     ) -> float:
         """Process a flow cell from backup. Return elapsed time."""
         start_time: float = get_start_time()
@@ -198,9 +201,7 @@ class BackupAPI:
         self.encryption_api.run_gpg_command(decryption_command)
         return decrypted_flow_cell, encryption_key, retrieved_flow_cell, retrieved_key
 
-    def retrieve_archived_key(
-        self, archived_key: Path, flow_cell: models.Flowcell, run_dir: Path
-    ) -> None:
+    def retrieve_archived_key(self, archived_key: Path, flow_cell: Flowcell, run_dir: Path) -> None:
         """Attempt to retrieve an archived key."""
         try:
             self.retrieve_archived_file(
@@ -221,7 +222,7 @@ class BackupAPI:
                 raise error
 
     def retrieve_archived_flow_cell(
-        self, archived_flow_cell: Path, flow_cell: models.Flowcell, run_dir: Path
+        self, archived_flow_cell: Path, flow_cell: Flowcell, run_dir: Path
     ):
         """Attempt to retrieve an archived flow cell."""
         try:
@@ -245,7 +246,7 @@ class BackupAPI:
                     self.status.commit()
                 raise error
 
-    def _set_flow_cell_status_to_retrieved(self, flow_cell: models.Flowcell):
+    def _set_flow_cell_status_to_retrieved(self, flow_cell: Flowcell):
         flow_cell.status = FlowCellStatus.RETRIEVED
         self.status.commit()
         LOG.info(f"Status for flow cell {flow_cell.name} set to {flow_cell.status}")

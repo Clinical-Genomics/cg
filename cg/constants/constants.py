@@ -1,4 +1,6 @@
 """Constants for cg."""
+from enum import Enum
+
 import click
 from cgmodels.cg.constants import StrEnum
 
@@ -53,7 +55,7 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
 class FlowCellStatus(StrEnum):
-    ONDISK: str = "ondisk"
+    ON_DISK: str = "ondisk"
     REMOVED: str = "removed"
     REQUESTED: str = "requested"
     PROCESSING: str = "processing"
@@ -67,6 +69,14 @@ FLOWCELL_Q30_THRESHOLD = {
     Sequencers.HISEQGA: 80,
     Sequencers.NOVASEQ: 75,
 }
+
+
+class AnalysisType(StrEnum):
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+    OTHER: str = "other"
 
 
 class PrepCategory(StrEnum):
@@ -89,6 +99,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
+    FASTQ: str = "fastq"
     JSON: str = "json"
     YAML: str = "yaml"
 
@@ -124,6 +135,8 @@ class HastaSlurmPartitions(StrEnum):
 
 
 class FileExtensions(StrEnum):
+    BED: str = ".bed"
+    CRAM: str = ".cram"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"
