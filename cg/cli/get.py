@@ -30,7 +30,7 @@ def get(context: click.Context, identifier: Optional[str]):
             context.invoke(case, case_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
-            context.invoke(flowcell, flow_cell_id=identifier)
+            context.invoke(flow_cell, flow_cell_id=identifier)
         else:
             LOG.error(f"{identifier}: can't predict identifier")
             raise click.Abort
@@ -47,7 +47,7 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
     for sample_id in sample_ids:
         LOG.debug(f"Get info on sample: {sample_id}")
         existing_sample: Sample = status_db.sample(sample_id)
-        if existing_sample is None:
+        if not existing_sample:
             LOG.warning(f"Sample: {sample_id} does not exist")
             continue
         row = [
@@ -66,9 +66,9 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
             ]
             context.invoke(case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
-            for flow_cell in existing_sample.flowcells:
-                LOG.debug(f"Get info on flow cell: {flow_cell.name}")
-                context.invoke(flowcell, flow_cell_id=flow_cell.name, samples=False)
+            for sample_flow_cell in existing_sample.flowcells:
+                LOG.debug(f"Get info on flow cell: {sample_flow_cell.name}")
+                context.invoke(flow_cell, flow_cell_id=sample_flow_cell.name, samples=False)
 
 
 @get.command()
@@ -100,10 +100,10 @@ def relations(context: CGConfig, case_id: str):
     status_db: Store = context.status_db
     case: Family = status_db.family(internal_id=case_id)
     if case is None:
-        LOG.error(f"{case_id}: family doesn't exist")
+        LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
 
-    LOG.debug(f"{case.internal_id}: get info about family relations")
+    LOG.debug(f"{case.internal_id}: get info about case relations")
 
     for case_link in case.links:
         row = [
@@ -168,28 +168,31 @@ def case(
             context.invoke(analysis, case_id=case.internal_id)
 
 
-@get.command()
-@click.option("--samples/--no-samples", default=True, help="display related samples")
+@get.command("flow-cell")
+@click.option("--samples/--no-samples", default=True, help="Display related samples")
 @click.argument("flow-cell-id")
 @click.pass_context
-def flowcell(context: click.Context, samples: bool, flow_cell_id: str):
-    """Get information about a flowcell and the samples on it."""
+def flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
+    """Get information about a flow cell and the samples on it."""
+    print("Kalle")
     status_db: Store = context.obj.status_db
-    flow_cell: Flowcell = status_db.get_flow_cell(flow_cell_id)
-    if flow_cell is None:
+    existing_flow_cell: Flowcell = status_db.get_flow_cell(flow_cell_id=flow_cell_id)
+    if not existing_flow_cell:
         LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort
     row: List[str] = [
-        flow_cell.name,
-        flow_cell.sequencer_type,
-        flow_cell.sequencer_name,
-        flow_cell.sequenced_at.date(),
-        flow_cell.archived_at.date() if flow_cell.archived_at else "No",
-        flow_cell.status,
+        existing_flow_cell.name,
+        existing_flow_cell.sequencer_type,
+        existing_flow_cell.sequencer_name,
+        existing_flow_cell.sequenced_at.date(),
+        existing_flow_cell.archived_at.date() if existing_flow_cell.archived_at else "No",
+        existing_flow_cell.status,
     ]
     click.echo(tabulate([row], headers=FLOWCELL_HEADERS, tablefmt="psql"))
     if samples:
-        sample_ids: List[str] = [sample_obj.internal_id for sample_obj in flow_cell.samples]
+        sample_ids: List[str] = [
+            sample_obj.internal_id for sample_obj in existing_flow_cell.samples
+        ]
         if sample_ids:
             context.invoke(sample, sample_ids=sample_ids, cases=False)
         else:
