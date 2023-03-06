@@ -26,7 +26,7 @@ def get(context: click.Context, identifier: Optional[str]):
         if re.match(r"^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$", identifier):
             context.invoke(sample, sample_ids=[identifier])
         elif re.match(r"^[a-z]*$", identifier):
-            # try family information
+            # try case information
             context.invoke(family, case_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
