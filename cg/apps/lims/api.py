@@ -218,7 +218,7 @@ class LimsAPI(Lims, OrderHandler):
     def process_samples(lims_process: Process) -> Generator[str, None, None]:
         """Retrieve LIMS input samples from a process."""
         for lims_artifact in lims_process.all_inputs():
-            for lims_sample in lims_artifact.get_all_samples:
+            for lims_sample in lims_artifact.samples:
                 yield lims_sample.id
 
     def update_sample(
