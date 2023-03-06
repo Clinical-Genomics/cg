@@ -9,6 +9,7 @@ from cg.models.cg_config import DDNConfig
 
 @pytest.fixture(name="ddn_config")
 def fixture_ddn_config() -> DDNConfig:
+    """Returns a dummy DDNConfig."""
     return DDNConfig(
         database_name="test_db",
         user="test_user",
@@ -21,6 +22,7 @@ def fixture_ddn_config() -> DDNConfig:
 
 @pytest.fixture(name="ddn_api")
 def fixture_ddn_api(ddn_config) -> DDNApi:
+    """Returns a DDNApi without tokens being set."""
     with patch.object(DDNApi, "__init__", lambda x, y: None):
         ddn_api: DDNApi = DDNApi(ddn_config)
         for key, value in ddn_config.dict().items():
@@ -30,9 +32,11 @@ def fixture_ddn_api(ddn_config) -> DDNApi:
 
 @pytest.fixture(name="remote_directory")
 def fixture_remote_directory() -> Path:
+    """Returns a dummy path."""
     return Path("/some/place")
 
 
 @pytest.fixture(name="local_directory")
 def fixture_local_directory() -> Path:
+    """Returns a dummy path with /home as its root."""
     return Path("/home/other/place")

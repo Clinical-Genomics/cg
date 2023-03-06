@@ -26,7 +26,7 @@ class DDNApi:
         self._set_auth_tokens()
 
     def _set_auth_tokens(self) -> None:
-        """Retrieves and sets auth and retrieve token from the REST-API."""
+        """Retrieves and sets auth and refresh token from the REST-API."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token"),
@@ -46,7 +46,7 @@ class DDNApi:
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
 
     def _refresh_auth_token(self) -> None:
-        """Updates the auth token via by prviding the refresh token to the REST-API."""
+        """Updates the auth token via by providing the refresh token to the REST-API."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token/refresh"),
@@ -63,7 +63,7 @@ class DDNApi:
 
     @property
     def auth_header(self) -> Dict[str, str]:
-        """Returns an authorisation header bases on the current auth token, or updates it if
+        """Returns an authorisation header based on the current auth token, or updates it if
         needed."""
         if datetime.now() > self.token_expiration:
             self._refresh_auth_token()
@@ -109,7 +109,8 @@ class DDNApi:
     def _format_paths_archive(
         self, sources_and_destinations: Dict[Path, Path]
     ) -> List[Dict[str, str]]:
-        """Formats the given archiving dict into the data structure requested by the REST-API"""
+        """Formats the given archiving-dictionary into the data structure specified by the
+        REST-API."""
         return [
             {
                 "source": Path(self.local_storage, source.relative_to("/home")).as_posix(),
@@ -121,7 +122,8 @@ class DDNApi:
     def _format_paths_retrieve(
         self, sources_and_destinations: Dict[Path, Path]
     ) -> List[Dict[str, str]]:
-        """Formats the given retrieve dict into the data structure requested by the REST-API"""
+        """Formats the given retrieve-dictionary into the data structure specified by the
+        REST-API."""
         return [
             {
                 "source": self.archive_repository + source.as_posix(),
