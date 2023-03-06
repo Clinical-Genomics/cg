@@ -427,9 +427,10 @@ class UploadScoutAPI:
             raise CgDataError(
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
-
+        collaborator_list: List[models.Collaborator] = rna_sample.collaborator_list
+        #TODO Something above here to get the collaborator list to feed into the SQL query.
         subject_id_samples: Query = self.status_db.samples_by_subject_id(
-            customer_id=rna_sample.customer.internal_id,
+            customer_id__in=collaborator_list,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
