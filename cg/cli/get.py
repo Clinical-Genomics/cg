@@ -133,39 +133,43 @@ def case(
 ):
     """Get information about a case."""
     status_db: Store = context.obj.status_db
-    cases: List[Family] = []
+    status_db_cases: List[Family] = []
     if name:
-        customer_id: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
-        if customer_id is None:
+        customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+        if not customer:
             LOG.error(f"{customer_id}: customer not found")
             raise click.Abort
-        cases: Iterable[Family] = status_db.families(customers=[customer_id], enquiry=case_ids[-1])
+        status_db_cases: Iterable[Family] = status_db.families(
+            customers=[customer], enquiry=case_ids[-1]
+        )
     else:
-        for family_id in case_ids:
-            case: Family = status_db.family(family_id)
-            if case is None:
-                LOG.error(f"{family_id}: family doesn't exist")
+        for case_id in case_ids:
+            existing_case: Family = status_db.family(internal_id=case_id)
+            if not existing_case:
+                LOG.error(f"{case_id}: case doesn't exist")
                 raise click.Abort
-            cases.append(case)
+            status_db_cases.append(existing_case)
 
-    for case in cases:
-        LOG.debug(f"{case.internal_id}: get info about family")
+    for status_db_case in status_db_cases:
+        LOG.debug(f"{status_db_case.internal_id}: get info about case")
         row: List[str] = [
-            case.internal_id,
-            case.name,
-            case.customer.internal_id,
-            case.priority_human,
-            ", ".join(case.panels),
-            case.action or "NA",
+            status_db_case.internal_id,
+            status_db_case.name,
+            status_db_case.customer.internal_id,
+            status_db_case.priority_human,
+            ", ".join(status_db_case.panels),
+            status_db_case.action or "NA",
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt="psql"))
         if relate:
-            context.invoke(relations, case_id=case.internal_id)
+            context.invoke(relations, case_id=status_db_case.internal_id)
         if samples:
-            sample_ids: List[str] = [link_obj.sample.internal_id for link_obj in case.links]
+            sample_ids: List[str] = [
+                link_obj.sample.internal_id for link_obj in status_db_case.links
+            ]
             context.invoke(sample, sample_ids=sample_ids, cases=False)
         if analyses:
-            context.invoke(analysis, case_id=case.internal_id)
+            context.invoke(analysis, case_id=status_db_case.internal_id)
 
 
 @get.command("flow-cell")

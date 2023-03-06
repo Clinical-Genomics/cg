@@ -79,12 +79,12 @@ class MicrobialSubmitter(Submitter):
 
         sample_objs = []
 
-        customer_id: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_samples = []
 
         with self.status.session.no_autoflush:
             for sample_data in items:
-                case: Family = self.status.find_family(customer=customer_id, name=ticket_id)
+                case: Family = self.status.find_family(customer=customer, name=ticket_id)
 
                 if not case:
                     case = self.status.add_case(
@@ -94,7 +94,7 @@ class MicrobialSubmitter(Submitter):
                         panels=None,
                         ticket=ticket_id,
                     )
-                    case.customer = customer_id
+                    case.customer = customer
                     self.status.add_commit(case)
 
                 application_tag = sample_data["application"]
@@ -123,7 +123,7 @@ class MicrobialSubmitter(Submitter):
                     original_ticket=ticket_id,
                     priority=sample_data["priority"],
                     application_version=application_version,
-                    customer=customer_id,
+                    customer=customer,
                     organism=organism,
                     reference_genome=sample_data["reference_genome"],
                 )

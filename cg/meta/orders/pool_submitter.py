@@ -109,7 +109,7 @@ class PoolSubmitter(Submitter):
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Pool]:
         """Store pools in the status database."""
-        customer_id: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_pools: List[Pool] = []
         new_samples: List[Sample] = []
         for pool in items:
@@ -119,7 +119,7 @@ class PoolSubmitter(Submitter):
                 )
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
-            case: Family = self.status.find_family(customer=customer_id, name=case_name)
+            case: Family = self.status.find_family(customer=customer, name=case_name)
             if not case:
                 data_analysis: Pipeline = Pipeline(pool["data_analysis"])
                 data_delivery: DataDelivery = DataDelivery(pool["data_delivery"])
@@ -131,12 +131,12 @@ class PoolSubmitter(Submitter):
                     priority=priority,
                     ticket=ticket_id,
                 )
-                case.customer = customer_id
+                case.customer = customer
                 self.status.add_commit(case)
 
             new_pool: Pool = self.status.add_pool(
                 application_version=application_version,
-                customer=customer_id,
+                customer=customer,
                 name=pool["name"],
                 order=order,
                 ordered=ordered,
@@ -155,7 +155,7 @@ class PoolSubmitter(Submitter):
                     original_ticket=ticket_id,
                     priority=priority,
                     application_version=application_version,
-                    customer=customer_id,
+                    customer=customer,
                     no_invoice=True,
                 )
                 new_samples.append(new_sample)

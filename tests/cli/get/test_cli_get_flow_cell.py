@@ -13,7 +13,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_get_flow_cell_bad_flow_cell(cli_runner: CliRunner, base_context: CGConfig):
-    """Test to get a flow cell using a non-existing flow cell."""
+    """Test that trying to get a flow cell using a non-existing flow cell fails."""
     # GIVEN an empty database
 
     # WHEN getting a flow cell
