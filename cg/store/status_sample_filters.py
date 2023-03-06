@@ -84,7 +84,7 @@ def get_samples_do_not_invoice(samples: Query, **kwargs) -> Query:
 
 def get_samples_by_customer_id(samples: Query, customer_id: str, **kwargs) -> Query:
     """Get samples by customer id."""
-    return samples.filter(Sample.customer_id == customer_id)
+    return samples.filter(Sample.customer_id.in_(customer_id))
 
 
 def get_samples_by_customer_name(samples: Query, customer_name: str, **kwargs) -> Query:

@@ -229,7 +229,7 @@ def samples():
         customer_objs: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples_q = db.samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
+        samples_q = db.get_all_samples(enquiry=request.args.get("enquiry"), customers=customer_objs)
     limit = int(request.args.get("limit", 50))
     data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
     return jsonify(samples=data, total=samples_q.count())
@@ -239,7 +239,7 @@ def samples():
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
     order_customer = db.customer(request.args.get("customer"))
-    samples_q = db.samples(
+    samples_q = db.get_all_samples(
         enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
     limit = int(request.args.get("limit", 50))

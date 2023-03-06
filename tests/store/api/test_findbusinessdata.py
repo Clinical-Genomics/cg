@@ -8,7 +8,15 @@ from sqlalchemy.orm import Query
 from cg.constants import FlowCellStatus
 from cg.store import Store
 from cg.constants.indexes import ListIndexes
-from cg.store.models import Application, ApplicationVersion, Flowcell, FamilySample, Family, Sample
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Flowcell,
+    FamilySample,
+    Family,
+    Sample,
+    Invoice,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -471,8 +479,14 @@ def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpe
     # GIVEN a database with a pool and a sample
     pool = helpers.ensure_pool(store=store, name="pool_1")
     sample = helpers.add_sample(store=store, name="sample_1")
+
     # AND an invoice with the pool and sample
-    invoice = helpers.ensure_invoice(store=store, pools=[pool], samples=[sample])
+    invoice: Invoice = helpers.ensure_invoice(store=store, pools=[pool], samples=[sample])
+
+    # ASSERT that there is an invoice with a pool and a sample
+    assert len(invoice.pools) == 1
+    assert len(invoice.samples) == 1
+
     # WHEN fetching all pools and samples for the invoice
     records = store.get_all_pools_and_samples_for_invoice_by_invoice_id(invoice_id=invoice.id)
     # THEN the pool and sample should be returned

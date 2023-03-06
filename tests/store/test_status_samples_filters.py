@@ -42,7 +42,7 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     )
 
     # GIVEN a sample query
-    samples: Query = store.samples()
+    samples: Query = store._get_sample_query()
 
     # WHEN retrieving the Loqusdb uploaded samples
     uploaded_samples = get_samples_with_loqusdb_id(samples=samples)
@@ -63,7 +63,7 @@ def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id,
     sample_store.relate_sample(family=case, sample=sample_uploaded, status=PhenotypeStatus.UNKNOWN)
 
     # GIVEN a sample query
-    samples: Query = store.samples()
+    samples: Query = store._get_sample_query()
 
     # WHEN retrieving the Loqusdb not uploaded samples
     not_uploaded_samples = get_samples_without_loqusdb_id(samples=samples)
@@ -106,7 +106,7 @@ def test_filter_samples_is_delivered(
     helpers.add_sample(base_store, delivered_at=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a cases Query
     samples: Query = base_store._get_sample_query()
@@ -132,18 +132,15 @@ def test_filter_samples_is_not_delivered(
     helpers.add_sample(base_store, delivered_at=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not delivered samples
-    samples: Query = get_samples_is_not_delivered(samples=samples)
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
+    samples: List[Sample] = get_samples_is_not_delivered(samples=samples)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1
+    assert samples and len(samples) == 1
 
 
 def test_filter_get_samples_by_invoice_id(base_store: Store, helpers: StoreHelpers, invoice_id=5):
@@ -154,16 +151,13 @@ def test_filter_get_samples_by_invoice_id(base_store: Store, helpers: StoreHelpe
     helpers.add_sample(base_store, invoice_id=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting samples by invoice_id
     samples: Query = get_samples_by_invoice_id(samples=samples, invoice_id=invoice_id)
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
     assert samples.all() and len(samples.all()) == 1
@@ -177,7 +171,7 @@ def test_filter_samples_without_invoice_id(base_store: Store, helpers: StoreHelp
     helpers.add_sample(base_store, invoice_id=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -200,7 +194,7 @@ def test_filter_samples_down_sampled(base_store: Store, helpers: StoreHelpers, d
     helpers.add_sample(base_store, downsampled_to=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -225,7 +219,7 @@ def test_filter_samples_not_down_sampled(
     helpers.add_sample(base_store, downsampled_to=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -248,7 +242,7 @@ def test_filter_samples_is_sequenced(base_store: Store, helpers: StoreHelpers):
     helpers.add_sample(base_store, sequenced_at=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -271,7 +265,7 @@ def test_filter_samples_is_not_sequenced(base_store: Store, helpers: StoreHelper
     helpers.add_sample(base_store, sequenced_at=datetime.now())
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -294,7 +288,7 @@ def test_filter_samples_do_invoice(base_store: Store, helpers: StoreHelpers):
     helpers.add_sample(base_store, no_invoice=True)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -317,7 +311,7 @@ def test_filter_samples_do_not_invoice(base_store: Store, helpers: StoreHelpers)
     helpers.add_sample(base_store, no_invoice=False)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -340,7 +334,7 @@ def test_filter_samples_is_delivered(base_store: Store, helpers: StoreHelpers):
     helpers.add_sample(base_store, delivered_at=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -363,7 +357,7 @@ def test_filter_samples_is_not_delivered(base_store: Store, helpers: StoreHelper
     helpers.add_sample(base_store, delivered_at=datetime.now())
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -386,7 +380,7 @@ def test_filter_samples_is_received(base_store: Store, helpers: StoreHelpers):
     helpers.add_sample(base_store, received_at=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -409,7 +403,7 @@ def test_filter_samples_is_not_received(base_store: Store, helpers: StoreHelpers
     helpers.add_sample(base_store, received_at=datetime.now())
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -429,7 +423,7 @@ def test_filter_samples_is_prepared(base_store: Store, helpers: StoreHelpers):
     helpers.add_sample(base_store, prepared_at=None)
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -452,7 +446,7 @@ def test_filter_samples_is_not_prepared(base_store: Store, helpers: StoreHelpers
     helpers.add_sample(base_store, prepared_at=datetime.now())
 
     # Assert that there are two samples in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -474,7 +468,7 @@ def test_filter_get_samples_by_sample_id(
     helpers.add_sample(base_store, internal_id=None)
 
     # Assert that there is one sample in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -497,7 +491,7 @@ def test_filter_get_samples_by_entry_id(base_store: Store, helpers: StoreHelpers
     helpers.add_sample(base_store, id=None)
 
     # Assert that there is one sample in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()
@@ -525,7 +519,7 @@ def test_filter_get_samples_with_type(
     helpers.add_sample(base_store, is_tumour=False, name="test_normal")
 
     # Assert that there is one sample in the database
-    assert base_store.samples().count() == 2
+    assert len(base_store.get_all_samples()) == 2
 
     # GIVEN a sample Query
     samples: Query = base_store._get_sample_query()

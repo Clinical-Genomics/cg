@@ -453,13 +453,16 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def samples(self, *, customers: Optional[List[Customer]] = None, enquiry: str = None) -> Query:
+    def get_all_samples(
+        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
+    ) -> List[Sample]:
+        # 1.
         records = self.Sample.query
-
+        # 2.
         if customers:
             customer_ids = [customer.id for customer in customers]
             records = records.filter(Sample.customer_id.in_(customer_ids))
-
+        # 3.
         records = (
             records.filter(
                 or_(
@@ -470,7 +473,7 @@ class FindBusinessDataHandler(BaseHandler):
             if enquiry
             else records
         )
-        return records.order_by(Sample.created_at.desc())
+        return records.order_by(Sample.created_at.desc()).all()
 
     def samples_by_subject_id(
         self, customer_id: str, subject_id: str, is_tumour: bool = None

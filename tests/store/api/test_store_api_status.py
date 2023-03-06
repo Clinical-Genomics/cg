@@ -13,7 +13,7 @@ def test_samples_to_receive_external(sample_store, helpers):
     """Test fetching external sample."""
     store = sample_store
     # GIVEN a store with a mixture of samples
-    assert store.samples().count() > 1
+    assert len(store.get_all_samples()) > 1
 
     # WHEN finding external samples to receive
     external_query: List[Sample] = store.get_all_samples_to_receive(external=True)
@@ -32,8 +32,8 @@ def test_samples_to_receive_external(sample_store, helpers):
 
 def test_get_all_samples_to_receive_internal(sample_store):
     # GIVEN a store with samples in a mix of states
-    assert sample_store.samples().count() > 1
-    assert len([sample for sample in sample_store.samples() if sample.received_at]) > 1
+    assert len(sample_store.get_all_samples()) > 1
+    assert len([sample for sample in sample_store.get_all_samples() if sample.received_at]) > 1
 
     # WHEN finding which samples are in queue to receive
     assert len(sample_store.get_all_samples_to_receive()) == 1
@@ -44,8 +44,8 @@ def test_get_all_samples_to_receive_internal(sample_store):
 
 def test_samples_to_sequence(sample_store):
     # GIVEN a store with sample in a mix of states
-    assert sample_store.samples().count() > 1
-    assert len([sample for sample in sample_store.samples() if sample.sequenced_at]) >= 1
+    assert len(sample_store.get_all_samples()) > 1
+    assert len([sample for sample in sample_store.get_all_samples() if sample.sequenced_at]) >= 1
 
     # WHEN finding which samples are in queue to be sequenced
     sequence_samples: List[Sample] = sample_store.get_all_samples_to_sequence()
