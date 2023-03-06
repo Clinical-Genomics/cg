@@ -27,7 +27,7 @@ def get(context: click.Context, identifier: Optional[str]):
             context.invoke(sample, sample_ids=[identifier])
         elif re.match(r"^[a-z]*$", identifier):
             # try case information
-            context.invoke(family, case_ids=[identifier])
+            context.invoke(case, case_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
             context.invoke(flowcell, flow_cell_id=identifier)
@@ -64,7 +64,7 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
             case_ids: List[str] = [
                 link_obj.family.internal_id for link_obj in existing_sample.links
             ]
-            context.invoke(family, case_ids=case_ids, samples=False)
+            context.invoke(case, case_ids=case_ids, samples=False)
         if not hide_flow_cell:
             for flow_cell in existing_sample.flowcells:
                 LOG.debug(f"Get info on flow cell: {flow_cell.name}")
@@ -122,7 +122,7 @@ def relations(context: CGConfig, case_id: str):
 @click.option("--analyses/--no-analyses", default=True, help="display related analyses")
 @click.argument("case-ids", nargs=-1)
 @click.pass_context
-def family(
+def case(
     context: click.Context,
     customer_id: str,
     name: bool,
