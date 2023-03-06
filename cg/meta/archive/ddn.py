@@ -24,6 +24,11 @@ class DDNApi:
         self.refresh_token: str
         self.token_expiration: datetime
         self._set_auth_tokens()
+        self.headers: Dict[str, str] = {
+            "Content-Type": "application/json",
+            "accept": "application/json",
+        }
+        self.ostype: str = "Unix/MacOS"
 
     def _set_auth_tokens(self) -> None:
         """Retrieves and sets auth and refresh token from the REST-API."""
@@ -50,7 +55,7 @@ class DDNApi:
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token/refresh"),
-            headers={"Content-Type": "application/json", "accept": "application/json"},
+            headers=self.headers,
             json={
                 "refresh": self.refresh_token,
             },
@@ -76,17 +81,18 @@ class DDNApi:
             "pathInfo": self._format_paths_archive(
                 sources_and_destinations=sources_and_destinations
             ),
-            "osType": "linux",
-            "createDirectory": "true",
+            "osType": self.ostype,
+            "createFolder": True,
             "metadataList": [],
         }
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="files/archive"),
-            headers=self.auth_header,
+            headers=dict(self.headers, **self.auth_header),
             json=payload,
         )
-        return response.ok
+        print(payload)
+        return response
 
     def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Retrieves all folders provided, to their corresponding destination, as given by the
@@ -95,13 +101,13 @@ class DDNApi:
             "pathInfo": self._format_paths_retrieve(
                 sources_and_destinations=sources_and_destinations
             ),
-            "osType": "linux",
-            "createDirectory": "true",
+            "osType": self.ostype,
+            "createFolder": True,
         }
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="files/retrieve"),
-            headers=self.auth_header,
+            headers=dict(self.headers, **self.auth_header),
             json=payload,
         )
         return response.ok
