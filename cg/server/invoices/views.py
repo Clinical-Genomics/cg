@@ -133,9 +133,9 @@ def new(record_type):
     customer_obj = db.customer(customer_id)
 
     if record_type == "Sample":
-        records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
+        records, customers_to_invoice = db.get_all_samples_to_invoice(customer=customer_obj)
     elif record_type == "Pool":
-        records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
+        records, customers_to_invoice = db.get_all_pools_to_invoice(customer=customer_obj)
     return render_template(
         "invoices/new.html",
         customers_to_invoice=customers_to_invoice,

@@ -220,11 +220,11 @@ def samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(http.HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
-        samples_q = db.samples_to_receive()
+        samples_q = db.get_all_samples_to_receive()
     elif request.args.get("status") == "labprep":
-        samples_q = db.samples_to_prepare()
+        samples_q = db.get_all_samples_to_prepare()
     elif request.args.get("status") == "sequencing":
-        samples_q = db.samples_to_sequence()
+        samples_q = db.get_all_samples_to_sequence()
     else:
         customer_objs: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers

@@ -77,7 +77,7 @@ def test_get_sample_by_entry_id(sample_store: Store):
     """Test retrieving sample by entry id."""
     # GIVEN a store containing samples
     # WHEN retrieving a sample by its entry id
-    sample: Sample = sample_store.get_sample_by_id(entry_id=1)
+    sample: Sample = sample_store.get_first_sample_by_entry_id(entry_id=1)
 
     # THEN a sample should be returned
     assert sample

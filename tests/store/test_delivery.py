@@ -1,15 +1,15 @@
 """Tests for the samples to deliver api"""
 
 import datetime as dt
-from typing import Set
+from typing import Set, List
 
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
-from cg.store import models
+from cg.store.models import Family, Sample
 
 
-def test_get_delivery_arguments(case_obj: models.Family):
+def test_get_delivery_arguments(case_obj: Family):
     """Testing the parsing of delivery arguments from the case data_delivery."""
     # GIVEN a DataDelivery
     case_obj.data_delivery = DataDelivery.FASTQ_ANALYSIS_SCOUT
@@ -31,10 +31,10 @@ def test_list_samples_to_deliver(base_store, helpers):
     assert store.samples().count() == 1
 
     # WHEN asking for samples to deliver
-    samples_to_deliver = store.samples_to_deliver()
+    samples_to_deliver: List[Sample] = store.get_all_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
-    assert samples_to_deliver.count() == 1
-    assert isinstance(samples_to_deliver.first().sequenced_at, dt.datetime)
+    assert len(samples_to_deliver) == 1
+    assert isinstance(samples_to_deliver[0].sequenced_at, dt.datetime)
 
 
 def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
@@ -51,7 +51,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     assert store.samples().count() == 2
 
     # WHEN asking for samples to deliver
-    samples_to_deliver = store.samples_to_deliver()
+    samples_to_deliver: List[Sample] = store.get_all_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
-    assert samples_to_deliver.count() == 1
-    assert isinstance(samples_to_deliver.first().sequenced_at, dt.datetime)
+    assert len(samples_to_deliver) == 1
+    assert isinstance(samples_to_deliver[0].sequenced_at, dt.datetime)
