@@ -94,14 +94,14 @@ class FindBasicDataHandler(BaseHandler):
         return self.Customer.query
 
     def _get_collaboration_query(self) -> Query:
-        """Returns a collaboration query"""
+        """Returns a collaboration query."""
         return self.Collaboration.query
 
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
         return apply_collaboration_version_filter(
             collaborations=self._get_collaboration_query(),
-            functions=[CollaborationFilters.get_collaboration_by_internal_id],
+            filter_functions=[CollaborationFilters.FILTER_BY_ID],
             internal_id=internal_id,
         ).first()
 

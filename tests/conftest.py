@@ -986,7 +986,7 @@ def fixture_analysis_store_single(
 @pytest.fixture(name="collaboration_id")
 def fixture_collaboration_id() -> str:
     """Return a default customer group."""
-    return "hospital_collab"
+    return "hospital_collaboration"
 
 
 @pytest.fixture(name="customer_production")
@@ -1113,7 +1113,7 @@ def fixture_base_store(
     store: Store,
 ) -> Store:
     """Setup and example store."""
-    collaboration = store.add_collaboration(collaboration_id, collaboration_id)
+    collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.add_commit(collaboration)
     customers = [

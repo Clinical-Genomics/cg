@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 from cg.store.models import Collaboration
 
 
-def get_collaboration_by_internal_id(collaborations: Query, internal_id: str, **kwargs) -> Query:
+def filter_collaboration_by_internal_id(collaborations: Query, internal_id: str, **kwargs) -> Query:
     """Return collaboration by internal_id."""
     return collaborations.filter(Collaboration.internal_id == internal_id)
 
@@ -14,16 +14,14 @@ def get_collaboration_by_internal_id(collaborations: Query, internal_id: str, **
 class CollaborationFilters(Enum):
     """Define Collaboration filter functions."""
 
-    get_collaboration_by_internal_id: Callable = get_collaboration_by_internal_id
+    FILTER_BY_ID: Callable = filter_collaboration_by_internal_id
 
 
 def apply_collaboration_version_filter(
-    collaborations: Query,
-    functions: List[Callable],
-    internal_id: Optional[str] = None,
+    collaborations: Query, filter_functions: List[Callable], internal_id: Optional[str] = None
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for function in functions:
+    for function in filter_functions:
         collaborations: Query = function(
             collaborations=collaborations,
             internal_id=internal_id,

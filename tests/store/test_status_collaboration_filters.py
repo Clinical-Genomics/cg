@@ -1,22 +1,22 @@
 from cg.store import Store
 from cg.store.models import Collaboration
-from cg.store.status_collaboration_filters import get_collaboration_by_internal_id
+from cg.store.status_collaboration_filters import filter_collaboration_by_internal_id
 
 
 def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: str):
-    """Test getting collaboration by internal_id."""
+    """Test getting collaboration by internal id."""
     # GIVEN a store with a collaboration
 
     # WHEN retrieving the collaboration
-    collaboration: Collaboration = get_collaboration_by_internal_id(
+    collaboration: Collaboration = filter_collaboration_by_internal_id(
         collaborations=base_store._get_collaboration_query(),
         internal_id=collaboration_id,
     ).first()
 
     # THEN collaboration should be returned
-    assert collaboration
+    assert isinstance(collaboration, Collaboration)
 
-    # THEN the internal_id should match the fixture
+    # THEN the internal id should match the fixture
     assert collaboration.internal_id == collaboration_id
 
 
@@ -25,9 +25,9 @@ def test_get_collaboration_by_internal_id_wrong_name(base_store: Store, collabor
     # GIVEN a store a collaboration
 
     # WHEN attempting to retrieve a non-existing collaboration
-    collaboration: Collaboration = get_collaboration_by_internal_id(
+    collaboration: Collaboration = filter_collaboration_by_internal_id(
         collaborations=base_store._get_collaboration_query(),
-        internal_id="missing_colab",
+        internal_id="missing_collaboration",
     ).first()
 
     # THEN no collaboration should be returned
