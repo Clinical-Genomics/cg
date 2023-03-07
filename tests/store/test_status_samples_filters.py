@@ -25,6 +25,7 @@ from cg.store.status_sample_filters import (
     get_samples_is_not_prepared,
     get_samples_is_received,
     get_samples_is_not_received,
+    get_samples_by_name,
 )
 from datetime import datetime
 
@@ -526,6 +527,34 @@ def test_filter_get_samples_with_type(
 
     # WHEN getting a sample by type
     samples: Query = get_samples_with_type(samples=samples, tissue_type=tissue_type)
+
+    # ASSERT that samples is a query
+    assert isinstance(samples, Query)
+
+    # THEN samples should contain the test sample
+    assert samples.all() and len(samples.all()) == 1
+
+
+def test_filter_get_samples_by_name(
+    base_store: Store,
+    helpers: StoreHelpers,
+    is_tumour: bool = True,
+    tissue_type: SampleType = SampleType.TUMOR,
+):
+    """Test that a sample is returned when there is a sample with the given type."""
+
+    # GIVEN a sample
+    helpers.add_sample(base_store, is_tumour=is_tumour, name="test_tumour")
+    helpers.add_sample(base_store, is_tumour=False, name="test_normal")
+
+    # Assert that there is one sample in the database
+    assert len(base_store.get_all_samples()) == 2
+
+    # GIVEN a sample Query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting a sample by type
+    samples: Query = get_samples_by_name(samples=samples, name="test_tumour")
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)

@@ -11,6 +11,11 @@ def get_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Qu
     return samples.filter_by(internal_id=internal_id)
 
 
+def get_samples_by_name(name: str, samples: Query, **kwargs) -> Query:
+    """Return sample with sample name."""
+    return samples.filter_by(name=name)
+
+
 def get_samples_with_type(samples: Query, tissue_type: SampleType, **kwargs) -> Query:
     """Return samples with sample type."""
     is_tumour: bool = tissue_type == SampleType.TUMOR
@@ -159,3 +164,4 @@ class SampleFilters(Enum):
     get_samples_is_not_received: Callable = get_samples_is_not_received
     get_samples_is_prepared: Callable = get_samples_is_prepared
     get_samples_is_not_prepared: Callable = get_samples_is_not_prepared
+    get_samples_by_name: Callable = get_samples_by_name

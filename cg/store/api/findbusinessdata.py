@@ -456,13 +456,6 @@ class FindBusinessDataHandler(BaseHandler):
     def get_all_samples(self) -> List[Sample]:
         return self.Sample.query.order_by(Sample.created_at.desc()).all()
 
-    def get_samples_by_customer_id(
-        self, customers: Optional[List[Customer]] = None
-    ) -> List[Sample]:
-        customer_ids = [customer.id for customer in customers]
-        records = self.Sample.query.filter(Sample.customer_id.in_(customer_ids))
-        return records.order_by(Sample.created_at.desc()).all()
-
     def get_samples_by_enquiry(self, enquiry: str) -> List[Sample]:
         records = self.Sample.query.filter(
             or_(
@@ -470,6 +463,9 @@ class FindBusinessDataHandler(BaseHandler):
                 Sample.internal_id.like(f"%{enquiry}%"),
             )
         )
+
+        records = self.Sample.query
+
         return records.order_by(Sample.created_at.desc()).all()
 
     def samples_by_subject_id(
