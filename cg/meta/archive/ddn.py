@@ -35,7 +35,7 @@ class DDNApi:
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token"),
-            headers={"Content-Type": "application/json", "accept": "application/json"},
+            headers=self.headers,
             json={
                 "dbName": self.database_name,
                 "name": self.user,
