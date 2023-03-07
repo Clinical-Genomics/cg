@@ -53,9 +53,9 @@ def apply_application_filter(
 class ApplicationFilters(Enum):
     """Enum with filtering functions for applications."""
 
-    filter_applications_is_external = filter_applications_is_external
-    filter_applications_is_not_external = filter_applications_is_not_external
-    filter_applications_by_tag = filter_applications_by_tag
-    filter_applications_by_prep_category = filter_applications_by_prep_category
-    filter_applications_is_archived = filter_applications_is_archived
-    filter_applications_by_id = filter_applications_by_id
+    FILTER_IS_EXTERNAL = filter_applications_is_external
+    FILTER_IS_NOT_EXTERNAL = filter_applications_is_not_external
+    FILTER_BY_TAG = filter_applications_by_tag
+    FILTER_BY_PREP_CATEGORY = filter_applications_by_prep_category
+    FILTER_IS_ARCHIVED = filter_applications_is_archived
+    FILTER_BY_ID = filter_applications_by_id

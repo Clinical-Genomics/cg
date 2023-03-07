@@ -375,11 +375,11 @@ class FindBusinessDataHandler(BaseHandler):
         invoices = self._get_invoice_query()
         if invoiced:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.filter_invoices_invoiced]
+                invoices=invoices, functions=[InvoiceFilters.FILTER_BY_INVOICED]
             ).all()
         else:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.filter_invoices_not_invoiced]
+                invoices=invoices, functions=[InvoiceFilters.FILTER_BY_NOT_INVOICED]
             ).all()
 
     def get_first_invoice_by_id(self, invoice_id: int) -> Invoice:
@@ -388,7 +388,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_invoice_filter(
             invoices=invoices,
             invoice_id=invoice_id,
-            functions=[InvoiceFilters.filter_invoices_by_invoice_id],
+            functions=[InvoiceFilters.FILTER_BY_INVOICE_ID],
         ).first()
 
     def get_all_pools_and_samples_for_invoice_by_invoice_id(
@@ -397,13 +397,13 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all pools and samples for an invoice."""
         pools = self.Pool.query
         pools = apply_pool_filter(
-            pools=pools, invoice_id=invoice_id, functions=[PoolFilters.filter_pools_by_invoice_id]
+            pools=pools, invoice_id=invoice_id, functions=[PoolFilters.FILTER_BY_INVOICE_ID]
         ).all()
         samples = self.Sample.query
         samples = apply_sample_filter(
             samples=samples,
             invoice_id=invoice_id,
-            functions=[SampleFilters.filter_samples_by_invoice_id],
+            functions=[SampleFilters.FILTER_BY_INVOICE_ID],
         ).all()
         return pools + samples
 
@@ -494,11 +494,11 @@ class FindBusinessDataHandler(BaseHandler):
 
         if is_tumour:
             return apply_sample_filter(
-                samples=samples, functions=[SampleFilters.filter_samples_is_tumour]
+                samples=samples, functions=[SampleFilters.FILTER_IS_TUMOUR]
             ).all()
         else:
             return apply_sample_filter(
-                samples=samples, functions=[SampleFilters.filter_samples_is_not_tumour]
+                samples=samples, functions=[SampleFilters.FILTER_IS_NOT_TUMOUR]
             ).all()
 
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
@@ -514,7 +514,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Get sample by name."""
         samples = self.Sample.query
         return apply_sample_filter(
-            samples=samples, functions=[SampleFilters.filter_samples_by_name], name=name
+            samples=samples, functions=[SampleFilters.FILTER_BY_SAMPLE_NAME], name=name
         ).first()
 
     def _join_sample_family_query(self) -> Query:
@@ -529,7 +529,7 @@ class FindBusinessDataHandler(BaseHandler):
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(
-            functions=[SampleFilters.filter_samples_with_type],
+            functions=[SampleFilters.FILTER_WITH_TYPE],
             samples=samples,
             tissue_type=sample_type,
         )
