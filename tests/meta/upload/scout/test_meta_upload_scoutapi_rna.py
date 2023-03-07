@@ -10,7 +10,8 @@ from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.store import Store, models
+from cg.store.models import Family, Sample
+import cg.store as Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -495,13 +496,11 @@ def test_get_application_prep_category(
     ensure_extra_rna_case_match(another_rna_sample_id, helpers, rna_case_id, rna_store)
     upload_scout_api.status_db = rna_store
 
-    dna_sample: models.Sample = rna_store.get_first_sample_by_internal_id(dna_sample_son_id)
-    another_rna_sample_id: models.Sample = rna_store.get_first_sample_by_internal_id(
-        another_rna_sample_id
-    )
-    all_son_rna_dna_samples: List[models.Sample] = [dna_sample, another_rna_sample_id]
+    dna_sample: Sample = rna_store.get_first_sample_by_internal_id(dna_sample_son_id)
+    another_rna_sample_id: Sample = rna_store.get_first_sample_by_internal_id(another_rna_sample_id)
+    all_son_rna_dna_samples: List[Sample] = [dna_sample, another_rna_sample_id]
 
-    # WHEN running the method to filter a list of models.Sample objects containing RNA and DNA samples connected by subject_id
+    # WHEN running the method to filter a list of Sample objects containing RNA and DNA samples connected by subject_id
     only_son_dna_samples = upload_scout_api._get_application_prep_category(all_son_rna_dna_samples)
 
     # THEN even though an RNA sample is present in the initial query, the output should not contain any RNA samples
@@ -519,7 +518,7 @@ def test_create_rna_dna_sample_case_map(
     """Test that the create_rna_dna_sample_case_map returns a nested dictionary."""
 
     # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
-    rna_case: models.Family = rna_store.families(enquiry=rna_case_id).first()
+    rna_case: Family = rna_store.families(enquiry=rna_case_id).first()
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
     rna_dna_case_map: dict = upload_scout_api.create_rna_dna_sample_case_map(rna_case=rna_case)
@@ -536,8 +535,8 @@ def test_add_rna_sample(
     """Test that for a given RNA case the RNA samples are added to the rna_dna_case_map."""
 
     # GIVEN an RNA case and the associated RNA samples
-    rna_case: models.Family = rna_store.families(enquiry=rna_case_id).first()
-    rna_sample_list: list = rna_store.get_samples_by_enquiry(enquiry="rna")
+    rna_case: Family = rna_store.families(enquiry=rna_case_id).first()
+    rna_sample_list: List[Sample] = rna_store.get_samples_by_enquiry(enquiry="rna")
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
     rna_dna_case_map: dict = upload_scout_api.create_rna_dna_sample_case_map(rna_case=rna_case)
@@ -556,7 +555,7 @@ def test_link_rna_sample_to_dna_sample(
     """Test for a given RNA sample, the associated DNA sample name matches and is present in rna_dna_case_map."""
 
     # GIVEN an RNA sample
-    rna_sample: models.Sample = rna_store.get_first_sample_by_internal_id(rna_sample_son_id)
+    rna_sample: Sample = rna_store.get_first_sample_by_internal_id(rna_sample_son_id)
 
     # WHEN adding the RNA sample to the rna_dna_case_map
     rna_dna_case_map: dict = {}

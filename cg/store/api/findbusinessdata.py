@@ -464,8 +464,6 @@ class FindBusinessDataHandler(BaseHandler):
             )
         )
 
-        records = self.Sample.query
-
         return records.order_by(Sample.created_at.desc()).all()
 
     def samples_by_subject_id(
