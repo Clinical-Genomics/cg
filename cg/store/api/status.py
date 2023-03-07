@@ -166,14 +166,6 @@ class StatusHandler(BaseHandler):
             sample.comment = comment
         self.commit()
 
-    def _get_analysis_case_query(self) -> Query:
-        """Return analysis query."""
-        return self.Analysis.query.join(Analysis.family)
-
-    def _get_case_query(self) -> Query:
-        """Return case query."""
-        return self.query(Family)
-
     def _get_flow_cell_sample_links_query(self) -> Query:
         """Return flow cell query."""
         return self.Flowcell.query.join(Flowcell.samples, Sample.links)
@@ -193,18 +185,16 @@ class StatusHandler(BaseHandler):
             "get_new_cases",
         ]
         return apply_case_filter(
-            functions=csse_filter_functions, cases=self._get_case_query(), date=date_threshold
+            functions=csse_filter_functions,
+            cases=self._get_query(table=Family),
+            date=date_threshold,
         ).all()
-
-    def _get_sample_query(self) -> Query:
-        """Return sample query."""
-        return self.query(Sample)
 
     def get_sample_by_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
         return apply_sample_filter(
             functions=["get_sample_by_entry_id"],
-            samples=self._get_sample_query(),
+            samples=self._get_query(table=Sample),
             entry_id=entry_id,
         ).first()
 
@@ -212,7 +202,7 @@ class StatusHandler(BaseHandler):
         """Return a sample by lims id."""
         return apply_sample_filter(
             functions=["get_sample_by_sample_id"],
-            samples=self._get_sample_query(),
+            samples=self._get_query(table=Sample),
             internal_id=internal_id,
         ).first()
 

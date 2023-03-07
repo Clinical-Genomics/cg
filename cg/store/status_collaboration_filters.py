@@ -14,10 +14,10 @@ def filter_collaboration_by_internal_id(collaborations: Query, internal_id: str,
 class CollaborationFilters(Enum):
     """Define Collaboration filter functions."""
 
-    FILTER_BY_ID: Callable = filter_collaboration_by_internal_id
+    FILTER_BY_INTERNAL_ID: Callable = filter_collaboration_by_internal_id
 
 
-def apply_collaboration_version_filter(
+def apply_collaboration_filter(
     collaborations: Query, filter_functions: List[Callable], internal_id: Optional[str] = None
 ) -> Query:
     """Apply filtering functions and return filtered results."""

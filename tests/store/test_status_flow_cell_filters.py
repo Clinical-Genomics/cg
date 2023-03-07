@@ -72,7 +72,7 @@ def test_get_flow_cell_by_id(base_store: Store, helpers: StoreHelpers, flow_cell
 
     # WHEN getting flow cell
     returned_flow_cell: Flowcell = get_flow_cell_by_id(
-        flow_cells=base_store._get_flow_cell_query(), flow_cell_id=flow_cell_id
+        flow_cells=base_store._get_query(table=Flowcell), flow_cell_id=flow_cell_id
     )
 
     # THEN returned flow cell should be the original flow cell
@@ -93,7 +93,7 @@ def test_get_flow_cell_by_id_and_by_enquiry(
 
     # WHEN getting flow cell
     returned_flow_cell: List[Flowcell] = get_flow_cell_by_id_and_by_enquiry(
-        flow_cells=base_store._get_flow_cell_query(), flow_cell_id=flow_cell_id[:4]
+        flow_cells=base_store._get_query(table=Flowcell), flow_cell_id=flow_cell_id[:4]
     )
 
     # THEN a list of flow cells should be returned
@@ -112,7 +112,7 @@ def test_get_flow_cells_with_statuses(base_store: Store, helpers: StoreHelpers, 
 
     # WHEN getting flow cell
     returned_flow_cell_query: Query = get_flow_cells_with_statuses(
-        flow_cells=base_store._get_flow_cell_query(),
+        flow_cells=base_store._get_query(table=Flowcell),
         flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.PROCESSING],
     )
 

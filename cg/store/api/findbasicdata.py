@@ -21,7 +21,7 @@ from cg.store.status_bed_filters import apply_bed_filter, BedFilters
 from cg.store.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
 from cg.store.status_collaboration_filters import (
     CollaborationFilters,
-    apply_collaboration_version_filter,
+    apply_collaboration_filter,
 )
 
 
@@ -87,15 +87,11 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch all customers."""
         return self.Customer.query
 
-    def _get_collaboration_query(self) -> Query:
-        """Returns a collaboration query."""
-        return self.Collaboration.query
-
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
-        return apply_collaboration_version_filter(
-            collaborations=self._get_collaboration_query(),
-            filter_functions=[CollaborationFilters.FILTER_BY_ID],
+        return apply_collaboration_filter(
+            collaborations=self._get_query(table=Collaboration),
+            filter_functions=[CollaborationFilters.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
 

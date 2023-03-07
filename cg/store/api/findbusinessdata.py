@@ -168,10 +168,6 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch a family by internal id from the database."""
         return self.Family.query.filter_by(internal_id=internal_id).first()
 
-    def _get_case_sample_query(self) -> Query:
-        """Return case sample query."""
-        return self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
@@ -271,10 +267,6 @@ class FindBusinessDataHandler(BaseHandler):
         """Find samples within a customer."""
         return self.Sample.query.filter_by(customer=customer, name=name)
 
-    def _get_flow_cell_query(self) -> Query:
-        """Return flow cell query."""
-        return self.Flowcell.query
-
     def _get_flow_cell_sample_links_query(self) -> Query:
         """Return flow cell query."""
         return self.Flowcell.query.join(Flowcell.samples, Sample.links)
@@ -282,7 +274,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
         """Return flow cell."""
         return apply_flow_cell_filter(
-            flow_cells=self._get_flow_cell_query(),
+            flow_cells=self._get_query(table=Flowcell),
             flow_cell_id=flow_cell_id,
             functions=[FlowCellFilters.get_flow_cell_by_id],
         )
@@ -290,19 +282,19 @@ class FindBusinessDataHandler(BaseHandler):
     def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Query:
         """Return flow cell enquiry."""
         return apply_flow_cell_filter(
-            flow_cells=self._get_flow_cell_query(),
+            flow_cells=self._get_query(table=Flowcell),
             flow_cell_id=flow_cell_id_enquiry,
             functions=[FlowCellFilters.get_flow_cell_by_id_and_by_enquiry],
         )
 
     def get_flow_cells(self) -> List[Flowcell]:
         """Return all flow cells."""
-        return self._get_flow_cell_query()
+        return self._get_query(table=Flowcell)
 
     def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
         """Return flow cells with supplied statuses."""
         return apply_flow_cell_filter(
-            flow_cells=self._get_flow_cell_query(),
+            flow_cells=self._get_query(table=Flowcell),
             flow_cell_statuses=flow_cell_statuses,
             functions=[FlowCellFilters.get_flow_cells_with_statuses],
         )
@@ -316,7 +308,7 @@ class FindBusinessDataHandler(BaseHandler):
             FlowCellFilters.get_flow_cell_by_id_and_by_enquiry,
         ]
         flow_cells: List[Flowcell] = apply_flow_cell_filter(
-            flow_cells=self._get_flow_cell_query(),
+            flow_cells=self._get_query(table=Flowcell),
             flow_cell_id=flow_cell_id_enquiry,
             flow_cell_statuses=flow_cell_statuses,
             functions=filter_functions,
@@ -474,10 +466,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_sample_by_name(self, name: str) -> Sample:
         return self.Sample.query.filter(Sample.name == name).first()
-
-    def _get_sample_case_query(self) -> Query:
-        """Return a sample case relationship query."""
-        return self.Sample.query.join(Family.links, FamilySample.sample)
 
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Get samples given a tissue type."""

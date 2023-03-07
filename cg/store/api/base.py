@@ -1,6 +1,8 @@
 """All models aggregated in a base class"""
-from alchy import Query
-from attr import dataclass
+from typing import Any, Type
+
+from alchy import Query, ModelBase
+from dataclasses import dataclass
 
 from cg.store.models import (
     Analysis,
@@ -15,7 +17,6 @@ from cg.store.models import (
     FamilySample,
     Flowcell,
     Invoice,
-    Model,
     Organism,
     Panel,
     Pool,
@@ -28,26 +29,26 @@ from cg.store.models import (
 class BaseHandler:
     """All models in one base class"""
 
-    Analysis = Analysis
-    Application = Application
-    ApplicationVersion = ApplicationVersion
-    Bed = Bed
-    BedVersion = BedVersion
-    Collaboration = Collaboration
-    Customer = Customer
-    Delivery = Delivery
-    Family = Family
-    FamilySample = FamilySample
-    Flowcell = Flowcell
-    Invoice = Invoice
-    Organism = Organism
-    Panel = Panel
-    Pool = Pool
-    Sample = Sample
-    User = User
+    Analysis: Type[ModelBase] = Analysis
+    Application: Type[ModelBase] = Application
+    ApplicationVersion: Type[ModelBase] = ApplicationVersion
+    Bed: Type[ModelBase] = Bed
+    BedVersion: Type[ModelBase] = BedVersion
+    Collaboration: Type[ModelBase] = Collaboration
+    Customer: Type[ModelBase] = Customer
+    Delivery: Type[ModelBase] = Delivery
+    Family: Type[ModelBase] = Family
+    FamilySample: Type[ModelBase] = FamilySample
+    Flowcell: Type[ModelBase] = Flowcell
+    Invoice: Type[ModelBase] = Invoice
+    Organism: Type[ModelBase] = Organism
+    Panel: Type[ModelBase] = Panel
+    Pool: Type[ModelBase] = Pool
+    Sample: Type[ModelBase] = Sample
+    User: Type[ModelBase] = User
 
     @staticmethod
-    def _get_query(table: Model):
+    def _get_query(table: Any) -> Query:
         return table.query
 
     def samples_to_receive(self, external=False) -> Query:
@@ -119,3 +120,15 @@ class BaseHandler:
         return self._get_query(table=Family).join(
             Family.links, FamilySample.sample, Family.customer
         )
+
+    def _get_analysis_case_query(self) -> Query:
+        """Return analysis query."""
+        return self._get_query(table=Analysis).join(Analysis.family)
+
+    def _get_case_sample_query(self) -> Query:
+        """Return case sample query."""
+        return self._get_query(table=FamilySample).join(FamilySample.family, FamilySample.sample)
+
+    def _get_sample_case_query(self) -> Query:
+        """Return a sample case relationship query."""
+        return self.Sample.query.join(Family.links, FamilySample.sample)

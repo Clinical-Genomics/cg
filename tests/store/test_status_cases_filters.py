@@ -421,7 +421,7 @@ def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     test_case = helpers.add_case(base_store)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: List[Family] = list(get_inactive_analysis_cases(cases=cases))
@@ -439,7 +439,7 @@ def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: St
     test_case = helpers.add_case(base_store, action=CaseActions.HOLD)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: List[Family] = list(get_inactive_analysis_cases(cases=cases))
@@ -457,7 +457,7 @@ def test_get_inactive_analysis_cases_when_not_completed(base_store: Store, helpe
     helpers.add_case(base_store, action=CaseActions.RUNNING)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: List[Family] = list(get_inactive_analysis_cases(cases=cases))
@@ -473,7 +473,7 @@ def test_get_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     test_case = helpers.add_case(base_store)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: List[Family] = list(get_new_cases(cases=cases, date=timestamp_in_2_weeks))
@@ -493,7 +493,7 @@ def test_get_new_cases_when_too_new(
     helpers.add_case(base_store)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: List[Family] = list(get_new_cases(cases=cases, date=timestamp_yesterday))
