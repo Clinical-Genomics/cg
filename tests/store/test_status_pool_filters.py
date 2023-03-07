@@ -3,14 +3,14 @@ from typing import List
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
 from cg.store.status_pool_filters import (
-    get_pools_is_received,
-    get_pools_is_not_received,
-    get_pools_is_delivered,
-    get_pools_is_not_delivered,
-    get_pools_without_invoice_id,
-    get_pools_do_invoice,
-    get_pools_do_not_invoice,
-    get_pools_by_invoice_id,
+    filter_pools_is_received,
+    filter_pools_is_not_received,
+    filter_pools_is_delivered,
+    filter_pools_is_not_delivered,
+    filter_pools_without_invoice_id,
+    filter_pools_do_invoice,
+    filter_pools_do_not_invoice,
+    filter_pools_by_invoice_id,
 )
 from datetime import datetime
 
@@ -31,7 +31,7 @@ def test_filter_pools_is_delivered(
     pools: Query = base_store._get_pool_query()
 
     # WHEN getting delivered pools
-    pools: Query = get_pools_is_delivered(pools=pools)
+    pools: Query = filter_pools_is_delivered(pools=pools)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
@@ -57,7 +57,7 @@ def test_filter_pools_is_not_delivered(
     pools: Query = base_store._get_pool_query()
 
     # WHEN getting not delivered pools
-    pools: Query = get_pools_is_not_delivered(pools=pools)
+    pools: Query = filter_pools_is_not_delivered(pools=pools)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
@@ -83,7 +83,7 @@ def test_filter_pools_is_received(
     assert base_store._get_pool_query().count() == 2
 
     # WHEN getting received pools
-    pools: Query = get_pools_is_received(pools=pools)
+    pools: Query = filter_pools_is_received(pools=pools)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
@@ -109,7 +109,7 @@ def test_filter_pools_is_not_received(
     assert base_store._get_pool_query().count() == 2
 
     # WHEN getting not received pools
-    pools: Query = get_pools_is_not_received(pools=pools)
+    pools: Query = filter_pools_is_not_received(pools=pools)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
@@ -135,7 +135,7 @@ def test_filter_pools_do_invoice(
     pools: Query = base_store._get_pool_query()
 
     # WHEN getting pools marked for invoicing
-    pools: Query = get_pools_do_invoice(pools=pools)
+    pools: Query = filter_pools_do_invoice(pools=pools)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
@@ -161,7 +161,7 @@ def test_filter_pools_do_not_invoice(
     assert base_store._get_pool_query().count() == 2
 
     # WHEN getting pools marked to skip invoicing
-    pools: Query = get_pools_do_not_invoice(pools=pools)
+    pools: Query = filter_pools_do_not_invoice(pools=pools)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
@@ -184,7 +184,7 @@ def test_filter_pools_by_invoice_id(base_store: Store, helpers: StoreHelpers, in
     assert base_store._get_pool_query().count() == 2
 
     # WHEN getting pools with invoice_id
-    pools: Query = get_pools_by_invoice_id(pools=pools, invoice_id=invoice_id)
+    pools: Query = filter_pools_by_invoice_id(pools=pools, invoice_id=invoice_id)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
@@ -211,7 +211,7 @@ def test_filter_pools_without_invoice_id(
     assert base_store._get_pool_query().count() == 2
 
     # WHEN getting pools without invoice_id
-    pools: Query = get_pools_without_invoice_id(pools=pools)
+    pools: Query = filter_pools_without_invoice_id(pools=pools)
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)

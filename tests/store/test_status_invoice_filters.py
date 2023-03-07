@@ -5,9 +5,9 @@ from cg.store import Store
 from cg.store.models import Invoice
 from tests.store_helpers import StoreHelpers
 from cg.store.status_invoice_filters import (
-    get_invoices_by_invoice_id,
-    get_invoices_invoiced,
-    get_invoices_not_invoiced,
+    filter_invoices_by_invoice_id,
+    filter_invoices_invoiced,
+    filter_invoices_not_invoiced,
 )
 
 
@@ -27,7 +27,7 @@ def test_filter_get_invoices_by_invoice_id(
     invoices: Query = base_store._get_invoice_query()
 
     # WHEN getting invoice by invoice id
-    invoice: Query = get_invoices_by_invoice_id(invoices=invoices, invoice_id=invoice_id[0])
+    invoice: Query = filter_invoices_by_invoice_id(invoices=invoices, invoice_id=invoice_id[0])
 
     # THEN assert that the invoice is a Query
     assert isinstance(invoice, Query)
@@ -50,7 +50,7 @@ def test_filter_get_invoices_invoiced(base_store: Store, helpers: StoreHelpers):
     invoices: Query = base_store._get_invoice_query()
 
     # WHEN getting invoice by invoice id
-    invoice: Query = get_invoices_invoiced(invoices=invoices)
+    invoice: Query = filter_invoices_invoiced(invoices=invoices)
 
     # THEN assert that the invoice is a query
     assert isinstance(invoice, Query)
@@ -73,7 +73,7 @@ def test_filter_get_invoices_not_invoiced(base_store: Store, helpers: StoreHelpe
     invoices: Query = base_store._get_invoice_query()
 
     # WHEN getting invoice by invoice id
-    invoice: Query = get_invoices_not_invoiced(invoices=invoices)
+    invoice: Query = filter_invoices_not_invoiced(invoices=invoices)
 
     # THEN assert that the invoice is a query
     assert isinstance(invoice, Query)

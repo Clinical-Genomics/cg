@@ -44,12 +44,12 @@ class StatusHandler(BaseHandler):
         records = apply_sample_filter(samples=records, functions=sample_filter_functions)
         if external:
             records = apply_application_filter(
-                applications=records, functions=[ApplicationFilters.get_applications_is_external]
+                applications=records, functions=[ApplicationFilters.filter_applications_is_external]
             )
         else:
             records = apply_application_filter(
                 applications=records,
-                functions=[ApplicationFilters.get_applications_is_not_external],
+                functions=[ApplicationFilters.filter_applications_is_not_external],
             )
         return records.order_by(Sample.ordered_at).all()
 
@@ -64,7 +64,7 @@ class StatusHandler(BaseHandler):
         ]
         records = apply_sample_filter(samples=records, functions=sample_filter_functions)
         records = apply_application_filter(
-            applications=records, functions=[ApplicationFilters.get_applications_is_not_external]
+            applications=records, functions=[ApplicationFilters.filter_applications_is_not_external]
         )
 
         return records.order_by(Sample.received_at).all()
@@ -79,7 +79,7 @@ class StatusHandler(BaseHandler):
         ]
         records = apply_sample_filter(samples=records, functions=sample_filter_functions)
         records = apply_application_filter(
-            applications=records, functions=[ApplicationFilters.get_applications_is_not_external]
+            applications=records, functions=[ApplicationFilters.filter_applications_is_not_external]
         )
         return records.order_by(Sample.prepared_at).all()
 
@@ -837,9 +837,9 @@ class StatusHandler(BaseHandler):
         have been marked to skip invoicing."""
         records = self._get_pool_query()
         pool_filter_functions: List[PoolFilters] = [
-            PoolFilters.get_pools_is_delivered,
-            PoolFilters.get_pools_without_invoice_id,
-            PoolFilters.get_pools_do_invoice,
+            PoolFilters.filter_pools_is_delivered,
+            PoolFilters.filter_pools_without_invoice_id,
+            PoolFilters.filter_pools_do_invoice,
         ]
 
         records: Query = apply_pool_filter(
@@ -867,15 +867,15 @@ class StatusHandler(BaseHandler):
     def get_all_pools_to_receive(self) -> List[Pool]:
         """Return all pools that have been not yet been received."""
         return apply_pool_filter(
-            functions=[PoolFilters.get_pools_is_not_received], pools=self._get_pool_query()
+            functions=[PoolFilters.filter_pools_is_not_received], pools=self._get_pool_query()
         ).all()
 
     def get_all_pools_to_deliver(self) -> List[Pool]:
         """Return all pools that are received but have been not yet been delivered."""
         records = self._get_pool_query()
         pool_filter_functions: List[PoolFilters] = [
-            PoolFilters.get_pools_is_received,
-            PoolFilters.get_pools_is_not_delivered,
+            PoolFilters.filter_pools_is_received,
+            PoolFilters.filter_pools_is_not_delivered,
         ]
 
         records: Query = apply_pool_filter(

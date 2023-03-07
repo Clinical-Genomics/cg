@@ -375,11 +375,11 @@ class FindBusinessDataHandler(BaseHandler):
         invoices = self._get_invoice_query()
         if invoiced:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.get_invoices_invoiced]
+                invoices=invoices, functions=[InvoiceFilters.filter_invoices_invoiced]
             ).all()
         else:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.get_invoices_not_invoiced]
+                invoices=invoices, functions=[InvoiceFilters.filter_invoices_not_invoiced]
             ).all()
 
     def get_first_invoice_by_id(self, invoice_id: int) -> Invoice:
@@ -388,7 +388,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_invoice_filter(
             invoices=invoices,
             invoice_id=invoice_id,
-            functions=[InvoiceFilters.get_invoices_by_invoice_id],
+            functions=[InvoiceFilters.filter_invoices_by_invoice_id],
         ).first()
 
     def get_all_pools_and_samples_for_invoice_by_invoice_id(
@@ -397,7 +397,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all pools and samples for an invoice."""
         pools = self.Pool.query
         pools = apply_pool_filter(
-            pools=pools, invoice_id=invoice_id, functions=[PoolFilters.get_pools_by_invoice_id]
+            pools=pools, invoice_id=invoice_id, functions=[PoolFilters.filter_pools_by_invoice_id]
         ).all()
         samples = self.Sample.query
         samples = apply_sample_filter(
