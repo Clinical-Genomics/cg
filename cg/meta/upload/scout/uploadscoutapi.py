@@ -428,12 +428,14 @@ class UploadScoutAPI:
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
 
-        subject_id_samples: Query = self.status_db.samples_by_subject_id(
+        subject_id_samples: List[
+            models.Sample
+        ] = self.status_db.get_samples_by_subject_id_and_is_tumour(
             customer_id=rna_sample.customer.internal_id,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
-        subject_id_dna_samples = self._get_application_prep_category(subject_id_samples.all())
+        subject_id_dna_samples = self._get_application_prep_category(subject_id_samples)
 
         if len(subject_id_dna_samples) != 1:
             raise CgDataError(

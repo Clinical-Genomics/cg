@@ -124,7 +124,7 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
         identifier_name: identifier_value for identifier_name, identifier_value in identifiers
     }
 
-    return list(store.samples_by_ids(**identifier_args))
+    return list(store.get_samples_by_any_id(**identifier_args))
 
 
 def is_locked_attribute_on_sample(key: str, skip_attributes: List[str]) -> bool:

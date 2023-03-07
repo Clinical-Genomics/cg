@@ -88,7 +88,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return the application of a case."""
 
         return (
-            self.family(case_id)
+            self.family(internal_id=case_id)
             .links[ListIndexes.FIRST.value]
             .sample.application_version.application
         )
@@ -403,7 +403,7 @@ class FindBusinessDataHandler(BaseHandler):
         samples = apply_sample_filter(
             samples=samples,
             invoice_id=invoice_id,
-            functions=[SampleFilters.get_samples_by_invoice_id],
+            functions=[SampleFilters.filter_samples_by_invoice_id],
         ).all()
         return pools + samples
 
@@ -444,7 +444,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case."""
 
-        application: Application = self.get_application_by_case(case_id)
+        application: Application = self.get_application_by_case(case_id=case_id)
 
         if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
             raise ValueError(
@@ -454,39 +454,74 @@ class FindBusinessDataHandler(BaseHandler):
         return application.expected_reads
 
     def get_all_samples(self) -> List[Sample]:
+        """Return all samples."""
         return self.Sample.query.order_by(Sample.created_at.desc()).all()
 
     def get_samples_by_enquiry(self, enquiry: str) -> List[Sample]:
-        records = self.Sample.query.filter(
-            or_(
-                Sample.name.like(f"%{enquiry}%"),
-                Sample.internal_id.like(f"%{enquiry}%"),
+        """Return samples by name or internal_id."""
+        records = self.Sample.query
+        samples_by_name = (
+            apply_sample_filter(
+                samples=records, name=enquiry, functions=[SampleFilters.filter_samples_by_name]
             )
+            .order_by(Sample.created_at.desc())
+            .all()
+        )
+        samples_by_internal_id = (
+            apply_sample_filter(
+                samples=records,
+                internal_id=enquiry,
+                functions=[SampleFilters.filter_samples_by_internal_id],
+            )
+            .order_by(Sample.created_at.desc())
+            .all(),
+        )
+        return samples_by_name if samples_by_name else samples_by_internal_id
+
+    def _join_sample_and_customer(self) -> Query:
+        """Join sample and customer."""
+        return self.Sample.query.join(Customer)
+
+    def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
+        """Get samples of customer with given subject_id or subject_id and is_tumour."""
+        samples = self._join_sample_and_customer()
+        filter_functions: List[SampleFilters] = [
+            SampleFilters.filter_samples_by_customer_id,
+            SampleFilters.filter_samples_by_subject_id,
+        ]
+        return apply_sample_filter(
+            samples=samples,
+            customer_id=customer_id,
+            subject_id=subject_id,
+            functions=filter_functions,
+        ).all()
+
+    def get_samples_by_subject_id_and_is_tumour(
+        self, customer_id: str, subject_id: str, is_tumour: bool
+    ) -> List[Sample]:
+        """Get samples of customer with given subject_id and is_tumour."""
+        samples = self._join_sample_and_customer()
+        filter_functions: List[SampleFilters] = [
+            SampleFilters.filter_samples_by_customer_id,
+            SampleFilters.filter_samples_by_subject_id,
+        ]
+        samples = apply_sample_filter(
+            samples=samples,
+            customer_id=customer_id,
+            subject_id=subject_id,
+            functions=filter_functions,
         )
 
-        return records.order_by(Sample.created_at.desc()).all()
-
-    def samples_by_subject_id(
-        self, customer_id: str, subject_id: str, is_tumour: bool = None
-    ) -> Query:
-        """Get samples of customer with given subject_id.
-
-        Args:
-            customer_id  (str):               Internal-id of customer
-            subject_id   (str):               Subject id
-            is_tumour    (bool):              (Optional) match on is_tumour
-        Returns:
-            matching samples (list of Sample)
-        """
-
-        query: Query = self.Sample.query.join(Customer).filter(
-            Customer.internal_id == customer_id, Sample.subject_id == subject_id
-        )
         if is_tumour:
-            query: Query = query.filter(Sample.is_tumour == is_tumour)
-        return query
+            return apply_sample_filter(
+                samples=samples, functions=[SampleFilters.filter_samples_is_tumour]
+            ).all()
+        else:
+            return apply_sample_filter(
+                samples=samples, functions=[SampleFilters.filter_samples_is_not_tumour]
+            ).all()
 
-    def samples_by_ids(self, **identifiers) -> Query:
+    def get_samples_by_any_id(self, **identifiers: dict) -> Query:
         records = self.Sample.query
 
         for identifier_name, identifier_value in identifiers.items():
@@ -496,7 +531,11 @@ class FindBusinessDataHandler(BaseHandler):
         return records.order_by(Sample.internal_id.desc())
 
     def get_sample_by_name(self, name: str) -> Sample:
-        return self.Sample.query.filter(Sample.name == name).first()
+        """Get sample by name."""
+        samples = self.Sample.query
+        return apply_sample_filter(
+            samples=samples, functions=[SampleFilters.filter_samples_by_name], name=name
+        ).first()
 
     def _join_sample_family_query(self) -> Query:
         """Return a sample case relationship query."""
@@ -510,7 +549,7 @@ class FindBusinessDataHandler(BaseHandler):
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(
-            functions=[SampleFilters.get_samples_with_type],
+            functions=[SampleFilters.filter_samples_with_type],
             samples=samples,
             tissue_type=sample_type,
         )

@@ -6,26 +6,27 @@ from cg.store import Store
 from cg.store.models import Sample
 from tests.store_helpers import StoreHelpers
 from cg.store.status_sample_filters import (
-    get_samples_with_loqusdb_id,
-    get_samples_without_loqusdb_id,
-    get_samples_is_delivered,
-    get_samples_is_not_delivered,
-    get_samples_without_invoice_id,
-    get_samples_down_sampled,
-    get_samples_not_down_sampled,
-    get_samples_is_sequenced,
-    get_samples_is_not_sequenced,
-    get_samples_do_invoice,
-    get_samples_do_not_invoice,
-    get_samples_by_invoice_id,
-    get_samples_by_internal_id,
-    get_samples_by_entry_id,
-    get_samples_with_type,
-    get_samples_is_prepared,
-    get_samples_is_not_prepared,
-    get_samples_is_received,
-    get_samples_is_not_received,
-    get_samples_by_name,
+    filter_samples_with_loqusdb_id,
+    filter_samples_without_loqusdb_id,
+    filter_samples_is_delivered,
+    filter_samples_is_not_delivered,
+    filter_samples_without_invoice_id,
+    filter_samples_down_sampled,
+    filter_samples_not_down_sampled,
+    filter_samples_is_sequenced,
+    filter_samples_is_not_sequenced,
+    filter_samples_do_invoice,
+    filter_samples_do_not_invoice,
+    filter_samples_by_invoice_id,
+    filter_samples_by_internal_id,
+    filter_samples_by_entry_id,
+    filter_samples_with_type,
+    filter_samples_is_prepared,
+    filter_samples_is_not_prepared,
+    filter_samples_is_received,
+    filter_samples_is_not_received,
+    filter_samples_by_name,
+    filter_samples_by_subject_id,
 )
 from datetime import datetime
 
@@ -46,7 +47,7 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     samples: Query = store._get_sample_query()
 
     # WHEN retrieving the Loqusdb uploaded samples
-    uploaded_samples = get_samples_with_loqusdb_id(samples=samples)
+    uploaded_samples = filter_samples_with_loqusdb_id(samples=samples)
 
     # THEN the obtained sample should match the expected one
     assert sample in uploaded_samples
@@ -67,7 +68,7 @@ def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id,
     samples: Query = store._get_sample_query()
 
     # WHEN retrieving the Loqusdb not uploaded samples
-    not_uploaded_samples = get_samples_without_loqusdb_id(samples=samples)
+    not_uploaded_samples = filter_samples_without_loqusdb_id(samples=samples)
 
     # THEN the obtained sample should match the expected one
     assert sample in not_uploaded_samples
@@ -113,7 +114,7 @@ def test_filter_samples_is_delivered(
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting delivered samples
-    samples: Query = get_samples_is_delivered(samples=samples)
+    samples: Query = filter_samples_is_delivered(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -138,7 +139,7 @@ def test_filter_samples_is_not_delivered(
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not delivered samples
-    samples: List[Sample] = get_samples_is_not_delivered(samples=samples)
+    samples: List[Sample] = filter_samples_is_not_delivered(samples=samples)
 
     # THEN samples should contain the test sample
     assert samples and len(samples) == 1
@@ -158,7 +159,7 @@ def test_filter_get_samples_by_invoice_id(base_store: Store, helpers: StoreHelpe
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting samples by invoice_id
-    samples: Query = get_samples_by_invoice_id(samples=samples, invoice_id=invoice_id)
+    samples: Query = filter_samples_by_invoice_id(samples=samples, invoice_id=invoice_id)
 
     # THEN samples should contain the test sample
     assert samples.all() and len(samples.all()) == 1
@@ -178,7 +179,7 @@ def test_filter_samples_without_invoice_id(base_store: Store, helpers: StoreHelp
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting samples without invoice_id
-    samples: Query = get_samples_without_invoice_id(samples=samples)
+    samples: Query = filter_samples_without_invoice_id(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -201,7 +202,7 @@ def test_filter_samples_down_sampled(base_store: Store, helpers: StoreHelpers, d
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not samples that are down sampled
-    samples: Query = get_samples_down_sampled(samples=samples)
+    samples: Query = filter_samples_down_sampled(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -226,7 +227,7 @@ def test_filter_samples_not_down_sampled(
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not samples that are not down sampled
-    samples: Query = get_samples_not_down_sampled(samples=samples)
+    samples: Query = filter_samples_not_down_sampled(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -249,7 +250,7 @@ def test_filter_samples_is_sequenced(base_store: Store, helpers: StoreHelpers):
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting sequenced samples
-    samples: Query = get_samples_is_sequenced(samples=samples)
+    samples: Query = filter_samples_is_sequenced(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -272,7 +273,7 @@ def test_filter_samples_is_not_sequenced(base_store: Store, helpers: StoreHelper
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not sequenced samples
-    samples: Query = get_samples_is_not_sequenced(samples=samples)
+    samples: Query = filter_samples_is_not_sequenced(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -295,7 +296,7 @@ def test_filter_samples_do_invoice(base_store: Store, helpers: StoreHelpers):
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting  samples mark to be invoiced
-    samples: Query = get_samples_do_invoice(samples=samples)
+    samples: Query = filter_samples_do_invoice(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -318,7 +319,7 @@ def test_filter_samples_do_not_invoice(base_store: Store, helpers: StoreHelpers)
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting samples that are marked to skip invoicing
-    samples: Query = get_samples_do_not_invoice(samples=samples)
+    samples: Query = filter_samples_do_not_invoice(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -341,7 +342,7 @@ def test_filter_samples_is_delivered(base_store: Store, helpers: StoreHelpers):
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting delivered samples
-    samples: Query = get_samples_is_delivered(samples=samples)
+    samples: Query = filter_samples_is_delivered(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -364,7 +365,7 @@ def test_filter_samples_is_not_delivered(base_store: Store, helpers: StoreHelper
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not delivered samples
-    samples: Query = get_samples_is_not_delivered(samples=samples)
+    samples: Query = filter_samples_is_not_delivered(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -387,7 +388,7 @@ def test_filter_samples_is_received(base_store: Store, helpers: StoreHelpers):
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting received samples
-    samples: Query = get_samples_is_received(samples=samples)
+    samples: Query = filter_samples_is_received(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -410,7 +411,7 @@ def test_filter_samples_is_not_received(base_store: Store, helpers: StoreHelpers
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not received samples
-    samples: Query = get_samples_is_not_received(samples=samples)
+    samples: Query = filter_samples_is_not_received(samples=samples)
 
     # THEN samples should contain the test sample
     assert samples.all() and len(samples.all()) == 1
@@ -430,7 +431,7 @@ def test_filter_samples_is_prepared(base_store: Store, helpers: StoreHelpers):
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting prepared samples
-    samples: Query = get_samples_is_prepared(samples=samples)
+    samples: Query = filter_samples_is_prepared(samples=samples)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -453,7 +454,7 @@ def test_filter_samples_is_not_prepared(base_store: Store, helpers: StoreHelpers
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting not prepared samples
-    samples: Query = get_samples_is_not_prepared(samples=samples)
+    samples: Query = filter_samples_is_not_prepared(samples=samples)
 
     # THEN samples should contain the test sample
     assert samples.all() and len(samples.all()) == 1
@@ -475,7 +476,7 @@ def test_filter_get_samples_by_sample_id(
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting a sample by id
-    samples: Query = get_samples_by_internal_id(samples=samples, internal_id=sample_id)
+    samples: Query = filter_samples_by_internal_id(samples=samples, internal_id=sample_id)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -498,7 +499,7 @@ def test_filter_get_samples_by_entry_id(base_store: Store, helpers: StoreHelpers
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting a sample by id
-    samples: Query = get_samples_by_entry_id(samples=samples, entry_id=entry_id)
+    samples: Query = filter_samples_by_entry_id(samples=samples, entry_id=entry_id)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -526,7 +527,7 @@ def test_filter_get_samples_with_type(
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting a sample by type
-    samples: Query = get_samples_with_type(samples=samples, tissue_type=tissue_type)
+    samples: Query = filter_samples_with_type(samples=samples, tissue_type=tissue_type)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
@@ -539,7 +540,6 @@ def test_filter_get_samples_by_name(
     base_store: Store,
     helpers: StoreHelpers,
     is_tumour: bool = True,
-    tissue_type: SampleType = SampleType.TUMOR,
 ):
     """Test that a sample is returned when there is a sample with the given type."""
 
@@ -554,7 +554,28 @@ def test_filter_get_samples_by_name(
     samples: Query = base_store._get_sample_query()
 
     # WHEN getting a sample by type
-    samples: Query = get_samples_by_name(samples=samples, name="test_tumour")
+    samples: Query = filter_samples_by_name(samples=samples, name="test_tumour")
+
+    # ASSERT that samples is a query
+    assert isinstance(samples, Query)
+
+    # THEN samples should contain the test sample
+    assert samples.all() and len(samples.all()) == 1
+
+
+def test_filter_get_samples_by_subject_id(
+    base_store: Store, helpers: StoreHelpers, subject_id: str = "test_subject_id"
+):
+    """Test that a sample is returned when there is a sample with the given subject id."""
+
+    helpers.add_sample(base_store, subject_id=subject_id)
+    helpers.add_sample(base_store, subject_id=None)
+
+    # GIVEN a sample query
+    samples: Query = base_store._get_sample_query()
+
+    # WHEN getting a sample by subject id
+    samples: Query = filter_samples_by_subject_id(samples=samples, subject_id=subject_id)
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)

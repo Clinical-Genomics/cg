@@ -492,3 +492,98 @@ def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpe
     # THEN the pool and sample should be returned
     assert pool in records
     assert sample in records
+
+
+def test_get_samples_by_subject_id(
+    store: Store,
+    helpers: StoreHelpers,
+    customer_id: str = "cust123",
+    subject_id: str = "test_subject",
+):
+    """Test that samples can be fetched by subject id."""
+    # GIVEN a database with a sample
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_1",
+        name="sample_1",
+        subject_id=subject_id,
+        is_tumour=True,
+        customer_id=customer_id,
+    )
+
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_2",
+        name="sample_2",
+        subject_id=subject_id,
+        is_tumour=False,
+        customer_id=customer_id,
+    )
+
+    # ASSERT that there are two samples in the store
+    assert len(store.get_all_samples()) == 2
+
+    # ASSERT that there is a customer with the given customer id
+    assert store.customer(internal_id=customer_id)
+    # WHEN fetching the sample by subject id and customer_id
+    samples = store.get_samples_by_subject_id(subject_id=subject_id, customer_id=customer_id)
+
+    # THEN two samples should be returned
+    assert samples and len(samples) == 2
+
+
+def test_get_samples_by_subject_id_and_is_tumour(
+    store: Store,
+    helpers: StoreHelpers,
+    customer_id: str = "cust123",
+    subject_id: str = "test_subject",
+    is_tumour: bool = True,
+):
+    """Test that samples can be fetched by subject id."""
+    # GIVEN a database with a sample
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_1",
+        name="sample_1",
+        subject_id=subject_id,
+        is_tumour=True,
+        customer_id=customer_id,
+    )
+
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_2",
+        name="sample_2",
+        subject_id=subject_id,
+        is_tumour=False,
+        customer_id=customer_id,
+    )
+
+    # ASSERT that there are two samples in the store
+    assert len(store.get_all_samples()) == 2
+
+    # ASSERT that there is a customer with the given customer id
+    assert store.customer(internal_id=customer_id)
+    # WHEN fetching the sample by subject id and customer_id
+    samples = store.get_samples_by_subject_id_and_is_tumour(
+        subject_id=subject_id, customer_id=customer_id, is_tumour=is_tumour
+    )
+
+    # THEN two samples should be returned
+    assert samples and len(samples) == 1
+
+
+def test_filter_get_sample_by_name(store: Store, helpers: StoreHelpers, name="sample_1"):
+    """Test that samples can be fetched by name."""
+    # GIVEN a database with a sample
+    helpers.add_sample(store=store, internal_id="test_sample_1", name="sample_1")
+    helpers.add_sample(store=store, internal_id="test_sample_2")
+
+    # ASSERT that there are two samples in the store
+    assert len(store.get_all_samples()) == 2
+
+    # WHEN fetching the sample by name
+    samples = store.get_sample_by_name(name=name)
+
+    # THEN one sample should be returned
+    assert samples and samples.name == name
