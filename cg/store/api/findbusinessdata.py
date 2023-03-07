@@ -484,32 +484,17 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
         """Get samples of customer with given subject_id or subject_id and is_tumour."""
-        samples = self._join_sample_and_customer()
-        filter_functions: List[SampleFilters] = [
-            SampleFilters.filter_samples_by_customer_id,
-            SampleFilters.filter_samples_by_subject_id,
-        ]
-        return apply_sample_filter(
-            samples=samples,
-            customer_id=customer_id,
-            subject_id=subject_id,
-            functions=filter_functions,
-        ).all()
+        query: Query = self.Sample.query.join(Customer).filter(
+            Customer.internal_id == customer_id, Sample.subject_id == subject_id
+        )
+        return query.all()
 
     def get_samples_by_subject_id_and_is_tumour(
         self, customer_id: str, subject_id: str, is_tumour: bool
     ) -> List[Sample]:
         """Get samples of customer with given subject_id and is_tumour."""
-        samples = self._join_sample_and_customer()
-        filter_functions: List[SampleFilters] = [
-            SampleFilters.filter_samples_by_customer_id,
-            SampleFilters.filter_samples_by_subject_id,
-        ]
-        samples = apply_sample_filter(
-            samples=samples,
-            customer_id=customer_id,
-            subject_id=subject_id,
-            functions=filter_functions,
+        samples: Query = self.Sample.query.join(Customer).filter(
+            Customer.internal_id == customer_id, Sample.subject_id == subject_id
         )
 
         if is_tumour:
