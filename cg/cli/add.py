@@ -60,7 +60,7 @@ def customer(
         raise click.Abort
 
     collaborations: List[models.Collaboration] = [
-        status_db.collaboration(collaboration_internal_id)
+        status_db.get_collaboration_by_internal_id(collaboration_internal_id)
         for collaboration_internal_id in collaboration_internal_ids
     ]
 
