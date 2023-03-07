@@ -252,7 +252,7 @@ def samples_in_collaboration():
 @BLUEPRINT.route("/samples/<sample_id>")
 def sample(sample_id):
     """Fetch a single sample."""
-    sample_obj = db.get_first_sample_by_internal_id(sample_id)
+    sample_obj = db.get_sample_by_internal_id(sample_id)
     if sample_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
@@ -264,7 +264,7 @@ def sample(sample_id):
 @BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
 def sample_in_collaboration(sample_id):
     """Fetch a single sample."""
-    sample_obj = db.get_first_sample_by_internal_id(sample_id)
+    sample_obj = db.get_sample_by_internal_id(sample_id)
     order_customer = db.customer(request.args.get("customer"))
     if sample_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)

@@ -118,17 +118,17 @@ class FluffyAnalysisAPI(AnalysisAPI):
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
     def get_sample_starlims_id(self, sample_id: str) -> str:
-        sample_obj: models.Sample = self.status_db.get_first_sample_by_internal_id(sample_id)
+        sample_obj: models.Sample = self.status_db.get_sample_by_internal_id(sample_id)
         return sample_obj.order
 
     def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
-        sample_obj: models.Sample = self.status_db.get_first_sample_by_internal_id(sample_id)
+        sample_obj: models.Sample = self.status_db.get_sample_by_internal_id(sample_id)
         sequenced_at: dt.datetime = sample_obj.sequenced_at
         if sequenced_at:
             return sequenced_at.date()
 
     def get_sample_control_status(self, sample_id: str) -> bool:
-        sample_obj: models.Sample = self.status_db.get_first_sample_by_internal_id(sample_id)
+        sample_obj: models.Sample = self.status_db.get_sample_by_internal_id(sample_id)
         return bool(sample_obj.control)
 
     def get_nr_of_header_lines_in_sample_sheet(

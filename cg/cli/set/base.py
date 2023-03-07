@@ -162,7 +162,7 @@ def list_keys(
 ):
     """List all available modifiable keys."""
     status_db: Store = context.status_db
-    sample: Sample = status_db.get_first_sample_by_internal_id(internal_id=sample_id)
+    sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
     list_changeable_sample_attributes(
         sample=sample, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES
     )
@@ -198,7 +198,7 @@ def sample(
 
     """
     status_db: Store = context.status_db
-    sample: Sample = status_db.get_first_sample_by_internal_id(internal_id=sample_id)
+    sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
 
     if sample is None:
         LOG.error(f"Can't find sample {sample_id}")

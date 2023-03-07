@@ -28,13 +28,11 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     """Test function to delete association between a sample and a case in store."""
 
     # GIVEN a store containing multiple samples associated with different cases
-    sample_in_single_case: Sample = (
-        store_with_multiple_cases_and_samples.get_first_sample_by_internal_id(
-            internal_id=sample_id_in_single_case
-        )
+    sample_in_single_case: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
+        internal_id=sample_id_in_single_case
     )
     sample_in_multiple_cases: Sample = (
-        store_with_multiple_cases_and_samples.get_first_sample_by_internal_id(
+        store_with_multiple_cases_and_samples.get_sample_by_internal_id(
             internal_id=sample_id_in_multiple_cases
         )
     )

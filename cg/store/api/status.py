@@ -272,7 +272,7 @@ class StatusHandler(BaseHandler):
         """Return Pool query."""
         return self.query(Pool)
 
-    def get_first_sample_by_entry_id(self, entry_id: int) -> Sample:
+    def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
         return apply_sample_filter(
             functions=[SampleFilters.filter_samples_by_entry_id],
@@ -280,7 +280,7 @@ class StatusHandler(BaseHandler):
             entry_id=entry_id,
         ).first()
 
-    def get_first_sample_by_internal_id(self, internal_id: str) -> Sample:
+    def get_sample_by_internal_id(self, internal_id: str) -> Sample:
         """Return a sample by lims id."""
         return apply_sample_filter(
             functions=[SampleFilters.filter_samples_by_internal_id],
@@ -288,7 +288,7 @@ class StatusHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_all_samples_by_internal_id(self, internal_id: str) -> List[Sample]:
+    def get_samples_by_internal_id(self, internal_id: str) -> List[Sample]:
         """Return all samples by lims id."""
         return apply_sample_filter(
             functions=[SampleFilters.filter_samples_by_internal_id],

@@ -27,7 +27,7 @@ def test_store_available_fastq_analysis(
     # GIVEN a case with no analysis, a sample that has been sequenced and a fastq context
     case_obj: models.Family = fastq_context.status_db.family(internal_id=case_id)
     case_obj.analyses = []
-    sample_obj: models.Sample = fastq_context.status_db.get_first_sample_by_internal_id(
+    sample_obj: models.Sample = fastq_context.status_db.get_sample_by_internal_id(
         internal_id=sample_id
     )
     sample_obj.sequenced_at = datetime.now()

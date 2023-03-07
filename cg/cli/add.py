@@ -249,19 +249,19 @@ def relationship(
         LOG.error("%s: family not found", family_id)
         raise click.Abort
 
-    sample_obj: models.Sample = status_db.get_first_sample_by_internal_id(sample_id)
+    sample_obj: models.Sample = status_db.get_sample_by_internal_id(sample_id)
     if sample_obj is None:
         LOG.error("%s: sample not found", sample_id)
         raise click.Abort
 
     if mother:
-        mother_obj: models.Sample = status_db.get_first_sample_by_internal_id(mother)
+        mother_obj: models.Sample = status_db.get_sample_by_internal_id(mother)
         if mother_obj is None:
             LOG.error("%s: mother not found", mother)
             raise click.Abort
 
     if father:
-        father_obj: models.Sample = status_db.get_first_sample_by_internal_id(father)
+        father_obj: models.Sample = status_db.get_sample_by_internal_id(father)
         if father_obj is None:
             LOG.error("%s: father not found", father)
             raise click.Abort

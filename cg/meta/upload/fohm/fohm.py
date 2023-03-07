@@ -168,7 +168,7 @@ class FOHMUploadAPI:
     def link_sample_rawdata_files(self) -> None:
         """Hardlink samples rawdata files to fohm delivery folder."""
         for sample_id in self.aggregation_dataframe["internal_id"]:
-            sample_obj: models.Sample = self.status_db.get_first_sample_by_internal_id(sample_id)
+            sample_obj: models.Sample = self.status_db.get_sample_by_internal_id(sample_id)
             bundle_name = sample_obj.links[0].family.internal_id
             version_obj: Version = self.housekeeper_api.last_version(bundle=bundle_name)
             files = self.housekeeper_api.files(version=version_obj.id, tags=[sample_id]).all()

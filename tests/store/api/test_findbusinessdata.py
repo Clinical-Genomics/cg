@@ -425,7 +425,7 @@ def test_find_single_case_for_sample(
     """Test that cases associated with a sample can be found."""
 
     # GIVEN a database containing a sample associated with a single case
-    sample: Sample = store_with_multiple_cases_and_samples.get_first_sample_by_internal_id(
+    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
         internal_id=sample_id_in_single_case
     )
 
@@ -444,7 +444,7 @@ def test_find_multiple_cases_for_sample(
     sample_id_in_multiple_cases: str, store_with_multiple_cases_and_samples: Store
 ):
     # GIVEN a database containing a sample associated with multiple cases
-    sample: Sample = store_with_multiple_cases_and_samples.get_first_sample_by_internal_id(
+    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
         internal_id=sample_id_in_multiple_cases
     )
     assert sample

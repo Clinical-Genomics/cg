@@ -670,7 +670,7 @@ def test_store_existing_single_sample_from_trio(
     assert new_link.father
     name = new_link.sample.name
     internal_id = new_link.sample.internal_id
-    assert base_store.get_first_sample_by_internal_id(internal_id)
+    assert base_store.get_sample_by_internal_id(internal_id)
 
     # WHEN storing a new case with one sample from the trio
     for family_idx, family in enumerate(mip_status_data["families"]):

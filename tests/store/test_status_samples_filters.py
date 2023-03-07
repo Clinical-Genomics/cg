@@ -79,7 +79,7 @@ def test_get_sample_by_entry_id(sample_store: Store):
     """Test retrieving sample by entry id."""
     # GIVEN a store containing samples
     # WHEN retrieving a sample by its entry id
-    sample: Sample = sample_store.get_first_sample_by_entry_id(entry_id=1)
+    sample: Sample = sample_store.get_sample_by_entry_id(entry_id=1)
 
     # THEN a sample should be returned
     assert sample
@@ -90,7 +90,7 @@ def test_get_samples_by_internal_id(
 ):
     # GIVEN a store containing a sample
     # WHEN retrieving the sample by its internal id
-    sample: Sample = store_with_multiple_cases_and_samples.get_first_sample_by_internal_id(
+    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
         internal_id=sample_id_in_single_case
     )
 
