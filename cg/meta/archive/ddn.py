@@ -91,8 +91,7 @@ class DDNApi:
             headers=dict(self.headers, **self.auth_header),
             json=payload,
         )
-        print(payload)
-        return response
+        return response.ok
 
     def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Retrieves all folders provided, to their corresponding destination, as given by the
