@@ -42,7 +42,7 @@ CASE_ACTIONS = [action.value for action in CaseActions]
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 COMBOS = {
-    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
