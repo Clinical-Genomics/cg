@@ -458,25 +458,20 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Sample.query.order_by(Sample.created_at.desc()).all()
 
     def get_samples_by_enquiry(self, enquiry: str) -> List[Sample]:
-        """Return samples by name or internal_id."""
+        """Return samples by name or internal id."""
         records = self.Sample.query
-        samples_by_name = (
-            apply_sample_filter(
-                samples=records, name=enquiry, functions=[SampleFilters.filter_samples_by_name]
+
+        records = (
+            records.filter(
+                or_(
+                    Sample.name.like(f"%{enquiry}%"),
+                    Sample.internal_id.like(f"%{enquiry}%"),
+                )
             )
-            .order_by(Sample.created_at.desc())
-            .all()
+            if enquiry
+            else records
         )
-        samples_by_internal_id = (
-            apply_sample_filter(
-                samples=records,
-                internal_id=enquiry,
-                functions=[SampleFilters.filter_samples_by_internal_id],
-            )
-            .order_by(Sample.created_at.desc())
-            .all(),
-        )
-        return samples_by_name if samples_by_name else samples_by_internal_id
+        return records.order_by(Sample.created_at.desc()).all()
 
     def _join_sample_and_customer(self) -> Query:
         """Join sample and customer."""
