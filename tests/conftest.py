@@ -986,7 +986,7 @@ def fixture_analysis_store_single(
 @pytest.fixture(name="collaboration_id")
 def fixture_collaboration_id() -> str:
     """Return a default customer group."""
-    return "all_customers"
+    return "hospital_collaboration"
 
 
 @pytest.fixture(name="customer_production")
@@ -1105,10 +1105,15 @@ def fixture_bed_version_short_name() -> str:
 
 @pytest.fixture(name="base_store")
 def fixture_base_store(
-    apptag_rna: str, bed_name: str, bed_version_short_name: str, customer_id: str, store: Store
+    apptag_rna: str,
+    bed_name: str,
+    bed_version_short_name: str,
+    collaboration_id: str,
+    customer_id: str,
+    store: Store,
 ) -> Store:
     """Setup and example store."""
-    collaboration = store.add_collaboration("all_customers", "all customers")
+    collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.add_commit(collaboration)
     customers = [
@@ -1147,7 +1152,7 @@ def fixture_base_store(
     applications = [
         store.add_application(
             tag="WGXCUSC000",
-            category="wgs",
+            prep_category="wgs",
             description="External WGS",
             sequencing_depth=0,
             is_external=True,
@@ -1157,7 +1162,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="EXXCUSR000",
-            category="wes",
+            prep_category="wes",
             description="External WES",
             sequencing_depth=0,
             is_external=True,
@@ -1167,7 +1172,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="WGSPCFC060",
-            category="wgs",
+            prep_category="wgs",
             description="WGS, double",
             sequencing_depth=30,
             accredited=True,
@@ -1177,7 +1182,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="RMLP05R800",
-            category="rml",
+            prep_category="rml",
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
@@ -1186,7 +1191,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="WGSPCFC030",
-            category="wgs",
+            prep_category="wgs",
             description="WGS trio",
             is_accredited=True,
             sequencing_depth=30,
@@ -1198,7 +1203,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="METLIFR020",
-            category="wgs",
+            prep_category="wgs",
             description="Whole genome metagenomics",
             sequencing_depth=0,
             target_reads=400000,
@@ -1207,7 +1212,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="METNXTR020",
-            category="wgs",
+            prep_category="wgs",
             description="Metagenomics",
             sequencing_depth=0,
             target_reads=200000,
@@ -1216,7 +1221,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="MWRNXTR003",
-            category="mic",
+            prep_category="mic",
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
@@ -1225,7 +1230,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag=apptag_rna,
-            category="tgs",
+            prep_category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
             percent_reads_guaranteed=75,
@@ -1236,7 +1241,7 @@ def fixture_base_store(
         ),
         store.add_application(
             tag="VWGDPTR001",
-            category="cov",
+            prep_category="cov",
             description="Viral whole genome  ",
             sequencing_depth=0,
             percent_kth=80,
