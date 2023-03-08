@@ -32,6 +32,9 @@ class StoreConftestFixture(enum.Enum):
     PREP_CATEGORY_APPLICATION_WITHOUT_ATTRIBUTES: str = "wes"
     TAG_APPLICATION_WITHOUT_ATTRIBUTES: str = "test_tag_2"
 
+    INVOICE_ID_INVOICE_WITH_ATTRIBUTES: int = 1
+    INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
+
 
 @pytest.fixture(name="application_versions_file")
 def fixture_application_versions_file(fixtures_dir: Path) -> str:
@@ -208,6 +211,7 @@ def fixture_store_with_a_pool_with_and_without_attributes(
     helpers: StoreHelpers,
     timestamp_now=datetime.datetime.now(),
 ) -> Store:
+    """Return a store with a pool with and without attributes."""
 
     helpers.ensure_pool(
         store=store,
@@ -236,6 +240,7 @@ def fixture_store_with_an_application_with_and_without_attributes(
     helpers: StoreHelpers,
     timestamp_now=datetime.datetime.now(),
 ) -> Store:
+    """Return a store with an application with and without attributes."""
 
     helpers.ensure_application(
         store=store,
@@ -251,6 +256,29 @@ def fixture_store_with_an_application_with_and_without_attributes(
         prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITHOUT_ATTRIBUTES.value,
         is_external=False,
         is_archived=False,
+    )
+
+    return store
+
+
+@pytest.fixture(name="store_with_an_invoice_with_and_without_attributes")
+def fixture_store_with_an_invoice_with_and_without_attributes(
+    store: Store,
+    helpers: StoreHelpers,
+    timestamp_now=datetime.datetime.now(),
+) -> Store:
+    """Return a store with an invoice with and without attributes."""
+
+    helpers.ensure_invoice(
+        store=store,
+        invoice_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
+        invoiced_at=timestamp_now,
+    )
+
+    helpers.ensure_invoice(
+        store=store,
+        invoice_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES.value,
+        invoiced_at=None,
     )
 
     return store
