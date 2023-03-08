@@ -465,6 +465,7 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
 def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpers: StoreHelpers):
     """Test that all pools and samples for an invoice can be fetched."""
+
     # GIVEN a database with a pool and a sample
     pool = helpers.ensure_pool(store=store, name="pool_1")
     sample = helpers.add_sample(store=store, name="sample_1")
@@ -497,6 +498,7 @@ def test_get_samples_by_subject_id(
 
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.customer(internal_id=customer_id)
+
     # WHEN fetching the sample by subject id and customer_id
     samples = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id(
         subject_id=subject_id, customer_id=customer_id
@@ -522,10 +524,10 @@ def test_get_samples_by_subject_id_and_is_tumour(
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.customer(internal_id=customer_id)
     # WHEN fetching the sample by subject id and customer_id
-    samples = (
-        store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id_and_is_tumour(
-            subject_id=subject_id, customer_id=customer_id, is_tumour=is_tumour
-        )
+    samples: List[
+        Sample
+    ] = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id_and_is_tumour(
+        subject_id=subject_id, customer_id=customer_id, is_tumour=is_tumour
     )
 
     # THEN two samples should be returned
@@ -540,7 +542,7 @@ def test_filter_get_sample_by_name(store_with_samples_that_have_names: Store, na
     assert len(store_with_samples_that_have_names.get_all_samples()) == 2
 
     # WHEN fetching the sample by name
-    samples = store_with_samples_that_have_names.get_sample_by_name(name=name)
+    samples: Sample = store_with_samples_that_have_names.get_sample_by_name(name=name)
 
     # THEN one sample should be returned
     assert samples and samples.name == name

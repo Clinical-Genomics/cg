@@ -7,7 +7,7 @@ from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.api.import_func import (
     parse_application_versions,
     parse_applications,
@@ -15,20 +15,18 @@ from cg.store.api.import_func import (
 )
 from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 from tests.store_helpers import StoreHelpers
-from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
+from cg.store.models import ApplicationVersion, Pool, Sample, Invoice, Application
 
 
 class StoreCheckers:
     @staticmethod
-    def get_versions_from_store(
-        store: Store, application_tag: str
-    ) -> List[models.ApplicationVersion]:
+    def get_versions_from_store(store: Store, application_tag: str) -> List[ApplicationVersion]:
         """Gets all versions for the specified application"""
 
         return store.application(application_tag).versions
 
     @staticmethod
-    def get_application_from_store(store: Store, application_tag: str) -> models.Application:
+    def get_application_from_store(store: Store, application_tag: str) -> Application:
         """Gets the specified application"""
 
         return store.application(application_tag)
@@ -36,7 +34,7 @@ class StoreCheckers:
     @staticmethod
     def version_exists_in_store(store: Store, application: ApplicationVersionSchema):
         """Check if the given raw version exists in the store."""
-        db_versions: List[models.Application] = StoreCheckers.get_versions_from_store(
+        db_versions: List[Application] = StoreCheckers.get_versions_from_store(
             store=store, application_tag=application.app_tag
         )
         return any(
@@ -309,6 +307,7 @@ def fixture_max_nr_of_samples() -> int:
 def store_with_samples_that_have_names(
     store: Store, helpers: StoreHelpers, name="sample_1"
 ) -> Store:
+    """Return a store with two samples of which one has a name"""
     helpers.add_sample(store=store, internal_id="test_sample_1", name=name)
     helpers.add_sample(store=store, internal_id="test_sample_2")
     return store
@@ -321,6 +320,7 @@ def store_with_samples_subject_id_and_tumour_status(
     customer_id: str = "cust123",
     subject_id: str = "test_subject",
 ) -> Store:
+    """Return a store with two samples that have subject ids of which one is tumour"""
     helpers.add_sample(
         store=store,
         internal_id="test_sample_1",
