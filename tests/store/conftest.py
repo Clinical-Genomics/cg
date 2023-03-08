@@ -169,7 +169,6 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
     timestamp_now=datetime.datetime.now(),
 ) -> Store:
     """Return a store with a sample that has many attributes and one without."""
-
     helpers.add_sample(
         store,
         internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
@@ -212,7 +211,6 @@ def fixture_store_with_a_pool_with_and_without_attributes(
     timestamp_now=datetime.datetime.now(),
 ) -> Store:
     """Return a store with a pool with and without attributes."""
-
     helpers.ensure_pool(
         store=store,
         delivered_at=timestamp_now,
@@ -241,7 +239,6 @@ def fixture_store_with_an_application_with_and_without_attributes(
     timestamp_now=datetime.datetime.now(),
 ) -> Store:
     """Return a store with an application with and without attributes."""
-
     helpers.ensure_application(
         store=store,
         tag=StoreConftestFixture.TAG_APPLICATION_WITH_ATTRIBUTES.value,
@@ -268,7 +265,6 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
     timestamp_now=datetime.datetime.now(),
 ) -> Store:
     """Return a store with an invoice with and without attributes."""
-
     helpers.ensure_invoice(
         store=store,
         invoice_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
