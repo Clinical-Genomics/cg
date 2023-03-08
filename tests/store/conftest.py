@@ -1,13 +1,27 @@
 """Fixtures for store tests."""
+import datetime
+import enum
 from pathlib import Path
 from typing import Generator
-
 import pytest
 
 from cg.constants import Pipeline
 from cg.constants.subject import Gender
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
+from tests.store_helpers import StoreHelpers
+
+
+class StoreConftestFixture(enum.Enum):
+    INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
+    NAME_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
+    SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES: str = "test_subject_id"
+    DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES: str = 1
+    ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: str = 1
+    INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: str = 1
+    INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
+    NAME_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
+    ENTRY_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = 2
 
 
 @pytest.fixture(name="application_versions_file")
@@ -134,3 +148,46 @@ def fixture_sample_obj(analysis_store) -> Sample:
 def fixture_sequencer_name() -> str:
     """Return sequencer name."""
     return "A00689"
+
+
+@pytest.fixture(name="store_with_a_sample_that_has_many_attributes_and_one_without")
+def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
+    store: Store,
+    helpers: StoreHelpers,
+    timestamp_now=datetime.datetime.now(),
+) -> Store:
+    """Return a store with a sample that has many attributes and one without."""
+
+    helpers.add_sample(
+        store,
+        internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        is_external=True,
+        is_tumour=True,
+        delivered_at=timestamp_now,
+        received_at=timestamp_now,
+        sequenced_at=timestamp_now,
+        prepared_at=timestamp_now,
+        subject_id=StoreConftestFixture.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        invoice_id=StoreConftestFixture.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        downsampled_to=StoreConftestFixture.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
+        no_invoice=False,
+    )
+
+    helpers.add_sample(
+        store,
+        internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
+        name=StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
+        is_external=False,
+        is_tumour=False,
+        delivered_at=None,
+        received_at=None,
+        sequenced_at=None,
+        prepared_at=None,
+        subject_id=None,
+        invoice_id=None,
+        downsampled_to=None,
+        no_invoice=True,
+    )
+
+    return store
