@@ -80,6 +80,7 @@ class CaseSubmitter(Submitter):
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        sample: Of1508Sample
         for sample in samples:
             if self._is_rerun_of_existing_case(sample=sample):
                 continue
@@ -218,9 +219,8 @@ class CaseSubmitter(Submitter):
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_cases: List[Family] = []
         for case in items:
-            status_db_case: Family
-            existing_case: Family = self.status.family(internal_id=case["internal_id"])
-            if not existing_case:
+            status_db_case: Family = self.status.family(internal_id=case["internal_id"])
+            if not status_db_case:
                 new_case: Family = self._create_case(
                     case=case, customer_obj=customer, ticket=ticket_id
                 )
@@ -228,10 +228,9 @@ class CaseSubmitter(Submitter):
                 self._update_case_panel(panels=case["panels"], case=new_case)
                 status_db_case: Family = new_case
             else:
-                self._append_ticket(ticket_id=ticket_id, case=existing_case)
-                self._update_action(action=CaseActions.ANALYZE, case=existing_case)
-                self._update_case_panel(panels=case["panels"], case=existing_case)
-                status_db_case: Family = existing_case
+                self._append_ticket(ticket_id=ticket_id, case=status_db_case)
+                self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
+                self._update_case_panel(panels=case["panels"], case=status_db_case)
 
             case_samples: Dict[str, Sample] = {}
             for sample in case["samples"]:
