@@ -303,3 +303,39 @@ def fixture_max_nr_of_cases() -> int:
 def fixture_max_nr_of_samples() -> int:
     """Return the number of maximum number of samples"""
     return 50
+
+
+@pytest.fixture(name="store_with_samples_that_have_names")
+def store_with_samples_that_have_names(
+    store: Store, helpers: StoreHelpers, name="sample_1"
+) -> Store:
+    helpers.add_sample(store=store, internal_id="test_sample_1", name=name)
+    helpers.add_sample(store=store, internal_id="test_sample_2")
+    return store
+
+
+@pytest.fixture(name="store_with_samples_subject_id_and_tumour_status")
+def store_with_samples_subject_id_and_tumour_status(
+    store: Store,
+    helpers: StoreHelpers,
+    customer_id: str = "cust123",
+    subject_id: str = "test_subject",
+) -> Store:
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_1",
+        name="sample_1",
+        subject_id=subject_id,
+        is_tumour=True,
+        customer_id=customer_id,
+    )
+
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_2",
+        name="sample_2",
+        subject_id=subject_id,
+        is_tumour=False,
+        customer_id=customer_id,
+    )
+    return store
