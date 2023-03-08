@@ -1,5 +1,5 @@
 from cg.store.status_application_filters import (
-    filter_applications_by_id,
+    filter_applications_by_entry_id,
     filter_applications_by_prep_category,
     filter_applications_by_tag,
     filter_applications_is_archived,
@@ -132,9 +132,9 @@ def test_filter_get_applications_by_entry_id(
     # GIVEN a database with an application two applications
 
     # WHEN getting an application by id
-    application: Query = filter_applications_by_id(
+    application: Query = filter_applications_by_entry_id(
         applications=store_with_an_application_with_and_without_attributes._get_application_query(),
-        application_id=entry_id,
+        entry_id=entry_id,
     )
 
     # ASSERT that applications is a query
