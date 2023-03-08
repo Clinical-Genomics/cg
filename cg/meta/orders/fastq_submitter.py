@@ -57,7 +57,7 @@ class FastqSubmitter(Submitter):
         }
         return status_data
 
-    def create_maf_case(self, sample_obj: Sample):
+    def create_maf_case(self, sample_obj: Sample) -> None:
         """Add a MAF case to the Status database."""
         case: Family = self.status.add_case(
             data_analysis=Pipeline(Pipeline.MIP_DNA),
