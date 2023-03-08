@@ -30,6 +30,10 @@ from cg.store.status_application_filters import apply_application_filter, Applic
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database."""
 
+    def _get_application_query(self) -> Query:
+        """Get query for application."""
+        return self.Application.query
+
     def _join_sample_application_version_query(self, query: Query) -> Query:
         """Join sample to application version."""
         return query.join(Sample.application_version, ApplicationVersion.application)

@@ -13,205 +13,162 @@ from cg.store.status_pool_filters import (
     filter_pools_by_invoice_id,
 )
 from datetime import datetime
+from tests.store.conftest import StoreConftestFixture
 
 
 def test_filter_pools_is_delivered(
-    base_store: Store,
-    helpers: StoreHelpers,
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a delivered pool."""
 
-    # GIVEN a delivered pool
-    helpers.ensure_pool(base_store, delivered_at=datetime.now(), name="delivered")
-    helpers.ensure_pool(base_store, delivered_at=None, name="not_delivered")
-
-    # ASSERT that there are really two pools
-    assert base_store._get_pool_query().count() == 2
-    # GIVEN a cases Query
-    pools: Query = base_store._get_pool_query()
+    # GIVEN a store with two pools of which one is delivered
 
     # WHEN getting delivered pools
-    pools: Query = filter_pools_is_delivered(pools=pools)
+    pools: Query = filter_pools_is_delivered(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+    )
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
+    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
 
 
 def test_filter_pools_is_not_delivered(
-    base_store: Store,
-    helpers: StoreHelpers,
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool that is not delivered."""
 
-    # GIVEN a not delivered pool
-    helpers.ensure_pool(base_store, delivered_at=datetime.now(), name="delivered")
-    helpers.ensure_pool(base_store, delivered_at=None, name="not_delivered")
-
-    # ASSERT that there are really two pools
-    assert base_store._get_pool_query().count() == 2
-
-    # GIVEN a pool Query
-    pools: Query = base_store._get_pool_query()
+    # GIVEN a store with two pools of which one is delivered
 
     # WHEN getting not delivered pools
-    pools: Query = filter_pools_is_not_delivered(pools=pools)
+    pools: Query = filter_pools_is_not_delivered(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+    )
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
+    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
 
 
 def test_filter_pools_is_received(
-    base_store: Store,
-    helpers: StoreHelpers,
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a received pool."""
 
-    # GIVEN a received pool
-    helpers.ensure_pool(base_store, received_at=datetime.now(), name="received")
-    helpers.ensure_pool(base_store, received_at=None, name="not_received")
-
-    # GIVEN a pool Query
-    pools: Query = base_store._get_pool_query()
-
-    # ASSERT that there are really two pools
-    assert base_store._get_pool_query().count() == 2
+    # GIVEN a store with two pools of which one is received
 
     # WHEN getting received pools
-    pools: Query = filter_pools_is_received(pools=pools)
+    pools: Query = filter_pools_is_received(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+    )
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
+    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
 
 
 def test_filter_pools_is_not_received(
-    base_store: Store,
-    helpers: StoreHelpers,
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool that is not received."""
 
-    # GIVEN a not received pool
-    helpers.ensure_pool(base_store, received_at=None, name="not_received")
-    helpers.ensure_pool(base_store, received_at=datetime.now(), name="received")
+    # GIVEN a store with two pools of which one is received
 
-    # GIVEN a cases Query
-    pools: Query = base_store._get_pool_query()
-
-    # ASSERT that there are really two pools
-    assert base_store._get_pool_query().count() == 2
-
-    # WHEN getting not received pools
-    pools: Query = filter_pools_is_not_received(pools=pools)
+    # WHEN getting received pools
+    pools: Query = filter_pools_is_not_received(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+    )
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
+    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+
+
+def test_filter_pools_do_not_invoice(
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
+):
+    """Test that a pool is returned when there is a pool that should not be invoiced."""
+
+    # GIVEN a pool marked to skip invoicing and one not marked to skip invoicing
+
+    # WHEN getting pools marked to skip invoicing
+    pools: Query = filter_pools_do_not_invoice(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+    )
+
+    # ASSERT that the query is a Query
+    assert isinstance(pools, Query)
+
+    # THEN pools should contain the test pool
+    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
 
 
 def test_filter_pools_do_invoice(
-    base_store: Store,
-    helpers: StoreHelpers,
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool that should be invoiced."""
 
     # GIVEN a pool marked for invoicing and one not marked for invoicing
-    helpers.ensure_pool(base_store, no_invoice=False, name="invoice")
-    helpers.ensure_pool(base_store, no_invoice=True, name="no_invoice")
-
-    # ASSERT that there are really two pools
-    assert base_store._get_pool_query().count() == 2
-
-    # GIVEN a cases Query
-    pools: Query = base_store._get_pool_query()
 
     # WHEN getting pools marked for invoicing
-    pools: Query = filter_pools_do_invoice(pools=pools)
+    pools: Query = filter_pools_do_invoice(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+    )
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
+    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
 
 
-def test_filter_pools_do_not_invoice(
-    base_store: Store,
-    helpers: StoreHelpers,
+def test_filter_pools_by_invoice_id(
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+    invoice_id=StoreConftestFixture.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
 ):
-    """Test that a pool is returned when there is a pool that should not be invoiced."""
-
-    # GIVEN a pool marked to skip invoicing.
-    helpers.ensure_pool(base_store, no_invoice=True, name="no_invoice")
-    helpers.ensure_pool(base_store, no_invoice=False, name="invoice")
-
-    # GIVEN a cases Query
-    pools: Query = base_store._get_pool_query()
-
-    # ASSERT that there are really two pools
-    assert base_store._get_pool_query().count() == 2
-
-    # WHEN getting pools marked to skip invoicing
-    pools: Query = filter_pools_do_not_invoice(pools=pools)
-
-    # ASSERT that the query is a Query
-    assert isinstance(pools, Query)
-
-    # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
-
-
-def test_filter_pools_by_invoice_id(base_store: Store, helpers: StoreHelpers, invoice_id=5):
     """Test that a pool is returned when there is a pool with a specific invoice id."""
 
-    # GIVEN a pool with invoice_id
-    helpers.ensure_pool(base_store, invoice_id=invoice_id, name="invoice_id")
-    helpers.ensure_pool(base_store, invoice_id=None, name="no_invoice_id")
-
-    # GIVEN a cases Query
-    pools: Query = base_store._get_pool_query()
-
-    # assert that there are really two pools
-    assert base_store._get_pool_query().count() == 2
+    # GIVEN a store with two pools of which one us marked for invoicing
 
     # WHEN getting pools with invoice_id
-    pools: Query = filter_pools_by_invoice_id(pools=pools, invoice_id=invoice_id)
+    pools: Query = filter_pools_by_invoice_id(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query(), invoice_id=invoice_id
+    )
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
+    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
 
 
 def test_filter_pools_without_invoice_id(
-    base_store: Store,
-    helpers: StoreHelpers,
-    invoice_id=5,
+    store_with_a_pool_with_and_without_attributes: Store,
+    name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool without invoice id."""
 
-    # GIVEN a pool without invoice_id
-    helpers.ensure_pool(base_store, invoice_id=None, name="no_invoice_id")
-    helpers.ensure_pool(base_store, invoice_id=invoice_id, name="invoice_id")
-
-    # GIVEN a cases Query
-    pools: Query = base_store._get_pool_query()
-
-    # assert that there are really two pools
-    assert base_store._get_pool_query().count() == 2
+    # GIVEN a store with two pools of which one has no invoice id
 
     # WHEN getting pools without invoice_id
-    pools: Query = filter_pools_without_invoice_id(pools=pools)
+    pools: Query = filter_pools_without_invoice_id(
+        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+    )
 
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)

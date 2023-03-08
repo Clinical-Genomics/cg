@@ -16,12 +16,21 @@ class StoreConftestFixture(enum.Enum):
     INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     NAME_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES: str = "test_subject_id"
-    DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES: str = 1
-    ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: str = 1
-    INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: str = 1
+    DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES: int = 1
+    ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
+    INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
     NAME_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
-    ENTRY_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = 2
+    ENTRY_ID_SAMPLE_WITHOUT_ATTRIBUTES: int = 2
+
+    INVOICE_ID_POOL_WITH_ATTRIBUTES: int = 1
+    NAME_POOL_WITH_ATTRIBUTES: str = "pool_with_attributes"
+    NAME_POOL_WITHOUT_ATTRIBUTES: str = "pool_without_attributes"
+
+    TAG_APPLICATION_WITH_ATTRIBUTES: str = "test_tag"
+    PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES: str = "wgs"
+    PREP_CATEGORY_APPLICATION_WITHOUT_ATTRIBUTES: str = "wes"
+    TAG_APPLICATION_WITHOUT_ATTRIBUTES: str = "test_tag_2"
 
 
 @pytest.fixture(name="application_versions_file")
@@ -188,6 +197,60 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
         invoice_id=None,
         downsampled_to=None,
         no_invoice=True,
+    )
+
+    return store
+
+
+@pytest.fixture(name="store_with_a_pool_with_and_without_attributes")
+def fixture_store_with_a_pool_with_and_without_attributes(
+    store: Store,
+    helpers: StoreHelpers,
+    timestamp_now=datetime.datetime.now(),
+) -> Store:
+
+    helpers.ensure_pool(
+        store=store,
+        delivered_at=timestamp_now,
+        received_at=timestamp_now,
+        invoice_id=StoreConftestFixture.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
+        no_invoice=False,
+        name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+    )
+
+    helpers.ensure_pool(
+        store=store,
+        delivered_at=None,
+        received_at=None,
+        invoice_id=None,
+        no_invoice=True,
+        name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
+    )
+
+    return store
+
+
+@pytest.fixture(name="store_with_an_application_with_and_without_attributes")
+def fixture_store_with_an_application_with_and_without_attributes(
+    store: Store,
+    helpers: StoreHelpers,
+    timestamp_now=datetime.datetime.now(),
+) -> Store:
+
+    helpers.ensure_application(
+        store=store,
+        tag=StoreConftestFixture.TAG_APPLICATION_WITH_ATTRIBUTES.value,
+        prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
+        is_external=True,
+        is_archived=True,
+    )
+
+    helpers.ensure_application(
+        store=store,
+        tag=StoreConftestFixture.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
+        prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITHOUT_ATTRIBUTES.value,
+        is_external=False,
+        is_archived=False,
     )
 
     return store

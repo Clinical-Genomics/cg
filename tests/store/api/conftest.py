@@ -16,6 +16,7 @@ from cg.store.api.import_func import (
 from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 from tests.store_helpers import StoreHelpers
 from cg.store.models import ApplicationVersion, Pool, Sample, Invoice, Application
+from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
 
 
 class StoreCheckers:
