@@ -233,7 +233,7 @@ class CaseSubmitter(Submitter):
                 self._update_case_panel(panels=case["panels"], case=existing_case)
                 status_db_case: Family = existing_case
 
-            family_samples: Dict[str, Sample] = {}
+            case_samples: Dict[str, Sample] = {}
             for sample in case["samples"]:
                 existing_sample: Sample = self.status.sample(sample["internal_id"])
                 if not existing_sample:
@@ -245,13 +245,13 @@ class CaseSubmitter(Submitter):
                         sample=sample,
                         ticket=ticket_id,
                     )
-                    family_samples[sample["name"]] = new_sample
+                    case_samples[sample["name"]] = new_sample
                 else:
-                    family_samples[sample["name"]] = existing_sample
+                    case_samples[sample["name"]] = existing_sample
 
             for sample in case["samples"]:
-                sample_mother: Sample = family_samples.get(sample.get(Pedigree.MOTHER))
-                sample_father: Sample = family_samples.get(sample.get(Pedigree.FATHER))
+                sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
+                sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
                     case_sample: FamilySample = self.status.link(
                         family_id=status_db_case.internal_id, sample_id=sample["internal_id"]
@@ -259,7 +259,7 @@ class CaseSubmitter(Submitter):
                 if not case_sample:
                     case_sample: FamilySample = self._create_link(
                         case_obj=status_db_case,
-                        family_samples=family_samples,
+                        family_samples=case_samples,
                         father_obj=sample_father,
                         mother_obj=sample_mother,
                         sample=sample,
