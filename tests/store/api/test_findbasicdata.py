@@ -3,7 +3,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer
+from cg.store.models import Bed, BedVersion, Collaboration, Customer
 
 
 def test_get_bed_query(base_store: Store):
@@ -164,3 +164,17 @@ def test_get_customers(base_store: Store, customer_id: str):
 
     # THEN return a customer with the database customer internal id
     assert customers[0].internal_id == customer_id
+
+
+def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: str):
+    """Test function to return the collaborations by internal_id."""
+
+    # GIVEN a store with collaborations
+
+    # WHEN getting the query for the collaborations
+    collaboration: Collaboration = base_store.get_collaboration_by_internal_id(
+        internal_id=collaboration_id
+    )
+
+    # THEN return a collaboration with the give collaboration internal_id
+    assert collaboration.internal_id == collaboration_id

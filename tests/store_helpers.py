@@ -163,7 +163,7 @@ class StoreHelpers:
 
     @staticmethod
     def ensure_collaboration(store: Store, collaboration_id: str = "all_customers"):
-        collaboration = store.collaboration(collaboration_id)
+        collaboration = store.get_collaboration_by_internal_id(collaboration_id)
         if not collaboration:
             collaboration = store.add_collaboration(collaboration_id, collaboration_id)
         return collaboration

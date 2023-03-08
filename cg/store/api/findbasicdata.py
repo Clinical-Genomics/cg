@@ -20,6 +20,10 @@ from cg.store.api.base import BaseHandler
 from cg.store.status_bed_filters import apply_bed_filter, BedFilters
 from cg.store.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
 from cg.store.status_customer_filters import apply_customer_filter, CustomerFilters
+from cg.store.status_collaboration_filters import (
+    CollaborationFilters,
+    apply_collaboration_version_filter,
+)
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -98,9 +102,17 @@ class FindBasicDataHandler(BaseHandler):
         """Return costumers."""
         return self._get_customer_query().all()
 
-    def collaboration(self, internal_id: str) -> Collaboration:
+    def _get_collaboration_query(self) -> Query:
+        """Returns a collaboration query."""
+        return self.Collaboration.query
+
+    def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
-        return self.Collaboration.query.filter_by(internal_id=internal_id).first()
+        return apply_collaboration_version_filter(
+            collaborations=self._get_collaboration_query(),
+            filter_functions=[CollaborationFilters.FILTER_BY_ID],
+            internal_id=internal_id,
+        ).first()
 
     def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
         """Fetch the current application version for an application tag."""
