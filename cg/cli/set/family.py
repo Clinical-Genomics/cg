@@ -74,7 +74,7 @@ def family(
         case.data_delivery = data_delivery
     if panels:
         for panel_id in panels:
-            panel: Panel = status_db.panel(panel_id)
+            panel: Panel = status_db.panel(abbrev=panel_id)
             if panel is None:
                 LOG.error(f"Unknown gene panel: {panel_id}")
                 raise click.Abort

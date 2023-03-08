@@ -67,7 +67,7 @@ class CaseSubmitter(Submitter):
             if not sample.internal_id:
                 continue
 
-            existing_sample: Sample = self.status.sample(sample.internal_id)
+            existing_sample: Sample = self.status.sample(internal_id=sample.internal_id)
             data_customer: Customer = self.status.get_customer_by_customer_id(
                 customer_id=customer_id
             )
@@ -81,7 +81,7 @@ class CaseSubmitter(Submitter):
         """Validate that the names of all cases are unused for all samples"""
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         for sample in samples:
-            if self._is_rerun_of_existing_case(sample):
+            if self._is_rerun_of_existing_case(sample=sample):
                 continue
             if self.status.find_family(customer=customer, name=sample.family_name):
                 raise OrderError(f"Case name {sample.family_name} already in use")
@@ -113,16 +113,16 @@ class CaseSubmitter(Submitter):
         status_data = self.order_to_status(order=order)
         samples = [sample for family in status_data["families"] for sample in family["samples"]]
         if lims_map:
-            self._fill_in_sample_ids(samples, lims_map)
+            self._fill_in_sample_ids(samples=samples, lims_map=lims_map)
 
-        new_families = self.store_items_in_status(
+        new_cases: List[Family] = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
             ticket_id=order.ticket,
             items=status_data["families"],
         )
-        return {"project": project_data, "records": new_families}
+        return {"project": project_data, "records": new_cases}
 
     @staticmethod
     def _group_cases(samples: List[Of1508Sample]) -> dict:
@@ -219,7 +219,7 @@ class CaseSubmitter(Submitter):
         new_cases: List[Family] = []
         for case in items:
             status_db_case: Family
-            existing_case: Family = self.status.family(case["internal_id"])
+            existing_case: Family = self.status.family(internal_id=case["internal_id"])
             if not existing_case:
                 new_case: Family = self._create_case(
                     case=case, customer_obj=customer, ticket=ticket_id

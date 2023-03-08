@@ -12,7 +12,7 @@ from cg.store.models import Family, Flowcell, Customer, Sample
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
 FAMILY_HEADERS = ["Family", "Name", "Customer", "Priority", "Panels", "Action"]
-FLOWCELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
+FLOW_CELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
 LINK_HEADERS = ["Sample", "Mother", "Father"]
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
 
@@ -191,7 +191,7 @@ def flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
         existing_flow_cell.archived_at.date() if existing_flow_cell.archived_at else "No",
         existing_flow_cell.status,
     ]
-    click.echo(tabulate([row], headers=FLOWCELL_HEADERS, tablefmt="psql"))
+    click.echo(tabulate([row], headers=FLOW_CELL_HEADERS, tablefmt="psql"))
     if samples:
         sample_ids: List[str] = [
             sample_obj.internal_id for sample_obj in existing_flow_cell.samples
