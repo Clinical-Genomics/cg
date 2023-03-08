@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 from cg.store.models import Customer
 
 
-def filter_customer_by_customer_id(customers: Query, customer_id: str, **kwargs) -> Query:
+def filter_customer_by_customer_internal_id(customers: Query, customer_id: str, **kwargs) -> Query:
     """Return customer by customer internal id."""
     return customers.filter(Customer.internal_id == customer_id)
 
@@ -14,7 +14,7 @@ def filter_customer_by_customer_id(customers: Query, customer_id: str, **kwargs)
 class CustomerFilters(Enum):
     """Define customer filter functions."""
 
-    FILTER_BY_ID: Callable = filter_customer_by_customer_id
+    FILTER_BY_INTERNAL_ID: Callable = filter_customer_by_customer_internal_id
 
 
 def apply_customer_filter(

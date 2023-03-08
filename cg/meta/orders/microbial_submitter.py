@@ -49,7 +49,9 @@ class MicrobialSubmitter(Submitter):
         )
         # prepare order for status database
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(status_data["samples"], lims_map, id_key="internal_id")
+        self._fill_in_sample_ids(
+            samples=status_data["samples"], lims_map=lims_map, id_key="internal_id"
+        )
 
         # submit samples to Status
         samples = self.store_items_in_status(
@@ -98,7 +100,7 @@ class MicrobialSubmitter(Submitter):
                     self.status.add_commit(case)
 
                 application_tag = sample_data["application"]
-                application_version = self.status.current_application_version(application_tag)
+                application_version = self.status.current_application_version(tag=application_tag)
                 organism = self.status.organism(sample_data["organism_id"])
 
                 if not organism:

@@ -225,12 +225,12 @@ class CaseSubmitter(Submitter):
                     case=case, customer_obj=customer, ticket=ticket_id
                 )
                 new_cases.append(new_case)
-                self._update_case(case, new_case)
+                self._update_case_panel(panels=case["panels"], case=new_case)
                 status_db_case: Family = new_case
             else:
                 self._append_ticket(ticket_id=ticket_id, case=existing_case)
                 self._update_action(action=CaseActions.ANALYZE, case=existing_case)
-                self._update_case(case, existing_case)
+                self._update_case_panel(panels=case["panels"], case=existing_case)
                 status_db_case: Family = existing_case
 
             family_samples: Dict[str, Sample] = {}
@@ -253,11 +253,11 @@ class CaseSubmitter(Submitter):
                 sample_mother: Sample = family_samples.get(sample.get(Pedigree.MOTHER))
                 sample_father: Sample = family_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
-                    family_sample: FamilySample = self.status.link(
+                    case_sample: FamilySample = self.status.link(
                         family_id=status_db_case.internal_id, sample_id=sample["internal_id"]
                     )
-                if not family_sample:
-                    family_sample: FamilySample = self._create_link(
+                if not case_sample:
+                    case_sample: FamilySample = self._create_link(
                         case_obj=status_db_case,
                         family_samples=family_samples,
                         father_obj=sample_father,
@@ -267,7 +267,7 @@ class CaseSubmitter(Submitter):
 
                 self._update_relationship(
                     father_obj=sample_father,
-                    link_obj=family_sample,
+                    link_obj=case_sample,
                     mother_obj=sample_mother,
                     sample=sample,
                 )
@@ -275,8 +275,9 @@ class CaseSubmitter(Submitter):
         return new_cases
 
     @staticmethod
-    def _update_case(case, case_obj):
-        case_obj.panels = case["panels"]
+    def _update_case_panel(panels: List[str], case: Family) -> None:
+        """Update case panels."""
+        case.panels = panels
 
     @staticmethod
     def _append_ticket(ticket_id: str, case: Family) -> None:

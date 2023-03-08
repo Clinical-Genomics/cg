@@ -26,7 +26,7 @@ class PoolSubmitter(Submitter):
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         samples = [sample for pool in status_data["pools"] for sample in pool["samples"]]
-        self._fill_in_sample_ids(samples, lims_map, id_key="internal_id")
+        self._fill_in_sample_ids(samples=samples, lims_map=lims_map, id_key="internal_id")
         new_records = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],

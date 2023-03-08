@@ -34,7 +34,7 @@ class MetagenomeSubmitter(Submitter):
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(status_data["families"][0]["samples"], lims_map)
+        self._fill_in_sample_ids(samples=status_data["families"][0]["samples"], lims_map=lims_map)
         new_samples = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
@@ -101,7 +101,7 @@ class MetagenomeSubmitter(Submitter):
                 )
                 new_sample.customer = customer
                 application_tag = sample["application"]
-                application_version = self.status.current_application_version(application_tag)
+                application_version = self.status.current_application_version(tag=application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version

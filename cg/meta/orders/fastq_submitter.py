@@ -4,6 +4,7 @@ from typing import List
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery, GenePanelMasterList
+from cg.constants.constants import PrepCategory
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -21,7 +22,7 @@ class FastqSubmitter(Submitter):
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(status_data["samples"], lims_map)
+        self._fill_in_sample_ids(samples=status_data["samples"], lims_map=lims_map)
         new_samples = self.store_items_in_status(
             customer_id=status_data["customer"],
             order=status_data["order"],
@@ -98,7 +99,7 @@ class FastqSubmitter(Submitter):
                 )
                 new_sample.customer = customer
                 application_tag = sample["application"]
-                application_version = self.status.current_application_version(application_tag)
+                application_version = self.status.current_application_version(tag=application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
@@ -114,7 +115,8 @@ class FastqSubmitter(Submitter):
                     )
                 if (
                     not new_sample.is_tumour
-                    and new_sample.application_version.application.prep_category == "wgs"
+                    and new_sample.application_version.application.prep_category
+                    == PrepCategory.WHOLE_GENOME_SEQUENCING
                 ):
                     self.create_maf_case(sample_obj=new_sample)
                 case.customer = customer

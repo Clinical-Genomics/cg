@@ -93,7 +93,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_customer_by_customer_id(self, customer_id: str) -> Customer:
         """Return customer with customer id."""
         return apply_customer_filter(
-            filter_functions=[CustomerFilters.FILTER_BY_ID],
+            filter_functions=[CustomerFilters.FILTER_BY_INTERNAL_ID],
             customers=self._get_customer_query(),
             customer_id=customer_id,
         ).first()
