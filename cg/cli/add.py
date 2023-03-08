@@ -3,6 +3,7 @@ from typing import Optional, Tuple, List
 
 import click
 from cg.constants import STATUS_OPTIONS, DataDelivery, Pipeline
+from cg.constants.subject import Gender
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -107,14 +108,16 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
 
 @add.command()
 @click.option("-l", "--lims", "lims_id", help="LIMS id for the sample")
-@click.option("-d", "--downsampled", type=int, help="how many reads is the sample downsampled to?")
-@click.option("-o", "--order", help="name of the order the sample belongs to")
+@click.option(
+    "-d", "--down-sampled", type=int, help="How many reads is the sample down sampled to?"
+)
+@click.option("-o", "--order", help="Name of the order the sample belongs to")
 @click.option(
     "-s",
     "--sex",
-    type=click.Choice(["male", "female", "unknown"]),
+    type=EnumChoice(Gender, use_value=False),
     required=True,
-    help="sample pedigree sex",
+    help="Sample pedigree sex",
 )
 @click.option("-a", "--application-tag", required=True, help="application tag name")
 @click.option(
@@ -122,7 +125,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     "--priority",
     type=EnumChoice(Priority, use_value=False),
     default="standard",
-    help="set the priority for the samples",
+    help="Set the priority for the samples",
 )
 @click.argument("customer_id")
 @click.argument("name")
@@ -130,8 +133,8 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
 def sample(
     context: CGConfig,
     lims_id: Optional[str],
-    downsampled: Optional[int],
-    sex: str,
+    down_sampled: Optional[int],
+    sex: Gender,
     order: Optional[str],
     application_tag: str,
     priority: Priority,
@@ -141,17 +144,17 @@ def sample(
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
     customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
-    if customer is None:
-        LOG.error("customer not found")
+    if not customer:
+        LOG.error(f"Customer: {customer_id} not found")
         raise click.Abort
     application: Application = status_db.application(application_tag)
-    if application is None:
-        LOG.error("application not found")
+    if not application:
+        LOG.error(f"Application: {application_tag} not found")
         raise click.Abort
     new_record: Sample = status_db.add_sample(
         name=name,
         sex=sex,
-        downsampled_to=downsampled,
+        downsampled_to=down_sampled,
         internal_id=lims_id,
         order=order,
         priority=priority,
