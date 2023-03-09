@@ -15,22 +15,22 @@ def filter_pools_by_name(pools: Query, name: str, **kwargs) -> Query:
 
 
 def filter_pools_is_received(pools: Query, **kwargs) -> Query:
-    """Return pools that are received."""
+    """Return received pools."""
     return pools.filter(Pool.received_at.isnot(None))
 
 
 def filter_pools_is_not_received(pools: Query, **kwargs) -> Query:
-    """Return pools that are not received."""
+    """Return not received pools."""
     return pools.filter(Pool.received_at.is_(None))
 
 
 def filter_pools_is_delivered(pools: Query, **kwargs) -> Query:
-    """Return pools that are delivered."""
+    """Return delivered pools."""
     return pools.filter(Pool.delivered_at.isnot(None))
 
 
 def filter_pools_is_not_delivered(pools: Query, **kwargs) -> Query:
-    """Return pools that are not delivered."""
+    """Return not delivered pools."""
     return pools.filter(Pool.delivered_at.is_(None))
 
 
@@ -40,12 +40,12 @@ def filter_pools_by_invoice_id(pools: Query, invoice_id: int, **kwargs):
 
 
 def filter_pools_without_invoice_id(pools: Query, **kwargs) -> Query:
-    """Return pools that without and invoice id."""
+    """Return pools without an invoice id."""
     return pools.filter(Pool.invoice_id.is_(None))
 
 
 def filter_pools_do_invoice(pools: Query, **kwargs) -> Query:
-    """Return pools marked to be invoiced."""
+    """Return pools marked for invoicing."""
     return pools.filter(Pool.no_invoice.is_(False))
 
 
