@@ -104,8 +104,8 @@ def upload_invoice_news_to_db():
 def index():
     """Retrieve invoices."""
     invoices = {
-        "sent_invoices": db.get_invoices_by_status(invoiced=True),
-        "pending_invoices": db.get_invoices_by_status(invoiced=False),
+        "sent_invoices": db.get_invoices_by_status(is_invoiced=True),
+        "pending_invoices": db.get_invoices_by_status(is_invoiced=False),
     }
     return render_template("invoices/index.html", invoices=invoices)
 

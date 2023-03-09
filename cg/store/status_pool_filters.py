@@ -4,52 +4,52 @@ from alchy import Query
 from cg.store.models import Pool
 
 
-def filter_pools_by_entry_id(pools: Query, entry_id: int) -> Query:
+def filter_pools_by_entry_id(pools: Query, entry_id: int, **kwargs) -> Query:
     """Return pools by entry id."""
     return pools.filter(Pool.id == entry_id)
 
 
-def filter_pools_by_name(pools: Query, name: str) -> Query:
+def filter_pools_by_name(pools: Query, name: str, **kwargs) -> Query:
     """Return pools by name."""
     return pools.filter(Pool.name == name)
 
 
-def filter_pools_is_received(pools: Query) -> Query:
+def filter_pools_is_received(pools: Query, **kwargs) -> Query:
     """Return pools that are received."""
     return pools.filter(Pool.received_at.isnot(None))
 
 
-def filter_pools_is_not_received(pools: Query) -> Query:
+def filter_pools_is_not_received(pools: Query, **kwargs) -> Query:
     """Return pools that are not received."""
     return pools.filter(Pool.received_at.is_(None))
 
 
-def filter_pools_is_delivered(pools: Query) -> Query:
+def filter_pools_is_delivered(pools: Query, **kwargs) -> Query:
     """Return pools that are delivered."""
     return pools.filter(Pool.delivered_at.isnot(None))
 
 
-def filter_pools_is_not_delivered(pools: Query) -> Query:
+def filter_pools_is_not_delivered(pools: Query, **kwargs) -> Query:
     """Return pools that are not delivered."""
     return pools.filter(Pool.delivered_at.is_(None))
 
 
-def filter_pools_by_invoice_id(pools: Query, invoice_id: int):
+def filter_pools_by_invoice_id(pools: Query, invoice_id: int, **kwargs):
     """Return a pool by an invoice id."""
     return pools.filter(Pool.invoice_id == invoice_id)
 
 
-def filter_pools_without_invoice_id(pools: Query) -> Query:
+def filter_pools_without_invoice_id(pools: Query, **kwargs) -> Query:
     """Return pools that without and invoice id."""
     return pools.filter(Pool.invoice_id.is_(None))
 
 
-def filter_pools_do_invoice(pools: Query) -> Query:
+def filter_pools_do_invoice(pools: Query, **kwargs) -> Query:
     """Return pools marked to be invoiced."""
     return pools.filter(Pool.no_invoice.is_(False))
 
 
-def filter_pools_do_not_invoice(pools: Query) -> Query:
+def filter_pools_do_not_invoice(pools: Query, **kwargs) -> Query:
     """Return pools marked to skip invoicing."""
     return pools.filter(Pool.no_invoice.is_(True))
 

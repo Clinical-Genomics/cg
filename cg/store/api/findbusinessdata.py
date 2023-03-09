@@ -370,10 +370,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all invoices."""
         return self._get_invoice_query()
 
-    def get_invoices_by_status(self, invoiced: bool = None) -> List[Invoice]:
+    def get_invoices_by_status(self, is_invoiced: bool = None) -> List[Invoice]:
         """Fetch invoices by invoiced status."""
-        invoices = self._get_invoice_query()
-        if invoiced:
+        invoices: Query = self._get_invoice_query()
+        if is_invoiced:
             return apply_invoice_filter(
                 invoices=invoices, functions=[InvoiceFilters.FILTER_BY_INVOICED]
             ).all()
@@ -384,7 +384,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_first_invoice_by_id(self, invoice_id: int) -> Invoice:
         """Return an invoice."""
-        invoices = self._get_invoice_query()
+        invoices: Query = self._get_invoice_query()
         return apply_invoice_filter(
             invoices=invoices,
             invoice_id=invoice_id,
@@ -395,12 +395,12 @@ class FindBusinessDataHandler(BaseHandler):
         self, *, invoice_id: int = None
     ) -> List[Union[Pool, Sample]]:
         """Return all pools and samples for an invoice."""
-        pools = self.Pool.query
-        pools = apply_pool_filter(
+        pools: Query = self.Pool.query
+        pools: List[Pool] = apply_pool_filter(
             pools=pools, invoice_id=invoice_id, functions=[PoolFilters.FILTER_BY_INVOICE_ID]
         ).all()
-        samples = self.Sample.query
-        samples = apply_sample_filter(
+        samples: Query = self.Sample.query
+        samples: List[Sample] = apply_sample_filter(
             samples=samples,
             invoice_id=invoice_id,
             functions=[SampleFilters.FILTER_BY_INVOICE_ID],
@@ -417,13 +417,13 @@ class FindBusinessDataHandler(BaseHandler):
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
-        query = self._get_invoice_query()
+        query: Query = self._get_invoice_query()
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
     def pools(self, *, customers: Optional[List[Customer]] = None, enquiry: str = None) -> Query:
         """Fetch all the pools for a customer."""
-        records = self.Pool.query
+        records: Query = self.Pool.query
 
         if customers:
             customer_ids = [customer.id for customer in customers]
