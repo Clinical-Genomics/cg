@@ -114,6 +114,8 @@ def apply_case_filter(
 
 
 class CaseFilters(Enum):
+    """Define case filters."""
+
     get_cases_has_sequence: Callable = get_cases_has_sequence
     get_inactive_analysis_cases: Callable = get_inactive_analysis_cases
     get_new_cases: Callable = get_new_cases

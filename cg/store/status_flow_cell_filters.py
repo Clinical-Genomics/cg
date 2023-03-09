@@ -34,10 +34,10 @@ def apply_flow_cell_filter(
     case: Optional[Family] = None,
     flow_cell_id: Optional[str] = None,
     flow_cell_statuses: Optional[List[str]] = None,
-) -> Union[Query, Flowcell]:
+) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in functions:
-        flow_cells: Union[Query, Flowcell] = function(
+        flow_cells: Query = function(
             flow_cells=flow_cells,
             case=case,
             flow_cell_id=flow_cell_id,
@@ -47,6 +47,8 @@ def apply_flow_cell_filter(
 
 
 class FlowCellFilters(Enum):
+    """Define FlowCell filter functions."""
+
     get_flow_cells_by_case: Callable = get_flow_cells_by_case
     get_flow_cell_by_id: Callable = get_flow_cell_by_id
     get_flow_cell_by_id_and_by_enquiry: Callable = get_flow_cell_by_id_and_by_enquiry

@@ -31,7 +31,7 @@ def test_list_samples_to_deliver(base_store, helpers):
     assert len(store.get_all_samples()) == 1
 
     # WHEN asking for samples to deliver
-    samples_to_deliver: List[Sample] = store.get_all_samples_to_deliver()
+    samples_to_deliver: List[Sample] = store.get_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
     assert len(samples_to_deliver) == 1
     assert isinstance(samples_to_deliver[0].sequenced_at, dt.datetime)
@@ -51,7 +51,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
     assert len(store.get_all_samples()) == 2
 
     # WHEN asking for samples to deliver
-    samples_to_deliver: List[Sample] = store.get_all_samples_to_deliver()
+    samples_to_deliver: List[Sample] = store.get_samples_to_deliver()
     # THEN it should return the sample which is ready to deliver
     assert len(samples_to_deliver) == 1
     assert isinstance(samples_to_deliver[0].sequenced_at, dt.datetime)

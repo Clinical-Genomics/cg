@@ -57,12 +57,12 @@ def filter_samples_without_invoice_id(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.invoice_id.is_(None))
 
 
-def filter_samples_not_down_sampled(samples: Query, **kwargs) -> Query:
+def filter_samples_is_not_down_sampled(samples: Query, **kwargs) -> Query:
     """Return samples that are not down sampled."""
     return samples.filter(Sample.downsampled_to.is_(None))
 
 
-def filter_samples_down_sampled(samples: Query, **kwargs) -> Query:
+def filter_samples_is_down_sampled(samples: Query, **kwargs) -> Query:
     """Return samples that are down sampled."""
     return samples.filter(Sample.downsampled_to.isnot(None))
 
@@ -173,8 +173,8 @@ class SampleFilters(Enum):
     FILTER_IS_NOT_DELIVERED: Callable = filter_samples_is_not_delivered
     FILTER_BY_INVOICE_ID: Callable = filter_samples_by_invoice_id
     FILTER_HAS_NO_INVOICE_ID: Callable = filter_samples_without_invoice_id
-    FILTER_NOT_DOWN_SAMPLED: Callable = filter_samples_not_down_sampled
-    FILTER_DOWN_SAMPLED: Callable = filter_samples_down_sampled
+    FILTER_IS_NOT_DOWN_SAMPLED: Callable = filter_samples_is_not_down_sampled
+    FILTER_IS_DOWN_SAMPLED: Callable = filter_samples_is_down_sampled
     FILTER_IS_SEQUENCED: Callable = filter_samples_is_sequenced
     FILTER_IS_NOT_SEQUENCED: Callable = filter_samples_is_not_sequenced
     FILTER_DO_INVOICE: Callable = filter_samples_do_invoice

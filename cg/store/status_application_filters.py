@@ -18,7 +18,7 @@ def filter_applications_by_prep_category(
 
 
 def filter_applications_is_archived(applications: Query, **kwargs) -> Query:
-    """Return application is archived."""
+    """Return application which is archived."""
     return applications.filter(Application.is_archived.is_(True))
 
 
@@ -28,12 +28,12 @@ def filter_applications_by_entry_id(applications: Query, entry_id: int, **kwargs
 
 
 def filter_applications_is_external(applications: Query, **kwargs) -> Query:
-    """Return application is external."""
+    """Return application which is external."""
     return applications.filter(Application.is_external == True)
 
 
 def filter_applications_is_not_external(applications: Query, **kwargs) -> Query:
-    """Return application is not external."""
+    """Return application which is not external."""
     return applications.filter(Application.is_external == False)
 
 

@@ -382,7 +382,7 @@ class FindBusinessDataHandler(BaseHandler):
                 invoices=invoices, functions=[InvoiceFilters.FILTER_BY_NOT_INVOICED]
             ).all()
 
-    def get_first_invoice_by_id(self, invoice_id: int) -> Invoice:
+    def get_invoice_by_id(self, invoice_id: int) -> Invoice:
         """Return an invoice."""
         invoices: Query = self._get_invoice_query()
         return apply_invoice_filter(
@@ -391,7 +391,7 @@ class FindBusinessDataHandler(BaseHandler):
             functions=[InvoiceFilters.FILTER_BY_INVOICE_ID],
         ).first()
 
-    def get_all_pools_and_samples_for_invoice_by_invoice_id(
+    def get_pools_and_samples_for_invoice_by_invoice_id(
         self, *, invoice_id: int = None
     ) -> List[Union[Pool, Sample]]:
         """Return all pools and samples for an invoice."""
@@ -421,9 +421,11 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def pools(self, *, customers: Optional[List[Customer]] = None, enquiry: str = None) -> Query:
+    def get_pools_for_customer(
+        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
+    ) -> Query:
         """Fetch all the pools for a customer."""
-        records: Query = self.Pool.query
+        records: Query = self._get_pool_query()
 
         if customers:
             customer_ids = [customer.id for customer in customers]
@@ -437,9 +439,16 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records.order_by(Pool.created_at.desc())
 
-    def pool(self, pool_id: int) -> Pool:
-        """Fetch a pool by pool_id."""
-        return self.Pool.get(pool_id)
+    def _get_pool_query(self) -> Query:
+        """Return pool query."""
+        return self.Pool.query
+
+    def get_pool_by_entry_id(self, entry_id: int) -> Pool:
+        """Return a pool by entry id."""
+        pools = self._get_pool_query()
+        return apply_pool_filter(
+            pools=pools, entry_id=entry_id, functions=[PoolFilters.FILTER_BY_ENTRY_ID]
+        ).first()
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case."""
@@ -473,7 +482,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records.order_by(Sample.created_at.desc()).all()
 
-    def _join_sample_and_customer(self) -> Query:
+    def _get_join_sample_and_customer_query(self) -> Query:
         """Join sample and customer."""
         return self.Sample.query.join(Customer)
 
@@ -517,7 +526,7 @@ class FindBusinessDataHandler(BaseHandler):
             samples=samples, functions=[SampleFilters.FILTER_BY_SAMPLE_NAME], name=name
         ).first()
 
-    def _join_sample_family_query(self) -> Query:
+    def _get_join_sample_family_query(self) -> Query:
         """Return a sample case relationship query."""
         return self.Sample.query.join(Family.links, FamilySample.sample)
 
@@ -525,7 +534,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
             functions=[CaseSampleFilters.get_samples_associated_with_case],
-            case_samples=self._join_sample_family_query(),
+            case_samples=self._get_join_sample_family_query(),
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(

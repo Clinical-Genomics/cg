@@ -19,8 +19,8 @@ def test_transfer_samples_received_at_overwriteable(
     # there is a sample in lims with the same internal id and another received_at date
     lims_api: LimsAPI = transfer_lims_api.lims
     sample_store: Store = transfer_lims_api.status
-    assert len(sample_store.get_all_samples_to_deliver()) > 0
-    sample: Sample = sample_store.get_all_samples_to_deliver()[0]
+    assert len(sample_store.get_samples_to_deliver()) > 0
+    sample: Sample = sample_store.get_samples_to_deliver()[0]
     assert sample.received_at
     lims_samples = [
         sample_store.add_sample(
@@ -43,8 +43,8 @@ def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt
     # there is a sample in lims with the same internal id and another received_at date
     lims_api = transfer_lims_api.lims
     sample_store = transfer_lims_api.status
-    assert len(sample_store.get_all_samples_to_deliver()) > 0
-    sample = sample_store.get_all_samples_to_deliver()[0]
+    assert len(sample_store.get_samples_to_deliver()) > 0
+    sample = sample_store.get_samples_to_deliver()[0]
     assert sample.received_at
     lims_samples = [
         sample_store.add_sample(

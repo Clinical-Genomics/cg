@@ -11,8 +11,8 @@ from cg.store.status_sample_filters import (
     filter_samples_is_delivered,
     filter_samples_is_not_delivered,
     filter_samples_without_invoice_id,
-    filter_samples_down_sampled,
-    filter_samples_not_down_sampled,
+    filter_samples_is_down_sampled,
+    filter_samples_is_not_down_sampled,
     filter_samples_is_sequenced,
     filter_samples_is_not_sequenced,
     filter_samples_do_invoice,
@@ -167,7 +167,7 @@ def test_filter_samples_down_sampled(
     # GIVEN a store with two samples of which one is not sequenced
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_down_sampled(
+    samples: Query = filter_samples_is_down_sampled(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
     )
 
@@ -187,7 +187,7 @@ def test_filter_samples_not_down_sampled(
     # GIVEN a store with two samples of which one is not sequenced
 
     # WHEN getting not sequenced samples
-    samples: Query = filter_samples_not_down_sampled(
+    samples: Query = filter_samples_is_not_down_sampled(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
     )
 

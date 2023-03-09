@@ -42,11 +42,11 @@ class TransferLims(object):
         self._sample_functions = {
             SampleState.RECEIVED: self.status.get_all_samples_to_receive,
             SampleState.PREPARED: self.status.get_all_samples_to_prepare,
-            SampleState.DELIVERED: self.status.get_all_samples_to_deliver,
+            SampleState.DELIVERED: self.status.get_samples_to_deliver,
         }
 
         self._pool_functions = {
-            PoolState.RECEIVED: self.status.get_all_pools_to_receive,
+            PoolState.RECEIVED: self.status.get_pools_to_receive,
             PoolState.DELIVERED: self.status.get_all_pools_to_deliver,
         }
 
@@ -59,7 +59,7 @@ class TransferLims(object):
         }
 
     def _get_all_samples_not_yet_delivered(self):
-        return self.status.get_all_samples_not_delivered()
+        return self.status.get_samples_not_delivered()
 
     def transfer_samples(
         self, status_type: SampleState, include: str = "unset", sample_id: str = None
@@ -99,9 +99,9 @@ class TransferLims(object):
         if include == IncludeOptions.UNSET.value:
             samples = self._get_samples_in_step(status_type)
         elif include == IncludeOptions.NOTINVOICED.value:
-            samples = self.status.get_all_samples_not_invoiced()
+            samples = self.status.get_samples_not_invoiced()
         elif include == IncludeOptions.ALL.value:
-            samples = self.status.get_all_samples_not_down_sampled()
+            samples = self.status.get_samples_not_down_sampled()
         return samples
 
     def transfer_pools(self, status_type: PoolState):

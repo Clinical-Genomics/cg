@@ -278,7 +278,9 @@ def pools():
     customer_objs: Optional[Customer] = (
         None if g.current_user.is_admin else g.current_user.customers
     )
-    pools_q = db.pools(customers=customer_objs, enquiry=request.args.get("enquiry"))
+    pools_q = db.get_pools_for_customer(
+        customers=customer_objs, enquiry=request.args.get("enquiry")
+    )
     data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
     return jsonify(pools=data, total=pools_q.count())
 
@@ -286,7 +288,7 @@ def pools():
 @BLUEPRINT.route("/pools/<pool_id>")
 def pool(pool_id):
     """Fetch a single pool."""
-    record = db.pool(pool_id)
+    record = db.get_pool_by_entry_id(pool_id)
     if record is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (record.customer not in g.current_user.customers):

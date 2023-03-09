@@ -478,7 +478,7 @@ def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpe
     assert len(invoice.samples) == 1
 
     # WHEN fetching all pools and samples for the invoice
-    records = store.get_all_pools_and_samples_for_invoice_by_invoice_id(invoice_id=invoice.id)
+    records = store.get_pools_and_samples_for_invoice_by_invoice_id(invoice_id=invoice.id)
     # THEN the pool and sample should be returned
     assert pool in records
     assert sample in records

@@ -744,7 +744,7 @@ class StoreHelpers:
         invoiced_at: Optional[datetime] = None,
     ) -> models.Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
-        invoice = store.get_first_invoice_by_id(invoice_id=invoice_id)
+        invoice = store.get_invoice_by_id(invoice_id=invoice_id)
         if not invoice:
             customer_obj = StoreHelpers.ensure_customer(
                 store=store,

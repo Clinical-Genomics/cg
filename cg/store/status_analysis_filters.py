@@ -81,6 +81,8 @@ def apply_analysis_filter(
 
 
 class AnalysisFilters(Enum):
+    """Define Analysis filter functions."""
+
     get_valid_analyses_in_production: Callable = get_valid_analyses_in_production
     get_analyses_with_pipeline: Callable = get_analyses_with_pipeline
     get_completed_analyses: Callable = get_completed_analyses
