@@ -116,14 +116,14 @@ def apply_case_filter(
 class CaseFilters(Enum):
     """Define case filters."""
 
-    get_cases_has_sequence: Callable = get_cases_has_sequence
-    get_inactive_analysis_cases: Callable = get_inactive_analysis_cases
-    get_new_cases: Callable = get_new_cases
-    get_cases_with_pipeline: Callable = get_cases_with_pipeline
-    get_cases_with_loqusdb_supported_pipeline: Callable = get_cases_with_loqusdb_supported_pipeline
-    get_cases_with_loqusdb_supported_sequencing_method: Callable = (
+    GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
+    GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
+    GET_NEW: Callable = get_new_cases
+    GET_WITH_PIPELINE: Callable = get_cases_with_pipeline
+    GET_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
+    GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
         get_cases_with_loqusdb_supported_sequencing_method
     )
-    get_cases_for_analysis: Callable = get_cases_for_analysis
-    get_cases_with_scout_data_delivery: Callable = get_cases_with_scout_data_delivery
-    get_report_supported_data_delivery_cases: Callable = get_report_supported_data_delivery_cases
+    GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
+    GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
+    GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases

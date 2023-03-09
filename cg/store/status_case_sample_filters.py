@@ -44,8 +44,8 @@ def apply_case_sample_filter(
 class CaseSampleFilters(Enum):
     """Define CaseSample filter functions."""
 
-    get_samples_associated_with_case: Callable = get_samples_associated_with_case
-    get_cases_associated_with_sample: Callable = get_cases_associated_with_sample
-    get_cases_associated_with_sample_by_entry_id: Callable = (
+    GET_SAMPLES_ASSOCIATED_WITH_CASE: Callable = get_samples_associated_with_case
+    GET_CASES_ASSOCIATED_WITH_SAMPLE: Callable = get_cases_associated_with_sample
+    GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID: Callable = (
         get_cases_associated_with_sample_by_entry_id
     )

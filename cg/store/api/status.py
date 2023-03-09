@@ -111,9 +111,9 @@ class StatusHandler(BaseHandler):
     ) -> List[Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: List[CaseFilters] = [
-            CaseFilters.get_cases_has_sequence,
-            CaseFilters.get_cases_with_pipeline,
-            CaseFilters.get_cases_for_analysis,
+            CaseFilters.GET_HAS_SEQUENCE,
+            CaseFilters.GET_WITH_PIPELINE,
+            CaseFilters.GET_FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
             functions=case_filter_functions,
@@ -260,15 +260,15 @@ class StatusHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            functions=[FlowCellFilters.get_flow_cells_by_case],
+            functions=[FlowCellFilters.GET_BY_CASE],
             case=case,
         ).all()
 
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: List[CaseFilters] = [
-            CaseFilters.get_inactive_analysis_cases,
-            CaseFilters.get_new_cases,
+            CaseFilters.GET_HAS_INACTIVE_ANALYSIS,
+            CaseFilters.GET_NEW,
         ]
         return apply_case_filter(
             functions=case_filter_functions, cases=self._get_case_query(), date=date_threshold
@@ -689,8 +689,8 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have not been uploaded."""
         case_filter_functions: List[CaseFilters] = [
-            CaseFilters.get_cases_with_loqusdb_supported_pipeline,
-            CaseFilters.get_cases_with_loqusdb_supported_sequencing_method,
+            CaseFilters.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE,
+            CaseFilters.GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
             functions=case_filter_functions,
@@ -704,7 +704,7 @@ class StatusHandler(BaseHandler):
     def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
-            functions=[CaseFilters.get_cases_with_loqusdb_supported_pipeline],
+            functions=[CaseFilters.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE],
             cases=self.get_families_with_samples(),
             pipeline=pipeline,
         )
@@ -728,7 +728,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
-            functions=[CaseFilters.get_report_supported_data_delivery_cases],
+            functions=[CaseFilters.GET_REPORT_SUPPORTED],
             cases=self._get_analysis_case_query(),
             pipeline=pipeline,
         )
@@ -745,7 +745,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
-            functions=[CaseFilters.get_cases_with_scout_data_delivery],
+            functions=[CaseFilters.GET_WITH_SCOUT_DELIVERY],
             cases=self._get_analysis_case_query(),
             pipeline=pipeline,
         )
@@ -812,10 +812,8 @@ class StatusHandler(BaseHandler):
             samples=self._get_sample_query(),
         ).all()
 
-    def get_samples_delivered_not_invoiced(self) -> List[Sample]:
-        """Return samples have been delivered but not invoiced, excluding those that
-        have been marked to skip invoicing."""
-        records = self._get_sample_query()
+    def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
+        """Return all samples that should be invoiced."""
         sample_filter_functions: List[SampleFilters] = [
             SampleFilters.FILTER_IS_DELIVERED,
             SampleFilters.FILTER_HAS_NO_INVOICE_ID,
@@ -825,13 +823,8 @@ class StatusHandler(BaseHandler):
 
         records: Query = apply_sample_filter(
             functions=sample_filter_functions,
-            samples=records,
+            samples=self._get_sample_query(),
         )
-        return records.all()
-
-    def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
-        """Return all samples that should be invoiced."""
-        records = self.get_samples_delivered_not_invoiced()
 
         customers_to_invoice = [
             case_obj.customer

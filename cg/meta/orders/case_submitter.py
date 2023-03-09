@@ -11,7 +11,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store import models
+from cg.store.models import Sample, Panel, Application, Customer, Family, User
 
 from cg.constants import Priority
 
@@ -44,10 +44,10 @@ class CaseSubmitter(Submitter):
             new_gender: str = sample.sex
             if new_gender == "unknown":
                 continue
-            existing_samples: List[models.Sample] = self.status.get_samples_by_subject_id(
+            existing_samples: List[Sample] = self.status.get_samples_by_subject_id(
                 customer_id=customer_id, subject_id=subject_id
             )
-            existing_sample: models.Sample
+            existing_sample: Sample
             for existing_sample in existing_samples:
                 previous_gender = existing_sample.sex
                 if previous_gender == "unknown":
@@ -67,10 +67,10 @@ class CaseSubmitter(Submitter):
             if not sample.internal_id:
                 continue
 
-            existing_sample: models.Sample = self.status.get_sample_by_internal_id(
+            existing_sample: Sample = self.status.get_sample_by_internal_id(
                 internal_id=sample.internal_id
             )
-            data_customer: models.Customer = self.status.customer(customer_id)
+            data_customer: Customer = self.status.customer(customer_id)
 
             if existing_sample.customer not in data_customer.collaborators:
                 raise OrderError(f"Sample not available: {sample.name}")
@@ -79,7 +79,7 @@ class CaseSubmitter(Submitter):
         self, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
-        customer_obj: models.Customer = self.status.customer(customer_id)
+        customer_obj: Customer = self.status.customer(customer_id)
 
         sample: Of1508Sample
         for sample in samples:
@@ -216,7 +216,7 @@ class CaseSubmitter(Submitter):
 
     def store_items_in_status(
         self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
-    ) -> List[models.Family]:
+    ) -> List[Family]:
         """Store cases and samples in the status database."""
 
         customer_obj = self.status.customer(customer)
@@ -262,12 +262,12 @@ class CaseSubmitter(Submitter):
         case_obj.panels = case["panels"]
 
     @staticmethod
-    def _append_ticket(ticket: str, case: models.Family) -> None:
+    def _append_ticket(ticket: str, case: Family) -> None:
         """Add a ticket to the case."""
         case.tickets = f"{case.tickets},{ticket}"
 
     @staticmethod
-    def _update_action(action: str, case: models.Family) -> None:
+    def _update_action(action: str, case: Family) -> None:
         """Update action of a case."""
         case.action = action
 
@@ -318,7 +318,7 @@ class CaseSubmitter(Submitter):
         self.status.add(new_delivery)
         return sample_obj
 
-    def _create_case(self, case: dict, customer_obj: models.Customer, ticket: str):
+    def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
         case_obj = self.status.add_case(
             cohorts=case["cohorts"],
             data_analysis=Pipeline(case["data_analysis"]),

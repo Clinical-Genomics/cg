@@ -18,7 +18,7 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer
+from cg.store.models import Customer, Sample, Pool
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
@@ -220,55 +220,56 @@ def samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(http.HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
-        samples_q = db.get_all_samples_to_receive()
+        samples_q: List[Sample] = db.get_all_samples_to_receive()
     elif request.args.get("status") == "labprep":
-        samples_q = db.get_all_samples_to_prepare()
+        samples_q: List[Sample] = db.get_all_samples_to_prepare()
     elif request.args.get("status") == "sequencing":
-        samples_q = db.get_all_samples_to_sequence()
+        samples_q: List[Sample] = db.get_all_samples_to_sequence()
     else:
         customer_objs: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples_q = db.get_samples_by_enquiry(
+        samples_q: List[Sample] = db.get_samples_by_enquiry(
             enquiry=request.args.get("enquiry"), customers=customer_objs
         )
     limit = int(request.args.get("limit", 50))
-    data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
-    return jsonify(samples=data, total=samples_q.count())
+    data = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
+
+    return jsonify(samples=data, total=len(samples_q))
 
 
 @BLUEPRINT.route("/samples_in_collaboration")
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
     order_customer = db.customer(request.args.get("customer"))
-    samples_q = db.get_all_samples(
+    samples_q: List[Sample] = db.get_all_samples(
         enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
-    data = [sample_obj.to_dict() for sample_obj in samples_q.limit(limit)]
-    return jsonify(samples=data, total=samples_q.count())
+    data = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
+    return jsonify(samples=data, total=len(samples_q))
 
 
 @BLUEPRINT.route("/samples/<sample_id>")
 def sample(sample_id):
     """Fetch a single sample."""
-    sample_obj = db.get_sample_by_internal_id(sample_id)
-    if sample_obj is None:
+    sample: Sample = db.get_sample_by_internal_id(sample_id)
+    if sample is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (sample_obj.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
-    data = sample_obj.to_dict(links=True, flowcells=True)
+    data = sample.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
 
 @BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
 def sample_in_collaboration(sample_id):
     """Fetch a single sample."""
-    sample_obj = db.get_sample_by_internal_id(sample_id)
+    sample: Sample = db.get_sample_by_internal_id(sample_id)
     order_customer = db.customer(request.args.get("customer"))
-    if sample_obj.customer not in order_customer.collaborators:
+    if sample.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    data = sample_obj.to_dict(links=True, flowcells=True)
+    data = sample.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
 
@@ -278,17 +279,17 @@ def pools():
     customer_objs: Optional[Customer] = (
         None if g.current_user.is_admin else g.current_user.customers
     )
-    pools_q = db.get_pools_for_customer(
+    pools_q: List[Pool] = db.get_pools_for_customer(
         customers=customer_objs, enquiry=request.args.get("enquiry")
     )
-    data = [pool_obj.to_dict() for pool_obj in pools_q.limit(30)]
-    return jsonify(pools=data, total=pools_q.count())
+    data = [pool_obj.to_dict() for pool_obj in pools_q[:30]]
+    return jsonify(pools=data, total=len(pools_q))
 
 
 @BLUEPRINT.route("/pools/<pool_id>")
 def pool(pool_id):
     """Fetch a single pool."""
-    record = db.get_pool_by_entry_id(pool_id)
+    record: Pool = db.get_pool_by_entry_id(entry_id=pool_id)
     if record is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (record.customer not in g.current_user.customers):
@@ -303,8 +304,8 @@ def flowcells() -> Any:
         flow_cell_statuses=[request.args.get("status")],
         flow_cell_id_enquiry=request.args.get("enquiry"),
     )
-    parsed_flow_cells: List[dict] = [flow_cell.to_dict() for flow_cell in flow_cells.limit(50)]
-    return jsonify(flowcells=parsed_flow_cells, total=flow_cells.count())
+    parsed_flow_cells: List[dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
+    return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
 
 
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
