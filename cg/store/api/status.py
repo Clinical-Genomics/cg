@@ -813,7 +813,7 @@ class StatusHandler(BaseHandler):
         ).all()
 
     def get_samples_delivered_not_invoiced(self) -> List[Sample]:
-        """Returns samples have been delivered but not invoiced, excluding those that
+        """Return samples have been delivered but not invoiced, excluding those that
         have been marked to skip invoicing."""
         records = self._get_sample_query()
         sample_filter_functions: List[SampleFilters] = [
@@ -829,7 +829,7 @@ class StatusHandler(BaseHandler):
         )
         return records.all()
 
-    def get_all_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
+    def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
         """Return all samples that should be invoiced."""
         records = self.get_samples_delivered_not_invoiced()
 
