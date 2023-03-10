@@ -143,7 +143,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def organisms(self) -> List[Organism]:
         """Fetch all organisms"""
-        return self.Organism.query.order_by(Organism.internal_id)
+        return self._get_organism_query().order_by(Organism.internal_id)
 
     def panel(self, abbrev):
         """Find a panel by abbreviation."""
