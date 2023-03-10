@@ -56,7 +56,7 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
     status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not status_db.is_all_flow_cells_on_disk(case_id=case_id):
-        if analysis_api.status_db.is_case_down_sampled(case_id=case_id):
+        if analysis_api.status_db.is_case_downsampled(case_id=case_id):
             LOG.debug("All samples have been downsampled. flow cell check bit applicable")
             return
         raise FlowCellsNeededError(
