@@ -9,9 +9,11 @@ from housekeeper.store import models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.cli.upload.utils import suggest_cases_to_upload
+from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.exc import CgDataError, ScoutUploadError
 from cg.io.controller import WriteStream
+from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
@@ -56,17 +58,22 @@ def scout(context, re_upload: bool, print_console: bool, case_id: str):
 def create_scout_load_config(context: CGConfig, case_id: str, print_console: bool, re_upload: bool):
     """Create a load config for a case in scout and add it to housekeeper"""
 
+    LOG.info("Fetching family object")
+    case_obj: Family = status_db.family(case_id)
+
+    if not case_obj.analyses:
+        LOG.warning("Could not find analyses for %s", case_id)
+        raise click.Abort
+    
+    if case_obj.data_analysis in [Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]:
+        LOG.info(f"Found BALSAMIC analysis for {case_id}, using BALSAMIC upload API")
+        context.meta_apis["upload_api"] = BalsamicUploadAPI(context)
+
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     status_db: Store = context.status_db
 
     LOG.info("----------------- CREATE CONFIG -----------------------")
-
-    LOG.info("Fetching family object")
-    case_obj: Family = status_db.family(case_id)
     LOG.info("Create load config")
-    if not case_obj.analyses:
-        LOG.warning("Could not find analyses for %s", case_id)
-        raise click.Abort
     try:
         scout_load_config: ScoutLoadConfig = scout_upload_api.generate_config(case_obj.analyses[0])
     except SyntaxError as error:
