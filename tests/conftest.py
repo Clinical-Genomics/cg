@@ -1736,3 +1736,11 @@ def store_with_multiple_cases_and_samples(
         helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
 
     yield store
+
+
+@pytest.fixture(name="store_with_panels")
+def store_with_panels(store: Store, helpers: StoreHelpers):
+    helpers.ensure_panel(store=store, panel_id="panel1", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_id="panel2", customer_id="cust000")
+
+    yield store

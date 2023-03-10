@@ -17,6 +17,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
+from cg.store.panel_filters import apply_panel_filter, PanelFilter
 from cg.store.status_bed_filters import apply_bed_filter, BedFilters
 from cg.store.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
 from cg.store.status_collaboration_filters import (
@@ -61,6 +62,10 @@ class FindBasicDataHandler(BaseHandler):
     def _get_bed_query(self) -> Query:
         """Return bed query."""
         return self.Bed.query
+
+    def _get_panel_query(self) -> Query:
+        """Return panel query."""
+        return self.Panel.query
 
     def get_beds(self) -> Query:
         """Returns all beds."""
@@ -136,13 +141,17 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch all organisms"""
         return self.Organism.query.order_by(Organism.internal_id)
 
-    def panel(self, abbrev):
+    def get_panel_by_abbreviation(self, abbrev: str):
         """Find a panel by abbreviation."""
-        return self.Panel.query.filter_by(abbrev=abbrev).first()
+        return apply_panel_filter(
+            panels=self._get_panel_query(),
+            filters=[PanelFilter.FILTER_BY_ABBREVIATION],
+            abbreviation=abbrev,
+        ).first()
 
     def panels(self):
         """Returns all panels."""
-        return self.Panel.query.order_by(Panel.abbrev)
+        return self._get_panel_query().order_by(Panel.abbrev)
 
     def user(self, email: str) -> User:
         """Fetch a user from the store."""

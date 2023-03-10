@@ -300,7 +300,7 @@ class StoreHelpers:
     ) -> models.Panel:
         """Utility function to add a panel to use in tests."""
         customer = StoreHelpers.ensure_customer(store, customer_id)
-        panel = store.panel(panel_id)
+        panel = store.get_panel_by_abbreviation(panel_id)
         if not panel:
             panel = store.add_panel(
                 customer=customer,
