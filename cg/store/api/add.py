@@ -141,7 +141,6 @@ class AddHandler(BaseHandler):
         received: dt.datetime = None,
         original_ticket: str = None,
         tumour: bool = False,
-        delivered_at: dt.datetime = None,
         **kwargs,
     ) -> Sample:
         """Build a new Sample record."""
@@ -161,7 +160,6 @@ class AddHandler(BaseHandler):
             priority=priority,
             received_at=received,
             sex=sex,
-            delivered_at=delivered_at,
             **kwargs,
         )
 
