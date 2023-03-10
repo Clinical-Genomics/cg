@@ -2,7 +2,7 @@ from typing import List
 
 from cg.store import Store
 from cg.store.models import Bed
-from cg.store.status_bed_filters import get_not_archived_beds, order_beds_by_name
+from cg.store.filters.status_bed_filters import get_not_archived_beds, order_beds_by_name
 
 
 def test_get_beds_by_name(base_store: Store, bed_name: str):

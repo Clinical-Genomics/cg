@@ -18,11 +18,11 @@ from cg.store.models import (
     Sample,
     Flowcell,
 )
-from cg.store.status_analysis_filters import apply_analysis_filter
-from cg.store.status_case_filters import apply_case_filter
+from cg.store.filters.status_analysis_filters import apply_analysis_filter
+from cg.store.filters.status_case_filters import apply_case_filter
 from cg.store.api.base import BaseHandler
-from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
-from cg.store.status_sample_filters import apply_sample_filter
+from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
+from cg.store.filters.status_sample_filters import apply_sample_filter
 
 
 class StatusHandler(BaseHandler):
