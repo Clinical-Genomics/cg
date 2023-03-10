@@ -31,11 +31,11 @@ class BedFilter(Enum):
 
 def apply_bed_filter(
     beds: Query,
-    functions: List[Callable],
+    filter_functions: List[Callable],
     bed_name: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for function in functions:
+    for function in filter_functions:
         beds: Query = function(
             beds=beds,
             bed_name=bed_name,

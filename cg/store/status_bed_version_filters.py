@@ -21,11 +21,11 @@ class BedVersionFilter(Enum):
 
 def apply_bed_version_filter(
     bed_versions: Query,
-    functions: List[Callable],
+    filter_functions: List[Callable],
     bed_version_short_name: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for function in functions:
+    for function in filter_functions:
         bed_versions: Query = function(
             bed_versions=bed_versions,
             bed_version_short_name=bed_version_short_name,

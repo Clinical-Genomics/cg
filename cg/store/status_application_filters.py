@@ -38,12 +38,12 @@ def filter_applications_is_not_external(applications: Query, **kwargs) -> Query:
 
 
 def apply_application_filter(
-    functions: List[Callable],
+    filter_functions: List[Callable],
     applications: Query,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
-    for function in functions:
+    for function in filter_functions:
         applications: Query = function(
             applications=applications,
         )

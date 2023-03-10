@@ -59,7 +59,7 @@ class FindBasicDataHandler(BaseHandler):
         return apply_bed_version_filter(
             bed_versions=self._get_bed_version_query(),
             bed_version_short_name=bed_version_short_name,
-            functions=[BedVersionFilter.FILTER_BY_SHORT_NAME],
+            filter_functions=[BedVersionFilter.FILTER_BY_SHORT_NAME],
         ).first()
 
     def _get_bed_query(self) -> Query:
@@ -73,7 +73,9 @@ class FindBasicDataHandler(BaseHandler):
     def get_bed_by_name(self, bed_name: str) -> Optional[Bed]:
         """Return bed by name."""
         return apply_bed_filter(
-            beds=self._get_bed_query(), bed_name=bed_name, functions=[BedFilter.FILTER_BY_NAME]
+            beds=self._get_bed_query(),
+            bed_name=bed_name,
+            filter_functions=[BedFilter.FILTER_BY_NAME],
         ).first()
 
     def get_active_beds(self) -> Query:
@@ -82,7 +84,7 @@ class FindBasicDataHandler(BaseHandler):
             BedFilter.FILTER_NOT_ARCHIVED,
             BedFilter.ORDER_BY_NAME,
         ]
-        return apply_bed_filter(beds=self._get_bed_query(), functions=bed_filter_functions)
+        return apply_bed_filter(beds=self._get_bed_query(), filter_functions=bed_filter_functions)
 
     def get_latest_bed_version(self, bed_name: str) -> Optional[BedVersion]:
         """Return the latest bed version for a bed by supplied name."""

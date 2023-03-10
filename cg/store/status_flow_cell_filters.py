@@ -30,13 +30,13 @@ def get_flow_cells_with_statuses(
 
 def apply_flow_cell_filter(
     flow_cells: Query,
-    functions: List[Callable],
+    filter_functions: List[Callable],
     case: Optional[Family] = None,
     flow_cell_id: Optional[str] = None,
     flow_cell_statuses: Optional[List[str]] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for function in functions:
+    for function in filter_functions:
         flow_cells: Query = function(
             flow_cells=flow_cells,
             case=case,

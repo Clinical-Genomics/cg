@@ -68,11 +68,11 @@ def order_analyses_by_uploaded_at(analyses: Query, **kwargs) -> Query:
 
 
 def apply_analysis_filter(
-    functions: List[Callable], analyses: Query, pipeline: Pipeline = None
+    filter_functions: List[Callable], analyses: Query, pipeline: Pipeline = None
 ) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
 
-    for function in functions:
+    for function in filter_functions:
         analyses: Query = function(
             analyses=analyses,
             pipeline=pipeline,

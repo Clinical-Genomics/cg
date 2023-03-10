@@ -103,12 +103,12 @@ def get_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
 
 def apply_case_filter(
     cases: Query,
-    functions: List[Callable],
+    filter_functions: List[Callable],
     date: Optional[datetime] = None,
     pipeline: Optional[Pipeline] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for function in functions:
+    for function in filter_functions:
         cases: Query = function(cases=cases, date=date, pipeline=pipeline)
     return cases
 

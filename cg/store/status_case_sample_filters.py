@@ -23,7 +23,7 @@ def get_cases_associated_with_sample_by_entry_id(
 
 
 def apply_case_sample_filter(
-    functions: List[Callable],
+    filter_functions: List[Callable],
     case_samples: Query,
     case_id: Optional[str] = None,
     sample_entry_id: Optional[int] = None,
@@ -31,7 +31,7 @@ def apply_case_sample_filter(
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
-    for function in functions:
+    for function in filter_functions:
         case_samples: Query = function(
             case_samples=case_samples,
             case_id=case_id,

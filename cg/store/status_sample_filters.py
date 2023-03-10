@@ -133,7 +133,7 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
 
 
 def apply_sample_filter(
-    functions: List[Callable],
+    filter_functions: List[Callable],
     samples: Query,
     entry_id: Optional[int] = None,
     internal_id: Optional[str] = None,
@@ -146,7 +146,7 @@ def apply_sample_filter(
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
-    for function in functions:
+    for function in filter_functions:
         samples: Query = function(
             samples=samples,
             entry_id=entry_id,

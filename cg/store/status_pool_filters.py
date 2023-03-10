@@ -55,7 +55,7 @@ def filter_pools_do_not_invoice(pools: Query, **kwargs) -> Query:
 
 
 def apply_pool_filter(
-    functions: List[Callable],
+    filter_functions: List[Callable],
     pools: Query,
     invoice_id: Optional[int] = None,
     entry_id: Optional[int] = None,
@@ -63,7 +63,7 @@ def apply_pool_filter(
 ) -> Query:
     """Apply filtering functions to the pool queries and return filtered results"""
 
-    for function in functions:
+    for function in filter_functions:
         pools: Query = function(pools=pools, invoice_id=invoice_id, entry_id=entry_id, name=name)
     return pools
 

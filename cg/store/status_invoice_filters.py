@@ -20,13 +20,13 @@ def filter_invoices_not_invoiced(invoices: Query, **kwargs) -> Query:
 
 
 def apply_invoice_filter(
-    functions: List[str],
+    filter_functions: List[str],
     invoices: Query,
     invoice_id: Optional[int] = None,
 ) -> Query:
     """Apply filtering functions to the invoice queries and return filtered results."""
 
-    for function in functions:
+    for function in filter_functions:
         invoices: Query = function(invoices=invoices, invoice_id=invoice_id)
     return invoices
 
