@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Query
 
@@ -16,18 +16,6 @@ def test_get_bed_query(base_store: Store):
 
     # THEN a query should be returned
     assert isinstance(bed_query, Query)
-
-
-def test_get_beds(base_store: Store):
-    """Test returning bed records query."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    beds: Query = base_store.get_beds()
-
-    # THEN beds should have be returned
-    assert beds
 
 
 def test_get_active_beds(base_store: Store):

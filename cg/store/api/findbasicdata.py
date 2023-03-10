@@ -54,10 +54,6 @@ class FindBasicDataHandler(BaseHandler):
             functions=[BedVersionFilters.get_bed_version_by_short_name],
         ).first()
 
-    def get_beds(self) -> Query:
-        """Returns all beds."""
-        return self._get_query(table=Bed)
-
     def get_bed_by_name(self, bed_name: str) -> Optional[Bed]:
         """Return bed by name."""
         return apply_bed_filter(

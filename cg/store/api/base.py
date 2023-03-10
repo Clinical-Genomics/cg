@@ -27,7 +27,7 @@ from cg.store.models import (
 
 @dataclass
 class BaseHandler:
-    """All models in one base class"""
+    """All models in one base class."""
 
     Analysis: Type[ModelBase] = Analysis
     Application: Type[ModelBase] = Application
@@ -48,62 +48,19 @@ class BaseHandler:
     User: Type[ModelBase] = User
 
     @staticmethod
-    def _get_query(table: Any) -> Query:
+    def _get_query(table: Type[ModelBase]) -> Query:
+        """Return a query for the given table."""
         return table.query
 
-    def samples_to_receive(self, external=False) -> Query:
+    def join_sample_ApplicationVersion(self) -> Query:
         """Fetch incoming samples."""
-        return (
-            self._get_query(table=Sample)
-            .join(
-                Sample.application_version,
-                ApplicationVersion.application,
-            )
-            .filter(
-                Sample.received_at.is_(None),
-                Sample.downsampled_to.is_(None),
-                Application.is_external == external,
-            )
-            .order_by(Sample.ordered_at)
+        return self._get_query(table=Sample).join(
+            Sample.application_version,
+            ApplicationVersion.application,
         )
 
-    def samples_to_prepare(self) -> Query:
-        """Fetch samples in lab prep queue."""
-        return (
-            self._get_query(table=Sample)
-            .join(
-                Sample.application_version,
-                ApplicationVersion.application,
-            )
-            .filter(
-                Sample.received_at.isnot(None),
-                Sample.prepared_at.is_(None),
-                Sample.downsampled_to.is_(None),
-                Application.is_external == False,
-                Sample.sequenced_at.is_(None),
-            )
-            .order_by(Sample.received_at)
-        )
-
-    def samples_to_sequence(self) -> Query:
-        """Fetch samples in sequencing."""
-        return (
-            self._get_query(table=Sample)
-            .join(
-                Sample.application_version,
-                ApplicationVersion.application,
-            )
-            .filter(
-                Sample.prepared_at.isnot(None),
-                Sample.sequenced_at.is_(None),
-                Sample.downsampled_to.is_(None),
-                Application.is_external == False,
-            )
-            .order_by(Sample.received_at)
-        )
-
-    def get_families_with_analyses(self) -> Query:
-        """Return all cases in the database with an analysis."""
+    def get_cases_with_analyses_query(self) -> Query:
+        """Return a query for all cases in the database with an analysis."""
         return (
             self._get_query(table=Family)
             .outerjoin(Analysis)
@@ -115,8 +72,8 @@ class BaseHandler:
             )
         )
 
-    def get_families_with_samples(self) -> Query:
-        """Return all cases in the database with samples."""
+    def get_cases_with_samples_query(self) -> Query:
+        """Return a query for all cases in the database with samples."""
         return self._get_query(table=Family).join(
             Family.links, FamilySample.sample, Family.customer
         )

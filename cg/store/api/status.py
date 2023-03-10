@@ -39,7 +39,7 @@ class StatusHandler(BaseHandler):
         ]
         cases = apply_case_filter(
             functions=case_filter_functions,
-            cases=self.get_families_with_analyses(),
+            cases=self.get_cases_with_analyses_query(),
             pipeline=pipeline,
         )
 
@@ -593,7 +593,7 @@ class StatusHandler(BaseHandler):
         ]
         records: Query = apply_case_filter(
             functions=case_filter_functions,
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples_query(),
             pipeline=pipeline,
         )
         return apply_sample_filter(functions=["get_samples_without_loqusdb_id"], samples=records)
@@ -602,7 +602,7 @@ class StatusHandler(BaseHandler):
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
             functions=["get_cases_with_loqusdb_supported_pipeline"],
-            cases=self.get_families_with_samples(),
+            cases=self.get_cases_with_samples_query(),
             pipeline=pipeline,
         )
         records: Query = apply_sample_filter(
@@ -717,6 +717,41 @@ class StatusHandler(BaseHandler):
         customers_to_invoice = list(set(customers_to_invoice))
         records = records.filter(Sample.customer == customer) if customer else records
         return records, customers_to_invoice
+
+    def samples_to_receive(self, external=False) -> Query:
+        """Fetch incoming samples."""
+        return self.join_sample_ApplicationVersion.filter(
+            Sample.received_at.is_(None),
+            Sample.downsampled_to.is_(None),
+            Application.is_external == external,
+        ).order_by(Sample.ordered_at)
+
+    def samples_to_prepare(self) -> Query:
+        """Fetch samples in lab prep queue."""
+        return (
+            self.join_sample_ApplicationVersion()
+            .filter(
+                Sample.received_at.isnot(None),
+                Sample.prepared_at.is_(None),
+                Sample.downsampled_to.is_(None),
+                Application.is_external == False,
+                Sample.sequenced_at.is_(None),
+            )
+            .order_by(Sample.received_at)
+        )
+
+    def samples_to_sequence(self) -> Query:
+        """Fetch samples in sequencing."""
+        return (
+            self.join_sample_ApplicationVersion()
+            .filter(
+                Sample.prepared_at.isnot(None),
+                Sample.sequenced_at.is_(None),
+                Sample.downsampled_to.is_(None),
+                Application.is_external == False,
+            )
+            .order_by(Sample.received_at)
+        )
 
     def pools_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
         """
