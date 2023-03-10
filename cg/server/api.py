@@ -18,7 +18,7 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool
+from cg.store.models import Customer, Sample, Pool, Family
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
@@ -170,7 +170,7 @@ def families():
         count = case_query.count()
         records = case_query.limit(30)
 
-    cases_data: List[dict] = [case_obj.to_dict(links=True) for case_obj in records]
+    cases_data: List[Dict] = [case_obj.to_dict(links=True) for case_obj in records]
     return jsonify(families=cases_data, total=count)
 
 
@@ -186,14 +186,14 @@ def families_in_collaboration():
     )
     count = families_q.count()
     records = families_q.limit(30)
-    data = [case_obj.to_dict(links=True) for case_obj in records]
+    data: List[Dict] = [case_obj.to_dict(links=True) for case_obj in records]
     return jsonify(families=data, total=count)
 
 
 @BLUEPRINT.route("/families/<family_id>")
 def family(family_id):
     """Fetch a family with links."""
-    case_obj = db.family(family_id)
+    case_obj: Family = db.family(family_id)
     if case_obj is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case_obj.customer not in g.current_user.customers):
@@ -210,7 +210,7 @@ def family_in_collaboration(family_id):
     order_customer = db.customer(request.args.get("customer"))
     if case_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    data = case_obj.to_dict(links=True, analyses=True)
+    data: Dict = case_obj.to_dict(links=True, analyses=True)
     return jsonify(**data)
 
 
@@ -233,7 +233,7 @@ def samples():
             enquiry=request.args.get("enquiry"), customers=customer_objs
         )
     limit = int(request.args.get("limit", 50))
-    data = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
+    data: List[Dict] = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
 
     return jsonify(samples=data, total=len(samples_q))
 
@@ -246,7 +246,7 @@ def samples_in_collaboration():
         enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
-    data = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
+    data: List[Dict] = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
     return jsonify(samples=data, total=len(samples_q))
 
 
@@ -258,7 +258,7 @@ def sample(sample_id):
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
-    data = sample.to_dict(links=True, flowcells=True)
+    data: Dict = sample.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
 
@@ -269,7 +269,7 @@ def sample_in_collaboration(sample_id):
     order_customer = db.customer(request.args.get("customer"))
     if sample.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    data = sample.to_dict(links=True, flowcells=True)
+    data: Dict = sample.to_dict(links=True, flowcells=True)
     return jsonify(**data)
 
 
@@ -282,7 +282,7 @@ def pools():
     pools_q: List[Pool] = db.get_pools_for_customer(
         customers=customer_objs, enquiry=request.args.get("enquiry")
     )
-    data = [pool_obj.to_dict() for pool_obj in pools_q[:30]]
+    data: List[Dict] = [pool_obj.to_dict() for pool_obj in pools_q[:30]]
     return jsonify(pools=data, total=len(pools_q))
 
 
