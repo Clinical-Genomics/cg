@@ -46,7 +46,7 @@ def apply_flow_cell_filter(
     return flow_cells
 
 
-class FlowCellFilters(Enum):
+class FlowCellFilter(Enum):
     """Define FlowCell filter functions."""
 
     GET_BY_CASE: Callable = get_flow_cells_by_case

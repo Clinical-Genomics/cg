@@ -80,16 +80,16 @@ def apply_analysis_filter(
     return analyses
 
 
-class AnalysisFilters(Enum):
+class AnalysisFilter(Enum):
     """Define Analysis filter functions."""
 
-    get_valid_analyses_in_production: Callable = get_valid_analyses_in_production
-    get_analyses_with_pipeline: Callable = get_analyses_with_pipeline
-    get_completed_analyses: Callable = get_completed_analyses
-    get_not_completed_analyses: Callable = get_not_completed_analyses
-    get_filter_uploaded_analyses: Callable = get_filter_uploaded_analyses
-    get_not_uploaded_analyses: Callable = get_not_uploaded_analyses
-    get_analyses_with_delivery_report: Callable = get_analyses_with_delivery_report
-    get_analyses_without_delivery_report: Callable = get_analyses_without_delivery_report
-    get_report_analyses_by_pipeline: Callable = get_report_analyses_by_pipeline
-    order_analyses_by_completed_at: Callable = order_analyses_by_completed_at
+    FILTER_VALID_IN_PRODUCTION: Callable = get_valid_analyses_in_production
+    FILTER_WITH_PIPELINE: Callable = get_analyses_with_pipeline
+    FILTER_COMPLETED: Callable = get_completed_analyses
+    FILTER_NOT_COMPLETED: Callable = get_not_completed_analyses
+    FILTER_UPLOADED: Callable = get_filter_uploaded_analyses
+    FILTER_NOT_UPLOADED: Callable = get_not_uploaded_analyses
+    FILTER_WITH_DELIVERY_REPORT: Callable = get_analyses_with_delivery_report
+    FILTER_WITHOUT_DELIVERY_REPORT: Callable = get_analyses_without_delivery_report
+    FILTER_REPORT_BY_PIPELINE: Callable = get_report_analyses_by_pipeline
+    ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at

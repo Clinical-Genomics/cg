@@ -18,13 +18,13 @@ from cg.store.models import (
     Sample,
     Flowcell,
 )
-from cg.store.status_analysis_filters import apply_analysis_filter, AnalysisFilters
-from cg.store.status_case_filters import apply_case_filter, CaseFilters
+from cg.store.status_analysis_filters import apply_analysis_filter, AnalysisFilter
+from cg.store.status_case_filters import apply_case_filter, CaseFilter
 from cg.store.api.base import BaseHandler
-from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
-from cg.store.status_sample_filters import apply_sample_filter, SampleFilters
-from cg.store.status_pool_filters import apply_pool_filter, PoolFilters
-from cg.store.status_application_filters import apply_application_filter, ApplicationFilters
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
+from cg.store.status_sample_filters import apply_sample_filter, SampleFilter
+from cg.store.status_pool_filters import apply_pool_filter, PoolFilter
+from cg.store.status_application_filters import apply_application_filter, ApplicationFilter
 
 
 class StatusHandler(BaseHandler):
@@ -43,19 +43,19 @@ class StatusHandler(BaseHandler):
         records: Query = self._get_join_sample_application_version_query(
             query=self._get_sample_query()
         )
-        sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.FILTER_IS_NOT_RECEIVED,
-            SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED,
+        sample_filter_functions: List[SampleFilter] = [
+            SampleFilter.FILTER_IS_NOT_RECEIVED,
+            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
         records: Query = apply_sample_filter(samples=records, functions=sample_filter_functions)
         if external:
             records: Query = apply_application_filter(
-                applications=records, functions=[ApplicationFilters.FILTER_IS_EXTERNAL]
+                applications=records, functions=[ApplicationFilter.FILTER_IS_EXTERNAL]
             )
         else:
             records: Query = apply_application_filter(
                 applications=records,
-                functions=[ApplicationFilters.FILTER_IS_NOT_EXTERNAL],
+                functions=[ApplicationFilter.FILTER_IS_NOT_EXTERNAL],
             )
         return records.order_by(Sample.ordered_at).all()
 
@@ -64,15 +64,15 @@ class StatusHandler(BaseHandler):
         records: Query = self._get_join_sample_application_version_query(
             query=self._get_sample_query()
         )
-        sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.FILTER_IS_RECEIVED,
-            SampleFilters.FILTER_IS_NOT_PREPARED,
-            SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED,
-            SampleFilters.FILTER_IS_NOT_SEQUENCED,
+        sample_filter_functions: List[SampleFilter] = [
+            SampleFilter.FILTER_IS_RECEIVED,
+            SampleFilter.FILTER_IS_NOT_PREPARED,
+            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
+            SampleFilter.FILTER_IS_NOT_SEQUENCED,
         ]
         records: Query = apply_sample_filter(samples=records, functions=sample_filter_functions)
         records: Query = apply_application_filter(
-            applications=records, functions=[ApplicationFilters.FILTER_IS_NOT_EXTERNAL]
+            applications=records, functions=[ApplicationFilter.FILTER_IS_NOT_EXTERNAL]
         )
 
         return records.order_by(Sample.received_at).all()
@@ -82,14 +82,14 @@ class StatusHandler(BaseHandler):
         records: Query = self._get_join_sample_application_version_query(
             query=self._get_sample_query()
         )
-        sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.FILTER_IS_PREPARED,
-            SampleFilters.FILTER_IS_NOT_SEQUENCED,
-            SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED,
+        sample_filter_functions: List[SampleFilter] = [
+            SampleFilter.FILTER_IS_PREPARED,
+            SampleFilter.FILTER_IS_NOT_SEQUENCED,
+            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
         records: Query = apply_sample_filter(samples=records, functions=sample_filter_functions)
         records: Query = apply_application_filter(
-            applications=records, functions=[ApplicationFilters.FILTER_IS_NOT_EXTERNAL]
+            applications=records, functions=[ApplicationFilter.FILTER_IS_NOT_EXTERNAL]
         )
         return records.order_by(Sample.prepared_at).all()
 
@@ -110,10 +110,10 @@ class StatusHandler(BaseHandler):
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
     ) -> List[Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
-        case_filter_functions: List[CaseFilters] = [
-            CaseFilters.GET_HAS_SEQUENCE,
-            CaseFilters.GET_WITH_PIPELINE,
-            CaseFilters.GET_FOR_ANALYSIS,
+        case_filter_functions: List[CaseFilter] = [
+            CaseFilter.GET_HAS_SEQUENCE,
+            CaseFilter.GET_WITH_PIPELINE,
+            CaseFilter.GET_FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
             functions=case_filter_functions,
@@ -260,15 +260,15 @@ class StatusHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            functions=[FlowCellFilters.GET_BY_CASE],
+            functions=[FlowCellFilter.GET_BY_CASE],
             case=case,
         ).all()
 
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
-        case_filter_functions: List[CaseFilters] = [
-            CaseFilters.GET_HAS_INACTIVE_ANALYSIS,
-            CaseFilters.GET_NEW,
+        case_filter_functions: List[CaseFilter] = [
+            CaseFilter.GET_HAS_INACTIVE_ANALYSIS,
+            CaseFilter.GET_NEW,
         ]
         return apply_case_filter(
             functions=case_filter_functions, cases=self._get_case_query(), date=date_threshold
@@ -285,7 +285,7 @@ class StatusHandler(BaseHandler):
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
         return apply_sample_filter(
-            functions=[SampleFilters.FILTER_BY_ENTRY_ID],
+            functions=[SampleFilter.FILTER_BY_ENTRY_ID],
             samples=self._get_sample_query(),
             entry_id=entry_id,
         ).first()
@@ -293,7 +293,7 @@ class StatusHandler(BaseHandler):
     def get_sample_by_internal_id(self, internal_id: str) -> Sample:
         """Return a sample by lims id."""
         return apply_sample_filter(
-            functions=[SampleFilters.FILTER_BY_INTERNAL_ID],
+            functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
             samples=self._get_sample_query(),
             internal_id=internal_id,
         ).first()
@@ -301,7 +301,7 @@ class StatusHandler(BaseHandler):
     def get_samples_by_internal_id(self, internal_id: str) -> List[Sample]:
         """Return all samples by lims id."""
         return apply_sample_filter(
-            functions=[SampleFilters.FILTER_BY_INTERNAL_ID],
+            functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
             samples=self._get_sample_query(),
             internal_id=internal_id,
         ).all()
@@ -638,12 +638,12 @@ class StatusHandler(BaseHandler):
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Return analyses that have not been uploaded."""
-        analysis_filter_functions: List[AnalysisFilters] = [
-            AnalysisFilters.get_analyses_with_pipeline,
-            AnalysisFilters.get_completed_analyses,
-            AnalysisFilters.get_not_uploaded_analyses,
-            AnalysisFilters.get_valid_analyses_in_production,
-            AnalysisFilters.order_analyses_by_completed_at,
+        analysis_filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_COMPLETED,
+            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
+            AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
             functions=analysis_filter_functions,
@@ -688,9 +688,9 @@ class StatusHandler(BaseHandler):
 
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have not been uploaded."""
-        case_filter_functions: List[CaseFilters] = [
-            CaseFilters.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE,
-            CaseFilters.GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
+        case_filter_functions: List[CaseFilter] = [
+            CaseFilter.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE,
+            CaseFilter.GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
             functions=case_filter_functions,
@@ -698,18 +698,18 @@ class StatusHandler(BaseHandler):
             pipeline=pipeline,
         )
         return apply_sample_filter(
-            functions=[SampleFilters.FILTER_WITHOUT_LOQUSDB_ID], samples=records
+            functions=[SampleFilter.FILTER_WITHOUT_LOQUSDB_ID], samples=records
         )
 
     def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
-            functions=[CaseFilters.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE],
+            functions=[CaseFilter.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE],
             cases=self.get_families_with_samples(),
             pipeline=pipeline,
         )
         records: Query = apply_sample_filter(
-            functions=[SampleFilters.FILTER_WITH_LOQUSDB_ID], samples=records
+            functions=[SampleFilter.FILTER_WITH_LOQUSDB_ID], samples=records
         )
         return records
 
@@ -728,15 +728,15 @@ class StatusHandler(BaseHandler):
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
-            functions=[CaseFilters.GET_REPORT_SUPPORTED],
+            functions=[CaseFilter.GET_REPORT_SUPPORTED],
             cases=self._get_analysis_case_query(),
             pipeline=pipeline,
         )
-        analysis_filter_functions: List[AnalysisFilters] = [
-            AnalysisFilters.get_report_analyses_by_pipeline,
-            AnalysisFilters.get_analyses_without_delivery_report,
-            AnalysisFilters.get_valid_analyses_in_production,
-            AnalysisFilters.order_analyses_by_completed_at,
+        analysis_filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
+            AnalysisFilter.FILTER_WITHOUT_DELIVERY_REPORT,
+            AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
+            AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
             functions=analysis_filter_functions, analyses=records, pipeline=pipeline
@@ -745,16 +745,16 @@ class StatusHandler(BaseHandler):
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
-            functions=[CaseFilters.GET_WITH_SCOUT_DELIVERY],
+            functions=[CaseFilter.GET_WITH_SCOUT_DELIVERY],
             cases=self._get_analysis_case_query(),
             pipeline=pipeline,
         )
-        analysis_filter_functions: List[AnalysisFilters] = [
-            AnalysisFilters.get_report_analyses_by_pipeline,
-            AnalysisFilters.get_analyses_with_delivery_report,
-            AnalysisFilters.get_not_uploaded_analyses,
-            AnalysisFilters.get_valid_analyses_in_production,
-            AnalysisFilters.order_analyses_by_completed_at,
+        analysis_filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
+            AnalysisFilter.FILTER_WITH_DELIVERY_REPORT,
+            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
+            AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
         return apply_analysis_filter(
             functions=analysis_filter_functions, analyses=records, pipeline=pipeline
@@ -763,10 +763,10 @@ class StatusHandler(BaseHandler):
     def get_samples_to_deliver(self) -> List[Sample]:
         """Return all samples not delivered."""
         records = self._get_sample_query()
-        sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.FILTER_IS_SEQUENCED,
-            SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED,
-            SampleFilters.FILTER_IS_NOT_DELIVERED,
+        sample_filter_functions: List[SampleFilter] = [
+            SampleFilter.FILTER_IS_SEQUENCED,
+            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
+            SampleFilter.FILTER_IS_NOT_DELIVERED,
         ]
 
         records: Query = apply_sample_filter(
@@ -779,9 +779,9 @@ class StatusHandler(BaseHandler):
     def get_samples_not_delivered(self) -> List[Sample]:
         """Return samples not delivered."""
         records = self._get_sample_query()
-        sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED,
-            SampleFilters.FILTER_IS_NOT_DELIVERED,
+        sample_filter_functions: List[SampleFilter] = [
+            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
+            SampleFilter.FILTER_IS_NOT_DELIVERED,
         ]
 
         records: Query = apply_sample_filter(
@@ -794,9 +794,9 @@ class StatusHandler(BaseHandler):
         """Return all samples that have  not been invoiced, excluding those that
         have been down sampled."""
         records = self._get_sample_query()
-        sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.FILTER_HAS_NO_INVOICE_ID,
-            SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED,
+        sample_filter_functions: List[SampleFilter] = [
+            SampleFilter.FILTER_HAS_NO_INVOICE_ID,
+            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
 
         records: Query = apply_sample_filter(
@@ -808,17 +808,17 @@ class StatusHandler(BaseHandler):
     def get_samples_not_down_sampled(self) -> List[Sample]:
         """Return all samples that have not been down sampled."""
         return apply_sample_filter(
-            functions=[SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED],
+            functions=[SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED],
             samples=self._get_sample_query(),
         ).all()
 
     def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
         """Return all samples that should be invoiced."""
-        sample_filter_functions: List[SampleFilters] = [
-            SampleFilters.FILTER_IS_DELIVERED,
-            SampleFilters.FILTER_HAS_NO_INVOICE_ID,
-            SampleFilters.FILTER_DO_INVOICE,
-            SampleFilters.FILTER_IS_NOT_DOWN_SAMPLED,
+        sample_filter_functions: List[SampleFilter] = [
+            SampleFilter.FILTER_IS_DELIVERED,
+            SampleFilter.FILTER_HAS_NO_INVOICE_ID,
+            SampleFilter.FILTER_DO_INVOICE,
+            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
 
         records: Query = apply_sample_filter(
@@ -841,10 +841,10 @@ class StatusHandler(BaseHandler):
         Return all pools that should be invoiced.
         """
         records = self._get_pool_query()
-        pool_filter_functions: List[PoolFilters] = [
-            PoolFilters.FILTER_IS_DELIVERED,
-            PoolFilters.FILTER_WITHOUT_INVOICE_ID,
-            PoolFilters.FILTER_DO_INVOICE,
+        pool_filter_functions: List[PoolFilter] = [
+            PoolFilter.FILTER_IS_DELIVERED,
+            PoolFilter.FILTER_WITHOUT_INVOICE_ID,
+            PoolFilter.FILTER_DO_INVOICE,
         ]
 
         records: Query = apply_pool_filter(
@@ -865,15 +865,15 @@ class StatusHandler(BaseHandler):
     def get_pools_to_receive(self) -> List[Pool]:
         """Return all pools that have been not yet been received."""
         return apply_pool_filter(
-            functions=[PoolFilters.FILTER_IS_NOT_RECEIVED], pools=self._get_pool_query()
+            functions=[PoolFilter.FILTER_IS_NOT_RECEIVED], pools=self._get_pool_query()
         ).all()
 
     def get_all_pools_to_deliver(self) -> List[Pool]:
         """Return all pools that are received but have been not yet been delivered."""
         records = self._get_pool_query()
-        pool_filter_functions: List[PoolFilters] = [
-            PoolFilters.FILTER_IS_RECEIVED,
-            PoolFilters.FILTER_IS_NOT_DELIVERED,
+        pool_filter_functions: List[PoolFilter] = [
+            PoolFilter.FILTER_IS_RECEIVED,
+            PoolFilter.FILTER_IS_NOT_DELIVERED,
         ]
 
         records: Query = apply_pool_filter(

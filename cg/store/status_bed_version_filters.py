@@ -13,10 +13,10 @@ def get_bed_version_by_short_name(
     return bed_versions.filter(BedVersion.shortname == bed_version_short_name)
 
 
-class BedVersionFilters(Enum):
+class BedVersionFilter(Enum):
     """Define BED version filter functions."""
 
-    get_bed_version_by_short_name: Callable = get_bed_version_by_short_name
+    FILTER_BY_SHORT_NAME: Callable = get_bed_version_by_short_name
 
 
 def apply_bed_version_filter(

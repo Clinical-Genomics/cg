@@ -113,7 +113,7 @@ def apply_case_filter(
     return cases
 
 
-class CaseFilters(Enum):
+class CaseFilter(Enum):
     """Define case filters."""
 
     GET_HAS_SEQUENCE: Callable = get_cases_has_sequence

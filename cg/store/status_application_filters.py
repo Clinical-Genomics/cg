@@ -50,7 +50,7 @@ def apply_application_filter(
     return applications
 
 
-class ApplicationFilters(Enum):
+class ApplicationFilter(Enum):
     """Define Application filter functions."""
 
     FILTER_IS_EXTERNAL = filter_applications_is_external

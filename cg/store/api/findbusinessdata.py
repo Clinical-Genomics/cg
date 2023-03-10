@@ -23,11 +23,11 @@ from cg.store.models import (
     Pool,
     Sample,
 )
-from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilters
-from cg.store.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilters
-from cg.store.status_sample_filters import apply_sample_filter, SampleFilters
-from cg.store.status_invoice_filters import apply_invoice_filter, InvoiceFilters
-from cg.store.status_pool_filters import apply_pool_filter, PoolFilters
+from cg.store.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
+from cg.store.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
+from cg.store.status_sample_filters import apply_sample_filter, SampleFilter
+from cg.store.status_invoice_filters import apply_invoice_filter, InvoiceFilter
+from cg.store.status_pool_filters import apply_pool_filter, PoolFilter
 
 LOG = logging.getLogger(__name__)
 
@@ -177,7 +177,7 @@ class FindBusinessDataHandler(BaseHandler):
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            functions=[CaseSampleFilters.GET_SAMPLES_ASSOCIATED_WITH_CASE],
+            functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
             case_id=family_id,
             case_samples=self._get_case_sample_query(),
         ).all()
@@ -185,7 +185,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_sample_cases(self, sample_id: str) -> Query:
         """Return the case-sample links associated with a sample."""
         return apply_case_sample_filter(
-            functions=[CaseSampleFilters.GET_CASES_ASSOCIATED_WITH_SAMPLE],
+            functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE],
             sample_id=sample_id,
             case_samples=self._get_case_sample_query(),
         )
@@ -193,7 +193,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_cases_from_sample(self, sample_entry_id: str) -> Query:
         """Return cases related to a given sample."""
         return apply_case_sample_filter(
-            functions=[CaseSampleFilters.GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID],
+            functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_case_sample_query(),
         )
@@ -286,7 +286,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id,
-            functions=[FlowCellFilters.GET_BY_ID],
+            functions=[FlowCellFilter.GET_BY_ID],
         ).first()
 
     def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Flowcell:
@@ -294,7 +294,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_id=flow_cell_id_enquiry,
-            functions=[FlowCellFilters.GET_BY_ID_AND_ENQUIRY],
+            functions=[FlowCellFilter.GET_BY_ID_AND_ENQUIRY],
         ).first()
 
     def get_flow_cells(self) -> List[Flowcell]:
@@ -306,16 +306,16 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
             flow_cell_statuses=flow_cell_statuses,
-            functions=[FlowCellFilters.GET_WITH_STATUSES],
+            functions=[FlowCellFilter.GET_WITH_STATUSES],
         )
 
     def get_flow_cell_by_enquiry_and_status(
         self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
     ) -> List[Flowcell]:
         """Return flow cell enquiry snd status."""
-        filter_functions: List[FlowCellFilters] = [
-            FlowCellFilters.GET_WITH_STATUSES,
-            FlowCellFilters.GET_BY_ID_AND_ENQUIRY,
+        filter_functions: List[FlowCellFilter] = [
+            FlowCellFilter.GET_WITH_STATUSES,
+            FlowCellFilter.GET_BY_ID_AND_ENQUIRY,
         ]
         flow_cells: List[Flowcell] = apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_query(),
@@ -329,7 +329,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return flow cells for case."""
         return apply_flow_cell_filter(
             flow_cells=self._get_flow_cell_sample_links_query(),
-            functions=[FlowCellFilters.GET_BY_CASE],
+            functions=[FlowCellFilter.GET_BY_CASE],
             case=case,
         )
 
@@ -375,11 +375,11 @@ class FindBusinessDataHandler(BaseHandler):
         invoices: Query = self._get_invoice_query()
         if is_invoiced:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.FILTER_BY_INVOICED]
+                invoices=invoices, functions=[InvoiceFilter.FILTER_BY_INVOICED]
             ).all()
         else:
             return apply_invoice_filter(
-                invoices=invoices, functions=[InvoiceFilters.FILTER_BY_NOT_INVOICED]
+                invoices=invoices, functions=[InvoiceFilter.FILTER_BY_NOT_INVOICED]
             ).all()
 
     def get_invoice_by_id(self, invoice_id: int) -> Invoice:
@@ -388,7 +388,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_invoice_filter(
             invoices=invoices,
             invoice_id=invoice_id,
-            functions=[InvoiceFilters.FILTER_BY_INVOICE_ID],
+            functions=[InvoiceFilter.FILTER_BY_INVOICE_ID],
         ).first()
 
     def get_pools_and_samples_for_invoice_by_invoice_id(
@@ -398,12 +398,12 @@ class FindBusinessDataHandler(BaseHandler):
         pools: List[Pool] = apply_pool_filter(
             pools=self._get_pool_query(),
             invoice_id=invoice_id,
-            functions=[PoolFilters.FILTER_BY_INVOICE_ID],
+            functions=[PoolFilter.FILTER_BY_INVOICE_ID],
         ).all()
         samples: List[Sample] = apply_sample_filter(
             samples=self._get_sample_query(),
             invoice_id=invoice_id,
-            functions=[SampleFilters.FILTER_BY_INVOICE_ID],
+            functions=[SampleFilter.FILTER_BY_INVOICE_ID],
         ).all()
         return pools + samples
 
@@ -451,7 +451,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return a pool by entry id."""
         pools = self._get_pool_query()
         return apply_pool_filter(
-            pools=pools, entry_id=entry_id, functions=[PoolFilters.FILTER_BY_ENTRY_ID]
+            pools=pools, entry_id=entry_id, functions=[PoolFilter.FILTER_BY_ENTRY_ID]
         ).first()
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
@@ -507,11 +507,11 @@ class FindBusinessDataHandler(BaseHandler):
 
         if is_tumour:
             return apply_sample_filter(
-                samples=samples, functions=[SampleFilters.FILTER_IS_TUMOUR]
+                samples=samples, functions=[SampleFilter.FILTER_IS_TUMOUR]
             ).all()
         else:
             return apply_sample_filter(
-                samples=samples, functions=[SampleFilters.FILTER_IS_NOT_TUMOUR]
+                samples=samples, functions=[SampleFilter.FILTER_IS_NOT_TUMOUR]
             ).all()
 
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
@@ -527,7 +527,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Get sample by name."""
         samples = self.Sample.query
         return apply_sample_filter(
-            samples=samples, functions=[SampleFilters.FILTER_BY_SAMPLE_NAME], name=name
+            samples=samples, functions=[SampleFilter.FILTER_BY_SAMPLE_NAME], name=name
         ).first()
 
     def _get_join_sample_family_query(self) -> Query:
@@ -537,12 +537,12 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            functions=[CaseSampleFilters.GET_SAMPLES_ASSOCIATED_WITH_CASE],
+            functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
             case_samples=self._get_join_sample_family_query(),
             case_id=case_id,
         )
         samples: Query = apply_sample_filter(
-            functions=[SampleFilters.FILTER_WITH_TYPE],
+            functions=[SampleFilter.FILTER_WITH_TYPE],
             samples=samples,
             tissue_type=sample_type,
         )

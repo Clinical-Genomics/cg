@@ -68,7 +68,7 @@ def apply_pool_filter(
     return pools
 
 
-class PoolFilters(Enum):
+class PoolFilter(Enum):
     """Define Pool filter functions."""
 
     FILTER_BY_ENTRY_ID: Callable = filter_pools_by_entry_id

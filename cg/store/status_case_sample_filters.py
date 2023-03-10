@@ -41,7 +41,7 @@ def apply_case_sample_filter(
     return case_samples
 
 
-class CaseSampleFilters(Enum):
+class CaseSampleFilter(Enum):
     """Define CaseSample filter functions."""
 
     GET_SAMPLES_ASSOCIATED_WITH_CASE: Callable = get_samples_associated_with_case

@@ -21,12 +21,12 @@ def order_beds_by_name(beds: Query, **kwargs) -> Query:
     return beds.order_by(Bed.name)
 
 
-class BedFilters(Enum):
+class BedFilter(Enum):
     """Define BED filter functions."""
 
-    get_beds_by_name: Callable = get_beds_by_name
-    get_not_archived_beds: Callable = get_not_archived_beds
-    order_beds_by_name: Callable = order_beds_by_name
+    FILTER_BY_NAME: Callable = get_beds_by_name
+    FILTER_NOT_ARCHIVED: Callable = get_not_archived_beds
+    ORDER_BY_NAME: Callable = order_beds_by_name
 
 
 def apply_bed_filter(

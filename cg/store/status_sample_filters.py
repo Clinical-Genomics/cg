@@ -161,7 +161,7 @@ def apply_sample_filter(
     return samples
 
 
-class SampleFilters(Enum):
+class SampleFilter(Enum):
     """Define Sample filter functions."""
 
     FILTER_BY_INTERNAL_ID: Callable = filter_samples_by_internal_id
