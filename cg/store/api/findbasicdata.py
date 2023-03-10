@@ -23,6 +23,7 @@ from cg.store.status_collaboration_filters import (
     CollaborationFilters,
     apply_collaboration_version_filter,
 )
+from cg.store.user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -97,6 +98,10 @@ class FindBasicDataHandler(BaseHandler):
         """Returns a collaboration query."""
         return self.Collaboration.query
 
+    def _get_user_query(self) -> Query:
+        """Returns a user query."""
+        return self.User.query
+
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
         return apply_collaboration_version_filter(
@@ -146,4 +151,6 @@ class FindBasicDataHandler(BaseHandler):
 
     def user(self, email: str) -> User:
         """Fetch a user from the store."""
-        return self.User.query.filter_by(email=email).first()
+        return apply_user_filter(
+            users=self._get_user_query(), email=email, filters=[UserFilter.FILTER_BY_EMAIL]
+        ).first()
