@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from housekeeper.store import models as hk_models
 from sqlalchemy.orm import Query
+from sqlalchemy.sql.expression import union_all
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -427,13 +428,22 @@ class UploadScoutAPI:
             raise CgDataError(
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
-        collaborator_list: List[models.Collaborator] = rna_sample.collaborator_list
-        #TODO Something above here to get the collaborator list to feed into the SQL query.
-        subject_id_samples: Query = self.status_db.samples_by_subject_id(
-            customer_id__in=collaborator_list,
-            subject_id=rna_sample.subject_id,
-            is_tumour=rna_sample.is_tumour,
-        )
+        rna_customer: models.Customer = self.status_db.customer(rna_sample.customer)
+        customer_ids: List = [
+            customer.internal_id for customer in rna_customer.collaborators
+        ] or rna_sample.customer_id
+
+        subject_id_samples: Query = union_all(
+            [
+                self.status_db.samples_by_subject_id(
+                    customer_id=cid,
+                    subject_id=rna_sample.subject_id,
+                    is_tumour=rna_sample.is_tumour,
+                )
+                for cid in customer_ids
+            ]
+        ).all()
+
         subject_id_dna_samples = self._get_application_prep_category(subject_id_samples.all())
 
         if len(subject_id_dna_samples) != 1:
