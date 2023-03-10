@@ -72,10 +72,10 @@ def family(
         LOG.info(f"Update data_delivery: {case_obj.data_delivery or 'NA'} -> {data_delivery}")
         case_obj.data_delivery = data_delivery
     if panels:
-        for panel_id in panels:
-            panel_obj: models.Panel = status_db.get_panel_by_abbreviation(panel_id)
+        for panel in panels:
+            panel_obj: models.Panel = status_db.get_panel_by_abbreviation(panel)
             if panel_obj is None:
-                LOG.error(f"unknown gene panel: {panel_id}")
+                LOG.error(f"unknown gene panel: {panel}")
                 raise click.Abort
         LOG.info(f"Update panels: {', '.join(case_obj.panels)} -> {', '.join(panels)}")
         case_obj.panels = panels

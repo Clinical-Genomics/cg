@@ -206,10 +206,10 @@ def family(
         LOG.error(f"{customer_id}: customer not found")
         raise click.Abort
 
-    for panel_id in panels:
-        panel_obj: models.Panel = status_db.get_panel_by_abbreviation(panel_id)
+    for panel in panels:
+        panel_obj: models.Panel = status_db.get_panel_by_abbreviation(panel)
         if panel_obj is None:
-            LOG.error(f"{panel_id}: panel not found")
+            LOG.error(f"{panel}: panel not found")
             raise click.Abort
 
     new_case: models.Family = status_db.add_case(
