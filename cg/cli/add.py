@@ -104,7 +104,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
         customer=customer_obj, email=email, name=name, is_admin=admin
     )
     status_db.add_commit(new_user)
-    LOG.info(f"user added: {new_user.email} ({new_user.id})")
+    LOG.info(f"User added: {new_user.email} ({new_user.id})")
 
 
 @add.command()
@@ -194,7 +194,7 @@ def sample(
 @click.argument("customer_id")
 @click.argument("name")
 @click.pass_obj
-def family(
+def case(
     context: CGConfig,
     priority: Priority,
     panels: Tuple[str],
@@ -204,7 +204,7 @@ def family(
     name: str,
     ticket: str,
 ):
-    """Add a family with the given name and associated with the given customer"""
+    """Add a case with the given name and associated with the given customer"""
     status_db: Store = context.status_db
     customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
     if customer is None:
