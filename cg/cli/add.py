@@ -35,7 +35,7 @@ def add():
     "--invoice-address",
     "invoice_address",
     required=True,
-    help="Street adress, Post code, City",
+    help="Street address, Post code, City",
 )
 @click.option(
     "-ir",
@@ -53,7 +53,7 @@ def customer(
     invoice_address: str,
     invoice_reference: str,
 ):
-    """Add a new customer with a unique INTERNAL_ID and NAME."""
+    """Add a new customer with a unique internal id and name."""
     collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
     customer: Customer = status_db.get_customer_by_customer_id(customer_id=internal_id)
@@ -62,7 +62,7 @@ def customer(
         raise click.Abort
 
     collaborations: List[Collaboration] = [
-        status_db.get_collaboration_by_internal_id(collaboration_internal_id)
+        status_db.get_collaboration_by_internal_id(internal_id=collaboration_internal_id)
         for collaboration_internal_id in collaboration_internal_ids
     ]
 
