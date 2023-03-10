@@ -52,25 +52,25 @@ def family(
     check_nothing_to_change(action, panels, priority, customer_id, data_analysis, data_delivery)
 
     status_db: Store = context.status_db
-    case_obj: Family = get_case(case_id=family_id, status_db=status_db)
+    case: Family = get_case(family_id, status_db)
 
     if action:
-        update_action(case_obj, action)
+        update_action(case, action)
 
     if customer_id:
-        update_customer(case_obj, customer_id, status_db)
+        update_customer(case, customer_id, status_db)
 
     if data_analysis:
-        update_data_analysis(case_obj, data_analysis)
+        update_data_analysis(case, data_analysis)
 
     if data_delivery:
-        update_data_delivery(case_obj, data_delivery)
+        update_data_delivery(case, data_delivery)
 
     if panels:
-        update_panels(case_obj, panels, status_db)
+        update_panels(case, panels, status_db)
 
     if priority:
-        update_priority(case_obj, priority)
+        update_priority(case, priority)
 
     status_db.commit()
 
@@ -82,53 +82,53 @@ def check_nothing_to_change(action, panels, priority, customer_id, data_analysis
 
 
 def get_case(case_id: str, status_db: Store):
-    case_obj: Family = status_db.family(case_id)
+    case: Family = status_db.family(case_id)
 
-    if case_obj is None:
+    if case is None:
         LOG.error(f"Can't find case {case_id}")
         raise click.Abort
 
-    return case_obj
+    return case
 
 
-def update_action(case_obj: Family, action: str) -> None:
+def update_action(case: Family, action: str) -> None:
     """Update case action."""
-    LOG.info(f"Update action: {case_obj.action or 'NA'} -> {action}")
-    case_obj.action = action
+    LOG.info(f"Update action: {case.action or 'NA'} -> {action}")
+    case.action = action
 
 
-def update_customer(case_obj: Family, customer_id: str, status_db: Store):
+def update_customer(case: Family, customer_id: str, status_db: Store):
     customer_obj: Customer = status_db.customer(customer_id)
 
     if customer_obj is None:
         LOG.error("Unknown customer: %s", customer_id)
         raise click.Abort
 
-    LOG.info(f"Update customer: {case_obj.customer.internal_id} -> {customer_id}")
-    case_obj.customer = customer_obj
+    LOG.info(f"Update customer: {case.customer.internal_id} -> {customer_id}")
+    case.customer = customer_obj
 
 
-def update_data_analysis(case_obj: Family, data_analysis: Pipeline):
-    LOG.info(f"Update data_analysis: {case_obj.data_analysis or 'NA'} -> {data_analysis}")
-    case_obj.data_analysis = data_analysis
+def update_data_analysis(case: Family, data_analysis: Pipeline):
+    LOG.info(f"Update data_analysis: {case.data_analysis or 'NA'} -> {data_analysis}")
+    case.data_analysis = data_analysis
 
 
-def update_data_delivery(case_obj: Family, data_delivery: DataDelivery):
-    LOG.info(f"Update data_delivery: {case_obj.data_delivery or 'NA'} -> {data_delivery}")
-    case_obj.data_delivery = data_delivery
+def update_data_delivery(case: Family, data_delivery: DataDelivery):
+    LOG.info(f"Update data_delivery: {case.data_delivery or 'NA'} -> {data_delivery}")
+    case.data_delivery = data_delivery
 
 
-def update_panels(case_obj, panels, status_db):
+def update_panels(case, panels, status_db):
     for panel_id in panels:
-        panel_obj: Panel = status_db.panel(panel_id)
-        if panel_obj is None:
+        panel: Panel = status_db.panel(panel_id)
+        if panel is None:
             LOG.error(f"unknown gene panel: {panel_id}")
             raise click.Abort
-    LOG.info(f"Update panels: {', '.join(case_obj.panels)} -> {', '.join(panels)}")
-    case_obj.panels = panels
+    LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panels)}")
+    case.panels = panels
 
 
-def update_priority(case_obj: Family, priority: Priority) -> None:
+def update_priority(case: Family, priority: Priority) -> None:
     """Update case priority."""
-    LOG.info(f"Update priority: {case_obj.priority.name} -> {priority.name}")
-    case_obj.priority = priority
+    LOG.info(f"Update priority: {case.priority.name} -> {priority.name}")
+    case.priority = priority
