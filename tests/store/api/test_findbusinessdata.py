@@ -464,3 +464,30 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # THEN no cases are found
     assert not cases
+
+
+def test_is_case_downsampled_true(base_store: Store, case_obj: Family, sample_id: str):
+    """Tests the dowmsampling check when all samples are downsampled."""
+    # GIVEN a case where all samples are downsampled
+    for sample in case_obj.samples:
+        sample.from_sample = sample_id
+    base_store.commit()
+
+    # WHEN checking if all sample in the case are downsampled
+    is_downsampled: bool = base_store.is_case_downsampled(case_id=case_obj.internal_id)
+
+    # THEN the return value should be True
+    assert is_downsampled
+
+
+def test_is_case_downsampled_false(base_store: Store, case_obj: Family, sample_id: str):
+    """Tests the dowmsampling check when none of the samples are downsampled."""
+    # GIVEN a case where all samples are not downsampled
+    for sample in case_obj.samples:
+        assert not sample.from_sample
+
+    # WHEN checking if all sample in the case are downsampled
+    is_downsampled: bool = base_store.is_case_downsampled(case_id=case_obj.internal_id)
+
+    # THEN the return value should be False
+    assert not is_downsampled
