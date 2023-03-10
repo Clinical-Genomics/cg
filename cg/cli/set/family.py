@@ -5,8 +5,8 @@ import click
 
 from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from cg.store.models import Family
+from cg.store import Store
+from cg.store.models import Customer, Family, Panel
 from cg.utils.click.EnumChoice import EnumChoice
 
 from cg.constants import Priority
@@ -52,7 +52,7 @@ def family(
     check_nothing_to_change(action, panels, priority, customer_id, data_analysis, data_delivery)
 
     status_db: Store = context.status_db
-    case_obj: models.Family = get_case(case_id=family_id, status_db=status_db)
+    case_obj: Family = get_case(case_id=family_id, status_db=status_db)
 
     if action:
         update_action(case_obj, action)
@@ -82,7 +82,7 @@ def check_nothing_to_change(action, panels, priority, customer_id, data_analysis
 
 
 def get_case(case_id: str, status_db: Store):
-    case_obj: models.Family = status_db.family(case_id)
+    case_obj: Family = status_db.family(case_id)
 
     if case_obj is None:
         LOG.error(f"Can't find case {case_id}")
@@ -91,14 +91,14 @@ def get_case(case_id: str, status_db: Store):
     return case_obj
 
 
-def update_action(case_obj: models.Family, action: str) -> None:
+def update_action(case_obj: Family, action: str) -> None:
     """Update case action."""
     LOG.info(f"Update action: {case_obj.action or 'NA'} -> {action}")
     case_obj.action = action
 
 
-def update_customer(case_obj: models.Family, customer_id: str, status_db: Store):
-    customer_obj: models.Customer = status_db.customer(customer_id)
+def update_customer(case_obj: Family, customer_id: str, status_db: Store):
+    customer_obj: Customer = status_db.customer(customer_id)
 
     if customer_obj is None:
         LOG.error("Unknown customer: %s", customer_id)
@@ -120,7 +120,7 @@ def update_data_delivery(case_obj: Family, data_delivery: DataDelivery):
 
 def update_panels(case_obj, panels, status_db):
     for panel_id in panels:
-        panel_obj: models.Panel = status_db.panel(panel_id)
+        panel_obj: Panel = status_db.panel(panel_id)
         if panel_obj is None:
             LOG.error(f"unknown gene panel: {panel_id}")
             raise click.Abort
@@ -128,7 +128,7 @@ def update_panels(case_obj, panels, status_db):
     case_obj.panels = panels
 
 
-def update_priority(case_obj: models.Family, priority: Priority) -> None:
+def update_priority(case_obj: Family, priority: Priority) -> None:
     """Update case priority."""
     LOG.info(f"Update priority: {case_obj.priority.name} -> {priority.name}")
     case_obj.priority = priority
