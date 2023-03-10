@@ -93,7 +93,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     """Add a new user with an EMAIL (login) and a NAME (full)."""
     status_db: Store = context.status_db
     customer_obj: models.Customer = status_db.customer(customer_id)
-    existing: models.User = status_db.user(email)
+    existing: models.User = status_db.get_user_by_email(email)
     if existing:
         LOG.error(f"{existing.name}: user already added")
         raise click.Abort

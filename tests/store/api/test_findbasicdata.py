@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Collaboration
+from cg.store.models import Bed, BedVersion, Collaboration, User
 
 
 def test_get_bed_query(base_store: Store):
@@ -16,6 +16,16 @@ def test_get_bed_query(base_store: Store):
 
     # THEN a query should be returned
     assert isinstance(bed_query, Query)
+
+
+def test_get_user_query(store_with_users: Store):
+    """Test function to return the user query."""
+
+    # WHEN getting the query for the users
+    user_query: Query = store_with_users._get_user_query()
+
+    # THEN a query should be returned
+    assert isinstance(user_query, Query)
 
 
 def test_get_beds(base_store: Store):
@@ -139,3 +149,38 @@ def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: s
 
     # THEN return a collaboration with the give collaboration internal_id
     assert collaboration.internal_id == collaboration_id
+
+
+def test_get_user_by_email_returns_correct_user(store_with_users: Store):
+    """Test fetching a user by email."""
+
+    # GIVEN a store with multiple users
+    num_users = store_with_users._get_user_query().count()
+    assert num_users > 0
+
+    # Select a random user from the store
+    user = store_with_users._get_user_query().first()
+    assert user is not None
+
+    # WHEN fetching the user by email
+    email = user.email
+    filtered_user = store_with_users.get_user_by_email(email=email)
+
+    # THEN a user should be returned
+    assert isinstance(filtered_user, User)
+
+    # THEN the email should match
+    assert filtered_user.email == email
+
+
+def test_get_user_by_email_returns_none_for_nonexisting_email(store_with_users: Store):
+    """Test getting user by email when the email does not exist."""
+
+    # GIVEN a non-existing email
+    non_existent_email = "non_existing@example.com"
+
+    # WHEN retrieving the user by email
+    filtered_user = store_with_users.get_user_by_email(email=non_existent_email)
+
+    # THEN no user should be returned
+    assert filtered_user is None

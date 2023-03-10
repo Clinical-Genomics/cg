@@ -6,7 +6,7 @@ from cg.store.models import User
 
 def filter_user_by_email(users: Query, email: str, **kwargs) -> Query:
     """Return user by email."""
-    return users.filter(User.name == email)
+    return users.filter(User.email == email)
 
 
 class UserFilter(Enum):

@@ -80,7 +80,7 @@ def before_request():
             )
         )
 
-    user_obj = db.user(user_data["email"])
+    user_obj = db.get_user_by_email(user_data["email"])
     if user_obj is None or not user_obj.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)

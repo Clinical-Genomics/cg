@@ -149,8 +149,8 @@ class FindBasicDataHandler(BaseHandler):
         """Returns all panels."""
         return self.Panel.query.order_by(Panel.abbrev)
 
-    def user(self, email: str) -> User:
-        """Fetch a user from the store."""
+    def get_user_by_email(self, email: str) -> User:
+        """Fetch a user by email from the store."""
         return apply_user_filter(
             users=self._get_user_query(), email=email, filters=[UserFilter.FILTER_BY_EMAIL]
         ).first()

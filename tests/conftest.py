@@ -27,7 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer, BedVersion, Bed
+from cg.store.models import Customer, BedVersion, Bed, User
 
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -1734,5 +1734,17 @@ def store_with_multiple_cases_and_samples(
     for case_sample in case_samples:
         case_id, sample_id = case_sample
         helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
+
+    yield store
+
+
+@pytest.fixture(name="store_with_users")
+def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with multiple users."""
+
+    customer = helpers.ensure_customer(store=store)
+    store.add_user(customer=customer, email="user1@example.com", name="User One", is_admin=False)
+    store.add_user(customer=customer, email="user2@example.com", name="User Two", is_admin=True)
+    store.add_user(customer=customer, email="user3@example.com", name="User Three", is_admin=False)
 
     yield store

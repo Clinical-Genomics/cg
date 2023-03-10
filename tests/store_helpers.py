@@ -709,7 +709,7 @@ class StoreHelpers:
         is_admin: bool = False,
     ) -> models.User:
         """Utility function to add a user that can be used in tests."""
-        user = store.user(email=email)
+        user = store.get_user_by_email(email=email)
         if not user:
             user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
             store.add_commit(user)
