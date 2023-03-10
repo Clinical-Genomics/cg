@@ -64,31 +64,37 @@ class GensAnalysisTag:
     FRACSNP: List[str] = ["gens", "fracsnp", "bed"]
 
 
+class BalsamicProtectedTags:
+    """Balsamic pipeline protected tags by type."""
+
+    QC: List[str] = [
+        "balsamic-config",
+        "balsamic-dag",
+        "balsamic-report",
+        "delivery-report",
+        "multiqc-html",
+        "multiqc-json",
+        "qc-metrics",
+    ]
+    VARIANT_CALLERS: List[str] = [
+        "ascatngs",
+        "cnv-report",
+        "cnvkit",
+        "delly",
+        "germline",
+        "svdb",
+        "tnscope",
+        "tnscope-umi",
+        "vardict",
+        "vcf2cytosure",
+    ]
+
+
 WORKFLOW_PROTECTED_TAGS = {
-    str(Pipeline.BALSAMIC): [
-        ["balsamic-report"],
-        ["balsamic-config"],
-        ["cnvkit", "sv-vcf", "filtered"],
-        ["cnvkit", "sv-vcf-index", "filtered"],
-        ["multiqc-html"],
-        ["tumor", "scope", "vcf-snv-research"],
-        ["tumor", "scope", "vcf-snv-research-index"],
-        ["vcf", "sention", "haplotype-caller", "filtered"],
-        ["vcf-index", "sention", "haplotype-caller", "filtered"],
-        ["vcf", "tumor", "haplotype-caller"],
-        ["vcf-index", "tumor", "haplotype-caller"],
-        ["vcf-sv-research", "manta", "tumor"],
-        ["vcf-sv-research-index", "manta", "tumor"],
-        ["vcf-snv-clinical", "scope", "filtered", "sention"],
-        ["vcf-snv-clinical-index", "scope", "filtered", "sention"],
-        ["vcf-snv-clinical", "filtered"],
-        ["vcf-snv-clinical-index", "filtered"],
-        ["vcf", "filtered"],
-        ["vcf-index", "filtered"],
-    ],
-    str(Pipeline.BALSAMIC_QC): [],
+    str(Pipeline.BALSAMIC): [BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS],
+    str(Pipeline.BALSAMIC_QC): [BalsamicProtectedTags.QC],
     str(Pipeline.BALSAMIC_PON): [],
-    str(Pipeline.BALSAMIC_UMI): [],
+    str(Pipeline.BALSAMIC_UMI): [BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS],
     str(Pipeline.FASTQ): [],
     str(Pipeline.FLUFFY): ["NIPT_csv", "MultiQC"],
     str(Pipeline.MICROSALT): [
