@@ -67,7 +67,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     if not case_obj.analyses:
         LOG.warning("Could not find analyses for %s", case_id)
         raise click.Abort
-    
+
     if case_obj.data_analysis == Pipeline.BALSAMIC:
         LOG.info(f"Found BALSAMIC analysis for {case_id}, using BALSAMIC upload API")
         context.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context)
@@ -76,7 +76,6 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         context.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(context)
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    
 
     LOG.info("----------------- CREATE CONFIG -----------------------")
     LOG.info("Create load config")
