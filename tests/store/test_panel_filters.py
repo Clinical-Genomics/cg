@@ -23,3 +23,17 @@ def test_filter_panel_by_abbrev_returns_correct_panel(store_with_panels: Store):
     # THEN the filtered panel should be of the correct instance and have the correct abbreviation
     assert isinstance(filtered_panel, Panel)
     assert filtered_panel.abbrev == panel.abbrev
+
+
+def test_filter_panel_by_abbrev_returns_none_when_abbrev_does_not_exist(store_with_panels: Store):
+    """Test finding a panel by abbreviation when the abbreviation does not exist in the store."""
+
+    # GIVEN a store with panels
+    panel_query = store_with_panels._get_panel_query()
+    assert panel_query.count() > 0
+
+    # WHEN finding a panel by an abbreviation that does not exist
+    filtered_panels = filter_panel_by_abbrev(panel_query, "nonexistent_abbrev").all()
+
+    # THEN no panels should be returned
+    assert len(filtered_panels) == 0
