@@ -1,6 +1,7 @@
 """Fixtures for deliver commands"""
 
 from pathlib import Path
+from typing import List
 
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -41,13 +42,19 @@ def fixture_base_context(
 
 @pytest.fixture(name="mip_delivery_bundle")
 def fixture_mip_delivery_bundle(
-    case_hk_bundle_no_files: dict, sample1_cram: Path, vcf_file: Path
+    case_hk_bundle_no_files: dict,
+    sample_cram_files: List[Path],
+    sample_ids: List[str],
+    vcf_file: Path,
 ) -> dict:
     """Return a bundle that includes files used when delivering MIP analysis data"""
     case_hk_bundle_no_files["files"] = [
-        {"path": str(sample1_cram), "archive": False, "tags": ["ADM1", "cram"]},
         {"path": str(vcf_file), "archive": False, "tags": ["vcf-snv-clinical"]},
     ]
+    for index, sample_id in enumerate(sample_ids):
+        case_hk_bundle_no_files["files"].append(
+            {"path": str(sample_cram_files[index]), "archive": False, "tags": [sample_id, "cram"]}
+        )
     return case_hk_bundle_no_files
 
 

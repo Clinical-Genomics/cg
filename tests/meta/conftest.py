@@ -15,7 +15,7 @@ from cg.constants.sequencing import Sequencers
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
-from cg.store.models import Customer, ApplicationVersion, Invoice
+from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
 from tests.mocks.limsmock import MockLimsAPI
@@ -218,7 +218,7 @@ def fixture_flowcell_store(
     for sample_data in stats_sample_data["samples"]:
         customer_obj: Customer = base_store.customers().first()
         application_version: ApplicationVersion = base_store.application("WGSPCFC030").versions[0]
-        sample: models.Sample = base_store.add_sample(
+        sample: Sample = base_store.add_sample(
             name="NA", sex="male", internal_id=sample_data["name"]
         )
         sample.customer = customer_obj

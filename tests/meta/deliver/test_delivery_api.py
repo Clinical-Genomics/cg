@@ -8,6 +8,7 @@ from housekeeper.store import models as hk_models
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 from cg.store.models import FamilySample, Sample, Family
@@ -133,7 +134,7 @@ def test_get_sample_files_from_version(
     hk_api = deliver_api.hk_api
     case_hk_bundle_no_files["files"] = [
         {"path": bed_file.as_posix(), "archive": False, "tags": ["case-tag"]},
-        {"path": str(vcf_file), "archive": False, "tags": ["sample-tag", "ADM1"]},
+        {"path": str(vcf_file), "archive": False, "tags": [AlignmentFileTag.CRAM, "ADM1"]},
     ]
     helpers.ensure_hk_bundle(hk_api, bundle_data=case_hk_bundle_no_files)
     # GIVEN a version object with some files

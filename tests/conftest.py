@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
 from housekeeper.store.models import File
@@ -14,7 +14,7 @@ from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline
+from cg.constants import Pipeline, FileExtensions
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -27,18 +27,18 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer
+from cg.store.models import Customer, BedVersion, Bed
 
-from .mocks.crunchy import MockCrunchyAPI
-from .mocks.hk_mock import MockHousekeeperAPI
-from .mocks.limsmock import MockLimsAPI
-from .mocks.madeline import MockMadelineAPI
-from .mocks.osticket import MockOsTicket
-from .mocks.process_mock import ProcessMock
-from .mocks.scout import MockScoutAPI
-from .mocks.tb_mock import MockTB
-from .small_helpers import SmallHelpers
-from .store_helpers import StoreHelpers
+from tests.mocks.crunchy import MockCrunchyAPI
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.mocks.limsmock import MockLimsAPI
+from tests.mocks.madeline import MockMadelineAPI
+from tests.mocks.osticket import MockOsTicket
+from tests.mocks.process_mock import ProcessMock
+from tests.mocks.scout import MockScoutAPI
+from tests.mocks.tb_mock import MockTB
+from tests.small_helpers import SmallHelpers
+from tests.store_helpers import StoreHelpers
 
 from housekeeper.store.models import Version
 
@@ -133,6 +133,24 @@ def fixture_another_case_id() -> str:
 def fixture_sample_id() -> str:
     """Returns a sample id."""
     return "ADM1"
+
+
+@pytest.fixture(name="father_sample_id")
+def fixture_father_sample_id() -> str:
+    """Returns the sample id of the father."""
+    return "ADM2"
+
+
+@pytest.fixture(name="mother_sample_id")
+def fixture_mother_sample_id() -> str:
+    """Returns the mothers sample id."""
+    return "ADM3"
+
+
+@pytest.fixture(name="sample_ids")
+def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
+    """Returns a list with three samples of a family."""
+    return [sample_id, father_sample_id, mother_sample_id]
 
 
 @pytest.fixture(name="sample_name")
@@ -555,21 +573,44 @@ def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "rnafusion")
 
 
-@pytest.fixture(name="sample1_cram")
-def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
-    """Return the path to the cram file for sample 1."""
+@pytest.fixture(name="sample_cram")
+def fixture_sample_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for a sample."""
     return Path(mip_dna_analysis_dir, "adm1.cram")
+
+
+@pytest.fixture(name="father_sample_cram")
+def fixture_father_sample_cram(
+    mip_dna_analysis_dir: Path,
+    father_sample_id: str,
+) -> Path:
+    """Return the path to the cram file for the father sample."""
+    return Path(mip_dna_analysis_dir, father_sample_id + FileExtensions.CRAM)
+
+
+@pytest.fixture(name="mother_sample_cram")
+def fixture_mother_sample_cram(mip_dna_analysis_dir: Path, mother_sample_id: str) -> Path:
+    """Return the path to the cram file for the mother sample."""
+    return Path(mip_dna_analysis_dir, mother_sample_id + FileExtensions.CRAM)
+
+
+@pytest.fixture(name="sample_cram_files")
+def fixture_sample_crams(
+    sample_cram: Path, father_sample_cram: Path, mother_sample_cram: Path
+) -> List[Path]:
+    """Return a list of cram paths for three samples."""
+    return [sample_cram, father_sample_cram, mother_sample_cram]
 
 
 @pytest.fixture(name="vcf_file")
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
-    """Return the path to to a vcf file."""
+    """Return the path to a VCF file."""
     return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
 
 
 @pytest.fixture(name="fastq_file")
 def fixture_fastq_file(fastq_dir: Path) -> Path:
-    """Return the path to to a fastq file."""
+    """Return the path to a FASTQ file."""
     return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
 
 
@@ -945,7 +986,7 @@ def fixture_analysis_store_single(
 @pytest.fixture(name="collaboration_id")
 def fixture_collaboration_id() -> str:
     """Return a default customer group."""
-    return "all_customers"
+    return "hospital_collaboration"
 
 
 @pytest.fixture(name="customer_production")
@@ -1050,10 +1091,29 @@ def fixture_apptag_rna() -> str:
     return "RNAPOAR025"
 
 
+@pytest.fixture(name="bed_name")
+def fixture_bed_name() -> str:
+    """Return a bed model name attribute."""
+    return "Bed"
+
+
+@pytest.fixture(name="bed_version_short_name")
+def fixture_bed_version_short_name() -> str:
+    """Return a bed version model short name attribute."""
+    return "bed_short_name_0.0"
+
+
 @pytest.fixture(name="base_store")
-def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store:
+def fixture_base_store(
+    apptag_rna: str,
+    bed_name: str,
+    bed_version_short_name: str,
+    collaboration_id: str,
+    customer_id: str,
+    store: Store,
+) -> Store:
     """Setup and example store."""
-    collaboration = store.add_collaboration("all_customers", "all customers")
+    collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.add_commit(collaboration)
     customers = [
@@ -1092,7 +1152,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
     applications = [
         store.add_application(
             tag="WGXCUSC000",
-            category="wgs",
+            prep_category="wgs",
             description="External WGS",
             sequencing_depth=0,
             is_external=True,
@@ -1102,7 +1162,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="EXXCUSR000",
-            category="wes",
+            prep_category="wes",
             description="External WES",
             sequencing_depth=0,
             is_external=True,
@@ -1112,7 +1172,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="WGSPCFC060",
-            category="wgs",
+            prep_category="wgs",
             description="WGS, double",
             sequencing_depth=30,
             accredited=True,
@@ -1122,7 +1182,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="RMLP05R800",
-            category="rml",
+            prep_category="rml",
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
@@ -1131,7 +1191,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="WGSPCFC030",
-            category="wgs",
+            prep_category="wgs",
             description="WGS trio",
             is_accredited=True,
             sequencing_depth=30,
@@ -1143,7 +1203,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="METLIFR020",
-            category="wgs",
+            prep_category="wgs",
             description="Whole genome metagenomics",
             sequencing_depth=0,
             target_reads=400000,
@@ -1152,7 +1212,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="METNXTR020",
-            category="wgs",
+            prep_category="wgs",
             description="Metagenomics",
             sequencing_depth=0,
             target_reads=200000,
@@ -1161,7 +1221,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="MWRNXTR003",
-            category="mic",
+            prep_category="mic",
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
@@ -1170,7 +1230,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag=apptag_rna,
-            category="tgs",
+            prep_category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
             percent_reads_guaranteed=75,
@@ -1181,7 +1241,7 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
         ),
         store.add_application(
             tag="VWGDPTR001",
-            category="cov",
+            prep_category="cov",
             description="Viral whole genome  ",
             sequencing_depth=0,
             percent_kth=80,
@@ -1199,9 +1259,17 @@ def fixture_base_store(store: Store, apptag_rna: str, customer_id: str) -> Store
     ]
     store.add_commit(versions)
 
-    beds = [store.add_bed("Bed")]
+    beds: List[Bed] = [store.add_bed(name=bed_name)]
     store.add_commit(beds)
-    bed_versions = [store.add_bed_version(bed, 1, "Bed.bed") for bed in beds]
+    bed_versions: List[BedVersion] = [
+        store.add_bed_version(
+            bed=bed,
+            version=1,
+            filename=bed_name + FileExtensions.BED,
+            shortname=bed_version_short_name,
+        )
+        for bed in beds
+    ]
     store.add_commit(bed_versions)
 
     organism = store.add_organism("C. jejuni", "C. jejuni")
@@ -1388,13 +1456,13 @@ def fixture_microsalt_dir(tmpdir_factory) -> Path:
 @pytest.fixture()
 def current_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
-    return Path("/home/ENCRYPT/")
+    return Path("home", "ENCRYPT")
 
 
 @pytest.fixture()
 def legacy_encryption_dir() -> Path:
     """Return a temporary directory for current encryption testing."""
-    return Path("/home/TO_PDC/")
+    return Path("home", "TO_PDC")
 
 
 @pytest.fixture(name="cg_uri")
