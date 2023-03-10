@@ -11,7 +11,7 @@ def filter_customer_by_customer_internal_id(customers: Query, customer_id: str, 
     return customers.filter(Customer.internal_id == customer_id)
 
 
-class CustomerFilters(Enum):
+class CustomerFilter(Enum):
     """Define customer filter functions."""
 
     FILTER_BY_INTERNAL_ID: Callable = filter_customer_by_customer_internal_id
