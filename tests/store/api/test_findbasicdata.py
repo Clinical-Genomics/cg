@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Collaboration
+from cg.store.models import Bed, BedVersion, Collaboration, Organism
 
 
 def test_get_bed_query(base_store: Store):
@@ -139,3 +139,42 @@ def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: s
 
     # THEN return a collaboration with the give collaboration internal_id
     assert collaboration.internal_id == collaboration_id
+
+
+def test_get_organism_by_internal_id_returns_correct_organism(store_with_organisms: Store):
+    """Test finding an organism by internal ID when the ID exists."""
+
+    # GIVEN a store with multiple organisms
+    num_organisms = store_with_organisms._get_organism_query().count()
+    assert num_organisms > 0
+
+    # Select a random organism from the store
+    organism = store_with_organisms.query(Organism).first()
+    assert isinstance(organism, Organism)
+
+    # WHEN finding the organism by internal ID
+    internal_id = organism.internal_id
+    filtered_organism = store_with_organisms.get_organism_by_internal_id(internal_id)
+
+    # THEN the filtered organism should be of the correct instance and have the correct internal ID
+    assert isinstance(filtered_organism, Organism)
+    assert filtered_organism.internal_id == internal_id
+
+
+def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
+    store_with_organisms: Store,
+):
+    """Test finding an organism by internal ID when the ID does not exist."""
+
+    # GIVEN a store with multiple organisms
+    num_organisms = store_with_organisms._get_organism_query().count()
+    assert num_organisms > 0
+
+    # Choose an ID that does not exist in the database
+    non_existent_id = "non_existent_id"
+
+    # WHEN finding the organism by internal ID
+    filtered_organism = store_with_organisms.get_organism_by_internal_id(non_existent_id)
+
+    # THEN the filtered organism should be None
+    assert filtered_organism is None

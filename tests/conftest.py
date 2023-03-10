@@ -27,7 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer, BedVersion, Bed
+from cg.store.models import Customer, BedVersion, Bed, Organism
 
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -1734,5 +1734,19 @@ def store_with_multiple_cases_and_samples(
     for case_sample in case_samples:
         case_id, sample_id = case_sample
         helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
+
+    yield store
+
+
+@pytest.fixture(name="store_with_organisms")
+def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with multiple organisms."""
+
+    # Add multiple organisms to the store
+    organism1 = helpers.add_organism(store, internal_id="organism1", name="Organism 1")
+    organism2 = helpers.add_organism(store, internal_id="organism2", name="Organism 2")
+    organism3 = helpers.add_organism(store, internal_id="organism3", name="Organism 3")
+    store.add_commit(organism1, organism2, organism3)
+    organisms = store.query(Organism).all()
 
     yield store
