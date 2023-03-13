@@ -19,10 +19,12 @@ from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
+from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -43,6 +45,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.profile: str = config.rnafusion.profile
         self.conda_env: str = config.rnafusion.conda_env
         self.conda_binary: str = config.rnafusion.conda_binary
+        self.tower_binary_path: str = config.rnafusion.tw_binary_path
+        self.tower_pipeline: str = config.rnafusion.tw_pipeline
 
     @property
     def root(self) -> str:
@@ -56,12 +60,23 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def process(self):
         if not self._process:
             self._process = Process(
+                binary=self.tower_binary_path,
+            )
+        return self._process
+
+    @process.setter
+    def process(self, use_nextflow: bool):
+        if use_nextflow:
+            self._process = Process(
                 binary=self.config.rnafusion.binary_path,
                 environment=self.conda_env,
                 conda_binary=self.conda_binary,
                 launch_directory=self.config.rnafusion.launch_directory,
             )
-        return self._process
+        else:
+            self._process = Process(
+                binary=self.tower_binary_path,
+            )
 
     def get_profile(self, profile: Optional[str] = None) -> str:
         if profile:
@@ -202,18 +217,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             f"{prefix}arriba": arriba,
         }
 
-    @staticmethod
-    def __build_command_str(options: dict, exclude_true: bool = False) -> List[str]:
-        formatted_options: list = []
-        for key, val in options.items():
-            if val:
-                if exclude_true and val is True:
-                    formatted_options.append(str(key))
-                elif val:
-                    formatted_options.append(str(key))
-                    formatted_options.append(str(val))
-        return formatted_options
-
     def config_case(
         self,
         case_id: str,
@@ -235,58 +238,27 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         LOG.info("Configs files written")
 
     def run_analysis(
-        self,
-        case_id: str,
-        log: Optional[str],
-        work_dir: Optional[str],
-        resume: bool,
-        profile: str,
-        with_tower: bool,
-        stub: bool,
-        config: Optional[str],
-        params_file: Optional[str],
-        dry_run: bool = False,
+        self, case_id: str, command_args: dict, use_nextflow: bool, dry_run: bool = False
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
-
-        run_options: List[str] = self.__build_command_str(
-            options=NextflowAnalysisAPI.get_verified_arguments_run(
+        self.process = use_nextflow
+        if use_nextflow:
+            LOG.info("Pipeline will be executed using nextflow")
+            parameters = NextflowAnalysisAPI.get_nextflow_run_parameters(
                 case_id=case_id,
+                pipeline=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
-                work_dir=work_dir,
-                resume=resume,
-                profile=self.get_profile(profile=profile),
-                with_tower=with_tower,
-                stub=stub,
-                params_file=params_file,
-            ),
-            exclude_true=True,
-        )
-
-        nextflow_options: List[str] = self.__build_command_str(
-            options=NextflowAnalysisAPI.get_verified_arguments_nextflow(
-                case_id=case_id,
-                pipeline=self.pipeline,
-                root_dir=self.root_dir,
-                log=log,
-                bg=True,
-                quiet=True,
-                config=config,
-            ),
-            exclude_true=True,
-        )
-        command: List[str] = ["run", self.nfcore_pipeline_path]
-        parameters = (
-            nextflow_options
-            + command
-            + run_options
-            + NextflowAnalysisAPI.get_nextflow_stdout_stderr(
-                case_id=case_id, root_dir=self.root_dir
+                command_args=command_args,
             )
-        )
-        self.process.export_variables(
-            export=self.get_variables_to_export(case_id),
-        )
+            self.process.export_variables(
+                export=self.get_variables_to_export(case_id),
+            )
+        else:
+            LOG.info("Pipeline will be executed using tower")
+            parameters = TowerAnalysisAPI.get_tower_launch_parameters(
+                tower_pipeline=self.tower_pipeline,
+                command_args=command_args,
+            )
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def verify_case_config_file_exists(self, case_id: str) -> None:

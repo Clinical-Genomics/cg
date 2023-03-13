@@ -22,6 +22,7 @@ from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -88,26 +89,36 @@ def run(
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    resume = False if from_start else True
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api.verify_case_id_in_statusdb(case_id)
+
+    command_args = {
+        "log": NextflowAnalysisAPI.get_log_path(
+            case_id=case_id, pipeline=analysis_api.pipeline, root_dir=analysis_api.root_dir, log=log
+        ),
+        "work-dir": NextflowAnalysisAPI.get_workdir_path(
+            case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
+        ),
+        "resume": not from_start,
+        "profile": profile,
+        "with-tower": with_tower,
+        "stub": stub,
+        "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
+        "params-file": NextflowAnalysisAPI.get_params_file_path(
+            case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+        ),
+        "name": case_id,
+        "compute-env": None,
+        "revision": None,
+        "wait": "SUBMITTED",
+    }
+
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running RNAFUSION analysis for {case_id}")
-
         analysis_api.run_analysis(
-            case_id=case_id,
-            log=log,
-            work_dir=work_dir,
-            resume=resume,
-            profile=profile,
-            with_tower=with_tower,
-            stub=stub,
-            config=config,
-            params_file=params_file,
-            use_nextflow=use_nextflow,
-            dry_run=dry_run,
+            case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
         )
         analysis_api.set_statusdb_action(case_id=case_id, action="running", dry_run=dry_run)
     except (CgError, ValueError) as error:
