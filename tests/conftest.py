@@ -1751,8 +1751,16 @@ def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple users."""
 
     customer: Customer = helpers.ensure_customer(store=store)
-    store.add_user(customer=customer, email="user1@example.com", name="User One", is_admin=False)
-    store.add_user(customer=customer, email="user2@example.com", name="User Two", is_admin=True)
-    store.add_user(customer=customer, email="user3@example.com", name="User Three", is_admin=False)
+
+    user_details = [
+        ("user1@example.com", "User One", False),
+        ("user2@example.com", "User Two", True),
+        ("user3@example.com", "User Three", False),
+    ]
+
+    for email, name, is_admin in user_details:
+        store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+
+    store.commit()
 
     yield store
