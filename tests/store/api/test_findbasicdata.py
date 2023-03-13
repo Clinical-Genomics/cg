@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Collaboration
+from cg.store.models import Bed, BedVersion, Collaboration, Customer
 
 
 def test_get_bed_query(base_store: Store):
@@ -125,6 +125,45 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 
     # THEN return a bed version with the supplied bed version short name
     assert bed_version.shortname == bed_version_short_name
+
+
+def test_get_customer_query(base_store: Store):
+    """Test function to return the customer query."""
+
+    # GIVEN a store with customer records
+
+    # WHEN getting the query for the customers
+    customer_query: Query = base_store._get_customer_query()
+
+    # THEN a query should be returned
+    assert isinstance(customer_query, Query)
+
+
+def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
+    """Test function to return the customer by customer id."""
+
+    # GIVEN a store with customer records
+
+    # WHEN getting the query for the customer
+    customer: Customer = base_store.get_customer_by_customer_id(customer_id=customer_id)
+
+    # THEN return a customer with the supplied customer internal id
+    assert customer.internal_id == customer_id
+
+
+def test_get_customers(base_store: Store, customer_id: str):
+    """Test function to return customers."""
+
+    # GIVEN a store with customer records
+
+    # WHEN getting the customers
+    customers: List[Customer] = base_store.get_customers()
+
+    # THEN return customers
+    assert customers
+
+    # THEN return a customer with the database customer internal id
+    assert customers[0].internal_id == customer_id
 
 
 def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: str):

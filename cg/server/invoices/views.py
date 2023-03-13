@@ -20,6 +20,7 @@ from flask_dance.contrib.google import google
 from cg.apps.invoice.render import render_xlsx
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
+from cg.store.models import Customer
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
 
@@ -49,7 +50,7 @@ def undo_invoice(invoice_id):
 
 def make_new_invoice():
     customer_id = request.form.get("customer")
-    customer_obj = db.customer(customer_id)
+    customer: Customer = db.get_customer_by_customer_id(customer_id=customer_id)
     record_ids = request.form.getlist("records")
     record_type = request.form.get("record_type")
     if len(record_ids) == 0:
@@ -57,7 +58,7 @@ def make_new_invoice():
     if record_type == "Pool":
         pools = [db.pool(pool_id) for pool_id in record_ids]
         new_invoice = db.add_invoice(
-            customer=customer_obj,
+            customer=customer,
             pools=pools,
             comment=request.form.get("comment"),
             discount=int(request.form.get("discount", "0")),
@@ -66,7 +67,7 @@ def make_new_invoice():
     elif record_type == "Sample":
         samples = [db.sample(sample_id) for sample_id in record_ids]
         new_invoice = db.add_invoice(
-            customer=customer_obj,
+            customer=customer,
             samples=samples,
             comment=request.form.get("comment"),
             discount=int(request.form.get("discount", "0")),
@@ -130,12 +131,12 @@ def new(record_type):
     """Generate a new invoice."""
     count = request.args.get("total", 0)
     customer_id = request.args.get("customer", "cust002")
-    customer_obj = db.customer(customer_id)
+    customer: Customer = db.get_customer_by_customer_id(customer_id=customer_id)
 
     if record_type == "Sample":
-        records, customers_to_invoice = db.samples_to_invoice(customer=customer_obj)
+        records, customers_to_invoice = db.samples_to_invoice(customer=customer)
     elif record_type == "Pool":
-        records, customers_to_invoice = db.pools_to_invoice(customer=customer_obj)
+        records, customers_to_invoice = db.pools_to_invoice(customer=customer)
     return render_template(
         "invoices/new.html",
         customers_to_invoice=customers_to_invoice,

@@ -19,6 +19,7 @@ from cg.store.models import (
 from cg.store.api.base import BaseHandler
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilters
 from cg.store.filters.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
+from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilters,
     apply_collaboration_version_filter,
@@ -85,13 +86,21 @@ class FindBasicDataHandler(BaseHandler):
         bed: Optional[Bed] = self.get_bed_by_name(bed_name=bed_name)
         return bed.versions[-1] if bed and bed.versions else None
 
-    def customer(self, internal_id: str) -> Customer:
-        """Fetch a customer by internal id from the store."""
-        return self.Customer.query.filter_by(internal_id=internal_id).first()
-
-    def customers(self) -> List[Customer]:
-        """Fetch all customers."""
+    def _get_customer_query(self) -> Query:
+        """Return customer query."""
         return self.Customer.query
+
+    def get_customer_by_customer_id(self, customer_id: str) -> Customer:
+        """Return customer with customer id."""
+        return apply_customer_filter(
+            filter_functions=[CustomerFilter.FILTER_BY_INTERNAL_ID],
+            customers=self._get_customer_query(),
+            customer_id=customer_id,
+        ).first()
+
+    def get_customers(self) -> List[Customer]:
+        """Return costumers."""
+        return self._get_customer_query().all()
 
     def _get_collaboration_query(self) -> Query:
         """Returns a collaboration query."""
@@ -104,10 +113,6 @@ class FindBasicDataHandler(BaseHandler):
             filter_functions=[CollaborationFilters.FILTER_BY_ID],
             internal_id=internal_id,
         ).first()
-
-    def customer_by_id(self, id_: int) -> Customer:
-        """Fetch a customer by id number from the store."""
-        return self.Customer.query.filter_by(id=id_).first()
 
     def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
         """Fetch the current application version for an application tag."""
