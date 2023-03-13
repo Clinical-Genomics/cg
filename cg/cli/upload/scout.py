@@ -1,7 +1,7 @@
 """Code for uploading to scout via CLI"""
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 from housekeeper.store import models as hk_models
@@ -13,13 +13,17 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.exc import CgDataError, ScoutUploadError
 from cg.io.controller import WriteStream
-from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
-from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
+from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
+from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
+from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
+from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Family
+
 
 LOG = logging.getLogger(__name__)
 
@@ -68,12 +72,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
         LOG.warning("Could not find analyses for %s", case_id)
         raise click.Abort
 
-    if case_obj.data_analysis == Pipeline.BALSAMIC:
-        LOG.info(f"Found BALSAMIC analysis for {case_id}, using BALSAMIC upload API")
-        context.meta_apis["analysis_api"] = BalsamicAnalysisAPI(context)
-    elif case_obj.data_analysis == Pipeline.BALSAMIC_UMI:
-        LOG.info(f"Found BALSAMIC UMI analysis for {case_id}, using BALSAMIC UMI upload API")
-        context.meta_apis["analysis_api"] = BalsamicUmiAnalysisAPI(context)
+    context.meta_apis["upload_api"]: UploadAPI = get_upload_api(cg_config=context, case=case_obj)
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
 
@@ -264,3 +263,16 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
         LOG.error(error)
         return 1
     return 0
+
+
+def get_upload_api(cg_config: CGConfig, case: Family) -> UploadAPI:
+    """Return the upload API based on the data analysis type"""
+
+    analysis_apis: Dict[Pipeline, UploadAPI] = {
+        Pipeline.BALSAMIC: BalsamicUploadAPI,
+        Pipeline.RNAFUSION: RnafusionUploadAPI,
+        Pipeline.MIP_RNA: MipRNAUploadAPI,
+        Pipeline.MIP_DNA: MipDNAUploadAPI,
+    }
+
+    return analysis_apis.get(case.data_analysis)(cg_config)
