@@ -60,3 +60,12 @@ OPTION_PARAMS_FILE = click.option(
     type=click.Path(),
     help="Nextflow pipeline-specific parameter file path",
 )
+
+OPTION_USE_NEXTFLOW = click.option(
+    "--use_nextflow",
+    type=bool,
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Execute pipeline using nextflow instead of tower",
+)
