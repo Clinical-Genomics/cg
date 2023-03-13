@@ -7,8 +7,8 @@ from cg.constants.subject import Gender
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Family, Customer, Application, User, Collaboration, Panel
 from cg.utils.click.EnumChoice import EnumChoice
+from cg.store.models import Family, Sample, Customer, User, Collaboration, Application, Panel
 
 from cg.constants import Priority
 
@@ -100,6 +100,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     if user:
         LOG.error(f"{user.name}: user already added")
         raise click.Abort
+
     new_user: User = status_db.add_user(
         customer=customer_obj, email=email, name=name, is_admin=admin
     )
@@ -144,6 +145,7 @@ def sample(
 ):
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
+
     customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
     if not customer:
         LOG.error(f"Customer: {customer_id} not found")
@@ -151,6 +153,7 @@ def sample(
     application: Application = status_db.application(application_tag)
     if not application:
         LOG.error(f"Application: {application_tag} not found")
+
         raise click.Abort
     new_record: Sample = status_db.add_sample(
         name=name,
@@ -206,6 +209,7 @@ def case(
 ):
     """Add a case with the given name and associated with the given customer"""
     status_db: Store = context.status_db
+
     customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
     if customer is None:
         LOG.error(f"{customer_id}: customer not found")
@@ -247,39 +251,35 @@ def relationship(
 ):
     """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
-    sample_mother: Optional[Sample] = None
-    sample_father: Optional[Sample] = None
-    case: Family = status_db.family(case_id)
-    if not case:
-        LOG.error(f"{case_id}: family not found")
+    mother: Optional[Sample] = None
+    father: Optional[Sample] = None
+    case_obj: Family = status_db.family(case_id)
+    if case_obj is None:
+        LOG.error("%s: family not found", case_id)
         raise click.Abort
 
-    existing_sample: Sample = status_db.sample(sample_id)
-    if not existing_sample:
-        LOG.error(f"{sample_id}: sample not found")
+    sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
+    if sample is None:
+        LOG.error("%s: sample not found", sample_id)
         raise click.Abort
 
     if mother_id:
-        sample_mother: Sample = status_db.sample(mother_id)
-        if not sample_mother:
-            LOG.error(f"{mother_id}: mother not found")
+        mother: Sample = status_db.get_sample_by_internal_id(internal_id=mother_id)
+        if mother is None:
+            LOG.error("%s: mother not found", mother_id)
             raise click.Abort
 
     if father_id:
-        sample_father: Sample = status_db.sample(father_id)
-        if not sample_father:
-            LOG.error(f"{father_id}: father not found")
+        father: Sample = status_db.get_sample_by_internal_id(internal_id=father_id)
+        if father is None:
+            LOG.error("%s: father not found", father_id)
             raise click.Abort
 
     new_record = status_db.relate_sample(
-        family=case,
-        sample=existing_sample,
-        status=status,
-        mother=sample_mother,
-        father=sample_father,
+        family=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.add_commit(new_record)
-    LOG.info(f"Related {case.internal_id} to {existing_sample.internal_id}")
+    LOG.info("related %s to %s", case_obj.internal_id, sample.internal_id)
 
 
 @add.command()

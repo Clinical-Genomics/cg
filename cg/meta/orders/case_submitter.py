@@ -12,6 +12,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
+
 from cg.constants import Priority
 from cg.store.models import Customer, Family, Sample, FamilySample
 
@@ -44,7 +45,8 @@ class CaseSubmitter(Submitter):
             new_gender: str = sample.sex
             if new_gender == "unknown":
                 continue
-            existing_samples: [Sample] = self.status.samples_by_subject_id(
+
+            existing_samples: List[Sample] = self.status.get_samples_by_subject_id(
                 customer_id=customer_id, subject_id=subject_id
             )
             existing_sample: Sample
@@ -67,7 +69,10 @@ class CaseSubmitter(Submitter):
             if not sample.internal_id:
                 continue
 
-            existing_sample: Sample = self.status.sample(internal_id=sample.internal_id)
+            existing_sample: Sample = self.status.get_sample_by_internal_id(
+                internal_id=sample.internal_id
+            )
+
             data_customer: Customer = self.status.get_customer_by_customer_id(
                 customer_id=customer_id
             )
@@ -79,7 +84,9 @@ class CaseSubmitter(Submitter):
         self, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
+
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+
         sample: Of1508Sample
         for sample in samples:
             if self._is_rerun_of_existing_case(sample=sample):
@@ -218,6 +225,7 @@ class CaseSubmitter(Submitter):
         """Store cases, samples and their relationship in the Status database."""
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_cases: List[Family] = []
+
         for case in items:
             status_db_case: Family = self.status.family(internal_id=case["internal_id"])
             if not status_db_case:
@@ -234,7 +242,9 @@ class CaseSubmitter(Submitter):
 
             case_samples: Dict[str, Sample] = {}
             for sample in case["samples"]:
-                existing_sample: Sample = self.status.sample(sample["internal_id"])
+                existing_sample: Sample = self.status.get_sample_by_internal_id(
+                    internal_id=sample["internal_id"]
+                )
                 if not existing_sample:
                     new_sample: Sample = self._create_sample(
                         case=case,

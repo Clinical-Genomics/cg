@@ -124,7 +124,7 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
         identifier_name: identifier_value for identifier_name, identifier_value in identifiers
     }
 
-    return list(store.samples_by_ids(**identifier_args))
+    return list(store.get_samples_by_any_id(**identifier_args))
 
 
 def is_locked_attribute_on_sample(key: str, skip_attributes: List[str]) -> bool:
@@ -162,7 +162,7 @@ def list_keys(
 ):
     """List all available modifiable keys."""
     status_db: Store = context.status_db
-    sample: Sample = status_db.sample(internal_id=sample_id)
+    sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
     list_changeable_sample_attributes(
         sample=sample, skip_attributes=NOT_CHANGEABLE_SAMPLE_ATTRIBUTES
     )
@@ -198,7 +198,7 @@ def sample(
 
     """
     status_db: Store = context.status_db
-    sample: Sample = status_db.sample(internal_id=sample_id)
+    sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
 
     if sample is None:
         LOG.error(f"Can't find sample {sample_id}")

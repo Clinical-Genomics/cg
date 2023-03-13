@@ -17,11 +17,11 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilters
-from cg.store.filters.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
+from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
+from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
 from cg.store.filters.status_collaboration_filters import (
-    CollaborationFilters,
+    CollaborationFilter,
     apply_collaboration_version_filter,
 )
 
@@ -29,13 +29,17 @@ from cg.store.filters.status_collaboration_filters import (
 class FindBasicDataHandler(BaseHandler):
     """Contains methods to find basic data model instances"""
 
+    def _get_application_query(self) -> Query:
+        """Get a query for applications."""
+        return self.query(Application)
+
     def application(self, tag: str) -> Application:
         """Fetch an application from the store."""
         return self.Application.query.filter_by(tag=tag).first()
 
     def applications(self, *, category=None, archived=None):
         """Fetch all applications."""
-        records = self.Application.query
+        records = self._get_application_query()
         if category:
             records = records.filter_by(prep_category=category)
         if archived is not None:
@@ -56,7 +60,7 @@ class FindBasicDataHandler(BaseHandler):
         return apply_bed_version_filter(
             bed_versions=self._get_bed_version_query(),
             bed_version_short_name=bed_version_short_name,
-            functions=[BedVersionFilters.get_bed_version_by_short_name],
+            filter_functions=[BedVersionFilter.FILTER_BY_SHORT_NAME],
         ).first()
 
     def _get_bed_query(self) -> Query:
@@ -70,16 +74,18 @@ class FindBasicDataHandler(BaseHandler):
     def get_bed_by_name(self, bed_name: str) -> Optional[Bed]:
         """Return bed by name."""
         return apply_bed_filter(
-            beds=self._get_bed_query(), bed_name=bed_name, functions=[BedFilters.get_beds_by_name]
+            beds=self._get_bed_query(),
+            bed_name=bed_name,
+            filter_functions=[BedFilter.FILTER_BY_NAME],
         ).first()
 
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
-        bed_filter_functions: List[Callable] = [
-            BedFilters.get_not_archived_beds,
-            BedFilters.order_beds_by_name,
+        bed_filter_functions: List[BedFilter] = [
+            BedFilter.FILTER_NOT_ARCHIVED,
+            BedFilter.ORDER_BY_NAME,
         ]
-        return apply_bed_filter(beds=self._get_bed_query(), functions=bed_filter_functions)
+        return apply_bed_filter(beds=self._get_bed_query(), filter_functions=bed_filter_functions)
 
     def get_latest_bed_version(self, bed_name: str) -> Optional[BedVersion]:
         """Return the latest bed version for a bed by supplied name."""
@@ -110,7 +116,7 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch a customer group by internal id from the store."""
         return apply_collaboration_version_filter(
             collaborations=self._get_collaboration_query(),
-            filter_functions=[CollaborationFilters.FILTER_BY_ID],
+            filter_functions=[CollaborationFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
 

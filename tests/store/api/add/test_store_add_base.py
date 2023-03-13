@@ -94,5 +94,5 @@ def test_add_pool(rml_pool_store: Store):
 
     rml_pool_store.add_commit(new_pool)
     # THEN the new pool should have no_invoice = False
-    pool = rml_pool_store.pool(pool_id=2)
+    pool = rml_pool_store.get_pool_by_entry_id(entry_id=2)
     assert pool.no_invoice is False

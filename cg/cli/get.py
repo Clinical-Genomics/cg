@@ -45,10 +45,10 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
-        LOG.debug(f"Get info on sample: {sample_id}")
-        existing_sample: Sample = status_db.sample(sample_id)
-        if not existing_sample:
-            LOG.warning(f"Sample: {sample_id} does not exist")
+        LOG.debug("%s: get info about sample", sample_id)
+        existing_sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
+        if existing_sample is None:
+            LOG.warning(f"{sample_id}: sample doesn't exist")
             continue
         row = [
             existing_sample.internal_id,

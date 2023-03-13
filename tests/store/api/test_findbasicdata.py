@@ -101,6 +101,18 @@ def test_get_latest_bed_version(base_store: Store, bed_name: str):
     assert bed_version.version == 1
 
 
+def test_get_application_query(base_store: Store):
+    """Test function to return the application query."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    application_query: Query = base_store._get_application_query()
+
+    # THEN a query should be returned
+    assert isinstance(application_query, Query)
+
+
 def test_get_bed_version_query(base_store: Store):
     """Test function to return the bed version query."""
 
