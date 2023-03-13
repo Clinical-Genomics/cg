@@ -15,9 +15,7 @@ from tests.store_helpers import StoreHelpers
 from tests.mocks.scout import MockScoutLoadConfig
 
 
-def test_get_upload_api(
-    cg_context: CGConfig, case_id: str, helpers: StoreHelpers
-):
+def test_get_upload_api(cg_context: CGConfig, case_id: str, helpers: StoreHelpers):
     """Test to get the correct upload API for a BALSAMIC case."""
     status_db: Store = cg_context.status_db
 
@@ -30,9 +28,9 @@ def test_get_upload_api(
     # WHEN getting the upload API
     upload_api: UploadAPI = get_upload_api(cg_config=cg_context, case=case)
 
-
     # THEN assert that the type of upload API is correct
     assert type(upload_api.analysis_api) == BalsamicAnalysisAPI
+
 
 def test_create_scout_load_config(
     caplog,
