@@ -137,7 +137,7 @@ class FindBasicDataHandler(BaseHandler):
         """Find an organism by internal id."""
         return apply_organism_filter(
             organisms=self._get_organism_query(),
-            filters=[OrganismFilter.FILTER_BY_INTERNAL_ID],
+            filter_functions=[OrganismFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
 

@@ -145,11 +145,11 @@ def test_get_organism_by_internal_id_returns_correct_organism(store_with_organis
     """Test finding an organism by internal ID when the ID exists."""
 
     # GIVEN a store with multiple organisms
-    num_organisms = store_with_organisms._get_organism_query().count()
-    assert num_organisms > 0
+    organisms: Query = store_with_organisms._get_organism_query()
+    assert organisms.count() > 0
 
-    # Select a random organism from the store
-    organism: Organism = store_with_organisms._get_organism_query.first()
+    # GIVEN a random organism from the store
+    organism: Organism = organisms.first()
     assert isinstance(organism, Organism)
 
     # WHEN finding the organism by internal ID
@@ -168,8 +168,8 @@ def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
     """Test finding an organism by internal ID when the ID does not exist."""
 
     # GIVEN a store with multiple organisms
-    num_organisms = store_with_organisms._get_organism_query().count()
-    assert num_organisms > 0
+    organisms: Query = store_with_organisms._get_organism_query()
+    assert organisms.count() > 0
 
     # WHEN finding the organism by internal ID
     filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(
