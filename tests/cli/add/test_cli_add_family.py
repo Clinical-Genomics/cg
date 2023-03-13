@@ -1,4 +1,4 @@
-"""This script tests the cli methods to add families to status-db"""
+"""Tests the CLI methods to add cases to the status database."""
 
 from cg.cli.add import add
 from cg.constants import DataDelivery, Pipeline
@@ -11,7 +11,7 @@ CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC_UMI
 CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 
-def test_add_family_required(
+def test_add_case_required(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test to add a case using only the required arguments"""
@@ -28,7 +28,7 @@ def test_add_family_required(
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -50,7 +50,7 @@ def test_add_family_required(
     assert disk_store.Family.query.first().panels == [panel_id]
 
 
-def test_add_family_bad_pipeline(
+def test_add_case_bad_pipeline(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test to add a case using only the required arguments"""
@@ -88,7 +88,7 @@ def test_add_family_bad_pipeline(
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_data_delivery(
+def test_add_case_bad_data_delivery(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test to add a case using only the required arguments"""
@@ -125,7 +125,7 @@ def test_add_family_bad_data_delivery(
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ticket: str):
+def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ticket: str):
     """Test to add a case using a non-existing customer"""
     # GIVEN an empty database
     disk_store: Store = base_context.status_db
@@ -136,7 +136,7 @@ def test_add_family_bad_customer(cli_runner: CliRunner, base_context: CGConfig, 
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -156,7 +156,7 @@ def test_add_family_bad_customer(cli_runner: CliRunner, base_context: CGConfig, 
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_panel(
+def test_add_case_bad_panel(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test to add a case using a non-existing panel"""
@@ -170,7 +170,7 @@ def test_add_family_bad_panel(
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -190,7 +190,7 @@ def test_add_family_bad_panel(
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_priority(
+def test_add_case_priority(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test that the added case get the priority we send in"""
@@ -207,7 +207,7 @@ def test_add_family_priority(
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--priority",

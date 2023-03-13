@@ -28,11 +28,13 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     """Test function to delete association between a sample and a case in store."""
 
     # GIVEN a store containing multiple samples associated with different cases
-    sample_in_single_case: Sample = store_with_multiple_cases_and_samples.sample(
+    sample_in_single_case: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
         internal_id=sample_id_in_single_case
     )
-    sample_in_multiple_cases: Sample = store_with_multiple_cases_and_samples.sample(
-        internal_id=sample_id_in_multiple_cases
+    sample_in_multiple_cases: Sample = (
+        store_with_multiple_cases_and_samples.get_sample_by_internal_id(
+            internal_id=sample_id_in_multiple_cases
+        )
     )
 
     assert sample_in_single_case
@@ -44,12 +46,12 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     # THEN it should no longer be associated with any cases, but other relationships should remain
     results: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample_in_single_case.id
-    )
+    ).all()
     existing_relationships: List[
         FamilySample
     ] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample_in_multiple_cases.id
-    )
+    ).all()
 
     assert not results
     assert existing_relationships

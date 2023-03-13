@@ -1103,6 +1103,18 @@ def fixture_bed_version_short_name() -> str:
     return "bed_short_name_0.0"
 
 
+@pytest.fixture(name="invoice_address")
+def fixture_invoice_address() -> str:
+    """Return an invoice address."""
+    return "Test street"
+
+
+@pytest.fixture(name="invoice_reference")
+def fixture_invoice_reference() -> str:
+    """Return an invoice reference."""
+    return "ABCDEF"
+
+
 @pytest.fixture(name="base_store")
 def fixture_base_store(
     apptag_rna: str,
@@ -1110,42 +1122,32 @@ def fixture_base_store(
     bed_version_short_name: str,
     collaboration_id: str,
     customer_id: str,
+    invoice_address: str,
+    invoice_reference: str,
     store: Store,
 ) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.add_commit(collaboration)
-    customers = [
-        store.add_customer(
-            customer_id,
-            "Production",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust001",
-            "Customer",
-            scout_access=False,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust002",
-            "Karolinska",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust003",
-            "CMMS",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-    ]
+    customers: List[Customer] = []
+    customer_map: Dict[str, str] = {
+        customer_id: "Production",
+        "cust001": "Customer",
+        "cust002": "Karolinska",
+        "cust003": "CMMS",
+    }
+    for new_customer_id, new_customer_name in customer_map.items():
+        customers.append(
+            store.add_customer(
+                internal_id=new_customer_id,
+                name=new_customer_name,
+                scout_access=True,
+                invoice_address=invoice_address,
+                invoice_reference=invoice_reference,
+            )
+        )
+
     for customer in customers:
         collaboration.customers.append(customer)
     store.add_commit(customers)
@@ -1310,7 +1312,7 @@ def sample_store(base_store: Store) -> Store:
             reads=(250 * 1000000),
         ),
     ]
-    customer = base_store.customers().first()
+    customer: Customer = (base_store.get_customers())[0]
     external_app = base_store.application("WGXCUSC000").versions[0]
     wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:

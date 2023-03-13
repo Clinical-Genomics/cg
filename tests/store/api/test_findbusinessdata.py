@@ -8,7 +8,15 @@ from sqlalchemy.orm import Query
 from cg.constants import FlowCellStatus
 from cg.store import Store
 from cg.constants.indexes import ListIndexes
-from cg.store.models import Application, ApplicationVersion, Flowcell, FamilySample, Family, Sample
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Flowcell,
+    FamilySample,
+    Family,
+    Sample,
+    Invoice,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -89,7 +97,7 @@ def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: 
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell[0].name == flow_cell_id
+    assert flow_cell.name == flow_cell_id
 
 
 def test_get_flow_cells_by_case(
@@ -371,17 +379,6 @@ def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, t
     assert ticket == ticket_from_case
 
 
-def test_get_case_pool(case_id: str, rml_pool_store: Store):
-    """Tests if the correct pool is returned."""
-    # GIVEN a case connected to a pool
-    case_name = rml_pool_store.family(internal_id=case_id).name
-    # WHEN the function is called
-    pool = rml_pool_store.get_case_pool(case_id=case_id)
-    # THEN the correct pool should be returned and the pool name should be the last part of the
-    # case name
-    assert pool.name == case_name.split("-", 1)[-1]
-
-
 def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
     """Test if the correct number of expected reads is returned."""
 
@@ -417,7 +414,7 @@ def test_find_single_case_for_sample(
     """Test that cases associated with a sample can be found."""
 
     # GIVEN a database containing a sample associated with a single case
-    sample: Sample = store_with_multiple_cases_and_samples.sample(
+    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
         internal_id=sample_id_in_single_case
     )
 
@@ -426,7 +423,7 @@ def test_find_single_case_for_sample(
     # WHEN the cases associated with the sample is fetched
     cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample.id
-    )
+    ).all()
 
     # THEN only one case is found
     assert cases and len(cases) == 1
@@ -436,7 +433,7 @@ def test_find_multiple_cases_for_sample(
     sample_id_in_multiple_cases: str, store_with_multiple_cases_and_samples: Store
 ):
     # GIVEN a database containing a sample associated with multiple cases
-    sample: Sample = store_with_multiple_cases_and_samples.sample(
+    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
         internal_id=sample_id_in_multiple_cases
     )
     assert sample
@@ -444,7 +441,7 @@ def test_find_multiple_cases_for_sample(
     # WHEN the cases associated with the sample is fetched
     cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample.id
-    )
+    ).all()
 
     # THEN multiple cases are found
     assert cases and len(cases) > 1
@@ -464,3 +461,92 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # THEN no cases are found
     assert not cases
+
+
+def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpers: StoreHelpers):
+    """Test that all pools and samples for an invoice can be fetched."""
+
+    # GIVEN a database with a pool and a sample
+    pool = helpers.ensure_pool(store=store, name="pool_1")
+    sample = helpers.add_sample(store=store, name="sample_1")
+
+    # AND an invoice with the pool and sample
+    invoice: Invoice = helpers.ensure_invoice(store=store, pools=[pool], samples=[sample])
+
+    # ASSERT that there is an invoice with a pool and a sample
+    assert len(invoice.pools) == 1
+    assert len(invoice.samples) == 1
+
+    # WHEN fetching all pools and samples for the invoice
+    records = store.get_pools_and_samples_for_invoice_by_invoice_id(invoice_id=invoice.id)
+    # THEN the pool and sample should be returned
+    assert pool in records
+    assert sample in records
+
+
+def test_get_samples_by_subject_id(
+    store_with_samples_subject_id_and_tumour_status: Store,
+    helpers: StoreHelpers,
+    customer_id: str = "cust123",
+    subject_id: str = "test_subject",
+):
+    """Test that samples can be fetched by subject id."""
+    # GIVEN a database with two samples that have a subject ID but only one is tumour
+
+    # ASSERT that there are two samples in the store
+    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
+
+    # ASSERT that there is a customer with the given customer id
+    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
+        customer_id=customer_id
+    )
+
+    # WHEN fetching the sample by subject id and customer_id
+    samples = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id(
+        subject_id=subject_id, customer_id=customer_id
+    )
+
+    # THEN two samples should be returned
+    assert samples and len(samples) == 2
+
+
+def test_get_samples_by_subject_id_and_is_tumour(
+    store_with_samples_subject_id_and_tumour_status: Store,
+    helpers: StoreHelpers,
+    customer_id: str = "cust123",
+    subject_id: str = "test_subject",
+    is_tumour: bool = True,
+):
+    """Test that samples can be fetched by subject id."""
+    # GIVEN a database with two samples that have a subject ID but only one is tumour
+
+    # ASSERT that there are two samples in the store
+    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
+
+    # ASSERT that there is a customer with the given customer id
+    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
+        customer_id=customer_id
+    )
+    # WHEN fetching the sample by subject id and customer_id
+    samples: List[
+        Sample
+    ] = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id_and_is_tumour(
+        subject_id=subject_id, customer_id=customer_id, is_tumour=is_tumour
+    )
+
+    # THEN two samples should be returned
+    assert samples and len(samples) == 1
+
+
+def test_filter_get_sample_by_name(store_with_samples_that_have_names: Store, name="sample_1"):
+    """Test that samples can be fetched by name."""
+    # GIVEN a database with two samples of which one has a name
+
+    # ASSERT that there are two samples in the store
+    assert len(store_with_samples_that_have_names.get_all_samples()) == 2
+
+    # WHEN fetching the sample by name
+    samples: Sample = store_with_samples_that_have_names.get_sample_by_name(name=name)
+
+    # THEN one sample should be returned
+    assert samples and samples.name == name
