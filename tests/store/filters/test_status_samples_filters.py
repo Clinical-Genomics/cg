@@ -3,7 +3,7 @@ from alchy import Query
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Sample
-from cg.store.status_sample_filters import (
+from cg.store.filters.status_sample_filters import (
     get_samples_with_loqusdb_id,
     get_samples_without_loqusdb_id,
 )

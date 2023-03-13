@@ -17,9 +17,9 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
-from cg.store.status_bed_filters import apply_bed_filter, BedFilters
-from cg.store.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
-from cg.store.status_collaboration_filters import (
+from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilters
+from cg.store.filters.status_bed_version_filters import BedVersionFilters, apply_bed_version_filter
+from cg.store.filters.status_collaboration_filters import (
     CollaborationFilters,
     apply_collaboration_version_filter,
 )

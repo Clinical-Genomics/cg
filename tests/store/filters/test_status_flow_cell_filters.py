@@ -5,7 +5,7 @@ from sqlalchemy.orm import Query
 from cg.constants import FlowCellStatus
 from cg.store import Store
 from cg.store.models import Flowcell, Family, Sample
-from cg.store.status_flow_cell_filters import (
+from cg.store.filters.status_flow_cell_filters import (
     get_flow_cell_by_id,
     get_flow_cells_with_statuses,
     get_flow_cells_by_case,
