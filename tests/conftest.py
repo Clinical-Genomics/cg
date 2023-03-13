@@ -1743,6 +1743,7 @@ def non_existent_email():
     """Return email not associated with any entity."""
     return "non_existent_email@example.com"
 
+
 @pytest.fixture(name="store_with_users")
 def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple users."""
