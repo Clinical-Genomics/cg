@@ -205,10 +205,10 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
 
     # WHEN storing the order
     new_pools = submitter.store_items_in_status(
-        customer=rml_status_data["customer"],
+        customer_id=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=rml_status_data["pools"],
     )
 
@@ -255,10 +255,10 @@ def test_store_samples(orders_api, base_store, fastq_status_data, ticket: str):
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=fastq_status_data["customer"],
+        customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -285,10 +285,10 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, tic
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=fastq_status_data["customer"],
+        customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -307,10 +307,10 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=fastq_status_data["customer"],
+        customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=1234348,
+        ticket_id=1234348,
         items=fastq_status_data["samples"],
     )
 
@@ -331,10 +331,10 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=fastq_status_data["customer"],
+        customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -357,10 +357,10 @@ def test_store_fastq_samples_non_wgs_as_fastq(
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=fastq_status_data["customer"],
+        customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=fastq_status_data["samples"],
     )
 
@@ -382,10 +382,10 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data, tic
     with pytest.raises(OrderError):
         # WHEN storing the order
         submitter.store_items_in_status(
-            customer=fastq_status_data["customer"],
+            customer_id=fastq_status_data["customer"],
             order=fastq_status_data["order"],
             ordered=dt.datetime.now(),
-            ticket=ticket,
+            ticket_id=ticket,
             items=fastq_status_data["samples"],
         )
 
@@ -400,10 +400,10 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data, 
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=microbial_status_data["customer"],
+        customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -430,10 +430,10 @@ def test_store_microbial_case_data_analysis_stored(
 
     # WHEN storing the order
     submitter.store_items_in_status(
-        customer=microbial_status_data["customer"],
+        customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -459,10 +459,10 @@ def test_store_microbial_sample_priority(
 
     # WHEN storing the order
     submitter.store_items_in_status(
-        customer=microbial_status_data["customer"],
+        customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -485,10 +485,10 @@ def test_store_mip(orders_api, base_store, mip_status_data, ticket: str):
 
     # WHEN storing the order
     new_families = submitter.store_items_in_status(
-        customer=mip_status_data["customer"],
+        customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -539,10 +539,10 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str)
 
     # WHEN storing the order
     new_cases = submitter.store_items_in_status(
-        customer=mip_rna_status_data["customer"],
+        customer_id=mip_rna_status_data["customer"],
         order=mip_rna_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_rna_status_data["families"],
     )
 
@@ -566,10 +566,10 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
 
     # WHEN storing the order
     new_samples = submitter.store_items_in_status(
-        customer=metagenome_status_data["customer"],
+        customer_id=metagenome_status_data["customer"],
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=metagenome_status_data["families"],
     )
 
@@ -593,10 +593,10 @@ def test_store_metagenome_samples_bad_apptag(
     with pytest.raises(OrderError):
         # WHEN storing the order
         submitter.store_items_in_status(
-            customer=metagenome_status_data["customer"],
+            customer_id=metagenome_status_data["customer"],
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
-            ticket=ticket,
+            ticket_id=ticket,
             items=metagenome_status_data["families"],
         )
 
@@ -613,10 +613,10 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
 
     # WHEN storing the order
     new_families = submitter.store_items_in_status(
-        customer=balsamic_status_data["customer"],
+        customer_id=balsamic_status_data["customer"],
         order=balsamic_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=balsamic_status_data["families"],
     )
 
@@ -652,10 +652,10 @@ def test_store_existing_single_sample_from_trio(
     # GIVEN a stored trio case
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
     new_families = submitter.store_items_in_status(
-        customer=mip_status_data["customer"],
+        customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -690,10 +690,10 @@ def test_store_existing_single_sample_from_trio(
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
     new_families = submitter.store_items_in_status(
-        customer=mip_status_data["customer"],
+        customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -715,10 +715,10 @@ def test_store_existing_case(
 
     # WHEN storing the order
     submitter.store_items_in_status(
-        customer=mip_status_data["customer"],
+        customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 
@@ -731,10 +731,10 @@ def test_store_existing_case(
         case["internal_id"] = stored_cases_internal_ids[case["name"]]
 
     submitter.store_items_in_status(
-        customer=mip_status_data["customer"],
+        customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket=ticket,
+        ticket_id=ticket,
         items=mip_status_data["families"],
     )
 

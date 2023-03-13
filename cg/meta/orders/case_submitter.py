@@ -1,19 +1,20 @@
 import datetime as dt
 import logging
-from typing import List, Set
+from typing import List, Set, Dict
 
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
 from cg.constants.constants import CaseActions
+from cg.constants.pedigree import Pedigree
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
-from cg.store.models import Sample, Panel, Application, Customer, Family, User
 
 from cg.constants import Priority
+from cg.store.models import Customer, Family, Sample, FamilySample
 
 LOG = logging.getLogger(__name__)
 
@@ -44,6 +45,7 @@ class CaseSubmitter(Submitter):
             new_gender: str = sample.sex
             if new_gender == "unknown":
                 continue
+
             existing_samples: List[Sample] = self.status.get_samples_by_subject_id(
                 customer_id=customer_id, subject_id=subject_id
             )
@@ -70,7 +72,10 @@ class CaseSubmitter(Submitter):
             existing_sample: Sample = self.status.get_sample_by_internal_id(
                 internal_id=sample.internal_id
             )
-            data_customer: Customer = self.status.customer(customer_id)
+
+            data_customer: Customer = self.status.get_customer_by_customer_id(
+                customer_id=customer_id
+            )
 
             if existing_sample.customer not in data_customer.collaborators:
                 raise OrderError(f"Sample not available: {sample.name}")
@@ -79,14 +84,14 @@ class CaseSubmitter(Submitter):
         self, samples: List[OrderInSample], customer_id: str
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
-        customer_obj: Customer = self.status.customer(customer_id)
+
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
 
         sample: Of1508Sample
         for sample in samples:
-            if self._is_rerun_of_existing_case(sample):
+            if self._is_rerun_of_existing_case(sample=sample):
                 continue
-
-            if self.status.find_family(customer=customer_obj, name=sample.family_name):
+            if self.status.find_family(customer=customer, name=sample.family_name):
                 raise OrderError(f"Case name {sample.family_name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
@@ -116,16 +121,16 @@ class CaseSubmitter(Submitter):
         status_data = self.order_to_status(order=order)
         samples = [sample for family in status_data["families"] for sample in family["samples"]]
         if lims_map:
-            self._fill_in_sample_ids(samples, lims_map)
+            self._fill_in_sample_ids(samples=samples, lims_map=lims_map)
 
-        new_families = self.store_items_in_status(
-            customer=status_data["customer"],
+        new_cases: List[Family] = self.store_items_in_status(
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"] if project_data else dt.datetime.now(),
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["families"],
         )
-        return {"project": project_data, "records": new_families}
+        return {"project": project_data, "records": new_cases}
 
     @staticmethod
     def _group_cases(samples: List[Of1508Sample]) -> dict:
@@ -215,56 +220,78 @@ class CaseSubmitter(Submitter):
         return status_data
 
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: str, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Family]:
-        """Store cases and samples in the status database."""
+        """Store cases, samples and their relationship in the Status database."""
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        new_cases: List[Family] = []
 
-        customer_obj = self.status.customer(customer)
-        new_families = []
         for case in items:
-            case_obj = self.status.family(case["internal_id"])
-            if not case_obj:
-                case_obj = self._create_case(case, customer_obj, ticket)
-                new_families.append(case_obj)
+            status_db_case: Family = self.status.family(internal_id=case["internal_id"])
+            if not status_db_case:
+                new_case: Family = self._create_case(
+                    case=case, customer_obj=customer, ticket=ticket_id
+                )
+                new_cases.append(new_case)
+                self._update_case_panel(panels=case["panels"], case=new_case)
+                status_db_case: Family = new_case
             else:
-                self._append_ticket(ticket=ticket, case=case_obj)
-                self._update_action(action=CaseActions.ANALYZE, case=case_obj)
+                self._append_ticket(ticket_id=ticket_id, case=status_db_case)
+                self._update_action(action=CaseActions.ANALYZE, case=status_db_case)
+                self._update_case_panel(panels=case["panels"], case=status_db_case)
 
-            self._update_case(case, case_obj)
-
-            family_samples = {}
+            case_samples: Dict[str, Sample] = {}
             for sample in case["samples"]:
-                sample_obj = self.status.get_sample_by_internal_id(sample["internal_id"])
-                if not sample_obj:
-                    sample_obj = self._create_sample(
-                        case, customer_obj, order, ordered, sample, ticket
+                existing_sample: Sample = self.status.get_sample_by_internal_id(
+                    internal_id=sample["internal_id"]
+                )
+                if not existing_sample:
+                    new_sample: Sample = self._create_sample(
+                        case=case,
+                        customer_obj=customer,
+                        order=order,
+                        ordered=ordered,
+                        sample=sample,
+                        ticket=ticket_id,
                     )
-
-                family_samples[sample["name"]] = sample_obj
+                    case_samples[sample["name"]] = new_sample
+                else:
+                    case_samples[sample["name"]] = existing_sample
 
             for sample in case["samples"]:
-                mother_obj = family_samples.get(sample.get("mother"))
-                father_obj = family_samples.get(sample.get("father"))
+                sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
+                sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
-                    link_obj = self.status.link(case_obj.internal_id, sample["internal_id"])
-                if not link_obj:
-                    link_obj = self._create_link(
-                        case_obj, family_samples, father_obj, mother_obj, sample
+                    case_sample: FamilySample = self.status.link(
+                        family_id=status_db_case.internal_id, sample_id=sample["internal_id"]
+                    )
+                if not case_sample:
+                    case_sample: FamilySample = self._create_link(
+                        case_obj=status_db_case,
+                        family_samples=case_samples,
+                        father_obj=sample_father,
+                        mother_obj=sample_mother,
+                        sample=sample,
                     )
 
-                self._update_relationship(father_obj, link_obj, mother_obj, sample)
-
-            self.status.add_commit(new_families)
-        return new_families
+                self._update_relationship(
+                    father_obj=sample_father,
+                    link_obj=case_sample,
+                    mother_obj=sample_mother,
+                    sample=sample,
+                )
+            self.status.add_commit(new_cases)
+        return new_cases
 
     @staticmethod
-    def _update_case(case, case_obj):
-        case_obj.panels = case["panels"]
+    def _update_case_panel(panels: List[str], case: Family) -> None:
+        """Update case panels."""
+        case.panels = panels
 
     @staticmethod
-    def _append_ticket(ticket: str, case: Family) -> None:
+    def _append_ticket(ticket_id: str, case: Family) -> None:
         """Add a ticket to the case."""
-        case.tickets = f"{case.tickets},{ticket}"
+        case.tickets = f"{case.tickets},{ticket_id}"
 
     @staticmethod
     def _update_action(action: str, case: Family) -> None:

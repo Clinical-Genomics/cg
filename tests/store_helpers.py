@@ -12,7 +12,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
-from cg.store.models import Flowcell, Bed, BedVersion, Sample
+from cg.store.models import Flowcell, Bed, BedVersion, Sample, Customer
 
 LOG = logging.getLogger(__name__)
 
@@ -184,7 +184,7 @@ class StoreHelpers:
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests."""
         collaboration: models.Collaboration = StoreHelpers.ensure_collaboration(store)
-        customer = store.customer(customer_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
 
         if not customer:
             customer = store.add_customer(
@@ -690,7 +690,7 @@ class StoreHelpers:
     ) -> models.Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
-        customer = store.customer(customer_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
         if not customer:
             customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
 

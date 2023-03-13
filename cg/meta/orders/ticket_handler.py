@@ -9,6 +9,8 @@ from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
 from cg.store import Store, models
+from cg.store.models import Customer, Sample
+from tempfile import TemporaryDirectory
 
 LOG = logging.getLogger(__name__)
 
@@ -119,7 +121,11 @@ class TicketHandler:
     ) -> str:
         if not internal_id:
             return message
-        existing_sample: models.Sample = self.status_db.get_sample_by_internal_id(internal_id)
+
+        existing_sample: models.Sample = self.status_db.get_sample_by_internal_id(
+            internal_id=internal_id
+        )
+
         sample_customer = ""
         if existing_sample.customer_id != customer_id:
             sample_customer = " from " + existing_sample.customer.internal_id
@@ -150,7 +156,8 @@ class TicketHandler:
         return message
 
     def add_customer_to_message(self, message: str, customer_id: str) -> str:
-        customer: models.Customer = self.status_db.customer(customer_id)
+        """Add customer info to message and return updated message."""
+        customer: Customer = self.status_db.get_customer_by_customer_id(customer_id=customer_id)
         message += f", {customer.name} ({customer_id})"
         return message
 
