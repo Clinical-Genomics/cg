@@ -1741,16 +1741,18 @@ def store_with_multiple_cases_and_samples(
 @pytest.fixture(name="store_with_organisms")
 def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple organisms."""
+
+    organism_details = [
+        ("organism_1", "Organism 1"),
+        ("organism_2", "Organism 2"),
+        ("organism_3", "Organism 3"),
+    ]
+
     organisms: List[Organism] = []
-    organism_map: Dict[str, str] = {
-        "organism_1": "Organism 1",
-        "organism_2": "Organism 2",
-        "organism_3": "Organism 3",
-    }
-    for organism_internal_id, organism_name in organism_map.items():
-        organisms.append(
-            helpers.add_organism(store, internal_id=organism_internal_id, name=organism_name)
-        )
+    for internal_id, name in organism_details:
+        organism: Organism = helpers.add_organism(store, internal_id=internal_id, name=name)
+        organisms.append(organism)
 
     store.add_commit(organisms)
+
     yield store
