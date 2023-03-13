@@ -54,9 +54,9 @@ def customer(
     """Add a new customer with a unique INTERNAL_ID and NAME."""
     collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
-    existing: models.Customer = status_db.customer(internal_id)
-    if existing:
-        LOG.error(f"{existing.name}: customer already added")
+    existing_customer: models.Customer = status_db.customer(internal_id)
+    if existing_customer:
+        LOG.error(f"{existing_customer.name}: customer already added")
         raise click.Abort
 
     collaborations: List[models.Collaboration] = [
@@ -93,9 +93,9 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     """Add a new user with an EMAIL (login) and a NAME (full)."""
     status_db: Store = context.status_db
     customer_obj: models.Customer = status_db.customer(customer_id)
-    existing: models.User = status_db.get_user_by_email(email)
-    if existing:
-        LOG.error(f"{existing.name}: user already added")
+    existing_user: models.User = status_db.get_user_by_email(email=email)
+    if existing_user:
+        LOG.error(f"{existing_user.name}: user already added")
         raise click.Abort
     new_user: models.User = status_db.add_user(
         customer=customer_obj, email=email, name=name, is_admin=admin
