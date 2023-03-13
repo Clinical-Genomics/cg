@@ -5,7 +5,7 @@ from cgmodels.cg.constants import Pipeline
 
 
 from cg.store import Store, models
-from cg.store.status_analysis_filters import (
+from cg.store.filters.status_analysis_filters import (
     get_valid_analyses_in_production,
     get_analyses_with_pipeline,
     get_completed_analyses,

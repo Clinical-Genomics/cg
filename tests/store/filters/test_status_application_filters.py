@@ -1,4 +1,4 @@
-from cg.store.status_application_filters import (
+from cg.store.filters.status_application_filters import (
     filter_applications_by_entry_id,
     filter_applications_by_prep_category,
     filter_applications_by_tag,

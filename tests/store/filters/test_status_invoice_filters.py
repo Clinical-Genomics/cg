@@ -1,7 +1,7 @@
 from alchy import Query
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
-from cg.store.status_invoice_filters import (
+from cg.store.filters.status_invoice_filters import (
     filter_invoices_by_invoice_id,
     filter_invoices_invoiced,
     filter_invoices_not_invoiced,

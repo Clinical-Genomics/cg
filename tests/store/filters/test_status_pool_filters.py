@@ -2,7 +2,7 @@ from alchy import Query
 from typing import List
 from cg.store import Store
 from tests.store_helpers import StoreHelpers
-from cg.store.status_pool_filters import (
+from cg.store.filters.status_pool_filters import (
     filter_pools_is_received,
     filter_pools_is_not_received,
     filter_pools_is_delivered,

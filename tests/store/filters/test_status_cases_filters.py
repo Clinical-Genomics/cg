@@ -9,7 +9,7 @@ from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store, models
 from cg.store.models import Family
-from cg.store.status_case_filters import (
+from cg.store.filters.status_case_filters import (
     get_cases_with_pipeline,
     get_cases_has_sequence,
     get_cases_for_analysis,
