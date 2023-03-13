@@ -50,7 +50,6 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
         existing_sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
         if existing_sample is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")
-
             continue
         row = [
             existing_sample.internal_id,

@@ -256,7 +256,6 @@ def relationship(
 ):
     """Create a link between a case id and a sample id."""
     status_db: Store = context.status_db
-
     mother: Optional[Sample] = None
     father: Optional[Sample] = None
     case_obj: Family = status_db.family(case_id)

@@ -60,7 +60,6 @@ def make_new_invoice():
     if len(record_ids) == 0:
         return redirect(url_for(".new", record_type=record_type))
     if record_type == "Pool":
-
         pools: List[Pool] = [db.get_pool_by_entry_id(pool_id) for pool_id in record_ids]
         new_invoice: Invoice = db.add_invoice(
             customer=customer,
@@ -189,7 +188,6 @@ def invoice_template(invoice_id):
     cost_center = request.args.get("cost_center", "KTH")
     invoice_obj: Invoice = db.get_invoice_by_id(invoice_id=invoice_id)
     api = InvoiceAPI(db, lims, invoice_obj)
-
     invoice_dict = api.get_invoice_report(cost_center)
     workbook = render_xlsx(invoice_dict)
 
@@ -211,7 +209,6 @@ def modified_invoice(invoice_id, cost_center):
     file_name = "invoice_" + cost_center + str(invoice_id) + ".xlsx"
     temp_dir = tempfile.mkdtemp()
     file_path = os.path.join(temp_dir, file_name)
-
     with open(file_path, "wb") as file_object:
         if cost_center == "KTH":
             file_object.write(invoice_obj.excel_kth)
