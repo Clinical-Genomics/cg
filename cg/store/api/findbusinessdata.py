@@ -472,7 +472,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_samples_by_enquiry(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
-    ) -> Query:
+    ) -> List[Sample]:
         records = self.Sample.query
 
         if customers:
@@ -489,7 +489,7 @@ class FindBusinessDataHandler(BaseHandler):
             if enquiry
             else records
         )
-        return records.order_by(Sample.created_at.desc())
+        return records.order_by(Sample.created_at.desc()).all()
 
     def _get_join_sample_and_customer_query(self) -> Query:
         """Join sample and customer."""
