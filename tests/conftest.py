@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
-from housekeeper.store.models import File
+from housekeeper.store.models import File, Version
 
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline, FileExtensions
+from cg.constants import FileExtensions, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -27,8 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer, BedVersion, Bed
-
+from cg.store.models import Bed, BedVersion, Customer
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -39,8 +38,6 @@ from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
-
-from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -1583,6 +1580,8 @@ def fixture_context_config(
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "root": str(rnafusion_dir),
+            "tw_binary_path": Path("path", "to", "bin", "tw").as_posix(),
+            "tw_pipeline": "rnafusion",
         },
         "pdc": {"binary_path": "/bin/dsmc"},
         "scout": {
