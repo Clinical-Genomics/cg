@@ -497,7 +497,9 @@ def test_get_samples_by_subject_id(
     assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
 
     # ASSERT that there is a customer with the given customer id
-    assert store_with_samples_subject_id_and_tumour_status.customer(internal_id=customer_id)
+    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
+        customer_id=customer_id
+    )
 
     # WHEN fetching the sample by subject id and customer_id
     samples = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id(
@@ -522,7 +524,9 @@ def test_get_samples_by_subject_id_and_is_tumour(
     assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
 
     # ASSERT that there is a customer with the given customer id
-    assert store_with_samples_subject_id_and_tumour_status.customer(internal_id=customer_id)
+    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
+        customer_id=customer_id
+    )
     # WHEN fetching the sample by subject id and customer_id
     samples: List[
         Sample
