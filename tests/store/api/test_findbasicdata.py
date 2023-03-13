@@ -172,7 +172,9 @@ def test_get_user_by_email_returns_correct_user(store_with_users: Store):
     assert filtered_user.email == user.email
 
 
-def test_get_user_by_email_returns_none_for_nonexisting_email(store_with_users: Store, non_existent_email: str):
+def test_get_user_by_email_returns_none_for_nonexisting_email(
+    store_with_users: Store, non_existent_email: str
+):
     """Test getting user by email when the email does not exist."""
 
     # GIVEN a non-existing email
