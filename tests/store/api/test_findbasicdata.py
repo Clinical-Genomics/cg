@@ -149,16 +149,17 @@ def test_get_organism_by_internal_id_returns_correct_organism(store_with_organis
     assert num_organisms > 0
 
     # Select a random organism from the store
-    organism = store_with_organisms.query(Organism).first()
+    organism: Organism = store_with_organisms._get_organism_query.first()
     assert isinstance(organism, Organism)
 
     # WHEN finding the organism by internal ID
-    internal_id = organism.internal_id
-    filtered_organism = store_with_organisms.get_organism_by_internal_id(internal_id)
+    filtered_organism = store_with_organisms.get_organism_by_internal_id(organism.internal_id)
 
-    # THEN the filtered organism should be of the correct instance and have the correct internal ID
+    # THEN the filtered organism should be of instance Organism
     assert isinstance(filtered_organism, Organism)
-    assert filtered_organism.internal_id == internal_id
+
+    # THEN the filtered organism should match the database organism internal id
+    assert filtered_organism.internal_id == organism.internal_id
 
 
 def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
@@ -170,11 +171,10 @@ def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
     num_organisms = store_with_organisms._get_organism_query().count()
     assert num_organisms > 0
 
-    # Choose an ID that does not exist in the database
-    non_existent_id = "non_existent_id"
-
     # WHEN finding the organism by internal ID
-    filtered_organism = store_with_organisms.get_organism_by_internal_id(non_existent_id)
+    filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(
+        internal_id="non_existent_id"
+    )
 
     # THEN the filtered organism should be None
     assert filtered_organism is None

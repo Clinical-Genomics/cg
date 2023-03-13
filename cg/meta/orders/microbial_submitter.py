@@ -140,7 +140,7 @@ class MicrobialSubmitter(Submitter):
         for sample in samples:
             organism_id = sample.organism
             reference_genome = sample.reference_genome
-            organism = self.status.get_organism_by_internal_id(internal_id=organism_id)
+            organism: models.Organism = self.status.get_organism_by_internal_id(internal_id=organism_id)
             is_verified = (
                 organism and organism.reference_genome == reference_genome and organism.verified
             )

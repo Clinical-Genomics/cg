@@ -134,15 +134,15 @@ class FindBasicDataHandler(BaseHandler):
         )
 
     def get_organism_by_internal_id(self, internal_id: str) -> Organism:
-        """Find an Organism by internal_id."""
+        """Find an organism by internal id."""
         return apply_organism_filter(
             organisms=self._get_organism_query(),
             filters=[OrganismFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
 
-    def organisms(self) -> List[Organism]:
-        """Fetch all organisms"""
+    def get_organisms(self) -> List[Organism]:
+        """Return all organisms ordered by organism internal id."""
         return self._get_organism_query().order_by(Organism.internal_id)
 
     def panel(self, abbrev):

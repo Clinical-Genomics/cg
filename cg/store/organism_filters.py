@@ -18,11 +18,11 @@ class OrganismFilter(Enum):
 
 def apply_organism_filter(
     organisms: Query,
-    filters: List[OrganismFilter],
+    filter_functions: List[Callable],
     internal_id: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for filter_function in filters:
+    for filter_function in filter_functions:
         organisms: Query = filter_function(
             organisms=organisms,
             internal_id=internal_id,
