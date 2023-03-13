@@ -222,7 +222,6 @@ def case(
 
         panel: Panel = status_db.panel(abbrev=panel_id)
         if panel is None:
-
             LOG.error(f"{panel_id}: panel not found")
             raise click.Abort
 

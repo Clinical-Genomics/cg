@@ -45,7 +45,6 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
-
         LOG.debug("%s: get info about sample", sample_id)
         existing_sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
         if existing_sample is None:
