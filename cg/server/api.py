@@ -177,7 +177,9 @@ def families():
 @BLUEPRINT.route("/families_in_collaboration")
 def families_in_collaboration():
     """Fetch families in collaboration."""
-    order_customer: Customer = db.customer(request.args.get("customer"))
+    order_customer: Customer = db.get_customer_by_customer_id(
+        customer_id=request.args.get("customer")
+    )
     data_analysis: str = request.args.get("data_analysis")
     families_q: Query = db.families(
         enquiry=request.args.get("enquiry"),
@@ -207,7 +209,7 @@ def family(family_id):
 def family_in_collaboration(family_id):
     """Fetch a family with links."""
     case_obj = db.family(family_id)
-    order_customer = db.customer(request.args.get("customer"))
+    order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if case_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     data = case_obj.to_dict(links=True, analyses=True)
@@ -238,7 +240,7 @@ def samples():
 @BLUEPRINT.route("/samples_in_collaboration")
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
-    order_customer = db.customer(request.args.get("customer"))
+    order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     samples_q = db.samples(
         enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
@@ -263,7 +265,7 @@ def sample(sample_id):
 def sample_in_collaboration(sample_id):
     """Fetch a single sample."""
     sample_obj = db.sample(sample_id)
-    order_customer = db.customer(request.args.get("customer"))
+    order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if sample_obj.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     data = sample_obj.to_dict(links=True, flowcells=True)
