@@ -470,9 +470,14 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all samples."""
         return self.Sample.query.order_by(Sample.created_at.desc()).all()
 
-    def get_samples_by_enquiry(self, enquiry: str) -> List[Sample]:
-        """Return samples by name or internal id."""
+    def get_samples_by_enquiry(
+        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
+    ) -> Query:
         records = self.Sample.query
+
+        if customers:
+            customer_ids = [customer.id for customer in customers]
+            records = records.filter(Sample.customer_id.in_(customer_ids))
 
         records = (
             records.filter(
@@ -484,7 +489,7 @@ class FindBusinessDataHandler(BaseHandler):
             if enquiry
             else records
         )
-        return records.order_by(Sample.created_at.desc()).all()
+        return records.order_by(Sample.created_at.desc())
 
     def _get_join_sample_and_customer_query(self) -> Query:
         """Join sample and customer."""

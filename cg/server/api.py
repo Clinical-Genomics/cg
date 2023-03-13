@@ -242,7 +242,7 @@ def samples():
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
     order_customer = db.customer(request.args.get("customer"))
-    samples_q: List[Sample] = db.get_all_samples(
+    samples_q: List[Sample] = db.get_samples_by_enquiry(
         enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
