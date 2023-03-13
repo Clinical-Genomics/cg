@@ -15,10 +15,10 @@ from cg.exc import CgDataError, ScoutUploadError
 from cg.io.controller import WriteStream
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.meta.upload.balsamic.balsamic import BalsamicUploadAPI
-from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
-from cg.meta.upload.mip.mip_rna import MipRNAUploadAPI
-from cg.meta.upload.mip.mip_dna import MipDNAUploadAPI
+from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
@@ -269,10 +269,12 @@ def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
     analysis_apis: Dict[Pipeline, UploadAPI] = {
-        Pipeline.BALSAMIC: BalsamicUploadAPI,
-        Pipeline.MIP_RNA: MipRNAUploadAPI,
-        Pipeline.MIP_DNA: MipDNAUploadAPI,
-        Pipeline.RNAFUSION: RnafusionUploadAPI,
+        Pipeline.BALSAMIC: BalsamicAnalysisAPI,
+        Pipeline.MIP_RNA: MipRNAAnalysisAPI,
+        Pipeline.MIP_DNA: MipDNAAnalysisAPI,
+        Pipeline.RNAFUSION: RnafusionAnalysisAPI,
     }
 
-    return analysis_apis.get(case.data_analysis)(cg_config)
+    return UploadAPI(
+        config=cg_config, analysis_api=analysis_apis.get(case.data_analysis)(cg_config)
+    )
