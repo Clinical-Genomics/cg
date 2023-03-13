@@ -8,7 +8,16 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
-from cg.store.models import Family, Sample, Customer, User, Collaboration, Application, Panel
+from cg.store.models import (
+    Family,
+    Sample,
+    Customer,
+    User,
+    Collaboration,
+    Customer,
+    Application,
+    Panel,
+)
 
 from cg.constants import Priority
 
@@ -58,7 +67,7 @@ def customer(
     collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
 
-    existing_customer: models.Customer = status_db.get_customer_by_customer_id(customer_id=internal_id)
+    existing_customer: Customer = status_db.get_customer_by_customer_id(customer_id=internal_id)
     if existing_customer:
         LOG.error(f"{existing_customer.name}: customer already added")
         raise click.Abort
@@ -98,7 +107,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     status_db: Store = context.status_db
 
     customer_obj: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
-    existing_user: models.User = status_db.get_user_by_email(email=email)
+    existing_user: User = status_db.get_user_by_email(email=email)
     if existing_user:
         LOG.error(f"{existing_user.name}: user already added")
         raise click.Abort
