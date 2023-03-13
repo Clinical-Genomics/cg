@@ -16,6 +16,7 @@ from cg.io.controller import WriteStream
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
+from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -270,6 +271,7 @@ def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:
 
     analysis_apis: Dict[Pipeline, UploadAPI] = {
         Pipeline.BALSAMIC: BalsamicAnalysisAPI,
+        Pipeline.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Pipeline.MIP_RNA: MipRNAAnalysisAPI,
         Pipeline.MIP_DNA: MipDNAAnalysisAPI,
         Pipeline.RNAFUSION: RnafusionAnalysisAPI,
