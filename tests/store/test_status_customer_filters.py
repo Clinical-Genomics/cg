@@ -1,6 +1,6 @@
 from cg.store import Store
 from cg.store.models import Customer
-from cg.store.status_customer_filters import filter_customer_by_customer_internal_id
+from cg.store.filters.status_customer_filters import filter_customer_by_customer_internal_id
 
 
 def test_filter_customer_by_customer_id(base_store: Store, customer_id: str):
