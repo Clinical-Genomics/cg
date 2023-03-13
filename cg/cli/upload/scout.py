@@ -265,14 +265,14 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
     return 0
 
 
-def get_upload_api(cg_config: CGConfig, case: Family) -> UploadAPI:
+def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
     analysis_apis: Dict[Pipeline, UploadAPI] = {
         Pipeline.BALSAMIC: BalsamicUploadAPI,
-        Pipeline.RNAFUSION: RnafusionUploadAPI,
         Pipeline.MIP_RNA: MipRNAUploadAPI,
         Pipeline.MIP_DNA: MipDNAUploadAPI,
+        Pipeline.RNAFUSION: RnafusionUploadAPI,
     }
 
     return analysis_apis.get(case.data_analysis)(cg_config)
