@@ -162,6 +162,8 @@ class RnafusionConfig(CommonAppConfig):
     profile: str
     conda_binary: Optional[str] = None
     launch_directory: str
+    tw_binary_path: str
+    tw_pipeline: str
 
 
 class CGStatsConfig(BaseModel):
