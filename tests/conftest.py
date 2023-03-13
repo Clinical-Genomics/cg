@@ -1738,11 +1738,16 @@ def store_with_multiple_cases_and_samples(
     yield store
 
 
+@pytest.fixture(name="non_existent_email")
+def non_existent_email():
+    """Return email not associated with any entity."""
+    return "non_existent_email@example.com"
+
 @pytest.fixture(name="store_with_users")
 def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple users."""
 
-    customer = helpers.ensure_customer(store=store)
+    customer: Customer = helpers.ensure_customer(store=store)
     store.add_user(customer=customer, email="user1@example.com", name="User One", is_admin=False)
     store.add_user(customer=customer, email="user2@example.com", name="User Two", is_admin=True)
     store.add_user(customer=customer, email="user3@example.com", name="User Three", is_admin=False)

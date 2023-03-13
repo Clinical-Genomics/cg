@@ -155,32 +155,30 @@ def test_get_user_by_email_returns_correct_user(store_with_users: Store):
     """Test fetching a user by email."""
 
     # GIVEN a store with multiple users
-    num_users = store_with_users._get_user_query().count()
+    num_users: int = store_with_users._get_user_query().count()
     assert num_users > 0
 
     # Select a random user from the store
-    user = store_with_users._get_user_query().first()
+    user: User = store_with_users._get_user_query().first()
     assert user is not None
 
     # WHEN fetching the user by email
-    email = user.email
-    filtered_user = store_with_users.get_user_by_email(email=email)
+    filtered_user: User = store_with_users.get_user_by_email(email=user.email)
 
     # THEN a user should be returned
     assert isinstance(filtered_user, User)
 
     # THEN the email should match
-    assert filtered_user.email == email
+    assert filtered_user.email == user.email
 
 
-def test_get_user_by_email_returns_none_for_nonexisting_email(store_with_users: Store):
+def test_get_user_by_email_returns_none_for_nonexisting_email(store_with_users: Store, non_existent_email: str):
     """Test getting user by email when the email does not exist."""
 
     # GIVEN a non-existing email
-    non_existent_email = "non_existing@example.com"
 
     # WHEN retrieving the user by email
-    filtered_user = store_with_users.get_user_by_email(email=non_existent_email)
+    filtered_user: User = store_with_users.get_user_by_email(email=non_existent_email)
 
     # THEN no user should be returned
     assert filtered_user is None

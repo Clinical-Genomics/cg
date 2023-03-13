@@ -31,8 +31,8 @@ def before_request():
 
 
 def logged_in():
-    user_obj = db.get_user_by_email(session.get("user_email"))
-    return google.authorized and user_obj and user_obj.is_admin
+    user = db.get_user_by_email(email=session.get("user_email"))
+    return google.authorized and user and user.is_admin
 
 
 def undo_invoice(invoice_id):

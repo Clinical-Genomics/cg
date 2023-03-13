@@ -150,7 +150,7 @@ class FindBasicDataHandler(BaseHandler):
         return self.Panel.query.order_by(Panel.abbrev)
 
     def get_user_by_email(self, email: str) -> User:
-        """Fetch a user by email from the store."""
+        """Return a user by email from the database."""
         return apply_user_filter(
-            users=self._get_user_query(), email=email, filters=[UserFilter.FILTER_BY_EMAIL]
+            users=self._get_user_query(), email=email, filter_functions=[UserFilter.FILTER_BY_EMAIL]
         ).first()

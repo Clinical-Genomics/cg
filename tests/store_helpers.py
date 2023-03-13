@@ -12,7 +12,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
-from cg.store.models import Flowcell, Bed, BedVersion, Sample
+from cg.store.models import Flowcell, Bed, BedVersion, Sample, User
 
 LOG = logging.getLogger(__name__)
 
@@ -709,7 +709,7 @@ class StoreHelpers:
         is_admin: bool = False,
     ) -> models.User:
         """Utility function to add a user that can be used in tests."""
-        user = store.get_user_by_email(email=email)
+        user: User = store.get_user_by_email(email=email)
         if not user:
             user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
             store.add_commit(user)

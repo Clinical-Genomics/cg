@@ -17,11 +17,11 @@ class UserFilter(Enum):
 
 def apply_user_filter(
     users: Query,
-    filters: List[UserFilter],
+    filter_functions: List[Callable],
     email: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for filter_function in filters:
+    for filter_function in filter_functions:
         users: Query = filter_function(
             users=users,
             email=email,

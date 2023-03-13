@@ -10,26 +10,23 @@ def test_filter_user_by_email_returns_correct_user(store_with_users: Store):
     user: User = store_with_users._get_user_query().first()
     assert user
 
-    user_email: str = user.email
-
     # WHEN retrieving the user by email
     filtered_user: User = filter_user_by_email(
         users=store_with_users._get_user_query(),
-        email=user_email,
+        email=user.email,
     ).first()
 
     # THEN a user should be returned
     assert isinstance(filtered_user, User)
 
     # THEN the email should match
-    assert filtered_user.email == user_email
+    assert filtered_user.email == user.email
 
 
-def test_filter_user_by_email_returns_none_for_nonexisting_email(store_with_users: Store):
+def test_filter_user_by_email_returns_none_for_nonexisting_email(store_with_users: Store, non_existent_email: str):
     """Test getting user by email when the email does not exist."""
 
     # GIVEN a non-existing email
-    non_existent_email = "non_existing@example.com"
 
     # WHEN retrieving the user by email
     filtered_user: User = filter_user_by_email(
