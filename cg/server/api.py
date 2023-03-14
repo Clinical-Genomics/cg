@@ -366,7 +366,7 @@ def options():
                 "internal_id": organism.internal_id,
                 "verified": organism.verified,
             }
-            for organism in db.get_organisms()
+            for organism in db.get_all_organisms()
         ],
         sources=source_groups,
         beds=[bed.name for bed in db.get_active_beds()],

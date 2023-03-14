@@ -157,7 +157,7 @@ class FindBasicDataHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_organisms(self) -> List[Organism]:
+    def get_all_organisms(self) -> List[Organism]:
         """Return all organisms ordered by organism internal id."""
         return self._get_organism_query().order_by(Organism.internal_id)
 
