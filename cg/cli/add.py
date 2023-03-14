@@ -161,7 +161,7 @@ def sample(
     if not customer:
         LOG.error(f"Customer: {customer_id} not found")
         raise click.Abort
-    application: Application = status_db.get_application_by_tag(application_tag)
+    application: Application = status_db.get_application_by_tag(tag=application_tag)
     if not application:
         LOG.error(f"Application: {application_tag} not found")
 

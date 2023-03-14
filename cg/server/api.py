@@ -399,7 +399,7 @@ def applications():
 @public
 def application(tag):
     """Fetch an application tag."""
-    record = db.get_application_by_tag(tag)
+    record = db.get_application_by_tag(tag=tag)
     if record is None:
         return abort(
             make_response(jsonify(message="application not found"), http.HTTPStatus.NOT_FOUND)

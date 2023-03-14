@@ -71,7 +71,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_applications_by_prep_category_and_is_not_archived(
         self, prep_category: str
     ) -> List[Application]:
-        """Fetch an application from the store."""
+        """Return applications that are not archived by prep category."""
         records: Query = self._get_application_query()
         return (
             apply_application_filter(
@@ -89,7 +89,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_applications_by_prep_category_and_is_archived(
         self, prep_category: str
     ) -> List[Application]:
-        """Fetch an application from the store."""
+        """Return applications that are archived by prep category."""
         records: Query = self._get_application_query()
         return (
             apply_application_filter(
@@ -105,7 +105,7 @@ class FindBasicDataHandler(BaseHandler):
         )
 
     def get_applications(self) -> List[Application]:
-        """Fetch all applications."""
+        """Return all applications."""
         records: Query = self._get_application_query()
         return records.order_by(self.Application.prep_category, self.Application.tag).all()
 
