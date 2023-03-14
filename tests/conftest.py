@@ -27,7 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer
+from cg.store.models import Bed, BedVersion, Customer, Organism, User
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -130,6 +130,24 @@ def fixture_another_case_id() -> str:
 def fixture_sample_id() -> str:
     """Returns a sample id."""
     return "ADM1"
+
+
+@pytest.fixture(name="father_sample_id")
+def fixture_father_sample_id() -> str:
+    """Returns the sample id of the father."""
+    return "ADM2"
+
+
+@pytest.fixture(name="mother_sample_id")
+def fixture_mother_sample_id() -> str:
+    """Returns the mothers sample id."""
+    return "ADM3"
+
+
+@pytest.fixture(name="sample_ids")
+def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
+    """Returns a list with three samples of a family."""
+    return [sample_id, father_sample_id, mother_sample_id]
 
 
 @pytest.fixture(name="sample_name")
@@ -552,21 +570,44 @@ def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "rnafusion")
 
 
-@pytest.fixture(name="sample1_cram")
-def fixture_sample1_cram(mip_dna_analysis_dir: Path) -> Path:
-    """Return the path to the cram file for sample 1."""
+@pytest.fixture(name="sample_cram")
+def fixture_sample_cram(mip_dna_analysis_dir: Path) -> Path:
+    """Return the path to the cram file for a sample."""
     return Path(mip_dna_analysis_dir, "adm1.cram")
+
+
+@pytest.fixture(name="father_sample_cram")
+def fixture_father_sample_cram(
+    mip_dna_analysis_dir: Path,
+    father_sample_id: str,
+) -> Path:
+    """Return the path to the cram file for the father sample."""
+    return Path(mip_dna_analysis_dir, father_sample_id + FileExtensions.CRAM)
+
+
+@pytest.fixture(name="mother_sample_cram")
+def fixture_mother_sample_cram(mip_dna_analysis_dir: Path, mother_sample_id: str) -> Path:
+    """Return the path to the cram file for the mother sample."""
+    return Path(mip_dna_analysis_dir, mother_sample_id + FileExtensions.CRAM)
+
+
+@pytest.fixture(name="sample_cram_files")
+def fixture_sample_crams(
+    sample_cram: Path, father_sample_cram: Path, mother_sample_cram: Path
+) -> List[Path]:
+    """Return a list of cram paths for three samples."""
+    return [sample_cram, father_sample_cram, mother_sample_cram]
 
 
 @pytest.fixture(name="vcf_file")
 def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
-    """Return the path to to a vcf file."""
+    """Return the path to a VCF file."""
     return Path(mip_dna_store_files, "yellowhog_clinical_selected.vcf")
 
 
 @pytest.fixture(name="fastq_file")
 def fixture_fastq_file(fastq_dir: Path) -> Path:
-    """Return the path to to a fastq file."""
+    """Return the path to a FASTQ file."""
     return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
 
 
@@ -942,7 +983,7 @@ def fixture_analysis_store_single(
 @pytest.fixture(name="collaboration_id")
 def fixture_collaboration_id() -> str:
     """Return a default customer group."""
-    return "all_customers"
+    return "hospital_collaboration"
 
 
 @pytest.fixture(name="customer_production")
@@ -1053,49 +1094,64 @@ def fixture_bed_name() -> str:
     return "Bed"
 
 
+@pytest.fixture(name="bed_version_short_name")
+def fixture_bed_version_short_name() -> str:
+    """Return a bed version model short name attribute."""
+    return "bed_short_name_0.0"
+
+
+@pytest.fixture(name="invoice_address")
+def fixture_invoice_address() -> str:
+    """Return an invoice address."""
+    return "Test street"
+
+
+@pytest.fixture(name="invoice_reference")
+def fixture_invoice_reference() -> str:
+    """Return an invoice reference."""
+    return "ABCDEF"
+
+
 @pytest.fixture(name="base_store")
-def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: Store) -> Store:
+def fixture_base_store(
+    apptag_rna: str,
+    bed_name: str,
+    bed_version_short_name: str,
+    collaboration_id: str,
+    customer_id: str,
+    invoice_address: str,
+    invoice_reference: str,
+    store: Store,
+) -> Store:
     """Setup and example store."""
-    collaboration = store.add_collaboration("all_customers", "all customers")
+    collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.add_commit(collaboration)
-    customers = [
-        store.add_customer(
-            customer_id,
-            "Production",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust001",
-            "Customer",
-            scout_access=False,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust002",
-            "Karolinska",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust003",
-            "CMMS",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-    ]
+    customers: List[Customer] = []
+    customer_map: Dict[str, str] = {
+        customer_id: "Production",
+        "cust001": "Customer",
+        "cust002": "Karolinska",
+        "cust003": "CMMS",
+    }
+    for new_customer_id, new_customer_name in customer_map.items():
+        customers.append(
+            store.add_customer(
+                internal_id=new_customer_id,
+                name=new_customer_name,
+                scout_access=True,
+                invoice_address=invoice_address,
+                invoice_reference=invoice_reference,
+            )
+        )
+
     for customer in customers:
         collaboration.customers.append(customer)
     store.add_commit(customers)
     applications = [
         store.add_application(
             tag="WGXCUSC000",
-            category="wgs",
+            prep_category="wgs",
             description="External WGS",
             sequencing_depth=0,
             is_external=True,
@@ -1105,7 +1161,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="EXXCUSR000",
-            category="wes",
+            prep_category="wes",
             description="External WES",
             sequencing_depth=0,
             is_external=True,
@@ -1115,7 +1171,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="WGSPCFC060",
-            category="wgs",
+            prep_category="wgs",
             description="WGS, double",
             sequencing_depth=30,
             accredited=True,
@@ -1125,7 +1181,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="RMLP05R800",
-            category="rml",
+            prep_category="rml",
             description="Ready-made",
             sequencing_depth=0,
             percent_kth=80,
@@ -1134,7 +1190,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="WGSPCFC030",
-            category="wgs",
+            prep_category="wgs",
             description="WGS trio",
             is_accredited=True,
             sequencing_depth=30,
@@ -1146,7 +1202,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="METLIFR020",
-            category="wgs",
+            prep_category="wgs",
             description="Whole genome metagenomics",
             sequencing_depth=0,
             target_reads=400000,
@@ -1155,7 +1211,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="METNXTR020",
-            category="wgs",
+            prep_category="wgs",
             description="Metagenomics",
             sequencing_depth=0,
             target_reads=200000,
@@ -1164,7 +1220,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="MWRNXTR003",
-            category="mic",
+            prep_category="mic",
             description="Microbial whole genome ",
             sequencing_depth=0,
             percent_kth=80,
@@ -1173,7 +1229,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag=apptag_rna,
-            category="tgs",
+            prep_category="tgs",
             description="RNA seq, poly-A based priming",
             percent_kth=80,
             percent_reads_guaranteed=75,
@@ -1184,7 +1240,7 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
         ),
         store.add_application(
             tag="VWGDPTR001",
-            category="cov",
+            prep_category="cov",
             description="Viral whole genome  ",
             sequencing_depth=0,
             percent_kth=80,
@@ -1205,7 +1261,12 @@ def fixture_base_store(apptag_rna: str, bed_name: str, customer_id: str, store: 
     beds: List[Bed] = [store.add_bed(name=bed_name)]
     store.add_commit(beds)
     bed_versions: List[BedVersion] = [
-        store.add_bed_version(bed=bed, version=1, filename=bed_name + FileExtensions.BED)
+        store.add_bed_version(
+            bed=bed,
+            version=1,
+            filename=bed_name + FileExtensions.BED,
+            shortname=bed_version_short_name,
+        )
         for bed in beds
     ]
     store.add_commit(bed_versions)
@@ -1248,7 +1309,7 @@ def sample_store(base_store: Store) -> Store:
             reads=(250 * 1000000),
         ),
     ]
-    customer = base_store.customers().first()
+    customer: Customer = (base_store.get_customers())[0]
     external_app = base_store.application("WGXCUSC000").versions[0]
     wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
@@ -1674,5 +1735,56 @@ def store_with_multiple_cases_and_samples(
     for case_sample in case_samples:
         case_id, sample_id = case_sample
         helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
+
+    yield store
+
+
+@pytest.fixture(name="store_with_organisms")
+def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with multiple organisms."""
+
+    organism_details = [
+        ("organism_1", "Organism 1"),
+        ("organism_2", "Organism 2"),
+        ("organism_3", "Organism 3"),
+    ]
+
+    organisms: List[Organism] = []
+    for internal_id, name in organism_details:
+        organism: Organism = helpers.add_organism(store, internal_id=internal_id, name=name)
+        organisms.append(organism)
+
+    store.add_commit(organisms)
+    yield store
+
+
+@pytest.fixture(name="non_existent_email")
+def non_existent_email():
+    """Return email not associated with any entity."""
+    return "non_existent_email@example.com"
+
+
+@pytest.fixture(name="non_existent_id")
+def non_existent_id():
+    """Return id not associated with any entity."""
+    return "non_existent_entity_id"
+
+
+@pytest.fixture(name="store_with_users")
+def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with multiple users."""
+
+    customer: Customer = helpers.ensure_customer(store=store)
+
+    user_details = [
+        ("user1@example.com", "User One", False),
+        ("user2@example.com", "User Two", True),
+        ("user3@example.com", "User Three", False),
+    ]
+
+    for email, name, is_admin in user_details:
+        store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+
+    store.commit()
 
     yield store

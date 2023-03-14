@@ -179,7 +179,7 @@ def add_application_object(
     """Adds an application from a raw application record"""
     new_application: models.Application = store.add_application(
         tag=application.tag,
-        category=application.prep_category,
+        prep_category=application.prep_category,
         description=application.description,
         is_accredited=application.is_accredited == 1.0,
         turnaround_time=application.turnaround_time,

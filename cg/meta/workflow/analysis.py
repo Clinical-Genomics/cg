@@ -119,8 +119,8 @@ class AnalysisAPI(MetaAPI):
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
         """Retrieve sample name provided by customer for specific sample"""
-        sample_obj: Sample = self.status_db.sample(lims_id)
-        return sample_obj.name
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=lims_id)
+        return sample.name
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
@@ -274,7 +274,8 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case_obj: Family, sample_obj: Sample):
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):
+        """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
     def gather_file_metadata_for_sample(self, sample_obj: Sample) -> List[dict]:
@@ -296,7 +297,7 @@ class AnalysisAPI(MetaAPI):
         concatenated_paths = {1: "", 2: ""}
         files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
+        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
         for fastq_data in sorted_files:
@@ -330,18 +331,22 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.remove_files(value)
 
     def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
-        """Get target bed filename from lims"""
-        case_obj: Family = self.status_db.family(case_id)
-        sample_obj: Sample = case_obj.links[0].sample
-        if sample_obj.from_sample:
-            sample_obj: Sample = self.status_db.sample(sample_obj.from_sample)
-        target_bed_shortname: str = self.lims_api.capture_kit(sample_obj.internal_id)
+        """Get target bed filename from LIMS."""
+        case: Family = self.status_db.family(internal_id=case_id)
+        sample: Sample = case.links[0].sample
+        if sample.from_sample:
+            sample: Sample = self.status_db.get_sample_by_internal_id(
+                internal_id=sample.from_sample
+            )
+        target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
-            return target_bed_shortname
-        bed_version_obj: Optional[BedVersion] = self.status_db.bed_version(target_bed_shortname)
-        if not bed_version_obj:
-            raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
-        return bed_version_obj.filename
+            return None
+        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+            bed_version_short_name=target_bed_shortname
+        )
+        if not bed_version:
+            raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
+        return bed_version.filename
 
     def decompression_running(self, case_id: str) -> None:
         """Check if decompression is running for a case"""

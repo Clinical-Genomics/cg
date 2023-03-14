@@ -84,7 +84,7 @@ def test_compress_fastq_cli_no_family(compress_context: CGConfig, cli_runner: Cl
     assert res.exit_code == 0
 
     # THEN assert it was communicated that no families where found
-    assert "individuals in 0 (completed) cases where compressed" in caplog.text
+    assert "No cases to compress" in caplog.text
 
 
 def test_compress_fastq_cli_case_id_no_family(

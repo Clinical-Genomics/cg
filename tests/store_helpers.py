@@ -12,7 +12,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
-from cg.store.models import Flowcell, Bed, BedVersion, Sample
+from cg.store.models import Flowcell, Bed, BedVersion, Customer, Sample, User
 
 LOG = logging.getLogger(__name__)
 
@@ -53,28 +53,31 @@ class StoreHelpers:
     def ensure_application_version(
         store: Store,
         application_tag: str = "dummy_tag",
-        application_type: str = "wgs",
+        prep_category: str = "wgs",
         is_external: bool = False,
         is_rna: bool = False,
         description: str = None,
         sequencing_depth: int = None,
         is_accredited: bool = False,
+        version: int = 1,
+        **kwargs,
     ) -> models.ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
         if is_rna:
             application_tag = "rna_tag"
-            application_type = "wts"
+            prep_category = "wts"
 
         application = store.application(tag=application_tag)
         if not application:
             application = StoreHelpers.add_application(
                 store,
-                application_tag,
-                application_type,
+                application_tag=application_tag,
+                prep_category=prep_category,
                 is_external=is_external,
                 description=description,
                 is_accredited=is_accredited,
                 sequencing_depth=sequencing_depth,
+                **kwargs,
             )
 
         prices = {
@@ -83,20 +86,23 @@ class StoreHelpers:
             PriorityTerms.EXPRESS: 30,
             PriorityTerms.RESEARCH: 5,
         }
-        version = store.application_version(application, 1)
-        if not version:
-            version = store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
+        application_version = store.application_version(application=application, version=version)
+        if not application_version:
+            application_version = store.add_version(
+                application=application, version=version, valid_from=datetime.now(), prices=prices
+            )
 
-            store.add_commit(version)
-        return version
+            store.add_commit(application_version)
+        return application_version
 
     @staticmethod
     def ensure_application(
         store: Store,
         tag: str,
-        application_type: str = "wgs",
+        prep_category: str = "wgs",
         description: str = "dummy_description",
         is_archived: bool = False,
+        **kwargs,
     ) -> models.Application:
         """Ensure that application exists in store."""
         application: models.Application = store.application(tag=tag)
@@ -104,9 +110,10 @@ class StoreHelpers:
             application: models.Application = StoreHelpers.add_application(
                 store=store,
                 application_tag=tag,
-                application_type=application_type,
+                prep_category=prep_category,
                 description=description,
                 is_archived=is_archived,
+                **kwargs,
             )
         return application
 
@@ -114,7 +121,7 @@ class StoreHelpers:
     def add_application(
         store: Store,
         application_tag: str = "dummy_tag",
-        application_type: str = "wgs",
+        prep_category: str = "wgs",
         description: str = None,
         is_archived: bool = False,
         is_accredited: bool = False,
@@ -131,7 +138,7 @@ class StoreHelpers:
             description = "dummy_description"
         application = store.add_application(
             tag=application_tag,
-            category=application_type,
+            prep_category=prep_category,
             description=description,
             is_archived=is_archived,
             percent_kth=80,
@@ -163,7 +170,7 @@ class StoreHelpers:
 
     @staticmethod
     def ensure_collaboration(store: Store, collaboration_id: str = "all_customers"):
-        collaboration = store.collaboration(collaboration_id)
+        collaboration = store.get_collaboration_by_internal_id(collaboration_id)
         if not collaboration:
             collaboration = store.add_collaboration(collaboration_id, collaboration_id)
         return collaboration
@@ -177,7 +184,7 @@ class StoreHelpers:
     ) -> models.Customer:
         """Utility function to return existing or create customer for tests."""
         collaboration: models.Collaboration = StoreHelpers.ensure_collaboration(store)
-        customer = store.customer(customer_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
 
         if not customer:
             customer = store.add_customer(
@@ -258,14 +265,16 @@ class StoreHelpers:
         application_version = StoreHelpers.ensure_application_version(
             store=store,
             application_tag=application_tag,
-            application_type=application_type,
+            prep_category=application_type,
             is_external=is_external,
             is_rna=is_rna,
         )
         application_version_id = application_version.id
 
         if internal_id:
-            existing_sample: models.Sample = store.sample(internal_id=internal_id)
+            existing_sample: models.Sample = store.get_sample_by_internal_id(
+                internal_id=internal_id
+            )
             if existing_sample:
                 return existing_sample
 
@@ -332,7 +341,7 @@ class StoreHelpers:
         """
         if not panels:
             panels: List[str] = ["panel_test"]
-        customer = StoreHelpers.ensure_customer(store, customer_id)
+        customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
         if case_obj:
             panels = case_obj.panels
         for panel_name in panels:
@@ -586,7 +595,7 @@ class StoreHelpers:
         """Function for adding a phenotype group to a sample in the database."""
         if phenotype_groups is None:
             phenotype_groups = ["a phenotype group"]
-        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        sample_obj: models.Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -601,7 +610,7 @@ class StoreHelpers:
         """Function for adding a phenotype term to a sample in the database."""
         if not phenotype_terms:
             phenotype_terms: List[str] = ["a phenotype term"]
-        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        sample_obj: models.Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -614,7 +623,7 @@ class StoreHelpers:
         store: Store, sample_id: str, subject_id: str = "a subject_id"
     ) -> Optional[models.Sample]:
         """Function for adding a subject_id to a sample in the database."""
-        sample_obj: models.Sample = store.sample(internal_id=sample_id)
+        sample_obj: models.Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -674,17 +683,21 @@ class StoreHelpers:
         application_type: str = "tgs",
         is_external: bool = False,
         is_rna: bool = False,
+        delivered_at: datetime = None,
+        received_at: datetime = None,
+        no_invoice: bool = None,
+        invoice_id: int = None,
     ) -> models.Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
-        customer = store.customer(customer_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
         if not customer:
             customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
 
         application_version = StoreHelpers.ensure_application_version(
             store=store,
             application_tag=application_tag,
-            application_type=application_type,
+            prep_category=application_type,
             is_external=is_external,
             is_rna=is_rna,
         )
@@ -695,6 +708,10 @@ class StoreHelpers:
             application_version=application_version,
             customer=customer,
             order="test_order",
+            delivered_at=delivered_at,
+            received_at=received_at,
+            no_invoice=no_invoice,
+            invoice_id=invoice_id,
         )
         store.add_commit(pool)
         return pool
@@ -709,7 +726,7 @@ class StoreHelpers:
         is_admin: bool = False,
     ) -> models.User:
         """Utility function to add a user that can be used in tests."""
-        user = store.user(email=email)
+        user: User = store.get_user_by_email(email=email)
         if not user:
             user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
             store.add_commit(user)
@@ -722,11 +739,12 @@ class StoreHelpers:
         invoice_id: int = 0,
         customer_id: str = "cust000",
         discount: int = 0,
-        record_type: str = "Sample",
-        internal_id: str = "savedkitten",
+        pools: Optional[List[models.Pool]] = None,
+        samples: Optional[List[models.Sample]] = None,
+        invoiced_at: Optional[datetime] = None,
     ) -> models.Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
-        invoice = store.invoice(invoice_id=invoice_id)
+        invoice = store.get_invoice_by_id(invoice_id=invoice_id)
         if not invoice:
             customer_obj = StoreHelpers.ensure_customer(
                 store=store,
@@ -736,28 +754,13 @@ class StoreHelpers:
             user_obj: models.User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
             customer_obj.invoice_contact: models.User = user_obj
 
-            pool = []
-            sample = []
-            if record_type == "Sample":
-                sample.append(
-                    StoreHelpers.add_sample(
-                        store=store, customer_id=customer_id, internal_id=internal_id
-                    )
-                )
-                pool = None
-            else:
-                pool.append(
-                    StoreHelpers.ensure_pool(store, customer_id=customer_id, name=customer_id)
-                )
-                sample = None
-
             invoice = store.add_invoice(
                 customer=customer_obj,
-                samples=sample,
-                pools=pool,
+                samples=samples,
+                pools=pools,
                 comment="just a test invoice",
                 discount=discount,
-                record_type=record_type,
+                invoiced_at=invoiced_at,
             )
             store.add_commit(invoice)
 

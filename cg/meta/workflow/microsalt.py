@@ -150,10 +150,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.info("Found deliverables file %s", deliverables_file_path)
         return deliverables_file_path
 
-    def get_sample_fastq_destination_dir(
-        self, case_obj: models.Family, sample_obj: models.Sample
-    ) -> Path:
-        return Path(self.get_case_fastq_path(case_id=case_obj.internal_id), sample_obj.internal_id)
+    def get_sample_fastq_destination_dir(self, case: models.Family, sample: models.Sample) -> Path:
+        return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
 
     def link_fastq_files(
         self, case_id: str, sample_id: Optional[str], dry_run: bool = False
@@ -353,7 +351,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_qc: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample_id in case_qc:
-            sample: Sample = self.status_db.sample(internal_id=sample_id)
+            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
             sample_check: Union[Dict, None] = self.qc_sample_check(
                 sample=sample,
                 sample_qc=case_qc[sample_id],
@@ -375,7 +373,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         qc_pass: bool = True
 
         for sample_id in failed_samples:
-            sample: Sample = self.status_db.sample(internal_id=sample_id)
+            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
             if sample.control == ControlEnum.negative:
                 qc_pass = False
             if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:

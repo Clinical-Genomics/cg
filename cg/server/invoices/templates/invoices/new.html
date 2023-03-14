@@ -108,7 +108,7 @@
   function check_subset() {
     total_price = 0;
     $("input[name='records']").each(function() {
-      if (total_price + parseInt(this.id) <= {{total_price_treshold}}) {
+      if (total_price + parseInt(this.id) <= {{total_price_threshold}}) {
         this.checked = !this.checked
         total_price += parseInt(this.id)
       }

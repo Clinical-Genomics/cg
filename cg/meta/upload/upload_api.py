@@ -1,9 +1,9 @@
 """Upload API"""
 
+import click
 import logging
 from datetime import datetime, timedelta
 
-import click
 from cg.exc import AnalysisUploadError, AnalysisAlreadyUploadedError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI

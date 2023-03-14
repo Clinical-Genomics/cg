@@ -66,9 +66,9 @@ class MockLimsAPI(LimsAPI):
             self.add_sample(internal_id)
         self.sample_vars[internal_id]["capture_kit"] = capture_kit
 
-    def capture_kit(self, internal_id: str):
-        if internal_id in self.sample_vars:
-            return self.sample_vars[internal_id].get("capture_kit")
+    def capture_kit(self, lims_id: str):
+        if lims_id in self.sample_vars:
+            return self.sample_vars[lims_id].get("capture_kit")
         return None
 
     def get_prep_method(self, lims_id: str) -> str:

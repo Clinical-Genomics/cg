@@ -42,7 +42,7 @@ CASE_ACTIONS = [action.value for action in CaseActions]
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 COMBOS = {
-    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
@@ -99,6 +99,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
+    FASTQ: str = "fastq"
     JSON: str = "json"
     YAML: str = "yaml"
 
@@ -135,6 +136,7 @@ class HastaSlurmPartitions(StrEnum):
 
 class FileExtensions(StrEnum):
     BED: str = ".bed"
+    CRAM: str = ".cram"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"
