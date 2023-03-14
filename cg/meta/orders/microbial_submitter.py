@@ -101,7 +101,7 @@ class MicrobialSubmitter(Submitter):
 
                 application_tag = sample_data["application"]
                 application_version = self.status.current_application_version(tag=application_tag)
-                organism = self.status.organism(sample_data["organism_id"])
+                organism = self.status.get_organism_by_internal_id(sample_data["organism_id"])
 
                 if not organism:
                     organism = self.status.add_organism(
@@ -143,7 +143,9 @@ class MicrobialSubmitter(Submitter):
         for sample in samples:
             organism_id = sample.organism
             reference_genome = sample.reference_genome
-            organism = self.status.organism(internal_id=organism_id)
+            organism: models.Organism = self.status.get_organism_by_internal_id(
+                internal_id=organism_id
+            )
             is_verified = (
                 organism and organism.reference_genome == reference_genome and organism.verified
             )

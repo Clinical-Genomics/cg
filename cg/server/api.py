@@ -80,13 +80,13 @@ def before_request():
             )
         )
 
-    user_obj = db.user(user_data["email"])
-    if user_obj is None or not user_obj.order_portal_login:
+    user = db.get_user_by_email(user_data["email"])
+    if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
-    g.current_user = user_obj
+    g.current_user = user
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
@@ -367,7 +367,7 @@ def options():
                 "internal_id": organism.internal_id,
                 "verified": organism.verified,
             }
-            for organism in db.organisms()
+            for organism in db.get_all_organisms()
         ],
         sources=source_groups,
         beds=[bed.name for bed in db.get_active_beds()],

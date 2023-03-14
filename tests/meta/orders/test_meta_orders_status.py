@@ -400,7 +400,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data, 
     # GIVEN a basic store with no samples and a microbial order and one Organism
     assert len(base_store.get_all_samples()) == 0
     assert base_store.families().count() == 0
-    assert base_store.organisms().count() == 1
+    assert base_store.get_all_organisms().count() == 1
 
     submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -422,7 +422,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data, 
     assert base_store.families().count() == 1
     assert len(new_samples) == 5
     assert len(base_store.get_all_samples()) == 5
-    assert base_store.organisms().count() == 3
+    assert base_store.get_all_organisms().count() == 3
 
 
 def test_store_microbial_case_data_analysis_stored(

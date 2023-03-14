@@ -17,6 +17,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
+from cg.store.organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
@@ -25,6 +26,7 @@ from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_version_filter,
 )
+from cg.store.user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -128,6 +130,10 @@ class FindBasicDataHandler(BaseHandler):
         """Return bed query."""
         return self.Bed.query
 
+    def _get_organism_query(self) -> Query:
+        """Return organism query."""
+        return self.Organism.query
+
     def get_beds(self) -> Query:
         """Returns all beds."""
         return self._get_bed_query()
@@ -173,6 +179,10 @@ class FindBasicDataHandler(BaseHandler):
         """Returns a collaboration query."""
         return self.Collaboration.query
 
+    def _get_user_query(self) -> Query:
+        """Returns a user query."""
+        return self.User.query
+
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
         return apply_collaboration_version_filter(
@@ -200,13 +210,17 @@ class FindBasicDataHandler(BaseHandler):
             application_obj.versions[-1] if application_obj and application_obj.versions else None
         )
 
-    def organism(self, internal_id: str) -> Organism:
-        """Find an Organism by internal_id."""
-        return self.Organism.query.filter_by(internal_id=internal_id).first()
+    def get_organism_by_internal_id(self, internal_id: str) -> Organism:
+        """Find an organism by internal id."""
+        return apply_organism_filter(
+            organisms=self._get_organism_query(),
+            filter_functions=[OrganismFilter.FILTER_BY_INTERNAL_ID],
+            internal_id=internal_id,
+        ).first()
 
-    def organisms(self) -> List[Organism]:
-        """Fetch all organisms"""
-        return self.Organism.query.order_by(Organism.internal_id)
+    def get_all_organisms(self) -> List[Organism]:
+        """Return all organisms ordered by organism internal id."""
+        return self._get_organism_query().order_by(Organism.internal_id)
 
     def panel(self, abbrev):
         """Find a panel by abbreviation."""
@@ -216,6 +230,8 @@ class FindBasicDataHandler(BaseHandler):
         """Returns all panels."""
         return self.Panel.query.order_by(Panel.abbrev)
 
-    def user(self, email: str) -> User:
-        """Fetch a user from the store."""
-        return self.User.query.filter_by(email=email).first()
+    def get_user_by_email(self, email: str) -> User:
+        """Return a user by email from the database."""
+        return apply_user_filter(
+            users=self._get_user_query(), email=email, filter_functions=[UserFilter.FILTER_BY_EMAIL]
+        ).first()
