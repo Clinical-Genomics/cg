@@ -23,7 +23,6 @@ OPTION_RESUME = click.option(
 OPTION_PROFILE = click.option(
     "--profile",
     type=str,
-    default="singularity,hasta,dev_prio",
     show_default=True,
     help="Choose a configuration profile",
 )

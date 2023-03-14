@@ -100,7 +100,7 @@ def run(
             case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
         ),
         "resume": not from_start,
-        "profile": profile,
+        "profile": analysis_api.get_profile(profile=profile),
         "with-tower": with_tower,
         "stub": stub,
         "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
