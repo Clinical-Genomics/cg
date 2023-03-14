@@ -148,21 +148,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
         """Write params-file for rnafusion analysis in case folder."""
-        default_options: Dict[str, str] = self.get_verified_arguments(
-            case_id=case_id,
-            input=None,
-            outdir=None,
-            genomes_base=None,
-            trim=RnafusionDefaults.TRIM,
-            fusioninspector_filter=RnafusionDefaults.FUSIONINSPECTOR_FILTER,
-            all=RnafusionDefaults.ALL,
-            pizzly=RnafusionDefaults.PIZZLY,
-            squid=RnafusionDefaults.SQUID,
-            starfusion=RnafusionDefaults.STARFUSION,
-            fusioncatcher=RnafusionDefaults.FUSIONCATCHER,
-            arriba=RnafusionDefaults.ARRIBA,
-            cli=False,
-        )
+        default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
         LOG.info(default_options)
         if dry_run:
             return
@@ -178,43 +164,26 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             return genomes_base
         return Path(self.references)
 
-    def get_verified_arguments(
-        self,
-        case_id: str,
-        input: Optional[str],
-        outdir: Optional[str],
-        genomes_base: Optional[str],
-        trim: bool,
-        fusioninspector_filter: bool,
-        all: bool,
-        pizzly: bool,
-        squid: bool,
-        starfusion: bool,
-        fusioncatcher: bool,
-        arriba: bool,
-        cli: bool = False,
-    ) -> Dict[str, str]:
-        """Transforms click argument related to rnafusion that were left empty into
-        defaults constructed with case_id paths or from config."""
-
-        prefix: str = "--" if cli else ""
-
+    def get_default_parameters(self, case_id: str) -> Dict:
+        """Returns a dictionary with default RnaFusion parameters."""
         return {
-            f"{prefix}input": NextflowAnalysisAPI.get_input_path(
-                case_id=case_id, root_dir=self.root_dir, input=input
+            "input": NextflowAnalysisAPI.get_input_path(
+                case_id=case_id, root_dir=self.root_dir
             ).as_posix(),
-            f"{prefix}outdir": NextflowAnalysisAPI.get_outdir_path(
-                case_id=case_id, root_dir=self.root_dir, outdir=outdir
+            "outdir": NextflowAnalysisAPI.get_outdir_path(
+                case_id=case_id, root_dir=self.root_dir
             ).as_posix(),
-            f"{prefix}genomes_base": self.get_references_path(genomes_base=genomes_base).as_posix(),
-            f"{prefix}trim": trim,
-            f"{prefix}fusioninspector_filter": fusioninspector_filter,
-            f"{prefix}all": all,
-            f"{prefix}pizzly": pizzly,
-            f"{prefix}squid": squid,
-            f"{prefix}starfusion": starfusion,
-            f"{prefix}fusioncatcher": fusioncatcher,
-            f"{prefix}arriba": arriba,
+            "genomes_base": self.get_references_path().as_posix(),
+            "trim": RnafusionDefaults.TRIM,
+            "fusioninspector_filter": RnafusionDefaults.FUSIONINSPECTOR_FILTER,
+            "all": RnafusionDefaults.ALL,
+            "pizzly": RnafusionDefaults.PIZZLY,
+            "squid": RnafusionDefaults.SQUID,
+            "starfusion": RnafusionDefaults.STARFUSION,
+            "fusioncatcher": RnafusionDefaults.FUSIONCATCHER,
+            "arriba": RnafusionDefaults.ARRIBA,
+            "priority": self.get_slurm_account(),
+            "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
         }
 
     def config_case(

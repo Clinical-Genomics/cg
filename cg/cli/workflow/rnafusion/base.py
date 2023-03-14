@@ -50,7 +50,7 @@ rnafusion.add_command(resolve_compression)
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, strandedness: str, dry_run: bool) -> None:
     """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis["analysis_api"]
     LOG.info(f"Creating samplesheet file for {case_id}.")
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
@@ -90,7 +90,7 @@ def run(
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id)
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
 
     command_args = {
         "log": NextflowAnalysisAPI.get_log_path(

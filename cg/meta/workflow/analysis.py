@@ -13,12 +13,13 @@ from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
 from cg.constants.constants import AnalysisType
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
+from cg.constants.slurm import ENV_TO_SLURM_ACCOUNT
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Sample, BedVersion, FamilySample, Analysis
+from cg.store.models import Analysis, BedVersion, Family, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -96,9 +97,13 @@ class AnalysisAPI(MetaAPI):
         return case_obj.priority.value or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
-        """Get Quality of service (SLURM QOS) for the case"""
+        """Get Quality of service (SLURM QOS) for the case."""
         priority: int = self.get_priority_for_case(case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
+
+    def get_slurm_account(self) -> str:
+        """Get slurm account associated to the environment used."""
+        return ENV_TO_SLURM_ACCOUNT[self.config.environment]
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
         """Path to case working directory."""
