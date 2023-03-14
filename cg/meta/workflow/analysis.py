@@ -114,8 +114,8 @@ class AnalysisAPI(MetaAPI):
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
         """Retrieve sample name provided by customer for specific sample"""
-        sample_obj: Sample = self.status_db.sample(lims_id)
-        return sample_obj.name
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=lims_id)
+        return sample.name
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
@@ -330,7 +330,9 @@ class AnalysisAPI(MetaAPI):
         case: Family = self.status_db.family(internal_id=case_id)
         sample: Sample = case.links[0].sample
         if sample.from_sample:
-            sample: Sample = self.status_db.sample(internal_id=sample.from_sample)
+            sample: Sample = self.status_db.get_sample_by_internal_id(
+                internal_id=sample.from_sample
+            )
         target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None

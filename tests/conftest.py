@@ -27,7 +27,8 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer, BedVersion, Bed, Organism
+from cg.store.models import Customer, BedVersion, Bed, Organism, User
+
 
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -1103,6 +1104,18 @@ def fixture_bed_version_short_name() -> str:
     return "bed_short_name_0.0"
 
 
+@pytest.fixture(name="invoice_address")
+def fixture_invoice_address() -> str:
+    """Return an invoice address."""
+    return "Test street"
+
+
+@pytest.fixture(name="invoice_reference")
+def fixture_invoice_reference() -> str:
+    """Return an invoice reference."""
+    return "ABCDEF"
+
+
 @pytest.fixture(name="base_store")
 def fixture_base_store(
     apptag_rna: str,
@@ -1110,42 +1123,32 @@ def fixture_base_store(
     bed_version_short_name: str,
     collaboration_id: str,
     customer_id: str,
+    invoice_address: str,
+    invoice_reference: str,
     store: Store,
 ) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
     store.add_commit(collaboration)
-    customers = [
-        store.add_customer(
-            customer_id,
-            "Production",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust001",
-            "Customer",
-            scout_access=False,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust002",
-            "Karolinska",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-        store.add_customer(
-            "cust003",
-            "CMMS",
-            scout_access=True,
-            invoice_address="Test street",
-            invoice_reference="ABCDEF",
-        ),
-    ]
+    customers: List[Customer] = []
+    customer_map: Dict[str, str] = {
+        customer_id: "Production",
+        "cust001": "Customer",
+        "cust002": "Karolinska",
+        "cust003": "CMMS",
+    }
+    for new_customer_id, new_customer_name in customer_map.items():
+        customers.append(
+            store.add_customer(
+                internal_id=new_customer_id,
+                name=new_customer_name,
+                scout_access=True,
+                invoice_address=invoice_address,
+                invoice_reference=invoice_reference,
+            )
+        )
+
     for customer in customers:
         collaboration.customers.append(customer)
     store.add_commit(customers)
@@ -1310,7 +1313,7 @@ def sample_store(base_store: Store) -> Store:
             reads=(250 * 1000000),
         ),
     ]
-    customer = base_store.customers().first()
+    customer: Customer = (base_store.get_customers())[0]
     external_app = base_store.application("WGXCUSC000").versions[0]
     wgs_app = base_store.application("WGSPCFC030").versions[0]
     for sample in new_samples:
@@ -1754,5 +1757,29 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
         organisms.append(organism)
 
     store.add_commit(organisms)
+
+
+@pytest.fixture(name="non_existent_email")
+def non_existent_email():
+    """Return email not associated with any entity."""
+    return "non_existent_email@example.com"
+
+
+@pytest.fixture(name="store_with_users")
+def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with multiple users."""
+
+    customer: Customer = helpers.ensure_customer(store=store)
+
+    user_details = [
+        ("user1@example.com", "User One", False),
+        ("user2@example.com", "User Two", True),
+        ("user3@example.com", "User Three", False),
+    ]
+
+    for email, name, is_admin in user_details:
+        store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
+
+    store.commit()
 
     yield store

@@ -207,7 +207,7 @@ def test_deliver_files_enough_reads(
     """Tests the deliver_files method for a sample with enough reads."""
     # GIVEN a case to be delivered and a sample with enough reads
     case: Family = deliver_api.store.family(internal_id=case_id)
-    sample: Sample = deliver_api.store.sample(sample_id)
+    sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
 
@@ -231,7 +231,7 @@ def test_deliver_files_not_enough_reads(
     """Tests the deliver_files method for a sample with too few reads."""
     # GIVEN a case to be delivered and a sample with too few reads
     case: Family = deliver_api.store.family(internal_id=case_id)
-    sample: Sample = deliver_api.store.sample(sample_id)
+    sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     sample.reads = 1
     helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)
@@ -258,7 +258,7 @@ def test_deliver_files_not_enough_reads_force(
     """Tests the deliver_files method for a sample with too few reads but with override."""
     # GIVEN a case to be delivered and a sample with too few reads
     case: Family = deliver_api.store.family(internal_id=case_id)
-    sample: Sample = deliver_api.store.sample(sample_id)
+    sample: Sample = deliver_api.store.get_sample_by_internal_id(sample_id)
     sample.reads = 1
     helpers.ensure_hk_bundle(deliver_api.hk_api, fastq_delivery_bundle, include=True)
     helpers.ensure_hk_bundle(deliver_api.hk_api, mip_delivery_bundle, include=True)

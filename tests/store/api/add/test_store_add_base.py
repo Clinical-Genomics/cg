@@ -1,6 +1,7 @@
 from datetime import datetime as dt
 
 from cg.store import Store
+from cg.store.models import Customer
 
 
 def test_add_collaboration(store: Store):
@@ -78,7 +79,7 @@ def test_add_microbial_sample(base_store: Store, helpers):
 def test_add_pool(rml_pool_store: Store):
     """Tests whether new pools are invoiced as default"""
     # GIVEN a valid customer and a valid application_version
-    customer = rml_pool_store.customers()[0]
+    customer: Customer = rml_pool_store.get_customers()[0]
     application = rml_pool_store.application(tag="RMLP05R800")
     app_version = rml_pool_store.application_version(application=application, version=1)
 
@@ -93,5 +94,5 @@ def test_add_pool(rml_pool_store: Store):
 
     rml_pool_store.add_commit(new_pool)
     # THEN the new pool should have no_invoice = False
-    pool = rml_pool_store.pool(pool_id=2)
+    pool = rml_pool_store.get_pool_by_entry_id(entry_id=2)
     assert pool.no_invoice is False
