@@ -233,7 +233,7 @@ def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
     organisms: Query = store_with_organisms._get_organism_query()
     assert organisms.count() > 0
 
-    # WHEN finding the organism by internal ID
+    # WHEN finding the organism by internal ID that does not exist
     filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(
         internal_id=non_existent_id
     )
@@ -251,7 +251,7 @@ def test_get_organism_by_internal_id_returns_none_when_id_is_none(
     organisms: Query = store_with_organisms._get_organism_query()
     assert organisms.count() > 0
 
-    # WHEN finding the organism by internal ID
+    # WHEN finding the organism by internal ID None
     filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(internal_id=None)
 
     # THEN the filtered organism should be None
