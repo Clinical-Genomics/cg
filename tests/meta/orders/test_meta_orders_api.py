@@ -3,6 +3,8 @@ from unittest.mock import patch
 
 import pytest
 from cgmodels.cg.constants import Pipeline
+
+from cg.store.models import Customer, Family
 from tests.store_helpers import StoreHelpers
 
 from cg.constants import DataDelivery
@@ -65,7 +67,7 @@ def test_submit(
     monkeypatch_process_lims(monkeypatch, order_data)
 
     # GIVEN an order and an empty store
-    assert base_store.samples().first() is None
+    assert not base_store.get_all_samples()
 
     # WHEN submitting the order
 
@@ -152,7 +154,7 @@ def test_submit_illegal_sample_customer(
         invoice_reference="dummy nr",
     )
     sample_store.add_commit(new_customer)
-    existing_sample = sample_store.samples().first()
+    existing_sample = sample_store.get_all_samples()[0]
     existing_sample.customer = new_customer
     sample_store.add_commit(existing_sample)
 
@@ -209,7 +211,7 @@ def test_submit_scout_legal_sample_customer(
     order_customer.collaborations.append(collaboration)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
-    existing_sample = sample_store.samples().first()
+    existing_sample = sample_store.get_all_samples()[0]
     existing_sample.customer = sample_customer
     sample_store.commit()
     order_data.customer = order_customer.internal_id
@@ -241,20 +243,20 @@ def test_submit_duplicate_sample_case_name(
     # GIVEN we have an order with a case that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
+    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
 
     for sample in order_data.samples:
         case_id = sample.family_name
-        if not store.find_family(customer=customer_obj, name=case_id):
-            case_obj = store.add_case(
+        if not store.find_family(customer=customer, name=case_id):
+            case: Family = store.add_case(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
                 ticket=ticket,
             )
-            case_obj.customer = customer_obj
-            store.add_commit(case_obj)
-        assert store.find_family(customer=customer_obj, name=case_id)
+            case.customer = customer
+            store.add_commit(case)
+        assert store.find_family(customer=customer, name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -321,8 +323,8 @@ def test_submit_unique_sample_case_name(
     sample: MipDnaSample
     for sample in order_data.samples:
         case_id = sample.family_name
-        customer_obj = store.customer(order_data.customer)
-        assert not store.find_family(customer=customer_obj, name=case_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+        assert not store.find_family(customer=customer, name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -343,7 +345,7 @@ def test_validate_sex_inconsistent_sex(
     # GIVEN we have an order with a sample that is already in the database but with different sex
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
+    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
 
     # add sample with different sex than in order
     sample: MipDnaSample
@@ -353,7 +355,7 @@ def test_validate_sex_inconsistent_sex(
             subject_id=sample.subject_id,
             name=sample.name,
             gender="male" if sample.sex == "female" else "female",
-            customer_id=customer_obj.internal_id,
+            customer_id=customer.internal_id,
         )
         store.add_commit(sample_obj)
         assert sample_obj.sex != sample.sex
@@ -372,7 +374,7 @@ def test_validate_sex_consistent_sex(
     # GIVEN we have an order with a sample that is already in the database and with same gender
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
+    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
 
     # add sample with different sex than in order
     sample: MipDnaSample
@@ -382,7 +384,7 @@ def test_validate_sex_consistent_sex(
             subject_id=sample.subject_id,
             name=sample.name,
             gender=sample.sex,
-            customer_id=customer_obj.internal_id,
+            customer_id=customer.internal_id,
         )
         store.add_commit(sample_obj)
         assert sample_obj.sex == sample.sex
@@ -402,7 +404,7 @@ def test_validate_sex_unknown_existing_sex(
     # of type "unknown"
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
+    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
 
     # add sample with different sex than in order
     sample: MipDnaSample
@@ -412,7 +414,7 @@ def test_validate_sex_unknown_existing_sex(
             subject_id=sample.subject_id,
             name=sample.name,
             gender="unknown",
-            customer_id=customer_obj.internal_id,
+            customer_id=customer.internal_id,
         )
         store.add_commit(sample_obj)
         assert sample_obj.sex != sample.sex
@@ -432,7 +434,7 @@ def test_validate_sex_unknown_new_sex(
     # type "unknown"
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer_obj = store.customer(order_data.customer)
+    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
 
     # add sample with different sex than in order
     for sample in order_data.samples:
@@ -441,7 +443,7 @@ def test_validate_sex_unknown_new_sex(
             subject_id=sample.subject_id,
             name=sample.name,
             gender=sample.sex,
-            customer_id=customer_obj.internal_id,
+            customer_id=customer.internal_id,
         )
         sample.sex = "unknown"
         store.add_commit(sample_obj)
@@ -485,7 +487,7 @@ def test_submit_unique_sample_name(
     # GIVEN we have an order with a sample that is not existing in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    assert store.samples().first() is None
+    assert not store.get_all_samples()
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -528,12 +530,12 @@ def test_sarscov2_submit_duplicate_sample_name(
 
 
 def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, order_data: OrderIn):
-    customer_obj = store.customer(order_data.customer)
+    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
     for sample in order_data.samples:
         sample_name = sample.name
-        if not store.find_samples(customer=customer_obj, name=sample_name).first():
+        if not store.find_samples(customer=customer, name=sample_name).first():
             sample_obj = helpers.add_sample(
-                store=store, name=sample_name, customer_id=customer_obj.internal_id
+                store=store, name=sample_name, customer_id=customer.internal_id
             )
             store.add_commit(sample_obj)
 

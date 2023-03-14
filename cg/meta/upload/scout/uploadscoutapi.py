@@ -24,7 +24,8 @@ from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis, Family, Sample, FamilySample
 
 LOG = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class UploadScoutAPI:
         self.lims = lims_api
         self.status_db = status_db
 
-    def generate_config(self, analysis_obj: models.Analysis) -> ScoutLoadConfig:
+    def generate_config(self, analysis_obj: Analysis) -> ScoutLoadConfig:
         """Fetch data about an analysis to load Scout."""
         LOG.info("Generate scout load config")
 
@@ -195,7 +196,7 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         report_type: str = "Research" if research else "Clinical"
-        rna_case: models.Family = status_db.family(case_id)
+        rna_case: Family = status_db.family(case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
@@ -295,7 +296,7 @@ class UploadScoutAPI:
         """
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
-        rna_case: models.Family = status_db.family(case_id)
+        rna_case: Family = status_db.family(case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
@@ -346,19 +347,19 @@ class UploadScoutAPI:
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
     @staticmethod
-    def _get_sample(case: models.Family, subject_id: str) -> Optional[models.Sample]:
+    def _get_sample(case: Family, subject_id: str) -> Optional[Sample]:
         """Get sample of a case for a subject_id.
 
         Args:
-            case     (models.Family):               Case
+            case     (Family):               Case
             subject_id   (str):                     Subject id to search for
         Returns:
-            matching sample (models.Sample)
+            matching sample (Sample)
         """
 
-        link: models.FamilySample
+        link: FamilySample
         for link in case.links:
-            sample: models.Sample = link.sample
+            sample: Sample = link.sample
             if sample.subject_id == subject_id:
                 return sample
 
@@ -391,12 +392,12 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
-    def create_rna_dna_sample_case_map(self, rna_case: models.Family) -> Dict[str, Dict[str, list]]:
+    def create_rna_dna_sample_case_map(self, rna_case: Family) -> Dict[str, Dict[str, list]]:
         """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
         subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
 
         Args:
-            rna_case                (models.Family):  RNA case identifier
+            rna_case                (Family):  RNA case identifier
         Case Returns:
             rna_dna_sample_case_map     (Dict):       rna-dna relationships, and related dna cases based on subject id
         """
@@ -408,10 +409,10 @@ class UploadScoutAPI:
         return rna_dna_sample_case_map
 
     def _add_rna_sample(
-        self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
+        self, rna_sample: Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
     ) -> Dict[str, Dict[str, list]]:
         """Adds an RNA sample and its matching DNA sample, and cases."""
-        dna_sample: models.Sample = self._link_rna_sample_to_dna_sample(
+        dna_sample: Sample = self._link_rna_sample_to_dna_sample(
             rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
         )
         self._add_dna_cases_to_dna_sample(
@@ -422,12 +423,13 @@ class UploadScoutAPI:
         return rna_dna_sample_case_map
 
     def _link_rna_sample_to_dna_sample(
-        self, rna_sample: models.Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
-    ) -> models.Sample:
+        self, rna_sample: Sample, rna_dna_sample_case_map: Dict[str, Dict[str, list]]
+    ) -> Sample:
         if not rna_sample.subject_id:
             raise CgDataError(
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
+
         collaborator_ids = [customer.internal_id for customer in rna_sample.customer.collaborators]
 
         queries = []
@@ -439,29 +441,29 @@ class UploadScoutAPI:
             )
             queries.append(query)
         combined_query = union(*queries)
-        subject_id_samples = (
+        subject_id_samples: List[Sample]  = (
             self.status_db.session.query(models.Sample).select_entity_from(combined_query).all()
         )
-        subject_id_dna_samples = self._get_application_prep_category(subject_id_samples)
+        subject_id_dna_samples: List[Sample]  = self._get_application_prep_category(subject_id_samples=subject_id_samples)
 
         if len(subject_id_dna_samples) != 1:
             raise CgDataError(
                 f"Failed to upload files for RNA case: unexpected number of DNA sample matches for subject_id: {rna_sample.subject_id}. Number of matches: {len(subject_id_dna_samples)} "
             )
         rna_dna_sample_case_map[rna_sample.internal_id]: Dict[str, list] = {}
-        sample: models.Sample
+        sample: Sample
         for sample in subject_id_dna_samples:
             rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: list = []
             return sample
 
     @staticmethod
     def _add_dna_cases_to_dna_sample(
-        dna_sample: models.Sample,
+        dna_sample: Sample,
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
-        rna_sample: models.Sample,
+        rna_sample: Sample,
     ) -> None:
         for dna_sample.link in dna_sample.links:
-            case_object: models.Family = dna_sample.link.family
+            case_object: Family = dna_sample.link.family
             if (
                 case_object.data_analysis
                 in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
@@ -472,9 +474,9 @@ class UploadScoutAPI:
                 )
 
     @staticmethod
-    def _get_application_prep_category(subject_id_samples: List[models.Sample]) -> List[Any]:
-        """Filter a models.Sample list, returning DNA samples selected on their prep_category."""
-        subject_id_dna_samples: List[models.Sample] = []
+    def _get_application_prep_category(subject_id_samples: List[Sample]) -> List[Sample]:
+        """Filter a Sample list, returning DNA samples selected on their prep_category."""
+        subject_id_dna_samples: List[Sample] = []
         for sample in subject_id_samples:
             if sample.application_version.application.prep_category in [
                 SequencingMethod.WGS,

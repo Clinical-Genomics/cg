@@ -21,8 +21,8 @@ class BaseView(ModelView):
     """Base for the specific views."""
 
     def is_accessible(self):
-        user_obj = db.user(session.get("user_email"))
-        return bool(google.authorized and user_obj and user_obj.is_admin)
+        user = db.get_user_by_email(email=session.get("user_email"))
+        return bool(google.authorized and user and user.is_admin)
 
     def inaccessible_callback(self, name, **kwargs):
         # redirect to login page if user doesn't have access
@@ -445,7 +445,7 @@ class SampleView(BaseView):
         all_associated_case_ids: set = set()
 
         for entry_id in entry_ids:
-            sample: Sample = db.get_sample_by_id(entry_id=int(entry_id))
+            sample: Sample = db.get_sample_by_entry_id(entry_id=int(entry_id))
 
             sample_case_ids: List[str] = [
                 case_sample.family.internal_id for case_sample in sample.links
@@ -465,9 +465,9 @@ class SampleView(BaseView):
 
     def write_cancel_comment(self, sample: Sample) -> None:
         """Add comment to sample with date and user cancelling the sample."""
-        username: str = db.user(session.get("user_email")).name
+        user_name: str = db.get_user_by_email(session.get("user_email")).name
         date: str = datetime.now().strftime("%Y-%m-%d")
-        comment: str = f"Cancelled {date} by {username}"
+        comment: str = f"Cancelled {date} by {user_name}"
 
         db.add_sample_comment(sample=sample, comment=comment)
 

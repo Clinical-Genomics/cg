@@ -56,6 +56,12 @@ def ensure_flow_cells_on_disk(context: CGConfig, case_id: str):
     status_db: Store = context.status_db
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not status_db.is_all_flow_cells_on_disk(case_id=case_id):
+        if analysis_api.status_db.is_case_down_sampled(case_id=case_id):
+            LOG.debug("All samples have been down sampled. Flow cell check not applicable")
+            return
+        elif analysis_api.status_db.is_case_external(case_id=case_id):
+            LOG.debug("All samples are external. Flow cell check not applicable")
+            return
         raise FlowCellsNeededError(
             "Analysis cannot be started: all flow cells need to be on disk to run the analysis"
         )
