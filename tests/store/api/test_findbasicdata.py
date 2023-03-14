@@ -235,3 +235,15 @@ def test_get_user_by_email_returns_none_for_nonexisting_email(
 
     # THEN no user should be returned
     assert filtered_user is None
+
+
+def test_get_user_when_email_is_none_returns_none(
+    store_with_users: Store
+):
+    """Test getting user by email when the email is None."""
+
+    # WHEN retrieving filtering by email None
+    filtered_user: User = store_with_users.get_user_by_email(email=None)
+
+    # THEN no user should be returned
+    assert filtered_user is None
