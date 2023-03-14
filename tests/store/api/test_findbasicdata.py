@@ -225,6 +225,7 @@ def test_get_organism_by_internal_id_returns_correct_organism(store_with_organis
 
 def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
     store_with_organisms: Store,
+    non_existent_id: str,
 ):
     """Test finding an organism by internal ID when the ID does not exist."""
 
@@ -234,8 +235,24 @@ def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
 
     # WHEN finding the organism by internal ID
     filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(
-        internal_id="non_existent_id"
+        internal_id=non_existent_id
     )
+
+    # THEN the filtered organism should be None
+    assert filtered_organism is None
+
+
+def test_get_organism_by_internal_id_returns_none_when_id_is_none(
+    store_with_organisms: Store,
+):
+    """Test finding an organism by internal ID None returns None."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_organism_query()
+    assert organisms.count() > 0
+
+    # WHEN finding the organism by internal ID
+    filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(internal_id=None)
 
     # THEN the filtered organism should be None
     assert filtered_organism is None
@@ -284,4 +301,3 @@ def test_get_user_when_email_is_none_returns_none(store_with_users: Store):
 
     # THEN no user should be returned
     assert filtered_user is None
-

@@ -14,7 +14,7 @@ def test_filter_organism_by_internal_id_returns_correct_organism(store_with_orga
     assert organisms.count() > 0
 
     # GIVEN a random organism from the store
-    organism : Organism = organisms.first()
+    organism: Organism = organisms.first()
     assert isinstance(organism, Organism)
 
     # WHEN filtering the organisms by internal ID
@@ -31,7 +31,7 @@ def test_filter_organism_by_internal_id_returns_correct_organism(store_with_orga
 
 
 def test_filter_organism_by_internal_id_returns_empty_list_when_id_does_not_exist(
-    store_with_organisms: Store,
+    store_with_organisms: Store, non_existent_id: str
 ):
     """Test filtering an organism by internal ID when the ID does not exist."""
 
@@ -41,7 +41,25 @@ def test_filter_organism_by_internal_id_returns_empty_list_when_id_does_not_exis
 
     # WHEN filtering the organisms by internal ID
     filtered_organisms: List[Organism] = filter_organism_by_internal_id(
-        organisms=organisms, internal_id="non_existent_id"
+        organisms=organisms, internal_id=non_existent_id
+    ).all()
+
+    # THEN the filtered organisms should be an empty list
+    assert not filtered_organisms
+
+
+def test_filter_organism_by_internal_id_returns_empty_list_when_id_is_none(
+    store_with_organisms: Store,
+):
+    """Test filtering an organism by internal ID when the ID is None."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_organism_query()
+    assert organisms.count() > 0
+
+    # WHEN filtering the organisms by internal ID None
+    filtered_organisms: List[Organism] = filter_organism_by_internal_id(
+        organisms=organisms, internal_id=None
     ).all()
 
     # THEN the filtered organisms should be an empty list

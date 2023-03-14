@@ -1757,12 +1757,19 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
         organisms.append(organism)
 
     store.add_commit(organisms)
+    yield store
 
 
 @pytest.fixture(name="non_existent_email")
 def non_existent_email():
     """Return email not associated with any entity."""
     return "non_existent_email@example.com"
+
+
+@pytest.fixture(name="non_existent_id")
+def non_existent_id():
+    """Return id not associated with any entity."""
+    return "non_existent_entity_id"
 
 
 @pytest.fixture(name="store_with_users")
