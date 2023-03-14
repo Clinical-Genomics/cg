@@ -25,7 +25,7 @@
 
 {% macro invoice_table(invoices ,no_invoice, status) %}
 <div class="card">
-  {% if invoices.all() %}
+  {% if invoices %}
   <br>
 <table id={{status}} class="table" cellspacing="0" width="100%">
     <thead>

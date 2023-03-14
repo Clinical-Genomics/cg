@@ -2,7 +2,7 @@ from typing import List
 
 from cg.store import Store
 from cg.store.models import BedVersion
-from cg.store.status_bed_version_filters import get_bed_version_by_short_name
+from cg.store.filters.status_bed_version_filters import get_bed_version_by_short_name
 
 
 def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):

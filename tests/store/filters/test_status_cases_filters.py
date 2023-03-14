@@ -9,7 +9,7 @@ from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store, models
 from cg.store.models import Family
-from cg.store.status_case_filters import (
+from cg.store.filters.status_case_filters import (
     get_cases_with_pipeline,
     get_cases_has_sequence,
     get_cases_for_analysis,
@@ -39,7 +39,10 @@ def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timest
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_has_sequence(cases=cases))
+    cases: Query = get_cases_has_sequence(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
@@ -61,7 +64,10 @@ def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreH
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_has_sequence(cases=cases))
+    cases: Query = get_cases_has_sequence(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
@@ -83,10 +89,13 @@ def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: S
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_has_sequence(cases=cases))
+    cases: Query = get_cases_has_sequence(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_has_sequence_when_not_external_nor_sequenced(
@@ -109,10 +118,13 @@ def test_get_cases_has_sequence_when_not_external_nor_sequenced(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_has_sequence(cases=cases))
+    cases: Query = get_cases_has_sequence(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_with_pipeline_when_correct_pipline(
@@ -212,9 +224,12 @@ def test_get_cases_with_loqusdb_supported_sequencing_method(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN retrieving the available cases
-    cases: List[Query] = list(
-        get_cases_with_loqusdb_supported_sequencing_method(cases=cases, pipeline=Pipeline.MIP_DNA)
+    cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
+        cases=cases, pipeline=Pipeline.MIP_DNA
     )
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN the expected case should be retrieved
     assert test_case_wes in cases
@@ -238,12 +253,15 @@ def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN retrieving the valid cases
-    cases: List[Query] = list(
-        get_cases_with_loqusdb_supported_sequencing_method(cases=cases, pipeline=Pipeline.MIP_DNA)
+    cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
+        cases=cases, pipeline=Pipeline.MIP_DNA
     )
 
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
+
     # THEN no cases should be returned
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
@@ -267,7 +285,10 @@ def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timest
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_for_analysis(cases=cases))
+    cases: Query = get_cases_for_analysis(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
@@ -293,7 +314,10 @@ def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_for_analysis(cases=cases))
+    cases: Query = get_cases_for_analysis(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
@@ -328,7 +352,10 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_for_analysis(cases=cases))
+    cases: Query = get_cases_for_analysis(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
@@ -357,10 +384,13 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(get_cases_for_analysis(cases=cases))
+    cases: Query = get_cases_for_analysis(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_cases_with_scout_data_delivery(
@@ -381,7 +411,10 @@ def test_get_cases_with_scout_data_delivery(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN getting cases with Scout as data delivery option
-    cases: List[Query] = list(get_cases_with_scout_data_delivery(cases=cases))
+    cases: Query = get_cases_with_scout_data_delivery(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
@@ -407,7 +440,10 @@ def test_get_report_supported_data_delivery_cases(
     cases: Query = base_store.get_cases_with_analyses_query()
 
     # WHEN retrieving the delivery report supported cases
-    cases: List[Query] = list(get_report_supported_data_delivery_cases(cases=cases))
+    cases: Query = get_report_supported_data_delivery_cases(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN only the delivery report supported case should be retrieved
     assert test_case in cases
@@ -424,12 +460,15 @@ def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: List[Family] = list(get_inactive_analysis_cases(cases=cases))
+    cases: Query = get_inactive_analysis_cases(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
 
-    assert cases[0].internal_id == test_case.internal_id
+    assert cases.all()[0].internal_id == test_case.internal_id
 
 
 def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
@@ -442,7 +481,10 @@ def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: St
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: List[Family] = list(get_inactive_analysis_cases(cases=cases))
+    cases: Query = get_inactive_analysis_cases(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
@@ -460,10 +502,13 @@ def test_get_inactive_analysis_cases_when_not_completed(base_store: Store, helpe
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: List[Family] = list(get_inactive_analysis_cases(cases=cases))
+    cases: Query = get_inactive_analysis_cases(cases=cases)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()
 
 
 def test_get_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_weeks: datetime):
@@ -476,12 +521,15 @@ def test_get_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: List[Family] = list(get_new_cases(cases=cases, date=timestamp_in_2_weeks))
+    cases: Query = get_new_cases(cases=cases, date=timestamp_in_2_weeks)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should contain the test case
     assert cases
 
-    assert cases[0].internal_id == test_case.internal_id
+    assert cases.all()[0].internal_id == test_case.internal_id
 
 
 def test_get_new_cases_when_too_new(
@@ -496,7 +544,10 @@ def test_get_new_cases_when_too_new(
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: List[Family] = list(get_new_cases(cases=cases, date=timestamp_yesterday))
+    cases: Query = get_new_cases(cases=cases, date=timestamp_yesterday)
+
+    # ASSERT that cases is a query
+    assert isinstance(cases, Query)
 
     # THEN cases should not contain the test case
-    assert not cases
+    assert not cases.all()

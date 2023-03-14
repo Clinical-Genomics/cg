@@ -5,7 +5,7 @@ from sqlalchemy.orm import Query
 from cg.constants import FlowCellStatus
 from cg.store import Store
 from cg.store.models import Flowcell, Family, Sample
-from cg.store.status_flow_cell_filters import (
+from cg.store.filters.status_flow_cell_filters import (
     get_flow_cell_by_id,
     get_flow_cells_with_statuses,
     get_flow_cells_by_case,
@@ -76,9 +76,9 @@ def test_get_flow_cell_by_id(base_store: Store, helpers: StoreHelpers, flow_cell
     )
 
     # THEN returned flow cell should be the original flow cell
-    assert isinstance(returned_flow_cell, Flowcell)
+    assert isinstance(returned_flow_cell, Query)
 
-    assert flow_cell is returned_flow_cell
+    assert flow_cell is returned_flow_cell.first()
 
 
 def test_get_flow_cell_by_id_and_by_enquiry(

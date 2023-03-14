@@ -11,7 +11,7 @@ def filter_collaboration_by_internal_id(collaborations: Query, internal_id: str,
     return collaborations.filter(Collaboration.internal_id == internal_id)
 
 
-class CollaborationFilters(Enum):
+class CollaborationFilter(Enum):
     """Define Collaboration filter functions."""
 
     FILTER_BY_INTERNAL_ID: Callable = filter_collaboration_by_internal_id

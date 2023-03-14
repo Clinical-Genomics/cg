@@ -1,23 +1,25 @@
-"""CLI for deleting case with CG"""
+"""CLI for deleting case with Cg."""
 
 import datetime
 import logging
 from typing import List
 
 import click
-from cg.cli.get import family as print_case
-from cg.store import Store, models
+from cg.cli.get import case as print_case
+from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
+from cg.store import Store
+from cg.store.models import Sample, Family
 
 LOG = logging.getLogger(__name__)
 
 
 @click.command()
 @click.argument("case_id")
-@click.option("--dry-run", is_flag=True)
-@click.option("--yes", is_flag=True)
+@DRY_RUN
+@SKIP_CONFIRMATION
 @click.pass_context
 def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
-    """Delete case with links and samples
+    """Delete case with links and samples.
 
     The command will stop if the case has any analyses made on it.
     The command will ask the user about deleting links between case and samples
@@ -27,37 +29,37 @@ def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     sample.
     """
     status_db: Store = context.obj.status_db
-    case_obj: models.Family = status_db.family(case_id)
-    if not case_obj:
-        LOG.error("Could not find case %s", case_id)
+    case: Family = status_db.family(case_id)
+    if not case:
+        LOG.error(f"Could not find case {case_id}")
         raise click.Abort
 
-    if case_obj.analyses:
-        LOG.error("Can NOT delete case with analyses %s", case_obj.analyses)
+    if case.analyses:
+        LOG.error(f"Can NOT delete case with analyses {case.analyses}")
         raise click.Abort
-    context.invoke(print_case, family_ids=[case_id])
+    context.invoke(print_case, case_ids=[case_id])
 
-    if case_obj.links and not (
-        yes or click.confirm(f"Case {case_id} has links: {case_obj.links}, Continue?")
+    if case.links and not (
+        yes or click.confirm(f"Case {case_id} has links: {case.links}, continue?")
     ):
         raise click.Abort
 
-    _delete_links_and_samples(case_obj=case_obj, dry_run=dry_run, status_db=status_db, yes=yes)
+    _delete_links_and_samples(case_obj=case, dry_run=dry_run, status_db=status_db, yes=yes)
 
-    if not (yes or click.confirm(f"Do you want to DELETE case: {case_obj}?")):
+    if not (yes or click.confirm(f"Do you want to DELETE case: {case}?")):
         raise click.Abort
 
     if dry_run:
-        LOG.info("Case: %s was NOT deleted due to --dry-run", case_id)
+        LOG.info(f"Case: {case_id} was NOT deleted due to --dry-run")
         return
 
-    LOG.info("Deleting case: %s", case_id)
-    status_db.delete_commit(case_obj)
+    LOG.info(f"Deleting case: {case_id}")
+    status_db.delete_commit(case)
 
 
-def _delete_links_and_samples(case_obj: models.Family, dry_run: bool, status_db: Store, yes: bool):
+def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store, yes: bool):
     """Delete all links from a case to samples"""
-    samples_to_delete: List[models.Sample] = []
+    samples_to_delete: List[Sample] = []
     for case_link in case_obj.links:
         if not (yes or click.confirm(f"Do you want to DELETE link: {case_link}?")):
             raise click.Abort
@@ -74,7 +76,7 @@ def _delete_links_and_samples(case_obj: models.Family, dry_run: bool, status_db:
         _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, yes=yes)
 
 
-def _delete_sample(dry_run: bool, sample: models.Sample, status_db: Store, yes: bool):
+def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
     if _has_sample_been_lab_processed(sample):
         _log_sample_process_information(sample)
         return
@@ -102,7 +104,7 @@ def _delete_sample(dry_run: bool, sample: models.Sample, status_db: Store, yes: 
     status_db.delete(sample)
 
 
-def _log_sample_process_information(sample: models.Sample):
+def _log_sample_process_information(sample: Sample):
     LOG.info("Can NOT delete processed sample: %s", sample.internal_id)
     LOG.info("Sample was received: %s", sample.received_at)
     LOG.info("Sample was prepared: %s", sample.prepared_at)
@@ -111,7 +113,7 @@ def _log_sample_process_information(sample: models.Sample):
     LOG.info("Sample has invoice: %s", sample.invoice_id)
 
 
-def _log_sample_links(sample: models.Sample):
+def _log_sample_links(sample: Sample):
     for sample_link in sample.links:
         LOG.info("Sample is linked to: %s", sample_link.family.internal_id)
     for sample_link in sample.mother_links:
@@ -120,7 +122,7 @@ def _log_sample_links(sample: models.Sample):
         LOG.info("Sample is linked as father to: %s", sample_link.father.internal_id)
 
 
-def _has_sample_been_lab_processed(sample: models.Sample) -> datetime.datetime:
+def _has_sample_been_lab_processed(sample: Sample) -> datetime.datetime:
     return (
         sample.received_at
         or sample.prepared_at
@@ -130,5 +132,5 @@ def _has_sample_been_lab_processed(sample: models.Sample) -> datetime.datetime:
     )
 
 
-def _is_sample_linked(sample: models.Sample):
+def _is_sample_linked(sample: Sample):
     return sample.links or sample.father_links or sample.mother_links
