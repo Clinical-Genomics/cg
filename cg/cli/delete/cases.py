@@ -15,7 +15,7 @@ def _get_samples_by_identifiers(
 ) -> [models.Sample]:
     """Get samples matched by given set of identifiers"""
     identifier_args = dict(identifiers)
-    return store.samples_by_ids(**identifier_args)
+    return store.get_samples_by_any_id(**identifier_args)
 
 
 def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [models.Family]:

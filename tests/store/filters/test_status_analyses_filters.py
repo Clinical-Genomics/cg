@@ -3,9 +3,9 @@ from datetime import datetime
 from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants import DataDelivery
+
 from cg.store import Store, models
-from cg.store.status_analysis_filters import (
+from cg.store.filters.status_analysis_filters import (
     get_valid_analyses_in_production,
     get_analyses_with_pipeline,
     get_completed_analyses,
@@ -41,6 +41,9 @@ def test_get_valid_analyses_in_production(
     # WHEN retrieving valid in production analyses
     analyses: Query = get_valid_analyses_in_production(analyses_query)
 
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
+
     # THEN only the up-to-date analysis should be returned
     assert analysis in analyses
     assert outdated_analysis not in analyses
@@ -65,6 +68,9 @@ def test_get_analyses_with_pipeline(
     # WHEN extracting the analyses
     analyses: Query = get_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
 
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
+
     # THEN only the BALSAMIC analysis should be retrieved
     assert balsamic_analysis in analyses
     assert mip_analysis not in analyses
@@ -81,6 +87,9 @@ def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timest
 
     # WHEN retrieving the completed analyses
     analyses: Query = get_completed_analyses(analyses_query)
+
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
 
     # THEN the completed analysis should be obtained
     assert analysis in analyses
@@ -100,6 +109,9 @@ def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     # WHEN retrieving the not completed analyses
     analyses: Query = get_not_completed_analyses(analyses_query)
 
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
+
     # THEN the expected analysis should be retrieved
     assert analysis_not_completed in analyses
 
@@ -118,6 +130,9 @@ def test_get_filter_uploaded_analyses(
     # WHEN calling the upload filtering function
     analyses: Query = get_filter_uploaded_analyses(analyses_query)
 
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
+
     # THEN the uploaded analysis should be retrieved
     assert analysis in analyses
 
@@ -135,6 +150,9 @@ def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
 
     # WHEN calling the upload filtering function
     analyses: Query = get_not_uploaded_analyses(analyses_query)
+
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
 
     # THEN the uploaded analysis should be retrieved
     assert not_uploaded_analysis in analyses
@@ -156,6 +174,9 @@ def test_get_analyses_with_delivery_report(
     # WHEN calling the delivery report analysis filtering function
     analyses: Query = get_analyses_with_delivery_report(analyses_query)
 
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
+
     # THEN the analysis containing the delivery report should be extracted
     assert analysis in analyses
 
@@ -173,6 +194,9 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
 
     # WHEN calling the delivery report analysis filtering function
     analyses: Query = get_analyses_without_delivery_report(analyses_query)
+
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
 
     # THEN the analysis without a delivery report should be extracted
     assert analysis_without_delivery_report in analyses
@@ -196,6 +220,9 @@ def test_get_report_analyses_by_pipeline(
 
     # WHEN filtering delivery report related analyses
     analyses: Query = get_report_analyses_by_pipeline(analyses_query)
+
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
 
     # THEN only the delivery report supported analysis should be retrieved
     assert balsamic_analysis in analyses
@@ -224,6 +251,9 @@ def test_order_analyses_by_completed_at(
 
     # WHEN ordering the analyses by the completed_at field
     analyses: Query = order_analyses_by_completed_at(analyses_query)
+
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
 
     # THEN the oldest analysis should be the first one in the list
     assert old_analysis == analyses.all()[0]
@@ -255,6 +285,9 @@ def test_order_analyses_by_uploaded_at(
 
     # WHEN ordering the analyses by the uploaded_at field
     analyses: Query = order_analyses_by_uploaded_at(analyses_query)
+
+    # ASSERT that analyeses is a query
+    assert isinstance(analyses, Query)
 
     # THEN the oldest analysis should be the first one in the list
     assert old_analysis == analyses.all()[0]

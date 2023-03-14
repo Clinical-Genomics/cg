@@ -4,6 +4,7 @@ from cg.apps.lims import LimsAPI
 from cg.meta.transfer import TransferLims
 from cg.meta.transfer.lims import IncludeOptions, SampleState
 from cg.store import Store
+from cg.store.models import Sample
 
 
 def has_same_received_at(lims, sample_obj):
@@ -18,8 +19,8 @@ def test_transfer_samples_received_at_overwriteable(
     # there is a sample in lims with the same internal id and another received_at date
     lims_api: LimsAPI = transfer_lims_api.lims
     sample_store: Store = transfer_lims_api.status
-    assert sample_store.samples_to_deliver().count() > 0
-    sample = sample_store.samples_to_deliver().first()
+    assert len(sample_store.get_samples_to_deliver()) > 0
+    sample: Sample = sample_store.get_samples_to_deliver()[0]
     assert sample.received_at
     lims_samples = [
         sample_store.add_sample(
@@ -42,8 +43,8 @@ def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt
     # there is a sample in lims with the same internal id and another received_at date
     lims_api = transfer_lims_api.lims
     sample_store = transfer_lims_api.status
-    assert sample_store.samples_to_deliver().count() > 0
-    sample = sample_store.samples_to_deliver().first()
+    assert len(sample_store.get_samples_to_deliver()) > 0
+    sample = sample_store.get_samples_to_deliver()[0]
     assert sample.received_at
     lims_samples = [
         sample_store.add_sample(
@@ -62,8 +63,8 @@ def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt
 
 def test_transfer_samples_include_unset_received_at(transfer_lims_api: TransferLims):
     sample_store = transfer_lims_api.status
-    samples = sample_store.samples()
-    assert samples.count() >= 2
+    samples = sample_store.get_all_samples()
+    assert len(samples) >= 2
 
     # GIVEN sample with unset received_at
     untransfered_sample = samples[0]
