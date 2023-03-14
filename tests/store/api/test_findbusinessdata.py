@@ -550,3 +550,62 @@ def test_filter_get_sample_by_name(store_with_samples_that_have_names: Store, na
 
     # THEN one sample should be returned
     assert samples and samples.name == name
+
+
+def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):
+    """Tests the down sampling check when all samples are down sampled."""
+    # GIVEN a case where all samples are down sampled
+    for sample in case_obj.samples:
+        sample.from_sample = sample_id
+    base_store.commit()
+
+    # WHEN checking if all sample in the case are down sampled
+    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
+
+    # THEN the return value should be True
+    assert is_down_sampled
+
+
+def test_is_case_down_sampled_false(base_store: Store, case_obj: Family, sample_id: str):
+    """Tests the down sampling check when none of the samples are down sampled."""
+    # GIVEN a case where all samples are not down sampled
+    for sample in case_obj.samples:
+        assert not sample.from_sample
+
+    # WHEN checking if all sample in the case are down sampled
+    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
+
+    # THEN the return value should be False
+    assert not is_down_sampled
+
+
+def test_is_case_external_true(
+    base_store: Store, case_obj: Family, helpers: StoreHelpers, sample_id: str
+):
+    """Tests the external case check when all the samples are external."""
+    # GIVEN a case where all samples are not external
+    external_application_version: ApplicationVersion = helpers.ensure_application_version(
+        store=base_store, is_external=True
+    )
+    for sample in case_obj.samples:
+        sample.application_version = external_application_version
+    base_store.commit()
+
+    # WHEN checking if all sample in the case are external
+    is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)
+
+    # THEN the return value should be False
+    assert is_external
+
+
+def test_is_case_external_false(base_store: Store, case_obj: Family, sample_id: str):
+    """Tests the external case check when none of the samples are external."""
+    # GIVEN a case where all samples are not external
+    for sample in case_obj.samples:
+        assert not sample.application_version.application.is_external
+
+    # WHEN checking if all sample in the case are external
+    is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)
+
+    # THEN the return value should be False
+    assert not is_external

@@ -554,3 +554,13 @@ class FindBusinessDataHandler(BaseHandler):
             tissue_type=sample_type,
         )
         return samples.all() if samples else None
+
+    def is_case_down_sampled(self, case_id: str) -> bool:
+        """Returns True if all samples in a case are down sampled from another sample."""
+        case: Family = self.family(internal_id=case_id)
+        return all(sample.from_sample is not None for sample in case.samples)
+
+    def is_case_external(self, case_id: str) -> bool:
+        """Returns True if all samples in a case have been sequenced externally."""
+        case: Family = self.family(internal_id=case_id)
+        return all(sample.application_version.application.is_external for sample in case.samples)
