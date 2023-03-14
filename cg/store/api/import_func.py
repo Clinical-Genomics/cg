@@ -36,7 +36,7 @@ def import_application_versions(
     )
 
     for application_version in application_versions:
-        application_obj: Application = store.get_application_by_tag(application_version.app_tag)
+        application_obj: Application = store.get_application_by_tag(tag=application_version.app_tag)
 
         if not application_obj:
             LOG.error(
@@ -98,7 +98,7 @@ def import_applications(
     )
 
     for application in applications:
-        application_obj: Application = store.get_application_by_tag(application.tag)
+        application_obj: Application = store.get_application_by_tag(tag=application.tag)
         if application_obj and applications_are_same(
             application_obj=application_obj, application=application
         ):

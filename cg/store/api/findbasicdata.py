@@ -54,18 +54,6 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_applications_is_archived(self) -> List[Application]:
-        """Return applications that are archived."""
-        records: Query = self._get_application_query()
-        return (
-            apply_application_filter(
-                applications=records,
-                filter_functions=[ApplicationFilter.FILTER_IS_ARCHIVED],
-            )
-            .order_by(self.Application.prep_category, self.Application.tag)
-            .all()
-        )
-
     def get_applications_is_not_archived(self) -> List[Application]:
         """Return applications that are not archived."""
         records: Query = self._get_application_query()
@@ -118,15 +106,6 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch all applications."""
         records: Query = self._get_application_query()
         return records.order_by(self.Application.prep_category, self.Application.tag).all()
-
-    def applications(self, *, category=None, archived=None) -> Query:
-        """Fetch all applications."""
-        records = self._get_application_query()
-        if category:
-            records: Query = records.filter_by(prep_category=category)
-        if archived is not None:
-            records: Query = records.filter_by(is_archived=archived)
-        return records.order_by(self.Application.prep_category, self.Application.tag)
 
     def application_version(self, application: Application, version: int) -> ApplicationVersion:
         """Fetch an application version."""

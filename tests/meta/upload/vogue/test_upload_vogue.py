@@ -5,6 +5,7 @@ import mock
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadStream
 from cg.meta.upload.vogue import UploadVogueAPI
+from typing import List, Dict
 
 
 def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
@@ -36,7 +37,7 @@ def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
 def test_load_apptags(vogue_api, genotype_api, store, mocker):
     """Test load application tags"""
     # GIVEN UploadVogueAPI and a set of application tags
-    apptags = store.applications().apptag_list
+    apptags: List[Dict] = store.get_applications().apptag_list
 
     mocker.patch.object(vogue_api, "load_apptags")
     upload_vogue_api = UploadVogueAPI(genotype_api=genotype_api, vogue_api=vogue_api, store=store)

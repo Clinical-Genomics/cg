@@ -125,19 +125,6 @@ def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003")
     assert application.tag == tag
 
 
-def test_get_applications_is_archived(microbial_store: Store):
-    """Test function to return the application by tag."""
-
-    # GIVEN a store with application records
-
-    # WHEN getting the query for the flow cells
-    applications: List[Application] = microbial_store.get_applications_is_archived()
-
-    # THEN return a application with the supplied application tag
-    assert len(applications) == 3
-    assert (application.is_archived is True for application in applications)
-
-
 def test_get_applications_is_not_archived(microbial_store: Store):
     """Test function to return the application by tag."""
 
