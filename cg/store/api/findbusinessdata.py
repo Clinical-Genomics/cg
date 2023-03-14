@@ -426,7 +426,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_pools_for_customer(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> Query:
-        """Fetch all the pools for a customer."""
+        """Return all the pools for a customer."""
         records: Query = self._get_pool_query()
 
         if customers:

@@ -17,6 +17,7 @@ from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 from tests.store_helpers import StoreHelpers
 from cg.store.models import ApplicationVersion, Pool, Sample, Invoice, Application
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
+from cg.constants.invoice import CustomerNames
 
 
 class StoreCheckers:
@@ -339,4 +340,16 @@ def store_with_samples_subject_id_and_tumour_status(
         is_tumour=False,
         customer_id=customer_id,
     )
+    return store
+
+
+@pytest.fixture(name="store_with_multiple_names_pools_for_customer")
+def store_with_multiple_names_pools_for_customer(
+    store: Store,
+    helpers: StoreHelpers,
+    customer_id: str = CustomerNames.cust132,
+) -> Store:
+    """Return a store with two pools with different names for the same customer"""
+    helpers.ensure_pool(store=store, customer_id=customer_id, name="pool_1")
+    helpers.ensure_pool(store=store, customer_id=customer_id, name="pool_2")
     return store

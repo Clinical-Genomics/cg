@@ -16,8 +16,10 @@ from cg.store.models import (
     Family,
     Sample,
     Invoice,
+    Pool,
 )
 from tests.store_helpers import StoreHelpers
+from cg.constants.invoice import CustomerNames
 
 
 def test_find_analysis_via_date(
@@ -550,6 +552,25 @@ def test_filter_get_sample_by_name(store_with_samples_that_have_names: Store, na
 
     # THEN one sample should be returned
     assert samples and samples.name == name
+
+
+def test_get_pools_for_customer(store_with_multiple_names_pools_for_customer: Store):
+    """Test that pools can be fetched for a customer."""
+    # GIVEN a database with two pools for a customer
+
+    # THEN one customer should be returned
+    customer = store_with_multiple_names_pools_for_customer.get_customer_by_customer_id(
+        customer_id=CustomerNames.cust132.value
+    )
+    assert customer
+
+    # WHEN fetching the pools for a customer
+    pools: List[Pool] = store_with_multiple_names_pools_for_customer.get_pools_for_customer(
+        customers=customer, enquiry="pool_1"
+    )
+
+    # THEN two pools should be returned
+    assert pools and len(pools) == 1
 
 
 def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):
