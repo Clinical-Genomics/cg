@@ -1,10 +1,7 @@
 from typing import Optional, List
-
 from sqlalchemy.orm import Query
-
 from cg.store import Store
 from cg.store.models import Bed, BedVersion, Customer, Collaboration, Organism, User
-
 
 
 def test_get_bed_query(base_store: Store):
