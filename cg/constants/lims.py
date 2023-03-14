@@ -25,6 +25,7 @@ PROP2UDF = {
     "organism_other": "Other species",
     "original_lab": "Original Lab",
     "original_lab_address": "Original Lab Address",
+    "original_well": "Original Well",
     "pool": "pool name",
     "post_formalin_fixation_time": "Post Formalin Fixation Time",
     "pre_processing_method": "Pre Processing Method",
