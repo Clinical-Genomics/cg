@@ -44,7 +44,7 @@ def test_filter_user_by_email_none_returns_none(
 ):
     """Test getting user by email None."""
 
-    # WHEN retrieving the user by email
+    # WHEN retrieving the user by email None
     filtered_user: User = filter_user_by_email(
         users=store_with_users._get_user_query(),
         email=None,
