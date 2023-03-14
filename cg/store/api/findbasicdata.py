@@ -24,6 +24,7 @@ from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_version_filter,
 )
+from cg.store.user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -112,6 +113,10 @@ class FindBasicDataHandler(BaseHandler):
         """Returns a collaboration query."""
         return self.Collaboration.query
 
+    def _get_user_query(self) -> Query:
+        """Returns a user query."""
+        return self.User.query
+
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
         return apply_collaboration_version_filter(
@@ -155,6 +160,8 @@ class FindBasicDataHandler(BaseHandler):
         """Returns all panels."""
         return self.Panel.query.order_by(Panel.abbrev)
 
-    def user(self, email: str) -> User:
-        """Fetch a user from the store."""
-        return self.User.query.filter_by(email=email).first()
+    def get_user_by_email(self, email: str) -> User:
+        """Return a user by email from the database."""
+        return apply_user_filter(
+            users=self._get_user_query(), email=email, filter_functions=[UserFilter.FILTER_BY_EMAIL]
+        ).first()
