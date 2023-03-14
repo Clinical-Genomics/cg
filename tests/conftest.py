@@ -27,7 +27,8 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer, BedVersion, Bed, User
+from cg.store.models import Customer, BedVersion, Bed, Organism, User
+
 
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -1740,10 +1741,35 @@ def store_with_multiple_cases_and_samples(
     yield store
 
 
+@pytest.fixture(name="store_with_organisms")
+def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with multiple organisms."""
+
+    organism_details = [
+        ("organism_1", "Organism 1"),
+        ("organism_2", "Organism 2"),
+        ("organism_3", "Organism 3"),
+    ]
+
+    organisms: List[Organism] = []
+    for internal_id, name in organism_details:
+        organism: Organism = helpers.add_organism(store, internal_id=internal_id, name=name)
+        organisms.append(organism)
+
+    store.add_commit(organisms)
+    yield store
+
+
 @pytest.fixture(name="non_existent_email")
 def non_existent_email():
     """Return email not associated with any entity."""
     return "non_existent_email@example.com"
+
+
+@pytest.fixture(name="non_existent_id")
+def non_existent_id():
+    """Return id not associated with any entity."""
+    return "non_existent_entity_id"
 
 
 @pytest.fixture(name="store_with_users")

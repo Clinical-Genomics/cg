@@ -3,7 +3,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Collaboration, Customer, User
+from cg.store.models import Bed, BedVersion, Customer, Collaboration, Organism, User
 
 
 def test_get_bed_query(base_store: Store):
@@ -200,6 +200,62 @@ def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: s
 
     # THEN return a collaboration with the give collaboration internal_id
     assert collaboration.internal_id == collaboration_id
+
+
+def test_get_organism_by_internal_id_returns_correct_organism(store_with_organisms: Store):
+    """Test finding an organism by internal ID when the ID exists."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_organism_query()
+    assert organisms.count() > 0
+
+    # GIVEN a random organism from the store
+    organism: Organism = organisms.first()
+    assert isinstance(organism, Organism)
+
+    # WHEN finding the organism by internal ID
+    filtered_organism = store_with_organisms.get_organism_by_internal_id(organism.internal_id)
+
+    # THEN the filtered organism should be of instance Organism
+    assert isinstance(filtered_organism, Organism)
+
+    # THEN the filtered organism should match the database organism internal id
+    assert filtered_organism.internal_id == organism.internal_id
+
+
+def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
+    store_with_organisms: Store,
+    non_existent_id: str,
+):
+    """Test finding an organism by internal ID when the ID does not exist."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_organism_query()
+    assert organisms.count() > 0
+
+    # WHEN finding the organism by internal ID that does not exist
+    filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(
+        internal_id=non_existent_id
+    )
+
+    # THEN the filtered organism should be None
+    assert filtered_organism is None
+
+
+def test_get_organism_by_internal_id_returns_none_when_id_is_none(
+    store_with_organisms: Store,
+):
+    """Test finding an organism by internal ID None returns None."""
+
+    # GIVEN a store with multiple organisms
+    organisms: Query = store_with_organisms._get_organism_query()
+    assert organisms.count() > 0
+
+    # WHEN finding the organism by internal ID None
+    filtered_organism: Organism = store_with_organisms.get_organism_by_internal_id(internal_id=None)
+
+    # THEN the filtered organism should be None
+    assert filtered_organism is None
 
 
 def test_get_user_by_email_returns_correct_user(store_with_users: Store):

@@ -17,6 +17,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
+from cg.store.organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
@@ -67,6 +68,10 @@ class FindBasicDataHandler(BaseHandler):
     def _get_bed_query(self) -> Query:
         """Return bed query."""
         return self.Bed.query
+
+    def _get_organism_query(self) -> Query:
+        """Return organism query."""
+        return self.Organism.query
 
     def get_beds(self) -> Query:
         """Returns all beds."""
@@ -144,13 +149,17 @@ class FindBasicDataHandler(BaseHandler):
             application_obj.versions[-1] if application_obj and application_obj.versions else None
         )
 
-    def organism(self, internal_id: str) -> Organism:
-        """Find an Organism by internal_id."""
-        return self.Organism.query.filter_by(internal_id=internal_id).first()
+    def get_organism_by_internal_id(self, internal_id: str) -> Organism:
+        """Find an organism by internal id."""
+        return apply_organism_filter(
+            organisms=self._get_organism_query(),
+            filter_functions=[OrganismFilter.FILTER_BY_INTERNAL_ID],
+            internal_id=internal_id,
+        ).first()
 
-    def organisms(self) -> List[Organism]:
-        """Fetch all organisms"""
-        return self.Organism.query.order_by(Organism.internal_id)
+    def get_all_organisms(self) -> List[Organism]:
+        """Return all organisms ordered by organism internal id."""
+        return self._get_organism_query().order_by(Organism.internal_id)
 
     def panel(self, abbrev):
         """Find a panel by abbreviation."""
