@@ -539,7 +539,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str)
     rna_application = "RNAPOAR025"
     assert not base_store.get_all_samples()
     assert base_store.families().first() is None
-    assert base_store.get_application_by_tag(rna_application)
+    assert base_store.get_application_by_tag(tag=rna_application_tag)
 
     submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 

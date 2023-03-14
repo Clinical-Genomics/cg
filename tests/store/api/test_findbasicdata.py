@@ -134,7 +134,7 @@ def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003")
 
 
 def test_get_applications_is_not_archived(microbial_store: Store):
-    """Test function to return the application by tag."""
+    """Test function to return the application when not archived."""
 
     # GIVEN a store with application records
 
@@ -176,7 +176,7 @@ def test_get_applications(microbial_store: Store):
 def test_get_applications_by_prep_category_and_is_not_archived(
     microbial_store: Store, prep_category="mic"
 ):
-    """Test function to return the application by prep category."""
+    """Test function to return the application by prep category and not archived."""
 
     # GIVEN a store with application records
 

@@ -143,7 +143,7 @@ def versions_are_same(
 
 
 def applications_are_same(application_obj: Application, application: ApplicationSchema) -> bool:
-    """Checks if the given applications are to be considered equal"""
+    """Check if the given application tags match."""
 
     return application_obj.tag == application.tag
 
@@ -171,7 +171,7 @@ def add_application_version(
 
 
 def add_application_object(application: ApplicationSchema, sign: str, store: Store) -> Application:
-    """Adds an application from a raw application record"""
+    """Adds an application from a raw application record."""
     new_application: Application = store.add_application(
         tag=application.tag,
         prep_category=application.prep_category,

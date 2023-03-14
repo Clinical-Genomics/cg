@@ -51,7 +51,7 @@ def apply_application_filter(
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
-    for function in filter_functions:
+    for filter_function in filter_functions:
         applications: Query = function(
             applications=applications,
             tag=tag,

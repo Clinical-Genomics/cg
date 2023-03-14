@@ -38,9 +38,8 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_application_by_tag(self, tag: str) -> Application:
         """Return an application by tag."""
-        records: Query = self._get_application_query()
         return apply_application_filter(
-            applications=records, filter_functions=[ApplicationFilter.FILTER_BY_TAG], tag=tag
+            applications=self._get_application_query(), filter_functions=[ApplicationFilter.FILTER_BY_TAG], tag=tag
         ).first()
 
     def get_applications_by_prep_category(self, prep_category: str) -> List[Application]:
@@ -71,7 +70,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_applications_by_prep_category_and_is_not_archived(
         self, prep_category: str
     ) -> List[Application]:
-        """Return applications that are not archived by prep category."""
+        """Return applications by prep category that are not archived."""
         records: Query = self._get_application_query()
         return (
             apply_application_filter(
@@ -89,7 +88,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_applications_by_prep_category_and_is_archived(
         self, prep_category: str
     ) -> List[Application]:
-        """Return applications that are archived by prep category."""
+        """Return applications by prep category that are archived."""
         records: Query = self._get_application_query()
         return (
             apply_application_filter(
