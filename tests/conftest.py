@@ -1313,8 +1313,8 @@ def sample_store(base_store: Store) -> Store:
         ),
     ]
     customer: Customer = (base_store.get_customers())[0]
-    external_app = base_store.application("WGXCUSC000").versions[0]
-    wgs_app = base_store.application("WGSPCFC030").versions[0]
+    external_app = base_store.get_application_by_tag("WGXCUSC000").versions[0]
+    wgs_app = base_store.get_application_by_tag("WGSPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
         sample.application_version = external_app if "external" in sample.name else wgs_app

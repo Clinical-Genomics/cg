@@ -3,7 +3,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Query
 
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Collaboration, Customer
+from cg.store.models import Bed, BedVersion, Collaboration, Customer, Application
 
 
 def test_get_bed_query(base_store: Store):
@@ -111,6 +111,91 @@ def test_get_application_query(base_store: Store):
 
     # THEN a query should be returned
     assert isinstance(application_query, Query)
+
+
+def test_get_application_by_tag(microbial_store: Store, tag: str = "MWRNXTR003"):
+    """Test function to return the application by tag."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    application: Application = microbial_store.get_application_by_tag(tag=tag)
+
+    # THEN return a application with the supplied application tag
+    assert application.tag == tag
+
+
+def test_get_applications_is_archived(microbial_store: Store):
+    """Test function to return the application by tag."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications_is_archived()
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == 3
+    assert (application.is_archived is True for application in applications)
+
+
+def test_get_applications_is_not_archived(microbial_store: Store):
+    """Test function to return the application by tag."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications_is_not_archived()
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == 4
+    assert (application.is_archived is False for application in applications)
+
+
+def test_get_applications_by_prep_category(microbial_store: Store, prep_category="mic"):
+    """Test function to return the application by prep category."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications_by_prep_category(
+        prep_category=prep_category
+    )
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == 7
+    assert (application.prep_category == prep_category for application in applications)
+
+
+def test_get_applications(microbial_store: Store):
+    """Test function to return the application by prep category."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications()
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == 7
+
+
+def test_get_applications_by_prep_category_and_is_not_archived(
+    microbial_store: Store, prep_category="mic"
+):
+    """Test function to return the application by prep category."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[
+        Application
+    ] = microbial_store.get_applications_by_prep_category_and_is_not_archived(
+        prep_category=prep_category
+    )
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == 4
+    assert (application.prep_category == prep_category for application in applications)
+    assert (application.is_archived is False for application in applications)
 
 
 def test_get_bed_version_query(base_store: Store):

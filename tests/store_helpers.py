@@ -67,7 +67,7 @@ class StoreHelpers:
             application_tag = "rna_tag"
             prep_category = "wts"
 
-        application = store.application(tag=application_tag)
+        application = store.get_application_by_tag(tag=application_tag)
         if not application:
             application = StoreHelpers.add_application(
                 store,
@@ -105,7 +105,7 @@ class StoreHelpers:
         **kwargs,
     ) -> models.Application:
         """Ensure that application exists in store."""
-        application: models.Application = store.application(tag=tag)
+        application: models.Application = store.get_application_by_tag(tag=tag)
         if not application:
             application: models.Application = StoreHelpers.add_application(
                 store=store,
@@ -130,7 +130,7 @@ class StoreHelpers:
         **kwargs,
     ) -> models.Application:
         """Utility function to add a application to a store."""
-        application = store.application(tag=application_tag)
+        application = store.get_application_by_tag(tag=application_tag)
         if application:
             return application
 

@@ -20,6 +20,7 @@ from cg.store.api.base import BaseHandler
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
+from cg.store.filters.status_application_filters import apply_application_filter, ApplicationFilter
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_version_filter,
@@ -30,20 +31,101 @@ class FindBasicDataHandler(BaseHandler):
     """Contains methods to find basic data model instances"""
 
     def _get_application_query(self) -> Query:
-        """Get a query for applications."""
-        return self.query(Application)
+        """Return a query for applications."""
+        return self.Application.query
 
-    def application(self, tag: str) -> Application:
+    def get_application_by_tag(self, tag: str) -> Application:
+        """Return an application by tag."""
+        records: Query = self._get_application_query()
+        return apply_application_filter(
+            applications=records, filter_functions=[ApplicationFilter.FILTER_BY_TAG], tag=tag
+        ).first()
+
+    def get_applications_by_prep_category(self, prep_category: str) -> List[Application]:
+        """Return applications by prep category."""
+        records: Query = self._get_application_query()
+        return (
+            apply_application_filter(
+                applications=records,
+                filter_functions=[ApplicationFilter.FILTER_BY_PREP_CATEGORY],
+                prep_category=prep_category,
+            )
+            .order_by(self.Application.prep_category, self.Application.tag)
+            .all()
+        )
+
+    def get_applications_is_archived(self) -> List[Application]:
+        """Return applications that are archived."""
+        records: Query = self._get_application_query()
+        return (
+            apply_application_filter(
+                applications=records,
+                filter_functions=[ApplicationFilter.FILTER_IS_ARCHIVED],
+            )
+            .order_by(self.Application.prep_category, self.Application.tag)
+            .all()
+        )
+
+    def get_applications_is_not_archived(self) -> List[Application]:
+        """Return applications that are not archived."""
+        records: Query = self._get_application_query()
+        return (
+            apply_application_filter(
+                applications=records,
+                filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
+            )
+            .order_by(self.Application.prep_category, self.Application.tag)
+            .all()
+        )
+
+    def get_applications_by_prep_category_and_is_not_archived(
+        self, prep_category: str
+    ) -> List[Application]:
         """Fetch an application from the store."""
-        return self.Application.query.filter_by(tag=tag).first()
+        records: Query = self._get_application_query()
+        return (
+            apply_application_filter(
+                applications=records,
+                filter_functions=[
+                    ApplicationFilter.FILTER_BY_PREP_CATEGORY,
+                    ApplicationFilter.FILTER_IS_NOT_ARCHIVED,
+                ],
+                prep_category=prep_category,
+            )
+            .order_by(self.Application.prep_category, self.Application.tag)
+            .all()
+        )
 
-    def applications(self, *, category=None, archived=None):
+    def get_applications_by_prep_category_and_is_archived(
+        self, prep_category: str
+    ) -> List[Application]:
+        """Fetch an application from the store."""
+        records: Query = self._get_application_query()
+        return (
+            apply_application_filter(
+                applications=records,
+                filter_functions=[
+                    ApplicationFilter.FILTER_BY_PREP_CATEGORY,
+                    ApplicationFilter.FILTER_IS_ARCHIVED,
+                ],
+                prep_category=prep_category,
+            )
+            .order_by(self.Application.prep_category, self.Application.tag)
+            .all()
+        )
+
+    def get_applications(self) -> List[Application]:
+        """Fetch all applications."""
+        records: Query = self._get_application_query()
+        return records.order_by(self.Application.prep_category, self.Application.tag).all()
+
+    def applications(self, *, category=None, archived=None) -> Query:
         """Fetch all applications."""
         records = self._get_application_query()
         if category:
-            records = records.filter_by(prep_category=category)
+            records: Query = records.filter_by(prep_category=category)
         if archived is not None:
-            records = records.filter_by(is_archived=archived)
+            records: Query = records.filter_by(is_archived=archived)
         return records.order_by(self.Application.prep_category, self.Application.tag)
 
     def application_version(self, application: Application, version: int) -> ApplicationVersion:

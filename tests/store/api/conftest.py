@@ -24,13 +24,13 @@ class StoreCheckers:
     def get_versions_from_store(store: Store, application_tag: str) -> List[ApplicationVersion]:
         """Gets all versions for the specified application"""
 
-        return store.application(application_tag).versions
+        return store.get_application_by_tag(tag=application_tag).versions
 
     @staticmethod
     def get_application_from_store(store: Store, application_tag: str) -> Application:
         """Gets the specified application"""
 
-        return store.application(application_tag)
+        return store.get_application_by_tag(tag=application_tag)
 
     @staticmethod
     def version_exists_in_store(store: Store, application: ApplicationVersionSchema):

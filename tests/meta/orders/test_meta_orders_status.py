@@ -300,7 +300,9 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
     # GIVEN a basic store with no samples and a non-tumour fastq order as wgs
     assert len(base_store.get_all_samples()) == 0
     assert base_store.families().count() == 0
-    base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
+    base_store.get_application_by_tag(
+        fastq_status_data["samples"][0]["application"]
+    ).prep_category = "wgs"
     fastq_status_data["samples"][0]["tumour"] = False
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -324,7 +326,9 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     # GIVEN a basic store with no samples and a tumour fastq order as wgs
     assert len(base_store.get_all_samples()) == 0
     assert base_store.families().count() == 0
-    base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
+    base_store.get_application_by_tag(
+        fastq_status_data["samples"][0]["application"]
+    ).prep_category = "wgs"
     fastq_status_data["samples"][0]["tumour"] = True
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -349,9 +353,11 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     assert len(base_store.get_all_samples()) == 0
     assert base_store.families().count() == 0
     non_wgs_prep_category = "wes"
-    assert base_store.applications(category=non_wgs_prep_category)
+    assert base_store.get_applications_by_prep_category(prep_category=non_wgs_prep_category)
     for sample in fastq_status_data["samples"]:
-        sample["application"] = base_store.applications(category=non_wgs_prep_category)[0].tag
+        sample["application"] = base_store.get_applications_by_prep_category(
+            prep_category=non_wgs_prep_category
+        )[0].tag
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -533,7 +539,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str)
     rna_application = "RNAPOAR025"
     assert not base_store.get_all_samples()
     assert base_store.families().first() is None
-    assert base_store.application(rna_application)
+    assert base_store.get_application_by_tag(rna_application)
 
     submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
