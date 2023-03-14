@@ -555,15 +555,6 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return samples.all() if samples else None
 
-    def get_case_pool(self, case_id: str) -> Optional[Pool]:
-        """Returns the pool connected to the case. Returns None if no pool is found."""
-        case: Family = self.family(internal_id=case_id)
-        pool_name: str = case.name.split("-", 1)[-1]
-        return self.pools(customers=[case.customer], enquiry=pool_name).first()
-
-    def is_pool(self, case_id: str) -> bool:
-        return bool(self.get_case_pool(case_id=case_id))
-
     def is_case_down_sampled(self, case_id: str) -> bool:
         """Returns True if all samples in a case are down sampled from another sample."""
         case: Family = self.family(internal_id=case_id)
