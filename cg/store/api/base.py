@@ -66,33 +66,33 @@ class BaseHandler:
         )
 
     def _get_join_cases_with_samples_query(self) -> Query:
-        """Return a query for all cases in the database with samples."""
+        """Return a join query for all cases in the database with samples."""
         return self._get_query(table=Family).join(
             Family.links, FamilySample.sample, Family.customer
         )
 
     def _get_join_analysis_case_query(self) -> Query:
-        """Return analysis query."""
+        """Return join analysis case query."""
         return self._get_query(table=Analysis).join(Analysis.family)
 
     def _get_join_case_sample_query(self) -> Query:
-        """Return case sample query."""
+        """Return join case sample query."""
         return self._get_query(table=FamilySample).join(FamilySample.family, FamilySample.sample)
 
     def _get_join_sample_and_customer_query(self) -> Query:
-        """Join sample and customer."""
+        """Return join sample and customer query."""
         return self._get_query(table=Sample).join(Customer)
 
     def _get_join_flow_cell_sample_links_query(self) -> Query:
-        """Return flow cell query."""
+        """Return join flow cell samples and relationship query."""
         return self._get_query(table=Flowcell).join(Flowcell.samples, Sample.links)
 
     def _get_join_sample_family_query(self) -> Query:
-        """Return a sample case relationship query."""
+        """Return a join sample case relationship query."""
         return self._get_query(table=Sample).join(Family.links, FamilySample.sample)
 
     def _get_join_sample_application_version_query(self) -> Query:
-        """Join sample to application version."""
+        """Return join sample to application version query."""
         return self._get_query(table=Sample).join(
             Sample.application_version, ApplicationVersion.application
         )
