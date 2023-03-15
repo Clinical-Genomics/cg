@@ -10,7 +10,7 @@ from housekeeper.store import models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
-from cg.exc import DeliveryReportError
+from cg.exc import MissingFilesError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
@@ -198,7 +198,7 @@ class DeliverAPI:
                 )
                 number_reviewed_files += 1
         if number_reviewed_files == 0:
-            raise DeliveryReportError(f"No files were linked for sample {sample_name}")
+            raise MissingFilesError(f"No files were linked for sample {sample_name}")
 
         LOG.info(f"Linked {number_reviewed_files} files for sample {sample_id}, case {case_id}")
 
