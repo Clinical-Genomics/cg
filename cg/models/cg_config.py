@@ -162,6 +162,7 @@ class RnafusionConfig(CommonAppConfig):
     profile: str
     conda_binary: Optional[str] = None
     launch_directory: str
+    slurm: SlurmConfig
     tw_binary_path: str
     tw_pipeline: str
 

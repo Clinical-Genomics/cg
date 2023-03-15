@@ -8,14 +8,12 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
-from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -24,7 +22,6 @@ from cg.models.cg_config import CGConfig
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
-from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -47,6 +44,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.conda_binary: str = config.rnafusion.conda_binary
         self.tower_binary_path: str = config.rnafusion.tw_binary_path
         self.tower_pipeline: str = config.rnafusion.tw_pipeline
+        self.account: str = config.rnafusion.slurm.account
 
     @property
     def root(self) -> str:
@@ -182,7 +180,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             "starfusion": RnafusionDefaults.STARFUSION,
             "fusioncatcher": RnafusionDefaults.FUSIONCATCHER,
             "arriba": RnafusionDefaults.ARRIBA,
-            "priority": self.get_slurm_account(),
+            "priority": self.account,
             "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
         }
 

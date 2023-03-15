@@ -1641,6 +1641,10 @@ def fixture_context_config(
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "root": str(rnafusion_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+            },
             "tw_binary_path": Path("path", "to", "bin", "tw").as_posix(),
             "tw_pipeline": "rnafusion",
         },
