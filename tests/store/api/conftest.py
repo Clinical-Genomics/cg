@@ -317,7 +317,7 @@ def fixture_expected_number_of_applications_with_prep_category() -> int:
 
 
 @pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")
-def fixture_expected_number_of_applications_with_prep_category() -> int:
+def fixture_expected_number_of_applications() -> int:
     """Return the number of expected number of applications with prep category"""
     return 7
 
