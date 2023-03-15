@@ -213,7 +213,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             LOG.info("Pipeline will be executed using nextflow")
             parameters = NextflowAnalysisAPI.get_nextflow_run_parameters(
                 case_id=case_id,
-                pipeline=self.nfcore_pipeline_path,
+                pipeline_path=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
                 command_args=command_args,
             )

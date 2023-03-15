@@ -139,7 +139,7 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_nextflow_run_parameters(
-        cls, case_id: str, pipeline: str, root_dir: str, command_args: dict
+        cls, case_id: str, pipeline_path: str, root_dir: str, command_args: dict
     ) -> List[str]:
         """Returns a nextflow run command given a dictionary with arguments."""
 
@@ -158,7 +158,7 @@ class NextflowAnalysisAPI:
         )
         parameters = (
             nextflow_options
-            + ["run", pipeline]
+            + ["run", pipeline_path]
             + run_options
             + NextflowAnalysisAPI.get_nextflow_stdout_stderr(case_id=case_id, root_dir=root_dir)
         )
