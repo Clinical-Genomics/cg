@@ -1,4 +1,4 @@
-"""Set case attributes in the status database"""
+"""Set case attributes in the status database."""
 import logging
 from typing import List, Optional, Tuple
 import click
@@ -99,7 +99,7 @@ def update_action(case: Family, action: str) -> None:
 
 
 def update_customer(case: Family, customer_id: str, status_db: Store) -> None:
-    customer_obj: Customer = status_db.customer(customer_id)
+    customer_obj: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
 
     if customer_obj is None:
         LOG.error("Unknown customer: %s", customer_id)
@@ -121,7 +121,7 @@ def update_data_delivery(case: Family, data_delivery: DataDelivery) -> None:
 
 def update_panels(case, panels, status_db) -> None:
     for panel_abbreviation in panels:
-        panel: Panel = status_db.panel(panel_abbreviation)
+        panel: Panel = status_db.panel(abbrev=panel_abbreviation)
         if panel is None:
             LOG.error(f"unknown gene panel: {panel_abbreviation}")
             raise click.Abort

@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import Optional, List
-
+from typing import Optional, List, Callable
+from enum import Enum
 from cgmodels.cg.constants import Pipeline
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Query
@@ -103,22 +103,27 @@ def get_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
 
 def apply_case_filter(
     cases: Query,
-    functions: List[str],
+    filter_functions: List[Callable],
     date: Optional[datetime] = None,
     pipeline: Optional[Pipeline] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    filter_map = {
-        "get_cases_for_analysis": get_cases_for_analysis,
-        "get_cases_has_sequence": get_cases_has_sequence,
-        "get_cases_with_loqusdb_supported_pipeline": get_cases_with_loqusdb_supported_pipeline,
-        "get_cases_with_loqusdb_supported_sequencing_method": get_cases_with_loqusdb_supported_sequencing_method,
-        "get_cases_with_pipeline": get_cases_with_pipeline,
-        "get_cases_with_scout_data_delivery": get_cases_with_scout_data_delivery,
-        "get_inactive_analysis_cases": get_inactive_analysis_cases,
-        "get_new_cases": get_new_cases,
-        "get_report_cases_with_valid_data_delivery": get_report_supported_data_delivery_cases,
-    }
-    for function in functions:
-        cases: Query = filter_map[function](cases=cases, date=date, pipeline=pipeline)
+    for function in filter_functions:
+        cases: Query = function(cases=cases, date=date, pipeline=pipeline)
     return cases
+
+
+class CaseFilter(Enum):
+    """Define case filters."""
+
+    GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
+    GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
+    GET_NEW: Callable = get_new_cases
+    GET_WITH_PIPELINE: Callable = get_cases_with_pipeline
+    GET_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
+    GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
+        get_cases_with_loqusdb_supported_sequencing_method
+    )
+    GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
+    GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
+    GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases

@@ -13,19 +13,19 @@ def get_bed_version_by_short_name(
     return bed_versions.filter(BedVersion.shortname == bed_version_short_name)
 
 
-class BedVersionFilters(Enum):
+class BedVersionFilter(Enum):
     """Define BED version filter functions."""
 
-    get_bed_version_by_short_name: Callable = get_bed_version_by_short_name
+    FILTER_BY_SHORT_NAME: Callable = get_bed_version_by_short_name
 
 
 def apply_bed_version_filter(
     bed_versions: Query,
-    functions: List[Callable],
+    filter_functions: List[Callable],
     bed_version_short_name: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
-    for function in functions:
+    for function in filter_functions:
         bed_versions: Query = function(
             bed_versions=bed_versions,
             bed_version_short_name=bed_version_short_name,
