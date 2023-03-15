@@ -2,6 +2,7 @@
 from attr import dataclass
 
 from cg.store import models
+from sqlalchemy.orm import Query
 
 
 @dataclass
@@ -25,3 +26,8 @@ class BaseHandler:
     Delivery = models.Delivery
     Invoice = models.Invoice
     Organism = models.Organism
+
+    @staticmethod
+    def _get_union_query(query: Query, query2: Query) -> Query:
+        """Return a union query"""
+        return query.union(query2)

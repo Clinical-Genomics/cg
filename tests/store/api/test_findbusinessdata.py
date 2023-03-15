@@ -17,6 +17,7 @@ from cg.store.models import (
     Sample,
     Invoice,
     Pool,
+    Customer,
 )
 from tests.store_helpers import StoreHelpers
 from cg.constants.invoice import CustomerNames
@@ -559,18 +560,29 @@ def test_get_pools_for_customer(store_with_multiple_names_pools_for_customer: St
     # GIVEN a database with two pools for a customer
 
     # THEN one customer should be returned
-    customer = store_with_multiple_names_pools_for_customer.get_customer_by_customer_id(
+    customer: Customer = store_with_multiple_names_pools_for_customer.get_customer_by_customer_id(
         customer_id=CustomerNames.cust132.value
     )
-    assert customer
+    assert isinstance(customer, Customer)
 
-    # WHEN fetching the pools for a customer
-    pools: List[Pool] = store_with_multiple_names_pools_for_customer.get_pools_for_customer(
-        customers=customer, enquiry="pool_1"
+    # WHEN fetching the pools for a customer and a name
+    pools: List[
+        Pool
+    ] = store_with_multiple_names_pools_for_customer.get_pools_for_customer_and_enquiry(
+        customers=[customer], enquiry="pool_1"
     )
 
-    # THEN two pools should be returned
+    # THEN one pool should be returned
     assert pools and len(pools) == 1
+
+    # When fetching the pools for a customer
+    pools: List[
+        Pool
+    ] = store_with_multiple_names_pools_for_customer.get_pools_for_customer_and_enquiry(
+        customers=[customer]
+    )
+
+    assert pools and len(pools) == 2
 
 
 def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):

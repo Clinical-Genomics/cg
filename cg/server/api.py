@@ -281,7 +281,7 @@ def pools():
     customer_objs: Optional[Customer] = (
         None if g.current_user.is_admin else g.current_user.customers
     )
-    pools_q: List[Pool] = db.get_pools_for_customer(
+    pools_q: List[Pool] = db.get_pools_for_customer_and_enquiry(
         customers=customer_objs, enquiry=request.args.get("enquiry")
     )
     data: List[Dict] = [pool_obj.to_dict() for pool_obj in pools_q[:30]]

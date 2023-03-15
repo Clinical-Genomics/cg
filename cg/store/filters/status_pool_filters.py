@@ -4,6 +4,21 @@ from alchy import Query
 from cg.store.models import Pool
 
 
+def filter_pools_by_customer_id(pools: Query, customer_ids: List[int], **kwargs) -> Query:
+    """Return pools by customer id."""
+    return pools.filter(Pool.customer_id.in_(customer_ids))
+
+
+def filter_pool_by_name_enquiry(pools: Query, name_enquiry: str, **kwargs) -> Query:
+    """Return pools by name enquiry."""
+    return pools.filter(Pool.name.like(f"%{name_enquiry}%"))
+
+
+def filter_pool_by_order_enquiry(pools: Query, order_enquiry: str, **kwargs) -> Query:
+    """Return pools by order enquiry."""
+    return pools.filter(Pool.order.like(f"%{order_enquiry}%"))
+
+
 def filter_pools_by_entry_id(pools: Query, entry_id: int, **kwargs) -> Query:
     """Return pools by entry id."""
     return pools.filter(Pool.id == entry_id)
@@ -60,11 +75,22 @@ def apply_pool_filter(
     invoice_id: Optional[int] = None,
     entry_id: Optional[int] = None,
     name: Optional[str] = None,
+    customer_ids: Optional[List[int]] = None,
+    name_enquiry: Optional[str] = None,
+    order_enquiry: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the pool queries and return filtered results"""
 
     for function in filter_functions:
-        pools: Query = function(pools=pools, invoice_id=invoice_id, entry_id=entry_id, name=name)
+        pools: Query = function(
+            pools=pools,
+            invoice_id=invoice_id,
+            entry_id=entry_id,
+            name=name,
+            customer_ids=customer_ids,
+            name_enquiry=name_enquiry,
+            order_enquiry=order_enquiry,
+        )
     return pools
 
 
@@ -81,3 +107,6 @@ class PoolFilter(Enum):
     FILTER_WITHOUT_INVOICE_ID: Callable = filter_pools_without_invoice_id
     FILTER_DO_INVOICE: Callable = filter_pools_do_invoice
     FILTER_DO_NOT_INVOICE: Callable = filter_pools_do_not_invoice
+    FILTER_BY_CUSTOMER_ID: Callable = filter_pools_by_customer_id
+    FILTER_BY_NAME_ENQUIRY: Callable = filter_pool_by_name_enquiry
+    FILTER_BY_ORDER_ENQUIRY: Callable = filter_pool_by_order_enquiry

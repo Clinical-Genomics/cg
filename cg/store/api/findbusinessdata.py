@@ -423,23 +423,34 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def get_pools_for_customer(
+    def get_pools_for_customer_and_enquiry(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
-    ) -> Query:
+    ) -> List[Pool]:
         """Return all the pools for a customer."""
         records: Query = self._get_pool_query()
 
         if customers:
             customer_ids = [customer.id for customer in customers]
-            records = records.filter(Pool.customer_id.in_(customer_ids))
+            records: Query = apply_pool_filter(
+                pools=records,
+                customer_ids=customer_ids,
+                filter_functions=[PoolFilter.FILTER_BY_CUSTOMER_ID],
+            )
+        if enquiry:
+            records: Query = self._get_union_query(
+                query=apply_pool_filter(
+                    pools=records,
+                    name_enquiry=enquiry,
+                    filter_functions=[PoolFilter.FILTER_BY_NAME_ENQUIRY],
+                ),
+                query2=apply_pool_filter(
+                    pools=records,
+                    order_enquiry=enquiry,
+                    filter_functions=[PoolFilter.FILTER_BY_ORDER_ENQUIRY],
+                ),
+            )
 
-        records = (
-            records.filter(or_(Pool.name.like(f"%{enquiry}%"), Pool.order.like(f"%{enquiry}%")))
-            if enquiry
-            else records
-        )
-
-        return records.order_by(Pool.created_at.desc())
+        return records.order_by(Pool.created_at.desc()).all()
 
     def _get_pool_query(self) -> Query:
         """Return pool query."""
