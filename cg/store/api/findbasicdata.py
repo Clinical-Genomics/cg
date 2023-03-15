@@ -17,7 +17,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
-from cg.store.organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
@@ -25,7 +25,7 @@ from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_version_filter,
 )
-from cg.store.user_filters import apply_user_filter, UserFilter
+from cg.store.filters.user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
