@@ -141,15 +141,15 @@ class FindBasicDataHandler(BaseHandler):
         """Fetch all organisms"""
         return self.Organism.query.order_by(Organism.internal_id)
 
-    def get_panel_by_abbreviation(self, abbrev: str):
+    def get_panel_by_abbreviation(self, abbreviation: str):
         """Find a panel by abbreviation."""
         return apply_panel_filter(
             panels=self._get_panel_query(),
             filters=[PanelFilter.FILTER_BY_ABBREVIATION],
-            abbreviation=abbrev,
+            abbreviation=abbreviation,
         ).first()
 
-    def panels(self):
+    def get_panels(self):
         """Returns all panels."""
         return self._get_panel_query().order_by(Panel.abbrev)
 

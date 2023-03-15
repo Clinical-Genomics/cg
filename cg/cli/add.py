@@ -207,7 +207,7 @@ def family(
         raise click.Abort
 
     for panel in panels:
-        panel_obj: models.Panel = status_db.get_panel_by_abbreviation(panel)
+        panel_obj: models.Panel = status_db.get_panel_by_abbreviation(abbreviation=panel)
         if panel_obj is None:
             LOG.error(f"{panel}: panel not found")
             raise click.Abort

@@ -73,7 +73,7 @@ def family(
         case_obj.data_delivery = data_delivery
     if panels:
         for panel in panels:
-            panel_obj: models.Panel = status_db.get_panel_by_abbreviation(panel)
+            panel_obj: models.Panel = status_db.get_panel_by_abbreviation(abbreviation=panel)
             if panel_obj is None:
                 LOG.error(f"unknown gene panel: {panel}")
                 raise click.Abort
