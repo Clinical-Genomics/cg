@@ -1645,8 +1645,8 @@ def fixture_context_config(
                 "account": "development",
                 "mail_user": "test.email@scilifelab.se",
             },
-            "tw_binary_path": Path("path", "to", "bin", "tw").as_posix(),
-            "tw_pipeline": "rnafusion",
+            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
+            "tower_pipeline": "rnafusion",
         },
         "pdc": {"binary_path": "/bin/dsmc"},
         "scout": {

@@ -163,8 +163,8 @@ class RnafusionConfig(CommonAppConfig):
     conda_binary: Optional[str] = None
     launch_directory: str
     slurm: SlurmConfig
-    tw_binary_path: str
-    tw_pipeline: str
+    tower_binary_path: str
+    tower_pipeline: str
 
 
 class CGStatsConfig(BaseModel):
