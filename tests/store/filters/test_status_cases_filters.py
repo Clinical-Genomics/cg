@@ -36,7 +36,7 @@ def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timest
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -61,7 +61,7 @@ def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreH
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -86,7 +86,7 @@ def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: S
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -115,7 +115,7 @@ def test_get_cases_has_sequence_when_not_external_nor_sequenced(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -142,7 +142,7 @@ def test_get_cases_with_pipeline_when_correct_pipline(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
     cases: List[Query] = list(get_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
@@ -166,7 +166,7 @@ def test_get_cases_with_pipeline_when_incorrect_pipline(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
     cases: List[Query] = list(get_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
@@ -196,7 +196,7 @@ def test_get_cases_with_loqusdb_supported_pipeline(
     base_store.relate_sample(test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with pipeline
     cases: List[Query] = list(get_cases_with_loqusdb_supported_pipeline(cases=cases))
@@ -221,7 +221,7 @@ def test_get_cases_with_loqusdb_supported_sequencing_method(
     base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the available cases
     cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
@@ -250,7 +250,7 @@ def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
     base_store.relate_sample(test_case_wts, test_sample_wts, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the valid cases
     cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
@@ -282,7 +282,7 @@ def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timest
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -311,7 +311,7 @@ def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -349,7 +349,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     test_analysis.created_at = timestamp_yesterday
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -381,7 +381,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -408,7 +408,7 @@ def test_get_cases_with_scout_data_delivery(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with Scout as data delivery option
     cases: Query = get_cases_with_scout_data_delivery(cases=cases)
@@ -437,7 +437,7 @@ def test_get_report_supported_data_delivery_cases(
     base_store.relate_sample(test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_cases_with_analyses_query()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the delivery report supported cases
     cases: Query = get_report_supported_data_delivery_cases(cases=cases)

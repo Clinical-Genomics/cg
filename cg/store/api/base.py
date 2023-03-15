@@ -52,14 +52,7 @@ class BaseHandler:
         """Return a query for the given table."""
         return table.query
 
-    def _get_join_sample_ApplicationVersion(self) -> Query:
-        """Fetch incoming samples."""
-        return self._get_query(table=Sample).join(
-            Sample.application_version,
-            ApplicationVersion.application,
-        )
-
-    def get_cases_with_analyses_query(self) -> Query:
+    def _get_outer_join_cases_with_analyses_query(self) -> Query:
         """Return a query for all cases in the database with an analysis."""
         return (
             self._get_query(table=Family)
@@ -90,7 +83,7 @@ class BaseHandler:
         """Join sample and customer."""
         return self._get_query(table=Sample).join(Customer)
 
-    def _get_flow_cell_sample_links_query(self) -> Query:
+    def _get_join_flow_cell_sample_links_query(self) -> Query:
         """Return flow cell query."""
         return self._get_query(table=Flowcell).join(Flowcell.samples, Sample.links)
 

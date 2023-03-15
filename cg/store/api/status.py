@@ -240,7 +240,7 @@ class StatusHandler(BaseHandler):
     def get_flow_cells_by_case(self, case: Family) -> List[Flowcell]:
         """Return flow cells for case."""
         return apply_flow_cell_filter(
-            flow_cells=self._get_flow_cell_sample_links_query(),
+            flow_cells=self._get_join_flow_cell_sample_links_query(),
             filter_functions=[FlowCellFilter.GET_BY_CASE],
             case=case,
         ).all()

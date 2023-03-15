@@ -31,7 +31,7 @@ def test_get_flow_cells_by_case(
 
     # WHEN getting flow cell
     returned_flow_cell: Optional[List[Flowcell]] = get_flow_cells_by_case(
-        flow_cells=base_store._get_flow_cell_sample_links_query(), case=case_obj
+        flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case_obj
     )
 
     # THEN a Flowcell type should be returned
@@ -55,7 +55,7 @@ def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
 
     # WHEN getting flow cell
     returned_flow_cell: Optional[List[Flowcell]] = get_flow_cells_by_case(
-        flow_cells=base_store._get_flow_cell_sample_links_query(), case=case_obj
+        flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case_obj
     )
 
     # THEN returned flow cell should be the original flow cell
