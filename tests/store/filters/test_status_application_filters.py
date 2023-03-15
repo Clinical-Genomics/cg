@@ -8,6 +8,7 @@ from cg.store.filters.status_application_filters import (
 )
 
 from cg.store import Store
+from cg.store.models import Application
 from tests.store_helpers import StoreHelpers
 from typing import List
 from sqlalchemy.orm import Query
@@ -23,7 +24,9 @@ def test_filter_get_application_by_tag(
 
     # WHEN getting an application by tag
     application: Query = filter_applications_by_tag(
-        applications=store_with_an_application_with_and_without_attributes._get_application_query(),
+        applications=store_with_an_application_with_and_without_attributes._get_query(
+            table=Application
+        ),
         tag=tag,
     )
 
@@ -43,7 +46,9 @@ def test_filter_get_applications_by_prep_category(
 
     # WHEN getting an application by prep category
     application: Query = filter_applications_by_prep_category(
-        applications=store_with_an_application_with_and_without_attributes._get_application_query(),
+        applications=store_with_an_application_with_and_without_attributes._get_query(
+            table=Application
+        ),
         prep_category=prep_category,
     )
 
@@ -66,7 +71,9 @@ def test_filter_get_applications_is_archived(
 
     # WHEN getting an application by is_archived
     application: Query = filter_applications_is_archived(
-        applications=store_with_an_application_with_and_without_attributes._get_application_query()
+        applications=store_with_an_application_with_and_without_attributes._get_query(
+            table=Application
+        )
     )
 
     # ASSERT that application is a query
@@ -88,7 +95,9 @@ def test_filter_get_applications_is_external(
 
     # WHEN getting an application by is_external
     application: Query = filter_applications_is_external(
-        applications=store_with_an_application_with_and_without_attributes._get_application_query()
+        applications=store_with_an_application_with_and_without_attributes._get_query(
+            table=Application
+        )
     )
 
     # ASSERT that application is a query
@@ -110,7 +119,9 @@ def test_filter_get_applications_is_not_external(
 
     # WHEN getting an application by is_external
     application: Query = filter_applications_is_not_external(
-        applications=store_with_an_application_with_and_without_attributes._get_application_query()
+        applications=store_with_an_application_with_and_without_attributes._get_query(
+            table=Application
+        )
     )
 
     # ASSERT that application is a query
@@ -133,7 +144,9 @@ def test_filter_get_applications_by_entry_id(
 
     # WHEN getting an application by id
     application: Query = filter_applications_by_entry_id(
-        applications=store_with_an_application_with_and_without_attributes._get_application_query(),
+        applications=store_with_an_application_with_and_without_attributes._get_query(
+            table=Application
+        ),
         entry_id=entry_id,
     )
 
