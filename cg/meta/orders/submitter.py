@@ -30,7 +30,7 @@ class Submitter(ABC):
 
     @abstractmethod
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: int, items: List[dict]
     ) -> List[Model]:
         pass
 

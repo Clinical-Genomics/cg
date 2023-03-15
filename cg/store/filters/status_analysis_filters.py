@@ -1,5 +1,5 @@
-from typing import List
-
+from typing import List, Callable
+from enum import Enum
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
@@ -14,7 +14,7 @@ def get_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
 
 
 def get_analyses_with_pipeline(analyses: Query, pipeline: Pipeline = None, **kwargs) -> Query:
-    """Return analyses with suplied pipeline."""
+    """Return analyses with supplied pipeline."""
     return analyses.filter(Analysis.pipeline == str(pipeline)) if pipeline else analyses
 
 
@@ -68,22 +68,28 @@ def order_analyses_by_uploaded_at(analyses: Query, **kwargs) -> Query:
 
 
 def apply_analysis_filter(
-    functions: List[str], analyses: Query, pipeline: Pipeline = None
+    filter_functions: List[Callable], analyses: Query, pipeline: Pipeline = None
 ) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
-    filter_map = {
-        "get_analyses_with_delivery_report": get_analyses_with_delivery_report,
-        "get_analyses_without_delivery_report": get_analyses_without_delivery_report,
-        "get_analyses_with_pipeline": get_analyses_with_pipeline,
-        "get_completed_analyses": get_completed_analyses,
-        "get_filter_uploaded_analyses": get_filter_uploaded_analyses,
-        "get_not_completed_analyses": get_not_completed_analyses,
-        "get_not_uploaded_analyses": get_not_uploaded_analyses,
-        "get_report_analyses_by_pipeline": get_report_analyses_by_pipeline,
-        "get_valid_analyses_in_production": get_valid_analyses_in_production,
-        "order_analyses_by_completed_at": order_analyses_by_completed_at,
-        "order_analyses_by_uploaded_at": order_analyses_by_uploaded_at,
-    }
-    for function in functions:
-        analyses: Query = filter_map[function](analyses=analyses, pipeline=pipeline)
+
+    for function in filter_functions:
+        analyses: Query = function(
+            analyses=analyses,
+            pipeline=pipeline,
+        )
     return analyses
+
+
+class AnalysisFilter(Enum):
+    """Define Analysis filter functions."""
+
+    FILTER_VALID_IN_PRODUCTION: Callable = get_valid_analyses_in_production
+    FILTER_WITH_PIPELINE: Callable = get_analyses_with_pipeline
+    FILTER_COMPLETED: Callable = get_completed_analyses
+    FILTER_NOT_COMPLETED: Callable = get_not_completed_analyses
+    FILTER_UPLOADED: Callable = get_filter_uploaded_analyses
+    FILTER_NOT_UPLOADED: Callable = get_not_uploaded_analyses
+    FILTER_WITH_DELIVERY_REPORT: Callable = get_analyses_with_delivery_report
+    FILTER_WITHOUT_DELIVERY_REPORT: Callable = get_analyses_without_delivery_report
+    FILTER_REPORT_BY_PIPELINE: Callable = get_report_analyses_by_pipeline
+    ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at
