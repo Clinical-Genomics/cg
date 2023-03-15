@@ -7,7 +7,8 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadStream
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis
 
 
 class UploadVogueAPI:
@@ -61,8 +62,8 @@ class UploadVogueAPI:
 
     @staticmethod
     def update_analysis_uploaded_to_vogue_date(
-        analysis: models.Analysis,
+        analysis: Analysis,
         vogue_upload_date: Optional[dt.datetime] = dt.datetime.now(),
-    ) -> models.Analysis:
+    ) -> Analysis:
         analysis.uploaded_to_vogue_at = vogue_upload_date
         return analysis

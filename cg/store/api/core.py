@@ -2,7 +2,7 @@ import logging
 
 import alchy
 
-from cg.store import models
+from cg.store.models import Model
 from cg.store.api.delete import DeleteDataHandler
 from cg.store.api.findbusinessdata import FindBusinessDataHandler
 
@@ -28,4 +28,4 @@ class CoreHandler(
 class Store(alchy.Manager, CoreHandler):
     def __init__(self, uri):
         self.uri = uri
-        super(Store, self).__init__(config=dict(SQLALCHEMY_DATABASE_URI=uri), Model=models.Model)
+        super(Store, self).__init__(config=dict(SQLALCHEMY_DATABASE_URI=uri), Model=Model)

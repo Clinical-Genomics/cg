@@ -2,7 +2,8 @@
 
 from typing import List
 
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Application, ApplicationVersion
 from cg.store.api.import_func import (
     add_application_version,
     import_application_versions,
@@ -82,11 +83,11 @@ def test_versions_are_same(applications_store: Store, application_versions_file:
     version: ApplicationVersionSchema = excel_versions[0]
 
     # GIVEN that the application exists in the database
-    application_obj: models.Application = store.application(version.app_tag)
+    application_obj: Application = store.application(version.app_tag)
 
     # GIVEN that there is a application version
     sign = "DummySign"
-    db_version: models.ApplicationVersion = add_application_version(
+    db_version: ApplicationVersion = add_application_version(
         application_obj=application_obj,
         latest_version=None,
         version=version,
@@ -110,10 +111,10 @@ def test_versions_are_not_same(applications_store: Store, application_versions_f
         parse_application_versions(excel_path=application_versions_file)
     )
     version: ApplicationVersionSchema = excel_versions[0]
-    application_obj: models.Application = applications_store.application(version.app_tag)
+    application_obj: Application = applications_store.application(version.app_tag)
     sign = "DummySign"
 
-    db_version: models.ApplicationVersion = add_application_version(
+    db_version: ApplicationVersion = add_application_version(
         application_obj=application_obj,
         latest_version=None,
         version=version,

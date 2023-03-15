@@ -1,27 +1,45 @@
 """All models aggregated in a base class"""
 from attr import dataclass
 
-from cg.store import models
+from cg.store.models import (
+    User,
+    BedVersion,
+    Bed,
+    Customer,
+    Collaboration,
+    Sample,
+    Family,
+    FamilySample,
+    Flowcell,
+    Analysis,
+    Application,
+    ApplicationVersion,
+    Panel,
+    Pool,
+    Delivery,
+    Invoice,
+    Organism,
+)
 
 
 @dataclass
 class BaseHandler:
     """All models in one base class"""
 
-    User = models.User
-    Bed = models.Bed
-    BedVersion = models.BedVersion
-    Customer = models.Customer
-    Collaboration = models.Collaboration
-    Sample = models.Sample
-    Family = models.Family
-    FamilySample = models.FamilySample
-    Flowcell = models.Flowcell
-    Analysis = models.Analysis
-    Application = models.Application
-    ApplicationVersion = models.ApplicationVersion
-    Panel = models.Panel
-    Pool = models.Pool
-    Delivery = models.Delivery
-    Invoice = models.Invoice
-    Organism = models.Organism
+    User = User
+    Bed = Bed
+    BedVersion = BedVersion
+    Customer = Customer
+    Collaboration = Collaboration
+    Sample = Sample
+    Family = Family
+    FamilySample = FamilySample
+    Flowcell = Flowcell
+    Analysis = Analysis
+    Application = Application
+    ApplicationVersion = ApplicationVersion
+    Panel = Panel
+    Pool = Pool
+    Delivery = Delivery
+    Invoice = Invoice
+    Organism = Organism

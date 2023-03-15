@@ -14,7 +14,8 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.process_mock import ProcessMock
 from tests.mocks.tb_mock import MockTB
@@ -136,14 +137,14 @@ def fixture_rnafusion_context(
     helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
 
     # Create textbook case with enough reads
-    case_enough_reads: models.Family = helpers.add_case(
+    case_enough_reads: Family = helpers.add_case(
         store=status_db,
         internal_id=rnafusion_case_id,
         name=rnafusion_case_id,
         data_analysis=Pipeline.RNAFUSION,
     )
 
-    sample_rnafusion_case_enough_reads: models.Sample = helpers.add_sample(
+    sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
         internal_id=rnafusion_sample_id,
         sequenced_at=dt.datetime.now(),
