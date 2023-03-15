@@ -26,7 +26,7 @@ class CoreHandler(
 
 
 class Store(alchy.Manager, CoreHandler):
-    uri: str
+    uri: str = ""
 
     def __init__(self, uri):
         self.uri = uri
