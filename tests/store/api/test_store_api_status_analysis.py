@@ -71,7 +71,7 @@ def test_get_cases_with_samples_query(
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting the stored case with its associated samples
-    cases: List[Query] = list(base_store.get_cases_with_samples_query())
+    cases: List[Query] = list(base_store._get_join_cases_with_samples_query())
 
     # THEN a list of cases should be returned, and it should contain the stored and linked sample
     assert cases

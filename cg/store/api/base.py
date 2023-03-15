@@ -52,7 +52,7 @@ class BaseHandler:
         """Return a query for the given table."""
         return table.query
 
-    def join_sample_ApplicationVersion(self) -> Query:
+    def _get_join_sample_ApplicationVersion(self) -> Query:
         """Fetch incoming samples."""
         return self._get_query(table=Sample).join(
             Sample.application_version,
@@ -72,20 +72,34 @@ class BaseHandler:
             )
         )
 
-    def get_cases_with_samples_query(self) -> Query:
+    def _get_join_cases_with_samples_query(self) -> Query:
         """Return a query for all cases in the database with samples."""
         return self._get_query(table=Family).join(
             Family.links, FamilySample.sample, Family.customer
         )
 
-    def _get_analysis_case_query(self) -> Query:
+    def _get_join_analysis_case_query(self) -> Query:
         """Return analysis query."""
         return self._get_query(table=Analysis).join(Analysis.family)
 
-    def _get_case_sample_query(self) -> Query:
+    def _get_join_case_sample_query(self) -> Query:
         """Return case sample query."""
         return self._get_query(table=FamilySample).join(FamilySample.family, FamilySample.sample)
 
-    def _get_sample_case_query(self) -> Query:
+    def _get_join_sample_and_customer_query(self) -> Query:
+        """Join sample and customer."""
+        return self._get_query(table=Sample).join(Customer)
+
+    def _get_flow_cell_sample_links_query(self) -> Query:
+        """Return flow cell query."""
+        return self._get_query(table=Flowcell).join(Flowcell.samples, Sample.links)
+
+    def _get_join_sample_family_query(self) -> Query:
         """Return a sample case relationship query."""
-        return self.Sample.query.join(Family.links, FamilySample.sample)
+        return self._get_query(table=Sample).join(Family.links, FamilySample.sample)
+
+    def _get_join_sample_application_version_query(self) -> Query:
+        """Join sample to application version."""
+        return self._get_query(table=Sample).join(
+            Sample.application_version, ApplicationVersion.application
+        )
