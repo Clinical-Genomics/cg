@@ -46,7 +46,7 @@ def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, lo
     )
 
     # GIVEN a sample query
-    samples: Query = store._get_sample_query()
+    samples: Query = store._get_query(table=Sample)
 
     # WHEN retrieving the Loqusdb uploaded samples
     uploaded_samples = filter_samples_with_loqusdb_id(samples=samples)
@@ -67,7 +67,7 @@ def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id,
     sample_store.relate_sample(family=case, sample=sample_uploaded, status=PhenotypeStatus.UNKNOWN)
 
     # GIVEN a sample query
-    samples: Query = store._get_sample_query()
+    samples: Query = store._get_query(table=Sample)
 
     # WHEN retrieving the Loqusdb not uploaded samples
     not_uploaded_samples = filter_samples_without_loqusdb_id(samples=samples)
@@ -87,7 +87,9 @@ def test_filter_samples_is_delivered(
 
     # WHEN getting delivered samples
     samples: Query = filter_samples_is_delivered(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -128,7 +130,9 @@ def test_filter_get_samples_by_invoice_id(
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_by_invoice_id(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query(),
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
         invoice_id=invoice_id,
     )
 
@@ -149,7 +153,9 @@ def test_filter_samples_without_invoice_id(
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_without_invoice_id(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -169,7 +175,9 @@ def test_filter_samples_down_sampled(
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_is_down_sampled(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -189,7 +197,9 @@ def test_filter_samples_not_down_sampled(
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_is_not_down_sampled(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -209,7 +219,9 @@ def test_filter_samples_is_sequenced(
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_is_sequenced(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -229,7 +241,9 @@ def test_filter_samples_is_not_sequenced(
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_is_not_sequenced(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -249,7 +263,9 @@ def test_filter_samples_do_invoice(
 
     # WHEN getting  samples mark to be invoiced
     samples: Query = filter_samples_do_invoice(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -269,7 +285,9 @@ def test_filter_samples_do_not_invoice(
 
     # WHEN getting samples that are marked to skip invoicing
     samples: Query = filter_samples_do_not_invoice(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -289,7 +307,9 @@ def test_filter_samples_is_delivered(
 
     # WHEN getting delivered samples
     samples: Query = filter_samples_is_delivered(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -309,7 +329,9 @@ def test_filter_samples_is_not_delivered(
 
     # WHEN getting not delivered samples
     samples: Query = filter_samples_is_not_delivered(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -329,7 +351,9 @@ def test_filter_samples_is_received(
 
     # WHEN getting received samples
     samples: Query = filter_samples_is_received(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -349,7 +373,9 @@ def test_filter_samples_is_not_received(
 
     # WHEN getting not received samples
     samples: Query = filter_samples_is_not_received(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # THEN samples should contain the test sample
@@ -365,7 +391,9 @@ def test_filter_samples_is_prepared(
     # GIVEN a store that has two samples of which one is prepared
 
     samples: Query = filter_samples_is_prepared(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query
@@ -385,7 +413,9 @@ def test_filter_samples_is_not_prepared(
 
     # WHEN getting not prepared samples
     samples: Query = filter_samples_is_not_prepared(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # THEN samples should contain the test sample
@@ -402,7 +432,9 @@ def test_filter_get_samples_by_internal_id(
 
     # WHEN getting a sample by id
     samples: Query = filter_samples_by_internal_id(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query(),
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
         internal_id=sample_id,
     )
 
@@ -423,7 +455,9 @@ def test_filter_get_samples_by_entry_id(
 
     # WHEN getting a sample by id
     samples: Query = filter_samples_by_entry_id(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query(),
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
         entry_id=entry_id,
     )
 
@@ -445,7 +479,9 @@ def test_filter_get_samples_with_type(
 
     # WHEN getting a sample by type
     samples: Query = filter_samples_with_type(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query(),
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
         tissue_type=tissue_type,
     )
 
@@ -465,7 +501,9 @@ def test_filter_get_samples_by_name(
 
     # WHEN getting a sample by name
     samples: Query = filter_samples_by_name(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query(),
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
         name=name,
     )
 
@@ -485,7 +523,9 @@ def test_filter_get_samples_by_subject_id(
 
     # WHEN getting a sample by subject id
     samples: Query = filter_samples_by_subject_id(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query(),
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
         subject_id=subject_id,
     )
 
