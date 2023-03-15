@@ -37,7 +37,7 @@ def test_load_genotype(genotype_api, vogue_api, genotype_return, mocker, store):
 def test_load_apptags(vogue_api, genotype_api, store, mocker):
     """Test load application tags"""
     # GIVEN UploadVogueAPI and a set of application tags
-    apptags: List[Dict] = store.get_applications().apptag_list
+    application_tags: List[Dict] = store.get_applications().apptag_list
 
     mocker.patch.object(vogue_api, "load_apptags")
     upload_vogue_api = UploadVogueAPI(genotype_api=genotype_api, vogue_api=vogue_api, store=store)
@@ -45,8 +45,8 @@ def test_load_apptags(vogue_api, genotype_api, store, mocker):
     # WHEN running load_apptags
     upload_vogue_api.load_apptags()
 
-    # THEN load_apptags is called with the apptags inside upload_vogue_api
-    vogue_api.load_apptags.assert_called_with(apptags)
+    # THEN load_apptags is called with the application tags inside upload_vogue_api
+    vogue_api.load_apptags.assert_called_with(application_tags)
 
 
 @mock.patch("cg.store.Store")

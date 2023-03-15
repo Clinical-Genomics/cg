@@ -99,7 +99,7 @@ def import_applications(
 
     for application in applications:
         application_obj: Application = store.get_application_by_tag(tag=application.tag)
-        if application_obj and applications_are_same(
+        if application_obj and is_applications_tags_equal(
             application_obj=application_obj, application=application
         ):
             LOG.info("skipping redundant application %s", application.tag)
@@ -131,7 +131,7 @@ def prices_are_same(first_price: float, second_price: float) -> bool:
 def versions_are_same(
     version_obj: ApplicationVersion, application_version: ApplicationVersionSchema
 ) -> bool:
-    """Checks if the given versions are to be considered equal"""
+    """Checks if the given versions are to be considered equal."""
     return (
         version_obj.application.tag == application_version.app_tag
         and version_obj.valid_from == application_version.valid_from
@@ -142,8 +142,10 @@ def versions_are_same(
     )
 
 
-def applications_are_same(application_obj: Application, application: ApplicationSchema) -> bool:
-    """Check if the given application tags match."""
+def is_applications_tags_equal(
+    application_obj: Application, application: ApplicationSchema
+) -> bool:
+    """Check if the given application tags are equal."""
 
     return application_obj.tag == application.tag
 

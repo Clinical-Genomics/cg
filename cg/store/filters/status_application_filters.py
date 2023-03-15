@@ -52,7 +52,7 @@ def apply_application_filter(
     """Apply filtering functions to the sample queries and return filtered results."""
 
     for filter_function in filter_functions:
-        applications: Query = function(
+        applications: Query = filter_function(
             applications=applications,
             tag=tag,
             prep_category=prep_category,

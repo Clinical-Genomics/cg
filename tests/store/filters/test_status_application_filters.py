@@ -84,10 +84,10 @@ def test_filter_get_applications_is_archived(
 def test_filter_application_is_not_archived(
     store_with_an_application_with_and_without_attributes: Store,
 ) -> None:
-    """Test to get application by is_archived."""
+    """Test to get application when no archived."""
     # GIVEN a store with two applications of which one is archived
 
-    # WHEN getting an application by is_archived
+    # WHEN getting an application that is not archived
     application: Query = filter_applications_is_not_archived(
         applications=store_with_an_application_with_and_without_attributes._get_application_query()
     )

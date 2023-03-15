@@ -2,7 +2,8 @@
 
 from typing import List
 
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import ApplicationVersion, Application
 from cg.store.api.import_func import (
     add_application_version,
     import_application_versions,
@@ -82,11 +83,11 @@ def test_versions_are_same(applications_store: Store, application_versions_file:
     version: ApplicationVersionSchema = excel_versions[0]
 
     # GIVEN that the application exists in the database
-    application_obj: models.Application = store.get_application_by_tag(version.app_tag)
+    application_obj: Application = store.get_application_by_tag(version.app_tag)
 
     # GIVEN that there is a application version
     sign = "DummySign"
-    db_version: models.ApplicationVersion = add_application_version(
+    db_version: ApplicationVersion = add_application_version(
         application_obj=application_obj,
         latest_version=None,
         version=version,
@@ -110,10 +111,10 @@ def test_versions_are_not_same(applications_store: Store, application_versions_f
         parse_application_versions(excel_path=application_versions_file)
     )
     version: ApplicationVersionSchema = excel_versions[0]
-    application_obj: models.Application = applications_store.get_application_by_tag(version.app_tag)
+    application_obj: Application = applications_store.get_application_by_tag(version.app_tag)
     sign = "DummySign"
 
-    db_version: models.ApplicationVersion = add_application_version(
+    db_version: ApplicationVersion = add_application_version(
         application_obj=application_obj,
         latest_version=None,
         version=version,
@@ -229,12 +230,12 @@ def test_sync_microbial_orderform_dry_run(microbial_store: Store, microbial_orde
     sign = "PG"
     activate = False
     inactivate = False
-    active_mic_apps_from_start = len(
+    active_mic_apps_from_start: int = len(
         microbial_store.get_applications_by_prep_category_and_is_not_archived(
             prep_category=prep_category
         )
     )
-    inactive_mic_apps_from_start = len(
+    inactive_mic_apps_from_start: int = len(
         microbial_store.get_applications_by_prep_category_and_is_archived(
             prep_category=prep_category
         )
@@ -254,12 +255,12 @@ def test_sync_microbial_orderform_dry_run(microbial_store: Store, microbial_orde
     )
 
     # THEN same number of active and inactive mic applications in status database
-    active_mic_apps_after_when = len(
+    active_mic_apps_after_when: int = len(
         microbial_store.get_applications_by_prep_category_and_is_not_archived(
             prep_category=prep_category
         )
     )
-    inactive_mic_apps_after_when = len(
+    inactive_mic_apps_after_when: int = len(
         microbial_store.get_applications_by_prep_category_and_is_archived(
             prep_category=prep_category
         )
@@ -275,12 +276,12 @@ def test_sync_microbial_orderform_activate(microbial_store: Store, microbial_ord
     sign = "PG"
     activate = True
     inactivate = False
-    active_mic_apps_from_start = len(
+    active_mic_apps_from_start: int = len(
         microbial_store.get_applications_by_prep_category_and_is_not_archived(
             prep_category=prep_category
         )
     )
-    inactive_mic_apps_from_start = len(
+    inactive_mic_apps_from_start: int = len(
         microbial_store.get_applications_by_prep_category_and_is_archived(
             prep_category=prep_category
         )
@@ -300,12 +301,12 @@ def test_sync_microbial_orderform_activate(microbial_store: Store, microbial_ord
     )
 
     # THEN more active mic applications in status database and same inactive
-    active_mic_apps_after_when = len(
+    active_mic_apps_after_when: int = len(
         microbial_store.get_applications_by_prep_category_and_is_not_archived(
             prep_category=prep_category
         )
     )
-    inactive_mic_apps_after_when = len(
+    inactive_mic_apps_after_when: int = len(
         microbial_store.get_applications_by_prep_category_and_is_archived(
             prep_category=prep_category
         )
@@ -328,10 +329,10 @@ def test_sync_rml_orderform_inactivate(rml_store: Store, rml_orderform: str, hel
         is_archived=False,
         prep_category=prep_category,
     )
-    active_apps_from_start = len(
+    active_apps_from_start: int = len(
         rml_store.get_applications_by_prep_category_and_is_not_archived(prep_category=prep_category)
     )
-    inactive_apps_from_start = len(
+    inactive_apps_from_start: int = len(
         rml_store.get_applications_by_prep_category_and_is_archived(prep_category=prep_category)
     )
 
@@ -349,10 +350,10 @@ def test_sync_rml_orderform_inactivate(rml_store: Store, rml_orderform: str, hel
     )
 
     # THEN the number of active should be less and the number of inactive more than before
-    active_apps_after_when = len(
+    active_apps_after_when: int = len(
         rml_store.get_applications_by_prep_category_and_is_not_archived(prep_category=prep_category)
     )
-    inactive_apps_after_when = len(
+    inactive_apps_after_when: int = len(
         rml_store.get_applications_by_prep_category_and_is_archived(prep_category=prep_category)
     )
     assert active_apps_from_start > active_apps_after_when

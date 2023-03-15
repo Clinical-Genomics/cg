@@ -30,7 +30,7 @@ from cg.store.user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
-    """Contains methods to find basic data model instances"""
+    """Contains methods to find basic data model instances."""
 
     def _get_application_query(self) -> Query:
         """Return a query for applications."""
@@ -39,15 +39,16 @@ class FindBasicDataHandler(BaseHandler):
     def get_application_by_tag(self, tag: str) -> Application:
         """Return an application by tag."""
         return apply_application_filter(
-            applications=self._get_application_query(), filter_functions=[ApplicationFilter.FILTER_BY_TAG], tag=tag
+            applications=self._get_application_query(),
+            filter_functions=[ApplicationFilter.FILTER_BY_TAG],
+            tag=tag,
         ).first()
 
     def get_applications_by_prep_category(self, prep_category: str) -> List[Application]:
         """Return applications by prep category."""
-        records: Query = self._get_application_query()
         return (
             apply_application_filter(
-                applications=records,
+                applications=self._get_application_query(),
                 filter_functions=[ApplicationFilter.FILTER_BY_PREP_CATEGORY],
                 prep_category=prep_category,
             )
@@ -57,10 +58,9 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_applications_is_not_archived(self) -> List[Application]:
         """Return applications that are not archived."""
-        records: Query = self._get_application_query()
         return (
             apply_application_filter(
-                applications=records,
+                applications=self._get_application_query(),
                 filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
             )
             .order_by(self.Application.prep_category, self.Application.tag)
@@ -71,10 +71,9 @@ class FindBasicDataHandler(BaseHandler):
         self, prep_category: str
     ) -> List[Application]:
         """Return applications by prep category that are not archived."""
-        records: Query = self._get_application_query()
         return (
             apply_application_filter(
-                applications=records,
+                applications=self._get_application_query(),
                 filter_functions=[
                     ApplicationFilter.FILTER_BY_PREP_CATEGORY,
                     ApplicationFilter.FILTER_IS_NOT_ARCHIVED,
@@ -89,10 +88,9 @@ class FindBasicDataHandler(BaseHandler):
         self, prep_category: str
     ) -> List[Application]:
         """Return applications by prep category that are archived."""
-        records: Query = self._get_application_query()
         return (
             apply_application_filter(
-                applications=records,
+                applications=self._get_application_query(),
                 filter_functions=[
                     ApplicationFilter.FILTER_BY_PREP_CATEGORY,
                     ApplicationFilter.FILTER_IS_ARCHIVED,
@@ -105,8 +103,11 @@ class FindBasicDataHandler(BaseHandler):
 
     def get_applications(self) -> List[Application]:
         """Return all applications."""
-        records: Query = self._get_application_query()
-        return records.order_by(self.Application.prep_category, self.Application.tag).all()
+        return (
+            self._get_application_query()
+            .order_by(self.Application.prep_category, self.Application.tag)
+            .all()
+        )
 
     def application_version(self, application: Application, version: int) -> ApplicationVersion:
         """Fetch an application version."""

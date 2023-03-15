@@ -304,6 +304,24 @@ def fixture_max_nr_of_samples() -> int:
     return 50
 
 
+@pytest.fixture(name="EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS")
+def fixture_expected_number_of_not_archived_applications() -> int:
+    """Return the number of expected number of not archived applications"""
+    return 4
+
+
+@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY")
+def fixture_expected_number_of_applications_with_prep_category() -> int:
+    """Return the number of expected number of applications with prep category"""
+    return 7
+
+
+@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")
+def fixture_expected_number_of_applications_with_prep_category() -> int:
+    """Return the number of expected number of applications with prep category"""
+    return 7
+
+
 @pytest.fixture(name="store_with_samples_that_have_names")
 def store_with_samples_that_have_names(
     store: Store, helpers: StoreHelpers, name="sample_1"

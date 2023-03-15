@@ -171,7 +171,7 @@ def qc_microsalt_context(
             store=store,
             internal_id=sample,
             application_tag=MicrosaltAppTags.MWRNXTR003,
-            application_type=MicrosaltAppTags.APP_TYPE,
+            application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
             sequenced_at=datetime.datetime.now(),
         )
@@ -191,7 +191,7 @@ def qc_microsalt_context(
             store=store,
             internal_id=sample,
             application_tag=MicrosaltAppTags.MWXNXTR003,
-            application_type=MicrosaltAppTags.APP_TYPE,
+            application_type=MicrosaltAppTags.PREP_CATEGORY,
             reads=MicrosaltQC.TARGET_READS,
             sequenced_at=datetime.datetime.now(),
         )
