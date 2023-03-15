@@ -1742,5 +1742,5 @@ def store_with_multiple_cases_and_samples(
 def store_with_panels(store: Store, helpers: StoreHelpers):
     helpers.ensure_panel(store=store, panel_id="panel1", customer_id="cust000")
     helpers.ensure_panel(store=store, panel_id="panel2", customer_id="cust000")
-
+    helpers.ensure_panel(store=store, panel_id="panel3", customer_id="cust000")
     yield store

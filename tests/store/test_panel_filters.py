@@ -1,3 +1,5 @@
+from sqlalchemy.orm import Query
+
 from cg.store.api.core import Store
 from cg.store.models import Panel
 from cg.store.panel_filters import filter_panel_by_abbrev
@@ -15,13 +17,19 @@ def test_filter_panel_by_abbrev_returns_correct_panel(store_with_panels: Store):
     assert isinstance(panel, Panel)
 
     # WHEN finding the panel by abbreviation
-    filtered_panel = filter_panel_by_abbrev(
+    filtered_panel_query: Query = filter_panel_by_abbrev(
         panels=store_with_panels._get_panel_query(),
         abbreviation=panel.abbrev,
-    ).first()
+    )
 
-    # THEN the filtered panel should be of the correct instance and have the correct abbreviation
+    # THEN the result is a query
+    assert isinstance(filtered_panel_query, Query)
+
+    # THEN the filtered panel is a Panel
+    filtered_panel: Panel = filtered_panel_query.first()
     assert isinstance(filtered_panel, Panel)
+
+    # THEN the filtered panel has the same abbreviation as the original panel
     assert filtered_panel.abbrev == panel.abbrev
 
 
@@ -29,11 +37,14 @@ def test_filter_panel_by_abbrev_returns_none_when_abbrev_does_not_exist(store_wi
     """Test finding a panel by abbreviation when the abbreviation does not exist in the store."""
 
     # GIVEN a store with panels
-    panel_query = store_with_panels._get_panel_query()
+    panel_query: Query = store_with_panels._get_panel_query()
     assert panel_query.count() > 0
 
     # WHEN finding a panel by an abbreviation that does not exist
-    filtered_panels = filter_panel_by_abbrev(panel_query, "nonexistent_abbrev").all()
+    filtered_panels_query: Query = filter_panel_by_abbrev(panel_query, "nonexistent_abbrev")
+
+    # THEN the result is a query
+    assert isinstance(filtered_panels_query, Query)
 
     # THEN no panels should be returned
-    assert len(filtered_panels) == 0
+    assert not filtered_panels_query.all()

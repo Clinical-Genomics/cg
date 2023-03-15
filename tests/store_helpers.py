@@ -12,7 +12,7 @@ from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store, models
-from cg.store.models import Flowcell, Bed, BedVersion, Sample
+from cg.store.models import Flowcell, Bed, BedVersion, Panel, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -300,7 +300,7 @@ class StoreHelpers:
     ) -> models.Panel:
         """Utility function to add a panel to use in tests."""
         customer = StoreHelpers.ensure_customer(store, customer_id)
-        panel = store.get_panel_by_abbreviation(panel_id)
+        panel: Panel = store.get_panel_by_abbreviation(abbreviation=panel_id)
         if not panel:
             panel = store.add_panel(
                 customer=customer,
