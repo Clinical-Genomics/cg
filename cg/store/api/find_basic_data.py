@@ -35,7 +35,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_application_by_tag(self, tag: str) -> Application:
         """Return an application by tag."""
         return apply_application_filter(
-            applications=self._get_application_query(),
+            applications=self._get_query(table=Application),
             filter_functions=[ApplicationFilter.FILTER_BY_TAG],
             tag=tag,
         ).first()
@@ -44,7 +44,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return applications by prep category."""
         return (
             apply_application_filter(
-                applications=self._get_application_query(),
+                applications=self._get_query(table=Application),
                 filter_functions=[ApplicationFilter.FILTER_BY_PREP_CATEGORY],
                 prep_category=prep_category,
             )
@@ -56,7 +56,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return applications that are not archived."""
         return (
             apply_application_filter(
-                applications=self._get_application_query(),
+                applications=self._get_query(table=Application),
                 filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
             )
             .order_by(self.Application.prep_category, self.Application.tag)
@@ -69,7 +69,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return applications by prep category that are not archived."""
         return (
             apply_application_filter(
-                applications=self._get_application_query(),
+                applications=self._get_query(table=Application),
                 filter_functions=[
                     ApplicationFilter.FILTER_BY_PREP_CATEGORY,
                     ApplicationFilter.FILTER_IS_NOT_ARCHIVED,
@@ -86,7 +86,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return applications by prep category that are archived."""
         return (
             apply_application_filter(
-                applications=self._get_application_query(),
+                applications=self._get_query(table=Application),
                 filter_functions=[
                     ApplicationFilter.FILTER_BY_PREP_CATEGORY,
                     ApplicationFilter.FILTER_IS_ARCHIVED,
@@ -100,7 +100,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_applications(self) -> List[Application]:
         """Return all applications."""
         return (
-            self._get_application_query()
+            self._get_query(table=Application)
             .order_by(self.Application.prep_category, self.Application.tag)
             .all()
         )

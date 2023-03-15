@@ -96,7 +96,9 @@ def test_filter_application_is_not_archived(
 
     # WHEN getting an application that is not archived
     application: Query = filter_applications_is_not_archived(
-        applications=store_with_an_application_with_and_without_attributes._get_application_query()
+        applications=store_with_an_application_with_and_without_attributes._get_query(
+            table=Application
+        )
     )
 
     # ASSERT that application is a query

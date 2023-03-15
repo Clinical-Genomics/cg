@@ -162,7 +162,7 @@ def test_get_bed_version_query(base_store: Store):
     # GIVEN a store with bed versions records
 
     # WHEN getting the query for the bed versions
-    bed_version_query: Query = base_store._get_bed_version_query()
+    bed_version_query: Query = base_store._get_query(table=BedVersion)
 
     # THEN a query should be returned
     assert isinstance(bed_version_query, Query)
