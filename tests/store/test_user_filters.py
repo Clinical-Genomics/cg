@@ -7,12 +7,12 @@ def test_filter_user_by_email_returns_correct_user(store_with_users: Store):
     """Test getting user by email."""
 
     # GIVEN a store with a user
-    user: User = store_with_users._get_user_query().first()
+    user: User = store_with_users._get_query(table=User).first()
     assert user
 
     # WHEN retrieving the user by email
     filtered_user: User = filter_user_by_email(
-        users=store_with_users._get_user_query(),
+        users=store_with_users._get_query(table=User),
         email=user.email,
     ).first()
 
@@ -32,7 +32,7 @@ def test_filter_user_by_email_returns_none_for_nonexisting_email(
 
     # WHEN retrieving the user by email
     filtered_user: User = filter_user_by_email(
-        users=store_with_users._get_user_query(),
+        users=store_with_users._get_query(table=User),
         email=non_existent_email,
     ).first()
 
@@ -45,7 +45,7 @@ def test_filter_user_by_email_none_returns_none(store_with_users: Store):
 
     # WHEN retrieving the user by email None
     filtered_user: User = filter_user_by_email(
-        users=store_with_users._get_user_query(),
+        users=store_with_users._get_query(table=User),
         email=None,
     ).first()
 

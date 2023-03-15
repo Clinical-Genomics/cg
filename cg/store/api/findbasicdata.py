@@ -29,11 +29,7 @@ from cg.store.user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
-    """Contains methods to find basic data model instances"""
-
-    def _get_application_query(self) -> Query:
-        """Get a query for applications."""
-        return self.query(Application)
+    """Contains methods to find basic data model instances."""
 
     def application(self, tag: str) -> Application:
         """Fetch an application from the store."""
@@ -41,7 +37,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def applications(self, *, category=None, archived=None):
         """Fetch all applications."""
-        records = self._get_application_query()
+        records = self._get_query(table=Application)
         if category:
             records = records.filter_by(prep_category=category)
         if archived is not None:
@@ -66,7 +62,7 @@ class FindBasicDataHandler(BaseHandler):
         return apply_bed_filter(
             beds=self._get_query(table=Bed),
             bed_name=bed_name,
-            functions=[BedFilter.FILTER_BY_NAME],
+            filter_functions=[BedFilter.FILTER_BY_NAME],
         ).first()
 
     def get_active_beds(self) -> Query:
@@ -84,29 +80,13 @@ class FindBasicDataHandler(BaseHandler):
         bed: Optional[Bed] = self.get_bed_by_name(bed_name=bed_name)
         return bed.versions[-1] if bed and bed.versions else None
 
-    def _get_customer_query(self) -> Query:
-        """Return customer query."""
-        return self.Customer.query
-
     def get_customer_by_customer_id(self, customer_id: str) -> Customer:
         """Return customer with customer id."""
         return apply_customer_filter(
             filter_functions=[CustomerFilter.FILTER_BY_INTERNAL_ID],
-            customers=self._get_customer_query(),
+            customers=self._get_query(table=Customer),
             customer_id=customer_id,
         ).first()
-
-    def get_customers(self) -> List[Customer]:
-        """Return costumers."""
-        return self._get_customer_query().all()
-
-    def _get_collaboration_query(self) -> Query:
-        """Returns a collaboration query."""
-        return self.Collaboration.query
-
-    def _get_user_query(self) -> Query:
-        """Returns a user query."""
-        return self.User.query
 
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
         """Fetch a customer group by internal id from the store."""
@@ -138,14 +118,18 @@ class FindBasicDataHandler(BaseHandler):
     def get_organism_by_internal_id(self, internal_id: str) -> Organism:
         """Find an organism by internal id."""
         return apply_organism_filter(
-            organisms=self._get_organism_query(),
+            organisms=self._get_query(table=Organism),
             filter_functions=[OrganismFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
 
     def get_all_organisms(self) -> List[Organism]:
         """Return all organisms ordered by organism internal id."""
-        return self._get_organism_query().order_by(Organism.internal_id)
+        return self._get_query(table=Organism).order_by(Organism.internal_id)
+
+    def get_customers(self) -> List[Customer]:
+        """Return costumers."""
+        return self._get_query(table=Customer).all()
 
     def panel(self, abbrev):
         """Find a panel by abbreviation."""
@@ -158,5 +142,7 @@ class FindBasicDataHandler(BaseHandler):
     def get_user_by_email(self, email: str) -> User:
         """Return a user by email from the database."""
         return apply_user_filter(
-            users=self._get_user_query(), email=email, filter_functions=[UserFilter.FILTER_BY_EMAIL]
+            users=self._get_query(table=User),
+            email=email,
+            filter_functions=[UserFilter.FILTER_BY_EMAIL],
         ).first()

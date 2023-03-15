@@ -356,17 +356,13 @@ class FindBusinessDataHandler(BaseHandler):
         self.commit()
         return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
-    def _get_invoice_query(self) -> Query:
-        """Return invoice query."""
-        return self.Invoice.query
-
     def _get_invoices(self) -> List[Invoice]:
         """Fetch all invoices."""
-        return self._get_invoice_query()
+        return self._get_query(table=Invoice)
 
     def get_invoices_by_status(self, is_invoiced: bool = None) -> List[Invoice]:
         """Fetch invoices by invoiced status."""
-        invoices: Query = self._get_invoice_query()
+        invoices: Query = self._get_query(table=Invoice)
         if is_invoiced:
             return apply_invoice_filter(
                 invoices=invoices, filter_functions=[InvoiceFilter.FILTER_BY_INVOICED]
@@ -378,7 +374,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_invoice_by_id(self, invoice_id: int) -> Invoice:
         """Return an invoice."""
-        invoices: Query = self._get_invoice_query()
+        invoices: Query = self._get_query(table=Invoice)
         return apply_invoice_filter(
             invoices=invoices,
             invoice_id=invoice_id,
@@ -390,12 +386,12 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Union[Pool, Sample]]:
         """Return all pools and samples for an invoice."""
         pools: List[Pool] = apply_pool_filter(
-            pools=self._get_pool_query(),
+            pools=self._get_query(table=Pool),
             invoice_id=invoice_id,
             filter_functions=[PoolFilter.FILTER_BY_INVOICE_ID],
         ).all()
         samples: List[Sample] = apply_sample_filter(
-            samples=self._get_sample_query(),
+            samples=self._get_query(table=Sample),
             invoice_id=invoice_id,
             filter_functions=[SampleFilter.FILTER_BY_INVOICE_ID],
         ).all()
@@ -411,7 +407,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
-        query: Query = self._get_invoice_query()
+        query: Query = self._get_query(table=Invoice)
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
@@ -419,7 +415,7 @@ class FindBusinessDataHandler(BaseHandler):
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> Query:
         """Fetch all the pools for a customer."""
-        records: Query = self._get_pool_query()
+        records: Query = self._get_query(table=Pool)
 
         if customers:
             customer_ids = [customer.id for customer in customers]
@@ -433,17 +429,9 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records.order_by(Pool.created_at.desc())
 
-    def _get_pool_query(self) -> Query:
-        """Return pool query."""
-        return self.Pool.query
-
-    def _get_sample_query(self) -> Query:
-        """Return sample query."""
-        return self.Sample.query
-
     def get_pool_by_entry_id(self, entry_id: int) -> Pool:
         """Return a pool by entry id."""
-        pools = self._get_pool_query()
+        pools = self._get_query(table=Pool)
         return apply_pool_filter(
             pools=pools, entry_id=entry_id, filter_functions=[PoolFilter.FILTER_BY_ENTRY_ID]
         ).first()

@@ -31,10 +31,6 @@ from cg.store.filters.status_application_filters import apply_application_filter
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database."""
 
-    def _get_application_query(self) -> Query:
-        """Get query for application."""
-        return self.Application.query
-
     def _get_join_sample_application_version_query(self, query: Query) -> Query:
         """Join sample to application version."""
         return query.join(Sample.application_version, ApplicationVersion.application)
@@ -42,7 +38,7 @@ class StatusHandler(BaseHandler):
     def get_all_samples_to_receive(self, external: bool = False) -> List[Sample]:
         """Return samples to receive."""
         records: Query = self._get_join_sample_application_version_query(
-            query=self._get_sample_query()
+            query=self._get_query(table=Sample)
         )
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_NOT_RECEIVED,
@@ -65,7 +61,7 @@ class StatusHandler(BaseHandler):
     def get_all_samples_to_prepare(self) -> List[Sample]:
         """Return samples to prepare."""
         records: Query = self._get_join_sample_application_version_query(
-            query=self._get_sample_query()
+            query=self._get_query(table=Sample)
         )
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_RECEIVED,
@@ -85,7 +81,7 @@ class StatusHandler(BaseHandler):
     def get_all_samples_to_sequence(self) -> List[Sample]:
         """Return samples in sequencing."""
         records: Query = self._get_join_sample_application_version_query(
-            query=self._get_sample_query()
+            query=self._get_query(table=Sample)
         )
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_PREPARED,
@@ -275,14 +271,6 @@ class StatusHandler(BaseHandler):
             date=date_threshold,
         ).all()
 
-    def _get_sample_query(self) -> Query:
-        """Return sample query."""
-        return self.query(Sample)
-
-    def _get_pool_query(self) -> Query:
-        """Return Pool query."""
-        return self.query(Pool)
-
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
         """Return a sample by entry id."""
         return apply_sample_filter(
@@ -303,7 +291,7 @@ class StatusHandler(BaseHandler):
         """Return all samples by lims id."""
         return apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
-            samples=self._get_sample_query(),
+            samples=self._get_query(table=Sample),
             internal_id=internal_id,
         ).all()
 
@@ -762,7 +750,7 @@ class StatusHandler(BaseHandler):
 
     def get_samples_to_deliver(self) -> List[Sample]:
         """Return all samples not delivered."""
-        records = self._get_sample_query()
+        records = self._get_query(table=Sample)
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_SEQUENCED,
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
@@ -778,7 +766,7 @@ class StatusHandler(BaseHandler):
 
     def get_samples_not_delivered(self) -> List[Sample]:
         """Return samples not delivered."""
-        records = self._get_sample_query()
+        records = self._get_query(table=Sample)
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
             SampleFilter.FILTER_IS_NOT_DELIVERED,
@@ -793,7 +781,7 @@ class StatusHandler(BaseHandler):
     def get_samples_not_invoiced(self) -> List[Sample]:
         """Return all samples that have  not been invoiced, excluding those that
         have been down sampled."""
-        records = self._get_sample_query()
+        records = self._get_query(table=Sample)
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_HAS_NO_INVOICE_ID,
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
@@ -809,7 +797,7 @@ class StatusHandler(BaseHandler):
         """Return all samples that have not been down sampled."""
         return apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED],
-            samples=self._get_sample_query(),
+            samples=self._get_query(table=Sample),
         ).all()
 
     def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
@@ -823,7 +811,7 @@ class StatusHandler(BaseHandler):
 
         records: Query = apply_sample_filter(
             filter_functions=sample_filter_functions,
-            samples=self._get_sample_query(),
+            samples=self._get_query(table=Sample),
         )
 
         customers_to_invoice = [
