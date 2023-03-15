@@ -9,7 +9,7 @@ def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: s
 
     # WHEN retrieving the collaboration
     collaboration: Collaboration = filter_collaboration_by_internal_id(
-        collaborations=base_store._get_collaboration_query(),
+        collaborations=base_store._get_query(table=Collaboration),
         internal_id=collaboration_id,
     ).first()
 
@@ -26,7 +26,7 @@ def test_get_collaboration_by_internal_id_wrong_name(base_store: Store, collabor
 
     # WHEN attempting to retrieve a non-existing collaboration
     collaboration: Collaboration = filter_collaboration_by_internal_id(
-        collaborations=base_store._get_collaboration_query(),
+        collaborations=base_store._get_query(table=Collaboration),
         internal_id="missing_collaboration",
     ).first()
 

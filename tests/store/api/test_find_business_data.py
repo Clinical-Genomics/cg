@@ -35,25 +35,13 @@ def test_find_analysis_via_date(
     assert db_analysis == analysis
 
 
-def test_get_flow_cell_query(re_sequenced_sample_store: Store):
-    """Test function to return the flow cell query from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN getting the query for the flow cells
-    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_query()
-
-    # THEN a query should be returned
-    assert isinstance(flow_cell_query, Query)
-
-
 def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
     """Test function to return the flow cell sample links query from the database."""
 
     # GIVEN a store with two flow cells
 
     # WHEN getting the query for the flow cells
-    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_sample_links_query()
+    flow_cell_query: Query = re_sequenced_sample_store._get_join_flow_cell_sample_links_query()
 
     # THEN a query should be returned
     assert isinstance(flow_cell_query, Query)
