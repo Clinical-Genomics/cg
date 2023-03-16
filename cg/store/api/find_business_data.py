@@ -420,6 +420,10 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[PoolFilter.FILTER_BY_NAME_ENQUIRY],
         ).all()
 
+    def get_pools(self) -> List[Pool]:
+        """Return all the pools."""
+        return self._get_query(table=Pool).all()
+
     def get_pools_by_order_enquiry(self, *, order_enquiry: str = None) -> List[Pool]:
         """Return all the pools with an order fitting the enquiry."""
         return apply_pool_filter(

@@ -18,7 +18,7 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application
+from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
@@ -27,8 +27,7 @@ from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
-
-from cg.store.models import Flowcell
+from cg.store.api.api_helpers import get_pools_to_render
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -281,19 +280,9 @@ def pools():
     customer_objs: Optional[List[Customer]] = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
-    pools_q: List[Pool] = (
-        db.get_pools_by_customer_id(customers=customer_objs)
-        if customer_objs
-        else db._get_query(table=Pool)
+    pools_q: List[Pool] = get_pools_to_render(
+        customers=customer_objs, enquiry=request.args.get("enquiry")
     )
-    enquiry = request.args.get("enquiry")
-    if enquiry:
-        pools_q: List[Pool] = list(
-            set(
-                db.get_pools_by_name_enquiry(name_enquiry=enquiry)
-                & set(db.get_pools_by_order_enquiry(order_enquiry=enquiry))
-            )
-        )
 
     data = [pool_obj.to_dict() for pool_obj in pools_q[:30]]
     return jsonify(pools=data, total=len(pools_q))
