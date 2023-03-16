@@ -103,13 +103,13 @@ class HousekeeperAPI:
         if isinstance(tags, str):
             tags: List[str] = [tags]
         for tag_name in tags:
-            if not self.tag(tag_name):
+            if not self.get_tag(tag_name):
                 self.add_tag(tag_name)
 
         new_file: File = self.new_file(
             path=str(Path(path).absolute()),
             to_archive=to_archive,
-            tags=[self.tag(tag_name) for tag_name in tags],
+            tags=[self.get_tag(tag_name) for tag_name in tags],
         )
 
         new_file.version: Version = version_obj
@@ -260,7 +260,7 @@ class HousekeeperAPI:
         self.add_commit(tag_obj)
         return tag_obj
 
-    def tag(self, name: str) -> models.Tag:
+    def get_tag(self, name: str) -> models.Tag:
         """Fetch a tag."""
         return self._store.get_tag(name)
 
