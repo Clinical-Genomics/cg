@@ -597,3 +597,29 @@ def test_is_case_external_false(base_store: Store, case_obj: Family, sample_id: 
 
     # THEN the return value should be False
     assert not is_external
+
+
+def test_get_invoice_by_status(store_with_an_invoice_with_and_without_attributes: Store):
+    """Test that invoices can be fetched by status."""
+    # GIVEN a database with two invoices of which one has attributes
+
+    # WHEN fetching the invoice by status
+    invoices: List[
+        Invoice
+    ] = store_with_an_invoice_with_and_without_attributes.get_invoices_by_status(is_invoiced=True)
+
+    # THEN one invoice should be returned
+    assert invoices and len(invoices) == 1 and invoices[0].invoiced_at
+
+
+def test_get_invoice_by_id(store_with_an_invoice_with_and_without_attributes: Store):
+    """Test that invoices can be fetched by invoice id."""
+    # GIVEN a database with two invoices of which one has attributes
+
+    # WHEN fetching the invoice by invoice id
+    invoice: Invoice = store_with_an_invoice_with_and_without_attributes.get_invoice_by_entry_id(
+        entry_id=1
+    )
+
+    # THEN one invoice should be returned
+    assert invoice and invoice.id == 1

@@ -4,9 +4,9 @@ from sqlalchemy.orm import Query
 from cg.store.models import Invoice
 
 
-def filter_invoices_by_invoice_id(invoices: Query, invoice_id: int, **kwargs) -> Query:
+def filter_invoices_by_invoice_id(invoices: Query, entry_id: int, **kwargs) -> Query:
     """Return invoices by invoice id."""
-    return invoices.filter(Invoice.id == invoice_id)
+    return invoices.filter(Invoice.id == entry_id)
 
 
 def filter_invoices_invoiced(invoices: Query, **kwargs) -> Query:
@@ -22,12 +22,12 @@ def filter_invoices_not_invoiced(invoices: Query, **kwargs) -> Query:
 def apply_invoice_filter(
     filter_functions: List[str],
     invoices: Query,
-    invoice_id: Optional[int] = None,
+    entry_id: Optional[int] = None,
 ) -> Query:
     """Apply filtering functions to the invoice queries and return filtered results."""
 
     for function in filter_functions:
-        invoices: Query = function(invoices=invoices, invoice_id=invoice_id)
+        invoices: Query = function(invoices=invoices, entry_id=entry_id)
     return invoices
 
 
