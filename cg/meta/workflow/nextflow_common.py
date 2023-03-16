@@ -143,13 +143,13 @@ class NextflowAnalysisAPI:
     ) -> List[str]:
         """Returns a nextflow run command given a dictionary with arguments."""
 
-        run_options: List[str] = build_command_from_dict(
+        nextflow_options: List[str] = build_command_from_dict(
             options=dict(
                 (f"-{arg}", command_args.get(arg, True)) for arg in ("bg", "quiet", "log", "config")
             ),
             exclude_true=True,
         )
-        nextflow_options: List[str] = build_command_from_dict(
+        run_options: List[str] = build_command_from_dict(
             options=dict(
                 (f"-{arg}", command_args.get(arg, None))
                 for arg in (
