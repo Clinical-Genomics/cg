@@ -62,12 +62,14 @@ class MockApplications:
         self.apptag_list = APPTAGS
         self.apptags = []
 
-    def all(self):
-        """Returning list of MockApplication instances"""
-        for apptag_dict in self.apptag_list:
-            apptag = MockApplication(apptag_dict["tag"], apptag_dict["prep_category"])
-            self.apptags.append(apptag)
-        return self.apptags
+    def __iter__(self):
+        """Returning an iterator over list of MockApplication instances"""
+        return iter(
+            [
+                MockApplication(apptag_dict["tag"], apptag_dict["prep_category"])
+                for apptag_dict in self.apptag_list
+            ]
+        )
 
 
 class MockStore:
@@ -78,7 +80,7 @@ class MockStore:
     def __init__(self):
         self.apptags = MockApplications()
 
-    def applications(self):
+    def get_applications(self):
         """Returning MockApplications instance"""
         return self.apptags
 

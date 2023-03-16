@@ -3,7 +3,8 @@ from typing import Iterable, List
 import click
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample, Customer, ApplicationVersion, Analysis
 from ansi.colour import fg
 from ansi.colour.fx import reset
 from tabulate import tabulate
@@ -59,7 +60,7 @@ def status():
 @click.pass_obj
 def analysis(context: CGConfig):
     """Which families will be analyzed?"""
-    records: List[models.Family] = context.status_db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+    records: List[Family] = context.status_db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
     for case_obj in records:
         click.echo(case_obj)
 
@@ -175,7 +176,7 @@ def cases(
 ):
     """progress of each case"""
     status_db: Store = context.status_db
-    records: List[models.Family] = status_db.cases(
+    records: List[Family] = status_db.cases(
         days=days,
         internal_id=internal_id,
         name=name,
@@ -355,7 +356,7 @@ def cases(
 def samples(context: CGConfig, skip: int):
     """View status of samples."""
     status_db: Store = context.status_db
-    records: Iterable[models.Sample] = status_db.samples().offset(skip).limit(30)
+    records: List[Sample] = status_db.get_all_samples()[skip : skip + 30]
     for record in records:
         message = f"{record.internal_id} ({record.customer.internal_id})"
         if record.sequenced_at:
@@ -380,7 +381,7 @@ def families(context: CGConfig, skip: int):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
     status_db: Store = context.status_db
-    records: List[models.Family] = status_db.families().offset(skip).limit(30)
+    records: List[Family] = status_db.families().offset(skip).limit(30)
     for case_obj in records:
         color = "red" if case_obj.priority_int > 1 else "blue"
         message = f"{case_obj.internal_id} ({case_obj.priority_int})"
