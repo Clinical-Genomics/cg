@@ -19,7 +19,7 @@ from cg.cli.workflow.nextflow.options import (
 )
 from cg.cli.workflow.rnafusion.options import OPTION_FROM_START, OPTION_STRANDEDNESS
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN
+from cg.constants.constants import DRY_RUN, MetaApis
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 def rnafusion(context: click.Context) -> None:
     """nf-core/rnafusion analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RnafusionAnalysisAPI(
         config=context.obj,
     )
 
@@ -50,7 +50,7 @@ rnafusion.add_command(resolve_compression)
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, strandedness: str, dry_run: bool) -> None:
     """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     LOG.info(f"Creating samplesheet file for {case_id}.")
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
@@ -89,7 +89,7 @@ def run(
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
-    analysis_api: RnafusionAnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
 
     command_args = {
@@ -185,7 +185,7 @@ def start(
 def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start full workflow for all cases ready for analysis."""
 
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
@@ -208,7 +208,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create a housekeeper deliverables file for given CASE ID."""
 
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -231,7 +231,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
@@ -272,7 +272,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished RNAFUSION analyses in Housekeeper."""
 
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
