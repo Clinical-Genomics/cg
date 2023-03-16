@@ -262,7 +262,7 @@ class HousekeeperAPI:
 
     def tag(self, name: str) -> models.Tag:
         """Fetch a tag."""
-        return self._store.tag(name)
+        return self._store.get_tag(name)
 
     @staticmethod
     def get_tag_names_from_file(file: File) -> List[str]:
