@@ -73,7 +73,6 @@ def family(
         LOG.info(f"Update data_delivery: {case.data_delivery or 'NA'} -> {data_delivery}")
         case.data_delivery = data_delivery
     if panels:
-
         for panel_abbreviation in panels:
             panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
             if panel is None:
