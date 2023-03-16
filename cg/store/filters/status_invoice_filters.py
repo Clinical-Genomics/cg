@@ -26,8 +26,8 @@ def apply_invoice_filter(
 ) -> Query:
     """Apply filtering functions to the invoice queries and return filtered results."""
 
-    for function in filter_functions:
-        invoices: Query = function(invoices=invoices, entry_id=entry_id)
+    for filter_function in filter_functions:
+        invoices: Query = filter_function(invoices=invoices, entry_id=entry_id)
     return invoices
 
 
