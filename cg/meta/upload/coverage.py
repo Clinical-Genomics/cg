@@ -3,7 +3,8 @@ import logging
 
 from cg.apps.coverage import ChanjoAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class UploadCoverageApi:
         self.hk_api = hk_api
         self.chanjo_api = chanjo_api
 
-    def data(self, analysis_obj: models.Analysis) -> dict:
+    def data(self, analysis_obj: Analysis) -> dict:
         """Get data for uploading coverage."""
         family_id = analysis_obj.family.internal_id
         data = {"family": family_id, "family_name": analysis_obj.family.name, "samples": []}

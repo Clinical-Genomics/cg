@@ -9,8 +9,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
-from cg.store import models
-from cg.store.models import Customer, Family
+from cg.store.models import Customer, Family, Organism, Sample
 
 
 class MicrobialSubmitter(Submitter):
@@ -76,7 +75,7 @@ class MicrobialSubmitter(Submitter):
         ordered: dt.datetime,
         items: List[dict],
         ticket_id: str,
-    ) -> [models.Sample]:
+    ) -> [Sample]:
         """Store microbial samples in the status database."""
 
         sample_objs = []
@@ -143,9 +142,7 @@ class MicrobialSubmitter(Submitter):
         for sample in samples:
             organism_id = sample.organism
             reference_genome = sample.reference_genome
-            organism: models.Organism = self.status.get_organism_by_internal_id(
-                internal_id=organism_id
-            )
+            organism: Organism = self.status.get_organism_by_internal_id(internal_id=organism_id)
             is_verified = (
                 organism and organism.reference_genome == reference_genome and organism.verified
             )

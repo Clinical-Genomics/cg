@@ -5,7 +5,7 @@ from cg.cli.clean import hk_case_bundle_files
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store import models
+from cg.store.models import Analysis
 from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 from cg.utils.date import get_date_days_ago
@@ -74,7 +74,7 @@ def test_clean_hk_case_files_single_analysis(
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
     pipeline: Pipeline = Pipeline.MIP_DNA
 
-    analysis: models.Analysis = helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(
         store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
     )
     bundle_name: str = analysis.family.internal_id
@@ -113,7 +113,7 @@ def test_clean_hk_case_files_analysis_with_protected_tag(
     date_days_ago: dt.datetime = get_date_days_ago(days_ago)
     pipeline: Pipeline = Pipeline.MIP_DNA
 
-    analysis: models.Analysis = helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(
         store=store, started_at=date_days_ago, completed_at=date_days_ago, pipeline=pipeline
     )
     bundle_name: str = analysis.family.internal_id
