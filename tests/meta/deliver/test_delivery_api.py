@@ -103,9 +103,7 @@ def test_get_case_files_from_version(
     sample_ids: Set[str] = set([sample.internal_id for sample in samples])
 
     # WHEN fetching the case files
-    case_files = deliver_api.get_case_files_from_version(
-        version=version, sample_ids=sample_ids
-    )
+    case_files = deliver_api.get_case_files_from_version(version=version, sample_ids=sample_ids)
 
     # THEN we should only get the case specific files back
     nr_files: int = 0
@@ -142,9 +140,7 @@ def test_get_sample_files_from_version(
     assert len(version.files) == 2
 
     # WHEN fetching the sample specific files
-    sample_files = deliver_api.get_sample_files_from_version(
-        version_obj=version, sample_id="ADM1"
-    )
+    sample_files = deliver_api.get_sample_files_from_version(version_obj=version, sample_id="ADM1")
 
     # THEN assert that only the sample specific file was returned
     nr_files: int = 0

@@ -134,9 +134,7 @@ class DeliverAPI:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
         number_linked_files: int = 0
-        for file_path in self.get_case_files_from_version(
-            version=version, sample_ids=sample_ids
-        ):
+        for file_path in self.get_case_files_from_version(version=version, sample_ids=sample_ids):
             # Out path should include customer names
             out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
             if out_path.exists():
@@ -205,12 +203,13 @@ class DeliverAPI:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
         if not version:
+            LOG.warning("Version is None, cannot get files")
             return []
 
         if not version.files:
             LOG.warning(f"No files associated with version {version.id}")
             return []
-    
+
         file: hk_models.File
         for file in version.files:
             if not self.include_file_case(file, sample_ids=sample_ids):
