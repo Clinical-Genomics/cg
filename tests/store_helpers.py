@@ -28,7 +28,7 @@ from cg.store.models import (
     Panel,
     Pool,
     Sample,
-    User
+    User,
 )
 
 LOG = logging.getLogger(__name__)
