@@ -24,13 +24,13 @@ class StoreCheckers:
     def get_versions_from_store(store: Store, application_tag: str) -> List[ApplicationVersion]:
         """Gets all versions for the specified application"""
 
-        return store.application(application_tag).versions
+        return store.get_application_by_tag(tag=application_tag).versions
 
     @staticmethod
     def get_application_from_store(store: Store, application_tag: str) -> Application:
         """Gets the specified application"""
 
-        return store.application(application_tag)
+        return store.get_application_by_tag(tag=application_tag)
 
     @staticmethod
     def version_exists_in_store(store: Store, application: ApplicationVersionSchema):
@@ -302,6 +302,24 @@ def fixture_max_nr_of_cases() -> int:
 def fixture_max_nr_of_samples() -> int:
     """Return the number of maximum number of samples"""
     return 50
+
+
+@pytest.fixture(name="EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS")
+def fixture_expected_number_of_not_archived_applications() -> int:
+    """Return the number of expected number of not archived applications"""
+    return 4
+
+
+@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY")
+def fixture_expected_number_of_applications_with_prep_category() -> int:
+    """Return the number of expected number of applications with prep category"""
+    return 7
+
+
+@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")
+def fixture_expected_number_of_applications() -> int:
+    """Return the number of expected number of applications with prep category"""
+    return 7
 
 
 @pytest.fixture(name="store_with_samples_that_have_names")

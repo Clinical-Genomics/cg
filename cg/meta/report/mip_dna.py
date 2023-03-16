@@ -83,7 +83,7 @@ class MipDNAReportAPI(ReportAPI):
 
         case_sample = self.status_db.family_samples(case.internal_id)[0].sample
         lims_sample = self.get_lims_sample(case_sample.internal_id)
-        application = self.status_db.application(tag=lims_sample.get("application"))
+        application = self.status_db.get_application_by_tag(tag=lims_sample.get("application"))
 
         return application.analysis_type if application else None
 

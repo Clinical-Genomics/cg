@@ -80,7 +80,7 @@ def test_add_pool(rml_pool_store: Store):
     """Tests whether new pools are invoiced as default"""
     # GIVEN a valid customer and a valid application_version
     customer: Customer = rml_pool_store.get_customers()[0]
-    application = rml_pool_store.application(tag="RMLP05R800")
+    application = rml_pool_store.get_application_by_tag(tag="RMLP05R800")
     app_version = rml_pool_store.application_version(application=application, version=1)
 
     # WHEN adding a new pool
