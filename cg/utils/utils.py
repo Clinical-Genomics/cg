@@ -18,5 +18,5 @@ def build_command_from_dict(options: dict, exclude_true: bool = False) -> List[s
                 formatted_options.append(str(option_name))
             elif option_value:
                 formatted_options.append(str(option_name))
-                formatted_options.append(str(option_name))
+                formatted_options.append(str(option_value))
     return formatted_options
