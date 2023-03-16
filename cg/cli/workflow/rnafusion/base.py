@@ -19,6 +19,7 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_WORKDIR,
 )
 from cg.cli.workflow.rnafusion.options import OPTION_FROM_START, OPTION_STRANDEDNESS
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import CgError, DecompressionNeededError
@@ -73,6 +74,7 @@ def config_case(context: CGConfig, case_id: str, strandedness: str, dry_run: boo
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
+@OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
 @DRY_RUN
 @click.pass_obj
@@ -88,6 +90,7 @@ def run(
     config: str,
     params_file: str,
     revision: str,
+    compute_env: str,
     use_nextflow: bool,
     dry_run: bool,
 ) -> None:
@@ -111,7 +114,7 @@ def run(
             case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
         ),
         "name": case_id,
-        "compute-env": None,
+        "compute-env": compute_env,
         "revision": revision,
         "wait": "SUBMITTED",
     }
@@ -144,6 +147,7 @@ def run(
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
 @OPTION_REVISION
+@OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
 @DRY_RUN
 @click.pass_context
@@ -158,6 +162,7 @@ def start(
     config: str,
     params_file: str,
     revision: str,
+    compute_env: str,
     use_nextflow: bool,
     dry_run: bool,
 ) -> None:
@@ -182,6 +187,7 @@ def start(
         config=config,
         params_file=params_file,
         revision=revision,
+        compute_env=compute_env,
         use_nextflow=use_nextflow,
         dry_run=dry_run,
     )

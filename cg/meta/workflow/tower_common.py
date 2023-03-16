@@ -26,6 +26,7 @@ class TowerAnalysisAPI:
                     "config",
                     "name",
                     "revision",
+                    "compute-env",
                 )
             ),
             exclude_true=True,
