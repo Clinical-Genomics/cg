@@ -276,7 +276,7 @@ def sample_in_collaboration(sample_id):
 @BLUEPRINT.route("/pools")
 def pools():
     """Fetch pools."""
-    customer_objs: Optional[List[Customer]] = (
+    customers: Optional[List[Customer]] = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
     pools_q: List[Pool] = db.get_pools_to_render(
