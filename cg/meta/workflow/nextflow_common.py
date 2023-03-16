@@ -163,12 +163,7 @@ class NextflowAnalysisAPI:
             ),
             exclude_true=True,
         )
-        parameters = (
-            nextflow_options
-            + ["run", pipeline_path]
-            + run_options
-            + NextflowAnalysisAPI.get_nextflow_stdout_stderr(case_id=case_id, root_dir=root_dir)
-        )
+        parameters = nextflow_options + ["run", pipeline_path] + run_options
         return parameters
 
     @classmethod
