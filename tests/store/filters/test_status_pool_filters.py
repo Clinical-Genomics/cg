@@ -38,7 +38,13 @@ def test_filter_pools_is_delivered(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_is_not_delivered(
@@ -58,7 +64,13 @@ def test_filter_pools_is_not_delivered(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_is_received(
@@ -78,7 +90,13 @@ def test_filter_pools_is_received(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_is_not_received(
@@ -98,7 +116,13 @@ def test_filter_pools_is_not_received(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_do_not_invoice(
@@ -118,7 +142,13 @@ def test_filter_pools_do_not_invoice(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_do_invoice(
@@ -138,7 +168,13 @@ def test_filter_pools_do_invoice(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_by_invoice_id(
@@ -160,7 +196,13 @@ def test_filter_pools_by_invoice_id(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_without_invoice_id(
@@ -180,7 +222,13 @@ def test_filter_pools_without_invoice_id(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_by_name_enquiry(
@@ -201,7 +249,13 @@ def test_filter_pools_by_name_enquiry(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_by_order_enquiry(
@@ -222,7 +276,13 @@ def test_filter_pools_by_order_enquiry(
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 1 and pools.all()[0].name == name
+    assert pools.all()
+
+    # THEN only one pool should be returned
+    assert len(pools.all()) == 1
+
+    # THEN the pool should have the expected name
+    assert pools.all()[0].name == name
 
 
 def test_filter_pools_by_customer_id(
@@ -231,7 +291,7 @@ def test_filter_pools_by_customer_id(
 ):
     """Test that a pool is returned when there is a pool with a specific customer id."""
 
-    # GIVEN a store with two pools of which one has a customer id
+    # GIVEN a store with two pools of with the same customer
 
     # WHEN getting pools with customer id
     pools: Query = filter_pools_by_customer_id(
@@ -242,5 +302,11 @@ def test_filter_pools_by_customer_id(
     # ASSERT that the query is a Query
     assert isinstance(pools, Query)
 
-    # THEN pools should contain the test pool
-    assert pools.all() and len(pools.all()) == 2 and pools.all()[0].name == name
+    # THEN pools should be returned
+    assert pools.all()
+
+    # THEN two pools should be returned
+    assert len(pools.all()) == 2
+
+    # THEN the pool with the customer id should be returned
+    assert pools.all()[0].customer_id == 1
