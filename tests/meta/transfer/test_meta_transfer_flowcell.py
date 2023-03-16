@@ -25,7 +25,7 @@ def test_add_tags_to_housekeeper(
     # GIVEN transfer flow cell API
 
     # GIVEN no flow cell id tag in Housekeeper
-    assert transfer_flow_cell_api.hk.tag(name=flow_cell_id) is None
+    assert transfer_flow_cell_api.hk.get_tag(name=flow_cell_id) is None
 
     # WHEN adding tags to Housekeeper
     transfer_flow_cell_api._add_tags_to_housekeeper(
@@ -33,7 +33,7 @@ def test_add_tags_to_housekeeper(
     )
 
     # THEN tha tags should be added
-    assert transfer_flow_cell_api.hk.tag(name=flow_cell_id) is not None
+    assert transfer_flow_cell_api.hk.get_tag(name=flow_cell_id) is not None
 
 
 def test_add_flow_cell_to_status_db(

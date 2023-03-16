@@ -118,7 +118,9 @@ def fixture_microbial_store(
     )
 
     for sample_data in microbial_submitted_order["items"]:
-        application_version = base_store.application(sample_data["application"]).versions[0]
+        application_version = base_store.get_application_by_tag(
+            sample_data["application"]
+        ).versions[0]
         organism = base_store.Organism(
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
