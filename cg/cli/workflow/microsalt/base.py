@@ -13,7 +13,7 @@ from cg.exc import CgError
 from cg.io.controller import WriteStream, WriteFile
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Analysis, Sample
 from housekeeper.store.models import File
 from cg.meta.workflow.analysis import AnalysisAPI
 
@@ -90,9 +90,7 @@ def config_case(
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    sample_objs: List[models.Sample] = analysis_api.get_samples(
-        case_id=case_id, sample_id=sample_id
-    )
+    sample_objs: List[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
@@ -280,8 +278,8 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
     latest_analyses = list(
         analysis_api.status_db.latest_analyses()
-        .filter(models.Analysis.pipeline == Pipeline.MICROSALT)
-        .filter(models.Analysis.uploaded_at.is_(None))
+        .filter(Analysis.pipeline == Pipeline.MICROSALT)
+        .filter(Analysis.uploaded_at.is_(None))
     )
     for analysis in latest_analyses:
         unique_id: str = analysis.family.internal_id

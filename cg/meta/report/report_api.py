@@ -29,7 +29,7 @@ from cg.models.report.report import (
     ScoutReportFiles,
 )
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
-from cg.store import models
+from cg.store.models import Analysis, Application, Family, Sample
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 LOG = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ class ReportAPI(MetaAPI):
         template = env.get_template(template_name)
         return template.render(**report_data)
 
-    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> List[models.Family]:
+    def get_cases_without_delivery_report(self, pipeline: Pipeline) -> List[Family]:
         """Returns a list of cases that has been stored and need a delivery report."""
 
         stored_cases = []
@@ -145,7 +145,7 @@ class ReportAPI(MetaAPI):
         ]
 
         for analysis_obj in analyses:
-            case: models.Family = analysis_obj.family
+            case: Family = analysis_obj.family
             last_version: hk_models.Version = self.housekeeper_api.last_version(case.internal_id)
             hk_file: hk_models.File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None
@@ -160,7 +160,7 @@ class ReportAPI(MetaAPI):
 
         return stored_cases
 
-    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> List[models.Family]:
+    def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> List[Family]:
         """Returns a list of cases that need a delivery report to be uploaded."""
 
         analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline)[
@@ -169,18 +169,18 @@ class ReportAPI(MetaAPI):
 
         return [analysis_obj.family for analysis_obj in analyses]
 
-    def update_delivery_report_date(self, case: models.Family, analysis_date: datetime) -> None:
+    def update_delivery_report_date(self, case: Family, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created."""
 
-        analysis: models.Analysis = self.status_db.analysis(case, analysis_date)
+        analysis: Analysis = self.status_db.analysis(case, analysis_date)
         analysis.delivery_report_created_at = datetime.now()
         self.status_db.commit()
 
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""
 
-        case: models.Family = self.status_db.family(case_id)
-        analysis: models.Analysis = self.status_db.analysis(case, analysis_date)
+        case: Family = self.status_db.family(case_id)
+        analysis: Analysis = self.status_db.analysis(case, analysis_date)
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)
 
@@ -216,7 +216,7 @@ class ReportAPI(MetaAPI):
         return report_data
 
     @staticmethod
-    def get_customer_data(case: models.Family) -> CustomerModel:
+    def get_customer_data(case: Family) -> CustomerModel:
         """Returns customer validated attributes retrieved from status DB."""
 
         return CustomerModel(
@@ -227,7 +227,7 @@ class ReportAPI(MetaAPI):
         )
 
     @staticmethod
-    def get_report_version(analysis: models.Analysis) -> int:
+    def get_report_version(analysis: Analysis) -> int:
         """
         Returns the version of the given analysis. The version of the first analysis is 1 and subsequent reruns
         increase it by 1.
@@ -242,8 +242,8 @@ class ReportAPI(MetaAPI):
 
     def get_case_data(
         self,
-        case: models.Family,
-        analysis: models.Analysis,
+        case: Family,
+        analysis: Analysis,
         analysis_metadata: AnalysisModel,
     ) -> CaseModel:
         """Returns case associated validated attributes."""
@@ -259,16 +259,14 @@ class ReportAPI(MetaAPI):
             applications=unique_applications,
         )
 
-    def get_samples_data(
-        self, case: models.Family, analysis_metadata: AnalysisModel
-    ) -> List[SampleModel]:
+    def get_samples_data(self, case: Family, analysis_metadata: AnalysisModel) -> List[SampleModel]:
         """Extracts all the samples associated to a specific case and their attributes."""
 
         samples = list()
-        case_samples: List[models.FamilySample] = self.status_db.family_samples(case.internal_id)
+        case_samples: List[FamilySample] = self.status_db.family_samples(case.internal_id)
 
         for case_sample in case_samples:
-            sample: models.Sample = case_sample.sample
+            sample: Sample = case_sample.sample
             lims_sample: Optional[dict] = self.get_lims_sample(sample.internal_id)
 
             samples.append(
@@ -303,7 +301,7 @@ class ReportAPI(MetaAPI):
     def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
 
-        application: models.Application = self.status_db.get_application_by_tag(
+        application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
 
@@ -347,8 +345,8 @@ class ReportAPI(MetaAPI):
 
     def get_case_analysis_data(
         self,
-        case: models.Family,
-        analysis: models.Analysis,
+        case: Family,
+        analysis: Analysis,
         analysis_metadata: AnalysisModel,
     ) -> DataAnalysisModel:
         """Retrieves the pipeline attributes used for data analysis."""
@@ -365,7 +363,7 @@ class ReportAPI(MetaAPI):
             scout_files=self.get_scout_uploaded_files(case),
         )
 
-    def get_scout_uploaded_files(self, case: models.Family) -> ScoutReportFiles:
+    def get_scout_uploaded_files(self, case: Family) -> ScoutReportFiles:
         """Extracts the files that will be uploaded to Scout."""
 
         return ScoutReportFiles(
@@ -376,7 +374,7 @@ class ReportAPI(MetaAPI):
         )
 
     @staticmethod
-    def get_sample_timestamp_data(sample: models.Sample) -> TimestampModel:
+    def get_sample_timestamp_data(sample: Sample) -> TimestampModel:
         """Retrieves the sample processing dates."""
 
         return TimestampModel(
@@ -388,15 +386,15 @@ class ReportAPI(MetaAPI):
 
     def get_sample_metadata(
         self,
-        case: models.Family,
-        sample: models.Sample,
+        case: Family,
+        sample: Sample,
         analysis_metadata: AnalysisModel,
     ) -> SampleMetadataModel:
         """Fetches the sample metadata to include in the report."""
 
         raise NotImplementedError
 
-    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
+    def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
         raise NotImplementedError

@@ -11,24 +11,24 @@ from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import (
-    Flowcell,
-    Bed,
-    BedVersion,
-    Customer,
-    Sample,
-    User,
+    Analysis,
     Application,
     ApplicationVersion,
+    Bed,
+    BedVersion,
     Collaboration,
+    Customer,
     Family,
-    Pool,
+    FamilySample,
+    Flowcell,
+    Invoice,
     Organism,
     Panel,
-    Analysis,
-    Invoice,
-    FamilySample,
+    Pool,
+    Sample,
+    User,
 )
 
 LOG = logging.getLogger(__name__)

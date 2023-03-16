@@ -5,7 +5,7 @@ from cg.constants.gene_panel import GENOME_BUILD_38
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Family
 from cg.utils import Process
 
 
@@ -60,6 +60,6 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
 
     def panel(self, case_id: str, genome_build: str = GENOME_BUILD_38) -> List[str]:
         """Create the aggregated gene panel file"""
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)

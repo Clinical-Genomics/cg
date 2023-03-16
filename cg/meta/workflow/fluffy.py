@@ -12,7 +12,7 @@ from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Family, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Links fastq files from Housekeeper to case working directory
         """
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         latest_flow_cell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:
@@ -118,17 +118,17 @@ class FluffyAnalysisAPI(AnalysisAPI):
         return self.lims_api.get_sample_attribute(lims_id=sample_id, key="concentration_sample")
 
     def get_sample_starlims_id(self, sample_id: str) -> str:
-        sample_obj: models.Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         return sample_obj.order
 
     def get_sample_sequenced_date(self, sample_id: str) -> Optional[dt.date]:
-        sample_obj: models.Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         sequenced_at: dt.datetime = sample_obj.sequenced_at
         if sequenced_at:
             return sequenced_at.date()
 
     def get_sample_control_status(self, sample_id: str) -> bool:
-        sample_obj: models.Sample = self.status_db.get_sample_by_internal_id(sample_id)
+        sample_obj: Sample = self.status_db.get_sample_by_internal_id(sample_id)
         return bool(sample_obj.control)
 
     def get_nr_of_header_lines_in_sample_sheet(
@@ -264,9 +264,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Create SampleSheet.csv file in working directory and add desired values to the file
         """
-        latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
-            family_id=case_id
-        )
+        latest_flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         sample_sheet_housekeeper_path = self.get_sample_sheet_housekeeper_path(
             flowcell_name=latest_flow_cell.name
         )
@@ -316,7 +314,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         ]
         self.process.run_command(command_args, dry_run=dry_run)
 
-    def get_cases_to_store(self) -> List[models.Family]:
+    def get_cases_to_store(self) -> List[Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
         return [

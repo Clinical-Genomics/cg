@@ -8,7 +8,8 @@ from housekeeper.store import models as hk_models
 
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class CleanAPI:
     ) -> Iterator[List[hk_models.File]]:
         """Get any bundle files for a specific version"""
 
-        analysis: models.Analysis
+        analysis: Analysis
         LOG.debug(
             f"number of {pipeline} analyses before: {before} : {self.status_db.get_analyses_before_date(pipeline=pipeline, before=before).count()}"
         )

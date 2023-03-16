@@ -6,15 +6,13 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.samples import (
     sample_class_for,
 )
-from cg.store import models
+from cg.store.models import Customer, Sample
 
 
 class OrderIn(BaseModel):
-    name: constr(min_length=2, max_length=models.Sample.order.property.columns[0].type.length)
+    name: constr(min_length=2, max_length=Sample.order.property.columns[0].type.length)
     comment: Optional[str]
-    customer: constr(
-        min_length=1, max_length=models.Customer.internal_id.property.columns[0].type.length
-    )
+    customer: constr(min_length=1, max_length=Customer.internal_id.property.columns[0].type.length)
     samples: conlist(Any, min_items=1)
     ticket: Optional[str]
 

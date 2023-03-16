@@ -9,7 +9,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.meta import MetaAPI
-from cg.store import models
+from cg.store.models import Analysis, Family
 
 
 LOG = logging.getLogger(__name__)
@@ -30,18 +30,18 @@ class UploadAPI(MetaAPI):
             status_db=config.status_db,
         )
 
-    def upload(self, ctx: click.Context, case_obj: models.Family, restart: bool) -> None:
+    def upload(self, ctx: click.Context, case_obj: Family, restart: bool) -> None:
         """Uploads pipeline specific analysis data and files"""
 
         raise NotImplementedError
 
-    def update_upload_started_at(self, analysis: models.Analysis) -> None:
+    def update_upload_started_at(self, analysis: Analysis) -> None:
         """Updates the upload_started_at field with the current local date and time"""
 
         analysis.upload_started_at = datetime.now()
         self.status_db.commit()
 
-    def update_uploaded_at(self, analysis: models.Analysis) -> None:
+    def update_uploaded_at(self, analysis: Analysis) -> None:
         """Updates the uploaded_at field with the current local date and time"""
 
         analysis.uploaded_at: datetime = datetime.now()
@@ -52,7 +52,7 @@ class UploadAPI(MetaAPI):
         )
 
     @staticmethod
-    def verify_analysis_upload(case_obj: models.Family, restart: bool) -> None:
+    def verify_analysis_upload(case_obj: Family, restart: bool) -> None:
         """Verifies the state of an analysis upload in StatusDB"""
 
         if not case_obj.data_delivery:
@@ -63,7 +63,7 @@ class UploadAPI(MetaAPI):
             LOG.error(f"There is no analysis for case: {case_obj.internal_id}")
             raise AnalysisUploadError
 
-        analysis_obj: models.Analysis = case_obj.analyses[0]
+        analysis_obj: Analysis = case_obj.analyses[0]
         if analysis_obj.uploaded_at is not None:
             LOG.error(f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}")
             raise AnalysisAlreadyUploadedError
