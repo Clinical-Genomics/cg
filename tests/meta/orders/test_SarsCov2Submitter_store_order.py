@@ -8,7 +8,8 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Sample
 from cg.store.models import Customer
 from tests.store_helpers import StoreHelpers
 import datetime as dt
@@ -42,7 +43,5 @@ def test_store_items_in_status_control_has_stored_value(
     customer: Customer = base_store.get_customer_by_customer_id(customer_id=order.customer)
     sample: SarsCov2Sample
     for sample in order.samples:
-        stored_sample: models.Sample = base_store.find_samples(
-            customer=customer, name=sample.name
-        ).first()
+        stored_sample: Sample = base_store.find_samples(customer=customer, name=sample.name).first()
         assert stored_sample.control == control_value
