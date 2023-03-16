@@ -27,7 +27,7 @@ from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
-from cg.store.api.api_helpers import get_pools_to_render
+from cg.server.helpers.api_helpers import get_pools_to_render
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
