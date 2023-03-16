@@ -14,6 +14,7 @@ class OrderIn(BaseModel):
     comment: Optional[str]
     customer: constr(min_length=1, max_length=Customer.internal_id.property.columns[0].type.length)
     samples: conlist(Any, min_items=1)
+    skip_reception_control: Optional[bool] = False
     ticket: Optional[str]
 
     @classmethod
@@ -37,6 +38,7 @@ class OrderIn(BaseModel):
         sample: dict
         for sample in self.samples:
             parsed_sample = sample_class_for(project=project).parse_obj(sample)
+            parsed_sample.customer = self.customer
+            parsed_sample.skip_reception_control = self.skip_reception_control
             parsed_samples.append(parsed_sample)
-
         self.samples = parsed_samples

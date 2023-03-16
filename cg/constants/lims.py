@@ -39,6 +39,7 @@ PROP2UDF = {
     "selection_criteria": "Selection Criteria",
     "sequencing_qc_pass": "Passed Sequencing QC",
     "sex": "Gender",
+    "skip_reception_control": "Skip Reception Control QC",
     "source": "Source",
     "target_reads": "Reads missing (M)",
     "tissue_block_size": "Tissue Block Size",

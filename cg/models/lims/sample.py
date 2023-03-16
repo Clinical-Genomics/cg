@@ -44,6 +44,7 @@ class Udf(BaseModel):
     rml_plate_name: Optional[str]
     selection_criteria: Optional[str]
     sex: Literal["M", "F", "unknown"] = "unknown"
+    skip_reception_control: Optional[bool] = False
     source: str = "NA"
     tissue_block_size: Optional[str]
     tumour: Optional[bool] = False
