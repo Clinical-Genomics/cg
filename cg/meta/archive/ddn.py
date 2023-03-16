@@ -1,4 +1,4 @@
-"""Module for archiving and retrieving folders via DDN."""
+"""Module for archiving and retrieving folders via DDN Dataflow."""
 from pathlib import Path
 from typing import Dict, List
 from urllib.parse import urljoin
@@ -10,8 +10,8 @@ from cg.io.controller import APIRequest, ReadStream
 from cg.models.cg_config import DDNConfig
 
 
-class DDNApi:
-    """Class for archiving and retrieving folders via DDN."""
+class DDNDataFlowApi:
+    """Class for archiving and retrieving folders via DDN Dataflow."""
 
     def __init__(self, config: DDNConfig):
         self.database_name: str = config.database_name
@@ -51,7 +51,7 @@ class DDNApi:
         self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
 
     def _refresh_auth_token(self) -> None:
-        """Updates the auth token via by providing the refresh token to the REST-API."""
+        """Updates the auth token by providing the refresh token to the REST-API."""
         response: Response = APIRequest.api_request_from_content(
             api_method=APIMethods.POST,
             url=urljoin(base=self.url, url="auth/token/refresh"),
@@ -68,15 +68,13 @@ class DDNApi:
 
     @property
     def auth_header(self) -> Dict[str, str]:
-        """Returns an authorisation header based on the current auth token, or updates it if
-        needed."""
+        """Returns an authorization header based on the current auth token, or updates it if needed."""
         if datetime.now() > self.token_expiration:
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
     def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
-        """Archives all folders provided, to their corresponding destination, as given by the
-        dict."""
+        """Archives all folders provided, to their corresponding destination, as given by dict."""
         payload: dict = {
             "pathInfo": self._format_paths_archive(
                 sources_and_destinations=sources_and_destinations
@@ -94,8 +92,7 @@ class DDNApi:
         return response.ok
 
     def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
-        """Retrieves all folders provided, to their corresponding destination, as given by the
-        dict."""
+        """Retrieves all folders provided, to their corresponding destination, as given by the dict."""
         payload: dict = {
             "pathInfo": self._format_paths_retrieve(
                 sources_and_destinations=sources_and_destinations
@@ -114,8 +111,7 @@ class DDNApi:
     def _format_paths_archive(
         self, sources_and_destinations: Dict[Path, Path]
     ) -> List[Dict[str, str]]:
-        """Formats the given archiving-dictionary into the data structure specified by the
-        REST-API."""
+        """Formats the given archiving-dictionary into the data structure specified by the REST-API."""
         return [
             {
                 "source": Path(self.local_storage, source.relative_to("/home")).as_posix(),
