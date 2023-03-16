@@ -158,7 +158,6 @@ class NextflowAnalysisAPI:
                     "profile",
                     "with-tower",
                     "params-file",
-                    "revision",
                 )
             ),
             exclude_true=True,
