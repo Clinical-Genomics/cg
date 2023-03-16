@@ -303,7 +303,7 @@ class ReportAPI(MetaAPI):
     def get_sample_application_data(self, lims_sample: dict) -> ApplicationModel:
         """Retrieves the analysis application attributes."""
 
-        application: models.Application = self.status_db.application(
+        application: models.Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
 

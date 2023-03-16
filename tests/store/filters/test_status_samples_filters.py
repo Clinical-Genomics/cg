@@ -109,7 +109,9 @@ def test_filter_samples_is_not_delivered(
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_is_not_delivered(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_sample_query()
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        )
     )
 
     # ASSERT that samples is a query

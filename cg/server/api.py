@@ -18,7 +18,7 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family
+from cg.store.models import Customer, Sample, Pool, Family, Application
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
@@ -340,7 +340,8 @@ def options():
     )
 
     apptag_groups: Dict[str, List[str]] = {"ext": []}
-    for application in db.applications(archived=False):
+    applications: List[Application] = db.get_applications_is_not_archived()
+    for application in applications:
         if not application.versions:
             LOG.debug(f"Skipping application {application} that doesn't have a price")
             continue
@@ -389,7 +390,7 @@ def me():
 @public
 def applications():
     """Fetch application tags."""
-    query = db.applications(archived=False)
+    query: List[Application] = db.get_applications_is_not_archived()
     data = [record.to_dict() for record in query]
     return jsonify(applications=data)
 
@@ -398,7 +399,7 @@ def applications():
 @public
 def application(tag):
     """Fetch an application tag."""
-    record = db.application(tag)
+    record = db.get_application_by_tag(tag=tag)
     if record is None:
         return abort(
             make_response(jsonify(message="application not found"), http.HTTPStatus.NOT_FOUND)

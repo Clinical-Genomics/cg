@@ -1,9 +1,8 @@
 from typing import Optional, List
-
 from sqlalchemy.orm import Query
-
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Collaboration, Organism, User
+from cg.store.models import Bed, BedVersion, Customer, Collaboration, Organism, User, Application
+from cg.constants.constants import MicrosaltAppTags
 
 
 def test_get_active_beds(base_store: Store):
@@ -75,6 +74,98 @@ def test_get_latest_bed_version(base_store: Store, bed_name: str):
 
     # THEN return a bed version with the supplied bed name
     assert bed_version.version == 1
+
+
+def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
+    """Test function to return the application by tag."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    application: Application = microbial_store.get_application_by_tag(tag=tag)
+
+    # THEN return a application with the supplied application tag
+    assert application.tag == tag
+
+
+def test_get_applications_is_not_archived(
+    microbial_store: Store, EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+):
+    """Test function to return the application when not archived."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications_is_not_archived()
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+    assert (application.is_archived is False for application in applications)
+
+
+def test_get_applications_by_prep_category(
+    microbial_store: Store,
+    EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY,
+    prep_category=MicrosaltAppTags.PREP_CATEGORY,
+):
+    """Test function to return the application by prep category."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications_by_prep_category(
+        prep_category=prep_category
+    )
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY
+    assert (application.prep_category == prep_category for application in applications)
+
+
+def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATIONS):
+    """Test function to return the applications."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications()
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS
+
+
+def test_get_applications_by_prep_category_and_is_not_archived(
+    microbial_store: Store,
+    EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS,
+    prep_category=MicrosaltAppTags.PREP_CATEGORY,
+):
+    """Test function to return the application by prep category and not archived."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[
+        Application
+    ] = microbial_store.get_applications_by_prep_category_and_is_not_archived(
+        prep_category=prep_category
+    )
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+    assert (application.prep_category == prep_category for application in applications)
+    assert (application.is_archived is False for application in applications)
+
+
+def test_get_bed_version_query(base_store: Store):
+    """Test function to return the bed version query."""
+
+    # GIVEN a store with bed versions records
+
+    # WHEN getting the query for the bed versions
+    bed_version_query: Query = base_store._get_query(table=BedVersion)
+
+    # THEN a query should be returned
+    assert isinstance(bed_version_query, Query)
 
 
 def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
