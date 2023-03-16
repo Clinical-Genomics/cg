@@ -361,16 +361,6 @@ def store_with_samples_subject_id_and_tumour_status(
     return store
 
 
-@pytest.fixture(name="EXPECT_ONE_POOL")
-def fixture_expect_one_pools() -> int:
-    """Return the number of pools to expect."""
-    return 1
-
-
-@pytest.fixture(name="EXPECT_TWO_POOLS")
-def fixture_expect_two_pools() -> int:
-    """Return the number of pools to expect."""
-    return 2
 
 
 @pytest.fixture(name="pool_name_1")
@@ -385,17 +375,13 @@ def fixture_pool_order_1() -> str:
     return "pool_order_1"
 
 
-@pytest.fixture(name="store_with_multiple_named_pools_for_customer")
-def store_with_multiple_names_pools_for_customer(
+@pytest.fixture(name="store_with_multiple_pools_for_customer")
+def fixture_store_with_multiple_pools_for_customer(
     store: Store,
     helpers: StoreHelpers,
     customer_id: str = CustomerNames.cust132,
-    pool_name_1="pool_1",
-    pool_order_1="pool_order_1",
-    pool_name_2="pool_2",
-    pool_order_2="pool_order_2",
-) -> Store:
+) -> Generator[Store, None, None]:
     """Return a store with two pools with different names for the same customer."""
-    helpers.ensure_pool(store=store, customer_id=customer_id, name=pool_name_1, order=pool_order_1)
-    helpers.ensure_pool(store=store, customer_id=customer_id, name=pool_name_2, order=pool_order_2)
-    return store
+    for number in  range(2):
+        helpers.ensure_pool(store=store, customer_id=customer_id, name="_".join(["pool", str(number)]), order="_".join(["pool", "order", str(number)]))
+    yield store

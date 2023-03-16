@@ -245,7 +245,7 @@ def test_filter_pools_by_name_enquiry(
         name_enquiry=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
     )
 
-    # ASSERT that the query is a Query
+    # THEN a Query is returned
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
@@ -272,7 +272,7 @@ def test_filter_pools_by_order_enquiry(
         order_enquiry=StoreConftestFixture.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
 
-    # ASSERT that the query is a Query
+    # THEN a Query is returned
     assert isinstance(pools, Query)
 
     # THEN pools should contain the test pool
@@ -299,7 +299,7 @@ def test_filter_pools_by_customer_id(
         customer_ids=[1],
     )
 
-    # ASSERT that the query is a Query
+    # THEN a Query is returned
     assert isinstance(pools, Query)
 
     # THEN pools should be returned
