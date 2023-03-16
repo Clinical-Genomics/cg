@@ -5,7 +5,7 @@ from pathlib import Path
 
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
-from cg.store import models
+from cg.store.models import Analysis
 
 
 def test_get_analysis_sex(case_qc_metrics_deliverables: Path, genotype_analysis_sex: dict):
@@ -47,7 +47,7 @@ def test_get_bcf_file(upload_genotypes_api: UploadGenotypesAPI, case_id: str, ti
 
 
 def test_get_data(
-    analysis_obj: models.Analysis,
+    analysis_obj: Analysis,
     genotype_analysis_sex: dict,
     mocker,
     upload_genotypes_api: UploadGenotypesAPI,

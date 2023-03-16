@@ -10,7 +10,6 @@ from typing import List, Optional, Dict, Iterable
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
-from cg.store import models
 
 from housekeeper.store.models import File, Version, Bundle
 
