@@ -27,7 +27,6 @@ from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
-from cg.server.helpers.api_helpers import get_pools_to_render
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -280,7 +279,7 @@ def pools():
     customer_objs: Optional[List[Customer]] = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
-    pools_q: List[Pool] = get_pools_to_render(
+    pools_q: List[Pool] = db.get_pools_to_render(
         customers=customer_objs, enquiry=request.args.get("enquiry")
     )
 

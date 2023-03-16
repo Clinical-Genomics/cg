@@ -9,12 +9,12 @@ def filter_pools_by_customer_id(pools: Query, customer_ids: List[int], **kwargs)
     return pools.filter(Pool.customer_id.in_(customer_ids))
 
 
-def filter_pool_by_name_enquiry(pools: Query, name_enquiry: str, **kwargs) -> Query:
+def filter_pools_by_name_enquiry(pools: Query, name_enquiry: str, **kwargs) -> Query:
     """Return pools by name enquiry."""
     return pools.filter(Pool.name.like(f"%{name_enquiry}%"))
 
 
-def filter_pool_by_order_enquiry(pools: Query, order_enquiry: str, **kwargs) -> Query:
+def filter_pools_by_order_enquiry(pools: Query, order_enquiry: str, **kwargs) -> Query:
     """Return pools by order enquiry."""
     return pools.filter(Pool.order.like(f"%{order_enquiry}%"))
 
@@ -108,5 +108,5 @@ class PoolFilter(Enum):
     FILTER_DO_INVOICE: Callable = filter_pools_do_invoice
     FILTER_DO_NOT_INVOICE: Callable = filter_pools_do_not_invoice
     FILTER_BY_CUSTOMER_ID: Callable = filter_pools_by_customer_id
-    FILTER_BY_NAME_ENQUIRY: Callable = filter_pool_by_name_enquiry
-    FILTER_BY_ORDER_ENQUIRY: Callable = filter_pool_by_order_enquiry
+    FILTER_BY_NAME_ENQUIRY: Callable = filter_pools_by_name_enquiry
+    FILTER_BY_ORDER_ENQUIRY: Callable = filter_pools_by_order_enquiry

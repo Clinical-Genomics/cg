@@ -26,6 +26,7 @@ class StoreConftestFixture(enum.Enum):
     INVOICE_ID_POOL_WITH_ATTRIBUTES: int = 1
     NAME_POOL_WITH_ATTRIBUTES: str = "pool_with_attributes"
     NAME_POOL_WITHOUT_ATTRIBUTES: str = "pool_without_attributes"
+    ORDER_POOL_WITH_ATTRIBUTES: str = "order001"
 
     TAG_APPLICATION_WITH_ATTRIBUTES: str = "test_tag"
     PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES: str = "wgs"
@@ -222,6 +223,7 @@ def fixture_store_with_a_pool_with_and_without_attributes(
         invoice_id=StoreConftestFixture.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
         no_invoice=False,
         name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+        order=StoreConftestFixture.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
 
     helpers.ensure_pool(

@@ -439,6 +439,21 @@ class FindBusinessDataHandler(BaseHandler):
             pools=pools, entry_id=entry_id, filter_functions=[PoolFilter.FILTER_BY_ENTRY_ID]
         ).first()
 
+    def get_pools_to_render(
+        self, customers: Optional[List[Customer]] = None, enquiry: str = None
+    ) -> List[Pool]:
+        pools: List[Pool] = (
+            self.get_pools_by_customer_id(customers=customers) if customers else self.get_pools()
+        )
+        if enquiry:
+            pools: List[Pool] = list(
+                set(
+                    self.get_pools_by_name_enquiry(name_enquiry=enquiry)
+                    or set(self.get_pools_by_order_enquiry(order_enquiry=enquiry))
+                )
+            )
+        return pools
+
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case."""
 

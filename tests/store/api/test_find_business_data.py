@@ -600,3 +600,100 @@ def test_is_case_external_false(base_store: Store, case_obj: Family, sample_id: 
 
     # THEN the return value should be False
     assert not is_external
+
+
+def test_get_pools(store_with_multiple_named_pools_for_customer: Store, EXPECT_TWO_POOLS):
+    """Test that pools can be fetched from the store."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching all pools
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools()
+
+    # THEN two pools should be returned
+    assert len(pools) == EXPECT_TWO_POOLS
+
+
+def test_get_pools_by_customer_id(
+    store_with_multiple_named_pools_for_customer: Store, EXPECT_TWO_POOLS
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching pools by customer id
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools_by_customer_id(
+        customers=store_with_multiple_named_pools_for_customer.get_customers()
+    )
+
+    # THEN two pools should be returned
+    assert len(pools) == EXPECT_TWO_POOLS
+
+
+def test_get_pools_by_name_enquiry(
+    store_with_multiple_named_pools_for_customer: Store, EXPECT_ONE_POOL: int, pool_name_1: str
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching pools by customer id
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools_by_name_enquiry(
+        name_enquiry=pool_name_1
+    )
+
+    # THEN two pools should be returned
+    assert len(pools) == EXPECT_ONE_POOL
+
+
+def test_get_pools_by_order_enquiry(
+    store_with_multiple_named_pools_for_customer: Store, EXPECT_ONE_POOL: int, pool_order_1: str
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching pools by customer id
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools_by_order_enquiry(
+        order_enquiry=pool_order_1
+    )
+
+    # THEN two pools should be returned
+    assert len(pools) == EXPECT_ONE_POOL
+
+
+def test_get_pools_to_render(
+    store_with_multiple_named_pools_for_customer: Store,
+    EXPECT_ONE_POOL,
+    EXPECT_TWO_POOLS,
+    pool_name_1: str,
+    pool_order_1: str,
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching pools with no customer or enquiry
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools_to_render()
+
+    # THEN two pools should be returned
+    assert len(pools) == EXPECT_TWO_POOLS
+
+    # WHEN fetching pools by customer id
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools_to_render(
+        customers=store_with_multiple_named_pools_for_customer.get_customers()
+    )
+
+    # THEN two pools should be returned
+    assert len(pools) == EXPECT_TWO_POOLS
+
+    # WHEN fetching pools by customer id and name enquiry
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools_to_render(
+        customers=store_with_multiple_named_pools_for_customer.get_customers(), enquiry=pool_name_1
+    )
+
+    # THEN one pools should be returned
+    assert len(pools) == EXPECT_ONE_POOL
+
+    # WHEN fetching pools by customer id and order enquiry
+    pools: List[Pool] = store_with_multiple_named_pools_for_customer.get_pools_to_render(
+        customers=store_with_multiple_named_pools_for_customer.get_customers(), enquiry=pool_order_1
+    )
+
+    # THEN one pools should be returned
+    assert len(pools) == EXPECT_ONE_POOL
