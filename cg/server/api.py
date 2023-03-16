@@ -278,13 +278,24 @@ def sample_in_collaboration(sample_id):
 @BLUEPRINT.route("/pools")
 def pools():
     """Fetch pools."""
-    customer_objs: Optional[Customer] = (
-        None if g.current_user.is_admin else g.current_user.customers
+    customer_objs: Optional[List[Customer]] = (
+        g.current_user.customers if not g.current_user.is_admin else None
     )
-    pools_q: List[Pool] = db.get_pools_for_customer_and_enquiry(
-        customers=customer_objs, enquiry=request.args.get("enquiry")
+    pools_q: List[Pool] = (
+        db.get_pools_by_customer_id(customers=customer_objs)
+        if customer_objs
+        else db._get_query(table=Pool)
     )
-    data: List[Dict] = [pool_obj.to_dict() for pool_obj in pools_q[:30]]
+    enquiry = request.args.get("enquiry")
+    if enquiry:
+        pools_q: List[Pool] = list(
+            set(
+                db.get_pools_by_name_enquiry(name_enquiry=enquiry)
+                & set(db.get_pools_by_order_enquiry(order_enquiry=enquiry))
+            )
+        )
+
+    data = [pool_obj.to_dict() for pool_obj in pools_q[:30]]
     return jsonify(pools=data, total=len(pools_q))
 
 

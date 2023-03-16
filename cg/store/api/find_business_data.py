@@ -403,34 +403,30 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def get_pools_for_customer_and_enquiry(
-        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
-    ) -> List[Pool]:
+    def get_pools_by_customer_id(self, *, customers: Optional[List[Customer]] = None) -> List[Pool]:
         """Return all the pools for a customer."""
-        records: Query = self._get_query(table=Pool)
+        customer_ids = [customer.id for customer in customers]
+        return apply_pool_filter(
+            pools=self._get_query(table=Pool),
+            customer_ids=customer_ids,
+            filter_functions=[PoolFilter.FILTER_BY_CUSTOMER_ID],
+        ).all()
 
-        if customers:
-            customer_ids = [customer.id for customer in customers]
-            records: Query = apply_pool_filter(
-                pools=records,
-                customer_ids=customer_ids,
-                filter_functions=[PoolFilter.FILTER_BY_CUSTOMER_ID],
-            )
-        if enquiry:
-            records: Query = self._get_union_query(
-                query=apply_pool_filter(
-                    pools=records,
-                    name_enquiry=enquiry,
-                    filter_functions=[PoolFilter.FILTER_BY_NAME_ENQUIRY],
-                ),
-                query2=apply_pool_filter(
-                    pools=records,
-                    order_enquiry=enquiry,
-                    filter_functions=[PoolFilter.FILTER_BY_ORDER_ENQUIRY],
-                ),
-            )
+    def get_pools_by_name_enquiry(self, *, name_enquiry: str = None) -> List[Pool]:
+        """Return all the pools with a name fitting the enquiry."""
+        return apply_pool_filter(
+            pools=self._get_query(table=Pool),
+            name_enquiry=name_enquiry,
+            filter_functions=[PoolFilter.FILTER_BY_NAME_ENQUIRY],
+        ).all()
 
-        return records.order_by(Pool.created_at.desc()).all()
+    def get_pools_by_order_enquiry(self, *, order_enquiry: str = None) -> List[Pool]:
+        """Return all the pools with an order fitting the enquiry."""
+        return apply_pool_filter(
+            pools=self._get_query(table=Pool),
+            order_enquiry=order_enquiry,
+            filter_functions=[PoolFilter.FILTER_BY_ORDER_ENQUIRY],
+        ).all()
 
     def get_pool_by_entry_id(self, entry_id: int) -> Pool:
         """Return a pool by entry id."""

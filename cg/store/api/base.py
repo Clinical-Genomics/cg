@@ -96,8 +96,3 @@ class BaseHandler:
         return self._get_query(table=Sample).join(
             Sample.application_version, ApplicationVersion.application
         )
-
-    @staticmethod
-    def _get_union_query(query: Query, query2: Query) -> Query:
-        """Return a union query"""
-        return query.union(query2)

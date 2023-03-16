@@ -1,6 +1,6 @@
 """Module to handle dictionary helper functions."""
 
-from typing import List
+from typing import List, Dict
 
 
 def get_list_from_dictionary(dictionary: dict) -> list:

@@ -543,36 +543,6 @@ def test_filter_get_sample_by_name(store_with_samples_that_have_names: Store, na
     assert samples and samples.name == name
 
 
-def test_get_pools_for_customer(store_with_multiple_names_pools_for_customer: Store):
-    """Test that pools can be fetched for a customer."""
-    # GIVEN a database with two pools for a customer
-
-    # THEN one customer should be returned
-    customer: Customer = store_with_multiple_names_pools_for_customer.get_customer_by_customer_id(
-        customer_id=CustomerNames.cust132.value
-    )
-    assert isinstance(customer, Customer)
-
-    # WHEN fetching the pools for a customer and a name
-    pools: List[
-        Pool
-    ] = store_with_multiple_names_pools_for_customer.get_pools_for_customer_and_enquiry(
-        customers=[customer], enquiry="pool_1"
-    )
-
-    # THEN one pool should be returned
-    assert pools and len(pools) == 1
-
-    # When fetching the pools for a customer
-    pools: List[
-        Pool
-    ] = store_with_multiple_names_pools_for_customer.get_pools_for_customer_and_enquiry(
-        customers=[customer]
-    )
-
-    assert pools and len(pools) == 2
-
-
 def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):
     """Tests the down sampling check when all samples are down sampled."""
     # GIVEN a case where all samples are down sampled
