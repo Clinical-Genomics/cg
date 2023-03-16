@@ -175,7 +175,8 @@ class DeliverAPI:
         if not self.dry_run:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
-        number_reviewed_files: int = 0
+        number_currently_linked_files: int = 0
+        number_previously_linked_files: int = 0
         for file_path in self.get_sample_files_from_version(
             version_obj=version_obj, sample_id=sample_id
         ):
@@ -186,21 +187,23 @@ class DeliverAPI:
             out_path: Path = delivery_base / file_name
             if self.dry_run:
                 LOG.info(f"Would hard link file {file_path} to {out_path}")
-                number_reviewed_files += 1
+                number_currently_linked_files += 1
                 continue
             LOG.info(f"Hard link file {file_path} to {out_path}")
             try:
                 os.link(file_path, out_path)
-                number_reviewed_files += 1
+                number_currently_linked_files += 1
             except FileExistsError:
                 LOG.info(
                     f"Warning: Path {out_path} exists, no hard link was made for file {file_name}"
                 )
-                number_reviewed_files += 1
-        if number_reviewed_files == 0:
+                number_previously_linked_files += 1
+        if number_previously_linked_files == 0 and number_currently_linked_files == 0:
             raise MissingFilesError(f"No files were linked for sample {sample_name}")
 
-        LOG.info(f"Linked {number_reviewed_files} files for sample {sample_id}, case {case_id}")
+        LOG.info(
+            f"There were {number_previously_linked_files} previously linked files and {number_currently_linked_files} were linked for sample {sample_id}, case {case_id}"
+        )
 
     def get_case_files_from_version(
         self, version_obj: hk_models.Version, sample_ids: Set[str]
