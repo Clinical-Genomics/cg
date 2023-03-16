@@ -16,16 +16,20 @@ from cg.store.models import (
     Analysis,
     Application,
     ApplicationVersion,
+    Bed,
+    BedVersion,
     Collaboration,
+    Customer,
     Family,
     FamilySample,
+    Flowcell,
     Invoice,
     Organism,
     Panel,
     Pool,
+    Sample,
+    User
 )
-
-from cg.store.models import Flowcell, Bed, BedVersion, Customer, Sample, User
 
 LOG = logging.getLogger(__name__)
 
@@ -80,7 +84,7 @@ class StoreHelpers:
             application_tag = "rna_tag"
             prep_category = "wts"
 
-        application = store.application(tag=application_tag)
+        application = store.get_application_by_tag(tag=application_tag)
         if not application:
             application = StoreHelpers.add_application(
                 store,
@@ -118,7 +122,7 @@ class StoreHelpers:
         **kwargs,
     ) -> Application:
         """Ensure that application exists in store."""
-        application: Application = store.application(tag=tag)
+        application: Application = store.get_application_by_tag(tag=tag)
         if not application:
             application: Application = StoreHelpers.add_application(
                 store=store,
@@ -143,7 +147,7 @@ class StoreHelpers:
         **kwargs,
     ) -> Application:
         """Utility function to add a application to a store."""
-        application = store.application(tag=application_tag)
+        application = store.get_application_by_tag(tag=application_tag)
         if application:
             return application
 

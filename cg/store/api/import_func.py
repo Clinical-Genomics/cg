@@ -36,7 +36,7 @@ def import_application_versions(
     )
 
     for application_version in application_versions:
-        application_obj: Application = store.application(application_version.app_tag)
+        application_obj: Application = store.get_application_by_tag(tag=application_version.app_tag)
 
         if not application_obj:
             LOG.error(
@@ -98,8 +98,8 @@ def import_applications(
     )
 
     for application in applications:
-        application_obj: Application = store.application(application.tag)
-        if application_obj and applications_are_same(
+        application_obj: Application = store.get_application_by_tag(tag=application.tag)
+        if application_obj and is_applications_tags_equal(
             application_obj=application_obj, application=application
         ):
             LOG.info("skipping redundant application %s", application.tag)
@@ -131,7 +131,7 @@ def prices_are_same(first_price: float, second_price: float) -> bool:
 def versions_are_same(
     version_obj: ApplicationVersion, application_version: ApplicationVersionSchema
 ) -> bool:
-    """Checks if the given versions are to be considered equal"""
+    """Checks if the given versions are to be considered equal."""
     return (
         version_obj.application.tag == application_version.app_tag
         and version_obj.valid_from == application_version.valid_from
@@ -142,8 +142,10 @@ def versions_are_same(
     )
 
 
-def applications_are_same(application_obj: Application, application: ApplicationSchema) -> bool:
-    """Checks if the given applications are to be considered equal"""
+def is_applications_tags_equal(
+    application_obj: Application, application: ApplicationSchema
+) -> bool:
+    """Check if the given application tags are equal."""
 
     return application_obj.tag == application.tag
 
@@ -171,7 +173,7 @@ def add_application_version(
 
 
 def add_application_object(application: ApplicationSchema, sign: str, store: Store) -> Application:
-    """Adds an application from a raw application record"""
+    """Adds an application from a raw application record."""
     new_application: Application = store.add_application(
         tag=application.tag,
         prep_category=application.prep_category,
@@ -224,7 +226,7 @@ def import_apptags(
         return
 
     for orderform_application_tag in orderform_application_tags:
-        application_obj = store.application(tag=orderform_application_tag)
+        application_obj = store.get_application_by_tag(tag=orderform_application_tag)
 
         if not application_obj:
             message = f"Application {orderform_application_tag} was not found"
@@ -256,7 +258,9 @@ def import_apptags(
         else:
             LOG.info("%s is already active, no need to activate it", application_obj)
 
-    all_active_apps_for_category = store.applications(category=prep_category, archived=False)
+    all_active_apps_for_category: List[
+        Application
+    ] = store.get_applications_by_prep_category_and_is_not_archived(prep_category=prep_category)
 
     for active_application in all_active_apps_for_category:
         if active_application.tag in orderform_application_tags:

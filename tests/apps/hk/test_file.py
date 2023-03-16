@@ -63,7 +63,7 @@ def test_add_new_file(
     assert madeline_output.exists() is True
 
     # GIVEN a tag that does not exist
-    assert populated_housekeeper_api.tag(name=not_existing_hk_tag) is None
+    assert populated_housekeeper_api.get_tag(name=not_existing_hk_tag) is None
 
     # GIVEN a known number of files in the db
     nr_files_in_db = small_helpers.length_of_iterable(populated_housekeeper_api.files())

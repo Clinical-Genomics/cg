@@ -265,14 +265,14 @@ class MockHousekeeperAPI:
         tags = {}
         for tag_name in tag_names:
             if self.tag_exists(tag_name):
-                tag_obj = self.tag(tag_name)
+                tag_obj = self.get_tag(tag_name)
             else:
                 tag_obj = self.new_tag(tag_name)
                 self._tags.append(tag_obj)
             tags[tag_name] = tag_obj
         return tags
 
-    def tag(self, name: str):
+    def get_tag(self, name: str):
         """Fetch a tag"""
         for tag_obj in self._tags:
             if tag_obj.name == name:
@@ -442,13 +442,13 @@ class MockHousekeeperAPI:
         if isinstance(tags, str):
             tags = [tags]
         for tag_name in tags:
-            if not self.tag(tag_name):
+            if not self.get_tag(tag_name):
                 self.add_tag(tag_name)
 
         new_file = self.new_file(
             path=str(Path(path).absolute()),
             to_archive=to_archive,
-            tags=[self.tag(tag_name) for tag_name in tags],
+            tags=[self.get_tag(tag_name) for tag_name in tags],
         )
         if not version_obj:
             version_obj = self.new_version(created_at=datetime.datetime.now())

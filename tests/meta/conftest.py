@@ -217,7 +217,9 @@ def fixture_flowcell_store(
     """Setup store with sample data for testing flow cell transfer."""
     for sample_data in stats_sample_data["samples"]:
         customer: Customer = (base_store.get_customers())[0]
-        application_version: ApplicationVersion = base_store.application("WGSPCFC030").versions[0]
+        application_version: ApplicationVersion = base_store.get_application_by_tag(
+            "WGSPCFC030"
+        ).versions[0]
         sample: Sample = base_store.add_sample(
             name="NA", sex="male", internal_id=sample_data["name"]
         )
