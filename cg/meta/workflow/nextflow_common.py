@@ -12,6 +12,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR, NXF_PID_FILE_ENV
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
+from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -137,52 +138,38 @@ class NextflowAnalysisAPI:
                 outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
     @classmethod
-    def get_verified_arguments_nextflow(
-        cls,
-        case_id: str,
-        pipeline: str,
-        root_dir: str,
-        log: Path,
-        bg: bool,
-        quiet: bool,
-        config: Optional[str],
-    ) -> dict:
-        """Transforms click argument related to nextflow that were left empty
-        into defaults constructed with case_id paths."""
+    def get_nextflow_run_parameters(
+        cls, case_id: str, pipeline_path: str, root_dir: str, command_args: dict
+    ) -> List[str]:
+        """Returns a nextflow run command given a dictionary with arguments."""
 
-        return {
-            "-bg": bg,
-            "-quiet": quiet,
-            "-log": cls.get_log_path(
-                case_id=case_id, pipeline=pipeline, root_dir=root_dir, log=log
+        nextflow_options: List[str] = build_command_from_dict(
+            options=dict(
+                (f"-{arg}", command_args.get(arg, True)) for arg in ("bg", "quiet", "log", "config")
             ),
-            "-config": cls.get_nextflow_config_path(nextflow_config=config),
-        }
+            exclude_true=True,
+        )
+        run_options: List[str] = build_command_from_dict(
+            options=dict(
+                (f"-{arg}", command_args.get(arg, None))
+                for arg in (
+                    "work-dir",
+                    "resume",
+                    "profile",
+                    "with-tower",
+                    "params-file",
+                )
+            ),
+            exclude_true=True,
+        )
+        parameters = (
+            nextflow_options
+            + ["run", pipeline_path]
+            + run_options
+            + NextflowAnalysisAPI.get_nextflow_stdout_stderr(case_id=case_id, root_dir=root_dir)
+        )
 
-    @classmethod
-    def get_verified_arguments_run(
-        cls,
-        case_id: str,
-        root_dir: str,
-        work_dir: str,
-        resume: bool,
-        profile: bool,
-        with_tower: bool,
-        stub: bool,
-        params_file: Optional[str],
-    ) -> dict:
-        """Transforms click argument related to nextflow run that were left empty
-        into defaults constructed with case_id paths."""
-        return {
-            "-w": cls.get_workdir_path(case_id=case_id, root_dir=root_dir, work_dir=work_dir),
-            "-resume": resume,
-            "-profile": profile,
-            "-with-tower": with_tower,
-            "-stub": stub,
-            "-params-file": cls.get_params_file_path(
-                case_id=case_id, root_dir=root_dir, params_file=params_file
-            ),
-        }
+        return parameters
 
     @classmethod
     def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: str = None) -> Path:

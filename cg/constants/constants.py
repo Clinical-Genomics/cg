@@ -187,3 +187,7 @@ class MicrosaltAppTags(StrEnum):
 
 
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
+
+
+class MetaApis:
+    ANALYSIS_API: str = "analysis_api"
