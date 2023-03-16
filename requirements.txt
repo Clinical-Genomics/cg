@@ -46,4 +46,4 @@ wtforms<3.0.0          # wtforms.compat missing in 3.0.0
 
 # apps
 genologics
-housekeeper>3.2.1
+housekeeper
