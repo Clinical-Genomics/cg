@@ -68,3 +68,9 @@ OPTION_USE_NEXTFLOW = click.option(
     show_default=True,
     help="Execute pipeline using nextflow",
 )
+
+OPTION_REVISION = click.option(
+    "--revision",
+    type=str,
+    help="Revision of workflow to run (either a git branch, tag or commit SHA number)",
+)

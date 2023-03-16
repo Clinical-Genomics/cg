@@ -12,6 +12,7 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_LOG,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
+    OPTION_REVISION,
     OPTION_STUB,
     OPTION_TOWER,
     OPTION_USE_NEXTFLOW,
@@ -71,6 +72,7 @@ def config_case(context: CGConfig, case_id: str, strandedness: str, dry_run: boo
 @OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
+@OPTION_REVISION
 @OPTION_USE_NEXTFLOW
 @DRY_RUN
 @click.pass_obj
@@ -85,6 +87,7 @@ def run(
     stub: bool,
     config: str,
     params_file: str,
+    revision: str,
     use_nextflow: bool,
     dry_run: bool,
 ) -> None:
@@ -109,7 +112,7 @@ def run(
         ),
         "name": case_id,
         "compute-env": None,
-        "revision": None,
+        "revision": revision,
         "wait": "SUBMITTED",
     }
 
@@ -140,6 +143,7 @@ def run(
 @OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
+@OPTION_REVISION
 @OPTION_USE_NEXTFLOW
 @DRY_RUN
 @click.pass_context
@@ -153,6 +157,7 @@ def start(
     stub: bool,
     config: str,
     params_file: str,
+    revision: str,
     use_nextflow: bool,
     dry_run: bool,
 ) -> None:
@@ -176,6 +181,7 @@ def start(
         stub=stub,
         config=config,
         params_file=params_file,
+        revision=revision,
         use_nextflow=use_nextflow,
         dry_run=dry_run,
     )

@@ -18,8 +18,15 @@ class TowerAnalysisAPI:
 
         tower_options: List[str] = build_command_from_dict(
             options=dict(
-                (f"--{arg}", command_args.get(arg, True))
-                for arg in ("work-dir", "profile", "params-file", "config", "name")
+                (f"--{arg}", command_args.get(arg, None))
+                for arg in (
+                    "work-dir",
+                    "profile",
+                    "params-file",
+                    "config",
+                    "name",
+                    "revision",
+                )
             ),
             exclude_true=True,
         )
