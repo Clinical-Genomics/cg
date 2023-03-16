@@ -19,7 +19,7 @@ from cg.cli.workflow.nextflow.options import (
 )
 from cg.cli.workflow.rnafusion.options import OPTION_FROM_START, OPTION_STRANDEDNESS
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, MetaApis
+from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -49,15 +49,15 @@ rnafusion.add_command(resolve_compression)
 @DRY_RUN
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, strandedness: str, dry_run: bool) -> None:
-    """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
+    """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    LOG.info(f"Creating samplesheet file for {case_id}.")
+    LOG.info(f"Creating sample sheet file for {case_id}.")
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
         analysis_api.config_case(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
 
     except CgError as error:
-        LOG.error(f"Could not create samplesheet: {error}")
+        LOG.error(f"Could not create sample sheet: {error}")
         raise click.Abort() from error
 
 
@@ -120,7 +120,9 @@ def run(
         analysis_api.run_analysis(
             case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
         )
-        analysis_api.set_statusdb_action(case_id=case_id, action="running", dry_run=dry_run)
+        analysis_api.set_statusdb_action(
+            case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
+        )
     except (CgError, ValueError) as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error

@@ -163,7 +163,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return Path(self.references)
 
     def get_default_parameters(self, case_id: str) -> Dict:
-        """Returns a dictionary with default RnaFusion parameters."""
+        """Returns a dictionary with default RNAFusion parameters."""
         return {
             "input": NextflowAnalysisAPI.get_input_path(
                 case_id=case_id, root_dir=self.root_dir
@@ -211,7 +211,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.process = use_nextflow
         if use_nextflow:
             LOG.info("Pipeline will be executed using nextflow")
-            parameters = NextflowAnalysisAPI.get_nextflow_run_parameters(
+            parameters: List[str] = NextflowAnalysisAPI.get_nextflow_run_parameters(
                 case_id=case_id,
                 pipeline_path=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
@@ -222,7 +222,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
         else:
             LOG.info("Pipeline will be executed using tower")
-            parameters = TowerAnalysisAPI.get_tower_launch_parameters(
+            parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(
                 tower_pipeline=self.tower_pipeline,
                 command_args=command_args,
             )

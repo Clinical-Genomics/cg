@@ -66,5 +66,5 @@ OPTION_USE_NEXTFLOW = click.option(
     is_flag=True,
     default=False,
     show_default=True,
-    help="Execute pipeline using nextflow instead of tower",
+    help="Execute pipeline using nextflow",
 )

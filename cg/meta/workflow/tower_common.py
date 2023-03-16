@@ -16,12 +16,12 @@ class TowerAnalysisAPI:
     def get_tower_launch_parameters(cls, tower_pipeline: str, command_args: dict) -> List[str]:
         """Returns a tower launch command given a dictionary with arguments."""
 
-        tw_options: List[str] = build_command_from_dict(
+        tower_options: List[str] = build_command_from_dict(
             options=dict(
                 (f"--{arg}", command_args.get(arg, True))
                 for arg in ("work-dir", "profile", "params-file", "config", "name")
             ),
             exclude_true=True,
         )
-        parameters = ["launch"] + tw_options + [tower_pipeline]
+        parameters = ["launch"] + tower_options + [tower_pipeline]
         return parameters

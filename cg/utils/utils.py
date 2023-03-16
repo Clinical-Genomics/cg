@@ -12,11 +12,11 @@ def get_string_from_list_by_pattern(strings: List[str], pattern: str) -> Optiona
 def build_command_from_dict(options: dict, exclude_true: bool = False) -> List[str]:
     """Returns a command list of strings given a dictionary with arguments."""
     formatted_options: list = []
-    for key, val in options.items():
-        if val:
-            if exclude_true and val is True:
-                formatted_options.append(str(key))
-            elif val:
-                formatted_options.append(str(key))
-                formatted_options.append(str(val))
+    for option_name, option_value in options.items():
+        if option_value:
+            if exclude_true and option_value is True:
+                formatted_options.append(str(option_name))
+            elif option_value:
+                formatted_options.append(str(option_name))
+                formatted_options.append(str(option_name))
     return formatted_options

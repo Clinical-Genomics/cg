@@ -97,7 +97,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
         """Get Quality of service (SLURM QOS) for the case."""
-        priority: int = self.get_priority_for_case(case_id)
+        priority: int = self.get_priority_for_case(case_id=case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
