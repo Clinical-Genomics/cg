@@ -361,8 +361,6 @@ def store_with_samples_subject_id_and_tumour_status(
     return store
 
 
-
-
 @pytest.fixture(name="pool_name_1")
 def fixture_pool_name_1() -> str:
     """Return the name of the first pool."""
@@ -380,8 +378,13 @@ def fixture_store_with_multiple_pools_for_customer(
     store: Store,
     helpers: StoreHelpers,
     customer_id: str = CustomerNames.cust132,
-) -> Generator[Store, None, None]:
+) -> Store:
     """Return a store with two pools with different names for the same customer."""
-    for number in  range(2):
-        helpers.ensure_pool(store=store, customer_id=customer_id, name="_".join(["pool", str(number)]), order="_".join(["pool", "order", str(number)]))
+    for number in range(2):
+        helpers.ensure_pool(
+            store=store,
+            customer_id=customer_id,
+            name="_".join(["pool", str(number)]),
+            order="_".join(["pool", "order", str(number)]),
+        )
     yield store
