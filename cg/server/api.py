@@ -279,12 +279,12 @@ def pools():
     customers: Optional[List[Customer]] = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
-    pools_q: List[Pool] = db.get_pools_to_render(
-        customers=customer_objs, enquiry=request.args.get("enquiry")
+    pool_list: List[Pool] = db.get_pools_to_render(
+        customers=customers, enquiry=request.args.get("enquiry")
     )
 
-    data = [pool_obj.to_dict() for pool_obj in pools_q[:30]]
-    return jsonify(pools=data, total=len(pools_q))
+    data = [pool_obj.to_dict() for pool_obj in pool_list[:30]]
+    return jsonify(pools=data, total=len(pool_list))
 
 
 @BLUEPRINT.route("/pools/<pool_id>")
