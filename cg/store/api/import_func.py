@@ -10,7 +10,8 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from cg.exc import CgError
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Application, ApplicationVersion
 
 from .models import ApplicationSchema, ApplicationVersionSchema, ParsedApplicationVersion
 
@@ -35,7 +36,7 @@ def import_application_versions(
     )
 
     for application_version in application_versions:
-        application_obj: models.Application = store.application(application_version.app_tag)
+        application_obj: Application = store.get_application_by_tag(tag=application_version.app_tag)
 
         if not application_obj:
             LOG.error(
@@ -51,9 +52,7 @@ def import_application_versions(
             sys.exit()
 
         app_tag: str = application_obj.tag
-        latest_version: models.ApplicationVersion = store.latest_version(
-            application_version.app_tag
-        )
+        latest_version: ApplicationVersion = store.latest_version(application_version.app_tag)
 
         if latest_version and versions_are_same(
             version_obj=latest_version, application_version=application_version
@@ -99,8 +98,8 @@ def import_applications(
     )
 
     for application in applications:
-        application_obj: models.Application = store.application(application.tag)
-        if application_obj and applications_are_same(
+        application_obj: Application = store.get_application_by_tag(tag=application.tag)
+        if application_obj and is_applications_tags_equal(
             application_obj=application_obj, application=application
         ):
             LOG.info("skipping redundant application %s", application.tag)
@@ -130,9 +129,9 @@ def prices_are_same(first_price: float, second_price: float) -> bool:
 
 
 def versions_are_same(
-    version_obj: models.ApplicationVersion, application_version: ApplicationVersionSchema
+    version_obj: ApplicationVersion, application_version: ApplicationVersionSchema
 ) -> bool:
-    """Checks if the given versions are to be considered equal"""
+    """Checks if the given versions are to be considered equal."""
     return (
         version_obj.application.tag == application_version.app_tag
         and version_obj.valid_from == application_version.valid_from
@@ -143,21 +142,21 @@ def versions_are_same(
     )
 
 
-def applications_are_same(
-    application_obj: models.Application, application: ApplicationSchema
+def is_applications_tags_equal(
+    application_obj: Application, application: ApplicationSchema
 ) -> bool:
-    """Checks if the given applications are to be considered equal"""
+    """Check if the given application tags are equal."""
 
     return application_obj.tag == application.tag
 
 
 def add_application_version(
-    application_obj: models.Application,
-    latest_version: Optional[models.ApplicationVersion],
+    application_obj: Application,
+    latest_version: Optional[ApplicationVersion],
     version: ApplicationVersionSchema,
     sign: str,
     store: Store,
-) -> models.ApplicationVersion:
+) -> ApplicationVersion:
     new_version = store.add_version(
         application=application_obj,
         version=latest_version.version + 1 if latest_version else 1,
@@ -173,11 +172,9 @@ def add_application_version(
     return new_version
 
 
-def add_application_object(
-    application: ApplicationSchema, sign: str, store: Store
-) -> models.Application:
-    """Adds an application from a raw application record"""
-    new_application: models.Application = store.add_application(
+def add_application_object(application: ApplicationSchema, sign: str, store: Store) -> Application:
+    """Adds an application from a raw application record."""
+    new_application: Application = store.add_application(
         tag=application.tag,
         prep_category=application.prep_category,
         description=application.description,
@@ -229,7 +226,7 @@ def import_apptags(
         return
 
     for orderform_application_tag in orderform_application_tags:
-        application_obj = store.application(tag=orderform_application_tag)
+        application_obj = store.get_application_by_tag(tag=orderform_application_tag)
 
         if not application_obj:
             message = f"Application {orderform_application_tag} was not found"
@@ -261,7 +258,9 @@ def import_apptags(
         else:
             LOG.info("%s is already active, no need to activate it", application_obj)
 
-    all_active_apps_for_category = store.applications(category=prep_category, archived=False)
+    all_active_apps_for_category: List[
+        Application
+    ] = store.get_applications_by_prep_category_and_is_not_archived(prep_category=prep_category)
 
     for active_application in all_active_apps_for_category:
         if active_application.tag in orderform_application_tags:

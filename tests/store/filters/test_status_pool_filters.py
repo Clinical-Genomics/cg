@@ -1,6 +1,7 @@
 from alchy import Query
 from typing import List
 from cg.store import Store
+from cg.store.models import Pool
 from tests.store_helpers import StoreHelpers
 from cg.store.filters.status_pool_filters import (
     filter_pools_is_received,
@@ -26,7 +27,7 @@ def test_filter_pools_is_delivered(
 
     # WHEN getting delivered pools
     pools: Query = filter_pools_is_delivered(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
     # ASSERT that the query is a Query
@@ -46,7 +47,7 @@ def test_filter_pools_is_not_delivered(
 
     # WHEN getting not delivered pools
     pools: Query = filter_pools_is_not_delivered(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
     # ASSERT that the query is a Query
@@ -66,7 +67,7 @@ def test_filter_pools_is_received(
 
     # WHEN getting received pools
     pools: Query = filter_pools_is_received(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
     # ASSERT that the query is a Query
@@ -86,7 +87,7 @@ def test_filter_pools_is_not_received(
 
     # WHEN getting received pools
     pools: Query = filter_pools_is_not_received(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
     # ASSERT that the query is a Query
@@ -106,7 +107,7 @@ def test_filter_pools_do_not_invoice(
 
     # WHEN getting pools marked to skip invoicing
     pools: Query = filter_pools_do_not_invoice(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
     # ASSERT that the query is a Query
@@ -126,7 +127,7 @@ def test_filter_pools_do_invoice(
 
     # WHEN getting pools marked for invoicing
     pools: Query = filter_pools_do_invoice(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
     # ASSERT that the query is a Query
@@ -147,7 +148,8 @@ def test_filter_pools_by_invoice_id(
 
     # WHEN getting pools with invoice_id
     pools: Query = filter_pools_by_invoice_id(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query(), invoice_id=invoice_id
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool),
+        invoice_id=invoice_id,
     )
 
     # ASSERT that the query is a Query
@@ -167,7 +169,7 @@ def test_filter_pools_without_invoice_id(
 
     # WHEN getting pools without invoice_id
     pools: Query = filter_pools_without_invoice_id(
-        pools=store_with_a_pool_with_and_without_attributes._get_pool_query()
+        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
     # ASSERT that the query is a Query

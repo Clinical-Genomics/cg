@@ -4,7 +4,7 @@ from copy import deepcopy
 import pytest
 
 from cg.constants import DataDelivery, Pipeline
-from cg.constants.constants import CaseActions
+from cg.constants.constants import CaseActions, PrepCategory
 from cg.exc import OrderError
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
@@ -300,7 +300,9 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
     # GIVEN a basic store with no samples and a non-tumour fastq order as wgs
     assert len(base_store.get_all_samples()) == 0
     assert base_store.families().count() == 0
-    base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
+    base_store.get_application_by_tag(
+        fastq_status_data["samples"][0]["application"]
+    ).prep_category = PrepCategory.WHOLE_GENOME_SEQUENCING
     fastq_status_data["samples"][0]["tumour"] = False
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -324,7 +326,9 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
     # GIVEN a basic store with no samples and a tumour fastq order as wgs
     assert len(base_store.get_all_samples()) == 0
     assert base_store.families().count() == 0
-    base_store.application(fastq_status_data["samples"][0]["application"]).prep_category = "wgs"
+    base_store.get_application_by_tag(
+        fastq_status_data["samples"][0]["application"]
+    ).prep_category = PrepCategory.WHOLE_GENOME_SEQUENCING
     fastq_status_data["samples"][0]["tumour"] = True
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -348,10 +352,12 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     # GIVEN a basic store with no samples and a fastq order as non wgs
     assert len(base_store.get_all_samples()) == 0
     assert base_store.families().count() == 0
-    non_wgs_prep_category = "wes"
-    assert base_store.applications(category=non_wgs_prep_category)
+    non_wgs_prep_category = PrepCategory.WHOLE_EXOME_SEQUENCING
+    assert base_store.get_applications_by_prep_category(prep_category=non_wgs_prep_category)
     for sample in fastq_status_data["samples"]:
-        sample["application"] = base_store.applications(category=non_wgs_prep_category)[0].tag
+        sample["application"] = base_store.get_applications_by_prep_category(
+            prep_category=non_wgs_prep_category
+        )[0].tag
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -530,10 +536,10 @@ def test_store_mip(orders_api, base_store, mip_status_data, ticket: str):
 
 def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str):
     # GIVEN a basic store with no samples or nothing in it + rna order
-    rna_application = "RNAPOAR025"
+    rna_application_tag = "RNAPOAR025"
     assert not base_store.get_all_samples()
     assert base_store.families().first() is None
-    assert base_store.application(rna_application)
+    assert base_store.get_application_by_tag(tag=rna_application_tag)
 
     submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -555,7 +561,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str)
     assert new_casing.data_analysis == str(Pipeline.MIP_RNA)
     assert new_casing.data_delivery == str(DataDelivery.SCOUT)
     assert new_link.sample.name == "sample1-rna-t1"
-    assert new_link.sample.application_version.application.tag == rna_application
+    assert new_link.sample.application_version.application.tag == rna_application_tag
 
 
 def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data, ticket: str):

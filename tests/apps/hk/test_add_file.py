@@ -15,11 +15,11 @@ def test_add_file_with_flat_tag(
 ):
     """Test that we can call hk with one existing tag."""
 
-    # GIVEN an hk api populated with a version obj
+    # GIVEN a hk api populated with a version obj
     version_obj = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
     # GIVEN a tag that is just a string that exists
-    assert housekeeper_api.tag(hk_tag)
+    assert housekeeper_api.get_tag(hk_tag)
 
     # WHEN we call add_file
     new_file = housekeeper_api.add_file(fastq_file, version_obj, hk_tag)
@@ -37,13 +37,13 @@ def test_add_file_with_list_of_tags(
 ):
     """Test that we can call Housekeeper with more than one tag."""
 
-    # GIVEN an hk api populated with a version obj
+    # GIVEN a hk api populated with a version obj
     version_obj = helpers.ensure_hk_version(housekeeper_api, hk_bundle_data)
 
     # GIVEN a list of tags that does not exist
     tags = [not_existing_hk_tag, not_existing_hk_tag + "_2"]
     for tag_name in tags:
-        assert housekeeper_api.tag(tag_name) is None
+        assert housekeeper_api.get_tag(tag_name) is None
 
     # WHEN we call add_file
     new_file = housekeeper_api.add_file(fastq_file, version_obj, tags)
