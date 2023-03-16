@@ -90,7 +90,7 @@ class DeliverAPI:
             self.deliver_case_files(
                 case_id=case_id,
                 case_name=case_name,
-                version_obj=last_version,
+                version=last_version,
                 sample_ids=sample_ids,
             )
 
@@ -123,7 +123,7 @@ class DeliverAPI:
             )
 
     def deliver_case_files(
-        self, case_id: str, case_name: str, version_obj: hk_models.Version, sample_ids: Set[str]
+        self, case_id: str, case_name: str, version: hk_models.Version, sample_ids: Set[str]
     ) -> None:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
@@ -135,7 +135,7 @@ class DeliverAPI:
         file_path: Path
         number_linked_files: int = 0
         for file_path in self.get_case_files_from_version(
-            version_obj=version_obj, sample_ids=sample_ids
+            version=version, sample_ids=sample_ids
         ):
             # Out path should include customer names
             out_path: Path = delivery_base / file_path.name.replace(case_id, case_name)
@@ -200,15 +200,23 @@ class DeliverAPI:
         LOG.info(f"Linked {number_linked_files} files for sample {sample_id}, case {case_id}")
 
     def get_case_files_from_version(
-        self, version_obj: hk_models.Version, sample_ids: Set[str]
+        self, version: hk_models.Version, sample_ids: Set[str]
     ) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
-        file_obj: hk_models.File
-        for file_obj in version_obj.files:
-            if not self.include_file_case(file_obj, sample_ids=sample_ids):
-                LOG.debug(f"Skipping file {file_obj.path}")
+
+        if not version:
+            return []
+
+        if not version.files:
+            LOG.warning(f"No files associated with version {version.id}")
+            return []
+    
+        file: hk_models.File
+        for file in version.files:
+            if not self.include_file_case(file, sample_ids=sample_ids):
+                LOG.debug(f"Skipping file {file.path}")
                 continue
-            yield Path(file_obj.full_path)
+            yield Path(file.full_path)
 
     def get_sample_files_from_version(
         self, version_obj: hk_models.Version, sample_id: str
