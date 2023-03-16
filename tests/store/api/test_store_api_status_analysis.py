@@ -32,7 +32,7 @@ def test_get_families_with_extended_models(
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(base_store.get_families_with_analyses())
+    cases: List[Query] = list(base_store._get_outer_join_cases_with_analyses_query())
 
     case: Family = cases[0]
 
@@ -49,16 +49,16 @@ def test_get_families_with_extended_models_when_no_case(base_store: Store):
     # GIVEN an empty database
 
     # WHEN getting cases to analyse
-    cases: List[Query] = list(base_store.get_families_with_analyses())
+    cases: List[Query] = list(base_store._get_outer_join_cases_with_analyses_query())
 
     # THEN no cases should be returned
     assert not cases
 
 
-def test_get_families_with_samples(
+def test_get_cases_with_samples_query(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
-    """Test that a family and samples query is returned from the database."""
+    """Test that a case and samples query is returned from the database."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
@@ -72,7 +72,7 @@ def test_get_families_with_samples(
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # WHEN getting the stored case with its associated samples
-    cases: List[Query] = list(base_store.get_families_with_samples())
+    cases: List[Query] = list(base_store._get_join_cases_with_samples_query())
 
     # THEN a list of cases should be returned, and it should contain the stored and linked sample
     assert cases

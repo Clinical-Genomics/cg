@@ -11,7 +11,7 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 
     # WHEN retrieving bed versions
     bed_versions: List[BedVersion] = get_bed_version_by_short_name(
-        bed_versions=base_store._get_bed_version_query(),
+        bed_versions=base_store._get_query(table=BedVersion),
         bed_version_short_name=bed_version_short_name,
     )
 
@@ -28,7 +28,8 @@ def test_get_bed_version_by_short_name_when_no_name(base_store: Store, bed_versi
 
     # WHEN retrieving bed versions
     bed_versions: List[BedVersion] = get_bed_version_by_short_name(
-        bed_versions=base_store._get_bed_version_query(), bed_version_short_name="does_not_exist"
+        bed_versions=base_store._get_query(table=BedVersion),
+        bed_version_short_name="does_not_exist",
     )
 
     # THEN bed versions should not be returned
