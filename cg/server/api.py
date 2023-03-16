@@ -231,7 +231,7 @@ def samples():
         customer_objs: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples_q: List[Sample] = db.get_samples_by_enquiry(
+        samples_q: List[Sample] = db.get_samples_to_render(
             enquiry=request.args.get("enquiry"), customers=customer_objs
         )
     limit = int(request.args.get("limit", 50))
@@ -244,7 +244,7 @@ def samples():
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
     order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    samples_q: List[Sample] = db.get_samples_by_enquiry(
+    samples_q: List[Sample] = db.get_samples_to_render(
         enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
     )
     limit = int(request.args.get("limit", 50))

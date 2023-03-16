@@ -87,7 +87,7 @@ def filter_samples_do_not_invoice(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.no_invoice.is_(True))
 
 
-def filter_samples_by_customer_id(samples: Query, customer_id: str, **kwargs) -> Query:
+def filter_samples_by_customer_id(samples: Query, customer_id: List[int], **kwargs) -> Query:
     """Return samples by customer id."""
     return samples.filter(Sample.customer_id.in_(customer_id))
 
@@ -132,6 +132,16 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_tumour.is_(False))
 
 
+def filter_samples_by_name_enquiry(samples: Query, name_equiry: str, **kwargs) -> Query:
+    """Return samples by name."""
+    return samples.filter(Sample.name == name_equiry)
+
+
+def filter_samples_by_order_enquiry(samples: Query, order_equiry: str, **kwargs) -> Query:
+    """Return samples by order."""
+    return samples.filter(Sample.order == order_equiry)
+
+
 def apply_sample_filter(
     filter_functions: List[Callable],
     samples: Query,
@@ -143,11 +153,13 @@ def apply_sample_filter(
     customer_id: Optional[str] = None,
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
+    name_enquiry: Optional[str] = None,
+    order_enquiry: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
-    for function in filter_functions:
-        samples: Query = function(
+    for filter_function in filter_functions:
+        samples: Query = filter_function(
             samples=samples,
             entry_id=entry_id,
             internal_id=internal_id,
@@ -157,6 +169,8 @@ def apply_sample_filter(
             customer_id=customer_id,
             subject_id=subject_id,
             name=name,
+            order_enquiry=order_enquiry,
+            name_enquiry=name_enquiry,
         )
     return samples
 
@@ -189,3 +203,5 @@ class SampleFilter(Enum):
     FILTER_BY_SUBJECT_ID: Callable = filter_samples_by_subject_id
     FILTER_IS_TUMOUR: Callable = filter_samples_is_tumour
     FILTER_IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
+    FILTER_BY_NAME_ENQUIRY: Callable = filter_samples_by_name_enquiry
+    FILTER_BY_ORDER_ENQUIRY: Callable = filter_samples_by_order_enquiry

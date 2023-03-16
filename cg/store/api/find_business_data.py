@@ -444,25 +444,43 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all samples."""
         return self._get_query(table=Sample).order_by(Sample.created_at.desc()).all()
 
-    def get_samples_by_enquiry(
+    def get_samples_by_customer(self, customers: Optional[List[Customer]]) -> List[Sample]:
+        """Return all samples for a customer."""
+        customer_ids = [customer.id for customer in customers]
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            customer_ids=customer_ids,
+            filter_functions=[SampleFilter.FILTER_BY_CUSTOMER_ID],
+        ).all()
+
+    def get_samples_by_name_enquiry(self, name_enquiry: str) -> List[Sample]:
+        """Return all samples for a customer."""
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            name_enquiry=name_enquiry,
+            filter_functions=[SampleFilter.FILTER_BY_NAME_ENQUIRY],
+        ).all()
+
+    def get_samples_by_order_enquiry(self, order_enquiry: str) -> List[Sample]:
+        """Return all samples for a customer."""
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            order_enquiry=order_enquiry,
+            filter_functions=[SampleFilter.FILTER_BY_ORDER_ENQUIRY],
+        ).all()
+
+    def get_samples_to_render(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
         records = self._get_query(table=Sample)
-
-        if customers:
-            customer_ids = [customer.id for customer in customers]
-            records = records.filter(Sample.customer_id.in_(customer_ids))
-
-        records = (
-            records.filter(
-                or_(
-                    Sample.name.like(f"%{enquiry}%"),
-                    Sample.internal_id.like(f"%{enquiry}%"),
+        records = self.get_samples_by_customer(customers=customers) if customers else records
+        if enquiry:
+            records = list(
+                set(
+                    set(self.get_samples_by_name_enquiry(name_enquiry=enquiry))
+                    or set(self.get_samples_by_order_enquiry(order_enquiry=enquiry))
                 )
             )
-            if enquiry
-            else records
-        )
         return records.order_by(Sample.created_at.desc()).all()
 
     def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
