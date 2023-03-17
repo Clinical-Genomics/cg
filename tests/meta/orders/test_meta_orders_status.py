@@ -20,7 +20,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.meta.orders import OrdersAPI
 from cg.store import Store
-
+from cg.store.models import Pool
 from cg.constants import Priority
 
 
@@ -197,7 +197,7 @@ def test_cases_to_status_synopsis(mip_order_to_submit):
 
 def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
     # GIVEN a basic store with no samples and a rml order
-    assert base_store.get_pools_for_customer().count() == 0
+    assert base_store._get_query(table=Pool).count() == 0
     assert base_store.families().count() == 0
     assert len(base_store.get_all_samples()) == 0
 
@@ -215,7 +215,7 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
     # THEN it should update the database with new pools
     assert len(new_pools) == 2
 
-    assert base_store.get_pools_for_customer().count() == base_store.families().count()
+    assert base_store._get_query(table=Pool).count() == base_store.families().count()
     assert len(base_store.get_all_samples()) == 4
 
     # ASSERT that there is one negative sample
@@ -225,7 +225,7 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
             negative_samples += 1
     assert negative_samples == 1
 
-    new_pool = base_store.get_pools_for_customer().first()
+    new_pool = base_store._get_query(table=Pool).order_by(Pool.created_at.desc()).first()
     assert new_pool == new_pools[1]
 
     assert new_pool.name == "pool-2"
