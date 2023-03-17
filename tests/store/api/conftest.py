@@ -2,7 +2,6 @@ import datetime as dt
 import pytest
 
 from typing import Iterable, List
-
 from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
@@ -17,6 +16,7 @@ from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 from tests.store_helpers import StoreHelpers
 from cg.store.models import ApplicationVersion, Pool, Sample, Invoice, Application
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
+from cg.constants.invoice import CustomerNames
 
 
 class StoreCheckers:
@@ -24,13 +24,13 @@ class StoreCheckers:
     def get_versions_from_store(store: Store, application_tag: str) -> List[ApplicationVersion]:
         """Gets all versions for the specified application"""
 
-        return store.application(application_tag).versions
+        return store.get_application_by_tag(tag=application_tag).versions
 
     @staticmethod
     def get_application_from_store(store: Store, application_tag: str) -> Application:
         """Gets the specified application"""
 
-        return store.application(application_tag)
+        return store.get_application_by_tag(tag=application_tag)
 
     @staticmethod
     def version_exists_in_store(store: Store, application: ApplicationVersionSchema):
@@ -304,6 +304,24 @@ def fixture_max_nr_of_samples() -> int:
     return 50
 
 
+@pytest.fixture(name="EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS")
+def fixture_expected_number_of_not_archived_applications() -> int:
+    """Return the number of expected number of not archived applications"""
+    return 4
+
+
+@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY")
+def fixture_expected_number_of_applications_with_prep_category() -> int:
+    """Return the number of expected number of applications with prep category"""
+    return 7
+
+
+@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")
+def fixture_expected_number_of_applications() -> int:
+    """Return the number of expected number of applications with prep category"""
+    return 7
+
+
 @pytest.fixture(name="store_with_samples_that_have_names")
 def store_with_samples_that_have_names(
     store: Store, helpers: StoreHelpers, name="sample_1"
@@ -340,3 +358,32 @@ def store_with_samples_subject_id_and_tumour_status(
         customer_id=customer_id,
     )
     return store
+
+
+@pytest.fixture(name="pool_name_1")
+def fixture_pool_name_1() -> str:
+    """Return the name of the first pool."""
+    return "pool_1"
+
+
+@pytest.fixture(name="pool_order_1")
+def fixture_pool_order_1() -> str:
+    """Return the order of the first pool."""
+    return "pool_order_1"
+
+
+@pytest.fixture(name="store_with_multiple_pools_for_customer")
+def fixture_store_with_multiple_pools_for_customer(
+    store: Store,
+    helpers: StoreHelpers,
+    customer_id: str = CustomerNames.cust132,
+) -> Store:
+    """Return a store with two pools with different names for the same customer."""
+    for number in range(2):
+        helpers.ensure_pool(
+            store=store,
+            customer_id=customer_id,
+            name="_".join(["pool", str(number)]),
+            order="_".join(["pool", "order", str(number)]),
+        )
+    yield store

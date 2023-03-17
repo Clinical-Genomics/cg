@@ -1,13 +1,14 @@
 """API to run Vogue"""
 
 import datetime as dt
-from typing import Optional
+from typing import Optional, List
 
 from cg.apps.gt import GenotypeAPI
 from cg.apps.vogue import VogueAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadStream
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Application, Analysis
 
 
 class UploadVogueAPI:
@@ -37,9 +38,10 @@ class UploadVogueAPI:
 
     def load_apptags(self) -> None:
         """Loading application tags from statusdb into the trending database"""
-        apptags = self.store.applications()
+        applications: List[Application] = self.store.get_applications()
         apptags_for_vogue = [
-            {"tag": tag.tag, "prep_category": tag.prep_category} for tag in apptags.all()
+            {"tag": application.tag, "prep_category": application.prep_category}
+            for application in applications
         ]
 
         self.vogue_api.load_apptags(apptags_for_vogue)
@@ -61,8 +63,8 @@ class UploadVogueAPI:
 
     @staticmethod
     def update_analysis_uploaded_to_vogue_date(
-        analysis: models.Analysis,
+        analysis: Analysis,
         vogue_upload_date: Optional[dt.datetime] = dt.datetime.now(),
-    ) -> models.Analysis:
+    ) -> Analysis:
         analysis.uploaded_to_vogue_at = vogue_upload_date
         return analysis

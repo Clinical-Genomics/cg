@@ -16,8 +16,12 @@ from cg.store.models import (
     Family,
     Sample,
     Invoice,
+    Pool,
+    Customer,
 )
 from tests.store_helpers import StoreHelpers
+from cg.constants.invoice import CustomerNames
+from tests.store.conftest import fixture_store_with_a_pool_with_and_without_attributes
 
 
 def test_find_analysis_via_date(
@@ -35,25 +39,13 @@ def test_find_analysis_via_date(
     assert db_analysis == analysis
 
 
-def test_get_flow_cell_query(re_sequenced_sample_store: Store):
-    """Test function to return the flow cell query from the database."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN getting the query for the flow cells
-    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_query()
-
-    # THEN a query should be returned
-    assert isinstance(flow_cell_query, Query)
-
-
 def test_get_flow_cell_sample_links_query(re_sequenced_sample_store: Store):
     """Test function to return the flow cell sample links query from the database."""
 
     # GIVEN a store with two flow cells
 
     # WHEN getting the query for the flow cells
-    flow_cell_query: Query = re_sequenced_sample_store._get_flow_cell_sample_links_query()
+    flow_cell_query: Query = re_sequenced_sample_store._get_join_flow_cell_sample_links_query()
 
     # THEN a query should be returned
     assert isinstance(flow_cell_query, Query)
@@ -609,3 +601,152 @@ def test_is_case_external_false(base_store: Store, case_obj: Family, sample_id: 
 
     # THEN the return value should be False
     assert not is_external
+
+
+def test_get_invoice_by_status(store_with_an_invoice_with_and_without_attributes: Store):
+    """Test that invoices can be fetched by status."""
+    # GIVEN a database with two invoices of which one has attributes
+
+    # WHEN fetching the invoice by status
+    invoices: List[
+        Invoice
+    ] = store_with_an_invoice_with_and_without_attributes.get_invoices_by_status(is_invoiced=True)
+
+    # THEN one invoice should be returned
+    assert invoices
+
+    # THEN there should be one invoice
+    assert len(invoices) == 1
+
+    # THEN the invoice should have that is invoiced
+    assert invoices[0].invoiced_at
+
+
+def test_get_invoice_by_id(store_with_an_invoice_with_and_without_attributes: Store):
+    """Test that invoices can be fetched by invoice id."""
+    # GIVEN a database with two invoices of which one has attributes
+
+    # WHEN fetching the invoice by invoice id
+    invoice: Invoice = store_with_an_invoice_with_and_without_attributes.get_invoice_by_entry_id(
+        entry_id=1
+    )
+
+    # THEN one invoice should be returned
+    assert invoice
+
+    # THEN the invoice should have id 1
+    assert invoice.id == 1
+
+
+def test_get_pools(store_with_multiple_pools_for_customer: Store):
+    """Test that pools can be fetched from the store."""
+    # GIVEN a database with two pools
+
+    # WHEN getting all pools
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools()
+
+    # THEN two pools should be returned
+    assert len(pools) == 2
+
+
+def test_get_pools_by_customer_id(store_with_multiple_pools_for_customer: Store):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN getting pools by customer id
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_by_customer_id(
+        customers=store_with_multiple_pools_for_customer.get_customers()
+    )
+
+    # THEN two pools should be returned
+    assert len(pools) == 2
+
+
+def test_get_pools_by_name_enquiry(store_with_multiple_pools_for_customer: Store, pool_name_1: str):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching pools by customer id
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_by_name_enquiry(
+        name_enquiry=pool_name_1
+    )
+
+    # THEN one pool should be returned
+    assert len(pools) == 1
+
+
+def test_get_pools_by_order_enquiry(
+    store_with_multiple_pools_for_customer: Store, pool_order_1: str
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN getting pools by customer id
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_by_order_enquiry(
+        order_enquiry=pool_order_1
+    )
+
+    # THEN one pool should be returned
+    assert len(pools) == 1
+
+
+def test_get_pools_to_render_with(
+    store_with_multiple_pools_for_customer: Store,
+    pool_name_1: str,
+    pool_order_1: str,
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching pools with no customer or enquiry
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render()
+
+    # THEN two pools should be returned
+    assert len(pools) == 2
+
+
+def test_get_pools_to_render_with_customer(
+    store_with_multiple_pools_for_customer: Store,
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN getting pools by customer id
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
+        customers=store_with_multiple_pools_for_customer.get_customers()
+    )
+
+    # THEN two pools should be returned
+    assert len(pools) == 2
+
+
+def test_get_pools_to_render_with_customer_and_name_enquiry(
+    store_with_multiple_pools_for_customer: Store,
+    pool_name_1: str,
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+    # WHEN fetching pools by customer id and name enquiry
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
+        customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_name_1
+    )
+
+    # THEN one pools should be returned
+    assert len(pools) == 1
+
+
+def test_get_pools_to_render_with_customer_and_order_enquiry(
+    store_with_multiple_pools_for_customer: Store,
+    pool_order_1: str,
+):
+    """Test that pools can be fetched from the store by customer id."""
+    # GIVEN a database with two pools
+
+    # WHEN fetching pools by customer id and order enquiry
+
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
+        customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_order_1
+    )
+
+    # THEN one pools should be returned
+    assert len(pools) == 1

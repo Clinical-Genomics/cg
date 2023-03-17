@@ -1,5 +1,6 @@
 from alchy import Query
 from cg.store import Store
+from cg.store.models import Invoice
 from tests.store_helpers import StoreHelpers
 from cg.store.filters.status_invoice_filters import (
     filter_invoices_by_invoice_id,
@@ -11,7 +12,7 @@ from tests.store.conftest import StoreConftestFixture
 
 def test_filter_get_invoices_by_invoice_id(
     store_with_an_invoice_with_and_without_attributes: Store,
-    invoice_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
+    entry_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
 ):
     """Test to get invoice by invoice id."""
 
@@ -19,8 +20,8 @@ def test_filter_get_invoices_by_invoice_id(
 
     # WHEN getting invoice by invoice id
     invoice: Query = filter_invoices_by_invoice_id(
-        invoices=store_with_an_invoice_with_and_without_attributes._get_invoice_query(),
-        invoice_id=invoice_id,
+        invoices=store_with_an_invoice_with_and_without_attributes._get_query(table=Invoice),
+        entry_id=entry_id,
     )
 
     # THEN assert that the invoice is a Query
@@ -37,7 +38,7 @@ def test_filter_get_invoices_invoiced(store_with_an_invoice_with_and_without_att
 
     # WHEN getting invoice by invoice id
     invoice: Query = filter_invoices_invoiced(
-        invoices=store_with_an_invoice_with_and_without_attributes._get_invoice_query()
+        invoices=store_with_an_invoice_with_and_without_attributes._get_query(table=Invoice)
     )
 
     # THEN assert that the invoice is a query
@@ -56,7 +57,7 @@ def test_filter_get_invoices_not_invoiced(
 
     # WHEN getting invoice by invoice id
     invoice: Query = filter_invoices_not_invoiced(
-        invoices=store_with_an_invoice_with_and_without_attributes._get_invoice_query()
+        invoices=store_with_an_invoice_with_and_without_attributes._get_query(table=Invoice)
     )
 
     # THEN assert that the invoice is a query

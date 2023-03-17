@@ -77,6 +77,35 @@ def test_without_config(
     assert "No config file found" in caplog.text
 
 
+def test_with_config_use_nextflow(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+    mock_config,
+):
+    """Test command with case_id and config file using nextflow."""
+    caplog.set_level(logging.INFO)
+    # GIVEN case-id
+    case_id: str = rnafusion_case_id
+
+    # GIVEN a mocked config
+
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run", "--use-nextflow"], obj=rnafusion_context)
+
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN command should use nextflow
+    assert "using nextflow" in caplog.text
+    assert "path/to/bin/nextflow" in caplog.text
+    assert "-work-dir" in caplog.text
+
+    # THEN command should include resume flag
+    assert "-resume" in caplog.text
+
+
 def test_with_config(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
@@ -84,7 +113,7 @@ def test_with_config(
     rnafusion_case_id: str,
     mock_config,
 ):
-    """Test command with case_id and config file."""
+    """Test command with case_id and config file using tower."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
     case_id: str = rnafusion_case_id
@@ -97,5 +126,33 @@ def test_with_config(
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
 
-    # THEN command should include resume flag
-    assert "-resume" in caplog.text
+    # THEN command should use tower
+    assert "using tower" in caplog.text
+    assert "path/to/bin/tw launch" in caplog.text
+    assert "--work-dir" in caplog.text
+
+
+def test_with_revision(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+    mock_config,
+):
+    """Test command with case_id and config file using tower and specifying a revision."""
+    caplog.set_level(logging.INFO)
+    # GIVEN case-id
+    case_id: str = rnafusion_case_id
+
+    # GIVEN a mocked config
+
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(
+        run, [case_id, "--dry-run", "--revision", "2.1.0"], obj=rnafusion_context
+    )
+
+    # THEN command should execute successfully
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN command should use tower
+    assert "--revision 2.1.0" in caplog.text

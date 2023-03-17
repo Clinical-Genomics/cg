@@ -18,7 +18,7 @@ def test_add_customer(
     """Test add customer command."""
     # GIVEN database with some customers
     status_db: Store = base_context.status_db
-    nr_customers: int = status_db._get_customer_query().count()
+    nr_customers: int = status_db._get_query(table=Customer).count()
 
     # WHEN adding a customer
     result = cli_runner.invoke(
@@ -39,7 +39,7 @@ def test_add_customer(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should be stored in the database
-    assert status_db._get_customer_query().count() == nr_customers + 1
+    assert status_db._get_query(table=Customer).count() == nr_customers + 1
 
 
 def test_add_customer_with_collaboration(
@@ -52,7 +52,7 @@ def test_add_customer_with_collaboration(
     """Test add customer with collaborator."""
     # GIVEN database with customers
     status_db: Store = base_context.status_db
-    nr_customers: int = status_db._get_customer_query().count()
+    nr_customers: int = status_db._get_query(table=Customer).count()
 
     # WHEN adding a customer
     result = cli_runner.invoke(
@@ -79,7 +79,7 @@ def test_add_customer_with_collaboration(
     assert result.exit_code == EXIT_SUCCESS
 
     # THEN it should be stored in the database
-    assert status_db._get_customer_query().count() == nr_customers + 1
+    assert status_db._get_query(table=Customer).count() == nr_customers + 1
 
     # THEN a collaborator should have been added
     assert new_customer.collaborations[0].internal_id == collaboration_id

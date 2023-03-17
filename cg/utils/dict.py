@@ -1,9 +1,9 @@
 """Module to handle dictionary helper functions."""
 
-from typing import List
+from typing import List, Dict
 
 
-def get_list_from_dictionary(dictionary: dict) -> list:
+def get_list_from_dictionary(dictionary: Dict) -> list:
     """Return a list of the passed dict non-empty key values."""
     list_from_dict: List[str] = []
     for key, value in dictionary.items():
@@ -12,7 +12,7 @@ def get_list_from_dictionary(dictionary: dict) -> list:
     return list_from_dict
 
 
-def get_full_path_dictionary(dictionary: dict) -> dict:
+def get_full_path_dictionary(dictionary: Dict) -> dict:
     """Return a full path of the values of the passed dictionary."""
     full_path_dict: dict = {}
     for key, value in dictionary.items():

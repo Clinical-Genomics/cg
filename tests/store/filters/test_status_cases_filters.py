@@ -7,8 +7,8 @@ from datetime import datetime
 from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
-from cg.store import Store, models
-from cg.store.models import Family
+from cg.store import Store
+from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
     get_cases_with_pipeline,
     get_cases_has_sequence,
@@ -27,7 +27,7 @@ def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timest
     """Test that a case is returned when there is a cases with a sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -36,7 +36,7 @@ def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timest
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -52,7 +52,7 @@ def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreH
     """Test that a case is returned when there is a case with an externally sequenced sample."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -61,7 +61,7 @@ def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreH
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -77,7 +77,7 @@ def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: S
     """Test that no case is returned when there is a cases with sample that has not been sequenced."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=None)
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=None)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -86,7 +86,7 @@ def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: S
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -104,9 +104,7 @@ def test_get_cases_has_sequence_when_not_external_nor_sequenced(
     """Test that no case is returned when there is a cases with sample that has not been sequenced nor is external."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(
-        base_store, sequenced_at=None, is_external=False
-    )
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=False)
 
     # GIVEN a case
     test_case = helpers.add_case(base_store)
@@ -115,7 +113,7 @@ def test_get_cases_has_sequence_when_not_external_nor_sequenced(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_has_sequence(cases=cases)
@@ -133,7 +131,7 @@ def test_get_cases_with_pipeline_when_correct_pipline(
     """Test that no case is returned when there are no cases with the  specified pipeline."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
     test_case = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
@@ -142,7 +140,7 @@ def test_get_cases_with_pipeline_when_correct_pipline(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
     cases: List[Query] = list(get_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
@@ -157,16 +155,16 @@ def test_get_cases_with_pipeline_when_incorrect_pipline(
     """Test that no case is returned when there are no cases with the  specified pipeline."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a cancer case
-    test_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
+    test_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.BALSAMIC)
 
     # GIVEN a database with a case with one sequenced samples for specified analysis
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
     cases: List[Query] = list(get_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
@@ -181,12 +179,12 @@ def test_get_cases_with_loqusdb_supported_pipeline(
     """Test retrieval of cases that support Loqusdb upload."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a MIP-DNA and a FLUFFY case
-    test_mip_case: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_mip_case: Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
     test_mip_case.customer.loqus_upload = True
-    test_fluffy_case: models.Family = helpers.add_case(
+    test_fluffy_case: Family = helpers.add_case(
         base_store, name="test", data_analysis=Pipeline.FLUFFY
     )
     test_fluffy_case.customer.loqus_upload = True
@@ -196,7 +194,7 @@ def test_get_cases_with_loqusdb_supported_pipeline(
     base_store.relate_sample(test_fluffy_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with pipeline
     cases: List[Query] = list(get_cases_with_loqusdb_supported_pipeline(cases=cases))
@@ -212,16 +210,16 @@ def test_get_cases_with_loqusdb_supported_sequencing_method(
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
 
     # GIVEN a sample with a valid Loqusdb sequencing method
-    test_sample_wes: models.Sample = helpers.add_sample(
+    test_sample_wes: Sample = helpers.add_sample(
         base_store, sequenced_at=timestamp_now, application_type=SequencingMethod.WES
     )
 
     # GIVEN a MIP-DNA associated test case
-    test_case_wes: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_case_wes: Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
     base_store.relate_sample(test_case_wes, test_sample_wes, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the available cases
     cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
@@ -241,16 +239,16 @@ def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
 
     # GIVEN a not supported loqusdb sample
-    test_sample_wts: models.Sample = helpers.add_sample(
+    test_sample_wts: Sample = helpers.add_sample(
         base_store, name="sample_wts", sequenced_at=timestamp_now, is_rna=True
     )
 
     # GIVEN a MIP-DNA associated test case
-    test_case_wts: models.Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
+    test_case_wts: Family = helpers.add_case(base_store, data_analysis=Pipeline.MIP_DNA)
     base_store.relate_sample(test_case_wts, test_sample_wts, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the valid cases
     cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
@@ -268,10 +266,10 @@ def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timest
     """Test that a case is returned when there is a cases with an action set to analyse."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
+    test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
 
     # GIVEN a completed analysis
-    test_analysis: models.Analysis = helpers.add_analysis(
+    test_analysis: Analysis = helpers.add_analysis(
         base_store, completed_at=timestamp_now, pipeline=Pipeline.MIP_DNA
     )
 
@@ -282,7 +280,7 @@ def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timest
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -300,7 +298,7 @@ def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     """Test that a case is returned when there are internally created cases with no action set and no prior analysis."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(
+    test_sample: Sample = helpers.add_sample(
         base_store, sequenced_at=timestamp_now, is_external=False
     )
 
@@ -311,7 +309,7 @@ def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -332,12 +330,12 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     """Test that a case is returned when cases with no action, but new sequence data."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(
+    test_sample: Sample = helpers.add_sample(
         base_store, sequenced_at=timestamp_now, is_external=False
     )
 
     # GIVEN a completed analysis
-    test_analysis: models.Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
+    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
     test_analysis.family.action: Union[None, str] = None
@@ -349,7 +347,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     test_analysis.created_at = timestamp_yesterday
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -367,12 +365,12 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     """Test that a case is not returned when cases with no action, but old sequence data."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(
+    test_sample: Sample = helpers.add_sample(
         base_store, sequenced_at=timestamp_yesterday, is_external=True
     )
 
     # GIVEN a completed analysis
-    test_analysis: models.Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
+    test_analysis: Analysis = helpers.add_analysis(base_store, pipeline=Pipeline.MIP_DNA)
 
     # Given an action set to None
     test_analysis.family.action: Union[None, str] = None
@@ -381,7 +379,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     base_store.relate_sample(test_analysis.family, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
     cases: Query = get_cases_for_analysis(cases=cases)
@@ -399,7 +397,7 @@ def test_get_cases_with_scout_data_delivery(
     """Test that a case is returned when Scout is specified as a data delivery option."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store)
+    test_sample: Sample = helpers.add_sample(base_store)
 
     # GIVEN a case with Scout as data delivery
     test_case = helpers.add_case(base_store, data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT)
@@ -408,7 +406,7 @@ def test_get_cases_with_scout_data_delivery(
     base_store.relate_sample(test_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with Scout as data delivery option
     cases: Query = get_cases_with_scout_data_delivery(cases=cases)
@@ -426,7 +424,7 @@ def test_get_report_supported_data_delivery_cases(
     """Test that a case is returned for a delivery report supported data delivery option."""
 
     # GIVEN a sequenced sample
-    test_sample: models.Sample = helpers.add_sample(base_store)
+    test_sample: Sample = helpers.add_sample(base_store)
 
     # GIVEN a case with Scout and a not supported option as data deliveries
     test_case = helpers.add_case(base_store, data_delivery=DataDelivery.FASTQ_ANALYSIS_SCOUT)
@@ -437,7 +435,7 @@ def test_get_report_supported_data_delivery_cases(
     base_store.relate_sample(test_invalid_case, test_sample, PhenotypeStatus.UNKNOWN)
 
     # GIVEN a cases Query
-    cases: Query = base_store.get_families_with_analyses()
+    cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the delivery report supported cases
     cases: Query = get_report_supported_data_delivery_cases(cases=cases)
@@ -457,7 +455,7 @@ def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     test_case = helpers.add_case(base_store)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: Query = get_inactive_analysis_cases(cases=cases)
@@ -478,7 +476,7 @@ def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: St
     test_case = helpers.add_case(base_store, action=CaseActions.HOLD)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: Query = get_inactive_analysis_cases(cases=cases)
@@ -499,7 +497,7 @@ def test_get_inactive_analysis_cases_when_not_completed(base_store: Store, helpe
     helpers.add_case(base_store, action=CaseActions.RUNNING)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: Query = get_inactive_analysis_cases(cases=cases)
@@ -518,7 +516,7 @@ def test_get_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     test_case = helpers.add_case(base_store)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: Query = get_new_cases(cases=cases, date=timestamp_in_2_weeks)
@@ -541,7 +539,7 @@ def test_get_new_cases_when_too_new(
     helpers.add_case(base_store)
 
     # GIVEN a cases Query
-    cases: Query = base_store._get_case_query()
+    cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
     cases: Query = get_new_cases(cases=cases, date=timestamp_yesterday)

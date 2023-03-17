@@ -8,7 +8,7 @@ from sendmail_container import FormDataRequest
 from cg.apps.osticket import OsTicket
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import Customer, Sample
 from tempfile import TemporaryDirectory
 
@@ -122,9 +122,7 @@ class TicketHandler:
         if not internal_id:
             return message
 
-        existing_sample: models.Sample = self.status_db.get_sample_by_internal_id(
-            internal_id=internal_id
-        )
+        existing_sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=internal_id)
 
         sample_customer = ""
         if existing_sample.customer_id != customer_id:

@@ -14,7 +14,8 @@ from cg.cli.upload.observations.utils import get_observations_case_to_upload, ge
 from cg.exc import LoqusdbError, CaseNotFoundError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.store import models, Store
+from cg.store import Store
+from cg.store.models import Family
 
 from cg.cli.workflow.commands import (
     ARGUMENT_CASE_ID,
@@ -37,7 +38,7 @@ def observations(context: CGConfig, case_id: Optional[str], dry_run: bool):
     click.echo(click.style("----------------- OBSERVATIONS -----------------"))
 
     with contextlib.suppress(LoqusdbError):
-        case: models.Family = get_observations_case_to_upload(context, case_id)
+        case: Family = get_observations_case_to_upload(context, case_id)
         observations_api: Union[
             MipDNAObservationsAPI, BalsamicObservationsAPI
         ] = get_observations_api(context, case)

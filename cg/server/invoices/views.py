@@ -39,7 +39,7 @@ def logged_in():
 
 
 def undo_invoice(invoice_id):
-    invoice_obj: Invoice = db.get_invoice_by_id(invoice_id)
+    invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     record_type: str = invoice_obj.record_type
     records: List[Union[Pool, Sample]] = db.get_pools_and_samples_for_invoice_by_invoice_id(
         invoice_id=invoice_id
@@ -86,7 +86,7 @@ def make_new_invoice():
 
 def upload_invoice_news_to_db():
     invoice_id: int = request.form.get("invoice_id")
-    invoice_obj: Invoice = db.get_invoice_by_id(invoice_id=invoice_id)
+    invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     invoice_obj.comment = request.form.get("comment")
 
     if request.form.get("final_price") != invoice_obj.price:
@@ -157,7 +157,7 @@ def new(record_type):
 @BLUEPRINT.route("/<int:invoice_id>", methods=["GET"])
 def invoice(invoice_id):
     """Save comments and uploaded modified invoices."""
-    invoice_obj: Invoice = db.get_invoice_by_id(invoice_id)
+    invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     api = InvoiceAPI(db, lims, invoice_obj)
     kth_inv = api.get_invoice_report(CostCenters.kth)
     ki_inv = api.get_invoice_report(CostCenters.kth)
@@ -186,7 +186,7 @@ def invoice(invoice_id):
 def invoice_template(invoice_id):
     """Generate invoice template"""
     cost_center = request.args.get("cost_center", "KTH")
-    invoice_obj: Invoice = db.get_invoice_by_id(invoice_id=invoice_id)
+    invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     api = InvoiceAPI(db, lims, invoice_obj)
     invoice_dict = api.get_invoice_report(cost_center)
     workbook = render_xlsx(invoice_dict)
@@ -205,7 +205,7 @@ def modified_invoice(invoice_id, cost_center):
     if cost_center not in ["KTH", "KI"]:
         return abort(http.HTTPStatus.BAD_REQUEST)
 
-    invoice_obj: Invoice = db.get_invoice_by_id(invoice_id)
+    invoice_obj: Invoice = db.get_invoice_by_entry_id(entry_id=invoice_id)
     file_name = "invoice_" + cost_center + str(invoice_id) + ".xlsx"
     temp_dir = tempfile.mkdtemp()
     file_path = os.path.join(temp_dir, file_name)

@@ -81,7 +81,7 @@ class TransferFlowCell:
     def _add_tags_to_housekeeper(self, store: bool, tags: List[str]) -> None:
         """Add and commit tag(s) to Housekeeper if not already exists in database."""
         for tag in tags:
-            if store and self.hk.tag(name=tag) is None:
+            if store and self.hk.get_tag(name=tag) is None:
                 self.hk.add_commit(self.hk.new_tag(tag))
 
     def _parse_flow_cell_samples(

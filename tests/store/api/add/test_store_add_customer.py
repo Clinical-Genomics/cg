@@ -1,5 +1,6 @@
 import pytest
 from cg.store import Store
+from cg.store.models import Customer
 
 
 @pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])
@@ -48,7 +49,7 @@ def test_contact_structure(store: Store, contact_type):
 
 def test_add_basic(store: Store):
     # GIVEN an empty database
-    assert (store._get_customer_query()).first() is None
+    assert (store._get_query(table=Customer)).first() is None
     internal_id, name, scout_access = "cust000", "Test customer", True
     collaboration = store.add_collaboration("dummy_group", "dummy group")
 
@@ -64,4 +65,4 @@ def test_add_basic(store: Store):
     store.add_commit(new_customer)
 
     # THEN it should be stored in the database
-    assert (store._get_customer_query()).first() == new_customer
+    assert (store._get_query(table=Customer)).first() == new_customer

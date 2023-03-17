@@ -183,7 +183,11 @@ class MicrosaltQC:
 class MicrosaltAppTags(StrEnum):
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
-    APP_TYPE: str = "mic"
+    PREP_CATEGORY: str = "mic"
 
 
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
+
+
+class MetaApis:
+    ANALYSIS_API: str = "analysis_api"

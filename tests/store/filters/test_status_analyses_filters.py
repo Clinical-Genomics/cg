@@ -4,7 +4,8 @@ from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
 
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis, Family
 from cg.store.filters.status_analysis_filters import (
     get_valid_analyses_in_production,
     get_analyses_with_pipeline,
@@ -24,15 +25,15 @@ from tests.store_helpers import StoreHelpers
 def test_get_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    case_obj: Family,
     timestamp_now: datetime,
     old_timestamp: datetime,
 ):
     """Test that an expected analysis is returned when it has a production valid completed_at date."""
 
     # GIVEN a set of mock analyses
-    analysis: models.Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
-    outdated_analysis: models.Analysis = helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    outdated_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, completed_at=old_timestamp
     )
     # GIVEN an analysis query
@@ -49,16 +50,12 @@ def test_get_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_get_analyses_with_pipeline(
-    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
-):
+def test_get_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case_obj: Family):
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
-    balsamic_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, pipeline=Pipeline.BALSAMIC
-    )
-    mip_analysis: models.Analysis = helpers.add_analysis(
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    mip_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, pipeline=Pipeline.MIP_DNA
     )
 
@@ -80,7 +77,7 @@ def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timest
     """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
-    analysis: models.Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
@@ -99,9 +96,7 @@ def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of ongoing analyses."""
 
     # GIVEN a mock not completed analysis
-    analysis_not_completed: models.Analysis = helpers.add_analysis(
-        store=base_store, completed_at=None
-    )
+    analysis_not_completed: Analysis = helpers.add_analysis(store=base_store, completed_at=None)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
@@ -122,7 +117,7 @@ def test_get_filter_uploaded_analyses(
     """Test filtering of analysis with an uploaded_at field."""
 
     # GIVEN a mock uploaded analysis
-    analysis: models.Analysis = helpers.add_analysis(store=base_store, uploaded_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(store=base_store, uploaded_at=timestamp_now)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
@@ -141,9 +136,7 @@ def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of analysis that has not been uploaded."""
 
     # GIVEN a mock not uploaded analysis
-    not_uploaded_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, uploaded_at=None
-    )
+    not_uploaded_analysis: Analysis = helpers.add_analysis(store=base_store, uploaded_at=None)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
@@ -164,9 +157,7 @@ def test_get_analyses_with_delivery_report(
     """Test filtering of analysis with a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
-    analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, delivery_reported_at=timestamp_now
-    )
+    analysis: Analysis = helpers.add_analysis(store=base_store, delivery_reported_at=timestamp_now)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
@@ -185,7 +176,7 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
     """Test filtering of analysis without a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
-    analysis_without_delivery_report: models.Analysis = helpers.add_analysis(
+    analysis_without_delivery_report: Analysis = helpers.add_analysis(
         store=base_store, delivery_reported_at=None
     )
 
@@ -203,15 +194,13 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
 
 
 def test_get_report_analyses_by_pipeline(
-    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
+    base_store: Store, helpers: StoreHelpers, case_obj: Family
 ):
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
-    balsamic_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, pipeline=Pipeline.BALSAMIC
-    )
-    fluffy_analysis: models.Analysis = helpers.add_analysis(
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    fluffy_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, pipeline=Pipeline.FLUFFY
     )
 
@@ -232,17 +221,15 @@ def test_get_report_analyses_by_pipeline(
 def test_order_analyses_by_completed_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    case_obj: Family,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ):
     """Test sorting of analyses by the completed_at field."""
 
     # GIVEN a set of mock analyses
-    new_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, completed_at=timestamp_now
-    )
-    old_analysis: models.Analysis = helpers.add_analysis(
+    new_analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    old_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, completed_at=timestamp_yesterday
     )
 
@@ -263,17 +250,17 @@ def test_order_analyses_by_completed_at(
 def test_order_analyses_by_uploaded_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    case_obj: Family,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ):
     """Test sorting of analyses by the uploaded_at field."""
 
     # GIVEN a set of mock analyses
-    new_analysis: models.Analysis = helpers.add_analysis(
+    new_analysis: Analysis = helpers.add_analysis(
         store=base_store, completed_at=timestamp_now, uploaded_at=timestamp_now
     )
-    old_analysis: models.Analysis = helpers.add_analysis(
+    old_analysis: Analysis = helpers.add_analysis(
         store=base_store,
         case=case_obj,
         completed_at=timestamp_yesterday,
