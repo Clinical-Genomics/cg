@@ -132,9 +132,9 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_tumour.is_(False))
 
 
-def filter_samples_by_name_enquiry(samples: Query, name_equiry: str, **kwargs) -> Query:
+def filter_samples_by_name_enquiry(samples: Query, name_enquiry: str, **kwargs) -> Query:
     """Return samples by name."""
-    return samples.filter(Sample.name == name_equiry)
+    return samples.filter(Sample.name == name_enquiry)
 
 
 def filter_samples_by_order_enquiry(samples: Query, order_equiry: str, **kwargs) -> Query:
