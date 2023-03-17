@@ -26,7 +26,7 @@ from cg.models.balsamic.metrics import (
 from cg.models.cg_config import CGConfig
 from cg.store.models import ApplicationVersion, Family, FamilySample, Sample
 from cg.utils import Process
-from cg.utils.utils import get_string_from_list_by_pattern
+from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -628,15 +628,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
         ]
 
-    @staticmethod
-    def __build_command_str(options: dict) -> List[str]:
-        formatted_options = []
-        for key, val in options.items():
-            if val:
-                formatted_options.append(str(key))
-                formatted_options.append(str(val))
-        return formatted_options
-
     def config_case(
         self,
         case_id: str,
@@ -659,7 +650,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             force_normal=force_normal,
         )
         command = ["config", "case"]
-        options = self.__build_command_str(
+        options = build_command_from_dict(
             {
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
@@ -698,7 +689,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if run_analysis else []
         benchmark = ["--benchmark"]
-        options = self.__build_command_str(
+        options = build_command_from_dict(
             {
                 "--account": self.account,
                 "--mail-user": self.email,
@@ -713,7 +704,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Execute BALSAMIC report deliver with given options"""
 
         command = ["report", "deliver"]
-        options = self.__build_command_str(
+        options = build_command_from_dict(
             {
                 "--sample-config": self.get_case_config_path(case_id=case_id),
             }
