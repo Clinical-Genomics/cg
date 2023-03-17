@@ -82,7 +82,7 @@ def apply_pool_filter(
     """Apply filtering functions to the pool queries and return filtered results"""
 
     for filter_function in filter_functions:
-        pools: Query = function(
+        pools: Query = filter_function(
             pools=pools,
             invoice_id=invoice_id,
             entry_id=entry_id,

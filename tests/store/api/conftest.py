@@ -2,7 +2,6 @@ import datetime as dt
 import pytest
 
 from typing import Iterable, List
-
 from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
