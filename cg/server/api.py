@@ -42,7 +42,7 @@ def get_public_endpoint(route_function):
 
 
 @BLUEPRINT.before_request
-def authorise_before_request():
+def before_request():
     """Authorize API routes with JSON Web Tokens."""
     if not request.is_secure:
         return abort(
