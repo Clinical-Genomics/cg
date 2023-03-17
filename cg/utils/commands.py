@@ -109,6 +109,15 @@ class Process:
 
         return res.returncode
 
+    def get_command(self, parameters: list = None) -> str:
+        """Returns a command string given a list of parameters."""
+
+        command = copy.deepcopy(self.base_call)
+        if parameters:
+            command.extend(parameters)
+
+        return " ".join(command)
+
     @property
     def stdout(self):
         """Fetch stdout"""

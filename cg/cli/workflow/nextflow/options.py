@@ -74,4 +74,3 @@ OPTION_REVISION = click.option(
     type=str,
     help="Revision of workflow to run (either a git branch, tag or commit SHA number)",
 )
-# TEST COMMENT

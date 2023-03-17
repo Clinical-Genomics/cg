@@ -45,6 +45,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.tower_binary_path: str = config.rnafusion.tower_binary_path
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
+        self.email: str = config.rnafusion.slurm.mail_user
 
     @property
     def root(self) -> str:
@@ -83,9 +84,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
-
-    def get_variables_to_export(self, case_id) -> Dict[str, str]:
-        return NextflowAnalysisAPI.get_variables_to_export(case_id=case_id, root_dir=self.root_dir)
 
     def verify_analysis_finished(self, case_id):
         return NextflowAnalysisAPI.verify_analysis_finished(case_id=case_id, root_dir=self.root_dir)
@@ -218,20 +216,36 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 command_args=command_args,
             )
             self.process.export_variables(
-                export=self.get_variables_to_export(case_id),
+                export=NextflowAnalysisAPI.get_variables_to_export(
+                    case_id=case_id, root_dir=self.root_dir
+                ),
             )
+
+            command = self.process.get_command(parameters=parameters)
+            LOG.info(f"{command}")
+            sbatch_number: int = NextflowAnalysisAPI.execute_head_job(
+                case_id=case_id,
+                root_dir=self.root_dir,
+                slurm_account=self.account,
+                email=self.email,
+                qos=self.get_slurm_qos_for_case(case_id=case_id),
+                commands=command,
+                dry_run=dry_run,
+            )
+            LOG.info(f"Nextflow head job running as job {sbatch_number}")
+
         else:
             LOG.info("Pipeline will be executed using tower")
             parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(
                 tower_pipeline=self.tower_pipeline,
                 command_args=command_args,
             )
-        exit_code = self.process.run_command(parameters=parameters, dry_run=dry_run)
-        for line in self.process.stdout_lines():
-            LOG.info(line)
-        for line in self.process.stderr_lines():
-            LOG.info(line)
-        return exit_code
+            exit_code = self.process.run_command(parameters=parameters, dry_run=dry_run)
+            for line in self.process.stdout_lines():
+                LOG.info(line)
+            for line in self.process.stderr_lines():
+                LOG.info(line)
+            return exit_code
 
     def verify_case_config_file_exists(self, case_id: str) -> None:
         NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir)
