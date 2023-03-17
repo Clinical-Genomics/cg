@@ -609,7 +609,13 @@ def test_get_invoice_by_status(store_with_an_invoice_with_and_without_attributes
     ] = store_with_an_invoice_with_and_without_attributes.get_invoices_by_status(is_invoiced=True)
 
     # THEN one invoice should be returned
-    assert invoices and len(invoices) == 1 and invoices[0].invoiced_at
+    assert invoices
+
+    # THEN there should be one invoice
+    assert len(invoices) == 1
+
+    # THEN the invoice should have that is invoiced
+    assert invoices[0].invoiced_at
 
 
 def test_get_invoice_by_id(store_with_an_invoice_with_and_without_attributes: Store):
@@ -622,4 +628,7 @@ def test_get_invoice_by_id(store_with_an_invoice_with_and_without_attributes: St
     )
 
     # THEN one invoice should be returned
-    assert invoice and invoice.id == 1
+    assert invoice
+
+    # THEN the invoice should have id 1
+    assert invoice.id == 1
