@@ -28,6 +28,9 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_is_not_received,
     filter_samples_by_name,
     filter_samples_by_subject_id,
+    filter_samples_by_customer_id,
+    filter_samples_by_name_enquiry,
+    filter_samples_by_order_enquiry,
 )
 from datetime import datetime
 from tests.store.conftest import StoreConftestFixture
@@ -96,7 +99,13 @@ def test_filter_samples_is_delivered(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have a delivered at date
+    assert samples.all()[0].delivered_at is not None
 
 
 def test_filter_samples_is_not_delivered(
@@ -118,7 +127,13 @@ def test_filter_samples_is_not_delivered(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should not have a delivered at date
+    assert samples.all()[0].delivered_at is None
 
 
 def test_filter_get_samples_by_invoice_id(
@@ -128,7 +143,7 @@ def test_filter_get_samples_by_invoice_id(
 ):
     """Test that a sample is returned when there is a sample that has an invoice id."""
 
-    # GIVEN a store with two samples of which oone has an invoice id
+    # GIVEN a store with two samples of which one has an invoice id
 
     # WHEN getting not sequenced samples
     samples: Query = filter_samples_by_invoice_id(
@@ -142,7 +157,13 @@ def test_filter_get_samples_by_invoice_id(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the correct invoice id
+    assert samples.all()[0].invoice_id == invoice_id
 
 
 def test_filter_samples_without_invoice_id(
@@ -164,7 +185,13 @@ def test_filter_samples_without_invoice_id(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should not have an invoice id
+    assert samples.all()[0].invoice_id is None
 
 
 def test_filter_samples_down_sampled(
@@ -186,7 +213,13 @@ def test_filter_samples_down_sampled(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have a down sampled to value
+    assert samples.all()[0].downsampled_to is not None
 
 
 def test_filter_samples_not_down_sampled(
@@ -208,7 +241,13 @@ def test_filter_samples_not_down_sampled(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should not have a down sampled to value
+    assert samples.all()[0].downsampled_to is None
 
 
 def test_filter_samples_is_sequenced(
@@ -230,7 +269,13 @@ def test_filter_samples_is_sequenced(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have a sequenced at date
+    assert samples.all()[0].sequenced_at is not None
 
 
 def test_filter_samples_is_not_sequenced(
@@ -252,7 +297,13 @@ def test_filter_samples_is_not_sequenced(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should not have a sequenced at date
+    assert samples.all()[0].sequenced_at is None
 
 
 def test_filter_samples_do_invoice(
@@ -274,7 +325,13 @@ def test_filter_samples_do_invoice(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have a no invoice indicator that is set to False
+    assert samples.all()[0].no_invoice is False
 
 
 def test_filter_samples_do_not_invoice(
@@ -296,51 +353,13 @@ def test_filter_samples_do_not_invoice(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
 
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
 
-def test_filter_samples_is_delivered(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
-):
-    """Test that a sample is returned when there is a sample that is delivered."""
-
-    # GIVEN a store with two samples of which one is delivered
-
-    # WHEN getting delivered samples
-    samples: Query = filter_samples_is_delivered(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        )
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
-
-
-def test_filter_samples_is_not_delivered(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
-):
-    """Test that a sample is returned when there is a sample that is not delivered."""
-
-    # GIVEN a store with two samples of which one is not delivered
-
-    # WHEN getting not delivered samples
-    samples: Query = filter_samples_is_not_delivered(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        )
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    # THEN the sample should have a no invoice indicator that is set to True
+    assert samples.all()[0].no_invoice is True
 
 
 def test_filter_samples_is_received(
@@ -362,7 +381,13 @@ def test_filter_samples_is_received(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have a received at date
+    assert samples.all()[0].received_at is not None
 
 
 def test_filter_samples_is_not_received(
@@ -381,7 +406,13 @@ def test_filter_samples_is_not_received(
     )
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should not have a received at date
+    assert samples.all()[0].received_at is None
 
 
 def test_filter_samples_is_prepared(
@@ -402,7 +433,13 @@ def test_filter_samples_is_prepared(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have a prepared at date
+    assert samples.all()[0].prepared_at is not None
 
 
 def test_filter_samples_is_not_prepared(
@@ -421,12 +458,18 @@ def test_filter_samples_is_not_prepared(
     )
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have not have a prepared at date
+    assert samples.all()[0].prepared_at is None
 
 
 def test_filter_get_samples_by_internal_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    sample_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    internal_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given id."""
 
@@ -437,14 +480,20 @@ def test_filter_get_samples_by_internal_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
-        internal_id=sample_id,
+        internal_id=internal_id,
     )
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.all()[0].internal_id == sample_id
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the internal id
+    assert samples.all()[0].internal_id == internal_id
 
 
 def test_filter_get_samples_by_entry_id(
@@ -467,7 +516,13 @@ def test_filter_get_samples_by_entry_id(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the correct id
+    assert samples.all()[0].id == entry_id
 
 
 def test_filter_get_samples_with_type(
@@ -491,7 +546,13 @@ def test_filter_get_samples_with_type(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.first().name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have is tumour set to true
+    assert samples.all()[0].is_tumour is True
 
 
 def test_filter_get_samples_by_name(
@@ -513,7 +574,13 @@ def test_filter_get_samples_by_name(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.first().name == name
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the correct name
+    assert samples.all()[0].name == name
 
 
 def test_filter_get_samples_by_subject_id(
@@ -535,4 +602,94 @@ def test_filter_get_samples_by_subject_id(
     assert isinstance(samples, Query)
 
     # THEN samples should contain the test sample
-    assert samples.all() and len(samples.all()) == 1 and samples.first().subject_id == subject_id
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the correct subject id
+    assert samples.all()[0].subject_id == subject_id
+
+
+def test_filter_get_samples_by_customer_id(
+    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
+    customer_id: int = 1,
+):
+    """Test that a sample is returned when there is a sample with the given customer id."""
+    # GIVEN a store with two samples of which one has a customer id
+
+    # WHEN getting a sample by customer id
+    samples: Query = filter_samples_by_customer_id(
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
+        customer_id=[customer_id],
+    )
+
+    # ASSERT that samples is a query
+    assert isinstance(samples, Query)
+
+    # THEN samples should contain the test sample
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 2
+
+    # THEN the sample should have the correct customer id
+    assert (sample.customer_id == customer_id for sample in samples)
+
+
+def test_filter_get_samples_by_order_enquiry(
+    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
+    order_enquiry: str = StoreConftestFixture.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
+):
+    """Test that a sample is returned when there is a sample with the given order enquiry id."""
+    # GIVEN a store with two samples of which one has a order enquiry id
+
+    # WHEN getting a sample by order enquiry id
+    samples: Query = filter_samples_by_order_enquiry(
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
+        order_enquiry=order_enquiry,
+    )
+
+    # ASSERT that samples is a query
+    assert isinstance(samples, Query)
+
+    # THEN samples should contain the test sample
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the correct order enquiry id
+    assert samples[0].order == order_enquiry
+
+
+def test_filter_get_samples_by_name_enquiry(
+    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
+    name_enquiry: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+):
+    """Test that a sample is returned when there is a sample with the given name enquiry id."""
+    # GIVEN a store with two samples of which one has a name enquiry id
+
+    # WHEN getting a sample by name enquiry id
+    samples: Query = filter_samples_by_name_enquiry(
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
+        name_enquiry=name_enquiry,
+    )
+
+    # ASSERT that samples is a query
+    assert isinstance(samples, Query)
+
+    # THEN samples should contain the test sample
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the correct name enquiry id
+    assert samples[0].name == name_enquiry

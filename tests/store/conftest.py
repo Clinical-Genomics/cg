@@ -22,6 +22,7 @@ class StoreConftestFixture(enum.Enum):
     INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
     NAME_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
     ENTRY_ID_SAMPLE_WITHOUT_ATTRIBUTES: int = 2
+    ORDER_SAMPLE_WITH_ATTRIBUTES: str = "order001"
 
     INVOICE_ID_POOL_WITH_ATTRIBUTES: int = 1
     NAME_POOL_WITH_ATTRIBUTES: str = "pool_with_attributes"
@@ -188,6 +189,7 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
         invoice_id=StoreConftestFixture.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConftestFixture.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
+        order=StoreConftestFixture.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
     )
 
     helpers.add_sample(

@@ -137,9 +137,9 @@ def filter_samples_by_name_enquiry(samples: Query, name_enquiry: str, **kwargs) 
     return samples.filter(Sample.name == name_enquiry)
 
 
-def filter_samples_by_order_enquiry(samples: Query, order_equiry: str, **kwargs) -> Query:
+def filter_samples_by_order_enquiry(samples: Query, order_enquiry: str, **kwargs) -> Query:
     """Return samples by order."""
-    return samples.filter(Sample.order == order_equiry)
+    return samples.filter(Sample.order == order_enquiry)
 
 
 def apply_sample_filter(
