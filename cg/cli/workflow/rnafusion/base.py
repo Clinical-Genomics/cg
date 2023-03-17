@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 @click.group(invoke_without_command=True)
 @click.pass_context
 def rnafusion(context: click.Context) -> None:
-    """nf-core/rnafusion analysis workflow."""
+    """nf-core/rnafusion analysis workflow test."""
     AnalysisAPI.get_help(context)
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = RnafusionAnalysisAPI(
         config=context.obj,
