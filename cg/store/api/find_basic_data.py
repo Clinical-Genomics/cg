@@ -26,7 +26,7 @@ from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.user_filters import apply_user_filter, UserFilter
+from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
