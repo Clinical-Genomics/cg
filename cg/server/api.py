@@ -145,31 +145,31 @@ def submit_order(order_type):
 @BLUEPRINT.route("/cases")
 def cases():
     """Fetch cases."""
-    records = db.cases(days=31)
-    count = len(records)
-    return jsonify(cases=records, total=count)
+    cases = db.cases(days=31)
+    count = len(cases)
+    return jsonify(cases=cases, total=count)
 
 
 @BLUEPRINT.route("/families")
 def families():
     """Return families."""
     if request.args.get("status") == "analysis":
-        records = db.cases_to_mip_analyze()
-        count = len(records)
+        cases = db.cases_to_mip_analyze()
+        count = len(cases)
     else:
         customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        case_query = db.families(
+        cases = db.families(
             enquiry=request.args.get("enquiry"),
             customers=customers,
             action=request.args.get("action"),
         )
-        count = case_query.count()
-        records = case_query.limit(30)
+        count = cases.count()
+        records = cases.limit(30)
 
-    cases_data: List[Dict] = [case_obj.to_dict(links=True) for case_obj in records]
-    return jsonify(families=cases_data, total=count)
+    parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=parsed_cases, total=count)
 
 
 @BLUEPRINT.route("/families_in_collaboration")
@@ -184,8 +184,8 @@ def families_in_collaboration():
     )
     count = cases.count()
     cases = cases.limit(30)
-    data: List[Dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=data, total=count)
+    parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=parsed_cases, total=count)
 
 
 @BLUEPRINT.route("/families/<family_id>")
@@ -231,9 +231,9 @@ def samples():
             enquiry=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))
-    parsed_sample: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
+    parsed_samples: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
 
-    return jsonify(samples=parsed_sample, total=len(samples))
+    return jsonify(samples=parsed_samples, total=len(samples))
 
 
 @BLUEPRINT.route("/samples_in_collaboration")
@@ -244,8 +244,8 @@ def samples_in_collaboration():
         enquiry=request.args.get("enquiry"), customers=customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
-    parsed_sample: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
-    return jsonify(samples=parsed_sample, total=len(samples))
+    parsed_samples: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
+    return jsonify(samples=parsed_samples, total=len(samples))
 
 
 @BLUEPRINT.route("/samples/<sample_id>")
@@ -256,8 +256,8 @@ def sample(sample_id):
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
-    parsed_sample: Dict = sample.to_dict(links=True, flowcells=True)
-    return jsonify(**parsed_sample)
+    parsed_samples: Dict = sample.to_dict(links=True, flowcells=True)
+    return jsonify(**parsed_samples)
 
 
 @BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
@@ -267,8 +267,8 @@ def sample_in_collaboration(sample_id):
     order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if sample.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    parsed_sample: Dict = sample.to_dict(links=True, flowcells=True)
-    return jsonify(**parsed_sample)
+    parsed_samples: Dict = sample.to_dict(links=True, flowcells=True)
+    return jsonify(**parsed_samples)
 
 
 @BLUEPRINT.route("/pools")
@@ -288,12 +288,12 @@ def pools():
 @BLUEPRINT.route("/pools/<pool_id>")
 def pool(pool_id):
     """Fetch a single pool."""
-    record: Pool = db.get_pool_by_entry_id(entry_id=pool_id)
-    if record is None:
+    pool: Pool = db.get_pool_by_entry_id(entry_id=pool_id)
+    if pool is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (record.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (pool.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
-    return jsonify(**record.to_dict())
+    return jsonify(**pool.to_dict())
 
 
 @BLUEPRINT.route("/flowcells")
