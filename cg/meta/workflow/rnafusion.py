@@ -240,12 +240,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 tower_pipeline=self.tower_pipeline,
                 command_args=command_args,
             )
-            exit_code = self.process.run_command(parameters=parameters, dry_run=dry_run)
-            for line in self.process.stdout_lines():
-                LOG.info(line)
-            for line in self.process.stderr_lines():
-                LOG.info(line)
-            return exit_code
+            self.process.run_command(parameters=parameters, dry_run=dry_run)
+            if self.process.stderr:
+                LOG.info(self.process.stderr)
+            LOG.info(self.process.stdout)
 
     def verify_case_config_file_exists(self, case_id: str) -> None:
         NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir)
