@@ -175,43 +175,41 @@ def families():
 @BLUEPRINT.route("/families_in_collaboration")
 def families_in_collaboration():
     """Fetch families in collaboration."""
-    order_customer: Customer = db.get_customer_by_customer_id(
-        customer_id=request.args.get("customer")
-    )
+    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     data_analysis: str = request.args.get("data_analysis")
-    families_q: Query = db.families(
+    cases: Query = db.families(
         enquiry=request.args.get("enquiry"),
-        customers=order_customer.collaborators,
+        customers=customer.collaborators,
         data_analysis=data_analysis,
     )
-    count = families_q.count()
-    records = families_q.limit(30)
-    data: List[Dict] = [case_obj.to_dict(links=True) for case_obj in records]
+    count = cases.count()
+    cases = cases.limit(30)
+    data: List[Dict] = [case.to_dict(links=True) for case in cases]
     return jsonify(families=data, total=count)
 
 
 @BLUEPRINT.route("/families/<family_id>")
 def family(family_id):
     """Fetch a family with links."""
-    case_obj: Family = db.family(family_id)
-    if case_obj is None:
+    case: Family = db.family(family_id)
+    if case is None:
         return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (case_obj.customer not in g.current_user.customers):
+    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
 
-    data = case_obj.to_dict(links=True, analyses=True)
-    return jsonify(**data)
+    parsed_case = case.to_dict(links=True, analyses=True)
+    return jsonify(**parsed_case)
 
 
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
 def family_in_collaboration(family_id):
     """Fetch a family with links."""
-    case_obj = db.family(family_id)
-    order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    if case_obj.customer not in order_customer.collaborators:
+    case = db.family(family_id)
+    customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    if case.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    data: Dict = case_obj.to_dict(links=True, analyses=True)
-    return jsonify(**data)
+    parsed_case: Dict = case.to_dict(links=True, analyses=True)
+    return jsonify(**parsed_case)
 
 
 @BLUEPRINT.route("/samples")
@@ -220,34 +218,34 @@ def samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(http.HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
-        samples_q: List[Sample] = db.get_all_samples_to_receive()
+        samples: List[Sample] = db.get_all_samples_to_receive()
     elif request.args.get("status") == "labprep":
-        samples_q: List[Sample] = db.get_all_samples_to_prepare()
+        samples: List[Sample] = db.get_all_samples_to_prepare()
     elif request.args.get("status") == "sequencing":
-        samples_q: List[Sample] = db.get_all_samples_to_sequence()
+        samples: List[Sample] = db.get_all_samples_to_sequence()
     else:
-        customer_objs: Optional[Customer] = (
+        customers: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples_q: List[Sample] = db.get_samples_to_render(
-            enquiry=request.args.get("enquiry"), customers=customer_objs
+        samples: List[Sample] = db.get_samples_to_render(
+            enquiry=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))
-    data: List[Dict] = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
+    parsed_sample: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
 
-    return jsonify(samples=data, total=len(samples_q))
+    return jsonify(samples=parsed_sample, total=len(samples))
 
 
 @BLUEPRINT.route("/samples_in_collaboration")
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
-    order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    samples_q: List[Sample] = db.get_samples_to_render(
-        enquiry=request.args.get("enquiry"), customers=order_customer.collaborators
+    customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    samples: List[Sample] = db.get_samples_to_render(
+        enquiry=request.args.get("enquiry"), customers=customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
-    data: List[Dict] = [sample_obj.to_dict() for sample_obj in samples_q[:limit]]
-    return jsonify(samples=data, total=len(samples_q))
+    parsed_sample: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
+    return jsonify(samples=parsed_sample, total=len(samples))
 
 
 @BLUEPRINT.route("/samples/<sample_id>")
@@ -258,8 +256,8 @@ def sample(sample_id):
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
-    data: Dict = sample.to_dict(links=True, flowcells=True)
-    return jsonify(**data)
+    parsed_sample: Dict = sample.to_dict(links=True, flowcells=True)
+    return jsonify(**parsed_sample)
 
 
 @BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
@@ -269,8 +267,8 @@ def sample_in_collaboration(sample_id):
     order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if sample.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    data: Dict = sample.to_dict(links=True, flowcells=True)
-    return jsonify(**data)
+    parsed_sample: Dict = sample.to_dict(links=True, flowcells=True)
+    return jsonify(**parsed_sample)
 
 
 @BLUEPRINT.route("/pools")
@@ -283,8 +281,8 @@ def pools():
         customers=customers, enquiry=request.args.get("enquiry")
     )
 
-    data = [pool_obj.to_dict() for pool_obj in pool_list[:30]]
-    return jsonify(pools=data, total=len(pool_list))
+    parsed_pools = [pool_obj.to_dict() for pool_obj in pool_list[:30]]
+    return jsonify(pools=parsed_pools, total=len(pool_list))
 
 
 @BLUEPRINT.route("/pools/<pool_id>")
