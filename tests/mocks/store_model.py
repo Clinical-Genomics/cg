@@ -2,17 +2,17 @@
 import datetime
 from typing import List
 
-from cg.store import models
+from cg.store.models import Analysis, Customer, Family
 
 
-class Customer(models.Customer):
+class Customer(Customer):
     """Mock a customer object"""
 
     def __init__(self):
         self.internal_id = "cust000"
 
 
-class Family(models.Family):
+class Family(Family):
     """Mock a case object"""
 
     def __init__(self):
@@ -23,7 +23,7 @@ class Family(models.Family):
         self.customer: Customer = Customer()
 
 
-class Analysis(models.Analysis):
+class Analysis(Analysis):
     """Mock an store analysis object"""
 
     def __init__(self):

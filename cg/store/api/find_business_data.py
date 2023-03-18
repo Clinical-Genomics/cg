@@ -348,12 +348,8 @@ class FindBusinessDataHandler(BaseHandler):
         self.commit()
         return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
-    def _get_invoices(self) -> List[Invoice]:
-        """Fetch all invoices."""
-        return self._get_query(table=Invoice)
-
     def get_invoices_by_status(self, is_invoiced: bool = None) -> List[Invoice]:
-        """Fetch invoices by invoiced status."""
+        """Return invoices by invoiced status."""
         invoices: Query = self._get_query(table=Invoice)
         if is_invoiced:
             return apply_invoice_filter(
@@ -364,12 +360,12 @@ class FindBusinessDataHandler(BaseHandler):
                 invoices=invoices, filter_functions=[InvoiceFilter.FILTER_BY_NOT_INVOICED]
             ).all()
 
-    def get_invoice_by_id(self, invoice_id: int) -> Invoice:
+    def get_invoice_by_entry_id(self, entry_id: int) -> Invoice:
         """Return an invoice."""
         invoices: Query = self._get_query(table=Invoice)
         return apply_invoice_filter(
             invoices=invoices,
-            invoice_id=invoice_id,
+            entry_id=entry_id,
             filter_functions=[InvoiceFilter.FILTER_BY_INVOICE_ID],
         ).first()
 
@@ -403,23 +399,34 @@ class FindBusinessDataHandler(BaseHandler):
         ids = [inv.id for inv in query]
         return max(ids) + 1 if ids else 0
 
-    def get_pools_for_customer(
-        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
-    ) -> Query:
-        """Fetch all the pools for a customer."""
-        records: Query = self._get_query(table=Pool)
+    def get_pools_by_customer_id(self, *, customers: Optional[List[Customer]] = None) -> List[Pool]:
+        """Return all the pools for a customer."""
+        customer_ids = [customer.id for customer in customers]
+        return apply_pool_filter(
+            pools=self._get_query(table=Pool),
+            customer_ids=customer_ids,
+            filter_functions=[PoolFilter.FILTER_BY_CUSTOMER_ID],
+        ).all()
 
-        if customers:
-            customer_ids = [customer.id for customer in customers]
-            records = records.filter(Pool.customer_id.in_(customer_ids))
+    def get_pools_by_name_enquiry(self, *, name_enquiry: str = None) -> List[Pool]:
+        """Return all the pools with a name fitting the enquiry."""
+        return apply_pool_filter(
+            pools=self._get_query(table=Pool),
+            name_enquiry=name_enquiry,
+            filter_functions=[PoolFilter.FILTER_BY_NAME_ENQUIRY],
+        ).all()
 
-        records = (
-            records.filter(or_(Pool.name.like(f"%{enquiry}%"), Pool.order.like(f"%{enquiry}%")))
-            if enquiry
-            else records
-        )
+    def get_pools(self) -> List[Pool]:
+        """Return all the pools."""
+        return self._get_query(table=Pool).all()
 
-        return records.order_by(Pool.created_at.desc())
+    def get_pools_by_order_enquiry(self, *, order_enquiry: str = None) -> List[Pool]:
+        """Return all the pools with an order fitting the enquiry."""
+        return apply_pool_filter(
+            pools=self._get_query(table=Pool),
+            order_enquiry=order_enquiry,
+            filter_functions=[PoolFilter.FILTER_BY_ORDER_ENQUIRY],
+        ).all()
 
     def get_pool_by_entry_id(self, entry_id: int) -> Pool:
         """Return a pool by entry id."""
@@ -427,6 +434,21 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_pool_filter(
             pools=pools, entry_id=entry_id, filter_functions=[PoolFilter.FILTER_BY_ENTRY_ID]
         ).first()
+
+    def get_pools_to_render(
+        self, customers: Optional[List[Customer]] = None, enquiry: str = None
+    ) -> List[Pool]:
+        pools: List[Pool] = (
+            self.get_pools_by_customer_id(customers=customers) if customers else self.get_pools()
+        )
+        if enquiry:
+            pools: List[Pool] = list(
+                set(
+                    self.get_pools_by_name_enquiry(name_enquiry=enquiry)
+                    or set(self.get_pools_by_order_enquiry(order_enquiry=enquiry))
+                )
+            )
+        return pools
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case."""

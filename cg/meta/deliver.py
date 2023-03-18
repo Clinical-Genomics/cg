@@ -10,7 +10,7 @@ from housekeeper.store import models as hk_models
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
 from cg.constants.constants import DataDelivery
-from cg.exc import DeliveryReportError
+from cg.exc import MissingFilesError
 from cg.store import Store
 from cg.store.models import Family, FamilySample, Sample
 
@@ -173,7 +173,8 @@ class DeliverAPI:
         if not self.dry_run:
             delivery_base.mkdir(parents=True, exist_ok=True)
         file_path: Path
-        number_linked_files: int = 0
+        number_linked_files_now: int = 0
+        number_previously_linked_files: int = 0
         for file_path in self.get_sample_files_from_version(
             version_obj=version_obj, sample_id=sample_id
         ):
@@ -184,18 +185,23 @@ class DeliverAPI:
             out_path: Path = delivery_base / file_name
             if self.dry_run:
                 LOG.info(f"Would hard link file {file_path} to {out_path}")
-                number_linked_files += 1
+                number_linked_files_now += 1
                 continue
             LOG.info(f"Hard link file {file_path} to {out_path}")
             try:
                 os.link(file_path, out_path)
-                number_linked_files += 1
+                number_linked_files_now += 1
             except FileExistsError:
-                LOG.info(f"Path {out_path} exists, skipping")
-        if number_linked_files == 0:
-            raise DeliveryReportError(f"No files were linked for sample {sample_name}")
+                LOG.info(
+                    f"Warning: Path {out_path} exists, no hard link was made for file {file_name}"
+                )
+                number_previously_linked_files += 1
+        if number_previously_linked_files == 0 and number_linked_files_now == 0:
+            raise MissingFilesError(f"No files were linked for sample {sample_name}")
 
-        LOG.info(f"Linked {number_linked_files} files for sample {sample_id}, case {case_id}")
+        LOG.info(
+            f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
+        )
 
     def get_case_files_from_version(
         self, version: hk_models.Version, sample_ids: Set[str]

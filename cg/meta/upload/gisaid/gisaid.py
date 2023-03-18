@@ -13,7 +13,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.cg_config import CGConfig
-from cg.store import models, Store
+from cg.store import Store
+from cg.store.models import Sample
 from cg.utils import Process
 from .constants import HEADERS
 from .models import GisaidSample, GisaidAccession
@@ -63,7 +64,7 @@ class GisaidAPI:
         completion_df = completion_df[completion_df["provnummer"].str.contains(SARS_COV_REGEX)]
         return completion_df
 
-    def get_gisaid_sample_list(self, case_id: str) -> List[models.Sample]:
+    def get_gisaid_sample_list(self, case_id: str) -> List[Sample]:
         """Get list of Sample objects eligeble for upload.
         The criteria is that the sample reached 20x coverage for >95% bases.
         The sample will be included in completion file."""
@@ -84,7 +85,7 @@ class GisaidAPI:
     def get_gisaid_samples(self, case_id: str) -> List[GisaidSample]:
         """Get list of Gisaid sample objects."""
 
-        samples: List[models.Sample] = self.get_gisaid_sample_list(case_id=case_id)
+        samples: List[Sample] = self.get_gisaid_sample_list(case_id=case_id)
         gisaid_samples = []
         for sample in samples:
             sample_id: str = sample.internal_id

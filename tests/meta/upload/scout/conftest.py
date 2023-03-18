@@ -17,7 +17,7 @@ from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import Analysis, Family
 
 # Mocks
@@ -562,7 +562,7 @@ def fixture_balsamic_umi_analysis_obj(analysis_obj: Analysis) -> Analysis:
 
 
 @pytest.fixture(name="rnafusion_analysis_obj")
-def fixture_rnafusion_analysis_obj(analysis_obj: models.Analysis) -> models.Analysis:
+def fixture_rnafusion_analysis_obj(analysis_obj: Analysis) -> Analysis:
     """Return a RNAfusion analysis object."""
     analysis_obj.pipeline = Pipeline.RNAFUSION
     for link_object in analysis_obj.family.links:
