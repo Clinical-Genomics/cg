@@ -140,7 +140,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     scout_api: ScoutAPI = context.scout_api
 
     tag_name = UploadScoutAPI.get_load_config_tag()
-    version_obj = housekeeper_api.last_version(case_id)
+    version_obj = housekeeper_api.last_version(case=case_id)
     scout_config_file: Optional[File] = housekeeper_api.fetch_file_from_version(
         version_obj=version_obj, tags={tag_name}
     )

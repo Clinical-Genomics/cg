@@ -211,15 +211,15 @@ class DeliverAPI:
             return []
 
         if not version.files:
-            LOG.warning(f"No files associated with version {version.id}")
+            LOG.warning(f"No files associated with Housekeeper version {version.id}")
             return []
 
-        file: File
-        for file in version.files:
-            if not self.include_file_case(file, sample_ids=sample_ids):
-                LOG.debug(f"Skipping file {file.path}")
+        version_file: File
+        for version_file in version.files:
+            if not self.include_file_case(file=version_file, sample_ids=sample_ids):
+                LOG.debug(f"Skipping file {version_file.path}")
                 continue
-            yield Path(file.full_path)
+            yield Path(version_file.full_path)
 
     def get_sample_files_from_version(self, version_obj: Version, sample_id: str) -> Iterable[Path]:
         """Fetch all files for a sample from a version that are tagged with any of the sample
@@ -230,14 +230,14 @@ class DeliverAPI:
                 continue
             yield Path(file_obj.full_path)
 
-    def include_file_case(self, file_obj: File, sample_ids: Set[str]) -> bool:
+    def include_file_case(self, file: File, sample_ids: Set[str]) -> bool:
         """Check if file should be included in case bundle.
 
         At least one tag should match between file and tags.
         Do not include files with sample tags.
         """
         tag: Tag
-        file_tags = {tag.name for tag in file_obj.tags}
+        file_tags = {tag.name for tag in file.tags}
         if self.all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")
             return False
@@ -246,7 +246,7 @@ class DeliverAPI:
 
         # Check if any of the sample tags exist
         if sample_ids.intersection(file_tags):
-            LOG.debug(f"Found sample tag, skipping {file_obj.path}")
+            LOG.debug(f"Found sample tag, skipping {file.path}")
             return False
 
         # Check if any of the file tags matches the case tags
@@ -255,7 +255,7 @@ class DeliverAPI:
             LOG.debug(f"check if {tags} is a subset of {file_tags}")
             if tags.issubset(file_tags):
                 return True
-        LOG.debug(f"Could not find any tags matching file {file_obj.path} with tags {file_tags}")
+        LOG.debug(f"Could not find any tags matching file {file.path} with tags {file_tags}")
 
         return False
 

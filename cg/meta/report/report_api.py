@@ -110,7 +110,7 @@ class ReportAPI(MetaAPI):
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Returns the file path of the uploaded to Scout file given its tag."""
 
-        version: Version = self.housekeeper_api.last_version(case_id)
+        version: Version = self.housekeeper_api.last_version(case=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag)
         uploaded_files: Query = self.housekeeper_api.get_files(
             bundle=case_id, tags=tags, version=version.id

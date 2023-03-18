@@ -46,7 +46,7 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
     """Test to fetch case specific files for a case that exists in housekeeper."""
     deliver_api: DeliverAPI = populated_deliver_api
     # GIVEN a case which exist as bundle in hk with a version
-    version = deliver_api.hk_api.last_version(case_id)
+    version: Version = deliver_api.hk_api.last_version(case_id)
     assert version
 
     # GIVEN that a case object exists in the database
@@ -94,7 +94,7 @@ def test_get_case_files_from_version(
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
 
     # GIVEN a version object where two file exists
-    version: Version = real_housekeeper_api.last_version(case_id)
+    version: Version = real_housekeeper_api.last_version(bundle=case_id)
     assert len(version.files) == 2
 
     # GIVEN the sample ids of the samples

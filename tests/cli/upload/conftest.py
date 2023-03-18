@@ -162,7 +162,7 @@ def fixture_upload_gens_hk_api(
 ) -> HousekeeperAPI:
     """Add and include files from upload_gens_hk_bundle."""
     helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(case_id)
+    hk_version = real_housekeeper_api.last_version(bundle=case_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
