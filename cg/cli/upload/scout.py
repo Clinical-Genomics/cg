@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import click
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -141,7 +141,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 
     tag_name = UploadScoutAPI.get_load_config_tag()
     version_obj = housekeeper_api.last_version(case_id)
-    scout_config_file: Optional[hk_models.File] = housekeeper_api.fetch_file_from_version(
+    scout_config_file: Optional[File] = housekeeper_api.fetch_file_from_version(
         version_obj=version_obj, tags={tag_name}
     )
 

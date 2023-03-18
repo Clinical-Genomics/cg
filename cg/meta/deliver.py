@@ -5,7 +5,7 @@ import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Iterable, List, Set, Tuple
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File, Tag, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants
@@ -70,7 +70,7 @@ class DeliverAPI:
         LOG.debug(
             f"Fetch latest version for case {case_id}",
         )
-        last_version: hk_models.Version = self.hk_api.last_version(bundle=case_id)
+        last_version: Version = self.hk_api.last_version(bundle=case_id)
         if not last_version:
             if not self.case_tags:
                 LOG.info(f"Could not find any version for {case_id}")
@@ -104,7 +104,7 @@ class DeliverAPI:
                 sample_name: str = link.sample.name
                 LOG.debug(f"Fetch last version for sample bundle {sample_id}")
                 if self.delivery_type == DataDelivery.FASTQ:
-                    last_version: hk_models.Version = self.hk_api.last_version(bundle=sample_id)
+                    last_version: Version = self.hk_api.last_version(bundle=sample_id)
                 if not last_version:
                     if self.skip_missing_bundle:
                         LOG.info(f"Could not find any version for {sample_id}")
@@ -123,7 +123,7 @@ class DeliverAPI:
             )
 
     def deliver_case_files(
-        self, case_id: str, case_name: str, version: hk_models.Version, sample_ids: Set[str]
+        self, case_id: str, case_name: str, version: Version, sample_ids: Set[str]
     ) -> None:
         """Deliver files on case level."""
         LOG.debug(f"Deliver case files for {case_id}")
@@ -160,7 +160,7 @@ class DeliverAPI:
         case_name: str,
         sample_id: str,
         sample_name: str,
-        version_obj: hk_models.Version,
+        version_obj: Version,
     ) -> None:
         """Deliver files on sample level."""
         # Make sure that the directory exists
@@ -203,9 +203,7 @@ class DeliverAPI:
             f"There were {number_previously_linked_files} previously linked files and {number_linked_files_now} were linked for sample {sample_id}, case {case_id}"
         )
 
-    def get_case_files_from_version(
-        self, version: hk_models.Version, sample_ids: Set[str]
-    ) -> Iterable[Path]:
+    def get_case_files_from_version(self, version: Version, sample_ids: Set[str]) -> Iterable[Path]:
         """Fetch all case files from a version that are tagged with any of the case tags."""
 
         if not version:
@@ -216,31 +214,29 @@ class DeliverAPI:
             LOG.warning(f"No files associated with version {version.id}")
             return []
 
-        file: hk_models.File
+        file: File
         for file in version.files:
             if not self.include_file_case(file, sample_ids=sample_ids):
                 LOG.debug(f"Skipping file {file.path}")
                 continue
             yield Path(file.full_path)
 
-    def get_sample_files_from_version(
-        self, version_obj: hk_models.Version, sample_id: str
-    ) -> Iterable[Path]:
+    def get_sample_files_from_version(self, version_obj: Version, sample_id: str) -> Iterable[Path]:
         """Fetch all files for a sample from a version that are tagged with any of the sample
         tags."""
-        file_obj: hk_models.File
+        file_obj: File
         for file_obj in version_obj.files:
             if not self.include_file_sample(file_obj, sample_id=sample_id):
                 continue
             yield Path(file_obj.full_path)
 
-    def include_file_case(self, file_obj: hk_models.File, sample_ids: Set[str]) -> bool:
+    def include_file_case(self, file_obj: File, sample_ids: Set[str]) -> bool:
         """Check if file should be included in case bundle.
 
         At least one tag should match between file and tags.
         Do not include files with sample tags.
         """
-        tag: hk_models.Tag
+        tag: Tag
         file_tags = {tag.name for tag in file_obj.tags}
         if self.all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")
@@ -263,7 +259,7 @@ class DeliverAPI:
 
         return False
 
-    def include_file_sample(self, file_obj: hk_models.File, sample_id: str) -> bool:
+    def include_file_sample(self, file_obj: File, sample_id: str) -> bool:
         """Check if file should be included in sample bundle.
 
         At least one tag should match between file and tags.
@@ -271,7 +267,6 @@ class DeliverAPI:
 
         For fastq delivery we know that we want to deliver all files of bundle.
         """
-        tag: hk_models.Tag
         file_tags = {tag.name for tag in file_obj.tags}
         tags: Set[str]
         # Check if any of the file tags matches the sample tags

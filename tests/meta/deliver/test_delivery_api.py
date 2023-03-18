@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Set
 
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
@@ -94,7 +94,7 @@ def test_get_case_files_from_version(
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
 
     # GIVEN a version object where two file exists
-    version: hk_models.Version = real_housekeeper_api.last_version(case_id)
+    version: Version = real_housekeeper_api.last_version(case_id)
     assert len(version.files) == 2
 
     # GIVEN the sample ids of the samples
@@ -136,7 +136,7 @@ def test_get_sample_files_from_version(
     ]
     helpers.ensure_hk_bundle(hk_api, bundle_data=case_hk_bundle_no_files)
     # GIVEN a version object with some files
-    version: hk_models.Version = hk_api.last_version(case_id)
+    version: Version = hk_api.last_version(case_id)
     assert len(version.files) == 2
 
     # WHEN fetching the sample specific files

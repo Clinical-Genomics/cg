@@ -9,7 +9,7 @@ import requests
 from alchy import Query
 
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File, Version
 
 from cg.constants.constants import FileFormat, MAX_ITEMS_TO_RETRIEVE
 from cg.exc import DeliveryReportError
@@ -73,7 +73,7 @@ class ReportAPI(MetaAPI):
 
     def add_delivery_report_to_hk(
         self, delivery_report_file: Path, case_id: str, analysis_date: datetime
-    ) -> Optional[hk_models.File]:
+    ) -> Optional[File]:
         """
         Adds a delivery report file, if it has not already been generated, to an analysis bundle for a specific case
         in HK and returns a pointer to it.
@@ -84,7 +84,7 @@ class ReportAPI(MetaAPI):
             self.get_delivery_report_from_hk(case_id=case_id)
         except FileNotFoundError:
             LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
-            file: hk_models.File = self.housekeeper_api.add_file(
+            file: File = self.housekeeper_api.add_file(
                 delivery_report_file.name, version, [case_id, HK_DELIVERY_REPORT_TAG]
             )
             self.housekeeper_api.include_file(file, version)
@@ -96,7 +96,7 @@ class ReportAPI(MetaAPI):
     def get_delivery_report_from_hk(self, case_id: str) -> str:
         """Extracts the delivery reports of a specific case stored in HK."""
 
-        version: hk_models.Version = self.housekeeper_api.last_version(case_id)
+        version: Version = self.housekeeper_api.last_version(case_id)
         delivery_report_files: Query = self.housekeeper_api.get_files(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
@@ -110,7 +110,7 @@ class ReportAPI(MetaAPI):
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Returns the file path of the uploaded to Scout file given its tag."""
 
-        version: hk_models.Version = self.housekeeper_api.last_version(case_id)
+        version: Version = self.housekeeper_api.last_version(case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag)
         uploaded_files: Query = self.housekeeper_api.get_files(
             bundle=case_id, tags=tags, version=version.id
@@ -146,8 +146,8 @@ class ReportAPI(MetaAPI):
 
         for analysis_obj in analyses:
             case: Family = analysis_obj.family
-            last_version: hk_models.Version = self.housekeeper_api.last_version(case.internal_id)
-            hk_file: hk_models.File = self.housekeeper_api.get_files(
+            last_version: Version = self.housekeeper_api.last_version(case.internal_id)
+            hk_file: File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None
             ).first()
 
