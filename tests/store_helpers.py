@@ -11,24 +11,24 @@ from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
-from cg.store import Store, models
+from cg.store import Store
 from cg.store.models import (
-    Flowcell,
-    Bed,
-    BedVersion,
-    Customer,
-    Sample,
-    User,
+    Analysis,
     Application,
     ApplicationVersion,
+    Bed,
+    BedVersion,
     Collaboration,
+    Customer,
     Family,
-    Pool,
+    FamilySample,
+    Flowcell,
+    Invoice,
     Organism,
     Panel,
-    Analysis,
-    Invoice,
-    FamilySample,
+    Pool,
+    Sample,
+    User,
 )
 
 LOG = logging.getLogger(__name__)
@@ -693,7 +693,7 @@ class StoreHelpers:
         store: Store,
         customer_id: str = "cust000",
         name: str = "test_pool",
-        ticket: str = "987654",
+        order: str = "test_order",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
         is_external: bool = False,
@@ -722,7 +722,7 @@ class StoreHelpers:
             ordered=datetime.now(),
             application_version=application_version,
             customer=customer,
-            order="test_order",
+            order=order,
             delivered_at=delivered_at,
             received_at=received_at,
             no_invoice=no_invoice,
@@ -759,7 +759,7 @@ class StoreHelpers:
         invoiced_at: Optional[datetime] = None,
     ) -> Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
-        invoice = store.get_invoice_by_id(invoice_id=invoice_id)
+        invoice = store.get_invoice_by_entry_id(entry_id=invoice_id)
         if not invoice:
             customer_obj = StoreHelpers.ensure_customer(
                 store=store,

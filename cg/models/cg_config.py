@@ -162,6 +162,9 @@ class RnafusionConfig(CommonAppConfig):
     profile: str
     conda_binary: Optional[str] = None
     launch_directory: str
+    slurm: SlurmConfig
+    tower_binary_path: str
+    tower_pipeline: str
 
 
 class CGStatsConfig(BaseModel):

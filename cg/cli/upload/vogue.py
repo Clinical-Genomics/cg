@@ -14,7 +14,8 @@ from cg.exc import AnalysisUploadError
 from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import FamilySample
 from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
@@ -283,7 +284,7 @@ def _get_samples(store: Store, case_name: str) -> str:
         sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs: List[models.FamilySample] = store.family(case_name).links
+    link_objs: List[FamilySample] = store.family(case_name).links
     sample_ids = {link_obj.sample.internal_id for link_obj in link_objs}
     return ",".join(sample_ids)
 

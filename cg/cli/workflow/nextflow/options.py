@@ -3,17 +3,17 @@
 import click
 
 OPTION_LOG = click.option(
-    "-log",
+    "--log",
     type=click.Path(),
     help="Set nextflow log file path",
 )
 OPTION_WORKDIR = click.option(
-    "-work-dir",
+    "--work-dir",
     type=click.Path(),
     help="Directory where intermediate result files are stored",
 )
 OPTION_RESUME = click.option(
-    "-resume",
+    "--resume",
     is_flag=True,
     default=False,
     show_default=True,
@@ -21,21 +21,20 @@ OPTION_RESUME = click.option(
         executions that was stopped by an error",
 )
 OPTION_PROFILE = click.option(
-    "-profile",
+    "--profile",
     type=str,
-    default="singularity,hasta,dev_prio",
     show_default=True,
     help="Choose a configuration profile",
 )
 OPTION_TOWER = click.option(
-    "-with-tower",
+    "--with-tower",
     is_flag=True,
     default=False,
     show_default=True,
     help="Monitor workflow execution with Seqera Tower service",
 )
 OPTION_STUB = click.option(
-    "-stub",
+    "--stub",
     is_flag=True,
     default=False,
     show_default=True,
@@ -50,13 +49,28 @@ OPTION_OUTDIR = click.option(
 
 
 OPTION_CONFIG = click.option(
-    "-config",
+    "--config",
     type=click.Path(),
     help="Nextflow config file path",
 )
 
 OPTION_PARAMS_FILE = click.option(
-    "-params-file",
+    "--params-file",
     type=click.Path(),
     help="Nextflow pipeline-specific parameter file path",
+)
+
+OPTION_USE_NEXTFLOW = click.option(
+    "--use-nextflow",
+    type=bool,
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Execute pipeline using nextflow",
+)
+
+OPTION_REVISION = click.option(
+    "--revision",
+    type=str,
+    help="Revision of workflow to run (either a git branch, tag or commit SHA number)",
 )
