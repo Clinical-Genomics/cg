@@ -8,7 +8,7 @@ from typing import TextIO, Optional
 
 import click
 
-from cg.store import models
+from cg.store.models import Family
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store import models as hk_models
 
@@ -49,7 +49,7 @@ def delivery_report(
 
     click.echo(click.style("--------------- DELIVERY REPORT ---------------"))
 
-    case: models.Family = get_report_case(context, case_id)
+    case: Family = get_report_case(context, case_id)
     report_api: ReportAPI = get_report_api(context, case)
     analysis_date: datetime = get_report_analysis_started(case, report_api, analysis_started_at)
 

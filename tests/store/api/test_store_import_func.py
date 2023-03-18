@@ -3,7 +3,7 @@
 from typing import List
 
 from cg.store import Store
-from cg.store.models import ApplicationVersion, Application
+from cg.store.models import Application, ApplicationVersion
 from cg.store.api.import_func import (
     add_application_version,
     import_application_versions,

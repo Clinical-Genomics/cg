@@ -251,3 +251,7 @@ class LoqusdbDuplicateRecordError(LoqusdbError):
 
 class PdcNoFilesMatchingSearchError(CgError):
     """Exception raised when PDC API returns no files matching the search criteria."""
+
+
+class MissingFilesError(CgError):
+    """Exception raised when there are missing files."""

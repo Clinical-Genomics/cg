@@ -2,7 +2,6 @@ import datetime as dt
 import pytest
 
 from typing import Iterable, List
-
 from cg.constants import Pipeline
 from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
@@ -17,6 +16,7 @@ from cg.store.api.models import ApplicationSchema, ApplicationVersionSchema
 from tests.store_helpers import StoreHelpers
 from cg.store.models import ApplicationVersion, Pool, Sample, Invoice, Application
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
+from cg.constants.invoice import CustomerNames
 
 
 class StoreCheckers:
@@ -358,3 +358,32 @@ def store_with_samples_subject_id_and_tumour_status(
         customer_id=customer_id,
     )
     return store
+
+
+@pytest.fixture(name="pool_name_1")
+def fixture_pool_name_1() -> str:
+    """Return the name of the first pool."""
+    return "pool_1"
+
+
+@pytest.fixture(name="pool_order_1")
+def fixture_pool_order_1() -> str:
+    """Return the order of the first pool."""
+    return "pool_order_1"
+
+
+@pytest.fixture(name="store_with_multiple_pools_for_customer")
+def fixture_store_with_multiple_pools_for_customer(
+    store: Store,
+    helpers: StoreHelpers,
+    customer_id: str = CustomerNames.cust132,
+) -> Store:
+    """Return a store with two pools with different names for the same customer."""
+    for number in range(2):
+        helpers.ensure_pool(
+            store=store,
+            customer_id=customer_id,
+            name="_".join(["pool", str(number)]),
+            order="_".join(["pool", "order", str(number)]),
+        )
+    yield store

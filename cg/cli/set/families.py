@@ -3,7 +3,8 @@ from typing import List, Optional, Set, Tuple
 
 import click
 from cg.constants import CASE_ACTIONS
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 
 from .family import family
 from ...constants import Priority
@@ -14,18 +15,16 @@ CONFIRM = "Continue?"
 LOG = logging.getLogger(__name__)
 
 
-def _get_samples_by_identifiers(
-    identifiers: click.Tuple([str, str]), store: Store
-) -> List[models.Sample]:
+def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Store) -> List[Sample]:
     """Get samples matched by given set of identifiers"""
     identifier_args = dict(identifiers)
     return list(store.get_samples_by_any_id(**identifier_args))
 
 
-def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[models.Family]:
+def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Family]:
     """Get cases that have samples that match identifiers if given"""
-    samples_by_id: List[models.Sample] = _get_samples_by_identifiers(identifiers, store)
-    cases: Set[models.Family] = set()
+    samples_by_id: List[Sample] = _get_samples_by_identifiers(identifiers, store)
+    cases: Set[Family] = set()
     for sample in samples_by_id:
         for link in sample.links:
             cases.add(link.family)
@@ -60,7 +59,7 @@ def families(
 ):
     """Set values on many families at the same time"""
     store: Store = context.obj.status_db
-    cases: List[models.Family] = _get_cases(identifiers, store)
+    cases: List[Family] = _get_cases(identifiers, store)
 
     if not cases:
         LOG.error("No cases to alter!")
