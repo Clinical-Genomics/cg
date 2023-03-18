@@ -193,7 +193,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return costumers."""
         return self._get_query(table=Customer).all()
 
-    def get_panel_by_abbreviation(self, abbreviation: str):
+    def get_panel_by_abbreviation(self, abbreviation: str) -> Panel:
         """Find a panel by abbreviation."""
         return apply_panel_filter(
             panels=self._get_query(table=Panel),
@@ -201,9 +201,9 @@ class FindBasicDataHandler(BaseHandler):
             abbreviation=abbreviation,
         ).first()
 
-    def get_panels(self):
+    def get_panels(self) -> List[Panel]:
         """Returns all panels."""
-        return self._get_query(table=Panel).order_by(Panel.abbrev)
+        return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 
     def get_user_by_email(self, email: str) -> User:
         """Return a user by email from the database."""

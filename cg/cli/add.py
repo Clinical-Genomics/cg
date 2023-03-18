@@ -187,7 +187,7 @@ def sample(
     default="standard",
     help="analysis priority",
 )
-@click.option("-p", "--panel", "panels", multiple=True, help="default gene panels")
+@click.option("-p", "--panel", "panel_abbreviations", multiple=True, help="default gene panels")
 @click.option(
     "-a",
     "--analysis",
@@ -211,7 +211,7 @@ def sample(
 def case(
     context: CGConfig,
     priority: Priority,
-    panels: Tuple[str],
+    panel_abbreviations: Tuple[str],
     data_analysis: Pipeline,
     data_delivery: DataDelivery,
     customer_id: str,
@@ -226,8 +226,9 @@ def case(
         LOG.error(f"{customer_id}: customer not found")
         raise click.Abort
 
-    for panel_abbreviation in panels:
+    for panel_abbreviation in panel_abbreviations:
         panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
+
         if panel is None:
             LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
@@ -236,10 +237,11 @@ def case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
-        panels=list(panels),
+        panels=list(panel_abbreviations),
         priority=priority,
         ticket=ticket,
     )
+
     new_case.customer = customer
     status_db.add_commit(new_case)
     LOG.info(f"{new_case.internal_id}: new case added")

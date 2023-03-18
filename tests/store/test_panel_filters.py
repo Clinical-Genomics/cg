@@ -9,16 +9,16 @@ def test_filter_panel_by_abbrev_returns_correct_panel(store_with_panels: Store):
     """Test finding a panel by abbreviation when the abbreviation exists."""
 
     # GIVEN a store with multiple panels
-    num_panels = store_with_panels._get_query(table=Panel).count()
-    assert num_panels > 0
+    panel_query = store_with_panels._get_query(table=Panel)
+    assert panel_query.count() > 1
 
-    # Select a random panel from the store
-    panel = store_with_panels._get_query(table=Panel).first()
+    # Select a panel from the store
+    panel = panel_query.first()
     assert isinstance(panel, Panel)
 
     # WHEN finding the panel by abbreviation
     filtered_panel_query: Query = filter_panel_by_abbrev(
-        panels=store_with_panels._get_query(table=Panel),
+        panels=panel_query,
         abbreviation=panel.abbrev,
     )
 

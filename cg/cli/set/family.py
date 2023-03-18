@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
     type=EnumChoice(DataDelivery),
     help="Update case data delivery",
 )
-@click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
+@click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
@@ -43,7 +43,7 @@ def family(
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
-    panels: Optional[Tuple[str]],
+    panel_abbreviations: Optional[Tuple[str]],
     family_id: str,
     customer_id: Optional[str],
 ):
@@ -53,7 +53,7 @@ def family(
     if case is None:
         LOG.error(f"Can not find case {family_id}")
         raise click.Abort
-    if not any([action, panels, priority, customer_id, data_analysis, data_delivery]):
+    if not any([action, panel_abbreviations, priority, customer_id, data_analysis, data_delivery]):
         LOG.error("Nothing to change")
         raise click.Abort
     if action:
@@ -72,14 +72,14 @@ def family(
     if data_delivery:
         LOG.info(f"Update data_delivery: {case.data_delivery or 'NA'} -> {data_delivery}")
         case.data_delivery = data_delivery
-    if panels:
-        for panel_abbreviation in panels:
+    if panel_abbreviations:
+        for panel_abbreviation in panel_abbreviations:
             panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
             if panel is None:
                 LOG.error(f"Unknown gene panel: {panel_abbreviation}")
                 raise click.Abort
-        LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panels)}")
-        case.panels = panels
+        LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panel_abbreviations)}")
+        case.panels = panel_abbreviations
     if priority:
         LOG.info(f"Update priority: {case.priority.name} -> {priority.name}")
         case.priority = priority
