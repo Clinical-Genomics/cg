@@ -1,4 +1,3 @@
-
 from cg.cli.workflow.fluffy.base import start_available
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
