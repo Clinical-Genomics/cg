@@ -6,7 +6,7 @@ from datetime import datetime
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.small_helpers import SmallHelpers
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Bundle
 
 
 def test_new_bundle(
@@ -64,7 +64,7 @@ def test_add_bundle_and_commit(
     assert small_helpers.length_of_iterable(housekeeper_api.bundles()) == 1
 
 
-def test_get_bundle(housekeeper_api: MockHousekeeperAPI, minimal_bundle_obj: hk_models.Bundle):
+def test_get_bundle(housekeeper_api: MockHousekeeperAPI, minimal_bundle_obj: Bundle):
     """Test to add a housekeeper bundle and fetch it back."""
     # GIVEN a housekeeper api with a bundle object
     assert housekeeper_api.bundle(minimal_bundle_obj.name) is None
@@ -81,7 +81,7 @@ def test_get_bundle(housekeeper_api: MockHousekeeperAPI, minimal_bundle_obj: hk_
 def test_create_bundle_and_version(
     case_id: str,
     housekeeper_api: MockHousekeeperAPI,
-    minimal_bundle_obj: hk_models.Bundle,
+    minimal_bundle_obj: Bundle,
     small_helpers: SmallHelpers,
 ):
     """Test to create a housekeeper bundle and version."""
