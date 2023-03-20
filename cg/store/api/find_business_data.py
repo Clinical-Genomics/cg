@@ -435,9 +435,10 @@ class FindBusinessDataHandler(BaseHandler):
             pools=pools, entry_id=entry_id, filter_functions=[PoolFilter.FILTER_BY_ENTRY_ID]
         ).first()
 
-    def get_pools_to_render(
+    def get_pools_to_parse(
         self, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Pool]:
+        """Return pools by customer and or enquiry"""
         pools: List[Pool] = (
             self.get_pools_by_customer_id(customers=customers) if customers else self.get_pools()
         )
@@ -452,7 +453,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_ready_made_library_expected_reads(self, case_id: str) -> int:
         """Return the target reads of a ready made library case."""
-
         application: Application = self.get_application_by_case(case_id=case_id)
 
         if application.prep_category != PrepCategory.READY_MADE_LIBRARY.value:
@@ -493,10 +493,10 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_ORDER_ENQUIRY],
         ).all()
 
-    def get_samples_to_render(
+    def get_samples_to_parse(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
-
+        """Return all samples for a customer and or enquiry."""
         samples: List[Sample] = (
             self.get_samples_by_customer_id(customers=customers)
             if customers
@@ -536,8 +536,8 @@ class FindBusinessDataHandler(BaseHandler):
             ).all()
 
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
+        """Get samples by any identifier."""
         records = self._get_query(table=Sample)
-
         for identifier_name, identifier_value in identifiers.items():
             identifier = getattr(Sample, identifier_name)
             records = records.filter(identifier.contains(identifier_value))

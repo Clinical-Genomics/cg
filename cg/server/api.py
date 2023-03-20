@@ -227,7 +227,7 @@ def samples():
         customers: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples: List[Sample] = db.get_samples_to_render(
+        samples: List[Sample] = db.get_samples_to_parse(
             enquiry=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))
@@ -240,7 +240,7 @@ def samples():
 def samples_in_collaboration():
     """Fetch samples in a customer group."""
     customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    samples: List[Sample] = db.get_samples_to_render(
+    samples: List[Sample] = db.get_samples_to_parse(
         enquiry=request.args.get("enquiry"), customers=customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
@@ -277,7 +277,7 @@ def pools():
     customers: Optional[List[Customer]] = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
-    pool_list: List[Pool] = db.get_pools_to_render(
+    pool_list: List[Pool] = db.get_pools_to_parse(
         customers=customers, enquiry=request.args.get("enquiry")
     )
 

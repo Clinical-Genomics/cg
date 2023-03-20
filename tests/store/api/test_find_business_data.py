@@ -699,7 +699,7 @@ def test_get_pools_to_render_with(
     # GIVEN a database with two pools
 
     # WHEN fetching pools with no customer or enquiry
-    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render()
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_parse()
 
     # THEN two pools should be returned
     assert len(pools) == 2
@@ -712,7 +712,7 @@ def test_get_pools_to_render_with_customer(
     # GIVEN a database with two pools
 
     # WHEN getting pools by customer id
-    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_parse(
         customers=store_with_multiple_pools_for_customer.get_customers()
     )
 
@@ -727,7 +727,7 @@ def test_get_pools_to_render_with_customer_and_name_enquiry(
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
     # WHEN fetching pools by customer id and name enquiry
-    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_parse(
         customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_name_1
     )
 
@@ -744,7 +744,7 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 
     # WHEN fetching pools by customer id and order enquiry
 
-    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_render(
+    pools: List[Pool] = store_with_multiple_pools_for_customer.get_pools_to_parse(
         customers=store_with_multiple_pools_for_customer.get_customers(), enquiry=pool_order_1
     )
 
@@ -822,7 +822,7 @@ def test_get_samples_to_render(store_with_samples_that_have_names: Store):
     # GIVEN a database with two samples
 
     # WHEN fetching samples by customer id
-    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render()
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_parse()
 
     # THEN two samples should be returned
     assert len(samples) == 2
@@ -835,7 +835,7 @@ def test_get_samples_to_render_with_customer(
     # GIVEN a database with two samples
 
     # WHEN fetching samples by customer id
-    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render(
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_parse(
         customers=store_with_samples_that_have_names.get_customers()
     )
 
@@ -857,7 +857,7 @@ def test_get_samples_to_render_with_name_enquiry(
     # GIVEN a database with two samples
 
     # WHEN fetching samples by customer id
-    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render(
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_parse(
         customers=store_with_samples_that_have_names.get_customers(), enquiry=name_enquiry
     )
 
@@ -876,7 +876,7 @@ def test_get_samples_to_render_with_order_enquiry(
     # GIVEN a database with two samples
 
     # WHEN fetching samples by customer id
-    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render(
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_parse(
         customers=store_with_samples_that_have_names.get_customers(), enquiry=order_enquiry
     )
 

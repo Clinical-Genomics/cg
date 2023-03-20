@@ -1,11 +1,9 @@
 """Tests for store API status module related to samples."""
 
-from alchy import Query
+
 from typing import List
-from cg.constants import Pipeline, Priority
-from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Family, Sample
+from cg.store.models import Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -32,6 +30,7 @@ def test_samples_to_receive_external(sample_store: Store, helpers: StoreHelpers)
 
 
 def test_get_all_samples_to_receive_internal(sample_store):
+    """Test fetching internal samples."""
     # GIVEN a store with samples in a mix of states
     assert len(sample_store.get_samples()) > 1
     assert len([sample for sample in sample_store.get_samples() if sample.received_at]) > 1
@@ -48,6 +47,7 @@ def test_get_all_samples_to_receive_internal(sample_store):
 
 
 def test_samples_to_sequence(sample_store):
+    """Test fetching samples to sequence."""
     # GIVEN a store with sample in a mix of states
     assert len(sample_store.get_samples()) > 1
     assert len([sample for sample in sample_store.get_samples() if sample.sequenced_at]) >= 1
@@ -71,6 +71,7 @@ def test_samples_to_sequence(sample_store):
 
 
 def test_samples_to_prepare(sample_store):
+    """Test fetching samples to prepare."""
     # GIVEN a store with sample in a mix of states
     assert len(sample_store.get_samples()) > 1
     assert len([sample for sample in sample_store.get_samples() if sample.prepared_at]) >= 1
@@ -88,6 +89,7 @@ def test_samples_to_prepare(sample_store):
 
 
 def test_get_sample_by_entry_id(sample_store, entry_id=1):
+    """Test fetching a sample by entry id."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -102,6 +104,7 @@ def test_get_sample_by_entry_id(sample_store, entry_id=1):
 
 
 def test_get_sample_by_internal_id(sample_store, internal_id="test_internal_id"):
+    """Test fetching a sample by internal id."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -116,6 +119,7 @@ def test_get_sample_by_internal_id(sample_store, internal_id="test_internal_id")
 
 
 def test_get_samples_to_deliver(sample_store):
+    """Test fetching samples to deliver."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -131,22 +135,8 @@ def test_get_samples_to_deliver(sample_store):
     assert {sample.name for sample in samples} == set(["to-deliver", "sequenced"])
 
 
-def test_get_samples_to_deliver(sample_store):
-    # GIVEN a store with a sample
-    assert len(sample_store.get_samples()) > 1
-
-    # WHEN finding samples to deliver
-    samples = sample_store.get_samples_not_delivered()
-
-    # THEN samples should be a list of samples
-    assert isinstance(samples, list)
-    assert (isinstance(sample, Sample) for sample in samples)
-
-    # THEN it should return all samples that are not delivered
-    assert len(samples) == len(sample_store.get_samples()) - 1
-
-
 def test_get_samples_to_invoice(sample_store):
+    """Test fetching samples to invoice."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -163,6 +153,7 @@ def test_get_samples_to_invoice(sample_store):
 
 
 def test_get_samples_not_invoiced(sample_store):
+    """Test fetching samples not invoiced."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -178,6 +169,7 @@ def test_get_samples_not_invoiced(sample_store):
 
 
 def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers, sample_id: int):
+    """Test fetching samples not down sampled."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
