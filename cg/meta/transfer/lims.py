@@ -67,7 +67,7 @@ class TransferLims(object):
         """Transfer information about samples."""
 
         if sample_id:
-            samples: List[Sample] = self.status.get_samples_by_internal_id(internal_id=sample_id)
+            samples: List[Sample] = self.status.get_sample_by_internal_id(internal_id=sample_id)
         else:
             samples: List[Sample] = self._get_samples_to_include(include, status_type)
 

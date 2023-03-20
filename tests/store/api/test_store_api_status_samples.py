@@ -17,8 +17,10 @@ def test_samples_to_receive_external(sample_store: Store, helpers: StoreHelpers)
     # WHEN finding external samples to receive
     samples: List[Sample] = sample_store.get_samples_to_receive(external=True)
 
-    # ASSERT that external_query is a list[sample]
+    # THEN samples should be a list of samples
     assert isinstance(samples, list)
+    assert (isinstance(sample, Sample) for sample in samples)
+
     # THEN assert that only the external sample is returned
     assert len(samples) == 1
 
@@ -35,8 +37,12 @@ def test_get_all_samples_to_receive_internal(sample_store):
     assert len([sample for sample in sample_store.get_samples() if sample.received_at]) > 1
 
     # WHEN finding which samples are in queue to receive
-    assert len(sample_store.get_samples_to_receive()) == 1
+    assert len(sample_store.get_samples_to_receive()) == 3
     first_sample = sample_store.get_samples_to_receive()[0]
+
+    # THEN samples should be a sample
+    assert isinstance(first_sample, Sample)
+
     assert first_sample.application_version.application.is_external is False
     assert first_sample.received_at is None
 
@@ -49,6 +55,10 @@ def test_samples_to_sequence(sample_store):
     # WHEN finding which samples are in queue to be sequenced
     sequence_samples: List[Sample] = sample_store.get_samples_to_sequence()
 
+    # THEN samples should be a list of samples
+    assert isinstance(sequence_samples, list)
+    assert (isinstance(sample, Sample) for sample in sequence_samples)
+
     # THEN it should list the received and partly sequenced samples
     assert len(sequence_samples) == 2
     assert {sample.name for sample in sequence_samples} == set(
@@ -58,3 +68,125 @@ def test_samples_to_sequence(sample_store):
         assert sample.sequenced_at is None
         if sample.name == "sequenced-partly":
             assert sample.reads > 0
+
+
+def test_samples_to_prepare(sample_store):
+    # GIVEN a store with sample in a mix of states
+    assert len(sample_store.get_samples()) > 1
+    assert len([sample for sample in sample_store.get_samples() if sample.prepared_at]) >= 1
+
+    # WHEN finding which samples are in queue to be prepared
+    prepare_samples: List[Sample] = sample_store.get_samples_to_prepare()
+
+    # THEN samples should be a list of samples
+    assert isinstance(prepare_samples, list)
+    assert (isinstance(sample, Sample) for sample in prepare_samples)
+
+    # THEN it should list the received sample
+    assert len(prepare_samples) == 1
+    assert prepare_samples[0].name == "received"
+
+
+def test_get_sample_by_entry_id(sample_store, entry_id=1):
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding a sample by entry id
+    sample: Sample = sample_store.get_sample_by_entry_id(entry_id=entry_id)
+
+    # THEN samples should be a list of samples
+    assert isinstance(sample, Sample)
+
+    # THEN it should return the sample
+    assert sample.id == entry_id
+
+
+def test_get_sample_by_internal_id(sample_store, internal_id="test_internal_id"):
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding a sample by internal id
+    sample: Sample = sample_store.get_sample_by_internal_id(internal_id=internal_id)
+
+    # THEN samples should be a list of samples
+    assert isinstance(sample, Sample)
+
+    # THEN it should return the sample
+    assert sample.internal_id == internal_id
+
+
+def test_get_samples_to_deliver(sample_store):
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to deliver
+    samples = sample_store.get_samples_to_deliver()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert (isinstance(sample, Sample) for sample in samples)
+
+    # THEN it should return the samples that are sequenced but not delivered
+    assert len(samples) == 2
+    assert {sample.name for sample in samples} == set(["to-deliver", "sequenced"])
+
+
+def test_get_samples_to_deliver(sample_store):
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to deliver
+    samples = sample_store.get_samples_not_delivered()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert (isinstance(sample, Sample) for sample in samples)
+
+    # THEN it should return all samples that are not delivered
+    assert len(samples) == len(sample_store.get_samples()) - 1
+
+
+def test_get_samples_to_invoice(sample_store):
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to invoice
+    samples = sample_store.get_samples_to_invoice()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert (isinstance(sample, Sample) for sample in samples)
+
+    # THEN it should return all samples that are not invoiced
+    assert len(samples) == 1
+    assert samples[0].name == "delivered"
+
+
+def test_get_samples_not_invoiced(sample_store):
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to invoice
+    samples = sample_store.get_samples_not_invoiced()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert (isinstance(sample, Sample) for sample in samples)
+
+    # THEN it should return all samples that are not invoiced
+    assert len(samples) == len(sample_store.get_samples())
+
+
+def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers, sample_id: int):
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to invoice
+    samples = sample_store.get_samples_not_down_sampled()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert (isinstance(sample, Sample) for sample in samples)
+
+    # THEN it should return all samples in the store
+    assert len(samples) == len(sample_store.get_samples())

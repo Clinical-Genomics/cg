@@ -273,14 +273,6 @@ class StatusHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def get_samples_by_internal_id(self, internal_id: str) -> List[Sample]:
-        """Return all samples by lims id."""
-        return apply_sample_filter(
-            filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
-            samples=self._get_query(table=Sample),
-            internal_id=internal_id,
-        ).all()
-
     @staticmethod
     def _get_case_output(case_data: SimpleNamespace) -> dict:
         return {
