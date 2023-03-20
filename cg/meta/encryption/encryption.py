@@ -7,8 +7,6 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List
 
-from housekeeper.store import models as hk_models
-
 from cg.constants import FileExtensions
 from cg.constants.encryption import GPGParameters
 from cg.constants.extraction import FlowCellExtractionParameters

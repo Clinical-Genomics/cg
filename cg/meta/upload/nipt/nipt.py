@@ -16,7 +16,7 @@ from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis, Flowcell, Family
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File
 from cg.apps.tb import TrailblazerAPI
 
 LOG = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class NiptUploadAPI:
         if not tags:
             tags: List[str] = self.RESULT_FILE_TAGS
 
-        hk_all_results_file: hk_models.File = self.housekeeper_api.get_file_from_latest_version(
+        hk_all_results_file: File = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
         )
 
