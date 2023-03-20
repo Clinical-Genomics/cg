@@ -16,7 +16,7 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import FamilySample
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -228,12 +228,12 @@ def bioinfo_all(
     analyses: Query = status_db.analyses_ready_for_vogue_upload(completed_after, completed_before)
     for analysis in analyses:
         case_name: str = analysis.family.internal_id
-        version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
+        version_obj: Version = housekeeper_api.last_version(case_name)
         if not version_obj:
             continue
 
         # confirm multiqc.json exists
-        multiqc_file_obj: List[hk_models.File] = list(
+        multiqc_file_obj: List[File] = list(
             housekeeper_api.get_files(
                 bundle=case_name, tags=["multiqc-json"], version=version_obj.id
             )
