@@ -30,7 +30,6 @@ from cg.store.filters.status_collaboration_filters import (
 from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
 
-
 class FindBasicDataHandler(BaseHandler):
     """Contains methods to find basic data model instances."""
 
