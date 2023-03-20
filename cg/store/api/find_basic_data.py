@@ -17,6 +17,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
+
 from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter

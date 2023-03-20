@@ -1,6 +1,6 @@
 """Set case attributes in the status database."""
 import logging
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 import click
 
 from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
@@ -48,39 +48,88 @@ def family(
     customer_id: Optional[str],
 ):
     """Update information about a case."""
+
+    options: List[str] = [action, panels, priority, customer_id, data_analysis, data_delivery]
+    abort_on_empty_options(options=options)
+
     status_db: Store = context.status_db
-    case: Family = status_db.family(family_id)
-    if case is None:
-        LOG.error(f"Can not find case {family_id}")
-        raise click.Abort
-    if not any([action, panels, priority, customer_id, data_analysis, data_delivery]):
+    case: Family = get_case(family_id, status_db)
+
+    if action:
+        update_action(case=case, action=action)
+
+    if customer_id:
+        update_customer(case=case, customer_id=customer_id, status_db=status_db)
+
+    if data_analysis:
+        update_data_analysis(case=case, data_analysis=data_analysis)
+
+    if data_delivery:
+        update_data_delivery(case=case, data_delivery=data_delivery)
+
+    if panels:
+        update_panels(case=case, panels=panels, status_db=status_db)
+
+    if priority:
+        update_priority(case=case, priority=priority)
+
+    status_db.commit()
+
+
+def abort_on_empty_options(options: List[str]) -> None:
+    if not any(options):
         LOG.error("Nothing to change")
         raise click.Abort
-    if action:
-        LOG.info(f"Update action: {case.action or 'NA'} -> {action}")
-        case.action = action
-    if customer_id:
-        customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
-        if customer is None:
-            LOG.error(f"Unknown customer: {customer_id}")
+
+
+def get_case(case_id: str, status_db: Store) -> Family:
+    case: Family = status_db.family(case_id)
+
+    if case is None:
+        LOG.error(f"Can't find case {case_id}")
+        raise click.Abort
+
+    return case
+
+
+def update_action(case: Family, action: str) -> None:
+    """Update case action."""
+    LOG.info(f"Update action: {case.action or 'NA'} -> {action}")
+    case.action = action
+
+
+def update_customer(case: Family, customer_id: str, status_db: Store) -> None:
+    customer_obj: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+
+    if customer_obj is None:
+        LOG.error("Unknown customer: %s", customer_id)
+        raise click.Abort
+
+    LOG.info(f"Update customer: {case.customer.internal_id} -> {customer_id}")
+    case.customer = customer_obj
+
+
+def update_data_analysis(case: Family, data_analysis: Pipeline) -> None:
+    LOG.info(f"Update data_analysis: {case.data_analysis or 'NA'} -> {data_analysis}")
+    case.data_analysis = data_analysis
+
+
+def update_data_delivery(case: Family, data_delivery: DataDelivery) -> None:
+    LOG.info(f"Update data_delivery: {case.data_delivery or 'NA'} -> {data_delivery}")
+    case.data_delivery = data_delivery
+
+
+def update_panels(case, panels, status_db) -> None:
+    for panel_abbreviation in panels:
+        panel: Panel = status_db.panel(abbrev=panel_abbreviation)
+        if panel is None:
+            LOG.error(f"unknown gene panel: {panel_abbreviation}")
             raise click.Abort
-        LOG.info(f"Update customer: {case.customer.internal_id} -> {customer_id}")
-        case.customer = customer
-    if data_analysis:
-        LOG.info(f"Update data_analysis: {case.data_analysis or 'NA'} -> {data_analysis}")
-        case.data_analysis = data_analysis
-    if data_delivery:
-        LOG.info(f"Update data_delivery: {case.data_delivery or 'NA'} -> {data_delivery}")
-        case.data_delivery = data_delivery
-    if panels:
-        for panel_id in panels:
-            panel: Panel = status_db.panel(abbrev=panel_id)
-            if panel is None:
-                LOG.error(f"Unknown gene panel: {panel_id}")
-                raise click.Abort
-        LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panels)}")
-        case.panels = panels
-    if priority:
-        LOG.info(f"Update priority: {case.priority.name} -> {priority.name}")
-        case.priority = priority
-    status_db.commit()
+    LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panels)}")
+    case.panels = panels
+
+
+def update_priority(case: Family, priority: Priority) -> None:
+    """Update case priority."""
+    LOG.info(f"Update priority: {case.priority.name} -> {priority.name}")
+    case.priority = priority
