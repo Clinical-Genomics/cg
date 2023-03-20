@@ -1743,6 +1743,14 @@ def store_with_multiple_cases_and_samples(
     yield store
 
 
+@pytest.fixture(name="store_with_panels")
+def store_with_panels(store: Store, helpers: StoreHelpers):
+    helpers.ensure_panel(store=store, panel_abbreviation="panel1", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel2", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel3", customer_id="cust000")
+    yield store
+
+
 @pytest.fixture(name="store_with_organisms")
 def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple organisms."""
