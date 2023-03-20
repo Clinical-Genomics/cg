@@ -49,7 +49,14 @@ def family(
 ):
     """Update information about a case."""
 
-    options: List[str] = [action, panels, priority, customer_id, data_analysis, data_delivery]
+    options: List[str] = [
+        action,
+        panel_abbreviations,
+        priority,
+        customer_id,
+        data_analysis,
+        data_delivery,
+    ]
     abort_on_empty_options(options=options)
 
     status_db: Store = context.status_db
