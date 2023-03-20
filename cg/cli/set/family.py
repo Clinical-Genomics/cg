@@ -128,12 +128,12 @@ def update_data_delivery(case: Family, data_delivery: DataDelivery) -> None:
 
 def update_panels(case, panel_abbreviations, status_db) -> None:
     for panel_abbreviation in panel_abbreviations:
-        panel: Panel = status_db.panel(abbrev=panel_abbreviation)
+        panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if panel is None:
             LOG.error(f"unknown gene panel: {panel_abbreviation}")
             raise click.Abort
-    LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panels)}")
-    case.panels = panels
+    LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panel_abbreviations)}")
+    case.panels = panel_abbreviations
 
 
 def update_priority(case: Family, priority: Priority) -> None:
