@@ -126,7 +126,7 @@ def update_data_delivery(case: Family, data_delivery: DataDelivery) -> None:
     case.data_delivery = data_delivery
 
 
-def update_panels(case, panel_abbreviations, status_db) -> None:
+def update_panels(case: Family, panel_abbreviations: List[str], status_db: Store) -> None:
     for panel_abbreviation in panel_abbreviations:
         panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if panel is None:
