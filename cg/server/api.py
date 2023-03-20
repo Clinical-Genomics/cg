@@ -386,7 +386,7 @@ def parse_current_user_information():
 
 
 @BLUEPRINT.route("/applications")
-@public
+@is_public
 def parse_applications():
     """Fetch application tags."""
     query: List[Application] = db.get_applications_is_not_archived()
@@ -395,7 +395,7 @@ def parse_applications():
 
 
 @BLUEPRINT.route("/applications/<tag>")
-@public
+@is_public
 def parse_application(tag):
     """Fetch an application tag."""
     record = db.get_application_by_tag(tag=tag)
