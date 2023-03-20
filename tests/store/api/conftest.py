@@ -324,10 +324,10 @@ def fixture_expected_number_of_applications() -> int:
 
 @pytest.fixture(name="store_with_samples_that_have_names")
 def store_with_samples_that_have_names(
-    store: Store, helpers: StoreHelpers, name="sample_1"
+    store: Store, helpers: StoreHelpers, name="sample_1", order="order_1"
 ) -> Store:
-    """Return a store with two samples of which one has a name"""
-    helpers.add_sample(store=store, internal_id="test_sample_1", name=name)
+    """Return a store with two samples of which one has a name and order"""
+    helpers.add_sample(store=store, internal_id="test_sample_1", name=name, order=order)
     helpers.add_sample(store=store, internal_id="test_sample_2")
     return store
 

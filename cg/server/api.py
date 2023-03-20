@@ -218,11 +218,11 @@ def samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(http.HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
-        samples: List[Sample] = db.get_all_samples_to_receive()
+        samples: List[Sample] = db.get_samples_to_receive()
     elif request.args.get("status") == "labprep":
-        samples: List[Sample] = db.get_all_samples_to_prepare()
+        samples: List[Sample] = db.get_samples_to_prepare()
     elif request.args.get("status") == "sequencing":
-        samples: List[Sample] = db.get_all_samples_to_sequence()
+        samples: List[Sample] = db.get_samples_to_sequence()
     else:
         customers: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers

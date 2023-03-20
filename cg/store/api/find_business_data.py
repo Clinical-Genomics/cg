@@ -462,9 +462,20 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_all_samples(self) -> List[Sample]:
+    def get_samples(self) -> List[Sample]:
         """Return all samples."""
         return self._get_query(table=Sample).order_by(Sample.created_at.desc()).all()
+
+    def get_samples_by_customer_id(
+        self, *, customers: Optional[List[Customer]] = None
+    ) -> List[Sample]:
+        """Return all the pools for a customer."""
+        customer_ids = [customer.id for customer in customers]
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            customer_ids=customer_ids,
+            filter_functions=[SampleFilter.FILTER_BY_CUSTOMER_ID],
+        ).all()
 
     def get_samples_by_name_enquiry(self, name_enquiry: str) -> List[Sample]:
         """Return all samples for a customer."""
@@ -485,16 +496,20 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_to_render(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
-        records = self._get_query(table=Sample)
-        records = self.get_samples_by_customer(customers=customers) if customers else records
+
+        samples: List[Sample] = (
+            self.get_samples_by_customer_id(customers=customers)
+            if customers
+            else self.get_samples()
+        )
         if enquiry:
-            records = list(
+            samples = list(
                 set(
                     set(self.get_samples_by_name_enquiry(name_enquiry=enquiry))
                     or set(self.get_samples_by_order_enquiry(order_enquiry=enquiry))
                 )
             )
-        return records.order_by(Sample.created_at.desc()).all()
+        return samples
 
     def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
         """Get samples of customer with given subject_id or subject_id and is_tumour."""

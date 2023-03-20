@@ -486,7 +486,7 @@ def test_get_samples_by_subject_id(
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
+    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
 
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
@@ -513,7 +513,7 @@ def test_get_samples_by_subject_id_and_is_tumour(
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
+    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
 
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
@@ -535,7 +535,7 @@ def test_filter_get_sample_by_name(store_with_samples_that_have_names: Store, na
     # GIVEN a database with two samples of which one has a name
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_that_have_names.get_all_samples()) == 2
+    assert len(store_with_samples_that_have_names.get_samples()) == 2
 
     # WHEN fetching the sample by name
     samples: Sample = store_with_samples_that_have_names.get_sample_by_name(name=name)
@@ -750,3 +750,138 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 
     # THEN one pools should be returned
     assert len(pools) == 1
+
+
+def test_get_samples(store_with_samples_that_have_names: Store):
+    """Test that samples can be fetched from the store."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching all samples
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples()
+
+    # THEN two samples should be returned
+    assert len(samples) == 2
+
+
+def test_get_samples_by_customer_id(store_with_samples_that_have_names: Store):
+    """Test that samples can be fetched from the store by customer id."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching samples by customer id
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_by_customer_id(
+        customers=store_with_samples_that_have_names.get_customers()
+    )
+
+    # THEN two samples should be returned
+    assert len(samples) == 2
+
+    assert (
+        sample.customer_id == store_with_samples_that_have_names.get_customers()
+        for sample in samples
+    )
+
+
+def test_get_samples_by_name_enquiry(
+    store_with_samples_that_have_names: Store, name_enquiry: str = "sample_1"
+):
+    """Test that samples can be fetched from the store by customer id."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching samples by customer id
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_by_name_enquiry(
+        name_enquiry=name_enquiry
+    )
+
+    # THEN one sample should be returned
+    assert len(samples) == 1
+
+    # THEN the sample should have the correct name
+    assert samples[0].name == name_enquiry
+
+
+def test_get_samples_by_order_enquiry(
+    store_with_samples_that_have_names: Store, order_enquiry: str = "order_1"
+):
+    """Test that samples can be fetched from the store by customer id."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching samples by customer id
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_by_order_enquiry(
+        order_enquiry=order_enquiry
+    )
+
+    # THEN one sample should be returned
+    assert len(samples) == 1
+
+    # THEN the sample should have the correct name
+    assert samples[0].order == order_enquiry
+
+
+def test_get_samples_to_render(store_with_samples_that_have_names: Store):
+    """Test that samples can be fetched from the store by customer id."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching samples by customer id
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render()
+
+    # THEN two samples should be returned
+    assert len(samples) == 2
+
+
+def test_get_samples_to_render_with_customer(
+    store_with_samples_that_have_names: Store,
+):
+    """Test that samples can be fetched from the store by customer id."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching samples by customer id
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render(
+        customers=store_with_samples_that_have_names.get_customers()
+    )
+
+    # THEN two samples should be returned
+    assert len(samples) == 2
+
+    # THEN the samples should have the correct customer id
+    assert (
+        sample.customer_id == store_with_samples_that_have_names.get_customers()
+        for sample in samples
+    )
+
+
+def test_get_samples_to_render_with_name_enquiry(
+    store_with_samples_that_have_names: Store,
+    name_enquiry: str = "sample_1",
+):
+    """Test that samples can be fetched from the store by customer id."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching samples by customer id
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render(
+        customers=store_with_samples_that_have_names.get_customers(), enquiry=name_enquiry
+    )
+
+    # THEN one sample should be returned
+    assert len(samples) == 1
+
+    # THEN the sample should have the correct name
+    assert samples[0].name == name_enquiry
+
+
+def test_get_samples_to_render_with_order_enquiry(
+    store_with_samples_that_have_names: Store,
+    order_enquiry: str = "order_1",
+):
+    """Test that samples can be fetched from the store by customer id."""
+    # GIVEN a database with two samples
+
+    # WHEN fetching samples by customer id
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_render(
+        customers=store_with_samples_that_have_names.get_customers(), enquiry=order_enquiry
+    )
+
+    # THEN one sample should be returned
+    assert len(samples) == 1
+
+    # THEN the sample should have the correct name
+    assert samples[0].order == order_enquiry

@@ -3,7 +3,7 @@ from enum import Enum
 from sqlalchemy.orm import Query
 
 from cg.constants.constants import SampleType
-from cg.store.models import Sample
+from cg.store.models import Sample, Customer
 
 
 def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Query:
@@ -87,9 +87,9 @@ def filter_samples_do_not_invoice(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.no_invoice.is_(True))
 
 
-def filter_samples_by_customer_id(samples: Query, customer_id: List[int], **kwargs) -> Query:
+def filter_samples_by_customer_id(samples: Query, customer_ids: List[int], **kwargs) -> Query:
     """Return samples by customer id."""
-    return samples.filter(Sample.customer_id.in_(customer_id))
+    return samples.filter(Sample.customer_id.in_(customer_ids))
 
 
 def filter_samples_by_customer_name(samples: Query, customer_name: str, **kwargs) -> Query:
@@ -142,6 +142,11 @@ def filter_samples_by_order_enquiry(samples: Query, order_enquiry: str, **kwargs
     return samples.filter(Sample.order == order_enquiry)
 
 
+def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
+    """Return samples by customer."""
+    return samples.filter(Sample.customer == customer)
+
+
 def apply_sample_filter(
     filter_functions: List[Callable],
     samples: Query,
@@ -150,11 +155,12 @@ def apply_sample_filter(
     tissue_type: Optional[SampleType] = None,
     data_analysis: Optional[str] = None,
     invoice_id: Optional[int] = None,
-    customer_id: Optional[str] = None,
+    customer_ids: Optional[str] = None,
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
     name_enquiry: Optional[str] = None,
     order_enquiry: Optional[str] = None,
+    customer: Optional[Customer] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
@@ -166,11 +172,12 @@ def apply_sample_filter(
             tissue_type=tissue_type,
             data_analysis=data_analysis,
             invoice_id=invoice_id,
-            customer_id=customer_id,
+            customer_ids=customer_ids,
             subject_id=subject_id,
             name=name,
             order_enquiry=order_enquiry,
             name_enquiry=name_enquiry,
+            customer=customer,
         )
     return samples
 
@@ -205,3 +212,4 @@ class SampleFilter(Enum):
     FILTER_IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
     FILTER_BY_NAME_ENQUIRY: Callable = filter_samples_by_name_enquiry
     FILTER_BY_ORDER_ENQUIRY: Callable = filter_samples_by_order_enquiry
+    FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
