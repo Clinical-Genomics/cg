@@ -256,7 +256,7 @@ class NextflowAnalysisAPI:
         email: str,
         qos: str,
         commands: str,
-        hours: int = 72,
+        hours: int = 96,
         memory: int = 10,
         number_tasks: int = 1,
         dry_run: bool = False,
