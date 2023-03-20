@@ -20,7 +20,6 @@ LOG = logging.getLogger(__name__)
 @click.group()
 def nipt():
     """Upload NIPT result files"""
-    pass
 
 
 @nipt.command("case")

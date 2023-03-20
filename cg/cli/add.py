@@ -27,7 +27,6 @@ LOG = logging.getLogger(__name__)
 @click.group()
 def add():
     """Add new things to the database."""
-    pass
 
 
 @add.command()

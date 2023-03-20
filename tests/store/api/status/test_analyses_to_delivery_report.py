@@ -1,5 +1,4 @@
 """This file tests the analyses_to_delivery_report part of the status api"""
-from datetime import datetime, timedelta
 
 from cg.constants import Pipeline, DataDelivery
 from cg.constants.subject import PhenotypeStatus

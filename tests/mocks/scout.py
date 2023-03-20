@@ -2,9 +2,8 @@
 
 import logging
 from pathlib import Path
-from datetime import datetime
 from pydantic import BaseModel, validator
-from typing import List, Optional
+from typing import List
 from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI

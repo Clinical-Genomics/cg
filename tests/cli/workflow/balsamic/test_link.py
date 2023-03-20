@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from cg.cli.workflow.balsamic.base import link
 from cg.models.cg_config import CGConfig

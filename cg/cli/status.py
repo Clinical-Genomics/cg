@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import List
 
 import click
 from cg.constants import CASE_ACTIONS, Pipeline
@@ -53,7 +53,6 @@ for header in CASE_HEADERS_LONG:
 @click.group()
 def status():
     """View status of things."""
-    pass
 
 
 @status.command()

@@ -1,6 +1,5 @@
 """Tests for the dict module."""
 from pathlib import Path
-from typing import Dict
 
 from housekeeper.store.models import File
 

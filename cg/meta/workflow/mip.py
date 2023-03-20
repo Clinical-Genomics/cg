@@ -1,7 +1,7 @@
 import logging
 
 from pathlib import Path
-from typing import Any, List, Optional, Type, Dict, Union
+from typing import Any, List, Optional, Dict, Union
 
 from pydantic import ValidationError
 

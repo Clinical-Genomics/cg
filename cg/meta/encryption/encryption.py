@@ -1,5 +1,4 @@
 """API for encryption on Hasta"""
-import hashlib
 import logging
 import subprocess
 from io import TextIOWrapper

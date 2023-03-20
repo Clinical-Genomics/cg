@@ -11,7 +11,6 @@ from cg.store.filters.status_application_filters import (
 from cg.store import Store
 from cg.store.models import Application
 from tests.store_helpers import StoreHelpers
-from typing import List
 from sqlalchemy.orm import Query
 from tests.store.conftest import StoreConftestFixture
 

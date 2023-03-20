@@ -1,7 +1,6 @@
 """Utility functions for the upload cli commands."""
 
 import logging
-from pathlib import Path
 from typing import Optional
 
 import click

@@ -1,6 +1,5 @@
 """This script tests the run cli command"""
 import logging
-from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner

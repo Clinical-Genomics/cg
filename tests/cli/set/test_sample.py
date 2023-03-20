@@ -1,5 +1,4 @@
 """Test methods for cg cli set sample"""
-import logging
 
 import pytest
 from cg.cli.set.base import sample

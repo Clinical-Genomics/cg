@@ -1,7 +1,6 @@
 """Tests for the report-deliver cli command"""
 
 import logging
-from pathlib import Path
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner

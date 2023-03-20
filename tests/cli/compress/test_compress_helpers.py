@@ -1,7 +1,6 @@
 """Tests for helper functions in Cg Compress CLI."""
 
 import logging
-import os
 from pathlib import Path
 
 from housekeeper.store.models import Version
