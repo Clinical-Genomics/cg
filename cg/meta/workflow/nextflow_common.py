@@ -10,7 +10,12 @@ from typing import Any, Dict, List, Optional
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileFormat
-from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR, NXF_JVM_ARGS_ENV
+from cg.constants.nextflow import (
+    JAVA_MEMORY_HEADJOB,
+    NFX_SAMPLE_HEADER,
+    NFX_WORK_DIR,
+    NXF_JVM_ARGS_ENV,
+)
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
 from cg.models.slurm.sbatch import Sbatch
@@ -89,7 +94,7 @@ class NextflowAnalysisAPI:
     @classmethod
     def get_variables_to_export(cls, case_id: str, root_dir: str) -> Dict[str, str]:
         """Generates a dictionary with variables that needs to be exported."""
-        return {NXF_JVM_ARGS_ENV: "-Xmx5g"}
+        return {NXF_JVM_ARGS_ENV: f"'{JAVA_MEMORY_HEADJOB}'"}
 
     @classmethod
     def verify_analysis_finished(cls, case_id: str, root_dir: str) -> None:
