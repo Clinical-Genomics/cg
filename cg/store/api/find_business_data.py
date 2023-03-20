@@ -68,23 +68,23 @@ class FindBusinessDataHandler(BaseHandler):
         sample: Sample = self.get_sample_by_internal_id(internal_id=internal_id)
         if any(
             [
-                self.family(
-                    internal_id=self.Family.query.filter(Family.id == family_sample.family_id)
-                    .first()
-                    .internal_id
-                ).action
-                == "analyze"
-                or self.family(
-                    internal_id=self.Family.query.filter(Family.id == family_sample.family_id)
-                    .first()
-                    .internal_id
-                ).action
-                == "running"
+                self.is_family_action(family_id=family_sample.family_id, action="analyze")
+                or self.is_family_action(family_id=family_sample.family_id, action="running")
                 for family_sample in sample.links
             ]
         ):
             return True
         return False
+
+    def is_family_action(self, family_id: str, action: str) -> bool:
+        """Check if the action is valid"""
+        return self.get_family_action(family_id=family_id) == action
+
+    def get_family_action(self, family_id) -> str:
+        """Return the action of a family"""
+        return self.family(
+            internal_id=self.Family.query.filter(Family.id == family_id).first().internal_id
+        ).action
 
     def get_application_by_case(self, case_id: str) -> Application:
         """Return the application of a case."""
