@@ -146,7 +146,7 @@ def fixture_microbial_store(
 @pytest.fixture(name="analysis_obj")
 def fixture_analysis_obj(analysis_store: Store) -> Analysis:
     """Return an analysis object from a populated store."""
-    return analysis_store.analyses()[0]
+    return analysis_store.get_analyses()[0]
 
 
 @pytest.fixture(name="case_obj")

@@ -37,11 +37,11 @@ LOG = logging.getLogger(__name__)
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def analyses(self, *, family: Family = None, before: dt.datetime = None) -> Query:
+    def get_analyses(self, *, case: Family = None, before: dt.datetime = None) -> Query:
         """Fetch multiple analyses."""
         records = self.Analysis.query
-        if family:
-            query_family = family
+        if case:
+            query_family = case
             records = records.filter(Analysis.family == query_family)
         if before:
             subq = (
