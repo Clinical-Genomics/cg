@@ -1,6 +1,6 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import List, Optional, Callable
+from typing import List, Optional
 
 from sqlalchemy import desc
 from sqlalchemy.orm import Query
@@ -17,7 +17,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
-from cg.store.filters.organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
@@ -27,7 +27,7 @@ from cg.store.filters.status_collaboration_filters import (
     apply_collaboration_filter,
 )
 from cg.store.filters.panel_filters import PanelFilter, apply_panel_filter
-from cg.store.filters.user_filters import apply_user_filter, UserFilter
+from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):

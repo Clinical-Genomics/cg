@@ -1,6 +1,6 @@
 import logging
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.constants.scout_upload import BALSAMIC_UMI_CASE_TAGS, BALSAMIC_UMI_SAMPLE_TAGS
@@ -13,9 +13,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicUmiConfigBuilder(BalsamicConfigBuilder):
-    def __init__(
-        self, hk_version_obj: hk_models.Version, analysis_obj: Analysis, lims_api: LimsAPI
-    ):
+    def __init__(self, hk_version_obj: Version, analysis_obj: Analysis, lims_api: LimsAPI):
         super().__init__(
             hk_version_obj=hk_version_obj, analysis_obj=analysis_obj, lims_api=lims_api
         )

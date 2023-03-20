@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Generator, List
 
 import pytest
-from housekeeper.store import models as hk_models
 from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, FileExtensions, Pipeline

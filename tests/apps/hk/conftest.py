@@ -7,7 +7,7 @@ import datetime
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from housekeeper.store import models
+from housekeeper.store.models import Bundle
 
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
@@ -41,7 +41,7 @@ def fixture_populated_housekeeper_api(
 @pytest.fixture(name="minimal_bundle_obj")
 def fixture_minimal_bundle_obj(
     timestamp: datetime.datetime, case_id: str, housekeeper_api: MockHousekeeperAPI
-) -> models.Bundle:
+) -> Bundle:
     """Return a bundle object with minimal information (name and created_at)."""
     return housekeeper_api.new_bundle(name=case_id, created_at=timestamp)
 

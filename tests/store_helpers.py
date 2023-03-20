@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from typing import List, Optional
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
@@ -38,9 +38,7 @@ class StoreHelpers:
     """Class to hold helper functions that needs to be used all over."""
 
     @staticmethod
-    def ensure_hk_bundle(
-        store: HousekeeperAPI, bundle_data: dict, include: bool = False
-    ) -> hk_models.Bundle:
+    def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict, include: bool = False) -> Bundle:
         """Utility function to add a bundle of information to a housekeeper api."""
 
         bundle_exists = False
@@ -61,7 +59,7 @@ class StoreHelpers:
         return _bundle
 
     @staticmethod
-    def ensure_hk_version(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:
+    def ensure_hk_version(store: HousekeeperAPI, bundle_data: dict) -> Version:
         """Utility function to return existing or create an version for tests."""
         _bundle = StoreHelpers.ensure_hk_bundle(store, bundle_data)
         return store.last_version(_bundle.name)
