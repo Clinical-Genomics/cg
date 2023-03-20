@@ -478,7 +478,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_samples_by_name_enquiry(self, name_enquiry: str) -> List[Sample]:
-        """Return all samples for a customer."""
+        """Return all samples that match name enquiry."""
         return apply_sample_filter(
             samples=self._get_query(table=Sample),
             name_enquiry=name_enquiry,
@@ -486,7 +486,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_samples_by_order_enquiry(self, order_enquiry: str) -> List[Sample]:
-        """Return all samples for a customer."""
+        """Return all that match the order enquiry."""
         return apply_sample_filter(
             samples=self._get_query(table=Sample),
             order_enquiry=order_enquiry,
