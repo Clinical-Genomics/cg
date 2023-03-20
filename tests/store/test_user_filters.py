@@ -1,6 +1,6 @@
 from cg.store.api.core import Store
 from cg.store.models import User
-from cg.store.filters.user_filters import filter_user_by_email
+from cg.store.filters.status_user_filters import filter_user_by_email
 
 
 def test_filter_user_by_email_returns_correct_user(store_with_users: Store):
