@@ -318,16 +318,16 @@ class StoreHelpers:
 
     @staticmethod
     def ensure_panel(
-        store: Store, panel_id: str = "panel_test", customer_id: str = "cust000"
+        store: Store, panel_abbreviation: str = "panel_test", customer_id: str = "cust000"
     ) -> Panel:
         """Utility function to add a panel to use in tests."""
         customer = StoreHelpers.ensure_customer(store, customer_id)
-        panel: Panel = store.get_panel_by_abbreviation(abbreviation=panel_id)
+        panel: Panel = store.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if not panel:
             panel = store.add_panel(
                 customer=customer,
-                name=panel_id,
-                abbrev=panel_id,
+                name=panel_abbreviation,
+                abbrev=panel_abbreviation,
                 version=1.0,
                 date=datetime.now(),
                 genes=1,
@@ -357,8 +357,10 @@ class StoreHelpers:
         customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
         if case_obj:
             panels = case_obj.panels
-        for panel_name in panels:
-            StoreHelpers.ensure_panel(store=store, panel_id=panel_name, customer_id=customer_id)
+        for panel_abbreivation in panels:
+            StoreHelpers.ensure_panel(
+                store=store, panel_abbreviation=panel_abbreivation, customer_id=customer_id
+            )
 
         if not case_obj:
             case_obj: Optional[Family] = store.family(internal_id=name)

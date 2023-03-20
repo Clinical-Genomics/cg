@@ -41,7 +41,9 @@ def test_filter_panel_by_abbrev_returns_none_when_abbrev_does_not_exist(store_wi
     assert panel_query.count() > 0
 
     # WHEN finding a panel by an abbreviation that does not exist
-    filtered_panels_query: Query = filter_panel_by_abbrev(panel_query, "nonexistent_abbrev")
+    filtered_panels_query: Query = filter_panel_by_abbrev(
+        panels=panel_query, abbreviation="nonexistent_abbrev"
+    )
 
     # THEN the result is a query
     assert isinstance(filtered_panels_query, Query)

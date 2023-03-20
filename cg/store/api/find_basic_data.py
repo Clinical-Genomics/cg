@@ -194,7 +194,7 @@ class FindBasicDataHandler(BaseHandler):
         return self._get_query(table=Customer).all()
 
     def get_panel_by_abbreviation(self, abbreviation: str) -> Panel:
-        """Find a panel by abbreviation."""
+        """Return a panel by abbreviation."""
         return apply_panel_filter(
             panels=self._get_query(table=Panel),
             filters=[PanelFilter.FILTER_BY_ABBREVIATION],
