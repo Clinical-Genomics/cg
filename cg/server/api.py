@@ -12,8 +12,8 @@ from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
-from cg.constants.constants import FileFormat, Pipeline
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
+from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
