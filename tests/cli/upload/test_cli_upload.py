@@ -1,7 +1,6 @@
 """Test CG CLI upload module."""
 from datetime import datetime, timedelta
 
-from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
 from cg.cli.upload.base import upload

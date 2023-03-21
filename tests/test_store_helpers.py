@@ -2,9 +2,7 @@
 Tests for command module
 """
 
-import pytest
 
-from cg.utils import Process
 
 
 def test_add_microbial_sample(base_store, helpers):

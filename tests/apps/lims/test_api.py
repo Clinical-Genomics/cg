@@ -3,7 +3,6 @@ import datetime as dt
 
 from requests.exceptions import HTTPError
 
-import cg
 from cg.apps.lims.api import LimsAPI
 
 
