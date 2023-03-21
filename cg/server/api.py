@@ -154,7 +154,7 @@ def parse_cases():
 def parse_families():
     """Return families."""
     if request.args.get("status") == "analysis":
-        records = db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+        records: List[Family] = db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
         count = len(records)
     else:
         customers: Optional[List[Customer]] = (
