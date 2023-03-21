@@ -63,18 +63,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return self._process
 
     @process.setter
-    def process(self, use_nextflow: bool):
-        if use_nextflow:
-            self._process = Process(
-                binary=self.config.rnafusion.binary_path,
-                environment=self.conda_env,
-                conda_binary=self.conda_binary,
-                launch_directory=self.config.rnafusion.launch_directory,
-            )
-        else:
-            self._process = Process(
-                binary=self.tower_binary_path,
-            )
+    def process(self, process: Process):
+        self._process = process
 
     def get_profile(self, profile: Optional[str] = None) -> str:
         if profile:
@@ -208,8 +198,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self, case_id: str, command_args: dict, use_nextflow: bool, dry_run: bool = False
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
-        self.process = use_nextflow
         if use_nextflow:
+            self.process = Process(
+                binary=self.config.rnafusion.binary_path,
+                environment=self.conda_env,
+                conda_binary=self.conda_binary,
+                launch_directory=NextflowAnalysisAPI.get_case_path(
+                    case_id=case_id, root_dir=self.root_dir
+                ),
+            )
             LOG.info("Pipeline will be executed using nextflow")
             parameters: List[str] = NextflowAnalysisAPI.get_nextflow_run_parameters(
                 case_id=case_id,
