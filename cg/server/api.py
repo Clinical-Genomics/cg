@@ -12,7 +12,7 @@ from urllib3.exceptions import MaxRetryError, NewConnectionError
 
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
 from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
@@ -154,7 +154,7 @@ def parse_cases():
 def parse_families():
     """Return families."""
     if request.args.get("status") == "analysis":
-        records = db.cases_to_mip_analyze()
+        records: List[Family] = db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
         count = len(records)
     else:
         customers: Optional[List[Customer]] = (
