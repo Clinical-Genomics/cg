@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileExtensions, FlowCellStatus
@@ -403,7 +403,7 @@ class SpringBackupAPI:
         if self.dry_run:
             LOG.info(f"Dry run, no changes made to {spring_file_path}")
             return
-        hk_spring_file: hk_models.File = self.hk_api.files(path=str(spring_file_path)).first()
+        hk_spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
         LOG.info(f"Setting {spring_file_path} to archived in Housekeeper")
         self.hk_api.set_to_archive(file=hk_spring_file, value=True)
 

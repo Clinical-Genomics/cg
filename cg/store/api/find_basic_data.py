@@ -1,6 +1,6 @@
 """Handler to find basic data objects"""
 import datetime as dt
-from typing import List, Optional, Callable
+from typing import List, Optional
 
 from sqlalchemy import desc
 from sqlalchemy.orm import Query
@@ -17,7 +17,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
-from cg.store.organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
@@ -26,7 +26,8 @@ from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
-from cg.store.user_filters import apply_user_filter, UserFilter
+from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
+from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
 
 class FindBasicDataHandler(BaseHandler):
@@ -192,13 +193,17 @@ class FindBasicDataHandler(BaseHandler):
         """Return costumers."""
         return self._get_query(table=Customer).all()
 
-    def panel(self, abbrev):
-        """Find a panel by abbreviation."""
-        return self.Panel.query.filter_by(abbrev=abbrev).first()
+    def get_panel_by_abbreviation(self, abbreviation: str) -> Panel:
+        """Return a panel by abbreviation."""
+        return apply_panel_filter(
+            panels=self._get_query(table=Panel),
+            filters=[PanelFilter.FILTER_BY_ABBREVIATION],
+            abbreviation=abbreviation,
+        ).first()
 
-    def panels(self):
+    def get_panels(self) -> List[Panel]:
         """Returns all panels."""
-        return self.Panel.query.order_by(Panel.abbrev)
+        return self._get_query(table=Panel).order_by(Panel.abbrev).all()
 
     def get_user_by_email(self, email: str) -> User:
         """Return a user by email from the database."""
