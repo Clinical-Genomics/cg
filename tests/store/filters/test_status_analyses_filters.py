@@ -38,7 +38,7 @@ def test_get_valid_analyses_in_production(
         store=base_store, case=case_obj, completed_at=old_timestamp
     )
     # GIVEN an analysis query
-    analyses_query: List[Analysis] = base_store.get_latest_analyses_for_case()
+    analyses_query: List[Analysis] = base_store.get_latest_analyses()
 
     # WHEN retrieving valid in production analyses
     analyses: Query = filter_valid_analyses_in_production(analyses_query)
@@ -61,7 +61,7 @@ def test_get_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, ca
     )
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN extracting the analyses
     analyses: Query = filter_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
@@ -81,7 +81,7 @@ def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timest
     analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN retrieving the completed analyses
     analyses: Query = filter_completed_analyses(analyses_query)
@@ -100,7 +100,7 @@ def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     analysis_not_completed: Analysis = helpers.add_analysis(store=base_store, completed_at=None)
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN retrieving the not completed analyses
     analyses: Query = filter_not_completed_analyses(analyses_query)
@@ -121,7 +121,7 @@ def test_get_filter_uploaded_analyses(
     analysis: Analysis = helpers.add_analysis(store=base_store, uploaded_at=timestamp_now)
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN calling the upload filtering function
     analyses: Query = filter_filter_uploaded_analyses(analyses_query)
@@ -140,7 +140,7 @@ def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     not_uploaded_analysis: Analysis = helpers.add_analysis(store=base_store, uploaded_at=None)
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN calling the upload filtering function
     analyses: Query = filter_not_uploaded_analyses(analyses_query)
@@ -161,7 +161,7 @@ def test_get_analyses_with_delivery_report(
     analysis: Analysis = helpers.add_analysis(store=base_store, delivery_reported_at=timestamp_now)
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
     analyses: Query = filter_analyses_with_delivery_report(analyses_query)
@@ -182,7 +182,7 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
     )
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
     analyses: Query = filter_analyses_without_delivery_report(analyses_query)
@@ -206,7 +206,7 @@ def test_get_report_analyses_by_pipeline(
     )
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN filtering delivery report related analyses
     analyses: Query = filter_report_analyses_by_pipeline(analyses_query)
@@ -235,7 +235,7 @@ def test_order_analyses_by_completed_at(
     )
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN ordering the analyses by the completed_at field
     analyses: Query = order_analyses_by_completed_at(analyses_query)
@@ -269,7 +269,7 @@ def test_order_analyses_by_uploaded_at(
     )
 
     # GIVEN an analysis query
-    analyses_query: Query = base_store.get_latest_analyses_for_case()
+    analyses_query: Query = base_store.get_latest_analyses()
 
     # WHEN ordering the analyses by the uploaded_at field
     analyses: Query = order_analyses_by_uploaded_at(analyses_query)

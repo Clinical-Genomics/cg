@@ -249,8 +249,8 @@ class AnalysisAPI(MetaAPI):
         )
 
     def get_analyses_to_clean(self, before: dt.datetime) -> List[Analysis]:
-        analyses_to_clean = self.status_db.analyses_to_clean(pipeline=self.pipeline, before=before)
-        return analyses_to_clean.all()
+        """Return analyses to clean."""
+        return self.status_db.get_analyses_to_clean(pipeline=self.pipeline, before=before)
 
     def get_cases_to_analyze(self) -> List[Family]:
         return self.status_db.cases_to_analyze(

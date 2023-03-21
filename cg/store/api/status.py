@@ -625,23 +625,33 @@ class StatusHandler(BaseHandler):
             pipeline=pipeline,
         ).all()
 
-    def analyses_to_clean(
+    def get_analyses_to_clean(
         self, before: datetime = datetime.now(), pipeline: Pipeline = None
-    ) -> Query:
+    ) -> List[Analysis]:
         """Fetch analyses that haven't been cleaned."""
-        records = self.latest_analyses()
-        records = records.filter(
-            Analysis.uploaded_at.isnot(None),
-            Analysis.cleaned_at.is_(None),
-            Analysis.started_at <= before,
-            Family.action.is_(None),
-        )
-        if pipeline:
-            records = records.filter(
-                Analysis.pipeline == str(pipeline),
-            )
 
-        return records
+        cases = self._get_query(table=Family).all()
+        filter_functions = [
+            AnalysisFilter.FILTER_BY_CASE,
+            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_UPLOADED,
+            AnalysisFilter.FILTER_NOT_CLEANED,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+            AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+        ]
+        latest_analyses = []
+        for case in cases:
+            latest_analysis = apply_analysis_filter(
+                analyses=self._get_query(table=Analysis),
+                filter_functions=filter_functions,
+                case=case,
+                pipeline=pipeline if pipeline else None,
+            ).first()
+            latest_analyses.append(latest_analysis)
+
+        return latest_analyses
 
     def get_analyses_before_date(
         self,

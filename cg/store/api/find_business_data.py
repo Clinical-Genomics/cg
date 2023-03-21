@@ -82,29 +82,35 @@ class FindBusinessDataHandler(BaseHandler):
         self,
         completed_after: Optional[dt.date],
         completed_before: Optional[dt.date],
-    ) -> Query:
+    ) -> List[Analysis]:
         """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
         Optionally fetch those cases finished before and/or after a specified date"""
-        records = self.get_latest_analyses_for_case().filter(
-            Analysis.uploaded_to_vogue_at.is_(None)
-        )
-
+        records = self._get_query(table=Analysis)
         if completed_after:
-            records = records.filter(Analysis.completed_at > completed_after)
+            records = apply_analysis_filter(
+                analyses=records,
+                filter_functions=[AnalysisFilter.FILTER_BY_COMPLETED_AFTER],
+                date=completed_after,
+            )
         if completed_before:
-            records = records.filter(Analysis.completed_at < completed_before)
+            records = apply_analysis_filter(
+                analyses=records,
+                filter_functions=[AnalysisFilter.FILTER_BY_COMPLETED_BEFORE],
+                date=completed_before,
+            )
+        return self.get_latest_analyses_for_case_not_uploaded_to_vogue(analyses=records)
 
-        return records
-
-    def get_latest_analyses_for_case(self) -> List[Analysis]:
-        """Return latest analysis for all cases."""
-
+    def get_latest_analyses(self, analyses: Query = None) -> List[Analysis]:
+        """Return latest analysis for all cases not uploaded to vogue."""
         latest_analyses = []
         cases = self._get_query(table=Family).all()
-        filter_functions = [AnalysisFilter.FILTER_BY_CASE, AnalysisFilter.ORDER_BY_STARTED_AT_DESC]
+        filter_functions = [
+            AnalysisFilter.FILTER_BY_CASE,
+            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
+        ]
         for case in cases:
             latest_analysis = apply_analysis_filter(
-                analyses=self._get_query(table=Analysis),
+                analyses=analyses,
                 filter_functions=filter_functions,
                 case=case,
             ).first()
@@ -112,9 +118,29 @@ class FindBusinessDataHandler(BaseHandler):
 
         return latest_analyses
 
+    def get_latest_analyses_for_case_not_uploaded_to_vogue(
+        self, analyses: Query = None
+    ) -> List[Analysis]:
+        """Return latest analysis for all cases not uploaded to vogue."""
+        latest_analyses_not_uploaded = []
+        cases = self._get_query(table=Family).all()
+        filter_functions = [
+            AnalysisFilter.FILTER_BY_CASE,
+            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
+            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
+        ]
+        for case in cases:
+            latest_analysis_not_uploaded = apply_analysis_filter(
+                analyses=analyses,
+                filter_functions=filter_functions,
+                case=case,
+            ).first()
+            latest_analyses_not_uploaded.append(latest_analysis_not_uploaded)
+
+        return latest_analyses_not_uploaded
+
     def get_latest_analysis_not_uploaded_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
         """Return latest analysis for pipeline not uploaded."""
-
         cases = self._get_query(table=Family).all()
         filter_functions = [
             AnalysisFilter.FILTER_BY_CASE,
@@ -131,7 +157,7 @@ class FindBusinessDataHandler(BaseHandler):
                 pipeline=pipeline,
             ).first()
             latest_analyses.append(latest_analysis)
-        return latest_analysis
+        return latest_analyses
 
     def analysis(self, family: Family, started_at: dt.datetime) -> Analysis:
         """Fetch an analysis."""

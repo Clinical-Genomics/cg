@@ -50,6 +50,11 @@ def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.delivery_report_created_at.is_(None))
 
 
+def filter_analysis_not_uploaded_to_vogue(analyses: Query, **kwargs) -> Query:
+    """Return analyses that have not been uploaded to vogue."""
+    return analyses.filter(Analysis.uploaded_to_vogue_at.is_(None))
+
+
 def filter_report_analyses_by_pipeline(
     analyses: Query, pipeline: Pipeline = None, **kwargs
 ) -> Query:
@@ -59,6 +64,16 @@ def filter_report_analyses_by_pipeline(
         if pipeline
         else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
     )
+
+
+def filter_analysis_completed_before(analyses: Query, date: datetime, **kwargs) -> Query:
+    """Return a query of analyses completed before a certain date."""
+    return analyses.filter(Analysis.completed_at < date)
+
+
+def filter_analysis_completed_after(analyses: Query, date: datetime, **kwargs) -> Query:
+    """Return a query of analyses completed after a certain date."""
+    return analyses.filter(Analysis.completed_at > date)
 
 
 def order_analyses_by_completed_at(analyses: Query, **kwargs) -> Query:
@@ -78,7 +93,7 @@ def filter_analyses_by_case(analyses: Query, case: Family, **kwargs) -> Query:
 
 def filter_analysis_started_before(analyses: Query, date: datetime, **kwargs) -> Query:
     """Return a query of analyses started before a certain date."""
-    return analyses.filter(Analysis.started_at < date)
+    return analyses.filter(Analysis.started_at <= date)
 
 
 def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
@@ -86,16 +101,29 @@ def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
     return analyses.order_by(Analysis.started_at.desc())
 
 
+def filter_analysis_not_cleaned(analyses: Query, **kwargs) -> Query:
+    """Return a query of analyses that have not been cleaned."""
+    return analyses.filter(Analysis.cleaned_at.is_(None))
+
+
+def filter_analysis_no_case_action(analyses: Query, **kwargs) -> Query:
+    """Return a query of analyses that have no case action."""
+    return analyses.filter(Analysis.family.action.is_(None))
+
+
 def apply_analysis_filter(
     filter_functions: List[Callable],
     analyses: Query,
     pipeline: Pipeline = None,
     case: Family = None,
+    date: datetime = None,
 ) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
 
     for filter_function in filter_functions:
-        analyses: Query = filter_function(analyses=analyses, pipeline=pipeline, case=case)
+        analyses: Query = filter_function(
+            analyses=analyses, pipeline=pipeline, case=case, date=date
+        )
     return analyses
 
 
@@ -114,3 +142,9 @@ class AnalysisFilter(Enum):
     FILTER_BY_CASE: Callable = filter_analyses_by_case
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at
     ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc
+    FILTER_COMPLETED_AT_AFTER: Callable = filter_analysis_completed_after
+    FILTER_COMPLETED_AT_BEFORE: Callable = filter_analysis_completed_before
+    FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analysis_not_uploaded_to_vogue
+    FILTER_NOT_CLEANED: Callable = filter_analysis_not_cleaned
+    FILTER_STARTED_AT_BEFORE: Callable = filter_analysis_started_before
+    FILTER_NO_CASE_ACTION: Callable = filter_analysis_no_case_action
