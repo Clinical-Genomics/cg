@@ -242,7 +242,7 @@ def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yes
     )
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.latest_analyses().all()
+    analyses = analysis_store.get_latest_analyses_for_case()
 
     # THEN only the newest analysis should be returned
     assert analysis_newest in analyses

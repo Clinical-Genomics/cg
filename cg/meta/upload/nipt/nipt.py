@@ -92,13 +92,10 @@ class NiptUploadAPI:
         return results_file
 
     def get_all_upload_analyses(self) -> Iterable[Analysis]:
-        """Gets all nipt analyses that are ready to be uploaded"""
-
-        latest_nipt_analyses = self.status_db.latest_analyses().filter(
-            Analysis.pipeline == Pipeline.FLUFFY
+        """Gets all NIPT analyses that are ready to be uploaded."""
+        return self.status_db.get_latest_analysis_not_uploaded_for_pipeline(
+            pipeline=Pipeline.FLUFFY
         )
-
-        return latest_nipt_analyses.filter(Analysis.uploaded_at.is_(None))
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""

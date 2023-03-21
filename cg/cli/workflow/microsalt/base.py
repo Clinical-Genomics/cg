@@ -277,7 +277,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
     EXIT_CODE: int = EXIT_SUCCESS
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
     latest_analyses = list(
-        analysis_api.status_db.latest_analyses()
+        analysis_api.status_db.get_latest_analyses_for_case()
         .filter(Analysis.pipeline == Pipeline.MICROSALT)
         .filter(Analysis.uploaded_at.is_(None))
     )

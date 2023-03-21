@@ -30,6 +30,7 @@ from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, Fl
 from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
 from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
 from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
+from cg.store.filters.status_case_filters import apply_case_filter, CaseFilter
 
 LOG = logging.getLogger(__name__)
 
@@ -84,7 +85,9 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> Query:
         """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
         Optionally fetch those cases finished before and/or after a specified date"""
-        records = self.latest_analyses().filter(Analysis.uploaded_to_vogue_at.is_(None))
+        records = self.get_latest_analyses_for_case().filter(
+            Analysis.uploaded_to_vogue_at.is_(None)
+        )
 
         if completed_after:
             records = records.filter(Analysis.completed_at > completed_after)
@@ -93,24 +96,42 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records
 
-    def latest_analyses(self) -> Query:
-        """Fetch latest analysis for all cases."""
+    def get_latest_analyses_for_case(self) -> List[Analysis]:
+        """Return latest analysis for all cases."""
 
-        records = self.Analysis.query
-        sub_query = (
-            self.Analysis.query.join(Analysis.family)
-            .group_by(Family.id)
-            .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
-            .subquery()
-        )
-        records = records.join(
-            sub_query,
-            and_(
-                self.Analysis.family_id == sub_query.c.family_id,
-                self.Analysis.started_at == sub_query.c.started_at,
-            ),
-        )
-        return records
+        latest_analyses = []
+        cases = self._get_query(table=Family).all()
+        filter_functions = [AnalysisFilter.FILTER_BY_CASE, AnalysisFilter.ORDER_BY_STARTED_AT_DESC]
+        for case in cases:
+            latest_analysis = apply_analysis_filter(
+                analyses=self._get_query(table=Analysis),
+                filter_functions=filter_functions,
+                case=case,
+            ).first()
+            latest_analyses.append(latest_analysis)
+
+        return latest_analyses
+
+    def get_latest_analysis_not_uploaded_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
+        """Return latest analysis for pipeline not uploaded."""
+
+        cases = self._get_query(table=Family).all()
+        filter_functions = [
+            AnalysisFilter.FILTER_BY_CASE,
+            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_NOT_UPLOADED,
+        ]
+        latest_analyses = []
+        for case in cases:
+            latest_analysis = apply_analysis_filter(
+                analyses=self._get_query(table=Analysis),
+                filter_functions=filter_functions,
+                case=case,
+                pipeline=pipeline,
+            ).first()
+            latest_analyses.append(latest_analysis)
+        return latest_analysis
 
     def analysis(self, family: Family, started_at: dt.datetime) -> Analysis:
         """Fetch an analysis."""

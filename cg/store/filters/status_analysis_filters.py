@@ -2,6 +2,7 @@ from typing import List, Callable
 from enum import Enum
 from sqlalchemy.orm import Query
 
+
 from cg.constants import REPORT_SUPPORTED_PIPELINES
 from cg.constants.constants import VALID_DATA_IN_PRODUCTION
 from cg.store.models import Analysis, Family
@@ -80,6 +81,11 @@ def filter_analysis_started_before(analyses: Query, date: datetime, **kwargs) ->
     return analyses.filter(Analysis.started_at < date)
 
 
+def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
+    """Return a query of ordered analyses (from old to new) by the started_at field."""
+    return analyses.order_by(Analysis.started_at.desc())
+
+
 def apply_analysis_filter(
     filter_functions: List[Callable],
     analyses: Query,
@@ -107,3 +113,4 @@ class AnalysisFilter(Enum):
     FILTER_REPORT_BY_PIPELINE: Callable = filter_report_analyses_by_pipeline
     FILTER_BY_CASE: Callable = filter_analyses_by_case
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at
+    ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc
