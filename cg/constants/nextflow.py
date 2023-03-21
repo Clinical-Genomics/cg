@@ -1,5 +1,5 @@
 """Nextflow related constants."""
-
+from enum import IntEnum
 
 NFX_WORK_DIR = "work"
 NFX_SAMPLE_HEADER = "sample"
@@ -13,8 +13,8 @@ NXF_JVM_ARGS_ENV = "NXF_JVM_ARGS"
 JAVA_MEMORY_HEADJOB = "-Xmx5g"
 
 
-class SlurmHeadJobDefaults:
-    """Default parameters for slurm head jobs"""
+class SlurmHeadJobDefaults(IntEnum):
+    """Default parameters for slurm head jobs."""
 
     HOURS: int = 96
     MEMORY: int = 10
