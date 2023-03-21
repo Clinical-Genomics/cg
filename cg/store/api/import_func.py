@@ -9,7 +9,6 @@ import openpyxl
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from cg.exc import CgError
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
 

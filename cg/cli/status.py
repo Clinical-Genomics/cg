@@ -4,7 +4,7 @@ import click
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample, Customer, ApplicationVersion, Analysis
+from cg.store.models import Family, Sample
 from ansi.colour import fg
 from ansi.colour.fx import reset
 from tabulate import tabulate
@@ -53,7 +53,6 @@ for header in CASE_HEADERS_LONG:
 @click.group()
 def status():
     """View status of things."""
-    pass
 
 
 @status.command()

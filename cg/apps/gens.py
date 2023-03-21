@@ -3,9 +3,6 @@
 import logging
 from typing import Dict, List
 
-from cg.constants.constants import FileFormat
-from cg.exc import CaseNotFoundError
-from cg.io.controller import ReadStream
 from cg.utils import Process
 from cg.utils.dict import get_list_from_dictionary
 

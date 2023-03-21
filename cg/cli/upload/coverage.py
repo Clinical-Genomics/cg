@@ -2,7 +2,6 @@
 
 import click
 from cg.meta.upload.coverage import UploadCoverageApi
-from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family

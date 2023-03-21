@@ -9,8 +9,8 @@ from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.housekeeper_tags import GensAnalysisTag
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
-from housekeeper.store.models import File, Version
+from cg.store.models import Family
+from housekeeper.store.models import File
 
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.workflow.commands import (

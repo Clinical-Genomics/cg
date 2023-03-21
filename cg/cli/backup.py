@@ -24,7 +24,6 @@ LOG = logging.getLogger(__name__)
 @click.pass_obj
 def backup(context: CGConfig):
     """Backup utilities"""
-    pass
 
 
 @backup.command("fetch-flow-cell")

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set
 
 from housekeeper.store.models import File, Version
-from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI

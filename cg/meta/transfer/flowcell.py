@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from housekeeper.store.models import Bundle, Version, Tag, File
+from housekeeper.store.models import Bundle, Version
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus
