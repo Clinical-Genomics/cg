@@ -44,7 +44,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Famil
 )
 @click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update family action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
-@click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
+@click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
@@ -53,7 +53,7 @@ def families(
     context: click.Context,
     action: Optional[str],
     priority: Optional[Priority],
-    panels: Optional[Tuple[str]],
+    panel_abbreviations: Optional[Tuple[str]],
     customer_id: Optional[str],
     identifiers: click.Tuple([str, str]),
 ):
@@ -78,7 +78,7 @@ def families(
             family,
             action=action,
             priority=priority,
-            panels=panels,
+            panels=panel_abbreviations,
             family_id=case.internal_id,
             customer_id=customer_id,
         )
