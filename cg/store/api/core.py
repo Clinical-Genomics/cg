@@ -22,6 +22,8 @@ class CoreHandler(
 ):
     """Aggregating class for the store api handlers."""
 
+    pass
+
 
 class Store(alchy.Manager, CoreHandler):
     uri: str = ""
