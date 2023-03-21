@@ -28,5 +28,3 @@ def test_taxprofiler_no_args(cli_runner: CliRunner, taxprofiler_context: CGConfi
 
     # THEN help should be printed
     assert "help" in result.output
-
-
