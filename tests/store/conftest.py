@@ -264,6 +264,16 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
+@pytest.fixture(name="store_with_an_application_version")
+def fixture_store_with_an_application_version(
+    store: Store,
+    helpers: StoreHelpers,
+) -> Store:
+    """Return a store with an application version."""
+    helpers.ensure_application_version(store=Store)
+    return store
+
+
 @pytest.fixture(name="store_with_an_invoice_with_and_without_attributes")
 def fixture_store_with_an_invoice_with_and_without_attributes(
     store: Store,
