@@ -1,11 +1,9 @@
 from alchy import Query
-from typing import List
 from cg.constants.subject import PhenotypeStatus
 from cg.constants.constants import SampleType
 from cg.store import Store
 from cg.store.models import Sample
 
-from tests.store_helpers import StoreHelpers
 from cg.store.filters.status_sample_filters import (
     filter_samples_with_loqusdb_id,
     filter_samples_without_loqusdb_id,
@@ -32,7 +30,6 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_name_enquiry,
     filter_samples_by_order_enquiry,
 )
-from datetime import datetime
 from tests.store.conftest import StoreConftestFixture
 
 

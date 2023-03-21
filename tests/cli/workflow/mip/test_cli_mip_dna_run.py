@@ -1,9 +1,7 @@
 """ Test the CLI for run mip-dna """
 import logging
-import pytest
 
 from cg.cli.workflow.mip_dna.base import run
-from cg.exc import CgError
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 
 

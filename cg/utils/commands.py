@@ -5,7 +5,6 @@ Code to handle communications to the shell from CG.
 import copy
 import logging
 import subprocess
-from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Dict, List
 

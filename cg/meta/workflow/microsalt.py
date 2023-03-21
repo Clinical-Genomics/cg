@@ -9,9 +9,8 @@ import logging
 import os
 import re
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Tuple, Union
 import glob
 
@@ -19,7 +18,7 @@ import click
 from cg.constants import Pipeline
 from cg.constants.constants import MicrosaltQC, MicrosaltAppTags
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgDataError, CgError
+from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
@@ -27,7 +26,7 @@ from cg.models.orders.sample_base import ControlEnum
 from cg.store.models import Family, Sample
 from cg.utils import Process
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.io.json import read_json, write_json_stream, write_json
+from cg.io.json import read_json, write_json
 
 from cg.constants import Priority
 
