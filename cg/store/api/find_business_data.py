@@ -39,7 +39,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_analyses(self, *, case: Family = None, before: dt.datetime = None) -> Query:
         """Fetch multiple analyses."""
-        records = self.Analysis.query
+        records = self._get_query(table=Analysis)
         if case:
             query_family = case
             records = records.filter(Analysis.family == query_family)

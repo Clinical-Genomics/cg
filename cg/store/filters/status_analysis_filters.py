@@ -4,8 +4,9 @@ from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
 from cg.constants.constants import VALID_DATA_IN_PRODUCTION
-from cg.store.models import Analysis
+from cg.store.models import Analysis, Family
 from cgmodels.cg.constants import Pipeline
+from datetime import datetime
 
 
 def get_valid_analyses_in_production(analyses: Query, **kwargs) -> Query:
@@ -67,13 +68,23 @@ def order_analyses_by_uploaded_at(analyses: Query, **kwargs) -> Query:
     return analyses.order_by(Analysis.uploaded_at.asc())
 
 
+def get_analysis_by_case(analyses: Query, case: Family, **kwargs) -> Query:
+    """Return a query of ordered analyses (from old to new) by the uploaded_at field."""
+    return analyses.filter(Analysis.family == case)
+
+
+def get_analysis_started_before(analyses: Query, date: datetime, **kwargs) -> Query:
+    """Return a query of analyses started before a certain date."""
+    return analyses.filter(Analysis.started_at < date)
+
+
 def apply_analysis_filter(
     filter_functions: List[Callable], analyses: Query, pipeline: Pipeline = None
 ) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
 
-    for function in filter_functions:
-        analyses: Query = function(
+    for filter_function in filter_functions:
+        analyses: Query = filter_function(
             analyses=analyses,
             pipeline=pipeline,
         )

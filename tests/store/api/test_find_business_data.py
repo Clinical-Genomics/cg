@@ -17,7 +17,7 @@ from cg.store.models import (
     Sample,
     Invoice,
     Pool,
-    Customer,
+    Analysis,
 )
 from tests.store_helpers import StoreHelpers
 from cg.constants.invoice import CustomerNames
@@ -750,3 +750,14 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 
     # THEN one pools should be returned
     assert len(pools) == 1
+
+
+def test_get_analyses(store_with_an_analysis: Store):
+    """Test that analyses can be fetched from the store."""
+    # GIVEN a database with an analysis
+
+    # WHEN fetching all analyses
+    analyses: List[Analysis] = store_with_an_analysis.get_analyses()
+
+    # THEN one analysis should be returned
+    assert len(analyses) == 1
