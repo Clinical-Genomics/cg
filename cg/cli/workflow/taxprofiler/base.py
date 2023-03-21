@@ -18,7 +18,8 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
-#from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_STRANDEDNESS
+
+# from cg.cli.workflow.taxprofiler.options import OPTION_FROM_START, OPTION_STRANDEDNESS
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
@@ -43,5 +44,3 @@ def taxprofiler(context: click.Context) -> None:
 
 
 taxprofiler.add_command(resolve_compression)
-
-
