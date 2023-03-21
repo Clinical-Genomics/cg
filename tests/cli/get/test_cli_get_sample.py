@@ -7,7 +7,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
-from cg.store.models import Flowcell, Sample, Family, FamilySample
+from cg.store.models import Flowcell, Sample, Family
 from tests.store_helpers import StoreHelpers
 
 

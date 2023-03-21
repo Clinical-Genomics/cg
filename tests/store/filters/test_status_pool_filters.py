@@ -1,9 +1,6 @@
 from alchy import Query
-from typing import List
 from cg.store import Store
 from cg.store.models import Pool
-from tests.store_helpers import StoreHelpers
-from cg.constants.invoice import CustomerNames
 from cg.store.filters.status_pool_filters import (
     filter_pools_is_received,
     filter_pools_is_not_received,
@@ -17,7 +14,6 @@ from cg.store.filters.status_pool_filters import (
     filter_pools_by_name_enquiry,
     filter_pools_by_customer_id,
 )
-from datetime import datetime
 from tests.store.conftest import StoreConftestFixture
 
 

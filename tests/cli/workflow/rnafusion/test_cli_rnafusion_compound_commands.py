@@ -2,7 +2,6 @@ import logging
 
 from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
-from pytest_mock import MockFixture
 
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
@@ -13,7 +12,6 @@ from cg.cli.workflow.rnafusion.base import (
     start_available,
     store,
     store_available,
-    store_housekeeper,
 )
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI

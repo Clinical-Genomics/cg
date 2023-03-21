@@ -1,8 +1,7 @@
 from functools import partial
 from typing import Any, Dict, List
 
-from genologics.entities import Artifact, Container, Containertype, Project, Researcher
-from lxml import etree
+from genologics.entities import Artifact, Container, Containertype, Project
 from lxml.objectify import ElementMaker, ObjectifiedElement
 
 SMP_MAKER = ElementMaker(

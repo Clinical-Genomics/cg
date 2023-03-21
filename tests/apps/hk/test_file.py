@@ -8,7 +8,7 @@ from cg.constants import SequencingFileTag
 from tests.meta.compress.conftest import MockCompressionData
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
-from housekeeper.store.models import Version, File, Bundle
+from housekeeper.store.models import Version, File
 
 from tests.small_helpers import SmallHelpers
 

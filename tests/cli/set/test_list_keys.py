@@ -1,9 +1,8 @@
 """Test methods for cg cli set list_keys"""
 import logging
 
-import pytest
 from cg.cli.set.base import list_keys
-from cg.constants import EXIT_SUCCESS, Priority
+from cg.constants import EXIT_SUCCESS
 from cg.constants.subject import Gender
 from cg.models.cg_config import CGConfig
 from cg.store import Store

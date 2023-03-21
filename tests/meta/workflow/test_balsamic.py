@@ -1,7 +1,5 @@
 """Tests for BALSAMIC analysis"""
-import logging
 from pathlib import Path
-from typing import Dict
 
 import pytest
 from _pytest.logging import LogCaptureFixture
