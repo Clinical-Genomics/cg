@@ -43,6 +43,7 @@ LOG = logging.getLogger(__name__)
 @click.group("set")
 def set_cmd():
     """Update information in the database."""
+    pass
 
 
 @set_cmd.command()

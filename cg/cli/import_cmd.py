@@ -18,6 +18,7 @@ LOG = logging.getLogger(__name__)
 @click.group("import")
 def import_cmd():
     """Import information into the database."""
+    pass
 
 
 @import_cmd.command("application")

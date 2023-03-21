@@ -53,6 +53,7 @@ for header in CASE_HEADERS_LONG:
 @click.group()
 def status():
     """View status of things."""
+    pass
 
 
 @status.command()
