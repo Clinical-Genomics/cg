@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from pathlib import Path
 
 from cg.cli.clean import hk_bundle_files
 from cg.models.cg_config import CGConfig

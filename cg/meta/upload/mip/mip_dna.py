@@ -5,7 +5,6 @@ import logging
 
 import click
 
-from cg.apps.tb import TrailblazerAPI
 from cg.cli.generate.report.base import delivery_report
 from cg.cli.upload.clinical_delivery import clinical_delivery
 from cg.cli.upload.coverage import coverage

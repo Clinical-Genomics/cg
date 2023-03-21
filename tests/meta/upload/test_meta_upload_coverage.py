@@ -45,7 +45,7 @@ def test_upload(chanjo_config, populated_housekeeper_api, analysis_store, mocker
     # GIVEN a coverage api and a data dictionary
     mock_upload = mocker.patch.object(ChanjoAPI, "upload")
     mock_sample = mocker.patch.object(ChanjoAPI, "sample")
-    mock_remove = mocker.patch.object(ChanjoAPI, "delete_sample")
+    mocker.patch.object(ChanjoAPI, "delete_sample")
     hk_api = populated_housekeeper_api
     chanjo_api = ChanjoAPI(config=chanjo_config)
     coverage_api = UploadCoverageApi(status_api=None, hk_api=hk_api, chanjo_api=chanjo_api)

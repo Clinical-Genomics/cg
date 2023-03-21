@@ -1,5 +1,4 @@
 """Constants for cg."""
-from enum import Enum
 
 import click
 from cgmodels.cg.constants import StrEnum

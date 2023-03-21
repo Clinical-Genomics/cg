@@ -2,7 +2,7 @@
 import logging
 import sys
 import traceback
-from typing import Dict, Optional
+from typing import Optional
 
 import click
 

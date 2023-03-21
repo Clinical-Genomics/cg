@@ -1,5 +1,5 @@
 """All models aggregated in a base class"""
-from typing import Any, Type
+from typing import Type
 
 from alchy import Query, ModelBase
 from dataclasses import dataclass

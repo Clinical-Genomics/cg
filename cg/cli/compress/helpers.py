@@ -16,7 +16,7 @@ from cg.exc import CaseNotFoundError
 from cg.meta.compress import CompressAPI
 from cg.meta.compress.files import get_spring_paths
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 

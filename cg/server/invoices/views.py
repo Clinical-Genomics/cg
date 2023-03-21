@@ -21,7 +21,7 @@ from cg.apps.invoice.render import render_xlsx
 from cg.meta.invoice import InvoiceAPI
 from cg.server.ext import db, lims
 from typing import List, Union
-from cg.store.models import Customer, Invoice, Pool, Sample, User
+from cg.store.models import Customer, Invoice, Pool, Sample
 
 
 BLUEPRINT = Blueprint("invoices", __name__, template_folder="templates")
@@ -214,6 +214,4 @@ def modified_invoice(invoice_id, cost_center):
             file_object.write(invoice_obj.excel_kth)
         elif cost_center == "KI":
             file_object.write(invoice_obj.excel_ki)
-        pass
-
     return send_from_directory(directory=temp_dir, filename=file_name, as_attachment=True)

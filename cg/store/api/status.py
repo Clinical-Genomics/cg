@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional, Tuple, Callable
+from typing import List, Optional, Tuple
 
 from sqlalchemy.orm import Query
 from typing_extensions import Literal

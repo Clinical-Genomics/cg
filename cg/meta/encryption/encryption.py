@@ -1,5 +1,4 @@
 """API for encryption on Hasta"""
-import hashlib
 import logging
 import subprocess
 from io import TextIOWrapper
@@ -9,7 +8,6 @@ from typing import List
 
 from cg.constants import FileExtensions
 from cg.constants.encryption import GPGParameters
-from cg.constants.extraction import FlowCellExtractionParameters
 from cg.exc import ChecksumFailedError
 from cg.utils import Process
 from cg.utils.checksum.checksum import sha512_checksum
