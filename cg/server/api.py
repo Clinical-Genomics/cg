@@ -32,7 +32,7 @@ LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 
 
-def public(route_function):
+def is_public(route_function):
     @wraps(route_function)
     def public_endpoint(*args, **kwargs):
         return route_function(*args, **kwargs)
@@ -143,7 +143,7 @@ def submit_order(order_type):
 
 
 @BLUEPRINT.route("/cases")
-def cases():
+def parse_cases():
     """Fetch cases."""
     records = db.cases(days=31)
     count = len(records)
@@ -151,7 +151,7 @@ def cases():
 
 
 @BLUEPRINT.route("/families")
-def families():
+def parse_families():
     """Return families."""
     if request.args.get("status") == "analysis":
         records = db.cases_to_mip_analyze()
@@ -173,7 +173,7 @@ def families():
 
 
 @BLUEPRINT.route("/families_in_collaboration")
-def families_in_collaboration():
+def parse_families_in_collaboration():
     """Fetch families in collaboration."""
     order_customer: Customer = db.get_customer_by_customer_id(
         customer_id=request.args.get("customer")
@@ -191,7 +191,7 @@ def families_in_collaboration():
 
 
 @BLUEPRINT.route("/families/<family_id>")
-def family(family_id):
+def parse_family(family_id):
     """Fetch a family with links."""
     case_obj: Family = db.family(family_id)
     if case_obj is None:
@@ -204,7 +204,7 @@ def family(family_id):
 
 
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
-def family_in_collaboration(family_id):
+def parse_family_in_collaboration(family_id):
     """Fetch a family with links."""
     case_obj = db.family(family_id)
     order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
@@ -215,7 +215,7 @@ def family_in_collaboration(family_id):
 
 
 @BLUEPRINT.route("/samples")
-def samples():
+def parse_samples():
     """Fetch samples."""
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(http.HTTPStatus.FORBIDDEN)
@@ -239,7 +239,7 @@ def samples():
 
 
 @BLUEPRINT.route("/samples_in_collaboration")
-def samples_in_collaboration():
+def parse_samples_in_collaboration():
     """Fetch samples in a customer group."""
     order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     samples_q: List[Sample] = db.get_samples_by_enquiry(
@@ -251,7 +251,7 @@ def samples_in_collaboration():
 
 
 @BLUEPRINT.route("/samples/<sample_id>")
-def sample(sample_id):
+def parse_sample(sample_id):
     """Fetch a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
     if sample is None:
@@ -263,7 +263,7 @@ def sample(sample_id):
 
 
 @BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
-def sample_in_collaboration(sample_id):
+def parse_sample_in_collaboration(sample_id):
     """Fetch a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
     order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
@@ -274,7 +274,7 @@ def sample_in_collaboration(sample_id):
 
 
 @BLUEPRINT.route("/pools")
-def pools():
+def parse_pools():
     """Fetch pools."""
     customers: Optional[List[Customer]] = (
         g.current_user.customers if not g.current_user.is_admin else None
@@ -288,7 +288,7 @@ def pools():
 
 
 @BLUEPRINT.route("/pools/<pool_id>")
-def pool(pool_id):
+def parse_pool(pool_id):
     """Fetch a single pool."""
     record: Pool = db.get_pool_by_entry_id(entry_id=pool_id)
     if record is None:
@@ -299,7 +299,7 @@ def pool(pool_id):
 
 
 @BLUEPRINT.route("/flowcells")
-def flowcells() -> Any:
+def parse_flow_cells() -> Any:
     """Fetch flow cells."""
     flow_cells: List[Flowcell] = db.get_flow_cell_by_enquiry_and_status(
         flow_cell_statuses=[request.args.get("status")],
@@ -310,7 +310,7 @@ def flowcells() -> Any:
 
 
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
-def flowcell(flowcell_id):
+def parse_flow_cell(flowcell_id):
     """Fetch a single flowcell."""
     record = db.get_flow_cell(flowcell_id)
     if record is None:
@@ -319,7 +319,7 @@ def flowcell(flowcell_id):
 
 
 @BLUEPRINT.route("/analyses")
-def analyses():
+def parse_analyses():
     """Fetch analyses."""
     if request.args.get("status") == "delivery":
         analyses_q = db.analyses_to_deliver()
@@ -332,7 +332,7 @@ def analyses():
 
 
 @BLUEPRINT.route("/options")
-def options():
+def parse_options():
     """Fetch various options."""
     customers: List[Optional[Customer]] = (
         db.get_customers() if g.current_user.is_admin else g.current_user.customers
@@ -374,7 +374,7 @@ def options():
 
 
 @BLUEPRINT.route("/me")
-def me():
+def parse_current_user_information():
     """Fetch information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
         LOG.error(
@@ -386,8 +386,8 @@ def me():
 
 
 @BLUEPRINT.route("/applications")
-@public
-def applications():
+@is_public
+def parse_applications():
     """Fetch application tags."""
     query: List[Application] = db.get_applications_is_not_archived()
     data = [record.to_dict() for record in query]
@@ -395,8 +395,8 @@ def applications():
 
 
 @BLUEPRINT.route("/applications/<tag>")
-@public
-def application(tag):
+@is_public
+def parse_application(tag):
     """Fetch an application tag."""
     record = db.get_application_by_tag(tag=tag)
     if record is None:
@@ -407,7 +407,7 @@ def application(tag):
 
 
 @BLUEPRINT.route("/orderform", methods=["POST"])
-def orderform():
+def parse_orderform():
     """Parse an orderform/JSON export."""
     input_file = request.files.get("file")
     filename = secure_filename(input_file.filename)
