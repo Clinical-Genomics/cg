@@ -100,7 +100,7 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return self.get_latest_analyses_for_case_not_uploaded_to_vogue(analyses=records)
 
-    def get_latest_analyses(self, analyses: Query = None) -> List[Analysis]:
+    def get_latest_analyses(self) -> List[Analysis]:
         """Return latest analysis for all cases not uploaded to vogue."""
         latest_analyses = []
         cases = self._get_query(table=Family).all()
@@ -110,7 +110,7 @@ class FindBusinessDataHandler(BaseHandler):
         ]
         for case in cases:
             latest_analysis = apply_analysis_filter(
-                analyses=analyses,
+                analyses=self._get_query(table=Analysis),
                 filter_functions=filter_functions,
                 case=case,
             ).first()

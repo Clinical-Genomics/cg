@@ -631,6 +631,7 @@ class StatusHandler(BaseHandler):
         """Fetch analyses that haven't been cleaned."""
 
         cases = self._get_query(table=Family).all()
+        latest_analyses = []
         filter_functions = [
             AnalysisFilter.FILTER_BY_CASE,
             AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
@@ -638,16 +639,15 @@ class StatusHandler(BaseHandler):
             AnalysisFilter.FILTER_UPLOADED,
             AnalysisFilter.FILTER_NOT_CLEANED,
             AnalysisFilter.FILTER_STARTED_AT_BEFORE,
-            AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
-            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_NO_CASE_ACTION,
         ]
-        latest_analyses = []
         for case in cases:
             latest_analysis = apply_analysis_filter(
                 analyses=self._get_query(table=Analysis),
                 filter_functions=filter_functions,
                 case=case,
                 pipeline=pipeline if pipeline else None,
+                date=before,
             ).first()
             latest_analyses.append(latest_analysis)
 

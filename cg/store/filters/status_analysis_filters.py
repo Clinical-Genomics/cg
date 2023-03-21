@@ -88,7 +88,7 @@ def order_analyses_by_uploaded_at(analyses: Query, **kwargs) -> Query:
 
 def filter_analyses_by_case(analyses: Query, case: Family, **kwargs) -> Query:
     """Return a query of ordered analyses (from old to new) by the uploaded_at field."""
-    return analyses.filter(Analysis.family == case)
+    return analyses.filter(Analysis.family_id == case.id)
 
 
 def filter_analysis_started_before(analyses: Query, date: datetime, **kwargs) -> Query:
@@ -108,7 +108,7 @@ def filter_analysis_not_cleaned(analyses: Query, **kwargs) -> Query:
 
 def filter_analysis_no_case_action(analyses: Query, **kwargs) -> Query:
     """Return a query of analyses that have no case action."""
-    return analyses.filter(Analysis.family.action.is_(None))
+    return analyses.filter(Family.id == Analysis.family_id).filter(Family.action.is_(None))
 
 
 def apply_analysis_filter(
