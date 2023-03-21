@@ -16,7 +16,7 @@ def test_store_fastq_analysis(caplog, case_id: str, cli_runner, fastq_context):
     cli_runner.invoke(store_fastq_analysis, [case_id], obj=fastq_context)
 
     # THEN the run command should be reached
-    assert len(fastq_context.status_db.get_analyses(case=case_obj).all()) > 0
+    assert len(fastq_context.status_db.get_analyses_by_case(case=case_obj)) > 0
 
 
 def test_store_available_fastq_analysis(

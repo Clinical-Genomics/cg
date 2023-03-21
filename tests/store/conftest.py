@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender
 from cg.store import Store
-from cg.store.models import Analysis, Family, Sample
+from cg.store.models import Analysis, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -146,7 +146,7 @@ def fixture_microbial_store(
 @pytest.fixture(name="analysis_obj")
 def fixture_analysis_obj(analysis_store: Store) -> Analysis:
     """Return an analysis object from a populated store."""
-    return analysis_store.get_analyses()[0]
+    return analysis_store._get_query(table=Analysis).first()
 
 
 @pytest.fixture(name="case_obj")

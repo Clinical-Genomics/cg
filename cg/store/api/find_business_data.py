@@ -29,7 +29,7 @@ from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
 from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
 from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
 from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
-
+from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
 
 LOG = logging.getLogger(__name__)
 
@@ -37,31 +37,13 @@ LOG = logging.getLogger(__name__)
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def get_analyses(self, *, case: Family = None, before: dt.datetime = None) -> Query:
-        """Fetch multiple analyses."""
-        records = self._get_query(table=Analysis)
-        if case:
-            query_family = case
-            records = records.filter(Analysis.family == query_family)
-        if before:
-            subq = (
-                self.Analysis.query.join(Analysis.family)
-                .filter(Analysis.started_at < before)
-                .group_by(Family.id)
-                .with_entities(
-                    Analysis.family_id,
-                    func.max(Analysis.started_at).label("started_at"),
-                )
-                .subquery()
-            )
-            records = records.join(
-                subq,
-                and_(
-                    self.Analysis.family_id == subq.c.family_id,
-                    self.Analysis.started_at == subq.c.started_at,
-                ),
-            ).filter(Analysis.started_at < before)
-        return records
+    def get_analyses_by_case(self, case: Family) -> List[Analysis]:
+        """Return the analysis of a case."""
+        return apply_analysis_filter(
+            analyses=self._get_query(table=Analysis),
+            case=case,
+            filter_functions=[AnalysisFilter.FILTER_BY_CASE],
+        ).all()
 
     def active_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""

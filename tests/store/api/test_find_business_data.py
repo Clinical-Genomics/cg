@@ -752,12 +752,13 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
     assert len(pools) == 1
 
 
-def test_get_analyses(store_with_an_analysis: Store):
-    """Test that analyses can be fetched from the store."""
+def test_get_analysis_by_case(base_store: Store, case_obj: Family):
+    """Test that analysis can be fetched from the store by case."""
     # GIVEN a database with an analysis
 
-    # WHEN fetching all analyses
-    analyses: List[Analysis] = store_with_an_analysis.get_analyses()
+    # WHEN fetching analysis by case
+    analyses: List[Analysis] = base_store.get_analyses_by_case(case=case_obj)
 
     # THEN one analysis should be returned
     assert len(analyses) == 1
+    assert analyses[0].family == case_obj
