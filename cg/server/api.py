@@ -358,7 +358,7 @@ def parse_options():
             for customer in customers
         ],
         applications=apptag_groups,
-        panels=[panel.abbrev for panel in db.panels()],
+        panels=[panel.abbrev for panel in db.get_panels()],
         organisms=[
             {
                 "name": organism.name,

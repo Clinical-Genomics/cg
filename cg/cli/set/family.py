@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
     type=EnumChoice(DataDelivery),
     help="Update case data delivery",
 )
-@click.option("-g", "--panel", "panels", multiple=True, help="update gene panels")
+@click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
@@ -43,13 +43,20 @@ def family(
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
-    panels: Optional[Tuple[str]],
+    panel_abbreviations: Optional[Tuple[str]],
     family_id: str,
     customer_id: Optional[str],
 ):
     """Update information about a case."""
 
-    options: List[str] = [action, panels, priority, customer_id, data_analysis, data_delivery]
+    options: List[str] = [
+        action,
+        panel_abbreviations,
+        priority,
+        customer_id,
+        data_analysis,
+        data_delivery,
+    ]
     abort_on_empty_options(options=options)
 
     status_db: Store = context.status_db
@@ -67,8 +74,8 @@ def family(
     if data_delivery:
         update_data_delivery(case=case, data_delivery=data_delivery)
 
-    if panels:
-        update_panels(case=case, panels=panels, status_db=status_db)
+    if panel_abbreviations:
+        update_panels(case=case, panel_abbreviations=panel_abbreviations, status_db=status_db)
 
     if priority:
         update_priority(case=case, priority=priority)
@@ -119,14 +126,14 @@ def update_data_delivery(case: Family, data_delivery: DataDelivery) -> None:
     case.data_delivery = data_delivery
 
 
-def update_panels(case, panels, status_db) -> None:
-    for panel_abbreviation in panels:
-        panel: Panel = status_db.panel(abbrev=panel_abbreviation)
+def update_panels(case: Family, panel_abbreviations: List[str], status_db: Store) -> None:
+    for panel_abbreviation in panel_abbreviations:
+        panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if panel is None:
             LOG.error(f"unknown gene panel: {panel_abbreviation}")
             raise click.Abort
-    LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panels)}")
-    case.panels = panels
+    LOG.info(f"Update panels: {', '.join(case.panels)} -> {', '.join(panel_abbreviations)}")
+    case.panels = panel_abbreviations
 
 
 def update_priority(case: Family, priority: Priority) -> None:
