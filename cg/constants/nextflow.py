@@ -11,3 +11,11 @@ DELIVER_FILE_HEADERS = ["format", "id", "path", "path_index", "step", "tag"]
 NXF_PID_FILE_ENV = "NXF_PID_FILE"
 NXF_JVM_ARGS_ENV = "NXF_JVM_ARGS"
 JAVA_MEMORY_HEADJOB = "-Xmx5g"
+
+
+class SlurmHeadJobDefaults:
+    """Default parameters for slurm head jobs"""
+
+    HOURS: int = 96
+    MEMORY: int = 10
+    NUMBER_TASKS: int = 1

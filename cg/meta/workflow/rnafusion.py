@@ -242,7 +242,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             )
             self.process.run_command(parameters=parameters, dry_run=dry_run)
             if self.process.stderr:
-                LOG.info(self.process.stderr)
+                LOG.error(self.process.stderr)
             LOG.info(self.process.stdout)
 
     def verify_case_config_file_exists(self, case_id: str) -> None:

@@ -15,6 +15,7 @@ from cg.constants.nextflow import (
     NFX_SAMPLE_HEADER,
     NFX_WORK_DIR,
     NXF_JVM_ARGS_ENV,
+    SlurmHeadJobDefaults,
 )
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
@@ -163,9 +164,7 @@ class NextflowAnalysisAPI:
             ),
             exclude_true=True,
         )
-        parameters = nextflow_options + ["run", pipeline_path] + run_options
-
-        return parameters
+        return nextflow_options + ["run", pipeline_path] + run_options
 
     @classmethod
     def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: str = None) -> Path:
@@ -255,14 +254,14 @@ class NextflowAnalysisAPI:
         email: str,
         qos: str,
         commands: str,
-        hours: int = 96,
-        memory: int = 10,
-        number_tasks: int = 1,
+        hours: int = SlurmHeadJobDefaults.HOURS,
+        memory: int = SlurmHeadJobDefaults.MEMORY,
+        number_tasks: int = SlurmHeadJobDefaults.NUMBER_TASKS,
         dry_run: bool = False,
     ) -> int:
         """Executes nextflow head job command."""
 
-        slurm_api = SlurmAPI()
+        slurm_api: SlurmAPI = SlurmAPI()
         slurm_api.set_dry_run(dry_run=dry_run)
         sbatch_parameters: Sbatch = Sbatch(
             account=slurm_account,
