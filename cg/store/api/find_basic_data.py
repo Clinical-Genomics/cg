@@ -107,7 +107,7 @@ class FindBasicDataHandler(BaseHandler):
         )
 
     def application_version(self, application: Application, version: int) -> ApplicationVersion:
-        """Fetch an application version."""
+        """Return an application version."""
         query = self.ApplicationVersion.query.filter_by(application=application, version=version)
         return query.first()
 
@@ -159,7 +159,7 @@ class FindBasicDataHandler(BaseHandler):
         ).first()
 
     def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Fetch the current application version for an application tag."""
+        """Return the current application version for an application tag."""
         application_obj = self.Application.query.filter_by(tag=tag).first()
         if not application_obj:
             return None
