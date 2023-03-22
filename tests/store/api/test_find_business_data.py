@@ -809,7 +809,7 @@ def test_get_samples_by_order_enquiry(
     )
 
     # THEN one sample should be returned
-    assert len(samples) == 1
+    assert len(samples) == 2
 
     # THEN the sample should have the correct name
     assert samples[0].order == order_enquiry

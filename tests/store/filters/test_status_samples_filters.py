@@ -658,7 +658,7 @@ def test_filter_get_samples_by_order_enquiry(
     assert samples.all()
 
     # THEN samples should contain one sample
-    assert len(samples.all()) == 1
+    assert len(samples.all()) == 2
 
     # THEN the sample should have the correct order enquiry id
     assert samples[0].order == order_enquiry
