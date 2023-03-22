@@ -258,7 +258,7 @@ class DemultiplexedRunsFlowCell:
         globbed_unaligned_paths_list: list = list(globbed_unaligned_paths)
         if not globbed_unaligned_paths_list:
             LOG.warning(
-                f"No Unaligned directory found for flow cell {self.run_nam}! No sample sheet to archive!"
+                f"No Unaligned directory found for flow cell {self.run_name}! No sample sheet to archive!"
             )
             return
         unaligned_path: Path = globbed_unaligned_paths_list[0]
