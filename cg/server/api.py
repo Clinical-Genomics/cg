@@ -154,8 +154,8 @@ def parse_cases():
 def parse_families():
     """Return families."""
     if request.args.get("status") == "analysis":
-        records: List[Family] = db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
-        count = len(records)
+        cases: List[Family] = db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+        count = len(cases)
     else:
         customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
@@ -165,8 +165,8 @@ def parse_families():
             customers=customers,
             action=request.args.get("action"),
         )
-        count = cases.count()
-        records = cases.limit(30)
+        count = len(cases)
+        cases = cases[:30]
 
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
     return jsonify(families=parsed_cases, total=count)
@@ -264,7 +264,9 @@ def parse_sample(sample_id):
 def parse_sample_in_collaboration(sample_id):
     """Fetch a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
-    order_customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    order_customer: Customer = db.get_customer_by_customer_id(
+        customer_id=request.args.get("customer")
+    )
     if sample.customer not in order_customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     parsed_samples: Dict = sample.to_dict(links=True, flowcells=True)

@@ -17,7 +17,7 @@ def test_samples_to_receive_external(sample_store: Store, helpers: StoreHelpers)
 
     # THEN samples should be a list of samples
     assert isinstance(samples, list)
-    assert (isinstance(sample, Sample) for sample in samples)
+    assert isinstance(samples[0], Sample)
 
     # THEN assert that only the external sample is returned
     assert len(samples) == 1
@@ -81,7 +81,7 @@ def test_samples_to_prepare(sample_store):
 
     # THEN samples should be a list of samples
     assert isinstance(prepare_samples, list)
-    assert (isinstance(sample, Sample) for sample in prepare_samples)
+    assert isinstance(prepare_samples[0], Sample)
 
     # THEN it should list the received sample
     assert len(prepare_samples) == 1
@@ -128,7 +128,7 @@ def test_get_samples_to_deliver(sample_store):
 
     # THEN samples should be a list of samples
     assert isinstance(samples, list)
-    assert (isinstance(sample, Sample) for sample in samples)
+    assert isinstance(samples[0], Sample)
 
     # THEN it should return the samples that are sequenced but not delivered
     assert len(samples) == 2
@@ -162,7 +162,7 @@ def test_get_samples_not_invoiced(sample_store):
 
     # THEN samples should be a list of samples
     assert isinstance(samples, list)
-    assert (isinstance(sample, Sample) for sample in samples)
+    assert isinstance(samples[0], Sample)
 
     # THEN it should return all samples that are not invoiced
     assert len(samples) == len(sample_store.get_samples())
@@ -178,7 +178,7 @@ def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers
 
     # THEN samples should be a list of samples
     assert isinstance(samples, list)
-    assert (isinstance(sample, Sample) for sample in samples)
+    assert isinstance(samples[0], Sample)
 
     # THEN it should return all samples in the store
     assert len(samples) == len(sample_store.get_samples())

@@ -775,10 +775,8 @@ def test_get_samples_by_customer_id(store_with_samples_that_have_names: Store):
     # THEN two samples should be returned
     assert len(samples) == 2
 
-    assert (
-        sample.customer_id == store_with_samples_that_have_names.get_customers()
-        for sample in samples
-    )
+    # THEN the samples should have the correct customer id
+    assert samples[0].customer_id == store_with_samples_that_have_names.get_customers()[0].id
 
 
 def test_get_samples_by_name_enquiry(
@@ -817,7 +815,7 @@ def test_get_samples_by_order_enquiry(
     assert samples[0].order == order_enquiry
 
 
-def test_get_samples_to_render(store_with_samples_that_have_names: Store):
+def test_get_samples_to_parse(store_with_samples_that_have_names: Store):
     """Test that samples can be fetched from the store by customer id."""
     # GIVEN a database with two samples
 
@@ -843,10 +841,7 @@ def test_get_samples_to_render_with_customer(
     assert len(samples) == 2
 
     # THEN the samples should have the correct customer id
-    assert (
-        sample.customer_id == store_with_samples_that_have_names.get_customers()
-        for sample in samples
-    )
+    assert samples[0].customer_id == store_with_samples_that_have_names.get_customers()[0].id
 
 
 def test_get_samples_to_render_with_name_enquiry(
