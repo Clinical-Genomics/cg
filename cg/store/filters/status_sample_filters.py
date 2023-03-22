@@ -138,10 +138,12 @@ def filter_samples_by_name_enquiry(samples: Query, name_enquiry: str, **kwargs) 
     return samples.filter(Sample.name == name_enquiry) if filtered_samples else samples
 
 
-def filter_samples_by_order_enquiry(samples: Query, order_enquiry: str, **kwargs) -> Query:
+def filter_samples_by_internal_id_enquiry(
+    samples: Query, internal_id_enquiry: str, **kwargs
+) -> Query:
     """Return samples by order."""
-    filtered_samples = samples.filter(Sample.name.like(f"%{order_enquiry}%")).all()
-    return samples.filter(Sample.name == order_enquiry) if filtered_samples else samples
+    filtered_samples = samples.filter(Sample.name.like(f"%{internal_id_enquiry}%")).all()
+    return samples.filter(Sample.name == internal_id_enquiry) if filtered_samples else samples
 
 
 def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
@@ -161,7 +163,7 @@ def apply_sample_filter(
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
     name_enquiry: Optional[str] = None,
-    order_enquiry: Optional[str] = None,
+    internal_id_enquiry: Optional[str] = None,
     customer: Optional[Customer] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
@@ -177,7 +179,7 @@ def apply_sample_filter(
             customer_ids=customer_ids,
             subject_id=subject_id,
             name=name,
-            order_enquiry=order_enquiry,
+            internal_id_enquiry=internal_id_enquiry,
             name_enquiry=name_enquiry,
             customer=customer,
         )
@@ -213,5 +215,5 @@ class SampleFilter(Enum):
     FILTER_IS_TUMOUR: Callable = filter_samples_is_tumour
     FILTER_IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
     FILTER_BY_NAME_ENQUIRY: Callable = filter_samples_by_name_enquiry
-    FILTER_BY_ORDER_ENQUIRY: Callable = filter_samples_by_order_enquiry
+    FILTER_BY_INTERNAL_ID_ENQUIRY: Callable = filter_samples_by_internal_id_enquiry
     FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer

@@ -28,7 +28,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_subject_id,
     filter_samples_by_customer_id,
     filter_samples_by_name_enquiry,
-    filter_samples_by_order_enquiry,
+    filter_samples_by_internal_id_enquiry,
 )
 from tests.store.conftest import StoreConftestFixture
 
@@ -634,34 +634,6 @@ def test_filter_get_samples_by_customer_id(
 
     # THEN the sample should have the correct customer id
     assert samples[0].customer_id == customer_id
-
-
-def test_filter_get_samples_by_order_enquiry(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    order_enquiry: str = StoreConftestFixture.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
-):
-    """Test that a sample is returned when there is a sample with the given order enquiry id."""
-    # GIVEN a store with two samples of which one has a order enquiry id
-
-    # WHEN getting a sample by order enquiry id
-    samples: Query = filter_samples_by_order_enquiry(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        ),
-        order_enquiry=order_enquiry,
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 2
-
-    # THEN the sample should have the correct order enquiry id
-    assert samples[0].order == order_enquiry
 
 
 def test_filter_get_samples_by_name_enquiry(

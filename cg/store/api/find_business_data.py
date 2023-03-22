@@ -485,14 +485,6 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_NAME_ENQUIRY],
         ).all()
 
-    def get_samples_by_order_enquiry(self, order_enquiry: str) -> List[Sample]:
-        """Return all that match the order enquiry."""
-        return apply_sample_filter(
-            samples=self._get_query(table=Sample),
-            order_enquiry=order_enquiry,
-            filter_functions=[SampleFilter.FILTER_BY_ORDER_ENQUIRY],
-        ).all()
-
     def get_samples_to_parse(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
@@ -505,7 +497,7 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions.extend(
                 [
                     SampleFilter.FILTER_BY_NAME_ENQUIRY,
-                    SampleFilter.FILTER_BY_ORDER_ENQUIRY,
+                    SampleFilter.FILTER_BY_INTERNAL_ID_ENQUIRY,
                 ]
             )
 
@@ -514,7 +506,7 @@ class FindBusinessDataHandler(BaseHandler):
                 samples=self._get_query(table=Sample),
                 customer_ids=customer_ids,
                 name_enquiry=enquiry,
-                order_enquiry=enquiry,
+                internal_id_enquiry=enquiry,
                 filter_functions=filter_functions,
             )
             .order_by(Sample.created_at.desc())

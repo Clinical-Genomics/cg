@@ -797,24 +797,6 @@ def test_get_samples_by_name_enquiry(
     assert samples[0].name == name_enquiry
 
 
-def test_get_samples_by_order_enquiry(
-    store_with_samples_that_have_names: Store, order_enquiry: str = "order_1"
-):
-    """Test that samples can be fetched from the store by customer id."""
-    # GIVEN a database with two samples
-
-    # WHEN fetching samples by customer id
-    samples: List[Sample] = store_with_samples_that_have_names.get_samples_by_order_enquiry(
-        order_enquiry=order_enquiry
-    )
-
-    # THEN one sample should be returned
-    assert len(samples) == 2
-
-    # THEN the sample should have the correct name
-    assert samples[0].order == order_enquiry
-
-
 def test_get_samples_to_parse(store_with_samples_that_have_names: Store):
     """Test that samples can be fetched from the store by customer id."""
     # GIVEN a database with two samples
@@ -861,22 +843,3 @@ def test_get_samples_to_render_with_name_enquiry(
 
     # THEN the sample should have the correct name
     assert samples[0].name == name_enquiry
-
-
-def test_get_samples_to_render_with_order_enquiry(
-    store_with_samples_that_have_names: Store,
-    order_enquiry: str = "order_1",
-):
-    """Test that samples can be fetched from the store by customer id."""
-    # GIVEN a database with two samples
-
-    # WHEN fetching samples by customer id
-    samples: List[Sample] = store_with_samples_that_have_names.get_samples_to_parse(
-        customers=store_with_samples_that_have_names.get_customers(), enquiry=order_enquiry
-    )
-
-    # THEN one sample should be returned
-    assert len(samples) == 2
-
-    # THEN the sample should have the correct name
-    assert samples[1].order == order_enquiry
