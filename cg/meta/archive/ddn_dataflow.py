@@ -11,7 +11,7 @@ from datetime import datetime
 from cg.constants.constants import APIMethods, FileFormat
 from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, ReadStream
-from cg.models.cg_config import DDNConfig
+from cg.models.cg_config import DDNDataFlowConfig
 
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
@@ -125,7 +125,7 @@ class AuthResponse(BaseModel):
 class DDNDataFlowApi:
     """Class for archiving and retrieving folders via DDN Dataflow."""
 
-    def __init__(self, config: DDNConfig):
+    def __init__(self, config: DDNDataFlowConfig):
         self.database_name: str = config.database_name
         self.user: str = config.user
         self.password: str = config.password

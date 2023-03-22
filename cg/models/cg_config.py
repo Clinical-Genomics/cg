@@ -217,7 +217,7 @@ class ExternalConfig(BaseModel):
     caesar: str
 
 
-class DDNConfig(BaseModel):
+class DDNDataFlowConfig(BaseModel):
     database_name: str
     user: str
     password: str
@@ -249,7 +249,7 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
-    ddn: Optional[DDNConfig] = None
+    ddn: Optional[DDNDataFlowConfig] = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Optional[CommonAppConfig] = None
