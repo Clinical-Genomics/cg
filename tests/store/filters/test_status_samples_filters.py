@@ -633,7 +633,7 @@ def test_filter_get_samples_by_customer_id(
     assert len(samples.all()) == 2
 
     # THEN the sample should have the correct customer id
-    assert (sample.customer_id == customer_id for sample in samples)
+    assert samples[0].customer_id == customer_id
 
 
 def test_filter_get_samples_by_order_enquiry(

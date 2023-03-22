@@ -57,7 +57,7 @@ def test_samples_to_sequence(sample_store):
 
     # THEN samples should be a list of samples
     assert isinstance(sequence_samples, list)
-    assert (isinstance(sample, Sample) for sample in sequence_samples)
+    assert isinstance(sequence_samples[0], Sample)
 
     # THEN it should list the received and partly sequenced samples
     assert len(sequence_samples) == 2
@@ -145,7 +145,7 @@ def test_get_samples_to_invoice(sample_store):
 
     # THEN samples should be a list of samples
     assert isinstance(samples, list)
-    assert (isinstance(sample, Sample) for sample in samples)
+    assert isinstance(samples[0], Sample)
 
     # THEN it should return all samples that are not invoiced
     assert len(samples) == 1
