@@ -496,20 +496,30 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_to_parse(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
-        """Return all samples for a customer and or enquiry."""
-        samples: List[Sample] = (
-            self.get_samples_by_customer_id(customers=customers)
-            if customers
-            else self.get_samples()
-        )
+        customer_ids = [customer.id for customer in customers] if customers else None
+        filter_functions = []
+
+        if customer_ids:
+            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ID)
         if enquiry:
-            samples = list(
-                set(
-                    set(self.get_samples_by_name_enquiry(name_enquiry=enquiry))
-                    or set(self.get_samples_by_order_enquiry(order_enquiry=enquiry))
-                )
+            filter_functions.extend(
+                [
+                    SampleFilter.FILTER_BY_NAME_ENQUIRY,
+                    SampleFilter.FILTER_BY_ORDER_ENQUIRY,
+                ]
             )
-        return samples
+
+        return (
+            apply_sample_filter(
+                samples=self._get_query(table=Sample),
+                customer_ids=customer_ids,
+                name_enquiry=enquiry,
+                order_enquiry=enquiry,
+                filter_functions=filter_functions,
+            )
+            .order_by(Sample.created_at.desc())
+            .all()
+        )
 
     def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
         """Get samples of customer with given subject_id or subject_id and is_tumour."""

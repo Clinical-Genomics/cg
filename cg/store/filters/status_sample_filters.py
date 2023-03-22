@@ -134,12 +134,14 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
 
 def filter_samples_by_name_enquiry(samples: Query, name_enquiry: str, **kwargs) -> Query:
     """Return samples by name."""
-    return samples.filter(Sample.name == name_enquiry)
+    filtered_samples = samples.filter(Sample.name.like(f"%{name_enquiry}%")).all()
+    return samples.filter(Sample.name == name_enquiry) if filtered_samples else samples
 
 
 def filter_samples_by_order_enquiry(samples: Query, order_enquiry: str, **kwargs) -> Query:
     """Return samples by order."""
-    return samples.filter(Sample.order == order_enquiry)
+    filtered_samples = samples.filter(Sample.name.like(f"%{order_enquiry}%")).all()
+    return samples.filter(Sample.name == order_enquiry) if filtered_samples else samples
 
 
 def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
