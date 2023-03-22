@@ -808,7 +808,7 @@ def test_get_samples_to_parse(store_with_samples_that_have_names: Store):
     assert len(samples) == 2
 
 
-def test_get_samples_to_render_with_customer(
+def test_get_samples_to_parse_with_customer(
     store_with_samples_that_have_names: Store,
 ):
     """Test that samples can be fetched from the store by customer id."""
@@ -826,7 +826,7 @@ def test_get_samples_to_render_with_customer(
     assert samples[0].customer_id == store_with_samples_that_have_names.get_customers()[0].id
 
 
-def test_get_samples_to_render_with_name_enquiry(
+def test_get_samples_to_parse_with_name_enquiry(
     store_with_samples_that_have_names: Store,
     name_enquiry: str = "sample_1",
 ):

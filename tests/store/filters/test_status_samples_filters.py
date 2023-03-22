@@ -28,7 +28,6 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_subject_id,
     filter_samples_by_customer_id,
     filter_samples_by_name_enquiry,
-    filter_samples_by_internal_id_enquiry,
 )
 from tests.store.conftest import StoreConftestFixture
 
