@@ -174,7 +174,7 @@ def test_get_samples_from_ticket(
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
 
     # WHEN checking which samples there are in the ticket
-    all_samples = deliver_ticket_api.get_samples_from_ticket(ticket=ticket)
+    all_samples: list = deliver_ticket_api.get_samples_from_ticket(ticket=ticket)
 
     # THEN concatenation is needed
     assert "child" in all_samples

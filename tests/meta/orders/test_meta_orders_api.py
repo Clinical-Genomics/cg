@@ -155,7 +155,7 @@ def test_submit_illegal_sample_customer(
         invoice_reference="dummy nr",
     )
     sample_store.add_commit(new_customer)
-    existing_sample = sample_store.get_samples()[0]
+    existing_sample: Sample = sample_store.get_samples()[0]
     existing_sample.customer = new_customer
     sample_store.add_commit(existing_sample)
 
@@ -212,7 +212,7 @@ def test_submit_scout_legal_sample_customer(
     order_customer.collaborations.append(collaboration)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
-    existing_sample = sample_store.get_samples()[0]
+    existing_sample: Sample = sample_store.get_samples()[0]
     existing_sample.customer = sample_customer
     sample_store.commit()
     order_data.customer = order_customer.internal_id
