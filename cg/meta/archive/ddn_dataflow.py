@@ -1,7 +1,7 @@
 """Module for archiving and retrieving folders via DDN Dataflow."""
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 from urllib.parse import urljoin
 
 from pydantic import BaseModel
@@ -9,9 +9,9 @@ from requests.models import Response
 
 from datetime import datetime
 from cg.constants.constants import APIMethods, FileFormat
+from cg.exc import DdnDataflowAuthenticationError
 from cg.io.controller import APIRequest, ReadStream
 from cg.models.cg_config import DDNConfig
-
 
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
@@ -26,51 +26,82 @@ class DataflowEndpoints(str, Enum):
     RETRIEVE_FILES = "files/retrieve"
 
 
+class ResponseFields(str, Enum):
+    """Enum containing all DDN dataflow endpoints used."""
+
+    REFRESH = "refresh"
+    ACCESS = "access"
+    EXPIRE = "expire"
+    RETRIEVE_FILES = "files/retrieve"
+
+
 class TransferData(BaseModel):
+    """Model for representing a singular object transfer."""
+
     source: str
     destination: str
-    # TODO: specify what metadata to include here
     _metadata = None
 
     def correct_source_root(self):
+        """Trims the source path from its root directory."""
         self.source = f"/{Path(self.source).relative_to(ROOT_TO_TRIM).as_posix()}"
 
     def correct_destination_root(self):
+        """Trims the destination path from its root directory."""
         self.destination = f"/{Path(self.destination).relative_to(ROOT_TO_TRIM).as_posix()}"
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
+        """Prepends the given repositories to the source and destination paths."""
         self.source = source_prefix + self.source
         self.destination = destination_prefix + self.destination
 
 
 class TransferPayload(BaseModel):
+    """Model for representing a Dataflow transfer task."""
+
     files_to_transfer: List[TransferData]
     osType: str = OSTYPE
     createFolder: bool = False
 
     def correct_source_root(self):
+        """Trims the source path from its root directory for all objects in the transfer."""
         for transfer_data in self.files_to_transfer:
             transfer_data.correct_source_root()
 
     def correct_destination_root(self):
+        """Trims the destination path from its root directory for all objects in the transfer."""
         for transfer_data in self.files_to_transfer:
             transfer_data.correct_destination_root()
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
+        """Prepends the given repositories to the source and destination paths all objects in the
+        transfer."""
         for transfer_data in self.files_to_transfer:
             transfer_data.add_repositories(
                 source_prefix=source_prefix, destination_prefix=destination_prefix
             )
 
     def dict(self, **kwargs) -> dict:
+        """Creates a correctly structured dict to be used as the request payload."""
         payload: dict = super().dict(exclude={"files_to_transfer"})
         payload["pathInfo"] = [transfer_data.dict() for transfer_data in self.files_to_transfer]
         payload["metadataList"] = []
-
         return payload
+
+    def post_request(self, url: str, headers: dict) -> bool:
+        """Sends a request to the given url with, the given headers, and its own content as
+        payload."""
+        return APIRequest.api_request_from_content(
+            api_method=APIMethods.POST,
+            url=url,
+            headers=headers,
+            json=self.dict(),
+        ).ok
 
 
 class AuthPayload(BaseModel):
+    """Model representing the payload for an Authentication request."""
+
     dbName: str
     name: str
     password: str
@@ -78,7 +109,17 @@ class AuthPayload(BaseModel):
 
 
 class RefreshPayload(BaseModel):
+    """Model representing the payload for Auth-token refresh request."""
+
     refresh: str
+
+
+class AuthResponse(BaseModel):
+    """Model representing th response fields from an access request to the Dataflow API."""
+
+    access: str
+    expire: int
+    refresh: Optional[str]
 
 
 class DDNDataFlowApi:
@@ -112,12 +153,16 @@ class DDNDataFlowApi:
                 password=self.password,
             ).dict(),
         )
-        response_content: dict = ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=response.content
+        if not response.ok:
+            raise DdnDataflowAuthenticationError(message=response.content)
+        response_content: AuthResponse = AuthResponse(
+            **ReadStream.get_content_from_stream(
+                file_format=FileFormat.JSON, stream=response.content
+            )
         )
-        self.refresh_token: str = response_content.get("refresh")
-        self.auth_token: str = response_content.get("access")
-        self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
+        self.refresh_token: str = response_content.refresh
+        self.auth_token: str = response_content.access
+        self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
 
     def _refresh_auth_token(self) -> None:
         """Updates the auth token by providing the refresh token to the REST-API."""
@@ -127,11 +172,13 @@ class DDNDataFlowApi:
             headers=self.headers,
             json=RefreshPayload(refresh=self.refresh_token).dict(),
         )
-        response_content: dict = ReadStream.get_content_from_stream(
-            file_format=FileFormat.JSON, stream=response.content
+        response_content: AuthResponse = AuthResponse(
+            **ReadStream.get_content_from_stream(
+                file_format=FileFormat.JSON, stream=response.content
+            )
         )
-        self.auth_token: str = response_content.get("access")
-        self.token_expiration: datetime = datetime.fromtimestamp(response_content.get("expire"))
+        self.auth_token: str = response_content.access
+        self.token_expiration: datetime = datetime.fromtimestamp(response_content.expire)
 
     @property
     def auth_header(self) -> Dict[str, str]:
@@ -147,18 +194,15 @@ class DDNDataFlowApi:
             TransferData(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
         ]
-        payload: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
-        payload.correct_source_root()
-        payload.add_repositories(
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+        transfer_request.correct_source_root()
+        transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
         )
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
-            url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
+        return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
-            json=payload.dict(),
+            url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         )
-        return response.ok
 
     def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
         """Retrieves all folders provided, to their corresponding destination, as given by the
@@ -167,15 +211,12 @@ class DDNDataFlowApi:
             TransferData(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
         ]
-        payload: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
-        payload.correct_destination_root()
-        payload.add_repositories(
+        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+        transfer_request.correct_destination_root()
+        transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage
         )
-        response: Response = APIRequest.api_request_from_content(
-            api_method=APIMethods.POST,
-            url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
+        return transfer_request.post_request(
             headers=dict(self.headers, **self.auth_header),
-            json=payload.dict(),
+            url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
-        return response.ok
