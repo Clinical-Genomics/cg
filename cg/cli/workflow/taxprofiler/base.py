@@ -6,7 +6,7 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
+from cg.cli.workflow.commands import link
 from cg.cli.workflow.nextflow.options import (
     OPTION_CONFIG,
     OPTION_LOG,
@@ -38,9 +38,12 @@ LOG = logging.getLogger(__name__)
 def taxprofiler(context: click.Context) -> None:
     """nf-core/taxprofiler analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
-        config=context.obj,
-    )
 
 
-taxprofiler.add_command(resolve_compression)
+#    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
+#        config=context.obj,
+#    )
+
+
+# taxprofiler.add_command(link)
+# taxprofiler.add_command(resolve_compression)
