@@ -177,13 +177,13 @@ def parse_families_in_collaboration():
     """Fetch families in collaboration."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     data_analysis: str = request.args.get("data_analysis")
-    cases: Query = db.families(
+    cases_q: Query = db.families(
         enquiry=request.args.get("enquiry"),
         customers=customer.collaborators,
         data_analysis=data_analysis,
     )
-    count = cases.count()
-    cases = cases.limit(30)
+    count = cases_q.count()
+    cases = cases_q.limit(30)
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
     return jsonify(families=parsed_cases, total=count)
 
