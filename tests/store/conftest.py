@@ -270,7 +270,7 @@ def fixture_store_with_two_applications_one_with_application_version(
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with an application version."""
-    app_1: Application = helpers.ensure_application(
+    application: Application = helpers.ensure_application(
         store=store,
         tag=StoreConftestFixture.TAG_APPLICATION_WITH_ATTRIBUTES.value,
         prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
@@ -278,7 +278,7 @@ def fixture_store_with_two_applications_one_with_application_version(
         is_archived=True,
     )
 
-    helpers.ensure_application_version(store=store, application=app_1)
+    helpers.ensure_application_version(store=store, application=application)
     return store
 
 
