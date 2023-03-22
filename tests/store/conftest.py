@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender
 from cg.store import Store
-from cg.store.models import Analysis, Family, Sample, Customer
+from cg.store.models import Analysis, Application, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -264,13 +264,21 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_an_application_version")
-def fixture_store_with_an_application_version(
+@pytest.fixture(name="store_with_two_applications_one_with_application_version")
+def fixture_store_with_two_applications_one_with_application_version(
     store: Store,
     helpers: StoreHelpers,
 ) -> Store:
     """Return a store with an application version."""
-    helpers.ensure_application_version(store=Store)
+    app_1: Application = helpers.ensure_application(
+        store=store,
+        tag=StoreConftestFixture.TAG_APPLICATION_WITH_ATTRIBUTES.value,
+        prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
+        is_external=True,
+        is_archived=True,
+    )
+
+    helpers.ensure_application_version(store=store, application=app_1)
     return store
 
 

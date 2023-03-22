@@ -10,70 +10,100 @@ from cg.store.models import Application, ApplicationVersion
 from sqlalchemy import desc
 from sqlalchemy.orm import Query
 
-from tests.cli.conftest import fixture_application_tag
 from tests.store_helpers import StoreHelpers
 
 
 def test_filter_application_version_by_application_correct_application(
-    store: Store, helpers: StoreHelpers, application_tag: str
+    store_with_two_applications_one_with_application_version: Store,
+    helpers: StoreHelpers,
 ):
-    """Test that the application of the filtered application version is the"""
-    # GIVEN an application
-    application: Application = helpers.ensure_application(store=store, tag=application_tag)
+    """Test that the application of the filtered application version is the correct one."""
+    # GIVEN a store with two applications
+    app_query: Query = store_with_two_applications_one_with_application_version._get_query(
+        table=Application
+    )
+    assert app_query.count() == 2
 
-    # GIVEN an application version with the previous application in the store
-    helpers.ensure_application_version(store=store, application=application)
+    # GIVEN that the applications are different
+    unlinked_app: Application = app_query.first()
+    linked_app: Application = app_query.order_by(desc(Application.id)).first()
+    assert str(unlinked_app) != str(linked_app)
 
-    # WHEN filtering an application version query by application
+    # GIVEN that the store has one application version of one application
+    app_version_query: Query = store_with_two_applications_one_with_application_version._get_query(
+        table=ApplicationVersion
+    )
+    assert app_version_query.count() == 1
+    assert str(app_version_query.first().application) == str(linked_app)
+
+    # WHEN filtering an application version query by the linked application
     application_versions: Query = filter_application_version_by_application(
-        application_versions=store._get_query(table=ApplicationVersion),
-        application=application,
+        application_versions=app_version_query,
+        application=linked_app,
     )
 
     # THEN the application of the application version in the filter query is the same as the input application
-    assert application_versions.first().application == application
+    assert str(application_versions.first().application) == str(linked_app)
 
 
 def test_filter_application_version_by_application_no_application_returns_none(
-    store: Store,
+    store_with_two_applications_one_with_application_version: Store,
     helpers: StoreHelpers,
-    application_tag: str,
-    wgs_application_tag: str,
 ):
     """Test that the filtering by application returns None if the application is not present"""
-    # GIVEN an application version of an application
-    application: Application = helpers.ensure_application(
-        store=store,
-        tag=application_tag,
+    # GIVEN a store with two applications
+    app_query: Query = store_with_two_applications_one_with_application_version._get_query(
+        table=Application
     )
-    helpers.ensure_application_version(
-        store=store,
-        application=application,
-    )
+    assert app_query.count() == 2
 
-    # GIVEN an application not linked to the application version
-    unlinked_application: Application = helpers.ensure_application(
-        store=store,
-        tag=wgs_application_tag,
+    # GIVEN that the applications are different
+    unlinked_app: Application = app_query.first()
+    linked_app: Application = app_query.order_by(desc(Application.id)).first()
+    assert str(unlinked_app) != str(linked_app)
+
+    # GIVEN that the store has one application version of one application
+    app_version_query: Query = store_with_two_applications_one_with_application_version._get_query(
+        table=ApplicationVersion
     )
+    assert app_version_query.count() == 1
+    assert str(app_version_query.first().application) == str(linked_app)
 
     # WHEN filtering the application version query by the unlinked application
-    query: Query = filter_application_version_by_application(
-        application_versions=store._get_query(table=ApplicationVersion),
-        application=unlinked_application,
+    application_versions: Query = filter_application_version_by_application(
+        application_versions=app_version_query,
+        application=unlinked_app,
     )
 
     # THEN the query is empty
-    assert query.count() == 0
+    assert application_versions.count() == 0
 
 
-def test_filter_application_version_by_application_id(store: Store, helpers: StoreHelpers):
-    pass
+def test_filter_application_version_by_application_id(
+    store: Store,
+    helpers: StoreHelpers,
+):
+    """."""
+    # GIVEN
+
+    # WHEN
+
+    # THEN
 
 
 def test_filter_application_version_newer_than_date():
-    pass
+    """."""
+    # GIVEN
+
+    # WHEN
+
+    # THEN
 
 
 def test_filter_application_version_by_version():
-    pass
+    """."""
+    # GIVEN
+
+    # WHEN
+
+    # THEN
