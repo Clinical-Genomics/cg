@@ -58,7 +58,7 @@ class TransferLims(object):
             PoolState.DELIVERED: self.lims.get_delivery_date,
         }
 
-    def _get_all_samples_not_yet_delivered(self):
+    def _get_samples_not_yet_delivered(self):
         return self.status.get_samples_not_delivered()
 
     def transfer_samples(

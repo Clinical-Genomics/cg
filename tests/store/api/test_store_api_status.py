@@ -30,7 +30,7 @@ def test_samples_to_receive_external(sample_store, helpers):
     assert first_sample.received_at is None
 
 
-def test_get_all_samples_to_receive_internal(sample_store):
+def test_get_samples_to_receive_internal(sample_store):
     # GIVEN a store with samples in a mix of states
     assert len(sample_store.get_samples()) > 1
     assert len([sample for sample in sample_store.get_samples() if sample.received_at]) > 1

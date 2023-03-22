@@ -91,7 +91,7 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Removing file: %s", file)
             file.unlink()
 
-    def get_all_samples_from_ticket(self, ticket: str) -> list:
+    def get_samples_from_ticket(self, ticket: str) -> list:
         all_samples = []
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
@@ -102,7 +102,7 @@ class DeliverTicketAPI(MetaAPI):
     def report_missing_samples(self, ticket: str, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket=ticket)
         missing_samples = []
-        all_samples: list = self.get_all_samples_from_ticket(ticket=ticket)
+        all_samples: list = self.get_samples_from_ticket(ticket=ticket)
         if not customer_inbox.exists() and dry_run:
             LOG.info("Dry run, will not search for missing data in: %s", customer_inbox)
             return
