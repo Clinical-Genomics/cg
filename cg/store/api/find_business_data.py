@@ -462,7 +462,7 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_all_samples(self) -> List[Sample]:
+    def get_samples(self) -> List[Sample]:
         """Return all samples."""
         return self._get_query(table=Sample).order_by(Sample.created_at.desc()).all()
 

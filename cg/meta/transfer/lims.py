@@ -40,8 +40,8 @@ class TransferLims(object):
         self.lims = lims
 
         self._sample_functions = {
-            SampleState.RECEIVED: self.status.get_all_samples_to_receive,
-            SampleState.PREPARED: self.status.get_all_samples_to_prepare,
+            SampleState.RECEIVED: self.status.get_samples_to_receive,
+            SampleState.PREPARED: self.status.get_samples_to_prepare,
             SampleState.DELIVERED: self.status.get_samples_to_deliver,
         }
 

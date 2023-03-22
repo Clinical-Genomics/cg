@@ -13,10 +13,10 @@ def test_samples_to_receive_external(sample_store, helpers):
     """Test fetching external sample."""
     store = sample_store
     # GIVEN a store with a mixture of samples
-    assert len(store.get_all_samples()) > 1
+    assert len(store.get_samples()) > 1
 
     # WHEN finding external samples to receive
-    external_query: List[Sample] = store.get_all_samples_to_receive(external=True)
+    external_query: List[Sample] = store.get_samples_to_receive(external=True)
 
     # ASSERT that external_query is a list[sample]
     assert isinstance(external_query, list)
@@ -32,23 +32,23 @@ def test_samples_to_receive_external(sample_store, helpers):
 
 def test_get_all_samples_to_receive_internal(sample_store):
     # GIVEN a store with samples in a mix of states
-    assert len(sample_store.get_all_samples()) > 1
-    assert len([sample for sample in sample_store.get_all_samples() if sample.received_at]) > 1
+    assert len(sample_store.get_samples()) > 1
+    assert len([sample for sample in sample_store.get_samples() if sample.received_at]) > 1
 
     # WHEN finding which samples are in queue to receive
-    assert len(sample_store.get_all_samples_to_receive()) == 1
-    first_sample = sample_store.get_all_samples_to_receive()[0]
+    assert len(sample_store.get_samples_to_receive()) == 1
+    first_sample = sample_store.get_samples_to_receive()[0]
     assert first_sample.application_version.application.is_external is False
     assert first_sample.received_at is None
 
 
 def test_samples_to_sequence(sample_store):
     # GIVEN a store with sample in a mix of states
-    assert len(sample_store.get_all_samples()) > 1
-    assert len([sample for sample in sample_store.get_all_samples() if sample.sequenced_at]) >= 1
+    assert len(sample_store.get_samples()) > 1
+    assert len([sample for sample in sample_store.get_samples() if sample.sequenced_at]) >= 1
 
     # WHEN finding which samples are in queue to be sequenced
-    sequence_samples: List[Sample] = sample_store.get_all_samples_to_sequence()
+    sequence_samples: List[Sample] = sample_store.get_samples_to_sequence()
 
     # THEN it should list the received and partly sequenced samples
     assert len(sequence_samples) == 2
