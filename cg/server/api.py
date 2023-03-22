@@ -239,12 +239,9 @@ def parse_samples():
 @BLUEPRINT.route("/samples_in_collaboration")
 def parse_samples_in_collaboration():
     """Fetch samples in a customer group."""
-    customers: List[Customer] = db.get_customer_by_customer_id(
-        customer_id=request.args.get("customer")
-    )
+    customers: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     samples: List[Sample] = db.get_samples_to_parse(
-        enquiry=request.args.get("enquiry"),
-        customers=customers,
+        enquiry=request.args.get("enquiry"), customers=customers.collaborators
     )
     limit = int(request.args.get("limit", 50))
     parsed_samples: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
