@@ -52,7 +52,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     packages=find_packages(exclude=("tests*", "docs", "examples")),
-    entry_points={"console_scripts": ["cg=cg.cli:base"]},
+    entry_points={"console_scripts": ["cg=cg.cli.profile_entry_point:main"]},
     install_requires=parse_requirements(),
     tests_require=parse_requirements("requirements-dev.txt"),
     classifiers=[
