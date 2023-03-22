@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from sqlalchemy import desc
 from sqlalchemy.orm import Query
+from sqlalchemy.types import DateTime
 
 from cg.store.models import (
     Application,
@@ -17,15 +18,19 @@ from cg.store.models import (
     User,
 )
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
+from cg.store.filters.status_application_filters import apply_application_filter, ApplicationFilter
+from cg.store.filters.status_application_version_filters import (
+    apply_application_version_filter,
+    ApplicationVersionFilter,
+)
 from cg.store.filters.status_bed_filters import apply_bed_filter, BedFilter
 from cg.store.filters.status_bed_version_filters import BedVersionFilter, apply_bed_version_filter
-from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
-from cg.store.filters.status_application_filters import apply_application_filter, ApplicationFilter
 from cg.store.filters.status_collaboration_filters import (
     CollaborationFilter,
     apply_collaboration_filter,
 )
+from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
+from cg.store.filters.status_organism_filters import OrganismFilter, apply_organism_filter
 from cg.store.filters.status_panel_filters import PanelFilter, apply_panel_filter
 from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
@@ -111,6 +116,25 @@ class FindBasicDataHandler(BaseHandler):
         query = self.ApplicationVersion.query.filter_by(application=application, version=version)
         return query.first()
 
+    def latest_version(self, tag: str) -> Optional[ApplicationVersion]:
+        """Fetch the latest application version for an application tag."""
+        application_obj = self.Application.query.filter_by(tag=tag).first()
+        return (
+            application_obj.versions[-1] if application_obj and application_obj.versions else None
+        )
+
+    def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
+        """Return the current application version for an application tag."""
+        application_obj = self.Application.query.filter_by(tag=tag).first()
+        if not application_obj:
+            return None
+        application_id = application_obj.id
+        records = self.ApplicationVersion.query.filter_by(application_id=application_id)
+        records = records.filter(self.ApplicationVersion.valid_from < dt.datetime.now())
+        records = records.order_by(desc(self.ApplicationVersion.valid_from))
+
+        return records.first()
+
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
         return apply_bed_version_filter(
@@ -157,25 +181,6 @@ class FindBasicDataHandler(BaseHandler):
             filter_functions=[CollaborationFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
-
-    def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Return the current application version for an application tag."""
-        application_obj = self.Application.query.filter_by(tag=tag).first()
-        if not application_obj:
-            return None
-        application_id = application_obj.id
-        records = self.ApplicationVersion.query.filter_by(application_id=application_id)
-        records = records.filter(self.ApplicationVersion.valid_from < dt.datetime.now())
-        records = records.order_by(desc(self.ApplicationVersion.valid_from))
-
-        return records.first()
-
-    def latest_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Fetch the latest application version for an application tag."""
-        application_obj = self.Application.query.filter_by(tag=tag).first()
-        return (
-            application_obj.versions[-1] if application_obj and application_obj.versions else None
-        )
 
     def get_organism_by_internal_id(self, internal_id: str) -> Organism:
         """Find an organism by internal id."""
