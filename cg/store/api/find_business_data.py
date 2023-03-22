@@ -485,33 +485,34 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_NAME_ENQUIRY],
         ).all()
 
+    def get_samples_by_order_enquiry(self, order_enquiry: str) -> List[Sample]:
+        """Return all that match the order enquiry."""
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            order_enquiry=order_enquiry,
+            filter_functions=[SampleFilter.FILTER_BY_ORDER_ENQUIRY],
+        ).all()
+
     def get_samples_to_parse(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
-        customer_ids = [customer.id for customer in customers] if customers else None
-        filter_functions = []
+        """Return all samples for a customer and or enquiry."""
+        records = self._get_query(table=Sample)
+        if customers:
+            customer_ids = [customer.id for customer in customers]
+        records = records.filter(Sample.customer_id.in_(customer_ids))
 
-        if customer_ids:
-            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ID)
-        if enquiry:
-            filter_functions.extend(
-                [
-                    SampleFilter.FILTER_BY_NAME_ENQUIRY,
-                    SampleFilter.FILTER_BY_INTERNAL_ID_ENQUIRY,
-                ]
+        records = (
+            records.filter(
+                or_(
+                    Sample.name.like(f"%{enquiry}%"),
+                    Sample.internal_id.like(f"%{enquiry}%"),
+                )
             )
-
-        return (
-            apply_sample_filter(
-                samples=self._get_query(table=Sample),
-                customer_ids=customer_ids,
-                name_enquiry=enquiry,
-                internal_id_enquiry=enquiry,
-                filter_functions=filter_functions,
-            )
-            .order_by(Sample.created_at.desc())
-            .all()
+            if enquiry
+            else records
         )
+        return records.order_by(Sample.created_at.desc()).all()
 
     def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
         """Get samples of customer with given subject_id or subject_id and is_tumour."""
