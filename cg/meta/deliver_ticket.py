@@ -12,7 +12,7 @@ from cg.constants.delivery import INBOX_NAME
 from cg.exc import CgError
 from cg.meta.meta import MetaAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Family, Sample
 
 
 LOG = logging.getLogger(__name__)
@@ -24,11 +24,11 @@ class DeliverTicketAPI(MetaAPI):
         super().__init__(config)
         self.delivery_path: Path = Path(config.delivery_path)
 
-    def get_all_cases_from_ticket(self, ticket: str) -> List[models.Family]:
+    def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
         return self.status_db.get_cases_from_ticket(ticket=ticket).all()
 
     def get_inbox_path(self, ticket: str) -> Path:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         if not cases:
             raise CgError(
                 f"The customer id was not identified since no cases for ticket {ticket} was found"
@@ -46,7 +46,7 @@ class DeliverTicketAPI(MetaAPI):
         return True
 
     def generate_date_tag(self, ticket: str) -> datetime.datetime:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         return cases[0].ordered_at
 
     def generate_output_filename(
@@ -93,7 +93,7 @@ class DeliverTicketAPI(MetaAPI):
 
     def get_all_samples_from_ticket(self, ticket: str) -> list:
         all_samples = []
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
             for link_obj in case.links:
                 all_samples.append(link_obj.sample.name)
@@ -168,10 +168,10 @@ class DeliverTicketAPI(MetaAPI):
         return app_tag
 
     def check_if_concatenation_is_needed(self, ticket: str) -> bool:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         case_id = cases[0].internal_id
         case_obj = self.status_db.family(case_id)
-        samples: List[models.Sample] = [link.sample for link in case_obj.links]
+        samples: List[Sample] = [link.sample for link in case_obj.links]
         app_tag = self.get_app_tag(samples=samples)
         for prefix in PREFIX_TO_CONCATENATE:
             if app_tag.startswith(prefix):

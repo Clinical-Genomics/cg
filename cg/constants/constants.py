@@ -1,5 +1,4 @@
 """Constants for cg."""
-from enum import Enum
 
 import click
 from cgmodels.cg.constants import StrEnum
@@ -42,7 +41,7 @@ CASE_ACTIONS = [action.value for action in CaseActions]
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 COMBOS = {
-    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
@@ -183,7 +182,11 @@ class MicrosaltQC:
 class MicrosaltAppTags(StrEnum):
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
-    APP_TYPE: str = "mic"
+    PREP_CATEGORY: str = "mic"
 
 
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
+
+
+class MetaApis:
+    ANALYSIS_API: str = "analysis_api"

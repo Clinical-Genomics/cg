@@ -7,7 +7,8 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family
 
 
 @pytest.fixture(scope="function", name="deliver_api")
@@ -88,7 +89,5 @@ def fixture_samples_missing_in_inbox(
 
 
 @pytest.fixture(name="deliver_api_destination_path")
-def fixture_deliver_api_destination_path(
-    customer_id: str, case_obj: models.Family, ticket: str
-) -> Path:
+def fixture_deliver_api_destination_path(customer_id: str, case_obj: Family, ticket: str) -> Path:
     return Path(customer_id, INBOX_NAME, ticket, case_obj.name)

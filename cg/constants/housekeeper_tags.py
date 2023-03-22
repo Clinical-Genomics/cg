@@ -1,5 +1,4 @@
 """File tags for files in Housekeeper."""
-from enum import Enum
 from typing import List
 
 from cgmodels.cg.constants import Pipeline, StrEnum
@@ -64,8 +63,37 @@ class GensAnalysisTag:
     FRACSNP: List[str] = ["gens", "fracsnp", "bed"]
 
 
+class BalsamicProtectedTags:
+    """Balsamic pipeline protected tags by type."""
+
+    QC: List[List[str]] = [
+        ["balsamic-config"],
+        ["balsamic-dag"],
+        ["balsamic-report"],
+        ["delivery-report"],
+        ["multiqc-html"],
+        ["multiqc-json"],
+        ["qc-metrics"],
+    ]
+    VARIANT_CALLERS: List[List[str]] = [
+        ["ascatngs"],
+        ["cnv-report"],
+        ["cnvkit"],
+        ["delly"],
+        ["germline"],
+        ["svdb"],
+        ["tnscope"],
+        ["tnscope-umi"],
+        ["vardict"],
+        ["vcf2cytosure"],
+    ]
+
+
 WORKFLOW_PROTECTED_TAGS = {
-    str(Pipeline.BALSAMIC): [],
+    str(Pipeline.BALSAMIC): BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
+    str(Pipeline.BALSAMIC_QC): BalsamicProtectedTags.QC,
+    str(Pipeline.BALSAMIC_PON): [],
+    str(Pipeline.BALSAMIC_UMI): BalsamicProtectedTags.QC + BalsamicProtectedTags.VARIANT_CALLERS,
     str(Pipeline.FASTQ): [],
     str(Pipeline.FLUFFY): ["NIPT_csv", "MultiQC"],
     str(Pipeline.MICROSALT): [

@@ -5,7 +5,25 @@ from flask_admin.base import AdminIndexView
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.google import google, make_google_blueprint
 
-from cg.store import models
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationVersion,
+    Bed,
+    BedVersion,
+    Collaboration,
+    Customer,
+    Delivery,
+    Family,
+    FamilySample,
+    Flowcell,
+    Invoice,
+    Organism,
+    Panel,
+    Pool,
+    Sample,
+    User,
+)
 
 from . import admin, api, ext, invoices
 
@@ -29,9 +47,7 @@ def _configure_extensions(app: Flask):
     certs_resp = requests.get("https://www.googleapis.com/oauth2/v1/certs")
     app.config["GOOGLE_OAUTH_CERTS"] = certs_resp.json()
 
-    ext.cors.init_app(
-        app, resources={app.config["CORS_RESOURCES"]: {"origins": app.config["CORS_ORIGINS"]}}
-    )
+    ext.cors.init_app(app)
     ext.csrf.init_app(app)
     ext.db.init_app(app)
     ext.lims.init_app(app)
@@ -82,22 +98,22 @@ def _register_blueprints(app: Flask):
 
 def _register_admin_views():
     # Base data views
-    ext.admin.add_view(admin.ApplicationView(models.Application, ext.db.session))
-    ext.admin.add_view(admin.ApplicationVersionView(models.ApplicationVersion, ext.db.session))
-    ext.admin.add_view(admin.BedView(models.Bed, ext.db.session))
-    ext.admin.add_view(admin.BedVersionView(models.BedVersion, ext.db.session))
-    ext.admin.add_view(admin.CustomerView(models.Customer, ext.db.session))
-    ext.admin.add_view(admin.CollaborationView(models.Collaboration, ext.db.session))
-    ext.admin.add_view(admin.OrganismView(models.Organism, ext.db.session))
-    ext.admin.add_view(admin.PanelView(models.Panel, ext.db.session))
-    ext.admin.add_view(admin.UserView(models.User, ext.db.session))
+    ext.admin.add_view(admin.ApplicationView(Application, ext.db.session))
+    ext.admin.add_view(admin.ApplicationVersionView(ApplicationVersion, ext.db.session))
+    ext.admin.add_view(admin.BedView(Bed, ext.db.session))
+    ext.admin.add_view(admin.BedVersionView(BedVersion, ext.db.session))
+    ext.admin.add_view(admin.CustomerView(Customer, ext.db.session))
+    ext.admin.add_view(admin.CollaborationView(Collaboration, ext.db.session))
+    ext.admin.add_view(admin.OrganismView(Organism, ext.db.session))
+    ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
+    ext.admin.add_view(admin.UserView(User, ext.db.session))
 
     # Business data views
-    ext.admin.add_view(admin.FamilyView(models.Family, ext.db.session))
-    ext.admin.add_view(admin.FamilySampleView(models.FamilySample, ext.db.session))
-    ext.admin.add_view(admin.SampleView(models.Sample, ext.db.session))
-    ext.admin.add_view(admin.PoolView(models.Pool, ext.db.session))
-    ext.admin.add_view(admin.FlowcellView(models.Flowcell, ext.db.session))
-    ext.admin.add_view(admin.AnalysisView(models.Analysis, ext.db.session))
-    ext.admin.add_view(admin.DeliveryView(models.Delivery, ext.db.session))
-    ext.admin.add_view(admin.InvoiceView(models.Invoice, ext.db.session))
+    ext.admin.add_view(admin.FamilyView(Family, ext.db.session))
+    ext.admin.add_view(admin.FamilySampleView(FamilySample, ext.db.session))
+    ext.admin.add_view(admin.SampleView(Sample, ext.db.session))
+    ext.admin.add_view(admin.PoolView(Pool, ext.db.session))
+    ext.admin.add_view(admin.FlowcellView(Flowcell, ext.db.session))
+    ext.admin.add_view(admin.AnalysisView(Analysis, ext.db.session))
+    ext.admin.add_view(admin.DeliveryView(Delivery, ext.db.session))
+    ext.admin.add_view(admin.InvoiceView(Invoice, ext.db.session))

@@ -5,7 +5,6 @@ import logging
 
 import click
 
-from cg.apps.tb import TrailblazerAPI
 from cg.cli.generate.report.base import delivery_report
 from cg.cli.upload.clinical_delivery import clinical_delivery
 from cg.cli.upload.coverage import coverage
@@ -18,7 +17,7 @@ from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Analysis, Family
 
 LOG = logging.getLogger(__name__)
 
@@ -30,10 +29,10 @@ class MipDNAUploadAPI(UploadAPI):
         self.analysis_api: MipDNAAnalysisAPI = MipDNAAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
-    def upload(self, ctx: click.Context, case: models.Family, restart: bool) -> None:
+    def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
         """Uploads MIP-DNA analysis data and files"""
 
-        analysis_obj: models.Analysis = case.analyses[0]
+        analysis_obj: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis_obj)
 
         # Main upload

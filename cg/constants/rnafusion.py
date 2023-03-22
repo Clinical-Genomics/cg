@@ -1,6 +1,5 @@
 """RNAfusion related constants."""
 
-from cgmodels.cg.constants import StrEnum
 
 from cg.constants.nextflow import NFX_SAMPLESHEET_HEADERS
 

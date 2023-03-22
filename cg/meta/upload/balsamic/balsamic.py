@@ -16,7 +16,7 @@ from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Analysis, Family
 
 LOG = logging.getLogger(__name__)
 
@@ -28,10 +28,10 @@ class BalsamicUploadAPI(UploadAPI):
         self.analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
-    def upload(self, ctx: click.Context, case: models.Family, restart: bool) -> None:
+    def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
         """Uploads BALSAMIC analysis data and files"""
 
-        analysis_obj: models.Analysis = case.analyses[0]
+        analysis_obj: Analysis = case.analyses[0]
 
         self.update_upload_started_at(analysis_obj)
 

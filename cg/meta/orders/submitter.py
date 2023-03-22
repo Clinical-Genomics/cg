@@ -5,8 +5,8 @@ from typing import List
 
 from cg.apps.lims import LimsAPI
 from cg.models.orders.order import OrderIn
-from cg.store import Store, models
-from cg.store.models import Model
+from cg.store import Store
+from cg.store.models import Model, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class Submitter(ABC):
 
     @abstractmethod
     def store_items_in_status(
-        self, customer: str, order: str, ordered: dt.datetime, ticket: int, items: List[dict]
+        self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: int, items: List[dict]
     ) -> List[Model]:
         pass
 
@@ -44,7 +44,7 @@ class Submitter(ABC):
                 LOG.info(f"{sample['name']} -> {internal_id}: connect sample to LIMS")
                 sample[id_key] = internal_id
 
-    def _add_missing_reads(self, samples: List[models.Sample]):
+    def _add_missing_reads(self, samples: List[Sample]):
         """Add expected reads/reads missing."""
         for sample_obj in samples:
             LOG.info(f"{sample_obj.internal_id}: add missing reads in LIMS")

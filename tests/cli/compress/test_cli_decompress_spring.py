@@ -4,9 +4,6 @@ import logging
 
 from cg.cli.compress.fastq import (
     decompress_case,
-    decompress_flowcell,
-    decompress_sample,
-    decompress_ticket,
 )
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner

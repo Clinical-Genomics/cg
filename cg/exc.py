@@ -4,6 +4,7 @@
 
 
 class CgError(Exception):
+
     """
     Base exception for the package.
     """
@@ -254,3 +255,7 @@ class PdcNoFilesMatchingSearchError(CgError):
 
 class DdnDataflowAuthenticationError(CgError):
     """Exception raised when the DDN Dataflow authentication fails."""
+
+
+class MissingFilesError(CgError):
+    """Exception raised when there are missing files."""

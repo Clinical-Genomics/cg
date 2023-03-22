@@ -9,9 +9,8 @@ import logging
 import os
 import re
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional, Tuple, Union
 import glob
 
@@ -19,16 +18,15 @@ import click
 from cg.constants import Pipeline
 from cg.constants.constants import MicrosaltQC, MicrosaltAppTags
 from cg.constants.tb import AnalysisStatus
-from cg.exc import CgDataError, CgError
+from cg.exc import CgDataError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import CGConfig
 from cg.models.orders.sample_base import ControlEnum
-from cg.store import models
-from cg.store.models import Sample, Family
+from cg.store.models import Family, Sample
 from cg.utils import Process
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.io.json import read_json, write_json_stream, write_json
+from cg.io.json import read_json, write_json
 
 from cg.constants import Priority
 
@@ -67,7 +65,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_path(self, case_id: str) -> List[Path]:
         """Returns all paths associated with the case or single sample analysis."""
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
         lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
 
@@ -127,8 +125,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         """Get trailblazer config path."""
-        case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: models.Sample = case_obj.links[0].sample
+        case_obj: Family = self.status_db.family(case_id)
+        sample_obj: Sample = case_obj.links[0].sample
         project_id: str = self.get_project(sample_obj.internal_id)
         return Path(
             self.root_dir, "results", "reports", "trailblazer", f"{project_id}_slurm_ids.yaml"
@@ -137,7 +135,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         order_id: str = case_obj.name
         deliverables_file_path = Path(
             self.root_dir,
@@ -150,29 +148,25 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
             LOG.info("Found deliverables file %s", deliverables_file_path)
         return deliverables_file_path
 
-    def get_sample_fastq_destination_dir(self, case: models.Family, sample: models.Sample) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample) -> Path:
         return Path(self.get_case_fastq_path(case_id=case.internal_id), sample.internal_id)
 
     def link_fastq_files(
         self, case_id: str, sample_id: Optional[str], dry_run: bool = False
     ) -> None:
-        case_obj: models.Family = self.status_db.family(case_id)
-        samples: List[models.Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        case_obj: Family = self.status_db.family(case_id)
+        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
 
-    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[models.Sample]:
+    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[Sample]:
         """Returns a list of samples to configure
         If sample_id is specified, will return a list with only this sample_id.
         Otherwise, returns all samples in given case"""
         if sample_id:
-            return [
-                self.status_db.query(models.Sample)
-                .filter(models.Sample.internal_id == sample_id)
-                .first()
-            ]
+            return [self.status_db.query(Sample).filter(Sample.internal_id == sample_id).first()]
 
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         return [link.sample for link in case_obj.links]
 
     def get_lims_comment(self, sample_id: str) -> str:
@@ -183,7 +177,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return ""
 
-    def get_organism(self, sample_obj: models.Sample) -> str:
+    def get_organism(self, sample_obj: Sample) -> str:
         """Organism
         - Fallback based on reference, ‘Other species’ and ‘Comment’.
         Default to "Unset"."""
@@ -211,7 +205,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
         return organism
 
-    def get_parameters(self, sample_obj: models.Sample) -> Dict[str, str]:
+    def get_parameters(self, sample_obj: Sample) -> Dict[str, str]:
         """Fill a dict with case config information for one sample"""
 
         sample_id = sample_obj.internal_id
@@ -313,7 +307,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_case_id_from_ticket(self, unique_id: str) -> Tuple[str, None]:
         """If ticked is provided as argument, finds the corresponding case_id and returns it.
         Since sample_id is not specified, nothing is returned as sample_id"""
-        case_obj: models.Family = self.status_db.find_family_by_name(unique_id)
+        case_obj: Family = self.status_db.find_family_by_name(unique_id)
         if not case_obj:
             LOG.error("No case found for ticket number:  %s", unique_id)
             raise click.Abort
@@ -324,10 +318,8 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """If sample is specified, finds the corresponding case_id to which this sample belongs.
         The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
         """
-        sample_obj: models.Sample = (
-            self.status_db.query(models.Sample)
-            .filter(models.Sample.internal_id == unique_id)
-            .first()
+        sample_obj: Sample = (
+            self.status_db.query(Sample).filter(Sample.internal_id == unique_id).first()
         )
         if not sample_obj:
             LOG.error("No sample found with id: %s", unique_id)
@@ -338,7 +330,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_id_from_case(self, unique_id: str) -> Tuple[str, None]:
         """If case_id is specified, validates the presence of case_id in database and returns it"""
-        case_obj: models.Family = self.status_db.family(unique_id)
+        case_obj: Family = self.status_db.family(unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
             raise click.Abort
@@ -351,7 +343,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         case_qc: Dict = read_json(file_path=Path(run_dir_path, f"{lims_project}.json"))
 
         for sample_id in case_qc:
-            sample: Sample = self.status_db.sample(internal_id=sample_id)
+            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
             sample_check: Union[Dict, None] = self.qc_sample_check(
                 sample=sample,
                 sample_qc=case_qc[sample_id],
@@ -373,7 +365,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         qc_pass: bool = True
 
         for sample_id in failed_samples:
-            sample: Sample = self.status_db.sample(internal_id=sample_id)
+            sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
             if sample.control == ControlEnum.negative:
                 qc_pass = False
             if sample.application_version.application.tag == MicrosaltAppTags.MWRNXTR003:

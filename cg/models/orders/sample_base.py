@@ -2,9 +2,9 @@ from enum import Enum
 from typing import List, Optional
 
 from cg.constants import DataDelivery, Pipeline
-from pydantic import BaseModel, constr, NonNegativeInt, validator
+from pydantic import BaseModel, constr, validator
 
-from cg.store import models
+from cg.store.models import Application, Family, Customer, Pool, Sample
 
 
 class ControlEnum(str, Enum):
@@ -44,18 +44,16 @@ NAME_PATTERN = r"^[A-Za-z0-9-]*$"
 
 class OrderSample(BaseModel):
     age_at_sampling: Optional[str]
-    application: constr(max_length=models.Application.tag.property.columns[0].type.length)
+    application: constr(max_length=Application.tag.property.columns[0].type.length)
     capture_kit: Optional[str]
     collection_date: Optional[str]
-    comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
+    comment: Optional[constr(max_length=Sample.comment.property.columns[0].type.length)]
     concentration: Optional[float]
     concentration_sample: Optional[float]
     container: Optional[ContainerEnum]
     container_name: Optional[str]
     control: Optional[str]
-    customer: Optional[
-        constr(max_length=models.Customer.internal_id.property.columns[0].type.length)
-    ]
+    customer: Optional[constr(max_length=Customer.internal_id.property.columns[0].type.length)]
     custom_index: Optional[str]
     data_analysis: Pipeline
     data_delivery: DataDelivery
@@ -65,27 +63,25 @@ class OrderSample(BaseModel):
         constr(
             regex=NAME_PATTERN,
             min_length=2,
-            max_length=models.Family.name.property.columns[0].type.length,
+            max_length=Family.name.property.columns[0].type.length,
         )
     ]
     father: Optional[
-        constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length)
     ]
     formalin_fixation_time: Optional[int]
     index: Optional[str]
     index_number: Optional[str]
     index_sequence: Optional[str]
-    internal_id: Optional[
-        constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
-    ]
+    internal_id: Optional[constr(max_length=Sample.internal_id.property.columns[0].type.length)]
     lab_code: Optional[str]
     mother: Optional[
-        constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length)
     ]
     name: constr(
         regex=NAME_PATTERN,
         min_length=2,
-        max_length=models.Sample.name.property.columns[0].type.length,
+        max_length=Sample.name.property.columns[0].type.length,
     )
     organism: Optional[str]
     organism_other: Optional[str]
@@ -93,14 +89,14 @@ class OrderSample(BaseModel):
     original_lab_address: Optional[str]
     phenotype_groups: Optional[List[str]]
     phenotype_terms: Optional[List[str]]
-    pool: Optional[constr(max_length=models.Pool.name.property.columns[0].type.length)]
+    pool: Optional[constr(max_length=Pool.name.property.columns[0].type.length)]
     post_formalin_fixation_time: Optional[int]
     pre_processing_method: Optional[str]
     priority: PriorityEnum = PriorityEnum.standard
     quantity: Optional[int]
     reagent_label: Optional[str]
     reference_genome: Optional[
-        constr(max_length=models.Sample.reference_genome.property.columns[0].type.length)
+        constr(max_length=Sample.reference_genome.property.columns[0].type.length)
     ]
     region: Optional[str]
     region_code: Optional[str]
@@ -111,9 +107,7 @@ class OrderSample(BaseModel):
     source: Optional[str]
     status: StatusEnum = StatusEnum.unknown
     subject_id: Optional[
-        constr(
-            regex=NAME_PATTERN, max_length=models.Sample.subject_id.property.columns[0].type.length
-        )
+        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
     ]
     tissue_block_size: Optional[str]
     tumour: bool = False

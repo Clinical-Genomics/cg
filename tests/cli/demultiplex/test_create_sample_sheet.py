@@ -5,7 +5,6 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.lims.samplesheet import (
-    LimsFlowcellSample,
     LimsFlowcellSampleBcl2Fastq,
     LimsFlowcellSampleDragen,
 )

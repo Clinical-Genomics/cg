@@ -18,7 +18,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Sample, BedVersion, FamilySample, Analysis
+from cg.store.models import Analysis, BedVersion, Family, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -96,8 +96,8 @@ class AnalysisAPI(MetaAPI):
         return case_obj.priority.value or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
-        """Get Quality of service (SLURM QOS) for the case"""
-        priority: int = self.get_priority_for_case(case_id)
+        """Get Quality of service (SLURM QOS) for the case."""
+        priority: int = self.get_priority_for_case(case_id=case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
@@ -114,8 +114,8 @@ class AnalysisAPI(MetaAPI):
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
         """Retrieve sample name provided by customer for specific sample"""
-        sample_obj: Sample = self.status_db.sample(lims_id)
-        return sample_obj.name
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=lims_id)
+        return sample.name
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
@@ -330,7 +330,9 @@ class AnalysisAPI(MetaAPI):
         case: Family = self.status_db.family(internal_id=case_id)
         sample: Sample = case.links[0].sample
         if sample.from_sample:
-            sample: Sample = self.status_db.sample(internal_id=sample.from_sample)
+            sample: Sample = self.status_db.get_sample_by_internal_id(
+                internal_id=sample.from_sample
+            )
         target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
             return None

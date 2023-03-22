@@ -13,7 +13,8 @@ from cg.constants.observations import (
     LoqusdbBalsamicCustomers,
 )
 from cg.exc import LoqusdbUploadCaseError, CaseNotFoundError, LoqusdbDuplicateRecordError
-from cg.store import models
+from cg.store.models import Family
+
 from housekeeper.store.models import Version, File
 
 from cg.constants.sequencing import SequencingMethod
@@ -34,9 +35,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         self.loqusdb_somatic_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.SOMATIC)
         self.loqusdb_tumor_api: LoqusdbAPI = self.get_loqusdb_api(LoqusdbInstance.TUMOR)
 
-    def load_observations(
-        self, case: models.Family, input_files: BalsamicObservationsInputFiles
-    ) -> None:
+    def load_observations(self, case: Family, input_files: BalsamicObservationsInputFiles) -> None:
         """Load observation counts to Loqusdb for a Balsamic case."""
         if self.sequencing_method not in LOQUSDB_BALSAMIC_SEQUENCING_METHODS:
             LOG.error(
@@ -66,7 +65,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
 
     @staticmethod
     def load_cancer_observations(
-        case: models.Family,
+        case: Family,
         input_files: BalsamicObservationsInputFiles,
         loqusdb_api: LoqusdbAPI,
     ) -> None:
@@ -101,7 +100,7 @@ class BalsamicObservationsAPI(ObservationsAPI):
         }
         return BalsamicObservationsInputFiles(**get_full_path_dictionary(input_files))
 
-    def delete_case(self, case: models.Family) -> None:
+    def delete_case(self, case: Family) -> None:
         """Delete cancer case observations from Loqusdb."""
         loqusdb_apis: List[LoqusdbAPI] = [self.loqusdb_somatic_api, self.loqusdb_tumor_api]
         for loqusdb_api in loqusdb_apis:

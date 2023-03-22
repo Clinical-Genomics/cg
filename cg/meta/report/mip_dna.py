@@ -25,7 +25,7 @@ from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
-from cg.store import models
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class MipDNAReportAPI(ReportAPI):
         self.analysis_api = analysis_api
 
     def get_sample_metadata(
-        self, case: models.Family, sample: models.Sample, analysis_metadata: MipAnalysis
+        self, case: Family, sample: Sample, analysis_metadata: MipAnalysis
     ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report."""
 
@@ -57,7 +57,7 @@ class MipDNAReportAPI(ReportAPI):
             duplicates=parsed_metrics.duplicate_reads,
         )
 
-    def get_sample_coverage(self, sample: models.Sample, case: models.Family) -> dict:
+    def get_sample_coverage(self, sample: Sample, case: Family) -> dict:
         """Calculates coverage values for a specific sample."""
 
         genes = self.get_genes_from_scout(case.panels)
@@ -78,12 +78,12 @@ class MipDNAReportAPI(ReportAPI):
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
         return panel_gene_ids
 
-    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
+    def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
         case_sample = self.status_db.family_samples(case.internal_id)[0].sample
         lims_sample = self.get_lims_sample(case_sample.internal_id)
-        application = self.status_db.application(tag=lims_sample.get("application"))
+        application = self.status_db.get_application_by_tag(tag=lims_sample.get("application"))
 
         return application.analysis_type if application else None
 

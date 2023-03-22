@@ -1,9 +1,10 @@
-"""This script tests the cli methods to add families to status-db"""
+"""Tests the CLI methods to add cases to the status database."""
 
 from cg.cli.add import add
 from cg.constants import DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Customer, Panel
 from click.testing import CliRunner
 from tests.store_helpers import StoreHelpers
 
@@ -11,16 +12,16 @@ CLI_OPTION_ANALYSIS = Pipeline.BALSAMIC_UMI
 CLI_OPTION_DELIVERY = DataDelivery.FASTQ_QC
 
 
-def test_add_family_required(
+def test_add_case_required(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test to add a case using only the required arguments"""
     # GIVEN a database with a customer and an panel
     disk_store: Store = base_context.status_db
 
-    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer: Customer = helpers.ensure_customer(store=disk_store)
     customer_id = customer.internal_id
-    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel: Panel = helpers.ensure_panel(store=disk_store)
     panel_id = panel.name
     name = "case_name"
 
@@ -28,7 +29,7 @@ def test_add_family_required(
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -50,7 +51,7 @@ def test_add_family_required(
     assert disk_store.Family.query.first().panels == [panel_id]
 
 
-def test_add_family_bad_pipeline(
+def test_add_case_bad_pipeline(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test to add a case using only the required arguments"""
@@ -59,9 +60,9 @@ def test_add_family_bad_pipeline(
     # WHEN adding a case
     disk_store: Store = base_context.status_db
 
-    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer: Customer = helpers.ensure_customer(store=disk_store)
     customer_id = customer.internal_id
-    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel: Panel = helpers.ensure_panel(store=disk_store)
     panel_id = panel.name
     non_existing_analysis = "epigenentic_alterations"
     name = "case_name"
@@ -88,7 +89,7 @@ def test_add_family_bad_pipeline(
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_data_delivery(
+def test_add_case_bad_data_delivery(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers
 ):
     """Test to add a case using only the required arguments"""
@@ -97,9 +98,9 @@ def test_add_family_bad_data_delivery(
     # WHEN adding a case without data delivery
     disk_store: Store = base_context.status_db
 
-    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer: Customer = helpers.ensure_customer(store=disk_store)
     customer_id = customer.internal_id
-    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel: Panel = helpers.ensure_panel(store=disk_store)
     panel_id = panel.name
     name = "case_name"
     non_existing_data_delivery = "aws"
@@ -125,7 +126,7 @@ def test_add_family_bad_data_delivery(
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ticket: str):
+def test_add_case_bad_customer(cli_runner: CliRunner, base_context: CGConfig, ticket: str):
     """Test to add a case using a non-existing customer"""
     # GIVEN an empty database
     disk_store: Store = base_context.status_db
@@ -136,7 +137,7 @@ def test_add_family_bad_customer(cli_runner: CliRunner, base_context: CGConfig, 
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -156,21 +157,21 @@ def test_add_family_bad_customer(cli_runner: CliRunner, base_context: CGConfig, 
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_bad_panel(
+def test_add_case_bad_panel(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test to add a case using a non-existing panel"""
     # GIVEN a database with a customer
     disk_store: Store = base_context.status_db
     # WHEN adding a case
-    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer: Customer = helpers.ensure_customer(store=disk_store)
     customer_id = customer.internal_id
     panel_id = "dummy_panel"
     name = "dummy_name"
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--analysis",
@@ -190,16 +191,16 @@ def test_add_family_bad_panel(
     assert disk_store.Family.query.count() == 0
 
 
-def test_add_family_priority(
+def test_add_case_priority(
     cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers, ticket: str
 ):
     """Test that the added case get the priority we send in"""
     # GIVEN a database with a customer and an panel
     disk_store: Store = base_context.status_db
     # WHEN adding a case
-    customer: models.Customer = helpers.ensure_customer(store=disk_store)
+    customer: Customer = helpers.ensure_customer(store=disk_store)
     customer_id = customer.internal_id
-    panel: models.Panel = helpers.ensure_panel(store=disk_store)
+    panel: Panel = helpers.ensure_panel(store=disk_store)
     panel_id = panel.name
     name = "case_name"
     priority = "priority"
@@ -207,7 +208,7 @@ def test_add_family_priority(
     result = cli_runner.invoke(
         add,
         [
-            "family",
+            "case",
             "--panel",
             panel_id,
             "--priority",
