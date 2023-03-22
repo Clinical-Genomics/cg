@@ -64,7 +64,7 @@ class FindBusinessDataHandler(BaseHandler):
         return records
 
     def is_active_sample(self, internal_id: str) -> bool:
-        """Check if there are any active cases for a sample"""
+        """Check if there are any active cases for a sample."""
         sample: Sample = self.get_sample_by_internal_id(internal_id=internal_id)
         if any(
             [
