@@ -38,7 +38,7 @@ class HousekeeperAPI:
 
     def bundle(self, name: str) -> Bundle:
         """Fetch a bundle."""
-        return self._store.bundle(name)
+        return self._store.get_bundle_by_name(bundle_name=name)
 
     def bundles(self) -> List[Bundle]:
         """Fetch bundles."""
@@ -70,7 +70,7 @@ class HousekeeperAPI:
     def get_file(self, file_id: int) -> Optional[File]:
         """Get a file based on file id."""
         LOG.info("Fetching file %s", file_id)
-        file_obj: File = self._store.file_(file_id)
+        file_obj: File = self._store.get_file_by_id(file_id=file_id)
         if not file_obj:
             LOG.info("file not found")
             return None
@@ -123,7 +123,9 @@ class HousekeeperAPI:
         path: str = None,
     ) -> Query:
         """Fetch files."""
-        return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
+        return self._store.get_files(
+            bundle_name=bundle, tag_names=tags, version_id=version, file_path=path
+        )
 
     @staticmethod
     def fetch_file_from_version(version_obj: Version, tags: Set[str]) -> Optional[File]:
@@ -154,7 +156,7 @@ class HousekeeperAPI:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
-        return self._store.files(bundle=bundle, tags=tags, version=version)
+        return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
 
     def check_bundle_files(
         self,
@@ -211,7 +213,9 @@ class HousekeeperAPI:
     def version(self, bundle: str, date: dt.datetime) -> Version:
         """Fetch a version."""
         LOG.info("Fetch version %s from bundle %s", date, bundle)
-        return self._store.version(bundle, date)
+        return self._store.get_version_by_date_and_bundle_name(
+            bundle_name=bundle, version_date=date
+        )
 
     def last_version(self, bundle: str) -> Version:
         """Gets the latest version of a bundle."""
