@@ -492,7 +492,7 @@ class FindBusinessDataHandler(BaseHandler):
         records = self._get_query(table=Sample)
         if customers:
             customer_ids = [customer.id for customer in customers]
-        records = records.filter(Sample.customer_id.in_(customer_ids))
+            records = records.filter(Sample.customer_id.in_(customer_ids))
 
         records = (
             records.filter(
