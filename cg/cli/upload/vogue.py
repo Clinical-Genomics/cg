@@ -284,7 +284,7 @@ def _get_samples(store: Store, case_name: str) -> str:
         sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs: List[FamilySample] = store.family(case_name).links
+    link_objs: List[FamilySample] = store.get_case_by_internal_id(case_name).links
     sample_ids = {link_obj.sample.internal_id for link_obj in link_objs}
     return ",".join(sample_ids)
 
@@ -298,7 +298,7 @@ def _get_analysis_workflow_details(status_api: Store, case_name: str) -> Tuple[A
         workflow_version(str): v3.14.15
     """
     # Workflow that generated these results
-    case_obj = status_api.family(case_name)
+    case_obj = status_api.get_case_by_internal_id(case_name)
     workflow_name = None
     workflow_version = None
     if case_obj.analyses:

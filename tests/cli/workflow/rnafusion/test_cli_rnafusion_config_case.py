@@ -32,7 +32,7 @@ def test_with_missing_case(
     """Test command with invalid case to start with."""
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
-    assert not rnafusion_context.status_db.family(not_existing_case_id)
+    assert not rnafusion_context.status_db.get_case_by_internal_id(not_existing_case_id)
     # WHEN running
     result = cli_runner.invoke(config_case, [not_existing_case_id], obj=rnafusion_context)
     # THEN command should NOT successfully call the command it creates

@@ -227,7 +227,9 @@ class CaseSubmitter(Submitter):
         new_cases: List[Family] = []
 
         for case in items:
-            status_db_case: Family = self.status.family(internal_id=case["internal_id"])
+            status_db_case: Family = self.status.get_case_by_internal_id(
+                internal_id=case["internal_id"]
+            )
             if not status_db_case:
                 new_case: Family = self._create_case(
                     case=case, customer_obj=customer, ticket=ticket_id

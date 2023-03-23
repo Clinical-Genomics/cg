@@ -26,7 +26,7 @@ def test_qc_check_fail(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
-    microsalt_case: Family = store.family(microsalt_case_qc_fail)
+    microsalt_case: Family = store.get_case_by_internal_id(microsalt_case_qc_fail)
     for index in range(4):
         microsalt_case.samples[index].reads = 1000
 
@@ -58,7 +58,7 @@ def test_qc_check_pass(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
-    microsalt_case: Family = store.family(microsalt_case_qc_pass)
+    microsalt_case: Family = store.get_case_by_internal_id(microsalt_case_qc_pass)
     microsalt_case.samples[1].control = ControlEnum.negative
     microsalt_case.samples[1].reads = 1100000
 
@@ -91,7 +91,7 @@ def test_qc_check_negative_control_fail(
     microsalt_api: MicrosaltAnalysisAPI = qc_microsalt_context.meta_apis["analysis_api"]
 
     # GIVEN a case that is to be stored
-    microsalt_case: Family = store.family(microsalt_case_qc_fail)
+    microsalt_case: Family = store.get_case_by_internal_id(microsalt_case_qc_fail)
     microsalt_case.samples[0].control = ControlEnum.negative
 
     mocker.patch.object(MicrosaltAnalysisAPI, "create_qc_done_file")
@@ -127,7 +127,7 @@ def test_get_cases_to_store_pass(
     mocker.patch.object(TrailblazerAPI, "add_comment")
 
     # GIVEN a store with a QC ready microsalt case that will pass QC
-    microsalt_pass_case: Family = store.family(microsalt_case_qc_pass)
+    microsalt_pass_case: Family = store.get_case_by_internal_id(microsalt_case_qc_pass)
     microsalt_pass_case.samples[1].control = "negative"
     microsalt_pass_case.samples[1].reads = 1100000
 
@@ -169,7 +169,7 @@ def test_get_cases_to_store_fail(
     mocker.patch.object(TrailblazerAPI, "add_comment")
 
     # GIVEN a store with a QC ready microsalt case that will fail QC
-    microsalt_fail_case: Family = store.family(microsalt_case_qc_fail)
+    microsalt_fail_case: Family = store.get_case_by_internal_id(microsalt_case_qc_fail)
 
     mocker.patch.object(
         MicrosaltAnalysisAPI,

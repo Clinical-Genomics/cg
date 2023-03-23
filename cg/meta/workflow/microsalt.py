@@ -65,7 +65,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_path(self, case_id: str) -> List[Path]:
         """Returns all paths associated with the case or single sample analysis."""
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         lims_project: str = self.get_project(case_obj.links[0].sample.internal_id)
         lims_project_dir_path: Path = Path(self.root_dir, "results", lims_project)
 
@@ -78,7 +78,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_latest_case_path(self, case_id: str) -> Union[Path, None]:
         """Return latest run dir for a microbial case, if no path found it returns None."""
         lims_project: str = self.get_project(
-            self.status_db.family(case_id).links[0].sample.internal_id
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample.internal_id
         )
 
         return next(
@@ -125,7 +125,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         """Get trailblazer config path."""
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_obj: Sample = case_obj.links[0].sample
         project_id: str = self.get_project(sample_obj.internal_id)
         return Path(
@@ -135,7 +135,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_deliverables_file_path(self, case_id: str) -> Path:
         """Returns a path where the microSALT deliverables file for the order_id should be
         located"""
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         order_id: str = case_obj.name
         deliverables_file_path = Path(
             self.root_dir,
@@ -154,7 +154,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def link_fastq_files(
         self, case_id: str, sample_id: Optional[str], dry_run: bool = False
     ) -> None:
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
         for sample_obj in samples:
             self.link_fastq_files_for_sample(case_obj=case_obj, sample_obj=sample_obj)
@@ -166,7 +166,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         if sample_id:
             return [self.status_db.query(Sample).filter(Sample.internal_id == sample_id).first()]
 
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return [link.sample for link in case_obj.links]
 
     def get_lims_comment(self, sample_id: str) -> str:
@@ -330,7 +330,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_id_from_case(self, unique_id: str) -> Tuple[str, None]:
         """If case_id is specified, validates the presence of case_id in database and returns it"""
-        case_obj: Family = self.status_db.family(unique_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
             raise click.Abort

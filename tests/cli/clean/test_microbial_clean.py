@@ -36,7 +36,7 @@ def test_dry_run(
         cleaned_at=None,
     )
 
-    analysis_to_clean = base_store.family(microsalt_case_clean_dry).analyses[0]
+    analysis_to_clean = base_store.get_case_by_internal_id(microsalt_case_clean_dry).analyses[0]
     case_path_list = clean_context_microsalt.meta_apis["analysis_api"].get_case_path(
         microsalt_case_clean_dry
     )
@@ -84,7 +84,7 @@ def test_clean_run(
         cleaned_at=None,
     )
 
-    analysis_to_clean = base_store.family(microsalt_case_clean).analyses[0]
+    analysis_to_clean = base_store.get_case_by_internal_id(microsalt_case_clean).analyses[0]
     case_path_list = clean_context_microsalt.meta_apis["analysis_api"].get_case_path(
         microsalt_case_clean
     )

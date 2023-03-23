@@ -64,7 +64,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
     elif family_id:  # Provided case ID without a subcommand: upload everything
         try:
             upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
-            case: Family = upload_api.status_db.family(family_id)
+            case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=family_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded

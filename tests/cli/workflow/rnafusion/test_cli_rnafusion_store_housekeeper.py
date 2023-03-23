@@ -43,7 +43,7 @@ def test_with_missing_case(
     caplog.set_level(logging.ERROR)
 
     # GIVEN case_id not in database
-    assert not rnafusion_context.status_db.family(not_existing_case_id)
+    assert not rnafusion_context.status_db.get_case_by_internal_id(not_existing_case_id)
 
     # WHEN running
     result = cli_runner.invoke(store_housekeeper, [not_existing_case_id], obj=rnafusion_context)
@@ -134,7 +134,7 @@ def test_valid_case(
     # Make sure nothing is currently stored in Housekeeper
 
     # Make sure  analysis not already stored in StatusDB
-    assert not rnafusion_context.status_db.family(case_id).analyses
+    assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -147,7 +147,7 @@ def test_valid_case(
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert rnafusion_context.status_db.family(case_id).analyses
+    assert rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert rnafusion_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
 
@@ -171,7 +171,7 @@ def test_valid_case_already_added(
     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # Make sure  analysis not already stored in ClinicalDB
-    assert not rnafusion_context.status_db.family(case_id).analyses
+    assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
     HermesApi.convert_deliverables.return_value = CGDeliverables(**hermes_deliverables)
@@ -221,7 +221,7 @@ def test_dry_run(
     assert not rnafusion_context.housekeeper_api.bundle(case_id)
 
     # Make sure analysis not already stored in status_db
-    assert not rnafusion_context.status_db.family(case_id).analyses
+    assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # WHEN running command
     result = cli_runner.invoke(store_housekeeper, [case_id, "--dry-run"], obj=rnafusion_context)

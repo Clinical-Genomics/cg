@@ -28,7 +28,7 @@ def test_data(coverage_upload_api, analysis_store, case_id):
     # GIVEN a coverage api and an analysis object
     coverage_api = coverage_upload_api
     case_name = case_id
-    case_obj = analysis_store.family(case_name)
+    case_obj = analysis_store.get_case_by_internal_id(case_name)
     analysis_obj = MockAnalysis(case_obj=case_obj)
 
     # WHEN using the data method
@@ -50,7 +50,7 @@ def test_upload(chanjo_config, populated_housekeeper_api, analysis_store, mocker
     chanjo_api = ChanjoAPI(config=chanjo_config)
     coverage_api = UploadCoverageApi(status_api=None, hk_api=hk_api, chanjo_api=chanjo_api)
     family_name = case_id
-    case_obj = analysis_store.family(family_name)
+    case_obj = analysis_store.get_case_by_internal_id(family_name)
     analysis_obj = MockAnalysis(case_obj=case_obj)
     data = coverage_api.data(analysis_obj=analysis_obj)
 

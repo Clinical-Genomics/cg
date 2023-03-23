@@ -77,7 +77,7 @@ def test_set_samples_by_invalid_case_id(
 
     # WHEN calling set samples with an identifier not existing on sample
     non_existing_case = "not_a_case"
-    assert not base_store.family(non_existing_case)
+    assert not base_store.get_case_by_internal_id(non_existing_case)
     with caplog.at_level(logging.INFO):
         result = cli_runner.invoke(
             samples, [non_existing_case, "-y", "--skip-lims"], obj=base_context
