@@ -1,12 +1,13 @@
 from cg.store import Store
 from cg.store.models import Customer, ApplicationVersion, Application
+from tests.cli.conftest import fixture_application_tag
 from tests.store_helpers import StoreHelpers
 
 
-def test_application_version_has_application(store: Store, helpers: StoreHelpers):
+def test_application_version_has_application(store: Store, helpers: StoreHelpers, application_tag):
     """Test that an Application version has the application that was instantiated to."""
     # GIVEN an application
-    application: Application = helpers.ensure_application(store=store, tag="tag_pepito")
+    application: Application = helpers.ensure_application(store=store, tag=application_tag)
 
     # WHEN initialising an application version with the application
     application_version = ApplicationVersion(application=application)
