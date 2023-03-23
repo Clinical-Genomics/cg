@@ -41,7 +41,7 @@ def test_get_samples_by_subject_id(
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
+    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
 
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
@@ -68,7 +68,7 @@ def test_get_samples_by_subject_id_and_is_tumour(
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
+    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
 
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
@@ -90,7 +90,7 @@ def test__get_sample_by_name(store_with_samples_that_have_names: Store, name="sa
     # GIVEN a database with two samples of which one has a name
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_that_have_names.get_all_samples()) == 2
+    assert len(store_with_samples_that_have_names.get_samples()) == 2
 
     # WHEN fetching the sample by name
     samples: Sample = store_with_samples_that_have_names.get_sample_by_name(name=name)
