@@ -63,28 +63,20 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(Analysis.started_at < before)
         return records
 
-    def active_sample(self, internal_id: str) -> bool:
+    def has_active_cases_for_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
-        sample: Sample = self.get_sample_by_internal_id(internal_id=internal_id)
-        if any(
-            [
-                self.family(
-                    internal_id=self.Family.query.filter(Family.id == family_sample.family_id)
-                    .first()
-                    .internal_id
-                ).action
-                == "analyze"
-                or self.family(
-                    internal_id=self.Family.query.filter(Family.id == family_sample.family_id)
-                    .first()
-                    .internal_id
-                ).action
-                == "running"
-                for family_sample in sample.links
-            ]
-        ):
-            return True
+        sample = self.get_sample_by_internal_id(internal_id=internal_id)
+        for family_sample in sample.links:
+            case_action = self.get_case_action(sample=family_sample)
+            if case_action in ["analyze", "running"]:
+                return True
         return False
+
+    def get_case_action(self, sample: FamilySample) -> str:
+        """Get the action of a case."""
+        return self.family(
+            internal_id=self.Family.query.filter(Family.id == sample.family_id).first().internal_id
+        ).action
 
     def get_application_by_case(self, case_id: str) -> Application:
         """Return the application of a case."""
@@ -462,7 +454,7 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_all_samples(self) -> List[Sample]:
+    def get_samples(self) -> List[Sample]:
         """Return all samples."""
         return self._get_query(table=Sample).order_by(Sample.created_at.desc()).all()
 

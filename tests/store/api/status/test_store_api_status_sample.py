@@ -1,0 +1,183 @@
+"""Tests for store API status module related to samples."""
+
+
+from typing import List
+from cg.store import Store
+from cg.store.models import Sample
+from tests.store_helpers import StoreHelpers
+
+
+def test_samples_to_receive_external(sample_store: Store, helpers: StoreHelpers):
+    """Test fetching external sample."""
+    # GIVEN a store with a mixture of samples
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding external samples to receive
+    samples: List[Sample] = sample_store.get_samples_to_receive(external=True)
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
+
+    # THEN assert that only the external sample is returned
+    assert len(samples) == 1
+
+    first_sample = samples[0]
+    # THEN assert that the sample is external in database
+    assert first_sample.application_version.application.is_external is True
+    # THEN assert that the sample is does not have a received at stamp
+    assert first_sample.received_at is None
+
+
+def test_get_samples_to_receive_internal(sample_store):
+    """Test fetching internal samples."""
+    # GIVEN a store with samples in a mix of states
+    assert len(sample_store.get_samples()) > 1
+    assert len([sample for sample in sample_store.get_samples() if sample.received_at]) > 1
+
+    # WHEN finding which samples are in queue to receive
+    assert len(sample_store.get_samples_to_receive()) == 3
+    first_sample = sample_store.get_samples_to_receive()[0]
+
+    # THEN samples should be a sample
+    assert isinstance(first_sample, Sample)
+
+    assert first_sample.application_version.application.is_external is False
+    assert first_sample.received_at is None
+
+
+def test_samples_to_sequence(sample_store):
+    """Test fetching samples to sequence."""
+    # GIVEN a store with sample in a mix of states
+    assert len(sample_store.get_samples()) > 1
+    assert len([sample for sample in sample_store.get_samples() if sample.sequenced_at]) >= 1
+
+    # WHEN finding which samples are in queue to be sequenced
+    sequence_samples: List[Sample] = sample_store.get_samples_to_sequence()
+
+    # THEN samples should be a list of samples
+    assert isinstance(sequence_samples, list)
+    assert isinstance(sequence_samples[0], Sample)
+
+    # THEN it should list the received and partly sequenced samples
+    assert len(sequence_samples) == 2
+    assert {sample.name for sample in sequence_samples} == set(
+        ["sequenced-partly", "received-prepared"]
+    )
+    for sample in sequence_samples:
+        assert sample.sequenced_at is None
+        if sample.name == "sequenced-partly":
+            assert sample.reads > 0
+
+
+def test_samples_to_prepare(sample_store):
+    """Test fetching samples to prepare."""
+    # GIVEN a store with sample in a mix of states
+    assert len(sample_store.get_samples()) > 1
+    assert len([sample for sample in sample_store.get_samples() if sample.prepared_at]) >= 1
+
+    # WHEN finding which samples are in queue to be prepared
+    prepare_samples: List[Sample] = sample_store.get_samples_to_prepare()
+
+    # THEN samples should be a list of samples
+    assert isinstance(prepare_samples, list)
+    assert isinstance(prepare_samples[0], Sample)
+
+    # THEN it should list the received sample
+    assert len(prepare_samples) == 1
+    assert prepare_samples[0].name == "received"
+
+
+def test_get_sample_by_entry_id(sample_store, entry_id=1):
+    """Test fetching a sample by entry id."""
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding a sample by entry id
+    sample: Sample = sample_store.get_sample_by_entry_id(entry_id=entry_id)
+
+    # THEN samples should be a list of samples
+    assert isinstance(sample, Sample)
+
+    # THEN it should return the sample
+    assert sample.id == entry_id
+
+
+def test_get_sample_by_internal_id(sample_store, internal_id="test_internal_id"):
+    """Test fetching a sample by internal id."""
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding a sample by internal id
+    sample: Sample = sample_store.get_sample_by_internal_id(internal_id=internal_id)
+
+    # THEN samples should be a list of samples
+    assert isinstance(sample, Sample)
+
+    # THEN it should return the sample
+    assert sample.internal_id == internal_id
+
+
+def test_get_samples_to_deliver(sample_store):
+    """Test fetching samples to deliver."""
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to deliver
+    samples = sample_store.get_samples_to_deliver()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
+
+    # THEN it should return the samples that are sequenced but not delivered
+    assert len(samples) == 2
+    assert {sample.name for sample in samples} == set(["to-deliver", "sequenced"])
+
+
+def test_get_samples_to_invoice(sample_store):
+    """Test fetching samples to invoice."""
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to invoice
+    sample = sample_store.get_samples_to_invoice()[0].first()
+
+    # THEN samples should be a list of samples
+    assert isinstance(sample, Sample)
+
+    # THEN it should return all samples that are not invoiced
+    assert sample
+    assert sample.name == "delivered"
+
+
+def test_get_samples_not_invoiced(sample_store):
+    """Test fetching samples not invoiced."""
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to invoice
+    samples = sample_store.get_samples_not_invoiced()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
+
+    # THEN it should return all samples that are not invoiced
+    assert len(samples) == len(sample_store.get_samples())
+
+
+def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers, sample_id: int):
+    """Test fetching samples not down sampled."""
+    # GIVEN a store with a sample
+    assert len(sample_store.get_samples()) > 1
+
+    # WHEN finding samples to invoice
+    samples = sample_store.get_samples_not_down_sampled()
+
+    # THEN samples should be a list of samples
+    assert isinstance(samples, list)
+    assert isinstance(samples[0], Sample)
+
+    # THEN it should return all samples in the store
+    assert len(samples) == len(sample_store.get_samples())
