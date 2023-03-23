@@ -225,7 +225,7 @@ class StatusHandler(BaseHandler):
 
     def set_case_action(self, action: Literal[CASE_ACTIONS], case_id: str) -> None:
         """Sets the action of provided cases to None or the given action."""
-        case_obj: Family = self.Family.query.filter(Family.internal_id == case_id).first()
+        case_obj: Family = self.get_case_by_internal_id(internal_id=case_id)
         case_obj.action = action
         self.commit()
 

@@ -11,6 +11,7 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
+from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
 
 from cg.store.models import (
     Analysis,
@@ -550,3 +551,12 @@ class FindBusinessDataHandler(BaseHandler):
         """Returns True if all samples in a case have been sequenced externally."""
         case: Family = self.family(internal_id=case_id)
         return all(sample.application_version.application.is_external for sample in case.samples)
+
+    def get_case_by_internal_id(self, internal_id: str) -> Family:
+        """Get case by internal id."""
+
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
+            cases=self._get_query(table=Family),
+            internal_id=internal_id,
+        ).first()
