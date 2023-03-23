@@ -31,7 +31,7 @@ from cg.store.filters.status_application_filters import apply_application_filter
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database."""
 
-    def get_all_samples_to_receive(self, external: bool = False) -> List[Sample]:
+    def get_samples_to_receive(self, external: bool = False) -> List[Sample]:
         """Return samples to receive."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: List[SampleFilter] = [
@@ -52,7 +52,7 @@ class StatusHandler(BaseHandler):
             )
         return records.order_by(Sample.ordered_at).all()
 
-    def get_all_samples_to_prepare(self) -> List[Sample]:
+    def get_samples_to_prepare(self) -> List[Sample]:
         """Return samples to prepare."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: List[SampleFilter] = [
@@ -70,7 +70,7 @@ class StatusHandler(BaseHandler):
 
         return records.order_by(Sample.received_at).all()
 
-    def get_all_samples_to_sequence(self) -> List[Sample]:
+    def get_samples_to_sequence(self) -> List[Sample]:
         """Return samples in sequencing."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: List[SampleFilter] = [
