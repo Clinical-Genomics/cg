@@ -146,8 +146,7 @@ def submit_order(order_type):
 def parse_cases():
     """Fetch cases."""
     cases: List[Family] = db.cases(days=31)
-    count = len(cases)
-    return jsonify(cases=cases, total=count)
+    return jsonify(cases=cases, total=len(cases))
 
 
 @BLUEPRINT.route("/families")
@@ -165,56 +164,51 @@ def parse_families():
             customers=customers,
             action=request.args.get("action"),
         )
-        count = cases.count()
-        cases = cases.limit(30)
-
+        count = len(cases)
+        cases = cases[:30]
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
     return jsonify(families=parsed_cases, total=count)
 
 
 @BLUEPRINT.route("/families_in_collaboration")
 def parse_families_in_collaboration():
-    """Fetch families in collaboration."""
+    """Return families in collaboration."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     data_analysis: str = request.args.get("data_analysis")
-    cases_q: Query = db.families(
+    cases_query: Query = db.families(
         enquiry=request.args.get("enquiry"),
         customers=customer.collaborators,
         data_analysis=data_analysis,
     )
-    count = cases_q.count()
-    cases = cases_q.limit(30)
+    cases = cases_query.limit(30)
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=parsed_cases, total=count)
+    return jsonify(families=parsed_cases, total=cases_query.count())
 
 
 @BLUEPRINT.route("/families/<family_id>")
 def parse_family(family_id):
-    """Fetch a family with links."""
+    """Return a family with links."""
     case: Family = db.family(family_id)
     if case is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
-
-    parsed_case = case.to_dict(links=True, analyses=True)
-    return jsonify(**parsed_case)
+    return jsonify(**case.to_dict(links=True, analyses=True))
 
 
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
 def parse_family_in_collaboration(family_id):
-    """Fetch a family with links."""
+    """Return a family with links."""
     case: Family = db.family(family_id)
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if case.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    parsed_case: Dict = case.to_dict(links=True, analyses=True)
-    return jsonify(**parsed_case)
+    return jsonify(**case.to_dict(links=True, analyses=True))
 
 
 @BLUEPRINT.route("/samples")
 def parse_samples():
-    """Fetch samples."""
+    """Return samples."""
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(http.HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
@@ -232,13 +226,12 @@ def parse_samples():
         )
     limit = int(request.args.get("limit", 50))
     parsed_samples: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
-
     return jsonify(samples=parsed_samples, total=len(samples))
 
 
 @BLUEPRINT.route("/samples_in_collaboration")
 def parse_samples_in_collaboration():
-    """Fetch samples in a customer group."""
+    """Return samples in a customer group."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     samples: List[Sample] = db.get_samples_by_enquiry(
         enquiry=request.args.get("enquiry"), customers=customer.collaborators
@@ -250,44 +243,41 @@ def parse_samples_in_collaboration():
 
 @BLUEPRINT.route("/samples/<sample_id>")
 def parse_sample(sample_id):
-    """Fetch a single sample."""
+    """Return a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
     if sample is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (sample.customer not in g.current_user.customers):
         return abort(http.HTTPStatus.FORBIDDEN)
-    parsed_sample: Dict = sample.to_dict(links=True, flowcells=True)
-    return jsonify(**parsed_sample)
+    return jsonify(**sample.to_dict(links=True, flowcells=True))
 
 
 @BLUEPRINT.route("/samples_in_collaboration/<sample_id>")
 def parse_sample_in_collaboration(sample_id):
-    """Fetch a single sample."""
+    """Return a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if sample.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
-    parsed_sample: Dict = sample.to_dict(links=True, flowcells=True)
-    return jsonify(**parsed_sample)
+    return jsonify(**sample.to_dict(links=True, flowcells=True))
 
 
 @BLUEPRINT.route("/pools")
 def parse_pools():
-    """Fetch pools."""
+    """Return pools."""
     customers: Optional[List[Customer]] = (
         g.current_user.customers if not g.current_user.is_admin else None
     )
     pools: List[Pool] = db.get_pools_to_render(
         customers=customers, enquiry=request.args.get("enquiry")
     )
-
-    data = [pool_obj.to_dict() for pool_obj in pools[:30]]
-    return jsonify(pools=data, total=len(pools))
+    parsed_pools: List[Dict] = [pool_obj.to_dict() for pool_obj in pools[:30]]
+    return jsonify(pools=parsed_pools, total=len(pools))
 
 
 @BLUEPRINT.route("/pools/<pool_id>")
 def parse_pool(pool_id):
-    """Fetch a single pool."""
+    """Return a single pool."""
     pool: Pool = db.get_pool_by_entry_id(entry_id=pool_id)
     if pool is None:
         return abort(http.HTTPStatus.NOT_FOUND)
@@ -298,18 +288,18 @@ def parse_pool(pool_id):
 
 @BLUEPRINT.route("/flowcells")
 def parse_flow_cells() -> Any:
-    """Fetch flow cells."""
+    """Return flow cells."""
     flow_cells: List[Flowcell] = db.get_flow_cell_by_enquiry_and_status(
         flow_cell_statuses=[request.args.get("status")],
         flow_cell_id_enquiry=request.args.get("enquiry"),
     )
-    parsed_flow_cells: List[dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
+    parsed_flow_cells: List[Dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
     return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
 
 
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def parse_flow_cell(flowcell_id):
-    """Fetch a single flowcell."""
+    """Return a single flowcell."""
     flow_cell: Flowcell = db.get_flow_cell(flowcell_id)
     if flow_cell is None:
         return abort(http.HTTPStatus.NOT_FOUND)
@@ -318,20 +308,20 @@ def parse_flow_cell(flowcell_id):
 
 @BLUEPRINT.route("/analyses")
 def parse_analyses():
-    """Fetch analyses."""
+    """Return analyses."""
     if request.args.get("status") == "delivery":
-        analyses = db.analyses_to_deliver()
+        analyses: Query = db.analyses_to_deliver()
     elif request.args.get("status") == "upload":
-        analyses = db.analyses_to_upload()
+        analyses: Query = db.analyses_to_upload()
     else:
-        analyses = db.Analysis.query
-    data = [analysis_obj.to_dict() for analysis_obj in analyses.limit(30)]
-    return jsonify(analyses=data, total=analyses.count())
+        analyses: Query = db.Analysis.query
+    parsed_analysis: List[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses.limit(30)]
+    return jsonify(analyses=parsed_analysis, total=analyses.count())
 
 
 @BLUEPRINT.route("/options")
 def parse_options():
-    """Fetch various options."""
+    """Return various options."""
     customers: List[Optional[Customer]] = (
         db.get_customers() if g.current_user.is_admin else g.current_user.customers
     )
@@ -373,7 +363,7 @@ def parse_options():
 
 @BLUEPRINT.route("/me")
 def parse_current_user_information():
-    """Fetch information about current user."""
+    """Return information about current user."""
     if not g.current_user.is_admin and not g.current_user.customers:
         LOG.error(
             "%s is not admin and is not connected to any customers, aborting", g.current_user.email
@@ -386,16 +376,16 @@ def parse_current_user_information():
 @BLUEPRINT.route("/applications")
 @is_public
 def parse_applications():
-    """Fetch application tags."""
+    """Return application tags."""
     applications: List[Application] = db.get_applications_is_not_archived()
-    parsed_applications = [application.to_dict() for application in applications]
+    parsed_applications: List[Dict] = [application.to_dict() for application in applications]
     return jsonify(applications=parsed_applications)
 
 
 @BLUEPRINT.route("/applications/<tag>")
 @is_public
 def parse_application(tag):
-    """Fetch an application tag."""
+    """Return an application tag."""
     application: Application = db.get_application_by_tag(tag=tag)
     if application is None:
         return abort(
