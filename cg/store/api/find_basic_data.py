@@ -140,13 +140,15 @@ class FindBasicDataHandler(BaseHandler):
             application_versions=app_version_query,
             application_id=application_id,
         )
-        app_version_query: Query = app_version_query.filter(
-            self.ApplicationVersion.valid_from < dt.datetime.now()
+        app_version_query: Query = apply_application_versions_filter(
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_DATE],
+            application_versions=app_version_query,
+            date=dt.datetime.now(),
         )
-        app_version_query: Query = app_version_query.order_by(
-            desc(self.ApplicationVersion.valid_from)
+        app_version_query: Query = apply_application_versions_filter(
+            filter_functions=[ApplicationVersionFilter.ORDER_BY_VALID_FROM],
+            application_versions=app_version_query,
         )
-
         return app_version_query.first()
 
     # def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
