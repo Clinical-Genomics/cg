@@ -92,7 +92,7 @@ class DeliverTicketAPI(MetaAPI):
             file.unlink()
 
     def get_samples_from_ticket(self, ticket: str) -> list:
-        all_samples = []
+        all_samples: List = []
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
             for link_obj in case.links:
