@@ -660,3 +660,16 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 
     # THEN one pools should be returned
     assert len(pools) == 1
+
+
+def test_get_case_action(store_with_active_sample_analyze: Store):
+    """Test to get the action of a case"""
+    # GIVEN a database with an active sample
+
+    # WHEN fetching the case action
+    action: str = store_with_active_sample_analyze.get_case_action(
+        sample=store_with_active_sample_analyze.get_samples()[0].links[0]
+    )
+
+    # THEN the action should be analyze
+    assert action == "analyze"
