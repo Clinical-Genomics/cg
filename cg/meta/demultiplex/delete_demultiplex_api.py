@@ -73,7 +73,7 @@ class DeleteDemuxAPI:
         active_samples_on_flow_cell: List[str] = [
             sample.internal_id
             for sample in self.samples_on_flow_cell
-            if self.status_db.is_active_sample(internal_id=sample.internal_id)
+            if self.status_db.has_active_cases_for_sample(internal_id=sample.internal_id)
         ]
         if active_samples_on_flow_cell:
             return active_samples_on_flow_cell

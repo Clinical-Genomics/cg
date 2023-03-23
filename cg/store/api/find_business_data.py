@@ -63,13 +63,13 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(Analysis.started_at < before)
         return records
 
-    def is_active_sample(self, internal_id: str) -> bool:
+    def has_active_cases_for_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
-        if any(
-            self.get_case_action(sample=family_sample) in ["analyze", "running"]
-            for family_sample in self.get_sample_by_internal_id(internal_id=internal_id).links
-        ):
-            return True
+        sample = self.get_sample_by_internal_id(internal_id=internal_id)
+        for family_sample in sample.links:
+            case_action = self.get_case_action(sample=family_sample)
+            if case_action in ["analyze", "running"]:
+                return True
         return False
 
     def get_case_action(self, sample: FamilySample) -> str:
