@@ -2,7 +2,7 @@
 import datetime
 import enum
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List
 import pytest
 
 from cg.constants import Pipeline
@@ -264,22 +264,22 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_two_applications_one_with_application_version")
-def fixture_store_with_two_applications_one_with_application_version(
-    store: Store,
+@pytest.fixture(name="store_with_applications_with_application_versions")
+def fixture_store_with_applications_with_application_versions(
+    store_with_an_application_with_and_without_attributes: Store,
     helpers: StoreHelpers,
 ) -> Store:
-    """Return a store with an application version."""
-    application: Application = helpers.ensure_application(
-        store=store,
-        tag=StoreConftestFixture.TAG_APPLICATION_WITH_ATTRIBUTES.value,
-        prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
-        is_external=True,
-        is_archived=True,
-    )
+    """."""
+    applications: List[
+        Application
+    ] = store_with_an_application_with_and_without_attributes.get_applications()
 
-    helpers.ensure_application_version(store=store, application=application)
-    return store
+    for app in applications:
+        helpers.ensure_application_version(
+            store=store_with_an_application_with_and_without_attributes,
+            application_tag=app.tag,
+        )
+    return store_with_an_application_with_and_without_attributes
 
 
 @pytest.fixture(name="store_with_an_invoice_with_and_without_attributes")
