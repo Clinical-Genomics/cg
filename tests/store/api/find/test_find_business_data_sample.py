@@ -99,7 +99,6 @@ def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="tes
     assert samples and samples.name == name
 
 
-
 def test_get_samples_by_name_pattern(
     store_with_samples_that_have_names: Store, name_pattern="sample"
 ):
@@ -116,6 +115,7 @@ def test_get_samples_by_name_pattern(
 
     # THEN one sample should be returned
     assert samples and len(samples) == 3
+
 
 def test_has_active_cases_for_sample_analyze(
     store_with_active_sample_analyze: Store,
@@ -145,4 +145,3 @@ def test_has_active_cases_for_sample_running(
         store_with_active_sample_running.has_active_cases_for_sample(internal_id=sample_internal_id)
         is True
     )
-
