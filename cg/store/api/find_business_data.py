@@ -470,7 +470,7 @@ class FindBusinessDataHandler(BaseHandler):
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
         samples: Query = self._get_query(table=Sample)
-        customer_ids: None
+        customer_ids = None
         filter_functions: List[SampleFilter] = []
         if customers:
             customer_ids: List[int] = [customer.id for customer in customers]
