@@ -134,8 +134,8 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
 
 def filter_samples_by_name_enquiry(samples: Query, name_enquiry: str, **kwargs) -> Query:
     """Return samples by name."""
-    filtered_samples = samples.filter(Sample.name.like(f"%{name_enquiry}%")).all()
-    return samples.filter(Sample.name == name_enquiry) if filtered_samples else samples
+    filtered_samples = samples.filter(Sample.name.like(f"%{name_enquiry}%"))
+    return samples.filter(filtered_samples) if filtered_samples.all() else samples
 
 
 def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
@@ -151,7 +151,7 @@ def apply_sample_filter(
     tissue_type: Optional[SampleType] = None,
     data_analysis: Optional[str] = None,
     invoice_id: Optional[int] = None,
-    customer_ids: Optional[str] = None,
+    customer_ids: Optional[List[int]] = None,
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
     customer: Optional[Customer] = None,

@@ -465,7 +465,7 @@ def test_filter_samples_is_not_prepared(
 
 def test_filter_get_samples_by_internal_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    internal_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    sample_internal_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given id."""
 
@@ -476,7 +476,7 @@ def test_filter_get_samples_by_internal_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
-        internal_id=internal_id,
+        internal_id=sample_internal_id,
     )
 
     # ASSERT that samples is a query
@@ -628,7 +628,7 @@ def test_filter_get_samples_by_customer_id(
     # THEN samples should contain the test sample
     assert samples.all()
 
-    # THEN samples should contain one sample
+    # THEN samples should contain two samples
     assert len(samples.all()) == 2
 
     # THEN the sample should have the correct customer id
@@ -659,5 +659,5 @@ def test_filter_get_samples_by_name_enquiry(
     # THEN samples should contain one sample
     assert len(samples.all()) == 1
 
-    # THEN the sample should have the correct name enquiry id
+    # THEN the sample should have the correct name
     assert samples[0].name == name_enquiry
