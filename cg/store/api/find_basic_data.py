@@ -134,40 +134,16 @@ class FindBasicDataHandler(BaseHandler):
         if not application:
             return None
         application_id = application.id
-        app_version_query: Query = self._get_query(table=ApplicationVersion)
-        app_version_query: Query = apply_application_versions_filter(
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_APPLICATION_ID],
-            application_versions=app_version_query,
+        return apply_application_versions_filter(
+            filter_functions=[
+                ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
+                ApplicationVersionFilter.FILTER_BY_DATE,
+                ApplicationVersionFilter.ORDER_BY_VALID_FROM,
+            ],
+            application_versions=self._get_query(table=ApplicationVersion),
             application_id=application_id,
-        )
-        app_version_query: Query = apply_application_versions_filter(
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_DATE],
-            application_versions=app_version_query,
             date=dt.datetime.now(),
-        )
-        app_version_query: Query = apply_application_versions_filter(
-            filter_functions=[ApplicationVersionFilter.ORDER_BY_VALID_FROM],
-            application_versions=app_version_query,
-        )
-        return app_version_query.first()
-
-    # def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
-    #     """Return the current application version for an application tag."""
-    #     application = self.get_application_by_tag(tag=tag)
-    #     if not application:
-    #         return None
-    #     application_id = application.id
-    #     app_version_query: Query = self._get_query(table=ApplicationVersion)
-    #     return apply_application_versions_filter(
-    #         application_versions=app_version_query,
-    #         filter_functions=[
-    #             ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
-    #             ApplicationVersionFilter.FILTER_BY_DATE,
-    #             ApplicationVersionFilter.ORDER_BY_VALID_FROM,
-    #         ],
-    #         application_id=application_id,
-    #         date=dt.datetime.now(),
-    #     )
+        ).first()
 
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
