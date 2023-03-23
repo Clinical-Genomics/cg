@@ -85,15 +85,33 @@ def test_get_samples_by_subject_id_and_is_tumour(
     assert samples and len(samples) == 1
 
 
-def test__get_sample_by_name(store_with_samples_that_have_names: Store, name="sample_1"):
+def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="sample_1"):
     """Test that samples can be fetched by name."""
     # GIVEN a database with two samples of which one has a name
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_that_have_names.get_samples()) == 2
+    assert len(store_with_samples_that_have_names.get_samples()) == 4
 
     # WHEN fetching the sample by name
     samples: Sample = store_with_samples_that_have_names.get_sample_by_name(name=name)
 
     # THEN one sample should be returned
     assert samples and samples.name == name
+
+
+def test_get_samples_by_name_pattern(
+    store_with_samples_that_have_names: Store, name_pattern="sample"
+):
+    """Test that samples can be fetched by name."""
+    # GIVEN a database with two samples of which one has a name
+
+    # ASSERT that there are two samples in the store
+    assert len(store_with_samples_that_have_names.get_samples()) == 4
+
+    # WHEN fetching the sample by name
+    samples: List[Sample] = store_with_samples_that_have_names.get_samples_by_name_pattern(
+        name_pattern=name_pattern
+    )
+
+    # THEN one sample should be returned
+    assert samples and len(samples) == 3

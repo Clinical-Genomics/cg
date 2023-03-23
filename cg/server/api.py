@@ -221,7 +221,7 @@ def parse_samples():
         customer_objs: Optional[Customer] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples: List[Sample] = db.get_samples_by_enquiry(
+        samples: List[Sample] = db.get_samples_to_parse(
             enquiry=request.args.get("enquiry"), customers=customer_objs
         )
     limit = int(request.args.get("limit", 50))
@@ -233,7 +233,7 @@ def parse_samples():
 def parse_samples_in_collaboration():
     """Return samples in a customer group."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    samples: List[Sample] = db.get_samples_by_enquiry(
+    samples: List[Sample] = db.get_samples_to_parse(
         enquiry=request.args.get("enquiry"), customers=customer.collaborators
     )
     limit = int(request.args.get("limit", 50))
