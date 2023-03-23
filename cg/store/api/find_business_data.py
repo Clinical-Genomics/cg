@@ -466,7 +466,7 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_NAME_PATTERN],
         ).all()
 
-    def get_samples_to_parse(
+    def get_samples_by_customer_id_and_pattern(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
         samples: Query = self._get_query(table=Sample)
