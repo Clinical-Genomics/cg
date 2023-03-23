@@ -111,11 +111,6 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def latest_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Fetch the latest application version for an application tag."""
-        application = self.get_application_by_tag(tag=tag)
-        return application.versions[-1] if application and application.versions else None
-
     def application_version(self, application: Application, version: int) -> ApplicationVersion:
         """Return an application version."""
         return apply_application_versions_filter(
@@ -126,23 +121,6 @@ class FindBasicDataHandler(BaseHandler):
                 ApplicationVersionFilter.FILTER_BY_APPLICATION,
                 ApplicationVersionFilter.FILTER_BY_VERSION,
             ],
-        ).first()
-
-    def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Return the current application version for an application tag."""
-        application = self.get_application_by_tag(tag=tag)
-        if not application:
-            return None
-        application_id = application.id
-        return apply_application_versions_filter(
-            filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
-                ApplicationVersionFilter.FILTER_BY_DATE,
-                ApplicationVersionFilter.ORDER_BY_VALID_FROM,
-            ],
-            application_versions=self._get_query(table=ApplicationVersion),
-            application_id=application_id,
-            date=dt.datetime.now(),
         ).first()
 
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
@@ -191,6 +169,28 @@ class FindBasicDataHandler(BaseHandler):
             filter_functions=[CollaborationFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
+
+    def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
+        """Return the current application version for an application tag."""
+        application = self.get_application_by_tag(tag=tag)
+        if not application:
+            return None
+        application_id = application.id
+        return apply_application_versions_filter(
+            filter_functions=[
+                ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
+                ApplicationVersionFilter.FILTER_BY_DATE,
+                ApplicationVersionFilter.ORDER_BY_VALID_FROM,
+            ],
+            application_versions=self._get_query(table=ApplicationVersion),
+            application_id=application_id,
+            date=dt.datetime.now(),
+        ).first()
+
+    def latest_version(self, tag: str) -> Optional[ApplicationVersion]:
+        """Fetch the latest application version for an application tag."""
+        application = self.get_application_by_tag(tag=tag)
+        return application.versions[-1] if application and application.versions else None
 
     def get_organism_by_internal_id(self, internal_id: str) -> Organism:
         """Find an organism by internal id."""
