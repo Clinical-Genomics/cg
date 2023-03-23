@@ -11,6 +11,7 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
+from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
 
 from cg.store.models import (
     Analysis,
@@ -62,6 +63,13 @@ class FindBusinessDataHandler(BaseHandler):
                 ),
             ).filter(Analysis.started_at < before)
         return records
+
+    def get_case_by_entry_id(self, entry_id: str) -> Family:
+        """Return a case by entry id."""
+        cases_query: Query = self._get_query(table=Family)
+        return apply_case_filter(
+            cases=cases_query, filter_functions=[CaseFilter.FILTER_BY_ENTRY_ID], entry_id=entry_id
+        )
 
     def active_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
