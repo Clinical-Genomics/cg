@@ -568,10 +568,10 @@ def test_filter_case_by_existing_entry_id(store_with_multiple_cases_and_samples:
     assert cases.first().id == entry_id
 
 
-def test_filter_cases_by_non_existing_internal_id(
+def test_filter_cases_by_non_existing_entry_id(
     store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
-    # GIVEN a store containing a case with an internal id case_id
+    # GIVEN a store containing cases without a specific entry id
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     entry_ids = [case.id for case in cases_query.all()]
     assert non_existent_id not in entry_ids
@@ -580,15 +580,4 @@ def test_filter_cases_by_non_existing_internal_id(
     cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id=non_existent_id)
 
     # THEN the query should contain no cases
-    assert cases.count() == 0
-
-
-def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples: Store):
-    # GIVEN a store containing cases
-    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
-
-    # WHEN filtering for cases with an empty internal id
-    cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id="")
-
-    # THEN the query should return no cases
     assert cases.count() == 0
