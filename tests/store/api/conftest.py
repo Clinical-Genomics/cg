@@ -391,3 +391,33 @@ def fixture_store_with_multiple_pools_for_customer(
             order="_".join(["pool", "order", str(number)]),
         )
     yield store
+
+
+@pytest.fixture(name="store_with_active_sample_analyze")
+def fixture_store_with_active_sample_analyze(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with an active sample with action analyze."""
+    # GIVEN a store with a sample that is active
+    case = helpers.add_case(
+        store=store, name="test_case", internal_id="test_case_internal_id", action="analyze"
+    )
+    sample = helpers.add_sample(
+        store=store, name="test_sample", internal_id="test_sample_internal_id"
+    )
+    helpers.add_relationship(store=store, sample=sample, case=case)
+
+    yield store
+
+
+@pytest.fixture(name="store_with_active_sample_running")
+def fixture_store_with_active_sample_running(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with an active sample with action running."""
+    # GIVEN a store with a sample that is active
+    case = helpers.add_case(
+        store=store, name="test_case", internal_id="test_case_internal_id", action="running"
+    )
+    sample = helpers.add_sample(
+        store=store, name="test_sample", internal_id="test_sample_internal_id"
+    )
+    helpers.add_relationship(store=store, sample=sample, case=case)
+
+    yield store
