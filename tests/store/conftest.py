@@ -158,7 +158,7 @@ def fixture_case_obj(analysis_store: Store) -> Family:
 @pytest.fixture(name="sample_obj")
 def fixture_sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
-    return analysis_store.get_all_samples()[0]
+    return analysis_store.get_samples()[0]
 
 
 @pytest.fixture(name="sequencer_name")

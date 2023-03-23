@@ -356,7 +356,7 @@ def cases(
 def samples(context: CGConfig, skip: int):
     """View status of samples."""
     status_db: Store = context.status_db
-    records: List[Sample] = status_db.get_all_samples()[skip : skip + 30]
+    records: List[Sample] = status_db.get_samples()[skip : skip + 30]
     for record in records:
         message = f"{record.internal_id} ({record.customer.internal_id})"
         if record.sequenced_at:

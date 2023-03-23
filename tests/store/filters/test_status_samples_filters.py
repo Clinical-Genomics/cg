@@ -27,7 +27,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_name,
     filter_samples_by_subject_id,
     filter_samples_by_customer_id,
-    filter_samples_by_name_enquiry,
+    filter_samples_by_name_pattern,
 )
 from tests.store.conftest import StoreConftestFixture
 
@@ -465,7 +465,7 @@ def test_filter_samples_is_not_prepared(
 
 def test_filter_get_samples_by_internal_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    internal_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    sample_internal_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given id."""
 
@@ -476,7 +476,7 @@ def test_filter_get_samples_by_internal_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
-        internal_id=internal_id,
+        internal_id=sample_internal_id,
     )
 
     # ASSERT that samples is a query
@@ -489,7 +489,7 @@ def test_filter_get_samples_by_internal_id(
     assert len(samples.all()) == 1
 
     # THEN the sample should have the internal id
-    assert samples.all()[0].internal_id == internal_id
+    assert samples.all()[0].internal_id == sample_internal_id
 
 
 def test_filter_get_samples_by_entry_id(
@@ -628,26 +628,26 @@ def test_filter_get_samples_by_customer_id(
     # THEN samples should contain the test sample
     assert samples.all()
 
-    # THEN samples should contain one sample
+    # THEN samples should contain two samples
     assert len(samples.all()) == 2
 
     # THEN the sample should have the correct customer id
     assert samples[0].customer_id == customer_id
 
 
-def test_filter_get_samples_by_name_enquiry(
+def test_filter_get_samples_by_name_pattern(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name_enquiry: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+    name_pattern: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
-    """Test that a sample is returned when there is a sample with the given name enquiry id."""
-    # GIVEN a store with two samples of which one has a name enquiry id
+    """Test that a sample is returned when there is a sample with the given name pattern."""
+    # GIVEN a store with two samples of which one has a name name pattern
 
-    # WHEN getting a sample by name enquiry id
-    samples: Query = filter_samples_by_name_enquiry(
+    # WHEN getting a sample by name pattern
+    samples: Query = filter_samples_by_name_pattern(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
-        name_enquiry=name_enquiry,
+        name_pattern=name_pattern,
     )
 
     # ASSERT that samples is a query
@@ -659,5 +659,5 @@ def test_filter_get_samples_by_name_enquiry(
     # THEN samples should contain one sample
     assert len(samples.all()) == 1
 
-    # THEN the sample should have the correct name enquiry id
-    assert samples[0].name == name_enquiry
+    # THEN the sample should have the correct name
+    assert samples[0].name == name_pattern
