@@ -28,7 +28,7 @@ def test_data(coverage_upload_api, analysis_store, case_id):
     # GIVEN a coverage api and an analysis object
     coverage_api = coverage_upload_api
     case_name = case_id
-    case_obj = analysis_store.get_case_by_internal_id(case_name)
+    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_name)
     analysis_obj = MockAnalysis(case_obj=case_obj)
 
     # WHEN using the data method

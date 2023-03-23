@@ -73,7 +73,7 @@ def test_cli_store(
     assert "stored in StatusDB" in caplog.text
 
     # THEN action of case in StatusDB is set to None
-    assert not mip_analysis_api.status_db.get_case_by_internal_id(mip_case_id).action
+    assert not mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action
 
 
 def test_cli_store_bundle_already_added(
@@ -174,7 +174,7 @@ def test_cli_store_available_case_is_running(
     assert mip_case_id in caplog.text
 
     # THEN case action is set to None after storing
-    assert not mip_analysis_api.status_db.get_case_by_internal_id(mip_case_id).action
+    assert not mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action
 
 
 def test_cli_store_available_case_not_running(
@@ -193,7 +193,7 @@ def test_cli_store_available_case_not_running(
     # GIVEN a case_id that does exist in database
 
     # GIVEN that case action is None
-    mip_analysis_api.status_db.get_case_by_internal_id(mip_case_id).action = None
+    mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action = None
     mip_analysis_api.status_db.commit()
 
     # GIVEN deliverables were generated and could be found

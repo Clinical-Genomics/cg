@@ -330,7 +330,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
 
     def get_case_id_from_case(self, unique_id: str) -> Tuple[str, None]:
         """If case_id is specified, validates the presence of case_id in database and returns it"""
-        case_obj: Family = self.status_db.get_case_by_internal_id(unique_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=unique_id)
         if not case_obj:
             LOG.error("No case found with the id:  %s", unique_id)
             raise click.Abort

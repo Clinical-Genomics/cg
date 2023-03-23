@@ -99,7 +99,7 @@ def test_store_api_delete_non_existing_case(
 
     # GIVEN a database containing some cases but not a specific case
     case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
-        case_id_does_not_exist
+        internal_id=case_id_does_not_exist
     )
     existing_cases: List[Family] = store_with_multiple_cases_and_samples.families().all()
 

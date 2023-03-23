@@ -43,7 +43,7 @@ def test_with_missing_case(
     caplog.set_level(logging.ERROR)
 
     # GIVEN case_id not in database
-    assert not rnafusion_context.status_db.get_case_by_internal_id(not_existing_case_id)
+    assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=not_existing_case_id)
 
     # WHEN running
     result = cli_runner.invoke(store_housekeeper, [not_existing_case_id], obj=rnafusion_context)

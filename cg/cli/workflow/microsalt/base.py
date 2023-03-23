@@ -225,7 +225,7 @@ def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> N
     """Upload the trending report for latest analysis of given case_id to Vogue"""
 
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
-    case_obj = analysis_api.status_db.get_case_by_internal_id(unique_id)
+    case_obj = analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
     if not case_obj or not case_obj.analyses:
         LOG.error("No analysis available for %s", unique_id)
         raise click.Abort
