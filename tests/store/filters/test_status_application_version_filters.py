@@ -11,7 +11,11 @@ from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
 from sqlalchemy import desc
 from sqlalchemy.orm import Query
-from tests.store.api.conftest import fixture_applications_store, fixture_invalid_application_id
+from tests.store.api.conftest import (
+    fixture_applications_store,
+    fixture_invalid_application_id,
+    fixture_invalid_application_version_version,
+)
 from tests.store_helpers import StoreHelpers
 
 
@@ -125,18 +129,18 @@ def test_filter_application_version_by_application_id_wrong_id(
     invalid_application_id: int,
 ):
     """Test that an empty query is returned when using an incorrect application id."""
-    # GIVEN
+    # GIVEN a store with an application version
     app_version_query: Query = store_with_applications_with_application_versions._get_query(
         table=ApplicationVersion
     )
 
-    # WHEN
+    # WHEN filtering with an invalid application id
     filtered_app_version_query: Query = filter_application_versions_by_application_id(
         application_versions=app_version_query,
         application_id=invalid_application_id,
     )
 
-    # THEN
+    # THEN the filtered query is empty
     assert filtered_app_version_query.count() == 0
 
 
@@ -149,10 +153,45 @@ def test_filter_application_versions_before_date():
     # THEN
 
 
-def test_filter_application_version_by_version():
+def test_filter_application_version_by_version_correct_version(
+    store_with_one_application_and_two_versions: Store,
+):
+    """Test that filtering by a valid version returns an application version with the correct version."""
+    # GIVEN a store with two application versions with different versions
+    app_version_query: Query = store_with_one_application_and_two_versions._get_query(
+        table=ApplicationVersion
+    )
+    version_to_filter: int = app_version_query.first().version
+    version_to_exclude: int = app_version_query.offset(1).first().version
+    assert version_to_filter != version_to_exclude
+
+    # WHEN filtering the application version query using the valid version
+    filtered_app_version_query: Query = filter_application_versions_by_version(
+        application_versions=app_version_query,
+        version=version_to_filter,
+    )
+
+    # THEN the filtered query has fewer elements than the unfiltered query
+    assert filtered_app_version_query.count() < app_version_query.count()
+    # THEN the version of the application version is the same as inputted to the filter
+    assert filtered_app_version_query.first().version == version_to_filter
+
+
+def test_filter_application_version_by_version_invalid_version_returns_empty(
+    store_with_one_application_and_two_versions: Store,
+    invalid_application_version_version: int,
+):
     """."""
-    # GIVEN
+    # GIVEN a store with application versions and an invalid version
+    app_version_query: Query = store_with_one_application_and_two_versions._get_query(
+        table=ApplicationVersion,
+    )
 
-    # WHEN
+    # WHEN filtering by version using the invalid version
+    filtered_app_version_query: Query = filter_application_versions_by_version(
+        application_versions=app_version_query,
+        version=invalid_application_version_version,
+    )
 
-    # THEN
+    # THEN the filtered query is empty
+    assert filtered_app_version_query.count() == 0

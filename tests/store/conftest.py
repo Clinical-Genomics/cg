@@ -264,12 +264,23 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
+@pytest.fixture(name="store_with_one_application_and_two_versions")
+def fixture_store_with_one_application_and_two_versions(
+    store: Store,
+    helpers: StoreHelpers,
+) -> Store:
+    """Returns a store with two application versions with different version values."""
+    helpers.ensure_application_version(store=store, version=1)
+    helpers.ensure_application_version(store=store, version=2)
+    return store
+
+
 @pytest.fixture(name="store_with_applications_with_application_versions")
 def fixture_store_with_applications_with_application_versions(
     store_with_an_application_with_and_without_attributes: Store,
     helpers: StoreHelpers,
 ) -> Store:
-    """."""
+    """Returns a store with two different applications and their respective application versions."""
     applications: List[
         Application
     ] = store_with_an_application_with_and_without_attributes.get_applications()

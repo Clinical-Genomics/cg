@@ -176,13 +176,13 @@ def test_application_version_with_version_and_application(
     assert isinstance(application, Application)
 
     # WHEN calling the function with an application and a version
-    app_versions: ApplicationVersion = local_store.application_version(
+    application_version: ApplicationVersion = local_store.application_version(
         application=application,
         version=application_version_version,
     )
 
     # THEN
-    assert isinstance(app_versions, ApplicationVersion)
+    assert isinstance(application_version, ApplicationVersion)
 
 
 def test_get_bed_version_query(base_store: Store):
