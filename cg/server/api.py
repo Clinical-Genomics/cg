@@ -218,11 +218,11 @@ def parse_samples():
     elif request.args.get("status") == "sequencing":
         samples: List[Sample] = db.get_samples_to_sequence()
     else:
-        customer_objs: Optional[Customer] = (
+        customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
         samples: List[Sample] = db.get_samples_to_parse(
-            enquiry=request.args.get("enquiry"), customers=customer_objs
+            enquiry=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))
     parsed_samples: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
