@@ -24,10 +24,10 @@ class DeleteDataHandler(BaseHandler):
                 case_sample.delete()
             self.commit()
 
-    def delete_cases_without_samples(self, case_ids: List[str]) -> None:
+    def delete_cases_without_samples(self, case_internal_ids: List[str]) -> None:
         """Delete any cases specified in case_ids without samples."""
-        for case_id in case_ids:
-            case: Family = self.get_case_by_internal_id(internal_id=case_id)
+        for case_internal_id in case_internal_ids:
+            case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
             if case and not case.links:
                 case.delete()
         self.commit()

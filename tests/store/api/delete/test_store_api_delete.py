@@ -106,7 +106,7 @@ def test_store_api_delete_non_existing_case(
 
     # WHEN removing empty cases, specifying the non existing case
     store_with_multiple_cases_and_samples.delete_cases_without_samples(
-        case_ids=[case_id_does_not_exist]
+        case_internal_ids=[case_id_does_not_exist]
     )
 
     # THEN no case has been deleted and nothing happens
