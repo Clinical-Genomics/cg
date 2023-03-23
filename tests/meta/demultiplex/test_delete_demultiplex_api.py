@@ -116,7 +116,7 @@ def test_no_active_samples_on_flow_cell(
     )
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
-        active: bool = store_.active_sample(internal_id=sample.internal_id)
+        active: bool = store_.is_active_sample(internal_id=sample.internal_id)
         assert not active
 
     # WHEN checking for active samples on flowcell
@@ -144,7 +144,7 @@ def test_active_samples_on_flow_cell(
 
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
-        active: bool = store_.active_sample(internal_id=sample.internal_id)
+        active: bool = store_.is_active_sample(internal_id=sample.internal_id)
         assert active
 
     # WHEN checking for active samples on flowcell

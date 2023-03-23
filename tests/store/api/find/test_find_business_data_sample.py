@@ -97,3 +97,27 @@ def test__get_sample_by_name(store_with_samples_that_have_names: Store, name="sa
 
     # THEN one sample should be returned
     assert samples and samples.name == name
+
+
+def test_is_active_sample_analyze(
+    store_with_active_sample_analyze: Store,
+    helpers: StoreHelpers,
+    sample_internal_id: str = "test_sample_internal_id",
+):
+    """Test that a sample is active."""
+    # GIVEN a store with an active sample
+
+    # THEN the sample should be active
+    assert store_with_active_sample_analyze.is_active_sample(internal_id=sample_internal_id) is True
+
+
+def test_is_active_sample_running(
+    store_with_active_sample_running: Store,
+    helpers: StoreHelpers,
+    sample_internal_id: str = "test_sample_internal_id",
+):
+    """Test that a sample is active."""
+    # GIVEN a store with an active sample
+
+    # THEN the sample should be active
+    assert store_with_active_sample_running.is_active_sample(internal_id=sample_internal_id) is True
