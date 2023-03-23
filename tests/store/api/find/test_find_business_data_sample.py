@@ -85,7 +85,7 @@ def test_get_samples_by_subject_id_and_is_tumour(
     assert samples and len(samples) == 1
 
 
-def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="sample_1"):
+def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="test_sample_1"):
     """Test that samples can be fetched by name."""
     # GIVEN a database with two samples of which one has a name
 
