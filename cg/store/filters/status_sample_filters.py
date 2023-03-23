@@ -135,7 +135,7 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
 def filter_samples_by_name_enquiry(samples: Query, name_enquiry: str, **kwargs) -> Query:
     """Return samples by name."""
     filtered_samples = samples.filter(Sample.name.like(f"%{name_enquiry}%"))
-    return samples.filter(filtered_samples) if filtered_samples.all() else samples
+    return filtered_samples if filtered_samples.all() else samples
 
 
 def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:

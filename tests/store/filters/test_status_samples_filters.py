@@ -489,7 +489,7 @@ def test_filter_get_samples_by_internal_id(
     assert len(samples.all()) == 1
 
     # THEN the sample should have the internal id
-    assert samples.all()[0].internal_id == internal_id
+    assert samples.all()[0].internal_id == sample_internal_id
 
 
 def test_filter_get_samples_by_entry_id(
@@ -652,7 +652,7 @@ def test_filter_get_samples_by_name_enquiry(
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
-
+    all_samples = samples.all()
     # THEN samples should contain the test sample
     assert samples.all()
 
