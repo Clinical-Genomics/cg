@@ -652,7 +652,7 @@ def test_filter_get_samples_by_name_pattern(
 
     # ASSERT that samples is a query
     assert isinstance(samples, Query)
-    all_samples = samples.all()
+
     # THEN samples should contain the test sample
     assert samples.all()
 
