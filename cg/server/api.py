@@ -159,13 +159,13 @@ def parse_families():
         customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        cases = db.families(
+        cases_query: Query = db.families(
             enquiry=request.args.get("enquiry"),
             customers=customers,
             action=request.args.get("action"),
         )
-        count = len(cases)
-        cases = cases[:30]
+        count = cases_query.count()
+        cases = cases_query.limit(30)
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
     return jsonify(families=parsed_cases, total=count)
 
