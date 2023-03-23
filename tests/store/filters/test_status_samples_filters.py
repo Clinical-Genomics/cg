@@ -27,7 +27,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_name,
     filter_samples_by_subject_id,
     filter_samples_by_customer_id,
-    filter_samples_by_name_enquiry,
+    filter_samples_by_name_pattern,
 )
 from tests.store.conftest import StoreConftestFixture
 
@@ -635,19 +635,19 @@ def test_filter_get_samples_by_customer_id(
     assert samples[0].customer_id == customer_id
 
 
-def test_filter_get_samples_by_name_enquiry(
+def test_filter_get_samples_by_name_pattern(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name_enquiry: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+    name_pattern: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
-    """Test that a sample is returned when there is a sample with the given name enquiry id."""
-    # GIVEN a store with two samples of which one has a name enquiry id
+    """Test that a sample is returned when there is a sample with the given name pattern."""
+    # GIVEN a store with two samples of which one has a name name pattern
 
-    # WHEN getting a sample by name enquiry id
-    samples: Query = filter_samples_by_name_enquiry(
+    # WHEN getting a sample by name pattern
+    samples: Query = filter_samples_by_name_pattern(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
-        name_enquiry=name_enquiry,
+        name_pattern=name_pattern,
     )
 
     # ASSERT that samples is a query
@@ -660,4 +660,4 @@ def test_filter_get_samples_by_name_enquiry(
     assert len(samples.all()) == 1
 
     # THEN the sample should have the correct name
-    assert samples[0].name == name_enquiry
+    assert samples[0].name == name_pattern

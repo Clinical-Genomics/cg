@@ -132,9 +132,9 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_tumour.is_(False))
 
 
-def filter_samples_by_name_enquiry(samples: Query, name_enquiry: str, **kwargs) -> Query:
-    """Return samples by name."""
-    filtered_samples = samples.filter(Sample.name.like(f"%{name_enquiry}%"))
+def filter_samples_by_name_pattern(samples: Query, name_pattern: str, **kwargs) -> Query:
+    """Return samples matching the name pattern."""
+    filtered_samples = samples.filter(Sample.name.like(f"%{name_pattern}%"))
     return filtered_samples if filtered_samples.all() else samples
 
 
@@ -155,7 +155,7 @@ def apply_sample_filter(
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
     customer: Optional[Customer] = None,
-    name_enquiry: Optional[str] = None,
+    name_pattern: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
@@ -171,7 +171,7 @@ def apply_sample_filter(
             subject_id=subject_id,
             name=name,
             customer=customer,
-            name_enquiry=name_enquiry,
+            name_pattern=name_pattern,
         )
     return samples
 
@@ -204,5 +204,5 @@ class SampleFilter(Enum):
     FILTER_BY_SUBJECT_ID: Callable = filter_samples_by_subject_id
     FILTER_IS_TUMOUR: Callable = filter_samples_is_tumour
     FILTER_IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
-    FILTER_BY_NAME_ENQUIRY: Callable = filter_samples_by_name_enquiry
+    FILTER_BY_NAME_PATTERN: Callable = filter_samples_by_name_pattern
     FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
