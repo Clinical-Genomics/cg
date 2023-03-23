@@ -1281,20 +1281,20 @@ def fixture_base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample("ordered", sex=Gender.MALE),
-        base_store.add_sample("received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
+        base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
         base_store.add_sample(
-            "received-prepared",
+            name="received-prepared",
             sex=Gender.UNKNOWN,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
         ),
         base_store.add_sample("external", sex=Gender.FEMALE, external=True),
         base_store.add_sample(
-            "external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
+            name="external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
         ),
         base_store.add_sample(
-            "sequenced",
+            name="sequenced",
             sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
@@ -1302,11 +1302,23 @@ def sample_store(base_store: Store) -> Store:
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
-            "sequenced-partly",
+            name="sequenced-partly",
             sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
             reads=(250 * 1000000),
+        ),
+        base_store.add_sample(
+            name="to-deliver",
+            sex=Gender.MALE,
+            sequenced_at=dt.datetime.now(),
+        ),
+        base_store.add_sample(
+            name="delivered",
+            sex=Gender.MALE,
+            sequenced_at=dt.datetime.now(),
+            delivered_at=dt.datetime.now(),
+            no_invoice=False,
         ),
     ]
     customer: Customer = (base_store.get_customers())[0]
