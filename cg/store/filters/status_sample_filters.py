@@ -134,13 +134,24 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
 
 def filter_samples_by_name_pattern(samples: Query, name_pattern: str, **kwargs) -> Query:
     """Return samples matching the name pattern."""
-    filtered_samples = samples.filter(Sample.name.like(f"%{name_pattern}%"))
-    return filtered_samples if filtered_samples.all() else samples
+    return samples.filter(Sample.name.like(f"%{name_pattern}%"))
+
+
+def filter_samples_by_internal_id_pattern(
+    samples: Query, internal_id_pattern: str, **kwargs
+) -> Query:
+    """Return samples matching the internal id pattern."""
+    return samples.filter(Sample.internal_id.like(f"%{internal_id_pattern}%"))
 
 
 def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
     """Return samples by customer."""
     return samples.filter(Sample.customer == customer)
+
+
+def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
+    """Return samples ordered by created_at descending."""
+    return samples.order_by(Sample.created_at.desc())
 
 
 def apply_sample_filter(
@@ -156,6 +167,7 @@ def apply_sample_filter(
     name: Optional[str] = None,
     customer: Optional[Customer] = None,
     name_pattern: Optional[str] = None,
+    internal_id_pattern: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
@@ -172,6 +184,7 @@ def apply_sample_filter(
             name=name,
             customer=customer,
             name_pattern=name_pattern,
+            internal_id_pattern=internal_id_pattern,
         )
     return samples
 
@@ -205,4 +218,6 @@ class SampleFilter(Enum):
     FILTER_IS_TUMOUR: Callable = filter_samples_is_tumour
     FILTER_IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
     FILTER_BY_NAME_PATTERN: Callable = filter_samples_by_name_pattern
+    FILTER_BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
+    ORDER_BY_CREATED_AT_DESC: Callable = order_samples_by_created_at_desc

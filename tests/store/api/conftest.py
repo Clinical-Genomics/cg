@@ -327,8 +327,12 @@ def store_with_samples_that_have_names(
     store: Store, helpers: StoreHelpers, name="sample_1"
 ) -> Store:
     """Return a store with two samples of which one has a name"""
-    helpers.add_sample(store=store, internal_id="test_sample_1", name=name)
-    helpers.add_sample(store=store, internal_id="test_sample_2")
+    for index in range(1, 4):
+        helpers.add_sample(
+            store=store, internal_id=f"test_sample_{index}", name=f"test_sample_{index}"
+        )
+
+    helpers.add_sample(store=store, internal_id="unrelated_id", name="unrelated_name")
     return store
 
 
