@@ -264,19 +264,21 @@ class FamilyView(BaseView):
 
     def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
         try:
-            query: Query = db.Family.query.filter(db.Family.id.in_(entry_ids))
-            family: Family
-            for family in query.all():
-                family.action = action
+            for entry_id in entry_ids:
+                family = self.get_case_by_entry_id(entry_id=entry_id)
+                if family:
+                    family.action = action
 
-            flash(
-                ngettext(
-                    f"Families were set to {action}.",
-                    f"{len(entry_ids)} families were set to {action}.",
-                    len(entry_ids),
-                )
-            )
             db.commit()
+
+            num_families = len(entry_ids)
+            action_message = (
+                f"Families were set to {action}."
+                if num_families == 1
+                else f"{num_families} families were set to {action}."
+            )
+            flash(action_message)
+
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
