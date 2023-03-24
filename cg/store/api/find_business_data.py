@@ -11,6 +11,7 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
+from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
 
 from cg.store.models import (
     Analysis,
@@ -74,7 +75,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_case_action(self, sample: FamilySample) -> str:
         """Get the action of a case."""
-        return self.family(
+        return self.get_case_by_internal_id(
             internal_id=self.Family.query.filter(Family.id == sample.family_id).first().internal_id
         ).action
 
@@ -82,7 +83,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return the application of a case."""
 
         return (
-            self.family(internal_id=case_id)
+            self.get_case_by_internal_id(internal_id=case_id)
             .links[ListIndexes.FIRST.value]
             .sample.application_version.application
         )
@@ -160,10 +161,6 @@ class FindBusinessDataHandler(BaseHandler):
         records = records.filter_by(data_analysis=data_analysis) if data_analysis else records
         return records.order_by(Family.created_at.desc())
 
-    def family(self, internal_id: str) -> Family:
-        """Fetch a family by internal id from the database."""
-        return self.Family.query.filter_by(internal_id=internal_id).first()
-
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
@@ -192,7 +189,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return case id:s associated with samples."""
         cases_with_samples = set()
         for case_id in case_ids:
-            case: Family = self.family(internal_id=case_id)
+            case: Family = self.get_case_by_internal_id(internal_id=case_id)
             if case and case.links:
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
@@ -211,12 +208,12 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
-        return self.family(case_id).latest_ticket
+        return self.get_case_by_internal_id(internal_id=case_id).latest_ticket
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
         """Fetch the latest sequenced flow cell related to a sample on a case."""
         flow_cells_on_case: List[Flowcell] = list(
-            self.get_flow_cells_by_case(case=self.family(family_id))
+            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=family_id))
         )
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
         return flow_cells_on_case[-1]
@@ -230,13 +227,13 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_case_id(self, case_id: str) -> List[Sample]:
         """Get samples on a given case id."""
 
-        case: Family = self.family(internal_id=case_id)
+        case: Family = self.get_case_by_internal_id(internal_id=case_id)
         self._is_case_found(case=case, case_id=case_id)
         return case.samples if case else []
 
     def get_sample_ids_by_case_id(self, case_id: str = None) -> Iterator[str]:
         """Return sample ids from case id."""
-        case: Family = self.family(internal_id=case_id)
+        case: Family = self.get_case_by_internal_id(internal_id=case_id)
         self._is_case_found(case=case, case_id=case_id)
         for link in case.links:
             yield link.sample.internal_id
@@ -322,7 +319,7 @@ class FindBusinessDataHandler(BaseHandler):
         Flow cells not on disk will be requested.
         """
         flow_cells: Optional[List[Flowcell]] = list(
-            self.get_flow_cells_by_case(case=self.family(case_id))
+            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=case_id))
         )
         if not flow_cells:
             LOG.info("No flow cells found")
@@ -458,26 +455,35 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all samples."""
         return self._get_query(table=Sample).order_by(Sample.created_at.desc()).all()
 
-    def get_samples_by_enquiry(
+    def get_samples_by_name_pattern(self, name_pattern: str) -> List[Sample]:
+        """Return all samples with a name fitting the pattern."""
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            name_pattern=name_pattern,
+            filter_functions=[SampleFilter.FILTER_BY_NAME_PATTERN],
+        ).all()
+
+    def get_samples_by_customer_id_and_pattern(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
-        records = self._get_query(table=Sample)
-
+        samples: Query = self._get_query(table=Sample)
+        customer_ids = None
+        filter_functions: List[SampleFilter] = []
         if customers:
-            customer_ids = [customer.id for customer in customers]
-            records = records.filter(Sample.customer_id.in_(customer_ids))
-
-        records = (
-            records.filter(
-                or_(
-                    Sample.name.like(f"%{enquiry}%"),
-                    Sample.internal_id.like(f"%{enquiry}%"),
-                )
+            customer_ids: List[int] = [customer.id for customer in customers]
+            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ID)
+        if enquiry:
+            filter_functions.extend(
+                [SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN, SampleFilter.FILTER_BY_NAME_PATTERN]
             )
-            if enquiry
-            else records
-        )
-        return records.order_by(Sample.created_at.desc()).all()
+        filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
+        return apply_sample_filter(
+            samples=samples,
+            customer_ids=customer_ids,
+            name_pattern=enquiry,
+            internal_id_pattern=enquiry,
+            filter_functions=filter_functions,
+        ).all()
 
     def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
         """Get samples of customer with given subject_id or subject_id and is_tumour."""
@@ -535,10 +541,19 @@ class FindBusinessDataHandler(BaseHandler):
 
     def is_case_down_sampled(self, case_id: str) -> bool:
         """Returns True if all samples in a case are down sampled from another sample."""
-        case: Family = self.family(internal_id=case_id)
+        case: Family = self.get_case_by_internal_id(internal_id=case_id)
         return all(sample.from_sample is not None for sample in case.samples)
 
     def is_case_external(self, case_id: str) -> bool:
         """Returns True if all samples in a case have been sequenced externally."""
-        case: Family = self.family(internal_id=case_id)
+        case: Family = self.get_case_by_internal_id(internal_id=case_id)
         return all(sample.application_version.application.is_external for sample in case.samples)
+
+    def get_case_by_internal_id(self, internal_id: str) -> Family:
+        """Get case by internal id."""
+
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
+            cases=self._get_query(table=Family),
+            internal_id=internal_id,
+        ).first()

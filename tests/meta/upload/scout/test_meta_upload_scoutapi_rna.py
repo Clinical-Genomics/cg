@@ -16,12 +16,12 @@ from tests.store_helpers import StoreHelpers
 
 
 def set_is_tumour_on_case(store: Store, case_id: str, is_tumour: bool):
-    for link in store.family(case_id).links:
+    for link in store.get_case_by_internal_id(internal_id=case_id).links:
         link.sample.is_tumour = is_tumour
 
 
 def get_subject_id_from_case(store: Store, case_id: str) -> str:
-    for link in store.family(case_id).links:
+    for link in store.get_case_by_internal_id(internal_id=case_id).links:
         return link.sample.subject_id
 
 
@@ -37,7 +37,7 @@ def ensure_two_dna_tumour_matches(
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
     set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=True)
     dna_extra_case = helpers.ensure_case(
-        store=rna_store, customer=rna_store.family(dna_case_id).customer
+        store=rna_store, customer=rna_store.get_case_by_internal_id(dna_case_id).customer
     )
     another_sample_id = helpers.add_sample(
         store=rna_store,
@@ -61,7 +61,7 @@ def ensure_extra_rna_case_match(
     rna_extra_case = helpers.ensure_case(
         store=rna_store,
         data_analysis=Pipeline.MIP_RNA,
-        customer=rna_store.family(rna_case_id).customer,
+        customer=rna_store.get_case_by_internal_id(rna_case_id).customer,
     )
     subject_id: str = get_subject_id_from_case(store=rna_store, case_id=rna_case_id)
     another_rna_sample_id = helpers.add_sample(
@@ -252,9 +252,9 @@ def test_upload_rna_fusion_report_to_scout_no_subject_id(
     """Test that A RNA case's gene fusion report"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via subject_id (i.e. same subject_id)
-    for link in rna_store.family(rna_case_id).links:
+    for link in rna_store.get_case_by_internal_id(rna_case_id).links:
         link.sample.subject_id = ""
-    for link in rna_store.family(dna_case_id).links:
+    for link in rna_store.get_case_by_internal_id(dna_case_id).links:
         link.sample.subject_id = ""
     rna_store.commit()
     upload_scout_api.status_db = rna_store
@@ -280,9 +280,9 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
     command into an already existing DNA case"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via subject_id (i.e. same subject_id)
-    for link in rna_store.family(rna_case_id).links:
+    for link in rna_store.get_case_by_internal_id(rna_case_id).links:
         link.sample.subject_id = ""
-    for link in rna_store.family(dna_case_id).links:
+    for link in rna_store.get_case_by_internal_id(dna_case_id).links:
         link.sample.subject_id = ""
     rna_store.commit()
     upload_scout_api.status_db = rna_store
@@ -308,9 +308,9 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     command into an already existing DNA case"""
 
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via subject_id (i.e. same subject_id)
-    for link in rna_store.family(rna_case_id).links:
+    for link in rna_store.get_case_by_internal_id(rna_case_id).links:
         link.sample.subject_id = ""
-    for link in rna_store.family(dna_case_id).links:
+    for link in rna_store.get_case_by_internal_id(dna_case_id).links:
         link.sample.subject_id = ""
     rna_store.commit()
     upload_scout_api.status_db = rna_store
@@ -536,7 +536,7 @@ def test_add_rna_sample(
 
     # GIVEN an RNA case and the associated RNA samples
     rna_case: Family = rna_store.families(enquiry=rna_case_id).first()
-    rna_sample_list: List[Sample] = rna_store.get_samples_by_enquiry(enquiry="rna")
+    rna_sample_list: List[Sample] = rna_store.get_samples_by_name_pattern(name_pattern="rna")
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
     rna_dna_case_map: dict = upload_scout_api.create_rna_dna_sample_case_map(rna_case=rna_case)

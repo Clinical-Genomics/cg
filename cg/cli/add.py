@@ -266,7 +266,7 @@ def relationship(
     status_db: Store = context.status_db
     mother: Optional[Sample] = None
     father: Optional[Sample] = None
-    case_obj: Family = status_db.family(case_id)
+    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
         LOG.error("%s: family not found", case_id)
         raise click.Abort

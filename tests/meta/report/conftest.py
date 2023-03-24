@@ -46,14 +46,14 @@ def report_api_balsamic(cg_context: CGConfig, lims_samples) -> BalsamicReportAPI
 def case_mip_dna(case_id, report_api_mip_dna) -> Family:
     """MIP DNA case instance."""
 
-    return report_api_mip_dna.status_db.family(case_id)
+    return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function", name="case_balsamic")
 def case_balsamic(case_id, report_api_balsamic) -> Family:
     """BALSAMIC case instance."""
 
-    return report_api_balsamic.status_db.family(case_id)
+    return report_api_balsamic.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function", name="case_samples_data")

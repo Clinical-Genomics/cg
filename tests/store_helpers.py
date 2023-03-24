@@ -366,7 +366,7 @@ class StoreHelpers:
             )
 
         if not case_obj:
-            case_obj: Optional[Family] = store.family(internal_id=name)
+            case_obj: Optional[Family] = store.get_case_by_internal_id(internal_id=name)
         if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
@@ -396,7 +396,9 @@ class StoreHelpers:
         """Load a case with samples and link relations."""
         if not customer:
             customer = StoreHelpers.ensure_customer(store=store)
-        case = store.family(internal_id=case_id) or store.find_family(customer=customer, name=name)
+        case = store.get_case_by_internal_id(internal_id=case_id) or store.find_family(
+            customer=customer, name=name
+        )
         if not case:
             case = StoreHelpers.add_case(
                 store=store,
@@ -598,7 +600,7 @@ class StoreHelpers:
         store: Store, case_id: str, synopsis: str = "a synopsis"
     ) -> Optional[Family]:
         """Function for adding a synopsis to a case in the database."""
-        case_obj: Family = store.family(internal_id=case_id)
+        case_obj: Family = store.get_case_by_internal_id(internal_id=case_id)
         if not case_obj:
             LOG.warning("Could not find case")
             return None

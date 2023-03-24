@@ -170,7 +170,7 @@ class DeliverTicketAPI(MetaAPI):
     def check_if_concatenation_is_needed(self, ticket: str) -> bool:
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         case_id = cases[0].internal_id
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: List[Sample] = [link.sample for link in case_obj.links]
         app_tag = self.get_app_tag(samples=samples)
         for prefix in PREFIX_TO_CONCATENATE:
