@@ -786,7 +786,7 @@ class StatusHandler(BaseHandler):
             samples=self._get_query(table=Sample),
         ).all()
 
-    def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
+    def get_samples_to_invoice_query(self) -> Query:
         """Return all samples that should be invoiced."""
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_DELIVERED,
@@ -794,47 +794,44 @@ class StatusHandler(BaseHandler):
             SampleFilter.FILTER_DO_INVOICE,
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
-
-        records: Query = apply_sample_filter(
+        return apply_sample_filter(
             filter_functions=sample_filter_functions,
             samples=self._get_query(table=Sample),
         )
 
-        customers_to_invoice = [
-            case_obj.customer
-            for case_obj in records.all()
-            if case_obj.customer.internal_id != "cust000"
-        ]
-
-        customers_to_invoice = list(set(customers_to_invoice))
-        records = records.filter(Sample.customer == customer) if customer else records
-        return records, customers_to_invoice
-
-    def get_pools_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
-        """
-        Return all pools that should be invoiced.
-        """
-        records = self._get_query(table=Pool)
+    def get_pools_to_invoice_query(self) -> Query:
+        """Return all pools that should be invoiced."""
         pool_filter_functions: List[PoolFilter] = [
             PoolFilter.FILTER_IS_DELIVERED,
             PoolFilter.FILTER_WITHOUT_INVOICE_ID,
             PoolFilter.FILTER_DO_INVOICE,
         ]
-
-        records: Query = apply_pool_filter(
+        return apply_pool_filter(
             filter_functions=pool_filter_functions,
-            pools=records,
+            pools=self._get_query(table=Pool),
         )
 
-        customers_to_invoice = [
-            case_obj.customer
-            for case_obj in records.all()
-            if case_obj.customer.internal_id != "cust000"
-        ]
+    def get_samples_to_invoice_for_customer(self, customer: Customer = None) -> List[Sample]:
+        """Return all samples that should be invoiced for a customer."""
+        return apply_sample_filter(
+            samples=self.get_samples_to_invoice_query(),
+            filter_functions=[SampleFilter.FILTER_BY_CUSTOMER],
+            customer=customer,
+        ).all()
 
-        customers_to_invoice = list(set(customers_to_invoice))
-        records = records.filter(Pool.customer_id == customer.id) if customer else records
-        return records, customers_to_invoice
+    def get_pools_to_invoice_for_customer(self, customer: Customer = None) -> List[Pool]:
+        """Return all pools for a customer that should be invoiced."""
+        return apply_pool_filter(
+            filter_functions=[PoolFilter.FILTER_BY_CUSTOMER],
+            pools=self.get_pools_to_invoice_query(),
+            customer=customer,
+        ).all()
+
+    def get_customers_to_invoice(self, records: Query) -> List[Customer]:
+        customers_to_invoice: List[Customer] = [
+            record.customer for record in records.all() if record.customer.internal_id != "cust000"
+        ]
+        return list(set(customers_to_invoice))
 
     def get_pools_to_receive(self) -> List[Pool]:
         """Return all pools that have been not yet been received."""

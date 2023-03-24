@@ -138,11 +138,16 @@ def new(record_type):
     count = request.args.get("total", 0)
     customer_id = request.args.get("customer", "cust002")
     customer: Customer = db.get_customer_by_customer_id(customer_id=customer_id)
-
     if record_type == "Sample":
-        records, customers_to_invoice = db.get_samples_to_invoice(customer=customer)
+        records: List[Pool or Sample] = db.get_samples_to_invoice_for_customer(customer=customer)
+        customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
+            records=db.get_samples_to_invoice()
+        )
     elif record_type == "Pool":
-        records, customers_to_invoice = db.get_pools_to_invoice(customer=customer)
+        records: List[Pool or Sample] = db.get_pools_to_invoice_for_customer(customer=customer)
+        customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
+            records=db.get_pools_to_invoice()
+        )
     return render_template(
         "invoices/new.html",
         customers_to_invoice=customers_to_invoice,
