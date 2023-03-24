@@ -40,7 +40,7 @@ def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    family: Family = status_db.family(case_id)
+    family: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
     for sample in family.samples:
         hk_coverage: File = housekeeper_api.get_file_from_latest_version(

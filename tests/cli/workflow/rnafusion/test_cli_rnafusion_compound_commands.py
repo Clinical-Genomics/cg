@@ -88,7 +88,7 @@ def test_store_success(
     assert not rnafusion_context.housekeeper_api.bundle(case_id)
 
     # Make sure analysis not already stored in status_db
-    assert not rnafusion_context.status_db.family(case_id).analyses
+    assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -100,7 +100,7 @@ def test_store_success(
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert rnafusion_context.status_db.family(case_id).analyses
+    assert rnafusion_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert rnafusion_context.housekeeper_api.bundle(case_id)
 
 
@@ -192,13 +192,13 @@ def test_store_available(
 
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
-    rnafusion_context.status_db.family(case_id_success).action = "running"
+    rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
     rnafusion_context.status_db.commit()
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS
     assert case_id_success in caplog.text
-    assert rnafusion_context.status_db.family(case_id_success).action == "running"
+    assert rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action == "running"
 
     rnafusion_context.housekeeper_api_ = real_housekeeper_api
     rnafusion_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
@@ -213,10 +213,10 @@ def test_store_available(
     assert case_id_success in caplog.text
 
     # THEN case has analyses
-    assert rnafusion_context.status_db.family(case_id_success).analyses
+    assert rnafusion_context.status_db.get_case_by_internal_id(case_id_success).analyses
 
     # THEN bundle can be found in Housekeeper
     assert rnafusion_context.housekeeper_api.bundle(case_id_success)
 
     # THEN bundle added successfully and action set to None
-    assert rnafusion_context.status_db.family(case_id_success).action is None
+    assert rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action is None

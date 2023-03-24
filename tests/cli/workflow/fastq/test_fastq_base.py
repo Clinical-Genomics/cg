@@ -9,7 +9,7 @@ def test_store_fastq_analysis(caplog, case_id: str, cli_runner, fastq_context):
     """Test for CLI command creating an analysis object for a fastq case"""
     # GIVEN a fastq context
     caplog.set_level(logging.INFO)
-    case_obj: Family = fastq_context.status_db.family(internal_id=case_id)
+    case_obj: Family = fastq_context.status_db.get_case_by_internal_id(internal_id=case_id)
     case_obj.analyses = []
 
     # WHEN the store_fastq_analysis command is invoked
@@ -25,7 +25,7 @@ def test_store_available_fastq_analysis(
     """Test for CLI command creating an analysis object for all fastq cases to be delivered"""
     caplog.set_level(logging.INFO)
     # GIVEN a case with no analysis, a sample that has been sequenced and a fastq context
-    case_obj: Family = fastq_context.status_db.family(internal_id=case_id)
+    case_obj: Family = fastq_context.status_db.get_case_by_internal_id(internal_id=case_id)
     case_obj.analyses = []
     sample_obj: Sample = fastq_context.status_db.get_sample_by_internal_id(internal_id=sample_id)
     sample_obj.sequenced_at = datetime.now()

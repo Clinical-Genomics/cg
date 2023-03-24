@@ -77,7 +77,7 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
 def analysis(context: CGConfig, case_id: str):
     """Get information about case analysis."""
     status_db: Store = context.status_db
-    case: Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
@@ -98,7 +98,7 @@ def analysis(context: CGConfig, case_id: str):
 def relations(context: CGConfig, case_id: str):
     """Get information about case relations."""
     status_db: Store = context.status_db
-    case: Family = status_db.family(internal_id=case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
@@ -144,7 +144,7 @@ def case(
         )
     else:
         for case_id in case_ids:
-            existing_case: Family = status_db.family(internal_id=case_id)
+            existing_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
             if not existing_case:
                 LOG.error(f"{case_id}: case doesn't exist")
                 raise click.Abort
