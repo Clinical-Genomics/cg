@@ -74,10 +74,13 @@ class FindBusinessDataHandler(BaseHandler):
     def has_active_cases_for_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
         sample = self.get_sample_by_internal_id(internal_id=internal_id)
+        active_actions = ["analyze", "running"]
+
         for family_sample in sample.links:
             case: Family = self.get_case_by_entry_id(entry_id=family_sample.family_id)
-            if case.action in ["analyze", "running"]:
+            if case.action in active_actions:
                 return True
+
         return False
 
     def get_application_by_case(self, case_id: str) -> Application:
