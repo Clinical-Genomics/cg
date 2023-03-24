@@ -252,7 +252,7 @@ class FamilyView(BaseView):
         "Are you sure you want to set the action for selected families to hold?",
     )
     def action_set_hold(self, ids: List[str]):
-        self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
+        self.set_action_for_cases(action=CaseActions.HOLD, case_entry_ids=ids)
 
     @action(
         "set_empty",
@@ -260,18 +260,18 @@ class FamilyView(BaseView):
         "Are you sure you want to set the action for selected families to Empty?",
     )
     def action_set_empty(self, ids: List[str]):
-        self.set_action_for_batch(action=None, entry_ids=ids)
+        self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
+    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: List[str]):
         try:
-            for entry_id in entry_ids:
+            for entry_id in case_entry_ids:
                 family = self.get_case_by_entry_id(entry_id=entry_id)
                 if family:
                     family.action = action
 
             db.commit()
 
-            num_families = len(entry_ids)
+            num_families = len(case_entry_ids)
             action_message = (
                 f"Families were set to {action}."
                 if num_families == 1
