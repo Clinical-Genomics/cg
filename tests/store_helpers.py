@@ -75,6 +75,7 @@ class StoreHelpers:
         sequencing_depth: int = None,
         is_accredited: bool = False,
         version: int = 1,
+        valid_from: datetime = datetime.now(),
         **kwargs,
     ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
@@ -106,7 +107,7 @@ class StoreHelpers:
         )
         if not application_version:
             application_version: ApplicationVersion = store.add_version(
-                application=application, version=version, valid_from=datetime.now(), prices=prices
+                application=application, version=version, valid_from=valid_from, prices=prices
             )
 
             store.add_commit(application_version)
