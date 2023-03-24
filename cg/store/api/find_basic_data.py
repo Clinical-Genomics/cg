@@ -2,7 +2,6 @@
 import datetime as dt
 from typing import List, Optional
 
-from sqlalchemy import desc
 from sqlalchemy.orm import Query
 
 from cg.store.models import (
