@@ -27,10 +27,11 @@ from cg.store.models import (
 
 from cg.store.filters.status_invoice_filters import apply_invoice_filter, InvoiceFilter
 from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
+
 from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
 from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
 from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
-
+from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
 
 LOG = logging.getLogger(__name__)
 
@@ -485,21 +486,34 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=filter_functions,
         ).all()
 
+    def get_samples_by_customer_and_subject_id_query(
+        self, customer_id: str, subject_id: str
+    ) -> Query:
+        """Get samples of customer with given subject_id or subject_id and is_tumour."""
+        records: Query = apply_customer_filter(
+            customers=self._get_join_sample_and_customer_query(),
+            customer_id=customer_id,
+            filter_functions=[CustomerFilter.FILTER_BY_INTERNAL_ID],
+        )
+        return apply_sample_filter(
+            samples=records,
+            subject_id=subject_id,
+            filter_functions=[SampleFilter.FILTER_BY_SUBJECT_ID],
+        )
+
     def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
         """Get samples of customer with given subject_id or subject_id and is_tumour."""
-        query: Query = self._get_join_sample_and_customer_query().filter(
-            Customer.internal_id == customer_id, Sample.subject_id == subject_id
-        )
-        return query.all()
+        return self.get_samples_by_customer_and_subject_id_query(
+            customer_id=customer_id, subject_id=subject_id
+        ).all()
 
     def get_samples_by_subject_id_and_is_tumour(
         self, customer_id: str, subject_id: str, is_tumour: bool
     ) -> List[Sample]:
         """Get samples of customer with given subject_id and is_tumour."""
-        samples: Query = self._get_join_sample_and_customer_query().filter(
-            Customer.internal_id == customer_id, Sample.subject_id == subject_id
+        samples: Query = self.get_samples_by_customer_and_subject_id_query(
+            customer_id=customer_id, subject_id=subject_id
         )
-
         if is_tumour:
             return apply_sample_filter(
                 samples=samples, filter_functions=[SampleFilter.FILTER_IS_TUMOUR]
