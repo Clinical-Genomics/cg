@@ -467,6 +467,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_customer_id_and_pattern(
         self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
     ) -> List[Sample]:
+        """Get samples by customer and pattern."""
         samples: Query = self._get_query(table=Sample)
         customer_ids = None
         filter_functions: List[SampleFilter] = []
@@ -489,7 +490,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_customer_and_subject_id_query(
         self, customer_id: str, subject_id: str
     ) -> Query:
-        """Get samples of customer with given subject_id or subject_id and is_tumour."""
+        """Return query of samples of customer with given subject_id or subject_id."""
         records: Query = apply_customer_filter(
             customers=self._get_join_sample_and_customer_query(),
             customer_id=customer_id,
