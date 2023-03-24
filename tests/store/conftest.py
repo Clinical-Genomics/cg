@@ -10,6 +10,7 @@ from cg.constants.subject import Gender
 from cg.store import Store
 from cg.store.models import Analysis, Application, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
+from tests.store.api.conftest import fixture_applications_store
 
 
 class StoreConftestFixture(enum.Enum):
@@ -167,6 +168,18 @@ def fixture_sequencer_name() -> str:
     return "A00689"
 
 
+@pytest.fixture(name="invalid_application_id")
+def fixture_invalid_application_id() -> int:
+    """Return an invalid application id."""
+    return -1
+
+
+@pytest.fixture(name="invalid_application_version_version")
+def fixture_invalid_application_version_version() -> int:
+    """Return a valid version of an Application Version."""
+    return -1
+
+
 @pytest.fixture(name="store_with_a_sample_that_has_many_attributes_and_one_without")
 def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
     store: Store,
@@ -291,6 +304,22 @@ def fixture_store_with_applications_with_application_versions(
             application_tag=app.tag,
         )
     return store_with_an_application_with_and_without_attributes
+
+
+@pytest.fixture(name="store_with_different_application_versions")
+def fixture_store_with_different_application_versions(
+    applications_store: Store,
+    helpers: StoreHelpers,
+) -> Store:
+    """."""
+    applications: List[Application] = applications_store.get_applications()
+
+    for app in applications:
+        helpers.ensure_application_version(
+            store=applications_store,
+            application_tag=app.tag,
+        )
+    return applications_store
 
 
 @pytest.fixture(name="store_with_an_invoice_with_and_without_attributes")

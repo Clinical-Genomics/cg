@@ -99,18 +99,6 @@ def fixture_application_version_version() -> int:
     return 1
 
 
-@pytest.fixture(name="invalid_application_version_version")
-def fixture_invalid_application_version_version() -> int:
-    """Return a valid version of an Application Version."""
-    return -1
-
-
-@pytest.fixture(name="invalid_application_id")
-def fixture_invalid_application_id() -> int:
-    """Return an invalid application id."""
-    return -1
-
-
 @pytest.fixture(name="microbial_store")
 def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
     """Populate a store with microbial application tags"""

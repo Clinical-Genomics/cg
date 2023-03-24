@@ -1,20 +1,21 @@
 from typing import List
 
+from sqlalchemy import desc
+from sqlalchemy.orm import Query
+
+from cg.store import Store
 from cg.store.filters.status_application_version_filters import (
     filter_application_versions_by_application_id,
     filter_application_versions_by_application,
     filter_application_versions_before_date,
     filter_application_versions_by_version,
+    order_application_versions_by_desc_date,
 )
 
-from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
-from sqlalchemy import desc
-from sqlalchemy.orm import Query
+
 from tests.store.api.conftest import (
     fixture_applications_store,
-    fixture_invalid_application_id,
-    fixture_invalid_application_version_version,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -195,3 +196,12 @@ def test_filter_application_version_by_version_invalid_version_returns_empty(
 
     # THEN the filtered query is empty
     assert filtered_app_version_query.count() == 0
+
+
+def test_order_application_versions_by_desc_date():
+    """."""
+    # GIVEN
+
+    # WHEN
+
+    # THEN
