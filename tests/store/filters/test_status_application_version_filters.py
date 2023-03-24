@@ -145,13 +145,29 @@ def test_filter_application_version_by_application_id_wrong_id(
     assert filtered_app_version_query.count() == 0
 
 
-def test_filter_application_versions_before_date():
-    """."""
-    # GIVEN
+def test_filter_application_versions_before_date(store_with_different_application_versions: Store):
+    """Test that filtering by date returns a query with older elements than the given date."""
+    # GIVEN a store with application versions with different dates
+    app_version_query: Query = store_with_different_application_versions._get_query(
+        table=ApplicationVersion
+    ).order_by(ApplicationVersion.valid_from)
+    first_app_version: ApplicationVersion = app_version_query.first()
+    third_app_version: ApplicationVersion = app_version_query.offset(2).first()
+    assert first_app_version.valid_from < third_app_version.valid_from
 
-    # WHEN
+    # WHEN filtering the application version query by the date of the third query
+    filtered_app_version_query: Query = filter_application_versions_before_date(
+        application_versions=app_version_query,
+        date=third_app_version.valid_from,
+    )
 
-    # THEN
+    # THEN a query with the two first application versions are returned
+    assert filtered_app_version_query.count() == 2
+    # THEN the date of the newest query is older than the filter date.
+    assert (
+        filtered_app_version_query.order_by(desc(ApplicationVersion.valid_from)).first().valid_from
+        < third_app_version.valid_from
+    )
 
 
 def test_filter_application_version_by_version_correct_version(
@@ -198,10 +214,21 @@ def test_filter_application_version_by_version_invalid_version_returns_empty(
     assert filtered_app_version_query.count() == 0
 
 
-def test_order_application_versions_by_desc_date():
+def test_order_application_versions_by_desc_date(store_with_different_application_versions: Store):
     """."""
-    # GIVEN
+    # GIVEN a store with application versions with different dates
+    app_version_query: Query = store_with_different_application_versions._get_query(
+        table=ApplicationVersion
+    )
 
-    # WHEN
+    # WHEN ordering the query by date
+    ordered_app_versions: List[ApplicationVersion] = list(
+        order_application_versions_by_desc_date(application_versions=app_version_query)
+    )
+    n_app_versions: int = len(ordered_app_versions)
 
-    # THEN
+    # THEN the elements of the ordered query have descending order of valid_from
+    assert all(
+        ordered_app_versions[i].valid_from > ordered_app_versions[i + 1].valid_from
+        for i in range(n_app_versions - 1)
+    )

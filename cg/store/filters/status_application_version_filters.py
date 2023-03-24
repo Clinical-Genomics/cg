@@ -1,7 +1,7 @@
 from enum import Enum
+from datetime import datetime
 from sqlalchemy import desc
 from sqlalchemy.orm import Query
-from sqlalchemy.types import DateTime
 from typing import List, Callable
 
 from cg.store.models import Application, ApplicationVersion
@@ -29,7 +29,7 @@ def filter_application_versions_by_version(
 
 
 def filter_application_versions_before_date(
-    application_versions: Query, date: DateTime, **kwargs
+    application_versions: Query, date: datetime, **kwargs
 ) -> Query:
     """Return the application versions with valid_from before a given date."""
     return application_versions.filter(ApplicationVersion.valid_from < date)
@@ -46,7 +46,7 @@ def apply_application_versions_filter(
     application_id: int = None,
     application: Application = None,
     version: int = None,
-    date: DateTime = None,
+    date: datetime = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
     for filter_function in filter_functions:
