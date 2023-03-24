@@ -514,7 +514,7 @@ def fixture_mip_dna_analysis(
 ) -> Analysis:
     """Return a MIP DNA analysis object."""
     helpers.add_synopsis_to_case(store=analysis_store_trio, case_id=case_id)
-    case: Family = analysis_store_trio.family(case_id)
+    case: Family = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
     analysis: Analysis = helpers.add_analysis(
         store=analysis_store_trio,
         case=case,

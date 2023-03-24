@@ -93,7 +93,7 @@ def fixture_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> Analysis:
     """Return a analysis object with a trio"""
-    return analysis_store_trio.family(case_id).analyses[0]
+    return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
 @pytest.fixture(name="upload_genotypes_hk_api")

@@ -159,13 +159,13 @@ def parse_families():
         customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        cases = db.families(
+        cases_query: Query = db.families(
             enquiry=request.args.get("enquiry"),
             customers=customers,
             action=request.args.get("action"),
         )
-        count = len(cases)
-        cases = cases[:30]
+        count = cases_query.count()
+        cases = cases_query.limit(30)
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
     return jsonify(families=parsed_cases, total=count)
 
@@ -188,7 +188,7 @@ def parse_families_in_collaboration():
 @BLUEPRINT.route("/families/<family_id>")
 def parse_family(family_id):
     """Return a family with links."""
-    case: Family = db.family(family_id)
+    case: Family = db.get_case_by_internal_id(internal_id=family_id)
     if case is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
@@ -199,7 +199,7 @@ def parse_family(family_id):
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
 def parse_family_in_collaboration(family_id):
     """Return a family with links."""
-    case: Family = db.family(family_id)
+    case: Family = db.get_case_by_internal_id(internal_id=family_id)
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if case.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)

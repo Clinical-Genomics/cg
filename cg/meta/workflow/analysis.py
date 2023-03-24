@@ -70,7 +70,7 @@ class AnalysisAPI(MetaAPI):
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """Passes silently if case exists in StatusDB, raises error if case is missing"""
 
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
@@ -92,7 +92,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return case_obj.priority.value or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
@@ -169,7 +169,7 @@ class AnalysisAPI(MetaAPI):
         """Storing analysis bundle in StatusDB for CASE_ID"""
 
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
         new_analysis: Family = self.status_db.add_analysis(
@@ -198,7 +198,9 @@ class AnalysisAPI(MetaAPI):
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
-            analysis_type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
+            analysis_type=self.get_application_type(
+                self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
+            ),
             out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
@@ -239,7 +241,7 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
         if action in [None, *CASE_ACTIONS]:
-            case_obj: Family = self.status_db.family(case_id)
+            case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case_obj.action = action
             self.status_db.commit()
             LOG.info("Action %s set for case %s", action, case_id)
@@ -327,7 +329,7 @@ class AnalysisAPI(MetaAPI):
 
     def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
         """Get target bed filename from LIMS."""
-        case: Family = self.status_db.family(internal_id=case_id)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample: Sample = case.links[0].sample
         if sample.from_sample:
             sample: Sample = self.status_db.get_sample_by_internal_id(
@@ -372,7 +374,7 @@ class AnalysisAPI(MetaAPI):
         if not decompression_possible:
             self.decompression_running(case_id=case_id)
             return
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         link: FamilySample
         any_decompression_started = False
         for link in case_obj.links:
@@ -441,7 +443,7 @@ class AnalysisAPI(MetaAPI):
 
     def clean_analyses(self, case_id: str) -> None:
         """Add a cleaned at date for all analyses related to a case."""
-        analyses: list = self.status_db.family(case_id).analyses
+        analyses: list = self.status_db.get_case_by_internal_id(internal_id=case_id).analyses
         LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()

@@ -375,7 +375,9 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
 
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
-        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+        rml_pool_store.get_case_by_internal_id(internal_id=case_id)
+        .links[ListIndexes.FIRST.value]
+        .sample.application_version
     )
 
     # WHEN the expected reads is fetched from the case
@@ -389,7 +391,9 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     """Test that the correct application is returned on a case."""
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
-        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+        rml_pool_store.get_case_by_internal_id(internal_id=case_id)
+        .links[ListIndexes.FIRST.value]
+        .sample.application_version
     )
 
     # WHEN the application is fetched from the case
@@ -443,7 +447,9 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # GIVEN a database containing some cases but not a specific case
     case_id: str = "some_case"
-    case: Family = store_with_multiple_cases_and_samples.family(case_id)
+    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+        internal_id=case_id
+    )
 
     assert not case
 
@@ -660,3 +666,16 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 
     # THEN one pools should be returned
     assert len(pools) == 1
+
+
+def test_get_case_action(store_with_active_sample_analyze: Store):
+    """Test to get the action of a case"""
+    # GIVEN a database with an active sample
+
+    # WHEN fetching the case action
+    action: str = store_with_active_sample_analyze.get_case_action(
+        sample=store_with_active_sample_analyze.get_samples()[0].links[0]
+    )
+
+    # THEN the action should be analyze
+    assert action == "analyze"
