@@ -101,7 +101,7 @@ def get_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
 
 
-def filter_cases_by_entry_id(cases: Query, entry_id: int) -> Query:
+def filter_cases_by_entry_id(cases: Query, entry_id: int, **kwargs) -> Query:
     """Filter cases by entry id."""
     return cases.filter(Family.id == entry_id)
 
@@ -121,7 +121,9 @@ def apply_case_filter(
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
-        cases: Query = function(cases=cases, date=date, pipeline=pipeline, internal_id=internal_id, entry_id=entry_id)
+        cases: Query = function(
+            cases=cases, date=date, pipeline=pipeline, internal_id=internal_id, entry_id=entry_id
+        )
     return cases
 
 
@@ -141,4 +143,3 @@ class CaseFilter(Enum):
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
     FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
     FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
-

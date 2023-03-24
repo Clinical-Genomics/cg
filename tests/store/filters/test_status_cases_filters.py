@@ -561,7 +561,7 @@ def test_filter_case_by_existing_entry_id(store_with_multiple_cases_and_samples:
 
     # WHEN filtering for cases with the entry_id
     cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id=entry_id)
-    
+
     # THEN the case should have the entry_id
     assert cases.first().id == entry_id
 
@@ -594,7 +594,7 @@ def test_filter_case_by_existing_internal_id(
 
     # THEN the query should contain only one case
     assert cases.count() == 1
-    
+
     # THEN the case should have the internal id case_id
     assert cases.first().internal_id == case_id
 
@@ -623,4 +623,3 @@ def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples:
 
     # THEN the query should return no cases
     assert cases.count() == 0
-
