@@ -28,7 +28,7 @@ def filter_not_completed_analyses(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.completed_at.is_(None))
 
 
-def filter_filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
+def filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
     """Return analyses that have been already uploaded."""
     return analyses.filter(Analysis.uploaded_at.isnot(None))
 
@@ -98,7 +98,7 @@ class AnalysisFilter(Enum):
     FILTER_WITH_PIPELINE: Callable = filter_analyses_with_pipeline
     FILTER_COMPLETED: Callable = filter_completed_analyses
     FILTER_NOT_COMPLETED: Callable = filter_not_completed_analyses
-    FILTER_UPLOADED: Callable = filter_filter_uploaded_analyses
+    FILTER_UPLOADED: Callable = filter_uploaded_analyses
     FILTER_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
     FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
     FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
