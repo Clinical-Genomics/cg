@@ -43,5 +43,7 @@ def test_store_items_in_status_control_has_stored_value(
     customer: Customer = base_store.get_customer_by_customer_id(customer_id=order.customer)
     sample: SarsCov2Sample
     for sample in order.samples:
-        stored_sample: Sample = base_store.find_samples(customer=customer, name=sample.name).first()
+        stored_sample: Sample = base_store.get_samples_by_customer_and_name(
+            customer=customer, name=sample.name
+        )[0]
         assert stored_sample.control == control_value

@@ -534,7 +534,7 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
     for sample in order_data.samples:
         sample_name = sample.name
-        if not store.find_samples(customer=customer, name=sample_name).first():
+        if not store.get_samples_by_customer_and_name(customer=customer, name=sample_name):
             sample_obj = helpers.add_sample(
                 store=store, name=sample_name, customer_id=customer.internal_id
             )

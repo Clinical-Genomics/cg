@@ -252,9 +252,16 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(name=name).first()
 
-    def find_samples(self, customer: Customer, name: str) -> Query:
-        """Find samples within a customer."""
-        return self._get_query(table=Sample).filter_by(customer=customer, name=name)
+    def get_samples_by_customer_and_name(self, customer: Customer, name: str) -> List[Sample]:
+        """Get samples within a customer."""
+        filter_functions = [SampleFilter.FILTER_BY_CUSTOMER, SampleFilter.FILTER_BY_SAMPLE_NAME]
+
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            filter_functions=filter_functions,
+            customer=customer,
+            name=name,
+        ).all()
 
     def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
         """Return flow cell by flow cell id."""
