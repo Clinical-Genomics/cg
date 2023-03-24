@@ -90,7 +90,7 @@ def abort_on_empty_options(options: List[str]) -> None:
 
 
 def get_case(case_id: str, status_db: Store) -> Family:
-    case: Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if case is None:
         LOG.error(f"Can't find case {case_id}")

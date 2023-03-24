@@ -124,7 +124,7 @@ class NiptUploadAPI:
     def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:
@@ -139,7 +139,7 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:

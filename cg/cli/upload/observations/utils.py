@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> Family:
     """Return a verified Loqusdb case."""
     status_db: Store = context.status_db
-    case: Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if not case or case.data_analysis not in LOQUSDB_SUPPORTED_PIPELINES:
         LOG.error("Invalid case ID. Retrieving available cases for Loqusdb actions.")
         cases_to_process: Query = (

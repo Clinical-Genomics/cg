@@ -43,7 +43,7 @@ def test_run_deliver_non_existing_case(
     # GIVEN a cli runner and a base context
     # GIVEN a case_id that does not exist in the database
     store: Store = base_context.status_db
-    assert store.family(case_id) is None
+    assert store.get_case_by_internal_id(internal_id=case_id) is None
 
     # WHEN running the deliver command with the non existing case
     result = cli_runner.invoke(

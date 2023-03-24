@@ -22,7 +22,7 @@ def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, ca
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context.status_db.family(case_id)
+    assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id)
     # WHEN running
     result = cli_runner.invoke(link, [case_id], obj=balsamic_context)
     # THEN command should NOT successfully call the command it creates

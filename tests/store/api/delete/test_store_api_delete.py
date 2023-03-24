@@ -98,7 +98,9 @@ def test_store_api_delete_non_existing_case(
     """Test that nothing happens when trying to delete a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
-    case: Family = store_with_multiple_cases_and_samples.family(case_id_does_not_exist)
+    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+        internal_id=case_id_does_not_exist
+    )
     existing_cases: List[Family] = store_with_multiple_cases_and_samples.families().all()
 
     assert not case
@@ -106,7 +108,7 @@ def test_store_api_delete_non_existing_case(
 
     # WHEN removing empty cases, specifying the non existing case
     store_with_multiple_cases_and_samples.delete_cases_without_samples(
-        case_ids=[case_id_does_not_exist]
+        case_internal_ids=[case_id_does_not_exist]
     )
 
     # THEN no case has been deleted and nothing happens

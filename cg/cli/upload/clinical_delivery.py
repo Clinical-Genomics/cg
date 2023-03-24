@@ -30,7 +30,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case_obj: Family = context.obj.status_db.family(case_id)
+    case_obj: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
     delivery_types: Set[str] = case_obj.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool

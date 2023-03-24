@@ -120,7 +120,7 @@ def test_check_if_concatenation_is_needed(
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 
     # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
+    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
@@ -144,7 +144,7 @@ def test_check_if_concatenation_is_needed_part_deux(
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 
     # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
+    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
@@ -168,7 +168,7 @@ def test_get_samples_from_ticket(
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 
     # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
+    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
