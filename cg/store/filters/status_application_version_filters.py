@@ -27,7 +27,7 @@ def filter_application_versions_by_version(
     return application_versions.filter(ApplicationVersion.version == version)
 
 
-def filter_application_versions_before_date(
+def filter_application_versions_before_valid_from(
     application_versions: Query, date: datetime, **kwargs
 ) -> Query:
     """Return the application versions with valid_from before a given date."""
@@ -64,6 +64,6 @@ class ApplicationVersionFilter(Enum):
 
     FILTER_BY_APPLICATION = filter_application_versions_by_application
     FILTER_BY_APPLICATION_ID = filter_application_versions_by_application_id
-    FILTER_BY_DATE = filter_application_versions_before_date
+    FILTER_BY_DATE = filter_application_versions_before_valid_from
     FILTER_BY_VERSION = filter_application_versions_by_version
     ORDER_BY_VALID_FROM = order_application_versions_by_valid_from_desc

@@ -289,49 +289,22 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
-@pytest.fixture(name="store_with_one_application_and_two_versions")
-def fixture_store_with_one_application_and_two_versions(
-    store: Store,
-    helpers: StoreHelpers,
-) -> Store:
-    """Returns a store with two application versions with different version values."""
-    helpers.ensure_application_version(store=store, version=1)
-    helpers.ensure_application_version(store=store, version=2)
-    return store
-
-
-@pytest.fixture(name="store_with_applications_with_application_versions")
-def fixture_store_with_applications_with_application_versions(
-    store_with_an_application_with_and_without_attributes: Store,
-    helpers: StoreHelpers,
-) -> Store:
-    """Returns a store with two different applications and their respective application versions."""
-    applications: List[
-        Application
-    ] = store_with_an_application_with_and_without_attributes.get_applications()
-
-    for application in applications:
-        helpers.ensure_application_version(
-            store=store_with_an_application_with_and_without_attributes,
-            application_tag=application.tag,
-        )
-    return store_with_an_application_with_and_without_attributes
-
-
 @pytest.fixture(name="store_with_different_application_versions")
 def fixture_store_with_different_application_versions(
     applications_store: Store,
     helpers: StoreHelpers,
 ) -> Store:
-    """Returns a store with application versions with different applications and dates."""
+    """Returns a store with application versions with different applications, dates and versions."""
     applications: List[Application] = applications_store.get_applications()
-    years = StoreConftestFixture.generate_year_interval(len(applications))
+    years: List[int] = StoreConftestFixture.generate_year_interval(len(applications))
+    versions: List[int] = list(range(1, len(applications) + 1))
 
-    for application, year in zip(applications, years):
+    for application, year, version in zip(applications, years, versions):
         helpers.ensure_application_version(
             store=applications_store,
             application_tag=application.tag,
             valid_from=datetime.datetime(year, 1, 1, 0, 0, 0),
+            version=version,
         )
     return applications_store
 
@@ -354,5 +327,4 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
         invoice_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES.value,
         invoiced_at=None,
     )
-
     return store
