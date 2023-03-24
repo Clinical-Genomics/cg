@@ -604,21 +604,24 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         )
         return config_data["analysis"]["BALSAMIC_version"]
 
-    def family_has_correct_number_tumor_normal_samples(self, case_id: str) -> bool:
+    def case_has_correct_number_tumour_normal_samples(self, case_internal_id: str) -> bool:
         """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
         This check is only applied to filter jobs which start automatically"""
-        query = (
-            self.status_db.query(Sample)
-            .join(Family.links, FamilySample.sample)
-            .filter(Family.internal_id == case_id)
-            .filter(Family.data_analysis == self.pipeline)
+
+        samples: List[Sample] = self.status_db.get_samples_by_case_and_pipeline(
+            case_internal_id=case_internal_id, pipeline=self.pipeline
         )
-        return all(
-            [
-                len(query.filter(Sample.is_tumour == False).all()) <= 1,
-                len(query.filter(Sample.is_tumour == True).all()) == 1,
-            ]
-        )
+
+        normal_samples_count: int = self.count_normal_samples(samples=samples)
+        tumour_samples_count: int = self.count_tumour_samples(samples=samples)
+
+        return normal_samples_count <= 1 and tumour_samples_count == 1
+
+    def count_normal_samples(self, samples: List[Sample]) -> int:
+        return len([sample for sample in samples if not sample.is_tumour])
+
+    def count_tumour_samples(self, samples: List[Sample]) -> int:
+        return len([sample for sample in samples if sample.is_tumour])
 
     def get_valid_cases_to_analyze(self) -> list:
         """Retrieve a list of balsamic cases without analysis,
@@ -627,7 +630,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return [
             case_object.internal_id
             for case_object in self.get_cases_to_analyze()
-            if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
+            if self.case_has_correct_number_tumour_normal_samples(
+                case_internal_id=case_object.internal_id
+            )
         ]
 
     def config_case(
