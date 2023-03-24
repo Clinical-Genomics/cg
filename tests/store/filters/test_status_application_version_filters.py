@@ -1,6 +1,5 @@
 from typing import List
 
-from sqlalchemy import desc
 from sqlalchemy.orm import Query
 
 from cg.store import Store
@@ -9,7 +8,7 @@ from cg.store.filters.status_application_version_filters import (
     filter_application_versions_by_application,
     filter_application_versions_before_date,
     filter_application_versions_by_version,
-    order_application_versions_by_desc_date,
+    order_application_versions_by_valid_from_desc,
 )
 
 from cg.store.models import Application, ApplicationVersion
@@ -48,7 +47,7 @@ def test_filter_application_version_by_application_correct_application(
     # THEN the filtered query has fewer entries than the unfiltered query
     assert app_version_query.count() > filtered_app_version_query.count()
     # THEN the application of the application version in the filter query is the linked application
-    assert str(filtered_app_version_query.first().application) == str(linked_application)
+    assert filtered_app_version_query.first().application == linked_application
 
 
 def test_filter_application_version_by_application_wrong_application_returns_empty(
@@ -165,7 +164,7 @@ def test_filter_application_versions_before_date(store_with_different_applicatio
     assert filtered_app_version_query.count() == 2
     # THEN the date of the newest query is older than the filter date.
     assert (
-        filtered_app_version_query.order_by(desc(ApplicationVersion.valid_from)).first().valid_from
+        filtered_app_version_query.order_by(ApplicationVersion.valid_from.desc()).first().valid_from
         < third_app_version.valid_from
     )
 
@@ -214,7 +213,9 @@ def test_filter_application_version_by_version_invalid_version_returns_empty(
     assert filtered_app_version_query.count() == 0
 
 
-def test_order_application_versions_by_desc_date(store_with_different_application_versions: Store):
+def test_order_application_versions_by_valid_from_desc(
+    store_with_different_application_versions: Store,
+):
     """."""
     # GIVEN a store with application versions with different dates
     app_version_query: Query = store_with_different_application_versions._get_query(
@@ -223,7 +224,7 @@ def test_order_application_versions_by_desc_date(store_with_different_applicatio
 
     # WHEN ordering the query by date
     ordered_app_versions: List[ApplicationVersion] = list(
-        order_application_versions_by_desc_date(application_versions=app_version_query)
+        order_application_versions_by_valid_from_desc(application_versions=app_version_query)
     )
     n_app_versions: int = len(ordered_app_versions)
 

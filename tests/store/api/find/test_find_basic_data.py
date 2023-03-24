@@ -171,14 +171,17 @@ def test_application_version_with_version_and_application(
 ):
     """Test that application_version returns a valid query given an application and a version"""
     # GIVEN a store with applications and an ApplicationVersion.version
-    local_store: Store = store_with_applications_with_application_versions
-    application: Application = local_store.get_applications()[0]
+    application: Application = store_with_applications_with_application_versions.get_applications()[
+        0
+    ]
     assert isinstance(application, Application)
 
     # WHEN calling the function with an application and a version
-    application_version: ApplicationVersion = local_store.application_version(
-        application=application,
-        version=application_version_version,
+    application_version: ApplicationVersion = (
+        store_with_applications_with_application_versions.application_version(
+            application=application,
+            version=application_version_version,
+        )
     )
 
     # THEN

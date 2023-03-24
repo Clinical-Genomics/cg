@@ -310,10 +310,10 @@ def fixture_store_with_applications_with_application_versions(
         Application
     ] = store_with_an_application_with_and_without_attributes.get_applications()
 
-    for app in applications:
+    for application in applications:
         helpers.ensure_application_version(
             store=store_with_an_application_with_and_without_attributes,
-            application_tag=app.tag,
+            application_tag=application.tag,
         )
     return store_with_an_application_with_and_without_attributes
 
@@ -327,10 +327,10 @@ def fixture_store_with_different_application_versions(
     applications: List[Application] = applications_store.get_applications()
     years = StoreConftestFixture.generate_year_interval(len(applications))
 
-    for app, year in zip(applications, years):
+    for application, year in zip(applications, years):
         helpers.ensure_application_version(
             store=applications_store,
-            application_tag=app.tag,
+            application_tag=application.tag,
             valid_from=datetime.datetime(year, 1, 1, 0, 0, 0),
         )
     return applications_store
