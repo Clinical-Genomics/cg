@@ -139,12 +139,14 @@ def new(record_type):
     customer_id = request.args.get("customer", "cust002")
     customer: Customer = db.get_customer_by_customer_id(customer_id=customer_id)
     if record_type == "Sample":
-        records: List[Pool or Sample] = db.get_samples_to_invoice_for_customer(customer=customer)
+        records: List[Union[Pool, Sample]] = db.get_samples_to_invoice_for_customer(
+            customer=customer
+        )
         customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
             records=db.get_samples_to_invoice_query()
         )
     elif record_type == "Pool":
-        records: List[Pool or Sample] = db.get_pools_to_invoice_for_customer(customer=customer)
+        records: List[Union[Pool, Sample]] = db.get_pools_to_invoice_for_customer(customer=customer)
         customers_to_invoice: List[Customer] = db.get_customers_to_invoice(
             records=db.get_pools_to_invoice_query()
         )

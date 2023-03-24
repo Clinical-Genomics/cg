@@ -152,7 +152,7 @@ def test_get_samples_to_invoice_query(sample_store):
 
 
 def test_get_samples_not_invoiced(sample_store):
-    """Test fetching samples not invoiced."""
+    """Test getting samples not invoiced."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -168,7 +168,7 @@ def test_get_samples_not_invoiced(sample_store):
 
 
 def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers, sample_id: int):
-    """Test fetching samples not down sampled."""
+    """Test getting samples not down sampled."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -188,7 +188,7 @@ def test_get_samples_to_invoice_for_customer(
     helpers: StoreHelpers,
     three_customer_ids: List[str],
 ):
-    """Test that samples to invoice can be fetched for a customer."""
+    """Test that samples to invoice can be returned for a customer."""
     # GIVEN a database with samples for a customer
 
     # THEN the one customer can be retrieved

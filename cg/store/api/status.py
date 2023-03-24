@@ -2,11 +2,13 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
+
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
+from cg.constants.invoice import CustomerNames
 from cg.store.models import (
     Analysis,
     Application,
@@ -829,7 +831,9 @@ class StatusHandler(BaseHandler):
 
     def get_customers_to_invoice(self, records: Query) -> List[Customer]:
         customers_to_invoice: List[Customer] = [
-            record.customer for record in records.all() if record.customer.internal_id != "cust000"
+            record.customer
+            for record in records.all()
+            if record.customer.internal_id != CustomerNames.cust000
         ]
         return list(set(customers_to_invoice))
 

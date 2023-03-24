@@ -7,7 +7,7 @@ def test_get_pools_to_invoice_query(
     store_with_pools_for_multiple_customers: Store,
     three_pool_names: List[str],
 ):
-    """Test fetching pools to invoice."""
+    """Test return pools to invoice."""
     # GIVEN a store with multiple pools for multiple customers
     assert len(store_with_pools_for_multiple_customers.get_pools()) > 1
 
@@ -24,7 +24,7 @@ def test_get_pools_to_invoice_for_customer(
     store_with_pools_for_multiple_customers: Store,
     three_customer_ids: List[str],
 ):
-    """Test fetching pools to invoice for a customer."""
+    """Test return pools to invoice for a customer."""
     # GIVEN a store with multiple pools for multiple customers
     assert len(store_with_pools_for_multiple_customers.get_pools()) > 1
 

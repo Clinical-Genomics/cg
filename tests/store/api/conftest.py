@@ -436,7 +436,9 @@ def fixture_three_pool_names() -> List[str]:
 
 
 @pytest.fixture(name="store_with_samples_for_multiple_customers")
-def fixture_store_with_samples_for_multiple_customers(store: Store, helpers: StoreHelpers) -> Store:
+def fixture_store_with_samples_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
+) -> Store:
     """Return a store with two samples for three different customers."""
     for number in range(3):
         helpers.add_sample(
@@ -444,13 +446,15 @@ def fixture_store_with_samples_for_multiple_customers(store: Store, helpers: Sto
             internal_id="_".join(["test_sample", str(number)]),
             customer_id="".join(["cust00", str(number)]),
             no_invoice=False,
-            delivered_at=dt.datetime.now(),
+            delivered_at=timestamp_now,
         )
     yield store
 
 
 @pytest.fixture(name="store_with_pools_for_multiple_customers")
-def fixture_store_with_pools_for_multiple_customers(store: Store, helpers: StoreHelpers) -> Store:
+def fixture_store_with_pools_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
+) -> Store:
     """Return a store with two samples for three different customers."""
     for number in range(3):
         helpers.ensure_pool(
@@ -458,6 +462,6 @@ def fixture_store_with_pools_for_multiple_customers(store: Store, helpers: Store
             name="_".join(["test_pool", str(number)]),
             customer_id="".join(["cust00", str(number)]),
             no_invoice=False,
-            delivered_at=dt.datetime.now(),
+            delivered_at=timestamp_now,
         )
     yield store

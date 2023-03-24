@@ -3,7 +3,7 @@ from cg.store import Store
 from cg.store.models import Customer, Sample
 from tests.store_helpers import StoreHelpers
 from typing import List
-from sqlalchemy.orm import Query
+from cg.constants.invoice import CustomerNames
 
 
 def test_get_customers_to_invoice(
@@ -11,7 +11,7 @@ def test_get_customers_to_invoice(
     helpers: StoreHelpers,
     three_customer_ids: List[str],
 ):
-    """Test that customers to invoice can be fetched."""
+    """Test that customers to invoice can be returned."""
     # GIVEN a database with samples for a customer
 
     # WHEN getting the customers to invoice
@@ -27,4 +27,4 @@ def test_get_customers_to_invoice(
 
     # THEN the customers to invoice should not contain cust000
     for customer in customers:
-        assert customer.internal_id != "cust000"
+        assert customer.internal_id != CustomerNames.cust000
