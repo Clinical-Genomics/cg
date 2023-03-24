@@ -94,7 +94,7 @@ def deliver_analysis(
         deliver_api.set_dry_run(dry_run)
         cases: List[Family] = []
         if case_id:
-            case_obj: Family = status_db.family(case_id)
+            case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
             if not case_obj:
                 LOG.warning("Could not find case %s", case_id)
                 return

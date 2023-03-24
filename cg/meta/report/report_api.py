@@ -179,7 +179,7 @@ class ReportAPI(MetaAPI):
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""
 
-        case: Family = self.status_db.family(case_id)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis: Analysis = self.status_db.analysis(case, analysis_date)
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)

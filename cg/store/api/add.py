@@ -179,7 +179,7 @@ class AddHandler(BaseHandler):
         # generate a unique case id
         while True:
             internal_id = petname.Generate(2, separator="")
-            if self.family(internal_id) is None:
+            if self.get_case_by_internal_id(internal_id) is None:
                 break
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")

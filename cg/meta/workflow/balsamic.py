@@ -126,10 +126,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         Analysis types are any of ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
         """
         LOG.debug("Fetch analysis type for %s", case_id)
-        number_of_samples: int = len(self.status_db.family(case_id).links)
+        number_of_samples: int = len(
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links
+        )
 
         application_type: str = self.get_application_type(
-            self.status_db.family(case_id).links[0].sample
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
         )
         sample_type = "tumor"
         if number_of_samples == 2:
@@ -145,7 +147,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             self.link_fastq_files_for_sample(
                 case_obj=case_obj, sample_obj=link.sample, concatenate=True
@@ -513,7 +515,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def build_case_id_map_string(self, case_id: str) -> Optional[str]:
         """Creates case info string for balsamic with format panel_shortname:case_name:application_tag."""
 
-        case: Family = self.status_db.family(internal_id=case_id)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample: Sample = case.links[0].sample
         if sample.from_sample:
             sample: Sample = self.status_db.get_sample_by_internal_id(
@@ -571,7 +573,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
-            for link_object in self.status_db.family(case_id).links
+            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
         }
 
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
@@ -580,7 +582,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_case_application_type(self, case_id: str) -> str:
         application_types = {
             self.get_application_type(link_object.sample)
-            for link_object in self.status_db.family(case_id).links
+            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
         }
 
         if application_types:

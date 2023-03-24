@@ -38,7 +38,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis"""
 
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_data = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
         if len(sample_data) == 0:
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC PON analysis!")

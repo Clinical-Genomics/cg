@@ -24,7 +24,7 @@ def validate(context: CGConfig, family_id: Optional[str]):
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
 
-    case_obj = status_db.family(family_id)
+    case_obj = status_db.get_case_by_internal_id(internal_id=family_id)
     chanjo_samples: List[dict] = []
     for link_obj in case_obj.links:
         sample_id = link_obj.sample.internal_id

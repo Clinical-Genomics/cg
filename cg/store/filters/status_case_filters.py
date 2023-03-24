@@ -101,15 +101,21 @@ def get_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
 
 
+def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Query:
+    """Return cases with matching internal id."""
+    return cases.filter(Family.internal_id == internal_id)
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: List[Callable],
     date: Optional[datetime] = None,
     pipeline: Optional[Pipeline] = None,
+    internal_id: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
-        cases: Query = function(cases=cases, date=date, pipeline=pipeline)
+        cases: Query = function(cases=cases, date=date, pipeline=pipeline, internal_id=internal_id)
     return cases
 
 
@@ -127,3 +133,4 @@ class CaseFilter(Enum):
     GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
     GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
+    FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
