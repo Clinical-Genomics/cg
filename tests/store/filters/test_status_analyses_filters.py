@@ -7,22 +7,22 @@ from cgmodels.cg.constants import Pipeline
 from cg.store import Store
 from cg.store.models import Analysis, Family
 from cg.store.filters.status_analysis_filters import (
-    get_valid_analyses_in_production,
-    get_analyses_with_pipeline,
-    get_completed_analyses,
-    get_not_completed_analyses,
-    get_filter_uploaded_analyses,
-    get_not_uploaded_analyses,
-    get_analyses_with_delivery_report,
-    get_analyses_without_delivery_report,
-    get_report_analyses_by_pipeline,
+    filter_valid_analyses_in_production,
+    filter_analyses_with_pipeline,
+    filter_completed_analyses,
+    filter_not_completed_analyses,
+    filter_uploaded_analyses,
+    filter_not_uploaded_analyses,
+    filter_analyses_with_delivery_report,
+    filter_analyses_without_delivery_report,
+    filter_report_analyses_by_pipeline,
     order_analyses_by_uploaded_at,
     order_analyses_by_completed_at,
 )
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_valid_analyses_in_production(
+def test_filter_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
     case_obj: Family,
@@ -40,7 +40,7 @@ def test_get_valid_analyses_in_production(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving valid in production analyses
-    analyses: Query = get_valid_analyses_in_production(analyses_query)
+    analyses: Query = filter_valid_analyses_in_production(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -50,7 +50,7 @@ def test_get_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_get_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case_obj: Family):
+def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case_obj: Family):
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
@@ -63,7 +63,7 @@ def test_get_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, ca
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN extracting the analyses
-    analyses: Query = get_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
+    analyses: Query = filter_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -73,7 +73,9 @@ def test_get_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, ca
     assert mip_analysis not in analyses
 
 
-def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
+def test_filter_completed_analyses(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
     """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
@@ -83,7 +85,7 @@ def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timest
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving the completed analyses
-    analyses: Query = get_completed_analyses(analyses_query)
+    analyses: Query = filter_completed_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -92,7 +94,7 @@ def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timest
     assert analysis in analyses
 
 
-def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
+def test_filter_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of ongoing analyses."""
 
     # GIVEN a mock not completed analysis
@@ -102,7 +104,7 @@ def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving the not completed analyses
-    analyses: Query = get_not_completed_analyses(analyses_query)
+    analyses: Query = filter_not_completed_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -111,7 +113,7 @@ def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     assert analysis_not_completed in analyses
 
 
-def test_get_filter_uploaded_analyses(
+def test_filter_uploaded_analyses(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test filtering of analysis with an uploaded_at field."""
@@ -123,7 +125,7 @@ def test_get_filter_uploaded_analyses(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the upload filtering function
-    analyses: Query = get_filter_uploaded_analyses(analyses_query)
+    analyses: Query = filter_uploaded_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -132,7 +134,7 @@ def test_get_filter_uploaded_analyses(
     assert analysis in analyses
 
 
-def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
+def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of analysis that has not been uploaded."""
 
     # GIVEN a mock not uploaded analysis
@@ -142,7 +144,7 @@ def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the upload filtering function
-    analyses: Query = get_not_uploaded_analyses(analyses_query)
+    analyses: Query = filter_not_uploaded_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -151,7 +153,7 @@ def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     assert not_uploaded_analysis in analyses
 
 
-def test_get_analyses_with_delivery_report(
+def test_filter_analyses_with_delivery_report(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test filtering of analysis with a delivery report generated."""
@@ -163,7 +165,7 @@ def test_get_analyses_with_delivery_report(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
-    analyses: Query = get_analyses_with_delivery_report(analyses_query)
+    analyses: Query = filter_analyses_with_delivery_report(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -172,7 +174,7 @@ def test_get_analyses_with_delivery_report(
     assert analysis in analyses
 
 
-def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
+def test_filter_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
     """Test filtering of analysis without a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
@@ -184,7 +186,7 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
-    analyses: Query = get_analyses_without_delivery_report(analyses_query)
+    analyses: Query = filter_analyses_without_delivery_report(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -193,7 +195,7 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
     assert analysis_without_delivery_report in analyses
 
 
-def test_get_report_analyses_by_pipeline(
+def test_filter_report_analyses_by_pipeline(
     base_store: Store, helpers: StoreHelpers, case_obj: Family
 ):
     """Test filtering delivery report related analysis by pipeline."""
@@ -208,7 +210,7 @@ def test_get_report_analyses_by_pipeline(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN filtering delivery report related analyses
-    analyses: Query = get_report_analyses_by_pipeline(analyses_query)
+    analyses: Query = filter_report_analyses_by_pipeline(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
