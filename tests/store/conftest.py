@@ -37,6 +37,18 @@ class StoreConftestFixture(enum.Enum):
     INVOICE_ID_INVOICE_WITH_ATTRIBUTES: int = 1
     INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
 
+    @staticmethod
+    def generate_year_interval(n_entries) -> List[int]:
+        """Create a list of approximately uniformly distributed year numbers from 1 to present."""
+        start: int = datetime.MINYEAR
+        stop: int = datetime.date.today().year
+        step: float = (stop - start) / (n_entries - 1)
+        output = [start]
+
+        for i in range(1, n_entries):
+            output.append(round(i * step))
+        return output
+
 
 @pytest.fixture(name="application_versions_file")
 def fixture_application_versions_file(fixtures_dir: Path) -> str:
@@ -311,13 +323,15 @@ def fixture_store_with_different_application_versions(
     applications_store: Store,
     helpers: StoreHelpers,
 ) -> Store:
-    """."""
+    """Returns a store with application versions with different applications and dates."""
     applications: List[Application] = applications_store.get_applications()
+    years = StoreConftestFixture.generate_year_interval(len(applications))
 
-    for app in applications:
+    for app, year in zip(applications, years):
         helpers.ensure_application_version(
             store=applications_store,
             application_tag=app.tag,
+            valid_from=datetime.datetime(year, 1, 1, 0, 0, 0),
         )
     return applications_store
 
