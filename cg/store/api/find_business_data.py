@@ -198,10 +198,10 @@ class FindBusinessDataHandler(BaseHandler):
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
 
-    def get_cases_with_ticket(self, ticket: str) -> List[Family]:
+    def get_cases_with_ticket(self, ticket_id: str) -> List[Family]:
         return apply_case_sample_filter(
             filter_functions=[CaseFilter.FILTER_BY_TICKET],
-            ticket=ticket,
+            ticket_id=ticket_id,
             cases=self._get_query(table=Family),
         ).all()
 

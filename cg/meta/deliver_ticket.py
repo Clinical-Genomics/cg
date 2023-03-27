@@ -25,7 +25,7 @@ class DeliverTicketAPI(MetaAPI):
         self.delivery_path: Path = Path(config.delivery_path)
 
     def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
-        return self.status_db.get_cases_with_ticket(ticket=ticket)
+        return self.status_db.get_cases_with_ticket(ticket_id=ticket)
 
     def get_inbox_path(self, ticket: str) -> Path:
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)

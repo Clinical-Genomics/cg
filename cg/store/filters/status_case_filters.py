@@ -111,9 +111,9 @@ def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Quer
     return cases.filter(Family.internal_id == internal_id)
 
 
-def filter_cases_by_ticket(cases: Query, ticket: str, **kwargs) -> Query:
+def filter_cases_by_ticket(cases: Query, ticket_id: str, **kwargs) -> Query:
     """Return cases with matching ticket id."""
-    return cases.filter(Family.tickets.contains(ticket))
+    return cases.filter(Family.tickets.contains(ticket_id))
 
 
 def apply_case_filter(
@@ -123,7 +123,7 @@ def apply_case_filter(
     pipeline: Optional[Pipeline] = None,
     internal_id: Optional[str] = None,
     entry_id: Optional[int] = None,
-    ticket: Optional[str] = None,
+    ticket_id: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -133,7 +133,7 @@ def apply_case_filter(
             pipeline=pipeline,
             internal_id=internal_id,
             entry_id=entry_id,
-            ticket=ticket,
+            ticket_id=ticket_id,
         )
     return cases
 
