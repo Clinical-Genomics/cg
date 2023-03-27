@@ -154,7 +154,7 @@ def test_add_transfer_to_housekeeper(
     # GIVEN a Store with a DNA case, which is available for analysis
     cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
     mocker.patch.object(Store, "get_cases_from_ticket")
-    Store.get_cases_from_ticket.return_value = cases
+    Store.get_cases_with_ticket.return_value = cases
     samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
 
     # GIVEN a list of paths and only two samples being available

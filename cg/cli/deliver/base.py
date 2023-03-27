@@ -100,7 +100,7 @@ def deliver_analysis(
                 return
             cases.append(case_obj)
         else:
-            cases: List[Family] = status_db.get_cases_from_ticket(ticket=ticket)
+            cases: List[Family] = status_db.get_cases_with_ticket(ticket=ticket)
             if not cases:
                 LOG.warning("Could not find cases for ticket %s", ticket)
                 return
