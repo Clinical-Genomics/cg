@@ -489,7 +489,7 @@ class FindBusinessDataHandler(BaseHandler):
         filter_functions: List[SampleFilter] = []
         if customers:
             customer_ids: List[int] = [customer.id for customer in customers]
-            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_IDS)
+            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS)
         if pattern:
             filter_functions.extend(
                 [SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN, SampleFilter.FILTER_BY_NAME_PATTERN]
