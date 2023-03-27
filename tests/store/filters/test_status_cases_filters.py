@@ -633,7 +633,22 @@ def test_filter_cases_by_ticket_no_matching_ticket(
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
 
     # WHEN filtering cases by a non-existent ticket
-    filtered_cases: Query = filter_cases_by_ticket(cases=cases_query, ticket=non_existent_id)
+    filtered_cases: Query = filter_cases_by_ticket(cases=cases_query, ticket_id=non_existent_id)
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
+
+
+def test_filter_cases_by_ticket_matching_ticket(
+    store_with_multiple_cases_and_samples: Store, ticket: str
+):
+    # GIVEN a store containing cases with a matching ticket
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # WHEN filtering cases by an existing ticket
+    filtered_cases: Query = filter_cases_by_ticket(cases=cases_query, ticket_id=ticket)
+
+    # THEN the query should return cases with the matching ticket
+    assert filtered_cases.count() > 0
+    for case in filtered_cases:
+        assert ticket in case.tickets
