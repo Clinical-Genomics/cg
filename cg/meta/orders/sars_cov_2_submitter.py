@@ -23,7 +23,9 @@ class SarsCov2Submitter(MicrobialSubmitter):
         for sample in samples:
             if sample.control:
                 continue
-            if self.status.get_samples_by_customer_and_name(customer=customer, name=sample.name):
+            if self.status.get_sample_by_customer_and_name(
+                customer_entry_id=[customer.id], sample_name=sample.name
+            ):
                 raise OrderError(
                     f"Sample name {sample.name} already in use for customer {customer.name}"
                 )
