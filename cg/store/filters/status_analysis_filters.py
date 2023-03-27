@@ -143,4 +143,3 @@ class AnalysisFilter(Enum):
     FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analyses_not_uploaded_to_vogue
     FILTER_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
-    FILTER_NO_CASE_ACTION: Callable = filter_analyses_no_case_action
