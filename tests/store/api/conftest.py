@@ -421,3 +421,47 @@ def fixture_store_with_active_sample_running(store: Store, helpers: StoreHelpers
     helpers.add_relationship(store=store, sample=sample, case=case)
 
     yield store
+
+
+@pytest.fixture(name="three_customer_ids")
+def fixture_three_customer_ids() -> List[str]:
+    """Return three customer ids."""
+    yield ["".join(["cust00", str(number)]) for number in range(3)]
+
+
+@pytest.fixture(name="three_pool_names")
+def fixture_three_pool_names() -> List[str]:
+    """Return three customer ids."""
+    yield ["_".join(["test_pool", str(number)]) for number in range(3)]
+
+
+@pytest.fixture(name="store_with_samples_for_multiple_customers")
+def fixture_store_with_samples_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
+) -> Store:
+    """Return a store with two samples for three different customers."""
+    for number in range(3):
+        helpers.add_sample(
+            store=store,
+            internal_id="_".join(["test_sample", str(number)]),
+            customer_id="".join(["cust00", str(number)]),
+            no_invoice=False,
+            delivered_at=timestamp_now,
+        )
+    yield store
+
+
+@pytest.fixture(name="store_with_pools_for_multiple_customers")
+def fixture_store_with_pools_for_multiple_customers(
+    store: Store, helpers: StoreHelpers, timestamp_now: dt.datetime
+) -> Store:
+    """Return a store with two samples for three different customers."""
+    for number in range(3):
+        helpers.ensure_pool(
+            store=store,
+            name="_".join(["test_pool", str(number)]),
+            customer_id="".join(["cust00", str(number)]),
+            no_invoice=False,
+            delivered_at=timestamp_now,
+        )
+    yield store
