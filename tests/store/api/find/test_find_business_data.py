@@ -666,3 +666,23 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 
     # THEN one pools should be returned
     assert len(pools) == 1
+
+
+def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_samples: Store):
+    """Test that a case can be found by customer and case name."""
+    # GIVEN a database with multiple cases for a customer
+    case: Family = store_with_multiple_cases_and_samples._get_query(table=Family).first()
+    customer: Customer = store_with_multiple_cases_and_samples._get_query(table=Customer).first()
+
+    assert case.customer == customer
+
+    # WHEN fetching a case by customer and case name
+    filtered_case: Family = store_with_multiple_cases_and_samples.get_case_by_name_and_customer(
+        customer=customer,
+        name=case.name,
+    )
+
+    # THEN the correct case should be returned
+    assert filtered_case is not None
+    assert filtered_case.customer_id == customer.id
+    assert filtered_case.name == case.name
