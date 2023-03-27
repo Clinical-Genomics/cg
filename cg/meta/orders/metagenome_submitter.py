@@ -86,7 +86,7 @@ class MetagenomeSubmitter(Submitter):
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case_obj = self.status.find_family(customer=customer, name=str(ticket_id))
+        case_obj = self.status.get_case_by_name_and_customer(customer=customer, name=str(ticket_id))
         case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in case["samples"]:

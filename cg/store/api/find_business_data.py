@@ -248,8 +248,14 @@ class FindBusinessDataHandler(BaseHandler):
         samples: List[Sample] = self.get_samples_by_case_id(family_id)
         return [sample for sample in samples if sample.sequencing_qc]
 
-    def find_family(self, customer: Customer, name: str) -> Family:
-        """Find a family by family name within a customer."""
+    def get_case_by_name_and_customer(self, customer: Customer, name: str) -> Family:
+        """Find a case by case name within a customer."""
+        apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=[CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID, CaseFilter.FILTER_BY_NAME],
+            customer_entry_id=customer.id,
+            name=name,
+        )
         return self.Family.query.filter_by(customer=customer, name=name).first()
 
     def find_family_by_name(self, name: str) -> Family:

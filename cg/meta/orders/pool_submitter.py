@@ -119,7 +119,9 @@ class PoolSubmitter(Submitter):
                 )
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])
-            case: Family = self.status.find_family(customer=customer, name=case_name)
+            case: Family = self.status.get_case_by_name_and_customer(
+                customer=customer, name=case_name
+            )
             if not case:
                 data_analysis: Pipeline = Pipeline(pool["data_analysis"])
                 data_delivery: DataDelivery = DataDelivery(pool["data_delivery"])
@@ -174,7 +176,7 @@ class PoolSubmitter(Submitter):
         customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         for sample in samples:
             case_name: str = self.create_case_name(pool_name=sample.pool, ticket=ticket)
-            if self.status.find_family(customer=customer, name=case_name):
+            if self.status.get_case_by_name_and_customer(customer=customer, name=case_name):
                 raise OrderError(
                     f"Case name {case_name} already in use for customer {customer.name}"
                 )
