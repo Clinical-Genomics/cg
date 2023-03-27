@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Tuple, Iterable
+from datetime import datetime
 
 from sqlalchemy.orm import Query
 
@@ -63,7 +64,6 @@ def test_filter_application_version_by_application_wrong_application_returns_emp
     app_version_query: Query = store_with_different_application_versions._get_query(
         table=ApplicationVersion
     )
-    assert app_version_query.count() > 0
 
     # GIVEN an application
     application: Application = helpers.ensure_application(
@@ -99,8 +99,9 @@ def test_filter_application_version_by_application_id_correct_id(
         table=ApplicationVersion
     )
 
-    # GIVEN an application in store
+    # GIVEN an application in store different in id from at least another application in store
     application: Application = store_with_different_application_versions.get_applications()[0]
+    assert application.id != store_with_different_application_versions.get_applications()[1]
 
     # WHEN the application version query is filtered by the id of the application
     filtered_app_version_query: Query = filter_application_versions_by_application_id(
@@ -125,7 +126,7 @@ def test_filter_application_version_by_application_id_wrong_id(
     invalid_application_id: int,
 ):
     """Test that an empty query is returned when using an incorrect application id."""
-    # GIVEN a store with an application version
+    # GIVEN a store with application versions
     app_version_query: Query = store_with_different_application_versions._get_query(
         table=ApplicationVersion
     )
@@ -140,10 +141,10 @@ def test_filter_application_version_by_application_id_wrong_id(
     assert filtered_app_version_query.count() == 0
 
 
-def test_filter_application_versions_before_valid_from(
+def test_filter_application_versions_before_valid_from_valid_date(
     store_with_different_application_versions: Store,
 ):
-    """Test that filtering by date returns a query with older elements than the given date."""
+    """Test that filtering by `valid_from` returns a query with older elements than the given date."""
     # GIVEN a store with application versions with different dates
     app_version_query: Query = store_with_different_application_versions._get_query(
         table=ApplicationVersion
@@ -158,14 +159,57 @@ def test_filter_application_versions_before_valid_from(
         date=third_app_version.valid_from,
     )
 
-    # THEN a query with the two first application versions are returned
+    # THEN a query with the two first application versions is returned
     assert filtered_app_version_query.count() == 2
 
-    # THEN the date of the newest query is older than the filter date.
-    assert (
-        filtered_app_version_query.order_by(ApplicationVersion.valid_from.desc()).first().valid_from
-        < third_app_version.valid_from
+    # THEN the date of the newest filtered application version is older than the filter date.
+    newest_application_version: ApplicationVersion = filtered_app_version_query.order_by(
+        ApplicationVersion.valid_from.desc()
+    ).first()
+    assert newest_application_version.valid_from < third_app_version.valid_from
+
+
+def test_filter_application_versions_before_valid_from_future_date(
+    store_with_different_application_versions: Store,
+    future_date: datetime,
+):
+    """Test that filtering by `valid_from` with a future date returns the unfiltered query."""
+    # GIVEN a store with application versions
+    app_version_query: Query = store_with_different_application_versions._get_query(
+        table=ApplicationVersion
     )
+
+    # WHEN filtering using a future date
+    filtered_app_version_query: Query = filter_application_versions_before_valid_from(
+        application_versions=app_version_query,
+        date=future_date,
+    )
+
+    # THEN the filtered query has the same elements as the unfiltered query
+    app_version_pair: Iterable[Tuple[ApplicationVersion, ApplicationVersion]] = zip(
+        app_version_query.all(), filtered_app_version_query.all()
+    )
+    assert all(non_filtered == filtered for non_filtered, filtered in app_version_pair)
+
+
+def test_filter_application_versions_before_valid_from_past_date(
+    store_with_different_application_versions: Store,
+    past_date: datetime,
+):
+    """Test that filtering by `valid_from` with a past date returns an empty query."""
+    # GIVEN a store with application versions
+    app_version_query: Query = store_with_different_application_versions._get_query(
+        table=ApplicationVersion
+    )
+
+    # WHEN filtering using a past date
+    filtered_app_version_query: Query = filter_application_versions_before_valid_from(
+        application_versions=app_version_query,
+        date=past_date,
+    )
+
+    # THEN the filtered query is empty
+    assert filtered_app_version_query.count() == 0
 
 
 def test_filter_application_version_by_version_correct_version(

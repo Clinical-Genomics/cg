@@ -186,6 +186,18 @@ def fixture_invalid_application_id() -> int:
     return -1
 
 
+@pytest.fixture(name="future_date")
+def fixture_future_date() -> datetime:
+    """Return a distant date in the future for which no events happen later."""
+    return datetime.datetime(datetime.MAXYEAR, 1, 1, 1, 1, 1)
+
+
+@pytest.fixture(name="past_date")
+def fixture_past_date() -> datetime:
+    """Return a distant date in the past for which no events happened earlier."""
+    return datetime.datetime(datetime.MINYEAR, 1, 1, 0, 0, 0)
+
+
 @pytest.fixture(name="invalid_application_version_version")
 def fixture_invalid_application_version_version() -> int:
     """Return a valid version of an Application Version."""
@@ -303,7 +315,7 @@ def fixture_store_with_different_application_versions(
         helpers.ensure_application_version(
             store=applications_store,
             application_tag=application.tag,
-            valid_from=datetime.datetime(year, 1, 1, 0, 0, 0),
+            valid_from=datetime.datetime(year, 1, 1, 1, 1, 1),
             version=version,
         )
     return applications_store
