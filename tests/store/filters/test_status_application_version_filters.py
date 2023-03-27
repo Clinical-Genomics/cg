@@ -1,5 +1,5 @@
 from typing import List, Tuple, Iterable
-from datetime import datetime
+import datetime as dt
 
 from sqlalchemy.orm import Query
 
@@ -10,6 +10,8 @@ from cg.store.filters.status_application_version_filters import (
     filter_application_versions_before_valid_from,
     filter_application_versions_by_version,
     order_application_versions_by_valid_from_desc,
+    apply_application_versions_filter,
+    ApplicationVersionFilter,
 )
 from cg.store.models import Application, ApplicationVersion
 
@@ -171,7 +173,7 @@ def test_filter_application_versions_before_valid_from_valid_date(
 
 def test_filter_application_versions_before_valid_from_future_date(
     store_with_different_application_versions: Store,
-    future_date: datetime,
+    future_date: dt.datetime,
 ):
     """Test that filtering by `valid_from` with a future date returns the unfiltered query."""
     # GIVEN a store with application versions
@@ -194,7 +196,7 @@ def test_filter_application_versions_before_valid_from_future_date(
 
 def test_filter_application_versions_before_valid_from_past_date(
     store_with_different_application_versions: Store,
-    past_date: datetime,
+    past_date: dt.datetime,
 ):
     """Test that filtering by `valid_from` with a past date returns an empty query."""
     # GIVEN a store with application versions
@@ -268,7 +270,7 @@ def test_order_application_versions_by_valid_from_desc(
         table=ApplicationVersion
     )
 
-    # WHEN ordering the query by date
+    # WHEN ordering the query by `valid_from`
     ordered_app_versions: List[ApplicationVersion] = list(
         order_application_versions_by_valid_from_desc(application_versions=app_version_query)
     )
@@ -281,15 +283,18 @@ def test_order_application_versions_by_valid_from_desc(
     )
 
 
-def test_filter_application_version_by_application_empty_query_returns_none(
-    store_with_an_application_with_and_without_attributes: Store, helpers: StoreHelpers
+def test_apply_application_versions_filter_empty_query_returns_empty_query(
+    store_with_an_application_with_and_without_attributes: Store,
+    first_application_version_version: int,
 ):
-    """Test that filtering an empty query returns an empty query."""
-    # GIVEN a store with applications
-    applications: List[
-        Application
-    ] = store_with_an_application_with_and_without_attributes.get_applications()
-    assert applications
+    """Test that applying all filters to an empty query returns an empty query."""
+    # GIVEN a store with a valid application, a valid date and a valid version
+    application: Application = (
+        store_with_an_application_with_and_without_attributes.get_applications()[0]
+    )
+    application_id: int = application.id
+    date: dt.datetime = dt.datetime.now()
+    assert application
 
     # GIVEN that the store has no application versions
     app_version_query: Query = store_with_an_application_with_and_without_attributes._get_query(
@@ -297,10 +302,20 @@ def test_filter_application_version_by_application_empty_query_returns_none(
     )
     assert app_version_query.count() == 0
 
-    # WHEN trying to filter the application versions by application
-    filtered_app_version_query: Query = filter_application_versions_by_application(
+    # WHEN applying all the filters and orderings to the empty query
+    filtered_app_version_query: Query = apply_application_versions_filter(
+        filter_functions=[
+            ApplicationVersionFilter.FILTER_BY_APPLICATION,
+            ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
+            ApplicationVersionFilter.FILTER_BY_DATE,
+            ApplicationVersionFilter.FILTER_BY_VERSION,
+            ApplicationVersionFilter.ORDER_BY_VALID_FROM,
+        ],
         application_versions=app_version_query,
-        application=applications[0],
+        application=application,
+        application_id=application_id,
+        date=date,
+        version=first_application_version_version,
     )
 
     # THEN the filtered query is empty

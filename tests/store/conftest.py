@@ -200,8 +200,14 @@ def fixture_past_date() -> datetime:
 
 @pytest.fixture(name="invalid_application_version_version")
 def fixture_invalid_application_version_version() -> int:
-    """Return a valid version of an Application Version."""
+    """Return an invalid version of an Application Version."""
     return -1
+
+
+@pytest.fixture(name="first_application_version_version")
+def fixture_first_application_version_version() -> int:
+    """Return the first version of an application version."""
+    return 1
 
 
 @pytest.fixture(name="store_with_a_sample_that_has_many_attributes_and_one_without")
