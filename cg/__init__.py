@@ -1,4 +1,4 @@
 import pkg_resources
 
 __title__ = "cg"
-__version__ = "27.1.25"
+__version__ = "27.1.26"
