@@ -88,9 +88,9 @@ def test_get_samples_by_subject_id_and_is_tumour(
 def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
     store_with_samples_customer_id_and_subject_id_and_tumour_status: Store,
     helpers: StoreHelpers,
-    customer_ids = [1, 2]
-    subject_id = "test_subject"
-    is_tumour = True
+    customer_ids: List[int] = [1, 2],
+    subject_id: str = "test_subject",
+    is_tumour: bool = True
 ):
     """Test that samples can be fetched by customer ID, subject ID, and tumour status."""
     # GIVEN a database with four samples, two with customer ID 1 and two with customer ID 2
@@ -113,8 +113,10 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
     # THEN two samples should be returned, one for each customer ID, with the specified subject ID and tumour status
     assert isinstance(samples, list)
     assert len(samples) == 2
-for sample in samples:
-    assert isInstance(sample,Sample)
+
+    for sample in samples:
+        assert isinstance(sample, Sample)
+
     for customer_id, sample in zip(customer_ids, samples):
         assert sample.customer_id == customer_id
         assert sample.subject_id == subject_id
