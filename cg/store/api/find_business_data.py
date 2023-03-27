@@ -487,7 +487,7 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=filter_functions,
         ).all()
 
-    def get_samples_by_customer_and_subject_id_query(
+    def __get_samples_by_customer_and_subject_id_query(
         self, customer_internal_id: str, subject_id: str
     ) -> Query:
         """Return query of samples of customer with given subject id."""
@@ -506,7 +506,7 @@ class FindBusinessDataHandler(BaseHandler):
         self, customer_internal_id: str, subject_id: str
     ) -> List[Sample]:
         """Get samples of customer with given subject id."""
-        return self.get_samples_by_customer_and_subject_id_query(
+        return self.__get_samples_by_customer_and_subject_id_query(
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
@@ -514,7 +514,7 @@ class FindBusinessDataHandler(BaseHandler):
         self, customer_internal_id: str, subject_id: str, is_tumour: bool
     ) -> List[Sample]:
         """Get samples of customer with given subject id and is tumour."""
-        samples: Query = self.get_samples_by_customer_and_subject_id_query(
+        samples: Query = self.__get_samples_by_customer_and_subject_id_query(
             customer_internal_id=customer_internal_id, subject_id=subject_id
         )
         if is_tumour:
