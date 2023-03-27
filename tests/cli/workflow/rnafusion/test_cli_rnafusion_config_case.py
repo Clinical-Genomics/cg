@@ -114,7 +114,7 @@ def test_params_file(
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
 ):
-    """Test command generates default params_file."""
+    """Test that command generates default params_file."""
     caplog.set_level(logging.INFO)
 
     # GIVEN a VALID case_id and genome_version
@@ -128,3 +128,30 @@ def test_params_file(
 
     # THEN parameters file should be generated
     assert "Generating parameters file" in caplog.text
+
+
+def test_reference(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test command with"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a VALID case_id and genome_version
+    case_id: str = rnafusion_case_id
+
+    # WHEN running config case
+    result = cli_runner.invoke(
+        config_case,
+        [case_id, "--genomes_base", "/non/default/path/to/references/"],
+        obj=rnafusion_context,
+    )
+
+    # THEN command should print the rnafusion command-string
+    assert result.exit_code == EXIT_SUCCESS
+
+    # THEN parameters file should be generated
+    assert "Generating parameters file" in caplog.text
+    assert "/non/default/path/to/references/" in caplog.text
