@@ -369,6 +369,30 @@ def store_with_samples_subject_id_and_tumour_status(
     return store
 
 
+@pytest.fixture(name="store_with_samples_customer_id_and_subject_id_and_tumour_status")
+def store_with_samples_customer_id_and_subject_id_and_tumour_status(
+    store: Store, helpers: StoreHelpers
+) -> Store:
+    """Return a store with four samples with different customer IDs, and tumour status."""
+    samples_data = [
+        # customer_id, subject_id, is_tumour
+        ("1", "test_subject", True),
+        ("1", "test_subject_2", False),
+        ("2", "test_subject", True),
+        ("2", "test_subject_2", False),
+    ]
+    for customer_id, subject_id, is_tumour in samples_data:
+        helpers.add_sample(
+            store=store,
+            internal_id=f"test_sample_{customer_id}_{subject_id}",
+            name=f"sample_{customer_id}_{subject_id}",
+            subject_id=subject_id,
+            is_tumour=is_tumour,
+            customer_id=customer_id,
+        )
+    return store
+
+
 @pytest.fixture(name="pool_name_1")
 def fixture_pool_name_1() -> str:
     """Return the name of the first pool."""
