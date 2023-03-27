@@ -136,16 +136,17 @@ def test_reference(
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
 ):
-    """Test command with"""
+    """Test command with given reference directory."""
     caplog.set_level(logging.INFO)
 
-    # GIVEN a VALID case_id and genome_version
+    # GIVEN a VALID case_id and reference dir
     case_id: str = rnafusion_case_id
+    reference_dir: str = "/non/default/path/to/references/"
 
     # WHEN running config case
     result = cli_runner.invoke(
         config_case,
-        [case_id, "--genomes_base", "/non/default/path/to/references/"],
+        [case_id, "--genomes_base", reference_dir],
         obj=rnafusion_context,
     )
 
@@ -154,4 +155,4 @@ def test_reference(
 
     # THEN parameters file should be generated
     assert "Generating parameters file" in caplog.text
-    assert "/non/default/path/to/references/" in caplog.text
+    assert reference_dir in caplog.text

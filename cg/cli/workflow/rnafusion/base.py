@@ -57,7 +57,7 @@ rnafusion.add_command(resolve_compression)
 @DRY_RUN
 @click.pass_obj
 def config_case(
-    context: CGConfig, case_id: str, strandedness: str, genomes_base: str, dry_run: bool
+    context: CGConfig, case_id: str, strandedness: str, genomes_base: Path, dry_run: bool
 ) -> None:
     """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
