@@ -516,7 +516,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
         self, customer_ids: List[int], subject_id: str
     ) -> List[Sample]:
-        """Return a list of samples matching a list of customers with given subject_id and is_tumour."""
+        """Return a list of samples matching a list of customers with given subject id and is a tumour sample."""
         samples = self._get_query(table=Sample)
         return apply_sample_filter(
             samples=samples,
