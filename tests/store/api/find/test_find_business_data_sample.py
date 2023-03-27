@@ -151,8 +151,7 @@ def test_get_samples_by_customer_and_name(
     customer_id="cust000",
 ):
     """Test that samples can be fetched by name."""
-    # GIVEN a database with two samples of which one has a name
-
+    # GIVEN a database with samples
     # WHEN getting a customer from the store
     customer: Customer = store_with_samples_that_have_names.get_customer_by_customer_id(
         customer_id=customer_id
@@ -175,8 +174,8 @@ def test_get_samples_by_customer_and_name_invalid_customer(
     name: str = "test_sample_1",
     customer_id="unrelated_customer",
 ):
-    """Test that samples can be fetched by name."""
-    # GIVEN a database with two samples of which one has a name
+    """Test that samples can be fetched by name does not return a sample when invalid customer is supplied."""
+    # GIVEN a database with two samples
 
     # WHEN getting a customer from the store
     customer: Customer = store_with_samples_that_have_names.get_customer_by_customer_id(
