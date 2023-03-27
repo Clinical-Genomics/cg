@@ -307,9 +307,9 @@ def test_apply_application_versions_filter_empty_query_returns_empty_query(
         filter_functions=[
             ApplicationVersionFilter.FILTER_BY_APPLICATION,
             ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
-            ApplicationVersionFilter.FILTER_BY_DATE,
+            ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
             ApplicationVersionFilter.FILTER_BY_VERSION,
-            ApplicationVersionFilter.ORDER_BY_VALID_FROM,
+            ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
         ],
         application_versions=app_version_query,
         application=application,

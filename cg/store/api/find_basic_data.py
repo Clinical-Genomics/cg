@@ -181,8 +181,8 @@ class FindBasicDataHandler(BaseHandler):
         return apply_application_versions_filter(
             filter_functions=[
                 ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
-                ApplicationVersionFilter.FILTER_BY_DATE,
-                ApplicationVersionFilter.ORDER_BY_VALID_FROM,
+                ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
+                ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
             ],
             application_versions=self._get_query(table=ApplicationVersion),
             application_id=application_id,

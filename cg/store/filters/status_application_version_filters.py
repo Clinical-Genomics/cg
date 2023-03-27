@@ -64,6 +64,6 @@ class ApplicationVersionFilter(Enum):
 
     FILTER_BY_APPLICATION = filter_application_versions_by_application
     FILTER_BY_APPLICATION_ID = filter_application_versions_by_application_id
-    FILTER_BY_DATE = filter_application_versions_before_valid_from
+    FILTER_BY_VALID_FROM_BEFORE = filter_application_versions_before_valid_from
     FILTER_BY_VERSION = filter_application_versions_by_version
-    ORDER_BY_VALID_FROM = order_application_versions_by_valid_from_desc
+    ORDER_BY_VALID_FROM_DESC = order_application_versions_by_valid_from_desc
