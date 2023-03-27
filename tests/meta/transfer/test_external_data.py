@@ -153,7 +153,7 @@ def test_add_transfer_to_housekeeper(
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis
     cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
-    mocker.patch.object(Store, "get_cases_from_ticket")
+    mocker.patch.object(Store, "get_cases_by_ticket_id")
     Store.get_cases_by_ticket_id.return_value = cases
     samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
 
