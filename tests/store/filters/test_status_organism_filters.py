@@ -3,14 +3,14 @@ from sqlalchemy.orm import Query
 
 from cg.store.api.core import Store
 from cg.store.models import Organism
-from cg.store.organism_filters import filter_organism_by_internal_id
+from cg.store.filters.status_organism_filters import filter_organism_by_internal_id
 
 
 def test_filter_organism_by_internal_id_returns_correct_organism(store_with_organisms: Store):
     """Test filtering an organism by internal ID when the ID exists."""
 
     # GIVEN a store with multiple organisms
-    organisms: Query = store_with_organisms._get_organism_query()
+    organisms: Query = store_with_organisms._get_query(table=Organism)
     assert organisms.count() > 0
 
     # GIVEN a random organism from the store
@@ -36,7 +36,7 @@ def test_filter_organism_by_internal_id_returns_empty_list_when_id_does_not_exis
     """Test filtering an organism by internal ID when the ID does not exist."""
 
     # GIVEN a store with multiple organisms
-    organisms: Query = store_with_organisms._get_organism_query()
+    organisms: Query = store_with_organisms._get_query(table=Organism)
     assert organisms.count() > 0
 
     # WHEN filtering the organisms by internal ID
@@ -54,7 +54,7 @@ def test_filter_organism_by_internal_id_returns_empty_list_when_id_is_none(
     """Test filtering an organism by internal ID when the ID is None."""
 
     # GIVEN a store with multiple organisms
-    organisms: Query = store_with_organisms._get_organism_query()
+    organisms: Query = store_with_organisms._get_query(table=Organism)
     assert organisms.count() > 0
 
     # WHEN filtering the organisms by internal ID None

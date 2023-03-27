@@ -14,8 +14,9 @@ from cg.constants import Pipeline
 from cg.exc import HousekeeperFileMissingError, StatinaAPIHTTPError
 from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from housekeeper.store import models as hk_models
+from cg.store import Store
+from cg.store.models import Analysis, Flowcell, Family
+from housekeeper.store.models import File
 from cg.apps.tb import TrailblazerAPI
 
 LOG = logging.getLogger(__name__)
@@ -51,9 +52,7 @@ class NiptUploadAPI:
 
     def flowcell_passed_qc_value(self, case_id: str, q30_threshold: float) -> bool:
         """Check average Q30 and of the latest flow cell related to a case."""
-        latest_flow_cell: models.Flowcell = self.status_db.get_latest_flow_cell_on_case(
-            family_id=case_id
-        )
+        latest_flow_cell: Flowcell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         flow_cell_reads_and_q30_summary: Dict[
             str, Union[int, float]
         ] = self.stats_api.flow_cell_reads_and_q30_summary(flow_cell_name=latest_flow_cell.name)
@@ -71,7 +70,7 @@ class NiptUploadAPI:
         if not tags:
             tags: List[str] = self.RESULT_FILE_TAGS
 
-        hk_all_results_file: hk_models.File = self.housekeeper_api.get_file_from_latest_version(
+        hk_all_results_file: File = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
         )
 
@@ -92,14 +91,14 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(self) -> Iterable[models.Analysis]:
+    def get_all_upload_analyses(self) -> Iterable[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
 
         latest_nipt_analyses = self.status_db.latest_analyses().filter(
-            models.Analysis.pipeline == Pipeline.FLUFFY
+            Analysis.pipeline == Pipeline.FLUFFY
         )
 
-        return latest_nipt_analyses.filter(models.Analysis.uploaded_at.is_(None))
+        return latest_nipt_analyses.filter(Analysis.uploaded_at.is_(None))
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
@@ -122,11 +121,11 @@ class NiptUploadAPI:
         sftp.close()
         transport.close()
 
-    def update_analysis_uploaded_at_date(self, case_id: str) -> models.Analysis:
+    def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: models.Family = self.status_db.family(case_id)
-        analysis_obj: models.Analysis = case_obj.analyses[0]
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:
             analysis_obj.uploaded_at = dt.datetime.now()
@@ -137,11 +136,11 @@ class NiptUploadAPI:
 
         return analysis_obj
 
-    def update_analysis_upload_started_date(self, case_id: str) -> models.Analysis:
+    def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: models.Family = self.status_db.family(case_id)
-        analysis_obj: models.Analysis = case_obj.analyses[0]
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:
             analysis_obj.upload_started_at = dt.datetime.now()

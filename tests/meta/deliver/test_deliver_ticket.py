@@ -120,7 +120,7 @@ def test_check_if_concatenation_is_needed(
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 
     # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
+    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
@@ -144,7 +144,7 @@ def test_check_if_concatenation_is_needed_part_deux(
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 
     # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
+    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
@@ -160,7 +160,7 @@ def test_check_if_concatenation_is_needed_part_deux(
     assert is_concatenation_needed is True
 
 
-def test_get_all_samples_from_ticket(
+def test_get_samples_from_ticket(
     cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket: str
 ):
     """Test to get all samples from a ticket"""
@@ -168,13 +168,13 @@ def test_get_all_samples_from_ticket(
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
 
     # GIVEN a case object
-    case_obj = analysis_store.family(case_id)
+    case_obj = analysis_store.get_case_by_internal_id(internal_id=case_id)
 
     mocker.patch.object(DeliverTicketAPI, "get_all_cases_from_ticket")
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
 
     # WHEN checking which samples there are in the ticket
-    all_samples = deliver_ticket_api.get_all_samples_from_ticket(ticket=ticket)
+    all_samples: list = deliver_ticket_api.get_samples_from_ticket(ticket=ticket)
 
     # THEN concatenation is needed
     assert "child" in all_samples
@@ -196,8 +196,8 @@ def test_all_samples_in_cust_inbox(
     DeliverTicketAPI.get_inbox_path.return_value = all_samples_in_inbox
 
     # GIVEN a ticket with certain samples
-    mocker.patch.object(DeliverTicketAPI, "get_all_samples_from_ticket")
-    DeliverTicketAPI.get_all_samples_from_ticket.return_value = ["ACC1", "ACC2"]
+    mocker.patch.object(DeliverTicketAPI, "get_samples_from_ticket")
+    DeliverTicketAPI.get_samples_from_ticket.return_value = ["ACC1", "ACC2"]
 
     # WHEN checking if a sample is missing
     deliver_ticket_api.report_missing_samples(ticket=ticket, dry_run=False)
@@ -225,8 +225,8 @@ def test_samples_missing_in_inbox(
     DeliverTicketAPI.get_inbox_path.return_value = samples_missing_in_inbox
 
     # GIVEN a ticket with certain samples
-    mocker.patch.object(DeliverTicketAPI, "get_all_samples_from_ticket")
-    DeliverTicketAPI.get_all_samples_from_ticket.return_value = [
+    mocker.patch.object(DeliverTicketAPI, "get_samples_from_ticket")
+    DeliverTicketAPI.get_samples_from_ticket.return_value = [
         sample["name"] for sample in analysis_family["samples"]
     ]
 

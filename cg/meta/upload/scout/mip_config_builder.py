@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import Optional
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Version
 
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 class MipConfigBuilder(ScoutConfigBuilder):
     def __init__(
         self,
-        hk_version_obj: hk_models.Version,
+        hk_version_obj: Version,
         analysis_obj: Analysis,
         mip_analysis_api: MipAnalysisAPI,
         lims_api: LimsAPI,

@@ -26,6 +26,7 @@ class StoreConftestFixture(enum.Enum):
     INVOICE_ID_POOL_WITH_ATTRIBUTES: int = 1
     NAME_POOL_WITH_ATTRIBUTES: str = "pool_with_attributes"
     NAME_POOL_WITHOUT_ATTRIBUTES: str = "pool_without_attributes"
+    ORDER_POOL_WITH_ATTRIBUTES: str = "order001"
 
     TAG_APPLICATION_WITH_ATTRIBUTES: str = "test_tag"
     PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES: str = "wgs"
@@ -118,7 +119,9 @@ def fixture_microbial_store(
     )
 
     for sample_data in microbial_submitted_order["items"]:
-        application_version = base_store.application(sample_data["application"]).versions[0]
+        application_version = base_store.get_application_by_tag(
+            sample_data["application"]
+        ).versions[0]
         organism = base_store.Organism(
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
@@ -155,7 +158,7 @@ def fixture_case_obj(analysis_store: Store) -> Family:
 @pytest.fixture(name="sample_obj")
 def fixture_sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
-    return analysis_store.get_all_samples()[0]
+    return analysis_store.get_samples()[0]
 
 
 @pytest.fixture(name="sequencer_name")
@@ -220,6 +223,7 @@ def fixture_store_with_a_pool_with_and_without_attributes(
         invoice_id=StoreConftestFixture.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
         no_invoice=False,
         name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
+        order=StoreConftestFixture.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
 
     helpers.ensure_pool(

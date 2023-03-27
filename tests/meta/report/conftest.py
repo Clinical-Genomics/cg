@@ -11,7 +11,7 @@ from cg.io.controller import ReadFile
 from cg.meta.report.balsamic import BalsamicReportAPI
 from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Family
 from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
@@ -43,17 +43,17 @@ def report_api_balsamic(cg_context: CGConfig, lims_samples) -> BalsamicReportAPI
 
 
 @pytest.fixture(scope="function", name="case_mip_dna")
-def case_mip_dna(case_id, report_api_mip_dna) -> models.Family:
+def case_mip_dna(case_id, report_api_mip_dna) -> Family:
     """MIP DNA case instance."""
 
-    return report_api_mip_dna.status_db.family(case_id)
+    return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function", name="case_balsamic")
-def case_balsamic(case_id, report_api_balsamic) -> models.Family:
+def case_balsamic(case_id, report_api_balsamic) -> Family:
     """BALSAMIC case instance."""
 
-    return report_api_balsamic.status_db.family(case_id)
+    return report_api_balsamic.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function", name="case_samples_data")

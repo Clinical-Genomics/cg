@@ -2,7 +2,7 @@
 
 import logging
 import os.path
-from typing import Optional, List
+from typing import Optional
 
 from flask import Flask
 

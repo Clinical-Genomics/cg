@@ -26,7 +26,7 @@ from cg.models.balsamic.metrics import (
 from cg.models.cg_config import CGConfig
 from cg.store.models import ApplicationVersion, Family, FamilySample, Sample
 from cg.utils import Process
-from cg.utils.utils import get_string_from_list_by_pattern
+from cg.utils.utils import build_command_from_dict, get_string_from_list_by_pattern
 
 LOG = logging.getLogger(__name__)
 
@@ -126,10 +126,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         Analysis types are any of ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
         """
         LOG.debug("Fetch analysis type for %s", case_id)
-        number_of_samples: int = len(self.status_db.family(case_id).links)
+        number_of_samples: int = len(
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links
+        )
 
         application_type: str = self.get_application_type(
-            self.status_db.family(case_id).links[0].sample
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
         )
         sample_type = "tumor"
         if number_of_samples == 2:
@@ -145,7 +147,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             self.link_fastq_files_for_sample(
                 case_obj=case_obj, sample_obj=link.sample, concatenate=True
@@ -513,7 +515,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def build_case_id_map_string(self, case_id: str) -> Optional[str]:
         """Creates case info string for balsamic with format panel_shortname:case_name:application_tag."""
 
-        case: Family = self.status_db.family(internal_id=case_id)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample: Sample = case.links[0].sample
         if sample.from_sample:
             sample: Sample = self.status_db.get_sample_by_internal_id(
@@ -571,7 +573,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
-            for link_object in self.status_db.family(case_id).links
+            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
         }
 
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
@@ -580,7 +582,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_case_application_type(self, case_id: str) -> str:
         application_types = {
             self.get_application_type(link_object.sample)
-            for link_object in self.status_db.family(case_id).links
+            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
         }
 
         if application_types:
@@ -628,15 +630,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
         ]
 
-    @staticmethod
-    def __build_command_str(options: dict) -> List[str]:
-        formatted_options = []
-        for key, val in options.items():
-            if val:
-                formatted_options.append(str(key))
-                formatted_options.append(str(val))
-        return formatted_options
-
     def config_case(
         self,
         case_id: str,
@@ -659,7 +652,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             force_normal=force_normal,
         )
         command = ["config", "case"]
-        options = self.__build_command_str(
+        options = build_command_from_dict(
             {
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
@@ -698,7 +691,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         command = ["run", "analysis"]
         run_analysis = ["--run-analysis"] if run_analysis else []
         benchmark = ["--benchmark"]
-        options = self.__build_command_str(
+        options = build_command_from_dict(
             {
                 "--account": self.account,
                 "--mail-user": self.email,
@@ -713,7 +706,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         """Execute BALSAMIC report deliver with given options"""
 
         command = ["report", "deliver"]
-        options = self.__build_command_str(
+        options = build_command_from_dict(
             {
                 "--sample-config": self.get_case_config_path(case_id=case_id),
             }

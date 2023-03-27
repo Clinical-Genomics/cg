@@ -14,7 +14,6 @@ from cg.constants.compression import (
     FASTQ_SECOND_READ_SUFFIX,
 )
 from cg.models import CompressionData
-from housekeeper.store import models as hk_models
 
 LOG = logging.getLogger(__name__)
 

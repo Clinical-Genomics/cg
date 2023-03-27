@@ -4,42 +4,43 @@ from alchy import Query
 from cgmodels.cg.constants import Pipeline
 
 
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis, Family
 from cg.store.filters.status_analysis_filters import (
-    get_valid_analyses_in_production,
-    get_analyses_with_pipeline,
-    get_completed_analyses,
-    get_not_completed_analyses,
-    get_filter_uploaded_analyses,
-    get_not_uploaded_analyses,
-    get_analyses_with_delivery_report,
-    get_analyses_without_delivery_report,
-    get_report_analyses_by_pipeline,
+    filter_valid_analyses_in_production,
+    filter_analyses_with_pipeline,
+    filter_completed_analyses,
+    filter_not_completed_analyses,
+    filter_uploaded_analyses,
+    filter_not_uploaded_analyses,
+    filter_analyses_with_delivery_report,
+    filter_analyses_without_delivery_report,
+    filter_report_analyses_by_pipeline,
     order_analyses_by_uploaded_at,
     order_analyses_by_completed_at,
 )
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_valid_analyses_in_production(
+def test_filter_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    case_obj: Family,
     timestamp_now: datetime,
     old_timestamp: datetime,
 ):
     """Test that an expected analysis is returned when it has a production valid completed_at date."""
 
     # GIVEN a set of mock analyses
-    analysis: models.Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
-    outdated_analysis: models.Analysis = helpers.add_analysis(
+    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    outdated_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, completed_at=old_timestamp
     )
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving valid in production analyses
-    analyses: Query = get_valid_analyses_in_production(analyses_query)
+    analyses: Query = filter_valid_analyses_in_production(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -49,16 +50,12 @@ def test_get_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_get_analyses_with_pipeline(
-    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
-):
+def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case_obj: Family):
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
-    balsamic_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, pipeline=Pipeline.BALSAMIC
-    )
-    mip_analysis: models.Analysis = helpers.add_analysis(
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    mip_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, pipeline=Pipeline.MIP_DNA
     )
 
@@ -66,7 +63,7 @@ def test_get_analyses_with_pipeline(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN extracting the analyses
-    analyses: Query = get_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
+    analyses: Query = filter_analyses_with_pipeline(analyses_query, pipeline=Pipeline.BALSAMIC)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -76,17 +73,19 @@ def test_get_analyses_with_pipeline(
     assert mip_analysis not in analyses
 
 
-def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
+def test_filter_completed_analyses(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
     """Test filtering of completed analyses."""
 
     # GIVEN a mock analysis
-    analysis: models.Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving the completed analyses
-    analyses: Query = get_completed_analyses(analyses_query)
+    analyses: Query = filter_completed_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -95,19 +94,17 @@ def test_get_completed_analyses(base_store: Store, helpers: StoreHelpers, timest
     assert analysis in analyses
 
 
-def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
+def test_filter_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of ongoing analyses."""
 
     # GIVEN a mock not completed analysis
-    analysis_not_completed: models.Analysis = helpers.add_analysis(
-        store=base_store, completed_at=None
-    )
+    analysis_not_completed: Analysis = helpers.add_analysis(store=base_store, completed_at=None)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN retrieving the not completed analyses
-    analyses: Query = get_not_completed_analyses(analyses_query)
+    analyses: Query = filter_not_completed_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -116,19 +113,19 @@ def test_get_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
     assert analysis_not_completed in analyses
 
 
-def test_get_filter_uploaded_analyses(
+def test_filter_uploaded_analyses(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test filtering of analysis with an uploaded_at field."""
 
     # GIVEN a mock uploaded analysis
-    analysis: models.Analysis = helpers.add_analysis(store=base_store, uploaded_at=timestamp_now)
+    analysis: Analysis = helpers.add_analysis(store=base_store, uploaded_at=timestamp_now)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the upload filtering function
-    analyses: Query = get_filter_uploaded_analyses(analyses_query)
+    analyses: Query = filter_uploaded_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -137,19 +134,17 @@ def test_get_filter_uploaded_analyses(
     assert analysis in analyses
 
 
-def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
+def test_filter_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     """Test filtering of analysis that has not been uploaded."""
 
     # GIVEN a mock not uploaded analysis
-    not_uploaded_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, uploaded_at=None
-    )
+    not_uploaded_analysis: Analysis = helpers.add_analysis(store=base_store, uploaded_at=None)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the upload filtering function
-    analyses: Query = get_not_uploaded_analyses(analyses_query)
+    analyses: Query = filter_not_uploaded_analyses(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -158,21 +153,19 @@ def test_get_not_uploaded_analyses(base_store: Store, helpers: StoreHelpers):
     assert not_uploaded_analysis in analyses
 
 
-def test_get_analyses_with_delivery_report(
+def test_filter_analyses_with_delivery_report(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test filtering of analysis with a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
-    analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, delivery_reported_at=timestamp_now
-    )
+    analysis: Analysis = helpers.add_analysis(store=base_store, delivery_reported_at=timestamp_now)
 
     # GIVEN an analysis query
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
-    analyses: Query = get_analyses_with_delivery_report(analyses_query)
+    analyses: Query = filter_analyses_with_delivery_report(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -181,11 +174,11 @@ def test_get_analyses_with_delivery_report(
     assert analysis in analyses
 
 
-def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
+def test_filter_analyses_without_delivery_report(base_store: Store, helpers: StoreHelpers):
     """Test filtering of analysis without a delivery report generated."""
 
     # GIVEN an analysis with a delivery report
-    analysis_without_delivery_report: models.Analysis = helpers.add_analysis(
+    analysis_without_delivery_report: Analysis = helpers.add_analysis(
         store=base_store, delivery_reported_at=None
     )
 
@@ -193,7 +186,7 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN calling the delivery report analysis filtering function
-    analyses: Query = get_analyses_without_delivery_report(analyses_query)
+    analyses: Query = filter_analyses_without_delivery_report(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -202,16 +195,14 @@ def test_get_analyses_without_delivery_report(base_store: Store, helpers: StoreH
     assert analysis_without_delivery_report in analyses
 
 
-def test_get_report_analyses_by_pipeline(
-    base_store: Store, helpers: StoreHelpers, case_obj: models.Family
+def test_filter_report_analyses_by_pipeline(
+    base_store: Store, helpers: StoreHelpers, case_obj: Family
 ):
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
-    balsamic_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, pipeline=Pipeline.BALSAMIC
-    )
-    fluffy_analysis: models.Analysis = helpers.add_analysis(
+    balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
+    fluffy_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, pipeline=Pipeline.FLUFFY
     )
 
@@ -219,7 +210,7 @@ def test_get_report_analyses_by_pipeline(
     analyses_query: Query = base_store.latest_analyses()
 
     # WHEN filtering delivery report related analyses
-    analyses: Query = get_report_analyses_by_pipeline(analyses_query)
+    analyses: Query = filter_report_analyses_by_pipeline(analyses_query)
 
     # ASSERT that analyeses is a query
     assert isinstance(analyses, Query)
@@ -232,17 +223,15 @@ def test_get_report_analyses_by_pipeline(
 def test_order_analyses_by_completed_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    case_obj: Family,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ):
     """Test sorting of analyses by the completed_at field."""
 
     # GIVEN a set of mock analyses
-    new_analysis: models.Analysis = helpers.add_analysis(
-        store=base_store, completed_at=timestamp_now
-    )
-    old_analysis: models.Analysis = helpers.add_analysis(
+    new_analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
+    old_analysis: Analysis = helpers.add_analysis(
         store=base_store, case=case_obj, completed_at=timestamp_yesterday
     )
 
@@ -263,17 +252,17 @@ def test_order_analyses_by_completed_at(
 def test_order_analyses_by_uploaded_at(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: models.Family,
+    case_obj: Family,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ):
     """Test sorting of analyses by the uploaded_at field."""
 
     # GIVEN a set of mock analyses
-    new_analysis: models.Analysis = helpers.add_analysis(
+    new_analysis: Analysis = helpers.add_analysis(
         store=base_store, completed_at=timestamp_now, uploaded_at=timestamp_now
     )
-    old_analysis: models.Analysis = helpers.add_analysis(
+    old_analysis: Analysis = helpers.add_analysis(
         store=base_store,
         case=case_obj,
         completed_at=timestamp_yesterday,

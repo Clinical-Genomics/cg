@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple, Dict
 
 from alchy import Query
-from housekeeper.exc import VersionIncludedError
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
@@ -39,7 +38,7 @@ class HousekeeperAPI:
 
     def bundle(self, name: str) -> Bundle:
         """Fetch a bundle."""
-        return self._store.bundle(name)
+        return self._store.get_bundle_by_name(bundle_name=name)
 
     def bundles(self) -> List[Bundle]:
         """Fetch bundles."""
@@ -71,7 +70,7 @@ class HousekeeperAPI:
     def get_file(self, file_id: int) -> Optional[File]:
         """Get a file based on file id."""
         LOG.info("Fetching file %s", file_id)
-        file_obj: File = self._store.file_(file_id)
+        file_obj: File = self._store.get_file_by_id(file_id=file_id)
         if not file_obj:
             LOG.info("file not found")
             return None
@@ -103,13 +102,13 @@ class HousekeeperAPI:
         if isinstance(tags, str):
             tags: List[str] = [tags]
         for tag_name in tags:
-            if not self.tag(tag_name):
+            if not self.get_tag(tag_name):
                 self.add_tag(tag_name)
 
         new_file: File = self.new_file(
             path=str(Path(path).absolute()),
             to_archive=to_archive,
-            tags=[self.tag(tag_name) for tag_name in tags],
+            tags=[self.get_tag(tag_name) for tag_name in tags],
         )
 
         new_file.version: Version = version_obj
@@ -124,7 +123,9 @@ class HousekeeperAPI:
         path: str = None,
     ) -> Query:
         """Fetch files."""
-        return self._store.files(bundle=bundle, tags=tags, version=version, path=path)
+        return self._store.get_files(
+            bundle_name=bundle, tag_names=tags, version_id=version, file_path=path
+        )
 
     @staticmethod
     def fetch_file_from_version(version_obj: Version, tags: Set[str]) -> Optional[File]:
@@ -155,7 +156,7 @@ class HousekeeperAPI:
         """Get all the files in housekeeper, optionally filtered by bundle and/or tags and/or
         version.
         """
-        return self._store.files(bundle=bundle, tags=tags, version=version)
+        return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
 
     def check_bundle_files(
         self,
@@ -212,7 +213,9 @@ class HousekeeperAPI:
     def version(self, bundle: str, date: dt.datetime) -> Version:
         """Fetch a version."""
         LOG.info("Fetch version %s from bundle %s", date, bundle)
-        return self._store.version(bundle, date)
+        return self._store.get_version_by_date_and_bundle_name(
+            bundle_name=bundle, version_date=date
+        )
 
     def last_version(self, bundle: str) -> Version:
         """Gets the latest version of a bundle."""
@@ -260,9 +263,9 @@ class HousekeeperAPI:
         self.add_commit(tag_obj)
         return tag_obj
 
-    def tag(self, name: str) -> models.Tag:
+    def get_tag(self, name: str) -> models.Tag:
         """Fetch a tag."""
-        return self._store.tag(name)
+        return self._store.get_tag(name)
 
     @staticmethod
     def get_tag_names_from_file(file: File) -> List[str]:

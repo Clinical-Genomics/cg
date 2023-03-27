@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
-from housekeeper.store.models import File
+from housekeeper.store.models import File, Version
 
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Pipeline, FileExtensions
+from cg.constants import FileExtensions, Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -27,9 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Customer, BedVersion, Bed, Organism, User
-
-
+from cg.store.models import Bed, BedVersion, Customer, Organism, User
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -40,8 +38,6 @@ from tests.mocks.scout import MockScoutAPI
 from tests.mocks.tb_mock import MockTB
 from tests.small_helpers import SmallHelpers
 from tests.store_helpers import StoreHelpers
-
-from housekeeper.store.models import Version
 
 LOG = logging.getLogger(__name__)
 
@@ -1285,20 +1281,20 @@ def fixture_base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample("ordered", sex=Gender.MALE),
-        base_store.add_sample("received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
+        base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
         base_store.add_sample(
-            "received-prepared",
+            name="received-prepared",
             sex=Gender.UNKNOWN,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
         ),
         base_store.add_sample("external", sex=Gender.FEMALE, external=True),
         base_store.add_sample(
-            "external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
+            name="external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
         ),
         base_store.add_sample(
-            "sequenced",
+            name="sequenced",
             sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
@@ -1306,16 +1302,28 @@ def sample_store(base_store: Store) -> Store:
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
-            "sequenced-partly",
+            name="sequenced-partly",
             sex=Gender.MALE,
             received=dt.datetime.now(),
             prepared_at=dt.datetime.now(),
             reads=(250 * 1000000),
         ),
+        base_store.add_sample(
+            name="to-deliver",
+            sex=Gender.MALE,
+            sequenced_at=dt.datetime.now(),
+        ),
+        base_store.add_sample(
+            name="delivered",
+            sex=Gender.MALE,
+            sequenced_at=dt.datetime.now(),
+            delivered_at=dt.datetime.now(),
+            no_invoice=False,
+        ),
     ]
     customer: Customer = (base_store.get_customers())[0]
-    external_app = base_store.application("WGXCUSC000").versions[0]
-    wgs_app = base_store.application("WGSPCFC030").versions[0]
+    external_app = base_store.get_application_by_tag("WGXCUSC000").versions[0]
+    wgs_app = base_store.get_application_by_tag("WGSPCFC030").versions[0]
     for sample in new_samples:
         sample.customer = customer
         sample.application_version = external_app if "external" in sample.name else wgs_app
@@ -1645,6 +1653,12 @@ def fixture_context_config(
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
             "root": str(rnafusion_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+            },
+            "tower_binary_path": Path("path", "to", "bin", "tw").as_posix(),
+            "tower_pipeline": "rnafusion",
         },
         "pdc": {"binary_path": "/bin/dsmc"},
         "scout": {
@@ -1738,6 +1752,14 @@ def store_with_multiple_cases_and_samples(
         case_id, sample_id = case_sample
         helpers.add_case_with_sample(base_store=store, case_id=case_id, sample_id=sample_id)
 
+    yield store
+
+
+@pytest.fixture(name="store_with_panels")
+def store_with_panels(store: Store, helpers: StoreHelpers):
+    helpers.ensure_panel(store=store, panel_abbreviation="panel1", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel2", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel3", customer_id="cust000")
     yield store
 
 

@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from typing import List, Optional
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import DataDelivery, Pipeline
@@ -11,8 +11,25 @@ from cg.constants.pedigree import Pedigree
 from cg.constants.priority import PriorityTerms
 from cg.constants.sequencing import Sequencers
 from cg.constants.subject import Gender, PhenotypeStatus
-from cg.store import Store, models
-from cg.store.models import Flowcell, Bed, BedVersion, Customer, Sample, User
+from cg.store import Store
+from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationVersion,
+    Bed,
+    BedVersion,
+    Collaboration,
+    Customer,
+    Family,
+    FamilySample,
+    Flowcell,
+    Invoice,
+    Organism,
+    Panel,
+    Pool,
+    Sample,
+    User,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -21,9 +38,7 @@ class StoreHelpers:
     """Class to hold helper functions that needs to be used all over."""
 
     @staticmethod
-    def ensure_hk_bundle(
-        store: HousekeeperAPI, bundle_data: dict, include: bool = False
-    ) -> hk_models.Bundle:
+    def ensure_hk_bundle(store: HousekeeperAPI, bundle_data: dict, include: bool = False) -> Bundle:
         """Utility function to add a bundle of information to a housekeeper api."""
 
         bundle_exists = False
@@ -44,7 +59,7 @@ class StoreHelpers:
         return _bundle
 
     @staticmethod
-    def ensure_hk_version(store: HousekeeperAPI, bundle_data: dict) -> hk_models.Version:
+    def ensure_hk_version(store: HousekeeperAPI, bundle_data: dict) -> Version:
         """Utility function to return existing or create an version for tests."""
         _bundle = StoreHelpers.ensure_hk_bundle(store, bundle_data)
         return store.last_version(_bundle.name)
@@ -61,13 +76,13 @@ class StoreHelpers:
         is_accredited: bool = False,
         version: int = 1,
         **kwargs,
-    ) -> models.ApplicationVersion:
+    ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
         if is_rna:
             application_tag = "rna_tag"
             prep_category = "wts"
 
-        application = store.application(tag=application_tag)
+        application = store.get_application_by_tag(tag=application_tag)
         if not application:
             application = StoreHelpers.add_application(
                 store,
@@ -103,11 +118,11 @@ class StoreHelpers:
         description: str = "dummy_description",
         is_archived: bool = False,
         **kwargs,
-    ) -> models.Application:
+    ) -> Application:
         """Ensure that application exists in store."""
-        application: models.Application = store.application(tag=tag)
+        application: Application = store.get_application_by_tag(tag=tag)
         if not application:
-            application: models.Application = StoreHelpers.add_application(
+            application: Application = StoreHelpers.add_application(
                 store=store,
                 application_tag=tag,
                 prep_category=prep_category,
@@ -128,9 +143,9 @@ class StoreHelpers:
         is_external: bool = False,
         min_sequencing_depth: int = 30,
         **kwargs,
-    ) -> models.Application:
+    ) -> Application:
         """Utility function to add a application to a store."""
-        application = store.application(tag=application_tag)
+        application = store.get_application_by_tag(tag=application_tag)
         if application:
             return application
 
@@ -181,9 +196,9 @@ class StoreHelpers:
         customer_id: str = "cust000",
         name: str = "Production",
         scout_access: bool = False,
-    ) -> models.Customer:
+    ) -> Customer:
         """Utility function to return existing or create customer for tests."""
-        collaboration: models.Collaboration = StoreHelpers.ensure_collaboration(store)
+        collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
         customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
 
         if not customer:
@@ -201,7 +216,7 @@ class StoreHelpers:
     @staticmethod
     def add_analysis(
         store: Store,
-        case: models.Family = None,
+        case: Family = None,
         started_at: datetime = None,
         completed_at: datetime = None,
         uploaded_at: datetime = None,
@@ -213,7 +228,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
         config_path: str = None,
-    ) -> models.Analysis:
+    ) -> Analysis:
         """Utility function to add an analysis for tests."""
 
         if not case:
@@ -258,7 +273,7 @@ class StoreHelpers:
         name: str = "sample_test",
         original_ticket: str = None,
         **kwargs,
-    ) -> models.Sample:
+    ) -> Sample:
         """Utility function to add a sample to use in tests."""
         customer_id = customer_id or "cust000"
         customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
@@ -272,9 +287,7 @@ class StoreHelpers:
         application_version_id = application_version.id
 
         if internal_id:
-            existing_sample: models.Sample = store.get_sample_by_internal_id(
-                internal_id=internal_id
-            )
+            existing_sample: Sample = store.get_sample_by_internal_id(internal_id=internal_id)
             if existing_sample:
                 return existing_sample
 
@@ -305,16 +318,16 @@ class StoreHelpers:
 
     @staticmethod
     def ensure_panel(
-        store: Store, panel_id: str = "panel_test", customer_id: str = "cust000"
-    ) -> models.Panel:
+        store: Store, panel_abbreviation: str = "panel_test", customer_id: str = "cust000"
+    ) -> Panel:
         """Utility function to add a panel to use in tests."""
         customer = StoreHelpers.ensure_customer(store, customer_id)
-        panel = store.panel(panel_id)
+        panel: Panel = store.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
         if not panel:
             panel = store.add_panel(
                 customer=customer,
-                name=panel_id,
-                abbrev=panel_id,
+                name=panel_abbreviation,
+                abbrev=panel_abbreviation,
                 version=1.0,
                 date=datetime.now(),
                 genes=1,
@@ -332,9 +345,9 @@ class StoreHelpers:
         internal_id: str = None,
         customer_id: str = "cust000",
         panels: List[str] = [],
-        case_obj: models.Family = None,
+        case_obj: Family = None,
         ticket: str = "123456",
-    ) -> models.Family:
+    ) -> Family:
         """Utility function to add a case to use in tests,
         If no case object is used a autogenerated case id will be used.
 
@@ -344,11 +357,13 @@ class StoreHelpers:
         customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
         if case_obj:
             panels = case_obj.panels
-        for panel_name in panels:
-            StoreHelpers.ensure_panel(store=store, panel_id=panel_name, customer_id=customer_id)
+        for panel_abbreivation in panels:
+            StoreHelpers.ensure_panel(
+                store=store, panel_abbreviation=panel_abbreivation, customer_id=customer_id
+            )
 
         if not case_obj:
-            case_obj: Optional[models.Family] = store.family(internal_id=name)
+            case_obj: Optional[Family] = store.get_case_by_internal_id(internal_id=name)
         if not case_obj:
             case_obj = store.add_case(
                 data_analysis=data_analysis,
@@ -371,14 +386,16 @@ class StoreHelpers:
         store: Store,
         name: str = "test-case",
         case_id: str = "blueeagle",
-        customer: models.Customer = None,
+        customer: Customer = None,
         data_analysis: Pipeline = Pipeline.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
     ):
         """Load a case with samples and link relations."""
         if not customer:
             customer = StoreHelpers.ensure_customer(store=store)
-        case = store.family(internal_id=case_id) or store.find_family(customer=customer, name=name)
+        case = store.get_case_by_internal_id(internal_id=case_id) or store.find_family(
+            customer=customer, name=name
+        )
         if not case:
             case = StoreHelpers.add_case(
                 store=store,
@@ -468,7 +485,7 @@ class StoreHelpers:
         internal_id: str = "organism_test",
         name: str = "organism_name",
         reference_genome: str = "reference_genome_test",
-    ) -> models.Organism:
+    ) -> Organism:
         """Utility function to add an organism to use in tests."""
         return store.add_organism(
             internal_id=internal_id, name=name, reference_genome=reference_genome
@@ -480,7 +497,7 @@ class StoreHelpers:
         organism_id: str = "organism_test",
         name: str = "organism_name",
         reference_genome: str = "reference_genome_test",
-    ) -> models.Organism:
+    ) -> Organism:
         """Utility function to add an organism to use in tests."""
         organism = StoreHelpers.add_organism(
             store, internal_id=organism_id, name=name, reference_genome=reference_genome
@@ -494,10 +511,10 @@ class StoreHelpers:
         sample_id: str = "microbial_sample_id",
         priority: str = PriorityTerms.RESEARCH,
         name: str = "microbial_name_test",
-        organism: models.Organism = None,
+        organism: Organism = None,
         comment: str = "comment",
         ticket: int = 123456,
-    ) -> models.Sample:
+    ) -> Sample:
         """Utility function to add a sample to use in tests."""
         customer = StoreHelpers.ensure_customer(store, "cust_test")
         application_version = StoreHelpers.ensure_application_version(store)
@@ -526,7 +543,7 @@ class StoreHelpers:
         return sample
 
     @staticmethod
-    def add_samples(store: Store, nr_samples: int = 5) -> List[models.Sample]:
+    def add_samples(store: Store, nr_samples: int = 5) -> List[Sample]:
         """Utility function to add a number of samples to use in tests."""
         nr_samples = max(nr_samples, 2)
         return [
@@ -562,12 +579,12 @@ class StoreHelpers:
     @staticmethod
     def add_relationship(
         store: Store,
-        sample: models.Sample,
-        case: models.Family,
+        sample: Sample,
+        case: Family,
         status: str = PhenotypeStatus.UNKNOWN,
-        father: models.Sample = None,
-        mother: models.Sample = None,
-    ) -> models.FamilySample:
+        father: Sample = None,
+        mother: Sample = None,
+    ) -> FamilySample:
         """Utility function to link a sample to a case."""
         link = store.relate_sample(
             sample=sample, family=case, status=status, father=father, mother=mother
@@ -578,9 +595,9 @@ class StoreHelpers:
     @staticmethod
     def add_synopsis_to_case(
         store: Store, case_id: str, synopsis: str = "a synopsis"
-    ) -> Optional[models.Family]:
+    ) -> Optional[Family]:
         """Function for adding a synopsis to a case in the database."""
-        case_obj: models.Family = store.family(internal_id=case_id)
+        case_obj: Family = store.get_case_by_internal_id(internal_id=case_id)
         if not case_obj:
             LOG.warning("Could not find case")
             return None
@@ -591,11 +608,11 @@ class StoreHelpers:
     @staticmethod
     def add_phenotype_groups_to_sample(
         store: Store, sample_id: str, phenotype_groups: [str] = None
-    ) -> Optional[models.Sample]:
+    ) -> Optional[Sample]:
         """Function for adding a phenotype group to a sample in the database."""
         if phenotype_groups is None:
             phenotype_groups = ["a phenotype group"]
-        sample_obj: models.Sample = store.get_sample_by_internal_id(internal_id=sample_id)
+        sample_obj: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -606,11 +623,11 @@ class StoreHelpers:
     @staticmethod
     def add_phenotype_terms_to_sample(
         store: Store, sample_id: str, phenotype_terms: List[str] = []
-    ) -> Optional[models.Sample]:
+    ) -> Optional[Sample]:
         """Function for adding a phenotype term to a sample in the database."""
         if not phenotype_terms:
             phenotype_terms: List[str] = ["a phenotype term"]
-        sample_obj: models.Sample = store.get_sample_by_internal_id(internal_id=sample_id)
+        sample_obj: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -621,9 +638,9 @@ class StoreHelpers:
     @staticmethod
     def add_subject_id_to_sample(
         store: Store, sample_id: str, subject_id: str = "a subject_id"
-    ) -> Optional[models.Sample]:
+    ) -> Optional[Sample]:
         """Function for adding a subject_id to a sample in the database."""
-        sample_obj: models.Sample = store.get_sample_by_internal_id(internal_id=sample_id)
+        sample_obj: Sample = store.get_sample_by_internal_id(internal_id=sample_id)
         if not sample_obj:
             LOG.warning("Could not find sample")
             return None
@@ -632,7 +649,7 @@ class StoreHelpers:
         return sample_obj
 
     @classmethod
-    def relate_samples(cls, base_store: Store, case: models.Family, samples: List[models.Sample]):
+    def relate_samples(cls, base_store: Store, case: Family, samples: List[Sample]):
         """Utility function to relate many samples to one case."""
 
         for sample in samples:
@@ -648,25 +665,25 @@ class StoreHelpers:
         case_id: str,
         nr_samples: int,
         sequenced_at: datetime = datetime.now(),
-    ) -> models.Family:
+    ) -> Family:
         """Utility function to add one case with many samples and return the case."""
 
-        samples: List[models.Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
+        samples: List[Sample] = cls.add_samples(store=base_store, nr_samples=nr_samples)
         for sample in samples:
             sample.sequenced_at: datetime = sequenced_at
-        case: models.Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
+        case: Family = cls.add_case(store=base_store, internal_id=case_id, name=case_id)
         cls.relate_samples(base_store=base_store, case=case, samples=samples)
         return case
 
     @classmethod
     def add_cases_with_samples(
         cls, base_store: Store, nr_cases: int, sequenced_at: datetime
-    ) -> List[models.Family]:
+    ) -> List[Family]:
         """Utility function to add many cases with two samples to use in tests."""
 
-        cases: List[models.Family] = []
+        cases: List[Family] = []
         for i in range(nr_cases):
-            case: List[models.Family] = cls.add_case_with_samples(
+            case: List[Family] = cls.add_case_with_samples(
                 base_store, f"f{i}", 2, sequenced_at=sequenced_at
             )
             cases.append(case)
@@ -678,7 +695,7 @@ class StoreHelpers:
         store: Store,
         customer_id: str = "cust000",
         name: str = "test_pool",
-        ticket: str = "987654",
+        order: str = "test_order",
         application_tag: str = "dummy_tag",
         application_type: str = "tgs",
         is_external: bool = False,
@@ -687,7 +704,7 @@ class StoreHelpers:
         received_at: datetime = None,
         no_invoice: bool = None,
         invoice_id: int = None,
-    ) -> models.Pool:
+    ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
         customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
@@ -707,7 +724,7 @@ class StoreHelpers:
             ordered=datetime.now(),
             application_version=application_version,
             customer=customer,
-            order="test_order",
+            order=order,
             delivered_at=delivered_at,
             received_at=received_at,
             no_invoice=no_invoice,
@@ -720,11 +737,11 @@ class StoreHelpers:
     def ensure_user(
         cls,
         store: Store,
-        customer: models.Customer,
+        customer: Customer,
         email: str = "Bob@bobmail.com",
         name: str = "Bob",
         is_admin: bool = False,
-    ) -> models.User:
+    ) -> User:
         """Utility function to add a user that can be used in tests."""
         user: User = store.get_user_by_email(email=email)
         if not user:
@@ -739,20 +756,20 @@ class StoreHelpers:
         invoice_id: int = 0,
         customer_id: str = "cust000",
         discount: int = 0,
-        pools: Optional[List[models.Pool]] = None,
-        samples: Optional[List[models.Sample]] = None,
+        pools: Optional[List[Pool]] = None,
+        samples: Optional[List[Sample]] = None,
         invoiced_at: Optional[datetime] = None,
-    ) -> models.Invoice:
+    ) -> Invoice:
         """Utility function to create an invoice with a costumer and samples or pools."""
-        invoice = store.get_invoice_by_id(invoice_id=invoice_id)
+        invoice = store.get_invoice_by_entry_id(entry_id=invoice_id)
         if not invoice:
             customer_obj = StoreHelpers.ensure_customer(
                 store=store,
                 customer_id=customer_id,
             )
 
-            user_obj: models.User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
-            customer_obj.invoice_contact: models.User = user_obj
+            user_obj: User = StoreHelpers.ensure_user(store=store, customer=customer_obj)
+            customer_obj.invoice_contact: User = user_obj
 
             invoice = store.add_invoice(
                 customer=customer_obj,
@@ -767,7 +784,7 @@ class StoreHelpers:
         return invoice
 
     @classmethod
-    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> models.Family:
+    def add_case_with_sample(cls, base_store: Store, case_id: str, sample_id: str) -> Family:
         """Helper function to add a case associated with a sample with the given ids."""
 
         case = cls.add_case(store=base_store, internal_id=case_id, name=case_id)

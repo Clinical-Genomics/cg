@@ -7,7 +7,6 @@ import shutil
 
 from pathlib import Path
 
-from cgmodels.cg.constants import Pipeline
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS

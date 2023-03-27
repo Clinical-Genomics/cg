@@ -13,7 +13,8 @@ from cg.meta.orders import OrdersAPI
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.samples import MipDnaSample
-from cg.store import models, Store
+from cg.store import Store
+from cg.store.models import Pool, Sample
 
 PROCESS_LIMS_FUNCTION_OLD = "cg.meta.orders.api.process_lims"
 PROCESS_LIMS_FUNCTION = "cg.meta.orders.lims.process_lims"
@@ -29,7 +30,7 @@ SUBMITTERS = [
 def test_too_long_order_name():
     # GIVEN order with more than allowed characters name
     long_name = "A super long order name that is longer than sixty-four characters."
-    assert len(long_name) > models.Sample.order.property.columns[0].type.length
+    assert len(long_name) > Sample.order.property.columns[0].type.length
 
     # WHEN placing it in the pydantic order model
     # THEN an error is raised
@@ -67,7 +68,7 @@ def test_submit(
     monkeypatch_process_lims(monkeypatch, order_data)
 
     # GIVEN an order and an empty store
-    assert not base_store.get_all_samples()
+    assert not base_store.get_samples()
 
     # WHEN submitting the order
 
@@ -77,11 +78,11 @@ def test_submit(
 
     # THEN the result should contain the ticket number for the order
     for record in result["records"]:
-        if isinstance(record, models.Pool):
+        if isinstance(record, Pool):
             assert record.ticket == ticket
-        elif isinstance(record, models.Sample):
+        elif isinstance(record, Sample):
             assert record.original_ticket == ticket
-        elif isinstance(record, models.Family):
+        elif isinstance(record, Family):
             for link_obj in record.links:
                 assert link_obj.sample.original_ticket == ticket
 
@@ -154,7 +155,7 @@ def test_submit_illegal_sample_customer(
         invoice_reference="dummy nr",
     )
     sample_store.add_commit(new_customer)
-    existing_sample = sample_store.get_all_samples()[0]
+    existing_sample: Sample = sample_store.get_samples()[0]
     existing_sample.customer = new_customer
     sample_store.add_commit(existing_sample)
 
@@ -211,7 +212,7 @@ def test_submit_scout_legal_sample_customer(
     order_customer.collaborations.append(collaboration)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
-    existing_sample = sample_store.get_all_samples()[0]
+    existing_sample: Sample = sample_store.get_samples()[0]
     existing_sample.customer = sample_customer
     sample_store.commit()
     order_data.customer = order_customer.internal_id
@@ -350,7 +351,7 @@ def test_validate_sex_inconsistent_sex(
     # add sample with different sex than in order
     sample: MipDnaSample
     for sample in order_data.samples:
-        sample_obj: models.Sample = helpers.add_sample(
+        sample_obj: Sample = helpers.add_sample(
             store=store,
             subject_id=sample.subject_id,
             name=sample.name,
@@ -379,7 +380,7 @@ def test_validate_sex_consistent_sex(
     # add sample with different sex than in order
     sample: MipDnaSample
     for sample in order_data.samples:
-        sample_obj: models.Sample = helpers.add_sample(
+        sample_obj: Sample = helpers.add_sample(
             store=store,
             subject_id=sample.subject_id,
             name=sample.name,
@@ -409,7 +410,7 @@ def test_validate_sex_unknown_existing_sex(
     # add sample with different sex than in order
     sample: MipDnaSample
     for sample in order_data.samples:
-        sample_obj: models.Sample = helpers.add_sample(
+        sample_obj: Sample = helpers.add_sample(
             store=store,
             subject_id=sample.subject_id,
             name=sample.name,
@@ -438,7 +439,7 @@ def test_validate_sex_unknown_new_sex(
 
     # add sample with different sex than in order
     for sample in order_data.samples:
-        sample_obj: models.Sample = helpers.add_sample(
+        sample_obj: Sample = helpers.add_sample(
             store=store,
             subject_id=sample.subject_id,
             name=sample.name,
@@ -487,7 +488,7 @@ def test_submit_unique_sample_name(
     # GIVEN we have an order with a sample that is not existing in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    assert not store.get_all_samples()
+    assert not store.get_samples()
 
     monkeypatch_process_lims(monkeypatch, order_data)
 

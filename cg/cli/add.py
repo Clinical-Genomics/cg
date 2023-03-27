@@ -161,7 +161,7 @@ def sample(
     if not customer:
         LOG.error(f"Customer: {customer_id} not found")
         raise click.Abort
-    application: Application = status_db.application(application_tag)
+    application: Application = status_db.get_application_by_tag(tag=application_tag)
     if not application:
         LOG.error(f"Application: {application_tag} not found")
 
@@ -187,7 +187,7 @@ def sample(
     default="standard",
     help="analysis priority",
 )
-@click.option("-p", "--panel", "panels", multiple=True, help="default gene panels")
+@click.option("-p", "--panel", "panel_abbreviations", multiple=True, help="default gene panels")
 @click.option(
     "-a",
     "--analysis",
@@ -211,7 +211,7 @@ def sample(
 def case(
     context: CGConfig,
     priority: Priority,
-    panels: Tuple[str],
+    panel_abbreviations: Tuple[str],
     data_analysis: Pipeline,
     data_delivery: DataDelivery,
     customer_id: str,
@@ -226,20 +226,22 @@ def case(
         LOG.error(f"{customer_id}: customer not found")
         raise click.Abort
 
-    for panel_id in panels:
-        panel: Panel = status_db.panel(abbrev=panel_id)
+    for panel_abbreviation in panel_abbreviations:
+        panel: Panel = status_db.get_panel_by_abbreviation(abbreviation=panel_abbreviation)
+
         if panel is None:
-            LOG.error(f"{panel_id}: panel not found")
+            LOG.error(f"{panel_abbreviation}: panel not found")
             raise click.Abort
 
     new_case: Family = status_db.add_case(
         data_analysis=data_analysis,
         data_delivery=data_delivery,
         name=name,
-        panels=list(panels),
+        panels=list(panel_abbreviations),
         priority=priority,
         ticket=ticket,
     )
+
     new_case.customer = customer
     status_db.add_commit(new_case)
     LOG.info(f"{new_case.internal_id}: new case added")
@@ -264,7 +266,7 @@ def relationship(
     status_db: Store = context.status_db
     mother: Optional[Sample] = None
     father: Optional[Sample] = None
-    case_obj: Family = status_db.family(case_id)
+    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if case_obj is None:
         LOG.error("%s: family not found", case_id)
         raise click.Abort

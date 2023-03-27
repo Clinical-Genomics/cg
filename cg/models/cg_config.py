@@ -162,6 +162,9 @@ class RnafusionConfig(CommonAppConfig):
     profile: str
     conda_binary: Optional[str] = None
     launch_directory: str
+    slurm: SlurmConfig
+    tower_binary_path: str
+    tower_pipeline: str
 
 
 class CGStatsConfig(BaseModel):
@@ -430,7 +433,7 @@ class CGConfig(BaseModel):
         status_db = self.__dict__.get("status_db_")
         if status_db is None:
             LOG.debug("Instantiating status db")
-            status_db = Store(self.database)
+            status_db = Store(uri=self.database)
             self.status_db_ = status_db
         return status_db
 

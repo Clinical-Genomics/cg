@@ -8,7 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Version
 from tests.store_helpers import StoreHelpers
 
 # Paths
@@ -80,12 +80,8 @@ def fixture_mip_dna_housekeeper(
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=mip_delivery_bundle)
     helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=fastq_delivery_bundle)
     # assert that the files exists
-    version_obj_mip: hk_models.Version = real_housekeeper_api.last_version(
-        mip_delivery_bundle["name"]
-    )
-    version_obj_fastq: hk_models.Version = real_housekeeper_api.last_version(
-        fastq_delivery_bundle["name"]
-    )
+    version_obj_mip: Version = real_housekeeper_api.last_version(mip_delivery_bundle["name"])
+    version_obj_fastq: Version = real_housekeeper_api.last_version(fastq_delivery_bundle["name"])
     real_housekeeper_api.include(version_obj=version_obj_mip)
     real_housekeeper_api.include(version_obj=version_obj_fastq)
 

@@ -14,7 +14,8 @@ from cg.meta.backup.pdc import PdcAPI
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 from cg.meta.tar.tar import TarAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Flowcell, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     backup_api: BackupAPI = context.meta_apis["backup_api"]
 
     status_api: Store = context.status_db
-    flow_cell: Optional[models.Flowcell] = (
+    flow_cell: Optional[Flowcell] = (
         status_api.get_flow_cell(flow_cell_id=flow_cell_id) if flow_cell_id else None
     )
 
@@ -135,7 +136,7 @@ def retrieve_spring_files(
     status_api: Store = config.status_db
     housekeeper_api: HousekeeperAPI = config.housekeeper_api
 
-    samples: List[models.Sample] = _get_samples(status_api, object_type, identifier)
+    samples: List[Sample] = _get_samples(status_api, object_type, identifier)
 
     for sample in samples:
         latest_version: hk_models.Version = housekeeper_api.last_version(bundle=sample.internal_id)
@@ -148,14 +149,14 @@ def retrieve_spring_files(
             context.invoke(retrieve_spring_file, spring_file_path=spring_file.path, dry_run=dry_run)
 
 
-def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[models.Sample]:
+def _get_samples(status_api: Store, object_type: str, identifier: str) -> List[Sample]:
     """Gets all samples belonging to a sample, case or flow cell id"""
     get_samples = {
         "sample": status_api.sample,
         "case": status_api.get_samples_by_case_id,
         "flow_cell": status_api.get_samples_from_flow_cell,
     }
-    samples: Union[models.Sample, List[models.Sample]] = get_samples[object_type](identifier)
+    samples: Union[Sample, List[Sample]] = get_samples[object_type](identifier)
     return samples if isinstance(samples, list) else [samples]
 
 

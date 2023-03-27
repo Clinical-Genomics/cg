@@ -4,11 +4,11 @@ from cgmodels.cg.constants import Pipeline
 
 from cg.cli.upload.clinical_delivery import auto_fastq
 from cg.constants import DataDelivery
-from cg.store import models
+from cg.store.models import Analysis
 
 
 def test_auto_fastq_not_started(
-    analysis_obj: models.Analysis, caplog, base_context, cli_runner, case_id: str
+    analysis_obj: Analysis, caplog, base_context, cli_runner, case_id: str
 ):
     """Tests if the command finds a non-uploaded analysis and attempts to start it"""
     caplog.set_level(logging.INFO)

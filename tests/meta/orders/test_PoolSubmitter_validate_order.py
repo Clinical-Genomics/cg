@@ -8,7 +8,8 @@ from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import ControlEnum
 from cg.models.orders.samples import SarsCov2Sample, RmlSample
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -26,9 +27,7 @@ def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helper
     order: OrderIn = OrderIn.parse_obj(rml_order_to_submit, OrderType.RML)
 
     sample: RmlSample
-    customer: models.Customer = helpers.ensure_customer(
-        store=base_store, customer_id=order.customer
-    )
+    customer: Customer = helpers.ensure_customer(store=base_store, customer_id=order.customer)
     for sample in order.samples:
         case = helpers.ensure_case(
             store=base_store,

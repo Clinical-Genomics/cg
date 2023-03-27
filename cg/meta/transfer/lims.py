@@ -40,8 +40,8 @@ class TransferLims(object):
         self.lims = lims
 
         self._sample_functions = {
-            SampleState.RECEIVED: self.status.get_all_samples_to_receive,
-            SampleState.PREPARED: self.status.get_all_samples_to_prepare,
+            SampleState.RECEIVED: self.status.get_samples_to_receive,
+            SampleState.PREPARED: self.status.get_samples_to_prepare,
             SampleState.DELIVERED: self.status.get_samples_to_deliver,
         }
 
@@ -58,7 +58,7 @@ class TransferLims(object):
             PoolState.DELIVERED: self.lims.get_delivery_date,
         }
 
-    def _get_all_samples_not_yet_delivered(self):
+    def _get_samples_not_yet_delivered(self):
         return self.status.get_samples_not_delivered()
 
     def transfer_samples(

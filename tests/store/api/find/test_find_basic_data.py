@@ -1,43 +1,8 @@
 from typing import Optional, List
-
 from sqlalchemy.orm import Query
-
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Collaboration, Organism, User
-
-
-def test_get_bed_query(base_store: Store):
-    """Test function to return the bed query."""
-
-    # GIVEN a store with bed records
-
-    # WHEN getting the query for the beds
-    bed_query: Query = base_store._get_bed_query()
-
-    # THEN a query should be returned
-    assert isinstance(bed_query, Query)
-
-
-def test_get_user_query(store_with_users: Store):
-    """Test function to return the user query."""
-
-    # WHEN getting the query for the users
-    user_query: Query = store_with_users._get_user_query()
-
-    # THEN a query should be returned
-    assert isinstance(user_query, Query)
-
-
-def test_get_beds(base_store: Store):
-    """Test returning bed records query."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    beds: Query = base_store.get_beds()
-
-    # THEN beds should have be returned
-    assert beds
+from cg.store.models import Bed, BedVersion, Customer, Collaboration, Organism, User, Application
+from cg.constants.constants import MicrosaltAppTags
 
 
 def test_get_active_beds(base_store: Store):
@@ -111,16 +76,84 @@ def test_get_latest_bed_version(base_store: Store, bed_name: str):
     assert bed_version.version == 1
 
 
-def test_get_application_query(base_store: Store):
-    """Test function to return the application query."""
+def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
+    """Test function to return the application by tag."""
 
     # GIVEN a store with application records
 
     # WHEN getting the query for the flow cells
-    application_query: Query = base_store._get_application_query()
+    application: Application = microbial_store.get_application_by_tag(tag=tag)
 
-    # THEN a query should be returned
-    assert isinstance(application_query, Query)
+    # THEN return a application with the supplied application tag
+    assert application.tag == tag
+
+
+def test_get_applications_is_not_archived(
+    microbial_store: Store, EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+):
+    """Test function to return the application when not archived."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications_is_not_archived()
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+    assert (application.is_archived is False for application in applications)
+
+
+def test_get_applications_by_prep_category(
+    microbial_store: Store,
+    EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY,
+    prep_category=MicrosaltAppTags.PREP_CATEGORY,
+):
+    """Test function to return the application by prep category."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications_by_prep_category(
+        prep_category=prep_category
+    )
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY
+    assert (application.prep_category == prep_category for application in applications)
+
+
+def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATIONS):
+    """Test function to return the applications."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[Application] = microbial_store.get_applications()
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS
+
+
+def test_get_applications_by_prep_category_and_is_not_archived(
+    microbial_store: Store,
+    EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS,
+    prep_category=MicrosaltAppTags.PREP_CATEGORY,
+):
+    """Test function to return the application by prep category and not archived."""
+
+    # GIVEN a store with application records
+
+    # WHEN getting the query for the flow cells
+    applications: List[
+        Application
+    ] = microbial_store.get_applications_by_prep_category_and_is_not_archived(
+        prep_category=prep_category
+    )
+
+    # THEN return a application with the supplied application tag
+    assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
+    assert (application.prep_category == prep_category for application in applications)
+    assert (application.is_archived is False for application in applications)
 
 
 def test_get_bed_version_query(base_store: Store):
@@ -129,7 +162,7 @@ def test_get_bed_version_query(base_store: Store):
     # GIVEN a store with bed versions records
 
     # WHEN getting the query for the bed versions
-    bed_version_query: Query = base_store._get_bed_version_query()
+    bed_version_query: Query = base_store._get_query(table=BedVersion)
 
     # THEN a query should be returned
     assert isinstance(bed_version_query, Query)
@@ -147,18 +180,6 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 
     # THEN return a bed version with the supplied bed version short name
     assert bed_version.shortname == bed_version_short_name
-
-
-def test_get_customer_query(base_store: Store):
-    """Test function to return the customer query."""
-
-    # GIVEN a store with customer records
-
-    # WHEN getting the query for the customers
-    customer_query: Query = base_store._get_customer_query()
-
-    # THEN a query should be returned
-    assert isinstance(customer_query, Query)
 
 
 def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
@@ -206,7 +227,7 @@ def test_get_organism_by_internal_id_returns_correct_organism(store_with_organis
     """Test finding an organism by internal ID when the ID exists."""
 
     # GIVEN a store with multiple organisms
-    organisms: Query = store_with_organisms._get_organism_query()
+    organisms: Query = store_with_organisms._get_query(table=Organism)
     assert organisms.count() > 0
 
     # GIVEN a random organism from the store
@@ -230,7 +251,7 @@ def test_get_organism_by_internal_id_returns_none_when_id_does_not_exist(
     """Test finding an organism by internal ID when the ID does not exist."""
 
     # GIVEN a store with multiple organisms
-    organisms: Query = store_with_organisms._get_organism_query()
+    organisms: Query = store_with_organisms._get_query(table=Organism)
     assert organisms.count() > 0
 
     # WHEN finding the organism by internal ID that does not exist
@@ -248,7 +269,7 @@ def test_get_organism_by_internal_id_returns_none_when_id_is_none(
     """Test finding an organism by internal ID None returns None."""
 
     # GIVEN a store with multiple organisms
-    organisms: Query = store_with_organisms._get_organism_query()
+    organisms: Query = store_with_organisms._get_query(table=Organism)
     assert organisms.count() > 0
 
     # WHEN finding the organism by internal ID None
@@ -262,11 +283,11 @@ def test_get_user_by_email_returns_correct_user(store_with_users: Store):
     """Test fetching a user by email."""
 
     # GIVEN a store with multiple users
-    num_users: int = store_with_users._get_user_query().count()
+    num_users: int = store_with_users._get_query(table=User).count()
     assert num_users > 0
 
     # Select a random user from the store
-    user: User = store_with_users._get_user_query().first()
+    user: User = store_with_users._get_query(table=User).first()
     assert user is not None
 
     # WHEN fetching the user by email
