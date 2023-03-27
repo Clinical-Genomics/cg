@@ -385,7 +385,7 @@ def store_with_samples_customer_id_and_subject_id_and_tumour_status(
             is_tumour=is_tumour,
             customer_id=customer_id,
         )
-    yield store
+    return store
 
 
 @pytest.fixture(name="pool_name_1")

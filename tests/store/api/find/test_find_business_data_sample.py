@@ -87,7 +87,6 @@ def test_get_samples_by_subject_id_and_is_tumour(
 
 def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
     store_with_samples_customer_id_and_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
     customer_ids: List[int] = [1, 2],
     subject_id: str = "test_subject",
     is_tumour: bool = True,
@@ -130,9 +129,12 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_e
     customer_ids = [1, 2, 3]
     for customer_id in customer_ids:
         if customer_id == 3:
-            assert store_with_samples_customer_id_and_subject_id_and_tumour_status.get_customer_by_customer_id(
-                customer_id=str(customer_id)
-            ) is None
+            assert (
+                store_with_samples_customer_id_and_subject_id_and_tumour_status.get_customer_by_customer_id(
+                    customer_id=str(customer_id)
+                )
+                is None
+            )
         else:
             assert store_with_samples_customer_id_and_subject_id_and_tumour_status.get_customer_by_customer_id(
                 customer_id=str(customer_id)
