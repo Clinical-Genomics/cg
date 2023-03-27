@@ -426,7 +426,9 @@ class UploadScoutAPI:
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
 
-        subject_id_samples: List[Sample] = self.status_db.get_samples_by_subject_id_and_is_tumour(
+        subject_id_samples: List[
+            Sample
+        ] = self.status_db.get_samples_by_customer_subject_id_and_is_tumour(
             customer_internal_id=rna_sample.customer.internal_id,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
