@@ -257,7 +257,7 @@ class FindBusinessDataHandler(BaseHandler):
         return self.Family.query.filter_by(name=name).first()
 
     def get_sample_by_customer_and_name(
-        self, customer_entry_id: list[int], sample_name: str
+        self, customer_entry_id: List[int], sample_name: str
     ) -> Sample:
         """Get samples within a customer."""
         filter_functions = [
