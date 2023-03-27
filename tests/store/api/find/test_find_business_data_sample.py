@@ -68,10 +68,10 @@ def test_get_samples_by_customer_and_subject_id_query(
     """Test that samples can be fetched by subject id."""
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
-    # ASSERT that there are two samples in the store
+    # GIVEN that there are two samples in the store
     assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
 
-    # ASSERT that there is a customer with the given customer id
+    # GIVEN that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
         customer_id=customer_id
     )
@@ -84,7 +84,8 @@ def test_get_samples_by_customer_and_subject_id_query(
     # THEN two samples should be returned
     assert samples
     assert samples.count() == 2
-    assert samples.first().subject_id == subject_id
+    # THEN the fetched samples have the subject id used for filtering
+    assert all(fetched_sample.subject_id == subject_id for fetched_sample in samples.all())
 
 
 def test_get_samples_by_subject_id_and_is_tumour(
