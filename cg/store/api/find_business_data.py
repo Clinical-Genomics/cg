@@ -514,7 +514,7 @@ class FindBusinessDataHandler(BaseHandler):
             ).all()
 
     def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-        self, customer_ids: list[int], subject_id: str
+        self, customer_ids: List[int], subject_id: str
     ) -> List[Sample]:
         """Return a list of samples matching a list of customers with given subject_id and is_tumour."""
         samples = self._get_query(table=Sample)
