@@ -257,9 +257,13 @@ class FindBusinessDataHandler(BaseHandler):
             name=name,
         ).first()
 
-    def find_family_by_name(self, name: str) -> Family:
-        """Find a family by family name within a customer."""
-        return self.Family.query.filter_by(name=name).first()
+    def get_case_by_name(self, name: str) -> Family:
+        """Get a case by name."""
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=[CaseFilter.FILTER_BY_NAME],
+            name=name,
+        ).first()
 
     def get_sample_by_customer_and_name(
         self, customer_entry_id: List[int], sample_name: str
