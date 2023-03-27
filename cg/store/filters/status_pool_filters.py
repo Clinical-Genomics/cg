@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional, Callable
 from alchy import Query
-from cg.store.models import Pool
+from cg.store.models import Pool, Customer
 
 
 def filter_pools_by_customer_id(pools: Query, customer_ids: List[int], **kwargs) -> Query:
@@ -69,6 +69,11 @@ def filter_pools_do_not_invoice(pools: Query, **kwargs) -> Query:
     return pools.filter(Pool.no_invoice.is_(True))
 
 
+def filter_pools_by_customer(pools: Query, customer: Customer, **kwargs) -> Query:
+    """Return pools by customer id."""
+    return pools.filter(Pool.customer == customer)
+
+
 def apply_pool_filter(
     filter_functions: List[Callable],
     pools: Query,
@@ -78,6 +83,7 @@ def apply_pool_filter(
     customer_ids: Optional[List[int]] = None,
     name_enquiry: Optional[str] = None,
     order_enquiry: Optional[str] = None,
+    customer: Optional[Customer] = None,
 ) -> Query:
     """Apply filtering functions to the pool queries and return filtered results"""
 
@@ -90,6 +96,7 @@ def apply_pool_filter(
             customer_ids=customer_ids,
             name_enquiry=name_enquiry,
             order_enquiry=order_enquiry,
+            customer=customer,
         )
     return pools
 
@@ -110,3 +117,4 @@ class PoolFilter(Enum):
     FILTER_BY_CUSTOMER_ID: Callable = filter_pools_by_customer_id
     FILTER_BY_NAME_ENQUIRY: Callable = filter_pools_by_name_enquiry
     FILTER_BY_ORDER_ENQUIRY: Callable = filter_pools_by_order_enquiry
+    FILTER_BY_CUSTOMER: Callable = filter_pools_by_customer
