@@ -532,10 +532,10 @@ class FindBusinessDataHandler(BaseHandler):
         samples = self._get_query(table=Sample)
         return apply_sample_filter(
             samples=samples,
-            customer_ids=customer_ids,
+            customer_entry_ids=customer_ids,
             subject_id=subject_id,
             filter_functions=[
-                SampleFilter.FILTER_BY_CUSTOMER_ID,
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
                 SampleFilter.FILTER_BY_SUBJECT_ID,
                 SampleFilter.FILTER_IS_TUMOUR,
             ],
