@@ -3,10 +3,7 @@
 from typing import List
 from cg.store import Store
 
-from cg.store.models import (
-    Sample,
-    Invoice,
-)
+from cg.store.models import Sample, Invoice, Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -145,3 +142,50 @@ def test_has_active_cases_for_sample_running(
         store_with_active_sample_running.has_active_cases_for_sample(internal_id=sample_internal_id)
         is True
     )
+
+
+def test_get_samples_by_customer_and_name(
+    store_with_samples_that_have_names: Store,
+    helpers: StoreHelpers,
+    name: str = "test_sample_1",
+    customer_id="cust000",
+):
+    """Test that samples can be fetched by name."""
+    # GIVEN a database with samples
+    # WHEN getting a customer from the store
+    customer: Customer = store_with_samples_that_have_names.get_customer_by_customer_id(
+        customer_id=customer_id
+    )
+    assert customer
+    # WHEN fetching the sample by name
+    sample: Sample = store_with_samples_that_have_names.get_sample_by_customer_and_name(
+        customer_entry_id=[customer.id], sample_name=name
+    )
+
+    # THEN one sample should be returned
+    assert sample
+    assert sample.name == name
+    assert sample.customer == customer
+
+
+def test_get_samples_by_customer_and_name_invalid_customer(
+    store_with_samples_that_have_names: Store,
+    helpers: StoreHelpers,
+    name: str = "test_sample_1",
+    customer_id="unrelated_customer",
+):
+    """Test that samples can be fetched by name does not return a sample when invalid customer is supplied."""
+    # GIVEN a database with two samples
+
+    # WHEN getting a customer from the store
+    customer: Customer = store_with_samples_that_have_names.get_customer_by_customer_id(
+        customer_id=customer_id
+    )
+    assert customer
+    # WHEN fetching the sample by name
+    sample: Sample = store_with_samples_that_have_names.get_sample_by_customer_and_name(
+        customer_entry_id=[customer.id], sample_name=name
+    )
+
+    # THEN one sample should be returned
+    assert not sample
