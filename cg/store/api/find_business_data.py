@@ -256,9 +256,21 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(name=name).first()
 
-    def find_samples(self, customer: Customer, name: str) -> Query:
-        """Find samples within a customer."""
-        return self._get_query(table=Sample).filter_by(customer=customer, name=name)
+    def get_sample_by_customer_and_name(
+        self, customer_entry_id: List[int], sample_name: str
+    ) -> Sample:
+        """Get samples within a customer."""
+        filter_functions = [
+            SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            SampleFilter.FILTER_BY_SAMPLE_NAME,
+        ]
+
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            filter_functions=filter_functions,
+            customer_entry_ids=customer_entry_id,
+            name=sample_name,
+        ).first()
 
     def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
         """Return flow cell by flow cell id."""
@@ -475,7 +487,7 @@ class FindBusinessDataHandler(BaseHandler):
         filter_functions: List[SampleFilter] = []
         if customers:
             customer_ids: List[int] = [customer.id for customer in customers]
-            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ID)
+            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID)
         if enquiry:
             filter_functions.extend(
                 [SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN, SampleFilter.FILTER_BY_NAME_PATTERN]
@@ -483,7 +495,7 @@ class FindBusinessDataHandler(BaseHandler):
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
         return apply_sample_filter(
             samples=samples,
-            customer_ids=customer_ids,
+            customer_entry_ids=customer_ids,
             name_pattern=enquiry,
             internal_id_pattern=enquiry,
             filter_functions=filter_functions,

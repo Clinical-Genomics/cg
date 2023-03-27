@@ -332,7 +332,12 @@ def store_with_samples_that_have_names(
             store=store, internal_id=f"test_sample_{index}", name=f"test_sample_{index}"
         )
 
-    helpers.add_sample(store=store, internal_id="unrelated_id", name="unrelated_name")
+    helpers.add_sample(
+        store=store,
+        internal_id="unrelated_id",
+        name="unrelated_name",
+        customer_id="unrelated_customer",
+    )
     return store
 
 
