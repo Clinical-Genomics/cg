@@ -427,7 +427,7 @@ class UploadScoutAPI:
             )
 
         subject_id_samples: List[Sample] = self.status_db.get_samples_by_subject_id_and_is_tumour(
-            customer_id=rna_sample.customer.internal_id,
+            customer_internal_id=rna_sample.customer.internal_id,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )

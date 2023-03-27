@@ -49,8 +49,10 @@ def test_get_samples_by_subject_id(
     )
 
     # WHEN fetching the sample by subject id and customer_id
-    samples = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id(
-        subject_id=subject_id, customer_id=customer_id
+    samples = (
+        store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_and_subject_id(
+            subject_id=subject_id, customer_internal_id=customer_id
+        )
     )
 
     # THEN two samples should be returned
@@ -76,7 +78,7 @@ def test_get_samples_by_customer_and_subject_id_query(
 
     # WHEN fetching the sample by subject id and customer_id
     samples = store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_and_subject_id_query(
-        subject_id=subject_id, customer_id=customer_id
+        subject_id=subject_id, customer_internal_id=customer_id
     )
 
     # THEN two samples should be returned
@@ -106,7 +108,7 @@ def test_get_samples_by_subject_id_and_is_tumour(
     samples: List[
         Sample
     ] = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id_and_is_tumour(
-        subject_id=subject_id, customer_id=customer_id, is_tumour=is_tumour
+        subject_id=subject_id, customer_internal_id=customer_id, is_tumour=is_tumour
     )
 
     # THEN two samples should be returned

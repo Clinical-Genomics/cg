@@ -208,7 +208,7 @@ class SampleFilter(Enum):
     FILTER_DO_INVOICE: Callable = filter_samples_do_invoice
     FILTER_DO_NOT_INVOICE: Callable = filter_samples_do_not_invoice
     FILTER_BY_CUSTOMER_NAME: Callable = filter_samples_by_customer_name
-    FILTER_BY_CUSTOMER_ID: Callable = filter_samples_by_customer_id
+    FILTER_BY_CUSTOMER_IDS: Callable = filter_samples_by_customer_id
     FILTER_IS_RECEIVED: Callable = filter_samples_is_received
     FILTER_IS_NOT_RECEIVED: Callable = filter_samples_is_not_received
     FILTER_IS_PREPARED: Callable = filter_samples_is_prepared

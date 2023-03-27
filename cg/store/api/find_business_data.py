@@ -465,16 +465,16 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_samples_by_customer_id_and_pattern(
-        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
+        self, *, customers: Optional[List[Customer]] = None, pattern: str = None
     ) -> List[Sample]:
-        """Get samples by customer and pattern."""
+        """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
         customer_ids = None
         filter_functions: List[SampleFilter] = []
         if customers:
             customer_ids: List[int] = [customer.id for customer in customers]
-            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ID)
-        if enquiry:
+            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_IDS)
+        if pattern:
             filter_functions.extend(
                 [SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN, SampleFilter.FILTER_BY_NAME_PATTERN]
             )
@@ -482,18 +482,18 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_sample_filter(
             samples=samples,
             customer_ids=customer_ids,
-            name_pattern=enquiry,
-            internal_id_pattern=enquiry,
+            name_pattern=pattern,
+            internal_id_pattern=pattern,
             filter_functions=filter_functions,
         ).all()
 
     def get_samples_by_customer_and_subject_id_query(
-        self, customer_id: str, subject_id: str
+        self, customer_internal_id: str, subject_id: str
     ) -> Query:
-        """Return query of samples of customer with given subject_id or subject_id."""
+        """Return query of samples of customer with given subject id."""
         records: Query = apply_customer_filter(
             customers=self._get_join_sample_and_customer_query(),
-            customer_id=customer_id,
+            customer_internal_id=customer_internal_id,
             filter_functions=[CustomerFilter.FILTER_BY_INTERNAL_ID],
         )
         return apply_sample_filter(
@@ -502,18 +502,20 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_SUBJECT_ID],
         )
 
-    def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
-        """Get samples of customer with given subject_id or subject_id and is_tumour."""
+    def get_samples_by_customer_and_subject_id(
+        self, customer_internal_id: str, subject_id: str
+    ) -> List[Sample]:
+        """Get samples of customer with given subject id."""
         return self.get_samples_by_customer_and_subject_id_query(
-            customer_id=customer_id, subject_id=subject_id
+            customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
 
     def get_samples_by_subject_id_and_is_tumour(
-        self, customer_id: str, subject_id: str, is_tumour: bool
+        self, customer_internal_id: str, subject_id: str, is_tumour: bool
     ) -> List[Sample]:
-        """Get samples of customer with given subject_id and is_tumour."""
+        """Get samples of customer with given subject id and is tumour."""
         samples: Query = self.get_samples_by_customer_and_subject_id_query(
-            customer_id=customer_id, subject_id=subject_id
+            customer_internal_id=customer_internal_id, subject_id=subject_id
         )
         if is_tumour:
             return apply_sample_filter(
