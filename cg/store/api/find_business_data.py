@@ -65,20 +65,24 @@ class FindBusinessDataHandler(BaseHandler):
             ).filter(Analysis.started_at < before)
         return records
 
+    def get_case_by_entry_id(self, entry_id: str) -> Family:
+        """Return a case by entry id."""
+        cases_query: Query = self._get_query(table=Family)
+        return apply_case_filter(
+            cases=cases_query, filter_functions=[CaseFilter.FILTER_BY_ENTRY_ID], entry_id=entry_id
+        ).first()
+
     def has_active_cases_for_sample(self, internal_id: str) -> bool:
         """Check if there are any active cases for a sample"""
         sample = self.get_sample_by_internal_id(internal_id=internal_id)
-        for family_sample in sample.links:
-            case_action = self.get_case_action(sample=family_sample)
-            if case_action in ["analyze", "running"]:
-                return True
-        return False
+        active_actions = ["analyze", "running"]
 
-    def get_case_action(self, sample: FamilySample) -> str:
-        """Get the action of a case."""
-        return self.get_case_by_internal_id(
-            internal_id=self.Family.query.filter(Family.id == sample.family_id).first().internal_id
-        ).action
+        for family_sample in sample.links:
+            case: Family = self.get_case_by_entry_id(entry_id=family_sample.family_id)
+            if case.action in active_actions:
+                return True
+
+        return False
 
     def get_application_by_case(self, case_id: str) -> Application:
         """Return the application of a case."""
@@ -253,9 +257,21 @@ class FindBusinessDataHandler(BaseHandler):
         """Find a family by family name within a customer."""
         return self.Family.query.filter_by(name=name).first()
 
-    def find_samples(self, customer: Customer, name: str) -> Query:
-        """Find samples within a customer."""
-        return self._get_query(table=Sample).filter_by(customer=customer, name=name)
+    def get_sample_by_customer_and_name(
+        self, customer_entry_id: List[int], sample_name: str
+    ) -> Sample:
+        """Get samples within a customer."""
+        filter_functions = [
+            SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            SampleFilter.FILTER_BY_SAMPLE_NAME,
+        ]
+
+        return apply_sample_filter(
+            samples=self._get_query(table=Sample),
+            filter_functions=filter_functions,
+            customer_entry_ids=customer_entry_id,
+            name=sample_name,
+        ).first()
 
     def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
         """Return flow cell by flow cell id."""
@@ -525,6 +541,22 @@ class FindBusinessDataHandler(BaseHandler):
             return apply_sample_filter(
                 samples=samples, filter_functions=[SampleFilter.FILTER_IS_NOT_TUMOUR]
             ).all()
+
+    def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+        self, customer_ids: List[int], subject_id: str
+    ) -> List[Sample]:
+        """Return a list of samples matching a list of customers with given subject id and is a tumour sample."""
+        samples = self._get_query(table=Sample)
+        return apply_sample_filter(
+            samples=samples,
+            customer_entry_ids=customer_ids,
+            subject_id=subject_id,
+            filter_functions=[
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+                SampleFilter.FILTER_BY_SUBJECT_ID,
+                SampleFilter.FILTER_IS_TUMOUR,
+            ],
+        ).all()
 
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
         records = self._get_query(table=Sample)

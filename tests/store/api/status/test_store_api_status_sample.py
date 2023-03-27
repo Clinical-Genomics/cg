@@ -3,7 +3,7 @@
 
 from typing import List
 from cg.store import Store
-from cg.store.models import Sample
+from cg.store.models import Sample, Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -135,13 +135,13 @@ def test_get_samples_to_deliver(sample_store):
     assert {sample.name for sample in samples} == set(["to-deliver", "sequenced"])
 
 
-def test_get_samples_to_invoice(sample_store):
+def test_get_samples_to_invoice_query(sample_store):
     """Test fetching samples to invoice."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
     # WHEN finding samples to invoice
-    sample = sample_store.get_samples_to_invoice()[0].first()
+    sample = sample_store.get_samples_to_invoice_query().first()
 
     # THEN samples should be a list of samples
     assert isinstance(sample, Sample)
@@ -152,7 +152,7 @@ def test_get_samples_to_invoice(sample_store):
 
 
 def test_get_samples_not_invoiced(sample_store):
-    """Test fetching samples not invoiced."""
+    """Test getting samples not invoiced."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -168,7 +168,7 @@ def test_get_samples_not_invoiced(sample_store):
 
 
 def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers, sample_id: int):
-    """Test fetching samples not down sampled."""
+    """Test getting samples not down sampled."""
     # GIVEN a store with a sample
     assert len(sample_store.get_samples()) > 1
 
@@ -181,3 +181,31 @@ def test_get_samples_not_down_sampled(sample_store: Store, helpers: StoreHelpers
 
     # THEN it should return all samples in the store
     assert len(samples) == len(sample_store.get_samples())
+
+
+def test_get_samples_to_invoice_for_customer(
+    store_with_samples_for_multiple_customers: Store,
+    helpers: StoreHelpers,
+    three_customer_ids: List[str],
+):
+    """Test that samples to invoice can be returned for a customer."""
+    # GIVEN a database with samples for a customer
+
+    # THEN the one customer can be retrieved
+    customer: Customer = store_with_samples_for_multiple_customers.get_customer_by_customer_id(
+        customer_id=three_customer_ids[1]
+    )
+    assert customer
+
+    # WHEN getting the samples to invoice for a customer
+    samples: List[
+        Sample
+    ] = store_with_samples_for_multiple_customers.get_samples_to_invoice_for_customer(
+        customer=customer,
+    )
+
+    # THEN the samples should be returned
+    assert samples
+    assert len(samples) == 1
+
+    assert samples[0].customer.internal_id == three_customer_ids[1]
