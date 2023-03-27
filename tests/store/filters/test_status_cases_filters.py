@@ -10,6 +10,7 @@ from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
+    filter_cases_by_entry_id,
     filter_case_by_internal_id,
     get_cases_with_pipeline,
     get_cases_has_sequence,
@@ -550,6 +551,34 @@ def test_get_new_cases_when_too_new(
 
     # THEN cases should not contain the test case
     assert not cases.all()
+
+
+def test_filter_case_by_existing_entry_id(store_with_multiple_cases_and_samples: Store):
+    # GIVEN a store containing a case with an entry id
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    entry_id: int = cases_query.first().id
+    assert entry_id
+
+    # WHEN filtering for cases with the entry_id
+    cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id=entry_id)
+
+    # THEN the case should have the entry_id
+    assert cases.first().id == entry_id
+
+
+def test_filter_cases_by_non_existing_entry_id(
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
+):
+    # GIVEN a store containing cases without a specific entry id
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    entry_ids = [case.id for case in cases_query.all()]
+    assert non_existent_id not in entry_ids
+
+    # WHEN filtering for cases with the non existing entry id
+    cases: Query = filter_cases_by_entry_id(cases=cases_query, entry_id=non_existent_id)
+
+    # THEN the query should contain no cases
+    assert cases.count() == 0
 
 
 def test_filter_case_by_existing_internal_id(
