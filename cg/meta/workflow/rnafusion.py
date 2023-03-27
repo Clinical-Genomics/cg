@@ -108,7 +108,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case_obj.links) != 1:
             raise NotImplementedError(
                 "Case objects are assumed to be related to a single sample (one link)"

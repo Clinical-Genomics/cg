@@ -67,7 +67,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     status_db: Store = context.status_db
 
     LOG.info("Fetching family object")
-    case_obj: Family = status_db.family(case_id)
+    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if not case_obj.analyses:
         LOG.warning("Could not find analyses for %s", case_id)

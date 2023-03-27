@@ -375,7 +375,9 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
 
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
-        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+        rml_pool_store.get_case_by_internal_id(internal_id=case_id)
+        .links[ListIndexes.FIRST.value]
+        .sample.application_version
     )
 
     # WHEN the expected reads is fetched from the case
@@ -389,7 +391,9 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     """Test that the correct application is returned on a case."""
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
-        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+        rml_pool_store.get_case_by_internal_id(internal_id=case_id)
+        .links[ListIndexes.FIRST.value]
+        .sample.application_version
     )
 
     # WHEN the application is fetched from the case
@@ -443,7 +447,9 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # GIVEN a database containing some cases but not a specific case
     case_id: str = "some_case"
-    case: Family = store_with_multiple_cases_and_samples.family(case_id)
+    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+        internal_id=case_id
+    )
 
     assert not case
 

@@ -188,7 +188,7 @@ def parse_families_in_collaboration():
 @BLUEPRINT.route("/families/<family_id>")
 def parse_family(family_id):
     """Return a family with links."""
-    case: Family = db.family(family_id)
+    case: Family = db.get_case_by_internal_id(internal_id=family_id)
     if case is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
@@ -199,7 +199,7 @@ def parse_family(family_id):
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
 def parse_family_in_collaboration(family_id):
     """Return a family with links."""
-    case: Family = db.family(family_id)
+    case: Family = db.get_case_by_internal_id(internal_id=family_id)
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     if case.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
@@ -212,17 +212,17 @@ def parse_samples():
     if request.args.get("status") and not g.current_user.is_admin:
         return abort(http.HTTPStatus.FORBIDDEN)
     if request.args.get("status") == "incoming":
-        samples_q: List[Sample] = db.get_samples_to_receive()
+        samples: List[Sample] = db.get_samples_to_receive()
     elif request.args.get("status") == "labprep":
-        samples_q: List[Sample] = db.get_samples_to_prepare()
+        samples: List[Sample] = db.get_samples_to_prepare()
     elif request.args.get("status") == "sequencing":
-        samples_q: List[Sample] = db.get_samples_to_sequence()
+        samples: List[Sample] = db.get_samples_to_sequence()
     else:
-        customer_objs: Optional[Customer] = (
+        customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        samples: List[Sample] = db.get_samples_by_enquiry(
-            enquiry=request.args.get("enquiry"), customers=customer_objs
+        samples: List[Sample] = db.get_samples_by_customer_id_and_pattern(
+            enquiry=request.args.get("enquiry"), customers=customers
         )
     limit = int(request.args.get("limit", 50))
     parsed_samples: List[Dict] = [sample.to_dict() for sample in samples[:limit]]
@@ -233,7 +233,7 @@ def parse_samples():
 def parse_samples_in_collaboration():
     """Return samples in a customer group."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    samples: List[Sample] = db.get_samples_by_enquiry(
+    samples: List[Sample] = db.get_samples_by_customer_id_and_pattern(
         enquiry=request.args.get("enquiry"), customers=customer.collaborators
     )
     limit = int(request.args.get("limit", 50))

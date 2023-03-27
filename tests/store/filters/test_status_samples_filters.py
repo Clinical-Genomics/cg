@@ -28,6 +28,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_subject_id,
     filter_samples_by_customer_id,
     filter_samples_by_name_pattern,
+    filter_samples_by_internal_id_pattern,
 )
 from tests.store.conftest import StoreConftestFixture
 
@@ -661,3 +662,31 @@ def test_filter_get_samples_by_name_pattern(
 
     # THEN the sample should have the correct name
     assert samples[0].name == name_pattern
+
+
+def test_filter_get_samples_by_internal_id_pattern(
+    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
+    internal_id_pattern: str = "with_attributes",
+):
+    """Test that a sample is returned when there is a sample with the given internal id pattern."""
+    # GIVEN a store with two samples of which one has a name name pattern
+
+    # WHEN getting a sample by name pattern
+    samples: Query = filter_samples_by_internal_id_pattern(
+        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+            table=Sample
+        ),
+        internal_id_pattern=internal_id_pattern,
+    )
+
+    # ASSERT that samples is a query
+    assert isinstance(samples, Query)
+
+    # THEN samples should contain the test sample
+    assert samples.all()
+
+    # THEN samples should contain one sample
+    assert len(samples.all()) == 1
+
+    # THEN the sample should have the correct name
+    assert samples[0].internal_id == StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
