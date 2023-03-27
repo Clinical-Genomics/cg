@@ -12,6 +12,7 @@ from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
+    filter_cases_by_ticket,
     get_cases_with_pipeline,
     get_cases_has_sequence,
     get_cases_for_analysis,
@@ -623,3 +624,16 @@ def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples:
 
     # THEN the query should return no cases
     assert cases.count() == 0
+
+
+def test_filter_cases_by_ticket_no_matching_ticket(
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
+):
+    # GIVEN a store containing cases with no matching ticket
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # WHEN filtering cases by a non-existent ticket
+    filtered_cases: Query = filter_cases_by_ticket(cases=cases_query, ticket=non_existent_id)
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0

@@ -198,8 +198,12 @@ class FindBusinessDataHandler(BaseHandler):
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
 
-    def get_cases_from_ticket(self, ticket: str) -> Query:
-        return self.Family.query.filter(Family.tickets.contains(ticket))
+    def get_cases_from_ticket(self, ticket: str) -> List[Family]:
+        return apply_case_sample_filter(
+            filter_functions=[CaseFilter.FILTER_BY_TICKET],
+            ticket=ticket,
+            cases=self._get_query(table=Family),
+        ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""

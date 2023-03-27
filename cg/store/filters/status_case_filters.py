@@ -111,6 +111,11 @@ def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Quer
     return cases.filter(Family.internal_id == internal_id)
 
 
+def filter_cases_by_ticket(cases: Query, ticket: str, **kwargs) -> Query:
+    """Return cases with matching ticket id."""
+    return cases.filter(Family.tickets.contains(ticket))
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: List[Callable],
@@ -118,11 +123,17 @@ def apply_case_filter(
     pipeline: Optional[Pipeline] = None,
     internal_id: Optional[str] = None,
     entry_id: Optional[int] = None,
+    ticket: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
         cases: Query = function(
-            cases=cases, date=date, pipeline=pipeline, internal_id=internal_id, entry_id=entry_id
+            cases=cases,
+            date=date,
+            pipeline=pipeline,
+            internal_id=internal_id,
+            entry_id=entry_id,
+            ticket=ticket,
         )
     return cases
 
@@ -143,3 +154,4 @@ class CaseFilter(Enum):
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
     FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
     FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
+    FILTER_BY_TICKET: Callable = filter_cases_by_ticket

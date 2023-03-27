@@ -1732,12 +1732,13 @@ def store_with_multiple_cases_and_samples(
     sample_id_in_single_case: str,
     sample_id_in_multiple_cases: str,
     case_id: str,
+    ticket: str,
     helpers: StoreHelpers,
     store: Store,
 ):
     """Return a store containing multiple cases and samples."""
 
-    helpers.add_case(store=store, internal_id=case_id_without_samples)
+    helpers.add_case(store=store, internal_id=case_id_without_samples, ticket=ticket)
     helpers.add_case_with_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
