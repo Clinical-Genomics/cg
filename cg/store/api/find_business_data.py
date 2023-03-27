@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import List, Optional, Iterator, Union
+from typing import Callable, List, Optional, Iterator, Union
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
@@ -145,7 +145,8 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> Query:
         """Fetch families."""
 
-        records = self.Family.query
+        records = self._get_query(table=Family)
+        filter_functions: List[Callable] = []
 
         if customers:
             customer_ids = [customer.id for customer in customers]
