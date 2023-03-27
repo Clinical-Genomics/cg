@@ -31,39 +31,11 @@ def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpe
     assert sample in records
 
 
-def test_get_samples_by_subject_id(
-    store_with_samples_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
-    customer_id: str = "cust123",
-    subject_id: str = "test_subject",
-):
-    """Test that samples can be fetched by subject id."""
-    # GIVEN a database with two samples that have a subject ID but only one is tumour
-
-    # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
-
-    # ASSERT that there is a customer with the given customer id
-    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
-        customer_id=customer_id
-    )
-
-    # WHEN fetching the sample by subject id and customer_id
-    samples = (
-        store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_and_subject_id(
-            subject_id=subject_id, customer_internal_id=customer_id
-        )
-    )
-
-    # THEN two samples should be returned
-    assert samples and len(samples) == 2
-
-
 def test_get_samples_by_customer_and_subject_id_query(
     store_with_samples_subject_id_and_tumour_status: Store,
     helpers: StoreHelpers,
-    customer_id: str = "cust123",
-    subject_id: str = "test_subject",
+    cust123: str,
+    test_subject: str,
 ):
     """Test that samples can be fetched by subject id."""
     # GIVEN a database with two samples that have a subject ID but only one is tumour
@@ -73,26 +45,79 @@ def test_get_samples_by_customer_and_subject_id_query(
 
     # GIVEN that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
-        customer_id=customer_id
+        customer_id=cust123
     )
 
     # WHEN fetching the sample by subject id and customer_id
-    samples = store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_and_subject_id_query(
-        subject_id=subject_id, customer_internal_id=customer_id
+    samples = store_with_samples_subject_id_and_tumour_status._get_samples_by_customer_and_subject_id_query(
+        subject_id=test_subject, customer_internal_id=cust123
     )
 
     # THEN two samples should be returned
-    assert samples
     assert samples.count() == 2
     # THEN the fetched samples have the subject id used for filtering
-    assert all(fetched_sample.subject_id == subject_id for fetched_sample in samples.all())
+    assert all(fetched_sample.subject_id == test_subject for fetched_sample in samples.all())
+
+
+def test_get_samples_by_customer_and_subject_id_query_missing_subject_id(
+    store_with_samples_and_tumour_status_missing_subject_id: Store,
+    helpers: StoreHelpers,
+    cust123: str,
+    test_subject: str,
+):
+    """Test that samples can be fetched by subject id."""
+    # GIVEN a database with two samples that have a subject ID but only one is tumour
+
+    # GIVEN that there are two samples in the store
+    assert len(store_with_samples_and_tumour_status_missing_subject_id.get_samples()) == 2
+
+    # GIVEN that there is a customer with the given customer id
+    assert store_with_samples_and_tumour_status_missing_subject_id.get_customer_by_customer_id(
+        customer_id=cust123
+    )
+
+    # WHEN fetching the sample by subject id and customer_id
+    samples = store_with_samples_and_tumour_status_missing_subject_id._get_samples_by_customer_and_subject_id_query(
+        subject_id=test_subject, customer_internal_id=cust123
+    )
+
+    # THEN two samples should be returned
+    assert samples.count() == 0
+
+
+def test_get_samples_by_subject_id(
+    store_with_samples_subject_id_and_tumour_status: Store,
+    helpers: StoreHelpers,
+    cust123: str,
+    test_subject: str,
+):
+    """Test that samples can be fetched by subject id."""
+    # GIVEN a database with two samples that have a subject ID but only one is tumour
+
+    # ASSERT that there are two samples in the store
+    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
+
+    # ASSERT that there is a customer with the given customer id
+    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
+        customer_id=cust123
+    )
+
+    # WHEN fetching the sample by subject id and customer_id
+    samples = (
+        store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_and_subject_id(
+            subject_id=test_subject, customer_internal_id=cust123
+        )
+    )
+
+    # THEN two samples should be returned
+    assert samples and len(samples) == 2
 
 
 def test_get_samples_by_subject_id_and_is_tumour(
     store_with_samples_subject_id_and_tumour_status: Store,
     helpers: StoreHelpers,
-    customer_id: str = "cust123",
-    subject_id: str = "test_subject",
+    cust123: str,
+    test_subject: str,
     is_tumour: bool = True,
 ):
     """Test that samples can be fetched by subject id."""
@@ -103,13 +128,13 @@ def test_get_samples_by_subject_id_and_is_tumour(
 
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
-        customer_id=customer_id
+        customer_id=cust123
     )
     # WHEN fetching the sample by subject id and customer_id
     samples: List[
         Sample
     ] = store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_subject_id_and_is_tumour(
-        subject_id=subject_id, customer_internal_id=customer_id, is_tumour=is_tumour
+        subject_id=test_subject, customer_internal_id=cust123, is_tumour=is_tumour
     )
 
     # THEN two samples should be returned
