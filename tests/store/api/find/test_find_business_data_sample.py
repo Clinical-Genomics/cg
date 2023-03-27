@@ -119,6 +119,36 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
         assert sample.is_tumour == is_tumour
 
 
+def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_existing_customer_id(
+    store_with_samples_customer_id_and_subject_id_and_tumour_status: Store,
+    helpers: StoreHelpers,
+):
+    """Test that no samples are returned when filtering on non-existing customer ID."""
+    # GIVEN a database with four samples, two with customer ID 1 and two with customer ID 2
+
+    # ASSERT that there are no customers with the given customer IDs
+    customer_ids = [1, 2, 3]
+    for customer_id in customer_ids:
+        if customer_id == 3:
+            assert store_with_samples_customer_id_and_subject_id_and_tumour_status.get_customer_by_customer_id(
+                customer_id=str(customer_id)
+            ) is None
+        else:
+            assert store_with_samples_customer_id_and_subject_id_and_tumour_status.get_customer_by_customer_id(
+                customer_id=str(customer_id)
+            )
+
+    # WHEN fetching the samples by customer ID list, subject ID, and tumour status
+    non_existing_customer_id = [3]
+    samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+        customer_ids=non_existing_customer_id, subject_id="test_subject"
+    )
+
+    # THEN no samples should be returned
+    assert isinstance(samples, list)
+    assert len(samples) == 0
+
+
 def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="test_sample_1"):
     """Test that samples can be fetched by name."""
     # GIVEN a database with two samples of which one has a name
