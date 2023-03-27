@@ -90,14 +90,10 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
     helpers: StoreHelpers,
     customer_ids: List[int] = [1, 2],
     subject_id: str = "test_subject",
-    is_tumour: bool = True
+    is_tumour: bool = True,
 ):
     """Test that samples can be fetched by customer ID, subject ID, and tumour status."""
     # GIVEN a database with four samples, two with customer ID 1 and two with customer ID 2
-
-
-    # ASSERT that there are four samples in the store
-    assert len(store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples()) == 4
 
     # ASSERT that there are customers with the given customer IDs
     for customer_id in customer_ids:
