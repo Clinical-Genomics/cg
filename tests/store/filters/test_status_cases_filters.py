@@ -12,6 +12,7 @@ from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
+    get_active_cases,
     get_cases_with_pipeline,
     get_cases_has_sequence,
     get_cases_for_analysis,
@@ -623,3 +624,39 @@ def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples:
 
     # THEN the query should return no cases
     assert cases.count() == 0
+
+
+def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
+    # GIVEN a store containing cases with no "running" action
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    cases_query = cases_query.filter(Family.action != "running")
+
+    # WHEN getting active cases
+    active_cases: Query = get_active_cases(cases=cases_query)
+
+    # THEN the query should return no cases
+    assert active_cases.count() == 0
+
+
+def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
+    # GIVEN a store containing cases with at least one "running" action
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # WHEN getting active cases
+    active_cases: Query = get_active_cases(cases=cases_query)
+
+    # THEN the query should return at least one case
+    assert active_cases.count() >= 1
+
+
+def test_get_active_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
+    # GIVEN a store containing only cases with "running" action
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    for case in cases_query.all():
+        case.action = "running"
+
+    # WHEN getting active cases
+    active_cases: Query = get_active_cases(cases=cases_query)
+
+    # THEN the query should return the same number of cases as the original query
+    assert active_cases.count() == cases_query.count()

@@ -132,14 +132,6 @@ class StatusHandler(BaseHandler):
             families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
 
-    def get_running_cases_for_pipeline(self, pipeline: Pipeline) -> List[Family]:
-        return (
-            self.query(Family)
-            .filter(Family.action == "running")
-            .filter(Family.data_analysis == pipeline)
-            .all()
-        )
-
     def cases(
         self,
         internal_id: str = None,
