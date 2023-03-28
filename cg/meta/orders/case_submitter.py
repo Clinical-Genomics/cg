@@ -46,8 +46,8 @@ class CaseSubmitter(Submitter):
             if new_gender == "unknown":
                 continue
 
-            existing_samples: List[Sample] = self.status.get_samples_by_subject_id(
-                customer_id=customer_id, subject_id=subject_id
+            existing_samples: List[Sample] = self.status.get_samples_by_customer_and_subject_id(
+                customer_internal_id=customer_id, subject_id=subject_id
             )
             existing_sample: Sample
             for existing_sample in existing_samples:
@@ -91,7 +91,9 @@ class CaseSubmitter(Submitter):
         for sample in samples:
             if self._is_rerun_of_existing_case(sample=sample):
                 continue
-            if self.status.find_family(customer=customer, name=sample.family_name):
+            if self.status.get_case_by_name_and_customer(
+                customer=customer, case_name=sample.family_name
+            ):
                 raise OrderError(f"Case name {sample.family_name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
