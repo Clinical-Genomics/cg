@@ -108,21 +108,21 @@ def fixture_fastq_case(case_id, family_name, sample_id, cust_sample_id, ticket: 
 def dna_case(analysis_store, helpers) -> Family:
     """Case with DNA application"""
     cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(cust, "dna_case")
+    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_case")
 
 
 @pytest.fixture(scope="function")
 def rna_case(analysis_store, helpers) -> Family:
     """Case with RNA application"""
     cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(cust, "rna_case")
+    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="rna_case")
 
 
 @pytest.fixture(scope="function")
 def dna_rna_mix_case(analysis_store, helpers) -> Family:
     """Case with MIP analysis type DNA and RNA application"""
     cust = helpers.ensure_customer(analysis_store)
-    return analysis_store.get_case_by_name_and_customer(cust, "dna_rna_mix_case")
+    return analysis_store.get_case_by_name_and_customer(customer=cust, case_name="dna_rna_mix_case")
 
 
 @pytest.fixture(name="create_multiqc_html_file")

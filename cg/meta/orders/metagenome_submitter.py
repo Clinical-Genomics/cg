@@ -10,7 +10,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import Customer, Sample
+from cg.store.models import Customer, Family, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -86,7 +86,9 @@ class MetagenomeSubmitter(Submitter):
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case_obj = self.status.get_case_by_name_and_customer(customer=customer, name=str(ticket_id))
+        case: Family = self.status.get_case_by_name_and_customer(
+            customer=customer, case_name=str(ticket_id)
+        )
         case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in case["samples"]:
@@ -109,8 +111,8 @@ class MetagenomeSubmitter(Submitter):
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                if not case_obj:
-                    case_obj = self.status.add_case(
+                if not case:
+                    case = self.status.add_case(
                         data_analysis=Pipeline(case["data_analysis"]),
                         data_delivery=DataDelivery(case["data_delivery"]),
                         name=str(ticket_id),
@@ -118,11 +120,11 @@ class MetagenomeSubmitter(Submitter):
                         priority=case["priority"],
                         ticket=ticket_id,
                     )
-                    case_obj.customer = customer
-                    self.status.add(case_obj)
+                    case.customer = customer
+                    self.status.add(case)
 
                 new_relationship = self.status.relate_sample(
-                    family=case_obj, sample=new_sample, status=StatusEnum.unknown
+                    family=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.add(new_relationship)
 

@@ -679,7 +679,7 @@ def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_
     # WHEN fetching a case by customer and case name
     filtered_case: Family = store_with_multiple_cases_and_samples.get_case_by_name_and_customer(
         customer=customer,
-        name=case.name,
+        case_name=case.name,
     )
 
     # THEN the correct case should be returned

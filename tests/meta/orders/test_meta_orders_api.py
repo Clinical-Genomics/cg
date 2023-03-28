@@ -248,7 +248,7 @@ def test_submit_duplicate_sample_case_name(
 
     for sample in order_data.samples:
         case_id = sample.family_name
-        if not store.get_case_by_name_and_customer(customer=customer, name=case_id):
+        if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
             case: Family = store.add_case(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
@@ -257,7 +257,7 @@ def test_submit_duplicate_sample_case_name(
             )
             case.customer = customer
             store.add_commit(case)
-        assert store.get_case_by_name_and_customer(customer=customer, name=case_id)
+        assert store.get_case_by_name_and_customer(customer=customer, case_name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -325,7 +325,7 @@ def test_submit_unique_sample_case_name(
     for sample in order_data.samples:
         case_id = sample.family_name
         customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
-        assert not store.get_case_by_name_and_customer(customer=customer, name=case_id)
+        assert not store.get_case_by_name_and_customer(customer=customer, case_name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 

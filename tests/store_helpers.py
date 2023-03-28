@@ -395,7 +395,7 @@ class StoreHelpers:
             customer = StoreHelpers.ensure_customer(store=store)
         case = store.get_case_by_internal_id(
             internal_id=case_id
-        ) or store.get_case_by_name_and_customer(customer=customer, name=name)
+        ) or store.get_case_by_name_and_customer(customer=customer, case_name=name)
         if not case:
             case = StoreHelpers.add_case(
                 store=store,

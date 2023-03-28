@@ -307,11 +307,11 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
     def get_case_id_from_ticket(self, unique_id: str) -> Tuple[str, None]:
         """If ticked is provided as argument, finds the corresponding case_id and returns it.
         Since sample_id is not specified, nothing is returned as sample_id"""
-        case_obj: Family = self.status_db.get_case_by_name(unique_id)
-        if not case_obj:
+        case: Family = self.status_db.get_case_by_name(name=unique_id)
+        if not case:
             LOG.error("No case found for ticket number:  %s", unique_id)
             raise click.Abort
-        case_id = case_obj.internal_id
+        case_id = case.internal_id
         return case_id, None
 
     def get_case_id_from_sample(self, unique_id: str) -> Tuple[str, str]:
