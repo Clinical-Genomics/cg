@@ -11,11 +11,11 @@ SUCCESS = 0
 
 @pytest.mark.parametrize("identifier_key", ["original_ticket", "order"])
 def test_set_cases_by_sample_identifiers(
-    cli_runner, base_context, base_store: Store, identifier_key, helpers, caplog, ticket
+    cli_runner, base_context, base_store: Store, identifier_key, helpers, caplog, ticket_id
 ):
     # GIVEN a database with a case with a sample
     sample_obj = helpers.add_sample(base_store)
-    sample_obj.original_ticket = ticket
+    sample_obj.original_ticket = ticket_id
     sample_obj.order = "An order"
     case = helpers.add_case(base_store)
     helpers.add_relationship(base_store, sample=sample_obj, case=case)

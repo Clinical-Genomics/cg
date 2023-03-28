@@ -155,7 +155,7 @@ def test_store_ticket(
     mocker,
     populated_compress_context: CGConfig,
     sample_id: str,
-    ticket: str,
+    ticket_id: str,
 ):
     """Test to run store ticket command."""
     caplog.set_level(logging.DEBUG)
@@ -166,7 +166,7 @@ def test_store_ticket(
     CompressAPI.add_decompressed_fastq.return_value = True
 
     # WHEN running the store ticket command
-    res = cli_runner.invoke(store_ticket, [ticket], obj=populated_compress_context)
+    res = cli_runner.invoke(store_ticket, [ticket_id], obj=populated_compress_context)
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS

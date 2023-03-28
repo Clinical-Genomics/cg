@@ -189,7 +189,7 @@ def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
 
 @pytest.fixture(name="analysis_family_single_case")
 def fixture_analysis_family_single(
-    case_id: str, family_name: str, sample_id: str, ticket: str
+    case_id: str, family_name: str, sample_id: str, ticket_id: str
 ) -> dict:
     """Build an example case."""
     return {
@@ -198,14 +198,14 @@ def fixture_analysis_family_single(
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
-        "tickets": ticket,
+        "tickets": ticket_id,
         "samples": [
             {
                 "name": "proband",
                 "sex": Gender.MALE,
                 "internal_id": sample_id,
                 "status": "affected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
             }
@@ -214,14 +214,14 @@ def fixture_analysis_family_single(
 
 
 @pytest.fixture(name="analysis_family")
-def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket: str) -> dict:
+def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
     """Return a dictionary with information from a analysis case."""
     return {
         "name": family_name,
         "internal_id": case_id,
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
-        "tickets": ticket,
+        "tickets": ticket_id,
         "panels": ["IEM", "EP"],
         "samples": [
             {
@@ -231,7 +231,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -240,7 +240,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "sex": Gender.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -249,7 +249,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "sex": Gender.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -400,17 +400,17 @@ def madeline_api(madeline_output) -> MockMadelineAPI:
     return _api
 
 
-@pytest.fixture(name="ticket", scope="session")
+@pytest.fixture(name="ticket_id", scope="session")
 def fixture_ticket_number() -> str:
     """Return a ticket number for testing."""
     return "123456"
 
 
 @pytest.fixture(name="osticket")
-def fixture_os_ticket(ticket: str) -> MockOsTicket:
+def fixture_os_ticket(ticket_id: str) -> MockOsTicket:
     """Return a api that mock the os ticket api."""
     api = MockOsTicket()
-    api.set_ticket_nr(ticket)
+    api.set_ticket_nr(ticket_id)
     return api
 
 
@@ -1732,12 +1732,13 @@ def store_with_multiple_cases_and_samples(
     sample_id_in_single_case: str,
     sample_id_in_multiple_cases: str,
     case_id: str,
+    ticket_id: str,
     helpers: StoreHelpers,
     store: Store,
 ):
     """Return a store containing multiple cases and samples."""
 
-    helpers.add_case(store=store, internal_id=case_id_without_samples)
+    helpers.add_case(store=store, internal_id=case_id_without_samples, ticket=ticket_id)
     helpers.add_case_with_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )

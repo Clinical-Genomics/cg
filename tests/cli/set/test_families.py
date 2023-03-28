@@ -12,12 +12,12 @@ SUCCESS = 0
 
 @pytest.mark.parametrize("identifier_key", ["original_ticket", "order"])
 def test_set_families_by_sample_identifiers(
-    cli_runner, base_context: CGConfig, identifier_key, helpers, caplog, ticket
+    cli_runner, base_context: CGConfig, identifier_key, helpers, caplog, ticket_id
 ):
     # GIVEN a database with a case with a sample
     base_store: Store = base_context.status_db
     sample_obj: Sample = helpers.add_sample(base_store)
-    sample_obj.original_ticket = ticket
+    sample_obj.original_ticket = ticket_id
     sample_obj.order = "An order"
     case: Family = helpers.add_case(base_store)
     helpers.add_relationship(base_store, sample=sample_obj, case=case)

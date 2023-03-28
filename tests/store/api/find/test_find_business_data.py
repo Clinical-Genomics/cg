@@ -351,15 +351,15 @@ def test_is_all_flow_cells_on_disk(
     assert f"{flow_cell.name}: status is {flow_cell.status}" in caplog.text
 
 
-def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
+def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_id: str):
     """Tests if the function in fact returns the correct customer."""
     # Given a store with a ticket
 
     # Then the function should return the customer connected to the ticket
-    assert analysis_store.get_customer_id_from_ticket(ticket) == customer_id
+    assert analysis_store.get_customer_id_from_ticket(ticket_id) == customer_id
 
 
-def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket: str):
+def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket_id: str):
     """Tests if the correct ticket is returned for the given case."""
     # GIVEN a populated store with a case
 
@@ -367,7 +367,7 @@ def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, t
     ticket_from_case: str = analysis_store_single_case.get_latest_ticket_from_case(case_id=case_id)
 
     # THEN the ticket should be correct
-    assert ticket == ticket_from_case
+    assert ticket_id == ticket_from_case
 
 
 def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):

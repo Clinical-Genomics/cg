@@ -89,5 +89,7 @@ def fixture_samples_missing_in_inbox(
 
 
 @pytest.fixture(name="deliver_api_destination_path")
-def fixture_deliver_api_destination_path(customer_id: str, case_obj: Family, ticket: str) -> Path:
-    return Path(customer_id, INBOX_NAME, ticket, case_obj.name)
+def fixture_deliver_api_destination_path(
+    customer_id: str, case_obj: Family, ticket_id: str
+) -> Path:
+    return Path(customer_id, INBOX_NAME, ticket_id, case_obj.name)
