@@ -52,6 +52,7 @@ BALSAMIC_VALIDATION_CASES = [
     "suitedsnake",  # BALSAMIC validation case from cust087, tumor-only panel
     "savinghorse",  # BALSAMIC validation case from cust087, tumor-only panel
     "rightpup",  # BALSAMIC validation case from cust087, tumor-only panel
+    "sureroughy",  # BALSAMIC validation case from cust087, tumor-only panel
 ]
 
 FLUFFY_VALIDATION_CASES = [
