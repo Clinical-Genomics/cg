@@ -26,7 +26,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_is_not_received,
     filter_samples_by_name,
     filter_samples_by_subject_id,
-    filter_samples_by_customer_id,
+    filter_samples_by_entry_customer_ids,
     filter_samples_by_name_pattern,
     filter_samples_by_internal_id_pattern,
 )
@@ -616,7 +616,7 @@ def test_filter_get_samples_by_customer_id(
     # GIVEN a store with two samples of which one has a customer id
 
     # WHEN getting a sample by customer id
-    samples: Query = filter_samples_by_customer_id(
+    samples: Query = filter_samples_by_entry_customer_ids(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),

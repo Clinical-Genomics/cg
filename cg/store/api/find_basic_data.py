@@ -161,7 +161,7 @@ class FindBasicDataHandler(BaseHandler):
         return apply_customer_filter(
             filter_functions=[CustomerFilter.FILTER_BY_INTERNAL_ID],
             customers=self._get_query(table=Customer),
-            customer_id=customer_id,
+            customer_internal_id=customer_id,
         ).first()
 
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:
