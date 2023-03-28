@@ -3,7 +3,7 @@ import copy
 import logging
 import os
 import shutil
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, MAXYEAR
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple
 
@@ -64,9 +64,9 @@ def fixture_later_timestamp() -> datetime:
 
 
 @pytest.fixture(name="future_date")
-def fixture_future_date() -> dt.datetime:
+def fixture_future_date() -> datetime:
     """Return a distant date in the future for which no events happen later."""
-    return dt.datetime(dt.MAXYEAR, 1, 1, 1, 1, 1)
+    return datetime(MAXYEAR, 1, 1, 1, 1, 1)
 
 
 @pytest.fixture(name="timestamp_now")
