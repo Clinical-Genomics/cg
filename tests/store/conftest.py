@@ -340,9 +340,9 @@ def fixture_store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
     case_obj: Family,
-    timestamp_now: datetime.datetime,
-    timestamp_yesterday: datetime.datetime,
-    old_timestamp: datetime.datetime,
+    timestamp_now: dt.datetime,
+    timestamp_yesterday: dt.datetime,
+    old_timestamp: dt.datetime,
 ) -> Store:
     """Return a store with  older and newer analyses."""
     analysis = base_store.Analysis.query.first()
