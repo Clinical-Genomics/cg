@@ -186,7 +186,7 @@ class FindBasicDataHandler(BaseHandler):
             ],
             application_versions=self._get_query(table=ApplicationVersion),
             application_id=application_id,
-            date=dt.datetime.now(),
+            valid_from=dt.datetime.now(),
         ).first()
 
     def latest_version(self, tag: str) -> Optional[ApplicationVersion]:

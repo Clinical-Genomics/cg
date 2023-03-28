@@ -143,6 +143,25 @@ def test_filter_application_version_by_application_id_wrong_id(
     assert filtered_app_version_query.count() == 0
 
 
+def test_filter_application_version_by_application_id_empty_query(
+    store: Store, application_id: int = 1
+):
+    """Test that filtering an empty query by application id returns an empty query."""
+    # GIVEN a store without any application version
+    app_version_query: Query = store._get_query(table=ApplicationVersion)
+    assert app_version_query.count() == 0
+
+    # WHEN filtering by application id
+    filtered_app_version_query: Query = filter_application_versions_by_application_id(
+        application_versions=app_version_query,
+        application_id=application_id,
+    )
+
+    # THEN the function returns an empty query
+    assert isinstance(filtered_app_version_query, Query)
+    assert filtered_app_version_query.count() == 0
+
+
 def test_filter_application_versions_before_valid_from_valid_date(
     store_with_different_application_versions: Store,
 ):
@@ -158,7 +177,7 @@ def test_filter_application_versions_before_valid_from_valid_date(
     # WHEN filtering the application version query by `valid_from` of the third query
     filtered_app_version_query: Query = filter_application_versions_before_valid_from(
         application_versions=app_version_query,
-        date=third_app_version.valid_from,
+        valid_from=third_app_version.valid_from,
     )
 
     # THEN a query with the two first application versions is returned
@@ -184,7 +203,7 @@ def test_filter_application_versions_before_valid_from_future_date(
     # WHEN filtering using a future date
     filtered_app_version_query: Query = filter_application_versions_before_valid_from(
         application_versions=app_version_query,
-        date=future_date,
+        valid_from=future_date,
     )
 
     # THEN the filtered query has the same elements as the unfiltered query
@@ -194,11 +213,11 @@ def test_filter_application_versions_before_valid_from_future_date(
     assert all(non_filtered == filtered for non_filtered, filtered in app_version_pair)
 
 
-def test_filter_application_versions_before_valid_from_past_date(
+def test_filter_application_versions_before_valid_from_old_date(
     store_with_different_application_versions: Store,
-    past_date: dt.datetime,
+    old_timestamp: dt.datetime,
 ):
-    """Test that filtering by `valid_from` with a past date returns an empty query."""
+    """Test that filtering by `valid_from` with an old date returns an empty query."""
     # GIVEN a store with application versions
     app_version_query: Query = store_with_different_application_versions._get_query(
         table=ApplicationVersion
@@ -207,10 +226,30 @@ def test_filter_application_versions_before_valid_from_past_date(
     # WHEN filtering using a past date
     filtered_app_version_query: Query = filter_application_versions_before_valid_from(
         application_versions=app_version_query,
-        date=past_date,
+        valid_from=old_timestamp,
     )
 
     # THEN the filtered query is empty
+    assert filtered_app_version_query.count() == 0
+
+
+def test_filter_application_version_before_valid_from_empty_query(
+    store: Store,
+    timestamp_now: dt.datetime,
+):
+    """Test that filtering an empty query by valid_from returns an empty query."""
+    # GIVEN a store without any application version
+    app_version_query: Query = store._get_query(table=ApplicationVersion)
+    assert app_version_query.count() == 0
+
+    # WHEN filtering by application id
+    filtered_app_version_query: Query = filter_application_versions_before_valid_from(
+        application_versions=app_version_query,
+        valid_from=timestamp_now,
+    )
+
+    # THEN the function returns an empty query
+    assert isinstance(filtered_app_version_query, Query)
     assert filtered_app_version_query.count() == 0
 
 
@@ -261,6 +300,23 @@ def test_filter_application_version_by_version_invalid_version_returns_empty(
     assert filtered_app_version_query.count() == 0
 
 
+def test_filter_application_version_by_version_empty_query(store: Store, version: int = 1):
+    """Test that filtering an empty query by version returns an empty query."""
+    # GIVEN a store without any application version
+    app_version_query: Query = store._get_query(table=ApplicationVersion)
+    assert app_version_query.count() == 0
+
+    # WHEN filtering by application id
+    filtered_app_version_query: Query = filter_application_versions_by_version(
+        application_versions=app_version_query,
+        version=version,
+    )
+
+    # THEN the function returns an empty query
+    assert isinstance(filtered_app_version_query, Query)
+    assert filtered_app_version_query.count() == 0
+
+
 def test_order_application_versions_by_valid_from_desc(
     store_with_different_application_versions: Store,
 ):
@@ -283,40 +339,17 @@ def test_order_application_versions_by_valid_from_desc(
     )
 
 
-def test_apply_application_versions_filter_empty_query_returns_empty_query(
-    store_with_an_application_with_and_without_attributes: Store,
-    first_application_version_version: int = 1,
-):
-    """Test that applying all filters to an empty query returns an empty query."""
-    # GIVEN a store with a valid application, a valid date and a valid version
-    application: Application = (
-        store_with_an_application_with_and_without_attributes.get_applications()[0]
-    )
-    application_id: int = application.id
-    date: dt.datetime = dt.datetime.now()
-    assert application
-
-    # GIVEN that the store has no application versions
-    app_version_query: Query = store_with_an_application_with_and_without_attributes._get_query(
-        table=ApplicationVersion
-    )
+def test_order_application_versions_by_valid_from_desc_empty_query(store: Store):
+    """Test that ordering an empty query by valid_from returns an empty query."""
+    # GIVEN a store without any application version
+    app_version_query: Query = store._get_query(table=ApplicationVersion)
     assert app_version_query.count() == 0
 
-    # WHEN applying all the filters and orderings to the empty query
-    filtered_app_version_query: Query = apply_application_versions_filter(
-        filter_functions=[
-            ApplicationVersionFilter.FILTER_BY_APPLICATION,
-            ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
-            ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
-            ApplicationVersionFilter.FILTER_BY_VERSION,
-            ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
-        ],
-        application_versions=app_version_query,
-        application=application,
-        application_id=application_id,
-        date=date,
-        version=first_application_version_version,
+    # WHEN filtering by application id
+    ordered_app_version_query: Query = order_application_versions_by_valid_from_desc(
+        application_versions=app_version_query
     )
 
-    # THEN the filtered query is empty
-    assert filtered_app_version_query.count() == 0
+    # THEN the function returns an empty query
+    assert isinstance(ordered_app_version_query, Query)
+    assert ordered_app_version_query.count() == 0

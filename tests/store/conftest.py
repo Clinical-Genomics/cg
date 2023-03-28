@@ -1,5 +1,5 @@
 """Fixtures for store tests."""
-import datetime
+import datetime as dt
 import enum
 from pathlib import Path
 from typing import Generator, List
@@ -11,6 +11,7 @@ from cg.store import Store
 from cg.store.models import Analysis, Application, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
 from tests.store.api.conftest import fixture_applications_store
+from tests.conftest import fixture_old_timestamp
 
 
 class StoreConftestFixture(enum.Enum):
@@ -38,15 +39,15 @@ class StoreConftestFixture(enum.Enum):
     INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
 
     @staticmethod
-    def generate_year_interval(n_entries) -> List[int]:
+    def generate_year_interval(n_entries, old_timestamp: dt.datetime) -> List[int]:
         """Create a list of approximately uniformly distributed year numbers from 1 to present."""
-        start: int = datetime.MINYEAR
-        stop: int = datetime.date.today().year
+        start: int = old_timestamp.year
+        stop: int = dt.date.today().year
         step: float = (stop - start) / (n_entries - 1)
         output = [start]
 
         for i in range(1, n_entries):
-            output.append(round(i * step))
+            output.append(output[0] + round(i * step))
         return output
 
 
@@ -186,18 +187,6 @@ def fixture_invalid_application_id() -> int:
     return -1
 
 
-@pytest.fixture(name="future_date")
-def fixture_future_date() -> datetime:
-    """Return a distant date in the future for which no events happen later."""
-    return datetime.datetime(datetime.MAXYEAR, 1, 1, 1, 1, 1)
-
-
-@pytest.fixture(name="past_date")
-def fixture_past_date() -> datetime:
-    """Return a distant date in the past for which no events happened earlier."""
-    return datetime.datetime(datetime.MINYEAR, 1, 1, 0, 0, 0)
-
-
 @pytest.fixture(name="invalid_application_version_version")
 def fixture_invalid_application_version_version() -> int:
     """Return an invalid version of an Application Version."""
@@ -208,7 +197,7 @@ def fixture_invalid_application_version_version() -> int:
 def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
     store: Store,
     helpers: StoreHelpers,
-    timestamp_now=datetime.datetime.now(),
+    timestamp_now=dt.datetime.now(),
 ) -> Store:
     """Return a store with a sample that has many attributes and one without."""
     helpers.add_sample(
@@ -250,7 +239,7 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
 def fixture_store_with_a_pool_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
-    timestamp_now=datetime.datetime.now(),
+    timestamp_now=dt.datetime.now(),
 ) -> Store:
     """Return a store with a pool with and without attributes."""
     helpers.ensure_pool(
@@ -279,7 +268,7 @@ def fixture_store_with_a_pool_with_and_without_attributes(
 def fixture_store_with_an_application_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
-    timestamp_now=datetime.datetime.now(),
+    timestamp_now=dt.datetime.now(),
 ) -> Store:
     """Return a store with an application with and without attributes."""
     helpers.ensure_application(
@@ -305,17 +294,21 @@ def fixture_store_with_an_application_with_and_without_attributes(
 def fixture_store_with_different_application_versions(
     applications_store: Store,
     helpers: StoreHelpers,
+    old_timestamp: dt.datetime,
 ) -> Store:
     """Returns a store with application versions with different applications, dates and versions."""
     applications: List[Application] = applications_store.get_applications()
-    years: List[int] = StoreConftestFixture.generate_year_interval(len(applications))
+    years: List[int] = StoreConftestFixture.generate_year_interval(
+        n_entries=len(applications),
+        old_timestamp=old_timestamp,
+    )
     versions: List[int] = list(range(1, len(applications) + 1))
 
     for application, year, version in zip(applications, years, versions):
         helpers.ensure_application_version(
             store=applications_store,
             application_tag=application.tag,
-            valid_from=datetime.datetime(year, 1, 1, 1, 1, 1),
+            valid_from=dt.datetime(year, 1, 1, 1, 1, 1),
             version=version,
         )
     return applications_store
@@ -325,7 +318,7 @@ def fixture_store_with_different_application_versions(
 def fixture_store_with_an_invoice_with_and_without_attributes(
     store: Store,
     helpers: StoreHelpers,
-    timestamp_now=datetime.datetime.now(),
+    timestamp_now=dt.datetime.now(),
 ) -> Store:
     """Return a store with an invoice with and without attributes."""
     helpers.ensure_invoice(

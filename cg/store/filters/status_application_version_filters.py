@@ -28,10 +28,10 @@ def filter_application_versions_by_version(
 
 
 def filter_application_versions_before_valid_from(
-    application_versions: Query, date: datetime, **kwargs
+    application_versions: Query, valid_from: datetime, **kwargs
 ) -> Query:
     """Return the application versions with valid_from before a given valid_from date."""
-    return application_versions.filter(ApplicationVersion.valid_from < date)
+    return application_versions.filter(ApplicationVersion.valid_from < valid_from)
 
 
 def order_application_versions_by_valid_from_desc(application_versions: Query, **kwargs) -> Query:
@@ -45,7 +45,7 @@ def apply_application_versions_filter(
     application_id: int = None,
     application: Application = None,
     version: int = None,
-    date: datetime = None,
+    valid_from: datetime = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
     for filter_function in filter_functions:
@@ -54,7 +54,7 @@ def apply_application_versions_filter(
             application_id=application_id,
             application=application,
             version=version,
-            date=date,
+            valid_from=valid_from,
         )
     return application_versions
 
