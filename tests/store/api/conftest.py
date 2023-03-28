@@ -217,7 +217,7 @@ def fixture_rml_pool_store(
     new_case = helpers.add_case(
         store=store,
         internal_id=case_id,
-        name=PoolSubmitter.create_case_name(ticket_id=ticket_id, pool_name="Test"),
+        name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
     )
     store.add_commit(new_case)
 
