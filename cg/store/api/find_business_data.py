@@ -121,7 +121,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all deliveries."""
         return self.Delivery.query
 
-    def families(
+    def get_cases(
         self,
         action: Optional[str] = None,
         pipeline: Optional[str] = None,

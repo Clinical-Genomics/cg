@@ -377,11 +377,11 @@ def samples(context: CGConfig, skip: int):
 @status.command()
 @click.option("-s", "--skip", default=0, help="skip initial records")
 @click.pass_obj
-def families(context: CGConfig, skip: int):
+def get_cases(context: CGConfig, skip: int):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
     status_db: Store = context.status_db
-    records: List[Family] = status_db.families().offset(skip).limit(30)
+    records: List[Family] = status_db.get_cases().offset(skip).limit(30)
     for case_obj in records:
         color = "red" if case_obj.priority_int > 1 else "blue"
         message = f"{case_obj.internal_id} ({case_obj.priority_int})"

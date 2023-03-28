@@ -159,7 +159,7 @@ def parse_families():
         customers: Optional[List[Customer]] = (
             None if g.current_user.is_admin else g.current_user.customers
         )
-        cases_query: Query = db.families(
+        cases_query: Query = db.get_cases(
             case_internal_id_or_name_search_pattern=request.args.get("enquiry"),
             customers=customers,
             action=request.args.get("action"),
@@ -175,7 +175,7 @@ def parse_families_in_collaboration():
     """Return families in collaboration."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     data_analysis: str = request.args.get("data_analysis")
-    cases_query: Query = db.families(
+    cases_query: Query = db.get_cases(
         case_internal_id_or_name_search_pattern=request.args.get("enquiry"),
         customers=customer.collaborators,
         pipeline=data_analysis,
