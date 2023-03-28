@@ -12,6 +12,8 @@ from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
+    get_active_cases,
+    filter_cases_by_ticket_id,
     get_cases_with_pipeline,
     get_cases_has_sequence,
     get_cases_for_analysis,
@@ -623,3 +625,74 @@ def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples:
 
     # THEN the query should return no cases
     assert cases.count() == 0
+
+
+def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that no cases are returned when no cases have a running action."""
+    # GIVEN a store containing cases with no "running" action
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    cases_query = cases_query.filter(Family.action != "running")
+
+    # WHEN getting active cases
+    active_cases: Query = get_active_cases(cases=cases_query)
+
+    # THEN the query should return no cases
+    assert active_cases.count() == 0
+
+
+def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that at least one case is returned when at least one case has a running action."""
+    # GIVEN a store containing cases with at least one "running" action
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    actions: List[str] = [case.action for case in cases_query.all()]
+    assert "running" in actions
+
+    # WHEN getting active cases
+    active_cases: Query = get_active_cases(cases=cases_query)
+
+    # THEN the query should return at least one case
+    assert active_cases.count() >= 1
+
+
+def test_get_active_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that all cases are returned when all cases have a running action."""
+    # GIVEN a store containing only cases with "running" action
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    for case in cases_query.all():
+        case.action = "running"
+
+    # WHEN getting active cases
+    active_cases: Query = get_active_cases(cases=cases_query)
+
+    # THEN the query should return the same number of cases as the original query
+    assert active_cases.count() == cases_query.count()
+
+
+def test_filter_cases_by_ticket_no_matching_ticket(
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
+):
+    """Test that no cases are returned when filtering by a non-existent ticket."""
+    # GIVEN a store containing cases with no matching ticket id
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # WHEN filtering cases by a non-existent ticket
+    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=non_existent_id)
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0
+
+
+def test_filter_cases_by_ticket_matching_ticket(
+    store_with_multiple_cases_and_samples: Store, ticket_id: str
+):
+    """Test that cases are returned when filtering by an existing ticket id."""
+    # GIVEN a store containing cases with a matching ticket id
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # WHEN filtering cases by an existing ticket id
+    filtered_cases: Query = filter_cases_by_ticket_id(cases=cases_query, ticket_id=ticket_id)
+
+    # THEN the query should return cases with the matching ticket
+    assert filtered_cases.count() > 0
+    for case in filtered_cases:
+        assert ticket_id in case.tickets
