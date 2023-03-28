@@ -89,9 +89,9 @@ class MetagenomeSubmitter(Submitter):
         case: Family = self.status.get_case_by_name_and_customer(
             customer=customer, case_name=str(ticket_id)
         )
-        case: dict = items[0]
+        case_dict: dict = items[0]
         with self.status.session.no_autoflush:
-            for sample in case["samples"]:
+            for sample in case_dict["samples"]:
                 new_sample = self.status.add_sample(
                     name=sample["name"],
                     sex="unknown",
@@ -113,11 +113,11 @@ class MetagenomeSubmitter(Submitter):
 
                 if not case:
                     case = self.status.add_case(
-                        data_analysis=Pipeline(case["data_analysis"]),
-                        data_delivery=DataDelivery(case["data_delivery"]),
+                        data_analysis=Pipeline(case_dict["data_analysis"]),
+                        data_delivery=DataDelivery(case_dict["data_delivery"]),
                         name=str(ticket_id),
                         panels=None,
-                        priority=case["priority"],
+                        priority=case_dict["priority"],
                         ticket=ticket_id,
                     )
                     case.customer = customer
