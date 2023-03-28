@@ -160,7 +160,7 @@ def parse_families():
             None if g.current_user.is_admin else g.current_user.customers
         )
         cases_query: Query = db.families(
-            enquiry=request.args.get("enquiry"),
+            case_internal_id_and_name_search_pattern=request.args.get("enquiry"),
             customers=customers,
             action=request.args.get("action"),
         )
@@ -176,9 +176,9 @@ def parse_families_in_collaboration():
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     data_analysis: str = request.args.get("data_analysis")
     cases_query: Query = db.families(
-        enquiry=request.args.get("enquiry"),
+        case_internal_id_and_name_search_pattern=request.args.get("enquiry"),
         customers=customer.collaborators,
-        data_analysis=data_analysis,
+        pipeline=data_analysis,
     )
     cases = cases_query.limit(30)
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]

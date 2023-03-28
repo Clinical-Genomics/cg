@@ -518,7 +518,9 @@ def test_create_rna_dna_sample_case_map(
     """Test that the create_rna_dna_sample_case_map returns a nested dictionary."""
 
     # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
-    rna_case: Family = rna_store.families(enquiry=rna_case_id).first()
+    rna_case: Family = rna_store.families(
+        case_internal_id_or_name_search_pattern=rna_case_id
+    ).first()
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
     rna_dna_case_map: dict = upload_scout_api.create_rna_dna_sample_case_map(rna_case=rna_case)
@@ -535,7 +537,9 @@ def test_add_rna_sample(
     """Test that for a given RNA case the RNA samples are added to the rna_dna_case_map."""
 
     # GIVEN an RNA case and the associated RNA samples
-    rna_case: Family = rna_store.families(enquiry=rna_case_id).first()
+    rna_case: Family = rna_store.families(
+        case_internal_id_or_name_search_pattern=rna_case_id
+    ).first()
     rna_sample_list: List[Sample] = rna_store.get_samples_by_name_pattern(name_pattern="rna")
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
@@ -581,9 +585,11 @@ def test_add_dna_cases_to_dna_sample(
     """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
-    rna_sample: models.Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
-    dna_sample: models.Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
-    dna_case: models.Family = rna_store.families(enquiry=dna_case_id).first()
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
+    dna_case: Family = rna_store.families(
+        case_internal_id_or_name_search_pattern=dna_case_id
+    ).first()
 
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_case_map: dict = {}

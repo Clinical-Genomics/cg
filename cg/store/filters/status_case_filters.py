@@ -32,7 +32,7 @@ def get_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
 
 def get_active_cases(cases: Query, **kwargs) -> Query:
     """Return cases which are running."""
-    return cases.filter(Family.action == "running")
+    return cases.filter(Family.action == CaseActions.RUNNING)
 
 
 def get_new_cases(cases: Query, date: datetime, **kwargs) -> Query:
@@ -126,9 +126,37 @@ def filter_cases_by_customer_entry_id(cases: Query, customer_entry_id: int, **kw
     return cases.filter(Customer.id == customer_entry_id)
 
 
+def filter_cases_by_customer_entry_ids(
+    cases: Query, customer_entry_ids: List[int], **kwargs
+) -> Query:
+    """Return cases with matching customer ids."""
+    return cases.filter(Customer.id.in_(customer_entry_ids)) if customer_entry_ids else cases
+
+
+def filter_cases_by_action(cases: Query, action: CaseActions, **kwargs) -> Query:
+    """Return cases with matching action."""
+    return cases.filter(Family.action == action.value) if action else cases
+
+
 def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
     """Return cases with matching name."""
-    return cases.filter(Family.name == name)
+    return cases.filter(Family.name == name) if name else cases
+
+
+def filter_cases_by_matching_internal_id_or_name(
+    cases: Query, internal_id_search_pattern, name_search_pattern, **kwargs
+) -> Query:
+    """Return cases with matching internal id or name."""
+    return (
+        cases.filter(
+            or_(
+                Family.internal_id.like(f"%{internal_id_search_pattern}%"),
+                Family.name.like(f"%{name_search_pattern}%"),
+            )
+        )
+        if internal_id_search_pattern or name_search_pattern
+        else cases
+    )
 
 
 def apply_case_filter(
@@ -140,7 +168,11 @@ def apply_case_filter(
     entry_id: Optional[int] = None,
     ticket_id: Optional[str] = None,
     customer_entry_id: Optional[int] = None,
+    customer_entry_ids: Optional[List[int]] = None,
     name: Optional[str] = None,
+    action: Optional[CaseActions] = None,
+    internal_id_search_pattern: Optional[str] = None,
+    name_search_pattern: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -152,7 +184,11 @@ def apply_case_filter(
             entry_id=entry_id,
             ticket_id=ticket_id,
             customer_entry_id=customer_entry_id,
+            customer_entry_ids=customer_entry_ids,
             name=name,
+            action=action,
+            internal_id_search_pattern=internal_id_search_pattern,
+            name_search_pattern=name_search_pattern,
         )
     return cases
 
@@ -176,4 +212,9 @@ class CaseFilter(Enum):
     IS_RUNNING: Callable = get_active_cases
     FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
     FILTER_BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
+    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
     FILTER_BY_NAME: Callable = filter_cases_by_name
+    FILTER_BY_ACTION: Callable = filter_cases_by_action
+    FILTER_BY_INTERNAL_ID_PATTERN_OR_NAME_PATTERN: Callable = (
+        filter_cases_by_matching_internal_id_or_name
+    )

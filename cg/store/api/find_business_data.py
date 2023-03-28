@@ -123,34 +123,33 @@ class FindBusinessDataHandler(BaseHandler):
 
     def families(
         self,
-        *,
         action: Optional[str] = None,
-        data_analysis: Optional[str] = None,
+        pipeline: Optional[str] = None,
         customers: List[Customer] = None,
-        enquiry: Optional[str] = None,
+        case_internal_id_or_name_search_pattern: Optional[str] = None,
     ) -> Query:
         """Fetch families."""
 
-        records = self._get_query(table=Family)
-        filter_functions: List[Callable] = []
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_ACTION,
+            CaseFilter.GET_WITH_PIPELINE,
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
+            CaseFilter.FILTER_BY_INTERNAL_ID_PATTERN_OR_NAME_PATTERN,
+        ]
 
-        if customers:
-            customer_ids = [customer.id for customer in customers]
-            records = records.filter(Family.customer_id.in_(customer_ids))
+        customer_entry_ids = [customer.id for customer in customers] if customers else None
 
-        records = (
-            records.filter(
-                or_(
-                    Family.name.like(f"%{enquiry}%"),
-                    Family.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
+        filtered_cases_query: Query = apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            action=action,
+            pipeline=pipeline,
+            customer_entry_ids=customer_entry_ids,
+            internal_id_search_pattern=case_internal_id_or_name_search_pattern,
+            name_search_pattern=case_internal_id_or_name_search_pattern,
         )
-        records = records.filter_by(action=action) if action else records
-        records = records.filter_by(data_analysis=data_analysis) if data_analysis else records
-        return records.order_by(Family.created_at.desc())
+
+        return filtered_cases_query.order_by(Family.created_at.desc())
 
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
