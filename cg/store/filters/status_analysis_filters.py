@@ -66,14 +66,18 @@ def filter_report_analyses_by_pipeline(
     )
 
 
-def filter_analyses_completed_before(analyses: Query, date: datetime, **kwargs) -> Query:
+def filter_analyses_completed_before(
+    analyses: Query, completed_at_date: datetime, **kwargs
+) -> Query:
     """Return a query of analyses completed before a certain date."""
-    return analyses.filter(Analysis.completed_at < date)
+    return analyses.filter(Analysis.completed_at < completed_at_date)
 
 
-def filter_analyses_completed_after(analyses: Query, date: datetime, **kwargs) -> Query:
+def filter_analyses_completed_after(
+    analyses: Query, completed_at_date: datetime, **kwargs
+) -> Query:
     """Return a query of analyses completed after a certain date."""
-    return analyses.filter(Analysis.completed_at > date)
+    return analyses.filter(Analysis.completed_at > completed_at_date)
 
 
 def order_analyses_by_completed_at_asc(analyses: Query, **kwargs) -> Query:
@@ -91,9 +95,14 @@ def filter_analyses_by_case_entry_id(analyses: Query, case_entry_id: int, **kwar
     return analyses.filter(Analysis.family_id == case_entry_id)
 
 
-def filter_analyses_started_before(analyses: Query, date: datetime, **kwargs) -> Query:
+def filter_analyses_started_before(analyses: Query, started_at_date: datetime, **kwargs) -> Query:
     """Return a query of analyses started before a certain date."""
-    return analyses.filter(Analysis.started_at < date)
+    return analyses.filter(Analysis.started_at < started_at_date)
+
+
+def filter_analyses_by_started_at(analyses: Query, started_at_date: datetime, **kwargs) -> Query:
+    """Return a query of analyses started at a certain date."""
+    return analyses.filter(Analysis.started_at == started_at_date)
 
 
 def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
@@ -111,13 +120,18 @@ def apply_analysis_filter(
     analyses: Query,
     pipeline: Pipeline = None,
     case_entry_id: int = None,
-    date: datetime = None,
+    completed_at_date: datetime = None,
+    started_at_date: datetime = None,
 ) -> Query:
     """Apply filtering functions to the analyses queries and return filtered results."""
 
     for filter_function in filter_functions:
         analyses: Query = filter_function(
-            analyses=analyses, pipeline=pipeline, case_entry_id=case_entry_id, date=date
+            analyses=analyses,
+            pipeline=pipeline,
+            case_entry_id=case_entry_id,
+            completed_at_date=completed_at_date,
+            started_at_date=started_at_date,
         )
     return analyses
 
@@ -140,6 +154,7 @@ class AnalysisFilter(Enum):
     FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analyses_not_uploaded_to_vogue
     FILTER_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
+    FILTER_BY_STARTED_AT: Callable = filter_analyses_by_started_at
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
     ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc
