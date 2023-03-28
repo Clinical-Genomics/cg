@@ -114,7 +114,7 @@ class FindBusinessDataHandler(BaseHandler):
         return records
 
     def get_analysis_by_case_entry_id_and_started_at(
-        self, case_entry_id: int, started_at: dt.datetime
+        self, case_entry_id: int, started_at_date: dt.datetime
     ) -> Analysis:
         """Fetch an analysis."""
         filter_functions = [
@@ -125,7 +125,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_analysis_filter(
             analyses=self._get_query(Analysis),
             case_entry_id=case_entry_id,
-            date=started_at,
+            started_at_date=started_at_date,
             filter_functions=filter_functions,
         ).first()
 

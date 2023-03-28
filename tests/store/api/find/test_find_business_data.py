@@ -33,7 +33,7 @@ def test_get_analysis_by_case_entry_id_and_started_at(
 
     # WHEN getting analysis via case_id and start date
     db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
-        case_entry_id=analysis.family.id, started_at=analysis.started_at
+        case_entry_id=analysis.family.id, started_at_date=analysis.started_at
     )
 
     # THEN the analysis should have been retrieved

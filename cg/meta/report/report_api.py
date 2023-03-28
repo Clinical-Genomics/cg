@@ -173,7 +173,7 @@ class ReportAPI(MetaAPI):
         """Updates the date when delivery report was created."""
 
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
-            case_entry_id=case.id, started_at=analysis_date
+            case_entry_id=case.id, started_at_date=analysis_date
         )
         analysis.delivery_report_created_at = datetime.now()
         self.status_db.commit()
@@ -183,7 +183,7 @@ class ReportAPI(MetaAPI):
 
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
-            case_entry_id=case.id, started_at=analysis_date
+            case_entry_id=case.id, started_at_date=analysis_date
         )
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)

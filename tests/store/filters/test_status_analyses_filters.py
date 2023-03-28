@@ -324,7 +324,7 @@ def test_filter_analysis_completed_after(
 
     # WHEN filtering the analyses by completed_at
     analyses: Query = filter_analyses_completed_after(
-        base_store._get_query(table=Analysis), date=timestamp_now
+        base_store._get_query(table=Analysis), completed_at_date=timestamp_now
     )
 
     # ASSERT that analyses is a query
@@ -350,7 +350,7 @@ def test_filter_analysis_started_before(
 
     # WHEN filtering the analyses by started_at
     analyses: Query = filter_analyses_started_before(
-        analyses=base_store._get_query(table=Analysis), date=timestamp_now
+        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_now
     )
 
     # ASSERT that analyses is a query
@@ -426,7 +426,7 @@ def test_filter_analyses_by_started_at(
 
     # WHEN filtering the analyses by started_at
     analyses: Query = filter_analyses_by_started_at(
-        analyses=base_store._get_query(table=Analysis), date=timestamp_yesterday
+        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_yesterday
     )
 
     # ASSERT that analyses is a query
