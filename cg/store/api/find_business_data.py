@@ -262,7 +262,7 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> Sample:
         """Get samples within a customer."""
         filter_functions = [
-            SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.FILTER_BY_SAMPLE_NAME,
         ]
 
@@ -485,10 +485,10 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Sample]:
         """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
-        customer_ids = None
+        customer_entry_ids = None
         filter_functions: List[SampleFilter] = []
         if customers:
-            customer_ids: List[int] = [customer.id for customer in customers]
+            customer_entry_ids: List[int] = [customer.id for customer in customers]
             filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS)
         if pattern:
             filter_functions.extend(
@@ -497,7 +497,7 @@ class FindBusinessDataHandler(BaseHandler):
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
         return apply_sample_filter(
             samples=samples,
-            customer_ids=customer_ids,
+            customer_entry_ids=customer_entry_ids,
             name_pattern=pattern,
             internal_id_pattern=pattern,
             filter_functions=filter_functions,
@@ -552,7 +552,7 @@ class FindBusinessDataHandler(BaseHandler):
             customer_entry_ids=customer_ids,
             subject_id=subject_id,
             filter_functions=[
-                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
                 SampleFilter.FILTER_BY_SUBJECT_ID,
                 SampleFilter.FILTER_IS_TUMOUR,
             ],
