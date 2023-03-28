@@ -133,9 +133,9 @@ def filter_cases_by_customer_entry_ids(
     return cases.filter(Customer.id.in_(customer_entry_ids)) if customer_entry_ids else cases
 
 
-def filter_cases_by_action(cases: Query, action: CaseActions, **kwargs) -> Query:
+def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
     """Return cases with matching action."""
-    return cases.filter(Family.action == action.value) if action else cases
+    return cases.filter(Family.action == action) if action else cases
 
 
 def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
@@ -170,7 +170,7 @@ def apply_case_filter(
     customer_entry_id: Optional[int] = None,
     customer_entry_ids: Optional[List[int]] = None,
     name: Optional[str] = None,
-    action: Optional[CaseActions] = None,
+    action: Optional[str] = None,
     internal_id_search_pattern: Optional[str] = None,
     name_search_pattern: Optional[str] = None,
 ) -> Query:
