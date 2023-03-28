@@ -91,7 +91,9 @@ class CaseSubmitter(Submitter):
         for sample in samples:
             if self._is_rerun_of_existing_case(sample=sample):
                 continue
-            if self.status.find_family(customer=customer, name=sample.family_name):
+            if self.status.get_case_by_name_and_customer(
+                customer=customer, case_name=sample.family_name
+            ):
                 raise OrderError(f"Case name {sample.family_name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:

@@ -31,7 +31,10 @@ from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
 from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
 from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
 from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
+
+from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
+
 
 LOG = logging.getLogger(__name__)
 
@@ -39,31 +42,13 @@ LOG = logging.getLogger(__name__)
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def analyses(self, *, family: Family = None, before: dt.datetime = None) -> Query:
-        """Fetch multiple analyses."""
-        records = self.Analysis.query
-        if family:
-            query_family = family
-            records = records.filter(Analysis.family == query_family)
-        if before:
-            subq = (
-                self.Analysis.query.join(Analysis.family)
-                .filter(Analysis.started_at < before)
-                .group_by(Family.id)
-                .with_entities(
-                    Analysis.family_id,
-                    func.max(Analysis.started_at).label("started_at"),
-                )
-                .subquery()
-            )
-            records = records.join(
-                subq,
-                and_(
-                    self.Analysis.family_id == subq.c.family_id,
-                    self.Analysis.started_at == subq.c.started_at,
-                ),
-            ).filter(Analysis.started_at < before)
-        return records
+    def get_analyses_by_case_entry_id(self, case_entry_id: int) -> List[Analysis]:
+        """Return analysis by case entry id."""
+        return apply_analysis_filter(
+            analyses=self._get_query(Analysis),
+            case_entry_id=case_entry_id,
+            filter_functions=[AnalysisFilter.FILTER_BY_CASE_ENTRY_ID],
+        ).all()
 
     def get_case_by_entry_id(self, entry_id: str) -> Family:
         """Return a case by entry id."""
@@ -199,17 +184,28 @@ class FindBusinessDataHandler(BaseHandler):
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
 
-    def get_cases_from_ticket(self, ticket: str) -> Query:
-        return self.Family.query.filter(Family.tickets.contains(ticket))
+    def get_cases_by_ticket_id(self, ticket_id: str) -> List[Family]:
+        """Return cases associated with a given ticket id."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_TICKET],
+            ticket_id=ticket_id,
+            cases=self._get_query(table=Family),
+        ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""
-        return (
-            self.Family.query.filter(Family.tickets.contains(ticket)).first().customer.internal_id
-        )
+        cases: List[Family] = self.get_cases_by_ticket_id(ticket_id=ticket)
+        if not cases:
+            raise ValueError(f"No case found for ticket {ticket}")
+        return cases[0].customer.internal_id
 
     def get_samples_from_ticket(self, ticket: str) -> List[Sample]:
-        return self._get_join_sample_family_query().filter(Family.tickets.contains(ticket)).all()
+        """Returns the samples related to given ticket."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_TICKET],
+            ticket_id=ticket,
+            cases=self._get_join_sample_family_query(),
+        ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
@@ -249,13 +245,22 @@ class FindBusinessDataHandler(BaseHandler):
         samples: List[Sample] = self.get_samples_by_case_id(family_id)
         return [sample for sample in samples if sample.sequencing_qc]
 
-    def find_family(self, customer: Customer, name: str) -> Family:
-        """Find a family by family name within a customer."""
-        return self.Family.query.filter_by(customer=customer, name=name).first()
+    def get_case_by_name_and_customer(self, customer: Customer, case_name: str) -> Family:
+        """Find a case by case name within a customer."""
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=[CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID, CaseFilter.FILTER_BY_NAME],
+            customer_entry_id=customer.id,
+            name=case_name,
+        ).first()
 
-    def find_family_by_name(self, name: str) -> Family:
-        """Find a family by family name within a customer."""
-        return self.Family.query.filter_by(name=name).first()
+    def get_case_by_name(self, name: str) -> Family:
+        """Get a case by name."""
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=[CaseFilter.FILTER_BY_NAME],
+            name=name,
+        ).first()
 
     def get_sample_by_customer_and_name(
         self, customer_entry_id: List[int], sample_name: str

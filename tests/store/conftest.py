@@ -160,7 +160,7 @@ def fixture_microbial_store(
 @pytest.fixture(name="analysis_obj")
 def fixture_analysis_obj(analysis_store: Store) -> Analysis:
     """Return an analysis object from a populated store."""
-    return analysis_store.analyses()[0]
+    return analysis_store._get_query(table=Analysis)[0]
 
 
 @pytest.fixture(name="case_obj")
@@ -333,6 +333,17 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
         invoiced_at=None,
     )
     return store
+
+
+@pytest.fixture(name="store_with_case_and_analysis")
+def fixture_store_with_case_and_analysis(
+    store: Store, helpers: StoreHelpers, analysis_type: str = "wgs"
+) -> Store:
+    """Return a store with a case and analysis."""
+    # GIVEN a store with a case and analysis
+    case = helpers.add_case(store=store, name="test_case", internal_id="test_case_internal_id")
+    helpers.add_analysis(store=store, case=case)
+    yield store
 
 
 @pytest.fixture(name="store_with_older_and_newer_analyses")

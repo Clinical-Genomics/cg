@@ -399,9 +399,9 @@ class StoreHelpers:
         """Load a case with samples and link relations."""
         if not customer:
             customer = StoreHelpers.ensure_customer(store=store)
-        case = store.get_case_by_internal_id(internal_id=case_id) or store.find_family(
-            customer=customer, name=name
-        )
+        case = store.get_case_by_internal_id(
+            internal_id=case_id
+        ) or store.get_case_by_name_and_customer(customer=customer, case_name=name)
         if not case:
             case = StoreHelpers.add_case(
                 store=store,
