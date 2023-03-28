@@ -43,7 +43,7 @@ class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
     def get_analyses_by_case_entry_id(self, case_entry_id: int) -> List[Analysis]:
-        """Fetch analysis by case id."""
+        """Return analysis by case entry id."""
         return apply_analysis_filter(
             analyses=self._get_query(Analysis),
             case_entry_id=case_entry_id,

@@ -87,7 +87,7 @@ def order_analyses_by_uploaded_at_asc(analyses: Query, **kwargs) -> Query:
 
 
 def filter_analyses_by_case_entry_id(analyses: Query, case_entry_id: int, **kwargs) -> Query:
-    """Return a query of analysis filtered by case."""
+    """Return a query of analysis filtered by case entry id."""
     return analyses.filter(Analysis.family_id == case_entry_id)
 
 
