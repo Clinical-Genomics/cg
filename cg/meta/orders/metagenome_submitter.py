@@ -10,7 +10,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import Customer, Sample
+from cg.store.models import Customer, Family, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -25,7 +25,9 @@ class MetagenomeSubmitter(Submitter):
         for sample in samples:
             if sample.control:
                 continue
-            if self.status.find_samples(customer=customer, name=sample.name).first():
+            if self.status.get_sample_by_customer_and_name(
+                customer_entry_id=[customer.id], sample_name=sample.name
+            ):
                 raise OrderError(f"Sample name {sample.name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
@@ -84,10 +86,12 @@ class MetagenomeSubmitter(Submitter):
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case_obj = self.status.find_family(customer=customer, name=str(ticket_id))
-        case: dict = items[0]
+        case: Family = self.status.get_case_by_name_and_customer(
+            customer=customer, case_name=str(ticket_id)
+        )
+        case_dict: dict = items[0]
         with self.status.session.no_autoflush:
-            for sample in case["samples"]:
+            for sample in case_dict["samples"]:
                 new_sample = self.status.add_sample(
                     name=sample["name"],
                     sex="unknown",
@@ -107,20 +111,20 @@ class MetagenomeSubmitter(Submitter):
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                if not case_obj:
-                    case_obj = self.status.add_case(
-                        data_analysis=Pipeline(case["data_analysis"]),
-                        data_delivery=DataDelivery(case["data_delivery"]),
+                if not case:
+                    case = self.status.add_case(
+                        data_analysis=Pipeline(case_dict["data_analysis"]),
+                        data_delivery=DataDelivery(case_dict["data_delivery"]),
                         name=str(ticket_id),
                         panels=None,
-                        priority=case["priority"],
+                        priority=case_dict["priority"],
                         ticket=ticket_id,
                     )
-                    case_obj.customer = customer
-                    self.status.add(case_obj)
+                    case.customer = customer
+                    self.status.add(case)
 
                 new_relationship = self.status.relate_sample(
-                    family=case_obj, sample=new_sample, status=StatusEnum.unknown
+                    family=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.add(new_relationship)
 

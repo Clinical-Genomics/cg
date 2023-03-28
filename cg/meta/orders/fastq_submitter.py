@@ -81,7 +81,9 @@ class FastqSubmitter(Submitter):
         if not customer:
             raise OrderError(f"Unknown customer: {customer_id}")
         new_samples = []
-        case: Family = self.status.find_family(customer=customer, name=ticket_id)
+        case: Family = self.status.get_case_by_name_and_customer(
+            customer=customer, case_name=ticket_id
+        )
         submitted_case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in items:

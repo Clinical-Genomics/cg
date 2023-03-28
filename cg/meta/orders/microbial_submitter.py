@@ -84,7 +84,9 @@ class MicrobialSubmitter(Submitter):
 
         with self.status.session.no_autoflush:
             for sample_data in items:
-                case: Family = self.status.find_family(customer=customer, name=ticket_id)
+                case: Family = self.status.get_case_by_name_and_customer(
+                    customer=customer, case_name=ticket_id
+                )
 
                 if not case:
                     case = self.status.add_case(
