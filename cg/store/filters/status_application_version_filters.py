@@ -30,7 +30,7 @@ def filter_application_versions_by_version(
 def filter_application_versions_before_valid_from(
     application_versions: Query, date: datetime, **kwargs
 ) -> Query:
-    """Return the application versions with valid_from before a given date."""
+    """Return the application versions with valid_from before a given valid_from date."""
     return application_versions.filter(ApplicationVersion.valid_from < date)
 
 
