@@ -24,6 +24,7 @@ from cg.store.filters.status_analysis_filters import (
     filter_analyses_started_before,
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
+    filter_analyses_by_started_at,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -406,3 +407,31 @@ def test_filter_analyses_not_uploaded_to_vogue(
     # THEN only the analysis that have not been uploaded to vogue should be retrieved
     assert analysis in analyses
     assert analysis_uploaded not in analyses
+
+
+def test_filter_analyses_by_started_at(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """Test filtering of analyses by started at."""
+
+    # GIVEN a set of mock analyses
+    analysis_started_now: Analysis = helpers.add_analysis(
+        store=base_store, started_at=timestamp_now
+    )
+    analysis_started_old: Analysis = helpers.add_analysis(
+        store=base_store,
+        started_at=timestamp_yesterday,
+        case=analysis_started_now.family,
+    )
+
+    # WHEN filtering the analyses by started_at
+    analyses: Query = filter_analyses_by_started_at(
+        analyses=base_store._get_query(table=Analysis), date=timestamp_yesterday
+    )
+
+    # ASSERT that analyses is a query
+    assert isinstance(analyses, Query)
+
+    # THEN only the analysis that have been started after the given date should be retrieved
+    assert analysis_started_now not in analyses
+    assert analysis_started_old in analyses
