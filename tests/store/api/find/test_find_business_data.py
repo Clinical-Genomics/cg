@@ -23,7 +23,7 @@ from tests.store_helpers import StoreHelpers
 from cg.constants.invoice import CustomerNames
 
 
-def test_find_analysis_via_date(
+def test_get_analysis_by_case_entry_id_and_started_at(
     sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test returning an analysis using a date."""
@@ -32,7 +32,9 @@ def test_find_analysis_via_date(
     assert analysis.started_at
 
     # WHEN getting analysis via case_id and start date
-    db_analysis = sample_store.analysis(analysis.family, analysis.started_at)
+    db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
+        case_entry_id=analysis.family.id, started_at=analysis.started_at
+    )
 
     # THEN the analysis should have been retrieved
     assert db_analysis == analysis

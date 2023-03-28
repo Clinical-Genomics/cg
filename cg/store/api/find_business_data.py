@@ -113,9 +113,21 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return records
 
-    def analysis(self, family: Family, started_at: dt.datetime) -> Analysis:
+    def get_analysis_by_case_entry_id_and_started_at(
+        self, case_entry_id: int, started_at: dt.datetime
+    ) -> Analysis:
         """Fetch an analysis."""
-        return self.Analysis.query.filter_by(family=family, started_at=started_at).first()
+        filter_functions = [
+            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
+            AnalysisFilter.FILTER_BY_STARTED_AT,
+        ]
+
+        return apply_analysis_filter(
+            analyses=self._get_query(Analysis),
+            case_entry_id=case_entry_id,
+            date=started_at,
+            filter_functions=filter_functions,
+        ).first()
 
     def deliveries(self) -> Query:
         """Fetch all deliveries."""

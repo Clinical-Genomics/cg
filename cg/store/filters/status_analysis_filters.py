@@ -96,6 +96,11 @@ def filter_analyses_started_before(analyses: Query, date: datetime, **kwargs) ->
     return analyses.filter(Analysis.started_at < date)
 
 
+def filter_analyses_by_started_at(analyses: Query, date: datetime, **kwargs) -> Query:
+    """Return a query of analyses started at a certain date."""
+    return analyses.filter(Analysis.started_at == date)
+
+
 def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
     """Return a query of ordered analyses (from old to new) by the started_at field."""
     return analyses.order_by(Analysis.started_at.desc())
@@ -140,6 +145,7 @@ class AnalysisFilter(Enum):
     FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analyses_not_uploaded_to_vogue
     FILTER_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
+    FILTER_BY_STARTED_AT: Callable = filter_analyses_by_started_at
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
     ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc
