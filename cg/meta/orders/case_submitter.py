@@ -46,8 +46,8 @@ class CaseSubmitter(Submitter):
             if new_gender == "unknown":
                 continue
 
-            existing_samples: List[Sample] = self.status.get_samples_by_subject_id(
-                customer_id=customer_id, subject_id=subject_id
+            existing_samples: List[Sample] = self.status.get_samples_by_customer_and_subject_id(
+                customer_internal_id=customer_id, subject_id=subject_id
             )
             existing_sample: Sample
             for existing_sample in existing_samples:

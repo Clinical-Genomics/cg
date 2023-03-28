@@ -228,6 +228,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
         config_path: str = None,
+        uploaded_to_vogue_at: datetime = None,
     ) -> Analysis:
         """Utility function to add an analysis for tests."""
 
@@ -251,6 +252,8 @@ class StoreHelpers:
             analysis.config_path = config_path
         if pipeline:
             analysis.pipeline = str(pipeline)
+        if uploaded_to_vogue_at:
+            analysis.uploaded_to_vogue_at = uploaded_to_vogue_at
 
         analysis.limitations = "A limitation"
         analysis.family = case
