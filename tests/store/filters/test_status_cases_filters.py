@@ -628,6 +628,7 @@ def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples:
 
 
 def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that no cases are returned when no cases have a running action."""
     # GIVEN a store containing cases with no "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     cases_query = cases_query.filter(Family.action != "running")
@@ -640,8 +641,11 @@ def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples
 
 
 def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that at least one case is returned when at least one case has a running action."""
     # GIVEN a store containing cases with at least one "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    actions: List[str] = [case.action for case in cases_query.all()]
+    assert "running" in actions
 
     # WHEN getting active cases
     active_cases: Query = get_active_cases(cases=cases_query)
@@ -651,6 +655,7 @@ def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_sampl
 
 
 def test_get_active_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that all cases are returned when all cases have a running action."""
     # GIVEN a store containing only cases with "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     for case in cases_query.all():

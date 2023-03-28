@@ -620,7 +620,6 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_case_by_internal_id(self, internal_id: str) -> Family:
         """Get case by internal id."""
-
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
             cases=self._get_query(table=Family),
@@ -628,6 +627,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).first()
 
     def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
+        """Get all running cases in a pipeline."""
         return apply_case_filter(
             filter_functions=[CaseFilter.GET_WITH_PIPELINE, CaseFilter.IS_RUNNING],
             cases=self._get_query(table=Family),

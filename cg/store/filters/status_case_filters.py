@@ -31,6 +31,7 @@ def get_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
 
 
 def get_active_cases(cases: Query, **kwargs) -> Query:
+    """Return cases which are running."""
     return cases.filter(Family.action == "running")
 
 
