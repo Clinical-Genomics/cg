@@ -75,6 +75,7 @@ class StoreHelpers:
         sequencing_depth: int = None,
         is_accredited: bool = False,
         version: int = 1,
+        valid_from: datetime = datetime.now(),
         **kwargs,
     ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
@@ -82,10 +83,10 @@ class StoreHelpers:
             application_tag = "rna_tag"
             prep_category = "wts"
 
-        application = store.get_application_by_tag(tag=application_tag)
+        application: Application = store.get_application_by_tag(tag=application_tag)
         if not application:
-            application = StoreHelpers.add_application(
-                store,
+            application: Application = StoreHelpers.add_application(
+                store=store,
                 application_tag=application_tag,
                 prep_category=prep_category,
                 is_external=is_external,
@@ -101,10 +102,12 @@ class StoreHelpers:
             PriorityTerms.EXPRESS: 30,
             PriorityTerms.RESEARCH: 5,
         }
-        application_version = store.application_version(application=application, version=version)
+        application_version: ApplicationVersion = store.application_version(
+            application=application, version=version
+        )
         if not application_version:
-            application_version = store.add_version(
-                application=application, version=version, valid_from=datetime.now(), prices=prices
+            application_version: ApplicationVersion = store.add_version(
+                application=application, version=version, valid_from=valid_from, prices=prices
             )
 
             store.add_commit(application_version)
