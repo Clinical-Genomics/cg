@@ -199,17 +199,28 @@ class FindBusinessDataHandler(BaseHandler):
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
 
-    def get_cases_from_ticket(self, ticket: str) -> Query:
-        return self.Family.query.filter(Family.tickets.contains(ticket))
+    def get_cases_by_ticket_id(self, ticket_id: str) -> List[Family]:
+        """Return cases associated with a given ticket id."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_TICKET],
+            ticket_id=ticket_id,
+            cases=self._get_query(table=Family),
+        ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""
-        return (
-            self.Family.query.filter(Family.tickets.contains(ticket)).first().customer.internal_id
-        )
+        cases: List[Family] = self.get_cases_by_ticket_id(ticket_id=ticket)
+        if not cases:
+            raise ValueError(f"No case found for ticket {ticket}")
+        return cases[0].customer.internal_id
 
     def get_samples_from_ticket(self, ticket: str) -> List[Sample]:
-        return self._get_join_sample_family_query().filter(Family.tickets.contains(ticket)).all()
+        """Returns the samples related to given ticket."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_TICKET],
+            ticket_id=ticket,
+            cases=self._get_join_sample_family_query(),
+        ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
