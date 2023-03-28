@@ -25,7 +25,9 @@ class MetagenomeSubmitter(Submitter):
         for sample in samples:
             if sample.control:
                 continue
-            if self.status.find_samples(customer=customer, name=sample.name).first():
+            if self.status.get_sample_by_customer_and_name(
+                customer_entry_id=[customer.id], sample_name=sample.name
+            ):
                 raise OrderError(f"Sample name {sample.name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
