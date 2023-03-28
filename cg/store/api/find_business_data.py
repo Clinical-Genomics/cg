@@ -210,7 +210,7 @@ class FindBusinessDataHandler(BaseHandler):
         cases: List[Family] = self.get_cases_by_ticket_id(ticket_id=ticket)
         if not cases:
             raise ValueError(f"No case found for ticket {ticket}")
-        return cases.customer.internal_id
+        return cases[0].customer.internal_id
 
     def get_samples_from_ticket(self, ticket: str) -> List[Sample]:
         """Returns the samples related to given ticket"""
