@@ -30,7 +30,7 @@ def filter_not_completed_analyses(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.completed_at.is_(None))
 
 
-def filter_filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
+def filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
     """Return analyses that have been already uploaded."""
     return analyses.filter(Analysis.uploaded_at.isnot(None))
 
@@ -76,24 +76,24 @@ def filter_analyses_completed_after(analyses: Query, date: datetime, **kwargs) -
     return analyses.filter(Analysis.completed_at > date)
 
 
-def order_analyses_by_completed_at(analyses: Query, **kwargs) -> Query:
+def order_analyses_by_completed_at_asc(analyses: Query, **kwargs) -> Query:
     """Return a query of ordered analyses (from old to new) by the completed_at field."""
     return analyses.order_by(Analysis.completed_at.asc())
 
 
-def order_analyses_by_uploaded_at(analyses: Query, **kwargs) -> Query:
+def order_analyses_by_uploaded_at_asc(analyses: Query, **kwargs) -> Query:
     """Return a query of ordered analyses (from old to new) by the uploaded_at field."""
     return analyses.order_by(Analysis.uploaded_at.asc())
 
 
 def filter_analyses_by_case(analyses: Query, case: Family, **kwargs) -> Query:
-    """Return a query of ordered analyses (from old to new) by the uploaded_at field."""
+    """Return a query of analysis filtered by case."""
     return analyses.filter(Analysis.family_id == case.id)
 
 
 def filter_analyses_started_before(analyses: Query, date: datetime, **kwargs) -> Query:
     """Return a query of analyses started before a certain date."""
-    return analyses.filter(Analysis.started_at <= date)
+    return analyses.filter(Analysis.started_at < date)
 
 
 def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
@@ -129,17 +129,17 @@ class AnalysisFilter(Enum):
     FILTER_WITH_PIPELINE: Callable = filter_analyses_with_pipeline
     FILTER_COMPLETED: Callable = filter_completed_analyses
     FILTER_NOT_COMPLETED: Callable = filter_not_completed_analyses
-    FILTER_UPLOADED: Callable = filter_filter_uploaded_analyses
+    FILTER_UPLOADED: Callable = filter_uploaded_analyses
     FILTER_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
     FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
     FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
     FILTER_REPORT_BY_PIPELINE: Callable = filter_report_analyses_by_pipeline
     FILTER_BY_CASE: Callable = filter_analyses_by_case
-    ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at
-    ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at
-    ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc
     FILTER_COMPLETED_AT_AFTER: Callable = filter_analyses_completed_after
     FILTER_COMPLETED_AT_BEFORE: Callable = filter_analyses_completed_before
     FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analyses_not_uploaded_to_vogue
     FILTER_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
+    ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
+    ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
+    ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc
