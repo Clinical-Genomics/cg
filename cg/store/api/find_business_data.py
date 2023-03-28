@@ -42,12 +42,12 @@ LOG = logging.getLogger(__name__)
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def get_analyses_by_case(self, case: Family) -> List[Analysis]:
+    def get_analyses_by_case_entry_id(self, case_entry_id: int) -> List[Analysis]:
         """Fetch analysis by case id."""
         return apply_analysis_filter(
             analyses=self._get_query(Analysis),
-            case=case,
-            filter_functions=[AnalysisFilter.FILTER_BY_CASE],
+            case_entry_id=case_entry_id,
+            filter_functions=[AnalysisFilter.FILTER_BY_CASE_ENTRY_ID],
         ).all()
 
     def get_case_by_entry_id(self, entry_id: str) -> Family:

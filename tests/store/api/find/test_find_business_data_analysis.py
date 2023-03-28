@@ -16,7 +16,9 @@ def test_get_analysis_by_case(
     case = store_with_case_and_analysis.get_case_by_internal_id(internal_id=case_id)
     assert case
     # WHEN fetching the analysis by case
-    analyses: List[Analysis] = store_with_case_and_analysis.get_analyses_by_case(case=case)
+    analyses: List[Analysis] = store_with_case_and_analysis.get_analyses_by_case_entry_id(
+        case_entry_id=case.id
+    )
     # THEN one analysis should be returned
     for analysis in analyses:
         assert analysis
