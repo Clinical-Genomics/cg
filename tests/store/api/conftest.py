@@ -341,30 +341,68 @@ def store_with_samples_that_have_names(
     return store
 
 
+@pytest.fixture(name="cust123")
+def fixture_cust123() -> str:
+    """Return a customer id"""
+    return "cust123"
+
+
+@pytest.fixture(name="test_subject")
+def fixture_test_subject() -> str:
+    """Return a subject id"""
+    return "test_subject"
+
+
 @pytest.fixture(name="store_with_samples_subject_id_and_tumour_status")
-def store_with_samples_subject_id_and_tumour_status(
+def fixture_store_with_samples_subject_id_and_tumour_status(
     store: Store,
     helpers: StoreHelpers,
-    customer_id: str = "cust123",
-    subject_id: str = "test_subject",
+    cust123: str,
+    test_subject: str,
 ) -> Store:
     """Return a store with two samples that have subject ids of which one is tumour"""
     helpers.add_sample(
         store=store,
         internal_id="test_sample_1",
         name="sample_1",
-        subject_id=subject_id,
+        subject_id=test_subject,
         is_tumour=True,
-        customer_id=customer_id,
+        customer_id=cust123,
     )
 
     helpers.add_sample(
         store=store,
         internal_id="test_sample_2",
         name="sample_2",
-        subject_id=subject_id,
+        subject_id=test_subject,
         is_tumour=False,
-        customer_id=customer_id,
+        customer_id=cust123,
+    )
+    return store
+
+
+@pytest.fixture(name="store_with_samples_and_tumour_status_missing_subject_id")
+def fixture_store_with_samples_and_tumour_status_missing_subject_id(
+    store: Store,
+    helpers: StoreHelpers,
+    cust123: str,
+    test_subject: str,
+) -> Store:
+    """Return a store with two samples of which one is tumour"""
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_1",
+        name="sample_1",
+        is_tumour=True,
+        customer_id=cust123,
+    )
+
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_2",
+        name="sample_2",
+        is_tumour=False,
+        customer_id=cust123,
     )
     return store
 

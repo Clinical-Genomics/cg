@@ -116,6 +116,16 @@ def filter_cases_by_ticket_id(cases: Query, ticket_id: str, **kwargs) -> Query:
     return cases.filter(Family.tickets.contains(ticket_id))
 
 
+def filter_cases_by_customer_entry_id(cases: Query, customer_entry_id: int, **kwargs) -> Query:
+    """Return cases with matching customer id."""
+    return cases.filter(Customer.id == customer_entry_id)
+
+
+def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
+    """Return cases with matching name."""
+    return cases.filter(Family.name == name)
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: List[Callable],
@@ -124,6 +134,8 @@ def apply_case_filter(
     internal_id: Optional[str] = None,
     entry_id: Optional[int] = None,
     ticket_id: Optional[str] = None,
+    customer_entry_id: Optional[int] = None,
+    name: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -134,6 +146,8 @@ def apply_case_filter(
             internal_id=internal_id,
             entry_id=entry_id,
             ticket_id=ticket_id,
+            customer_entry_id=customer_entry_id,
+            name=name,
         )
     return cases
 
@@ -155,3 +169,5 @@ class CaseFilter(Enum):
     FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
     FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
     FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
+    FILTER_BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
+    FILTER_BY_NAME: Callable = filter_cases_by_name

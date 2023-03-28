@@ -228,6 +228,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
         config_path: str = None,
+        uploaded_to_vogue_at: datetime = None,
     ) -> Analysis:
         """Utility function to add an analysis for tests."""
 
@@ -251,6 +252,8 @@ class StoreHelpers:
             analysis.config_path = config_path
         if pipeline:
             analysis.pipeline = str(pipeline)
+        if uploaded_to_vogue_at:
+            analysis.uploaded_to_vogue_at = uploaded_to_vogue_at
 
         analysis.limitations = "A limitation"
         analysis.family = case
@@ -393,9 +396,9 @@ class StoreHelpers:
         """Load a case with samples and link relations."""
         if not customer:
             customer = StoreHelpers.ensure_customer(store=store)
-        case = store.get_case_by_internal_id(internal_id=case_id) or store.find_family(
-            customer=customer, name=name
-        )
+        case = store.get_case_by_internal_id(
+            internal_id=case_id
+        ) or store.get_case_by_name_and_customer(customer=customer, case_name=name)
         if not case:
             case = StoreHelpers.add_case(
                 store=store,
