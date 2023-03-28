@@ -132,14 +132,6 @@ class StatusHandler(BaseHandler):
             families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
 
-    def get_running_cases_for_pipeline(self, pipeline: Pipeline) -> List[Family]:
-        return (
-            self.query(Family)
-            .filter(Family.action == "running")
-            .filter(Family.data_analysis == pipeline)
-            .all()
-        )
-
     def cases(
         self,
         internal_id: str = None,
@@ -592,14 +584,6 @@ class StatusHandler(BaseHandler):
             or (samples_received_at and samples_received_at < case_obj.ordered_at)
             or (samples_prepared_at and samples_prepared_at < case_obj.ordered_at)
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
-        )
-
-    @staticmethod
-    def _all_samples_have_sequence_data(links: List[FamilySample]) -> bool:
-        """Return True if all samples are external or sequenced in-house."""
-        return all(
-            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
-            for link in links
         )
 
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:

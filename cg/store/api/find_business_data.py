@@ -6,7 +6,7 @@ from typing import List, Optional, Iterator, Union
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus
+from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
@@ -617,9 +617,16 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_case_by_internal_id(self, internal_id: str) -> Family:
         """Get case by internal id."""
-
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
             cases=self._get_query(table=Family),
             internal_id=internal_id,
         ).first()
+
+    def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
+        """Get all running cases in a pipeline."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.GET_WITH_PIPELINE, CaseFilter.IS_RUNNING],
+            cases=self._get_query(table=Family),
+            pipeline=pipeline,
+        ).all()

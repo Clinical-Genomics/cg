@@ -260,7 +260,7 @@ class AnalysisAPI(MetaAPI):
         )
 
     def get_running_cases(self) -> List[Family]:
-        return self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
+        return self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
 
     def get_cases_to_store(self) -> List[Family]:
         """Retrieve a list of cases where analysis finished successfully,
