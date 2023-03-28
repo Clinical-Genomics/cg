@@ -30,6 +30,11 @@ def get_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     )
 
 
+def get_active_cases(cases: Query, **kwargs) -> Query:
+    """Return cases which are running."""
+    return cases.filter(Family.action == "running")
+
+
 def get_new_cases(cases: Query, date: datetime, **kwargs) -> Query:
     """Return old cases compared to date."""
     cases = cases.filter(Family.created_at < date)
@@ -168,6 +173,7 @@ class CaseFilter(Enum):
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
     FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
     FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
+    IS_RUNNING: Callable = get_active_cases
     FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
     FILTER_BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
     FILTER_BY_NAME: Callable = filter_cases_by_name
