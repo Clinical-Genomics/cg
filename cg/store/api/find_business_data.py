@@ -175,22 +175,6 @@ class FindBusinessDataHandler(BaseHandler):
             case_samples=self._get_join_case_sample_query(),
         )
 
-    def get_samples_by_case_and_pipeline(
-        self, case_internal_id: str, pipeline: Pipeline
-    ) -> List[Sample]:
-        """Return all samples linked to a case and pipeline"""
-
-        linked_samples: Query = self.query(Sample).join(Family.links, FamilySample.sample)
-
-        filtered_samples: Query = apply_case_filter(
-            cases=linked_samples,
-            filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID, CaseFilter.GET_WITH_PIPELINE],
-            internal_id=case_internal_id,
-            pipeline=pipeline,
-        )
-
-        return filtered_samples.all()
-
     def filter_cases_with_samples(self, case_ids: List[str]) -> List[str]:
         """Return case id:s associated with samples."""
         cases_with_samples = set()
