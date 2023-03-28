@@ -20,14 +20,14 @@ def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig):
     assert result.exit_code != EXIT_SUCCESS
 
 
-def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, ticket, caplog):
+def test_dry_arguments(cli_runner: CliRunner, base_context: CGConfig, ticket_id, caplog):
     """Test command dry"""
 
     # GIVEN
     caplog.set_level(logging.INFO)
 
     # WHEN dry running without anything specified
-    result = cli_runner.invoke(run, [ticket, "-t", "-d"], obj=base_context)
+    result = cli_runner.invoke(run, [ticket_id, "-t", "-d"], obj=base_context)
 
     # THEN command should mention missing arguments
     assert result.exit_code == EXIT_SUCCESS

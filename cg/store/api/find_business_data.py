@@ -6,7 +6,7 @@ from typing import Callable, List, Optional, Iterator, Union
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
 
-from cg.constants import FlowCellStatus
+from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
@@ -27,9 +27,13 @@ from cg.store.models import (
 
 from cg.store.filters.status_invoice_filters import apply_invoice_filter, InvoiceFilter
 from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
+
 from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
 from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
 from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
+
+from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
+from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
 
 
 LOG = logging.getLogger(__name__)
@@ -38,31 +42,13 @@ LOG = logging.getLogger(__name__)
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
 
-    def analyses(self, *, family: Family = None, before: dt.datetime = None) -> Query:
-        """Fetch multiple analyses."""
-        records = self.Analysis.query
-        if family:
-            query_family = family
-            records = records.filter(Analysis.family == query_family)
-        if before:
-            subq = (
-                self.Analysis.query.join(Analysis.family)
-                .filter(Analysis.started_at < before)
-                .group_by(Family.id)
-                .with_entities(
-                    Analysis.family_id,
-                    func.max(Analysis.started_at).label("started_at"),
-                )
-                .subquery()
-            )
-            records = records.join(
-                subq,
-                and_(
-                    self.Analysis.family_id == subq.c.family_id,
-                    self.Analysis.started_at == subq.c.started_at,
-                ),
-            ).filter(Analysis.started_at < before)
-        return records
+    def get_analyses_by_case_entry_id(self, case_entry_id: int) -> List[Analysis]:
+        """Return analysis by case entry id."""
+        return apply_analysis_filter(
+            analyses=self._get_query(Analysis),
+            case_entry_id=case_entry_id,
+            filter_functions=[AnalysisFilter.FILTER_BY_CASE_ENTRY_ID],
+        ).all()
 
     def get_case_by_entry_id(self, entry_id: str) -> Family:
         """Return a case by entry id."""
@@ -199,17 +185,28 @@ class FindBusinessDataHandler(BaseHandler):
                 cases_with_samples.add(case_id)
         return list(cases_with_samples)
 
-    def get_cases_from_ticket(self, ticket: str) -> Query:
-        return self.Family.query.filter(Family.tickets.contains(ticket))
+    def get_cases_by_ticket_id(self, ticket_id: str) -> List[Family]:
+        """Return cases associated with a given ticket id."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_TICKET],
+            ticket_id=ticket_id,
+            cases=self._get_query(table=Family),
+        ).all()
 
     def get_customer_id_from_ticket(self, ticket: str) -> str:
         """Returns the customer related to given ticket"""
-        return (
-            self.Family.query.filter(Family.tickets.contains(ticket)).first().customer.internal_id
-        )
+        cases: List[Family] = self.get_cases_by_ticket_id(ticket_id=ticket)
+        if not cases:
+            raise ValueError(f"No case found for ticket {ticket}")
+        return cases[0].customer.internal_id
 
     def get_samples_from_ticket(self, ticket: str) -> List[Sample]:
-        return self._get_join_sample_family_query().filter(Family.tickets.contains(ticket)).all()
+        """Returns the samples related to given ticket."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.FILTER_BY_TICKET],
+            ticket_id=ticket,
+            cases=self._get_join_sample_family_query(),
+        ).all()
 
     def get_latest_ticket_from_case(self, case_id: str) -> str:
         """Returns the ticket from the most recent sample in a case"""
@@ -249,20 +246,29 @@ class FindBusinessDataHandler(BaseHandler):
         samples: List[Sample] = self.get_samples_by_case_id(family_id)
         return [sample for sample in samples if sample.sequencing_qc]
 
-    def find_family(self, customer: Customer, name: str) -> Family:
-        """Find a family by family name within a customer."""
-        return self.Family.query.filter_by(customer=customer, name=name).first()
+    def get_case_by_name_and_customer(self, customer: Customer, case_name: str) -> Family:
+        """Find a case by case name within a customer."""
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=[CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID, CaseFilter.FILTER_BY_NAME],
+            customer_entry_id=customer.id,
+            name=case_name,
+        ).first()
 
-    def find_family_by_name(self, name: str) -> Family:
-        """Find a family by family name within a customer."""
-        return self.Family.query.filter_by(name=name).first()
+    def get_case_by_name(self, name: str) -> Family:
+        """Get a case by name."""
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=[CaseFilter.FILTER_BY_NAME],
+            name=name,
+        ).first()
 
     def get_sample_by_customer_and_name(
         self, customer_entry_id: List[int], sample_name: str
     ) -> Sample:
         """Get samples within a customer."""
         filter_functions = [
-            SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
             SampleFilter.FILTER_BY_SAMPLE_NAME,
         ]
 
@@ -481,42 +487,58 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_samples_by_customer_id_and_pattern(
-        self, *, customers: Optional[List[Customer]] = None, enquiry: str = None
+        self, *, customers: Optional[List[Customer]] = None, pattern: str = None
     ) -> List[Sample]:
+        """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
-        customer_ids = None
+        customer_entry_ids = None
         filter_functions: List[SampleFilter] = []
         if customers:
-            customer_ids: List[int] = [customer.id for customer in customers]
-            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID)
-        if enquiry:
+            customer_entry_ids: List[int] = [customer.id for customer in customers]
+            filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS)
+        if pattern:
             filter_functions.extend(
                 [SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN, SampleFilter.FILTER_BY_NAME_PATTERN]
             )
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
         return apply_sample_filter(
             samples=samples,
-            customer_entry_ids=customer_ids,
-            name_pattern=enquiry,
-            internal_id_pattern=enquiry,
+            customer_entry_ids=customer_entry_ids,
+            name_pattern=pattern,
+            internal_id_pattern=pattern,
             filter_functions=filter_functions,
         ).all()
 
-    def get_samples_by_subject_id(self, customer_id: str, subject_id: str) -> List[Sample]:
-        """Get samples of customer with given subject_id or subject_id and is_tumour."""
-        query: Query = self._get_join_sample_and_customer_query().filter(
-            Customer.internal_id == customer_id, Sample.subject_id == subject_id
+    def _get_samples_by_customer_and_subject_id_query(
+        self, customer_internal_id: str, subject_id: str
+    ) -> Query:
+        """Return query of samples of customer with given subject id."""
+        records: Query = apply_customer_filter(
+            customers=self._get_join_sample_and_customer_query(),
+            customer_internal_id=customer_internal_id,
+            filter_functions=[CustomerFilter.FILTER_BY_INTERNAL_ID],
         )
-        return query.all()
+        return apply_sample_filter(
+            samples=records,
+            subject_id=subject_id,
+            filter_functions=[SampleFilter.FILTER_BY_SUBJECT_ID],
+        )
 
-    def get_samples_by_subject_id_and_is_tumour(
-        self, customer_id: str, subject_id: str, is_tumour: bool
+    def get_samples_by_customer_and_subject_id(
+        self, customer_internal_id: str, subject_id: str
     ) -> List[Sample]:
-        """Get samples of customer with given subject_id and is_tumour."""
-        samples: Query = self._get_join_sample_and_customer_query().filter(
-            Customer.internal_id == customer_id, Sample.subject_id == subject_id
-        )
+        """Get samples of customer with given subject id."""
+        return self._get_samples_by_customer_and_subject_id_query(
+            customer_internal_id=customer_internal_id, subject_id=subject_id
+        ).all()
 
+    def get_samples_by_customer_subject_id_and_is_tumour(
+        self, customer_internal_id: str, subject_id: str, is_tumour: bool
+    ) -> List[Sample]:
+        """Get samples of customer with given subject id and is tumour."""
+        samples: Query = self._get_samples_by_customer_and_subject_id_query(
+            customer_internal_id=customer_internal_id, subject_id=subject_id
+        )
         if is_tumour:
             return apply_sample_filter(
                 samples=samples, filter_functions=[SampleFilter.FILTER_IS_TUMOUR]
@@ -536,7 +558,7 @@ class FindBusinessDataHandler(BaseHandler):
             customer_entry_ids=customer_ids,
             subject_id=subject_id,
             filter_functions=[
-                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
                 SampleFilter.FILTER_BY_SUBJECT_ID,
                 SampleFilter.FILTER_IS_TUMOUR,
             ],
@@ -584,9 +606,16 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_case_by_internal_id(self, internal_id: str) -> Family:
         """Get case by internal id."""
-
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_INTERNAL_ID],
             cases=self._get_query(table=Family),
             internal_id=internal_id,
         ).first()
+
+    def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
+        """Get all running cases in a pipeline."""
+        return apply_case_filter(
+            filter_functions=[CaseFilter.GET_WITH_PIPELINE, CaseFilter.IS_RUNNING],
+            cases=self._get_query(table=Family),
+            pipeline=pipeline,
+        ).all()

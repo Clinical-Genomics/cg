@@ -10,7 +10,7 @@ def test_filter_customer_by_customer_id(base_store: Store, customer_id: str):
     # WHEN retrieving a customer
     customer: Customer = filter_customer_by_customer_internal_id(
         customers=base_store._get_query(table=Customer),
-        customer_id=customer_id,
+        customer_internal_id=customer_id,
     ).first()
 
     # THEN a customer should be returned

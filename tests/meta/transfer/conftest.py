@@ -18,11 +18,11 @@ def fixture_transfer_lims_api(sample_store: Store) -> Generator[TransferLims, No
 
 @pytest.fixture(name="external_data_directory", scope="session")
 def external_data_directory(
-    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket: str
+    tmpdir_factory, customer_id: str, cust_sample_id: str, ticket_id: str
 ) -> Path:
     """Returns a customer folder with fastq.gz files in sample-directories."""
     cust_folder: Path = tmpdir_factory.mktemp(customer_id, numbered=False)
-    ticket_folder: Path = Path(cust_folder, ticket)
+    ticket_folder: Path = Path(cust_folder, ticket_id)
     ticket_folder.mkdir()
     samples: List[str] = [f"{cust_sample_id}1", f"{cust_sample_id}2"]
     for sample in samples:

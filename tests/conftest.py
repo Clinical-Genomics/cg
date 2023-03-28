@@ -63,6 +63,12 @@ def fixture_later_timestamp() -> dt.datetime:
     return dt.datetime(2020, 6, 1)
 
 
+@pytest.fixture(name="future_date")
+def fixture_future_date() -> dt.datetime:
+    """Return a distant date in the future for which no events happen later."""
+    return dt.datetime(dt.MAXYEAR, 1, 1, 1, 1, 1)
+
+
 @pytest.fixture(name="timestamp_now")
 def fixture_timestamp_now() -> dt.datetime:
     """Return a time stamp of today's date in date time format."""
@@ -189,7 +195,7 @@ def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
 
 @pytest.fixture(name="analysis_family_single_case")
 def fixture_analysis_family_single(
-    case_id: str, family_name: str, sample_id: str, ticket: str
+    case_id: str, family_name: str, sample_id: str, ticket_id: str
 ) -> dict:
     """Build an example case."""
     return {
@@ -198,14 +204,14 @@ def fixture_analysis_family_single(
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
-        "tickets": ticket,
+        "tickets": ticket_id,
         "samples": [
             {
                 "name": "proband",
                 "sex": Gender.MALE,
                 "internal_id": sample_id,
                 "status": "affected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
             }
@@ -214,14 +220,14 @@ def fixture_analysis_family_single(
 
 
 @pytest.fixture(name="analysis_family")
-def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket: str) -> dict:
+def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
     """Return a dictionary with information from a analysis case."""
     return {
         "name": family_name,
         "internal_id": case_id,
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
-        "tickets": ticket,
+        "tickets": ticket_id,
         "panels": ["IEM", "EP"],
         "samples": [
             {
@@ -231,7 +237,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -240,7 +246,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "sex": Gender.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -249,7 +255,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "sex": Gender.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -400,17 +406,17 @@ def madeline_api(madeline_output) -> MockMadelineAPI:
     return _api
 
 
-@pytest.fixture(name="ticket", scope="session")
+@pytest.fixture(name="ticket_id", scope="session")
 def fixture_ticket_number() -> str:
     """Return a ticket number for testing."""
     return "123456"
 
 
 @pytest.fixture(name="osticket")
-def fixture_os_ticket(ticket: str) -> MockOsTicket:
+def fixture_os_ticket(ticket_id: str) -> MockOsTicket:
     """Return a api that mock the os ticket api."""
     api = MockOsTicket()
-    api.set_ticket_nr(ticket)
+    api.set_ticket_nr(ticket_id)
     return api
 
 
@@ -1695,49 +1701,52 @@ def fixture_cg_context(
 
 
 @pytest.fixture(name="case_id_with_single_sample")
-def case_id_with_single_sample():
+def fixture_case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
 @pytest.fixture(name="case_id_with_multiple_samples")
-def case_id_with_multiple_samples():
+def fixture_case_id_with_multiple_samples():
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
 @pytest.fixture(name="case_id_without_samples")
-def case_id_without_samples():
+def fixture_case_id_without_samples():
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
 @pytest.fixture(name="sample_id_in_single_case")
-def sample_id_in_single_case():
+def fixture_sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
 @pytest.fixture(name="sample_id_in_multiple_cases")
-def sample_id_in_multiple_cases():
+def fixture_sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")
-def store_with_multiple_cases_and_samples(
+def fixture_store_with_multiple_cases_and_samples(
     case_id_without_samples: str,
     case_id_with_single_sample: str,
     case_id_with_multiple_samples: str,
     sample_id_in_single_case: str,
     sample_id_in_multiple_cases: str,
     case_id: str,
+    ticket_id: str,
     helpers: StoreHelpers,
     store: Store,
 ):
     """Return a store containing multiple cases and samples."""
 
-    helpers.add_case(store=store, internal_id=case_id_without_samples)
+    helpers.add_case(
+        store=store, internal_id=case_id_without_samples, ticket=ticket_id, action="running"
+    )
     helpers.add_case_with_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
@@ -1756,7 +1765,7 @@ def store_with_multiple_cases_and_samples(
 
 
 @pytest.fixture(name="store_with_panels")
-def store_with_panels(store: Store, helpers: StoreHelpers):
+def fixture_store_with_panels(store: Store, helpers: StoreHelpers):
     helpers.ensure_panel(store=store, panel_abbreviation="panel1", customer_id="cust000")
     helpers.ensure_panel(store=store, panel_abbreviation="panel2", customer_id="cust000")
     helpers.ensure_panel(store=store, panel_abbreviation="panel3", customer_id="cust000")
@@ -1764,7 +1773,7 @@ def store_with_panels(store: Store, helpers: StoreHelpers):
 
 
 @pytest.fixture(name="store_with_organisms")
-def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple organisms."""
 
     organism_details = [
@@ -1783,13 +1792,13 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="non_existent_email")
-def non_existent_email():
+def fixture_non_existent_email():
     """Return email not associated with any entity."""
     return "non_existent_email@example.com"
 
 
 @pytest.fixture(name="non_existent_id")
-def non_existent_id():
+def fixture_non_existent_id():
     """Return id not associated with any entity."""
     return "non_existent_entity_id"
 
