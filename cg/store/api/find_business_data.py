@@ -85,7 +85,9 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> Query:
         """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
         Optionally fetch those cases finished before and/or after a specified date"""
-        records = self.latest_analyses().filter(Analysis.uploaded_to_vogue_at.is_(None))
+        records = self.get_analyses_by_case_entry_id_and_latest_started_at_date().filter(
+            Analysis.uploaded_to_vogue_at.is_(None)
+        )
 
         if completed_after:
             records = records.filter(Analysis.completed_at > completed_after)
@@ -94,24 +96,24 @@ class FindBusinessDataHandler(BaseHandler):
 
         return records
 
-    def latest_analyses(self) -> Query:
-        """Fetch latest analysis for all cases."""
-
-        records = self.Analysis.query
-        sub_query = (
-            self.Analysis.query.join(Analysis.family)
-            .group_by(Family.id)
-            .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
-            .subquery()
-        )
-        records = records.join(
-            sub_query,
-            and_(
-                self.Analysis.family_id == sub_query.c.family_id,
-                self.Analysis.started_at == sub_query.c.started_at,
-            ),
-        )
-        return records
+    def get_analyses_by_case_entry_id_and_latest_started_at_date(self) -> List[Analysis]:
+        """Return analysis for all cases and latest started at date."""
+        analyses = self._get_query(table=Analysis)
+        case_entry_ids = set([analysis.family_id for analysis in analyses])
+        latest_analyses_per_case = []
+        filter_functions = [
+            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
+            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
+        ]
+        for case_entry_id in case_entry_ids:
+            latest_analyses_per_case.append(
+                apply_analysis_filter(
+                    analyses=analyses,
+                    filter_functions=filter_functions,
+                    case_entry_id=case_entry_id,
+                ).first()
+            )
+        return latest_analyses_per_case
 
     def analysis(self, family: Family, started_at: dt.datetime) -> Analysis:
         """Fetch an analysis."""
