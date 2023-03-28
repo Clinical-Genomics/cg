@@ -620,7 +620,7 @@ def test_filter_get_samples_by_customer_id(
         samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
             table=Sample
         ),
-        customer_ids=[customer_id],
+        customer_entry_ids=[customer_id],
     )
 
     # ASSERT that samples is a query
