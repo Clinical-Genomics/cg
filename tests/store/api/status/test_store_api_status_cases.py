@@ -1506,7 +1506,7 @@ def add_case(
         name=case_id,
         panels=panel.name,
         priority=priority,
-        ticket=ticket,
+        ticket=ticket_id,
     )
     case.customer = customer
     case.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)

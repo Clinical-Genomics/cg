@@ -170,7 +170,7 @@ def fixture_rml_pool_store(
     helpers,
     sample_id: str,
     store: Store,
-    ticket: str,
+    ticket_id: str,
     timestamp_now: dt.datetime,
 ):
     new_customer = store.add_customer(
@@ -217,7 +217,7 @@ def fixture_rml_pool_store(
     new_case = helpers.add_case(
         store=store,
         internal_id=case_id,
-        name=PoolSubmitter.create_case_name(ticket=ticket, pool_name="Test"),
+        name=PoolSubmitter.create_case_name(ticket_id=ticket_id_id, pool_name="Test"),
     )
     store.add_commit(new_case)
 
@@ -248,7 +248,7 @@ def fixture_re_sequenced_sample_store(
     family_name: str,
     flow_cell_id: str,
     sample_id: str,
-    ticket: str,
+    ticket_id: str,
     timestamp_now: dt.datetime,
     helpers,
 ) -> Store:
@@ -267,7 +267,7 @@ def fixture_re_sequenced_sample_store(
         application_type=PrepCategory.READY_MADE_LIBRARY.value,
         reads=1200000000,
         store=re_sequenced_sample_store,
-        original_ticket=ticket,
+        original_ticket=ticket_id_id,
         sequenced_at=timestamp_now,
     )
 
