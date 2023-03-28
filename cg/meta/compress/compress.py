@@ -225,7 +225,7 @@ class CompressAPI:
         version: Version = self.hk_api.last_version(sample_id)
         spring_tags: List[str] = [sample_id, SequencingFileTag.SPRING]
         spring_metadata_tags: List[str] = [sample_id, SequencingFileTag.SPRING_METADATA]
-        LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}:")
+        LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}")
         LOG.info(
             f"{compression_obj.fastq_first}, {compression_obj.fastq_second} -> {compression_obj.spring_path}, "
             f"with tags {spring_tags}"
