@@ -132,16 +132,6 @@ class StatusHandler(BaseHandler):
             families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
 
-    def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
-        """Returns a list of cases that may be available to store in Housekeeper."""
-        families_query = (
-            self.Family.query.outerjoin(Analysis)
-            .join(Family.links, FamilySample.sample)
-            .filter(Family.data_analysis == str(pipeline))
-            .filter(Family.action == "running")
-        )
-        return list(families_query)[:limit]
-
     def get_running_cases_for_pipeline(self, pipeline: Pipeline) -> List[Family]:
         return (
             self.query(Family)
