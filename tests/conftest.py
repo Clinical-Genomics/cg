@@ -1695,37 +1695,37 @@ def fixture_cg_context(
 
 
 @pytest.fixture(name="case_id_with_single_sample")
-def case_id_with_single_sample():
+def fixture_case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
 @pytest.fixture(name="case_id_with_multiple_samples")
-def case_id_with_multiple_samples():
+def fixture_case_id_with_multiple_samples():
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
 @pytest.fixture(name="case_id_without_samples")
-def case_id_without_samples():
+def fixture_case_id_without_samples():
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
 @pytest.fixture(name="sample_id_in_single_case")
-def sample_id_in_single_case():
+def fixture_sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
 @pytest.fixture(name="sample_id_in_multiple_cases")
-def sample_id_in_multiple_cases():
+def fixture_sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")
-def store_with_multiple_cases_and_samples(
+def fixture_store_with_multiple_cases_and_samples(
     case_id_without_samples: str,
     case_id_with_single_sample: str,
     case_id_with_multiple_samples: str,
@@ -1738,7 +1738,9 @@ def store_with_multiple_cases_and_samples(
 ):
     """Return a store containing multiple cases and samples."""
 
-    helpers.add_case(store=store, internal_id=case_id_without_samples, ticket=ticket_id)
+    helpers.add_case(
+        store=store, internal_id=case_id_without_samples, ticket=ticket_id, action="running"
+    )
     helpers.add_case_with_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
@@ -1757,7 +1759,7 @@ def store_with_multiple_cases_and_samples(
 
 
 @pytest.fixture(name="store_with_panels")
-def store_with_panels(store: Store, helpers: StoreHelpers):
+def fixture_store_with_panels(store: Store, helpers: StoreHelpers):
     helpers.ensure_panel(store=store, panel_abbreviation="panel1", customer_id="cust000")
     helpers.ensure_panel(store=store, panel_abbreviation="panel2", customer_id="cust000")
     helpers.ensure_panel(store=store, panel_abbreviation="panel3", customer_id="cust000")
@@ -1765,7 +1767,7 @@ def store_with_panels(store: Store, helpers: StoreHelpers):
 
 
 @pytest.fixture(name="store_with_organisms")
-def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple organisms."""
 
     organism_details = [
@@ -1784,13 +1786,13 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="non_existent_email")
-def non_existent_email():
+def fixture_non_existent_email():
     """Return email not associated with any entity."""
     return "non_existent_email@example.com"
 
 
 @pytest.fixture(name="non_existent_id")
-def non_existent_id():
+def fixture_non_existent_id():
     """Return id not associated with any entity."""
     return "non_existent_entity_id"
 
