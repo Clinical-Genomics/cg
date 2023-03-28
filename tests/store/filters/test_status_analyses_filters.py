@@ -16,7 +16,7 @@ from cg.store.filters.status_analysis_filters import (
     filter_analyses_with_delivery_report,
     filter_analyses_without_delivery_report,
     filter_report_analyses_by_pipeline,
-    filter_analyses_by_case,
+    filter_analyses_by_case_entry_id,
     filter_analyses_completed_after,
     filter_analyses_completed_before,
     filter_analyses_not_uploaded_to_vogue,
@@ -267,8 +267,8 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case_
     analysis_other_case: Analysis = helpers.add_analysis(store=base_store, case=case_obj)
 
     # WHEN filtering the analyses by case
-    analyses: Query = filter_analyses_by_case(
-        analyses=base_store._get_query(table=Analysis), case=case_obj
+    analyses: Query = filter_analyses_by_case_entry_id(
+        analyses=base_store._get_query(table=Analysis), case_entry_id=case_obj.id
     )
 
     # ASSERT that analyses is a query
