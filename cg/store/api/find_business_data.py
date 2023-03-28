@@ -526,19 +526,27 @@ class FindBusinessDataHandler(BaseHandler):
             ).all()
 
     def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-        self, customer_ids: List[int], subject_id: str
+            self, customer_ids: List[int], subject_id: str, is_tumour: bool
     ) -> List[Sample]:
-        """Return a list of samples matching a list of customers with given subject id and is a tumour sample."""
+        """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
         samples = self._get_query(table=Sample)
+        if is_tumour:
+            filter_functions = [
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+                SampleFilter.FILTER_BY_SUBJECT_ID,
+                SampleFilter.FILTER_IS_TUMOUR,
+            ]
+        else:
+            filter_functions = [
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+                SampleFilter.FILTER_BY_SUBJECT_ID,
+                SampleFilter.FILTER_IS_NOT_TUMOUR,
+            ]
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_ids,
             subject_id=subject_id,
-            filter_functions=[
-                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
-                SampleFilter.FILTER_BY_SUBJECT_ID,
-                SampleFilter.FILTER_IS_TUMOUR,
-            ],
+            filter_functions=filter_functions,
         ).all()
 
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
