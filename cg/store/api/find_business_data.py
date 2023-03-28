@@ -199,6 +199,7 @@ class FindBusinessDataHandler(BaseHandler):
         return list(cases_with_samples)
 
     def get_cases_by_ticket_id(self, ticket_id: str) -> List[Family]:
+        """Return cases associated with a given ticket id."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_TICKET],
             ticket_id=ticket_id,
@@ -213,7 +214,7 @@ class FindBusinessDataHandler(BaseHandler):
         return cases[0].customer.internal_id
 
     def get_samples_from_ticket(self, ticket: str) -> List[Sample]:
-        """Returns the samples related to given ticket"""
+        """Returns the samples related to given ticket."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_BY_TICKET],
             ticket_id=ticket,

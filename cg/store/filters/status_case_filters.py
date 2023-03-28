@@ -111,7 +111,7 @@ def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Quer
     return cases.filter(Family.internal_id == internal_id)
 
 
-def filter_cases_by_ticket(cases: Query, ticket_id: str, **kwargs) -> Query:
+def filter_cases_by_ticket_id(cases: Query, ticket_id: str, **kwargs) -> Query:
     """Return cases with matching ticket id."""
     return cases.filter(Family.tickets.contains(ticket_id))
 
@@ -154,4 +154,4 @@ class CaseFilter(Enum):
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
     FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
     FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
-    FILTER_BY_TICKET: Callable = filter_cases_by_ticket
+    FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
