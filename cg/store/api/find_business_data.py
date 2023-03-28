@@ -133,7 +133,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all deliveries."""
         return self.Delivery.query
 
-    def get_cases(
+    def get_filtered_cases(
         self,
         action: Optional[str] = None,
         pipeline: Optional[str] = None,
