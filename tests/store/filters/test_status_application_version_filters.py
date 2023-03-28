@@ -285,7 +285,7 @@ def test_order_application_versions_by_valid_from_desc(
 
 def test_apply_application_versions_filter_empty_query_returns_empty_query(
     store_with_an_application_with_and_without_attributes: Store,
-    first_application_version_version: int,
+    first_application_version_version: int = 1,
 ):
     """Test that applying all filters to an empty query returns an empty query."""
     # GIVEN a store with a valid application, a valid date and a valid version

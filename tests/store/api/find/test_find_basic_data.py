@@ -167,7 +167,7 @@ def test_get_applications_by_prep_category_and_is_not_archived(
 
 def test_application_version_with_version_and_application(
     store_with_different_application_versions: Store,
-    application_version_version: int,
+    application_version_version: int = 1,
 ):
     """Test that application_version returns a valid query given an application and a version"""
     # GIVEN a store with applications and an ApplicationVersion.version
