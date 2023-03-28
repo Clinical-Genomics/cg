@@ -63,6 +63,12 @@ def fixture_later_timestamp() -> dt.datetime:
     return dt.datetime(2020, 6, 1)
 
 
+@pytest.fixture(name="future_date")
+def fixture_future_date() -> dt.datetime:
+    """Return a distant date in the future for which no events happen later."""
+    return dt.datetime(dt.MAXYEAR, 1, 1, 1, 1, 1)
+
+
 @pytest.fixture(name="timestamp_now")
 def fixture_timestamp_now() -> dt.datetime:
     """Return a time stamp of today's date in date time format."""
