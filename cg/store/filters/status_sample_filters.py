@@ -87,9 +87,11 @@ def filter_samples_do_not_invoice(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.no_invoice.is_(True))
 
 
-def filter_samples_by_customer_id(samples: Query, customer_ids: List[int], **kwargs) -> Query:
+def filter_samples_by_entry_customer_ids(
+    samples: Query, customer_entry_ids: List[int], **kwargs
+) -> Query:
     """Return samples by customer id."""
-    return samples.filter(Sample.customer_id.in_(customer_ids))
+    return samples.filter(Sample.customer_id.in_(customer_entry_ids))
 
 
 def filter_samples_by_customer_name(samples: Query, customer_name: str, **kwargs) -> Query:
@@ -162,7 +164,7 @@ def apply_sample_filter(
     tissue_type: Optional[SampleType] = None,
     data_analysis: Optional[str] = None,
     invoice_id: Optional[int] = None,
-    customer_ids: Optional[List[int]] = None,
+    customer_entry_ids: Optional[List[int]] = None,
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
     customer: Optional[Customer] = None,
@@ -179,7 +181,7 @@ def apply_sample_filter(
             tissue_type=tissue_type,
             data_analysis=data_analysis,
             invoice_id=invoice_id,
-            customer_ids=customer_ids,
+            customer_entry_ids=customer_entry_ids,
             subject_id=subject_id,
             name=name,
             customer=customer,
@@ -208,7 +210,7 @@ class SampleFilter(Enum):
     FILTER_DO_INVOICE: Callable = filter_samples_do_invoice
     FILTER_DO_NOT_INVOICE: Callable = filter_samples_do_not_invoice
     FILTER_BY_CUSTOMER_NAME: Callable = filter_samples_by_customer_name
-    FILTER_BY_CUSTOMER_ID: Callable = filter_samples_by_customer_id
+    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_samples_by_entry_customer_ids
     FILTER_IS_RECEIVED: Callable = filter_samples_is_received
     FILTER_IS_NOT_RECEIVED: Callable = filter_samples_is_not_received
     FILTER_IS_PREPARED: Callable = filter_samples_is_prepared

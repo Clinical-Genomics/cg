@@ -2,11 +2,13 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
 
+
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
+from cg.constants.invoice import CustomerNames
 from cg.store.models import (
     Analysis,
     Application,
@@ -129,24 +131,6 @@ class StatusHandler(BaseHandler):
         if threshold:
             families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
-
-    def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
-        """Returns a list of cases that may be available to store in Housekeeper."""
-        families_query = (
-            self.Family.query.outerjoin(Analysis)
-            .join(Family.links, FamilySample.sample)
-            .filter(Family.data_analysis == str(pipeline))
-            .filter(Family.action == "running")
-        )
-        return list(families_query)[:limit]
-
-    def get_running_cases_for_pipeline(self, pipeline: Pipeline) -> List[Family]:
-        return (
-            self.query(Family)
-            .filter(Family.action == "running")
-            .filter(Family.data_analysis == pipeline)
-            .all()
-        )
 
     def cases(
         self,
@@ -602,14 +586,6 @@ class StatusHandler(BaseHandler):
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
-    @staticmethod
-    def _all_samples_have_sequence_data(links: List[FamilySample]) -> bool:
-        """Return True if all samples are external or sequenced in-house."""
-        return all(
-            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
-            for link in links
-        )
-
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Return analyses that have not been uploaded."""
         analysis_filter_functions: List[AnalysisFilter] = [
@@ -786,7 +762,7 @@ class StatusHandler(BaseHandler):
             samples=self._get_query(table=Sample),
         ).all()
 
-    def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
+    def get_samples_to_invoice_query(self) -> Query:
         """Return all samples that should be invoiced."""
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_DELIVERED,
@@ -794,47 +770,46 @@ class StatusHandler(BaseHandler):
             SampleFilter.FILTER_DO_INVOICE,
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
-
-        records: Query = apply_sample_filter(
+        return apply_sample_filter(
             filter_functions=sample_filter_functions,
             samples=self._get_query(table=Sample),
         )
 
-        customers_to_invoice = [
-            case_obj.customer
-            for case_obj in records.all()
-            if case_obj.customer.internal_id != "cust000"
-        ]
-
-        customers_to_invoice = list(set(customers_to_invoice))
-        records = records.filter(Sample.customer == customer) if customer else records
-        return records, customers_to_invoice
-
-    def get_pools_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
-        """
-        Return all pools that should be invoiced.
-        """
-        records = self._get_query(table=Pool)
+    def get_pools_to_invoice_query(self) -> Query:
+        """Return all pools that should be invoiced."""
         pool_filter_functions: List[PoolFilter] = [
             PoolFilter.FILTER_IS_DELIVERED,
             PoolFilter.FILTER_WITHOUT_INVOICE_ID,
             PoolFilter.FILTER_DO_INVOICE,
         ]
-
-        records: Query = apply_pool_filter(
+        return apply_pool_filter(
             filter_functions=pool_filter_functions,
-            pools=records,
+            pools=self._get_query(table=Pool),
         )
 
-        customers_to_invoice = [
-            case_obj.customer
-            for case_obj in records.all()
-            if case_obj.customer.internal_id != "cust000"
-        ]
+    def get_samples_to_invoice_for_customer(self, customer: Customer = None) -> List[Sample]:
+        """Return all samples that should be invoiced for a customer."""
+        return apply_sample_filter(
+            samples=self.get_samples_to_invoice_query(),
+            filter_functions=[SampleFilter.FILTER_BY_CUSTOMER],
+            customer=customer,
+        ).all()
 
-        customers_to_invoice = list(set(customers_to_invoice))
-        records = records.filter(Pool.customer_id == customer.id) if customer else records
-        return records, customers_to_invoice
+    def get_pools_to_invoice_for_customer(self, customer: Customer = None) -> List[Pool]:
+        """Return all pools for a customer that should be invoiced."""
+        return apply_pool_filter(
+            filter_functions=[PoolFilter.FILTER_BY_CUSTOMER],
+            pools=self.get_pools_to_invoice_query(),
+            customer=customer,
+        ).all()
+
+    def get_customers_to_invoice(self, records: Query) -> List[Customer]:
+        customers_to_invoice: List[Customer] = [
+            record.customer
+            for record in records.all()
+            if record.customer.internal_id != CustomerNames.cust000
+        ]
+        return list(set(customers_to_invoice))
 
     def get_pools_to_receive(self) -> List[Pool]:
         """Return all pools that have been not yet been received."""

@@ -351,15 +351,15 @@ def test_is_all_flow_cells_on_disk(
     assert f"{flow_cell.name}: status is {flow_cell.status}" in caplog.text
 
 
-def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
+def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_id: str):
     """Tests if the function in fact returns the correct customer."""
     # Given a store with a ticket
 
     # Then the function should return the customer connected to the ticket
-    assert analysis_store.get_customer_id_from_ticket(ticket) == customer_id
+    assert analysis_store.get_customer_id_from_ticket(ticket_id) == customer_id
 
 
-def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket: str):
+def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket_id: str):
     """Tests if the correct ticket is returned for the given case."""
     # GIVEN a populated store with a case
 
@@ -367,7 +367,7 @@ def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, t
     ticket_from_case: str = analysis_store_single_case.get_latest_ticket_from_case(case_id=case_id)
 
     # THEN the ticket should be correct
-    assert ticket == ticket_from_case
+    assert ticket_id == ticket_from_case
 
 
 def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
@@ -668,14 +668,21 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
     assert len(pools) == 1
 
 
-def test_get_case_action(store_with_active_sample_analyze: Store):
-    """Test to get the action of a case"""
-    # GIVEN a database with an active sample
+def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_samples: Store):
+    """Test that a case can be found by customer and case name."""
+    # GIVEN a database with multiple cases for a customer
+    case: Family = store_with_multiple_cases_and_samples._get_query(table=Family).first()
+    customer: Customer = store_with_multiple_cases_and_samples._get_query(table=Customer).first()
 
-    # WHEN fetching the case action
-    action: str = store_with_active_sample_analyze.get_case_action(
-        sample=store_with_active_sample_analyze.get_samples()[0].links[0]
+    assert case.customer == customer
+
+    # WHEN fetching a case by customer and case name
+    filtered_case: Family = store_with_multiple_cases_and_samples.get_case_by_name_and_customer(
+        customer=customer,
+        case_name=case.name,
     )
 
-    # THEN the action should be analyze
-    assert action == "analyze"
+    # THEN the correct case should be returned
+    assert filtered_case is not None
+    assert filtered_case.customer_id == customer.id
+    assert filtered_case.name == case.name

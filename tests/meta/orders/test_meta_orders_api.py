@@ -60,7 +60,7 @@ def test_submit(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket: str,
+    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -79,12 +79,12 @@ def test_submit(
     # THEN the result should contain the ticket number for the order
     for record in result["records"]:
         if isinstance(record, Pool):
-            assert record.ticket == ticket
+            assert record.ticket == ticket_id
         elif isinstance(record, Sample):
-            assert record.original_ticket == ticket
+            assert record.original_ticket == ticket_id
         elif isinstance(record, Family):
             for link_obj in record.links:
-                assert link_obj.sample.original_ticket == ticket
+                assert link_obj.sample.original_ticket == ticket_id
 
 
 def monkeypatch_process_lims(monkeypatch, order_data):
@@ -138,7 +138,7 @@ def test_submit_illegal_sample_customer(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket: str,
+    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -237,7 +237,7 @@ def test_submit_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket: str,
+    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -248,16 +248,16 @@ def test_submit_duplicate_sample_case_name(
 
     for sample in order_data.samples:
         case_id = sample.family_name
-        if not store.find_family(customer=customer, name=case_id):
+        if not store.get_case_by_name_and_customer(customer=customer, case_name=case_id):
             case: Family = store.add_case(
                 data_analysis=Pipeline.MIP_DNA,
                 data_delivery=DataDelivery.SCOUT,
                 name=case_id,
-                ticket=ticket,
+                ticket=ticket_id,
             )
             case.customer = customer
             store.add_commit(case)
-        assert store.find_family(customer=customer, name=case_id)
+        assert store.get_case_by_name_and_customer(customer=customer, case_name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -283,7 +283,7 @@ def test_submit_fluffy_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket: str,
+    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -311,7 +311,7 @@ def test_submit_unique_sample_case_name(
     mail_patch,
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,
-    ticket: str,
+    ticket_id: str,
     user_name: str,
     user_mail: str,
     monkeypatch,
@@ -325,7 +325,7 @@ def test_submit_unique_sample_case_name(
     for sample in order_data.samples:
         case_id = sample.family_name
         customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
-        assert not store.find_family(customer=customer, name=case_id)
+        assert not store.get_case_by_name_and_customer(customer=customer, case_name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -481,7 +481,7 @@ def test_submit_unique_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket: str,
+    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -534,7 +534,9 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
     customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
     for sample in order_data.samples:
         sample_name = sample.name
-        if not store.find_samples(customer=customer, name=sample_name).first():
+        if not store.get_sample_by_customer_and_name(
+            customer_entry_id=[customer.id], sample_name=sample_name
+        ):
             sample_obj = helpers.add_sample(
                 store=store, name=sample_name, customer_id=customer.internal_id
             )

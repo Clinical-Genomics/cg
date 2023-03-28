@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender
 from cg.store import Store
-from cg.store.models import Analysis, Family, Sample
+from cg.store.models import Analysis, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -146,7 +146,7 @@ def fixture_microbial_store(
 @pytest.fixture(name="analysis_obj")
 def fixture_analysis_obj(analysis_store: Store) -> Analysis:
     """Return an analysis object from a populated store."""
-    return analysis_store.analyses()[0]
+    return analysis_store._get_query(table=Analysis)[0]
 
 
 @pytest.fixture(name="case_obj")
@@ -284,3 +284,47 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
     )
 
     return store
+
+
+@pytest.fixture(name="store_with_case_and_analysis")
+def fixture_store_with_case_and_analysis(
+    store: Store, helpers: StoreHelpers, analysis_type: str = "wgs"
+) -> Store:
+    """Return a store with a case and analysis."""
+    # GIVEN a store with a case and analysis
+    case = helpers.add_case(store=store, name="test_case", internal_id="test_case_internal_id")
+    helpers.add_analysis(store=store, case=case)
+    yield store
+
+
+@pytest.fixture(name="store_with_older_and_newer_analyses")
+def fixture_store_with_older_and_newer_analyses(
+    base_store: Store,
+    helpers: StoreHelpers,
+    case_obj: Family,
+    timestamp_now: datetime.datetime,
+    timestamp_yesterday: datetime.datetime,
+    old_timestamp: datetime.datetime,
+) -> Store:
+    """Return a store with  older and newer analyses."""
+    analysis = base_store.Analysis.query.first()
+    analysis.uploaded_at = timestamp_now
+    analysis.uploaded_to_vogue_at = timestamp_now
+    analysis.cleaned_at = timestamp_now
+    analysis.started_at = timestamp_now
+    analysis.completed_at = timestamp_now
+    base_store.add_commit(analysis)
+    times = [timestamp_now, timestamp_yesterday, old_timestamp]
+    for time in times:
+        helpers.add_analysis(
+            store=base_store,
+            case=case_obj,
+            pipeline=Pipeline.BALSAMIC,
+            started_at=time,
+            completed_at=time,
+            uploaded_at=time,
+            uploaded_to_vogue_at=time,
+            cleaned_at=time,
+        )
+
+    yield base_store
