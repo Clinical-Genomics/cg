@@ -61,6 +61,7 @@ def delivery_report(
         click.echo(delivery_report_html)
         return
 
+    #Generate diferent delivery reports for original and demux?
     delivery_report_file: TextIO = report_api.create_delivery_report_file(
         case_id,
         file_path=Path(report_api.analysis_api.root, case_id),
