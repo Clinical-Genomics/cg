@@ -197,36 +197,17 @@ def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yes
     assert analysis_oldest not in analyses
 
 
-def test_multiple_analyses_and_cases(analysis_store, helpers, timestamp_now, timestamp_yesterday):
+def test_multiple_analyses_and_cases(
+    store_with_analyses_for_cases, helpers, timestamp_now, timestamp_yesterday
+):
     """Tests that analyses that are not latest are not returned."""
 
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
-    case_one = analysis_store.get_case_by_internal_id("yellowhog")
-    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
-
-    cases = [case_one, case_two]
-    for case in cases:
-        oldest_analysis = helpers.add_analysis(
-            analysis_store,
-            case=case,
-            started_at=timestamp_yesterday,
-            uploaded_at=timestamp_yesterday,
-            delivery_reported_at=None,
-        )
-        helpers.add_analysis(
-            analysis_store,
-            case=case,
-            started_at=timestamp_now,
-            uploaded_at=timestamp_now,
-            delivery_reported_at=None,
-        )
-        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
-            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
-        )
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.get_analyses_by_case_entry_id_and_latest_started_at_date()
+    analyses = (
+        store_with_analyses_for_cases.get_analyses_by_case_entry_id_and_latest_started_at_date()
+    )
 
     # THEN only the newest analysis should be returned
     for analysis in analyses:

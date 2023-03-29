@@ -93,7 +93,6 @@ class FindBusinessDataHandler(BaseHandler):
             records = records.filter(Analysis.completed_at > completed_after)
         if completed_before:
             records = records.filter(Analysis.completed_at < completed_before)
-
         return records
 
     def get_analyses_by_case_entry_id_and_latest_started_at_date(self) -> List[Analysis]:

@@ -23,3 +23,10 @@ def test_get_analysis_by_case(
     for analysis in analyses:
         assert analysis
         assert analysis.family == case
+
+
+def test_get_analyses_uploaded_to_vogue_with_completed_at(
+    store_with_analyses_for_cases: Store, case_id: str = "test_case_internal_id"
+):
+    """Test that an analysis can be fetched by case."""
+    # GIVEN a database with an analysis and case
