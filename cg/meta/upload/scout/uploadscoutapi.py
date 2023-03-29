@@ -108,7 +108,7 @@ class UploadScoutAPI:
 
     def get_multiqc_html_report(
         self, case_id: str, pipeline: Pipeline
-    ) -> Tuple[ScoutCustomCaseReportTags, Optional[hk_models.File]]:
+    ) -> Tuple[ScoutCustomCaseReportTags, Optional[File]]:
         """Get a multiqc report for case in housekeeper."""
         if pipeline == Pipeline.MIP_RNA:
             return (
@@ -131,7 +131,7 @@ class UploadScoutAPI:
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
-    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
+    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
         """Get a splice junctions bed file for case in housekeeper."""
 
         tags: Set[str] = {"junction", "bed", sample_id}
@@ -145,7 +145,7 @@ class UploadScoutAPI:
 
         return splice_junctions_bed
 
-    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
+    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
         """Get a RNA coverage bigwig file for case in housekeeper."""
 
         tags: Set[str] = {"coverage", "bigwig", sample_id}
@@ -154,7 +154,7 @@ class UploadScoutAPI:
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique dna cases related to a RNA case"""
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.family(case_id)
         rna_dna_sample_case_map: Dict[
             str, Dict[str, List[str]]
         ] = self.create_rna_dna_sample_case_map(rna_case=case_obj)
@@ -173,7 +173,7 @@ class UploadScoutAPI:
         """Upload fusion report file for a case to Scout."""
 
         report_type: str = "Research" if research else "Clinical"
-        rna_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+        rna_case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
@@ -208,7 +208,7 @@ class UploadScoutAPI:
         self,
         dry_run: bool,
         report_type: str,
-        report_file: hk_models.File,
+        report_file: File,
         rna_case_id: str,
     ) -> None:
         """Upload report file to DNA cases related to a RNA case in scout."""
@@ -226,7 +226,7 @@ class UploadScoutAPI:
         dry_run: bool,
         case_id: str,
         report_type: str,
-        report_file: hk_models.File,
+        report_file: File,
     ) -> None:
         """Upload report file a case to Scout."""
 
@@ -429,7 +429,7 @@ class UploadScoutAPI:
                 return sample
 
     def validate_number_of_dna_samples_by_subject_id(
-        self, samples_by_subject_id: List[models.Sample]
+        self, samples_by_subject_id: List[Sample]
     ) -> None:
         """Validates that there are two DNA samples with the same subject_id."""
 
@@ -441,7 +441,7 @@ class UploadScoutAPI:
 
     @staticmethod
     def _map_dna_cases_to_dna_sample(
-        dna_sample: models.Sample,
+        dna_sample: Sample,
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
         rna_sample: Sample,
     ) -> None:
@@ -458,10 +458,10 @@ class UploadScoutAPI:
 
     @staticmethod
     def _get_application_prep_category(
-        subject_id_samples: List[models.Sample],
-    ) -> List[Optional[models.Sample]]:
+        subject_id_samples: List[Sample],
+    ) -> List[Optional[Sample]]:
         """Filter a models.Sample list, returning DNA samples selected on their prep_category."""
-        subject_id_dna_samples: List[Optional[models.Sample]] = [
+        subject_id_dna_samples: List[Optional[Sample]] = [
             sample
             for sample in subject_id_samples
             if sample.prep_category
