@@ -158,6 +158,13 @@ class HousekeeperAPI:
         """
         return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
 
+    def get_latest_file(
+        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
+    ) -> Optional[File]:
+        """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
+        files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
+        return files.order_by(File.id.desc()).first()
+
     def check_bundle_files(
         self,
         bundle_name: str,
