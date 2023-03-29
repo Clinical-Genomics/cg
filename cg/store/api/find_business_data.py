@@ -153,7 +153,18 @@ class FindBusinessDataHandler(BaseHandler):
         customers: List[Customer] = None,
         case_internal_id_or_name_search_pattern: Optional[str] = None,
     ) -> Query:
-        """Fetch families."""
+        """
+        Fetch cases with optional filters applied.
+
+        Args:
+            action (Optional[str], default=None): Filter cases by the specified action, if provided.
+            pipeline (Optional[str], default=None): Filter cases by the specified pipeline, if provided.
+            customers (List[Customer], default=None): Filter cases by the customers in the list, if provided.
+            case_internal_id_or_name_search_pattern (Optional[str], default=None): Filter cases by searching for the given pattern in internal IDs or names, if provided.
+
+        Returns:
+            Query: A filtered query object containing cases based on the specified filters ordered by their creation date.
+        """
 
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_ACTION,
