@@ -109,7 +109,9 @@ class PoolSubmitter(Submitter):
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Pool]:
         """Store pools in the status database."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         new_pools: List[Pool] = []
         new_samples: List[Sample] = []
         for pool in items:
@@ -173,7 +175,9 @@ class PoolSubmitter(Submitter):
         self, customer_id: str, samples: List[RmlSample], ticket: str
     ):
         """Validate names of all samples are not already in use."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         for sample in samples:
             case_name: str = self.create_case_name(pool_name=sample.pool, ticket=ticket)
             if self.status.get_case_by_name_and_customer(customer=customer, case_name=case_name):
