@@ -736,6 +736,7 @@ def test_filter_cases_by_name(store_with_multiple_cases_and_samples: Store):
 
 
 def test_filter_cases_by_matching_internal_id_or_name(store_with_multiple_cases_and_samples: Store):
+    """Test that cases are returned when filtering by matching internal id or name."""
     # GIVEN a store containing cases with internal ids and names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     test_internal_id_pattern = cases_query.first().internal_id[:3]
