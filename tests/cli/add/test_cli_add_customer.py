@@ -71,8 +71,8 @@ def test_add_customer_with_collaboration(
         obj=base_context,
     )
 
-    new_customer: Customer = status_db.get_customer_by_internal_id(
-        customer_internal_id=NEW_TEST_CUST_INTERNAL_ID
+    new_customer: Customer = status_db.get_customer_by_customer_id(
+        customer_id=NEW_TEST_CUST_INTERNAL_ID
     )
 
     # THEN exit successfully

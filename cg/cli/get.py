@@ -135,7 +135,7 @@ def case(
     status_db: Store = context.obj.status_db
     status_db_cases: List[Family] = []
     if name:
-        customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
+        customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
         if not customer:
             LOG.error(f"{customer_id}: customer not found")
             raise click.Abort

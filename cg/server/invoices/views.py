@@ -54,7 +54,7 @@ def undo_invoice(invoice_id):
 
 def make_new_invoice():
     customer_id = request.form.get("customer")
-    customer: Customer = db.get_customer_by_internal_id(customer_internal_id=customer_id)
+    customer: Customer = db.get_customer_by_customer_id(customer_id=customer_id)
     record_ids = request.form.getlist("records")
     record_type = request.form.get("record_type")
     if len(record_ids) == 0:
@@ -137,7 +137,7 @@ def new(record_type):
     """Generate a new invoice."""
     count = request.args.get("total", 0)
     customer_id = request.args.get("customer", "cust002")
-    customer: Customer = db.get_customer_by_internal_id(customer_internal_id=customer_id)
+    customer: Customer = db.get_customer_by_customer_id(customer_id=customer_id)
     if record_type == "Sample":
         records: List[Union[Pool, Sample]] = db.get_samples_to_invoice_for_customer(
             customer=customer

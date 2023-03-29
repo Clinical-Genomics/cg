@@ -19,9 +19,7 @@ class SarsCov2Submitter(MicrobialSubmitter):
         self, samples: List[SarsCov2Sample], customer_id: str
     ) -> None:
         """Validate names of all samples are not already in use."""
-        customer: Customer = self.status.get_customer_by_internal_id(
-            customer_internal_id=customer_id
-        )
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         for sample in samples:
             if sample.control:
                 continue

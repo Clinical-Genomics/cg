@@ -27,7 +27,7 @@ def test_contact_storing(store: Store, contact_type, helpers):
 
     # THEN contact should be stored on the customer
     assert (
-        getattr(store.get_customer_by_internal_id(customer_internal_id=internal_id), contact_field)
+        getattr(store.get_customer_by_customer_id(customer_id=internal_id), contact_field)
         == new_user
     )
 

@@ -155,9 +155,7 @@ class TicketHandler:
 
     def add_customer_to_message(self, message: str, customer_id: str) -> str:
         """Add customer info to message and return updated message."""
-        customer: Customer = self.status_db.get_customer_by_internal_id(
-            customer_internal_id=customer_id
-        )
+        customer: Customer = self.status_db.get_customer_by_customer_id(customer_id=customer_id)
         message += f", {customer.name} ({customer_id})"
         return message
 

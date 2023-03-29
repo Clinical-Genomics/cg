@@ -202,7 +202,7 @@ class StoreHelpers:
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
         collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
-        customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
 
         if not customer:
             customer = store.add_customer(
@@ -715,7 +715,7 @@ class StoreHelpers:
     ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
-        customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
+        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
         if not customer:
             customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
 

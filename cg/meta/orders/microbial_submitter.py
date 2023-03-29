@@ -79,9 +79,7 @@ class MicrobialSubmitter(Submitter):
 
         sample_objs = []
 
-        customer: Customer = self.status.get_customer_by_internal_id(
-            customer_internal_id=customer_id
-        )
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         new_samples = []
 
         with self.status.session.no_autoflush:

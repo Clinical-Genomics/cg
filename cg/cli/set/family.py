@@ -106,7 +106,7 @@ def update_action(case: Family, action: str) -> None:
 
 
 def update_customer(case: Family, customer_id: str, status_db: Store) -> None:
-    customer_obj: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
+    customer_obj: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
 
     if customer_obj is None:
         LOG.error("Unknown customer: %s", customer_id)
