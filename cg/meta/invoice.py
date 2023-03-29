@@ -1,10 +1,21 @@
 from cg.apps.lims import LimsAPI
 from cg.server.ext import lims as genologics_lims
-from cg.store import Store, models
+from cg.server.ext import FlaskLims
+from cg.store import Store
+from typing import Optional, Union, List, Any
+from cg.store.models import Invoice, Customer, User, Sample, Pool
+from cg.constants.priority import PriorityTerms
+from cg.constants.sequencing import RecordType
+from cg.constants.invoice import (
+    CostCenters,
+    CustomerNames,
+)
+from cg.models.invoice.invoice import InvoiceContact, InvoiceApplication, InvoiceReport, InvoiceInfo
+from pydantic import ValidationError
 
 
 class InvoiceAPI:
-    def __init__(self, db: Store, lims_api: LimsAPI, invoice_obj: models.Invoice):
+    def __init__(self, db: Store, lims_api: LimsAPI, invoice_obj: Invoice):
         self.db = db
         self.lims_api = lims_api
         self.log = []
@@ -13,103 +24,125 @@ class InvoiceAPI:
         self.record_type = ""
         self.raw_records = []
         self._set_record_type()
+        self.genologics_lims: FlaskLims = genologics_lims
+        self.invoice_info: Optional[InvoiceInfo] = None
 
     def _set_record_type(self):
         """Define the record_type based on the invoice object.
-        It can only be either pool or sample"""
-
+        It can only be either pool or sample."""
         if self.invoice_obj.pools:
             self.raw_records = self.invoice_obj.pools
-            self.record_type = "Pool"
+            self.record_type = RecordType.Pool
         elif self.invoice_obj.samples:
-            self.record_type = "Sample"
+            self.record_type = RecordType.Sample
             self.raw_records = self.invoice_obj.samples
 
-    def prepare_contact_info(self, costcenter):
-        """Function to prepare contact info for a customer"""
+    def get_customer_by_cost_center(self, cost_center: str) -> Union[Customer, str]:
+        """Return the costumer based on cost center."""
+        return (
+            self.db.get_customer_by_customer_id(customer_id=CustomerNames.cust999)
+            if cost_center.lower() == CostCenters.kth
+            else self.customer_obj
+        )
+
+    def get_customer_invoice_contact(self, customer: Customer, msg: str) -> Any:
+        """Return the customer invoice contact."""
+        if not customer.invoice_contact:
+            self.log.append(msg)
+            return None
+        return customer.invoice_contact
+
+    def get_contact(
+        self, customer: Customer, customer_invoice_contact: Optional[User], msg: str
+    ) -> Optional[InvoiceContact]:
+        """Return the contact information."""
+        try:
+            contact = InvoiceContact(
+                name=customer_invoice_contact.name,
+                email=customer_invoice_contact.email,
+                customer_name=customer.name,
+                reference=customer.invoice_reference,
+                address=customer.invoice_address,
+            )
+            return contact
+
+        except ValidationError:
+            self.log.append(msg)
+            return None
+
+    def get_contact_info(self, cost_center: str) -> Optional[InvoiceContact]:
+        """Return contact info for a customer."""
 
         msg = (
             f"Could not open/generate invoice. Contact information missing in database for "
             f"customer {self.customer_obj.internal_id}. See log files."
         )
+        customer = self.get_customer_by_cost_center(cost_center=cost_center)
+        customer_invoice_contact = self.get_customer_invoice_contact(customer=customer, msg=msg)
+        return self.get_contact(
+            customer_invoice_contact=customer_invoice_contact, customer=customer, msg=msg
+        )
 
-        customer = self.db.customer("cust999") if costcenter.lower() == "kth" else self.customer_obj
-        user = customer.invoice_contact
+    def get_invoice_report(self, cost_center: str) -> Optional[dict]:
+        """Return invoice information as dictionary to generate Excel report."""
 
-        if not user:
-            self.log.append(msg)
-            return None
-
-        contact = {
-            "name": user.name,
-            "email": user.email,
-            "customer_name": customer.name,
-            "reference": customer.invoice_reference,
-            "address": customer.invoice_address,
-        }
-
-        if None in contact.values():
-            self.log.append(msg)
-            return None
-
-        return contact
-
-    def prepare(self, costcenter: str) -> dict:
-        """Get information about an invoice to generate Excel report."""
-
-        records = []
-        pooled_samples = []
+        records: List[dict] = []
+        pooled_samples: List = []
 
         for raw_record in self.raw_records:
-            if self.record_type == "Pool":
-                pooled_samples += genologics_lims.samples_in_pools(
+            if self.record_type == RecordType.Pool:
+                pooled_samples += self.genologics_lims.samples_in_pools(
                     raw_record.name, raw_record.ticket
                 )
-            record = self.prepare_record(
-                costcenter=costcenter.lower(), discount=self.invoice_obj.discount, record=raw_record
+            record = self.get_invoice_entity_record(
+                cost_center=cost_center.lower(),
+                discount=self.invoice_obj.discount,
+                record=raw_record,
             )
             if record:
-                records.append(record)
+                records.append(record.dict())
             else:
                 return None
 
         customer_obj = self.invoice_obj.customer
-        contact = self.prepare_contact_info(costcenter)
+        contact = self.get_contact_info(cost_center)
         if not contact:
             return None
-        return {
-            "costcenter": costcenter,
-            "project_number": getattr(customer_obj, f"project_account_{costcenter.lower()}"),
-            "customer_id": customer_obj.internal_id,
-            "customer_name": customer_obj.name,
-            "agreement": customer_obj.agreement_registration,
-            "invoice_id": self.invoice_obj.id,
-            "contact": contact,
-            "records": records,
-            "pooled_samples": pooled_samples,
-            "record_type": self.record_type,
-        }
 
-    def _discount_price(self, record, discount: int = 0):
-        """Get discount price for a sample or pool."""
+        try:
+            invoice_report = InvoiceReport(
+                cost_center=cost_center,
+                project_number=getattr(customer_obj, f"project_account_{cost_center.lower()}"),
+                customer_id=customer_obj.internal_id,
+                customer_name=customer_obj.name,
+                agreement=customer_obj.agreement_registration,
+                invoice_id=self.invoice_obj.id,
+                contact=contact.dict(),
+                records=records,
+                pooled_samples=pooled_samples,
+                record_type=self.record_type,
+            )
+            return invoice_report.dict()
+        except ValidationError:
+            self.log.append("ValidationError in InvoiceReport class.")
+            return None
 
-        if self.record_type == "Pool" or record.priority_human == "clinical trials":
-            priority = "research"
-        else:
-            priority = record.priority_human
-
+    def _discount_price(self, record: Sample or Pool, discount: int = 0) -> Optional[int]:
+        """Return discount price for a sample or pool."""
+        priority = self.get_priority(record, for_discount_price=True)
         full_price = getattr(record.application_version, f"price_{priority}")
         discount_factor = 1 - discount / 100
-
         if not full_price:
             return None
         return round(full_price * discount_factor)
 
-    def _cost_center_split_factor(self, price, costcenter, percent_kth, tag, version):
-        """Split price based on cost center"""
+    def _cost_center_split_factor(
+        self, price: int, cost_center: str, percent_kth: int, tag: str, version: str
+    ) -> Optional[int]:
+        """Return split price based on cost center."""
         if price:
             try:
-                if costcenter == "kth":
+                if cost_center == CostCenters.kth:
                     split_factor = percent_kth / 100
                 else:
                     split_factor = 1 - percent_kth / 100
@@ -127,47 +160,109 @@ class InvoiceAPI:
             return None
         return split_price
 
-    def prepare_record(self, costcenter: str, discount: int, record):
-        """Get invoice information for a specific sample or pool"""
-
-        try:
-            tag = record.application_version.application.tag
-            version = str(record.application_version.version)
-            percent_kth = record.application_version.application.percent_kth
-            discounted_price = self._discount_price(record, discount)
-        except ValueError:
-            self.log.append(f"Application tag/version seems to be missing for sample {record.id}.")
-            return None
+    def get_invoice_entity_record(
+        self, cost_center: str, discount: int, record: Sample or Pool
+    ) -> InvoiceInfo:
+        """Return invoice information for a specific sample or pool."""
+        application = self.get_application(record=record, discount=discount)
 
         split_discounted_price = self._cost_center_split_factor(
-            discounted_price, costcenter, percent_kth, tag, version
+            price=application.discounted_price,
+            cost_center=cost_center,
+            percent_kth=application.percent_kth,
+            tag=application.tag,
+            version=application.version,
+        )
+        invoice_info = self.get_invoice_info(
+            record=record,
+            split_discounted_price=split_discounted_price,
+            cost_center=cost_center,
+            application=application,
         )
 
-        order = record.order
-        ticket = record.ticket if self.record_type == "Pool" else record.original_ticket
-        lims_id = None if self.record_type == "Pool" else record.internal_id
-        priority = "research" if self.record_type == "Pool" else record.priority_human
-
-        invoice_info = {
-            "name": record.name,
-            "lims_id": lims_id,
-            "id": record.id,
-            "application_tag": record.application_version.application.tag,
-            "project": f"{order or 'NA'} ({ticket or 'NA'})",
-            "date": record.received_at.date() if record.received_at else "",
-            "price": split_discounted_price,
-            "priority": priority,
-        }
-        if costcenter == "ki":
-            price_kth = self._cost_center_split_factor(
-                discounted_price, "kth", percent_kth, tag, version
-            )
-            invoice_info["price_kth"] = price_kth
-            invoice_info["total_price"] = discounted_price
         return invoice_info
 
-    def total_price(self) -> float:
-        """Get the total price for all records in the invoice"""
+    def get_application(
+        self, record: Sample or Pool, discount: int
+    ) -> Optional[InvoiceApplication]:
+        """Return the application information."""
+        try:
+            application = InvoiceApplication(
+                tag=record.application_version.application.tag,
+                version=record.application_version.version,
+                percent_kth=record.application_version.application.percent_kth,
+                discounted_price=self._discount_price(record, discount),
+            )
+            return application
+
+        except ValidationError:
+            self.log.append(f"Application tag/version seems to be missing for sample {record.id}.")
+
+            return None
+
+    def get_ticket(self, record: Sample or Pool) -> str:
+        """Return ticket."""
+        return record.ticket if self.record_type == RecordType.Pool else record.original_ticket
+
+    def get_lims_id(self, record: Sample or Pool) -> str:
+        """Return Lims id."""
+        return None if self.record_type == RecordType.Pool else record.internal_id
+
+    def get_priority(self, record: Sample or Pool, for_discount_price: bool = False) -> str:
+        """Return the priority."""
+        if self.customer_obj.internal_id == CustomerNames.cust032:
+            priority = PriorityTerms.STANDARD
+        elif self.record_type == RecordType.Pool or (
+            record.priority_human == "clinical trials" and for_discount_price
+        ):
+            priority = PriorityTerms.RESEARCH
+        else:
+            priority = record.priority_human
+        return priority
+
+    def get_invoice_info(
+        self, record, split_discounted_price: int, cost_center: str, application: InvoiceApplication
+    ) -> InvoiceInfo:
+        """Return the invoice_info to be used in the invoice report."""
+        order = record.order
+        ticket = self.get_ticket(record)
+        lims_id = self.get_lims_id(record)
+        priority = self.get_priority(record)
+        price_kth: int = 0
+        if cost_center == CostCenters.ki:
+            price_kth: int = self._cost_center_split_factor(
+                price=application.discounted_price,
+                cost_center=CostCenters.kth,
+                percent_kth=application.percent_kth,
+                tag=application.tag,
+                version=application.version,
+            )
+
+        try:
+            invoice_info = InvoiceInfo(
+                name=record.name,
+                lims_id=lims_id,
+                id=record.id,
+                application_tag=record.application_version.application.tag,
+                project=f"{order or 'NA'} ({ticket or 'NA'})",
+                date=record.received_at.date() if record.received_at else "",
+                price=split_discounted_price,
+                priority=priority,
+                price_kth=price_kth if cost_center == CostCenters.ki else None,
+                total_price=application.discounted_price if cost_center == CostCenters.ki else None,
+            )
+            self.set_invoice_info(invoice_info=invoice_info)
+            return invoice_info
+
+        except ValidationError:
+            self.log.append("ValidationError in InvoiceInfo class.")
+
+    def set_invoice_info(self, invoice_info: InvoiceInfo):
+        """Set invoice_info."""
+        self.invoice_info = invoice_info
+
+    def total_price(self) -> Optional[float]:
+        """Return the total price for all records in the invoice."""
 
         discount = self.invoice_obj.discount
         total_price = 0
@@ -178,5 +273,4 @@ class InvoiceAPI:
                 total_price += discount_price
             else:
                 return None
-
         return total_price

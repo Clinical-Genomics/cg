@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, validator
-from datetime import date, datetime
+from datetime import datetime
 
 from cg.meta.upload.gisaid.constants import AUTHORS
 

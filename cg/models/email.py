@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional
 
-from pydantic import EmailStr
 
 from cg.models.cg_config import EmailBaseSettings
 

@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Any, Callable
 
 import pytest
 
@@ -13,6 +12,7 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.meta.workflow.mip_rna import MipRNAAnalysisAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
+from cg.store.api.find_business_data import FindBusinessDataHandler
 from cg.store.api.status import StatusHandler
 from cg.store.models import Family
 from tests.store_helpers import StoreHelpers
@@ -109,7 +109,7 @@ def fixture_mip_rna_context(
     cg_context.housekeeper_api_ = housekeeper_api
     cg_context.trailblazer_api_ = tb_api
     analysis_family_single_case["data_analysis"] = str(Pipeline.MIP_RNA)
-    if not cg_context.status_db.family(case_id):
+    if not cg_context.status_db.get_case_by_internal_id(internal_id=case_id):
         helpers.ensure_case_from_dict(
             cg_context.status_db, case_info=analysis_family_single_case, app_tag=apptag_rna
         )
@@ -131,12 +131,12 @@ def fixture_mip_dna_context(
     mip_analysis_api = MipDNAAnalysisAPI(config=cg_context)
 
     # Add apptag to db
-    helpers.ensure_application_version(store=_store, application_tag="WGSA", application_type="wgs")
+    helpers.ensure_application_version(store=_store, application_tag="WGSA", prep_category="wgs")
 
     # Add sample, cases and relationships to db
 
     for case_id in mip_case_ids:
-        if not _store.family(case_id):
+        if not _store.get_case_by_internal_id(internal_id=case_id):
             case_obj = helpers.add_case(
                 store=_store,
                 data_analysis=Pipeline.MIP_DNA,
@@ -192,5 +192,8 @@ def setup_mocks(
     mocker.patch.object(PrepareFastqAPI, "check_fastq_links")
     PrepareFastqAPI.check_fastq_links.return_value = None
 
-    mocker.patch.object(MipDNAAnalysisAPI, "resolve_panel_bed")
-    MipDNAAnalysisAPI.resolve_panel_bed.return_value = "bla"
+    mocker.patch.object(MipDNAAnalysisAPI, "get_panel_bed")
+    MipDNAAnalysisAPI.get_panel_bed.return_value = "a_string"
+
+    mocker.patch.object(FindBusinessDataHandler, "is_all_flow_cells_on_disk")
+    FindBusinessDataHandler.is_all_flow_cells_on_disk.return_value = True

@@ -1,6 +1,5 @@
 """ Fixtures for microsalt CLI test """
 
-from pathlib import Path
 
 import pytest
 from cg.apps.hermes.hermes_api import HermesApi

@@ -23,7 +23,7 @@ def fixture_mip_dna_context(cg_context, helpers, case_id, real_housekeeper_api) 
     helpers.ensure_application_version(
         store=store,
         application_tag="WGSA",
-        application_type="wgs",
+        prep_category="wgs",
     )
     case = helpers.add_case(
         store=store,

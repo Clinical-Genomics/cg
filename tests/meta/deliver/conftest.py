@@ -1,14 +1,14 @@
-"""Fixtures for backup tests"""
-
+"""Fixtures for backup tests."""
 from pathlib import Path
 
 import pytest
 from tests.store_helpers import StoreHelpers
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
+from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family
 
 
 @pytest.fixture(scope="function", name="deliver_api")
@@ -24,7 +24,7 @@ def fixture_deliver_api(
         store=analysis_store,
         hk_api=real_housekeeper_api,
         case_tags=[{"case-tag"}],
-        sample_tags=[{"sample-tag"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
     )
@@ -33,19 +33,13 @@ def fixture_deliver_api(
 
 @pytest.fixture(name="delivery_hk_api")
 def fixture_delivery_hk_api(
-    case_hk_bundle_no_files: dict,
-    sample1_cram: Path,
-    vcf_file: Path,
+    mip_delivery_bundle,
     real_housekeeper_api: HousekeeperAPI,
     helpers=StoreHelpers,
 ) -> HousekeeperAPI:
     """Fixture that returns a housekeeper database with delivery data"""
 
-    case_hk_bundle_no_files["files"] = [
-        {"path": str(sample1_cram), "archive": False, "tags": ["cram", "ADM1"]},
-        {"path": str(vcf_file), "archive": False, "tags": ["vcf-snv-clinical"]},
-    ]
-    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=case_hk_bundle_no_files)
+    helpers.ensure_hk_bundle(real_housekeeper_api, bundle_data=mip_delivery_bundle)
     return real_housekeeper_api
 
 
@@ -57,8 +51,8 @@ def fixture_populated_deliver_api(
     _deliver_api = DeliverAPI(
         store=analysis_store,
         hk_api=delivery_hk_api,
-        case_tags=["case-tag"],
-        sample_tags=["sample-tag"],
+        case_tags=[{"case-tag"}],
+        sample_tags=[{AlignmentFileTag.CRAM}],
         project_base_path=project_dir,
         delivery_type="balsamic",
     )
@@ -96,6 +90,6 @@ def fixture_samples_missing_in_inbox(
 
 @pytest.fixture(name="deliver_api_destination_path")
 def fixture_deliver_api_destination_path(
-    customer_id: str, case_obj: models.Family, ticket: str
+    customer_id: str, case_obj: Family, ticket_id: str
 ) -> Path:
-    return Path(customer_id, INBOX_NAME, ticket, case_obj.name)
+    return Path(customer_id, INBOX_NAME, ticket_id, case_obj.name)

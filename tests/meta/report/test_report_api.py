@@ -9,7 +9,7 @@ from cg.models.report.sample import SampleModel, ApplicationModel, MethodsModel,
 
 from cg.models.mip.mip_analysis import MipAnalysis
 
-from cg.store import models
+from cg.store.models import Analysis
 
 from cg.constants import REPORT_GENDER
 from cg.exc import DeliveryReportError
@@ -177,8 +177,8 @@ def test_get_report_version_version(report_api_mip_dna, store, helpers, timestam
     """Validates the extracted report versions of two analyses."""
 
     # GIVEN a specific set of analyses
-    last_analysis: models.Analysis = helpers.add_analysis(store, completed_at=datetime.now())
-    first_analysis: models.Analysis = helpers.add_analysis(
+    last_analysis: Analysis = helpers.add_analysis(store, completed_at=datetime.now())
+    first_analysis: Analysis = helpers.add_analysis(
         store, last_analysis.family, completed_at=timestamp_yesterday
     )
 

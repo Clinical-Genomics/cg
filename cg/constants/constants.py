@@ -1,4 +1,5 @@
 """Constants for cg."""
+
 import click
 from cgmodels.cg.constants import StrEnum
 
@@ -40,7 +41,7 @@ CASE_ACTIONS = [action.value for action in CaseActions]
 COLLABORATORS = ("cust000", "cust002", "cust003", "cust004", "cust042")
 
 COMBOS = {
-    "DSD": ("DSD", "HYP", "SEXDIF", "SEXDET"),
+    "DSD": ("DSD", "DSD-S", "HYP", "SEXDIF", "SEXDET"),
     "CM": ("CNM", "CM"),
     "Horsel": ("Horsel", "141217", "141201"),
 }
@@ -53,7 +54,7 @@ DEFAULT_CAPTURE_KIT = "twistexomerefseq_9.1_hg19_design.bed"
 
 
 class FlowCellStatus(StrEnum):
-    ONDISK: str = "ondisk"
+    ON_DISK: str = "ondisk"
     REMOVED: str = "removed"
     REQUESTED: str = "requested"
     PROCESSING: str = "processing"
@@ -67,6 +68,14 @@ FLOWCELL_Q30_THRESHOLD = {
     Sequencers.HISEQGA: 80,
     Sequencers.NOVASEQ: 75,
 }
+
+
+class AnalysisType(StrEnum):
+    TARGETED_GENOME_SEQUENCING: str = "tgs"
+    WHOLE_EXOME_SEQUENCING: str = "wes"
+    WHOLE_GENOME_SEQUENCING: str = "wgs"
+    WHOLE_TRANSCRIPTOME_SEQUENCING: str = "wts"
+    OTHER: str = "other"
 
 
 class PrepCategory(StrEnum):
@@ -89,6 +98,7 @@ STATUS_OPTIONS = ("affected", "unaffected", "unknown")
 
 
 class FileFormat(StrEnum):
+    FASTQ: str = "fastq"
     JSON: str = "json"
     YAML: str = "yaml"
 
@@ -124,6 +134,8 @@ class HastaSlurmPartitions(StrEnum):
 
 
 class FileExtensions(StrEnum):
+    BED: str = ".bed"
+    CRAM: str = ".cram"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"
@@ -170,7 +182,11 @@ class MicrosaltQC:
 class MicrosaltAppTags(StrEnum):
     MWRNXTR003: str = "MWRNXTR003"
     MWXNXTR003: str = "MWXNXTR003"
-    APP_TYPE: str = "mic"
+    PREP_CATEGORY: str = "mic"
 
 
 DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
+
+
+class MetaApis:
+    ANALYSIS_API: str = "analysis_api"

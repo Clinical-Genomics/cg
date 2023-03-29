@@ -9,15 +9,19 @@ import pytest
 from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.constants.sequencing import Sequencers
 from cg.meta.transfer import TransferFlowCell
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.store import Store
-from cg.store.models import Flowcell, Customer, ApplicationVersion
+from cg.store.models import Customer, ApplicationVersion, Invoice, Sample
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.store_helpers import StoreHelpers
+from tests.mocks.limsmock import MockLimsAPI
+from cg.constants.sequencing import RecordType
+from cg.constants.invoice import CustomerNames
+from cg.meta.invoice import InvoiceAPI
 
 
 @pytest.fixture(scope="function", name="mip_hk_store")
@@ -212,12 +216,14 @@ def fixture_flowcell_store(
 ) -> Generator[Store, None, None]:
     """Setup store with sample data for testing flow cell transfer."""
     for sample_data in stats_sample_data["samples"]:
-        customer_obj: Customer = base_store.customers().first()
-        application_version: ApplicationVersion = base_store.application("WGSPCFC030").versions[0]
-        sample: models.Sample = base_store.add_sample(
+        customer: Customer = (base_store.get_customers())[0]
+        application_version: ApplicationVersion = base_store.get_application_by_tag(
+            "WGSPCFC030"
+        ).versions[0]
+        sample: Sample = base_store.add_sample(
             name="NA", sex="male", internal_id=sample_data["name"]
         )
-        sample.customer = customer_obj
+        sample.customer = customer
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
         base_store.add(sample)
@@ -231,3 +237,61 @@ def fixture_transfer_flow_cell_api(
 ) -> Generator[TransferFlowCell, None, None]:
     """Setup transfer flow cell API."""
     yield TransferFlowCell(db=flowcell_store, stats_api=base_store_stats, hk_api=housekeeper_api)
+
+
+@pytest.fixture(name="get_invoice_api_sample")
+def fixture_invoice_api_sample(
+    store: Store,
+    lims_api: MockLimsAPI,
+    helpers: StoreHelpers,
+    invoice_id: int = 0,
+    customer_id: str = CustomerNames.cust132,
+) -> InvoiceAPI:
+    """Return an InvoiceAPI with samples."""
+    sample = helpers.add_sample(store, customer_id=customer_id)
+    invoice: Invoice = helpers.ensure_invoice(
+        store,
+        invoice_id=invoice_id,
+        customer_id=customer_id,
+        samples=[sample],
+    )
+    return InvoiceAPI(store, lims_api, invoice)
+
+
+@pytest.fixture(name="get_invoice_api_nipt_customer")
+def fixture_invoice_api_nipt_customer(
+    store: Store,
+    lims_api: MockLimsAPI,
+    helpers: StoreHelpers,
+    invoice_id: int = 0,
+    customer_id: str = CustomerNames.cust032,
+) -> InvoiceAPI:
+    """Return an InvoiceAPI with a pool for NIPT customer."""
+    pool = helpers.ensure_pool(store, customer_id=customer_id)
+    invoice: Invoice = helpers.ensure_invoice(
+        store,
+        invoice_id=invoice_id,
+        customer_id=customer_id,
+        pools=[pool],
+    )
+    return InvoiceAPI(store, lims_api, invoice)
+
+
+@pytest.fixture(name="get_invoice_api_pool_generic_customer")
+def fixture_invoice_api_pool_generic_customer(
+    store: Store,
+    lims_api: MockLimsAPI,
+    helpers: StoreHelpers,
+    invoice_id: int = 0,
+    record_type: str = RecordType.Pool,
+    customer_id: str = CustomerNames.cust132,
+) -> InvoiceAPI:
+    """Return an InvoiceAPI with a pool."""
+    pool = helpers.ensure_pool(store, customer_id=customer_id)
+    invoice: Invoice = helpers.ensure_invoice(
+        store,
+        invoice_id=invoice_id,
+        pools=[pool],
+        customer_id=customer_id,
+    )
+    return InvoiceAPI(store, lims_api, invoice)

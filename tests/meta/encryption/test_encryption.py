@@ -1,7 +1,6 @@
 """Tests for the meta EncryptionAPI and SpringEncryptionAPI"""
 import logging
 import pathlib
-from pathlib import Path
 
 import mock
 import pytest

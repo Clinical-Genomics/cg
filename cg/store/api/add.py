@@ -5,11 +5,27 @@ from typing import List, Optional
 import petname
 
 from cg.constants import DataDelivery, Pipeline, FlowCellStatus
-from cg.store import models
 from cg.store.api.base import BaseHandler
 
 from cg.constants import Priority
-from cg.store.models import Flowcell
+from cg.store.models import (
+    Flowcell,
+    Organism,
+    Customer,
+    Sample,
+    Pool,
+    Delivery,
+    ApplicationVersion,
+    Panel,
+    Analysis,
+    Family,
+    FamilySample,
+    Bed,
+    BedVersion,
+    Application,
+    User,
+    Collaboration,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -20,7 +36,7 @@ class AddHandler(BaseHandler):
     def generate_unique_petname(self) -> str:
         while True:
             random_id = petname.Generate(3, separator="")
-            if not self.sample(random_id):
+            if not self.get_sample_by_internal_id(internal_id=random_id):
                 return random_id
 
     def add_customer(
@@ -32,7 +48,7 @@ class AddHandler(BaseHandler):
         scout_access: bool = False,
         *args,
         **kwargs,
-    ) -> models.Customer:
+    ) -> Customer:
         """Build a new customer record."""
 
         return self.Customer(
@@ -44,14 +60,12 @@ class AddHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_collaboration(self, internal_id: str, name: str, **kwargs) -> models.Collaboration:
+    def add_collaboration(self, internal_id: str, name: str, **kwargs) -> Collaboration:
         """Build a new customer group record."""
 
         return self.Collaboration(internal_id=internal_id, name=name, **kwargs)
 
-    def add_user(
-        self, customer: models.Customer, email: str, name: str, is_admin: bool = False
-    ) -> models.User:
+    def add_user(self, customer: Customer, email: str, name: str, is_admin: bool = False) -> User:
         """Build a new user record."""
 
         new_user = self.User(name=name, email=email, is_admin=is_admin)
@@ -61,18 +75,18 @@ class AddHandler(BaseHandler):
     def add_application(
         self,
         tag: str,
-        category: str,
+        prep_category: str,
         description: str,
         percent_kth: int,
         percent_reads_guaranteed: int,
         is_accredited: bool = False,
         **kwargs,
-    ) -> models.Application:
+    ) -> Application:
         """Build a new application  record."""
 
         return self.Application(
             tag=tag,
-            prep_category=category,
+            prep_category=prep_category,
             description=description,
             is_accredited=is_accredited,
             percent_kth=percent_kth,
@@ -82,12 +96,12 @@ class AddHandler(BaseHandler):
 
     def add_version(
         self,
-        application: models.Application,
+        application: Application,
         version: int,
         valid_from: dt.datetime,
         prices: dict,
         **kwargs,
-    ) -> models.ApplicationVersion:
+    ) -> ApplicationVersion:
         """Build a new application version record."""
 
         new_record = self.ApplicationVersion(version=version, valid_from=valid_from, **kwargs)
@@ -101,18 +115,17 @@ class AddHandler(BaseHandler):
         new_record.application = application
         return new_record
 
-    def add_bed(self, name: str, **kwargs) -> models.Bed:
+    def add_bed(self, name: str) -> Bed:
         """Build a new bed record."""
-        return self.Bed(name=name, **kwargs)
+        return self.Bed(name=name)
 
-    def add_bed_version(
-        self, bed: models.Bed, version: int, filename: str, **kwargs
-    ) -> models.BedVersion:
+    def add_bed_version(self, bed: Bed, version: int, filename: str, shortname: str) -> BedVersion:
         """Build a new bed version record."""
-
-        new_record = self.BedVersion(version=version, filename=filename, **kwargs)
-        new_record.bed = bed
-        return new_record
+        bed_version: BedVersion = self.BedVersion(
+            version=version, filename=filename, shortname=shortname
+        )
+        bed_version.bed = bed
+        return bed_version
 
     def add_sample(
         self,
@@ -129,7 +142,7 @@ class AddHandler(BaseHandler):
         original_ticket: str = None,
         tumour: bool = False,
         **kwargs,
-    ) -> models.Sample:
+    ) -> Sample:
         """Build a new Sample record."""
 
         internal_id = internal_id or self.generate_unique_petname()
@@ -160,13 +173,13 @@ class AddHandler(BaseHandler):
         cohorts: Optional[List[str]] = None,
         priority: Optional[Priority] = Priority.standard,
         synopsis: Optional[str] = None,
-    ) -> models.Family:
+    ) -> Family:
         """Build a new Family record."""
 
         # generate a unique case id
         while True:
             internal_id = petname.Generate(2, separator="")
-            if self.family(internal_id) is None:
+            if self.get_case_by_internal_id(internal_id) is None:
                 break
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
@@ -185,12 +198,12 @@ class AddHandler(BaseHandler):
 
     def relate_sample(
         self,
-        family: models.Family,
-        sample: models.Sample,
+        family: Family,
+        sample: Sample,
         status: str,
-        mother: models.Sample = None,
-        father: models.Sample = None,
-    ) -> models.FamilySample:
+        mother: Sample = None,
+        father: Sample = None,
+    ) -> FamilySample:
         """Relate a sample record to a family record."""
 
         new_record = self.FamilySample(status=status)
@@ -206,7 +219,7 @@ class AddHandler(BaseHandler):
         sequencer_name: str,
         sequencer_type: str,
         date: dt.datetime,
-        flow_cell_status: Optional[str] = FlowCellStatus.ONDISK,
+        flow_cell_status: Optional[str] = FlowCellStatus.ON_DISK,
     ) -> Flowcell:
         """Build a new Flowcell record."""
         return self.Flowcell(
@@ -226,7 +239,7 @@ class AddHandler(BaseHandler):
         uploaded: dt.datetime = None,
         started_at: dt.datetime = None,
         **kwargs,
-    ) -> models.Analysis:
+    ) -> Analysis:
         """Build a new Analysis record."""
         return self.Analysis(
             pipeline=str(pipeline),
@@ -240,13 +253,13 @@ class AddHandler(BaseHandler):
 
     def add_panel(
         self,
-        customer: models.Customer,
+        customer: Customer,
         name: str,
         abbrev: str,
         version: float,
         date: dt.datetime = None,
         genes: int = None,
-    ) -> models.Panel:
+    ) -> Panel:
         """Build a new panel record."""
 
         new_record = self.Panel(
@@ -257,16 +270,19 @@ class AddHandler(BaseHandler):
 
     def add_pool(
         self,
-        customer: models.Customer,
+        customer: Customer,
         name: str,
         order: str,
         ordered: dt.datetime,
-        application_version: models.ApplicationVersion,
+        application_version: ApplicationVersion,
         ticket: str = None,
         comment: str = None,
-        received: dt.datetime = None,
+        received_at: dt.datetime = None,
         capture_kit: str = None,
-    ) -> models.Pool:
+        invoice_id: int = None,
+        no_invoice: bool = None,
+        delivered_at: dt.datetime = None,
+    ) -> Pool:
         """Build a new Pool record."""
 
         new_record = self.Pool(
@@ -274,9 +290,12 @@ class AddHandler(BaseHandler):
             ordered_at=ordered or dt.datetime.now(),
             order=order,
             ticket=ticket,
-            received_at=received,
+            received_at=received_at,
             comment=comment,
             capture_kit=capture_kit,
+            delivered_at=delivered_at,
+            invoice_id=invoice_id,
+            no_invoice=no_invoice,
         )
         new_record.customer = customer
         new_record.application_version = application_version
@@ -285,10 +304,10 @@ class AddHandler(BaseHandler):
     def add_delivery(
         self,
         destination: str,
-        sample: models.Sample = None,
-        pool: models.Pool = None,
+        sample: Sample = None,
+        pool: Pool = None,
         comment: str = None,
-    ) -> models.Delivery:
+    ) -> Delivery:
         """Build a new Delivery record."""
 
         if not any([sample, pool]):
@@ -300,19 +319,24 @@ class AddHandler(BaseHandler):
 
     def add_invoice(
         self,
-        customer: models.Customer,
-        samples: List[models.Sample] = None,
-        microbial_samples: List[models.Sample] = None,
-        pools: List[models.Pool] = None,
+        customer: Customer,
+        samples: List[Sample] = None,
+        microbial_samples: List[Sample] = None,
+        pools: List[Pool] = None,
         comment: str = None,
         discount: int = 0,
         record_type: str = None,
+        invoiced_at: Optional[dt.datetime] = None,
     ):
         """Build a new Invoice record."""
 
         new_id = self.new_invoice_id()
         new_invoice = self.Invoice(
-            comment=comment, discount=discount, id=new_id, record_type=record_type
+            comment=comment,
+            discount=discount,
+            id=new_id,
+            record_type=record_type,
+            invoiced_at=invoiced_at,
         )
         new_invoice.customer = customer
         for sample in samples or []:
@@ -330,7 +354,7 @@ class AddHandler(BaseHandler):
         reference_genome: str = None,
         verified: bool = False,
         **kwargs,
-    ) -> models.Organism:
+    ) -> Organism:
         """Build a new Organism record."""
         return self.Organism(
             internal_id=internal_id,

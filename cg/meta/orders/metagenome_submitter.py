@@ -9,8 +9,8 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
-from cg.models.orders.samples import OrderInSample, MetagenomeSample
-from cg.store import models
+from cg.models.orders.samples import MetagenomeSample
+from cg.store.models import Customer, Family, Sample
 
 
 class MetagenomeSubmitter(Submitter):
@@ -20,14 +20,14 @@ class MetagenomeSubmitter(Submitter):
     def _validate_sample_names_are_unique(
         self, samples: List[MetagenomeSample], customer_id: str
     ) -> None:
-        """Validate that the names of all samples are unused"""
-        customer_obj: models.Customer = self.status.customer(customer_id)
-
-        sample: MetagenomeSample
+        """Validate that the names of all samples are unused."""
+        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
         for sample in samples:
             if sample.control:
                 continue
-            if self.status.find_samples(customer=customer_obj, name=sample.name).first():
+            if self.status.get_sample_by_customer_and_name(
+                customer_entry_id=[customer.id], sample_name=sample.name
+            ):
                 raise OrderError(f"Sample name {sample.name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
@@ -36,12 +36,12 @@ class MetagenomeSubmitter(Submitter):
             lims_api=self.lims, lims_order=order, new_samples=order.samples
         )
         status_data = self.order_to_status(order)
-        self._fill_in_sample_ids(status_data["families"][0]["samples"], lims_map)
+        self._fill_in_sample_ids(samples=status_data["families"][0]["samples"], lims_map=lims_map)
         new_samples = self.store_items_in_status(
-            customer=status_data["customer"],
+            customer_id=status_data["customer"],
             order=status_data["order"],
             ordered=project_data["date"],
-            ticket=order.ticket,
+            ticket_id=order.ticket,
             items=status_data["families"],
         )
         self._add_missing_reads(new_samples)
@@ -75,21 +75,23 @@ class MetagenomeSubmitter(Submitter):
 
     def store_items_in_status(
         self,
-        customer: str,
+        customer_id: str,
         order: str,
         ordered: dt.datetime,
-        ticket: str,
+        ticket_id: str,
         items: List[dict],
-    ) -> List[models.Sample]:
+    ) -> List[Sample]:
         """Store samples in the status database."""
-        customer_obj = self.status.customer(customer)
-        if customer_obj is None:
-            raise OrderError(f"unknown customer: {customer}")
+        customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        if customer is None:
+            raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
-        case_obj = self.status.find_family(customer=customer_obj, name=str(ticket))
-        case: dict = items[0]
+        case: Family = self.status.get_case_by_name_and_customer(
+            customer=customer, case_name=str(ticket_id)
+        )
+        case_dict: dict = items[0]
         with self.status.session.no_autoflush:
-            for sample in case["samples"]:
+            for sample in case_dict["samples"]:
                 new_sample = self.status.add_sample(
                     name=sample["name"],
                     sex="unknown",
@@ -98,31 +100,31 @@ class MetagenomeSubmitter(Submitter):
                     internal_id=sample.get("internal_id"),
                     order=order,
                     ordered=ordered,
-                    original_ticket=ticket,
+                    original_ticket=ticket_id,
                     priority=sample["priority"],
                 )
-                new_sample.customer = customer_obj
+                new_sample.customer = customer
                 application_tag = sample["application"]
-                application_version = self.status.current_application_version(application_tag)
+                application_version = self.status.current_application_version(tag=application_tag)
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version
                 new_samples.append(new_sample)
 
-                if not case_obj:
-                    case_obj = self.status.add_case(
-                        data_analysis=Pipeline(case["data_analysis"]),
-                        data_delivery=DataDelivery(case["data_delivery"]),
-                        name=str(ticket),
+                if not case:
+                    case = self.status.add_case(
+                        data_analysis=Pipeline(case_dict["data_analysis"]),
+                        data_delivery=DataDelivery(case_dict["data_delivery"]),
+                        name=str(ticket_id),
                         panels=None,
-                        priority=case["priority"],
-                        ticket=ticket,
+                        priority=case_dict["priority"],
+                        ticket=ticket_id,
                     )
-                    case_obj.customer = customer_obj
-                    self.status.add(case_obj)
+                    case.customer = customer
+                    self.status.add(case)
 
                 new_relationship = self.status.relate_sample(
-                    family=case_obj, sample=new_sample, status=StatusEnum.unknown
+                    family=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.add(new_relationship)
 

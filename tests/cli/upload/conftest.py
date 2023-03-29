@@ -25,7 +25,8 @@ from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.madeline import MockMadelineAPI
 from tests.mocks.report import MockMipDNAReportAPI
@@ -90,16 +91,16 @@ def fixture_upload_genotypes_hk_bundle(
 @pytest.fixture(name="analysis_obj")
 def fixture_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
-) -> models.Analysis:
+) -> Analysis:
     """Return a analysis object with a trio"""
-    return analysis_store_trio.family(case_id).analyses[0]
+    return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
 @pytest.fixture(name="upload_genotypes_hk_api")
 def fixture_upload_genotypes_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_genotypes_hk_bundle: dict,
-    analysis_obj: models.Analysis,
+    analysis_obj: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload genotypes hk bundle"""
@@ -161,7 +162,7 @@ def fixture_upload_gens_hk_api(
 ) -> HousekeeperAPI:
     """Add and include files from upload_gens_hk_bundle."""
     helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(case_id)
+    hk_version = real_housekeeper_api.last_version(bundle=case_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -197,7 +198,7 @@ def fixture_upload_report_hk_bundle(case_id: str, delivery_report_html: Path, ti
 def fixture_upload_report_hk_api(
     real_housekeeper_api: HousekeeperAPI,
     upload_report_hk_bundle: dict,
-    analysis_obj: models.Analysis,
+    analysis_obj: Analysis,
     helpers,
 ) -> HousekeeperAPI:
     """Add and include files from upload reports hk bundle"""

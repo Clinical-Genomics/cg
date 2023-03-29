@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from alchy import Query
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
@@ -258,7 +258,7 @@ class DemultiplexedRunsFlowCell:
         globbed_unaligned_paths_list: list = list(globbed_unaligned_paths)
         if not globbed_unaligned_paths_list:
             LOG.warning(
-                f"No Unaligned directory found for flow cell {self.run_nam}! No sample sheet to archive!"
+                f"No Unaligned directory found for flow cell {self.run_name}! No sample sheet to archive!"
             )
             return
         unaligned_path: Path = globbed_unaligned_paths_list[0]
@@ -290,12 +290,12 @@ class DemultiplexedRunsFlowCell:
     def add_sample_sheet_to_housekeeper(self, sample_sheet_path: Path):
         """Adds an archive sample sheet to Housekeeper."""
 
-        hk_bundle: hk_models.Bundle = self.hk.bundle(self.id)
+        hk_bundle: Bundle = self.hk.bundle(self.id)
         if hk_bundle is None:
             hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
 
         with self.hk.session_no_autoflush():
-            hk_version: hk_models.Version = self.hk.last_version(bundle=hk_bundle.name)
+            hk_version: Version = self.hk.last_version(bundle=hk_bundle.name)
             if self.hk.files(path=str(sample_sheet_path)).first() is None:
                 LOG.info(f"Adding archived sample sheet: {str(sample_sheet_path)}")
                 tags: List[str] = [SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id]

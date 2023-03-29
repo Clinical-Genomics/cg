@@ -28,11 +28,13 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     """Test function to delete association between a sample and a case in store."""
 
     # GIVEN a store containing multiple samples associated with different cases
-    sample_in_single_case: Sample = store_with_multiple_cases_and_samples.sample(
+    sample_in_single_case: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
         internal_id=sample_id_in_single_case
     )
-    sample_in_multiple_cases: Sample = store_with_multiple_cases_and_samples.sample(
-        internal_id=sample_id_in_multiple_cases
+    sample_in_multiple_cases: Sample = (
+        store_with_multiple_cases_and_samples.get_sample_by_internal_id(
+            internal_id=sample_id_in_multiple_cases
+        )
     )
 
     assert sample_in_single_case
@@ -44,12 +46,12 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     # THEN it should no longer be associated with any cases, but other relationships should remain
     results: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample_in_single_case.id
-    )
+    ).all()
     existing_relationships: List[
         FamilySample
     ] = store_with_multiple_cases_and_samples.get_cases_from_sample(
         sample_entry_id=sample_in_multiple_cases.id
-    )
+    ).all()
 
     assert not results
     assert existing_relationships
@@ -96,7 +98,9 @@ def test_store_api_delete_non_existing_case(
     """Test that nothing happens when trying to delete a case that does not exist."""
 
     # GIVEN a database containing some cases but not a specific case
-    case: Family = store_with_multiple_cases_and_samples.family(case_id_does_not_exist)
+    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+        internal_id=case_id_does_not_exist
+    )
     existing_cases: List[Family] = store_with_multiple_cases_and_samples.families().all()
 
     assert not case
@@ -104,7 +108,7 @@ def test_store_api_delete_non_existing_case(
 
     # WHEN removing empty cases, specifying the non existing case
     store_with_multiple_cases_and_samples.delete_cases_without_samples(
-        case_ids=[case_id_does_not_exist]
+        case_internal_ids=[case_id_does_not_exist]
     )
 
     # THEN no case has been deleted and nothing happens

@@ -14,8 +14,9 @@ from cg.exc import AnalysisUploadError
 from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
-from housekeeper.store import models as hk_models
+from cg.store import Store
+from cg.store.models import FamilySample
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -227,12 +228,12 @@ def bioinfo_all(
     analyses: Query = status_db.analyses_ready_for_vogue_upload(completed_after, completed_before)
     for analysis in analyses:
         case_name: str = analysis.family.internal_id
-        version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
+        version_obj: Version = housekeeper_api.last_version(case_name)
         if not version_obj:
             continue
 
         # confirm multiqc.json exists
-        multiqc_file_obj: List[hk_models.File] = list(
+        multiqc_file_obj: List[File] = list(
             housekeeper_api.get_files(
                 bundle=case_name, tags=["multiqc-json"], version=version_obj.id
             )
@@ -283,7 +284,7 @@ def _get_samples(store: Store, case_name: str) -> str:
         sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs: List[models.FamilySample] = store.family(case_name).links
+    link_objs: List[FamilySample] = store.get_case_by_internal_id(internal_id=case_name).links
     sample_ids = {link_obj.sample.internal_id for link_obj in link_objs}
     return ",".join(sample_ids)
 
@@ -297,7 +298,7 @@ def _get_analysis_workflow_details(status_api: Store, case_name: str) -> Tuple[A
         workflow_version(str): v3.14.15
     """
     # Workflow that generated these results
-    case_obj = status_api.family(case_name)
+    case_obj = status_api.get_case_by_internal_id(internal_id=case_name)
     workflow_name = None
     workflow_version = None
     if case_obj.analyses:

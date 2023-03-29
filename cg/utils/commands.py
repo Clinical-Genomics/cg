@@ -5,7 +5,6 @@ Code to handle communications to the shell from CG.
 import copy
 import logging
 import subprocess
-from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Dict, List
 
@@ -108,6 +107,15 @@ class Process:
             raise CalledProcessError(res.returncode, command)
 
         return res.returncode
+
+    def get_command(self, parameters: list = None) -> str:
+        """Returns a command string given a list of parameters."""
+
+        command: List[str] = copy.deepcopy(self.base_call)
+        if parameters:
+            command.extend(parameters)
+
+        return " ".join(command)
 
     @property
     def stdout(self):

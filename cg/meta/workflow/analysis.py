@@ -11,13 +11,14 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.priority import PRIORITY_TO_SLURM_QOS, SlurmQos
+from cg.constants.constants import AnalysisType
+from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
 from cg.meta.workflow.fastq import FastqHandler
 from cg.models.analysis import AnalysisModel
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Analysis, BedVersion, Family, FamilySample, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -69,7 +70,7 @@ class AnalysisAPI(MetaAPI):
     def verify_case_id_in_statusdb(self, case_id: str) -> None:
         """Passes silently if case exists in StatusDB, raises error if case is missing"""
 
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if not case_obj:
             LOG.error("Case %s could not be found in StatusDB!", case_id)
             raise CgError
@@ -89,32 +90,14 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"No working directory for {case_id} exists")
             raise FileNotFoundError(f"No working directory for {case_id} exists")
 
-    def all_flowcells_on_disk(self, case_id: str) -> bool:
-        """Check if flowcells are on disk for sample before starting the analysis.
-        Flowcells not on disk will be requested
-        """
-        flowcells = self.status_db.flowcells(family=self.status_db.family(case_id))
-        statuses = []
-        for flowcell_obj in flowcells:
-            LOG.info(f"{flowcell_obj.name}: checking if flowcell is on disk")
-            LOG.info(f"{flowcell_obj.name}: status is {flowcell_obj.status}")
-            statuses.append(flowcell_obj.status or "ondisk")
-            if flowcell_obj.status == "removed":
-                LOG.info(f"{flowcell_obj.name}: flowcell not on disk, requesting")
-                flowcell_obj.status = "requested"
-            elif flowcell_obj.status != "ondisk":
-                LOG.warning(f"{flowcell_obj.name}: {flowcell_obj.status}")
-        self.status_db.commit()
-        return all(status == "ondisk" for status in statuses)
-
     def get_priority_for_case(self, case_id: str) -> int:
         """Get priority from the status db case priority"""
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return case_obj.priority.value or Priority.research
 
     def get_slurm_qos_for_case(self, case_id: str) -> str:
-        """Get Quality of service (SLURM QOS) for the case"""
-        priority: int = self.get_priority_for_case(case_id)
+        """Get Quality of service (SLURM QOS) for the case."""
+        priority: int = self.get_priority_for_case(case_id=case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
@@ -131,8 +114,8 @@ class AnalysisAPI(MetaAPI):
 
     def get_sample_name_from_lims_id(self, lims_id: str) -> str:
         """Retrieve sample name provided by customer for specific sample"""
-        sample_obj: models.Sample = self.status_db.sample(lims_id)
-        return sample_obj.name
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=lims_id)
+        return sample.name
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
         """
@@ -144,19 +127,19 @@ class AnalysisAPI(MetaAPI):
         return None
 
     @staticmethod
-    def get_application_type(sample_obj: models.Sample) -> str:
+    def get_application_type(sample_obj: Sample) -> str:
         """
         Gets application type for sample. Only application types supported by trailblazer (or other)
-        are valid outputs
+        are valid outputs.
         """
-        analysis_type: str = sample_obj.prep_category
-        if analysis_type and analysis_type.lower() in [
-            "wgs",
-            "wes",
-            "tgs",
-        ]:
-            return analysis_type.lower()
-        return "other"
+        prep_category: str = sample_obj.prep_category
+        if prep_category and prep_category.lower() in {
+            AnalysisType.TARGETED_GENOME_SEQUENCING,
+            AnalysisType.WHOLE_EXOME_SEQUENCING,
+            AnalysisType.WHOLE_GENOME_SEQUENCING,
+        }:
+            return prep_category.lower()
+        return AnalysisType.OTHER
 
     def upload_bundle_housekeeper(self, case_id: str, dry_run: bool = False) -> None:
         """Storing bundle data in Housekeeper for CASE_ID"""
@@ -186,10 +169,10 @@ class AnalysisAPI(MetaAPI):
         """Storing analysis bundle in StatusDB for CASE_ID"""
 
         LOG.info(f"Storing analysis in StatusDB for {case_id}")
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_start: dt.datetime = self.get_bundle_created_date(case_id=case_id)
         pipeline_version: str = self.get_pipeline_version(case_id=case_id)
-        new_analysis: models.Family = self.status_db.add_analysis(
+        new_analysis: Family = self.status_db.add_analysis(
             pipeline=self.pipeline,
             version=pipeline_version,
             started_at=analysis_start,
@@ -215,7 +198,9 @@ class AnalysisAPI(MetaAPI):
         self.trailblazer_api.add_pending_analysis(
             case_id=case_id,
             email=environ_email(),
-            analysis_type=self.get_application_type(self.status_db.family(case_id).links[0].sample),
+            analysis_type=self.get_application_type(
+                self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
+            ),
             out_dir=self.get_trailblazer_config_path(case_id=case_id).parent.as_posix(),
             config_path=self.get_trailblazer_config_path(case_id=case_id).as_posix(),
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
@@ -256,7 +241,7 @@ class AnalysisAPI(MetaAPI):
             LOG.info(f"Dry-run: Action {action} would be set for case {case_id}")
             return
         if action in [None, *CASE_ACTIONS]:
-            case_obj: models.Family = self.status_db.family(case_id)
+            case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case_obj.action = action
             self.status_db.commit()
             LOG.info("Action %s set for case %s", action, case_id)
@@ -265,19 +250,19 @@ class AnalysisAPI(MetaAPI):
             f"Action '{action}' not permitted by StatusDB and will not be set for case {case_id}"
         )
 
-    def get_analyses_to_clean(self, before: dt.datetime) -> List[models.Analysis]:
+    def get_analyses_to_clean(self, before: dt.datetime) -> List[Analysis]:
         analyses_to_clean = self.status_db.analyses_to_clean(pipeline=self.pipeline, before=before)
         return analyses_to_clean.all()
 
-    def get_cases_to_analyze(self) -> List[models.Family]:
+    def get_cases_to_analyze(self) -> List[Family]:
         return self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
 
-    def get_running_cases(self) -> List[models.Family]:
-        return self.status_db.get_running_cases_for_pipeline(pipeline=self.pipeline)
+    def get_running_cases(self) -> List[Family]:
+        return self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
 
-    def get_cases_to_store(self) -> List[models.Family]:
+    def get_cases_to_store(self) -> List[Family]:
         """Retrieve a list of cases where analysis finished successfully,
         and is ready to be stored in Housekeeper"""
         return [
@@ -286,10 +271,11 @@ class AnalysisAPI(MetaAPI):
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
         ]
 
-    def get_sample_fastq_destination_dir(self, case_obj: models.Family, sample_obj: models.Sample):
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):
+        """Return the path to the FASTQ destination directory."""
         raise NotImplementedError
 
-    def gather_file_metadata_for_sample(self, sample_obj: models.Sample) -> List[dict]:
+    def gather_file_metadata_for_sample(self, sample_obj: Sample) -> List[dict]:
         return [
             self.fastq_handler.parse_file_data(file_obj.full_path)
             for file_obj in self.housekeeper_api.files(
@@ -298,7 +284,7 @@ class AnalysisAPI(MetaAPI):
         ]
 
     def link_fastq_files_for_sample(
-        self, case_obj: models.Family, sample_obj: models.Sample, concatenate: bool = False
+        self, case_obj: Family, sample_obj: Sample, concatenate: bool = False
     ) -> None:
         """
         Link FASTQ files for a sample to working directory.
@@ -308,7 +294,7 @@ class AnalysisAPI(MetaAPI):
         concatenated_paths = {1: "", 2: ""}
         files: List[dict] = self.gather_file_metadata_for_sample(sample_obj=sample_obj)
         sorted_files = sorted(files, key=lambda k: k["path"])
-        fastq_dir = self.get_sample_fastq_destination_dir(case_obj=case_obj, sample_obj=sample_obj)
+        fastq_dir = self.get_sample_fastq_destination_dir(case=case_obj, sample=sample_obj)
         fastq_dir.mkdir(parents=True, exist_ok=True)
 
         for fastq_data in sorted_files:
@@ -342,20 +328,22 @@ class AnalysisAPI(MetaAPI):
             self.fastq_handler.remove_files(value)
 
     def get_target_bed_from_lims(self, case_id: str) -> Optional[str]:
-        """Get target bed filename from lims"""
-        case_obj: models.Family = self.status_db.family(case_id)
-        sample_obj: models.Sample = case_obj.links[0].sample
-        if sample_obj.from_sample:
-            sample_obj: models.Sample = self.status_db.sample(sample_obj.from_sample)
-        target_bed_shortname: str = self.lims_api.capture_kit(sample_obj.internal_id)
+        """Get target bed filename from LIMS."""
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample: Sample = case.links[0].sample
+        if sample.from_sample:
+            sample: Sample = self.status_db.get_sample_by_internal_id(
+                internal_id=sample.from_sample
+            )
+        target_bed_shortname: str = self.lims_api.capture_kit(lims_id=sample.internal_id)
         if not target_bed_shortname:
-            return target_bed_shortname
-        bed_version_obj: Optional[models.BedVersion] = self.status_db.bed_version(
-            target_bed_shortname
+            return None
+        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+            bed_version_short_name=target_bed_shortname
         )
-        if not bed_version_obj:
-            raise CgDataError("Bed-version %s does not exist" % target_bed_shortname)
-        return bed_version_obj.filename
+        if not bed_version:
+            raise CgDataError(f"Bed-version {target_bed_shortname} does not exist")
+        return bed_version.filename
 
     def decompression_running(self, case_id: str) -> None:
         """Check if decompression is running for a case"""
@@ -386,8 +374,8 @@ class AnalysisAPI(MetaAPI):
         if not decompression_possible:
             self.decompression_running(case_id=case_id)
             return
-        case_obj: models.Family = self.status_db.family(case_id)
-        link: models.FamilySample
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        link: FamilySample
         any_decompression_started = False
         for link in case_obj.links:
             sample_id: str = link.sample.internal_id
@@ -438,7 +426,7 @@ class AnalysisAPI(MetaAPI):
         """
         return dt.datetime.fromtimestamp(int(os.path.getctime(file_path)))
 
-    def get_additional_naming_metadata(self, sample_obj: models.Sample) -> Optional[str]:
+    def get_additional_naming_metadata(self, sample_obj: Sample) -> Optional[str]:
         return None
 
     def get_latest_metadata(self, case_id: str) -> AnalysisModel:
@@ -455,7 +443,7 @@ class AnalysisAPI(MetaAPI):
 
     def clean_analyses(self, case_id: str) -> None:
         """Add a cleaned at date for all analyses related to a case."""
-        analyses: list = self.status_db.family(case_id).analyses
+        analyses: list = self.status_db.get_case_by_internal_id(internal_id=case_id).analyses
         LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()

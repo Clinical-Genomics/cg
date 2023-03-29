@@ -48,7 +48,7 @@ def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog):
         # THEN it should setup the database with some tables
         assert result.exit_code == 0
         assert database_path.exists()
-        assert len(Store(database_uri).engine.table_names()) > 0
+        assert len(Store(uri=database_uri).engine.table_names()) > 0
 
         # GIVEN the database already exists
         # WHEN calling the init function

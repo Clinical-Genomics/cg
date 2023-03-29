@@ -11,17 +11,18 @@ from cg.constants.sequencing import SequencingMethod
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.balsamic_observations_api import BalsamicObservationsAPI
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
-from cg.store import models, Store
+from cg.store import Store
+from cg.store.models import Family
 
 from cg.models.cg_config import CGConfig
 
 LOG = logging.getLogger(__name__)
 
 
-def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> models.Family:
+def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> Family:
     """Return a verified Loqusdb case."""
     status_db: Store = context.status_db
-    case: models.Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if not case or case.data_analysis not in LOQUSDB_SUPPORTED_PIPELINES:
         LOG.error("Invalid case ID. Retrieving available cases for Loqusdb actions.")
         cases_to_process: Query = (
@@ -38,9 +39,9 @@ def get_observations_case(context: CGConfig, case_id: str, upload: bool) -> mode
     return case
 
 
-def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.Family:
+def get_observations_case_to_upload(context: CGConfig, case_id: str) -> Family:
     """Return a verified case ready to be uploaded to Loqusdb."""
-    case: models.Family = get_observations_case(context, case_id, upload=True)
+    case: Family = get_observations_case(context, case_id, upload=True)
     if not case.customer.loqus_upload:
         LOG.error(
             f"Customer {case.customer.internal_id} is not whitelisted for upload to Loqusdb. Canceling upload for "
@@ -51,7 +52,7 @@ def get_observations_case_to_upload(context: CGConfig, case_id: str) -> models.F
 
 
 def get_observations_api(
-    context: CGConfig, case: models.Family
+    context: CGConfig, case: Family
 ) -> Union[MipDNAObservationsAPI, BalsamicObservationsAPI]:
     """Return an observations API given a specific case object."""
     observations_apis = {
@@ -61,7 +62,7 @@ def get_observations_api(
     return observations_apis[case.data_analysis]
 
 
-def get_sequencing_method(case: models.Family) -> SequencingMethod:
+def get_sequencing_method(case: Family) -> SequencingMethod:
     """Returns the sequencing method for the given case object."""
     analysis_types = [
         link.sample.application_version.application.analysis_type for link in case.links

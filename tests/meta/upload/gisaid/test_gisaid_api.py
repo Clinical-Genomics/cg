@@ -1,8 +1,6 @@
 """
     Tests for GisaidAPI
 """
-from pathlib import Path
-from typing import List
 
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI

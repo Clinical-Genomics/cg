@@ -9,38 +9,39 @@ from tests.store.conftest import fixture_sample_obj
 
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
 from housekeeper.store.models import Version
 
 
-def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket: str):
+def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
     """Test generating the directory for logging."""
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
-    log_dir = external_data_api.create_log_dir(ticket=ticket, dry_run=True)
+    log_dir = external_data_api.create_log_dir(ticket=ticket_id, dry_run=True)
 
     # THEN the path is not created since it is a dry run
     assert "Would have created path" in caplog.text
 
     # THEN the created path should start with 2 dirs and then the ticket id
-    assert str(log_dir).startswith(f"/another/path/{ticket}")
+    assert str(log_dir).startswith(f"/another/path/{ticket_id}")
 
 
 def test_get_source_path(
     cust_sample_id: str,
     customer_id: str,
     external_data_api: ExternalDataAPI,
-    ticket: str,
+    ticket_id: str,
 ):
     """Test generating the source path."""
     # GIVEN a ticket number a customer and a customer sample id
 
     # WHEN the function is called and assigned
     source_path = external_data_api.get_source_path(
-        ticket=ticket,
+        ticket=ticket_id,
         customer=customer_id,
         cust_sample_id=cust_sample_id,
     )
@@ -75,13 +76,15 @@ def test_transfer_sample_files_from_source(
     helpers,
     mocker,
     sample_store: Store,
-    ticket: str,
+    ticket_id: str,
 ):
     caplog.set_level(logging.INFO)
 
     # GIVEN a Store with three samples, where only two samples are present in the source folder
     for sample in [f"{cust_sample_id}1", f"{cust_sample_id}2", f"{cust_sample_id}3"]:
-        helpers.add_sample(store=external_data_api.status_db, name=sample, original_ticket=ticket)
+        helpers.add_sample(
+            store=external_data_api.status_db, name=sample, original_ticket=ticket_id
+        )
 
     mocker.patch.object(Store, "get_customer_id_from_ticket")
     Store.get_customer_id_from_ticket.return_value = customer_id
@@ -95,7 +98,7 @@ def test_transfer_sample_files_from_source(
     )
 
     # WHEN the transfer is initiated
-    external_data_api.transfer_sample_files_from_source(ticket=ticket, dry_run=True)
+    external_data_api.transfer_sample_files_from_source(ticket=ticket_id, dry_run=True)
 
     # THEN only the two samples present in the source directory are included in the rsync
 
@@ -147,15 +150,13 @@ def test_add_transfer_to_housekeeper(
     external_data_api: ExternalDataAPI,
     fastq_file: Path,
     mocker,
-    ticket: str,
+    ticket_id: str,
 ):
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis
-    cases = external_data_api.status_db.query(models.Family).filter(
-        models.Family.internal_id == case_id
-    )
-    mocker.patch.object(Store, "get_cases_from_ticket")
-    Store.get_cases_from_ticket.return_value = cases
+    cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
+    mocker.patch.object(Store, "get_cases_by_ticket_id")
+    Store.get_cases_by_ticket_id.return_value = cases
     samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
 
     # GIVEN a list of paths and only two samples being available
@@ -186,7 +187,7 @@ def test_add_transfer_to_housekeeper(
     )
 
     # WHEN the sample bundles are added to housekeeper
-    external_data_api.add_transfer_to_housekeeper(ticket=ticket)
+    external_data_api.add_transfer_to_housekeeper(ticket=ticket_id)
 
     # THEN two sample bundles exist in housekeeper and the file has been added to those bundles bundles
     added_samples = list(external_data_api.housekeeper_api.bundles())
@@ -205,13 +206,15 @@ def test_get_available_samples(
     analysis_store_trio,
     customer_id: str,
     external_data_api: ExternalDataAPI,
-    sample_obj: models.Sample,
-    ticket: str,
+    sample_obj: Sample,
+    ticket_id: str,
     tmpdir_factory,
 ):
     # GIVEN one such sample exists
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
-    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path, ticket=ticket)
+    available_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path, ticket=ticket_id
+    )
     # THEN the function should return a list containing the sample object
     assert available_samples == [sample_obj]
 
@@ -219,10 +222,8 @@ def test_get_available_samples(
 def test_curate_sample_folder(
     case_id, customer_id, dna_case, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
-    cases = external_data_api.status_db.query(models.Family).filter(
-        models.Family.internal_id == case_id
-    )
-    sample: models.Sample = cases.first().links[0].sample
+    cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
+    sample: Sample = cases.first().links[0].sample
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
     external_data_api.curate_sample_folder(
         cust_name=customer_id, sample_folder=tmp_folder, force=False
@@ -235,12 +236,14 @@ def test_get_available_samples_no_samples_avail(
     analysis_store_trio,
     customer_id: str,
     external_data_api: ExternalDataAPI,
-    ticket: str,
+    ticket_id: str,
     tmpdir_factory,
 ):
     # GIVEN that the empty directory created does not contain any correct folders
     tmp_dir_path: Path = Path(tmpdir_factory.mktemp("not_sample_id", numbered=False))
-    available_samples = external_data_api.get_available_samples(folder=tmp_dir_path, ticket=ticket)
+    available_samples = external_data_api.get_available_samples(
+        folder=tmp_dir_path, ticket=ticket_id
+    )
     # THEN the function should return an empty list
     assert available_samples == []
 

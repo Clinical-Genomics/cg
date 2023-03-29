@@ -17,7 +17,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.store import models
+from cg.store.models import Family
 from cg.constants import Pipeline
 
 LOG = logging.getLogger(__name__)
@@ -97,11 +97,11 @@ class RsyncAPI(MetaAPI):
             LOG.info(f"Setting log dir to: {self.base_path / folder_name}")
             self.log_dir: Path = self.base_path / folder_name
 
-    def get_all_cases_from_ticket(self, ticket: str) -> List[models.Family]:
-        return self.status_db.get_cases_from_ticket(ticket=ticket).all()
+    def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
+        return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(self, ticket: str) -> Dict[str, Path]:
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         source_and_destination_paths: Dict[str, Path] = {}
         if not cases:
             LOG.warning("Could not find any cases for ticket %s", ticket)
@@ -136,7 +136,7 @@ class RsyncAPI(MetaAPI):
             ticket=ticket,
         )
 
-    def format_covid_report_path(self, case: models.Family, ticket: str) -> str:
+    def format_covid_report_path(self, case: Family, ticket: str) -> str:
         """Return a formatted of covid report path."""
         covid_report_options: List[str] = glob.glob(
             self.covid_report_path % (case.internal_id, ticket)
@@ -175,7 +175,7 @@ class RsyncAPI(MetaAPI):
                 [sample.name for sample in self.status_db.get_samples_by_case_id(case_id=case_id)]
             )
         if case_files_present:
-            folder_list.append(self.status_db.family(case_id).name)
+            folder_list.append(self.status_db.get_case_by_internal_id(internal_id=case_id).name)
         return folder_list
 
     def slurm_rsync_single_case(
@@ -221,7 +221,7 @@ class RsyncAPI(MetaAPI):
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket
         )
-        cases: List[models.Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         customer_id: str = cases[0].customer.internal_id
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")

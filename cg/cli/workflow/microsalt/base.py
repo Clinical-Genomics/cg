@@ -13,7 +13,7 @@ from cg.exc import CgError
 from cg.io.controller import WriteStream, WriteFile
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Analysis, Sample
 from housekeeper.store.models import File
 from cg.meta.workflow.analysis import AnalysisAPI
 
@@ -90,9 +90,7 @@ def config_case(
     case_id, sample_id = analysis_api.resolve_case_sample_id(
         sample=sample, ticket=ticket, unique_id=unique_id
     )
-    sample_objs: List[models.Sample] = analysis_api.get_samples(
-        case_id=case_id, sample_id=sample_id
-    )
+    sample_objs: List[Sample] = analysis_api.get_samples(case_id=case_id, sample_id=sample_id)
 
     if not sample_objs:
         LOG.error("No sample found for that ticket/sample_id")
@@ -227,7 +225,7 @@ def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> N
     """Upload the trending report for latest analysis of given case_id to Vogue"""
 
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
-    case_obj = analysis_api.status_db.family(unique_id)
+    case_obj = analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
     if not case_obj or not case_obj.analyses:
         LOG.error("No analysis available for %s", unique_id)
         raise click.Abort
@@ -278,11 +276,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
 
     EXIT_CODE: int = EXIT_SUCCESS
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
-    latest_analyses = list(
-        analysis_api.status_db.latest_analyses()
-        .filter(models.Analysis.pipeline == Pipeline.MICROSALT)
-        .filter(models.Analysis.uploaded_at.is_(None))
-    )
+    latest_analyses = list(analysis_api.status_db.get_latest_microsalt_analysis_to_upload())
     for analysis in latest_analyses:
         unique_id: str = analysis.family.internal_id
         try:
@@ -310,7 +304,9 @@ def qc_microsalt(context: click.Context, unique_id: str) -> None:
             case_id=unique_id,
             run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
             lims_project=analysis_api.get_project(
-                analysis_api.status_db.family(internal_id=unique_id).samples[0].internal_id
+                analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
+                .samples[0]
+                .internal_id
             ),
         )
     except IndexError:

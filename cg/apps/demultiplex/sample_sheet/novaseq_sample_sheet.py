@@ -25,15 +25,17 @@ class SampleSheetCreator:
 
     def __init__(
         self,
+        bcl_converter: str,
         flowcell_id: str,
         lims_samples: List[LimsFlowcellSample],
         run_parameters: RunParameters,
-        bcl_converter: str,
+        force: bool = False,
     ):
+        self.bcl_converter = bcl_converter
         self.flowcell_id: str = flowcell_id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = run_parameters
-        self.bcl_converter = bcl_converter
+        self.force = force
 
     @property
     def valid_indexes(self) -> List[Index]:
@@ -128,6 +130,9 @@ class SampleSheetCreator:
             expected_index_length=self.run_parameters.index_length,
         )
         sample_sheet: str = self.convert_to_sample_sheet()
+        if self.force:
+            LOG.info("Skipping validation of sample sheet due to force flag")
+            return sample_sheet
         LOG.info("Validating sample sheet")
         get_sample_sheet(
             sample_sheet=sample_sheet,

@@ -3,13 +3,11 @@
 import logging
 from pathlib import Path
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 
 from cg.cli.workflow.balsamic.base import config_case
 from click.testing import CliRunner
 
-from cg.exc import BalsamicStartError
 from cg.models.cg_config import CGConfig
 
 EXIT_SUCCESS = 0
@@ -32,7 +30,7 @@ def test_with_missing_case(
     caplog.set_level(logging.ERROR)
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context.status_db.family(case_id)
+    assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id)
     # WHEN running
     result = cli_runner.invoke(config_case, [case_id], obj=balsamic_context)
     # THEN command should NOT successfully call the command it creates
@@ -126,10 +124,13 @@ def test_target_bed_from_lims(
     caplog.set_level(logging.INFO)
     # GIVEN case that bed-version set in lims with same version existing in status db
     case_id = "balsamic_case_tgs_single"
+
     # WHEN dry running
     result = cli_runner.invoke(config_case, [case_id, "--dry-run"], obj=balsamic_context)
+
     # THEN command should be generated successfully
     assert result.exit_code == EXIT_SUCCESS
+
     # THEN dry-print should include the bed_key and the bed_value including path
     assert "--panel-bed" in caplog.text
     assert ".bed" in caplog.text

@@ -1,7 +1,6 @@
 """Utility functions for the upload cli commands."""
 
 import logging
-from pathlib import Path
 from typing import Optional
 
 import click
@@ -9,7 +8,6 @@ import click
 from cg.constants import Pipeline
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE
 from cg.store import Store
-from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 

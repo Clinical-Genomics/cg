@@ -2,13 +2,50 @@
 
 import logging
 from pathlib import Path
+from pydantic import BaseModel, validator
 from typing import List
+from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI
 from tests.mocks.process_mock import ProcessMock
 
 
 LOG = logging.getLogger(__name__)
+
+
+class MockScoutIndividual(BaseModel):
+    sample_id: str = "sample_id"
+    sex: str = "female"
+    analysis_type: Literal[
+        "external",
+        "mixed",
+        "panel",
+        "panel-umi",
+        "unknown",
+        "wes",
+        "wgs",
+        "wts",
+    ] = "wgs"
+
+    @validator("sample_id", "sex", "analysis_type")
+    def field_not_none(cls, value):
+        if value is None:
+            raise ValueError("sample_id, sex and analysis_type can not be None")
+        return value
+
+
+class MockScoutLoadConfig(BaseModel):
+    owner: str = "cust000"
+    family: str = "family_id"
+
+    @validator("owner", "family")
+    def field_not_none(cls, value):
+        if value is None:
+            raise ValueError("Owner and family can not be None")
+        return value
+
+    class Config:
+        validate_assignment = True
 
 
 class MockScoutAPI(ScoutAPI):

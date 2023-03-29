@@ -100,8 +100,8 @@ class FlowCellError(CgError):
     """Raised when there is a problem with demultiplexing a flow cell."""
 
 
-class FlowcellsNeededError(CgError):
-    """Raised when fetching flowcells still needed to start analysis."""
+class FlowCellsNeededError(CgError):
+    """Raised when fetching flow cells still needed to start analysis."""
 
 
 class GisaidUploadFailedError(CgError):
@@ -251,3 +251,7 @@ class LoqusdbDuplicateRecordError(LoqusdbError):
 
 class PdcNoFilesMatchingSearchError(CgError):
     """Exception raised when PDC API returns no files matching the search criteria."""
+
+
+class MissingFilesError(CgError):
+    """Exception raised when there are missing files."""

@@ -10,7 +10,7 @@ from cg.meta.meta import MetaAPI
 from cg.meta.rsync.sbatch import ERROR_RSYNC_FUNCTION, RSYNC_CONTENTS_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
-from cg.store import models
+from cg.store.models import Sample, Customer
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 
 LOG = logging.getLogger(__name__)
@@ -111,10 +111,10 @@ class ExternalDataAPI(MetaAPI):
             if not check_md5sum(file_path=fastq_path, md5sum=given_md5sum):
                 return fastq_path
 
-    def get_available_samples(self, folder: Path, ticket: str) -> List[models.Sample]:
+    def get_available_samples(self, folder: Path, ticket: str) -> List[Sample]:
         """Returns the samples from given ticket that are present in the provided folder"""
         available_folders: List[str] = [sample_path.parts[-1] for sample_path in folder.iterdir()]
-        available_samples: List[models.Sample] = [
+        available_samples: List[Sample] = [
             sample
             for sample in self.status_db.get_samples_from_ticket(ticket=ticket)
             if sample.internal_id in available_folders or sample.name in available_folders
@@ -150,17 +150,17 @@ class ExternalDataAPI(MetaAPI):
         return fastq_paths_to_add
 
     def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
-        """Changes the name of the folder to the internal_id. If force is true replaces any previous folder"""
-        customer: models.Customer = self.status_db.customer(internal_id=cust_name)
+        """Changes the name of the folder to the internal_id. If force is true replaces any previous folder."""
+        customer: Customer = self.status_db.get_customer_by_customer_id(customer_id=cust_name)
         customer_folder: Path = sample_folder.parent
-        sample: models.Sample = self.status_db.find_samples(
-            customer=customer, name=sample_folder.name
-        ).first()
+        sample: Sample = self.status_db.get_sample_by_customer_and_name(
+            customer_entry_id=[customer.id], sample_name=sample_folder.name
+        )
         if (sample and not customer_folder.joinpath(sample.internal_id).exists()) or (
             sample and force
         ):
             sample_folder.rename(customer_folder.joinpath(sample.internal_id))
-        elif not sample and not self.status_db.sample(sample_folder.name):
+        elif not sample and not self.status_db.get_sample_by_internal_id(sample_folder.name):
             raise Exception(
                 f"{sample_folder} is not a sample present in statusdb. Move or remove it to continue"
             )
@@ -175,7 +175,7 @@ class ExternalDataAPI(MetaAPI):
         destination_folder_path: Path = self.get_destination_path(customer=cust)
         for sample_folder in destination_folder_path.iterdir():
             self.curate_sample_folder(cust_name=cust, sample_folder=sample_folder, force=force)
-        available_samples: List[models.Sample] = self.get_available_samples(
+        available_samples: List[Sample] = self.get_available_samples(
             folder=destination_folder_path, ticket=ticket
         )
         cases_to_start: List[dict] = []
@@ -207,4 +207,4 @@ class ExternalDataAPI(MetaAPI):
             return
         self.housekeeper_api.commit()
         for case in cases_to_start:
-            self.status_db.set_case_action(case_id=case["internal_id"], action="analyze")
+            self.status_db.set_case_action(case_internal_id=case["internal_id"], action="analyze")

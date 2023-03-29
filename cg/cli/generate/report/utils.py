@@ -15,12 +15,12 @@ from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
-from cg.store import models
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 
 
-def get_report_case(context: click.Context, case_id: str) -> models.Family:
+def get_report_case(context: click.Context, case_id: str) -> Family:
     """Extracts a case object for delivery report generation."""
 
     # Default report API (MIP DNA report API)
@@ -30,7 +30,7 @@ def get_report_case(context: click.Context, case_id: str) -> models.Family:
         else MipDNAReportAPI(config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj))
     )
 
-    case: models.Family = report_api.status_db.family(case_id)
+    case: Family = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
 
     # Missing or not valid internal case ID
     if not case_id or not case:
@@ -74,7 +74,7 @@ def get_report_case(context: click.Context, case_id: str) -> models.Family:
     return case
 
 
-def get_report_api(context: click.Context, case: models.Family) -> ReportAPI:
+def get_report_api(context: click.Context, case: Family) -> ReportAPI:
     """Returns a report API to be used for the delivery report generation."""
 
     if context.obj.meta_apis.get("report_api"):
@@ -105,17 +105,19 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
 
 
 def get_report_analysis_started(
-    case: models.Family, report_api: ReportAPI, analysis_started_at: Optional[str]
+    case: Family, report_api: ReportAPI, analysis_started_at: Optional[str]
 ) -> datetime:
     """Resolves and returns a valid analysis date."""
 
     if not analysis_started_at:
         analysis_started_at: datetime = (
-            report_api.status_db.family(case.internal_id).analyses[0].started_at
+            report_api.status_db.get_case_by_internal_id(case.internal_id).analyses[0].started_at
         )
 
     # If there is no analysis for the provided date
-    if not report_api.status_db.analysis(case, analysis_started_at):
+    if not report_api.status_db.get_analysis_by_case_entry_id_and_started_at(
+        case_entry_id=case.id, started_at_date=analysis_started_at
+    ):
         LOG.error(f"There is no analysis started at {analysis_started_at}")
         raise click.Abort
 

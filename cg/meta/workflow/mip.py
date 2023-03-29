@@ -1,12 +1,12 @@
 import logging
 
 from pathlib import Path
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Dict, Union
 
 from pydantic import ValidationError
 
 from cg.apps.mip.confighandler import ConfigHandler
-from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline
+from cg.constants import COLLABORATORS, COMBOS, GenePanelMasterList, Pipeline, FileExtensions
 from cg.constants.constants import FileFormat
 from cg.constants.housekeeper_tags import HkMipAnalysisTag
 from cg.exc import CgError
@@ -18,7 +18,7 @@ from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
-from cg.store import models
+from cg.store.models import BedVersion, FamilySample, Family, Sample
 
 CLI_OPTIONS = {
     "config": {"option": "--config_file"},
@@ -80,14 +80,18 @@ class MipAnalysisAPI(AnalysisAPI):
         """Get case analysis sample info path"""
         return Path(self.root, case_id, "analysis", f"{case_id}_qc_sample_info.yaml")
 
-    def resolve_panel_bed(self, panel_bed: Optional[str]) -> Optional[str]:
-        if panel_bed:
-            if panel_bed.endswith(".bed"):
-                return panel_bed
-            bed_version = self.status_db.bed_version(panel_bed)
-            if not bed_version:
-                raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
-            return bed_version.filename
+    def get_panel_bed(self, panel_bed: str = None) -> Optional[str]:
+        """Check and return BED gene panel."""
+        if not panel_bed:
+            return None
+        if panel_bed.endswith(FileExtensions.BED):
+            return panel_bed
+        bed_version: Optional[BedVersion] = self.status_db.get_bed_version_by_short_name(
+            bed_version_short_name=panel_bed
+        )
+        if not bed_version:
+            raise CgError("Please provide a valid panel shortname or a path to panel.bed file!")
+        return bed_version.filename
 
     def pedigree_config(self, case_id: str, panel_bed: str = None) -> dict:
         """Make the MIP pedigree config. Meta data for the family is taken from the family object
@@ -95,7 +99,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """
 
         # Validate and reformat to MIP pedigree config format
-        case_obj: models.Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return ConfigHandler.make_pedigree_config(
             data={
                 "case": case_obj.internal_id,
@@ -118,7 +122,8 @@ class MipAnalysisAPI(AnalysisAPI):
         LOG.info("Config file saved to %s", pedigree_config_path)
 
     @staticmethod
-    def get_sample_data(link_obj: models.FamilySample) -> dict:
+    def get_sample_data(link_obj: FamilySample) -> Dict[str, Union[str, int]]:
+        """Return sample specific data."""
         return {
             "sample_id": link_obj.sample.internal_id,
             "sample_display_name": link_obj.sample.name,
@@ -128,19 +133,18 @@ class MipAnalysisAPI(AnalysisAPI):
             "expected_coverage": link_obj.sample.application_version.application.min_sequencing_depth,
         }
 
-    def get_sample_fastq_destination_dir(
-        self, case_obj: models.Family, sample_obj: models.Sample
-    ) -> Path:
+    def get_sample_fastq_destination_dir(self, case: Family, sample: Sample) -> Path:
+        """Return the path to the FASTQ destination directory."""
         return Path(
             self.root,
-            case_obj.internal_id,
-            sample_obj.application_version.application.analysis_type,
-            sample_obj.internal_id,
-            "fastq",
+            case.internal_id,
+            sample.application_version.application.analysis_type,
+            sample.internal_id,
+            FileFormat.FASTQ,
         )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             self.link_fastq_files_for_sample(
                 case_obj=case_obj,
@@ -262,8 +266,8 @@ class MipAnalysisAPI(AnalysisAPI):
         )
 
     @staticmethod
-    def is_dna_only_case(case_obj: models.Family) -> bool:
-        """Returns True if all samples of a case has dna application type"""
+    def is_dna_only_case(case_obj: Family) -> bool:
+        """Returns True if all samples of a case has DNA application type."""
 
         return all(
             _link.sample.application_version.application.analysis_type not in "wts"
@@ -274,7 +278,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """If any sample in this case is downsampled or external, returns true"""
         if skip_evaluation:
             return True
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link_obj in case_obj.links:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external
@@ -286,8 +290,9 @@ class MipAnalysisAPI(AnalysisAPI):
                 return True
         return False
 
-    def get_cases_to_analyze(self) -> List[models.Family]:
-        cases_query: List[models.Family] = self.status_db.cases_to_analyze(
+    def get_cases_to_analyze(self) -> List[Family]:
+        """Return cases to analyze."""
+        cases_query: List[Family] = self.status_db.cases_to_analyze(
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
         cases_to_analyze = []
@@ -334,7 +339,7 @@ class MipAnalysisAPI(AnalysisAPI):
     def get_trailblazer_config_path(self, case_id: str) -> Path:
         return Path(self.get_case_path(case_id=case_id), "analysis", "slurm_job_ids.yaml")
 
-    def config_sample(self, link_obj: models.FamilySample, panel_bed: str) -> dict:
+    def config_sample(self, link_obj: FamilySample, panel_bed: str) -> dict:
         raise NotImplementedError
 
     def get_pipeline_version(self, case_id: str) -> str:
