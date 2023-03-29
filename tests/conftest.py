@@ -1858,6 +1858,5 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
             action=action.value,
             customer=customer,
         )
-        store.add_commit(case)
-
+    store.commit()
     yield store
