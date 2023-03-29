@@ -173,7 +173,9 @@ def parse_families():
 @BLUEPRINT.route("/families_in_collaboration")
 def parse_families_in_collaboration():
     """Return families in collaboration."""
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    customer: Customer = db.get_customer_by_internal_id(
+        customer_internal_id=request.args.get("customer")
+    )
     data_analysis: str = request.args.get("data_analysis")
     cases_query: Query = db.get_filtered_cases(
         case_internal_id_or_name_search_pattern=request.args.get("enquiry"),
@@ -200,7 +202,9 @@ def parse_family(family_id):
 def parse_family_in_collaboration(family_id):
     """Return a family with links."""
     case: Family = db.get_case_by_internal_id(internal_id=family_id)
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    customer: Customer = db.get_customer_by_internal_id(
+        customer_internal_id=request.args.get("customer")
+    )
     if case.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     return jsonify(**case.to_dict(links=True, analyses=True))
@@ -232,7 +236,9 @@ def parse_samples():
 @BLUEPRINT.route("/samples_in_collaboration")
 def parse_samples_in_collaboration():
     """Return samples in a customer group."""
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    customer: Customer = db.get_customer_by_internal_id(
+        customer_internal_id=request.args.get("customer")
+    )
     samples: List[Sample] = db.get_samples_by_customer_id_and_pattern(
         pattern=request.args.get("enquiry"), customers=customer.collaborators
     )
@@ -256,7 +262,9 @@ def parse_sample(sample_id):
 def parse_sample_in_collaboration(sample_id):
     """Return a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    customer: Customer = db.get_customer_by_internal_id(
+        customer_internal_id=request.args.get("customer")
+    )
     if sample.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     return jsonify(**sample.to_dict(links=True, flowcells=True))

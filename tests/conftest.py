@@ -15,7 +15,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, CaseActions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
@@ -27,7 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Organism, User
+from cg.store.models import Bed, BedVersion, Customer, Family, Organism, User
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -1819,5 +1819,45 @@ def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
         store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
 
     store.commit()
+
+    yield store
+
+
+@pytest.fixture(name="store_with_cases_and_customers")
+def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with cases and customers."""
+
+    customer_details = [
+        ("cust000", "Customer 1", True),
+        ("cust001", "Customer 2", False),
+        ("cust002", "Customer 3", True),
+    ]
+    customers = []
+
+    for customer_id, customer_name, scout_access in customer_details:
+        customer: Customer = helpers.ensure_customer(
+            store=store, customer_id=customer_id, name=customer_name, scout_access=scout_access
+        )
+        customers.append(customer)
+
+    case_details = [
+        ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
+        ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
+        ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),
+        ("case 4", "funkysloth", Pipeline.MIP_DNA, CaseActions.ANALYZE, customers[1]),
+        ("case 5", "deadparrot", Pipeline.MICROSALT, CaseActions.RUNNING, customers[2]),
+        ("case 6", "anxiousbeetle", Pipeline.DEMULTIPLEX, CaseActions.RUNNING, customers[2]),
+    ]
+
+    for case_name, case_id, pipeline, action, customer in case_details:
+        case: Family = helpers.ensure_case(
+            store=store,
+            name=case_name,
+            case_id=case_id,
+            data_analysis=pipeline.value,
+            action=action.value,
+            customer=customer,
+        )
+        store.add_commit(case)
 
     yield store
