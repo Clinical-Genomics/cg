@@ -95,10 +95,12 @@ class FindBusinessDataHandler(BaseHandler):
         return records
 
     def get_latest_nipt_analysis_to_upload(self):
+        """Return latest nipt analysis."""
         latest_nipt_analyses = self.latest_analyses().filter(Analysis.pipeline == Pipeline.FLUFFY)
         return latest_nipt_analyses.filter(Analysis.uploaded_at.is_(None))
 
     def get_latest_microsalt_analysis_to_upload(self):
+        """Return latest mircosalt analysis."""
         return (
             self.latest_analyses()
             .filter(Analysis.pipeline == Pipeline.MICROSALT)
