@@ -159,6 +159,11 @@ def filter_cases_by_matching_internal_id_or_name(
     )
 
 
+def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
+    """Order cases by created at."""
+    return cases.order_by(Family.created_at.desc())
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: List[Callable],
@@ -218,3 +223,4 @@ class CaseFilter(Enum):
     FILTER_BY_INTERNAL_ID_PATTERN_OR_NAME_PATTERN: Callable = (
         filter_cases_by_matching_internal_id_or_name
     )
+    ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

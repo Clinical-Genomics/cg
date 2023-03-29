@@ -147,6 +147,7 @@ class FindBusinessDataHandler(BaseHandler):
             CaseFilter.GET_WITH_PIPELINE,
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
             CaseFilter.FILTER_BY_INTERNAL_ID_PATTERN_OR_NAME_PATTERN,
+            CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
         customer_entry_ids = [customer.id for customer in customers] if customers else None
@@ -160,8 +161,7 @@ class FindBusinessDataHandler(BaseHandler):
             internal_id_search_pattern=case_internal_id_or_name_search_pattern,
             name_search_pattern=case_internal_id_or_name_search_pattern,
         )
-
-        return filtered_cases_query.order_by(Family.created_at.desc())
+        return filtered_cases_query
 
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
