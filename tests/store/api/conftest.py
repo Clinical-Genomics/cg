@@ -611,7 +611,7 @@ def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
 
 
 @pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_microsalt")
-def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
+def fixture_store_with_analyses_for_cases_not_uploaded_microsalt(
     analysis_store: Store,
     helpers: StoreHelpers,
     timestamp_now: dt.datetime,
