@@ -163,6 +163,10 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return filtered_cases_query
 
+    def get_all_cases(self) -> List[Family]:
+        """Return all cases."""
+        return self._get_query(table=Family).all()
+
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(

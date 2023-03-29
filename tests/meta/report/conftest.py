@@ -89,7 +89,7 @@ def fixture_lims_samples(lims_family: dict) -> List[dict]:
 def report_store(analysis_store, helpers, timestamp_yesterday):
     """A mock store instance for report testing."""
 
-    case = analysis_store.get_filtered_cases()[0]
+    case = analysis_store.get_all_cases()[0]
     helpers.add_analysis(
         analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=timestamp_yesterday
     )

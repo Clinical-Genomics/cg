@@ -166,7 +166,7 @@ def fixture_analysis_obj(analysis_store: Store) -> Analysis:
 @pytest.fixture(name="case_obj")
 def fixture_case_obj(analysis_store: Store) -> Family:
     """Return a case models object."""
-    return analysis_store.get_filtered_cases()[0]
+    return analysis_store.get_all_cases()[0]
 
 
 @pytest.fixture(name="sample_obj")
