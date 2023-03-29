@@ -101,7 +101,7 @@ def test_store_api_delete_non_existing_case(
     case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
         internal_id=case_id_does_not_exist
     )
-    existing_cases: List[Family] = store_with_multiple_cases_and_samples.get_all_cases()
+    existing_cases: List[Family] = store_with_multiple_cases_and_samples.get_cases()
 
     assert not case
     assert existing_cases
@@ -112,6 +112,6 @@ def test_store_api_delete_non_existing_case(
     )
 
     # THEN no case has been deleted and nothing happens
-    remaining_cases: List[Family] = store_with_multiple_cases_and_samples.get_all_cases()
+    remaining_cases: List[Family] = store_with_multiple_cases_and_samples.get_cases()
 
     assert len(remaining_cases) == len(existing_cases)

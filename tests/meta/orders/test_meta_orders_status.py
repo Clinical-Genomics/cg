@@ -717,7 +717,7 @@ def test_store_existing_case(
 ):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert not base_store.get_samples()
-    assert not base_store.get_all_cases()
+    assert not base_store.get_cases()
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -731,7 +731,7 @@ def test_store_existing_case(
     )
 
     base_store.close()
-    new_cases = base_store.get_all_cases()
+    new_cases = base_store.get_cases()
 
     # Save internal id
     stored_cases_internal_ids = dict([(case["name"], case["internal_id"]) for case in new_cases])
@@ -747,7 +747,7 @@ def test_store_existing_case(
     )
 
     base_store.close()
-    rerun_cases = base_store.get_all_cases()
+    rerun_cases = base_store.get_cases()
 
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
     assert rerun_cases[0].tickets == f"{ticket_id},{ticket_id}"

@@ -187,7 +187,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return filtered_cases_query
 
-    def get_all_cases(self) -> List[Family]:
+    def get_cases(self) -> List[Family]:
         """Return all cases."""
         return self._get_query(table=Family).all()
 

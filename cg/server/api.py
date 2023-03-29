@@ -174,11 +174,11 @@ def parse_families():
 def parse_families_in_collaboration():
     """Return families in collaboration."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    data_analysis: str = request.args.get("data_analysis")
+    pipeline: str = request.args.get("data_analysis")
     cases_query: Query = db.get_filtered_cases(
         case_internal_id_or_name_search_pattern=request.args.get("enquiry"),
         customers=customer.collaborators,
-        pipeline=data_analysis,
+        pipeline=pipeline,
     )
     cases = cases_query.limit(30)
     parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
