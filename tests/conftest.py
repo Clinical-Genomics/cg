@@ -1850,7 +1850,7 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
     ]
 
     for case_name, case_id, pipeline, action, customer in case_details:
-        case: Family = helpers.ensure_case(
+        helpers.ensure_case(
             store=store,
             name=case_name,
             case_id=case_id,
