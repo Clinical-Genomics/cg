@@ -15,7 +15,7 @@ from cg.store.filters.status_case_filters import (
     filter_case_by_internal_id,
     filter_cases_by_matching_internal_id_or_name,
     filter_cases_by_name,
-    get_active_cases,
+    get_running_cases,
     filter_cases_by_ticket_id,
     get_cases_with_pipeline,
     get_cases_has_sequence,
@@ -637,7 +637,7 @@ def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples
     cases_query = cases_query.filter(Family.action != "running")
 
     # WHEN getting active cases
-    active_cases: Query = get_active_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return no cases
     assert active_cases.count() == 0
@@ -651,7 +651,7 @@ def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_sampl
     assert "running" in actions
 
     # WHEN getting active cases
-    active_cases: Query = get_active_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return at least one case
     assert active_cases.count() >= 1
@@ -665,7 +665,7 @@ def test_get_active_cases_only_running_cases(store_with_multiple_cases_and_sampl
         case.action = "running"
 
     # WHEN getting active cases
-    active_cases: Query = get_active_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return the same number of cases as the original query
     assert active_cases.count() == cases_query.count()

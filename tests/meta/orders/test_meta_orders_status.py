@@ -236,7 +236,7 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket_id: str):
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"
 
-    new_case = base_store.get_all_cases()[0]
+    new_case = base_store.get_cases()[0]
     assert new_case.data_analysis == str(Pipeline.FASTQ)
     assert new_case.data_delivery == str(DataDelivery.FASTQ)
 
@@ -269,7 +269,7 @@ def test_store_samples(orders_api, base_store, fastq_status_data, ticket_id: str
     first_sample = new_samples[0]
     assert len(first_sample.links) == 2
     family_link = first_sample.links[0]
-    assert family_link.family in base_store.get_all_cases()
+    assert family_link.family in base_store.get_cases()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
     assert family_link.family.data_analysis
@@ -450,7 +450,7 @@ def test_store_microbial_case_data_analysis_stored(
     assert len(base_store.get_samples()) > 0
     assert base_store._get_query(table=Family).count() == 1
 
-    microbial_case = base_store.get_all_cases()[0]
+    microbial_case = base_store.get_cases()[0]
     assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
     assert microbial_case.data_delivery == str(DataDelivery.FASTQ_QC)
 
@@ -485,7 +485,7 @@ def test_store_microbial_sample_priority(
 def test_store_mip(orders_api, base_store, mip_status_data, ticket_id: str):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert not base_store.get_samples()
-    assert not base_store.get_all_cases()
+    assert not base_store.get_cases()
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -538,7 +538,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket_id: s
     # GIVEN a basic store with no samples or nothing in it + rna order
     rna_application_tag = "RNAPOAR025"
     assert not base_store.get_samples()
-    assert not base_store.get_all_cases()
+    assert not base_store.get_cases()
     assert base_store.get_application_by_tag(tag=rna_application_tag)
 
     submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -615,7 +615,7 @@ def test_store_cancer_samples(
 ):
     # GIVEN a basic store with no samples and a cancer order
     assert not base_store.get_samples()
-    assert not base_store.get_all_cases()
+    assert not base_store.get_cases()
 
     submitter: Submitter = submitter(lims=orders_api.lims, status=orders_api.status)
 
