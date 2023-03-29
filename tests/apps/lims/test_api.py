@@ -93,35 +93,6 @@ def test_get_delivery_date_no_sample(lims_api, mocker):
     assert res is None
 
 
-def test_get_sequenced_date(lims_api, mocker):
-    """Test to get the sequenced date"""
-    # GIVEN a lims api and a mocked sample that returns a sequenced date
-    mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
-    mock_instance = mocked_sample.return_value
-    date = dt.datetime.today()
-    mock_instance.udf = {"Sequencing Finished": date}
-
-    # WHEN fetching the date
-    res = lims_api.get_sequenced_date(123)
-
-    # THEN asserrt the correct date is fetched
-    assert res == date
-
-
-def test_get_sequenced_date_no_sample(lims_api, mocker):
-    """Test to get the sequenced date when sample not exists"""
-    # GIVEN a lims api and a mocked sample that raises exception when fething date
-    mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
-    mock_instance = mocked_sample.return_value
-    mock_instance.udf.get.side_effect = HTTPError()
-
-    # WHEN fetching the date
-    res = lims_api.get_sequenced_date(123)
-
-    # THEN assert that None is returned since a exception was raised
-    assert res is None
-
-
 def test_get_processing_time_for_values(lims_api, mocker):
     """Test to get the processing time when there are some existing dates"""
     # GIVEN there is a received_at date and a delivered date
