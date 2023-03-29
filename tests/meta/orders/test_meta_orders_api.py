@@ -192,8 +192,6 @@ def test_submit_scout_legal_sample_customer(
     monkeypatch_process_lims(monkeypatch, order_data)
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
-    collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
-    sample_store.add_commit(collaboration)
     sample_customer = sample_store.add_customer(
         "customer1",
         "customer 1",
@@ -208,8 +206,6 @@ def test_submit_scout_legal_sample_customer(
         invoice_address="dummy street 2",
         invoice_reference="dummy nr",
     )
-    sample_customer.collaborations.append(collaboration)
-    order_customer.collaborations.append(collaboration)
     sample_store.add_commit(sample_customer)
     sample_store.add_commit(order_customer)
     existing_sample: Sample = sample_store.get_samples()[0]

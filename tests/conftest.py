@@ -1130,9 +1130,7 @@ def fixture_base_store(
     store: Store,
 ) -> Store:
     """Setup and example store."""
-    collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
-    store.add_commit(collaboration)
     customers: List[Customer] = []
     customer_map: Dict[str, str] = {
         customer_id: "Production",

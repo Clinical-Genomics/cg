@@ -51,7 +51,6 @@ def test_add_basic(store: Store):
     # GIVEN an empty database
     assert (store._get_query(table=Customer)).first() is None
     internal_id, name, scout_access = "cust000", "Test customer", True
-    collaboration = store.add_collaboration("dummy_group", "dummy group")
 
     # WHEN adding a new customer
     new_customer = store.add_customer(
@@ -61,7 +60,6 @@ def test_add_basic(store: Store):
         invoice_address="dummy street 1",
         invoice_reference="dummy nr",
     )
-    new_customer.collaborations.append(collaboration)
     store.add_commit(new_customer)
 
     # THEN it should be stored in the database

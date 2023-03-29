@@ -60,11 +60,6 @@ class AddHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_collaboration(self, internal_id: str, name: str, **kwargs) -> Collaboration:
-        """Build a new customer group record."""
-
-        return self.Collaboration(internal_id=internal_id, name=name, **kwargs)
-
     def add_user(self, customer: Customer, email: str, name: str, is_admin: bool = False) -> User:
         """Build a new user record."""
 

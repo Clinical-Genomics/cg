@@ -187,13 +187,6 @@ class StoreHelpers:
         return bed_version
 
     @staticmethod
-    def ensure_collaboration(store: Store, collaboration_id: str = "all_customers"):
-        collaboration = store.get_collaboration_by_internal_id(collaboration_id)
-        if not collaboration:
-            collaboration = store.add_collaboration(collaboration_id, collaboration_id)
-        return collaboration
-
-    @staticmethod
     def ensure_customer(
         store: Store,
         customer_id: str = "cust000",
@@ -201,7 +194,6 @@ class StoreHelpers:
         scout_access: bool = False,
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
-        collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
         customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
 
         if not customer:
@@ -212,7 +204,6 @@ class StoreHelpers:
                 invoice_address="Test street",
                 invoice_reference="ABCDEF",
             )
-            customer.collaborations.append(collaboration)
             store.add_commit(customer)
         return customer
 
