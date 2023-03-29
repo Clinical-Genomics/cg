@@ -485,7 +485,7 @@ def test_store_microbial_sample_priority(
 def test_store_mip(orders_api, base_store, mip_status_data, ticket_id: str):
     # GIVEN a basic store with no samples or nothing in it + scout order
     assert not base_store.get_samples()
-    assert base_store.get_all_cases()[0] is None
+    assert not base_store.get_all_cases()
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -538,7 +538,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket_id: s
     # GIVEN a basic store with no samples or nothing in it + rna order
     rna_application_tag = "RNAPOAR025"
     assert not base_store.get_samples()
-    assert base_store.get_all_cases()[0] is None
+    assert not base_store.get_all_cases()
     assert base_store.get_application_by_tag(tag=rna_application_tag)
 
     submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -615,7 +615,7 @@ def test_store_cancer_samples(
 ):
     # GIVEN a basic store with no samples and a cancer order
     assert not base_store.get_samples()
-    assert base_store.get_all_cases()[0] is None
+    assert not base_store.get_all_cases()
 
     submitter: Submitter = submitter(lims=orders_api.lims, status=orders_api.status)
 
