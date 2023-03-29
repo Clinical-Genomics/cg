@@ -132,7 +132,7 @@ class HousekeeperAPI:
         """Return the latest file that includes at least all tags in "tags". Return None if no file could be found."""
         LOG.debug(f"Fetch files from version with tags {tags}")
         files: List[File] = []
-        for file in version_obj.files:
+        for file in list(version_obj.files):
             file_tags = {tag.name for tag in file.tags}
             if tags.issubset(file_tags):
                 LOG.debug("Found file %s", file)
