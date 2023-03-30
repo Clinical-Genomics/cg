@@ -404,17 +404,9 @@ class SpringBackupAPI:
             LOG.info(f"Dry run, no changes made to {spring_file_path}")
             return
         hk_spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
-        LOG.info(f"Setting {spring_file_path} to archived in Housekeeper")
         if hk_spring_file:
+            LOG.info(f"Setting {spring_file_path} to archived in Housekeeper")
             self.hk_api.set_to_archive(file=hk_spring_file, value=True)
-
-    def is_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
-        """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted."""
-        file = self.hk_api.files(path=str(spring_file_path)).first()
-        if file and not spring_file_path.exists():
-            LOG.info(f"Spring file {spring_file_path} does not exist")
-            return file.to_archive
-        return False
 
     def remove_archived_spring_file(self, spring_file_path: Path) -> None:
         """Removes all files related to spring PDC archiving."""
