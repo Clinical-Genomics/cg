@@ -22,7 +22,7 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
     assert bed_versions[0].shortname == bed_version_short_name
 
 
-def test_get_bed_version_by_short_name_when_no_name(base_store: Store):
+def test_get_bed_version_by_short_name_when_no_name(base_store: Store, bed_version_short_name: str):
     """Test return bed version by short name when short name does not exist."""
     # GIVEN a store containing bed version
 

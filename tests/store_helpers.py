@@ -199,8 +199,6 @@ class StoreHelpers:
         customer_id: str = "cust000",
         name: str = "Production",
         scout_access: bool = False,
-        invoice_address: str = "Test street",
-        invoice_reference: str = "ABCDEF",
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
         collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
@@ -211,8 +209,8 @@ class StoreHelpers:
                 internal_id=customer_id,
                 name=name,
                 scout_access=scout_access,
-                invoice_address=invoice_address,
-                invoice_reference=invoice_reference,
+                invoice_address="Test street",
+                invoice_reference="ABCDEF",
             )
             customer.collaborations.append(collaboration)
             store.add_commit(customer)
