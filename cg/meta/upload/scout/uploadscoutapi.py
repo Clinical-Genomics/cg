@@ -109,7 +109,7 @@ class UploadScoutAPI:
     def get_multiqc_html_report(
         self, case_id: str, pipeline: Pipeline
     ) -> Tuple[ScoutCustomCaseReportTags, Optional[File]]:
-        """Get a multiqc report for case in housekeeper."""
+        """Get a multiqc report for a case in housekeeper."""
         if pipeline == Pipeline.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
@@ -173,12 +173,7 @@ class UploadScoutAPI:
         """Upload fusion report file for a case to Scout."""
 
         report_type: str = "Research" if research else "Clinical"
-        rna_case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
 
-        rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
-            rna_case=rna_case
-        )
-        unique_dna_cases: Set[str] = set()
         fusion_report: Optional[File] = self.get_fusion_report(case_id, research)
         if fusion_report is None:
             raise FileNotFoundError(
@@ -187,7 +182,7 @@ class UploadScoutAPI:
 
         LOG.info(f"{report_type} fusion report {fusion_report.path} found")
 
-        for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(case_id):
+        for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(case_id=case_id):
             LOG.info(f"Uploading {report_type} fusion report to scout for case {dna_case_id}")
 
             if dry_run:

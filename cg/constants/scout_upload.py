@@ -14,8 +14,8 @@ class ScoutCustomCaseReportTags(StrEnum):
     COV_QC: str = "coverage_qc_report"
     MULTIQC: str = "multiqc"
     MULTIQC_RNA: str = "multiqc_rna"
-    GENE_FUSION: str = "gene_fusion_report"
-    GENE_FUSION_RESEARCH: str = "gene_fusion_report_research"
+    GENE_FUSION: str = "gene_fusion"
+    GENE_FUSION_RESEARCH: str = "gene_fusion_research"
 
 
 MIP_CASE_TAGS = dict(

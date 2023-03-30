@@ -8,6 +8,7 @@ from typing import List, Optional
 from cg.apps.scout.scout_export import ScoutExportCase, Variant
 from cg.constants.constants import FileFormat
 from cg.constants.gene_panel import GENOME_BUILD_37
+from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.exc import ScoutUploadError
 from cg.io.controller import ReadFile, ReadStream
 from cg.models.scout.scout_load_config import ScoutLoadConfig
@@ -186,8 +187,7 @@ class ScoutAPI:
         """Load a delivery report into a case in the database.
         If the report already exists the function will exit.
         If the user want to load a report that is already in the database
-        'update' has to be 'True'.
-        """
+        'update' has to be 'True'."""
 
         upload_command: List[str] = ["load", "delivery-report", case_id, report_path]
 
@@ -201,36 +201,34 @@ class ScoutAPI:
             LOG.warning("Something went wrong when uploading delivery report")
 
     def upload_report(self, case_id: str, report_path: str, report_type: str) -> None:
-        """Load report into a case in the database. If the report already exists the function will exit."""
+        """Load report into a case in the database."""
 
-        upload_command: List[str] = ["load", "report", "-t", report_type, case_id, report_path]
+        upload_report_command: List[str] = [
+            "load",
+            "report",
+            "-t",
+            report_type,
+            case_id,
+            report_path,
+        ]
 
         try:
             LOG.info(f"Uploading {report_type} report to case {case_id}")
-            self.process.run_command(upload_command)
+            self.process.run_command(upload_report_command)
         except CalledProcessError:
-            LOG.warning("Something went wrong when uploading multiqc report")
+            LOG.warning(f"Something went wrong when uploading {report_type} for case {case_id}")
 
     def upload_fusion_report(
         self, case_id: str, report_path: str, research: bool, update: bool
     ) -> None:
         """Load a fusion report into a case in the database."""
 
-        upload_command: List[str] = ["load", "gene-fusion-report"]
-
-        if research:
-            upload_command.append("--research")
-
-        if update:
-            upload_command.append("--update")
-
-        upload_command.extend([case_id, report_path])
-
-        try:
-            LOG.info(f"Uploading fusion report {report_path} to case {case_id}")
-            self.process.run_command(upload_command)
-        except CalledProcessError as error:
-            raise ScoutUploadError("Something went wrong when uploading fusion report") from error
+        report_type: str = (
+            ScoutCustomCaseReportTags.GENE_FUSION_RESEARCH
+            if research
+            else ScoutCustomCaseReportTags.GENE_FUSION
+        )
+        self.upload_report(case_id=case_id, report_path=report_path, report_type=report_type)
 
     def upload_splice_junctions_bed(self, file_path: str, case_id: str, customer_sample_id: str):
         """Load a splice junctions bed file into a case in the database."""
@@ -254,7 +252,9 @@ class ScoutAPI:
                 "Something went wrong when uploading splice junctions bed file"
             ) from error
 
-    def upload_rna_coverage_bigwig(self, file_path: str, case_id: str, customer_sample_id: str):
+    def upload_rna_coverage_bigwig(
+        self, file_path: str, case_id: str, customer_sample_id: str
+    ) -> None:
         """Load a rna coverage bigwig file into a case in the database."""
 
         upload_command: List[str] = [

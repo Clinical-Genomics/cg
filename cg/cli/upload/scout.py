@@ -173,7 +173,7 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.pass_context
 def upload_rna_to_scout(
     context, case_id: str, dry_run: bool, update_fusion_report: bool, research: bool
-) -> int:
+) -> None:
     """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
