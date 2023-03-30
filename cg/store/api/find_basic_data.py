@@ -191,6 +191,7 @@ class FindBasicDataHandler(BaseHandler):
 
     def latest_version(self, tag: str) -> Optional[ApplicationVersion]:
         """Return the latest application version for an application tag."""
+        # TO REFACTOR
         application = self.get_application_by_tag(tag=tag)
         return application.versions[-1] if application and application.versions else None
 
