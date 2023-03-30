@@ -11,10 +11,10 @@ SUCCESS = 0
 
 @pytest.mark.parametrize("identifier_key", ["name", "internal_id"])
 def test_set_samples_by_identifiers(
-    cli_runner, base_context, base_store: Store, identifier_key, helpers, caplog
+    cli_runner, base_context, store: Store, identifier_key, helpers, caplog
 ):
     # GIVEN a database with a sample
-    sample_obj = helpers.add_sample(base_store)
+    sample_obj = helpers.add_sample(store)
     identifier_value = getattr(sample_obj, identifier_key)
 
     # WHEN calling set samples with valid identifiers
@@ -31,11 +31,9 @@ def test_set_samples_by_identifiers(
     assert sample_obj.name in caplog.text
 
 
-def test_set_samples_by_invalid_identifier(
-    cli_runner, base_context, base_store: Store, helpers, caplog
-):
+def test_set_samples_by_invalid_identifier(cli_runner, base_context, store: Store, helpers, caplog):
     # GIVEN a database with a sample that belongs to a case
-    sample_obj = helpers.add_sample(base_store)
+    sample_obj = helpers.add_sample(store)
 
     # WHEN calling set samples with an identifier not existing on sample
     bad_identifier = "bad_identifier"
@@ -51,11 +49,11 @@ def test_set_samples_by_invalid_identifier(
     assert result.exit_code != SUCCESS
 
 
-def test_set_samples_by_case_id(cli_runner, base_context, base_store: Store, helpers, caplog):
+def test_set_samples_by_case_id(cli_runner, base_context, store: Store, helpers, caplog):
     # GIVEN a database with a sample that belongs to a case
-    case_obj = helpers.add_case(store=base_store)
-    sample_obj = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
+    case_obj = helpers.add_case(store=store)
+    sample_obj = helpers.add_sample(store)
+    helpers.add_relationship(store=store, case=case_obj, sample=sample_obj)
 
     # WHEN calling set samples with case_id
     with caplog.at_level(logging.INFO):
@@ -69,15 +67,13 @@ def test_set_samples_by_case_id(cli_runner, base_context, base_store: Store, hel
     assert sample_obj.name in caplog.text
 
 
-def test_set_samples_by_invalid_case_id(
-    cli_runner, base_context, base_store: Store, helpers, caplog
-):
+def test_set_samples_by_invalid_case_id(cli_runner, base_context, store: Store, helpers, caplog):
     # GIVEN a database with a sample that belongs to a case
-    sample_obj = helpers.add_sample(base_store)
+    sample_obj = helpers.add_sample(store)
 
     # WHEN calling set samples with an identifier not existing on sample
     non_existing_case = "not_a_case"
-    assert not base_store.get_case_by_internal_id(internal_id=non_existing_case)
+    assert not store.get_case_by_internal_id(internal_id=non_existing_case)
     with caplog.at_level(logging.INFO):
         result = cli_runner.invoke(
             samples, [non_existing_case, "-y", "--skip-lims"], obj=base_context
@@ -90,12 +86,12 @@ def test_set_samples_by_invalid_case_id(
 
 
 def test_set_samples_by_valid_case_id_and_valid_identifier(
-    cli_runner, base_context, base_store: Store, helpers, caplog
+    cli_runner, base_context, store: Store, helpers, caplog
 ):
     # GIVEN a database with a sample that belongs to a case
-    case_obj = helpers.add_case(store=base_store)
-    sample_obj = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
+    case_obj = helpers.add_case(store=store)
+    sample_obj = helpers.add_sample(store)
+    helpers.add_relationship(store=store, case=case_obj, sample=sample_obj)
 
     # WHEN calling set samples with case_id for sample and valid identifier for sample
     with caplog.at_level(logging.INFO):
@@ -122,10 +118,10 @@ def test_set_samples_by_invalid_case_id_and_valid_identifier(
     cli_runner, base_context: CGConfig, helpers, caplog
 ):
     # GIVEN a database with a sample that belongs to a case
-    base_store: Store = base_context.status_db
-    case_obj = helpers.add_case(store=base_store)
-    sample_obj = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
+    store: Store = base_context.status_db
+    case_obj = helpers.add_case(store=store)
+    sample_obj = helpers.add_sample(store)
+    helpers.add_relationship(store=store, case=case_obj, sample=sample_obj)
 
     # WHEN calling set samples with bad case_id for sample and valid identifier for sample
     with caplog.at_level(logging.INFO):
@@ -145,10 +141,10 @@ def test_set_samples_by_valid_case_id_and_invalid_identifier(
     cli_runner, base_context: CGConfig, helpers, caplog
 ):
     # GIVEN a database with a sample that belongs to a case
-    base_store: Store = base_context.status_db
-    case_obj = helpers.add_case(store=base_store)
-    sample_obj = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, case=case_obj, sample=sample_obj)
+    store: Store = base_context.status_db
+    case_obj = helpers.add_case(store=store)
+    sample_obj = helpers.add_sample(store)
+    helpers.add_relationship(store=store, case=case_obj, sample=sample_obj)
 
     # WHEN calling set samples with valid case_id for sample and wrong valid identifier for sample
     with caplog.at_level(logging.INFO):

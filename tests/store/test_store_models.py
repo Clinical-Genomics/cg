@@ -40,10 +40,10 @@ def test_microbial_sample_to_dict(microbial_store: Store, helpers):
     assert a_dict["application_version"]
 
 
-def test_no_collaborators(base_store):
+def test_no_collaborators(store):
     # GIVEN a customer without collaborations
     new_customer_id = "cust004"
-    customer = base_store.add_customer(
+    customer = store.add_customer(
         new_customer_id,
         "No-colab",
         scout_access=True,

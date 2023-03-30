@@ -20,32 +20,32 @@ def test_validate_normal_order(sarscov2_order_to_submit: dict, base_store: Store
 
 
 def test_validate_submitted_order(
-    sarscov2_order_to_submit: dict, base_store: Store, helpers: StoreHelpers
+    sarscov2_order_to_submit: dict, store: Store, helpers: StoreHelpers
 ):
     # GIVEN sarscov2 order with three samples, all in the database
     order: OrderIn = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
     sample: SarsCov2Sample
     for sample in order.samples:
-        helpers.add_sample(store=base_store, name=sample.name, customer_id=order.customer)
+        helpers.add_sample(store=store, name=sample.name, customer_id=order.customer)
 
     # WHEN validating the order
     # THEN it should be regarded as invalid
     with pytest.raises(OrderError):
-        SarsCov2Submitter(status=base_store, lims=None).validate_order(order=order)
+        SarsCov2Submitter(status=store, lims=None).validate_order(order=order)
 
 
 def test_validate_submitted_control_order(
-    sarscov2_order_to_submit: dict, base_store: Store, helpers: StoreHelpers
+    sarscov2_order_to_submit: dict, store: Store, helpers: StoreHelpers
 ):
     # GIVEN sarscov2 order with three control samples, all in the database
     order: OrderIn = OrderIn.parse_obj(sarscov2_order_to_submit, OrderType.SARS_COV_2)
 
     sample: SarsCov2Sample
     for sample in order.samples:
-        helpers.add_sample(store=base_store, name=sample.name, customer_id=order.customer)
+        helpers.add_sample(store=store, name=sample.name, customer_id=order.customer)
         sample.control = ControlEnum.positive
 
     # WHEN validating the order
     # THEN it should be regarded as valid
-    SarsCov2Submitter(status=base_store, lims=None).validate_order(order=order)
+    SarsCov2Submitter(status=store, lims=None).validate_order(order=order)

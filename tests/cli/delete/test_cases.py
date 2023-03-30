@@ -11,14 +11,14 @@ SUCCESS = 0
 
 @pytest.mark.parametrize("identifier_key", ["original_ticket", "order"])
 def test_set_cases_by_sample_identifiers(
-    cli_runner, base_context, base_store: Store, identifier_key, helpers, caplog, ticket_id
+    cli_runner, base_context, store: Store, identifier_key, helpers, caplog, ticket_id
 ):
     # GIVEN a database with a case with a sample
-    sample_obj = helpers.add_sample(base_store)
+    sample_obj = helpers.add_sample(store)
     sample_obj.original_ticket = ticket_id
     sample_obj.order = "An order"
-    case = helpers.add_case(base_store)
-    helpers.add_relationship(base_store, sample=sample_obj, case=case)
+    case = helpers.add_case(store)
+    helpers.add_relationship(store, sample=sample_obj, case=case)
     identifier_value = getattr(sample_obj, identifier_key)
 
     caplog.set_level(logging.INFO)
@@ -35,13 +35,13 @@ def test_set_cases_by_sample_identifiers(
     assert case.name in caplog.text
 
 
-def test_delete_cases_with_dry_run(cli_runner, base_context, base_store: Store, helpers, caplog):
+def test_delete_cases_with_dry_run(cli_runner, base_context, store: Store, helpers, caplog):
     """Test that the delete cases will not delete the cases in dry-run mode"""
     # GIVEN a database with a case
-    case_obj = helpers.add_case(base_store)
+    case_obj = helpers.add_case(store)
     case_id = case_obj.internal_id
-    sample = helpers.add_sample(base_store)
-    helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
+    sample = helpers.add_sample(store)
+    helpers.add_relationship(store=store, case=case_obj, sample=sample)
 
     # WHEN deleting a case
     caplog.set_level(logging.DEBUG)

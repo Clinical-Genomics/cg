@@ -14,13 +14,13 @@ from cg.store.models import (
 )
 
 
-def test_get_active_beds(base_store: Store):
+def test_get_active_beds(store: Store):
     """Test returning not archived bed records from the database."""
 
     # GIVEN a store with beds
 
     # WHEN fetching beds
-    beds: Query = base_store.get_active_beds()
+    beds: Query = store.get_active_beds()
 
     # THEN beds should have be returned
     assert beds
@@ -30,17 +30,17 @@ def test_get_active_beds(base_store: Store):
         assert bed.is_archived is False
 
 
-def test_get_active_beds_when_archived(base_store: Store):
+def test_get_active_beds_when_archived(store: Store):
     """Test returning not archived bed records from the database when archived."""
 
     # GIVEN a store with beds
-    beds: Query = base_store.get_active_beds()
+    beds: Query = store.get_active_beds()
     for bed in beds:
         bed.is_archived = True
-        base_store.add_commit(bed)
+        store.add_commit(bed)
 
     # WHEN fetching beds
-    active_beds: Query = base_store.get_active_beds()
+    active_beds: Query = store.get_active_beds()
 
     # THEN return no beds
     assert not list(active_beds)
@@ -61,13 +61,13 @@ def test_get_bed_by_name(base_store: Store, bed_name: str):
     assert bed.name == bed_name
 
 
-def test_get_bed_by_name_when_no_match(base_store: Store):
+def test_get_bed_by_name_when_no_match(store: Store):
     """Test returning a bed record by name from the database when no match."""
 
     # GIVEN a store with beds
 
     # WHEN fetching beds
-    bed: Optional[Bed] = base_store.get_bed_by_name(bed_name="does_not_exist")
+    bed: Optional[Bed] = store.get_bed_by_name(bed_name="does_not_exist")
 
     # THEN do not return a bed
     assert not bed
@@ -186,13 +186,13 @@ def test_application_version_with_version_and_application(
     assert isinstance(application_version, ApplicationVersion)
 
 
-def test_get_bed_version_query(base_store: Store):
+def test_get_bed_version_query(store: Store):
     """Test function to return the bed version query."""
 
     # GIVEN a store with bed versions records
 
     # WHEN getting the query for the bed versions
-    bed_version_query: Query = base_store._get_query(table=BedVersion)
+    bed_version_query: Query = store._get_query(table=BedVersion)
 
     # THEN a query should be returned
     assert isinstance(bed_version_query, Query)
@@ -201,7 +201,7 @@ def test_get_bed_version_query(base_store: Store):
 def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name: str):
     """Test function to return the bed version by short name."""
 
-    # GIVEN a store with bed versions records
+    # GIVEN a base store with bed versions records
 
     # WHEN getting the query for the bed versions
     bed_version: BedVersion = base_store.get_bed_version_by_short_name(
@@ -215,7 +215,7 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
 def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
     """Test function to return the customer by customer id."""
 
-    # GIVEN a store with customer records
+    # GIVEN a base store with customer records
 
     # WHEN getting the query for the customer
     customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=customer_id)
@@ -227,7 +227,7 @@ def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
 def test_get_customers(base_store: Store, customer_id: str):
     """Test function to return customers."""
 
-    # GIVEN a store with customer records
+    # GIVEN a base store with customer records
 
     # WHEN getting the customers
     customers: List[Customer] = base_store.get_customers()
@@ -242,7 +242,7 @@ def test_get_customers(base_store: Store, customer_id: str):
 def test_get_collaboration_by_internal_id(base_store: Store, collaboration_id: str):
     """Test function to return the collaborations by internal_id."""
 
-    # GIVEN a store with collaborations
+    # GIVEN a base store with collaborations
 
     # WHEN getting the query for the collaborations
     collaboration: Collaboration = base_store.get_collaboration_by_internal_id(

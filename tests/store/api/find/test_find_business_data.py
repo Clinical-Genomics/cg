@@ -94,7 +94,7 @@ def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: 
 
 
 def test_get_flow_cells_by_case(
-    base_store: Store,
+    store: Store,
     flow_cell_id: str,
     another_flow_cell_id: str,
     case_obj: Family,
@@ -104,12 +104,12 @@ def test_get_flow_cells_by_case(
     """Test returning the latest flow cell from the database by case."""
 
     # GIVEN a store with two flow cell
-    helpers.add_flowcell(store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj])
+    helpers.add_flowcell(store=store, flow_cell_id=flow_cell_id, samples=[sample_obj])
 
-    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+    helpers.add_flowcell(store=store, flow_cell_id=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
-    flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case_obj)
+    flow_cells: List[Flowcell] = store.get_flow_cells_by_case(case=case_obj)
 
     # THEN the flow cell samples for the case should be returned
     for flow_cell in flow_cells:
@@ -232,7 +232,7 @@ def test_get_latest_flow_cell_on_case(
 
 
 def test_is_all_flow_cells_on_disk_when_no_flow_cell(
-    base_store: Store,
+    store: Store,
     caplog,
     case_id: str,
 ):
@@ -240,7 +240,7 @@ def test_is_all_flow_cells_on_disk_when_no_flow_cell(
     caplog.set_level(logging.DEBUG)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -250,7 +250,7 @@ def test_is_all_flow_cells_on_disk_when_no_flow_cell(
 
 
 def test_is_all_flow_cells_on_disk_when_not_on_disk(
-    base_store: Store,
+    store: Store,
     caplog,
     flow_cell_id: str,
     another_flow_cell_id: str,
@@ -262,21 +262,21 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
-        store=base_store,
+        store=store,
         flow_cell_id=flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.PROCESSING,
     )
 
     another_flow_cell = helpers.add_flowcell(
-        store=base_store,
+        store=store,
         flow_cell_id=another_flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.RETRIEVED,
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -287,7 +287,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
 
 
 def test_is_all_flow_cells_on_disk_when_requested(
-    base_store: Store,
+    store: Store,
     caplog,
     flow_cell_id: str,
     another_flow_cell_id: str,
@@ -299,21 +299,21 @@ def test_is_all_flow_cells_on_disk_when_requested(
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
-        store=base_store,
+        store=store,
         flow_cell_id=flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.REMOVED,
     )
 
     another_flow_cell = helpers.add_flowcell(
-        store=base_store,
+        store=store,
         flow_cell_id=another_flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.REQUESTED,
     )
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return false
     assert is_on_disk is False
@@ -326,7 +326,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
 
 
 def test_is_all_flow_cells_on_disk(
-    base_store: Store,
+    store: Store,
     caplog,
     flow_cell_id: str,
     another_flow_cell_id: str,
@@ -337,14 +337,12 @@ def test_is_all_flow_cells_on_disk(
     """Test check if all flow cells for samples on a case is on disk."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
-    flow_cell = helpers.add_flowcell(
-        store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj]
-    )
+    flow_cell = helpers.add_flowcell(store=store, flow_cell_id=flow_cell_id, samples=[sample_obj])
 
-    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+    helpers.add_flowcell(store=store, flow_cell_id=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
-    is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
+    is_on_disk = store.is_all_flow_cells_on_disk(case_id=case_id)
 
     # THEN return true
     assert is_on_disk is True
@@ -462,60 +460,60 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
     assert not cases
 
 
-def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):
+def test_is_case_down_sampled_true(store: Store, case_obj: Family, sample_id: str):
     """Tests the down sampling check when all samples are down sampled."""
     # GIVEN a case where all samples are down sampled
     for sample in case_obj.samples:
         sample.from_sample = sample_id
-    base_store.commit()
+    store.commit()
 
     # WHEN checking if all sample in the case are down sampled
-    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
+    is_down_sampled: bool = store.is_case_down_sampled(case_id=case_obj.internal_id)
 
     # THEN the return value should be True
     assert is_down_sampled
 
 
-def test_is_case_down_sampled_false(base_store: Store, case_obj: Family, sample_id: str):
+def test_is_case_down_sampled_false(store: Store, case_obj: Family, sample_id: str):
     """Tests the down sampling check when none of the samples are down sampled."""
     # GIVEN a case where all samples are not down sampled
     for sample in case_obj.samples:
         assert not sample.from_sample
 
     # WHEN checking if all sample in the case are down sampled
-    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
+    is_down_sampled: bool = store.is_case_down_sampled(case_id=case_obj.internal_id)
 
     # THEN the return value should be False
     assert not is_down_sampled
 
 
 def test_is_case_external_true(
-    base_store: Store, case_obj: Family, helpers: StoreHelpers, sample_id: str
+    store: Store, case_obj: Family, helpers: StoreHelpers, sample_id: str
 ):
     """Tests the external case check when all the samples are external."""
     # GIVEN a case where all samples are not external
     external_application_version: ApplicationVersion = helpers.ensure_application_version(
-        store=base_store, is_external=True
+        store=store, is_external=True
     )
     for sample in case_obj.samples:
         sample.application_version = external_application_version
-    base_store.commit()
+    store.commit()
 
     # WHEN checking if all sample in the case are external
-    is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)
+    is_external: bool = store.is_case_external(case_id=case_obj.internal_id)
 
     # THEN the return value should be False
     assert is_external
 
 
-def test_is_case_external_false(base_store: Store, case_obj: Family, sample_id: str):
+def test_is_case_external_false(store: Store, case_obj: Family, sample_id: str):
     """Tests the external case check when none of the samples are external."""
     # GIVEN a case where all samples are not external
     for sample in case_obj.samples:
         assert not sample.application_version.application.is_external
 
     # WHEN checking if all sample in the case are external
-    is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)
+    is_external: bool = store.is_case_external(case_id=case_obj.internal_id)
 
     # THEN the return value should be False
     assert not is_external

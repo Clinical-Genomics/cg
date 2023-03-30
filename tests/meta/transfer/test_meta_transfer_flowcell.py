@@ -277,11 +277,11 @@ def test_include_sequencing_file(
 
 
 def test_set_status_db_sample_sequenced_at_when_first_sequenced(
-    base_store: Store, flow_cell_id: str, helpers: StoreHelpers, timestamp_now: datetime
+    store: Store, flow_cell_id: str, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test setting sample sequenced at with no previous sequencing."""
     # GIVEN a status db sample
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=None)
+    sample: Sample = helpers.add_sample(store, sequenced_at=None)
 
     # Given no previous sequencing
     assert sample.sequenced_at is None
@@ -296,7 +296,7 @@ def test_set_status_db_sample_sequenced_at_when_first_sequenced(
 
 
 def test_set_status_db_sample_sequenced_at_when_sequenced_again(
-    base_store: Store,
+    store: Store,
     flow_cell_id: str,
     helpers: StoreHelpers,
     timestamp_now: datetime,
@@ -304,7 +304,7 @@ def test_set_status_db_sample_sequenced_at_when_sequenced_again(
 ):
     """Test setting sample sequenced at when sequenced again."""
     # GIVEN a status db sample sequenced yesterday
-    sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_yesterday)
+    sample: Sample = helpers.add_sample(store, sequenced_at=timestamp_yesterday)
 
     # WHEN setting sequenced at for the sample
     _set_status_db_sample_sequenced_at(
