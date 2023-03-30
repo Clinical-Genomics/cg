@@ -92,11 +92,6 @@ class LimsAPI(Lims, OrderHandler):
             "comment": udfs.get("comment"),
         }
 
-    @staticmethod
-    def _export_artifact(lims_artifact):
-        """Get data from a LIMS artifact."""
-        return {"id": lims_artifact.id, "name": lims_artifact.name}
-
     def get_received_date(self, lims_id: str) -> dt.date:
         """Get the date when a sample was received."""
 
@@ -214,13 +209,6 @@ class LimsAPI(Lims, OrderHandler):
         """Get LIMS process."""
         return Process(self, id=process_id)
 
-    @staticmethod
-    def process_samples(lims_process: Process) -> Generator[str, None, None]:
-        """Retrieve LIMS input samples from a process."""
-        for lims_artifact in lims_process.all_inputs():
-            for lims_sample in lims_artifact.samples:
-                yield lims_sample.id
-
     def update_sample(
         self, lims_id: str, sex=None, target_reads: int = None, name: str = None, **kwargs
     ):
@@ -255,13 +243,6 @@ class LimsAPI(Lims, OrderHandler):
             )
         return sample.udf[PROP2UDF[key]]
 
-    def update_project(self, lims_id: str, name: str = None) -> None:
-        """Update information about a project."""
-        lims_project = Project(self, id=lims_id)
-        if name:
-            lims_project.name = name
-            lims_project.put()
-
     def get_prep_method(self, lims_id: str) -> str:
         """Get the library preparation method."""
 
@@ -276,21 +257,6 @@ class LimsAPI(Lims, OrderHandler):
 
         return self._get_methods(step_names_udfs, lims_id)
 
-    def get_delivery_method(self, lims_id: str) -> str:
-        """Get the delivery method."""
-
-        step_names_udfs = MASTER_STEPS_UDFS["delivery_method_step"]
-
-        return self._get_methods(step_names_udfs, lims_id)
-
-    def get_processing_time(self, lims_id: str) -> Optional[dt.timedelta]:
-        """Get the time it takes to process a sample"""
-        received_at = self.get_received_date(lims_id)
-        delivery_date = self.get_delivery_date(lims_id)
-        if received_at and delivery_date:
-            return delivery_date - received_at
-        return None
-
     @staticmethod
     def _sort_by_date_run(sort_list: list):
         """
@@ -303,23 +269,6 @@ class LimsAPI(Lims, OrderHandler):
             sorted list of tuples
         """
         return sorted(sort_list, key=lambda sort_tuple: sort_tuple[0], reverse=True)
-
-    def _most_recent_date(self, dates: list):
-        """
-        Gets the most recent date from a list of dates sorted by date_run
-
-        Parameters:
-            dates (list): a list of tuples in the format (date_run, date), sorted by date_run
-                descending
-
-        Returns:
-            The date in the first tuple in dates
-        """
-        sorted_dates = self._sort_by_date_run(dates)
-        date_run_index = 0
-        date_index = 1
-
-        return sorted_dates[date_run_index][date_index] if dates else None
 
     def _get_methods(self, step_names_udfs, lims_id):
         """
