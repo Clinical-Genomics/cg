@@ -27,4 +27,4 @@ def test_get_customers_to_invoice(
 
     # THEN the customers to invoice should not contain cust000
     for customer in customers:
-        assert customer.internal_id != CustomerNames.cust000
+        assert customer.internal_id != CustomerNames.CG_INTERNAL_CUSTOMER
