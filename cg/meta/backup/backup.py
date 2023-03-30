@@ -407,6 +407,8 @@ class SpringBackupAPI:
         if hk_spring_file:
             LOG.info(f"Setting {spring_file_path} to archived in Housekeeper")
             self.hk_api.set_to_archive(file=hk_spring_file, value=True)
+        else:
+            LOG.warning(f"Could not find {spring_file_path} in Housekeeper")
 
     def remove_archived_spring_file(self, spring_file_path: Path) -> None:
         """Removes all files related to spring PDC archiving."""
@@ -418,7 +420,7 @@ class SpringBackupAPI:
         """Checks if a spring file is marked as archived in Housekeeper."""
         file = self.hk_api.files(path=str(spring_file_path)).first()
         if file and not spring_file_path.exists():
-            LOG.info(f"Spring file {spring_file_path} does not exist")
+            LOG.warning(f"Could not find {spring_file_path} in Housekeeper")
             return file.to_archive
         return False
 
