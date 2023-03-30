@@ -134,31 +134,12 @@ class FindBusinessDataHandler(BaseHandler):
             latest_analyses_per_case.append(query.first())
         return latest_analyses_per_case
 
-    def _get_latest_analysis_for_case_query(self) -> List[Query]:
-        """Return query for all cases and latest started at date."""
-        analyses = self._get_query(table=Analysis)
-        case_entry_ids = set([analysis.family_id for analysis in analyses])
-        latest_analyses_per_case = []
-        filter_functions = [
-            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
-            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
-        ]
-        for case_entry_id in case_entry_ids:
-            latest_analyses_per_case.append(
-                apply_analysis_filter(
-                    analyses=analyses,
-                    filter_functions=filter_functions,
-                    case_entry_id=case_entry_id,
-                )
-            )
-        return latest_analyses_per_case
-
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
         """Return latest  analysis that is not uploaded for each case with pipeline."""
         latest_analyses_to_upload_for_pipeline = []
         filter_functions = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
-            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
         ]
         for analysis_query in self._get_latest_analysis_for_case_query():
             latest_analyses_to_upload_for_pipeline.append(
