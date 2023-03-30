@@ -5,7 +5,7 @@
 import pytest
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
-from cg.exc import InvalidFastaError, HousekeeperBundleVersionMissingError
+from cg.exc import HousekeeperBundleVersionMissingError
 from cg.meta.upload.gisaid import GisaidAPI
 from cg.meta.upload.gisaid.models import FastaFile, GisaidSample
 from housekeeper.store.models import File
