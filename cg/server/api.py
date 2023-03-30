@@ -149,24 +149,39 @@ def parse_cases():
     return jsonify(cases=cases, total=len(cases))
 
 
+def _get_current_customers() -> Optional[List[Customer]]:
+    """Return customers if the current user is not an admin."""
+    if not g.current_user.is_admin:
+        return g.current_user.customers
+    return None
+
+
+def _get_cases(
+    status: str, enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
+) -> List[Family]:
+    """Get cases based on the provided filters."""
+    if status == "analysis":
+        return db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+
+    return db.get_cases_by_customers_action_and_case_search_pattern(
+        case_search_pattern=enquiry,
+        customers=customers,
+        action=action,
+    )
+
+
 @BLUEPRINT.route("/families")
-def parse_families():
+def get_families():
     """Return families."""
-    if request.args.get("status") == "analysis":
-        cases: List[Family] = db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
-        count = len(cases)
-    else:
-        customers: Optional[List[Customer]] = (
-            None if g.current_user.is_admin else g.current_user.customers
-        )
-        cases_query: Query = db.get_filtered_cases(
-            case_internal_id_or_name_search_pattern=request.args.get("enquiry"),
-            customers=customers,
-            action=request.args.get("action"),
-        )
-        count = cases_query.count()
-        cases = cases_query.limit(30)
-    parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
+    status = request.args.get("status")
+    enquiry = request.args.get("enquiry")
+    action = request.args.get("action")
+
+    customers = _get_current_customers()
+    cases = _get_cases(status=status, enquiry=enquiry, action=action, customers=customers)
+
+    count = len(cases)
+    parsed_cases = [case.to_dict(links=True) for case in cases]
     return jsonify(families=parsed_cases, total=count)
 
 
