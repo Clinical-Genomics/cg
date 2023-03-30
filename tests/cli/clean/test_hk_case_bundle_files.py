@@ -42,7 +42,9 @@ def test_clean_hk_case_files_too_old(cli_runner: CliRunner, clean_context: CGCon
     days_ago = 365 * 100
     date_one_year_ago = get_date_days_ago(days_ago)
     context = clean_context
-    assert not context.status_db.get_analyses_before_date(before=date_one_year_ago).all()
+    assert not context.status_db.get_analyses_for_case_and_pipeline_started_at_before(
+        started_at_before=date_one_year_ago
+    )
 
     # WHEN running the clean command
     caplog.set_level(logging.DEBUG)

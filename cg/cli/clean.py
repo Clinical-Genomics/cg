@@ -40,7 +40,7 @@ from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Sample, Flowcell, Analysis
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -197,10 +197,15 @@ def hk_bundle_files(
     status_db: Store = context.status_db
 
     date_threshold: datetime = get_date_days_ago(days_ago=days_old)
+    if case_id:
+        analyses: List[Analysis] = status_db.get_analyses_for_case_and_pipeline_started_at_before(
+            case_internal_id=case_id, started_at_before=date_threshold, pipeline=pipeline
+        )
+    elif pipeline:
+        analyses: List[Analysis] = status_db.get_analyses_for_case_and_pipeline_started_at_before(
+            case_internal_id=case_id, started_at_before=date_threshold, pipeline=pipeline
+        )
 
-    analyses: Query = status_db.get_analyses_before_date(
-        case_id=case_id, before=date_threshold, pipeline=pipeline
-    )
     size_cleaned: int = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")
