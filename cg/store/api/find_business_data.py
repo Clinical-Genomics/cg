@@ -186,7 +186,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return filtered_cases.limit(limit=limit).all()
 
-    def get_cases_by_customers_pipeline_and_case_search_pattern(
+    def get_cases_by_customer_pipeline_and_case_search_pattern(
         self,
         customer: Optional[Customer],
         pipeline: Optional[str],

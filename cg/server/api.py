@@ -192,7 +192,7 @@ def parse_families_in_collaboration():
     pipeline: str = request.args.get("data_analysis")
     case_search_pattern = request.args.get("enquiry")
 
-    cases: List[Family] = db.get_cases_by_customers_pipeline_and_case_search_pattern(
+    cases: List[Family] = db.get_cases_by_customer_pipeline_and_case_search_pattern(
         case_search_pattern=case_search_pattern,
         customer=customer,
         pipeline=pipeline,
