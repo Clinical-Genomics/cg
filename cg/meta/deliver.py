@@ -236,7 +236,6 @@ class DeliverAPI:
         At least one tag should match between file and tags.
         Do not include files with sample tags.
         """
-        tag: Tag
         file_tags = {tag.name for tag in file.tags}
         if self.all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")

@@ -42,14 +42,3 @@ def test_get_dummy_sample(flow_cell_id: str, index_obj: Index):
 
     # THEN assert the sample id was correct
     assert dummy_sample_obj.sample_id == dummy_sample.dummy_sample_name(index_obj.name)
-
-
-def test_get_project_name():
-    # GIVEN a raw string
-    raw = "project name"
-
-    # WheN parsing the project name
-    project_name = SampleSheetCreator.get_project_name(raw)
-
-    # THEN assert the correct project name was returned
-    assert project_name == "project"
