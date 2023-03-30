@@ -13,23 +13,6 @@ class CgError(Exception):
         super().__init__(message)
 
 
-class AccessionNumerMissingError(CgError):
-    """Raised when accession numers are not found in a gisaid cli log."""
-
-
-class AnalysisDuplicationError(CgError):
-    """
-    Error related to trying to create analysis object that already exists in status-db.
-    """
-
-
-class AnalysisNotFinishedError(CgError):
-    """
-    Exception raised when an adding a MIP analysis to Housekeeper, but the analysis is not
-    finished in MIP, as indicated in the qc sample info file.
-    """
-
-
 class AnalysisUploadError(CgError):
     """
     Error related to trying to upload analysis data.
@@ -62,7 +45,7 @@ class CaseNotFoundError(CgError):
 
 class CgDataError(CgError):
     """
-    Error related to missing/incomplete data in Status DB.
+    Error related to missing or incomplete data in Status DB.
     """
 
 
@@ -86,26 +69,12 @@ class EmailNotSentError(CgError):
     """Raised when email not sent."""
 
 
-class FamilyLinkMissingError(CgError):
-    """Raised when faimly link missing for a sample."""
-
-
-class FastaSequenceMissingError(CgError):
-    """
-    Exception raised when expected sequence in fasta file is missing.
-    """
-
-
 class FlowCellError(CgError):
     """Raised when there is a problem with demultiplexing a flow cell."""
 
 
 class FlowCellsNeededError(CgError):
     """Raised when fetching flow cells still needed to start analysis."""
-
-
-class GisaidUploadFailedError(CgError):
-    """Raised when gisaid upload fails."""
 
 
 class HousekeeperFileMissingError(CgError):
@@ -124,33 +93,10 @@ class HousekeeperBundleVersionMissingError(CgError):
     """
 
 
-class InvalidFastaError(CgError):
-    """
-    Exception raised when fasta file content is invalid.
-    """
-
-
 class LimsDataError(CgError):
     """
     Error related to missing/incomplete data in LIMS.
     """
-
-
-class MandatoryFilesMissing(CgError):
-    """
-    Exception raised when mandatory files are missing from the deliverables when storing an
-    analysis in Housekeeper.
-    """
-
-
-class MipStartError(CgError):
-    """
-    Exception raised when MIP fails to start a run.
-    """
-
-
-class MultipleFamilyLinksError(CgError):
-    """Raised when only one family was expected but more than one was found."""
 
 
 class OrderError(CgError):
@@ -175,30 +121,12 @@ class PedigreeConfigError(CgError):
         self.errors = errors
 
 
-class PipelineUnknownError(CgError):
-    """
-    Exception raised when a sample in a case has no data analysis type.
-    """
-
-
-class RnafusionStartError(CgError):
-    """
-    Exception raised when rnafusion fails to start
-    """
-
-
 class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails."""
 
 
 class StatinaAPIHTTPError(CgError):
     """Raised when Statina REST API response code is not 200."""
-
-
-class StoreError(CgError):
-    """
-    Exception related to storing an analysis.
-    """
 
 
 class TicketCreationError(CgError):
@@ -211,10 +139,6 @@ class TrailblazerAPIHTTPError(CgError):
     """Raised when Trailblazer REST API response code is not 200."""
 
 
-class TrailblazerMissingAnalysisError(CgError):
-    """Raised when Trailblazer REST API response code is not 200."""
-
-
 class ValidationError(CgError):
     """
     Exception related to delivery report validation.
@@ -223,14 +147,6 @@ class ValidationError(CgError):
 
 class DeleteDemuxError(CgError):
     """Raised when there is an issue with wiping a flowcell before start."""
-
-
-class CustomerPermissionError(CgError):
-    """Exception related to the limited permissions of a customer."""
-
-
-class DataIntegrityError(CgError):
-    """Raised when data integrity is not met."""
 
 
 class LoqusdbError(CgError):
