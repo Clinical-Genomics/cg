@@ -412,6 +412,7 @@ class SpringBackupAPI:
         """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted."""
         file = self.hk_api.files(path=str(spring_file_path)).first()
         if file and not spring_file_path.exists():
+            LOG.info(f"Spring file {spring_file_path} does not exist")
             return file.to_archive
         return False
 
@@ -425,6 +426,7 @@ class SpringBackupAPI:
         """Checks if a spring file is marked as archived in Housekeeper."""
         file = self.hk_api.files(path=str(spring_file_path)).first()
         if file and not spring_file_path.exists():
+            LOG.info(f"Spring file {spring_file_path} does not exist")
             return file.to_archive
         return False
 
