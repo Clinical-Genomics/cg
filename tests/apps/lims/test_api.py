@@ -91,4 +91,3 @@ def test_get_delivery_date_no_sample(lims_api, mocker):
 
     # THEN assert that None is returned since a exception was raised
     assert res is None
-
