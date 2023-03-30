@@ -979,11 +979,11 @@ def fixture_analysis_store_trio(analysis_store: Store) -> Generator[Store, None,
 
 @pytest.fixture(name="analysis_store_single_case")
 def fixture_analysis_store_single(
-    base_store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
+    store: Store, analysis_family_single_case: Store, helpers: StoreHelpers
 ):
     """Setup a store instance with a single ind case for testing analysis API."""
-    helpers.ensure_case_from_dict(base_store, case_info=analysis_family_single_case)
-    yield base_store
+    helpers.ensure_case_from_dict(store, case_info=analysis_family_single_case)
+    yield store
 
 
 @pytest.fixture(name="collaboration_id")
@@ -1125,35 +1125,29 @@ def fixture_base_store(
     bed_version_short_name: str,
     collaboration_id: str,
     customer_id: str,
-    invoice_address: str,
-    invoice_reference: str,
     store: Store,
+    helpers: StoreHelpers,
 ) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
-
     store.add_commit(collaboration)
-    customers: List[Customer] = []
+
     customer_map: Dict[str, str] = {
         customer_id: "Production",
         "cust001": "Customer",
         "cust002": "Karolinska",
         "cust003": "CMMS",
     }
+    customers: List[Customer] = []
     for new_customer_id, new_customer_name in customer_map.items():
-        customers.append(
-            store.add_customer(
-                internal_id=new_customer_id,
-                name=new_customer_name,
-                scout_access=True,
-                invoice_address=invoice_address,
-                invoice_reference=invoice_reference,
-            )
+        customer = helpers.ensure_customer(
+            store, new_customer_id, new_customer_name, scout_access=True
         )
+        customers.append(customer)
 
     for customer in customers:
         collaboration.customers.append(customer)
-    store.add_commit(customers)
+
     applications = [
         store.add_application(
             tag="WGXCUSC000",
@@ -1691,11 +1685,11 @@ def fixture_context_config(
 
 @pytest.fixture(name="cg_context")
 def fixture_cg_context(
-    context_config: dict, base_store: Store, housekeeper_api: MockHousekeeperAPI
+    context_config: dict, store: Store, housekeeper_api: MockHousekeeperAPI
 ) -> CGConfig:
     """Return a cg config."""
     cg_config = CGConfig(**context_config)
-    cg_config.status_db_ = base_store
+    cg_config.status_db_ = store
     cg_config.housekeeper_api_ = housekeeper_api
     return cg_config
 

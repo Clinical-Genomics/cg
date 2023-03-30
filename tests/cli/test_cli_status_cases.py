@@ -13,10 +13,10 @@ def test_lists_sample_in_unreceived_samples(
     """Test to that cases displays case in database"""
 
     # GIVEN a database with a case
-    base_store: Store = base_context.status_db
-    case = helpers.add_case(base_store)
-    sample1 = helpers.add_sample(base_store, "sample1")
-    helpers.add_relationship(base_store, case=case, sample=sample1)
+    store: Store = base_context.status_db
+    case = helpers.add_case(store)
+    sample1 = helpers.add_sample(store, "sample1")
+    helpers.add_relationship(store, case=case, sample=sample1)
 
     # WHEN listing cases
     result = cli_runner.invoke(cases, ["-o", "count"], obj=base_context)
@@ -33,12 +33,12 @@ def test_lists_samples_in_unreceived_samples(
     """Test to that cases displays case in database"""
 
     # GIVEN a database with a case
-    base_store: Store = base_context.status_db
-    case = helpers.add_case(base_store)
-    sample1 = helpers.add_sample(base_store, "sample1")
-    sample2 = helpers.add_sample(base_store, "sample2")
-    helpers.add_relationship(base_store, case=case, sample=sample1)
-    helpers.add_relationship(base_store, case=case, sample=sample2)
+    store: Store = base_context.status_db
+    case = helpers.add_case(store)
+    sample1 = helpers.add_sample(store, "sample1")
+    sample2 = helpers.add_sample(store, "sample2")
+    helpers.add_relationship(store, case=case, sample=sample1)
+    helpers.add_relationship(store, case=case, sample=sample2)
 
     # WHEN listing cases
     result = cli_runner.invoke(cases, ["-o", "count"], obj=base_context)
@@ -53,8 +53,8 @@ def test_lists_family(cli_runner: CliRunner, base_context: CGConfig, helpers: St
     """Test to that cases displays case in database"""
 
     # GIVEN a database with a case
-    base_store: Store = base_context.status_db
-    case = helpers.add_case(base_store)
+    store: Store = base_context.status_db
+    case = helpers.add_case(store)
 
     # WHEN listing cases
     result = cli_runner.invoke(cases, obj=base_context)
