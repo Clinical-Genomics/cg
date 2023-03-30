@@ -122,16 +122,6 @@ class LimsAPI(Lims, OrderHandler):
             date = None
         return date
 
-    def get_sequenced_date(self, lims_id: str) -> dt.date:
-        """Get the date when a sample was sequenced."""
-
-        sample = Sample(self, id=lims_id)
-        try:
-            date = sample.udf.get("Sequencing Finished")
-        except HTTPError:
-            date = None
-        return date
-
     def capture_kit(self, lims_id: str) -> str:
         """Get capture kit for a LIMS sample."""
 
