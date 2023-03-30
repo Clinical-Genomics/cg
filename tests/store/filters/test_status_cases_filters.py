@@ -10,10 +10,10 @@ from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
+    filter_cases_by_case_search_pattern,
     filter_cases_by_customer_entry_ids,
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
-    filter_cases_by_matching_internal_id_or_name,
     filter_cases_by_name,
     get_running_cases,
     filter_cases_by_ticket_id,
@@ -735,17 +735,17 @@ def test_filter_cases_by_name(store_with_multiple_cases_and_samples: Store):
         assert case.name == test_name
 
 
-def test_filter_cases_by_matching_internal_id_or_name(store_with_multiple_cases_and_samples: Store):
-    """Test that cases are returned when filtering by matching internal id or name."""
+def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: Store):
+    """Test that cases are returned when filtering by matching internal ids."""
     # GIVEN a store containing cases with internal ids and names
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     test_internal_id_pattern = cases_query.first().internal_id[:3]
     test_name_pattern = cases_query.first().name[:3]
 
     # WHEN filtering cases by matching internal id or name
-    filtered_cases: Query = filter_cases_by_matching_internal_id_or_name(
+    filtered_cases: Query = filter_cases_by_case_search_pattern(
         cases=cases_query,
-        internal_id_search_pattern=test_internal_id_pattern,
+        case_search_pattern=test_internal_id_pattern,
         name_search_pattern=test_name_pattern,
     )
 

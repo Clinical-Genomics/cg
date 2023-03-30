@@ -518,9 +518,7 @@ def test_create_rna_dna_sample_case_map(
     """Test that the create_rna_dna_sample_case_map returns a nested dictionary."""
 
     # GIVEN an RNA case with RNA samples that are connected by subject ID to DNA samples in a DNA case
-    rna_case: Family = rna_store.get_filtered_cases(
-        case_internal_id_or_name_search_pattern=rna_case_id
-    ).first()
+    rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
     rna_dna_case_map: dict = upload_scout_api.create_rna_dna_sample_case_map(rna_case=rna_case)
@@ -537,9 +535,7 @@ def test_add_rna_sample(
     """Test that for a given RNA case the RNA samples are added to the rna_dna_case_map."""
 
     # GIVEN an RNA case and the associated RNA samples
-    rna_case: Family = rna_store.get_filtered_cases(
-        case_internal_id_or_name_search_pattern=rna_case_id
-    ).first()
+    rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
     rna_sample_list: List[Sample] = rna_store.get_samples_by_name_pattern(name_pattern="rna")
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
@@ -587,9 +583,7 @@ def test_add_dna_cases_to_dna_sample(
     # GIVEN an RNA sample, a DNA sample, and a DNA case
     rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
     dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
-    dna_case: Family = rna_store.get_filtered_cases(
-        case_internal_id_or_name_search_pattern=dna_case_id
-    ).first()
+    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_case_map: dict = {}
