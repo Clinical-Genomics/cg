@@ -41,11 +41,6 @@ class SampleSheetCreator:
     def valid_indexes(self) -> List[Index]:
         return index.get_valid_indexes(dual_indexes_only=True)
 
-    @staticmethod
-    def get_project_name(project: str) -> str:
-        """Only keeps the first part of the project name"""
-        return project.split()[0]
-
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non existing indexes to samples
 

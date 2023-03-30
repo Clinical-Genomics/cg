@@ -25,7 +25,7 @@ class ScoutAPI:
         config_path = config["scout"]["config_path"]
         self.process = Process(binary=binary_path, config=config_path)
 
-    def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
+    def upload(self, scout_load_config: Path, force: bool = False):
         """Load analysis of a new family into Scout."""
 
         scout_config: dict = ReadFile.get_content_from_file(
