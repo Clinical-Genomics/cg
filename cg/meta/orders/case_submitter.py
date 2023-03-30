@@ -73,8 +73,8 @@ class CaseSubmitter(Submitter):
                 internal_id=sample.internal_id
             )
 
-            data_customer: Customer = self.status.get_customer_by_customer_id(
-                customer_id=customer_id
+            data_customer: Customer = self.status.get_customer_by_internal_id(
+                customer_internal_id=customer_id
             )
 
             if existing_sample.customer not in data_customer.collaborators:
@@ -85,7 +85,9 @@ class CaseSubmitter(Submitter):
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
 
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
 
         sample: Of1508Sample
         for sample in samples:
@@ -225,7 +227,9 @@ class CaseSubmitter(Submitter):
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Family]:
         """Store cases, samples and their relationship in the Status database."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         new_cases: List[Family] = []
 
         for case in items:

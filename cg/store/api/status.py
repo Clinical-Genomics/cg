@@ -807,7 +807,7 @@ class StatusHandler(BaseHandler):
         customers_to_invoice: List[Customer] = [
             record.customer
             for record in records.all()
-            if record.customer.internal_id != CustomerNames.cust000
+            if record.customer.internal_id != CustomerNames.CG_INTERNAL_CUSTOMER
         ]
         return list(set(customers_to_invoice))
 

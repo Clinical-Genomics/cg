@@ -29,8 +29,8 @@ def test_get_pools_to_invoice_for_customer(
     assert len(store_with_pools_for_multiple_customers.get_pools()) > 1
 
     # THEN the one customer can be retrieved
-    customer: Customer = store_with_pools_for_multiple_customers.get_customer_by_customer_id(
-        customer_id=three_customer_ids[1]
+    customer: Customer = store_with_pools_for_multiple_customers.get_customer_by_internal_id(
+        customer_internal_id=three_customer_ids[1]
     )
     assert customer
 

@@ -67,7 +67,9 @@ def customer(
     collaboration_internal_ids = collaboration_internal_ids or []
     status_db: Store = context.status_db
 
-    existing_customer: Customer = status_db.get_customer_by_customer_id(customer_id=internal_id)
+    existing_customer: Customer = status_db.get_customer_by_internal_id(
+        customer_internal_id=internal_id
+    )
     if existing_customer:
         LOG.error(f"{existing_customer.name}: customer already added")
         raise click.Abort
@@ -106,7 +108,7 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     """Add a new user with an EMAIL (login) and a NAME (full)."""
     status_db: Store = context.status_db
 
-    customer_obj: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+    customer_obj: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
     existing_user: User = status_db.get_user_by_email(email=email)
     if existing_user:
         LOG.error(f"{existing_user.name}: user already added")
@@ -157,7 +159,7 @@ def sample(
     """Add a sample for CUSTOMER_ID with a NAME (display)."""
     status_db: Store = context.status_db
 
-    customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+    customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
     if not customer:
         LOG.error(f"Customer: {customer_id} not found")
         raise click.Abort
@@ -221,7 +223,7 @@ def case(
     """Add a case with the given name and associated with the given customer"""
     status_db: Store = context.status_db
 
-    customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+    customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
     if customer is None:
         LOG.error(f"{customer_id}: customer not found")
         raise click.Abort
