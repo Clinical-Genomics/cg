@@ -192,8 +192,8 @@ def test_get_samples_to_invoice_for_customer(
     # GIVEN a database with samples for a customer
 
     # THEN the one customer can be retrieved
-    customer: Customer = store_with_samples_for_multiple_customers.get_customer_by_customer_id(
-        customer_id=three_customer_ids[1]
+    customer: Customer = store_with_samples_for_multiple_customers.get_customer_by_internal_id(
+        customer_internal_id=three_customer_ids[1]
     )
     assert customer
 

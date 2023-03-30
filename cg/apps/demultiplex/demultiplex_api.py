@@ -143,24 +143,6 @@ class DemultiplexingAPI:
             return False
         return self.demultiplexing_completed_path(flow_cell).exists()
 
-    def is_demultiplexing_ongoing(self, flow_cell: FlowCell) -> bool:
-        """Check if demultiplexing is ongoing.
-
-        This is indicated by if the file demuxstarted.txt exists in the flow cell directory
-        AND
-        that the demultiplexing completed file does not exist.
-        """
-        LOG.debug("Check if demultiplexing is ongoing for %s", flow_cell.id)
-        if not flow_cell.demultiplexing_started_path.exists():
-            LOG.debug("Demultiplexing has not been started")
-            return False
-        LOG.debug("Demultiplexing has been started!")
-        if self.is_demultiplexing_completed(flow_cell):
-            LOG.debug(f"Demultiplexing is already completed for flow cell {flow_cell.id}")
-            return False
-        LOG.debug("Demultiplexing is not finished!")
-        return True
-
     def is_demultiplexing_possible(self, flow_cell: FlowCell) -> bool:
         """Check if it is possible to start demultiplexing.
 
