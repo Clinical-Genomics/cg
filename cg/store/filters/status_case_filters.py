@@ -159,6 +159,13 @@ def filter_cases_by_matching_internal_id_or_name(
     )
 
 
+def filter_cases_by_internal_id_search_pattern(
+    cases: Query, internal_id_search_pattern: str, **kwargs
+) -> Query:
+    """Return cases with internal ids matching the search pattern."""
+    return cases.filter(Family.internal_id.like(f"%{internal_id_search_pattern}%"))
+
+
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     """Order cases by created at."""
     return cases.order_by(Family.created_at.desc())
@@ -223,4 +230,5 @@ class CaseFilter(Enum):
     FILTER_BY_INTERNAL_ID_PATTERN_OR_NAME_PATTERN: Callable = (
         filter_cases_by_matching_internal_id_or_name
     )
+    FILTER_BY_INTERNAL_ID_SEARCH_PATTERN: Callable = filter_cases_by_internal_id_search_pattern
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

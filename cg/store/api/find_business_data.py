@@ -187,6 +187,22 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return filtered_cases_query
 
+    def get_cases_by_customer_and_case_internal_id_pattern(
+        self, customer: Customer, case_internal_id_search_pattern: str
+    ) -> List[Family]:
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            CaseFilter.FILTER_BY_INTERNAL_ID_SEARCH_PATTERN,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
+
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_id=customer.id,
+            internal_id_search_pattern=case_internal_id_search_pattern,
+        ).all()
+
     def get_cases(self) -> List[Family]:
         """Return all cases."""
         return self._get_query(table=Family).all()
