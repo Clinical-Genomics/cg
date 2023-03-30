@@ -182,7 +182,6 @@ def apply_case_filter(
     name: Optional[str] = None,
     action: Optional[str] = None,
     internal_id_search_pattern: Optional[str] = None,
-    name_search_pattern: Optional[str] = None,
     case_search_pattern: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
@@ -199,7 +198,6 @@ def apply_case_filter(
             name=name,
             action=action,
             internal_id_search_pattern=internal_id_search_pattern,
-            name_search_pattern=name_search_pattern,
             case_search_pattern=case_search_pattern,
         )
     return cases

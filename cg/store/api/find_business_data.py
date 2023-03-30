@@ -205,8 +205,7 @@ class FindBusinessDataHandler(BaseHandler):
             cases=self._get_query(table=Family),
             filter_functions=filter_functions,
             customer_entry_id=customer_entry_id,
-            internal_id_search_pattern=case_search_pattern,
-            name_search_pattern=case_search_pattern,
+            case_search_pattern=case_search_pattern,
             pipeline=pipeline,
         )
         return filtered_cases.limit(limit=limit).all()
