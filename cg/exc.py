@@ -45,7 +45,7 @@ class CaseNotFoundError(CgError):
 
 class CgDataError(CgError):
     """
-    Error related to missing/incomplete data in Status DB.
+    Error related to missing or incomplete data in Status DB.
     """
 
 
