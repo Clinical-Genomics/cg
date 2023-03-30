@@ -143,18 +143,16 @@ def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
     return cases.filter(Family.name == name) if name else cases
 
 
-def filter_cases_by_matching_internal_id_or_name(
-    cases: Query, internal_id_search_pattern, name_search_pattern, **kwargs
-) -> Query:
+def filter_cases_by_case_search_pattern(cases: Query, case_search_pattern: str, **kwargs) -> Query:
     """Return cases with matching internal id or name."""
     return (
         cases.filter(
             or_(
-                Family.internal_id.like(f"%{internal_id_search_pattern}%"),
-                Family.name.like(f"%{name_search_pattern}%"),
+                Family.internal_id.like(f"%{case_search_pattern}%"),
+                Family.name.like(f"%{case_search_pattern}%"),
             )
         )
-        if internal_id_search_pattern or name_search_pattern
+        if case_search_pattern
         else cases
     )
 
@@ -185,6 +183,7 @@ def apply_case_filter(
     action: Optional[str] = None,
     internal_id_search_pattern: Optional[str] = None,
     name_search_pattern: Optional[str] = None,
+    case_search_pattern: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -201,6 +200,7 @@ def apply_case_filter(
             action=action,
             internal_id_search_pattern=internal_id_search_pattern,
             name_search_pattern=name_search_pattern,
+            case_search_pattern=case_search_pattern,
         )
     return cases
 
@@ -227,8 +227,6 @@ class CaseFilter(Enum):
     FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
     FILTER_BY_NAME: Callable = filter_cases_by_name
     FILTER_BY_ACTION: Callable = filter_cases_by_action
-    FILTER_BY_INTERNAL_ID_PATTERN_OR_NAME_PATTERN: Callable = (
-        filter_cases_by_matching_internal_id_or_name
-    )
+    FILTER_BY_CASE_SEARCH_PATTERN: Callable = filter_cases_by_case_search_pattern
     FILTER_BY_INTERNAL_ID_SEARCH_PATTERN: Callable = filter_cases_by_internal_id_search_pattern
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

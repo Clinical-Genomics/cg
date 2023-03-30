@@ -146,47 +146,6 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all deliveries."""
         return self.Delivery.query
 
-    def get_filtered_cases(
-        self,
-        action: Optional[str] = None,
-        pipeline: Optional[str] = None,
-        customers: List[Customer] = None,
-        case_internal_id_or_name_search_pattern: Optional[str] = None,
-    ) -> Query:
-        """
-        Fetch cases with optional filters applied.
-
-        Args:
-            action (Optional[str], default=None): Filter cases by the specified action, if provided.
-            pipeline (Optional[str], default=None): Filter cases by the specified pipeline, if provided.
-            customers (List[Customer], default=None): Filter cases by the customers in the list, if provided.
-            case_internal_id_or_name_search_pattern (Optional[str], default=None): Filter cases by searching for the given pattern in internal IDs or names, if provided.
-
-        Returns:
-            Query: A filtered query object containing cases based on the specified filters ordered by their creation date.
-        """
-
-        filter_functions: List[Callable] = [
-            CaseFilter.FILTER_BY_ACTION,
-            CaseFilter.GET_WITH_PIPELINE,
-            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
-            CaseFilter.FILTER_BY_INTERNAL_ID_PATTERN_OR_NAME_PATTERN,
-            CaseFilter.ORDER_BY_CREATED_AT,
-        ]
-
-        customer_entry_ids = [customer.id for customer in customers] if customers else None
-
-        filtered_cases_query: Query = apply_case_filter(
-            cases=self._get_query(table=Family),
-            filter_functions=filter_functions,
-            action=action,
-            pipeline=pipeline,
-            customer_entry_ids=customer_entry_ids,
-            internal_id_search_pattern=case_internal_id_or_name_search_pattern,
-            name_search_pattern=case_internal_id_or_name_search_pattern,
-        )
-        return filtered_cases_query
-
     def get_cases_by_customer_and_case_internal_id_pattern(
         self, customer: Customer, case_internal_id_search_pattern: str
     ) -> List[Family]:
@@ -212,7 +171,7 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Family]:
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
-            CaseFilter.FILTER_BY_INTERNAL_ID_SEARCH_PATTERN,
+            CaseFilter.FILTER_BY_CASE_SEARCH_PATTERN,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -222,9 +181,33 @@ class FindBusinessDataHandler(BaseHandler):
             cases=self._get_query(table=Family),
             filter_functions=filter_functions,
             customer_entry_ids=customer_entry_ids,
+            case_search_pattern=case_search_pattern,
+            action=action,
+        )
+        return filtered_cases.limit(limit=limit).all()
+
+    def get_cases_by_customers_pipeline_and_case_search_pattern(
+        self,
+        customer: Optional[Customer],
+        pipeline: Optional[str],
+        case_search_pattern: Optional[str],
+        limit: Optional[int] = 30,
+    ):
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            CaseFilter.FILTER_BY_CASE_SEARCH_PATTERN,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
+
+        customer_entry_id = customer.id if customer else None
+
+        filtered_cases: Query = apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_id=customer_entry_id,
             internal_id_search_pattern=case_search_pattern,
             name_search_pattern=case_search_pattern,
-            action=action,
+            pipeline=pipeline,
         )
         return filtered_cases.limit(limit=limit).all()
 
