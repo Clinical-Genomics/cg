@@ -89,12 +89,6 @@ class CompressionData:
         return True
 
     @staticmethod
-    def get_nlinks(file_path: Path) -> int:
-        """Get number of links to path"""
-        LOG.info("Check nr of links for %s", file_path)
-        return os.stat(file_path).st_nlink
-
-    @staticmethod
     def is_symlink(file_path: Path) -> bool:
         """Check if file path is symbolik link"""
         LOG.info("Check if %s is a symlink", file_path)
