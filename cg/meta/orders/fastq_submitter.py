@@ -5,6 +5,7 @@ from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery, GenePanelMasterList
 from cg.constants.constants import PrepCategory
+from cg.constants.invoice import CustomerNames
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -68,7 +69,7 @@ class FastqSubmitter(Submitter):
             ticket=sample_obj.original_ticket,
         )
         case.customer: Customer = self.status.get_customer_by_internal_id(
-            customer_internal_id="cust000"
+            customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
         )
         relationship: FamilySample = self.status.relate_sample(
             family=case, sample=sample_obj, status=StatusEnum.unknown
