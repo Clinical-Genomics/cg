@@ -601,7 +601,7 @@ class StatusHandler(BaseHandler):
             pipeline=pipeline,
         ).all()
 
-    def analyses_to_clean(
+    def get_analyses_to_clean(
         self, before: datetime = datetime.now(), pipeline: Pipeline = None
     ) -> List[Analysis]:
         """Fetch analyses that haven't been cleaned."""
