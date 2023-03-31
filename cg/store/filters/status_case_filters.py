@@ -143,25 +143,28 @@ def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
     return cases.filter(Family.name == name) if name else cases
 
 
-def filter_cases_by_case_search_pattern(cases: Query, case_search_pattern: str, **kwargs) -> Query:
+def filter_cases_by_case_search(cases: Query, case_search: str, **kwargs) -> Query:
     """Return cases with matching internal id or name."""
     return (
         cases.filter(
             or_(
-                Family.internal_id.like(f"%{case_search_pattern}%"),
-                Family.name.like(f"%{case_search_pattern}%"),
+                Family.internal_id.like(f"%{case_search}%"),
+                Family.name.like(f"%{case_search}%"),
             )
         )
-        if case_search_pattern
+        if case_search
         else cases
     )
 
 
-def filter_cases_by_internal_id_search_pattern(
-    cases: Query, internal_id_search_pattern: str, **kwargs
-) -> Query:
+def filter_cases_by_internal_id_search(cases: Query, internal_id_search: str, **kwargs) -> Query:
     """Return cases with internal ids matching the search pattern."""
-    return cases.filter(Family.internal_id.like(f"%{internal_id_search_pattern}%"))
+    return cases.filter(Family.internal_id.like(f"%{internal_id_search}%"))
+
+
+def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Query:
+    """Return cases with names matching the search pattern."""
+    return cases.filter(Family.name.like(f"%{name_search}%"))
 
 
 def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
@@ -181,8 +184,9 @@ def apply_case_filter(
     customer_entry_ids: Optional[List[int]] = None,
     name: Optional[str] = None,
     action: Optional[str] = None,
-    internal_id_search_pattern: Optional[str] = None,
-    case_search_pattern: Optional[str] = None,
+    internal_id_search: Optional[str] = None,
+    name_search: Optional[str] = None,
+    case_search: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -197,8 +201,9 @@ def apply_case_filter(
             customer_entry_ids=customer_entry_ids,
             name=name,
             action=action,
-            internal_id_search_pattern=internal_id_search_pattern,
-            case_search_pattern=case_search_pattern,
+            internal_id_search=internal_id_search,
+            name_search=name_search,
+            case_search=case_search,
         )
     return cases
 
@@ -225,6 +230,7 @@ class CaseFilter(Enum):
     FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
     FILTER_BY_NAME: Callable = filter_cases_by_name
     FILTER_BY_ACTION: Callable = filter_cases_by_action
-    FILTER_BY_CASE_SEARCH_PATTERN: Callable = filter_cases_by_case_search_pattern
-    FILTER_BY_INTERNAL_ID_SEARCH_PATTERN: Callable = filter_cases_by_internal_id_search_pattern
+    FILTER_BY_CASE_SEARCH: Callable = filter_cases_by_case_search
+    FILTER_BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
+    FILTER_BY_NAME_SEARCH: Callable = filter_cases_by_name_search
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

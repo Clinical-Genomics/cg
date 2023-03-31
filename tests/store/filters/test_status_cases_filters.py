@@ -10,7 +10,7 @@ from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
-    filter_cases_by_case_search_pattern,
+    filter_cases_by_case_search,
     filter_cases_by_customer_entry_ids,
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
@@ -743,9 +743,9 @@ def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: S
     test_name_pattern = cases_query.first().name[:3]
 
     # WHEN filtering cases by matching internal id or name
-    filtered_cases: Query = filter_cases_by_case_search_pattern(
+    filtered_cases: Query = filter_cases_by_case_search(
         cases=cases_query,
-        case_search_pattern=test_internal_id_pattern,
+        case_search=test_internal_id_pattern,
         name_search_pattern=test_name_pattern,
     )
 

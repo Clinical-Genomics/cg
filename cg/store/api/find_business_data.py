@@ -146,12 +146,12 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all deliveries."""
         return self.Delivery.query
 
-    def get_cases_by_customer_and_case_internal_id_pattern(
-        self, customer: Customer, case_internal_id_search_pattern: str
+    def get_cases_by_customer_and_case_name_search(
+        self, customer: Customer, case_name_search: str
     ) -> List[Family]:
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
-            CaseFilter.FILTER_BY_INTERNAL_ID_SEARCH_PATTERN,
+            CaseFilter.FILTER_BY_CASE_SEARCH,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -159,7 +159,7 @@ class FindBusinessDataHandler(BaseHandler):
             cases=self._get_query(table=Family),
             filter_functions=filter_functions,
             customer_entry_id=customer.id,
-            internal_id_search_pattern=case_internal_id_search_pattern,
+            name_search=case_name_search,
         ).all()
 
     def get_cases_by_customers_action_and_case_search_pattern(
@@ -171,7 +171,7 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Family]:
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
-            CaseFilter.FILTER_BY_CASE_SEARCH_PATTERN,
+            CaseFilter.FILTER_BY_CASE_SEARCH,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -181,7 +181,7 @@ class FindBusinessDataHandler(BaseHandler):
             cases=self._get_query(table=Family),
             filter_functions=filter_functions,
             customer_entry_ids=customer_entry_ids,
-            case_search_pattern=case_search_pattern,
+            case_search=case_search_pattern,
             action=action,
         )
         return filtered_cases.limit(limit=limit).all()
@@ -195,7 +195,7 @@ class FindBusinessDataHandler(BaseHandler):
     ):
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
-            CaseFilter.FILTER_BY_CASE_SEARCH_PATTERN,
+            CaseFilter.FILTER_BY_CASE_SEARCH,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -205,7 +205,7 @@ class FindBusinessDataHandler(BaseHandler):
             cases=self._get_query(table=Family),
             filter_functions=filter_functions,
             customer_entry_id=customer_entry_id,
-            case_search_pattern=case_search_pattern,
+            case_search=case_search_pattern,
             pipeline=pipeline,
         )
         return filtered_cases.limit(limit=limit).all()
