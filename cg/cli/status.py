@@ -381,7 +381,7 @@ def families(context: CGConfig, skip: int):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
     status_db: Store = context.status_db
-    records: List[Family] = status_db.families().offset(skip).limit(30)
+    records: List[Family] = status_db._get_query(table=Family).offset(skip).limit(30)
     for case_obj in records:
         color = "red" if case_obj.priority_int > 1 else "blue"
         message = f"{case_obj.internal_id} ({case_obj.priority_int})"
