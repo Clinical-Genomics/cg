@@ -377,7 +377,7 @@ def samples(context: CGConfig, skip: int):
 @status.command()
 @click.option("-s", "--skip", default=0, help="skip initial records")
 @click.pass_obj
-def get_cases(context: CGConfig, skip: int):
+def families(context: CGConfig, skip: int):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
     status_db: Store = context.status_db
