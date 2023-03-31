@@ -190,18 +190,20 @@ def get_families():
 @BLUEPRINT.route("/families_in_collaboration")
 def parse_families_in_collaboration():
     """Return cases in collaboration."""
-    customer: Customer = db.get_customer_by_internal_id(
-        customer_internal_id=request.args.get("customer")
-    )
-    pipeline: str = request.args.get("data_analysis")
-    case_search_pattern: str = request.args.get("enquiry")
 
-    cases: List[Family] = db.get_cases_by_customer_pipeline_and_case_search(
+    customer_internal_id = request.args.get("customer")
+    pipeline = request.args.get("data_analysis")
+    case_search_pattern = request.args.get("enquiry")
+
+    customer = db.get_customer_by_internal_id(customer_internal_id=customer_internal_id)
+
+    cases = db.get_cases_by_customer_pipeline_and_case_search(
         case_search=case_search_pattern,
         customer=customer,
         pipeline=pipeline,
     )
-    case_dicts: List[Dict] = [case.to_dict(links=True) for case in cases]
+
+    case_dicts = [case.to_dict(links=True) for case in cases]
     return jsonify(families=case_dicts, total=len(cases))
 
 
