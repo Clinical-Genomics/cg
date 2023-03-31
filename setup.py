@@ -42,7 +42,7 @@ except FileNotFoundError:
 
 setup(
     name=NAME,
-    version="27.1.39",
+    version="27.1.40",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
