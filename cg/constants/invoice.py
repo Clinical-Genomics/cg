@@ -6,7 +6,7 @@ class CustomerNames(StrEnum):
     cust032: str = "cust032"
     cust001: str = "cust001"
     cust132: str = "cust132"
-    cust000: str = "cust000"
+    CG_INTERNAL_CUSTOMER: str = "cust000"
 
 
 class CostCenters(StrEnum):

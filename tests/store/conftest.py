@@ -128,8 +128,8 @@ def fixture_microbial_store(
     base_store: Store, microbial_submitted_order: dict
 ) -> Generator[Store, None, None]:
     """Set up a microbial store instance."""
-    customer: Customer = base_store.get_customer_by_customer_id(
-        customer_id=microbial_submitted_order["customer"]
+    customer: Customer = base_store.get_customer_by_internal_id(
+        customer_internal_id=microbial_submitted_order["customer"]
     )
 
     for sample_data in microbial_submitted_order["items"]:
