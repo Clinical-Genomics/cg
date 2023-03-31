@@ -579,13 +579,13 @@ class FindBusinessDataHandler(BaseHandler):
         samples = self._get_query(table=Sample)
         if is_tumour:
             filter_functions = [
-                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
                 SampleFilter.FILTER_BY_SUBJECT_ID,
                 SampleFilter.FILTER_IS_TUMOUR,
             ]
         else:
             filter_functions = [
-                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
                 SampleFilter.FILTER_BY_SUBJECT_ID,
                 SampleFilter.FILTER_IS_NOT_TUMOUR,
             ]
