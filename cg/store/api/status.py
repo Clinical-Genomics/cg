@@ -132,14 +132,6 @@ class StatusHandler(BaseHandler):
             families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
 
-    def get_running_cases_for_pipeline(self, pipeline: Pipeline) -> List[Family]:
-        return (
-            self.query(Family)
-            .filter(Family.action == "running")
-            .filter(Family.data_analysis == pipeline)
-            .all()
-        )
-
     def cases(
         self,
         internal_id: str = None,
@@ -594,14 +586,6 @@ class StatusHandler(BaseHandler):
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
-    @staticmethod
-    def _all_samples_have_sequence_data(links: List[FamilySample]) -> bool:
-        """Return True if all samples are external or sequenced in-house."""
-        return all(
-            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
-            for link in links
-        )
-
     def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Return analyses that have not been uploaded."""
         analysis_filter_functions: List[AnalysisFilter] = [
@@ -823,7 +807,7 @@ class StatusHandler(BaseHandler):
         customers_to_invoice: List[Customer] = [
             record.customer
             for record in records.all()
-            if record.customer.internal_id != CustomerNames.cust000
+            if record.customer.internal_id != CustomerNames.CG_INTERNAL_CUSTOMER
         ]
         return list(set(customers_to_invoice))
 

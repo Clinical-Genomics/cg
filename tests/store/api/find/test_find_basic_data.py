@@ -1,8 +1,17 @@
 from typing import Optional, List
 from sqlalchemy.orm import Query
-from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Collaboration, Organism, User, Application
 from cg.constants.constants import MicrosaltAppTags
+from cg.store import Store
+from cg.store.models import (
+    Application,
+    ApplicationVersion,
+    Bed,
+    BedVersion,
+    Customer,
+    Collaboration,
+    Organism,
+    User,
+)
 
 
 def test_get_active_beds(base_store: Store):
@@ -156,6 +165,27 @@ def test_get_applications_by_prep_category_and_is_not_archived(
     assert (application.is_archived is False for application in applications)
 
 
+def test_application_version_with_version_and_application(
+    store_with_different_application_versions: Store,
+    application_version_version: int = 1,
+):
+    """Test that application_version returns a valid query given an application and a version"""
+    # GIVEN a store with applications and an ApplicationVersion.version
+    application: Application = store_with_different_application_versions.get_applications()[0]
+    assert isinstance(application, Application)
+
+    # WHEN calling the function with an application and a version
+    application_version: ApplicationVersion = (
+        store_with_different_application_versions.application_version(
+            application=application,
+            version=application_version_version,
+        )
+    )
+
+    # THEN
+    assert isinstance(application_version, ApplicationVersion)
+
+
 def test_get_bed_version_query(base_store: Store):
     """Test function to return the bed version query."""
 
@@ -182,13 +212,13 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
     assert bed_version.shortname == bed_version_short_name
 
 
-def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
+def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
     """Test function to return the customer by customer id."""
 
     # GIVEN a store with customer records
 
     # WHEN getting the query for the customer
-    customer: Customer = base_store.get_customer_by_customer_id(customer_id=customer_id)
+    customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=customer_id)
 
     # THEN return a customer with the supplied customer internal id
     assert customer.internal_id == customer_id

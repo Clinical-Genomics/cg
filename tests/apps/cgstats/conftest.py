@@ -98,7 +98,7 @@ def fixture_nipt_stats_api(
     flow_cell_full_name: str,
     novaseq_dragen_sample_sheet_path: Path,
     sample_id: str,
-    ticket: str,
+    ticket_id: str,
 ):
     nipt_stats_api: StatsAPI = stats_api
     mock_demux_sample = MockDemuxSample(pass_filter_clusters=600000000, pass_filter_Q30=0.90)
@@ -107,7 +107,7 @@ def fixture_nipt_stats_api(
     )
 
     project_obj: stats_models.Project = create.create_project(
-        manager=nipt_stats_api, project_name=ticket
+        manager=nipt_stats_api, project_name=ticket_id
     )
     support_parameters_obj: stats_models.Supportparams = create.create_support_parameters(
         manager=nipt_stats_api, demux_results=mock_demux_results

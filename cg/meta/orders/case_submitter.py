@@ -73,8 +73,8 @@ class CaseSubmitter(Submitter):
                 internal_id=sample.internal_id
             )
 
-            data_customer: Customer = self.status.get_customer_by_customer_id(
-                customer_id=customer_id
+            data_customer: Customer = self.status.get_customer_by_internal_id(
+                customer_internal_id=customer_id
             )
 
             if existing_sample.customer not in data_customer.collaborators:
@@ -85,13 +85,17 @@ class CaseSubmitter(Submitter):
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
 
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
 
         sample: Of1508Sample
         for sample in samples:
             if self._is_rerun_of_existing_case(sample=sample):
                 continue
-            if self.status.find_family(customer=customer, name=sample.family_name):
+            if self.status.get_case_by_name_and_customer(
+                customer=customer, case_name=sample.family_name
+            ):
                 raise OrderError(f"Case name {sample.family_name} already in use")
 
     def submit_order(self, order: OrderIn) -> dict:
@@ -223,7 +227,9 @@ class CaseSubmitter(Submitter):
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Family]:
         """Store cases, samples and their relationship in the Status database."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         new_cases: List[Family] = []
 
         for case in items:

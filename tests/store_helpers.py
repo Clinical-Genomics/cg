@@ -75,6 +75,7 @@ class StoreHelpers:
         sequencing_depth: int = None,
         is_accredited: bool = False,
         version: int = 1,
+        valid_from: datetime = datetime.now(),
         **kwargs,
     ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
@@ -82,10 +83,10 @@ class StoreHelpers:
             application_tag = "rna_tag"
             prep_category = "wts"
 
-        application = store.get_application_by_tag(tag=application_tag)
+        application: Application = store.get_application_by_tag(tag=application_tag)
         if not application:
-            application = StoreHelpers.add_application(
-                store,
+            application: Application = StoreHelpers.add_application(
+                store=store,
                 application_tag=application_tag,
                 prep_category=prep_category,
                 is_external=is_external,
@@ -101,10 +102,12 @@ class StoreHelpers:
             PriorityTerms.EXPRESS: 30,
             PriorityTerms.RESEARCH: 5,
         }
-        application_version = store.application_version(application=application, version=version)
+        application_version: ApplicationVersion = store.application_version(
+            application=application, version=version
+        )
         if not application_version:
-            application_version = store.add_version(
-                application=application, version=version, valid_from=datetime.now(), prices=prices
+            application_version: ApplicationVersion = store.add_version(
+                application=application, version=version, valid_from=valid_from, prices=prices
             )
 
             store.add_commit(application_version)
@@ -199,7 +202,7 @@ class StoreHelpers:
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
         collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
-        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
 
         if not customer:
             customer = store.add_customer(
@@ -396,9 +399,9 @@ class StoreHelpers:
         """Load a case with samples and link relations."""
         if not customer:
             customer = StoreHelpers.ensure_customer(store=store)
-        case = store.get_case_by_internal_id(internal_id=case_id) or store.find_family(
-            customer=customer, name=name
-        )
+        case = store.get_case_by_internal_id(
+            internal_id=case_id
+        ) or store.get_case_by_name_and_customer(customer=customer, case_name=name)
         if not case:
             case = StoreHelpers.add_case(
                 store=store,
@@ -710,7 +713,7 @@ class StoreHelpers:
     ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
-        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
         if not customer:
             customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
 

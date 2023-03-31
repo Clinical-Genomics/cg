@@ -16,7 +16,7 @@ from cg.store.filters.status_analysis_filters import (
     filter_analyses_with_delivery_report,
     filter_analyses_without_delivery_report,
     filter_report_analyses_by_pipeline,
-    filter_analyses_by_case,
+    filter_analyses_by_case_entry_id,
     filter_analyses_completed_after,
     filter_analyses_completed_before,
     filter_analyses_not_uploaded_to_vogue,
@@ -24,6 +24,7 @@ from cg.store.filters.status_analysis_filters import (
     filter_analyses_started_before,
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
+    filter_analyses_by_started_at,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -267,8 +268,8 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case_
     analysis_other_case: Analysis = helpers.add_analysis(store=base_store, case=case_obj)
 
     # WHEN filtering the analyses by case
-    analyses: Query = filter_analyses_by_case(
-        analyses=base_store._get_query(table=Analysis), case=case_obj
+    analyses: Query = filter_analyses_by_case_entry_id(
+        analyses=base_store._get_query(table=Analysis), case_entry_id=case_obj.id
     )
 
     # ASSERT that analyses is a query
@@ -323,7 +324,7 @@ def test_filter_analysis_completed_after(
 
     # WHEN filtering the analyses by completed_at
     analyses: Query = filter_analyses_completed_after(
-        base_store._get_query(table=Analysis), date=timestamp_now
+        base_store._get_query(table=Analysis), completed_at_date=timestamp_now
     )
 
     # ASSERT that analyses is a query
@@ -349,7 +350,7 @@ def test_filter_analysis_started_before(
 
     # WHEN filtering the analyses by started_at
     analyses: Query = filter_analyses_started_before(
-        analyses=base_store._get_query(table=Analysis), date=timestamp_now
+        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_now
     )
 
     # ASSERT that analyses is a query
@@ -406,3 +407,31 @@ def test_filter_analyses_not_uploaded_to_vogue(
     # THEN only the analysis that have not been uploaded to vogue should be retrieved
     assert analysis in analyses
     assert analysis_uploaded not in analyses
+
+
+def test_filter_analyses_by_started_at(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
+):
+    """Test filtering of analyses by started at."""
+
+    # GIVEN a set of mock analyses
+    analysis_started_now: Analysis = helpers.add_analysis(
+        store=base_store, started_at=timestamp_now
+    )
+    analysis_started_old: Analysis = helpers.add_analysis(
+        store=base_store,
+        started_at=timestamp_yesterday,
+        case=analysis_started_now.family,
+    )
+
+    # WHEN filtering the analyses by started_at
+    analyses: Query = filter_analyses_by_started_at(
+        analyses=base_store._get_query(table=Analysis), started_at_date=timestamp_yesterday
+    )
+
+    # ASSERT that analyses is a query
+    assert isinstance(analyses, Query)
+
+    # THEN only the analysis that have been started after the given date should be retrieved
+    assert analysis_started_now not in analyses
+    assert analysis_started_old in analyses

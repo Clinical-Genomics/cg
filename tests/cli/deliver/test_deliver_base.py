@@ -50,7 +50,7 @@ def test_run_deliver_ticket_help(cli_runner: CliRunner, base_context: CGConfig):
 
 
 def test_run_deliver_delivered_ticket(
-    cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket
+    cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket_id
 ):
     """Test for when files are already delivered to customer inbox the HPC"""
     caplog.set_level(logging.INFO)
@@ -64,7 +64,7 @@ def test_run_deliver_delivered_ticket(
     # WHEN running cg deliver ticket
     result = cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket, "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
         obj=cg_context,
     )
 
@@ -75,7 +75,7 @@ def test_run_deliver_delivered_ticket(
     assert "Files already delivered to customer inbox on the HPC" in caplog.text
 
 
-def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket):
+def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket_id):
     """Test for delivering tu customer inbox"""
     caplog.set_level(logging.INFO)
 
@@ -92,7 +92,7 @@ def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker,
     # WHEN running cg deliver ticket
     cli_runner.invoke(
         deliver_cmd,
-        ["ticket", "--dry-run", "--ticket", ticket, "--delivery-type", "fastq"],
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq"],
         obj=cg_context,
     )
 

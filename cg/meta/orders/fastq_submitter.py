@@ -5,6 +5,7 @@ from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery, GenePanelMasterList
 from cg.constants.constants import PrepCategory
+from cg.constants.invoice import CustomerNames
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
@@ -67,7 +68,9 @@ class FastqSubmitter(Submitter):
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
-        case.customer: Customer = self.status.get_customer_by_customer_id(customer_id="cust000")
+        case.customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
+        )
         relationship: FamilySample = self.status.relate_sample(
             family=case, sample=sample_obj, status=StatusEnum.unknown
         )
@@ -77,11 +80,15 @@ class FastqSubmitter(Submitter):
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         if not customer:
             raise OrderError(f"Unknown customer: {customer_id}")
         new_samples = []
-        case: Family = self.status.find_family(customer=customer, name=ticket_id)
+        case: Family = self.status.get_case_by_name_and_customer(
+            customer=customer, case_name=ticket_id
+        )
         submitted_case: dict = items[0]
         with self.status.session.no_autoflush:
             for sample in items:
