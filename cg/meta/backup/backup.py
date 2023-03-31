@@ -420,7 +420,6 @@ class SpringBackupAPI:
         """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted."""
         spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
         if spring_file and not spring_file_path.exists():
-            LOG.warning(f"Could not find {spring_file_path} on disk")
             return spring_file.to_archive
         return False
 
