@@ -443,10 +443,13 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     sample_id: str,
     tags: List[str],
 ):
-    """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present and some both FASTQ and SPRING."""
-    # GIVEN a populated housekeeper api with some files
+    """
+    Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present and some
+    both FASTQ and SPRING.
+    """
+    # GIVEN a populated Housekeeper API with some files
 
-    # GIVEN a FASTQ file tag with a file included the bundle
+    # GIVEN a FASTQ file tag with a file included in the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
         file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
     )
@@ -457,16 +460,11 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
 
-    # GIVEN a SPRING file tag with a file included the bundle
+    # GIVEN a SPRING file tag with a file included in the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
         file=compression_object.spring_metadata_path,
         bundle_name=sample_id,
         tags=[SequencingFileTag.SPRING_METADATA],
-    )
-
-    # GIVEN a FASTQ file tag with a file included the bundle
-    populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
     )
 
     # WHEN fetching all files
