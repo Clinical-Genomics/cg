@@ -244,7 +244,7 @@ def test_submit_duplicate_sample_case_name(
     # GIVEN we have an order with a case that is already in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     for sample in order_data.samples:
         case_id = sample.family_name
@@ -324,7 +324,9 @@ def test_submit_unique_sample_case_name(
     sample: MipDnaSample
     for sample in order_data.samples:
         case_id = sample.family_name
-        customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+        customer: Customer = store.get_customer_by_internal_id(
+            customer_internal_id=order_data.customer
+        )
         assert not store.get_case_by_name_and_customer(customer=customer, case_name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
@@ -346,7 +348,7 @@ def test_validate_sex_inconsistent_sex(
     # GIVEN we have an order with a sample that is already in the database but with different sex
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
     sample: MipDnaSample
@@ -375,7 +377,7 @@ def test_validate_sex_consistent_sex(
     # GIVEN we have an order with a sample that is already in the database and with same gender
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
     sample: MipDnaSample
@@ -405,7 +407,7 @@ def test_validate_sex_unknown_existing_sex(
     # of type "unknown"
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
     sample: MipDnaSample
@@ -435,7 +437,7 @@ def test_validate_sex_unknown_new_sex(
     # type "unknown"
     order_data = OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA)
     store = orders_api.status
-    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
 
     # add sample with different sex than in order
     for sample in order_data.samples:
@@ -531,7 +533,7 @@ def test_sarscov2_submit_duplicate_sample_name(
 
 
 def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, order_data: OrderIn):
-    customer: Customer = store.get_customer_by_customer_id(customer_id=order_data.customer)
+    customer: Customer = store.get_customer_by_internal_id(customer_internal_id=order_data.customer)
     for sample in order_data.samples:
         sample_name = sample.name
         if not store.get_sample_by_customer_and_name(
