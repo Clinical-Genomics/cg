@@ -418,17 +418,17 @@ class SpringBackupAPI:
 
     def is_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
         """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted."""
-        file: File = self.hk_api.files(path=str(spring_file_path)).first()
-        if file and not spring_file_path.exists():
+        spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
+        if spring_file and not spring_file_path.exists():
             LOG.warning(f"Could not find {spring_file_path} on disk")
-            return file.to_archive
+            return spring_file.to_archive
         return False
 
     def is_spring_file_archived(self, spring_file_path: Path) -> bool:
         """Checks if a spring file is marked as archived in Housekeeper."""
-        file: File = self.hk_api.files(path=str(spring_file_path)).first()
-        if file:
-            return file.to_archive
+        spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
+        if spring_file:
+            return spring_file.to_archive
         return False
 
     @staticmethod
