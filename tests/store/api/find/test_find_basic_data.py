@@ -212,13 +212,13 @@ def test_get_bed_version_by_short_name(base_store: Store, bed_version_short_name
     assert bed_version.shortname == bed_version_short_name
 
 
-def test_get_customer_by_customer_id(base_store: Store, customer_id: str):
+def test_get_customer_by_internal_id(base_store: Store, customer_id: str):
     """Test function to return the customer by customer id."""
 
     # GIVEN a store with customer records
 
     # WHEN getting the query for the customer
-    customer: Customer = base_store.get_customer_by_customer_id(customer_id=customer_id)
+    customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=customer_id)
 
     # THEN return a customer with the supplied customer internal id
     assert customer.internal_id == customer_id

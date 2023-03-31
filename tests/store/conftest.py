@@ -128,8 +128,8 @@ def fixture_microbial_store(
     base_store: Store, microbial_submitted_order: dict
 ) -> Generator[Store, None, None]:
     """Set up a microbial store instance."""
-    customer: Customer = base_store.get_customer_by_customer_id(
-        customer_id=microbial_submitted_order["customer"]
+    customer: Customer = base_store.get_customer_by_internal_id(
+        customer_internal_id=microbial_submitted_order["customer"]
     )
 
     for sample_data in microbial_submitted_order["items"]:
@@ -166,7 +166,7 @@ def fixture_analysis_obj(analysis_store: Store) -> Analysis:
 @pytest.fixture(name="case_obj")
 def fixture_case_obj(analysis_store: Store) -> Family:
     """Return a case models object."""
-    return analysis_store.families()[0]
+    return analysis_store.get_cases()[0]
 
 
 @pytest.fixture(name="sample_obj")

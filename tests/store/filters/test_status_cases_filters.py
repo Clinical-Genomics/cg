@@ -10,9 +10,12 @@ from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.store.filters.status_case_filters import (
+    filter_cases_by_case_search,
+    filter_cases_by_customer_entry_ids,
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
-    get_active_cases,
+    filter_cases_by_name,
+    get_running_cases,
     filter_cases_by_ticket_id,
     get_cases_with_pipeline,
     get_cases_has_sequence,
@@ -634,7 +637,7 @@ def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples
     cases_query = cases_query.filter(Family.action != "running")
 
     # WHEN getting active cases
-    active_cases: Query = get_active_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return no cases
     assert active_cases.count() == 0
@@ -648,7 +651,7 @@ def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_sampl
     assert "running" in actions
 
     # WHEN getting active cases
-    active_cases: Query = get_active_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return at least one case
     assert active_cases.count() >= 1
@@ -662,7 +665,7 @@ def test_get_active_cases_only_running_cases(store_with_multiple_cases_and_sampl
         case.action = "running"
 
     # WHEN getting active cases
-    active_cases: Query = get_active_cases(cases=cases_query)
+    active_cases: Query = get_running_cases(cases=cases_query)
 
     # THEN the query should return the same number of cases as the original query
     assert active_cases.count() == cases_query.count()
@@ -696,3 +699,59 @@ def test_filter_cases_by_ticket_matching_ticket(
     assert filtered_cases.count() > 0
     for case in filtered_cases:
         assert ticket_id in case.tickets
+
+
+def test_filter_cases_by_customer_entry_ids(store_with_multiple_cases_and_samples: Store):
+    """Test that cases are returned when filtering by customer entry ids."""
+    # GIVEN a store containing cases with customer ids
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    customer_ids = [case.customer_id for case in cases_query.all()]
+    assert customer_ids
+
+    # WHEN filtering cases by customer ids
+    filtered_cases: Query = filter_cases_by_customer_entry_ids(
+        cases=cases_query, customer_entry_ids=customer_ids
+    )
+
+    # THEN the filtered_cases should have the same count as cases_query
+    assert filtered_cases.count() == cases_query.count()
+
+    # THEN all cases in filtered_cases should have a customer_id in the customer_ids list
+    for case in filtered_cases:
+        assert case.customer_id in customer_ids
+
+
+def test_filter_cases_by_name(store_with_multiple_cases_and_samples: Store):
+    """Test that cases are returned when filtering by name."""
+    # GIVEN a store containing cases with various names
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    test_name = cases_query.first().name
+
+    # WHEN filtering cases by a specific name
+    filtered_cases: Query = filter_cases_by_name(cases=cases_query, name=test_name)
+
+    # THEN all cases in filtered_cases should have the specified name
+    for case in filtered_cases:
+        assert case.name == test_name
+
+
+def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: Store):
+    """Test that cases are returned when filtering by matching internal ids."""
+    # GIVEN a store containing cases with internal ids and names
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    test_internal_id_pattern = cases_query.first().internal_id[:3]
+    test_name_pattern = cases_query.first().name[:3]
+
+    # WHEN filtering cases by matching internal id or name
+    filtered_cases: Query = filter_cases_by_case_search(
+        cases=cases_query,
+        case_search=test_internal_id_pattern,
+        name_search_pattern=test_name_pattern,
+    )
+
+    # THEN at least one case in filtered_cases should have an internal_id or name matching the specified patterns
+    assert any(
+        case.internal_id.startswith(test_internal_id_pattern)
+        or case.name.startswith(test_name_pattern)
+        for case in filtered_cases
+    )

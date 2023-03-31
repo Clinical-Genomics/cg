@@ -21,7 +21,9 @@ class MetagenomeSubmitter(Submitter):
         self, samples: List[MetagenomeSample], customer_id: str
     ) -> None:
         """Validate that the names of all samples are unused."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         for sample in samples:
             if sample.control:
                 continue
@@ -82,7 +84,7 @@ class MetagenomeSubmitter(Submitter):
         items: List[dict],
     ) -> List[Sample]:
         """Store samples in the status database."""
-        customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer = self.status.get_customer_by_internal_id(customer_internal_id=customer_id)
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
