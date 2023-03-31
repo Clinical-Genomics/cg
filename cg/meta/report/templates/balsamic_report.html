@@ -233,13 +233,13 @@
                   <li><strong>Kliniskt relevanta förvärvade SNVs och INDELs</strong> : <em>{{ case.data_analysis.scout_files.snv_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.snv_research_vcf != 'N/A' %}
-                  <li><strong>Förvärvade SNVs och INDELs</strong>: <em>{{ case.data_analysis.scout_files.snv_research_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Förvärvade SNVs och INDELs för forskning</strong>: <em>{{ case.data_analysis.scout_files.snv_research_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_vcf != 'N/A' %}
                   <li><strong>Kliniskt relevanta förvärvade SVs</strong>: <em>{{ case.data_analysis.scout_files.sv_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_research_vcf != 'N/A' %}
-                  <li><strong>Förvärvade SVs</strong>: <em>{{ case.data_analysis.scout_files.sv_research_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Förvärvade SVs för forskning</strong>: <em>{{ case.data_analysis.scout_files.sv_research_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 </ul>
             </div>
