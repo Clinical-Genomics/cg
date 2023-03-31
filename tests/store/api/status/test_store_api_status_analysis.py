@@ -352,6 +352,29 @@ def test_get_analyses_for_case_and_pipeline_before(
         assert analysis.pipeline == pipeline
 
 
+def test_get_analyses_for_case_before(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
+    timestamp_now: datetime,
+    case_id: str = "yellowhog",
+):
+    """Test to get all analyses before a given date"""
+
+    # GIVEN a database with a number of analyses
+
+    # WHEN getting all analyses before a given date
+    analyses: List[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_started_at_before(
+        case_internal_id=case_id,
+        started_at_before=timestamp_now,
+    )
+
+    # THEN assert that the analyses before the given date are returned
+    for analysis in analyses:
+        assert analysis.started_at < timestamp_now
+        assert analysis.family.internal_id == case_id
+
+
 def test_get_analyses_for_pipeline_before(
     store_with_analyses_for_cases_not_uploaded_fluffy: Store,
     timestamp_now: datetime,

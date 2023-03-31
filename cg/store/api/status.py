@@ -640,6 +640,24 @@ class StatusHandler(BaseHandler):
             pipeline=pipeline,
         ).all()
 
+    def get_analyses_for_case_started_at_before(
+        self,
+        case_internal_id: str,
+        started_at_before: datetime,
+    ) -> List[Analysis]:
+        """Return all analyses for a case older than certain date."""
+        case_entry_id: int = self.get_case_by_internal_id(internal_id=case_internal_id).id
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_query(table=Analysis),
+            filter_functions=filter_functions,
+            case_entry_id=case_entry_id,
+            started_at_date=started_at_before,
+        ).all()
+
     def get_analyses_for_pipeline_started_at_before(
         self, pipeline: Pipeline, started_at_before: datetime
     ) -> List[Analysis]:
