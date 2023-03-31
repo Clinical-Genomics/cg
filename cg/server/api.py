@@ -172,25 +172,27 @@ def _get_cases(
 
 @BLUEPRINT.route("/families")
 def get_families():
-    """Return families."""
-    status = request.args.get("status")
-    enquiry = request.args.get("enquiry")
-    action = request.args.get("action")
+    """Return cases."""
+    status: str = request.args.get("status")
+    enquiry: str = request.args.get("enquiry")
+    action: str = request.args.get("action")
 
-    customers = _get_current_customers()
-    cases = _get_cases(status=status, enquiry=enquiry, action=action, customers=customers)
+    customers: List[Customer] = _get_current_customers()
+    cases: List[Family] = _get_cases(
+        status=status, enquiry=enquiry, action=action, customers=customers
+    )
 
     count = len(cases)
-    parsed_cases = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=parsed_cases, total=count)
+    case_dicts = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=case_dicts, total=count)
 
 
 @BLUEPRINT.route("/families_in_collaboration")
 def parse_families_in_collaboration():
-    """Return families in collaboration."""
+    """Return cases in collaboration."""
     customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
     pipeline: str = request.args.get("data_analysis")
-    case_search_pattern = request.args.get("enquiry")
+    case_search_pattern: str = request.args.get("enquiry")
 
     cases: List[Family] = db.get_cases_by_customer_pipeline_and_case_search(
         case_search=case_search_pattern,

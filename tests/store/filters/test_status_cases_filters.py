@@ -702,7 +702,7 @@ def test_filter_cases_by_ticket_matching_ticket(
 
 
 def test_filter_cases_by_customer_entry_ids(store_with_multiple_cases_and_samples: Store):
-    """Test that cases are returned when filtering by customer ids."""
+    """Test that cases are returned when filtering by customer entry ids."""
     # GIVEN a store containing cases with customer ids
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     customer_ids = [case.customer_id for case in cases_query.all()]

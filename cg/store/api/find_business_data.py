@@ -149,6 +149,16 @@ class FindBusinessDataHandler(BaseHandler):
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
     ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by a customer and matching names.
+
+        Args:
+            customer (Customer): The customer object to filter cases by.
+            case_name_search (str): The case name search string to filter cases by.
+
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time.
+        """
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
             CaseFilter.FILTER_BY_NAME_SEARCH,
@@ -169,6 +179,18 @@ class FindBusinessDataHandler(BaseHandler):
         case_search: Optional[str],
         limit: Optional[int] = 30,
     ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
+
+        Args:
+            customers (Optional[List[Customer]]): A list of customer objects to filter cases by.
+            action (Optional[str]): The action string to filter cases by.
+            case_search (Optional[str]): The case search string to filter cases by.
+            limit (Optional[int], default=30): The maximum number of cases to return.
+
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+        """
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
             CaseFilter.FILTER_BY_ACTION,
@@ -176,7 +198,9 @@ class FindBusinessDataHandler(BaseHandler):
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
-        customer_entry_ids = [customer.id for customer in customers] if customers else None
+        customer_entry_ids: List[int] = (
+            [customer.id for customer in customers] if customers else None
+        )
 
         filtered_cases: Query = apply_case_filter(
             cases=self._get_query(table=Family),
@@ -193,7 +217,19 @@ class FindBusinessDataHandler(BaseHandler):
         pipeline: Optional[str],
         case_search: Optional[str],
         limit: Optional[int] = 30,
-    ):
+    ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by customer, pipeline, and matching names or internal ids.
+
+        Args:
+            customer (Optional[Customer]): A customer object to filter cases by.
+            pipeline (Optional[str]): The pipeline string to filter cases by.
+            case_search (Optional[str]): The case search string to filter cases by.
+            limit (Optional[int], default=30): The maximum number of cases to return.
+
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+        """
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
             CaseFilter.FILTER_BY_CASE_SEARCH,
@@ -201,7 +237,7 @@ class FindBusinessDataHandler(BaseHandler):
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
-        customer_entry_id = customer.id if customer else None
+        customer_entry_id: int = customer.id if customer else None
 
         filtered_cases: Query = apply_case_filter(
             cases=self._get_query(table=Family),

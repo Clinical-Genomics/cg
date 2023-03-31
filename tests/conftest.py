@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -1827,7 +1827,7 @@ def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
 def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with cases and customers."""
 
-    customer_details = [
+    customer_details: List[Tuple[str, str, bool]] = [
         ("cust000", "Customer 1", True),
         ("cust001", "Customer 2", False),
         ("cust002", "Customer 3", True),
@@ -1836,11 +1836,14 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
 
     for customer_id, customer_name, scout_access in customer_details:
         customer: Customer = helpers.ensure_customer(
-            store=store, customer_id=customer_id, name=customer_name, scout_access=scout_access
+            store=store,
+            customer_id=customer_id,
+            customer_name=customer_name,
+            scout_access=scout_access,
         )
         customers.append(customer)
 
-    case_details = [
+    case_details: List[Tuple[str, str, Pipeline, CaseActions, Customer]] = [
         ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
         ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
         ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),
@@ -1852,7 +1855,7 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
     for case_name, case_id, pipeline, action, customer in case_details:
         helpers.ensure_case(
             store=store,
-            name=case_name,
+            case_name=case_name,
             case_id=case_id,
             data_analysis=pipeline.value,
             action=action.value,

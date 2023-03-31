@@ -197,7 +197,7 @@ class StoreHelpers:
     def ensure_customer(
         store: Store,
         customer_id: str = "cust000",
-        name: str = "Production",
+        customer_name: str = "Production",
         scout_access: bool = False,
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
@@ -207,7 +207,7 @@ class StoreHelpers:
         if not customer:
             customer = store.add_customer(
                 internal_id=customer_id,
-                name=name,
+                name=customer_name,
                 scout_access=scout_access,
                 invoice_address="Test street",
                 invoice_reference="ABCDEF",
@@ -390,7 +390,7 @@ class StoreHelpers:
     @staticmethod
     def ensure_case(
         store: Store,
-        name: str = "test-case",
+        case_name: str = "test-case",
         case_id: str = "blueeagle",
         customer: Customer = None,
         data_analysis: Pipeline = Pipeline.MIP_DNA,
@@ -402,13 +402,13 @@ class StoreHelpers:
             customer = StoreHelpers.ensure_customer(store=store)
         case = store.get_case_by_internal_id(
             internal_id=case_id
-        ) or store.get_case_by_name_and_customer(customer=customer, case_name=name)
+        ) or store.get_case_by_name_and_customer(customer=customer, case_name=case_name)
         if not case:
             case = StoreHelpers.add_case(
                 store=store,
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,
-                name=name,
+                name=case_name,
                 internal_id=case_id,
                 action=action,
             )
@@ -542,7 +542,7 @@ class StoreHelpers:
         sample.customer = customer
         case = StoreHelpers.ensure_case(
             store=store,
-            name=str(ticket),
+            case_name=str(ticket),
             customer=customer,
             data_analysis=Pipeline.MICROSALT,
             data_delivery=DataDelivery.FASTQ_QC,
