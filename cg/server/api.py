@@ -163,8 +163,8 @@ def _get_cases(
     if status == "analysis":
         return db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
 
-    return db.get_cases_by_customers_action_and_case_search_pattern(
-        case_search_pattern=enquiry,
+    return db.get_cases_by_customers_action_and_case_search(
+        case_search=enquiry,
         customers=customers,
         action=action,
     )
@@ -192,8 +192,8 @@ def parse_families_in_collaboration():
     pipeline: str = request.args.get("data_analysis")
     case_search_pattern = request.args.get("enquiry")
 
-    cases: List[Family] = db.get_cases_by_customer_pipeline_and_case_search_pattern(
-        case_search_pattern=case_search_pattern,
+    cases: List[Family] = db.get_cases_by_customer_pipeline_and_case_search(
+        case_search=case_search_pattern,
         customer=customer,
         pipeline=pipeline,
     )

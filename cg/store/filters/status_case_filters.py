@@ -123,14 +123,14 @@ def filter_cases_by_ticket_id(cases: Query, ticket_id: str, **kwargs) -> Query:
 
 def filter_cases_by_customer_entry_id(cases: Query, customer_entry_id: int, **kwargs) -> Query:
     """Return cases with matching customer id."""
-    return cases.filter(Customer.id == customer_entry_id)
+    return cases.filter(Family.customer_id == customer_entry_id)
 
 
 def filter_cases_by_customer_entry_ids(
     cases: Query, customer_entry_ids: List[int], **kwargs
 ) -> Query:
     """Return cases with matching customer ids."""
-    return cases.filter(Customer.id.in_(customer_entry_ids)) if customer_entry_ids else cases
+    return cases.filter(Family.customer_id.in_(customer_entry_ids)) if customer_entry_ids else cases
 
 
 def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
