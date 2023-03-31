@@ -60,11 +60,11 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
 ):
     """Test adding fastq files to Housekeeper when no fastq files in Housekeeper."""
 
-    # GIVEN real HK API populated with a HK bundle with SPRING info
+    # GIVEN real Housekeeper API populated with a bundle with SPRING metadata
     hk_bundle: dict = decompress_hk_spring_bundle
     sample_id: str = hk_bundle["name"]
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_bundle)
-    sample_obj: Sample = helpers.add_sample(store, internal_id=sample_id)
+    sample: Sample = helpers.add_sample(store, internal_id=sample_id)
     compress_api.hk_api = real_housekeeper_api
     # GIVEN that there are no fastq files in HK
     version_obj: Version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
@@ -76,7 +76,7 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
 
     # WHEN adding the files to housekeeper
     compress_api.add_fastq_hk(
-        sample_obj=sample_obj,
+        sample_obj=sample,
         fastq_first=compression_files.fastq_first_file,
         fastq_second=compression_files.fastq_second_file,
     )

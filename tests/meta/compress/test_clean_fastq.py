@@ -1,16 +1,17 @@
 """Tests for cleaning FASTQ files."""
 import logging
 from pathlib import Path
-from typing import Generator, Dict
+from typing import Generator, Dict, List
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from housekeeper.store.models import Version
+from housekeeper.store.models import Version, File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.meta.compress import files
+from cg.models import CompressionData
 from tests.cli.compress.conftest import MockCompressAPI
 from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
@@ -63,27 +64,25 @@ def test_update_hk_fastq(
     helpers.ensure_hk_bundle(hk_api, compress_hk_fastq_bundle)
     compress_api.hk_api = hk_api
 
-    # GIVEN that the compression has finished and the SPRING files exist in disk
-    assert compression_files.spring_file.exists()
-    assert compression_files.spring_metadata_file.exists()
-
-    # GIVEN that there are some FASTQ files in housekeeper
+    # GIVEN that there are FASTQ files in Housekeeper
     hk_fastq_files: list = list(hk_api.files(tags=[SequencingFileTag.FASTQ]))
     assert hk_fastq_files
 
-    # GIVEN that there are no SPRING files in housekeeper
+    # GIVEN that the SPRING files exist in disk but has been not added to Housekeeper
+    assert compression_files.spring_file.exists()
+    assert compression_files.spring_metadata_file.exists()
     hk_spring_files: list = list(hk_api.files(tags=[SequencingFileTag.SPRING]))
-    assert not hk_spring_files
-    hk_fastq_flag_files: list = list(hk_api.files(tags=[SequencingFileTag.SPRING_METADATA]))
-    assert not hk_fastq_flag_files
+    hk_spring_metadata_files: list = list(hk_api.files(tags=[SequencingFileTag.SPRING_METADATA]))
+    for spring_file in [hk_spring_files, hk_spring_metadata_files]:
+        assert not spring_file
 
-    # GIVEN a housekeeper version
+    # GIVEN a Housekeeper version and a compression object
     hk_version: Version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
     fastq: Dict[str, dict] = files.get_fastq_files(sample_id=sample_id, version_obj=hk_version)
     run: str = list(fastq.keys())[0]
-    compression = fastq[run]["compression_data"]
+    compression: CompressionData = fastq[run]["compression_data"]
 
-    # WHEN updating HK with compressed FASTQ files
+    # WHEN updating Housekeeper with compressed FASTQ files
     compress_api.update_fastq_hk(
         sample_id=sample_id,
         compression_obj=compression,
@@ -91,20 +90,20 @@ def test_update_hk_fastq(
         hk_fastq_second=fastq[run]["hk_second"],
     )
 
-    # THEN assert that the SPRING file and the metadata file is added to Housekeeper
-    hk_spring_files: list = list(real_housekeeper_api.files(tags=[SequencingFileTag.SPRING]))
-    assert hk_spring_files
-    hk_fastq_flag_files: list = list(
+    # THEN assert that the SPRING files have been added to Housekeeper
+    hk_spring_files: List[File] = list(real_housekeeper_api.files(tags=[SequencingFileTag.SPRING]))
+    hk_spring_metadata_files: List[File] = list(
         real_housekeeper_api.files(tags=[SequencingFileTag.SPRING_METADATA])
     )
-    assert hk_fastq_flag_files
+    for spring_file in [hk_spring_files, hk_spring_metadata_files]:
+        assert spring_file
 
-    # THEN assert that the SPRING file has been added to bundles directory
-    for spring_file in [hk_spring_files[0]["path"], hk_fastq_flag_files[0]["path"]]:
-        print(Path(root_path, spring_file))
+    # THEN assert that the SPRING files have been added to bundles directory
+    for spring_file in [hk_spring_files[0].path, hk_spring_metadata_files[0].path]:
+        assert Path(root_path, spring_file).exists()
 
     # THEN assert that the FASTQ files are removed from Housekeeper
-    hk_fastq_files = list(hk_api.files(tags=[SequencingFileTag.FASTQ]))
+    hk_fastq_files: List[File] = list(hk_api.files(tags=[SequencingFileTag.FASTQ]))
     assert not hk_fastq_files
 
 
