@@ -106,7 +106,7 @@ def test_call_for_function_with_same_number_of_parameters():
     # WHEN calling the dispatcher with a dictionary that has the same number of parameters as the functions
     dispatcher = Dispatcher([foo, bar], input_dict={"a": 1, "b": 2, "c": 3, "d": 4})
 
-    # THEN the dispatcher should return the correct result
+    # THEN the dispatcher should return the correct result for each function
     assert dispatcher({"a": 1, "b": 2}) == 3
     assert dispatcher({"c": 3, "d": 4}) == 12
 
