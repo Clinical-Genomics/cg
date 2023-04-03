@@ -225,7 +225,7 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     ).collaborators
     assert customer
 
-    # WHEN getting the samples to invoice for a customer
+    # WHEN getting the samples for a customer
     samples: List[
         Sample
     ] = store_with_samples_for_multiple_customers.get_samples_by_customer_id_and_pattern(
