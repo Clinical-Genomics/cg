@@ -2,6 +2,8 @@ import logging
 from typing import List, Optional
 
 from cgmodels.cg.constants import Pipeline
+from housekeeper.store.models import Version
+from sqlalchemy.orm import Query
 
 from cg.constants import (
     REQUIRED_REPORT_FIELDS,
@@ -151,3 +153,20 @@ class MipDNAReportAPI(ReportAPI):
         """Retrieves MIP DNA upload case tags."""
 
         return MIP_CASE_TAGS
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """Returns the file path of the uploaded to Scout file given its tag."""
+
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        tags: list = self.get_hk_scout_file_tags(scout_tag)
+        uploaded_files: Query = self.housekeeper_api.get_files(
+            bundle=case_id, tags=tags, version=version.id
+        )
+
+        if not tags or uploaded_files.count() == 0:
+            LOG.info(
+                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
+            )
+            return None
+
+        return uploaded_files[0].full_path
