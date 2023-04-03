@@ -109,6 +109,15 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
+    def get_application_version_by_application_id(self, application_id: int) -> ApplicationVersion:
+        """Return an application version by application id"""
+        application_versions = self._get_query(table=ApplicationVersion)
+        return apply_application_versions_filter(
+            application_versions=application_versions,
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_APPLICATION_ID],
+            application_id=application_id,
+        ).first()
+
     def get_application_versions(self) -> List[ApplicationVersion]:
         """Return all application versions"""
         return self._get_query(table=ApplicationVersion).all()
