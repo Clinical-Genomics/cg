@@ -66,10 +66,11 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
     helpers.ensure_hk_bundle(real_housekeeper_api, hk_bundle)
     sample: Sample = helpers.add_sample(store, internal_id=sample_id)
     compress_api.hk_api = real_housekeeper_api
-    # GIVEN that there are no fastq files in HK
-    version_obj: Version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
+
+    # GIVEN that there are no FASTQ files in HK
+    version: Version = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
     file_tags: set = set()
-    for file_obj in version_obj.files:
+    for file_obj in version.files:
         for tag in file_obj.tags:
             file_tags.add(tag.name)
     assert not set(HK_FASTQ_TAGS).intersection(file_tags)
@@ -81,10 +82,9 @@ def test_add_fastq_housekeeper_when_no_fastq_in_hk(
         fastq_second=compression_files.fastq_second_file,
     )
 
-    # THEN assert that the fastq files where added to HK
-    version_obj = compress_api.hk_api.get_latest_bundle_version(bundle_name=sample_id)
+    # THEN assert that the FASTQ files where added to HK
     file_tags = set()
-    for file_obj in version_obj.files:
+    for file_obj in version.files:
         for tag in file_obj.tags:
             file_tags.add(tag.name)
 
