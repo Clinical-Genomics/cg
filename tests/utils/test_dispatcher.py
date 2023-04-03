@@ -1,6 +1,9 @@
-from typing import List, Tuple, Callable, Any
-import pytest
+from typing import List
+
 from cg.utils.dispatcher import Dispatcher
+from tests.store_helpers import StoreHelpers
+from cg.store import Store
+from cg.store.models import Sample
 
 
 def test_dispatch_table_generation(
@@ -87,3 +90,32 @@ def test_call_dictionary_extra_parameters_not_in_functions():
 
     dispatcher = Dispatcher([foo, bar], input_dict={"a": 1, "b": 2, "c": 3, "d": 4, "e": 5})
     assert dispatcher({"a": 1, "b": 2}) == 3
+
+
+def test_call_with_status_db_functions(
+    store: Store,
+    helpers: StoreHelpers,
+    test_subject: str = "test_subject",
+    is_tumour: bool = True,
+):
+
+    helpers.add_sample(store, subject_id=test_subject)
+    helpers.add_sample(store, subject_id=test_subject, is_tumour=False)
+
+    dispatcher = Dispatcher(
+        functions=[
+            store.get_samples_by_customer_and_subject_id,
+            store.get_samples_by_customer_subject_id_and_is_tumour,
+        ],
+        input_dict={
+            "customer_internal_id": "cust000",
+            "subject_id": test_subject,
+            "is_tumour": is_tumour,
+        },
+    )
+    samples: List[Sample] = dispatcher(
+        {"customer_internal_id": "cust000", "subject_id": test_subject}
+    )
+    for sample in samples:
+        assert sample.customer.internal_id == "cust000"
+        assert sample.subject_id == test_subject
