@@ -156,12 +156,12 @@ class FindBasicDataHandler(BaseHandler):
         bed: Optional[Bed] = self.get_bed_by_name(bed_name=bed_name)
         return bed.versions[-1] if bed and bed.versions else None
 
-    def get_customer_by_customer_id(self, customer_id: str) -> Customer:
+    def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer:
         """Return customer with customer id."""
         return apply_customer_filter(
             filter_functions=[CustomerFilter.FILTER_BY_INTERNAL_ID],
             customers=self._get_query(table=Customer),
-            customer_internal_id=customer_id,
+            customer_internal_id=customer_internal_id,
         ).first()
 
     def get_collaboration_by_internal_id(self, internal_id: str) -> Collaboration:

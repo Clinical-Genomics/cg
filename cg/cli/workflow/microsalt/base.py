@@ -211,7 +211,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error(f"Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
