@@ -128,8 +128,8 @@ def test_add_decompressed_fastq(
 
     # THEN assert that the FASTQ files have been added with a relative path
     assert files.is_file_in_version(
-        version_obj=version, path=Path(hk_bundle_sample_path, fastq_first.name).as_posix()
+        version_obj=version, path=Path(hk_bundle_sample_path, fastq_first.name)
     )
     assert files.is_file_in_version(
-        version_obj=version, path=Path(hk_bundle_sample_path, fastq_second.name).as_posix()
+        version_obj=version, path=Path(hk_bundle_sample_path, fastq_second.name)
     )
