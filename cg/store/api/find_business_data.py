@@ -597,15 +597,12 @@ class FindBusinessDataHandler(BaseHandler):
             customer_entry_ids: List[int] = [customer.id for customer in customers]
             filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS)
         if pattern:
-            filter_functions.extend(
-                [SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN, SampleFilter.FILTER_BY_NAME_PATTERN]
-            )
+            filter_functions.extend([SampleFilter.FILTER_BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_entry_ids,
-            name_pattern=pattern,
-            internal_id_pattern=pattern,
+            search_pattern=pattern,
             filter_functions=filter_functions,
         ).all()
 
