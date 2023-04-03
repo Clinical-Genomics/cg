@@ -229,7 +229,7 @@ def test_get_samples_by_customer_id_and_pattern_with_collaboration(
     samples: List[
         Sample
     ] = store_with_samples_for_multiple_customers.get_samples_by_customer_id_and_pattern(
-        customers=list(customer),
+        customers=customer,
         pattern="sample",
     )
 
