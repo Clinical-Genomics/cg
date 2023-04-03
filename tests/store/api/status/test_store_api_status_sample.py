@@ -238,3 +238,33 @@ def test_get_samples_by_customer_id_and_pattern(
     assert len(samples) == 1
 
     assert samples[0].customer.internal_id == three_customer_ids[1]
+
+
+def test_get_samples_by_customer_id_and_pattern_with_collaboration(
+    store_with_samples_for_multiple_customers: Store,
+    helpers: StoreHelpers,
+    three_customer_ids: List[str],
+):
+    """Test that samples can be returned for a customer."""
+    # GIVEN a database with samples for a customer
+
+    # THEN the one customer can be retrieved
+    customer: set[Customer] = store_with_samples_for_multiple_customers.get_customer_by_internal_id(
+        customer_internal_id=three_customer_ids[1]
+    ).collaborators
+    assert customer
+
+    # WHEN getting the samples to invoice for a customer
+    samples: List[
+        Sample
+    ] = store_with_samples_for_multiple_customers.get_samples_by_customer_id_and_pattern(
+        customers=list(customer),
+        pattern="sample",
+    )
+
+    # THEN the samples should be returned
+    assert samples
+    assert len(samples) == 3
+
+    for sample in samples:
+        assert "sample" in sample.name
