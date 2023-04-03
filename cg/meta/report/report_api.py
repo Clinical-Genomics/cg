@@ -97,33 +97,32 @@ class ReportAPI(MetaAPI):
         """Extracts the delivery reports of a specific case stored in HK."""
 
         version: Version = self.housekeeper_api.last_version(case_id)
-        delivery_report_files: Query = self.housekeeper_api.get_files(
+        delivery_report: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
 
-        if delivery_report_files.count() == 0:
+        if not delivery_report:
             LOG.warning(f"No existing delivery report found in housekeeper for {case_id}")
             raise FileNotFoundError
 
-        return delivery_report_files[0].full_path
+        return delivery_report.full_path
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Returns the file path of the uploaded to Scout file given its tag."""
 
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag)
-        uploaded_files: Query = self.housekeeper_api.get_files(
+        uploaded_file: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=tags, version=version.id
         )
 
-        if not tags or uploaded_files.count() == 0:
-            LOG.info(
+        if not tags or not uploaded_file:
+            LOG.warning(
                 f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
             )
-
             return None
 
-        return uploaded_files[0].full_path
+        return uploaded_file.full_path
 
     def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template."""
