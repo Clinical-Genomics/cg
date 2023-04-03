@@ -117,7 +117,7 @@ def fixture_rna_store(
     # an existing RNA case with related sample
     rna_case = helpers.ensure_case(
         store=store,
-        name="rna_case",
+        case_name="rna_case",
         customer=helpers.ensure_customer(store=store),
         data_analysis=Pipeline.MIP_RNA,
         data_delivery=DataDelivery.SCOUT,
@@ -177,7 +177,7 @@ def fixture_rna_store(
     # an existing DNA case with related sample
     dna_case = helpers.ensure_case(
         store=store,
-        name="dna_case",
+        case_name="dna_case",
         customer=helpers.ensure_customer(store=store),
         data_analysis=Pipeline.MIP_DNA,
         data_delivery=DataDelivery.SCOUT,

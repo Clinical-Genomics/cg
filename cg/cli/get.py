@@ -139,8 +139,8 @@ def case(
         if not customer:
             LOG.error(f"{customer_id}: customer not found")
             raise click.Abort
-        status_db_cases: Iterable[Family] = status_db.families(
-            customers=[customer], enquiry=case_ids[-1]
+        status_db_cases: Iterable[Family] = status_db.get_cases_by_customer_and_case_name_search(
+            customer=customer, case_name_search=case_ids[-1]
         )
     else:
         for case_id in case_ids:
