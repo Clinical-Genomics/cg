@@ -4,7 +4,7 @@ import logging
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from housekeeper.store.models import Bundle
 
@@ -102,14 +102,15 @@ class RunDirFlowCell:
             return
         LOG.info("Sample sheet found!")
         hk_bundle: Bundle = self.hk.bundle(name=self.id)
+        hk_tags: List[str] = [SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id]
         if hk_bundle is None:
             LOG.info(f"Creating bundle with name {self.id}")
             self.hk.create_new_bundle_and_version(name=self.id)
-        try:
-            self.hk.add_and_include_file_to_latest_version(
-                bundle_name=self.id,
-                file=self.sample_sheet_path,
-                tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id],
-            )
-        except FileExistsError:
+        elif self.hk.get_file_from_latest_version(bundle_name=hk_bundle.name, tags=hk_tags):
             LOG.warning("Sample sheet already included!")
+            return
+        self.hk.add_and_include_file_to_latest_version(
+            bundle_name=self.id,
+            file=self.sample_sheet_path,
+            tags=hk_tags,
+        )
