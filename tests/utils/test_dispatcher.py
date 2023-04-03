@@ -56,3 +56,34 @@ def test_call_non_matching_function(a: int = 1, b: int = 2, c: int = 3, x: int =
     dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "x": x, "y": y})
     with pytest.raises(ValueError):
         dispatcher({"a": a, "b": b})
+
+
+def test_call_for_function_without_parameters():
+    def foo():
+        return 1
+
+    dispatcher = Dispatcher([foo], input_dict={})
+    assert dispatcher({}) == 1
+
+
+def test_call_for_function_with_same_number_of_parameters():
+    def foo(a, b):
+        return a + b
+
+    def bar(c, d):
+        return c * d
+
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": 1, "b": 2, "c": 3, "d": 4})
+    assert dispatcher({"a": 1, "b": 2}) == 3
+    assert dispatcher({"c": 3, "d": 4}) == 12
+
+
+def test_call_dictionary_extra_parameters_not_in_functions():
+    def foo(a, b):
+        return a + b
+
+    def bar(c, d):
+        return c * d
+
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": 1, "b": 2, "c": 3, "d": 4, "e": 5})
+    assert dispatcher({"a": 1, "b": 2}) == 3
