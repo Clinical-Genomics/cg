@@ -205,11 +205,12 @@ class HousekeeperAPI:
             LOG.warning(
                 f"Another file with identical included file path: {new_path} already exist. Skip linking of: {file_obj.path}"
             )
+            file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
             return file_obj
         # hardlink file to the internal structure
         os.link(file_obj.path, new_path)
         LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
-        file_obj.path: str = str(new_path).replace(f"{global_root_dir}/", "", 1)
+        file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 
     def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None) -> Version:
