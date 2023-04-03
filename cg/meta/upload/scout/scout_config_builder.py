@@ -136,15 +136,21 @@ class ScoutConfigBuilder:
 
     def include_cnv_report(self) -> None:
         LOG.info("Include CNV report to case")
-        self.load_config.cnv_report = self.fetch_file_from_hk(self.case_tags.cnv_report)
+        self.load_config.cnv_report = self.fetch_file_from_hk(
+            hk_tags=self.case_tags.cnv_report, latest=True
+        )
 
     def include_multiqc_report(self) -> None:
         LOG.info("Include MultiQC report to case")
-        self.load_config.multiqc = self.fetch_file_from_hk(self.case_tags.multiqc_report)
+        self.load_config.multiqc = self.fetch_file_from_hk(
+            hk_tags=self.case_tags.multiqc_report, latest=True
+        )
 
     def include_delivery_report(self) -> None:
         LOG.info("Include delivery report to case")
-        self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
+        self.load_config.delivery_report = self.fetch_file_from_hk(
+            hk_tags=self.case_tags.delivery_report, latest=True
+        )
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the alignment file for a sample
