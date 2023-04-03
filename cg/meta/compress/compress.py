@@ -224,12 +224,12 @@ class CompressAPI:
     ) -> None:
         """Update Housekeeper with compressed FASTQ files and SPRING metadata file."""
         version: Version = self.hk_api.last_version(sample_id)
-
         spring_tags: List[str] = [sample_id, SequencingFileTag.SPRING]
         spring_metadata_tags: List[str] = [sample_id, SequencingFileTag.SPRING_METADATA]
-        LOG.info(f"Updating FASTQ files in Housekeeper update for {sample_id}:")
+        LOG.info(f"Updating FASTQ files in Housekeeper for {sample_id}")
         LOG.info(
-            f"{compression_obj.fastq_first}, {compression_obj.fastq_second} -> {compression_obj.spring_path}, with tags {spring_tags}"
+            f"{compression_obj.fastq_first}, {compression_obj.fastq_second} -> {compression_obj.spring_path}, "
+            f"with tags {spring_tags}"
         )
         LOG.info(f"Adds {compression_obj.spring_metadata_path}, with tags {spring_metadata_tags}")
         if self.dry_run:
@@ -240,17 +240,18 @@ class CompressAPI:
             LOG.info("SPRING file is already in Housekeeper")
         else:
             LOG.info("Adding SPRING file to Housekeeper")
-            self.hk_api.add_file(
-                path=compression_obj.spring_path, version_obj=version, tags=spring_tags
+            self.hk_api.add_and_include_file_to_latest_version(
+                bundle_name=sample_id, file=compression_obj.spring_path, tags=spring_tags
             )
             self.hk_api.commit()
 
         if files.is_file_in_version(version_obj=version, path=compression_obj.spring_metadata_path):
-            LOG.info("Spring metadata file is already in Housekeeper")
+            LOG.info("SPRING metadata file is already in Housekeeper")
         else:
-            self.hk_api.add_file(
-                path=compression_obj.spring_metadata_path,
-                version_obj=version,
+            LOG.info("Adding SPRING metadata file to Housekeeper")
+            self.hk_api.add_and_include_file_to_latest_version(
+                bundle_name=sample_id,
+                file=compression_obj.spring_metadata_path,
                 tags=spring_metadata_tags,
             )
             self.hk_api.commit()
@@ -267,7 +268,6 @@ class CompressAPI:
             fastq_tags: List[str] = [flow_cell_id, SequencingFileTag.FASTQ]
         else:
             fastq_tags: List[str] = [sample_obj.internal_id, SequencingFileTag.FASTQ]
-        last_version: Version = self.hk_api.last_version(bundle=sample_obj.internal_id)
         LOG.info(
             f"Adds {fastq_first}, {fastq_second} to bundle {sample_obj.internal_id} with tags {fastq_tags}"
         )
@@ -275,8 +275,10 @@ class CompressAPI:
             return
 
         LOG.info("Updating files in Housekeeper...")
-        self.hk_api.add_file(path=fastq_first, version_obj=last_version, tags=fastq_tags)
-        self.hk_api.add_file(path=fastq_second, version_obj=last_version, tags=fastq_tags)
+        for fastq in [fastq_first, fastq_second]:
+            self.hk_api.add_and_include_file_to_latest_version(
+                bundle_name=sample_obj.internal_id, file=fastq, tags=fastq_tags
+            )
         self.hk_api.commit()
 
     # Methods to remove files from disc
