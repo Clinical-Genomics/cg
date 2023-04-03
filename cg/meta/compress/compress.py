@@ -115,6 +115,7 @@ class CompressAPI:
                 if not self.backup_api.is_to_be_retrieved_and_decrypted(
                     spring_file_path=compression.spring_path
                 ):
+                    LOG.warning(f"Could not find {compression.spring_path} on disk")
                     return False
                 LOG.info("Until the SPRING file is retrieved from PDC and decrypted")
                 self.backup_api.retrieve_and_decrypt_spring_file(
