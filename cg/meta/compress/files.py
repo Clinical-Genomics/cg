@@ -35,8 +35,8 @@ def get_hk_files_dict(tags: List[str], version_obj: Version) -> Dict[Path, File]
 
 
 def is_file_in_version(version_obj: Version, path: Path) -> bool:
-    """Check if a file is in a certain version."""
-    return any(version_file.path == str(path) for version_file in version_obj.files)
+    """Check if a file is in a certain version considering relative path in the database."""
+    return any(version_file.path in str(path) for version_file in version_obj.files)
 
 
 # Functions to get FASTQ like files
