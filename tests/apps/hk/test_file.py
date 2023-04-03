@@ -118,7 +118,40 @@ def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
     assert hk_file is not None
 
 
-def test_fetch_file_from_version(
+def test_fetch_files_from_version(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    hk_bundle_data: Dict[str, Any],
+    hk_tag: str,
+    observations_clinical_snv_file_path: Path,
+    observations_clinical_sv_file_path: Path,
+):
+    """Test get the files from the Housekeeper database given the version object."""
+
+    # GIVEN a Housekeeper API with some files
+    version: Version = helpers.ensure_hk_version(real_housekeeper_api, hk_bundle_data)
+    first_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_snv_file_path, version_obj=version, tags=hk_tag
+    )
+    second_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_sv_file_path, version_obj=version, tags=hk_tag
+    )
+
+    # GIVEN that the files exist in the version object
+    assert first_file in version.files
+    assert second_file in version.files
+
+    # WHEN extracting the files from version
+    files: List[File] = real_housekeeper_api.fetch_files_from_version(
+        version=version, tags={hk_tag}
+    )
+
+    # THEN the added files should be retrieved
+    assert first_file in files
+    assert second_file in files
+
+
+def test_fetch_latest_file_from_version(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     hk_bundle_data: Dict[str, Any],
@@ -142,8 +175,8 @@ def test_fetch_file_from_version(
     assert second_file in version.files
 
     # WHEN extracting the latest file from version
-    latest_file: File = real_housekeeper_api.fetch_file_from_version(
-        version_obj=version, tags={hk_tag}
+    latest_file: File = real_housekeeper_api.fetch_latest_file_from_version(
+        version=version, tags={hk_tag}
     )
 
     # THEN the file with the higher ID should be returned

@@ -173,10 +173,15 @@ class MockHousekeeperAPI:
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
     # Mock specific functions
-    def fetch_file_from_version(self, version_obj, tags):
+    def fetch_file_from_version(self, version, tags):
         if tags.intersection(self._missing_tags):
             return None
         return self._files[0]
+
+    def fetch_latest_file_from_version(self, version, tags):
+        if tags.intersection(self._missing_tags):
+            return None
+        return self._files[-1]
 
     def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
         """Find a file in the latest version of a bundle."""
