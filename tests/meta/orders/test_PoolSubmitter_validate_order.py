@@ -31,7 +31,7 @@ def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helper
     for sample in order.samples:
         case = helpers.ensure_case(
             store=base_store,
-            name=PoolSubmitter.create_case_name(ticket=order.ticket, pool_name=sample.pool),
+            case_name=PoolSubmitter.create_case_name(ticket=order.ticket, pool_name=sample.pool),
             customer=customer,
             data_analysis=Pipeline.FLUFFY,
             data_delivery=DataDelivery.STATINA,

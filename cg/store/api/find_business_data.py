@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import List, Optional, Iterator, Union
+from typing import Callable, List, Optional, Iterator, Union
 
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Query
@@ -146,35 +146,111 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all deliveries."""
         return self.Delivery.query
 
-    def families(
+    def get_cases_by_customer_and_case_name_search(
+        self, customer: Customer, case_name_search: str
+    ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by a customer and matching names.
+
+        Args:
+            customer (Customer): The customer object to filter cases by.
+            case_name_search (str): The case name search string to filter cases by.
+
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time.
+        """
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            CaseFilter.FILTER_BY_NAME_SEARCH,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
+
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_id=customer.id,
+            name_search=case_name_search,
+        ).all()
+
+    def get_cases_by_customers_action_and_case_search(
         self,
-        *,
-        action: Optional[str] = None,
-        data_analysis: Optional[str] = None,
-        customers: List[Customer] = None,
-        enquiry: Optional[str] = None,
-    ) -> Query:
-        """Fetch families."""
+        customers: Optional[List[Customer]],
+        action: Optional[str],
+        case_search: Optional[str],
+        limit: Optional[int] = 30,
+    ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
 
-        records = self.Family.query
+        Args:
+            customers (Optional[List[Customer]]): A list of customer objects to filter cases by.
+            action (Optional[str]): The action string to filter cases by.
+            case_search (Optional[str]): The case search string to filter cases by.
+            limit (Optional[int], default=30): The maximum number of cases to return.
 
-        if customers:
-            customer_ids = [customer.id for customer in customers]
-            records = records.filter(Family.customer_id.in_(customer_ids))
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+        """
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
+            CaseFilter.FILTER_BY_ACTION,
+            CaseFilter.FILTER_BY_CASE_SEARCH,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
 
-        records = (
-            records.filter(
-                or_(
-                    Family.name.like(f"%{enquiry}%"),
-                    Family.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
+        customer_entry_ids: List[int] = (
+            [customer.id for customer in customers] if customers else None
         )
-        records = records.filter_by(action=action) if action else records
-        records = records.filter_by(data_analysis=data_analysis) if data_analysis else records
-        return records.order_by(Family.created_at.desc())
+
+        filtered_cases: Query = apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_ids=customer_entry_ids,
+            action=action,
+            case_search=case_search,
+        )
+        return filtered_cases.limit(limit=limit).all()
+
+    def get_cases_by_customer_pipeline_and_case_search(
+        self,
+        customer: Optional[Customer],
+        pipeline: Optional[str],
+        case_search: Optional[str],
+        limit: Optional[int] = 30,
+    ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by customer, pipeline, and matching names or internal ids.
+
+        Args:
+            customer (Optional[Customer]): A customer object to filter cases by.
+            pipeline (Optional[str]): The pipeline string to filter cases by.
+            case_search (Optional[str]): The case search string to filter cases by.
+            limit (Optional[int], default=30): The maximum number of cases to return.
+
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+        """
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            CaseFilter.FILTER_BY_CASE_SEARCH,
+            CaseFilter.GET_WITH_PIPELINE,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
+
+        customer_entry_id: int = customer.id if customer else None
+
+        filtered_cases: Query = apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_id=customer_entry_id,
+            case_search=case_search,
+            pipeline=pipeline,
+        )
+        return filtered_cases.limit(limit=limit).all()
+
+    def get_cases(self) -> List[Family]:
+        """Return all cases."""
+        return self._get_query(table=Family).all()
 
     def family_samples(self, family_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
