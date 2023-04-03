@@ -594,6 +594,8 @@ class FindBusinessDataHandler(BaseHandler):
         customer_entry_ids: List[int] = []
         filter_functions: List[SampleFilter] = []
         if customers:
+            if not isinstance(customers, list):
+                customers = list(customers)
             customer_entry_ids = [customer.id for customer in customers]
             filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS)
         if pattern:
