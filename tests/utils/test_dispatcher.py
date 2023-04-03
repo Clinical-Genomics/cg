@@ -4,6 +4,7 @@ from cg.utils.dispatcher import Dispatcher
 from tests.store_helpers import StoreHelpers
 from cg.store import Store
 from cg.store.models import Sample
+from cg.constants.invoice import CustomerNames
 
 
 def test_dispatch_table_generation(
@@ -95,6 +96,7 @@ def test_call_dictionary_extra_parameters_not_in_functions():
 def test_call_with_status_db_functions(
     store: Store,
     helpers: StoreHelpers,
+    customer_internal_id: str = CustomerNames.cust001,
     test_subject: str = "test_subject",
     is_tumour: bool = True,
 ):
@@ -108,14 +110,14 @@ def test_call_with_status_db_functions(
             store.get_samples_by_customer_subject_id_and_is_tumour,
         ],
         input_dict={
-            "customer_internal_id": "cust000",
+            "customer_internal_id": customer_internal_id,
             "subject_id": test_subject,
             "is_tumour": is_tumour,
         },
     )
     samples: List[Sample] = dispatcher(
-        {"customer_internal_id": "cust000", "subject_id": test_subject}
+        {"customer_internal_id": customer_internal_id, "subject_id": test_subject}
     )
     for sample in samples:
-        assert sample.customer.internal_id == "cust000"
+        assert sample.customer.internal_id == customer_internal_id
         assert sample.subject_id == test_subject
