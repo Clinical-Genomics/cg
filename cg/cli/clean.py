@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
+from cg.utils.dispatcher import Dispatcher
 
 import click
 from alchy import Query
@@ -197,14 +198,19 @@ def hk_bundle_files(
     status_db: Store = context.status_db
 
     date_threshold: datetime = get_date_days_ago(days_ago=days_old)
-    if case_id:
-        analyses: List[Analysis] = status_db.get_analyses_for_case_and_pipeline_started_at_before(
-            case_internal_id=case_id, started_at_before=date_threshold, pipeline=pipeline
-        )
-    elif pipeline:
-        analyses: List[Analysis] = status_db.get_analyses_for_case_and_pipeline_started_at_before(
-            case_internal_id=case_id, started_at_before=date_threshold, pipeline=pipeline
-        )
+
+    function_dispatcher: Dispatcher = Dispatcher(
+        functions=[
+            status_db.get_analyses_started_at_before,
+            status_db.get_analyses_for_case_and_pipeline_started_at_before,
+            status_db.get_analyses_for_pipeline_started_at_before,
+            status_db.get_analyses_for_case_started_at_before,
+        ],
+        input_dict={"case_id": case_id, "pipeline": pipeline, "date_threshold": date_threshold},
+    )
+    analyses: List[Analysis] = function_dispatcher(
+        {"case_id": case_id, "pipeline": pipeline, "date_threshold": date_threshold}
+    )
 
     size_cleaned: int = 0
     for analysis in analyses:
