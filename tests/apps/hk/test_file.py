@@ -1,7 +1,7 @@
 """Test how the api handles files."""
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Any
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -11,6 +11,7 @@ from tests.mocks.hk_mock import MockHousekeeperAPI
 from housekeeper.store.models import Version, File
 
 from tests.small_helpers import SmallHelpers
+from tests.store_helpers import StoreHelpers
 
 
 def test_new_file(bed_file: Path, housekeeper_api: MockHousekeeperAPI, small_helpers: SmallHelpers):
@@ -115,6 +116,38 @@ def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
 
     # THEN assert a file was returned
     assert hk_file is not None
+
+
+def test_fetch_file_from_version(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    hk_bundle_data: Dict[str, Any],
+    hk_tag: str,
+    observations_clinical_snv_file_path: Path,
+    observations_clinical_sv_file_path: Path,
+):
+    """Test to get the latest file from the Housekeeper database given the version object."""
+
+    # GIVEN a Housekeeper API with some files
+    version: Version = helpers.ensure_hk_version(real_housekeeper_api, hk_bundle_data)
+    first_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_snv_file_path, version_obj=version, tags=hk_tag
+    )
+    second_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_sv_file_path, version_obj=version, tags=hk_tag
+    )
+
+    # GIVEN that the files exist in the version object
+    assert first_file in version.files
+    assert second_file in version.files
+
+    # WHEN extracting the latest file from version
+    latest_file: File = real_housekeeper_api.fetch_file_from_version(
+        version_obj=version, tags={hk_tag}
+    )
+
+    # THEN the file with the higher ID should be returned
+    assert latest_file == second_file
 
 
 def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: MockHousekeeperAPI):
