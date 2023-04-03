@@ -178,6 +178,4 @@ class ScoutConfigBuilder:
         hk_file: Optional[File] = HousekeeperAPI.fetch_file_from_version(
             version_obj=self.hk_version_obj, tags=hk_tags
         )
-        if hk_file is None:
-            return hk_file
-        return hk_file.full_path
+        return hk_file.full_path if hk_file else None

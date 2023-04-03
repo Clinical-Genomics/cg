@@ -129,18 +129,17 @@ class HousekeeperAPI:
 
     @staticmethod
     def fetch_file_from_version(version_obj: Version, tags: Set[str]) -> Optional[File]:
-        """Fetch file that includes at least all tags in 'tags'.
-
-        Return None if no file could be found.
-        """
-        LOG.debug("Fetch files from version with tags %s", tags)
-        for file_obj in version_obj.files:
-            tag: models.Tag
-            file_tags = {tag.name for tag in file_obj.tags}
+        """Return the latest file that includes at least all tags in "tags". Return None if no file could be found."""
+        LOG.debug(f"Fetch files from version with tags {tags}")
+        files: List[File] = []
+        for file in list(version_obj.files):
+            file_tags = {tag.name for tag in file.tags}
             if tags.issubset(file_tags):
-                LOG.debug("Found file %s", file_obj)
-                return file_obj
-        LOG.info("Could not find any files matching the tags")
+                LOG.debug("Found file %s", file)
+                files.append(file)
+        if not files:
+            LOG.info(f"Could not find any files matching the tags {tags}")
+        return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
 
     def rollback(self):
         """Wrap method in Housekeeper Store."""
@@ -157,6 +156,13 @@ class HousekeeperAPI:
         version.
         """
         return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
+
+    def get_latest_file(
+        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
+    ) -> Optional[File]:
+        """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
+        files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
+        return files.order_by(File.id.desc()).first()
 
     def check_bundle_files(
         self,
