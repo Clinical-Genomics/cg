@@ -13,7 +13,7 @@ class Dispatcher:
             raise ValueError(f"No matching function found for arguments: {input_dict.keys()}")
         return self.dispatch_table[key](*values)
 
-    def _parse_input_dict(self, input_dict: Dict[str, Any]) -> Tuple[str], Tuple[Any]:
+    def _parse_input_dict(self, input_dict: Dict[str, Any]) -> [Tuple[str], Tuple[Any]]:
         parameters_not_none: List[str] = []
         values_not_none: List[Any] = []
         for parameter in input_dict.keys():
