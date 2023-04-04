@@ -345,7 +345,7 @@ class CaseSubmitter(Submitter):
         sample_obj.customer = customer_obj
         with self.status.session.no_autoflush:
             application_tag = sample["application"]
-            sample_obj.application_version = self.status.current_application_version(
+            sample_obj.application_version = self.status.get_current_application_version(
                 application_tag
             )
         self.status.add(sample_obj)

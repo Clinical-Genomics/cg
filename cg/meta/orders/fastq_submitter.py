@@ -106,7 +106,9 @@ class FastqSubmitter(Submitter):
                 )
                 new_sample.customer = customer
                 application_tag = sample["application"]
-                application_version = self.status.current_application_version(tag=application_tag)
+                application_version = self.status.get_current_application_version(
+                    tag=application_tag
+                )
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
                 new_sample.application_version = application_version

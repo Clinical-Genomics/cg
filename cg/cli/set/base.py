@@ -227,7 +227,7 @@ def sample(
                     customer_internal_id=value
                 )
             elif key == "application_version":
-                new_value: ApplicationVersion = status_db.current_application_version(value)
+                new_value: ApplicationVersion = status_db.get_current_application_version(value)
 
             if not new_value:
                 LOG.error(f"{key} {value} not found, aborting")
