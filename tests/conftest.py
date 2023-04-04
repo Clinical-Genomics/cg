@@ -1,9 +1,9 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
-import datetime as dt
 import logging
 import os
 import shutil
+from datetime import datetime, timedelta, MAXYEAR
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
@@ -46,45 +46,45 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="old_timestamp")
-def fixture_old_timestamp() -> dt.datetime:
+def fixture_old_timestamp() -> datetime:
     """Return a time stamp in date time format."""
-    return dt.datetime(1900, 1, 1)
+    return datetime(1900, 1, 1)
 
 
 @pytest.fixture(name="timestamp")
-def fixture_timestamp() -> dt.datetime:
+def fixture_timestamp() -> datetime:
     """Return a time stamp in date time format."""
-    return dt.datetime(2020, 5, 1)
+    return datetime(2020, 5, 1)
 
 
 @pytest.fixture(name="later_timestamp")
-def fixture_later_timestamp() -> dt.datetime:
+def fixture_later_timestamp() -> datetime:
     """Return a time stamp in date time format."""
-    return dt.datetime(2020, 6, 1)
+    return datetime(2020, 6, 1)
 
 
 @pytest.fixture(name="future_date")
-def fixture_future_date() -> dt.datetime:
+def fixture_future_date() -> datetime:
     """Return a distant date in the future for which no events happen later."""
-    return dt.datetime(dt.MAXYEAR, 1, 1, 1, 1, 1)
+    return datetime(MAXYEAR, 1, 1, 1, 1, 1)
 
 
 @pytest.fixture(name="timestamp_now")
-def fixture_timestamp_now() -> dt.datetime:
+def fixture_timestamp_now() -> datetime:
     """Return a time stamp of today's date in date time format."""
-    return dt.datetime.now()
+    return datetime.now()
 
 
 @pytest.fixture(name="timestamp_yesterday")
-def fixture_timestamp_yesterday(timestamp_now: dt.datetime) -> dt.datetime:
+def fixture_timestamp_yesterday(timestamp_now: datetime) -> datetime:
     """Return a time stamp of yesterday's date in date time format."""
-    return timestamp_now - dt.timedelta(days=1)
+    return timestamp_now - timedelta(days=1)
 
 
 @pytest.fixture(name="timestamp_in_2_weeks")
-def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
+def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
     """Return a time stamp 14 days ahead in time."""
-    return timestamp_now + dt.timedelta(days=14)
+    return timestamp_now + timedelta(days=14)
 
 
 # Case fixtures
@@ -821,8 +821,14 @@ def fixture_root_path(project_dir: Path) -> Path:
     return _root_path
 
 
+@pytest.fixture(name="hk_bundle_sample_path")
+def fixture_hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
+    """Return the relative path to a HK bundle mock sample."""
+    return Path(sample_id, timestamp.strftime("%Y-%m-%d"))
+
+
 @pytest.fixture(name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: dt.datetime) -> Dict[str, Any]:
+def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: datetime) -> Dict[str, Any]:
     """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
@@ -833,7 +839,7 @@ def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: dt.datetime)
 
 
 @pytest.fixture(name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) -> dict:
+def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: datetime) -> dict:
     """Create a complete bundle mock for testing compression."""
     return {
         "name": sample_id,
@@ -844,7 +850,7 @@ def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) ->
 
 
 @pytest.fixture(name="case_hk_bundle_no_files")
-def fixture_case_hk_bundle_no_files(case_id: str, timestamp: dt.datetime) -> dict:
+def fixture_case_hk_bundle_no_files(case_id: str, timestamp: datetime) -> dict:
     """Create a complete bundle mock for testing compression."""
     return {
         "name": case_id,
@@ -871,7 +877,7 @@ def fixture_compress_hk_fastq_bundle(
         # We need to set the time to an old date
         # Create a older date
         # Convert the date to a float
-        before_timestamp = dt.datetime.timestamp(dt.datetime(2020, 1, 1))
+        before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
         os.utime(fastq_file, (before_timestamp, before_timestamp))
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
@@ -1259,7 +1265,7 @@ def fixture_base_store(
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     versions = [
-        store.add_version(application, 1, valid_from=dt.datetime.now(), prices=prices)
+        store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
         for application in applications
     ]
     store.add_commit(versions)
@@ -1288,42 +1294,42 @@ def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
         base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
-        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
+        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=datetime.now()),
         base_store.add_sample(
             name="received-prepared",
             sex=Gender.UNKNOWN,
-            received=dt.datetime.now(),
-            prepared_at=dt.datetime.now(),
+            received=datetime.now(),
+            prepared_at=datetime.now(),
         ),
         base_store.add_sample("external", sex=Gender.FEMALE, external=True),
         base_store.add_sample(
-            name="external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
+            name="external-received", sex=Gender.FEMALE, received=datetime.now(), external=True
         ),
         base_store.add_sample(
             name="sequenced",
             sex=Gender.MALE,
-            received=dt.datetime.now(),
-            prepared_at=dt.datetime.now(),
-            sequenced_at=dt.datetime.now(),
+            received=datetime.now(),
+            prepared_at=datetime.now(),
+            sequenced_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
             name="sequenced-partly",
             sex=Gender.MALE,
-            received=dt.datetime.now(),
-            prepared_at=dt.datetime.now(),
+            received=datetime.now(),
+            prepared_at=datetime.now(),
             reads=(250 * 1000000),
         ),
         base_store.add_sample(
             name="to-deliver",
             sex=Gender.MALE,
-            sequenced_at=dt.datetime.now(),
+            sequenced_at=datetime.now(),
         ),
         base_store.add_sample(
             name="delivered",
             sex=Gender.MALE,
-            sequenced_at=dt.datetime.now(),
-            delivered_at=dt.datetime.now(),
+            sequenced_at=datetime.now(),
+            delivered_at=datetime.now(),
             no_invoice=False,
         ),
     ]
