@@ -190,11 +190,29 @@ def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yes
     )
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.latest_analyses().all()
+    analyses = analysis_store.get_analyses_by_case_entry_id_and_latest_started_at_date()
 
     # THEN only the newest analysis should be returned
     assert analysis_newest in analyses
     assert analysis_oldest not in analyses
+
+
+def test_multiple_analyses_and_cases(
+    store_with_analyses_for_cases, helpers, timestamp_now, timestamp_yesterday
+):
+    """Tests that analyses that are not latest are not returned."""
+
+    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
+
+    # WHEN calling the analyses_to_delivery_report
+    analyses = (
+        store_with_analyses_for_cases.get_analyses_by_case_entry_id_and_latest_started_at_date()
+    )
+
+    # THEN only the newest analysis should be returned
+    for analysis in analyses:
+        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
+        assert analysis.started_at == timestamp_now
 
 
 def test_set_case_action(analysis_store, case_id):
