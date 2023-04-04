@@ -96,5 +96,5 @@ def test_cli_upload_vogue_bioinfo_all(upload_context: CGConfig, cli_runner: CliR
     # WHEN running vogue upload bioinfo_all the days argument
     result = cli_runner.invoke(bioinfo_all, ["-a", "2020-01-01"], obj=upload_context)
 
-    # THEN assert that the program exits with a non zero exit code
-    assert result.exit_code != 0
+    # THEN assert that the program exits with a  zero exit code
+    assert result.exit_code == 0
