@@ -35,7 +35,7 @@ def test_get_analyses_uploaded_to_vogue(
     # WHEN fetching the latest analysis to upload to vogue
     analyses = store_with_analyses_for_cases.get_analyses_for_vogue_upload()
 
-    # THEN only the newest analysis should be returned
+    # THEN the analyses have not been uploaded to Vogue
     for analysis in analyses:
         assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert not analysis.uploaded_to_vogue_at
@@ -48,12 +48,12 @@ def test_get_analyses_uploaded_to_vogue_completed_before(
     """Test that an analysis can be fetched by case."""
     # GIVEN a database with an analysis and case
 
-    # WHEN fetching the latest analysis to upload to vogue
+    # WHEN fetching the latest analysis to upload to vogue that completed before 2 weeks
     analyses = store_with_analyses_for_cases.get_analysis_for_vogue_upload_completed_before(
         completed_at_before=timestamp_in_2_weeks
     )
 
-    # THEN only the newest analysis should be returned
+    # THEN the returned analysis was completed earlier than 2 weeks ago
     for analysis in analyses:
         assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert not analysis.uploaded_to_vogue_at
@@ -67,12 +67,12 @@ def test_get_analyses_uploaded_to_vogue_completed_after(
     """Test that an analysis can be fetched by case."""
     # GIVEN a database with an analysis and case
 
-    # WHEN fetching the latest analysis to upload to vogue
+    # WHEN fetching the latest analysis to upload to vogue completed after yesterday
     analyses = store_with_analyses_for_cases.get_analysis_for_vogue_upload_completed_after(
         completed_at_after=timestamp_yesterday
     )
 
-    # THEN only the newest analysis should be returned
+    # THE the returned analysis was completed after yesterday
     for analysis in analyses:
         assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert not analysis.uploaded_to_vogue_at

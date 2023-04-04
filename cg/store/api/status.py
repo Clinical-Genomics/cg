@@ -604,7 +604,7 @@ class StatusHandler(BaseHandler):
     def get_analyses_to_clean(
         self, before: datetime = datetime.now(), pipeline: Pipeline = None
     ) -> List[Analysis]:
-        """Fetch analyses that haven't been cleaned."""
+        """Return analyses that haven't been cleaned."""
         analyses_to_clean = []
         filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_IS_UPLOADED,
