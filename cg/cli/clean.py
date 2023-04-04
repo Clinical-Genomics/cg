@@ -212,9 +212,7 @@ def hk_bundle_files(
             "started_at_before": date_threshold,
         },
     )
-    analyses: List[Analysis] = function_dispatcher(
-        {"case_internal_id": case_id, "pipeline": pipeline, "started_at_before": date_threshold}
-    )
+    analyses: List[Analysis] = function_dispatcher()
 
     size_cleaned: int = 0
     for analysis in analyses:
