@@ -237,7 +237,7 @@ def bioinfo_all(
         ],
         input_dict=input_dict,
     )
-    analyses: List[Analysis] = function_dispatcher(input_dict=input_dict)
+    analyses: List[Analysis] = function_dispatcher()
     if not analyses:
         LOG.info("No analyses found for upload to trending.")
         context.abort()
