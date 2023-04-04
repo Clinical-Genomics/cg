@@ -24,10 +24,12 @@ class CleanAPI:
 
         analysis: Analysis
         LOG.debug(
-            f"number of {pipeline} analyses before: {before} : {self.status_db.get_analyses_before_date(pipeline=pipeline, before=before).count()}"
+            f"number of {pipeline} analyses before: {before} : {len(self.status_db.get_analyses_for_pipeline_started_at_before(pipeline=pipeline, started_at_before=before))}"
         )
 
-        for analysis in self.status_db.get_analyses_before_date(pipeline=pipeline, before=before):
+        for analysis in self.status_db.get_analyses_for_pipeline_started_at_before(
+            pipeline=pipeline, started_at_before=before
+        ):
             bundle_name = analysis.family.internal_id
 
             hk_bundle_version: Optional[Version] = self.housekeeper_api.version(
