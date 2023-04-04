@@ -125,7 +125,7 @@ class StoreHelpers:
             application_id=application.id
         )
         if not new_record:
-            new_record: ApplicationVersion = store.add_version(
+            new_record: ApplicationVersion = store.add_application_version(
                 application=application,
                 version=version,
                 valid_from=valid_from,

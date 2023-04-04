@@ -156,7 +156,7 @@ def add_application_version(
     sign: str,
     store: Store,
 ) -> ApplicationVersion:
-    new_version = store.add_version(
+    new_version = store.add_application_version(
         application=application_obj,
         version=latest_version.version + 1 if latest_version else 1,
         valid_from=version.valid_from,

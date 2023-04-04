@@ -1265,7 +1265,7 @@ def fixture_base_store(
 
     prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     versions = [
-        store.add_version(application, 1, valid_from=datetime.now(), prices=prices)
+        store.add_application_version(application, 1, valid_from=datetime.now(), prices=prices)
         for application in applications
     ]
     store.add_commit(versions)
