@@ -206,10 +206,14 @@ def hk_bundle_files(
             status_db.get_analyses_for_pipeline_started_at_before,
             status_db.get_analyses_for_case_started_at_before,
         ],
-        input_dict={"case_id": case_id, "pipeline": pipeline, "date_threshold": date_threshold},
+        input_dict={
+            "case_internal_id": case_id,
+            "pipeline": pipeline,
+            "started_at_before": date_threshold,
+        },
     )
     analyses: List[Analysis] = function_dispatcher(
-        {"case_id": case_id, "pipeline": pipeline, "date_threshold": date_threshold}
+        {"case_internal_id": case_id, "pipeline": pipeline, "started_at_before": date_threshold}
     )
 
     size_cleaned: int = 0
