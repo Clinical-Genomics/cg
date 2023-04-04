@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
+from cg.utils.dispatcher import Dispatcher
 
 import click
 from alchy import Query
@@ -40,7 +41,7 @@ from cg.meta.clean.demultiplexed_flow_cells import DemultiplexedRunsFlowCell
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Sample, Flowcell
+from cg.store.models import Sample, Flowcell, Analysis
 
 CHECK_COLOR = {True: "green", False: "red"}
 LOG = logging.getLogger(__name__)
@@ -198,9 +199,23 @@ def hk_bundle_files(
 
     date_threshold: datetime = get_date_days_ago(days_ago=days_old)
 
-    analyses: Query = status_db.get_analyses_before_date(
-        case_id=case_id, before=date_threshold, pipeline=pipeline
+    function_dispatcher: Dispatcher = Dispatcher(
+        functions=[
+            status_db.get_analyses_started_at_before,
+            status_db.get_analyses_for_case_and_pipeline_started_at_before,
+            status_db.get_analyses_for_pipeline_started_at_before,
+            status_db.get_analyses_for_case_started_at_before,
+        ],
+        input_dict={
+            "case_internal_id": case_id,
+            "pipeline": pipeline,
+            "started_at_before": date_threshold,
+        },
     )
+    analyses: List[Analysis] = function_dispatcher(
+        {"case_internal_id": case_id, "pipeline": pipeline, "started_at_before": date_threshold}
+    )
+
     size_cleaned: int = 0
     for analysis in analyses:
         LOG.info(f"Cleaning analysis {analysis}")

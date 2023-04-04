@@ -11,7 +11,7 @@ def test_clean_hk_bundle_files_no_files(cli_runner: CliRunner, cg_context: CGCon
     # GIVEN a housekeeper api and a bundle without files
     bundle_name = "non_existing"
     assert not cg_context.housekeeper_api.bundle(bundle_name)
-
+    case = cg_context.status_db.get_case_by_internal_id(bundle_name)
     # WHEN running the clean hk alignment files command
     caplog.set_level(logging.INFO)
     result = cli_runner.invoke(
