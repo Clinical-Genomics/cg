@@ -51,7 +51,9 @@ def import_application_versions(
             sys.exit()
 
         app_tag: str = application_obj.tag
-        latest_version: ApplicationVersion = store.latest_version(application_version.app_tag)
+        latest_version: ApplicationVersion = store.get_current_application_version(
+            application_version.app_tag
+        )
 
         if latest_version and versions_are_same(
             version_obj=latest_version, application_version=application_version
