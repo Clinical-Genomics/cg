@@ -10,7 +10,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.models.orders.samples import MetagenomeSample
-from cg.store.models import Customer, Family, Sample
+from cg.store.models import Customer, Family, FamilySample, Sample, ApplicationVersion
 
 
 class MetagenomeSubmitter(Submitter):
@@ -84,7 +84,9 @@ class MetagenomeSubmitter(Submitter):
         items: List[dict],
     ) -> List[Sample]:
         """Store samples in the status database."""
-        customer = self.status.get_customer_by_internal_id(customer_internal_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         if customer is None:
             raise OrderError(f"unknown customer: {customer_id}")
         new_samples = []
@@ -105,14 +107,14 @@ class MetagenomeSubmitter(Submitter):
                     original_ticket=ticket_id,
                     priority=sample["priority"],
                 )
-                new_sample.customer = customer
-                application_tag = sample["application"]
-                application_version = self.status.get_current_application_version_by_tag(
-                    tag=application_tag
+                new_sample.customer: Customer = customer
+                application_tag: str = sample["application"]
+                application_version: ApplicationVersion = (
+                    self.status.get_current_application_version_by_tag(tag=application_tag)
                 )
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
-                new_sample.application_version = application_version
+                new_sample.application_version: ApplicationVersion = application_version
                 new_samples.append(new_sample)
 
                 if not case:
@@ -124,10 +126,10 @@ class MetagenomeSubmitter(Submitter):
                         priority=case_dict["priority"],
                         ticket=ticket_id,
                     )
-                    case.customer = customer
+                    case.customer: Customer = customer
                     self.status.add(case)
 
-                new_relationship = self.status.relate_sample(
+                new_relationship: FamilySample = self.status.relate_sample(
                     family=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 self.status.add(new_relationship)
