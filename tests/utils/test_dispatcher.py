@@ -188,14 +188,14 @@ def test_dispatcher_on_other_functions(
         ],
         input_dict={
             "case_internal_id": case_internal_id,
-            "pipeline": pipeline,
+            "pipeline": Pipeline,
             "started_at_before": timestamp_now,
         },
     )
     analyses: List[Analysis] = function_dispatcher(
         {
             "case_internal_id": case_internal_id,
-            "pipeline": pipeline,
+            "pipeline": Pipeline,
             "started_at_before": timestamp_now,
         }
     )

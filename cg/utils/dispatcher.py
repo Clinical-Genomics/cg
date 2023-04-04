@@ -8,15 +8,18 @@ class Dispatcher:
         self.dispatch_table: Dict[Tuple[str], Callable] = self._generate_dispatch_table()
 
     def __call__(self, input_dict: Dict[str, Any]):
-        key, values = self._parse_input_dict(input_dict)
-        if key not in self.dispatch_table:
+        parameters_not_none, parameter_values_not_none = self._parse_input_dict(input_dict)
+        if parameters_not_none not in self.dispatch_table:
             raise ValueError(f"No matching function found for arguments: {input_dict.keys()}")
-        return self.dispatch_table[key](**input_dict)
+        return self.dispatch_table[parameters_not_none](
+            **dict(zip(parameters_not_none, parameter_values_not_none))
+        )
 
     def _parse_input_dict(self, input_dict: Dict[str, Any]) -> [Tuple[str], Tuple[Any]]:
         parameters_not_none: List[str] = []
         values_not_none: List[Any] = []
         for parameter in sorted(input_dict.keys()):
+
             value = input_dict[parameter]
             if value is not None:
                 parameters_not_none.append(parameter)
