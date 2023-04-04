@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 
 from sqlalchemy.orm import Query
@@ -626,22 +626,69 @@ class StatusHandler(BaseHandler):
                 analyses_to_clean.append(filtered_analysis)
         return analyses_to_clean
 
-    def get_analyses_before_date(
+    def get_analyses_for_case_and_pipeline_started_at_before(
         self,
-        case_id: Optional[str] = None,
-        before: Optional[datetime] = datetime.now(),
-        pipeline: Optional[Pipeline] = None,
-    ) -> Query:
-        """Fetch all analyses older than certain date."""
-        records: Query = self._get_join_analysis_case_query()
-        if case_id:
-            records = records.filter(Family.internal_id == case_id)
-        if pipeline:
-            records = records.filter(
-                Analysis.pipeline == str(pipeline),
-            )
-        records = records.filter(Analysis.started_at <= before)
-        return records
+        pipeline: Pipeline,
+        started_at_before: datetime,
+        case_internal_id: str,
+    ) -> List[Analysis]:
+        """Return all analyses older than certain date."""
+        case = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case_entry_id: int = case.id if case else None
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_query(table=Analysis),
+            filter_functions=filter_functions,
+            case_entry_id=case_entry_id,
+            started_at_date=started_at_before,
+            pipeline=pipeline,
+        ).all()
+
+    def get_analyses_for_case_started_at_before(
+        self,
+        case_internal_id: str,
+        started_at_before: datetime,
+    ) -> List[Analysis]:
+        """Return all analyses for a case older than certain date."""
+        case = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case_entry_id: int = case.id if case else None
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_query(table=Analysis),
+            filter_functions=filter_functions,
+            case_entry_id=case_entry_id,
+            started_at_date=started_at_before,
+        ).all()
+
+    def get_analyses_for_pipeline_started_at_before(
+        self, pipeline: Pipeline, started_at_before: datetime
+    ) -> List[Analysis]:
+        """Return all analyses for a pipeline started before a certain date."""
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            filter_functions=filter_functions,
+            analyses=self._get_query(table=Analysis),
+            pipeline=pipeline,
+            started_at_date=started_at_before,
+        ).all()
+
+    def get_analyses_started_at_before(self, started_at_before: datetime) -> List[Analysis]:
+        """Return all analyses for a pipeline started before a certain date."""
+        return apply_analysis_filter(
+            filter_functions=[AnalysisFilter.FILTER_STARTED_AT_BEFORE],
+            analyses=self._get_query(table=Analysis),
+            started_at_date=started_at_before,
+        ).all()
 
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have not been uploaded."""
