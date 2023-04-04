@@ -80,7 +80,7 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
     def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
-        """Fetch all cases with a finished analysis that has not been uploaded to Vogue completed after."""
+        """Return all cases completed after a given date that have not been uploaded to Vogue."""
         latest_analysis_not_uploaded_to_vogue = []
         filter_functions = [
             AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
@@ -97,7 +97,7 @@ class FindBusinessDataHandler(BaseHandler):
         return latest_analysis_not_uploaded_to_vogue
 
     def get_analysis_for_vogue_upload_completed_before(self, completed_at_before: dt.datetime):
-        """Fetch all cases with a finished analysis that has not been uploaded to Vogue completed before."""
+        """Return all cases completed before a given date that have not been uploaded to Vogue."""
         latest_analysis_not_uploaded_to_vogue = []
         filter_functions = [
             AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
@@ -116,7 +116,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_analyses_for_vogue_upload(
         self,
     ) -> List[Analysis]:
-        """Fetch all cases with a finished analysis that has not been uploaded to Vogue."""
+        """Return the latest analysis not uploaded to Vogue for each case."""
         latest_analysis_not_uploaded_to_vogue = []
         for analysis_query in self._get_latest_analysis_for_case_query():
             latest_analysis_not_uploaded_to_vogue.append(
@@ -135,7 +135,7 @@ class FindBusinessDataHandler(BaseHandler):
         return latest_analyses_per_case
 
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
-        """Return latest  analysis that is not uploaded for each case with pipeline."""
+        """Return latest not uploaded analysis for each case given a pipeline."""
         latest_analyses_to_upload_for_pipeline = []
         filter_functions = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
