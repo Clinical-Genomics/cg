@@ -128,17 +128,29 @@ class HousekeeperAPI:
         )
 
     @staticmethod
-    def fetch_file_from_version(version_obj: Version, tags: Set[str]) -> Optional[File]:
-        """Return the latest file that includes at least all tags in "tags". Return None if no file could be found."""
-        LOG.debug(f"Fetch files from version with tags {tags}")
+    def get_files_from_version(version: Version, tags: Set[str]) -> Optional[List[File]]:
+        """Return a list of files associated with the given version and tags."""
+        LOG.debug(f"Getting files from version with tags {tags}")
         files: List[File] = []
-        for file in list(version_obj.files):
+        for file in list(version.files):
             file_tags = {tag.name for tag in file.tags}
             if tags.issubset(file_tags):
-                LOG.debug("Found file %s", file)
+                LOG.debug(f"Found file {file}")
                 files.append(file)
         if not files:
-            LOG.info(f"Could not find any files matching the tags {tags}")
+            LOG.warning(f"Could not find any files matching the tags {tags}")
+        return files
+
+    @staticmethod
+    def get_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+        """Return the first file matching the given tags."""
+        files: List[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
+        return files[0] if files else None
+
+    @staticmethod
+    def get_latest_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+        """Return the latest file from Housekeeper given its version and tags."""
+        files: List[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
 
     def rollback(self):

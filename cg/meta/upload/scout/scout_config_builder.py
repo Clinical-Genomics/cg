@@ -136,15 +136,21 @@ class ScoutConfigBuilder:
 
     def include_cnv_report(self) -> None:
         LOG.info("Include CNV report to case")
-        self.load_config.cnv_report = self.fetch_file_from_hk(self.case_tags.cnv_report)
+        self.load_config.cnv_report = self.get_file_from_hk(
+            hk_tags=self.case_tags.cnv_report, latest=True
+        )
 
     def include_multiqc_report(self) -> None:
         LOG.info("Include MultiQC report to case")
-        self.load_config.multiqc = self.fetch_file_from_hk(self.case_tags.multiqc_report)
+        self.load_config.multiqc = self.get_file_from_hk(
+            hk_tags=self.case_tags.multiqc_report, latest=True
+        )
 
     def include_delivery_report(self) -> None:
         LOG.info("Include delivery report to case")
-        self.load_config.delivery_report = self.fetch_file_from_hk(self.case_tags.delivery_report)
+        self.load_config.delivery_report = self.get_file_from_hk(
+            hk_tags=self.case_tags.delivery_report, latest=True
+        )
 
     def include_sample_alignment_file(self, config_sample: ScoutIndividual) -> None:
         """Include the alignment file for a sample
@@ -153,29 +159,29 @@ class ScoutConfigBuilder:
         Cram is preferred so overwrite if found
         """
         sample_id: str = config_sample.sample_id
-        config_sample.alignment_path = self.fetch_sample_file(
+        config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.bam_file, sample_id=sample_id
         )
 
-        config_sample.alignment_path = self.fetch_sample_file(
+        config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
-    def fetch_sample_file(self, hk_tags: Set[str], sample_id: str) -> Optional[str]:
-        """Fetch a file that is specific for a individual from housekeeper"""
+    def get_sample_file(self, hk_tags: Set[str], sample_id: str) -> Optional[str]:
+        """Return a file that is specific for a individual from housekeeper"""
         tags: set = hk_tags.copy()
         tags.add(sample_id)
-        return self.fetch_file_from_hk(hk_tags=tags)
+        return self.get_file_from_hk(hk_tags=tags)
 
-    def fetch_file_from_hk(self, hk_tags: Set[str]) -> Optional[str]:
-        """Fetch a file from housekeeper and return the path as a string.
-        If file does not exist return None
-        """
-        LOG.info("Fetch file with tags %s", hk_tags)
+    def get_file_from_hk(self, hk_tags: Set[str], latest: Optional[bool] = False) -> Optional[str]:
+        """Get a file from housekeeper and return the path as a string."""
+        LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
             return None
-        hk_file: Optional[File] = HousekeeperAPI.fetch_file_from_version(
-            version_obj=self.hk_version_obj, tags=hk_tags
+        hk_file: Optional[File] = (
+            HousekeeperAPI.get_latest_file_from_version(version=self.hk_version_obj, tags=hk_tags)
+            if latest
+            else HousekeeperAPI.get_file_from_version(version=self.hk_version_obj, tags=hk_tags)
         )
         return hk_file.full_path if hk_file else None
