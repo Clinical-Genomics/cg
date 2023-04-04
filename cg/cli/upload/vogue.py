@@ -238,6 +238,9 @@ def bioinfo_all(
         input_dict=input_dict,
     )
     analyses: List[Analysis] = function_dispatcher(input_dict=input_dict)
+    if not analyses:
+        LOG.info("No analyses found for upload to trending.")
+        context.abort()
 
     for analysis in analyses:
         case_name: str = analysis.family.internal_id

@@ -11,7 +11,6 @@ class Dispatcher:
     def __call__(self, input_dict: Dict[str, Any]):
         """Call the dispatcher with the input dict"""
         parameters_not_none, parameter_values_not_none = self._parse_input_dict(input_dict)
-        table = self.dispatch_table
         if parameters_not_none not in self.dispatch_table:
             raise ValueError(f"No matching function found for arguments: {parameters_not_none}")
         return self.dispatch_table[parameters_not_none](
