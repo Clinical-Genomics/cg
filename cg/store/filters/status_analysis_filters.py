@@ -97,7 +97,7 @@ def filter_analyses_by_case_entry_id(analyses: Query, case_entry_id: int, **kwar
 
 def filter_analyses_started_before(analyses: Query, started_at_date: datetime, **kwargs) -> Query:
     """Return a query of analyses started before a certain date."""
-    return analyses.filter(Analysis.started_at <= started_at_date)
+    return analyses.filter(Analysis.started_at < started_at_date)
 
 
 def filter_analyses_by_started_at(analyses: Query, started_at_date: datetime, **kwargs) -> Query:
