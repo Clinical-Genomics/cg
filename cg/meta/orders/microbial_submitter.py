@@ -102,7 +102,7 @@ class MicrobialSubmitter(Submitter):
                     self.status.add_commit(case)
 
                 application_tag = sample_data["application"]
-                application_version = self.status.get_current_application_version(
+                application_version = self.status.get_current_application_version_by_tag(
                     tag=application_tag
                 )
                 organism = self.status.get_organism_by_internal_id(sample_data["organism_id"])

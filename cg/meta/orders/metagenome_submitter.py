@@ -107,7 +107,7 @@ class MetagenomeSubmitter(Submitter):
                 )
                 new_sample.customer = customer
                 application_tag = sample["application"]
-                application_version = self.status.get_current_application_version(
+                application_version = self.status.get_current_application_version_by_tag(
                     tag=application_tag
                 )
                 if application_version is None:

@@ -12,25 +12,20 @@ from cg.store.filters.status_application_version_filters import (
 )
 from cg.store.models import Application, ApplicationVersion
 
-from tests.store.api.conftest import (
-    fixture_applications_store,
-)
 from tests.store_helpers import StoreHelpers
 
 
 def test_filter_application_version_by_application_id_correct_id(
-    store_with_different_application_versions: Store,
+    base_store: Store,
     helpers: StoreHelpers,
 ):
     """Test that the correct application version is returned when using a correct application id."""
     # GIVEN a store with application versions
-    app_version_query: Query = store_with_different_application_versions._get_query(
-        table=ApplicationVersion
-    )
+    app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # GIVEN an application in store different in id from at least another application in store
-    application: Application = store_with_different_application_versions.get_applications()[0]
-    assert application.id != store_with_different_application_versions.get_applications()[1]
+    application: Application = base_store.get_applications()[0]
+    assert application.id != base_store.get_applications()[1]
 
     # WHEN the application version query is filtered by the id of the application
     filtered_app_version_query: Query = filter_application_versions_by_application_id(
@@ -50,15 +45,13 @@ def test_filter_application_version_by_application_id_correct_id(
 
 
 def test_filter_application_version_by_application_id_wrong_id(
-    store_with_different_application_versions: Store,
+    base_store: Store,
     helpers: StoreHelpers,
     invalid_application_id: int,
 ):
     """Test that an empty query is returned when using an incorrect application id."""
     # GIVEN a store with application versions
-    app_version_query: Query = store_with_different_application_versions._get_query(
-        table=ApplicationVersion
-    )
+    app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN filtering with an invalid application id
     filtered_app_version_query: Query = filter_application_versions_by_application_id(
@@ -90,13 +83,13 @@ def test_filter_application_version_by_application_id_empty_query(
 
 
 def test_filter_application_versions_before_valid_from_valid_date(
-    store_with_different_application_versions: Store,
+    base_store: Store,
 ):
     """Test that filtering by `valid_from` returns a query with older elements than the given date."""
     # GIVEN a store with application versions with different dates
-    app_version_query: Query = store_with_different_application_versions._get_query(
-        table=ApplicationVersion
-    ).order_by(ApplicationVersion.valid_from)
+    app_version_query: Query = base_store._get_query(table=ApplicationVersion).order_by(
+        ApplicationVersion.valid_from
+    )
     first_app_version: ApplicationVersion = app_version_query.first()
     third_app_version: ApplicationVersion = app_version_query.offset(2).first()
     assert first_app_version.valid_from < third_app_version.valid_from
@@ -118,14 +111,12 @@ def test_filter_application_versions_before_valid_from_valid_date(
 
 
 def test_filter_application_versions_before_valid_from_future_date(
-    store_with_different_application_versions: Store,
+    base_store: Store,
     future_date: dt.datetime,
 ):
     """Test that filtering by `valid_from` with a future date returns the unfiltered query."""
     # GIVEN a store with application versions
-    app_version_query: Query = store_with_different_application_versions._get_query(
-        table=ApplicationVersion
-    )
+    app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN filtering using a future date
     filtered_app_version_query: Query = filter_application_versions_before_valid_from(
@@ -141,14 +132,12 @@ def test_filter_application_versions_before_valid_from_future_date(
 
 
 def test_filter_application_versions_before_valid_from_old_date(
-    store_with_different_application_versions: Store,
+    base_store: Store,
     old_timestamp: dt.datetime,
 ):
     """Test that filtering by `valid_from` with an old date returns an empty query."""
     # GIVEN a store with application versions
-    app_version_query: Query = store_with_different_application_versions._get_query(
-        table=ApplicationVersion
-    )
+    app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN filtering using a past date
     filtered_app_version_query: Query = filter_application_versions_before_valid_from(
@@ -208,12 +197,12 @@ def test_filter_application_version_by_version_correct_version(
 
 
 def test_filter_application_version_by_version_invalid_version_returns_empty(
-    store_with_different_application_versions: Store,
+    base_store: Store,
     invalid_application_version_version: int,
 ):
     """Test that an empty query is returned if a non-existent version is used to filter."""
     # GIVEN a store with application versions
-    app_version_query: Query = store_with_different_application_versions._get_query(
+    app_version_query: Query = base_store._get_query(
         table=ApplicationVersion,
     )
 
@@ -245,13 +234,11 @@ def test_filter_application_version_by_version_empty_query(store: Store, version
 
 
 def test_order_application_versions_by_valid_from_desc(
-    store_with_different_application_versions: Store,
+    base_store: Store,
 ):
     """Test that ordering an application version query returns a query ordered by 'valid_from'."""
     # GIVEN a store with application versions with different dates
-    app_version_query: Query = store_with_different_application_versions._get_query(
-        table=ApplicationVersion
-    )
+    app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN ordering the query by `valid_from`
     ordered_app_versions: List[ApplicationVersion] = list(

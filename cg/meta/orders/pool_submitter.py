@@ -117,7 +117,7 @@ class PoolSubmitter(Submitter):
         for pool in items:
             with self.status.session.no_autoflush:
                 application_version: ApplicationVersion = (
-                    self.status.get_current_application_version(pool["application"])
+                    self.status.get_current_application_version_by_tag(tag=pool["application"])
                 )
             priority: str = pool["priority"]
             case_name: str = self.create_case_name(ticket=ticket_id, pool_name=pool["name"])

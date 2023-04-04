@@ -176,7 +176,9 @@ def sample(
         order=order,
         priority=priority,
     )
-    new_record.application_version = status_db.get_current_application_version(application_tag)
+    new_record.application_version = status_db.get_current_application_version_by_tag(
+        tag=application_tag
+    )
     new_record.customer = customer
     status_db.add_commit(new_record)
     LOG.info(f"{new_record.internal_id}: new sample added")

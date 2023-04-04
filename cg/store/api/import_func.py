@@ -51,8 +51,8 @@ def import_application_versions(
             sys.exit()
 
         app_tag: str = application_obj.tag
-        latest_version: ApplicationVersion = store.get_current_application_version(
-            application_version.app_tag
+        latest_version: ApplicationVersion = store.get_current_application_version_by_tag(
+            tag=application_version.app_tag
         )
 
         if latest_version and versions_are_same(
@@ -119,7 +119,7 @@ def import_applications(
 
 
 def prices_are_same(first_price: float, second_price: float) -> bool:
-    """Checks if the given prices are to be considered equal"""
+    """Checks if the given prices are to be considered equal."""
 
     if first_price == second_price:
         return True
@@ -211,7 +211,7 @@ def import_apptags(
     activate: bool,
     inactivate: bool,
 ):
-    """Syncs all applications from the specified excel file"""
+    """Syncs all applications from the specified excel file."""
 
     orderform_application_tags = []
 

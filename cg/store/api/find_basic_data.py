@@ -118,6 +118,22 @@ class FindBasicDataHandler(BaseHandler):
             application_id=application_id,
         ).first()
 
+    def get_current_application_version_by_tag(self, tag: str) -> Optional[ApplicationVersion]:
+        """Return the current application version for an application tag."""
+        application = self.get_application_by_tag(tag=tag)
+        if not application:
+            return None
+        return apply_application_versions_filter(
+            filter_functions=[
+                ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
+                ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
+                ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
+            ],
+            application_versions=self._get_query(table=ApplicationVersion),
+            application_id=application.id,
+            valid_from=dt.datetime.now(),
+        ).first()
+
     def get_application_versions(self) -> List[ApplicationVersion]:
         """Return all application versions."""
         return self._get_query(table=ApplicationVersion).all()
@@ -167,22 +183,6 @@ class FindBasicDataHandler(BaseHandler):
             collaborations=self._get_query(table=Collaboration),
             filter_functions=[CollaborationFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
-        ).first()
-
-    def get_current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Return the current application version for an application tag."""
-        application = self.get_application_by_tag(tag=tag)
-        if not application:
-            return None
-        return apply_application_versions_filter(
-            filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
-                ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
-                ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
-            ],
-            application_versions=self._get_query(table=ApplicationVersion),
-            application_id=application.id,
-            valid_from=dt.datetime.now(),
         ).first()
 
     def get_organism_by_internal_id(self, internal_id: str) -> Organism:
