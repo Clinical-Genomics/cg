@@ -11,8 +11,7 @@ class Dispatcher:
         key, values = self._parse_input_dict(input_dict)
         if key not in self.dispatch_table:
             raise ValueError(f"No matching function found for arguments: {input_dict.keys()}")
-        vals = [*values]
-        return self.dispatch_table[key](*values)
+        return self.dispatch_table[key](**input_dict)
 
     def _parse_input_dict(self, input_dict: Dict[str, Any]) -> [Tuple[str], Tuple[Any]]:
         parameters_not_none: List[str] = []
