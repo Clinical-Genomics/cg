@@ -89,7 +89,7 @@ def test_cli_upload_vogue_flowcells_no_days(upload_context: CGConfig, cli_runner
 
 
 def test_cli_upload_vogue_bioinfo_all(upload_context: CGConfig, cli_runner: CliRunner):
-    """Testing cli for upload vogue flowcells with wrong argument"""
+    """Testing cli for upload vogue bioinfo_all with correct argument"""
 
     # GIVEN a vogue api
 
