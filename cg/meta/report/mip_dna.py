@@ -168,4 +168,4 @@ class MipDNAReportAPI(ReportAPI):
             )
             return None
 
-        return next(uploaded_files).full_path
+        return uploaded_files[0].full_path
