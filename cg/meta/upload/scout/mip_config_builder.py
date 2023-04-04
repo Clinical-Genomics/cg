@@ -100,15 +100,15 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def include_case_files(self):
         """Include case level files for mip case"""
         LOG.info("Including MIP specific case level files")
-        self.load_config.vcf_snv = self.fetch_file_from_hk(self.case_tags.snv_vcf)
-        self.load_config.vcf_sv = self.fetch_file_from_hk(self.case_tags.sv_vcf)
-        self.load_config.vcf_snv_research = self.fetch_file_from_hk(self.case_tags.snv_research_vcf)
-        self.load_config.vcf_sv_research = self.fetch_file_from_hk(self.case_tags.sv_research_vcf)
-        self.load_config.vcf_str = self.fetch_file_from_hk(self.case_tags.vcf_str)
-        self.load_config.peddy_ped = self.fetch_file_from_hk(self.case_tags.peddy_ped)
-        self.load_config.peddy_sex = self.fetch_file_from_hk(self.case_tags.peddy_sex)
-        self.load_config.peddy_check = self.fetch_file_from_hk(self.case_tags.peddy_check)
-        self.load_config.smn_tsv = self.fetch_file_from_hk(self.case_tags.smn_tsv)
+        self.load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
+        self.load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
+        self.load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
+        self.load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
+        self.load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
+        self.load_config.peddy_ped = self.get_file_from_hk(self.case_tags.peddy_ped)
+        self.load_config.peddy_sex = self.get_file_from_hk(self.case_tags.peddy_sex)
+        self.load_config.peddy_check = self.get_file_from_hk(self.case_tags.peddy_check)
+        self.load_config.smn_tsv = self.get_file_from_hk(self.case_tags.smn_tsv)
         self.include_multiqc_report()
         self.include_delivery_report()
 
@@ -151,7 +151,7 @@ class MipConfigBuilder(ScoutConfigBuilder):
         config_sample.reviewer.vcf = self.fetch_sample_file(
             hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
         )
-        config_sample.reviewer.catalog = self.fetch_file_from_hk(hk_tags=self.case_tags.str_catalog)
+        config_sample.reviewer.catalog = self.get_file_from_hk(hk_tags=self.case_tags.str_catalog)
         config_sample.mitodel_file = self.fetch_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )

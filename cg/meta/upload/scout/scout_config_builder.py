@@ -136,19 +136,19 @@ class ScoutConfigBuilder:
 
     def include_cnv_report(self) -> None:
         LOG.info("Include CNV report to case")
-        self.load_config.cnv_report = self.fetch_file_from_hk(
+        self.load_config.cnv_report = self.get_file_from_hk(
             hk_tags=self.case_tags.cnv_report, latest=True
         )
 
     def include_multiqc_report(self) -> None:
         LOG.info("Include MultiQC report to case")
-        self.load_config.multiqc = self.fetch_file_from_hk(
+        self.load_config.multiqc = self.get_file_from_hk(
             hk_tags=self.case_tags.multiqc_report, latest=True
         )
 
     def include_delivery_report(self) -> None:
         LOG.info("Include delivery report to case")
-        self.load_config.delivery_report = self.fetch_file_from_hk(
+        self.load_config.delivery_report = self.get_file_from_hk(
             hk_tags=self.case_tags.delivery_report, latest=True
         )
 
@@ -168,14 +168,12 @@ class ScoutConfigBuilder:
         )
 
     def fetch_sample_file(self, hk_tags: Set[str], sample_id: str) -> Optional[str]:
-        """Fetch a file that is specific for a individual from housekeeper"""
+        """Return a file that is specific for a individual from housekeeper"""
         tags: set = hk_tags.copy()
         tags.add(sample_id)
-        return self.fetch_file_from_hk(hk_tags=tags)
+        return self.get_file_from_hk(hk_tags=tags)
 
-    def fetch_file_from_hk(
-        self, hk_tags: Set[str], latest: Optional[bool] = False
-    ) -> Optional[str]:
+    def get_file_from_hk(self, hk_tags: Set[str], latest: Optional[bool] = False) -> Optional[str]:
         """Get a file from housekeeper and return the path as a string."""
         LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:

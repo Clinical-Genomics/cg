@@ -26,10 +26,10 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def include_case_files(self):
         LOG.info("Including BALSAMIC specific case level files")
-        self.load_config.vcf_cancer = self.fetch_file_from_hk(
+        self.load_config.vcf_cancer = self.get_file_from_hk(
             hk_tags=self.case_tags.snv_vcf, latest=True
         )
-        self.load_config.vcf_cancer_sv = self.fetch_file_from_hk(
+        self.load_config.vcf_cancer_sv = self.get_file_from_hk(
             hk_tags=self.case_tags.sv_vcf, latest=True
         )
         self.include_cnv_report()
