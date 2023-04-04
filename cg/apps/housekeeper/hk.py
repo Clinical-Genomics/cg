@@ -128,9 +128,9 @@ class HousekeeperAPI:
         )
 
     @staticmethod
-    def fetch_files_from_version(version: Version, tags: Set[str]) -> Optional[List[File]]:
+    def get_files_from_version(version: Version, tags: Set[str]) -> Optional[List[File]]:
         """Return a list of files associated with the given version and tags."""
-        LOG.debug(f"Fetch files from version with tags {tags}")
+        LOG.debug(f"Getting files from version with tags {tags}")
         files: List[File] = []
         for file in list(version.files):
             file_tags = {tag.name for tag in file.tags}
@@ -142,15 +142,15 @@ class HousekeeperAPI:
         return files
 
     @staticmethod
-    def fetch_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
-        """Fetch the first file matching the given tags."""
-        files: List[File] = HousekeeperAPI.fetch_files_from_version(version=version, tags=tags)
+    def get_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+        """Return the first file matching the given tags."""
+        files: List[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return files[0] if files else None
 
     @staticmethod
-    def fetch_latest_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+    def get_latest_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
         """Return the latest file from Housekeeper given its version and tags."""
-        files: List[File] = HousekeeperAPI.fetch_files_from_version(version=version, tags=tags)
+        files: List[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
         return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
 
     def rollback(self):

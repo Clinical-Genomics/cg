@@ -176,14 +176,14 @@ class ScoutConfigBuilder:
     def fetch_file_from_hk(
         self, hk_tags: Set[str], latest: Optional[bool] = False
     ) -> Optional[str]:
-        """Fetch a file from housekeeper and return the path as a string."""
-        LOG.info(f"Fetch file with tags {hk_tags}")
+        """Get a file from housekeeper and return the path as a string."""
+        LOG.info(f"Get file with tags {hk_tags}")
         if not hk_tags:
             LOG.debug("No tags provided, skipping")
             return None
         hk_file: Optional[File] = (
-            HousekeeperAPI.fetch_latest_file_from_version(version=self.hk_version_obj, tags=hk_tags)
+            HousekeeperAPI.get_latest_file_from_version(version=self.hk_version_obj, tags=hk_tags)
             if latest
-            else HousekeeperAPI.fetch_file_from_version(version=self.hk_version_obj, tags=hk_tags)
+            else HousekeeperAPI.get_file_from_version(version=self.hk_version_obj, tags=hk_tags)
         )
         return hk_file.full_path if hk_file else None

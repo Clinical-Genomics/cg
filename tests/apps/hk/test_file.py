@@ -118,7 +118,7 @@ def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
     assert hk_file is not None
 
 
-def test_fetch_files_from_version(
+def test_get_files_from_version(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     hk_bundle_data: Dict[str, Any],
@@ -142,16 +142,14 @@ def test_fetch_files_from_version(
     assert second_file in version.files
 
     # WHEN extracting the files from version
-    files: List[File] = real_housekeeper_api.fetch_files_from_version(
-        version=version, tags={hk_tag}
-    )
+    files: List[File] = real_housekeeper_api.get_files_from_version(version=version, tags={hk_tag})
 
     # THEN the added files should be retrieved
     assert first_file in files
     assert second_file in files
 
 
-def test_fetch_latest_file_from_version(
+def test_get_latest_file_from_version(
     helpers: StoreHelpers,
     real_housekeeper_api: HousekeeperAPI,
     hk_bundle_data: Dict[str, Any],
@@ -175,7 +173,7 @@ def test_fetch_latest_file_from_version(
     assert second_file in version.files
 
     # WHEN extracting the latest file from version
-    latest_file: File = real_housekeeper_api.fetch_latest_file_from_version(
+    latest_file: File = real_housekeeper_api.get_latest_file_from_version(
         version=version, tags={hk_tag}
     )
 

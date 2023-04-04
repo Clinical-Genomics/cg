@@ -5,7 +5,7 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Set
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
@@ -173,12 +173,12 @@ class MockHousekeeperAPI:
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
     # Mock specific functions
-    def fetch_file_from_version(self, version, tags):
+    def get_file_from_version(self, version: Version, tags: Set[str]):
         if tags.intersection(self._missing_tags):
             return None
         return self._files[0]
 
-    def fetch_latest_file_from_version(self, version, tags):
+    def get_latest_file_from_version(self, version: Version, tags: Set[str]):
         if tags.intersection(self._missing_tags):
             return None
         return self._files[-1]

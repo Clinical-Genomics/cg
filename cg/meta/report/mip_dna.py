@@ -158,7 +158,7 @@ class MipDNAReportAPI(ReportAPI):
         """Returns the file path of the uploaded to Scout file given its tag."""
 
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag)
+        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
         uploaded_files: Query = self.housekeeper_api.get_files(
             bundle=case_id, tags=tags, version=version.id
         )

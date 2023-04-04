@@ -1,4 +1,4 @@
-"""File includes api to uploading data into Scout"""
+"""File includes api to uploading data into Scout."""
 
 import logging
 from pathlib import Path
@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 
 class UploadScoutAPI:
-    """Class that handles everything that has to do with uploading to Scout"""
+    """Class that handles everything that has to do with uploading to Scout."""
 
     def __init__(
         self,
@@ -66,12 +66,12 @@ class UploadScoutAPI:
 
     @staticmethod
     def get_load_config_tag() -> str:
-        """Get the hk tag for a scout load config"""
+        """Get the Housekeeper tag for a Scout load config."""
         return "scout-load-config"
 
     @staticmethod
     def save_config_file(upload_config: ScoutLoadConfig, file_path: Path) -> None:
-        """Save a scout load config file to <file_path>."""
+        """Save a Scout load config file to the supplied file path."""
 
         LOG.info(f"Save Scout load config to {file_path.as_posix()}")
         WriteFile.write_file_from_content(
@@ -87,7 +87,7 @@ class UploadScoutAPI:
         LOG.info(f"Adding load config {config_file_path} to Housekeeper")
         tag_name: str = self.get_load_config_tag()
         version: Version = self.housekeeper.last_version(bundle=case_id)
-        uploaded_config_file: Optional[File] = self.housekeeper.fetch_latest_file_from_version(
+        uploaded_config_file: Optional[File] = self.housekeeper.get_latest_file_from_version(
             version=version, tags={tag_name}
         )
         if uploaded_config_file:
