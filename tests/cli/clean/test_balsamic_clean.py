@@ -100,7 +100,7 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert balsamic_case_clean in caplog.text
-    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Pipeline.BALSAMIC)
+    assert analysis_to_clean in base_store.analyses_to_clean(pipeline=Pipeline.BALSAMIC)
 
 
 def test_cleaned_at_valid(

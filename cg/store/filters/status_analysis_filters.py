@@ -1,6 +1,6 @@
 from typing import List, Callable
 from enum import Enum
-from sqlalchemy.orm import Query, join
+from sqlalchemy.orm import Query
 
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES
@@ -115,11 +115,6 @@ def filter_analyses_not_cleaned(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.cleaned_at.is_(None))
 
 
-def filter_analysis_case_action_is_none(analyses: Query, **kwargs) -> Query:
-    """Return a query of analyses that do not have active cases."""
-    return analyses.join(Family).filter(Family.action.is_(None))
-
-
 def apply_analysis_filter(
     filter_functions: List[Callable],
     analyses: Query,
@@ -148,8 +143,8 @@ class AnalysisFilter(Enum):
     FILTER_WITH_PIPELINE: Callable = filter_analyses_with_pipeline
     FILTER_COMPLETED: Callable = filter_completed_analyses
     FILTER_NOT_COMPLETED: Callable = filter_not_completed_analyses
-    FILTER_IS_UPLOADED: Callable = filter_uploaded_analyses
-    FILTER_IS_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
+    FILTER_UPLOADED: Callable = filter_uploaded_analyses
+    FILTER_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
     FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
     FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
     FILTER_REPORT_BY_PIPELINE: Callable = filter_report_analyses_by_pipeline
@@ -157,10 +152,9 @@ class AnalysisFilter(Enum):
     FILTER_COMPLETED_AT_AFTER: Callable = filter_analyses_completed_after
     FILTER_COMPLETED_AT_BEFORE: Callable = filter_analyses_completed_before
     FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analyses_not_uploaded_to_vogue
-    FILTER_IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
+    FILTER_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
     FILTER_BY_STARTED_AT: Callable = filter_analyses_by_started_at
-    FILTER_CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
     ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc

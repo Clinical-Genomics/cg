@@ -556,7 +556,6 @@ def fixture_store_with_analyses_for_cases(
             uploaded_at=timestamp_yesterday,
             delivery_reported_at=None,
             uploaded_to_vogue_at=timestamp_yesterday,
-            completed_at=timestamp_yesterday,
         )
         helpers.add_analysis(
             analysis_store,
@@ -564,14 +563,12 @@ def fixture_store_with_analyses_for_cases(
             started_at=timestamp_now,
             uploaded_at=timestamp_now,
             delivery_reported_at=None,
-            uploaded_to_vogue_at=None,
-            completed_at=timestamp_now,
+            uploaded_to_vogue_at=timestamp_now,
         )
         sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
         analysis_store.relate_sample(
             family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
         )
-
     return analysis_store
 
 
