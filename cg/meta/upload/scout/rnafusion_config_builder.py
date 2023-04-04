@@ -49,7 +49,7 @@ class RnafusionConfigBuilder(ScoutConfigBuilder):
         setattr(
             self.load_config,
             scout_key,
-            self.fetch_file_from_hk(getattr(self.case_tags, scout_key)),
+            self.get_file_from_hk(getattr(self.case_tags, scout_key)),
         )
 
     def build_config_sample(self, case_sample: FamilySample) -> ScoutCancerIndividual:
