@@ -4,7 +4,6 @@ from cg.constants.constants import MicrosaltAppTags
 from cg.store import Store
 from cg.store.models import (
     Application,
-    ApplicationVersion,
     Bed,
     BedVersion,
     Customer,

@@ -1124,6 +1124,12 @@ def fixture_invoice_reference() -> str:
     return "ABCDEF"
 
 
+@pytest.fixture(name="prices")
+def fixture_prices() -> Dict[str, int]:
+    """Return dictionary with prices for each priority status."""
+    return {"standard": 10, "priority": 20, "express": 30, "research": 5}
+
+
 @pytest.fixture(name="base_store")
 def fixture_base_store(
     apptag_rna: str,
@@ -1134,6 +1140,7 @@ def fixture_base_store(
     invoice_address: str,
     invoice_reference: str,
     store: Store,
+    prices: Dict[str, int],
 ) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
@@ -1263,7 +1270,7 @@ def fixture_base_store(
 
     store.add_commit(applications)
 
-    prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
+    prices = prices
     versions = [
         store.add_application_version(application, 1, valid_from=datetime.now(), prices=prices)
         for application in applications
