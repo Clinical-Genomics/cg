@@ -16,7 +16,7 @@ class Dispatcher:
     def _parse_input_dict(self, input_dict: Dict[str, Any]) -> [Tuple[str], Tuple[Any]]:
         parameters_not_none: List[str] = []
         values_not_none: List[Any] = []
-        for parameter in input_dict.keys():
+        for parameter in sorted(input_dict.keys()):
             value = input_dict[parameter]
             if value is not None:
                 parameters_not_none.append(parameter)

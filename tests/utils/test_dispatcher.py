@@ -187,9 +187,9 @@ def test_dispatcher_on_other_functions(
             store.get_analyses_for_case_started_at_before,
         ],
         input_dict={
-            "case_internal_id": case_internal_id,
             "pipeline": pipeline,
             "started_at_before": timestamp_now,
+            "case_internal_id": case_internal_id,
         },
     )
     analyses: List[Analysis] = function_dispatcher(
