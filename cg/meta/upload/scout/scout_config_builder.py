@@ -159,15 +159,15 @@ class ScoutConfigBuilder:
         Cram is preferred so overwrite if found
         """
         sample_id: str = config_sample.sample_id
-        config_sample.alignment_path = self.fetch_sample_file(
+        config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.bam_file, sample_id=sample_id
         )
 
-        config_sample.alignment_path = self.fetch_sample_file(
+        config_sample.alignment_path = self.get_sample_file(
             hk_tags=self.sample_tags.alignment_file, sample_id=sample_id
         )
 
-    def fetch_sample_file(self, hk_tags: Set[str], sample_id: str) -> Optional[str]:
+    def get_sample_file(self, hk_tags: Set[str], sample_id: str) -> Optional[str]:
         """Return a file that is specific for a individual from housekeeper"""
         tags: set = hk_tags.copy()
         tags.add(sample_id)

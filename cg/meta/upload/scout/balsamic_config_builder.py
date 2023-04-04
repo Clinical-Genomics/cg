@@ -46,7 +46,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             elif SampleType.NORMAL in config_sample.alignment_path:
                 sample_id = SampleType.NORMAL.value
 
-        config_sample.vcf2cytosure = self.fetch_sample_file(
+        config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
 

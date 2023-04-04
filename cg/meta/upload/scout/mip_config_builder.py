@@ -116,43 +116,43 @@ class MipConfigBuilder(ScoutConfigBuilder):
         """Include sample level files that are optional for mip samples"""
         LOG.info("Including MIP specific sample level files")
         sample_id: str = config_sample.sample_id
-        config_sample.vcf2cytosure = self.fetch_sample_file(
+        config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=sample_id
         )
-        config_sample.mt_bam = self.fetch_sample_file(
+        config_sample.mt_bam = self.get_sample_file(
             hk_tags=self.sample_tags.mt_bam, sample_id=sample_id
         )
         config_sample.chromograph_images.autozygous = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_autozyg, sample_id=sample_id
             )
         )
         config_sample.chromograph_images.coverage = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_coverage, sample_id=sample_id
             )
         )
         config_sample.chromograph_images.upd_regions = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_regions, sample_id=sample_id
             )
         )
         config_sample.chromograph_images.upd_sites = self.extract_generic_filepath(
-            file_path=self.fetch_sample_file(
+            file_path=self.get_sample_file(
                 hk_tags=self.sample_tags.chromograph_sites, sample_id=sample_id
             )
         )
-        config_sample.reviewer.alignment = self.fetch_sample_file(
+        config_sample.reviewer.alignment = self.get_sample_file(
             hk_tags=self.sample_tags.reviewer_alignment, sample_id=sample_id
         )
-        config_sample.reviewer.alignment_index = self.fetch_sample_file(
+        config_sample.reviewer.alignment_index = self.get_sample_file(
             hk_tags=self.sample_tags.reviewer_alignment_index, sample_id=sample_id
         )
-        config_sample.reviewer.vcf = self.fetch_sample_file(
+        config_sample.reviewer.vcf = self.get_sample_file(
             hk_tags=self.sample_tags.reviewer_vcf, sample_id=sample_id
         )
         config_sample.reviewer.catalog = self.get_file_from_hk(hk_tags=self.case_tags.str_catalog)
-        config_sample.mitodel_file = self.fetch_sample_file(
+        config_sample.mitodel_file = self.get_sample_file(
             hk_tags=self.sample_tags.mitodel_file, sample_id=sample_id
         )
 
