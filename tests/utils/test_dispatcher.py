@@ -3,8 +3,10 @@ import pytest
 from cg.utils.dispatcher import Dispatcher
 from tests.store_helpers import StoreHelpers
 from cg.store import Store
-from cg.store.models import Sample
+from cg.store.models import Sample, Analysis
 from cg.constants.invoice import CustomerNames
+from cg.constants import Pipeline
+from datetime import datetime, timedelta
 
 
 def test_dispatch_table_generation(
@@ -160,3 +162,46 @@ def test_call_with_status_db_functions(
     for sample in samples:
         assert sample.customer.internal_id == customer_internal_id
         assert sample.subject_id == test_subject
+
+
+def test_dispatcher_on_other_functions(
+    store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: datetime,
+    timestamp_yesterday: datetime,
+    pipeline: str = str(Pipeline.MIP_DNA),
+    case_internal_id: str = "test_case",
+):
+    """Test that the dispatcher can be used to call functions in the status db"""
+
+    # GIVEN a database with a case and an analysis
+    case = helpers.add_case(store, internal_id=case_internal_id)
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, pipeline=pipeline)
+
+    # WHEN calling the dispatcher with the to get analyses
+    function_dispatcher: Dispatcher = Dispatcher(
+        functions=[
+            store.get_analyses_started_at_before,
+            store.get_analyses_for_case_and_pipeline_started_at_before,
+            store.get_analyses_for_pipeline_started_at_before,
+            store.get_analyses_for_case_started_at_before,
+        ],
+        input_dict={
+            "case_internal_id": case_internal_id,
+            "pipeline": pipeline,
+            "started_at_before": timestamp_now,
+        },
+    )
+    analyses: List[Analysis] = function_dispatcher(
+        {
+            "case_internal_id": case_internal_id,
+            "pipeline": pipeline,
+            "started_at_before": timestamp_now,
+        }
+    )
+
+    # THEN the dispatcher should return the correct analyses
+    for analysis in analyses:
+        assert analysis.case.internal_id == case_internal_id
+        assert analysis.pipeline == pipeline
+        assert analysis.started_at < timestamp_now

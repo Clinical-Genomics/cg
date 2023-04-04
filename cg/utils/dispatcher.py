@@ -26,7 +26,9 @@ class Dispatcher:
     def _generate_dispatch_table(self) -> Dict[Tuple[str], Callable]:
         dispatch_table = {}
         for func in self.functions:
-            func_arg_names: List[str] = func.__code__.co_varnames[: func.__code__.co_argcount]
+            func_arg_names: List[str] = sorted(
+                func.__code__.co_varnames[: func.__code__.co_argcount]
+            )
             func_arg_names: List[str] = [arg for arg in func_arg_names if arg != "self"]
             if len(set(func_arg_names)) != len(func_arg_names):
                 raise ValueError(f"Duplicate argument names in function: {func.__name__}")
