@@ -34,12 +34,3 @@ def test_add_application_version(
     assert (
         len(store_with_an_application_with_and_without_attributes.get_application_versions()) == 1
     )
-
-
-def test_add_application_version_(store: Store):
-    """Test that the functions returns an application version."""
-    # GIVEN
-
-    # WHEN
-
-    # THEN

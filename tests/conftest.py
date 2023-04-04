@@ -1270,9 +1270,10 @@ def fixture_base_store(
 
     store.add_commit(applications)
 
-    prices = prices
     versions = [
-        store.add_application_version(application, 1, valid_from=datetime.now(), prices=prices)
+        store.add_application_version(
+            application=application, version=1, valid_from=datetime.now(), prices=prices
+        )
         for application in applications
     ]
     store.add_commit(versions)
