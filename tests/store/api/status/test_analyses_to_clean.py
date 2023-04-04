@@ -1,37 +1,42 @@
 """This file tests the analyses_to_clean part of the status api"""
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from cg.constants import Pipeline
 from cg.store import Store
 
 
 def test_analysis_included(analysis_store: Store, helpers):
-    """Tests that analyses that are uploaded are returned"""
+    """Tests that analyses that are uploaded are returned."""
 
     # GIVEN an analysis that is uploaded
-    timestamp = datetime.now()
+    timestamp_now = datetime.now()
+    timestamp_yesterday = timestamp_now - timedelta(days=1)
     analysis = helpers.add_analysis(
-        analysis_store, started_at=timestamp, uploaded_at=timestamp, cleaned_at=None
+        analysis_store,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
     )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_clean
-    analyses_to_clean = analysis_store.get_analyses_to_clean(before=analysis.started_at)
+    analyses_to_clean = analysis_store.get_analyses_to_clean(before=timestamp_now)
 
     # THEN this analyse should be returned
     assert analysis in analyses_to_clean
 
 
 def test_analysis_excluded(analysis_store: Store, helpers):
-    """Tests that analyses that are completed but lacks delivery report are returned"""
+    """Tests that analyses that are completed but lacks delivery report are returned."""
 
     # GIVEN an analysis that is not uploaded
-    timestamp = datetime.now()
+    timestamp_now = datetime.now()
+
     analysis = helpers.add_analysis(
-        analysis_store, started_at=timestamp, uploaded_at=None, cleaned_at=None
+        analysis_store, started_at=timestamp_now, uploaded_at=None, cleaned_at=None
     )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_clean
@@ -42,30 +47,33 @@ def test_analysis_excluded(analysis_store: Store, helpers):
 
 
 def test_pipeline_included(analysis_store: Store, helpers):
-    """Tests that analyses that are included depending on pipeline"""
+    """Tests that analyses that are included depending on pipeline."""
 
     # GIVEN an analysis that is uploaded and pipeline is specified
-    timestamp = datetime.now()
+    timestamp_now = datetime.now()
+    timestamp_yesterday = timestamp_now - timedelta(days=1)
     pipeline = Pipeline.BALSAMIC
     analysis = helpers.add_analysis(
         analysis_store,
         pipeline=pipeline,
-        started_at=timestamp,
-        uploaded_at=timestamp,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
         cleaned_at=None,
     )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_clean specifying the used pipeline
-    analyses_to_clean = analysis_store.get_analyses_to_clean(pipeline=pipeline, before=timestamp)
+    analyses_to_clean = analysis_store.get_analyses_to_clean(
+        pipeline=pipeline, before=timestamp_now
+    )
 
     # THEN this analyse should be returned
     assert analysis in analyses_to_clean
 
 
 def test_pipeline_excluded(analysis_store: Store, helpers):
-    """Tests that analyses are excluded depending on pipeline"""
+    """Tests that analyses are excluded depending on pipeline."""
 
     # GIVEN an analysis that is uploaded
     timestamp = datetime.now()
@@ -89,25 +97,29 @@ def test_pipeline_excluded(analysis_store: Store, helpers):
 
 
 def test_non_cleaned_included(analysis_store: Store, helpers):
-    """Tests that analyses that are included depending on cleaned_at"""
+    """Tests that analyses that are included depending on cleaned_at."""
 
     # GIVEN an analysis that is uploaded but not cleaned
-    timestamp = datetime.now()
+    timestamp_now = datetime.now()
+    timestamp_yesterday = timestamp_now - timedelta(days=1)
     analysis = helpers.add_analysis(
-        analysis_store, started_at=timestamp, uploaded_at=timestamp, cleaned_at=None
+        analysis_store,
+        started_at=timestamp_yesterday,
+        uploaded_at=timestamp_yesterday,
+        cleaned_at=None,
     )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp)
+    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_yesterday)
     analysis_store.relate_sample(family=analysis.family, sample=sample, status="unknown")
 
     # WHEN calling the analyses_to_clean
-    analyses_to_clean = analysis_store.get_analyses_to_clean(before=timestamp)
+    analyses_to_clean = analysis_store.get_analyses_to_clean(before=timestamp_now)
 
     # THEN this analyse should be returned
     assert analysis in analyses_to_clean
 
 
 def test_cleaned_excluded(analysis_store: Store, helpers):
-    """Tests that analyses are excluded depending on cleaned_at"""
+    """Tests that analyses are excluded depending on cleaned_at."""
 
     # GIVEN an analysis that is cleaned
     timestamp = datetime.now()
