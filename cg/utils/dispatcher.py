@@ -12,7 +12,7 @@ class Dispatcher:
         """Call the dispatcher with the input dict"""
         parameters_not_none, parameter_values_not_none = self._parse_input_dict(self.input_dict)
         if parameters_not_none not in self.dispatch_table:
-            raise ValueError(f"No matching function found for arguments: {self.input_dict.keys()}")
+            raise ValueError(f"No matching function found for arguments: {parameters_not_none}")
         return self.dispatch_table[parameters_not_none](
             **dict(zip(parameters_not_none, parameter_values_not_none))
         )
