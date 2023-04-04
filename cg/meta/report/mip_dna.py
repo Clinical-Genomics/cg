@@ -1,8 +1,8 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Iterable
 
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store.models import Version
+from housekeeper.store.models import Version, File
 from sqlalchemy.orm import Query
 
 from cg.constants import (
@@ -159,14 +159,13 @@ class MipDNAReportAPI(ReportAPI):
 
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
-        uploaded_files: Query = self.housekeeper_api.get_files(
+        uploaded_files: Iterable[File] = self.housekeeper_api.get_files(
             bundle=case_id, tags=tags, version=version.id
         )
-
-        if not tags or uploaded_files.count() == 0:
+        if not tags or not any(uploaded_files):
             LOG.info(
                 f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
             )
             return None
 
-        return uploaded_files[0].full_path
+        return next(uploaded_files).full_path
