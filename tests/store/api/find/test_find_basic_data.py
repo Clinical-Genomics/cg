@@ -176,9 +176,8 @@ def test_application_version_with_version_and_application(
 
     # WHEN calling the function with an application and a version
     application_version: ApplicationVersion = (
-        store_with_different_application_versions.application_version(
-            application=application,
-            version=application_version_version,
+        store_with_different_application_versions.get_application_version_by_application_id(
+            application_id=application.id,
         )
     )
 
