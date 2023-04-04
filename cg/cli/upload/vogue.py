@@ -226,7 +226,7 @@ def bioinfo_all(
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
     input_dict: Dict[str, Any] = {
-        "completed_after ": completed_after,
+        "completed_after": completed_after,
         "completed_before": completed_before,
     }
     function_dispatcher: Dispatcher = Dispatcher(

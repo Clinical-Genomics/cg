@@ -2,7 +2,7 @@
 
 import logging
 
-from cg.cli.upload.vogue import flowcells, reagent_labels, samples
+from cg.cli.upload.vogue import flowcells, reagent_labels, samples, bioinfo_all
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 
@@ -83,6 +83,18 @@ def test_cli_upload_vogue_flowcells_no_days(upload_context: CGConfig, cli_runner
 
     # WHEN running vogue load flowcells without the days argument
     result = cli_runner.invoke(flowcells, [], obj=upload_context)
+
+    # THEN assert that the program exits with a non zero exit code
+    assert result.exit_code != 0
+
+
+def test_cli_upload_vogue_bioinfo_all(upload_context: CGConfig, cli_runner: CliRunner):
+    """Testing cli for upload vogue flowcells with wrong argument"""
+
+    # GIVEN a vogue api
+
+    # WHEN running vogue load flowcells without the days argument
+    result = cli_runner.invoke(bioinfo_all, ["-a", "2020-01-01"], obj=upload_context)
 
     # THEN assert that the program exits with a non zero exit code
     assert result.exit_code != 0
