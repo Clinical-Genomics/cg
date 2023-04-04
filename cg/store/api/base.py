@@ -98,6 +98,10 @@ class BaseHandler:
             Sample.application_version, ApplicationVersion.application
         )
 
+    def _get_join_analysis_sample_family_query(self) -> Query:
+        """Return join analysis to sample to case query."""
+        return self._get_query(table=Analysis).join(Family, Family.links, FamilySample.sample)
+
     def _get_latest_analysis_for_case_query(self) -> List[Query]:
         """Return query for all cases and latest started at date."""
         analyses = self._get_query(table=Analysis)
