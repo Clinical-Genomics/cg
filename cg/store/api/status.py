@@ -622,8 +622,8 @@ class StatusHandler(BaseHandler):
     def get_analyses_for_case_and_pipeline_started_at_before(
         self,
         case_internal_id: str,
-        started_at_before: datetime,
         pipeline: Pipeline,
+        started_at_before: datetime,
     ) -> List[Analysis]:
         """Return all analyses older than certain date."""
         case = self.get_case_by_internal_id(internal_id=case_internal_id)

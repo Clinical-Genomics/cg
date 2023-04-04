@@ -169,7 +169,7 @@ def test_dispatcher_on_other_functions(
     helpers: StoreHelpers,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
-    pipeline: str = str(Pipeline.MIP_DNA),
+    pipeline: str = Pipeline.MIP_DNA,
     case_internal_id: str = "test_case",
 ):
     """Test that the dispatcher can be used to call functions in the status db"""
@@ -187,9 +187,9 @@ def test_dispatcher_on_other_functions(
             store.get_analyses_for_case_started_at_before,
         ],
         input_dict={
+            "case_internal_id": case_internal_id,
             "pipeline": pipeline,
             "started_at_before": timestamp_now,
-            "case_internal_id": case_internal_id,
         },
     )
     analyses: List[Analysis] = function_dispatcher(
@@ -202,6 +202,7 @@ def test_dispatcher_on_other_functions(
 
     # THEN the dispatcher should return the correct analyses
     for analysis in analyses:
-        assert analysis.case.internal_id == case_internal_id
+        assert analysis
+        assert analysis.family.internal_id == case_internal_id
         assert analysis.pipeline == pipeline
         assert analysis.started_at < timestamp_now
