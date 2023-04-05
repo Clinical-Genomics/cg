@@ -83,7 +83,7 @@ class MipDNAReportAPI(ReportAPI):
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
-        case_sample = self.status_db.family_samples(case.internal_id)[0].sample
+        case_sample = self.status_db.get_case_samples_by_case_id(case_id=case.internal_id)[0].sample
         lims_sample = self.get_lims_sample(case_sample.internal_id)
         application = self.status_db.get_application_by_tag(tag=lims_sample.get("application"))
 

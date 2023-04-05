@@ -252,11 +252,11 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all cases."""
         return self._get_query(table=Family).all()
 
-    def family_samples(self, family_id: str) -> List[FamilySample]:
+    def get_case_samples_by_case_id(self, case_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
-            case_id=family_id,
+            case_id=case_id,
             case_samples=self._get_join_case_sample_query(),
         ).all()
 

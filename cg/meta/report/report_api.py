@@ -29,7 +29,7 @@ from cg.models.report.report import (
     ScoutReportFiles,
 )
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
-from cg.store.models import Analysis, Application, Family, Sample
+from cg.store.models import Analysis, Application, Family, Sample, FamilySample
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 LOG = logging.getLogger(__name__)
@@ -254,7 +254,9 @@ class ReportAPI(MetaAPI):
         """Extracts all the samples associated to a specific case and their attributes."""
 
         samples = list()
-        case_samples: List[FamilySample] = self.status_db.family_samples(case.internal_id)
+        case_samples: List[FamilySample] = self.status_db.get_case_samples_by_case_id(
+            case_id=case.internal_id
+        )
 
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
