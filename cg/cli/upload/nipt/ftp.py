@@ -65,5 +65,5 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
         return
 
     for analysis in analyses:
-        case_id = analysis.family.internal_id if analysis.family else None
+        case_id = analysis.family.internal_id
         context.invoke(nipt_upload_case, case_id=case_id, dry_run=dry_run)
