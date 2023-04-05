@@ -10,11 +10,6 @@ def get_samples_associated_with_case(case_samples: Query, case_id: str, **kwargs
     return case_samples.filter(Family.internal_id == case_id)
 
 
-def get_cases_associated_with_sample(case_samples: Query, sample_id: str, **kwargs) -> Query:
-    """Return cases associated with a sample."""
-    return case_samples.filter(Sample.internal_id == sample_id)
-
-
 def get_cases_associated_with_sample_by_entry_id(
     case_samples: Query, sample_entry_id: int, **kwargs
 ) -> Query:
@@ -45,7 +40,6 @@ class CaseSampleFilter(Enum):
     """Define CaseSample filter functions."""
 
     GET_SAMPLES_ASSOCIATED_WITH_CASE: Callable = get_samples_associated_with_case
-    GET_CASES_ASSOCIATED_WITH_SAMPLE: Callable = get_cases_associated_with_sample
     GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID: Callable = (
         get_cases_associated_with_sample_by_entry_id
     )

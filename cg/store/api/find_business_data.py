@@ -260,14 +260,6 @@ class FindBusinessDataHandler(BaseHandler):
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
-    def get_sample_cases(self, sample_id: str) -> Query:
-        """Return the case-sample links associated with a sample."""
-        return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE],
-            sample_id=sample_id,
-            case_samples=self._get_join_case_sample_query(),
-        )
-
     def get_cases_from_sample(self, sample_entry_id: str) -> Query:
         """Return cases related to a given sample."""
         return apply_case_sample_filter(
