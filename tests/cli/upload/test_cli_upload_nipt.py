@@ -2,6 +2,7 @@
 import datetime
 import logging
 
+import pytest
 from click.testing import CliRunner
 
 from cg.cli.upload.nipt.base import nipt_upload_all, nipt_upload_case
@@ -9,6 +10,7 @@ from cg.meta.upload.nipt import NiptUploadAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.models.cg_config import CGConfig
 from cgmodels.cg.constants import Pipeline
+from cg.exc import AnalysisUploadError
 
 NIPT_CASE_SUCCESS = "*** NIPT UPLOAD START ***"
 NIPT_ALL_SUCCESS = "*** NIPT UPLOAD ALL START ***"
@@ -138,6 +140,32 @@ def test_nipt_statina_upload_auto(
 
     # THEN exit without errors
     assert result.exit_code == 0
+
+
+def test_nipt_statina_upload_auto_without_analyses(
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
+):
+    """Tests CLI command to upload a single case"""
+
+    # GIVEN a case ready for upload
+    caplog.set_level(logging.DEBUG)
+
+    # Mock NiptUploadAPI methods
+    mocker.patch.object(NiptUploadAPI, "get_all_upload_analyses", return_value=[])
+    mocker.patch.object(NiptUploadAPI, "flowcell_passed_qc_value", return_value=True)
+
+    # WHEN uploading all NIPT cases
+    result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
+
+    # THEN an AnalysisUploadError should be raised
+    assert result.exception is not None
+    assert isinstance(result.exception, AnalysisUploadError)
+    assert "No analyses to upload" in str(result.exception)
+
+    # Check logs for errors
+    assert NIPT_CASE_SUCCESS in caplog.text
+    assert "No analyses to upload" in caplog.text
+    assert not any(record.levelname == "ERROR" for record in caplog.records)
 
 
 def test_nipt_statina_upload_auto_dry_run(
