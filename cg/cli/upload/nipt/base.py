@@ -69,11 +69,11 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     all_good = True
     analyses = nipt_upload_api.get_all_upload_analyses()
     if not analyses:
-        LOG.info("No analyses to upload")
-        raise AnalysisUploadError("No analyses to upload")
+        LOG.info("No analyses found to upload")
+        click.Abort()
 
     for analysis in analyses:
-        internal_id = analysis.family.internal_ids
+        internal_id = analysis.family.internal_id
 
         if nipt_upload_api.flowcell_passed_qc_value(
             case_id=internal_id, q30_threshold=Q30_THRESHOLD
