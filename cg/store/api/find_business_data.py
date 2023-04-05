@@ -1,5 +1,4 @@
 """Handler to find business data objects."""
-import datetime
 import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union
@@ -117,7 +116,7 @@ class FindBusinessDataHandler(BaseHandler):
         self,
     ) -> List[Analysis]:
         """Return the latest analysis not uploaded to Vogue for each case."""
-        latest_analysis_not_uploaded_to_vogue = []
+        latest_analysis_not_uploaded_to_vogue: List[Analysis] = []
         for analysis_query in self._get_latest_analysis_for_case_query():
             latest_analysis_not_uploaded_to_vogue.append(
                 apply_analysis_filter(
@@ -129,15 +128,15 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_analyses_by_case_entry_id_and_latest_started_at_date(self) -> List[Analysis]:
         """Return analysis for all cases and latest started at date."""
-        latest_analyses_per_case = []
+        latest_analyses_per_case: List[Analysis] = []
         for query in self._get_latest_analysis_for_case_query():
             latest_analyses_per_case.append(query.first())
         return latest_analyses_per_case
 
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
         """Return latest not uploaded analysis for each case given a pipeline."""
-        latest_analyses_to_upload_for_pipeline = []
-        filter_functions = [
+        latest_analyses_to_upload_for_pipeline: List[Analysis] = []
+        filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
             AnalysisFilter.FILTER_IS_NOT_UPLOADED,
         ]
@@ -153,7 +152,7 @@ class FindBusinessDataHandler(BaseHandler):
         self, case_entry_id: int, started_at_date: dt.datetime
     ) -> Analysis:
         """Fetch an analysis."""
-        filter_functions = [
+        filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
             AnalysisFilter.FILTER_BY_STARTED_AT,
         ]
