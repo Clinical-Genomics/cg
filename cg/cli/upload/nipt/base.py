@@ -70,7 +70,7 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     analyses = nipt_upload_api.get_all_upload_analyses()
     if not analyses:
         LOG.info("No analyses found to upload")
-        click.Abort()
+        return
 
     for analysis in analyses:
         internal_id = analysis.family.internal_id
