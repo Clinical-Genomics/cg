@@ -160,6 +160,28 @@ def test_nipt_statina_upload_auto_without_analyses(
     assert "No analyses found to upload" in caplog.text
 
 
+def test_nipt_statina_upload_auto_analysis_without_case(
+    upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
+):
+    """Tests CLI command to upload without any analyses to upload"""
+
+    # GIVEN no analyses for upload
+    caplog.set_level(logging.DEBUG)
+
+    analysis_obj = helpers.add_analysis(
+        store=upload_context.status_db,
+        completed_at=datetime.datetime.now(),
+        pipeline=Pipeline.FLUFFY,
+    )
+
+    # WHEN uploading all NIPT cases
+    result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
+
+    # THEN the command should abort without raising an error
+    assert result.exit_code == 0
+    assert "No analyses found to upload" in caplog.text
+
+
 def test_nipt_statina_upload_auto_dry_run(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):

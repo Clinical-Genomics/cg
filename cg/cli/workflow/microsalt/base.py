@@ -286,7 +286,7 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
         return
 
     for analysis in latest_analyses:
-        case_internal_id: str = analysis.family.internal_id
+        case_internal_id: str = analysis.family.internal_id if analysis.family else None
         try:
             context.invoke(upload_analysis_vogue, unique_id=case_internal_id, dry_run=dry_run)
         except Exception as error:
