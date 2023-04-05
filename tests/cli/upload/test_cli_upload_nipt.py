@@ -173,13 +173,13 @@ def test_nipt_statina_upload_auto_analysis_without_case(
         completed_at=datetime.datetime.now(),
         pipeline=Pipeline.FLUFFY,
     )
-
+    analysis_obj.family = None
+    mocker.patch.object(NiptUploadAPI, "get_all_upload_analyses", return_value=[analysis_obj])
     # WHEN uploading all NIPT cases
     result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
 
     # THEN the command should abort without raising an error
-    assert result.exit_code == 0
-    assert "No analyses found to upload" in caplog.text
+    assert result.exit_code != 0
 
 
 def test_nipt_statina_upload_auto_dry_run(

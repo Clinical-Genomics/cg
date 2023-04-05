@@ -102,7 +102,7 @@ class BaseHandler:
         """Return query for all cases and latest started at date."""
         analyses = self._get_query(table=Analysis)
         case_entry_ids = set([analysis.family_id for analysis in analyses])
-        latest_analyses_per_case = []
+        latest_analyses_per_case: List[Query] = []
         filter_functions = [
             AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
             AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
