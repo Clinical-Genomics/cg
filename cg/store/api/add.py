@@ -94,7 +94,7 @@ class AddHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_version(
+    def add_application_version(
         self,
         application: Application,
         version: int,

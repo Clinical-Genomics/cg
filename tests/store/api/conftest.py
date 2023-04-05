@@ -195,7 +195,7 @@ def fixture_rml_pool_store(
     )
     store.add_commit(application)
 
-    app_version = store.add_version(
+    app_version = store.add_application_version(
         application=application,
         version=1,
         valid_from=timestamp_now,
