@@ -14,8 +14,10 @@ def test_get_application_version_by_application_id_existing_id(
     assert application
 
     # WHEN getting the application version by application id
-    application_version: ApplicationVersion = base_store.get_application_version_by_application_id(
-        application_id=application.id
+    application_version: ApplicationVersion = (
+        base_store.get_application_version_by_application_entry_id(
+            application_entry_id=application.id
+        )
     )
 
     # THEN the id of the application is the same as the application version
@@ -35,7 +37,9 @@ def test_get_application_version_by_application_id_invalid_id(
     # WHEN getting an application version by the invalid id
     application_version: Optional[
         ApplicationVersion
-    ] = base_store.get_application_version_by_application_id(application_id=invalid_application_id)
+    ] = base_store.get_application_version_by_application_entry_id(
+        application_entry_id=invalid_application_id
+    )
 
     # THEN the application version is None
     assert application_version is None

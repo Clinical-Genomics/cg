@@ -121,8 +121,8 @@ class StoreHelpers:
         valid_from: datetime = datetime.now(),
     ) -> ApplicationVersion:
         """Add an application version to store."""
-        new_record: ApplicationVersion = store.get_application_version_by_application_id(
-            application_id=application.id
+        new_record: ApplicationVersion = store.get_application_version_by_application_entry_id(
+            application_entry_id=application.id
         )
         if not new_record:
             new_record: ApplicationVersion = store.add_application_version(

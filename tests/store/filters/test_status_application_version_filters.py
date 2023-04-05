@@ -5,7 +5,7 @@ from sqlalchemy.orm import Query
 
 from cg.store import Store
 from cg.store.filters.status_application_version_filters import (
-    filter_application_versions_by_application_id,
+    filter_application_versions_by_application_entry_id,
     filter_application_versions_before_valid_from,
     filter_application_versions_by_version,
     order_application_versions_by_valid_from_desc,
@@ -15,22 +15,22 @@ from cg.store.models import Application, ApplicationVersion
 from tests.store_helpers import StoreHelpers
 
 
-def test_filter_application_version_by_application_id_correct_id(
+def test_filter_application_version_by_application_entry_id_correct_id(
     base_store: Store,
     helpers: StoreHelpers,
 ):
-    """Test that the correct application version is returned when using a correct application id."""
+    """Test that the correct application version is returned when using a correct application entry id."""
     # GIVEN a store with application versions
     app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # GIVEN an application in store different in id from at least another application in store
     application: Application = base_store.get_applications()[0]
-    assert application.id != base_store.get_applications()[1]
+    assert application.id != base_store.get_applications()[1].id
 
     # WHEN the application version query is filtered by the id of the application
-    filtered_app_version_query: Query = filter_application_versions_by_application_id(
+    filtered_app_version_query: Query = filter_application_versions_by_application_entry_id(
         application_versions=app_version_query,
-        application_id=application.id,
+        application_entry_id=application.id,
     )
 
     # THEN the filtered query is shorter than the unfiltered query
@@ -44,7 +44,7 @@ def test_filter_application_version_by_application_id_correct_id(
     assert all(application_id == application.id for application_id in application_ids)
 
 
-def test_filter_application_version_by_application_id_wrong_id(
+def test_filter_application_version_by_application_entry_id_wrong_id(
     base_store: Store,
     helpers: StoreHelpers,
     invalid_application_id: int,
@@ -54,27 +54,27 @@ def test_filter_application_version_by_application_id_wrong_id(
     app_version_query: Query = base_store._get_query(table=ApplicationVersion)
 
     # WHEN filtering with an invalid application id
-    filtered_app_version_query: Query = filter_application_versions_by_application_id(
+    filtered_app_version_query: Query = filter_application_versions_by_application_entry_id(
         application_versions=app_version_query,
-        application_id=invalid_application_id,
+        application_entry_id=invalid_application_id,
     )
 
     # THEN the filtered query is empty
     assert filtered_app_version_query.count() == 0
 
 
-def test_filter_application_version_by_application_id_empty_query(
+def test_filter_application_version_by_application_entry_id_empty_query(
     store: Store, application_id: int = 1
 ):
-    """Test that filtering an empty query by application id returns an empty query."""
+    """Test that filtering an empty query by application entry id returns an empty query."""
     # GIVEN a store without any application version
     app_version_query: Query = store._get_query(table=ApplicationVersion)
     assert app_version_query.count() == 0
 
     # WHEN filtering by application id
-    filtered_app_version_query: Query = filter_application_versions_by_application_id(
+    filtered_app_version_query: Query = filter_application_versions_by_application_entry_id(
         application_versions=app_version_query,
-        application_id=application_id,
+        application_entry_id=application_id,
     )
 
     # THEN the function returns an empty query

@@ -3,14 +3,14 @@ from datetime import datetime
 from sqlalchemy.orm import Query
 from typing import List, Callable
 
-from cg.store.models import Application, ApplicationVersion
+from cg.store.models import ApplicationVersion
 
 
-def filter_application_versions_by_application_id(
-    application_versions: Query, application_id: int, **kwargs
+def filter_application_versions_by_application_entry_id(
+    application_versions: Query, application_entry_id: int, **kwargs
 ) -> Query:
     """Return the application versions given an application id."""
-    return application_versions.filter(ApplicationVersion.application_id == application_id)
+    return application_versions.filter(ApplicationVersion.application_id == application_entry_id)
 
 
 def filter_application_versions_by_version(
@@ -35,7 +35,7 @@ def order_application_versions_by_valid_from_desc(application_versions: Query, *
 def apply_application_versions_filter(
     filter_functions: List[Callable],
     application_versions: Query,
-    application_id: int = None,
+    application_entry_id: int = None,
     version: int = None,
     valid_from: datetime = None,
 ) -> Query:
@@ -43,7 +43,7 @@ def apply_application_versions_filter(
     for filter_function in filter_functions:
         application_versions: Query = filter_function(
             application_versions=application_versions,
-            application_id=application_id,
+            application_entry_id=application_entry_id,
             version=version,
             valid_from=valid_from,
         )
@@ -53,7 +53,7 @@ def apply_application_versions_filter(
 class ApplicationVersionFilter(Enum):
     """Define Application Version filter functions."""
 
-    FILTER_BY_APPLICATION_ID = filter_application_versions_by_application_id
+    FILTER_BY_ENTRY_ID = filter_application_versions_by_application_entry_id
     FILTER_BY_VALID_FROM_BEFORE = filter_application_versions_before_valid_from
     FILTER_BY_VERSION = filter_application_versions_by_version
     ORDER_BY_VALID_FROM_DESC = order_application_versions_by_valid_from_desc

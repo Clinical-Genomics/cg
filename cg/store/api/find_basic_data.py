@@ -109,13 +109,15 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_application_version_by_application_id(self, application_id: int) -> ApplicationVersion:
-        """Return an application version by application id."""
+    def get_application_version_by_application_entry_id(
+        self, application_entry_id: int
+    ) -> ApplicationVersion:
+        """Return an application version by application entry id."""
         application_versions = self._get_query(table=ApplicationVersion)
         return apply_application_versions_filter(
             application_versions=application_versions,
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_APPLICATION_ID],
-            application_id=application_id,
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
+            application_entry_id=application_entry_id,
         ).first()
 
     def get_current_application_version_by_tag(self, tag: str) -> Optional[ApplicationVersion]:
@@ -125,12 +127,12 @@ class FindBasicDataHandler(BaseHandler):
             return None
         return apply_application_versions_filter(
             filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
+                ApplicationVersionFilter.FILTER_BY_ENTRY_ID,
                 ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
                 ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
             ],
             application_versions=self._get_query(table=ApplicationVersion),
-            application_id=application.id,
+            application_entry_id=application.id,
             valid_from=dt.datetime.now(),
         ).first()
 
