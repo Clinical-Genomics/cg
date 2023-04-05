@@ -59,7 +59,7 @@ def test_dry_run(
 
     # THEN the analysis should still be in the analyses_to_clean query since this is a dry-ryn
     assert analysis_to_clean.cleaned_at == None
-    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Pipeline.MICROSALT)
+    assert analysis_to_clean in base_store.analyses_to_clean(pipeline=Pipeline.MICROSALT)
 
 
 def test_clean_run(
@@ -107,4 +107,4 @@ def test_clean_run(
 
     # THEN the analysis should no longer be in the analyses_to_clean query
     assert isinstance(analysis_to_clean.cleaned_at, dt.datetime)
-    assert analysis_to_clean not in base_store.get_analyses_to_clean(pipeline=Pipeline.MICROSALT)
+    assert analysis_to_clean not in base_store.analyses_to_clean(pipeline=Pipeline.MICROSALT)
