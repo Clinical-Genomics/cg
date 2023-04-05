@@ -1,4 +1,4 @@
-"""File includes api to uploading data into Scout"""
+"""File includes api to uploading data into Scout."""
 
 import logging
 from pathlib import Path
@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 
 class UploadScoutAPI:
-    """Class that handles everything that has to do with uploading to Scout"""
+    """Class that handles everything that has to do with uploading to Scout."""
 
     def __init__(
         self,
@@ -66,14 +66,14 @@ class UploadScoutAPI:
 
     @staticmethod
     def get_load_config_tag() -> str:
-        """Get the hk tag for a scout load config"""
+        """Get the Housekeeper tag for a Scout load config."""
         return "scout-load-config"
 
     @staticmethod
     def save_config_file(upload_config: ScoutLoadConfig, file_path: Path) -> None:
-        """Save a scout load config file to <file_path>"""
+        """Save a Scout load config file to the supplied file path."""
 
-        LOG.info("Save Scout load config to %s", file_path)
+        LOG.info(f"Save Scout load config to {file_path.as_posix()}")
         WriteFile.write_file_from_content(
             content=upload_config.dict(exclude_none=True),
             file_format=FileFormat.YAML,
@@ -83,26 +83,26 @@ class UploadScoutAPI:
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
     ) -> File:
-        """Add scout load config to hk bundle"""
-        LOG.info("Adding load config %s to housekeeper", config_file_path)
+        """Add Scout load config to Housekeeper bundle."""
+        LOG.info(f"Adding load config {config_file_path} to Housekeeper")
         tag_name: str = self.get_load_config_tag()
-        version_obj: Version = self.housekeeper.last_version(bundle=case_id)
-        uploaded_config_file: Optional[File] = self.housekeeper.fetch_file_from_version(
-            version_obj=version_obj, tags={tag_name}
+        version: Version = self.housekeeper.last_version(bundle=case_id)
+        uploaded_config_file: Optional[File] = self.housekeeper.get_latest_file_from_version(
+            version=version, tags={tag_name}
         )
         if uploaded_config_file:
-            LOG.info("Found config file: %s", uploaded_config_file)
+            LOG.info(f"Found config file: {uploaded_config_file}")
             if not delete:
                 raise FileExistsError("Upload config already exists")
             self.housekeeper.delete_file(uploaded_config_file.id)
 
         file_obj: File = self.housekeeper.add_file(
-            path=str(config_file_path), version_obj=version_obj, tags=tag_name
+            path=str(config_file_path), version_obj=version, tags=tag_name
         )
-        self.housekeeper.include_file(file_obj=file_obj, version_obj=version_obj)
+        self.housekeeper.include_file(file_obj=file_obj, version_obj=version)
         self.housekeeper.add_commit(file_obj)
 
-        LOG.info("Added scout load config to housekeeper: %s", config_file_path)
+        LOG.info(f"Added Scout load config to Housekeeper: {config_file_path}")
         return file_obj
 
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[File]:
@@ -192,7 +192,7 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         report_type: str = "Research" if research else "Clinical"
-        rna_case: Family = status_db.family(case_id)
+        rna_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
@@ -241,7 +241,7 @@ class UploadScoutAPI:
 
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
-        rna_case = status_db.family(case_id)
+        rna_case = status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
         )
@@ -292,7 +292,7 @@ class UploadScoutAPI:
         """
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
-        rna_case: Family = status_db.family(case_id)
+        rna_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
@@ -426,8 +426,10 @@ class UploadScoutAPI:
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
 
-        subject_id_samples: List[Sample] = self.status_db.get_samples_by_subject_id_and_is_tumour(
-            customer_id=rna_sample.customer.internal_id,
+        subject_id_samples: List[
+            Sample
+        ] = self.status_db.get_samples_by_customer_subject_id_and_is_tumour(
+            customer_internal_id=rna_sample.customer.internal_id,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )

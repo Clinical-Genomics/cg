@@ -76,7 +76,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_output_path(case_id=case_id), f"{case_id}_deliverables.yaml")
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: List[Sample] = [link.sample for link in case_obj.links]
         for sample_obj in samples:
             application = sample_obj.application_version.application
@@ -126,7 +126,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         )
 
     def create_case_config(self, case_id: str, dry_run: bool) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: List[Sample] = [link.sample for link in case_obj.links]
         case_config_list = [
             self.get_sample_parameters(sample_obj=sample_obj).dict() for sample_obj in samples

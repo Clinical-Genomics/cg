@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import click
-from housekeeper.store.models import File
+from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -67,7 +67,7 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
     status_db: Store = context.status_db
 
     LOG.info("Fetching family object")
-    case_obj: Family = status_db.family(case_id)
+    case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if not case_obj.analyses:
         LOG.warning("Could not find analyses for %s", case_id)
@@ -139,21 +139,21 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     scout_api: ScoutAPI = context.scout_api
 
-    tag_name = UploadScoutAPI.get_load_config_tag()
-    version_obj = housekeeper_api.last_version(bundle=case_id)
-    scout_config_file: Optional[File] = housekeeper_api.fetch_file_from_version(
-        version_obj=version_obj, tags={tag_name}
+    tag_name: str = UploadScoutAPI.get_load_config_tag()
+    version: Version = housekeeper_api.last_version(bundle=case_id)
+    scout_config_file: Optional[File] = housekeeper_api.get_latest_file_from_version(
+        version=version, tags={tag_name}
     )
 
     if scout_config_file is None:
         raise FileNotFoundError(f"No scout load config was found in housekeeper for {case_id}")
 
-    LOG.info("uploading case %s to scout", case_id)
+    LOG.info(f"Uploading case {case_id} to scout")
 
     if not dry_run:
         scout_api.upload(scout_load_config=scout_config_file.full_path, force=re_upload)
 
-    LOG.info("uploaded to scout using load config %s", scout_config_file.full_path)
+    LOG.info(f"Uploaded to scout using load config {scout_config_file.full_path}")
     LOG.info("Case loaded successfully to Scout")
 
 

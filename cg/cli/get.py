@@ -77,7 +77,7 @@ def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids
 def analysis(context: CGConfig, case_id: str):
     """Get information about case analysis."""
     status_db: Store = context.status_db
-    case: Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
@@ -98,7 +98,7 @@ def analysis(context: CGConfig, case_id: str):
 def relations(context: CGConfig, case_id: str):
     """Get information about case relations."""
     status_db: Store = context.status_db
-    case: Family = status_db.family(internal_id=case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
@@ -135,16 +135,16 @@ def case(
     status_db: Store = context.obj.status_db
     status_db_cases: List[Family] = []
     if name:
-        customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
         if not customer:
             LOG.error(f"{customer_id}: customer not found")
             raise click.Abort
-        status_db_cases: Iterable[Family] = status_db.families(
-            customers=[customer], enquiry=case_ids[-1]
+        status_db_cases: Iterable[Family] = status_db.get_cases_by_customer_and_case_name_search(
+            customer=customer, case_name_search=case_ids[-1]
         )
     else:
         for case_id in case_ids:
-            existing_case: Family = status_db.family(internal_id=case_id)
+            existing_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
             if not existing_case:
                 LOG.error(f"{case_id}: case doesn't exist")
                 raise click.Abort

@@ -432,7 +432,7 @@ def test_transfer(
 
     # GIVEN a store with a received but not sequenced sample
     housekeeper_api: HousekeeperAPI = transfer_flow_cell_api.hk
-    assert len(flowcell_store.get_all_samples()) == 2
+    assert len(flowcell_store.get_samples()) == 2
     assert flowcell_store.get_flow_cells().count() == 0
     assert housekeeper_api.bundles().count() == 0
 
@@ -451,7 +451,7 @@ def test_transfer(
     assert flow_cell.status == FlowCellStatus.ON_DISK
     assert isinstance(flow_cell.id, int)
     assert flow_cell.name == yet_another_flow_cell_id
-    status_sample = flowcell_store.get_all_samples()[0]
+    status_sample = flowcell_store.get_samples()[0]
     assert isinstance(status_sample.sequenced_at, datetime)
 
     # ... and it should store the fastq files and samplesheet for the sample in housekeeper

@@ -90,7 +90,7 @@ def abort_on_empty_options(options: List[str]) -> None:
 
 
 def get_case(case_id: str, status_db: Store) -> Family:
-    case: Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
     if case is None:
         LOG.error(f"Can't find case {case_id}")
@@ -106,7 +106,7 @@ def update_action(case: Family, action: str) -> None:
 
 
 def update_customer(case: Family, customer_id: str, status_db: Store) -> None:
-    customer_obj: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+    customer_obj: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
 
     if customer_obj is None:
         LOG.error("Unknown customer: %s", customer_id)

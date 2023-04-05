@@ -56,9 +56,9 @@ def fixture_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers: StoreHelpers
 ) -> Analysis:
     """Return an analysis object with a trio."""
-    case_obj = analysis_store_trio.family(case_id)
+    case_obj = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
     helpers.add_analysis(store=analysis_store_trio, case=case_obj, started_at=timestamp)
-    return analysis_store_trio.family(case_id).analyses[0]
+    return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
 @pytest.fixture(name="upload_genotypes_api")
@@ -89,7 +89,7 @@ def coverage_upload_api(
 def analysis(analysis_store, case_id, timestamp):
     """Fixture to mock an analysis."""
     _analysis = analysis_store.add_analysis(pipeline=Pipeline.BALSAMIC, version="version")
-    _analysis.family = analysis_store.family(case_id)
+    _analysis.family = analysis_store.get_case_by_internal_id(internal_id=case_id)
     _analysis.config_path = "dummy_path"
     _analysis.completed_at = timestamp
     yield _analysis
@@ -132,7 +132,7 @@ def fixture_mip_dna_case(mip_dna_context: CGConfig, helpers: StoreHelpers) -> Fa
 @pytest.fixture(name="mip_rna_case")
 def fixture_mip_rna_case(mip_rna_context: CGConfig, case_id: str):
     """Return a MIP RNA case."""
-    return mip_rna_context.status_db.family(internal_id=case_id)
+    return mip_rna_context.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(name="mip_rna_analysis")

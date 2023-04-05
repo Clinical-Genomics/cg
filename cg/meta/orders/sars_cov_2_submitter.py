@@ -19,11 +19,15 @@ class SarsCov2Submitter(MicrobialSubmitter):
         self, samples: List[SarsCov2Sample], customer_id: str
     ) -> None:
         """Validate names of all samples are not already in use."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         for sample in samples:
             if sample.control:
                 continue
-            if self.status.find_samples(customer=customer, name=sample.name).first():
+            if self.status.get_sample_by_customer_and_name(
+                customer_entry_id=[customer.id], sample_name=sample.name
+            ):
                 raise OrderError(
                     f"Sample name {sample.name} already in use for customer {customer.name}"
                 )

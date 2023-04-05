@@ -94,13 +94,13 @@ def deliver_analysis(
         deliver_api.set_dry_run(dry_run)
         cases: List[Family] = []
         if case_id:
-            case_obj: Family = status_db.family(case_id)
+            case_obj: Family = status_db.get_case_by_internal_id(internal_id=case_id)
             if not case_obj:
                 LOG.warning("Could not find case %s", case_id)
                 return
             cases.append(case_obj)
         else:
-            cases: List[Family] = status_db.get_cases_from_ticket(ticket=ticket).all()
+            cases: List[Family] = status_db.get_cases_by_ticket_id(ticket_id=ticket)
             if not cases:
                 LOG.warning("Could not find cases for ticket %s", ticket)
                 return

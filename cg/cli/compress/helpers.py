@@ -27,7 +27,7 @@ def get_cases_to_process(
     """Return cases to process."""
     cases: List[Family] = []
     if case_id:
-        case: Family = store.family(case_id)
+        case: Family = store.get_case_by_internal_id(internal_id=case_id)
         if not case:
             LOG.warning(f"Could not find case {case_id}")
             return
@@ -40,7 +40,7 @@ def get_cases_to_process(
 
 def get_fastq_individuals(store: Store, case_id: str = None) -> Iterator[str]:
     """Fetch individual ids from cases that are ready for SPRING compression"""
-    case_obj = store.family(case_id)
+    case_obj = store.get_case_by_internal_id(internal_id=case_id)
     if not case_obj:
         LOG.error("Could not find case %s", case_id)
         raise CaseNotFoundError("")

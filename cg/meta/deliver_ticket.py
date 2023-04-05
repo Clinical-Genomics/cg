@@ -25,7 +25,7 @@ class DeliverTicketAPI(MetaAPI):
         self.delivery_path: Path = Path(config.delivery_path)
 
     def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
-        return self.status_db.get_cases_from_ticket(ticket=ticket).all()
+        return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_inbox_path(self, ticket: str) -> Path:
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
@@ -91,8 +91,8 @@ class DeliverTicketAPI(MetaAPI):
             LOG.info("Removing file: %s", file)
             file.unlink()
 
-    def get_all_samples_from_ticket(self, ticket: str) -> list:
-        all_samples = []
+    def get_samples_from_ticket(self, ticket: str) -> list:
+        all_samples: List = []
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         for case in cases:
             for link_obj in case.links:
@@ -102,7 +102,7 @@ class DeliverTicketAPI(MetaAPI):
     def report_missing_samples(self, ticket: str, dry_run: bool) -> None:
         customer_inbox: Path = self.get_inbox_path(ticket=ticket)
         missing_samples = []
-        all_samples: list = self.get_all_samples_from_ticket(ticket=ticket)
+        all_samples: list = self.get_samples_from_ticket(ticket=ticket)
         if not customer_inbox.exists() and dry_run:
             LOG.info("Dry run, will not search for missing data in: %s", customer_inbox)
             return
@@ -170,7 +170,7 @@ class DeliverTicketAPI(MetaAPI):
     def check_if_concatenation_is_needed(self, ticket: str) -> bool:
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
         case_id = cases[0].internal_id
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         samples: List[Sample] = [link.sample for link in case_obj.links]
         app_tag = self.get_app_tag(samples=samples)
         for prefix in PREFIX_TO_CONCATENATE:

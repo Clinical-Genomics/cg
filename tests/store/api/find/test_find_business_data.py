@@ -21,10 +21,9 @@ from cg.store.models import (
 )
 from tests.store_helpers import StoreHelpers
 from cg.constants.invoice import CustomerNames
-from tests.store.conftest import fixture_store_with_a_pool_with_and_without_attributes
 
 
-def test_find_analysis_via_date(
+def test_get_analysis_by_case_entry_id_and_started_at(
     sample_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test returning an analysis using a date."""
@@ -33,7 +32,9 @@ def test_find_analysis_via_date(
     assert analysis.started_at
 
     # WHEN getting analysis via case_id and start date
-    db_analysis = sample_store.analysis(analysis.family, analysis.started_at)
+    db_analysis = sample_store.get_analysis_by_case_entry_id_and_started_at(
+        case_entry_id=analysis.family.id, started_at_date=analysis.started_at
+    )
 
     # THEN the analysis should have been retrieved
     assert db_analysis == analysis
@@ -352,15 +353,15 @@ def test_is_all_flow_cells_on_disk(
     assert f"{flow_cell.name}: status is {flow_cell.status}" in caplog.text
 
 
-def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket: str):
+def test_get_customer_id_from_ticket(analysis_store, customer_id, ticket_id: str):
     """Tests if the function in fact returns the correct customer."""
     # Given a store with a ticket
 
     # Then the function should return the customer connected to the ticket
-    assert analysis_store.get_customer_id_from_ticket(ticket) == customer_id
+    assert analysis_store.get_customer_id_from_ticket(ticket_id) == customer_id
 
 
-def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket: str):
+def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, ticket_id: str):
     """Tests if the correct ticket is returned for the given case."""
     # GIVEN a populated store with a case
 
@@ -368,7 +369,7 @@ def test_get_latest_ticket_from_case(case_id: str, analysis_store_single_case, t
     ticket_from_case: str = analysis_store_single_case.get_latest_ticket_from_case(case_id=case_id)
 
     # THEN the ticket should be correct
-    assert ticket == ticket_from_case
+    assert ticket_id == ticket_from_case
 
 
 def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Store):
@@ -376,7 +377,9 @@ def test_get_ready_made_library_expected_reads(case_id: str, rml_pool_store: Sto
 
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
-        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+        rml_pool_store.get_case_by_internal_id(internal_id=case_id)
+        .links[ListIndexes.FIRST.value]
+        .sample.application_version
     )
 
     # WHEN the expected reads is fetched from the case
@@ -390,7 +393,9 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     """Test that the correct application is returned on a case."""
     # GIVEN a case with a sample with an application version
     application_version: ApplicationVersion = (
-        rml_pool_store.family(case_id).links[ListIndexes.FIRST.value].sample.application_version
+        rml_pool_store.get_case_by_internal_id(internal_id=case_id)
+        .links[ListIndexes.FIRST.value]
+        .sample.application_version
     )
 
     # WHEN the application is fetched from the case
@@ -444,7 +449,9 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # GIVEN a database containing some cases but not a specific case
     case_id: str = "some_case"
-    case: Family = store_with_multiple_cases_and_samples.family(case_id)
+    case: Family = store_with_multiple_cases_and_samples.get_case_by_internal_id(
+        internal_id=case_id
+    )
 
     assert not case
 
@@ -453,95 +460,6 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
 
     # THEN no cases are found
     assert not cases
-
-
-def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpers: StoreHelpers):
-    """Test that all pools and samples for an invoice can be fetched."""
-
-    # GIVEN a database with a pool and a sample
-    pool = helpers.ensure_pool(store=store, name="pool_1")
-    sample = helpers.add_sample(store=store, name="sample_1")
-
-    # AND an invoice with the pool and sample
-    invoice: Invoice = helpers.ensure_invoice(store=store, pools=[pool], samples=[sample])
-
-    # ASSERT that there is an invoice with a pool and a sample
-    assert len(invoice.pools) == 1
-    assert len(invoice.samples) == 1
-
-    # WHEN fetching all pools and samples for the invoice
-    records = store.get_pools_and_samples_for_invoice_by_invoice_id(invoice_id=invoice.id)
-    # THEN the pool and sample should be returned
-    assert pool in records
-    assert sample in records
-
-
-def test_get_samples_by_subject_id(
-    store_with_samples_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
-    customer_id: str = "cust123",
-    subject_id: str = "test_subject",
-):
-    """Test that samples can be fetched by subject id."""
-    # GIVEN a database with two samples that have a subject ID but only one is tumour
-
-    # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
-
-    # ASSERT that there is a customer with the given customer id
-    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
-        customer_id=customer_id
-    )
-
-    # WHEN fetching the sample by subject id and customer_id
-    samples = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id(
-        subject_id=subject_id, customer_id=customer_id
-    )
-
-    # THEN two samples should be returned
-    assert samples and len(samples) == 2
-
-
-def test_get_samples_by_subject_id_and_is_tumour(
-    store_with_samples_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
-    customer_id: str = "cust123",
-    subject_id: str = "test_subject",
-    is_tumour: bool = True,
-):
-    """Test that samples can be fetched by subject id."""
-    # GIVEN a database with two samples that have a subject ID but only one is tumour
-
-    # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_all_samples()) == 2
-
-    # ASSERT that there is a customer with the given customer id
-    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_customer_id(
-        customer_id=customer_id
-    )
-    # WHEN fetching the sample by subject id and customer_id
-    samples: List[
-        Sample
-    ] = store_with_samples_subject_id_and_tumour_status.get_samples_by_subject_id_and_is_tumour(
-        subject_id=subject_id, customer_id=customer_id, is_tumour=is_tumour
-    )
-
-    # THEN two samples should be returned
-    assert samples and len(samples) == 1
-
-
-def test_filter_get_sample_by_name(store_with_samples_that_have_names: Store, name="sample_1"):
-    """Test that samples can be fetched by name."""
-    # GIVEN a database with two samples of which one has a name
-
-    # ASSERT that there are two samples in the store
-    assert len(store_with_samples_that_have_names.get_all_samples()) == 2
-
-    # WHEN fetching the sample by name
-    samples: Sample = store_with_samples_that_have_names.get_sample_by_name(name=name)
-
-    # THEN one sample should be returned
-    assert samples and samples.name == name
 
 
 def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):
@@ -750,3 +668,23 @@ def test_get_pools_to_render_with_customer_and_order_enquiry(
 
     # THEN one pools should be returned
     assert len(pools) == 1
+
+
+def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_samples: Store):
+    """Test that a case can be found by customer and case name."""
+    # GIVEN a database with multiple cases for a customer
+    case: Family = store_with_multiple_cases_and_samples._get_query(table=Family).first()
+    customer: Customer = store_with_multiple_cases_and_samples._get_query(table=Customer).first()
+
+    assert case.customer == customer
+
+    # WHEN fetching a case by customer and case name
+    filtered_case: Family = store_with_multiple_cases_and_samples.get_case_by_name_and_customer(
+        customer=customer,
+        case_name=case.name,
+    )
+
+    # THEN the correct case should be returned
+    assert filtered_case is not None
+    assert filtered_case.customer_id == customer.id
+    assert filtered_case.name == case.name
