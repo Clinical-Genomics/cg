@@ -271,7 +271,6 @@ def test_archive_folders(
     """Tests that the archiving function correctly formats the input and sends API request."""
 
     # GIVEN two paths that should be archived
-
     mock_ddn_refresh_response = Response()
     mock_ddn_refresh_response.status_code = 200
 
@@ -321,7 +320,7 @@ def test_retrieve_folders(
             {Path(remote_path): Path(local_directory)}
         )
 
-    # THEN a boolean response should be returned
+    # THEN the response returned should be true
     assert response
 
     # THEN the mocked submit function should have been called exactly once with correct arguments

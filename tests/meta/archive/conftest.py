@@ -21,7 +21,7 @@ def fixture_ddn_dataflow_config(
         database_name="test_db",
         user="test_user",
         password="DummyPassword",
-        url="some/api/url.com",
+        url=Path("some", "api", "url.com").as_posix(),
         local_storage=local_storage_repository,
         archive_repository=remote_storage_repository,
     )
@@ -49,13 +49,13 @@ def fixture_ddn_dataflow_api(ddn_dataflow_config: DDNDataFlowConfig) -> DDNDataF
 
 @pytest.fixture(name="transfer_data")
 def fixture_transfer_data(local_directory: Path, remote_path: Path) -> TransferData:
-    """Fixture of a TransferData object."""
+    """Return a TransferData object."""
     return TransferData(source=local_directory.as_posix(), destination=remote_path.as_posix())
 
 
 @pytest.fixture(name="transfer_payload")
 def fixture_transfer_payload(transfer_data: TransferData) -> TransferPayload:
-    """Fixture of a TransferPayload object containing two identical TransferData object.."""
+    """Return a TransferPayload object containing two identical TransferData object.."""
     return TransferPayload(files_to_transfer=[transfer_data, transfer_data.copy(deep=True)])
 
 
