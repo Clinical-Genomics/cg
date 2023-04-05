@@ -1,5 +1,6 @@
 # pytest
 pytest>=5.2     # due to pytest-flask, pytest-cov
+pytest-testmon
 mock
 pytest-mock
 snapshottest
