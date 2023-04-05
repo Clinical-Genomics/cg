@@ -156,7 +156,7 @@ def test_nipt_statina_upload_auto_without_analyses(
     result = cli_runner.invoke(nipt_upload_all, [], obj=upload_context)
 
     # THEN the command should abort without raising an error
-    assert result.exit_code != 0
+    assert result.exit_code == 0
     assert "No analyses found to upload" in caplog.text
 
 
