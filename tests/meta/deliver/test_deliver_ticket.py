@@ -11,7 +11,7 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_get_inbox_path(
-    cg_context: CGConfig, customer_id: str, helpers: StoreHelpers, mocker, ticket: str
+    cg_context: CGConfig, customer_id: str, helpers: StoreHelpers, mocker, ticket_id: str
 ):
     """Test to get the path to customer inbox on the HPC."""
     # GIVEN a deliver_ticket API
@@ -21,7 +21,7 @@ def test_get_inbox_path(
     case = helpers.add_case(
         store=cg_context.status_db,
         internal_id="angrybird",
-        name=ticket,
+        name=ticket_id,
         data_analysis=Pipeline.SARS_COV_2,
     )
 
@@ -29,13 +29,13 @@ def test_get_inbox_path(
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN running get_inbox_path
-    inbox = deliver_ticket_api.get_inbox_path(ticket=ticket)
+    inbox = deliver_ticket_api.get_inbox_path(ticket=ticket_id)
 
     # THEN a path is returned for cust000 with the folder ticket in the inbox
-    assert inbox.parts[-3:] == (customer_id, INBOX_NAME, ticket)
+    assert inbox.parts[-3:] == (customer_id, INBOX_NAME, ticket_id)
 
 
-def test_check_if_upload_is_needed(cg_context: CGConfig, mocker, ticket: str):
+def test_check_if_upload_is_needed(cg_context: CGConfig, mocker, ticket_id: str):
     """Test if upload is needed when it is needed"""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
@@ -47,13 +47,13 @@ def test_check_if_upload_is_needed(cg_context: CGConfig, mocker, ticket: str):
     )
 
     # WHEN running check_if_upload_is_needed
-    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket)
+    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket_id)
 
     # THEN it turns out that upload is needed
     assert is_upload_needed is True
 
 
-def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker, ticket: str):
+def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker, ticket_id: str):
     """Test if upload is needed when it is not needed"""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
@@ -63,13 +63,13 @@ def test_check_if_upload_is_needed_part_deux(cg_context: CGConfig, mocker, ticke
     DeliverTicketAPI.get_inbox_path.return_value = Path("/")
 
     # WHEN running check_if_upload_is_needed
-    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket)
+    is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket_id)
 
     # THEN it turns out that upload is not needed
     assert is_upload_needed is False
 
 
-def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, ticket: str, timestamp_now):
+def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, ticket_id: str, timestamp_now):
     """Test to generate the date tag."""
     # GIVEN a deliver_ticket API
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
@@ -78,7 +78,7 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, ticket: str, t
     case = helpers.add_case(
         store=cg_context.status_db,
         internal_id="angrybird",
-        name=ticket,
+        name=ticket_id,
         data_analysis=Pipeline.SARS_COV_2,
     )
 
@@ -88,7 +88,7 @@ def test_generate_date_tag(cg_context: CGConfig, mocker, helpers, ticket: str, t
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN running generate_date_tag
-    date = deliver_ticket_api.generate_date_tag(ticket=ticket)
+    date = deliver_ticket_api.generate_date_tag(ticket=ticket_id)
 
     # THEN check that a date was returned
     assert str(timestamp_now) == str(date)
@@ -113,7 +113,7 @@ def test_sort_files(cg_context: CGConfig):
 
 
 def test_check_if_concatenation_is_needed(
-    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket: str
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_id: str
 ):
     """Test to check if concatenation is needed when it is not needed"""
     # GIVEN a deliver_ticket API
@@ -130,14 +130,14 @@ def test_check_if_concatenation_is_needed(
     DeliverTicketAPI.get_app_tag.return_value = "RMLP15S175"
 
     # WHEN running check_if_concatenation_is_needed
-    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(ticket=ticket)
+    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(ticket=ticket_id)
 
     # THEN concatenation is not needed
     assert is_concatenation_needed is False
 
 
 def test_check_if_concatenation_is_needed_part_deux(
-    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket: str
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_id: str
 ):
     """Test to check if concatenation is needed when it is needed"""
     # GIVEN a deliver_ticket API
@@ -154,14 +154,14 @@ def test_check_if_concatenation_is_needed_part_deux(
     DeliverTicketAPI.get_app_tag.return_value = "MWRNXTR003"
 
     # WHEN running check_if_concatenation_is_needed
-    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(ticket=ticket)
+    is_concatenation_needed = deliver_ticket_api.check_if_concatenation_is_needed(ticket=ticket_id)
 
     # THEN concatenation is needed
     assert is_concatenation_needed is True
 
 
 def test_get_samples_from_ticket(
-    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket: str
+    cg_context: CGConfig, mocker, helpers, analysis_store: Store, case_id, ticket_id: str
 ):
     """Test to get all samples from a ticket"""
     # GIVEN a deliver_ticket API
@@ -174,7 +174,7 @@ def test_get_samples_from_ticket(
     DeliverTicketAPI.get_all_cases_from_ticket.return_value = [case_obj]
 
     # WHEN checking which samples there are in the ticket
-    all_samples: list = deliver_ticket_api.get_samples_from_ticket(ticket=ticket)
+    all_samples: list = deliver_ticket_api.get_samples_from_ticket(ticket=ticket_id)
 
     # THEN concatenation is needed
     assert "child" in all_samples
@@ -183,7 +183,7 @@ def test_get_samples_from_ticket(
 
 
 def test_all_samples_in_cust_inbox(
-    cg_context: CGConfig, mocker, caplog, ticket: str, all_samples_in_inbox
+    cg_context: CGConfig, mocker, caplog, ticket_id: str, all_samples_in_inbox
 ):
     """Test that no samples will be reported as missing when all samples in inbox"""
     caplog.set_level(logging.INFO)
@@ -200,7 +200,7 @@ def test_all_samples_in_cust_inbox(
     DeliverTicketAPI.get_samples_from_ticket.return_value = ["ACC1", "ACC2"]
 
     # WHEN checking if a sample is missing
-    deliver_ticket_api.report_missing_samples(ticket=ticket, dry_run=False)
+    deliver_ticket_api.report_missing_samples(ticket=ticket_id, dry_run=False)
 
     # THEN assert that all files were delivered
     assert "Data has been delivered for all samples" in caplog.text
@@ -211,7 +211,7 @@ def test_samples_missing_in_inbox(
     cg_context: CGConfig,
     mocker,
     caplog,
-    ticket: str,
+    ticket_id: str,
     samples_missing_in_inbox,
 ):
     """Test when samples is missing in customer inbox."""
@@ -231,7 +231,7 @@ def test_samples_missing_in_inbox(
     ]
 
     # WHEN checking if a sample is missing
-    deliver_ticket_api.report_missing_samples(ticket=ticket, dry_run=False)
+    deliver_ticket_api.report_missing_samples(ticket=ticket_id, dry_run=False)
 
     # THEN assert that a sample that is not missing is not missing
     assert analysis_family["samples"][1]["name"] not in caplog.text

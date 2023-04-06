@@ -17,6 +17,8 @@ from tests.store_helpers import StoreHelpers
 from cg.store.models import ApplicationVersion, Pool, Sample, Invoice, Application
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
 from cg.constants.invoice import CustomerNames
+from cg.constants.subject import PhenotypeStatus
+from cg.constants import Pipeline
 
 
 class StoreCheckers:
@@ -170,7 +172,7 @@ def fixture_rml_pool_store(
     helpers,
     sample_id: str,
     store: Store,
-    ticket: str,
+    ticket_id: str,
     timestamp_now: dt.datetime,
 ):
     new_customer = store.add_customer(
@@ -193,7 +195,7 @@ def fixture_rml_pool_store(
     )
     store.add_commit(application)
 
-    app_version = store.add_version(
+    app_version = store.add_application_version(
         application=application,
         version=1,
         valid_from=timestamp_now,
@@ -217,7 +219,7 @@ def fixture_rml_pool_store(
     new_case = helpers.add_case(
         store=store,
         internal_id=case_id,
-        name=PoolSubmitter.create_case_name(ticket=ticket, pool_name="Test"),
+        name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
     )
     store.add_commit(new_case)
 
@@ -248,7 +250,7 @@ def fixture_re_sequenced_sample_store(
     family_name: str,
     flow_cell_id: str,
     sample_id: str,
-    ticket: str,
+    ticket_id: str,
     timestamp_now: dt.datetime,
     helpers,
 ) -> Store:
@@ -267,7 +269,7 @@ def fixture_re_sequenced_sample_store(
         application_type=PrepCategory.READY_MADE_LIBRARY.value,
         reads=1200000000,
         store=re_sequenced_sample_store,
-        original_ticket=ticket,
+        original_ticket=ticket_id,
         sequenced_at=timestamp_now,
     )
 
@@ -341,31 +343,93 @@ def store_with_samples_that_have_names(
     return store
 
 
+@pytest.fixture(name="cust123")
+def fixture_cust123() -> str:
+    """Return a customer id"""
+    return "cust123"
+
+
+@pytest.fixture(name="test_subject")
+def fixture_test_subject() -> str:
+    """Return a subject id"""
+    return "test_subject"
+
+
 @pytest.fixture(name="store_with_samples_subject_id_and_tumour_status")
-def store_with_samples_subject_id_and_tumour_status(
+def fixture_store_with_samples_subject_id_and_tumour_status(
     store: Store,
     helpers: StoreHelpers,
-    customer_id: str = "cust123",
-    subject_id: str = "test_subject",
+    cust123: str,
+    test_subject: str,
 ) -> Store:
     """Return a store with two samples that have subject ids of which one is tumour"""
     helpers.add_sample(
         store=store,
         internal_id="test_sample_1",
         name="sample_1",
-        subject_id=subject_id,
+        subject_id=test_subject,
         is_tumour=True,
-        customer_id=customer_id,
+        customer_id=cust123,
     )
 
     helpers.add_sample(
         store=store,
         internal_id="test_sample_2",
         name="sample_2",
-        subject_id=subject_id,
+        subject_id=test_subject,
         is_tumour=False,
-        customer_id=customer_id,
+        customer_id=cust123,
     )
+    return store
+
+
+@pytest.fixture(name="store_with_samples_and_tumour_status_missing_subject_id")
+def fixture_store_with_samples_and_tumour_status_missing_subject_id(
+    store: Store,
+    helpers: StoreHelpers,
+    cust123: str,
+    test_subject: str,
+) -> Store:
+    """Return a store with two samples of which one is tumour"""
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_1",
+        name="sample_1",
+        is_tumour=True,
+        customer_id=cust123,
+    )
+
+    helpers.add_sample(
+        store=store,
+        internal_id="test_sample_2",
+        name="sample_2",
+        is_tumour=False,
+        customer_id=cust123,
+    )
+    return store
+
+
+@pytest.fixture(name="store_with_samples_customer_id_and_subject_id_and_tumour_status")
+def store_with_samples_customer_id_and_subject_id_and_tumour_status(
+    store: Store, helpers: StoreHelpers
+) -> Store:
+    """Return a store with four samples with different customer IDs, and tumour status."""
+    samples_data = [
+        # customer_id, subject_id, is_tumour
+        ("1", "test_subject", True),
+        ("1", "test_subject_2", False),
+        ("2", "test_subject", True),
+        ("2", "test_subject_2", False),
+    ]
+    for customer_id, subject_id, is_tumour in samples_data:
+        helpers.add_sample(
+            store=store,
+            internal_id=f"test_sample_{customer_id}_{subject_id}",
+            name=f"sample_{customer_id}_{subject_id}",
+            subject_id=subject_id,
+            is_tumour=is_tumour,
+            customer_id=customer_id,
+        )
     return store
 
 
@@ -470,3 +534,115 @@ def fixture_store_with_pools_for_multiple_customers(
             delivered_at=timestamp_now,
         )
     yield store
+
+
+@pytest.fixture(name="store_with_analyses_for_cases")
+def fixture_store_with_analyses_for_cases(
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: dt.datetime,
+    timestamp_yesterday: dt.datetime,
+) -> Store:
+    """Return a store with two analyses for two cases."""
+    case_one = analysis_store.get_case_by_internal_id("yellowhog")
+    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
+
+    cases = [case_one, case_two]
+    for case in cases:
+        oldest_analysis = helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_yesterday,
+            uploaded_at=timestamp_yesterday,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_yesterday,
+        )
+        helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_now,
+            uploaded_at=timestamp_now,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_now,
+        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        analysis_store.relate_sample(
+            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        )
+    return analysis_store
+
+
+@pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_fluffy")
+def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: dt.datetime,
+    timestamp_yesterday: dt.datetime,
+) -> Store:
+    """Return a store with two analyses for two cases and pipeline."""
+    case_one = analysis_store.get_case_by_internal_id("yellowhog")
+    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
+
+    cases = [case_one, case_two]
+    for case in cases:
+        oldest_analysis = helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_yesterday,
+            uploaded_at=timestamp_yesterday,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_yesterday,
+            pipeline=Pipeline.FLUFFY,
+        )
+        helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_now,
+            uploaded_at=None,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_now,
+            pipeline=Pipeline.FLUFFY,
+        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        analysis_store.relate_sample(
+            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        )
+    return analysis_store
+
+
+@pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_microsalt")
+def fixture_store_with_analyses_for_cases_not_uploaded_microsalt(
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: dt.datetime,
+    timestamp_yesterday: dt.datetime,
+) -> Store:
+    """Return a store with two analyses for two cases and pipeline."""
+    case_one = analysis_store.get_case_by_internal_id("yellowhog")
+    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
+
+    cases = [case_one, case_two]
+    for case in cases:
+        oldest_analysis = helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_yesterday,
+            uploaded_at=timestamp_yesterday,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_yesterday,
+            pipeline=Pipeline.MICROSALT,
+        )
+        helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_now,
+            uploaded_at=None,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_now,
+            pipeline=Pipeline.MICROSALT,
+        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        analysis_store.relate_sample(
+            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        )
+    return analysis_store

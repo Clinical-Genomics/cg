@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
+          cache: 'pip'
 
       - name: Intall pip
         # Make sure that we have correct python version and pip version

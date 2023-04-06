@@ -98,7 +98,7 @@ class RsyncAPI(MetaAPI):
             self.log_dir: Path = self.base_path / folder_name
 
     def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
-        return self.status_db.get_cases_from_ticket(ticket=ticket).all()
+        return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(self, ticket: str) -> Dict[str, Path]:
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)

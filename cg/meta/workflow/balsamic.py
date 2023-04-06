@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from housekeeper.store.models import Version, File
 from pydantic import ValidationError
 
 from cg.constants import Pipeline
@@ -348,12 +349,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         }
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
-        """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
+        """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
 
-        version = self.housekeeper_api.last_version(bundle=case_id)
-        raw_file = self.housekeeper_api.get_files(
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        raw_file: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, version=version.id, tags=tags
-        ).first()
+        )
 
         if not raw_file:
             raise FileNotFoundError(
@@ -603,32 +604,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.JSON, file_path=self.get_case_config_path(case_id=case_id)
         )
         return config_data["analysis"]["BALSAMIC_version"]
-
-    def family_has_correct_number_tumor_normal_samples(self, case_id: str) -> bool:
-        """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
-        This check is only applied to filter jobs which start automatically"""
-        query = (
-            self.status_db.query(Sample)
-            .join(Family.links, FamilySample.sample)
-            .filter(Family.internal_id == case_id)
-            .filter(Family.data_analysis == self.pipeline)
-        )
-        return all(
-            [
-                len(query.filter(Sample.is_tumour == False).all()) <= 1,
-                len(query.filter(Sample.is_tumour == True).all()) == 1,
-            ]
-        )
-
-    def get_valid_cases_to_analyze(self) -> list:
-        """Retrieve a list of balsamic cases without analysis,
-        where samples have enough reads to be analyzed"""
-
-        return [
-            case_object.internal_id
-            for case_object in self.get_cases_to_analyze()
-            if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
-        ]
 
     def config_case(
         self,

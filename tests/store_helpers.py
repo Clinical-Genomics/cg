@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from housekeeper.store.models import Bundle, Version
 
@@ -75,6 +75,7 @@ class StoreHelpers:
         sequencing_depth: int = None,
         is_accredited: bool = False,
         version: int = 1,
+        valid_from: datetime = datetime.now(),
         **kwargs,
     ) -> ApplicationVersion:
         """Utility function to return existing or create application version for tests."""
@@ -82,10 +83,10 @@ class StoreHelpers:
             application_tag = "rna_tag"
             prep_category = "wts"
 
-        application = store.get_application_by_tag(tag=application_tag)
+        application: Application = store.get_application_by_tag(tag=application_tag)
         if not application:
-            application = StoreHelpers.add_application(
-                store,
+            application: Application = StoreHelpers.add_application(
+                store=store,
                 application_tag=application_tag,
                 prep_category=prep_category,
                 is_external=is_external,
@@ -101,14 +102,37 @@ class StoreHelpers:
             PriorityTerms.EXPRESS: 30,
             PriorityTerms.RESEARCH: 5,
         }
-        application_version = store.application_version(application=application, version=version)
-        if not application_version:
-            application_version = store.add_version(
-                application=application, version=version, valid_from=datetime.now(), prices=prices
-            )
 
-            store.add_commit(application_version)
+        application_version: ApplicationVersion = StoreHelpers.add_application_version(
+            store=store,
+            application=application,
+            prices=prices,
+            version=version,
+            valid_from=valid_from,
+        )
         return application_version
+
+    @staticmethod
+    def add_application_version(
+        store: Store,
+        application: Application,
+        prices: Dict,
+        version: int = 1,
+        valid_from: datetime = datetime.now(),
+    ) -> ApplicationVersion:
+        """Add an application version to store."""
+        new_record: ApplicationVersion = store.get_application_version_by_application_entry_id(
+            application_entry_id=application.id
+        )
+        if not new_record:
+            new_record: ApplicationVersion = store.add_application_version(
+                application=application,
+                version=version,
+                valid_from=valid_from,
+                prices=prices,
+            )
+        store.add_commit(new_record)
+        return new_record
 
     @staticmethod
     def ensure_application(
@@ -194,17 +218,17 @@ class StoreHelpers:
     def ensure_customer(
         store: Store,
         customer_id: str = "cust000",
-        name: str = "Production",
+        customer_name: str = "Production",
         scout_access: bool = False,
     ) -> Customer:
         """Utility function to return existing or create customer for tests."""
         collaboration: Collaboration = StoreHelpers.ensure_collaboration(store)
-        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
 
         if not customer:
             customer = store.add_customer(
                 internal_id=customer_id,
-                name=name,
+                name=customer_name,
                 scout_access=scout_access,
                 invoice_address="Test street",
                 invoice_reference="ABCDEF",
@@ -228,6 +252,7 @@ class StoreHelpers:
         data_delivery: DataDelivery = DataDelivery.FASTQ_QC,
         uploading: bool = False,
         config_path: str = None,
+        uploaded_to_vogue_at: datetime = None,
     ) -> Analysis:
         """Utility function to add an analysis for tests."""
 
@@ -251,6 +276,8 @@ class StoreHelpers:
             analysis.config_path = config_path
         if pipeline:
             analysis.pipeline = str(pipeline)
+        if uploaded_to_vogue_at:
+            analysis.uploaded_to_vogue_at = uploaded_to_vogue_at
 
         analysis.limitations = "A limitation"
         analysis.family = case
@@ -384,25 +411,27 @@ class StoreHelpers:
     @staticmethod
     def ensure_case(
         store: Store,
-        name: str = "test-case",
+        case_name: str = "test-case",
         case_id: str = "blueeagle",
         customer: Customer = None,
         data_analysis: Pipeline = Pipeline.MIP_DNA,
         data_delivery: DataDelivery = DataDelivery.SCOUT,
+        action: str = None,
     ):
         """Load a case with samples and link relations."""
         if not customer:
             customer = StoreHelpers.ensure_customer(store=store)
-        case = store.get_case_by_internal_id(internal_id=case_id) or store.find_family(
-            customer=customer, name=name
-        )
+        case = store.get_case_by_internal_id(
+            internal_id=case_id
+        ) or store.get_case_by_name_and_customer(customer=customer, case_name=case_name)
         if not case:
             case = StoreHelpers.add_case(
                 store=store,
                 data_analysis=data_analysis,
                 data_delivery=data_delivery,
-                name=name,
+                name=case_name,
                 internal_id=case_id,
+                action=action,
             )
             case.customer = customer
         return case
@@ -534,7 +563,7 @@ class StoreHelpers:
         sample.customer = customer
         case = StoreHelpers.ensure_case(
             store=store,
-            name=str(ticket),
+            case_name=str(ticket),
             customer=customer,
             data_analysis=Pipeline.MICROSALT,
             data_delivery=DataDelivery.FASTQ_QC,
@@ -707,7 +736,7 @@ class StoreHelpers:
     ) -> Pool:
         """Utility function to add a pool that can be used in tests."""
         customer_id = customer_id or "cust000"
-        customer: Customer = store.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = store.get_customer_by_internal_id(customer_internal_id=customer_id)
         if not customer:
             customer = StoreHelpers.ensure_customer(store, customer_id=customer_id)
 
