@@ -405,6 +405,24 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     assert application_version.application == application
 
 
+def test_get_case_samples_by_case_id(
+    store_with_analyses_for_cases: Store,
+    case_id: str,
+):
+    """Test that getting case-samples by case id returns a list of FamilySamples."""
+    # GIVEN a store with case-samples and a case id
+
+    # WHEN fetching the case-samples matching the case id
+    case_samples: List[FamilySample] = store_with_analyses_for_cases.get_case_samples_by_case_id(
+        case_id=case_id
+    )
+
+    # THEN a list of case-samples should be returned
+    assert case_samples
+    assert isinstance(case_samples, List)
+    assert isinstance(case_samples[0], FamilySample)
+
+
 def test_find_single_case_for_sample(
     sample_id_in_single_case: str, store_with_multiple_cases_and_samples: Store
 ):
