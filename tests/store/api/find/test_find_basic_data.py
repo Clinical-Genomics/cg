@@ -4,7 +4,6 @@ from cg.constants.constants import MicrosaltAppTags
 from cg.store import Store
 from cg.store.models import (
     Application,
-    ApplicationVersion,
     Bed,
     BedVersion,
     Customer,
@@ -163,27 +162,6 @@ def test_get_applications_by_prep_category_and_is_not_archived(
     assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
     assert (application.prep_category == prep_category for application in applications)
     assert (application.is_archived is False for application in applications)
-
-
-def test_application_version_with_version_and_application(
-    store_with_different_application_versions: Store,
-    application_version_version: int = 1,
-):
-    """Test that application_version returns a valid query given an application and a version"""
-    # GIVEN a store with applications and an ApplicationVersion.version
-    application: Application = store_with_different_application_versions.get_applications()[0]
-    assert isinstance(application, Application)
-
-    # WHEN calling the function with an application and a version
-    application_version: ApplicationVersion = (
-        store_with_different_application_versions.application_version(
-            application=application,
-            version=application_version_version,
-        )
-    )
-
-    # THEN
-    assert isinstance(application_version, ApplicationVersion)
 
 
 def test_get_bed_version_query(base_store: Store):
