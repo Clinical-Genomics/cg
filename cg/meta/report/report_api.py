@@ -255,7 +255,7 @@ class ReportAPI(MetaAPI):
 
         samples = list()
         case_samples: List[FamilySample] = self.status_db.get_case_samples_by_case_id(
-            case_id=case.internal_id
+            case_internal_id=case.internal_id
         )
 
         for case_sample in case_samples:

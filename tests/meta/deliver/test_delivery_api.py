@@ -50,7 +50,9 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
     assert version
 
     # GIVEN that a case object exists in the database
-    link_objs: List[FamilySample] = deliver_api.store.get_case_samples_by_case_id(case_id=case_id)
+    link_objs: List[FamilySample] = deliver_api.store.get_case_samples_by_case_id(
+        case_internal_id=case_id
+    )
     samples: List[Sample] = [link.sample for link in link_objs]
     sample_ids: Set[str] = set([sample.internal_id for sample in samples])
 

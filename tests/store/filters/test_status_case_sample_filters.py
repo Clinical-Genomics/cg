@@ -18,7 +18,7 @@ def test_get_samples_associated_with_case_by_internal_id_valid_id(
 
     # WHEN filtering by the chosen case internal id
     filtered_query: Query = get_samples_associated_with_case_by_internal_id(
-        case_samples=case_sample_query, case_id=case_id
+        case_samples=case_sample_query, case_internal_id=case_id
     )
 
     # THEN the filtered query has at least one element but fewer elements than the original query
@@ -38,7 +38,7 @@ def test_get_samples_associated_with_case_by_internal_id_unexistent_id(
 
     # WHEN filtering using an unexistent id
     filtered_query: Query = get_samples_associated_with_case_by_internal_id(
-        case_samples=case_sample_query, case_id=case_id_does_not_exist
+        case_samples=case_sample_query, case_internal_id=case_id_does_not_exist
     )
 
     # THEN the filtered query is empty
@@ -55,7 +55,7 @@ def test_get_cases_associated_with_sample_by_internal_id_valid_id(
 
     # WHEN filtering using a sample internal id
     filtered_query: Query = get_cases_associated_with_sample_by_internal_id(
-        case_samples=case_sample_query, sample_id=sample_id
+        case_samples=case_sample_query, sample_internal_id=sample_id
     )
 
     # THEN the filtered query has at least one element but fewer elements than the original query
@@ -75,7 +75,7 @@ def test_get_cases_associated_with_sample_by_internal_id_invalid_id(
 
     # WHEN filtering using an invalid sample internal id
     filtered_query: Query = get_cases_associated_with_sample_by_internal_id(
-        case_samples=case_sample_query, sample_id=invalid_sample_id
+        case_samples=case_sample_query, sample_internal_id=invalid_sample_id
     )
 
     # THEN the filtered query is empty

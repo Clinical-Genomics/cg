@@ -70,12 +70,12 @@ def test_store_api_delete_all_empty_cases(
     case_without_samples: List[
         FamilySample
     ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
-        case_id=case_id_without_samples
+        case_internal_id=case_id_without_samples
     )
     case_with_samples: List[
         FamilySample
     ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
-        case_id=case_id_with_multiple_samples
+        case_internal_id=case_id_with_multiple_samples
     )
 
     assert not case_without_samples
@@ -88,12 +88,12 @@ def test_store_api_delete_all_empty_cases(
 
     # THEN no entry should be found for the empty case, but the one with samples should remain.
     result: List[FamilySample] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
-        case_id=case_id_without_samples
+        case_internal_id=case_id_without_samples
     )
     case_with_samples: List[
         FamilySample
     ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
-        case_id=case_id_with_multiple_samples
+        case_internal_id=case_id_with_multiple_samples
     )
 
     assert not result

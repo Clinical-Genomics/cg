@@ -414,7 +414,7 @@ def test_get_case_samples_by_case_id(
 
     # WHEN fetching the case-samples matching the case id
     case_samples: List[FamilySample] = store_with_analyses_for_cases.get_case_samples_by_case_id(
-        case_id=case_id
+        case_internal_id=case_id
     )
 
     # THEN a list of case-samples should be returned

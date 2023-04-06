@@ -60,7 +60,7 @@ def case_balsamic(case_id, report_api_balsamic) -> Family:
 def case_samples_data(case_id, report_api_mip_dna):
     """MIP DNA family sample object."""
 
-    return report_api_mip_dna.status_db.get_case_samples_by_case_id(case_id=case_id)
+    return report_api_mip_dna.status_db.get_case_samples_by_case_id(case_internal_id=case_id)
 
 
 @pytest.fixture(name="mip_analysis_api")
@@ -96,7 +96,9 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
     helpers.add_analysis(analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=datetime.now())
 
     # Mock sample dates to calculate processing times
-    for family_sample in analysis_store.get_case_samples_by_case_id(case_id=case.internal_id):
+    for family_sample in analysis_store.get_case_samples_by_case_id(
+        case_internal_id=case.internal_id
+    ):
         family_sample.sample.ordered_at = timestamp_yesterday - timedelta(days=2)
         family_sample.sample.received_at = timestamp_yesterday - timedelta(days=1)
         family_sample.sample.prepared_at = timestamp_yesterday

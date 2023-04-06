@@ -6,15 +6,17 @@ from cg.store.models import Family, Sample
 
 
 def get_samples_associated_with_case_by_internal_id(
-    case_samples: Query, case_id: str, **kwargs
+    case_samples: Query, case_internal_id: str, **kwargs
 ) -> Query:
     """Return samples associated with a case."""
-    return case_samples.filter(Family.internal_id == case_id)
+    return case_samples.filter(Family.internal_id == case_internal_id)
 
 
-def get_cases_associated_with_sample_by_internal_id(case_samples: Query, sample_id: str, **kwargs):
+def get_cases_associated_with_sample_by_internal_id(
+    case_samples: Query, sample_internal_id: str, **kwargs
+):
     """Return cases associated with a sample internal id."""
-    return case_samples.filter(Sample.internal_id == sample_id)
+    return case_samples.filter(Sample.internal_id == sample_internal_id)
 
 
 def get_cases_associated_with_sample_by_entry_id(
@@ -27,18 +29,18 @@ def get_cases_associated_with_sample_by_entry_id(
 def apply_case_sample_filter(
     filter_functions: List[Callable],
     case_samples: Query,
-    case_id: Optional[str] = None,
+    case_internal_id: Optional[str] = None,
     sample_entry_id: Optional[int] = None,
-    sample_id: Optional[str] = None,
+    sample_internal_id: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
     for function in filter_functions:
         case_samples: Query = function(
             case_samples=case_samples,
-            case_id=case_id,
+            case_internal_id=case_internal_id,
             sample_entry_id=sample_entry_id,
-            sample_id=sample_id,
+            sample_internal_id=sample_internal_id,
         )
     return case_samples
 

@@ -252,11 +252,11 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all cases."""
         return self._get_query(table=Family).all()
 
-    def get_case_samples_by_case_id(self, case_id: str) -> List[FamilySample]:
+    def get_case_samples_by_case_id(self, case_internal_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_INTERNAL_ID],
-            case_id=case_id,
+            case_internal_id=case_internal_id,
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
@@ -489,7 +489,7 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def get_case_sample_link(self, case_id: str, sample_id: str) -> FamilySample:
+    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> FamilySample:
         """Return a case-sample link between a family and a sample."""
         filter_functions: List[CaseSampleFilter] = [
             CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_INTERNAL_ID,
@@ -498,8 +498,8 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_case_sample_filter(
             filter_functions=filter_functions,
             case_samples=self._get_join_case_sample_query(),
-            case_id=case_id,
-            sample_id=sample_id,
+            case_internal_id=case_internal_id,
+            sample_internal_id=sample_internal_id,
         ).first()
 
     def new_invoice_id(self) -> int:
@@ -681,7 +681,7 @@ class FindBusinessDataHandler(BaseHandler):
         samples: Query = apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_INTERNAL_ID],
             case_samples=self._get_join_sample_family_query(),
-            case_id=case_id,
+            case_internal_id=case_id,
         )
         samples: Query = apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITH_TYPE],

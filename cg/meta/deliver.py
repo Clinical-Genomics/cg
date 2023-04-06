@@ -76,7 +76,7 @@ class DeliverAPI:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        links: List[FamilySample] = self.store.get_case_samples_by_case_id(case_id=case_id)
+        links: List[FamilySample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
