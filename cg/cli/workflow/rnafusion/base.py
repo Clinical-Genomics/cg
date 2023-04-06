@@ -159,6 +159,7 @@ def run(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_REFERENCES
 @DRY_RUN
 @click.pass_context
 def start(
@@ -174,6 +175,7 @@ def start(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
+    genomes_base: Path,
     dry_run: bool,
 ) -> None:
     """Start full workflow for CASE ID."""
@@ -184,7 +186,7 @@ def start(
     except DecompressionNeededError as error:
         LOG.error(error)
         raise click.Abort() from error
-    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
     context.invoke(
         run,
         case_id=case_id,
