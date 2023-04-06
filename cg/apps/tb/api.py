@@ -9,11 +9,11 @@ from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat, APIMethods
+from cg.constants.constants import APIMethods, FileFormat
 from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
-from cg.io.controller import ReadStream, APIRequest
+from cg.io.controller import APIRequest, ReadStream
 
 LOG = logging.getLogger(__name__)
 
@@ -151,6 +151,7 @@ class TrailblazerAPI:
         email: str = None,
         data_analysis: Pipeline = None,
         ticket: str = None,
+        use_tower: bool = False,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -161,6 +162,7 @@ class TrailblazerAPI:
             "priority": slurm_quality_of_service,
             "data_analysis": str(data_analysis).upper(),
             "ticket": ticket,
+            "use_tower": use_tower,
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
