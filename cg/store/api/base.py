@@ -2,6 +2,7 @@
 from typing import Type, List
 
 from alchy import Query, ModelBase
+from sqlalchemy import and_, func
 from dataclasses import dataclass
 
 from cg.store.models import (
@@ -116,3 +117,30 @@ class BaseHandler:
                 )
             )
         return latest_analyses_per_case
+
+    def _get_latest_analyses_for_cases_query(self) -> Query:
+        """Return a list of the latest analyses for each case."""
+        return self._get_join_subquery_analysis_case_entry_id_and_started_at()
+
+    def _get_latest_analysis_for_cases_sub_query(self) -> Query:
+        """Return a sub query for the latest analysis for each case."""
+        sub_query = (
+            self._get_join_analysis_case_query()
+            .group_by(Family.id)
+            .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
+            .subquery()
+        )
+        return sub_query
+
+    def _get_join_subquery_analysis_case_entry_id_and_started_at(self) -> Query:
+        """Return a join query for the latest analysis for each case."""
+        analyses = self._get_query(table=Analysis)
+        sub_query = self._get_latest_analysis_for_cases_sub_query()
+
+        return analyses.join(
+            sub_query,
+            and_(
+                self.Analysis.family_id == sub_query.c.family_id,
+                self.Analysis.started_at == sub_query.c.started_at,
+            ),
+        )
