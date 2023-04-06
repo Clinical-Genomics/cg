@@ -29,7 +29,7 @@ def test_get_samples_associated_with_case_valid_id(store_with_analyses_for_cases
 
     # THEN the filtered query has fewer elements than the original query
     assert filtered_query.count() < case_sample_query.count()
-    # THEN the case_samples in the query have the correct case id
+    # THEN the case_samples in the filtered query have the correct case id
     assert all(
         case_sample.family.internal_id == case_internal_id for case_sample in filtered_query.all()
     )
@@ -48,14 +48,14 @@ def test_get_samples_associated_with_case_unexistent_id(
         case_samples=case_sample_query, case_id=case_id_does_not_exist
     )
 
-    # THEN the returned query is empty
+    # THEN the filtered query is empty
     assert filtered_query.count() == 0
 
 
 def test_get_cases_associated_with_sample_by_entry_id_valid_id(
     store_with_analyses_for_cases: Store,
 ):
-    """."""
+    """Test that filtering by a valid entry id returns case-samples with the desired entry id."""
     # GIVEN a store with case-samples
     case_sample_query: Query = store_with_analyses_for_cases._get_join_case_sample_query()
     assert case_sample_query.count() > 0
@@ -70,16 +70,23 @@ def test_get_cases_associated_with_sample_by_entry_id_valid_id(
 
     # THEN the filtered query has fewer elements than the original query
     assert filtered_query.count() < case_sample_query.count()
-    # THEN the case_samples in the query have the correct case id
+    # THEN the case_samples in the filtered query have the correct case id
     assert all(case_sample.sample_id == sample_entry_id for case_sample in filtered_query.all())
 
 
 def test_get_cases_associated_with_sample_by_entry_id_invalid_id(
     store_with_analyses_for_cases: Store,
+    invalid_entry_id: int = -1,
 ):
-    """."""
-    # GIVEN
+    """Test that filtering with an invalid entry id returns an empty query."""
+    # GIVEN a store with case-samples
+    case_sample_query: Query = store_with_analyses_for_cases._get_join_case_sample_query()
+    assert case_sample_query.count() > 0
 
-    # WHEN
+    # WHEN filtering using an invalid entry id
+    filtered_query: Query = get_cases_associated_with_sample_by_entry_id(
+        case_samples=case_sample_query, sample_entry_id=invalid_entry_id
+    )
 
-    # THEN
+    # THEN the filtered query is empty
+    assert filtered_query.count() == 0
