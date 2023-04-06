@@ -255,7 +255,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_case_samples_by_case_id(self, case_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_ID],
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_INTERNAL_ID],
             case_id=case_id,
             case_samples=self._get_join_case_sample_query(),
         ).all()
@@ -490,13 +490,11 @@ class FindBusinessDataHandler(BaseHandler):
         return pools + samples
 
     def link(self, family_id: str, sample_id: str) -> FamilySample:
-        """Find a link between a family and a sample."""
-        # to refactor
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Family.internal_id == family_id, Sample.internal_id == sample_id)
-            .first()
-        )
+        """Return a link between a family and a sample."""
+        case_samples: Query = self._get_join_case_sample_query()
+        return case_samples.filter(
+            Family.internal_id == family_id, Sample.internal_id == sample_id
+        ).first()
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
@@ -675,7 +673,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_ID],
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_INTERNAL_ID],
             case_samples=self._get_join_sample_family_query(),
             case_id=case_id,
         )
