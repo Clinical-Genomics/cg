@@ -270,8 +270,8 @@ class CaseSubmitter(Submitter):
                 sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
                 sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
-                    case_sample: FamilySample = self.status.link(
-                        family_id=status_db_case.internal_id, sample_id=sample["internal_id"]
+                    case_sample: FamilySample = self.status.get_case_sample_link(
+                        case_id=status_db_case.internal_id, sample_id=sample["internal_id"]
                     )
                 if not case_sample:
                     case_sample: FamilySample = self._create_link(

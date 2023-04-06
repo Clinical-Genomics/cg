@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union
 
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus, Pipeline
@@ -489,11 +489,17 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def link(self, family_id: str, sample_id: str) -> FamilySample:
-        """Return a link between a family and a sample."""
-        case_samples: Query = self._get_join_case_sample_query()
-        return case_samples.filter(
-            Family.internal_id == family_id, Sample.internal_id == sample_id
+    def get_case_sample_link(self, case_id: str, sample_id: str) -> FamilySample:
+        """Return a case-sample link between a family and a sample."""
+        filter_functions: List[CaseSampleFilter] = [
+            CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_INTERNAL_ID,
+            CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_INTERNAL_ID,
+        ]
+        return apply_case_sample_filter(
+            filter_functions=filter_functions,
+            case_samples=self._get_join_case_sample_query(),
+            case_id=case_id,
+            sample_id=sample_id,
         ).first()
 
     def new_invoice_id(self) -> int:
