@@ -423,6 +423,27 @@ def test_get_case_samples_by_case_id(
     assert isinstance(case_samples[0], FamilySample)
 
 
+def test_get_case_sample_link(
+    store_with_analyses_for_cases: Store,
+    case_id: str,
+    sample_id: str,
+):
+    """Test that the returned element is a FamilySample with the correct case and sample internal ids."""
+    # GIVEN a store with case-samples and valid case and sample internal ids
+
+    # WHEN fetching a case-sample with case and sample internal ids
+    case_sample: FamilySample = store_with_analyses_for_cases.get_case_sample_link(
+        case_internal_id=case_id,
+        sample_internal_id=sample_id,
+    )
+
+    # THEN the returned element is a FamilySample object
+    assert isinstance(case_sample, FamilySample)
+    # THEN the returned family sample has teh correct case and sample internal ids
+    assert case_sample.family.internal_id == case_id
+    assert case_sample.sample.internal_id == sample_id
+
+
 def test_find_single_case_for_sample(
     sample_id_in_single_case: str, store_with_multiple_cases_and_samples: Store
 ):
