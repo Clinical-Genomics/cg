@@ -1,6 +1,7 @@
 """Tests cli methods to create the case config for RNAfusion"""
 
 import logging
+from pathlib import Path
 from typing import List
 
 from _pytest.logging import LogCaptureFixture
@@ -141,7 +142,7 @@ def test_reference(
 
     # GIVEN a VALID case_id and reference dir
     case_id: str = rnafusion_case_id
-    reference_dir: str = "/non/default/path/to/references/"
+    reference_dir: str = Path("non", "default", "path", "to", "references").as_posix()
 
     # WHEN running config case
     result = cli_runner.invoke(
