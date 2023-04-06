@@ -438,7 +438,7 @@ def test_find_single_case_for_sample(
     # WHEN the cases associated with the sample is fetched
     cases: List[
         FamilySample
-    ] = store_with_multiple_cases_and_samples.get_cases_from_sample_entry_id(
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample.id
     ).all()
 
@@ -458,7 +458,7 @@ def test_find_multiple_cases_for_sample(
     # WHEN the cases associated with the sample is fetched
     cases: List[
         FamilySample
-    ] = store_with_multiple_cases_and_samples.get_cases_from_sample_entry_id(
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample.id
     ).all()
 

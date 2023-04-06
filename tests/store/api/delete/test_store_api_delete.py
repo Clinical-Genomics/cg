@@ -46,12 +46,12 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     # THEN it should no longer be associated with any cases, but other relationships should remain
     results: List[
         FamilySample
-    ] = store_with_multiple_cases_and_samples.get_cases_from_sample_entry_id(
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample_in_single_case.id
     ).all()
     existing_relationships: List[
         FamilySample
-    ] = store_with_multiple_cases_and_samples.get_cases_from_sample_entry_id(
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample_in_multiple_cases.id
     ).all()
 
