@@ -4,7 +4,6 @@ from typing import Type, List
 from alchy import Query, ModelBase
 from sqlalchemy import and_, func
 from dataclasses import dataclass
-
 from cg.store.models import (
     Analysis,
     Application,
@@ -98,6 +97,10 @@ class BaseHandler:
         return self._get_query(table=Sample).join(
             Sample.application_version, ApplicationVersion.application
         )
+
+    def _get_join_analysis_sample_family_query(self) -> Query:
+        """Return join analysis to sample to case query."""
+        return self._get_query(table=Analysis).join(Family, Family.links, FamilySample.sample)
 
     def _get_subquery_with_latest_case_analysis_date(self) -> Query:
         """Return a subquery with the case internal id and the date of its latest analysis."""

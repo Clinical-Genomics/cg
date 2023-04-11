@@ -586,7 +586,7 @@ class StatusHandler(BaseHandler):
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
-    def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
+    def get_analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Return analyses that have not been uploaded."""
         analysis_filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
@@ -711,17 +711,23 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def analyses_to_deliver(self, pipeline: Pipeline = None) -> Query:
-        """Fetch analyses that have been uploaded but not delivered."""
-        return (
-            self.Analysis.query.join(Family, Family.links, FamilySample.sample)
-            .filter(
-                Analysis.uploaded_at.isnot(None),
-                Sample.delivered_at.is_(None),
-                Analysis.pipeline == str(pipeline),
-            )
-            .order_by(Analysis.uploaded_at.desc())
+    def get_analyses(self) -> List[Analysis]:
+        return self._get_query(table=Analysis).all()
+
+    def get_analyses_to_deliver_for_pipeline(self, pipeline: Pipeline = None) -> List[Analysis]:
+        """Return analyses that have been uploaded but not delivered."""
+        analyses: Query = apply_sample_filter(
+            samples=self._get_join_analysis_sample_family_query(),
+            filter_functions=[SampleFilter.FILTER_IS_NOT_DELIVERED],
         )
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.ORDER_BY_UPLOADED_AT,
+        ]
+        return apply_analysis_filter(
+            analyses=analyses, filter_functions=filter_functions, pipeline=pipeline
+        ).all()
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
