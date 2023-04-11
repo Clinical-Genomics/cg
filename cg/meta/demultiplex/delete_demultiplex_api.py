@@ -239,7 +239,7 @@ class DeleteDemuxAPI:
         init_files: bool,
         status_db: bool,
     ) -> None:
-        """Master command to delete the presence of a flow cell in all services"""
+        """Master command to delete the presence of a flow cell in all services."""
         self.check_active_samples()
         if status_db:
             self.delete_flow_cell_hasta(
