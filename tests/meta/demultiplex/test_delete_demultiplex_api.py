@@ -280,7 +280,7 @@ def test_delete_flow_cell_statusdb(
 
     # WHEN removing the object from the database
 
-    wipe_demux_api.delete_flow_cell_statusdb()
+    wipe_demux_api.delete_flow_cell_in_status_db()
 
     # THEN the user should be informed that the object was removed
 

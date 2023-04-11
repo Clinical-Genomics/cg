@@ -281,15 +281,18 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
     ] = analysis_api.status_db.get_latest_analysis_to_upload_for_pipeline(
         pipeline=Pipeline.MICROSALT
     )
+    if not latest_analyses:
+        LOG.info("No new analyses to upload to Vogue!")
+        return
 
     for analysis in latest_analyses:
-        unique_id: str = analysis.family.internal_id
+        case_internal_id: str = analysis.family.internal_id if analysis.family else None
         try:
-            context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
+            context.invoke(upload_analysis_vogue, unique_id=case_internal_id, dry_run=dry_run)
         except Exception as error:
             LOG.error(
                 "Could not upload data for %s to vogue, exception %s",
-                unique_id,
+                case_internal_id,
                 error.__class__.__name__,
             )
             EXIT_CODE: int = EXIT_FAIL

@@ -91,7 +91,7 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(self) -> Iterable[Analysis]:
+    def get_all_upload_analyses(self) -> List[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
         return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Pipeline.FLUFFY)
 

@@ -79,7 +79,7 @@ def samples(
 ):
     """Set values on many samples at the same time."""
     store: Store = context.obj.status_db
-    sample_objs = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
+    sample_objs: List[Sample] = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
 
     if not sample_objs:
         LOG.error("No samples to alter!")
@@ -108,7 +108,7 @@ def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Stor
         samples_by_case_id: List[Sample] = store.get_samples_by_case_id(case_id=case_id)
 
     if identifiers:
-        samples_by_id = _get_samples_by_identifiers(identifiers, store)
+        samples_by_id: List[Sample] = _get_samples_by_identifiers(identifiers, store)
 
     if case_id and identifiers:
         sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
@@ -227,7 +227,9 @@ def sample(
                     customer_internal_id=value
                 )
             elif key == "application_version":
-                new_value: ApplicationVersion = status_db.current_application_version(value)
+                new_value: ApplicationVersion = status_db.get_current_application_version_by_tag(
+                    tag=value
+                )
 
             if not new_value:
                 LOG.error(f"{key} {value} not found, aborting")
