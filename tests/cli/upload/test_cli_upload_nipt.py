@@ -148,7 +148,7 @@ def test_nipt_statina_upload_auto(
 def test_nipt_statina_upload_auto_without_analyses(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
-    """Tests CLI command to upload without any analyses to upload"""
+    """Tests CLI command to upload without any analyses to upload."""
 
     # GIVEN no analyses for upload
     caplog.set_level(logging.DEBUG)
