@@ -20,7 +20,7 @@ def test_get_latest_analyses_for_cases_query(
 ):
     """Tests that analyses that are not latest are not returned."""
 
-    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
+    # GIVEN an analysis a newer analysis exists
     case = helpers.add_case(analysis_store)
     analysis_oldest = helpers.add_analysis(
         analysis_store,
@@ -45,7 +45,7 @@ def test_get_latest_analyses_for_cases_query(
     # WHEN calling the analyses_to_delivery_report
     analyses: Query = analysis_store._get_latest_analyses_for_cases_query()
 
-    # THEN analyses is a qeury
+    # THEN analyses is a query
     assert isinstance(analyses, Query)
 
     # THEN only the newest analysis should be returned

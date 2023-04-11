@@ -166,7 +166,7 @@ def test_nipt_statina_upload_auto_without_analyses(
 def test_nipt_statina_upload_auto_analysis_without_case(
     upload_context: CGConfig, cli_runner: CliRunner, caplog, helpers, mocker
 ):
-    """Tests CLI command to upload without any analyses to upload"""
+    """Tests CLI command to upload a non-existing case."""
 
     # GIVEN no analyses for upload
     caplog.set_level(logging.DEBUG)

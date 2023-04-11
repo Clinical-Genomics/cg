@@ -35,7 +35,7 @@ def test_get_analyses_uploaded_to_vogue(
     # WHEN fetching the latest analysis to upload to vogue
     analyses: List[Analysis] = store_with_analyses_for_cases.get_analyses_for_vogue_upload()
 
-    # THEN the analyses have not been uploaded to Vogue
+    # THEN the analyses should not have been uploaded to Vogue
     for analysis in analyses:
         assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert not analysis.uploaded_to_vogue_at

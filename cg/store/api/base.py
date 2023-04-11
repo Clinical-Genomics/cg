@@ -99,24 +99,24 @@ class BaseHandler:
             Sample.application_version, ApplicationVersion.application
         )
 
-    def _get_latest_analysis_for_cases_sub_query(self) -> Query:
-        """Return a sub query for the latest analysis for each case."""
-        sub_query = (
+    def _get_subquery_with_latest_case_analysis_date(self) -> Query:
+        """Return a subquery with the case internal id and the date of its latest analysis."""
+        case_and_date: Query = (
             self._get_join_analysis_case_query()
             .group_by(Family.id)
             .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
             .subquery()
         )
-        return sub_query
+        return case_and_date
 
     def _get_latest_analyses_for_cases_query(self) -> Query:
         """Return a join query for the latest analysis for each case."""
-        analyses = self._get_query(table=Analysis)
-        sub_query = self._get_latest_analysis_for_cases_sub_query()
+        analyses: Query = self._get_query(table=Analysis)
+        case_and_date_subquery: Query = self._get_latest_analysis_for_cases_sub_query()
         return analyses.join(
-            sub_query,
+            case_and_date_subquery,
             and_(
-                self.Analysis.family_id == sub_query.c.family_id,
-                self.Analysis.started_at == sub_query.c.started_at,
+                self.Analysis.family_id == case_and_date_subquery.c.family_id,
+                self.Analysis.started_at == case_and_date_subquery.c.started_at,
             ),
         )
