@@ -190,7 +190,9 @@ def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yes
     )
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.get_analyses_for_each_case_with_latest_started_at_date()
+    analyses: List[
+        Analysis
+    ] = analysis_store.get_analyses_for_each_case_with_latest_started_at_date()
 
     # THEN only the newest analysis should be returned
     assert analysis_newest in analyses
