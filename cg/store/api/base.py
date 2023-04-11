@@ -100,22 +100,3 @@ class BaseHandler:
     def _get_join_analysis_sample_family_query(self) -> Query:
         """Return join analysis to sample to case query."""
         return self._get_query(table=Analysis).join(Family, Family.links, FamilySample.sample)
-
-    def _get_latest_analysis_for_case_query(self) -> List[Query]:
-        """Return query for all cases and latest started at date."""
-        analyses = self._get_query(table=Analysis)
-        case_entry_ids = set([analysis.family_id for analysis in analyses])
-        latest_analyses_per_case = []
-        filter_functions = [
-            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
-            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
-        ]
-        for case_entry_id in case_entry_ids:
-            latest_analyses_per_case.append(
-                apply_analysis_filter(
-                    analyses=analyses,
-                    filter_functions=filter_functions,
-                    case_entry_id=case_entry_id,
-                )
-            )
-        return latest_analyses_per_case
