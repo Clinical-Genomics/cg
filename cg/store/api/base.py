@@ -1,9 +1,9 @@
 """All models aggregated in a base class"""
-from typing import Type
+from typing import Type, List
 
 from alchy import Query, ModelBase
 from dataclasses import dataclass
-
+from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
 from cg.store.models import (
     Analysis,
     Application,
@@ -97,7 +97,6 @@ class BaseHandler:
             Sample.application_version, ApplicationVersion.application
         )
 
-
     def _get_join_analysis_sample_family_query(self) -> Query:
         """Return join analysis to sample to case query."""
         return self._get_query(table=Analysis).join(Family, Family.links, FamilySample.sample)
@@ -120,4 +119,3 @@ class BaseHandler:
                 )
             )
         return latest_analyses_per_case
-

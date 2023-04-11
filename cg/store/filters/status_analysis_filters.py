@@ -143,8 +143,8 @@ class AnalysisFilter(Enum):
     FILTER_WITH_PIPELINE: Callable = filter_analyses_with_pipeline
     FILTER_COMPLETED: Callable = filter_completed_analyses
     FILTER_NOT_COMPLETED: Callable = filter_not_completed_analyses
-    FILTER_UPLOADED: Callable = filter_uploaded_analyses
-    FILTER_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
+    FILTER_IS_UPLOADED: Callable = filter_uploaded_analyses
+    FILTER_IS_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
     FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
     FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
     FILTER_REPORT_BY_PIPELINE: Callable = filter_report_analyses_by_pipeline

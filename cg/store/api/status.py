@@ -591,7 +591,7 @@ class StatusHandler(BaseHandler):
         analysis_filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
             AnalysisFilter.FILTER_COMPLETED,
-            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
@@ -755,7 +755,7 @@ class StatusHandler(BaseHandler):
         analysis_filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
             AnalysisFilter.FILTER_WITH_DELIVERY_REPORT,
-            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]

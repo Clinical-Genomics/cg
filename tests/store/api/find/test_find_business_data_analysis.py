@@ -45,7 +45,9 @@ def test_get_latest_nipt_analysis_to_upload(
 
 
 def test_get_latest_microsalt_analysis_to_upload(
-    store_with_analyses_for_cases_not_uploaded_microsalt: Store, timestamp_now: datetime
+    store_with_analyses_for_cases_not_uploaded_microsalt: Store,
+    timestamp_now: datetime,
+    pipeline: Pipeline = Pipeline.MICROSALT,
 ):
     # GIVEN an analysis that is not delivery reported but there exists a newer analysis
 
@@ -91,4 +93,3 @@ def test_get_analyses(store_with_analyses_for_cases: Store, analysis_id: int = 1
 
     # THEN one analysis should be returned
     assert len(analysis) == store_with_analyses_for_cases._get_query(table=Analysis).count()
-
