@@ -122,3 +122,33 @@ def test_get_latest_microsalt_analysis_to_upload(
         assert analysis.started_at == timestamp_now
         assert analysis.uploaded_at is None
         assert analysis.pipeline == pipeline
+
+
+def test_get_analyses_to_deliver_for_pipeline(
+    store_with_analyses_for_cases_to_deliver: Store,
+    timestamp_now: datetime,
+    pipeline: Pipeline = Pipeline.FLUFFY,
+):
+    # GIVEN a store with multiple analyses to deliver
+
+    # WHEN fetching the latest analysis to upload to nipt
+    analyses = store_with_analyses_for_cases_to_deliver.get_analyses_to_deliver_for_pipeline(
+        pipeline=pipeline
+    )
+
+    # THEN only the newest analysis should be returned
+    for analysis in analyses:
+        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
+        assert analysis.uploaded_at is None
+        assert analysis.pipeline == pipeline
+
+
+def test_get_analyses(store_with_analyses_for_cases: Store):
+    """Test all analyses can be returned."""
+    # GIVEN a database with an analysis and case
+
+    # WHEN fetching all analyses
+    analysis: List[Analysis] = store_with_analyses_for_cases.get_analyses()
+
+    # THEN one analysis should be returned
+    assert len(analysis) == store_with_analyses_for_cases._get_query(table=Analysis).count()
