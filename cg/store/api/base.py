@@ -99,29 +99,6 @@ class BaseHandler:
             Sample.application_version, ApplicationVersion.application
         )
 
-    def _get_latest_analysis_for_case_query(self) -> List[Query]:
-        """Return query for all cases and latest started at date."""
-        analyses = self._get_query(table=Analysis)
-        case_entry_ids = set([analysis.family_id for analysis in analyses])
-        latest_analyses_per_case: List[Query] = []
-        filter_functions = [
-            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
-            AnalysisFilter.ORDER_BY_STARTED_AT_DESC,
-        ]
-        for case_entry_id in case_entry_ids:
-            latest_analyses_per_case.append(
-                apply_analysis_filter(
-                    analyses=analyses,
-                    filter_functions=filter_functions,
-                    case_entry_id=case_entry_id,
-                )
-            )
-        return latest_analyses_per_case
-
-    def _get_latest_analyses_for_cases_query(self) -> Query:
-        """Return a list of the latest analyses for each case."""
-        return self._get_join_subquery_analysis_case_entry_id_and_started_at()
-
     def _get_latest_analysis_for_cases_sub_query(self) -> Query:
         """Return a sub query for the latest analysis for each case."""
         sub_query = (
@@ -132,11 +109,10 @@ class BaseHandler:
         )
         return sub_query
 
-    def _get_join_subquery_analysis_case_entry_id_and_started_at(self) -> Query:
+    def _get_latest_analyses_for_cases_query(self) -> Query:
         """Return a join query for the latest analysis for each case."""
         analyses = self._get_query(table=Analysis)
         sub_query = self._get_latest_analysis_for_cases_sub_query()
-
         return analyses.join(
             sub_query,
             and_(
