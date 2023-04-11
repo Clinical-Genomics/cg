@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Dict
 
 import click
 from sqlalchemy.orm import Query
@@ -15,8 +15,9 @@ from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import FamilySample
+from cg.store.models import FamilySample, Analysis
 from housekeeper.store.models import File, Version
+from cg.utils.dispatcher import Dispatcher
 
 LOG = logging.getLogger(__name__)
 
@@ -224,8 +225,23 @@ def bioinfo_all(
 
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
+    input_dict: Dict[str, Any] = {
+        "completed_at_after": completed_after,
+        "completed_at_before": completed_before,
+    }
+    function_dispatcher: Dispatcher = Dispatcher(
+        functions=[
+            status_db.get_analysis_for_vogue_upload_completed_after,
+            status_db.get_analysis_for_vogue_upload_completed_before,
+            status_db.get_analyses_for_vogue_upload,
+        ],
+        input_dict=input_dict,
+    )
+    analyses: List[Analysis] = function_dispatcher(input_dict=input_dict)
+    if not analyses:
+        LOG.info("No analyses found for upload to trending.")
+        return
 
-    analyses: Query = status_db.analyses_ready_for_vogue_upload(completed_after, completed_before)
     for analysis in analyses:
         case_name: str = analysis.family.internal_id
         version_obj: Version = housekeeper_api.last_version(case_name)
