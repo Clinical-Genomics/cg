@@ -536,42 +536,6 @@ def fixture_store_with_pools_for_multiple_customers(
     yield store
 
 
-@pytest.fixture(name="store_with_analyses_for_cases")
-def fixture_store_with_analyses_for_cases(
-    analysis_store: Store,
-    helpers: StoreHelpers,
-    timestamp_now: dt.datetime,
-    timestamp_yesterday: dt.datetime,
-) -> Store:
-    """Return a store with two analyses for two cases."""
-    case_one = analysis_store.get_case_by_internal_id("yellowhog")
-    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
-
-    cases = [case_one, case_two]
-    for case in cases:
-        oldest_analysis = helpers.add_analysis(
-            analysis_store,
-            case=case,
-            started_at=timestamp_yesterday,
-            uploaded_at=timestamp_yesterday,
-            delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_yesterday,
-        )
-        helpers.add_analysis(
-            analysis_store,
-            case=case,
-            started_at=timestamp_now,
-            uploaded_at=timestamp_now,
-            delivery_reported_at=None,
-            uploaded_to_vogue_at=timestamp_now,
-        )
-        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-        analysis_store.relate_sample(
-            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
-        )
-    return analysis_store
-
-
 @pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_fluffy")
 def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
     analysis_store: Store,
