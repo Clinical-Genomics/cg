@@ -4,7 +4,8 @@ from cg.store.models import Flowcell, Family, FamilySample, Sample
 
 
 def test_delete_flow_cell(flow_cell_id: str, populated_flow_cell_store: Store):
-    """Test deleting a flow cell in Store"""
+    """Test deleting a flow cell in Store."""
+
 
     # GIVEN a database containing a flow cell
     flow_cell: Flowcell = populated_flow_cell_store.get_flow_cell(flow_cell_id=flow_cell_id)
