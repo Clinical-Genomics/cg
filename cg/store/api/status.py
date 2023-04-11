@@ -591,7 +591,7 @@ class StatusHandler(BaseHandler):
         analysis_filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
             AnalysisFilter.FILTER_COMPLETED,
-            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
@@ -601,23 +601,24 @@ class StatusHandler(BaseHandler):
             pipeline=pipeline,
         ).all()
 
-    def analyses_to_clean(
+    def get_analyses_to_clean(
         self, before: datetime = datetime.now(), pipeline: Pipeline = None
-    ) -> Query:
-        """Fetch analyses that haven't been cleaned."""
-        records = self.latest_analyses()
-        records = records.filter(
-            Analysis.uploaded_at.isnot(None),
-            Analysis.cleaned_at.is_(None),
-            Analysis.started_at <= before,
-            Family.action.is_(None),
-        )
+    ) -> List[Analysis]:
+        """Return analyses that haven't been cleaned."""
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_IS_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_CLEANED,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+            AnalysisFilter.FILTER_CASE_ACTION_IS_NONE,
+        ]
         if pipeline:
-            records = records.filter(
-                Analysis.pipeline == str(pipeline),
-            )
-
-        return records
+            filter_functions.append(AnalysisFilter.FILTER_WITH_PIPELINE)
+        return apply_analysis_filter(
+            filter_functions=filter_functions,
+            analyses=self._get_latest_analyses_for_cases_query(),
+            pipeline=pipeline,
+            started_at_date=before,
+        ).all()
 
     def get_analyses_for_case_and_pipeline_started_at_before(
         self,
@@ -749,7 +750,7 @@ class StatusHandler(BaseHandler):
         analysis_filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
             AnalysisFilter.FILTER_WITH_DELIVERY_REPORT,
-            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
