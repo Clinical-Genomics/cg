@@ -1,8 +1,10 @@
-"""Module for Balsamic PON Analysis API"""
+"""Module for Balsamic PON Analysis API."""
 
 import logging
 from pathlib import Path
 from typing import List
+
+from cg.utils.utils import build_command_from_dict
 
 from cg.constants.indexes import ListIndexes
 from cg.exc import BalsamicStartError
@@ -16,7 +18,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
-    """Handles communication between BALSAMIC processes and the rest of CG infrastructure"""
+    """Handles communication between Balsamic processes and the rest of CG infrastructure."""
 
     def __init__(
         self,
@@ -36,16 +38,14 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         force_normal: bool,
         dry_run: bool = False,
     ) -> None:
-        """Creates a config file for BALSAMIC PON analysis"""
-
+        """Creates a config file for BALSAMIC PON analysis."""
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample_data = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
         if len(sample_data) == 0:
             raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC PON analysis!")
         verified_panel_bed = self.get_verified_bed(panel_bed, sample_data)
-
         command = ["config", "pon"]
-        options = BalsamicAnalysisAPI._BalsamicAnalysisAPI__build_command_str(
+        options = build_command_from_dict(
             {
                 "--case-id": case_obj.internal_id,
                 "--analysis-dir": self.root_dir,
@@ -56,23 +56,19 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )
-
         parameters = command + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def get_case_config_path(self, case_id: str) -> Path:
-        """Returns the BALSAMIC PON config path"""
-
+        """Returns the BALSAMIC PON config path."""
         return Path(self.root_dir, case_id, case_id + "_PON.json")
 
     def get_next_pon_version(self, panel_bed: str) -> str:
-        """Returns the next PON version to be generated"""
-
+        """Returns the next PON version to be generated."""
         latest_pon_file = self.get_latest_pon_file(panel_bed)
         next_version = (
             int(Path(latest_pon_file).stem.split("_v")[ListIndexes.LAST.value]) + 1
             if latest_pon_file
             else 1
         )
-
         return "v" + str(next_version)
