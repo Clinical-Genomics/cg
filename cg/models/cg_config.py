@@ -220,6 +220,15 @@ class ExternalConfig(BaseModel):
     caesar: str
 
 
+class DDNDataFlowConfig(BaseModel):
+    database_name: str
+    user: str
+    password: str
+    url: str
+    local_storage: str
+    archive_repository: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -243,6 +252,7 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
+    ddn: Optional[DDNDataFlowConfig] = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Optional[CommonAppConfig] = None
