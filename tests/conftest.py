@@ -134,25 +134,31 @@ def fixture_another_case_id() -> str:
 
 @pytest.fixture(name="sample_id")
 def fixture_sample_id() -> str:
-    """Returns a sample id."""
+    """Return a sample id."""
     return "ADM1"
 
 
 @pytest.fixture(name="father_sample_id")
 def fixture_father_sample_id() -> str:
-    """Returns the sample id of the father."""
+    """Return the sample id of the father."""
     return "ADM2"
 
 
 @pytest.fixture(name="mother_sample_id")
 def fixture_mother_sample_id() -> str:
-    """Returns the mothers sample id."""
+    """Return the mothers sample id."""
     return "ADM3"
+
+
+@pytest.fixture(name="invalid_sample_id")
+def fixture_invalid_sample_id() -> str:
+    """Return an invalid sample id."""
+    return "invalid-sample-id"
 
 
 @pytest.fixture(name="sample_ids")
 def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
-    """Returns a list with three samples of a family."""
+    """Return a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
 

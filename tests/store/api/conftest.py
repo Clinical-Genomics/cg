@@ -574,7 +574,6 @@ def fixture_store_with_analyses_for_cases(
 
     return analysis_store
 
-
 @pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_fluffy")
 def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
     analysis_store: Store,

@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union
 
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus, Pipeline
@@ -254,26 +254,18 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all cases."""
         return self._get_query(table=Family).all()
 
-    def family_samples(self, family_id: str) -> List[FamilySample]:
+    def get_case_samples_by_case_id(self, case_internal_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
-            case_id=family_id,
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
+            case_internal_id=case_internal_id,
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
-    def get_sample_cases(self, sample_id: str) -> Query:
-        """Return the case-sample links associated with a sample."""
-        return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE],
-            sample_id=sample_id,
-            case_samples=self._get_join_case_sample_query(),
-        )
-
-    def get_cases_from_sample(self, sample_entry_id: str) -> Query:
+    def get_case_samples_from_sample_entry_id(self, sample_entry_id: str) -> Query:
         """Return cases related to a given sample."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID],
+            filter_functions=[CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_ENTRY_ID],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_join_case_sample_query(),
         )
@@ -499,13 +491,18 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def link(self, family_id: str, sample_id: str) -> FamilySample:
-        """Find a link between a family and a sample."""
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Family.internal_id == family_id, Sample.internal_id == sample_id)
-            .first()
-        )
+    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> FamilySample:
+        """Return a case-sample link between a family and a sample."""
+        filter_functions: List[CaseSampleFilter] = [
+            CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID,
+            CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID,
+        ]
+        return apply_case_sample_filter(
+            filter_functions=filter_functions,
+            case_samples=self._get_join_case_sample_query(),
+            case_internal_id=case_internal_id,
+            sample_internal_id=sample_internal_id,
+        ).first()
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
@@ -684,9 +681,9 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
             case_samples=self._get_join_sample_family_query(),
-            case_id=case_id,
+            case_internal_id=case_id,
         )
         samples: Query = apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITH_TYPE],
