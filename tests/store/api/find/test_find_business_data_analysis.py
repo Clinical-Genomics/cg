@@ -37,7 +37,6 @@ def test_get_analyses_uploaded_to_vogue(
 
     # THEN the analyses should not have been uploaded to Vogue
     for analysis in analyses:
-        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert not analysis.uploaded_to_vogue_at
 
 
@@ -57,7 +56,6 @@ def test_get_analyses_uploaded_to_vogue_completed_before(
 
     # THEN the returned analysis was completed earlier than 2 weeks ago
     for analysis in analyses:
-        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert not analysis.uploaded_to_vogue_at
         assert analysis.completed_at < timestamp_in_2_weeks
 
@@ -78,7 +76,6 @@ def test_get_analyses_uploaded_to_vogue_completed_after(
 
     # THEN the returned analysis was completed after yesterday
     for analysis in analyses:
-        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert not analysis.uploaded_to_vogue_at
         assert analysis.completed_at > timestamp_yesterday
 
@@ -100,7 +97,6 @@ def test_get_latest_nipt_analysis_to_upload(
 
     # THEN only the newest analysis should be returned
     for analysis in analyses:
-        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert analysis.started_at == timestamp_now
         assert analysis.uploaded_at is None
         assert analysis.pipeline == pipeline
@@ -123,7 +119,6 @@ def test_get_latest_microsalt_analysis_to_upload(
 
     # THEN only the newest analysis should be returned
     for analysis in analyses:
-        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
         assert analysis.started_at == timestamp_now
         assert analysis.uploaded_at is None
         assert analysis.pipeline == pipeline

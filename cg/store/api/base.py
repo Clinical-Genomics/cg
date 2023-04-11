@@ -112,7 +112,7 @@ class BaseHandler:
     def _get_latest_analyses_for_cases_query(self) -> Query:
         """Return a join query for the latest analysis for each case."""
         analyses: Query = self._get_query(table=Analysis)
-        case_and_date_subquery: Query = self._get_latest_analysis_for_cases_sub_query()
+        case_and_date_subquery: Query = self._get_subquery_with_latest_case_analysis_date()
         return analyses.join(
             case_and_date_subquery,
             and_(
