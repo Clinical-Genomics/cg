@@ -439,7 +439,7 @@ def test_get_case_sample_link(
 
     # THEN the returned element is a FamilySample object
     assert isinstance(case_sample, FamilySample)
-    # THEN the returned family sample has teh correct case and sample internal ids
+    # THEN the returned family sample has the correct case and sample internal ids
     assert case_sample.family.internal_id == case_id
     assert case_sample.sample.internal_id == sample_id
 

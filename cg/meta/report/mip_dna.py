@@ -27,7 +27,7 @@ from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
-from cg.store.models import Family, Sample
+from cg.store.models import Family, Sample, Application
 
 LOG = logging.getLogger(__name__)
 
@@ -83,11 +83,13 @@ class MipDNAReportAPI(ReportAPI):
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
-        case_sample = self.status_db.get_case_samples_by_case_id(case_internal_id=case.internal_id)[
-            0
-        ].sample
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )[0].sample
         lims_sample = self.get_lims_sample(case_sample.internal_id)
-        application = self.status_db.get_application_by_tag(tag=lims_sample.get("application"))
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
 
         return application.analysis_type if application else None
 

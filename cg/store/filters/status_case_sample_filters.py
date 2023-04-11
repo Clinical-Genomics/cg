@@ -5,23 +5,19 @@ from sqlalchemy.orm import Query
 from cg.store.models import Family, Sample
 
 
-def get_samples_associated_with_case_by_internal_id(
+def get_samples_in_case_by_internal_id(
     case_samples: Query, case_internal_id: str, **kwargs
 ) -> Query:
     """Return samples associated with a case."""
     return case_samples.filter(Family.internal_id == case_internal_id)
 
 
-def get_cases_associated_with_sample_by_internal_id(
-    case_samples: Query, sample_internal_id: str, **kwargs
-):
+def get_cases_with_sample_by_internal_id(case_samples: Query, sample_internal_id: str, **kwargs):
     """Return cases associated with a sample internal id."""
     return case_samples.filter(Sample.internal_id == sample_internal_id)
 
 
-def get_cases_associated_with_sample_by_entry_id(
-    case_samples: Query, sample_entry_id: int, **kwargs
-) -> Query:
+def get_cases_with_sample_by_entry_id(case_samples: Query, sample_entry_id: int, **kwargs) -> Query:
     """Return cases associated with a sample entry id."""
     return case_samples.filter(Sample.id == sample_entry_id)
 
@@ -48,12 +44,6 @@ def apply_case_sample_filter(
 class CaseSampleFilter(Enum):
     """Define CaseSample filter functions."""
 
-    GET_SAMPLES_ASSOCIATED_WITH_CASE_BY_INTERNAL_ID: Callable = (
-        get_samples_associated_with_case_by_internal_id
-    )
-    GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_INTERNAL_ID: Callable = (
-        get_cases_associated_with_sample_by_internal_id
-    )
-    GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID: Callable = (
-        get_cases_associated_with_sample_by_entry_id
-    )
+    GET_SAMPLES_IN_CASE_BY_INTERNAL_ID: Callable = get_samples_in_case_by_internal_id
+    GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID: Callable = get_cases_with_sample_by_internal_id
+    GET_CASES_WITH_SAMPLE_BY_ENTRY_ID: Callable = get_cases_with_sample_by_entry_id
