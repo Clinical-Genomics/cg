@@ -574,6 +574,7 @@ def fixture_store_with_analyses_for_cases(
 
     return analysis_store
 
+
 @pytest.fixture(name="store_with_analyses_for_cases_not_uploaded_fluffy")
 def fixture_store_with_analyses_for_cases_not_uploaded_fluffy(
     analysis_store: Store,
@@ -620,6 +621,7 @@ def fixture_store_with_analyses_for_cases_not_uploaded_microsalt(
     timestamp_yesterday: dt.datetime,
 ) -> Store:
     """Return a store with two analyses for two cases and pipeline."""
+
     case_one = analysis_store.get_case_by_internal_id("yellowhog")
     case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
 
