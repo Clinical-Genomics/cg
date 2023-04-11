@@ -3,7 +3,6 @@ from typing import Type, List
 
 from alchy import Query, ModelBase
 from dataclasses import dataclass
-from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
 from cg.store.models import (
     Analysis,
     Application,

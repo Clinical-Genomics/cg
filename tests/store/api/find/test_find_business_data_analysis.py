@@ -88,7 +88,7 @@ def test_get_analyses(store_with_analyses_for_cases: Store, analysis_id: int = 1
     """Test all analyses can be returned."""
     # GIVEN a database with an analysis and case
 
-    # WHEN fetching the analysis by id
+    # WHEN fetching all analyses
     analysis: List[Analysis] = store_with_analyses_for_cases.get_analyses()
 
     # THEN one analysis should be returned
