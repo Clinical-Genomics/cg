@@ -10,12 +10,13 @@ from cg.store import Store
 from cg.utils.click.EnumChoice import EnumChoice
 from cg.store.models import (
     Family,
+    FamilySample,
     Sample,
-    Customer,
     User,
     Collaboration,
     Customer,
     Application,
+    ApplicationVersion,
     Panel,
 )
 
@@ -176,8 +177,10 @@ def sample(
         order=order,
         priority=priority,
     )
-    new_record.application_version = status_db.current_application_version(application_tag)
-    new_record.customer = customer
+    new_record.application_version: ApplicationVersion = (
+        status_db.get_current_application_version_by_tag(tag=application_tag)
+    )
+    new_record.customer: Customer = customer
     status_db.add_commit(new_record)
     LOG.info(f"{new_record.internal_id}: new sample added")
 
@@ -244,7 +247,7 @@ def case(
         ticket=ticket,
     )
 
-    new_case.customer = customer
+    new_case.customer: Customer = customer
     status_db.add_commit(new_case)
     LOG.info(f"{new_case.internal_id}: new case added")
 
@@ -290,7 +293,7 @@ def relationship(
             LOG.error("%s: father not found", father_id)
             raise click.Abort
 
-    new_record = status_db.relate_sample(
+    new_record: FamilySample = status_db.relate_sample(
         family=case_obj, sample=sample, status=status, mother=mother, father=father
     )
     status_db.add_commit(new_record)

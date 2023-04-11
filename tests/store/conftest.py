@@ -39,7 +39,7 @@ class StoreConftestFixture(enum.Enum):
     INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
 
     @staticmethod
-    def generate_year_interval(n_entries, old_timestamp: dt.datetime) -> List[int]:
+    def generate_year_interval(n_entries: int, old_timestamp: dt.datetime) -> List[int]:
         """Create a list of approximately uniformly distributed year numbers from 1 to present."""
         start: int = old_timestamp.year
         stop: int = dt.date.today().year
@@ -185,6 +185,12 @@ def fixture_sequencer_name() -> str:
 def fixture_invalid_application_id() -> int:
     """Return an invalid application id."""
     return -1
+
+
+@pytest.fixture(name="invalid_application_tag")
+def fixture_invalid_application_tag() -> str:
+    """Return an invalid application tag."""
+    return "invalid-tag"
 
 
 @pytest.fixture(name="invalid_application_version_version")
