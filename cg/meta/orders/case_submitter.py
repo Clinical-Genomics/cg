@@ -14,7 +14,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
 
 from cg.constants import Priority
-from cg.store.models import Customer, Family, Sample, FamilySample
+from cg.store.models import Customer, Family, Sample, FamilySample, ApplicationVersion
 
 LOG = logging.getLogger(__name__)
 
