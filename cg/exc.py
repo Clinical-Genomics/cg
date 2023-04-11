@@ -169,5 +169,9 @@ class PdcNoFilesMatchingSearchError(CgError):
     """Exception raised when PDC API returns no files matching the search criteria."""
 
 
+class DdnDataflowAuthenticationError(CgError):
+    """Exception raised when the DDN Dataflow authentication fails."""
+
+
 class MissingFilesError(CgError):
     """Exception raised when there are missing files."""
