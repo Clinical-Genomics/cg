@@ -44,12 +44,14 @@ def test_store_api_delete_relationships_between_sample_and_cases(
     store_with_multiple_cases_and_samples.delete_relationships_sample(sample=sample_in_single_case)
 
     # THEN it should no longer be associated with any cases, but other relationships should remain
-    results: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    results: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample_in_single_case.id
     ).all()
     existing_relationships: List[
         FamilySample
-    ] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample_in_multiple_cases.id
     ).all()
 
@@ -65,11 +67,15 @@ def test_store_api_delete_all_empty_cases(
     """Test function to delete cases that are not associated with any samples"""
 
     # GIVEN a database containing a case without samples and a case with samples
-    case_without_samples: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
-        case_id_without_samples
+    case_without_samples: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+        case_internal_id=case_id_without_samples
     )
-    case_with_samples: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
-        case_id_with_multiple_samples
+    case_with_samples: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+        case_internal_id=case_id_with_multiple_samples
     )
 
     assert not case_without_samples
@@ -81,11 +87,13 @@ def test_store_api_delete_all_empty_cases(
     )
 
     # THEN no entry should be found for the empty case, but the one with samples should remain.
-    result: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
-        case_id_without_samples
+    result: List[FamilySample] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+        case_internal_id=case_id_without_samples
     )
-    case_with_samples: List[FamilySample] = store_with_multiple_cases_and_samples.family_samples(
-        case_id_with_multiple_samples
+    case_with_samples: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_by_case_id(
+        case_internal_id=case_id_with_multiple_samples
     )
 
     assert not result

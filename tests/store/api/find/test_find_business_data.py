@@ -405,6 +405,45 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     assert application_version.application == application
 
 
+def test_get_case_samples_by_case_id(
+    store_with_analyses_for_cases: Store,
+    case_id: str,
+):
+    """Test that getting case-samples by case id returns a list of FamilySamples."""
+    # GIVEN a store with case-samples and a case id
+
+    # WHEN fetching the case-samples matching the case id
+    case_samples: List[FamilySample] = store_with_analyses_for_cases.get_case_samples_by_case_id(
+        case_internal_id=case_id
+    )
+
+    # THEN a list of case-samples should be returned
+    assert case_samples
+    assert isinstance(case_samples, List)
+    assert isinstance(case_samples[0], FamilySample)
+
+
+def test_get_case_sample_link(
+    store_with_analyses_for_cases: Store,
+    case_id: str,
+    sample_id: str,
+):
+    """Test that the returned element is a FamilySample with the correct case and sample internal ids."""
+    # GIVEN a store with case-samples and valid case and sample internal ids
+
+    # WHEN fetching a case-sample with case and sample internal ids
+    case_sample: FamilySample = store_with_analyses_for_cases.get_case_sample_link(
+        case_internal_id=case_id,
+        sample_internal_id=sample_id,
+    )
+
+    # THEN the returned element is a FamilySample object
+    assert isinstance(case_sample, FamilySample)
+    # THEN the returned family sample has the correct case and sample internal ids
+    assert case_sample.family.internal_id == case_id
+    assert case_sample.sample.internal_id == sample_id
+
+
 def test_find_single_case_for_sample(
     sample_id_in_single_case: str, store_with_multiple_cases_and_samples: Store
 ):
@@ -418,7 +457,9 @@ def test_find_single_case_for_sample(
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    cases: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample.id
     ).all()
 
@@ -436,7 +477,9 @@ def test_find_multiple_cases_for_sample(
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    cases: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample.id
     ).all()
 
