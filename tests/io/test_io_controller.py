@@ -246,4 +246,4 @@ def test_write_csv_stream_from_content(csv_stream: str):
     )
 
     # THEN assert all data is kept and in csv format
-    assert csv_stream == csv_content
+    assert csv_stream + "\n" == csv_content
