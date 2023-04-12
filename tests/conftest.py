@@ -1815,7 +1815,7 @@ def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
 
 @pytest.fixture(name="ok_response")
 def fixture_ok_response() -> Response:
-    """Return email not associated with any entity."""
+    """Return a response with the OK status code."""
     response: Response = Response()
     response.status_code = http.HTTPStatus.OK
     return response
@@ -1823,7 +1823,7 @@ def fixture_ok_response() -> Response:
 
 @pytest.fixture(name="unauthorized_response")
 def fixture_unauthorized_response() -> Response:
-    """Return email not associated with any entity."""
+    """Return a response with the UNAUTHORIZED status code."""
     response: Response = Response()
     response.status_code = http.HTTPStatus.UNAUTHORIZED
     return response
