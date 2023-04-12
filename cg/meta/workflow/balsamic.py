@@ -593,7 +593,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "--analysis-dir": self.root_dir,
                 "--balsamic-cache": self.balsamic_cache,
                 "--fastq-path": self.get_sample_fastq_destination_dir(
-                    self.status_db.family(case_id)
+                    self.status_db.get_case_by_internal_id(case_id)
                 ),
                 "--case-id": arguments.get("case_id"),
                 "--gender": arguments.get("gender"),
