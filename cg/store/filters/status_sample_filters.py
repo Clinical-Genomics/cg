@@ -1,4 +1,4 @@
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, Any
 from enum import Enum
 from sqlalchemy.orm import Query
 from sqlalchemy import and_, or_
@@ -167,6 +167,15 @@ def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> 
 def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
     """Return samples ordered by created_at descending."""
     return samples.order_by(Sample.created_at.desc())
+
+
+def filter_samples_by_identifier_name_and_value(
+    samples: Query, identifier_name: str, identifier_value: Any
+) -> Query:
+    """Filters the sample query by the given identifier name and value if they are attributes of Sample."""
+    if identifier_name in dir(Sample):
+        samples: Query = samples.filter(getattr(Sample, identifier_name) == identifier_value)
+    return samples
 
 
 def apply_sample_filter(

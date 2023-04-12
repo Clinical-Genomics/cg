@@ -30,7 +30,11 @@ from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
 
 from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
 from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
-from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
+from cg.store.filters.status_sample_filters import (
+    apply_sample_filter,
+    SampleFilter,
+    filter_samples_by_identifier_name_and_value,
+)
 
 from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
@@ -663,13 +667,13 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_samples_by_any_id(self, **identifiers: dict) -> Query:
-        records = self._get_query(table=Sample)
-
+        """Return the filtered sample query based on the given names and values of Sample attributes."""
+        samples: Query = self._get_query(table=Sample)
         for identifier_name, identifier_value in identifiers.items():
-            identifier = getattr(Sample, identifier_name)
-            records = records.filter(identifier.contains(identifier_value))
-
-        return records.order_by(Sample.internal_id.desc())
+            samples: Query = filter_samples_by_identifier_name_and_value(
+                samples=samples, identifier_name=identifier_name, identifier_value=identifier_value
+            )
+        return samples.order_by(Sample.internal_id.desc())
 
     def get_sample_by_name(self, name: str) -> Sample:
         """Get sample by name."""
