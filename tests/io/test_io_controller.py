@@ -41,6 +41,21 @@ def test_get_content_from_file_when_json(json_file_path: Path):
     assert isinstance(raw_json_content, dict)
 
 
+def test_get_content_from_file_when_csv(csv_file_path: Path):
+    """
+    Tests get_content_from_file when csv
+    """
+    # GIVEN a csv file
+
+    # WHEN reading the csv file
+    raw_csv_content: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=csv_file_path
+    )
+
+    # Then assert a list is returned
+    assert isinstance(raw_csv_content, list)
+
+
 def test_get_content_from_stream(yaml_stream: str):
     """
     Tests read_yaml_stream
@@ -69,6 +84,21 @@ def test_get_content_from_stream_when_json(json_stream: str):
 
     # THEN assert that a dict is returned
     assert isinstance(raw_content, dict)
+
+
+def test_get_content_from_stream_when_csv(csv_stream: str):
+    """
+    Tests read_csv_stream
+    """
+    # GIVEN a string in csv format
+
+    # WHEN reading the csv content in string
+    raw_content: list = ReadStream.get_content_from_stream(
+        file_format=FileFormat.CSV, stream=csv_stream
+    )
+
+    # THEN assert that a list is returned
+    assert isinstance(raw_content, list)
 
 
 def test_write_file_from_content(case_qc_sample_info_path: Path, cg_dir: Path):
@@ -132,6 +162,36 @@ def test_write_file_from_content_when_json(json_file_path: Path, json_temp_path:
     assert raw_json_content == written_raw_sample_info
 
 
+def test_write_file_from_content_when_csv(csv_file_path: Path, csv_temp_path: Path):
+    """
+    Tests write_file_from_content when csv
+    """
+    # GIVEN a csv file
+
+    # GIVEN a file path to write to
+
+    # WHEN reading the csv file
+    raw_csv_content: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=csv_file_path
+    )
+
+    # WHEN writing the csv file from list
+    WriteFile.write_file_from_content(
+        content=raw_csv_content, file_format=FileFormat.CSV, file_path=csv_temp_path
+    )
+
+    # THEN assert that a file was successfully created
+    assert Path.exists(csv_temp_path)
+
+    # WHEN reading it as a csv
+    written_raw_sample_info: list = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=csv_temp_path
+    )
+
+    # THEN assert that all data is kept
+    assert raw_csv_content == written_raw_sample_info
+
+
 def test_write_yaml_stream_from_content(yaml_stream: str):
     """
     Tests read_yaml_stream
@@ -168,3 +228,22 @@ def test_write_json_stream_from_content(json_stream: str):
 
     # THEN assert all data is kept abd in json format
     assert json_stream == json_content
+
+
+def test_write_csv_stream_from_content(csv_stream: str):
+    """
+    Tests read_csv_stream
+    """
+    # GIVEN a string in csv format
+
+    # WHEN reading the csv content in string
+    raw_content: list = ReadStream.get_content_from_stream(
+        file_format=FileFormat.CSV, stream=csv_stream
+    )
+    # WHEN writing a csv stream
+    csv_content = WriteStream.write_stream_from_content(
+        content=raw_content, file_format=FileFormat.CSV
+    )
+
+    # THEN assert all data is kept abd in csv format
+    assert csv_stream == csv_content
