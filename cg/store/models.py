@@ -238,6 +238,7 @@ class Customer(Model):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
+    is_trusted = Column(types.Boolean, nullable=False, default=False)
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
     name = Column(types.String(128), nullable=False)
     organisation_number = Column(types.String(32))
