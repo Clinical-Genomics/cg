@@ -272,10 +272,10 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_case_samples_from_sample_internal_id(self, sample_internal_id: str) -> Query:
         """Return cases related to a given sample internal id."""
-        return apply_sample_filter(
+        return apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID],
-            case_samples=self._get_join_case_sample_query(),
             sample_internal_id=sample_internal_id,
+            case_samples=self._get_join_case_sample_query(),
         )
 
     def filter_cases_with_samples(self, case_ids: List[str]) -> List[str]:
