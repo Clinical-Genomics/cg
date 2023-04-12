@@ -16,44 +16,47 @@ from cg.models.cg_config import DDNDataFlowConfig
 OSTYPE: str = "Unix/MacOS"
 ROOT_TO_TRIM: str = "/home"
 
+DESTINATION_ATTRIBUTE: str = "destination"
+SOURCE_ATTRIBUTE: str = "source"
+
 
 class DataflowEndpoints(str, Enum):
     """Enum containing all DDN dataflow endpoints used."""
 
+    ARCHIVE_FILES = "files/archive"
     GET_AUTH_TOKEN = "auth/token"
     REFRESH_AUTH_TOKEN = "auth/token/refresh"
-    ARCHIVE_FILES = "files/archive"
     RETRIEVE_FILES = "files/retrieve"
 
 
 class ResponseFields(str, Enum):
     """Enum containing all DDN dataflow endpoints used."""
 
-    REFRESH = "refresh"
     ACCESS = "access"
     EXPIRE = "expire"
+    REFRESH = "refresh"
     RETRIEVE_FILES = "files/retrieve"
 
 
 class TransferData(BaseModel):
     """Model for representing a singular object transfer."""
 
-    source: str
-    destination: str
     _metadata = None
+    destination: str
+    source: str
 
-    def correct_source_root(self):
-        """Trims the source path from its root directory."""
-        self.source = f"/{Path(self.source).relative_to(ROOT_TO_TRIM).as_posix()}"
-
-    def correct_destination_root(self):
-        """Trims the destination path from its root directory."""
-        self.destination = f"/{Path(self.destination).relative_to(ROOT_TO_TRIM).as_posix()}"
+    def trim_path(self, attribute_to_trim: str):
+        """Trims the given attribute (source or destination) from its root directory."""
+        setattr(
+            self,
+            attribute_to_trim,
+            f"/{Path(getattr(self, attribute_to_trim)).relative_to(ROOT_TO_TRIM)}",
+        )
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths."""
-        self.source = source_prefix + self.source
-        self.destination = destination_prefix + self.destination
+        self.source: str = source_prefix + self.source
+        self.destination: str = destination_prefix + self.destination
 
 
 class TransferPayload(BaseModel):
@@ -63,15 +66,10 @@ class TransferPayload(BaseModel):
     osType: str = OSTYPE
     createFolder: bool = False
 
-    def correct_source_root(self):
+    def trim_paths(self, attribute_to_trim: str):
         """Trims the source path from its root directory for all objects in the transfer."""
         for transfer_data in self.files_to_transfer:
-            transfer_data.correct_source_root()
-
-    def correct_destination_root(self):
-        """Trims the destination path from its root directory for all objects in the transfer."""
-        for transfer_data in self.files_to_transfer:
-            transfer_data.correct_destination_root()
+            transfer_data.trim_path(attribute_to_trim=attribute_to_trim)
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths all objects in the
@@ -154,7 +152,7 @@ class DDNDataFlowApi:
             ).dict(),
         )
         if not response.ok:
-            raise DdnDataflowAuthenticationError(message=response.content)
+            raise DdnDataflowAuthenticationError(message=response.content.decode())
         response_content: AuthResponse = AuthResponse(
             **ReadStream.get_content_from_stream(
                 file_format=FileFormat.JSON, stream=response.content
@@ -195,7 +193,7 @@ class DDNDataFlowApi:
             for source, destination in sources_and_destinations.items()
         ]
         transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
-        transfer_request.correct_source_root()
+        transfer_request.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
         )
@@ -211,7 +209,7 @@ class DDNDataFlowApi:
             for source, destination in sources_and_destinations.items()
         ]
         transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
-        transfer_request.correct_destination_root()
+        transfer_request.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage
         )
