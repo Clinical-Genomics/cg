@@ -1,5 +1,6 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
+import http
 import logging
 import os
 import shutil
@@ -9,6 +10,7 @@ from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
 from housekeeper.store.models import File, Version
+from requests import Response
 
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
@@ -1809,6 +1811,22 @@ def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
 
     store.add_commit(organisms)
     yield store
+
+
+@pytest.fixture(name="ok_response")
+def fixture_ok_response() -> Response:
+    """Return a response with the OK status code."""
+    response: Response = Response()
+    response.status_code = http.HTTPStatus.OK
+    return response
+
+
+@pytest.fixture(name="unauthorized_response")
+def fixture_unauthorized_response() -> Response:
+    """Return a response with the UNAUTHORIZED status code."""
+    response: Response = Response()
+    response.status_code = http.HTTPStatus.UNAUTHORIZED
+    return response
 
 
 @pytest.fixture(name="non_existent_email")
