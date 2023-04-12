@@ -13,9 +13,9 @@ class ReadFile:
     """Reading file using different methods."""
 
     read_file = {
+        FileFormat.CSV: read_csv,
         FileFormat.JSON: read_json,
         FileFormat.YAML: read_yaml,
-        FileFormat.CSV: read_csv,
     }
 
     @classmethod
@@ -28,9 +28,9 @@ class ReadStream:
     """Reading stream using different methods."""
 
     read_stream = {
+        FileFormat.CSV: read_csv_stream,
         FileFormat.JSON: read_json_stream,
         FileFormat.YAML: read_yaml_stream,
-        FileFormat.CSV: read_csv_stream,
     }
 
     @classmethod
@@ -43,9 +43,9 @@ class WriteFile:
     """Write file using different methods."""
 
     write_file = {
+        FileFormat.CSV: write_csv,
         FileFormat.JSON: write_json,
         FileFormat.YAML: write_yaml,
-        FileFormat.CSV: write_csv,
     }
 
     @classmethod
@@ -58,9 +58,9 @@ class WriteStream:
     """Write stream using different methods."""
 
     write_stream = {
+        FileFormat.CSV: write_csv_stream,
         FileFormat.JSON: write_json_stream,
         FileFormat.YAML: write_yaml_stream,
-        FileFormat.CSV: write_csv_stream,
     }
 
     @classmethod
