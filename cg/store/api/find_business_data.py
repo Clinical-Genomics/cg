@@ -263,11 +263,19 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
 
     def get_case_samples_from_sample_entry_id(self, sample_entry_id: str) -> Query:
-        """Return cases related to a given sample."""
+        """Return cases related to a given sample entry id."""
         return apply_case_sample_filter(
             filter_functions=[CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_ENTRY_ID],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_join_case_sample_query(),
+        )
+
+    def get_case_samples_from_sample_internal_id(self, sample_internal_id: str) -> Query:
+        """Return cases related to a given sample internal id."""
+        return apply_sample_filter(
+            filter_functions=[CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID],
+            case_samples=self._get_join_case_sample_query(),
+            sample_internal_id=sample_internal_id,
         )
 
     def filter_cases_with_samples(self, case_ids: List[str]) -> List[str]:
