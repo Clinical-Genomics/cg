@@ -8,7 +8,7 @@ class Dispatcher:
         self.input_dict: Dict[str, any] = input_dict
         self.dispatch_table: Dict[Tuple[str], Callable] = self._generate_dispatch_table()
 
-    def __call__(self) -> Dict[Tuple[str], Callable]:
+    def __call__(self):
         """Call the dispatcher with the input dict"""
         parameters_not_none, parameter_values_not_none = self._parse_input_dict(self.input_dict)
         if parameters_not_none not in self.dispatch_table:
