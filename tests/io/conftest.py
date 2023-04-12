@@ -41,3 +41,21 @@ def fixture_invalid_yaml_file(project_dir: Path) -> Path:
     with open(invalid_yaml, "w") as outfile:
         outfile.write(content)
     return invalid_yaml
+
+
+@pytest.fixture(name="csv_file_path")
+def fixture_csv_file_path(fixtures_dir: Path) -> Path:
+    """Return a file path to example CSV file."""
+    return Path(fixtures_dir, "io", "example_csv.csv")
+
+
+@pytest.fixture(name="csv_stream")
+def fixture_csv_stream() -> str:
+    """Return string with CSV format."""
+    return """Lorem,ipsum,sit,amet"""
+
+
+@pytest.fixture(name="csv_temp_path")
+def fixture_csv_temp_path(cg_dir: Path) -> Path:
+    """Return a temp file path to use when writing csv."""
+    return Path(cg_dir, "write_csv.csv")
