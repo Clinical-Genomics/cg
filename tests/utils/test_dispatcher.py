@@ -45,7 +45,9 @@ def test_dispatch_table_generation(
         assert dispatcher.dispatch_table[key] == expected_table[key]
 
 
-def test_call_matching_function(a: int = 1, b: int = 2, c: int = 3, x: int = 5, y: int = 4):
+def test_call_matching_function(
+    a: int = None, b: int = None, c: int = None, x: int = 5, y: int = 4
+):
     """Test that the dispatcher can be called with a dictionary that matches one of the functions."""
 
     # Given two functions
@@ -59,8 +61,7 @@ def test_call_matching_function(a: int = 1, b: int = 2, c: int = 3, x: int = 5, 
     dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "x": x, "y": y})
 
     # Then the dispatcher should return the correct result
-    assert dispatcher({"a": a, "b": b, "c": c}) == 6
-    assert dispatcher({"x": x, "y": y}) == 20
+    assert dispatcher() == 20
 
 
 def test_call_non_matching_function(a: int = 1, b: int = 2, c: int = 3, x: int = 5, y: int = 4):
@@ -78,7 +79,7 @@ def test_call_non_matching_function(a: int = 1, b: int = 2, c: int = 3, x: int =
 
     # Then the dispatcher should raise an error
     with pytest.raises(ValueError):
-        dispatcher({"a": a, "b": b})
+        dispatcher()
 
 
 def test_call_for_function_without_parameters():
@@ -92,10 +93,10 @@ def test_call_for_function_without_parameters():
     dispatcher = Dispatcher([foo], input_dict={})
 
     # THEN the dispatcher should return the correct result
-    assert dispatcher({}) == 1
+    assert dispatcher() == 1
 
 
-def test_call_for_function_with_same_number_of_parameters():
+def test_call_for_function_with_same_number_of_parameters(a=1, b=2, c=None, d=None):
     """Test that the dispatcher can be called with a dictionary that has the same number of parameters as the functions."""
 
     # GIVEN two functions with the same number of parameters
@@ -106,14 +107,15 @@ def test_call_for_function_with_same_number_of_parameters():
         return c * d
 
     # WHEN calling the dispatcher with a dictionary that has the same number of parameters as the functions
-    dispatcher = Dispatcher([foo, bar], input_dict={"a": 1, "b": 2, "c": 3, "d": 4})
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "d": d})
 
     # THEN the dispatcher should return the correct result for each function
-    assert dispatcher({"a": 1, "b": 2}) == 3
-    assert dispatcher({"c": 3, "d": 4}) == 12
+    assert dispatcher() == 3
 
 
-def test_call_dictionary_extra_parameters_not_in_functions():
+def test_call_dictionary_extra_parameters_not_in_functions(
+    a: int = 1, b: int = 2, c: int = 3, d: int = None, e: int = None
+):
     """Test that the dispatcher can be called with a dictionary that has extra parameters that are not in the functions."""
 
     # GIVEN two functions with different parameters
@@ -124,10 +126,11 @@ def test_call_dictionary_extra_parameters_not_in_functions():
         return c * d
 
     # WHEN calling the dispatcher with a dictionary that has extra parameters
-    dispatcher = Dispatcher([foo, bar], input_dict={"a": 1, "b": 2, "c": 3, "d": 4, "e": 5})
+    dispatcher = Dispatcher([foo, bar], input_dict={"a": a, "b": b, "c": c, "d": d, "e": e})
 
-    # THEN the dispatcher should return the correct result
-    assert dispatcher({"a": 1, "b": 2}) == 3
+    # THEN the dispatcher should return a value error
+    with pytest.raises(ValueError):
+        dispatcher()
 
 
 def test_call_with_status_db_functions(
@@ -156,9 +159,7 @@ def test_call_with_status_db_functions(
         },
     )
     # THEN the dispatcher should return the correct samples
-    samples: List[Sample] = dispatcher(
-        {"customer_internal_id": customer_internal_id, "subject_id": test_subject}
-    )
+    samples: List[Sample] = dispatcher()
     for sample in samples:
         assert sample.customer.internal_id == customer_internal_id
         assert sample.subject_id == test_subject
@@ -169,7 +170,7 @@ def test_dispatcher_on_other_functions(
     helpers: StoreHelpers,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
-    pipeline: str = Pipeline.MIP_DNA,
+    pipeline: Pipeline = Pipeline.MIP_DNA,
     case_internal_id: str = "test_case",
 ):
     """Test that the dispatcher can be used to call functions in the status db"""
@@ -177,6 +178,8 @@ def test_dispatcher_on_other_functions(
     # GIVEN a database with a case and an analysis
     case = helpers.add_case(store, internal_id=case_internal_id)
     helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, pipeline=pipeline)
+    helpers.add_analysis(store, case=case, started_at=timestamp_now, pipeline=Pipeline.FLUFFY)
+    helpers.add_analysis(store, case=case, started_at=timestamp_yesterday, pipeline=Pipeline.FLUFFY)
 
     # WHEN calling the dispatcher with the to get analyses
     function_dispatcher: Dispatcher = Dispatcher(
@@ -188,17 +191,11 @@ def test_dispatcher_on_other_functions(
         ],
         input_dict={
             "case_internal_id": case_internal_id,
-            "pipeline": Pipeline,
+            "pipeline": pipeline,
             "started_at_before": timestamp_now,
         },
     )
-    analyses: List[Analysis] = function_dispatcher(
-        {
-            "case_internal_id": case_internal_id,
-            "pipeline": Pipeline,
-            "started_at_before": timestamp_now,
-        }
-    )
+    analyses: List[Analysis] = function_dispatcher()
 
     # THEN the dispatcher should return the correct analyses
     for analysis in analyses:
