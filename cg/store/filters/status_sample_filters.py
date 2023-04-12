@@ -173,9 +173,7 @@ def filter_samples_by_identifier_name_and_value(
     samples: Query, identifier_name: str, identifier_value: Any
 ) -> Query:
     """Filters the sample query by the given identifier name and value if they are attributes of Sample."""
-    if identifier_name in dir(Sample):
-        samples: Query = samples.filter(getattr(Sample, identifier_name) == identifier_value)
-    return samples
+    return samples.filter(getattr(Sample, identifier_name) == identifier_value)
 
 
 def apply_sample_filter(
