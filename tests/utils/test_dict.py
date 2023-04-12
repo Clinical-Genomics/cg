@@ -1,8 +1,6 @@
 """Tests for the dict module."""
 from pathlib import Path
-from typing import Dict
 
-from housekeeper.store.models import File
 
 from cg.utils.dict import get_list_from_dictionary, get_full_path_dictionary
 

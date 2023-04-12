@@ -8,10 +8,19 @@ from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Any, Dict, List, Optional
 
+from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants.constants import FileFormat
-from cg.constants.nextflow import NFX_SAMPLE_HEADER, NFX_WORK_DIR, NXF_PID_FILE_ENV
+from cg.constants.nextflow import (
+    JAVA_MEMORY_HEADJOB,
+    NFX_SAMPLE_HEADER,
+    NFX_WORK_DIR,
+    NXF_JVM_ARGS_ENV,
+    SlurmHeadJobDefaults,
+)
 from cg.exc import CgError
 from cg.io.controller import ReadFile, WriteFile
+from cg.models.slurm.sbatch import Sbatch
+from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
 
@@ -86,11 +95,7 @@ class NextflowAnalysisAPI:
     @classmethod
     def get_variables_to_export(cls, case_id: str, root_dir: str) -> Dict[str, str]:
         """Generates a dictionary with variables that needs to be exported."""
-        return {
-            NXF_PID_FILE_ENV: cls.get_case_nextflow_pid_path(
-                case_id=case_id, root_dir=root_dir
-            ).as_posix()
-        }
+        return {NXF_JVM_ARGS_ENV: f"'{JAVA_MEMORY_HEADJOB}'"}
 
     @classmethod
     def verify_analysis_finished(cls, case_id: str, root_dir: str) -> None:
@@ -137,52 +142,29 @@ class NextflowAnalysisAPI:
                 outfile.write(f"{key}: {quotes}{value}{quotes}\n")
 
     @classmethod
-    def get_verified_arguments_nextflow(
-        cls,
-        case_id: str,
-        pipeline: str,
-        root_dir: str,
-        log: Path,
-        bg: bool,
-        quiet: bool,
-        config: Optional[str],
-    ) -> dict:
-        """Transforms click argument related to nextflow that were left empty
-        into defaults constructed with case_id paths."""
+    def get_nextflow_run_parameters(
+        cls, case_id: str, pipeline_path: str, root_dir: str, command_args: dict
+    ) -> List[str]:
+        """Returns a nextflow run command given a dictionary with arguments."""
 
-        return {
-            "-bg": bg,
-            "-quiet": quiet,
-            "-log": cls.get_log_path(
-                case_id=case_id, pipeline=pipeline, root_dir=root_dir, log=log
+        nextflow_options: List[str] = build_command_from_dict(
+            options=dict((f"-{arg}", command_args.get(arg, True)) for arg in ("log", "config")),
+            exclude_true=True,
+        )
+        run_options: List[str] = build_command_from_dict(
+            options=dict(
+                (f"-{arg}", command_args.get(arg, None))
+                for arg in (
+                    "work-dir",
+                    "resume",
+                    "profile",
+                    "with-tower",
+                    "params-file",
+                )
             ),
-            "-config": cls.get_nextflow_config_path(nextflow_config=config),
-        }
-
-    @classmethod
-    def get_verified_arguments_run(
-        cls,
-        case_id: str,
-        root_dir: str,
-        work_dir: str,
-        resume: bool,
-        profile: bool,
-        with_tower: bool,
-        stub: bool,
-        params_file: Optional[str],
-    ) -> dict:
-        """Transforms click argument related to nextflow run that were left empty
-        into defaults constructed with case_id paths."""
-        return {
-            "-w": cls.get_workdir_path(case_id=case_id, root_dir=root_dir, work_dir=work_dir),
-            "-resume": resume,
-            "-profile": profile,
-            "-with-tower": with_tower,
-            "-stub": stub,
-            "-params-file": cls.get_params_file_path(
-                case_id=case_id, root_dir=root_dir, params_file=params_file
-            ),
-        }
+            exclude_true=True,
+        )
+        return nextflow_options + ["run", pipeline_path] + run_options
 
     @classmethod
     def get_log_path(cls, case_id: str, pipeline: str, root_dir: str, log: str = None) -> Path:
@@ -255,3 +237,47 @@ class NextflowAnalysisAPI:
         WriteFile.write_file_from_content(
             content=deliverables_content, file_format=file_format, file_path=file_path
         )
+
+    @classmethod
+    def get_sbatch_path(cls, case_id: str, root_dir: str) -> Path:
+        """Returns a path where the nextflow sbatch for the head job should be located."""
+        return Path(
+            cls.get_case_path(case_id=case_id, root_dir=root_dir), "nextflow_head_job.sbatch"
+        )
+
+    @classmethod
+    def execute_head_job(
+        cls,
+        case_id: str,
+        root_dir: str,
+        slurm_account: str,
+        email: str,
+        qos: str,
+        commands: str,
+        hours: int = SlurmHeadJobDefaults.HOURS,
+        memory: int = SlurmHeadJobDefaults.MEMORY,
+        number_tasks: int = SlurmHeadJobDefaults.NUMBER_TASKS,
+        dry_run: bool = False,
+    ) -> int:
+        """Executes nextflow head job command."""
+
+        slurm_api: SlurmAPI = SlurmAPI()
+        slurm_api.set_dry_run(dry_run=dry_run)
+        sbatch_parameters: Sbatch = Sbatch(
+            account=slurm_account,
+            commands=commands,
+            email=email,
+            hours=hours,
+            job_name=f"{case_id}.%j",
+            log_dir=cls.get_case_path(case_id=case_id, root_dir=root_dir).as_posix(),
+            memory=memory,
+            number_tasks=number_tasks,
+            quality_of_service=qos,
+        )
+
+        sbatch_content: str = slurm_api.generate_sbatch_content(sbatch_parameters=sbatch_parameters)
+        sbatch_path: Path = cls.get_sbatch_path(case_id=case_id, root_dir=root_dir)
+        sbatch_number: int = slurm_api.submit_sbatch(
+            sbatch_content=sbatch_content, sbatch_path=sbatch_path
+        )
+        return sbatch_number

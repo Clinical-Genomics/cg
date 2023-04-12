@@ -5,12 +5,11 @@ import logging
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, Dict, Iterable
+from typing import List, Optional, Dict, Set
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
-from cg.store import models
 
 from housekeeper.store.models import File, Version, Bundle
 
@@ -174,10 +173,15 @@ class MockHousekeeperAPI:
         self.root_path = config.get("housekeeper", {}).get("root", str(ROOT_PATH))
 
     # Mock specific functions
-    def fetch_file_from_version(self, version_obj, tags):
+    def get_file_from_version(self, version: Version, tags: Set[str]):
         if tags.intersection(self._missing_tags):
             return None
         return self._files[0]
+
+    def get_latest_file_from_version(self, version: Version, tags: Set[str]):
+        if tags.intersection(self._missing_tags):
+            return None
+        return self._files[-1]
 
     def get_file_from_latest_version(self, bundle_name: str, tags: List[str]) -> Optional[File]:
         """Find a file in the latest version of a bundle."""
@@ -266,14 +270,14 @@ class MockHousekeeperAPI:
         tags = {}
         for tag_name in tag_names:
             if self.tag_exists(tag_name):
-                tag_obj = self.tag(tag_name)
+                tag_obj = self.get_tag(tag_name)
             else:
                 tag_obj = self.new_tag(tag_name)
                 self._tags.append(tag_obj)
             tags[tag_name] = tag_obj
         return tags
 
-    def tag(self, name: str):
+    def get_tag(self, name: str):
         """Fetch a tag"""
         for tag_obj in self._tags:
             if tag_obj.name == name:
@@ -443,13 +447,13 @@ class MockHousekeeperAPI:
         if isinstance(tags, str):
             tags = [tags]
         for tag_name in tags:
-            if not self.tag(tag_name):
+            if not self.get_tag(tag_name):
                 self.add_tag(tag_name)
 
         new_file = self.new_file(
             path=str(Path(path).absolute()),
             to_archive=to_archive,
-            tags=[self.tag(tag_name) for tag_name in tags],
+            tags=[self.get_tag(tag_name) for tag_name in tags],
         )
         if not version_obj:
             version_obj = self.new_version(created_at=datetime.datetime.now())

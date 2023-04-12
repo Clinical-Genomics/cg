@@ -4,13 +4,15 @@ from typing import Iterable, List, Optional
 
 import click
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
 from tabulate import tabulate
+
+from cg.store.models import Family, Flowcell, Customer, Sample
 
 LOG = logging.getLogger(__name__)
 ANALYSIS_HEADERS = ["Analysis Date", "Pipeline", "Version"]
 FAMILY_HEADERS = ["Family", "Name", "Customer", "Priority", "Panels", "Action"]
-FLOWCELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
+FLOW_CELL_HEADERS = ["Flowcell", "Type", "Sequencer", "Date", "Archived?", "Status"]
 LINK_HEADERS = ["Sample", "Mother", "Father"]
 SAMPLE_HEADERS = ["Sample", "Name", "Customer", "Application", "State", "Priority", "External?"]
 
@@ -24,172 +26,177 @@ def get(context: click.Context, identifier: Optional[str]):
         if re.match(r"^[A-Z]{3}[0-9]{4,5}[A-Z]{1}[1-9]{1,3}$", identifier):
             context.invoke(sample, sample_ids=[identifier])
         elif re.match(r"^[a-z]*$", identifier):
-            # try family information
-            context.invoke(family, family_ids=[identifier])
+            # try case information
+            context.invoke(case, case_ids=[identifier])
         elif re.match(r"^[HC][A-Z0-9]{8}$", identifier):
             # try flowcell information
-            context.invoke(flowcell, flowcell_id=identifier)
+            context.invoke(flow_cell, flow_cell_id=identifier)
         else:
             LOG.error(f"{identifier}: can't predict identifier")
             raise click.Abort
 
 
 @get.command()
-@click.option("--families/--no-families", default=True, help="display related families")
-@click.option("-hf", "--hide-flowcell", is_flag=True, help="hide related flowcells")
-@click.argument("sample_ids", nargs=-1)
+@click.option("--cases/--no-cases", default=True, help="Display related cases")
+@click.option("-hf", "--hide-flow-cell", is_flag=True, help="Hide related flow cells")
+@click.argument("sample-ids", nargs=-1)
 @click.pass_context
-def sample(context: click.Context, families: bool, hide_flowcell: bool, sample_ids: List[str]):
+def sample(context: click.Context, cases: bool, hide_flow_cell: bool, sample_ids: List[str]):
     """Get information about a sample."""
     status_db: Store = context.obj.status_db
     for sample_id in sample_ids:
         LOG.debug("%s: get info about sample", sample_id)
-        sample_obj: models.Sample = status_db.sample(sample_id)
-        if sample_obj is None:
+        existing_sample: Sample = status_db.get_sample_by_internal_id(internal_id=sample_id)
+        if existing_sample is None:
             LOG.warning(f"{sample_id}: sample doesn't exist")
             continue
         row = [
-            sample_obj.internal_id,
-            sample_obj.name,
-            sample_obj.customer.internal_id,
-            sample_obj.application_version.application.tag,
-            sample_obj.state,
-            sample_obj.priority_human,
-            "Yes" if sample_obj.application_version.application.is_external else "No",
+            existing_sample.internal_id,
+            existing_sample.name,
+            existing_sample.customer.internal_id,
+            existing_sample.application_version.application.tag,
+            existing_sample.state,
+            existing_sample.priority_human,
+            "Yes" if existing_sample.application_version.application.is_external else "No",
         ]
         click.echo(tabulate([row], headers=SAMPLE_HEADERS, tablefmt="psql"))
-        if families:
-            family_ids: List[str] = [link_obj.family.internal_id for link_obj in sample_obj.links]
-            context.invoke(family, family_ids=family_ids, samples=False)
-        if not hide_flowcell:
-            for flowcell_obj in sample_obj.flowcells:
-                LOG.debug(f"{flowcell_obj.name}: get info about flowcell")
-                context.invoke(flowcell, flowcell_id=flowcell_obj.name, samples=False)
+        if cases:
+            case_ids: List[str] = [
+                link_obj.family.internal_id for link_obj in existing_sample.links
+            ]
+            context.invoke(case, case_ids=case_ids, samples=False)
+        if not hide_flow_cell:
+            for sample_flow_cell in existing_sample.flowcells:
+                LOG.debug(f"Get info on flow cell: {sample_flow_cell.name}")
+                context.invoke(flow_cell, flow_cell_id=sample_flow_cell.name, samples=False)
 
 
 @get.command()
-@click.argument("case_id")
+@click.argument("case-id")
 @click.pass_obj
 def analysis(context: CGConfig, case_id: str):
     """Get information about case analysis."""
     status_db: Store = context.status_db
-    case_obj: models.Family = status_db.family(case_id)
-    if case_obj is None:
-        LOG.error("%s: case doesn't exist", case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    if case is None:
+        LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
+    LOG.debug(f"{case.internal_id}: get info about case analysis")
 
-    LOG.debug("%s: get info about case analysis", case_obj.internal_id)
-
-    for analysis_obj in case_obj.analyses:
+    for case_analysis in case.analyses:
         row = [
-            analysis_obj.started_at,
-            analysis_obj.pipeline,
-            analysis_obj.pipeline_version,
+            case_analysis.started_at,
+            case_analysis.pipeline,
+            case_analysis.pipeline_version,
         ]
         click.echo(tabulate([row], headers=ANALYSIS_HEADERS, tablefmt="psql"))
 
 
 @get.command()
-@click.argument("family_id")
+@click.argument("case-id")
 @click.pass_obj
-def relations(context: CGConfig, family_id: str):
-    """Get information about family relations."""
+def relations(context: CGConfig, case_id: str):
+    """Get information about case relations."""
     status_db: Store = context.status_db
-    case_obj: models.Family = status_db.family(family_id)
-    if case_obj is None:
-        LOG.error("%s: family doesn't exist", family_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    if case is None:
+        LOG.error(f"{case_id}: case doesn't exist")
         raise click.Abort
 
-    LOG.debug("%s: get info about family relations", case_obj.internal_id)
+    LOG.debug(f"{case.internal_id}: get info about case relations")
 
-    for link_obj in case_obj.links:
+    for case_link in case.links:
         row = [
-            link_obj.sample.internal_id if link_obj.sample else "",
-            link_obj.mother.internal_id if link_obj.mother else "",
-            link_obj.father.internal_id if link_obj.father else "",
+            case_link.sample.internal_id if case_link.sample else "",
+            case_link.mother.internal_id if case_link.mother else "",
+            case_link.father.internal_id if case_link.father else "",
         ]
         click.echo(tabulate([row], headers=LINK_HEADERS, tablefmt="psql"))
 
 
 @get.command()
-@click.option("-c", "--customer", help="internal id for customer to filter by")
+@click.option("-c", "--customer-id", help="internal id for customer to filter by")
 @click.option("-n", "--name", is_flag=True, help="search family by name")
 @click.option("--samples/--no-samples", default=True, help="display related samples")
 @click.option("--relate/--no-relate", default=True, help="display relations to samples")
 @click.option("--analyses/--no-analyses", default=True, help="display related analyses")
-@click.argument("family_ids", nargs=-1)
+@click.argument("case-ids", nargs=-1)
 @click.pass_context
-def family(
+def case(
     context: click.Context,
-    customer: str,
+    customer_id: str,
     name: bool,
     samples: bool,
     relate: bool,
     analyses: bool,
-    family_ids: List[str],
+    case_ids: List[str],
 ):
-    """Get information about a family."""
+    """Get information about a case."""
     status_db: Store = context.obj.status_db
-    cases: List[models.Family] = []
+    status_db_cases: List[Family] = []
     if name:
-        customer_obj: models.Customer = status_db.customer(customer)
-        if customer_obj is None:
-            LOG.error(f"{customer}: customer not found")
+        customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
+        if not customer:
+            LOG.error(f"{customer_id}: customer not found")
             raise click.Abort
-        cases: Iterable[models.Family] = status_db.families(
-            customers=[customer_obj], enquiry=family_ids[-1]
+        status_db_cases: Iterable[Family] = status_db.get_cases_by_customer_and_case_name_search(
+            customer=customer, case_name_search=case_ids[-1]
         )
     else:
-        for family_id in family_ids:
-            case_obj: models.Family = status_db.family(family_id)
-            if case_obj is None:
-                LOG.error(f"{family_id}: family doesn't exist")
+        for case_id in case_ids:
+            existing_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+            if not existing_case:
+                LOG.error(f"{case_id}: case doesn't exist")
                 raise click.Abort
-            cases.append(case_obj)
+            status_db_cases.append(existing_case)
 
-    for case_obj in cases:
-        LOG.debug(f"{case_obj.internal_id}: get info about family")
+    for status_db_case in status_db_cases:
+        LOG.debug(f"{status_db_case.internal_id}: get info about case")
         row: List[str] = [
-            case_obj.internal_id,
-            case_obj.name,
-            case_obj.customer.internal_id,
-            case_obj.priority_human,
-            ", ".join(case_obj.panels),
-            case_obj.action or "NA",
+            status_db_case.internal_id,
+            status_db_case.name,
+            status_db_case.customer.internal_id,
+            status_db_case.priority_human,
+            ", ".join(status_db_case.panels),
+            status_db_case.action or "NA",
         ]
         click.echo(tabulate([row], headers=FAMILY_HEADERS, tablefmt="psql"))
         if relate:
-            context.invoke(relations, family_id=case_obj.internal_id)
+            context.invoke(relations, case_id=status_db_case.internal_id)
         if samples:
-            sample_ids: List[str] = [link_obj.sample.internal_id for link_obj in case_obj.links]
-            context.invoke(sample, sample_ids=sample_ids, families=False)
+            sample_ids: List[str] = [
+                link_obj.sample.internal_id for link_obj in status_db_case.links
+            ]
+            context.invoke(sample, sample_ids=sample_ids, cases=False)
         if analyses:
-            context.invoke(analysis, case_id=case_obj.internal_id)
+            context.invoke(analysis, case_id=status_db_case.internal_id)
 
 
-@get.command()
-@click.option("--samples/--no-samples", default=True, help="display related samples")
-@click.argument("flowcell_id")
+@get.command("flow-cell")
+@click.option("--samples/--no-samples", default=True, help="Display related samples")
+@click.argument("flow-cell-id")
 @click.pass_context
-def flowcell(context: click.Context, samples: bool, flowcell_id: str):
-    """Get information about a flowcell and the samples on it."""
+def flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
+    """Get information about a flow cell and the samples on it."""
     status_db: Store = context.obj.status_db
-    flowcell_obj: models.Flowcell = status_db.get_flow_cell(flowcell_id)
-    if flowcell_obj is None:
-        LOG.error(f"{flowcell_id}: flowcell not found")
+    existing_flow_cell: Flowcell = status_db.get_flow_cell(flow_cell_id=flow_cell_id)
+    if not existing_flow_cell:
+        LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort
     row: List[str] = [
-        flowcell_obj.name,
-        flowcell_obj.sequencer_type,
-        flowcell_obj.sequencer_name,
-        flowcell_obj.sequenced_at.date(),
-        flowcell_obj.archived_at.date() if flowcell_obj.archived_at else "No",
-        flowcell_obj.status,
+        existing_flow_cell.name,
+        existing_flow_cell.sequencer_type,
+        existing_flow_cell.sequencer_name,
+        existing_flow_cell.sequenced_at.date(),
+        existing_flow_cell.archived_at.date() if existing_flow_cell.archived_at else "No",
+        existing_flow_cell.status,
     ]
-    click.echo(tabulate([row], headers=FLOWCELL_HEADERS, tablefmt="psql"))
+    click.echo(tabulate([row], headers=FLOW_CELL_HEADERS, tablefmt="psql"))
     if samples:
-        sample_ids: List[str] = [sample_obj.internal_id for sample_obj in flowcell_obj.samples]
+        sample_ids: List[str] = [
+            sample_obj.internal_id for sample_obj in existing_flow_cell.samples
+        ]
         if sample_ids:
-            context.invoke(sample, sample_ids=sample_ids, families=False)
+            context.invoke(sample, sample_ids=sample_ids, cases=False)
         else:
-            LOG.warning("no samples found on flowcell")
+            LOG.warning("No samples found on flow cell")

@@ -9,8 +9,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.meta.compress import files
 from cg.meta.compress.compress import CompressAPI
 from cg.models import CompressionData
-from cg.store import Store, models
-from housekeeper.store import models as hk_models
+from cg.store import Store
+from cg.store.models import Family
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -24,11 +25,11 @@ class PrepareFastqAPI:
 
     def get_compression_objects(self, case_id: str) -> List[CompressionData]:
         """Return a list of compression objects"""
-        case_obj: models.Family = self.store.family(case_id)
+        case_obj: Family = self.store.get_case_by_internal_id(internal_id=case_id)
         compression_objects = []
         for link in case_obj.links:
             sample_id = link.sample.internal_id
-            version_obj: hk_models.Version = self.compress_api.hk_api.get_latest_bundle_version(
+            version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
                 bundle_name=sample_id
             )
             compression_objects.extend(files.get_spring_paths(version_obj))
@@ -61,13 +62,13 @@ class PrepareFastqAPI:
 
     def check_fastq_links(self, case_id: str) -> None:
         """Check if all FASTQ files are linked in Housekeeper."""
-        case_obj: models.Family = self.store.family(case_id)
+        case_obj: Family = self.store.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             sample_id = link.sample.internal_id
-            version_obj: hk_models.Version = self.compress_api.hk_api.get_latest_bundle_version(
+            version_obj: Version = self.compress_api.hk_api.get_latest_bundle_version(
                 bundle_name=sample_id
             )
-            fastq_files: Dict[Path, hk_models.File] = files.get_hk_files_dict(
+            fastq_files: Dict[Path, File] = files.get_hk_files_dict(
                 tags=["fastq"], version_obj=version_obj
             )
             compression_objs: List[CompressionData] = files.get_spring_paths(version_obj)

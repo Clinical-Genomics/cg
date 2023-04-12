@@ -1,5 +1,4 @@
 """Tests for the models in scout load config"""
-from pathlib import Path
 from typing import Any
 
 import pytest

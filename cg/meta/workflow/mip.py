@@ -1,7 +1,7 @@
 import logging
 
 from pathlib import Path
-from typing import Any, List, Optional, Type, Dict, Union
+from typing import Any, List, Optional, Dict, Union
 
 from pydantic import ValidationError
 
@@ -99,7 +99,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """
 
         # Validate and reformat to MIP pedigree config format
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return ConfigHandler.make_pedigree_config(
             data={
                 "case": case_obj.internal_id,
@@ -144,7 +144,7 @@ class MipAnalysisAPI(AnalysisAPI):
         )
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             self.link_fastq_files_for_sample(
                 case_obj=case_obj,
@@ -278,7 +278,7 @@ class MipAnalysisAPI(AnalysisAPI):
         """If any sample in this case is downsampled or external, returns true"""
         if skip_evaluation:
             return True
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link_obj in case_obj.links:
             downsampled = isinstance(link_obj.sample.downsampled_to, int)
             external = link_obj.sample.application_version.application.is_external

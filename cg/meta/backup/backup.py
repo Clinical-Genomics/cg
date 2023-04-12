@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple
 
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileExtensions, FlowCellStatus
@@ -403,16 +403,12 @@ class SpringBackupAPI:
         if self.dry_run:
             LOG.info(f"Dry run, no changes made to {spring_file_path}")
             return
-        hk_spring_file: hk_models.File = self.hk_api.files(path=str(spring_file_path)).first()
-        LOG.info(f"Setting {spring_file_path} to archived in Housekeeper")
-        self.hk_api.set_to_archive(file=hk_spring_file, value=True)
-
-    def is_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
-        """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted."""
-        return (
-            self.hk_api.files(path=str(spring_file_path)).first().to_archive
-            and not spring_file_path.exists()
-        )
+        hk_spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
+        if hk_spring_file:
+            LOG.info(f"Setting {spring_file_path} to archived in Housekeeper")
+            self.hk_api.set_to_archive(file=hk_spring_file, value=True)
+        else:
+            LOG.warning(f"Could not find {spring_file_path} on disk")
 
     def remove_archived_spring_file(self, spring_file_path: Path) -> None:
         """Removes all files related to spring PDC archiving."""
@@ -420,9 +416,19 @@ class SpringBackupAPI:
             LOG.info(f"Removing spring file {spring_file_path} from disk")
             spring_file_path.unlink()
 
+    def is_to_be_retrieved_and_decrypted(self, spring_file_path: Path) -> bool:
+        """Determines if a spring file is archived on PDC and needs to be retrieved and decrypted."""
+        spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
+        if spring_file and not spring_file_path.exists():
+            return spring_file.to_archive
+        return False
+
     def is_spring_file_archived(self, spring_file_path: Path) -> bool:
         """Checks if a spring file is marked as archived in Housekeeper."""
-        return self.hk_api.files(path=str(spring_file_path)).first().to_archive
+        spring_file: File = self.hk_api.files(path=str(spring_file_path)).first()
+        if spring_file:
+            return spring_file.to_archive
+        return False
 
     @staticmethod
     def is_compression_ongoing(spring_file_path: Path) -> bool:

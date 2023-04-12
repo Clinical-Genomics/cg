@@ -2,6 +2,7 @@ import logging
 from typing import List, Union, Optional, Dict
 
 from cgmodels.cg.constants import Pipeline
+from housekeeper.store.models import Version, File
 
 from cg.constants import (
     BALSAMIC_REPORT_ACCREDITED_PANELS,
@@ -32,7 +33,7 @@ from cg.models.report.metadata import (
 )
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
-from cg.store import models
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class BalsamicReportAPI(ReportAPI):
         self.analysis_api = analysis_api
 
     def get_sample_metadata(
-        self, case: models.Family, sample: models.Sample, analysis_metadata: BalsamicAnalysis
+        self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Fetches the sample metadata to include in the report."""
 
@@ -61,7 +62,7 @@ class BalsamicReportAPI(ReportAPI):
 
     @staticmethod
     def get_panel_metadata(
-        sample: models.Sample,
+        sample: Sample,
         million_read_pairs: float,
         sample_metrics: BalsamicTargetedQCMetrics,
         analysis_metadata: BalsamicAnalysis,
@@ -107,7 +108,7 @@ class BalsamicReportAPI(ReportAPI):
             else None
         )
 
-    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
+    def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
         return self.analysis_api.get_bundle_deliverables_type(case.internal_id)
@@ -210,3 +211,20 @@ class BalsamicReportAPI(ReportAPI):
         """Retrieves BALSAMIC upload case tags."""
 
         return BALSAMIC_CASE_TAGS
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """Return the file path of the uploaded to Scout file given its tag."""
+
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        uploaded_file: File = self.housekeeper_api.get_latest_file(
+            bundle=case_id, tags=tags, version=version.id
+        )
+
+        if not tags or not uploaded_file:
+            LOG.warning(
+                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
+            )
+            return None
+
+        return uploaded_file.full_path

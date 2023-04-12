@@ -36,7 +36,7 @@ class AddHandler(BaseHandler):
     def generate_unique_petname(self) -> str:
         while True:
             random_id = petname.Generate(3, separator="")
-            if not self.sample(random_id):
+            if not self.get_sample_by_internal_id(internal_id=random_id):
                 return random_id
 
     def add_customer(
@@ -94,7 +94,7 @@ class AddHandler(BaseHandler):
             **kwargs,
         )
 
-    def add_version(
+    def add_application_version(
         self,
         application: Application,
         version: int,
@@ -179,7 +179,7 @@ class AddHandler(BaseHandler):
         # generate a unique case id
         while True:
             internal_id = petname.Generate(2, separator="")
-            if self.family(internal_id) is None:
+            if self.get_case_by_internal_id(internal_id) is None:
                 break
             else:
                 LOG.debug(f"{internal_id} already used - trying another id")
@@ -277,8 +277,11 @@ class AddHandler(BaseHandler):
         application_version: ApplicationVersion,
         ticket: str = None,
         comment: str = None,
-        received: dt.datetime = None,
+        received_at: dt.datetime = None,
         capture_kit: str = None,
+        invoice_id: int = None,
+        no_invoice: bool = None,
+        delivered_at: dt.datetime = None,
     ) -> Pool:
         """Build a new Pool record."""
 
@@ -287,9 +290,12 @@ class AddHandler(BaseHandler):
             ordered_at=ordered or dt.datetime.now(),
             order=order,
             ticket=ticket,
-            received_at=received,
+            received_at=received_at,
             comment=comment,
             capture_kit=capture_kit,
+            delivered_at=delivered_at,
+            invoice_id=invoice_id,
+            no_invoice=no_invoice,
         )
         new_record.customer = customer
         new_record.application_version = application_version
@@ -320,12 +326,17 @@ class AddHandler(BaseHandler):
         comment: str = None,
         discount: int = 0,
         record_type: str = None,
+        invoiced_at: Optional[dt.datetime] = None,
     ):
         """Build a new Invoice record."""
 
         new_id = self.new_invoice_id()
         new_invoice = self.Invoice(
-            comment=comment, discount=discount, id=new_id, record_type=record_type
+            comment=comment,
+            discount=discount,
+            id=new_id,
+            record_type=record_type,
+            invoiced_at=invoiced_at,
         )
         new_invoice.customer = customer
         for sample in samples or []:

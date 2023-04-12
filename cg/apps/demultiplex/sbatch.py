@@ -30,14 +30,14 @@ log "dragen --bcl-conversion-only true \
 --bcl-input-directory {run_dir} \
 --output-directory {unaligned_dir} \
 --bcl-sampleproject-subdirectories true \
---force   
+--force
 touch {demux_completed_file}"
 
 dragen --bcl-conversion-only true \
 --bcl-input-directory {run_dir} \
 --output-directory {unaligned_dir} \
 --bcl-sampleproject-subdirectories true \
---force   
+--force
 touch {demux_completed_file}
 log "Dragen BCL Convert finished!"
 """,

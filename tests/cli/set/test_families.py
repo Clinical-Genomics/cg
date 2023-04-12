@@ -4,21 +4,22 @@ import logging
 import pytest
 from cg.cli.set.families import families
 from cg.models.cg_config import CGConfig
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family, Sample
 
 SUCCESS = 0
 
 
 @pytest.mark.parametrize("identifier_key", ["original_ticket", "order"])
 def test_set_families_by_sample_identifiers(
-    cli_runner, base_context: CGConfig, identifier_key, helpers, caplog, ticket
+    cli_runner, base_context: CGConfig, identifier_key, helpers, caplog, ticket_id
 ):
     # GIVEN a database with a case with a sample
     base_store: Store = base_context.status_db
-    sample_obj: models.Sample = helpers.add_sample(base_store)
-    sample_obj.original_ticket = ticket
+    sample_obj: Sample = helpers.add_sample(base_store)
+    sample_obj.original_ticket = ticket_id
     sample_obj.order = "An order"
-    case: models.Family = helpers.add_case(base_store)
+    case: Family = helpers.add_case(base_store)
     helpers.add_relationship(base_store, sample=sample_obj, case=case)
     identifier_value = getattr(sample_obj, identifier_key)
 

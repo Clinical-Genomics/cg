@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.models.demultiplex.flow_cell import FlowCell
 
 

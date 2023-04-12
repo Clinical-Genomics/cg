@@ -26,8 +26,12 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
 
     def include_case_files(self):
         LOG.info("Including BALSAMIC specific case level files")
-        self.load_config.vcf_cancer = self.fetch_file_from_hk(self.case_tags.snv_vcf)
-        self.load_config.vcf_cancer_sv = self.fetch_file_from_hk(self.case_tags.sv_vcf)
+        self.load_config.vcf_cancer = self.get_file_from_hk(
+            hk_tags=self.case_tags.snv_vcf, latest=True
+        )
+        self.load_config.vcf_cancer_sv = self.get_file_from_hk(
+            hk_tags=self.case_tags.sv_vcf, latest=True
+        )
         self.include_cnv_report()
         self.include_multiqc_report()
         self.include_delivery_report()
@@ -43,8 +47,8 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
         return config_sample.sample_id
 
     def include_sample_files(self, config_sample: ScoutCancerIndividual) -> None:
-        LOG.info("Including BALSAMIC specific sample level files.")
-        config_sample.vcf2cytosure = self.fetch_sample_file(
+        LOG.info("Including BALSAMIC specific sample level files")
+        config_sample.vcf2cytosure = self.get_sample_file(
             hk_tags=self.sample_tags.vcf2cytosure, sample_id=self._get_sample_id(config_sample)
         )
 

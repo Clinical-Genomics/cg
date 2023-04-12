@@ -162,6 +162,9 @@ class RnafusionConfig(CommonAppConfig):
     profile: str
     conda_binary: Optional[str] = None
     launch_directory: str
+    slurm: SlurmConfig
+    tower_binary_path: str
+    tower_pipeline: str
 
 
 class CGStatsConfig(BaseModel):
@@ -217,6 +220,15 @@ class ExternalConfig(BaseModel):
     caesar: str
 
 
+class DDNDataFlowConfig(BaseModel):
+    database_name: str
+    user: str
+    password: str
+    url: str
+    local_storage: str
+    archive_repository: str
+
+
 class CGConfig(BaseModel):
     database: str
     environment: Literal["production", "stage"] = "stage"
@@ -240,6 +252,7 @@ class CGConfig(BaseModel):
     crunchy: CrunchyConfig = None
     crunchy_api_: CrunchyAPI = None
     data_delivery: DataDeliveryConfig = Field(None, alias="data-delivery")
+    ddn: Optional[DDNDataFlowConfig] = None
     demultiplex: DemultiplexConfig = None
     demultiplex_api_: DemultiplexingAPI = None
     encryption: Optional[CommonAppConfig] = None
@@ -430,7 +443,7 @@ class CGConfig(BaseModel):
         status_db = self.__dict__.get("status_db_")
         if status_db is None:
             LOG.debug("Instantiating status db")
-            status_db = Store(self.database)
+            status_db = Store(uri=self.database)
             self.status_db_ = status_db
         return status_db
 

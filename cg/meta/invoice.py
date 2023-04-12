@@ -40,7 +40,7 @@ class InvoiceAPI:
     def get_customer_by_cost_center(self, cost_center: str) -> Union[Customer, str]:
         """Return the costumer based on cost center."""
         return (
-            self.db.customer(CustomerNames.cust999)
+            self.db.get_customer_by_internal_id(customer_internal_id=CustomerNames.cust999)
             if cost_center.lower() == CostCenters.kth
             else self.customer_obj
         )

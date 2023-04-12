@@ -15,7 +15,7 @@ from cg.models.orders.sample_base import (
     StatusEnum,
     ControlEnum,
 )
-from cg.store import models
+from cg.store.models import Application, Family, Organism, Panel, Pool, Sample
 
 
 class OptionalIntValidator:
@@ -32,18 +32,16 @@ class OptionalFloatValidator:
 
 class OrderInSample(BaseModel):
     # Order portal specific
-    internal_id: Optional[
-        constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
-    ]
+    internal_id: Optional[constr(max_length=Sample.internal_id.property.columns[0].type.length)]
     _suitable_project: OrderType = None
-    application: constr(max_length=models.Application.tag.property.columns[0].type.length)
-    comment: Optional[constr(max_length=models.Sample.comment.property.columns[0].type.length)]
+    application: constr(max_length=Application.tag.property.columns[0].type.length)
+    comment: Optional[constr(max_length=Sample.comment.property.columns[0].type.length)]
     data_analysis: Pipeline
     data_delivery: DataDelivery
     name: constr(
         regex=NAME_PATTERN,
         min_length=2,
-        max_length=models.Sample.name.property.columns[0].type.length,
+        max_length=Sample.name.property.columns[0].type.length,
     )
     priority: PriorityEnum = PriorityEnum.standard
     require_qcok: bool = False
@@ -57,28 +55,25 @@ class OrderInSample(BaseModel):
 class Of1508Sample(OrderInSample):
     # Orderform 1508
     # Order portal specific
-    internal_id: Optional[
-        constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
-    ]
+    internal_id: Optional[constr(max_length=Sample.internal_id.property.columns[0].type.length)]
     # "required for new samples"
     name: Optional[
         constr(
             regex=NAME_PATTERN,
             min_length=2,
-            max_length=models.Sample.name.property.columns[0].type.length,
+            max_length=Sample.name.property.columns[0].type.length,
         )
     ]
 
     # customer
     age_at_sampling: Optional[float]
-    # "application": str,
     family_name: constr(
         regex=NAME_PATTERN,
         min_length=2,
-        max_length=models.Family.name.property.columns[0].type.length,
+        max_length=Family.name.property.columns[0].type.length,
     )
     case_internal_id: Optional[
-        constr(max_length=models.Sample.internal_id.property.columns[0].type.length)
+        constr(max_length=Sample.internal_id.property.columns[0].type.length)
     ]
     sex: SexEnum = SexEnum.unknown
     tumour: bool = False
@@ -91,10 +86,10 @@ class Of1508Sample(OrderInSample):
     well_position: Optional[str]
     # "Required if samples are part of trio/family"
     mother: Optional[
-        constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length)
     ]
     father: Optional[
-        constr(regex=NAME_PATTERN, max_length=models.Sample.name.property.columns[0].type.length)
+        constr(regex=NAME_PATTERN, max_length=Sample.name.property.columns[0].type.length)
     ]
     # This information is required for panel analysis
     capture_kit: Optional[str]
@@ -112,9 +107,7 @@ class Of1508Sample(OrderInSample):
     require_qcok: bool = False
     quantity: Optional[int]
     subject_id: Optional[
-        constr(
-            regex=NAME_PATTERN, max_length=models.Sample.subject_id.property.columns[0].type.length
-        )
+        constr(regex=NAME_PATTERN, max_length=Sample.subject_id.property.columns[0].type.length)
     ]
     synopsis: Optional[str]
 
@@ -146,9 +139,7 @@ class Of1508Sample(OrderInSample):
 class MipDnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_DNA
     # "Required if data analysis in Scout or vcf delivery"
-    panels: List[
-        constr(min_length=1, max_length=models.Panel.abbrev.property.columns[0].type.length)
-    ]
+    panels: List[constr(min_length=1, max_length=Panel.abbrev.property.columns[0].type.length)]
     status: StatusEnum
 
 
@@ -198,7 +189,7 @@ class RmlSample(OrderInSample):
     # 1604 Orderform Ready made libraries (RML)
     # Order portal specific
     # "This information is required"
-    pool: constr(max_length=models.Pool.name.property.columns[0].type.length)
+    pool: constr(max_length=Pool.name.property.columns[0].type.length)
     concentration: float
     concentration_sample: Optional[float]
     index: str
@@ -250,10 +241,8 @@ class MetagenomeSample(OrderInSample):
 class MicrobialSample(OrderInSample):
     # 1603 Orderform Microbial WGS
     # "These fields are required"
-    organism: constr(max_length=models.Organism.internal_id.property.columns[0].type.length)
-    reference_genome: constr(
-        max_length=models.Sample.reference_genome.property.columns[0].type.length
-    )
+    organism: constr(max_length=Organism.internal_id.property.columns[0].type.length)
+    reference_genome: constr(max_length=Sample.reference_genome.property.columns[0].type.length)
     elution_buffer: str
     extraction_method: Optional[str]
     container: ContainerEnum
@@ -262,7 +251,7 @@ class MicrobialSample(OrderInSample):
     well_position: Optional[str]
     # "Required if "Other" is chosen in column "Species""
     organism_other: Optional[
-        constr(max_length=models.Organism.internal_id.property.columns[0].type.length)
+        constr(max_length=Organism.internal_id.property.columns[0].type.length)
     ]
     # "These fields are not required"
     concentration_sample: Optional[float]

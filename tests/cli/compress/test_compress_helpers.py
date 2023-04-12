@@ -1,7 +1,6 @@
 """Tests for helper functions in Cg Compress CLI."""
 
 import logging
-import os
 from pathlib import Path
 
 from housekeeper.store.models import Version
@@ -10,7 +9,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.compress import helpers
 from cg.cli.compress.helpers import set_memory_according_to_reads
 from cg.constants.compression import MAX_READS_PER_GB, CRUNCHY_MIN_GB_PER_PROCESS
-from cg.constants.slurm import Slurm
 
 
 def test_set_memory_according_to_reads_when_no_reads(caplog, sample_id: str):

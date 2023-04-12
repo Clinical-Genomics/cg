@@ -14,7 +14,8 @@ from cg.constants.delivery import PIPELINE_ANALYSIS_TAG_MAP
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case_obj: models.Family = context.obj.status_db.family(case_id)
+    case_obj: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
     delivery_types: Set[str] = case_obj.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
@@ -86,7 +87,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
 
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
-    for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FASTQ):
+    for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
         if analysis_obj.family.analyses[0].uploaded_at:
             LOG.warning(
                 "Newer analysis already uploaded for %s, skipping",
@@ -109,7 +110,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
                     analysis_obj.family.internal_id,
                 )
             continue
-        case: models.Family = analysis_obj.family
+        case: Family = analysis_obj.family
         LOG.info("Uploading family: %s", case.internal_id)
         analysis_obj.upload_started_at = dt.datetime.now()
         context.invoke(clinical_delivery, case_id=case.internal_id, dry_run=dry_run)

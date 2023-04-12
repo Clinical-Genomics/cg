@@ -1,7 +1,9 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Iterable
 
 from cgmodels.cg.constants import Pipeline
+from housekeeper.store.models import Version, File
+from sqlalchemy.orm import Query
 
 from cg.constants import (
     REQUIRED_REPORT_FIELDS,
@@ -25,7 +27,7 @@ from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
-from cg.store import models
+from cg.store.models import Family, Sample, Application
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +40,7 @@ class MipDNAReportAPI(ReportAPI):
         self.analysis_api = analysis_api
 
     def get_sample_metadata(
-        self, case: models.Family, sample: models.Sample, analysis_metadata: MipAnalysis
+        self, case: Family, sample: Sample, analysis_metadata: MipAnalysis
     ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report."""
 
@@ -57,7 +59,7 @@ class MipDNAReportAPI(ReportAPI):
             duplicates=parsed_metrics.duplicate_reads,
         )
 
-    def get_sample_coverage(self, sample: models.Sample, case: models.Family) -> dict:
+    def get_sample_coverage(self, sample: Sample, case: Family) -> dict:
         """Calculates coverage values for a specific sample."""
 
         genes = self.get_genes_from_scout(case.panels)
@@ -78,12 +80,16 @@ class MipDNAReportAPI(ReportAPI):
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
         return panel_gene_ids
 
-    def get_data_analysis_type(self, case: models.Family) -> Optional[str]:
+    def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
-        case_sample = self.status_db.family_samples(case.internal_id)[0].sample
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )[0].sample
         lims_sample = self.get_lims_sample(case_sample.internal_id)
-        application = self.status_db.application(tag=lims_sample.get("application"))
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
 
         return application.analysis_type if application else None
 
@@ -151,3 +157,19 @@ class MipDNAReportAPI(ReportAPI):
         """Retrieves MIP DNA upload case tags."""
 
         return MIP_CASE_TAGS
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """Returns the file path of the uploaded to Scout file given its tag."""
+
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        uploaded_files: Iterable[File] = self.housekeeper_api.get_files(
+            bundle=case_id, tags=tags, version=version.id
+        )
+        if not tags or not any(uploaded_files):
+            LOG.info(
+                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
+            )
+            return None
+
+        return uploaded_files[0].full_path

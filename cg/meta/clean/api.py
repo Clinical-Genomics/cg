@@ -4,11 +4,12 @@ from typing import Iterator, List, Optional
 from pathlib import Path
 
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File, Version
 
 from cg.constants.housekeeper_tags import WORKFLOW_PROTECTED_TAGS
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.store import Store, models
+from cg.store import Store
+from cg.store.models import Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -18,20 +19,20 @@ class CleanAPI:
         self.status_db = status_db
         self.housekeeper_api = housekeeper_api
 
-    def get_bundle_files(
-        self, before: datetime, pipeline: Pipeline
-    ) -> Iterator[List[hk_models.File]]:
+    def get_bundle_files(self, before: datetime, pipeline: Pipeline) -> Iterator[List[File]]:
         """Get any bundle files for a specific version"""
 
-        analysis: models.Analysis
+        analysis: Analysis
         LOG.debug(
-            f"number of {pipeline} analyses before: {before} : {self.status_db.get_analyses_before_date(pipeline=pipeline, before=before).count()}"
+            f"number of {pipeline} analyses before: {before} : {len(self.status_db.get_analyses_for_pipeline_started_at_before(pipeline=pipeline, started_at_before=before))}"
         )
 
-        for analysis in self.status_db.get_analyses_before_date(pipeline=pipeline, before=before):
+        for analysis in self.status_db.get_analyses_for_pipeline_started_at_before(
+            pipeline=pipeline, started_at_before=before
+        ):
             bundle_name = analysis.family.internal_id
 
-            hk_bundle_version: Optional[hk_models.Version] = self.housekeeper_api.version(
+            hk_bundle_version: Optional[Version] = self.housekeeper_api.version(
                 bundle=bundle_name, date=analysis.started_at
             )
             if not hk_bundle_version:
@@ -54,7 +55,7 @@ class CleanAPI:
             ).all()
 
     @staticmethod
-    def has_protected_tags(file: hk_models.File, protected_tags_lists: List[List[str]]) -> bool:
+    def has_protected_tags(file: File, protected_tags_lists: List[List[str]]) -> bool:
         """Check if a file has any protected tags"""
 
         LOG.info(f"File {file.full_path} has the tags {file.tags}")
@@ -75,7 +76,7 @@ class CleanAPI:
             LOG.info("File %s has no protected tags.", file.full_path)
         return _has_protected_tags
 
-    def get_unprotected_existing_bundle_files(self, before: datetime) -> Iterator[hk_models.File]:
+    def get_unprotected_existing_bundle_files(self, before: datetime) -> Iterator[File]:
         """Returns all existing bundle files from analyses started before 'before' that have no protected tags"""
 
         pipeline: Pipeline
@@ -85,12 +86,12 @@ class CleanAPI:
                 LOG.debug("No protected tags defined for %s, skipping", pipeline)
                 continue
 
-            hk_files: List[hk_models.File]
+            hk_files: List[File]
             for hk_files in self.get_bundle_files(
                 before=before,
                 pipeline=pipeline,
             ):
-                hk_file: hk_models.File
+                hk_file: File
                 for hk_file in hk_files:
                     if self.has_protected_tags(hk_file, protected_tags_lists=protected_tags_lists):
                         continue

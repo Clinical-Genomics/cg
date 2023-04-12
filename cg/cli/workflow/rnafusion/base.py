@@ -6,35 +6,25 @@ import click
 from pydantic import ValidationError
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, link, resolve_compression
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nextflow.options import (
     OPTION_CONFIG,
-    OPTION_INPUT,
     OPTION_LOG,
-    OPTION_OUTDIR,
     OPTION_PARAMS_FILE,
     OPTION_PROFILE,
+    OPTION_REVISION,
     OPTION_STUB,
     OPTION_TOWER,
+    OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
-from cg.cli.workflow.rnafusion.options import (
-    OPTION_ALL,
-    OPTION_ARRIBA,
-    OPTION_FROM_START,
-    OPTION_FUSIONCATCHER,
-    OPTION_FUSIONINSPECTOR_FILTER,
-    OPTION_PIZZLY,
-    OPTION_REFERENCES,
-    OPTION_SQUID,
-    OPTION_STARFUSION,
-    OPTION_STRANDEDNESS,
-    OPTION_TRIM,
-)
+from cg.cli.workflow.rnafusion.options import OPTION_FROM_START, OPTION_STRANDEDNESS
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN
+from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -47,7 +37,7 @@ LOG = logging.getLogger(__name__)
 def rnafusion(context: click.Context) -> None:
     """nf-core/rnafusion analysis workflow."""
     AnalysisAPI.get_help(context)
-    context.obj.meta_apis["analysis_api"] = RnafusionAnalysisAPI(
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = RnafusionAnalysisAPI(
         config=context.obj,
     )
 
@@ -60,23 +50,17 @@ rnafusion.add_command(resolve_compression)
 @OPTION_STRANDEDNESS
 @DRY_RUN
 @click.pass_obj
-def config_case(
-    context: CGConfig,
-    case_id: str,
-    strandedness: str,
-    dry_run: bool,
-) -> None:
-    """Create samplesheet file for RNAFUSION analysis for a given CASE_ID."""
-
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-
-    LOG.info(f"Creating samplesheet file for {case_id}.")
+def config_case(context: CGConfig, case_id: str, strandedness: str, dry_run: bool) -> None:
+    """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    LOG.info(f"Creating sample sheet file for {case_id}.")
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
         analysis_api.config_case(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
+
     except CgError as error:
-        LOG.error(f"Could not create samplesheet: {error}")
-        raise click.Abort()
+        LOG.error(f"Could not create sample sheet: {error}")
+        raise click.Abort() from error
 
 
 @rnafusion.command("run")
@@ -89,6 +73,9 @@ def config_case(
 @OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
+@OPTION_REVISION
+@OPTION_COMPUTE_ENV
+@OPTION_USE_NEXTFLOW
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -102,30 +89,46 @@ def run(
     stub: bool,
     config: str,
     params_file: str,
+    revision: str,
+    compute_env: str,
+    use_nextflow: bool,
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
-    resume = False if from_start else True
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+
+    command_args = {
+        "log": NextflowAnalysisAPI.get_log_path(
+            case_id=case_id, pipeline=analysis_api.pipeline, root_dir=analysis_api.root_dir, log=log
+        ),
+        "work-dir": NextflowAnalysisAPI.get_workdir_path(
+            case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
+        ),
+        "resume": not from_start,
+        "profile": analysis_api.get_profile(profile=profile),
+        "with-tower": with_tower,
+        "stub": stub,
+        "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
+        "params-file": NextflowAnalysisAPI.get_params_file_path(
+            case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+        ),
+        "name": case_id,
+        "compute-env": compute_env,
+        "revision": revision,
+        "wait": "SUBMITTED",
+    }
+
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id)
         analysis_api.verify_case_config_file_exists(case_id=case_id)
         analysis_api.check_analysis_ongoing(case_id)
         LOG.info(f"Running RNAFUSION analysis for {case_id}")
-
         analysis_api.run_analysis(
-            case_id=case_id,
-            log=log,
-            work_dir=work_dir,
-            resume=resume,
-            profile=profile,
-            with_tower=with_tower,
-            stub=stub,
-            config=config,
-            params_file=params_file,
-            dry_run=dry_run,
+            case_id=case_id, command_args=command_args, use_nextflow=use_nextflow, dry_run=dry_run
         )
-        analysis_api.set_statusdb_action(case_id=case_id, action="running", dry_run=dry_run)
+        analysis_api.set_statusdb_action(
+            case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
+        )
     except (CgError, ValueError) as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
@@ -143,6 +146,9 @@ def run(
 @OPTION_STUB
 @OPTION_CONFIG
 @OPTION_PARAMS_FILE
+@OPTION_REVISION
+@OPTION_COMPUTE_ENV
+@OPTION_USE_NEXTFLOW
 @DRY_RUN
 @click.pass_context
 def start(
@@ -155,6 +161,9 @@ def start(
     stub: bool,
     config: str,
     params_file: str,
+    revision: str,
+    compute_env: str,
+    use_nextflow: bool,
     dry_run: bool,
 ) -> None:
     """Start full workflow for CASE ID."""
@@ -177,6 +186,9 @@ def start(
         stub=stub,
         config=config,
         params_file=params_file,
+        revision=revision,
+        compute_env=compute_env,
+        use_nextflow=use_nextflow,
         dry_run=dry_run,
     )
 
@@ -187,7 +199,7 @@ def start(
 def start_available(context: click.Context, dry_run: bool = False) -> None:
     """Start full workflow for all cases ready for analysis."""
 
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_analyze():
@@ -210,7 +222,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create a housekeeper deliverables file for given CASE ID."""
 
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -233,7 +245,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @click.pass_obj
 def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Store a finished RNAFUSION analysis in Housekeeper and StatusDB."""
-    analysis_api: AnalysisAPI = context.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
     status_db: Store = context.status_db
 
@@ -274,7 +286,7 @@ def store(context: click.Context, case_id: str, dry_run: bool) -> None:
 def store_available(context: click.Context, dry_run: bool) -> None:
     """Store bundles for all finished RNAFUSION analyses in Housekeeper."""
 
-    analysis_api: AnalysisAPI = context.obj.meta_apis["analysis_api"]
+    analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
     for case_obj in analysis_api.get_cases_to_store():
