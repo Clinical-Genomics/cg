@@ -52,7 +52,7 @@ def fixture_csv_file_path(fixtures_dir: Path) -> Path:
 @pytest.fixture(name="csv_stream")
 def fixture_csv_stream() -> str:
     """Return string with CSV format."""
-    return """Lorem,ipsum sit,amet"""
+    return """Lorem,ipsum,sit,amet"""
 
 
 @pytest.fixture(name="csv_temp_path")

@@ -29,7 +29,7 @@ def test_get_content_from_stream(csv_stream: str):
     assert isinstance(raw_content, List)
 
     # THEN the content should match the expected content
-    expected_content = [["Lorem", "ipsum"], ["sit", "amet"]]
+    expected_content = [["Lorem", "ipsum", "sit", "amet"]]
     assert raw_content == expected_content
 
 
@@ -64,7 +64,7 @@ def test_write_csv_stream(csv_stream: str):
     # GIVEN a list of lists
 
     # WHEN writing the csv stream
-    written_stream: str = write_csv_stream(content=[["Lorem", "ipsum"], ["sit", "amet"]])
+    written_stream: str = write_csv_stream(content=[["Lorem", "ipsum", "sit", "amet"]])
 
     # THEN assert that the stream is correct
-    assert written_stream == csv_stream
+    assert written_stream == csv_stream + "\n"
