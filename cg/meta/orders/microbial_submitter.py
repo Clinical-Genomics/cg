@@ -8,7 +8,7 @@ from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import MicrobialSample
-from cg.store.models import Customer, Family, Organism, Sample
+from cg.store.models import Customer, Family, Organism, Sample, ApplicationVersion
 
 
 class MicrobialSubmitter(Submitter):
@@ -91,22 +91,26 @@ class MicrobialSubmitter(Submitter):
                 )
 
                 if not case:
-                    case = self.status.add_case(
+                    case: Family = self.status.add_case(
                         data_analysis=data_analysis,
                         data_delivery=data_delivery,
                         name=ticket_id,
                         panels=None,
                         ticket=ticket_id,
                     )
-                    case.customer = customer
+                    case.customer: Customer = customer
                     self.status.add_commit(case)
 
-                application_tag = sample_data["application"]
-                application_version = self.status.current_application_version(tag=application_tag)
-                organism = self.status.get_organism_by_internal_id(sample_data["organism_id"])
+                application_tag: str = sample_data["application"]
+                application_version: ApplicationVersion = (
+                    self.status.get_current_application_version_by_tag(tag=application_tag)
+                )
+                organism: Organism = self.status.get_organism_by_internal_id(
+                    sample_data["organism_id"]
+                )
 
                 if not organism:
-                    organism = self.status.add_organism(
+                    organism: Organism = self.status.add_organism(
                         internal_id=sample_data["organism_id"],
                         name=sample_data["organism_id"],
                         reference_genome=sample_data["reference_genome"],
@@ -114,7 +118,7 @@ class MicrobialSubmitter(Submitter):
                     self.status.add_commit(organism)
 
                 if comment:
-                    case.comment = f"Order comment: {comment}"
+                    case.comment: str = f"Order comment: {comment}"
 
                 new_sample = self.status.add_sample(
                     name=sample_data["name"],

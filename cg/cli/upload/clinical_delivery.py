@@ -87,7 +87,7 @@ def auto_fastq(context: click.Context, dry_run: bool):
 
     status_db: Store = context.obj.status_db
     trailblazer_api: TrailblazerAPI = context.obj.trailblazer_api
-    for analysis_obj in status_db.analyses_to_upload(pipeline=Pipeline.FASTQ):
+    for analysis_obj in status_db.get_analyses_to_upload(pipeline=Pipeline.FASTQ):
         if analysis_obj.family.analyses[0].uploaded_at:
             LOG.warning(
                 "Newer analysis already uploaded for %s, skipping",

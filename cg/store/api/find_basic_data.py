@@ -109,21 +109,36 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_application_versions(self) -> List[ApplicationVersion]:
-        """Return all application versions"""
-        return self._get_query(table=ApplicationVersion).all()
-
-    def application_version(self, application: Application, version: int) -> ApplicationVersion:
-        """Return an application version."""
+    def get_application_version_by_application_entry_id(
+        self, application_entry_id: int
+    ) -> ApplicationVersion:
+        """Return an application version by application entry id."""
+        application_versions = self._get_query(table=ApplicationVersion)
         return apply_application_versions_filter(
-            application_versions=self._get_query(table=ApplicationVersion),
-            application=application,
-            version=version,
-            filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_APPLICATION,
-                ApplicationVersionFilter.FILTER_BY_VERSION,
-            ],
+            application_versions=application_versions,
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
+            application_entry_id=application_entry_id,
         ).first()
+
+    def get_current_application_version_by_tag(self, tag: str) -> Optional[ApplicationVersion]:
+        """Return the current application version for an application tag."""
+        application = self.get_application_by_tag(tag=tag)
+        if not application:
+            return None
+        return apply_application_versions_filter(
+            filter_functions=[
+                ApplicationVersionFilter.FILTER_BY_ENTRY_ID,
+                ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
+                ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
+            ],
+            application_versions=self._get_query(table=ApplicationVersion),
+            application_entry_id=application.id,
+            valid_from=dt.datetime.now(),
+        ).first()
+
+    def get_application_versions(self) -> List[ApplicationVersion]:
+        """Return all application versions."""
+        return self._get_query(table=ApplicationVersion).all()
 
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
@@ -171,28 +186,6 @@ class FindBasicDataHandler(BaseHandler):
             filter_functions=[CollaborationFilter.FILTER_BY_INTERNAL_ID],
             internal_id=internal_id,
         ).first()
-
-    def current_application_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Return the current application version for an application tag."""
-        application = self.get_application_by_tag(tag=tag)
-        if not application:
-            return None
-        application_id = application.id
-        return apply_application_versions_filter(
-            filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_APPLICATION_ID,
-                ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
-                ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
-            ],
-            application_versions=self._get_query(table=ApplicationVersion),
-            application_id=application_id,
-            valid_from=dt.datetime.now(),
-        ).first()
-
-    def latest_version(self, tag: str) -> Optional[ApplicationVersion]:
-        """Return the latest application version for an application tag."""
-        application = self.get_application_by_tag(tag=tag)
-        return application.versions[-1] if application and application.versions else None
 
     def get_organism_by_internal_id(self, internal_id: str) -> Organism:
         """Find an organism by internal id."""

@@ -18,7 +18,7 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell
+from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
@@ -338,13 +338,13 @@ def parse_flow_cell(flowcell_id):
 def parse_analyses():
     """Return analyses."""
     if request.args.get("status") == "delivery":
-        analyses: Query = db.analyses_to_deliver()
+        analyses: List[Analysis] = db.get_analyses_to_deliver_for_pipeline()
     elif request.args.get("status") == "upload":
-        analyses: Query = db.analyses_to_upload()
+        analyses: List[Analysis] = db.get_analyses_to_upload()
     else:
-        analyses: Query = db.Analysis.query
-    parsed_analysis: List[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses.limit(30)]
-    return jsonify(analyses=parsed_analysis, total=analyses.count())
+        analyses: List[Analysis] = db.get_analyses()
+    parsed_analysis: List[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses[:30]]
+    return jsonify(analyses=parsed_analysis, total=len(analyses))
 
 
 @BLUEPRINT.route("/options")

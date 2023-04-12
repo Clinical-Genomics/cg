@@ -113,7 +113,7 @@ class RefreshPayload(BaseModel):
 
 
 class AuthResponse(BaseModel):
-    """Model representing the response fields from an access request to the Dataflow API."""
+    """Model representing th response fields from an access request to the Dataflow API."""
 
     access: str
     expire: int
@@ -187,8 +187,7 @@ class DDNDataFlowApi:
         return {"Authorization": f"Bearer {self.auth_token}"}
 
     def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
-        """Archives all folders provided, to their corresponding destination, as given by sources
-        and destination parameter."""
+        """Archives all folders provided, to their corresponding destination, as given by sources and destination parameter."""
         transfer_data: List[TransferData] = [
             TransferData(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
@@ -204,8 +203,7 @@ class DDNDataFlowApi:
         )
 
     def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
-        """Retrieves all folders provided, to their corresponding destination, as given by the
-        sources and destination parameter."""
+        """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
         transfer_data: List[TransferData] = [
             TransferData(source=source.as_posix(), destination=destination.as_posix())
             for source, destination in sources_and_destinations.items()
