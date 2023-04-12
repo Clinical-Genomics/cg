@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from cg.store.models import Family
 
@@ -42,11 +42,13 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_data: dict = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
-        if len(sample_data) == 0:
+        sample_parameters: dict = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
+        if not sample_parameters:
             LOG.error(f"{case_id} has no samples tagged for Balsamic PON analysis")
             raise BalsamicStartError()
-        verified_panel_bed: str = self.get_verified_bed(panel_bed, sample_data)
+        verified_panel_bed: str = self.get_verified_bed(
+            panel_bed=panel_bed, sample_data=sample_parameters
+        )
         options: List[str] = build_command_from_dict(
             {
                 "--case-id": case.internal_id,
@@ -67,7 +69,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
 
     def get_next_pon_version(self, panel_bed: str) -> str:
         """Returns the next PON version to be generated."""
-        latest_pon_file: str = self.get_latest_pon_file(panel_bed)
+        latest_pon_file: str = self.get_latest_pon_file(panel_bed=panel_bed)
         next_version = (
             int(Path(latest_pon_file).stem.split("_v")[ListIndexes.LAST.value]) + 1
             if latest_pon_file
