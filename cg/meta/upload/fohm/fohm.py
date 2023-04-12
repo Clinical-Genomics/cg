@@ -280,7 +280,7 @@ class FOHMUploadAPI:
         """Update timestamp for cases which started being processed as batch"""
         if self._dry_run:
             return
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].upload_started_at = dt.datetime.now()
         self.status_db.commit()
 
@@ -288,6 +288,6 @@ class FOHMUploadAPI:
         """Update timestamp for cases which uploaded successfully"""
         if self._dry_run:
             return
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
         self.status_db.commit()

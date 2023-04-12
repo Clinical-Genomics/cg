@@ -40,8 +40,10 @@ def test_store_items_in_status_control_has_stored_value(
     )
 
     # THEN control should exist on the sample in the store
-    customer: Customer = base_store.get_customer_by_customer_id(customer_id=order.customer)
+    customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=order.customer)
     sample: SarsCov2Sample
     for sample in order.samples:
-        stored_sample: Sample = base_store.find_samples(customer=customer, name=sample.name).first()
+        stored_sample: Sample = base_store.get_sample_by_customer_and_name(
+            customer_entry_id=[customer.id], sample_name=sample.name
+        )
         assert stored_sample.control == control_value

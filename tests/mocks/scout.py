@@ -2,9 +2,8 @@
 
 import logging
 from pathlib import Path
-from datetime import datetime
 from pydantic import BaseModel, validator
-from typing import List, Optional
+from typing import List
 from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI
@@ -75,7 +74,7 @@ class MockScoutAPI(ScoutAPI):
 
     # Overridden functions
 
-    def upload(self, data: dict, threshold: int = 5, force: bool = False):
+    def upload(self, data: dict, force: bool = False):
         """Load analysis of a new case into Scout."""
         LOG.debug("Case loaded successfully to Scout")
 

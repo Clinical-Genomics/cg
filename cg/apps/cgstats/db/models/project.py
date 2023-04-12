@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import Column, ForeignKey, UniqueConstraint, orm, types
+from sqlalchemy import Column, orm, types
 from sqlalchemy.orm.exc import NoResultFound
 
 from .base import Model

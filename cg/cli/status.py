@@ -1,10 +1,10 @@
-from typing import Iterable, List
+from typing import List
 
 import click
 from cg.constants import CASE_ACTIONS, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample, Customer, ApplicationVersion, Analysis
+from cg.store.models import Family, Sample
 from ansi.colour import fg
 from ansi.colour.fx import reset
 from tabulate import tabulate
@@ -356,7 +356,7 @@ def cases(
 def samples(context: CGConfig, skip: int):
     """View status of samples."""
     status_db: Store = context.status_db
-    records: List[Sample] = status_db.get_all_samples()[skip : skip + 30]
+    records: List[Sample] = status_db.get_samples()[skip : skip + 30]
     for record in records:
         message = f"{record.internal_id} ({record.customer.internal_id})"
         if record.sequenced_at:
@@ -381,7 +381,7 @@ def families(context: CGConfig, skip: int):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
     status_db: Store = context.status_db
-    records: List[Family] = status_db.families().offset(skip).limit(30)
+    records: List[Family] = status_db._get_query(table=Family).offset(skip).limit(30)
     for case_obj in records:
         color = "red" if case_obj.priority_int > 1 else "blue"
         message = f"{case_obj.internal_id} ({case_obj.priority_int})"

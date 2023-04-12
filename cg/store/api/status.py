@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional, Tuple, Callable
+from typing import List, Optional
+
 
 from sqlalchemy.orm import Query
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
+from cg.constants.invoice import CustomerNames
 from cg.store.models import (
     Analysis,
     Application,
@@ -31,7 +33,7 @@ from cg.store.filters.status_application_filters import apply_application_filter
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database."""
 
-    def get_all_samples_to_receive(self, external: bool = False) -> List[Sample]:
+    def get_samples_to_receive(self, external: bool = False) -> List[Sample]:
         """Return samples to receive."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: List[SampleFilter] = [
@@ -52,7 +54,7 @@ class StatusHandler(BaseHandler):
             )
         return records.order_by(Sample.ordered_at).all()
 
-    def get_all_samples_to_prepare(self) -> List[Sample]:
+    def get_samples_to_prepare(self) -> List[Sample]:
         """Return samples to prepare."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: List[SampleFilter] = [
@@ -70,7 +72,7 @@ class StatusHandler(BaseHandler):
 
         return records.order_by(Sample.received_at).all()
 
-    def get_all_samples_to_sequence(self) -> List[Sample]:
+    def get_samples_to_sequence(self) -> List[Sample]:
         """Return samples in sequencing."""
         records: Query = self._get_join_sample_application_version_query()
         sample_filter_functions: List[SampleFilter] = [
@@ -129,24 +131,6 @@ class StatusHandler(BaseHandler):
         if threshold:
             families = [case_obj for case_obj in families if case_obj.all_samples_pass_qc]
         return families[:limit]
-
-    def cases_to_store(self, pipeline: Pipeline, limit: int = None) -> list:
-        """Returns a list of cases that may be available to store in Housekeeper."""
-        families_query = (
-            self.Family.query.outerjoin(Analysis)
-            .join(Family.links, FamilySample.sample)
-            .filter(Family.data_analysis == str(pipeline))
-            .filter(Family.action == "running")
-        )
-        return list(families_query)[:limit]
-
-    def get_running_cases_for_pipeline(self, pipeline: Pipeline) -> List[Family]:
-        return (
-            self.query(Family)
-            .filter(Family.action == "running")
-            .filter(Family.data_analysis == pipeline)
-            .all()
-        )
 
     def cases(
         self,
@@ -223,10 +207,10 @@ class StatusHandler(BaseHandler):
 
         return sorted(cases, key=lambda k: k["tat"], reverse=True)
 
-    def set_case_action(self, action: Literal[CASE_ACTIONS], case_id: str) -> None:
+    def set_case_action(self, action: Literal[CASE_ACTIONS], case_internal_id: str) -> None:
         """Sets the action of provided cases to None or the given action."""
-        case_obj: Family = self.Family.query.filter(Family.internal_id == case_id).first()
-        case_obj.action = action
+        case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case.action = action
         self.commit()
 
     def add_sample_comment(self, sample: Sample, comment: str) -> None:
@@ -602,20 +586,12 @@ class StatusHandler(BaseHandler):
             or (samples_sequenced_at and samples_sequenced_at < case_obj.ordered_at)
         )
 
-    @staticmethod
-    def _all_samples_have_sequence_data(links: List[FamilySample]) -> bool:
-        """Return True if all samples are external or sequenced in-house."""
-        return all(
-            (link.sample.sequenced_at or link.sample.application_version.application.is_external)
-            for link in links
-        )
-
-    def analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
+    def get_analyses_to_upload(self, pipeline: Pipeline = None) -> List[Analysis]:
         """Return analyses that have not been uploaded."""
         analysis_filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_WITH_PIPELINE,
             AnalysisFilter.FILTER_COMPLETED,
-            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
@@ -625,40 +601,88 @@ class StatusHandler(BaseHandler):
             pipeline=pipeline,
         ).all()
 
-    def analyses_to_clean(
+    def get_analyses_to_clean(
         self, before: datetime = datetime.now(), pipeline: Pipeline = None
-    ) -> Query:
-        """Fetch analyses that haven't been cleaned."""
-        records = self.latest_analyses()
-        records = records.filter(
-            Analysis.uploaded_at.isnot(None),
-            Analysis.cleaned_at.is_(None),
-            Analysis.started_at <= before,
-            Family.action.is_(None),
-        )
+    ) -> List[Analysis]:
+        """Return analyses that haven't been cleaned."""
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_IS_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_CLEANED,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+            AnalysisFilter.FILTER_CASE_ACTION_IS_NONE,
+        ]
         if pipeline:
-            records = records.filter(
-                Analysis.pipeline == str(pipeline),
-            )
+            filter_functions.append(AnalysisFilter.FILTER_WITH_PIPELINE)
+        return apply_analysis_filter(
+            filter_functions=filter_functions,
+            analyses=self._get_latest_analyses_for_cases_query(),
+            pipeline=pipeline,
+            started_at_date=before,
+        ).all()
 
-        return records
-
-    def get_analyses_before_date(
+    def get_analyses_for_case_and_pipeline_started_at_before(
         self,
-        case_id: Optional[str] = None,
-        before: Optional[datetime] = datetime.now(),
-        pipeline: Optional[Pipeline] = None,
-    ) -> Query:
-        """Fetch all analyses older than certain date."""
-        records: Query = self._get_join_analysis_case_query()
-        if case_id:
-            records = records.filter(Family.internal_id == case_id)
-        if pipeline:
-            records = records.filter(
-                Analysis.pipeline == str(pipeline),
-            )
-        records = records.filter(Analysis.started_at <= before)
-        return records
+        pipeline: Pipeline,
+        started_at_before: datetime,
+        case_internal_id: str,
+    ) -> List[Analysis]:
+        """Return all analyses older than certain date."""
+        case = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case_entry_id: int = case.id if case else None
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_query(table=Analysis),
+            filter_functions=filter_functions,
+            case_entry_id=case_entry_id,
+            started_at_date=started_at_before,
+            pipeline=pipeline,
+        ).all()
+
+    def get_analyses_for_case_started_at_before(
+        self,
+        case_internal_id: str,
+        started_at_before: datetime,
+    ) -> List[Analysis]:
+        """Return all analyses for a case older than certain date."""
+        case = self.get_case_by_internal_id(internal_id=case_internal_id)
+        case_entry_id: int = case.id if case else None
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_query(table=Analysis),
+            filter_functions=filter_functions,
+            case_entry_id=case_entry_id,
+            started_at_date=started_at_before,
+        ).all()
+
+    def get_analyses_for_pipeline_started_at_before(
+        self, pipeline: Pipeline, started_at_before: datetime
+    ) -> List[Analysis]:
+        """Return all analyses for a pipeline started before a certain date."""
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_STARTED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            filter_functions=filter_functions,
+            analyses=self._get_query(table=Analysis),
+            pipeline=pipeline,
+            started_at_date=started_at_before,
+        ).all()
+
+    def get_analyses_started_at_before(self, started_at_before: datetime) -> List[Analysis]:
+        """Return all analyses for a pipeline started before a certain date."""
+        return apply_analysis_filter(
+            filter_functions=[AnalysisFilter.FILTER_STARTED_AT_BEFORE],
+            analyses=self._get_query(table=Analysis),
+            started_at_date=started_at_before,
+        ).all()
 
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have not been uploaded."""
@@ -687,17 +711,23 @@ class StatusHandler(BaseHandler):
         )
         return records
 
-    def analyses_to_deliver(self, pipeline: Pipeline = None) -> Query:
-        """Fetch analyses that have been uploaded but not delivered."""
-        return (
-            self.Analysis.query.join(Family, Family.links, FamilySample.sample)
-            .filter(
-                Analysis.uploaded_at.isnot(None),
-                Sample.delivered_at.is_(None),
-                Analysis.pipeline == str(pipeline),
-            )
-            .order_by(Analysis.uploaded_at.desc())
+    def get_analyses(self) -> List[Analysis]:
+        return self._get_query(table=Analysis).all()
+
+    def get_analyses_to_deliver_for_pipeline(self, pipeline: Pipeline = None) -> List[Analysis]:
+        """Return analyses that have been uploaded but not delivered."""
+        analyses: Query = apply_sample_filter(
+            samples=self._get_join_analysis_sample_family_query(),
+            filter_functions=[SampleFilter.FILTER_IS_NOT_DELIVERED],
         )
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.ORDER_BY_UPLOADED_AT,
+        ]
+        return apply_analysis_filter(
+            analyses=analyses, filter_functions=filter_functions, pipeline=pipeline
+        ).all()
 
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
@@ -726,7 +756,7 @@ class StatusHandler(BaseHandler):
         analysis_filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_REPORT_BY_PIPELINE,
             AnalysisFilter.FILTER_WITH_DELIVERY_REPORT,
-            AnalysisFilter.FILTER_NOT_UPLOADED,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
             AnalysisFilter.FILTER_VALID_IN_PRODUCTION,
             AnalysisFilter.ORDER_BY_COMPLETED_AT,
         ]
@@ -786,7 +816,7 @@ class StatusHandler(BaseHandler):
             samples=self._get_query(table=Sample),
         ).all()
 
-    def get_samples_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
+    def get_samples_to_invoice_query(self) -> Query:
         """Return all samples that should be invoiced."""
         sample_filter_functions: List[SampleFilter] = [
             SampleFilter.FILTER_IS_DELIVERED,
@@ -794,47 +824,46 @@ class StatusHandler(BaseHandler):
             SampleFilter.FILTER_DO_INVOICE,
             SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
         ]
-
-        records: Query = apply_sample_filter(
+        return apply_sample_filter(
             filter_functions=sample_filter_functions,
             samples=self._get_query(table=Sample),
         )
 
-        customers_to_invoice = [
-            case_obj.customer
-            for case_obj in records.all()
-            if case_obj.customer.internal_id != "cust000"
-        ]
-
-        customers_to_invoice = list(set(customers_to_invoice))
-        records = records.filter(Sample.customer == customer) if customer else records
-        return records, customers_to_invoice
-
-    def get_pools_to_invoice(self, customer: Customer = None) -> Tuple[Query, list]:
-        """
-        Return all pools that should be invoiced.
-        """
-        records = self._get_query(table=Pool)
+    def get_pools_to_invoice_query(self) -> Query:
+        """Return all pools that should be invoiced."""
         pool_filter_functions: List[PoolFilter] = [
             PoolFilter.FILTER_IS_DELIVERED,
             PoolFilter.FILTER_WITHOUT_INVOICE_ID,
             PoolFilter.FILTER_DO_INVOICE,
         ]
-
-        records: Query = apply_pool_filter(
+        return apply_pool_filter(
             filter_functions=pool_filter_functions,
-            pools=records,
+            pools=self._get_query(table=Pool),
         )
 
-        customers_to_invoice = [
-            case_obj.customer
-            for case_obj in records.all()
-            if case_obj.customer.internal_id != "cust000"
-        ]
+    def get_samples_to_invoice_for_customer(self, customer: Customer = None) -> List[Sample]:
+        """Return all samples that should be invoiced for a customer."""
+        return apply_sample_filter(
+            samples=self.get_samples_to_invoice_query(),
+            filter_functions=[SampleFilter.FILTER_BY_CUSTOMER],
+            customer=customer,
+        ).all()
 
-        customers_to_invoice = list(set(customers_to_invoice))
-        records = records.filter(Pool.customer_id == customer.id) if customer else records
-        return records, customers_to_invoice
+    def get_pools_to_invoice_for_customer(self, customer: Customer = None) -> List[Pool]:
+        """Return all pools for a customer that should be invoiced."""
+        return apply_pool_filter(
+            filter_functions=[PoolFilter.FILTER_BY_CUSTOMER],
+            pools=self.get_pools_to_invoice_query(),
+            customer=customer,
+        ).all()
+
+    def get_customers_to_invoice(self, records: Query) -> List[Customer]:
+        customers_to_invoice: List[Customer] = [
+            record.customer
+            for record in records.all()
+            if record.customer.internal_id != CustomerNames.CG_INTERNAL_CUSTOMER
+        ]
+        return list(set(customers_to_invoice))
 
     def get_pools_to_receive(self) -> List[Pool]:
         """Return all pools that have been not yet been received."""

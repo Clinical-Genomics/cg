@@ -2,7 +2,7 @@
 
 import logging
 import os.path
-from typing import Optional, List
+from typing import Optional
 
 from flask import Flask
 
@@ -26,8 +26,8 @@ class MockOsTicket(OsTicket):
         self._return_none: bool = False
         self.email_uri = "http://localhost:0000/sendmail"
 
-    def set_ticket_nr(self, ticket: str) -> None:
-        self._ticket_nr = ticket
+    def set_ticket_nr(self, ticket_id: str) -> None:
+        self._ticket_nr = ticket_id
 
     def init_app(self, app: Flask):
         """Initialize the API in Flask."""

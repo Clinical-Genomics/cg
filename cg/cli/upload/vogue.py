@@ -3,7 +3,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Dict
 
 import click
 from sqlalchemy.orm import Query
@@ -15,8 +15,9 @@ from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import FamilySample
-from housekeeper.store import models as hk_models
+from cg.store.models import FamilySample, Analysis
+from housekeeper.store.models import File, Version
+from cg.utils.dispatcher import Dispatcher
 
 LOG = logging.getLogger(__name__)
 
@@ -224,16 +225,31 @@ def bioinfo_all(
 
     status_db: Store = context.obj.status_db
     housekeeper_api: HousekeeperAPI = context.obj.housekeeper_api
+    input_dict: Dict[str, Any] = {
+        "completed_at_after": completed_after,
+        "completed_at_before": completed_before,
+    }
+    function_dispatcher: Dispatcher = Dispatcher(
+        functions=[
+            status_db.get_analysis_for_vogue_upload_completed_after,
+            status_db.get_analysis_for_vogue_upload_completed_before,
+            status_db.get_analyses_for_vogue_upload,
+        ],
+        input_dict=input_dict,
+    )
+    analyses: List[Analysis] = function_dispatcher()
+    if not analyses:
+        LOG.info("No analyses found for upload to trending.")
+        return
 
-    analyses: Query = status_db.analyses_ready_for_vogue_upload(completed_after, completed_before)
     for analysis in analyses:
         case_name: str = analysis.family.internal_id
-        version_obj: hk_models.Version = housekeeper_api.last_version(case_name)
+        version_obj: Version = housekeeper_api.last_version(case_name)
         if not version_obj:
             continue
 
         # confirm multiqc.json exists
-        multiqc_file_obj: List[hk_models.File] = list(
+        multiqc_file_obj: List[File] = list(
             housekeeper_api.get_files(
                 bundle=case_name, tags=["multiqc-json"], version=version_obj.id
             )
@@ -284,7 +300,7 @@ def _get_samples(store: Store, case_name: str) -> str:
         sample_names(str): ACC12345,ACC45679
     """
 
-    link_objs: List[FamilySample] = store.family(case_name).links
+    link_objs: List[FamilySample] = store.get_case_by_internal_id(internal_id=case_name).links
     sample_ids = {link_obj.sample.internal_id for link_obj in link_objs}
     return ",".join(sample_ids)
 
@@ -298,7 +314,7 @@ def _get_analysis_workflow_details(status_api: Store, case_name: str) -> Tuple[A
         workflow_version(str): v3.14.15
     """
     # Workflow that generated these results
-    case_obj = status_api.family(case_name)
+    case_obj = status_api.get_case_by_internal_id(internal_id=case_name)
     workflow_name = None
     workflow_version = None
     if case_obj.analyses:

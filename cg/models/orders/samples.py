@@ -69,7 +69,6 @@ class Of1508Sample(OrderInSample):
 
     # customer
     age_at_sampling: Optional[float]
-    # "application": str,
     family_name: constr(
         regex=NAME_PATTERN,
         min_length=2,

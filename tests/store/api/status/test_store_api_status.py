@@ -9,58 +9,6 @@ from cg.store.models import Analysis, Application, Family, Sample
 from tests.store_helpers import StoreHelpers
 
 
-def test_samples_to_receive_external(sample_store, helpers):
-    """Test fetching external sample."""
-    store = sample_store
-    # GIVEN a store with a mixture of samples
-    assert len(store.get_all_samples()) > 1
-
-    # WHEN finding external samples to receive
-    external_query: List[Sample] = store.get_all_samples_to_receive(external=True)
-
-    # ASSERT that external_query is a list[sample]
-    assert isinstance(external_query, list)
-    # THEN assert that only the external sample is returned
-    assert len(external_query) == 1
-
-    first_sample = external_query[0]
-    # THEN assert that the sample is external in database
-    assert first_sample.application_version.application.is_external is True
-    # THEN assert that the sample is does not have a received at stamp
-    assert first_sample.received_at is None
-
-
-def test_get_all_samples_to_receive_internal(sample_store):
-    # GIVEN a store with samples in a mix of states
-    assert len(sample_store.get_all_samples()) > 1
-    assert len([sample for sample in sample_store.get_all_samples() if sample.received_at]) > 1
-
-    # WHEN finding which samples are in queue to receive
-    assert len(sample_store.get_all_samples_to_receive()) == 1
-    first_sample = sample_store.get_all_samples_to_receive()[0]
-    assert first_sample.application_version.application.is_external is False
-    assert first_sample.received_at is None
-
-
-def test_samples_to_sequence(sample_store):
-    # GIVEN a store with sample in a mix of states
-    assert len(sample_store.get_all_samples()) > 1
-    assert len([sample for sample in sample_store.get_all_samples() if sample.sequenced_at]) >= 1
-
-    # WHEN finding which samples are in queue to be sequenced
-    sequence_samples: List[Sample] = sample_store.get_all_samples_to_sequence()
-
-    # THEN it should list the received and partly sequenced samples
-    assert len(sequence_samples) == 2
-    assert {sample.name for sample in sequence_samples} == set(
-        ["sequenced-partly", "received-prepared"]
-    )
-    for sample in sequence_samples:
-        assert sample.sequenced_at is None
-        if sample.name == "sequenced-partly":
-            assert sample.reads > 0
-
-
 def test_case_in_uploaded_observations(helpers: StoreHelpers, sample_store: Store, loqusdb_id: str):
     """Test retrieval of uploaded observations."""
 
@@ -145,7 +93,9 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     helpers.add_analysis(store=sample_store)
 
     # WHEN fetching all analyses that are ready for upload
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload()]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload()
+    ]
 
     # THEN no analysis object should be returned since they did not have a completed_at entry
     assert len(records) == 0
@@ -157,7 +107,9 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
     # WHEN fetching all analysis that are ready for upload without specifying pipeline
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+    ]
 
     # THEN one analysis object should be returned
     assert len(records) == 1
@@ -169,7 +121,9 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+    ]
 
     # THEN one analysis object should be returned
     assert len(records) == 1
@@ -182,7 +136,9 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
 
     # WHEN fetching all pipelines that are analysed with MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=pipeline)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+    ]
 
     for analysis_obj in records:
         # THEN pipeline should be MIP in the analysis object
@@ -196,7 +152,9 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
     helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=pipeline)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+    ]
 
     # THEN no analysis object should be returned since they where not completed
     assert len(records) == 0
@@ -208,8 +166,9 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that was analysed with MIP
-    records = [
-        analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=Pipeline.FASTQ)
+    records: List[Analysis] = [
+        analysis_obj
+        for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Pipeline.FASTQ)
     ]
 
     # THEN no analysis object should be returned since there where no MIP analyses
@@ -242,11 +201,31 @@ def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yes
     )
 
     # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.latest_analyses().all()
+    analyses: List[
+        Analysis
+    ] = analysis_store.get_analyses_for_each_case_with_latest_started_at_date()
 
     # THEN only the newest analysis should be returned
     assert analysis_newest in analyses
     assert analysis_oldest not in analyses
+
+
+def test_multiple_analyses_and_cases(
+    store_with_analyses_for_cases, helpers, timestamp_now, timestamp_yesterday
+):
+    """Tests that analyses that are not latest are not returned."""
+
+    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
+
+    # WHEN calling the analyses_to_delivery_report
+    analyses: List[
+        Analysis
+    ] = store_with_analyses_for_cases.get_analyses_for_each_case_with_latest_started_at_date()
+
+    # THEN only the newest analysis should be returned
+    for analysis in analyses:
+        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
+        assert analysis.started_at == timestamp_now
 
 
 def test_set_case_action(analysis_store, case_id):
@@ -257,7 +236,7 @@ def test_set_case_action(analysis_store, case_id):
     assert action == None
 
     # When setting the case to "analyze"
-    analysis_store.set_case_action(case_id=case_id, action="analyze")
+    analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
     new_action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
 
     # Then the action should be set to analyze

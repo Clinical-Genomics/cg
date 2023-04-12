@@ -212,7 +212,6 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
         pdc_api=mock.Mock(),
         root_dir=cg_context.backup.root.dict(),
     )
-    # breakpoint()
 
     # WHEN no flow cell is specified, but a flow cell in status-db has the status "requested"
     mock_flow_cell.status = FlowCellStatus.REQUESTED

@@ -1,16 +1,17 @@
 """Test how the api handles files."""
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict, Any
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
 from tests.meta.compress.conftest import MockCompressionData
 from tests.mocks.hk_mock import MockHousekeeperAPI
 
-from housekeeper.store.models import Version, File, Bundle
+from housekeeper.store.models import Version, File
 
 from tests.small_helpers import SmallHelpers
+from tests.store_helpers import StoreHelpers
 
 
 def test_new_file(bed_file: Path, housekeeper_api: MockHousekeeperAPI, small_helpers: SmallHelpers):
@@ -115,6 +116,69 @@ def test_get_file(populated_housekeeper_api: MockHousekeeperAPI):
 
     # THEN assert a file was returned
     assert hk_file is not None
+
+
+def test_get_files_from_version(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    hk_bundle_data: Dict[str, Any],
+    hk_tag: str,
+    observations_clinical_snv_file_path: Path,
+    observations_clinical_sv_file_path: Path,
+):
+    """Test get the files from the Housekeeper database given the version object."""
+
+    # GIVEN a Housekeeper API with some files
+    version: Version = helpers.ensure_hk_version(real_housekeeper_api, hk_bundle_data)
+    first_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_snv_file_path, version_obj=version, tags=hk_tag
+    )
+    second_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_sv_file_path, version_obj=version, tags=hk_tag
+    )
+
+    # GIVEN that the files exist in the version object
+    assert first_file in version.files
+    assert second_file in version.files
+
+    # WHEN extracting the files from version
+    files: List[File] = real_housekeeper_api.get_files_from_version(version=version, tags={hk_tag})
+
+    # THEN the added files should be retrieved
+    assert first_file in files
+    assert second_file in files
+
+
+def test_get_latest_file_from_version(
+    helpers: StoreHelpers,
+    real_housekeeper_api: HousekeeperAPI,
+    hk_bundle_data: Dict[str, Any],
+    hk_tag: str,
+    observations_clinical_snv_file_path: Path,
+    observations_clinical_sv_file_path: Path,
+):
+    """Test to get the latest file from the Housekeeper database given the version object."""
+
+    # GIVEN a Housekeeper API with some files
+    version: Version = helpers.ensure_hk_version(real_housekeeper_api, hk_bundle_data)
+    first_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_snv_file_path, version_obj=version, tags=hk_tag
+    )
+    second_file: File = real_housekeeper_api.add_file(
+        path=observations_clinical_sv_file_path, version_obj=version, tags=hk_tag
+    )
+
+    # GIVEN that the files exist in the version object
+    assert first_file in version.files
+    assert second_file in version.files
+
+    # WHEN extracting the latest file from version
+    latest_file: File = real_housekeeper_api.get_latest_file_from_version(
+        version=version, tags={hk_tag}
+    )
+
+    # THEN the file with the higher ID should be returned
+    assert latest_file == second_file
 
 
 def test_get_file_from_latest_version(case_id: str, populated_housekeeper_api: MockHousekeeperAPI):
@@ -443,10 +507,13 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     sample_id: str,
     tags: List[str],
 ):
-    """Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present and some both FASTQ and SPRING."""
-    # GIVEN a populated housekeeper api with some files
+    """
+    Test checking if all FASTQ or SPRING files are present in bundles when all bundles have files present and some
+    both FASTQ and SPRING.
+    """
+    # GIVEN a populated Housekeeper API with some files
 
-    # GIVEN a FASTQ file tag with a file included the bundle
+    # GIVEN a FASTQ file tag with a file included in the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
         file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
     )
@@ -457,16 +524,11 @@ def test_is_fastq_or_spring_in_all_bundles_when_multiple_bundles_and_files(
     # GIVEN an existing SPRING metadata file
     compression_object.spring_metadata_path.touch()
 
-    # GIVEN a SPRING file tag with a file included the bundle
+    # GIVEN a SPRING file tag with a file included in the bundle
     populated_housekeeper_api.add_and_include_file_to_latest_version(
         file=compression_object.spring_metadata_path,
         bundle_name=sample_id,
         tags=[SequencingFileTag.SPRING_METADATA],
-    )
-
-    # GIVEN a FASTQ file tag with a file included the bundle
-    populated_housekeeper_api.add_and_include_file_to_latest_version(
-        file=madeline_output, bundle_name=case_id, tags=[SequencingFileTag.FASTQ]
     )
 
     # WHEN fetching all files

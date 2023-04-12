@@ -4,7 +4,6 @@ import datetime as dt
 import logging
 from typing import Any, Optional
 
-import requests
 from google.auth import jwt
 from google.auth.crypt import RSASigner
 

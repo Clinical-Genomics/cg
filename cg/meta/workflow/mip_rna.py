@@ -60,6 +60,6 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
 
     def panel(self, case_id: str, genome_build: str = GENOME_BUILD_38) -> List[str]:
         """Create the aggregated gene panel file"""
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         all_panels = self.convert_panels(case_obj.customer.internal_id, case_obj.panels)
         return self.scout_api.export_panels(build=genome_build, panels=all_panels)

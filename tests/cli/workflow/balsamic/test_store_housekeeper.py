@@ -36,7 +36,7 @@ def test_with_missing_case(cli_runner: CliRunner, balsamic_context: CGConfig, ca
 
     # GIVEN case_id not in database
     case_id = "soberelephant"
-    assert not balsamic_context.status_db.family(case_id)
+    assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id)
 
     # WHEN running
     result = cli_runner.invoke(store_housekeeper, [case_id], obj=balsamic_context)
@@ -140,7 +140,7 @@ def test_valid_case(
     # Make sure nothing is currently stored in Housekeeper
 
     # Make sure  analysis not alredy stored in ClinicalDB
-    assert not balsamic_context.status_db.family(case_id).analyses
+    assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")
@@ -153,7 +153,7 @@ def test_valid_case(
     assert result.exit_code == EXIT_SUCCESS
     assert "Analysis successfully stored in Housekeeper" in caplog.text
     assert "Analysis successfully stored in StatusDB" in caplog.text
-    assert balsamic_context.status_db.family(case_id).analyses
+    assert balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
     assert balsamic_context.meta_apis["analysis_api"].housekeeper_api.bundle(case_id)
 
 
@@ -177,7 +177,7 @@ def test_valid_case_already_added(
     balsamic_context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
 
     # Make sure  analysis not already stored in ClinicalDB
-    assert not balsamic_context.status_db.family(case_id).analyses
+    assert not balsamic_context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # GIVEN that HermesAPI returns a deliverables output
     mocker.patch.object(HermesApi, "convert_deliverables")

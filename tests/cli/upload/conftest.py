@@ -93,7 +93,7 @@ def fixture_analysis_obj(
     analysis_store_trio: Store, case_id: str, timestamp: datetime, helpers
 ) -> Analysis:
     """Return a analysis object with a trio"""
-    return analysis_store_trio.family(case_id).analyses[0]
+    return analysis_store_trio.get_case_by_internal_id(internal_id=case_id).analyses[0]
 
 
 @pytest.fixture(name="upload_genotypes_hk_api")
@@ -162,7 +162,7 @@ def fixture_upload_gens_hk_api(
 ) -> HousekeeperAPI:
     """Add and include files from upload_gens_hk_bundle."""
     helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=upload_gens_hk_bundle)
-    hk_version = real_housekeeper_api.last_version(case_id)
+    hk_version = real_housekeeper_api.last_version(bundle=case_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
 
@@ -282,7 +282,7 @@ class MockScoutApi(ScoutAPI):
     def __init__(self):
         """docstring for __init__"""
 
-    def upload(self, scout_load_config: Path, threshold: int = 5, force: bool = False):
+    def upload(self, scout_load_config: Path, force: bool = False):
         """docstring for upload"""
         LOG.info("Case loaded successfully to Scout")
 

@@ -211,7 +211,7 @@ def start_available(context: click.Context, dry_run: bool = False):
             LOG.error(error)
             exit_code = EXIT_FAIL
         except Exception as error:
-            LOG.error(f"Unspecified error occurred: %s", error)
+            LOG.error(f"Unspecified error occurred: {error}")
             exit_code = EXIT_FAIL
     if exit_code:
         raise click.Abort
@@ -225,7 +225,7 @@ def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> N
     """Upload the trending report for latest analysis of given case_id to Vogue"""
 
     analysis_api: MicrosaltAnalysisAPI = context.meta_apis["analysis_api"]
-    case_obj = analysis_api.status_db.family(unique_id)
+    case_obj = analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
     if not case_obj or not case_obj.analyses:
         LOG.error("No analysis available for %s", unique_id)
         raise click.Abort
@@ -276,19 +276,23 @@ def upload_vogue_latest(context: click.Context, dry_run: bool) -> None:
 
     EXIT_CODE: int = EXIT_SUCCESS
     analysis_api: MicrosaltAnalysisAPI = context.obj.meta_apis["analysis_api"]
-    latest_analyses = list(
-        analysis_api.status_db.latest_analyses()
-        .filter(Analysis.pipeline == Pipeline.MICROSALT)
-        .filter(Analysis.uploaded_at.is_(None))
+    latest_analyses: List[
+        Analysis
+    ] = analysis_api.status_db.get_latest_analysis_to_upload_for_pipeline(
+        pipeline=Pipeline.MICROSALT
     )
+    if not latest_analyses:
+        LOG.info("No new analyses to upload to Vogue!")
+        return
+
     for analysis in latest_analyses:
-        unique_id: str = analysis.family.internal_id
+        case_internal_id: str = analysis.family.internal_id if analysis.family else None
         try:
-            context.invoke(upload_analysis_vogue, unique_id=unique_id, dry_run=dry_run)
+            context.invoke(upload_analysis_vogue, unique_id=case_internal_id, dry_run=dry_run)
         except Exception as error:
             LOG.error(
                 "Could not upload data for %s to vogue, exception %s",
-                unique_id,
+                case_internal_id,
                 error.__class__.__name__,
             )
             EXIT_CODE: int = EXIT_FAIL
@@ -308,7 +312,9 @@ def qc_microsalt(context: click.Context, unique_id: str) -> None:
             case_id=unique_id,
             run_dir_path=analysis_api.get_latest_case_path(case_id=unique_id),
             lims_project=analysis_api.get_project(
-                analysis_api.status_db.family(internal_id=unique_id).samples[0].internal_id
+                analysis_api.status_db.get_case_by_internal_id(internal_id=unique_id)
+                .samples[0]
+                .internal_id
             ),
         )
     except IndexError:

@@ -36,7 +36,7 @@ def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
     if not family_id:
         suggest_cases_to_upload(status_db=status_db)
         raise click.Abort
-    case_obj: Family = status_db.family(family_id)
+    case_obj: Family = status_db.get_case_by_internal_id(internal_id=family_id)
     upload_genotypes_api = UploadGenotypesAPI(hk_api=housekeeper_api, gt_api=genotype_api)
     results: dict = upload_genotypes_api.data(case_obj.analyses[0])
 

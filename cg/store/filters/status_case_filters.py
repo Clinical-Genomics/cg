@@ -30,6 +30,11 @@ def get_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     )
 
 
+def get_running_cases(cases: Query, **kwargs) -> Query:
+    """Return cases which are running."""
+    return cases.filter(Family.action == CaseActions.RUNNING)
+
+
 def get_new_cases(cases: Query, date: datetime, **kwargs) -> Query:
     """Return old cases compared to date."""
     cases = cases.filter(Family.created_at < date)
@@ -101,15 +106,105 @@ def get_report_supported_data_delivery_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.data_delivery.in_(REPORT_SUPPORTED_DATA_DELIVERY))
 
 
+def filter_cases_by_entry_id(cases: Query, entry_id: int, **kwargs) -> Query:
+    """Filter cases by entry id."""
+    return cases.filter(Family.id == entry_id)
+
+
+def filter_case_by_internal_id(cases: Query, internal_id: str, **kwargs) -> Query:
+    """Return cases with matching internal id."""
+    return cases.filter(Family.internal_id == internal_id)
+
+
+def filter_cases_by_ticket_id(cases: Query, ticket_id: str, **kwargs) -> Query:
+    """Return cases with matching ticket id."""
+    return cases.filter(Family.tickets.contains(ticket_id))
+
+
+def filter_cases_by_customer_entry_id(cases: Query, customer_entry_id: int, **kwargs) -> Query:
+    """Return cases with matching customer id."""
+    return cases.filter(Family.customer_id == customer_entry_id)
+
+
+def filter_cases_by_customer_entry_ids(
+    cases: Query, customer_entry_ids: List[int], **kwargs
+) -> Query:
+    """Return cases with matching customer ids."""
+    return cases.filter(Family.customer_id.in_(customer_entry_ids)) if customer_entry_ids else cases
+
+
+def filter_cases_by_action(cases: Query, action: str, **kwargs) -> Query:
+    """Return cases with matching action."""
+    return cases.filter(Family.action == action) if action else cases
+
+
+def filter_cases_by_name(cases: Query, name: str, **kwargs) -> Query:
+    """Return cases with matching name."""
+    return cases.filter(Family.name == name) if name else cases
+
+
+def filter_cases_by_case_search(cases: Query, case_search: str, **kwargs) -> Query:
+    """Return cases with matching internal id or name."""
+    return (
+        cases.filter(
+            or_(
+                Family.internal_id.like(f"%{case_search}%"),
+                Family.name.like(f"%{case_search}%"),
+            )
+        )
+        if case_search
+        else cases
+    )
+
+
+def filter_cases_by_internal_id_search(cases: Query, internal_id_search: str, **kwargs) -> Query:
+    """Return cases with internal ids matching the search pattern."""
+    return cases.filter(Family.internal_id.like(f"%{internal_id_search}%"))
+
+
+def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Query:
+    """Return cases with names matching the search pattern."""
+    return cases.filter(Family.name.like(f"%{name_search}%"))
+
+
+def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
+    """Order cases by created at."""
+    return cases.order_by(Family.created_at.desc())
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: List[Callable],
     date: Optional[datetime] = None,
     pipeline: Optional[Pipeline] = None,
+    internal_id: Optional[str] = None,
+    entry_id: Optional[int] = None,
+    ticket_id: Optional[str] = None,
+    customer_entry_id: Optional[int] = None,
+    customer_entry_ids: Optional[List[int]] = None,
+    name: Optional[str] = None,
+    action: Optional[str] = None,
+    internal_id_search: Optional[str] = None,
+    name_search: Optional[str] = None,
+    case_search: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
-        cases: Query = function(cases=cases, date=date, pipeline=pipeline)
+        cases: Query = function(
+            cases=cases,
+            date=date,
+            pipeline=pipeline,
+            internal_id=internal_id,
+            entry_id=entry_id,
+            ticket_id=ticket_id,
+            customer_entry_id=customer_entry_id,
+            customer_entry_ids=customer_entry_ids,
+            name=name,
+            action=action,
+            internal_id_search=internal_id_search,
+            name_search=name_search,
+            case_search=case_search,
+        )
     return cases
 
 
@@ -127,3 +222,15 @@ class CaseFilter(Enum):
     GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
     GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
+    FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
+    FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
+    IS_RUNNING: Callable = get_running_cases
+    FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
+    FILTER_BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
+    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
+    FILTER_BY_NAME: Callable = filter_cases_by_name
+    FILTER_BY_ACTION: Callable = filter_cases_by_action
+    FILTER_BY_CASE_SEARCH: Callable = filter_cases_by_case_search
+    FILTER_BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
+    FILTER_BY_NAME_SEARCH: Callable = filter_cases_by_name_search
+    ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

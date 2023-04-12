@@ -71,7 +71,6 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
     """Test adding a sample."""
     # GIVEN a database with a customer and an application
     disk_store: Store = base_context.status_db
-    sex = "male"
     application_tag = "dummy_tag"
     helpers.ensure_application(store=disk_store, tag=application_tag)
     helpers.ensure_application_version(store=disk_store, application_tag=application_tag)

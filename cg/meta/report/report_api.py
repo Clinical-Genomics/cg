@@ -9,7 +9,7 @@ import requests
 from alchy import Query
 
 from cgmodels.cg.constants import Pipeline
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File, Version
 
 from cg.constants.constants import FileFormat, MAX_ITEMS_TO_RETRIEVE
 from cg.exc import DeliveryReportError
@@ -29,7 +29,7 @@ from cg.models.report.report import (
     ScoutReportFiles,
 )
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
-from cg.store.models import Analysis, Application, Family, Sample
+from cg.store.models import Analysis, Application, Family, Sample, FamilySample
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 LOG = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ class ReportAPI(MetaAPI):
 
     def add_delivery_report_to_hk(
         self, delivery_report_file: Path, case_id: str, analysis_date: datetime
-    ) -> Optional[hk_models.File]:
+    ) -> Optional[File]:
         """
         Adds a delivery report file, if it has not already been generated, to an analysis bundle for a specific case
         in HK and returns a pointer to it.
@@ -84,7 +84,7 @@ class ReportAPI(MetaAPI):
             self.get_delivery_report_from_hk(case_id=case_id)
         except FileNotFoundError:
             LOG.info(f"Adding a new delivery report to housekeeper for {case_id}")
-            file: hk_models.File = self.housekeeper_api.add_file(
+            file: File = self.housekeeper_api.add_file(
                 delivery_report_file.name, version, [case_id, HK_DELIVERY_REPORT_TAG]
             )
             self.housekeeper_api.include_file(file, version)
@@ -96,34 +96,21 @@ class ReportAPI(MetaAPI):
     def get_delivery_report_from_hk(self, case_id: str) -> str:
         """Extracts the delivery reports of a specific case stored in HK."""
 
-        version: hk_models.Version = self.housekeeper_api.last_version(case_id)
-        delivery_report_files: Query = self.housekeeper_api.get_files(
+        version: Version = self.housekeeper_api.last_version(case_id)
+        delivery_report: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
 
-        if delivery_report_files.count() == 0:
+        if not delivery_report:
             LOG.warning(f"No existing delivery report found in housekeeper for {case_id}")
             raise FileNotFoundError
 
-        return delivery_report_files[0].full_path
+        return delivery_report.full_path
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
-        """Returns the file path of the uploaded to Scout file given its tag."""
+        """Return the file path of the uploaded to Scout file given its tag."""
 
-        version: hk_models.Version = self.housekeeper_api.last_version(case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag)
-        uploaded_files: Query = self.housekeeper_api.get_files(
-            bundle=case_id, tags=tags, version=version.id
-        )
-
-        if not tags or uploaded_files.count() == 0:
-            LOG.info(
-                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
-            )
-
-            return None
-
-        return uploaded_files[0].full_path
+        raise NotImplementedError
 
     def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template."""
@@ -146,8 +133,8 @@ class ReportAPI(MetaAPI):
 
         for analysis_obj in analyses:
             case: Family = analysis_obj.family
-            last_version: hk_models.Version = self.housekeeper_api.last_version(case.internal_id)
-            hk_file: hk_models.File = self.housekeeper_api.get_files(
+            last_version: Version = self.housekeeper_api.last_version(case.internal_id)
+            hk_file: File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None
             ).first()
 
@@ -172,15 +159,19 @@ class ReportAPI(MetaAPI):
     def update_delivery_report_date(self, case: Family, analysis_date: datetime) -> None:
         """Updates the date when delivery report was created."""
 
-        analysis: Analysis = self.status_db.analysis(case, analysis_date)
+        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
+            case_entry_id=case.id, started_at_date=analysis_date
+        )
         analysis.delivery_report_created_at = datetime.now()
         self.status_db.commit()
 
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""
 
-        case: Family = self.status_db.family(case_id)
-        analysis: Analysis = self.status_db.analysis(case, analysis_date)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        analysis: Analysis = self.status_db.get_analysis_by_case_entry_id_and_started_at(
+            case_entry_id=case.id, started_at_date=analysis_date
+        )
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)
 
@@ -263,7 +254,9 @@ class ReportAPI(MetaAPI):
         """Extracts all the samples associated to a specific case and their attributes."""
 
         samples = list()
-        case_samples: List[FamilySample] = self.status_db.family_samples(case.internal_id)
+        case_samples: List[FamilySample] = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )
 
         for case_sample in case_samples:
             sample: Sample = case_sample.sample

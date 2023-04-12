@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Generator, List
 
 import pytest
-from housekeeper.store import models as hk_models
 from housekeeper.store.models import Version
 
 from cg.constants import DataDelivery, FileExtensions, Pipeline
@@ -118,7 +117,7 @@ def fixture_rna_store(
     # an existing RNA case with related sample
     rna_case = helpers.ensure_case(
         store=store,
-        name="rna_case",
+        case_name="rna_case",
         customer=helpers.ensure_customer(store=store),
         data_analysis=Pipeline.MIP_RNA,
         data_delivery=DataDelivery.SCOUT,
@@ -178,7 +177,7 @@ def fixture_rna_store(
     # an existing DNA case with related sample
     dna_case = helpers.ensure_case(
         store=store,
-        name="dna_case",
+        case_name="dna_case",
         customer=helpers.ensure_customer(store=store),
         data_analysis=Pipeline.MIP_DNA,
         data_delivery=DataDelivery.SCOUT,
@@ -515,7 +514,7 @@ def fixture_mip_dna_analysis(
 ) -> Analysis:
     """Return a MIP DNA analysis object."""
     helpers.add_synopsis_to_case(store=analysis_store_trio, case_id=case_id)
-    case: Family = analysis_store_trio.family(case_id)
+    case: Family = analysis_store_trio.get_case_by_internal_id(internal_id=case_id)
     analysis: Analysis = helpers.add_analysis(
         store=analysis_store_trio,
         case=case,

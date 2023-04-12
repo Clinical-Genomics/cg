@@ -1,11 +1,11 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
-import datetime as dt
 import logging
 import os
 import shutil
+from datetime import datetime, timedelta, MAXYEAR
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -15,7 +15,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, CaseActions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
@@ -27,7 +27,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Organism, User
+from cg.store.models import Bed, BedVersion, Customer, Family, Organism, User
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -46,39 +46,45 @@ LOG = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="old_timestamp")
-def fixture_old_timestamp() -> dt.datetime:
+def fixture_old_timestamp() -> datetime:
     """Return a time stamp in date time format."""
-    return dt.datetime(1900, 1, 1)
+    return datetime(1900, 1, 1)
 
 
 @pytest.fixture(name="timestamp")
-def fixture_timestamp() -> dt.datetime:
+def fixture_timestamp() -> datetime:
     """Return a time stamp in date time format."""
-    return dt.datetime(2020, 5, 1)
+    return datetime(2020, 5, 1)
 
 
 @pytest.fixture(name="later_timestamp")
-def fixture_later_timestamp() -> dt.datetime:
+def fixture_later_timestamp() -> datetime:
     """Return a time stamp in date time format."""
-    return dt.datetime(2020, 6, 1)
+    return datetime(2020, 6, 1)
+
+
+@pytest.fixture(name="future_date")
+def fixture_future_date() -> datetime:
+    """Return a distant date in the future for which no events happen later."""
+    return datetime(MAXYEAR, 1, 1, 1, 1, 1)
 
 
 @pytest.fixture(name="timestamp_now")
-def fixture_timestamp_now() -> dt.datetime:
+def fixture_timestamp_now() -> datetime:
     """Return a time stamp of today's date in date time format."""
-    return dt.datetime.now()
+    return datetime.now()
 
 
 @pytest.fixture(name="timestamp_yesterday")
-def fixture_timestamp_yesterday(timestamp_now: dt.datetime) -> dt.datetime:
+def fixture_timestamp_yesterday(timestamp_now: datetime) -> datetime:
     """Return a time stamp of yesterday's date in date time format."""
-    return timestamp_now - dt.timedelta(days=1)
+    return timestamp_now - timedelta(days=1)
 
 
 @pytest.fixture(name="timestamp_in_2_weeks")
-def fixture_timestamp_in_2_weeks(timestamp_now: dt.datetime) -> dt.datetime:
+def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
     """Return a time stamp 14 days ahead in time."""
-    return timestamp_now + dt.timedelta(days=14)
+    return timestamp_now + timedelta(days=14)
 
 
 # Case fixtures
@@ -128,25 +134,31 @@ def fixture_another_case_id() -> str:
 
 @pytest.fixture(name="sample_id")
 def fixture_sample_id() -> str:
-    """Returns a sample id."""
+    """Return a sample id."""
     return "ADM1"
 
 
 @pytest.fixture(name="father_sample_id")
 def fixture_father_sample_id() -> str:
-    """Returns the sample id of the father."""
+    """Return the sample id of the father."""
     return "ADM2"
 
 
 @pytest.fixture(name="mother_sample_id")
 def fixture_mother_sample_id() -> str:
-    """Returns the mothers sample id."""
+    """Return the mothers sample id."""
     return "ADM3"
+
+
+@pytest.fixture(name="invalid_sample_id")
+def fixture_invalid_sample_id() -> str:
+    """Return an invalid sample id."""
+    return "invalid-sample-id"
 
 
 @pytest.fixture(name="sample_ids")
 def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
-    """Returns a list with three samples of a family."""
+    """Return a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
 
@@ -189,7 +201,7 @@ def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
 
 @pytest.fixture(name="analysis_family_single_case")
 def fixture_analysis_family_single(
-    case_id: str, family_name: str, sample_id: str, ticket: str
+    case_id: str, family_name: str, sample_id: str, ticket_id: str
 ) -> dict:
     """Build an example case."""
     return {
@@ -198,14 +210,14 @@ def fixture_analysis_family_single(
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
         "panels": ["IEM", "EP"],
-        "tickets": ticket,
+        "tickets": ticket_id,
         "samples": [
             {
                 "name": "proband",
                 "sex": Gender.MALE,
                 "internal_id": sample_id,
                 "status": "affected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 5000000000,
                 "capture_kit": "GMSmyeloid",
             }
@@ -214,14 +226,14 @@ def fixture_analysis_family_single(
 
 
 @pytest.fixture(name="analysis_family")
-def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket: str) -> dict:
+def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, ticket_id: str) -> dict:
     """Return a dictionary with information from a analysis case."""
     return {
         "name": family_name,
         "internal_id": case_id,
         "data_analysis": str(Pipeline.MIP_DNA),
         "application_type": "wgs",
-        "tickets": ticket,
+        "tickets": ticket_id,
         "panels": ["IEM", "EP"],
         "samples": [
             {
@@ -231,7 +243,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "father": "ADM2",
                 "mother": "ADM3",
                 "status": "affected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 5000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -240,7 +252,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "sex": Gender.MALE,
                 "internal_id": "ADM2",
                 "status": "unaffected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 6000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -249,7 +261,7 @@ def fixture_analysis_family(case_id: str, family_name: str, sample_id: str, tick
                 "sex": Gender.FEMALE,
                 "internal_id": "ADM3",
                 "status": "unaffected",
-                "original_ticket": ticket,
+                "original_ticket": ticket_id,
                 "reads": 7000000,
                 "capture_kit": "GMSmyeloid",
             },
@@ -400,17 +412,17 @@ def madeline_api(madeline_output) -> MockMadelineAPI:
     return _api
 
 
-@pytest.fixture(name="ticket", scope="session")
+@pytest.fixture(name="ticket_id", scope="session")
 def fixture_ticket_number() -> str:
     """Return a ticket number for testing."""
     return "123456"
 
 
 @pytest.fixture(name="osticket")
-def fixture_os_ticket(ticket: str) -> MockOsTicket:
+def fixture_os_ticket(ticket_id: str) -> MockOsTicket:
     """Return a api that mock the os ticket api."""
     api = MockOsTicket()
-    api.set_ticket_nr(ticket)
+    api.set_ticket_nr(ticket_id)
     return api
 
 
@@ -815,8 +827,14 @@ def fixture_root_path(project_dir: Path) -> Path:
     return _root_path
 
 
+@pytest.fixture(name="hk_bundle_sample_path")
+def fixture_hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
+    """Return the relative path to a HK bundle mock sample."""
+    return Path(sample_id, timestamp.strftime("%Y-%m-%d"))
+
+
 @pytest.fixture(name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: dt.datetime) -> Dict[str, Any]:
+def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: datetime) -> Dict[str, Any]:
     """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
@@ -827,7 +845,7 @@ def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: dt.datetime)
 
 
 @pytest.fixture(name="sample_hk_bundle_no_files")
-def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) -> dict:
+def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: datetime) -> dict:
     """Create a complete bundle mock for testing compression."""
     return {
         "name": sample_id,
@@ -838,7 +856,7 @@ def fixture_sample_hk_bundle_no_files(sample_id: str, timestamp: dt.datetime) ->
 
 
 @pytest.fixture(name="case_hk_bundle_no_files")
-def fixture_case_hk_bundle_no_files(case_id: str, timestamp: dt.datetime) -> dict:
+def fixture_case_hk_bundle_no_files(case_id: str, timestamp: datetime) -> dict:
     """Create a complete bundle mock for testing compression."""
     return {
         "name": case_id,
@@ -865,7 +883,7 @@ def fixture_compress_hk_fastq_bundle(
         # We need to set the time to an old date
         # Create a older date
         # Convert the date to a float
-        before_timestamp = dt.datetime.timestamp(dt.datetime(2020, 1, 1))
+        before_timestamp = datetime.timestamp(datetime(2020, 1, 1))
         # Update the utime so file looks old
         os.utime(fastq_file, (before_timestamp, before_timestamp))
         fastq_file_info = {"path": str(fastq_file), "archive": False, "tags": ["fastq"]}
@@ -1112,6 +1130,12 @@ def fixture_invoice_reference() -> str:
     return "ABCDEF"
 
 
+@pytest.fixture(name="prices")
+def fixture_prices() -> Dict[str, int]:
+    """Return dictionary with prices for each priority status."""
+    return {"standard": 10, "priority": 20, "express": 30, "research": 5}
+
+
 @pytest.fixture(name="base_store")
 def fixture_base_store(
     apptag_rna: str,
@@ -1122,6 +1146,7 @@ def fixture_base_store(
     invoice_address: str,
     invoice_reference: str,
     store: Store,
+    prices: Dict[str, int],
 ) -> Store:
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
@@ -1251,9 +1276,10 @@ def fixture_base_store(
 
     store.add_commit(applications)
 
-    prices = {"standard": 10, "priority": 20, "express": 30, "research": 5}
     versions = [
-        store.add_version(application, 1, valid_from=dt.datetime.now(), prices=prices)
+        store.add_application_version(
+            application=application, version=1, valid_from=datetime.now(), prices=prices
+        )
         for application in applications
     ]
     store.add_commit(versions)
@@ -1281,32 +1307,44 @@ def fixture_base_store(
 def sample_store(base_store: Store) -> Store:
     """Populate store with samples."""
     new_samples = [
-        base_store.add_sample("ordered", sex=Gender.MALE),
-        base_store.add_sample("received", sex=Gender.UNKNOWN, received=dt.datetime.now()),
+        base_store.add_sample(name="ordered", sex=Gender.MALE, internal_id="test_internal_id"),
+        base_store.add_sample(name="received", sex=Gender.UNKNOWN, received=datetime.now()),
         base_store.add_sample(
-            "received-prepared",
+            name="received-prepared",
             sex=Gender.UNKNOWN,
-            received=dt.datetime.now(),
-            prepared_at=dt.datetime.now(),
+            received=datetime.now(),
+            prepared_at=datetime.now(),
         ),
         base_store.add_sample("external", sex=Gender.FEMALE, external=True),
         base_store.add_sample(
-            "external-received", sex=Gender.FEMALE, received=dt.datetime.now(), external=True
+            name="external-received", sex=Gender.FEMALE, received=datetime.now(), external=True
         ),
         base_store.add_sample(
-            "sequenced",
+            name="sequenced",
             sex=Gender.MALE,
-            received=dt.datetime.now(),
-            prepared_at=dt.datetime.now(),
-            sequenced_at=dt.datetime.now(),
+            received=datetime.now(),
+            prepared_at=datetime.now(),
+            sequenced_at=datetime.now(),
             reads=(310 * 1000000),
         ),
         base_store.add_sample(
-            "sequenced-partly",
+            name="sequenced-partly",
             sex=Gender.MALE,
-            received=dt.datetime.now(),
-            prepared_at=dt.datetime.now(),
+            received=datetime.now(),
+            prepared_at=datetime.now(),
             reads=(250 * 1000000),
+        ),
+        base_store.add_sample(
+            name="to-deliver",
+            sex=Gender.MALE,
+            sequenced_at=datetime.now(),
+        ),
+        base_store.add_sample(
+            name="delivered",
+            sex=Gender.MALE,
+            sequenced_at=datetime.now(),
+            delivered_at=datetime.now(),
+            no_invoice=False,
         ),
     ]
     customer: Customer = (base_store.get_customers())[0]
@@ -1683,49 +1721,52 @@ def fixture_cg_context(
 
 
 @pytest.fixture(name="case_id_with_single_sample")
-def case_id_with_single_sample():
+def fixture_case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
 @pytest.fixture(name="case_id_with_multiple_samples")
-def case_id_with_multiple_samples():
+def fixture_case_id_with_multiple_samples():
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
 @pytest.fixture(name="case_id_without_samples")
-def case_id_without_samples():
+def fixture_case_id_without_samples():
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
 @pytest.fixture(name="sample_id_in_single_case")
-def sample_id_in_single_case():
+def fixture_sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
 @pytest.fixture(name="sample_id_in_multiple_cases")
-def sample_id_in_multiple_cases():
+def fixture_sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
 
 
 @pytest.fixture(name="store_with_multiple_cases_and_samples")
-def store_with_multiple_cases_and_samples(
+def fixture_store_with_multiple_cases_and_samples(
     case_id_without_samples: str,
     case_id_with_single_sample: str,
     case_id_with_multiple_samples: str,
     sample_id_in_single_case: str,
     sample_id_in_multiple_cases: str,
     case_id: str,
+    ticket_id: str,
     helpers: StoreHelpers,
     store: Store,
 ):
     """Return a store containing multiple cases and samples."""
 
-    helpers.add_case(store=store, internal_id=case_id_without_samples)
+    helpers.add_case(
+        store=store, internal_id=case_id_without_samples, ticket=ticket_id, action="running"
+    )
     helpers.add_case_with_samples(
         base_store=store, case_id=case_id_with_multiple_samples, nr_samples=5
     )
@@ -1743,8 +1784,16 @@ def store_with_multiple_cases_and_samples(
     yield store
 
 
+@pytest.fixture(name="store_with_panels")
+def fixture_store_with_panels(store: Store, helpers: StoreHelpers):
+    helpers.ensure_panel(store=store, panel_abbreviation="panel1", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel2", customer_id="cust000")
+    helpers.ensure_panel(store=store, panel_abbreviation="panel3", customer_id="cust000")
+    yield store
+
+
 @pytest.fixture(name="store_with_organisms")
-def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
+def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
     """Return a store with multiple organisms."""
 
     organism_details = [
@@ -1763,13 +1812,13 @@ def store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
 
 
 @pytest.fixture(name="non_existent_email")
-def non_existent_email():
+def fixture_non_existent_email():
     """Return email not associated with any entity."""
     return "non_existent_email@example.com"
 
 
 @pytest.fixture(name="non_existent_id")
-def non_existent_id():
+def fixture_non_existent_id():
     """Return id not associated with any entity."""
     return "non_existent_entity_id"
 
@@ -1791,4 +1840,46 @@ def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
 
     store.commit()
 
+    yield store
+
+
+@pytest.fixture(name="store_with_cases_and_customers")
+def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with cases and customers."""
+
+    customer_details: List[Tuple[str, str, bool]] = [
+        ("cust000", "Customer 1", True),
+        ("cust001", "Customer 2", False),
+        ("cust002", "Customer 3", True),
+    ]
+    customers = []
+
+    for customer_id, customer_name, scout_access in customer_details:
+        customer: Customer = helpers.ensure_customer(
+            store=store,
+            customer_id=customer_id,
+            customer_name=customer_name,
+            scout_access=scout_access,
+        )
+        customers.append(customer)
+
+    case_details: List[Tuple[str, str, Pipeline, CaseActions, Customer]] = [
+        ("case 1", "flyingwhale", Pipeline.BALSAMIC, CaseActions.RUNNING, customers[0]),
+        ("case 2", "swimmingtiger", Pipeline.FLUFFY, CaseActions.ANALYZE, customers[0]),
+        ("case 3", "sadbaboon", Pipeline.SARS_COV_2, CaseActions.HOLD, customers[1]),
+        ("case 4", "funkysloth", Pipeline.MIP_DNA, CaseActions.ANALYZE, customers[1]),
+        ("case 5", "deadparrot", Pipeline.MICROSALT, CaseActions.RUNNING, customers[2]),
+        ("case 6", "anxiousbeetle", Pipeline.DEMULTIPLEX, CaseActions.RUNNING, customers[2]),
+    ]
+
+    for case_name, case_id, pipeline, action, customer in case_details:
+        helpers.ensure_case(
+            store=store,
+            case_name=case_name,
+            case_id=case_id,
+            data_analysis=pipeline.value,
+            action=action.value,
+            customer=customer,
+        )
+    store.commit()
     yield store

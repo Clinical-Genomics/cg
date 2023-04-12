@@ -15,7 +15,7 @@ from tests.store_helpers import StoreHelpers
 def test_get_families_with_extended_models(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
-    """Test that a query is returned from the database"""
+    """Test that a query is returned from the database."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
@@ -44,7 +44,7 @@ def test_get_families_with_extended_models(
 
 
 def test_get_families_with_extended_models_when_no_case(base_store: Store):
-    """test that no case is returned from the database when no cases"""
+    """test that no case is returned from the database when no cases."""
 
     # GIVEN an empty database
 
@@ -82,7 +82,7 @@ def test_get_cases_with_samples_query(
 def test_that_many_cases_can_have_one_sample_each(
     base_store: Store, helpers: StoreHelpers, max_nr_of_cases: int, timestamp_now: datetime
 ):
-    """Test that tests that cases are returned even if there are many result rows in the query"""
+    """Test that tests that cases are returned even if there are many result rows in the query."""
 
     # GIVEN a database with max_nr_of_cases cases
     test_cases: List[Family] = helpers.add_cases_with_samples(
@@ -99,7 +99,7 @@ def test_that_many_cases_can_have_one_sample_each(
 def test_that_cases_can_have_many_samples(
     base_store: Store, helpers, max_nr_of_samples: int, timestamp_now: datetime
 ):
-    """Test that tests that cases are returned even if there are many result rows in the query"""
+    """Test that tests that cases are returned even if there are many result rows in the query."""
 
     # GIVEN a cases with max_nr_of_samples sequenced samples
     case_with_50: Family = helpers.add_case_with_samples(
@@ -159,7 +159,7 @@ def test_external_sample_to_re_analyse(
 
 
 def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelpers):
-    """Test that a case with one external sample that has no specified data_analysis does not show up"""
+    """Test that a case with one external sample that has no specified data_analysis does not show up."""
 
     # GIVEN an externally sequenced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=None, is_external=True)
@@ -179,7 +179,7 @@ def test_new_external_case_not_in_result(base_store: Store, helpers: StoreHelper
 
 def test_case_to_re_analyse(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
     """Test that a case marked for re-analyse with one sample that has been sequenced and
-    with completed analysis do show up among the cases to analyse"""
+    with completed analysis do show up among the cases to analyse."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
@@ -209,7 +209,7 @@ def test_all_samples_and_analysis_completed(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case with one sample that has been sequenced and with completed
-    analysis don't show up among the cases to analyse"""
+    analysis don't show up among the cases to analyse."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
@@ -233,7 +233,7 @@ def test_all_samples_and_analysis_completed(
 def test_specified_analysis_in_result(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
-    """Test that a case with one sample that has specified data_analysis does show up"""
+    """Test that a case with one sample that has specified data_analysis does show up."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
@@ -258,7 +258,7 @@ def test_exclude_other_pipeline_analysis_from_result(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case with specified analysis and with one sample does not show up among
-    others"""
+    others."""
 
     # GIVEN a sequenced sample
     test_sample: Sample = helpers.add_sample(base_store, sequenced_at=timestamp_now)
@@ -280,7 +280,7 @@ def test_one_of_two_sequenced_samples(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case with one sequenced samples and one not sequenced sample do not shows up among the
-    cases to analyse"""
+    cases to analyse."""
 
     # GIVEN a case
     test_case: Family = helpers.add_case(base_store)
@@ -306,7 +306,7 @@ def test_one_of_one_sequenced_samples(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case with one of one samples that has been sequenced shows up among the
-    cases to analyse"""
+    cases to analyse."""
 
     # GIVEN a case
     test_case: Family = helpers.add_case(base_store)
@@ -326,3 +326,92 @@ def test_one_of_one_sequenced_samples(
 
     # THEN cases should contain the test case
     assert test_case in cases
+
+
+def test_get_analyses_for_case_and_pipeline_before(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
+    timestamp_now: datetime,
+    pipeline: Pipeline = Pipeline.FLUFFY,
+    case_id: str = "yellowhog",
+):
+    """Test to get all analyses before a given date."""
+
+    # GIVEN a database with a number of analyses
+
+    # WHEN getting all analyses before a given date
+    analyses: List[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_and_pipeline_started_at_before(
+        case_internal_id=case_id, started_at_before=timestamp_now, pipeline=pipeline
+    )
+
+    # THEN assert that the analyses before the given date are returned
+    for analysis in analyses:
+        assert analysis.started_at < timestamp_now
+        assert analysis.family.internal_id == case_id
+        assert analysis.pipeline == pipeline
+
+
+def test_get_analyses_for_case_before(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
+    timestamp_now: datetime,
+    case_id: str = "yellowhog",
+):
+    """Test to get all analyses before a given date."""
+
+    # GIVEN a database with a number of analyses
+
+    # WHEN getting all analyses before a given date
+    analyses: List[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_case_started_at_before(
+        case_internal_id=case_id,
+        started_at_before=timestamp_now,
+    )
+
+    # THEN assert that the analyses before the given date are returned
+    for analysis in analyses:
+        assert analysis.started_at < timestamp_now
+        assert analysis.family.internal_id == case_id
+
+
+def test_get_analyses_for_pipeline_before(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
+    timestamp_now: datetime,
+    pipeline: Pipeline = Pipeline.FLUFFY,
+):
+    """Test to get all analyses for a pipeline before a given date."""
+
+    # GIVEN a database with a number of analyses
+
+    # WHEN getting all analyses before a given date
+    analyses: List[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_for_pipeline_started_at_before(
+        started_at_before=timestamp_now, pipeline=pipeline
+    )
+
+    # THEN assert that the analyses before the given date are returned
+    for analysis in analyses:
+        assert analysis.started_at < timestamp_now
+        assert analysis.pipeline == pipeline
+
+
+def test_get_analyses_before(
+    store_with_analyses_for_cases_not_uploaded_fluffy: Store,
+    timestamp_now: datetime,
+):
+    """Test to get all analyses for a pipeline before a given date."""
+
+    # GIVEN a database with a number of analyses
+
+    # WHEN getting all analyses before a given date
+    analyses: List[
+        Analysis
+    ] = store_with_analyses_for_cases_not_uploaded_fluffy.get_analyses_started_at_before(
+        started_at_before=timestamp_now
+    )
+
+    # THEN assert that the analyses before the given date are returned
+    for analysis in analyses:
+        assert analysis.started_at < timestamp_now

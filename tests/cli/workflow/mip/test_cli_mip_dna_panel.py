@@ -1,5 +1,4 @@
 """ Test the CLI for mip-dna panel"""
-import logging
 
 from cg.cli.workflow.mip_dna.base import panel
 

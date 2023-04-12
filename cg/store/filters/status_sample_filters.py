@@ -1,9 +1,10 @@
 from typing import Optional, List, Callable
 from enum import Enum
 from sqlalchemy.orm import Query
+from sqlalchemy import and_, or_
 
 from cg.constants.constants import SampleType
-from cg.store.models import Sample
+from cg.store.models import Sample, Customer
 
 
 def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Query:
@@ -87,9 +88,11 @@ def filter_samples_do_not_invoice(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.no_invoice.is_(True))
 
 
-def filter_samples_by_customer_id(samples: Query, customer_id: str, **kwargs) -> Query:
+def filter_samples_by_entry_customer_ids(
+    samples: Query, customer_entry_ids: List[int], **kwargs
+) -> Query:
     """Return samples by customer id."""
-    return samples.filter(Sample.customer_id.in_(customer_id))
+    return samples.filter(Sample.customer_id.in_(customer_entry_ids))
 
 
 def filter_samples_by_customer_name(samples: Query, customer_name: str, **kwargs) -> Query:
@@ -132,6 +135,40 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_tumour.is_(False))
 
 
+def filter_samples_by_name_pattern(samples: Query, name_pattern: str, **kwargs) -> Query:
+    """Return samples matching the name pattern."""
+    return samples.filter(Sample.name.like(f"%{name_pattern}%"))
+
+
+def filter_samples_by_internal_id_pattern(
+    samples: Query, internal_id_pattern: str, **kwargs
+) -> Query:
+    """Return samples matching the internal id pattern."""
+    return samples.filter(Sample.internal_id.like(f"%{internal_id_pattern}%"))
+
+
+def filter_samples_by_internal_id_or_name_search(
+    samples: Query, search_pattern: str, **kwargs
+) -> Query:
+    """Return samples matching the internal id or name search."""
+    return samples.filter(
+        or_(
+            Sample.name.like(f"%{search_pattern}%"),
+            Sample.internal_id.like(f"%{search_pattern}%"),
+        )
+    )
+
+
+def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
+    """Return samples by customer."""
+    return samples.filter(Sample.customer == customer)
+
+
+def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
+    """Return samples ordered by created_at descending."""
+    return samples.order_by(Sample.created_at.desc())
+
+
 def apply_sample_filter(
     filter_functions: List[Callable],
     samples: Query,
@@ -140,23 +177,31 @@ def apply_sample_filter(
     tissue_type: Optional[SampleType] = None,
     data_analysis: Optional[str] = None,
     invoice_id: Optional[int] = None,
-    customer_id: Optional[str] = None,
+    customer_entry_ids: Optional[List[int]] = None,
     subject_id: Optional[str] = None,
     name: Optional[str] = None,
+    customer: Optional[Customer] = None,
+    name_pattern: Optional[str] = None,
+    internal_id_pattern: Optional[str] = None,
+    search_pattern: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
-    for function in filter_functions:
-        samples: Query = function(
+    for filter_function in filter_functions:
+        samples: Query = filter_function(
             samples=samples,
             entry_id=entry_id,
             internal_id=internal_id,
             tissue_type=tissue_type,
             data_analysis=data_analysis,
             invoice_id=invoice_id,
-            customer_id=customer_id,
+            customer_entry_ids=customer_entry_ids,
             subject_id=subject_id,
             name=name,
+            customer=customer,
+            name_pattern=name_pattern,
+            internal_id_pattern=internal_id_pattern,
+            search_pattern=search_pattern,
         )
     return samples
 
@@ -180,7 +225,7 @@ class SampleFilter(Enum):
     FILTER_DO_INVOICE: Callable = filter_samples_do_invoice
     FILTER_DO_NOT_INVOICE: Callable = filter_samples_do_not_invoice
     FILTER_BY_CUSTOMER_NAME: Callable = filter_samples_by_customer_name
-    FILTER_BY_CUSTOMER_ID: Callable = filter_samples_by_customer_id
+    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_samples_by_entry_customer_ids
     FILTER_IS_RECEIVED: Callable = filter_samples_is_received
     FILTER_IS_NOT_RECEIVED: Callable = filter_samples_is_not_received
     FILTER_IS_PREPARED: Callable = filter_samples_is_prepared
@@ -189,3 +234,8 @@ class SampleFilter(Enum):
     FILTER_BY_SUBJECT_ID: Callable = filter_samples_by_subject_id
     FILTER_IS_TUMOUR: Callable = filter_samples_is_tumour
     FILTER_IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
+    FILTER_BY_NAME_PATTERN: Callable = filter_samples_by_name_pattern
+    FILTER_BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
+    FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
+    FILTER_BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search
+    ORDER_BY_CREATED_AT_DESC: Callable = order_samples_by_created_at_desc

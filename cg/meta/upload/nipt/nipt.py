@@ -16,7 +16,7 @@ from cg.meta.upload.nipt.models import StatinaUploadFiles
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Analysis, Flowcell, Family
-from housekeeper.store import models as hk_models
+from housekeeper.store.models import File
 from cg.apps.tb import TrailblazerAPI
 
 LOG = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class NiptUploadAPI:
         if not tags:
             tags: List[str] = self.RESULT_FILE_TAGS
 
-        hk_all_results_file: hk_models.File = self.housekeeper_api.get_file_from_latest_version(
+        hk_all_results_file: File = self.housekeeper_api.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
         )
 
@@ -91,14 +91,9 @@ class NiptUploadAPI:
 
         return results_file
 
-    def get_all_upload_analyses(self) -> Iterable[Analysis]:
+    def get_all_upload_analyses(self) -> List[Analysis]:
         """Gets all nipt analyses that are ready to be uploaded"""
-
-        latest_nipt_analyses = self.status_db.latest_analyses().filter(
-            Analysis.pipeline == Pipeline.FLUFFY
-        )
-
-        return latest_nipt_analyses.filter(Analysis.uploaded_at.is_(None))
+        return self.status_db.get_latest_analysis_to_upload_for_pipeline(pipeline=Pipeline.FLUFFY)
 
     def upload_to_ftp_server(self, results_file: Path) -> None:
         """Upload the result file to the ftp server"""
@@ -124,7 +119,7 @@ class NiptUploadAPI:
     def update_analysis_uploaded_at_date(self, case_id: str) -> Analysis:
         """Updates analysis_uploaded_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:
@@ -139,7 +134,7 @@ class NiptUploadAPI:
     def update_analysis_upload_started_date(self, case_id: str) -> Analysis:
         """Updates analysis_upload_started_at for the uploaded analysis"""
 
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         analysis_obj: Analysis = case_obj.analyses[0]
 
         if not self.dry_run:

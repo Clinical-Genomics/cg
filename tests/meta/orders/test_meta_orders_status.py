@@ -1,5 +1,6 @@
 import datetime as dt
 from copy import deepcopy
+from typing import List
 
 import pytest
 
@@ -20,7 +21,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.meta.orders import OrdersAPI
 from cg.store import Store
-
+from cg.store.models import Family, Pool
 from cg.constants import Priority
 
 
@@ -195,11 +196,11 @@ def test_cases_to_status_synopsis(mip_order_to_submit):
     # THEN No exception should have been raised on synopsis
 
 
-def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
+def test_store_rml(orders_api, base_store, rml_status_data, ticket_id: str):
     # GIVEN a basic store with no samples and a rml order
-    assert base_store.get_pools_for_customer().count() == 0
-    assert base_store.families().count() == 0
-    assert len(base_store.get_all_samples()) == 0
+    assert base_store._get_query(table=Pool).count() == 0
+    assert base_store._get_query(table=Family).count() == 0
+    assert not base_store.get_samples()
 
     submitter: RmlSubmitter = RmlSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -208,24 +209,24 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
         customer_id=rml_status_data["customer"],
         order=rml_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=rml_status_data["pools"],
     )
 
     # THEN it should update the database with new pools
     assert len(new_pools) == 2
 
-    assert base_store.get_pools_for_customer().count() == base_store.families().count()
-    assert len(base_store.get_all_samples()) == 4
+    assert base_store._get_query(table=Pool).count() == base_store._get_query(table=Family).count()
+    assert len(base_store.get_samples()) == 4
 
     # ASSERT that there is one negative sample
     negative_samples = 0
-    for sample in base_store.get_all_samples():
+    for sample in base_store.get_samples():
         if sample.control == "negative":
             negative_samples += 1
     assert negative_samples == 1
 
-    new_pool = base_store.get_pools_for_customer().first()
+    new_pool = base_store._get_query(table=Pool).order_by(Pool.created_at.desc()).first()
     assert new_pool == new_pools[1]
 
     assert new_pool.name == "pool-2"
@@ -236,7 +237,7 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
     assert len(new_pool.deliveries) == 1
     assert new_pool.deliveries[0].destination == "caesar"
 
-    new_case = base_store.families().first()
+    new_case = base_store.get_cases()[0]
     assert new_case.data_analysis == str(Pipeline.FASTQ)
     assert new_case.data_delivery == str(DataDelivery.FASTQ)
 
@@ -246,10 +247,10 @@ def test_store_rml(orders_api, base_store, rml_status_data, ticket: str):
         assert link.sample.no_invoice
 
 
-def test_store_samples(orders_api, base_store, fastq_status_data, ticket: str):
+def test_store_samples(orders_api, base_store, fastq_status_data, ticket_id: str):
     # GIVEN a basic store with no samples and a fastq order
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
 
     submitter: FastqSubmitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -258,28 +259,28 @@ def test_store_samples(orders_api, base_store, fastq_status_data, ticket: str):
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=fastq_status_data["samples"],
     )
 
     # THEN it should store the samples and create a case for each sample
     assert len(new_samples) == 2
-    assert len(base_store.get_all_samples()) == 2
-    assert base_store.families().count() == 2
+    assert len(base_store.get_samples()) == 2
+    assert base_store._get_query(table=Family).count() == 2
     first_sample = new_samples[0]
     assert len(first_sample.links) == 2
     family_link = first_sample.links[0]
-    assert family_link.family in base_store.families()
+    assert family_link.family in base_store.get_cases()
     for sample in new_samples:
         assert len(sample.deliveries) == 1
     assert family_link.family.data_analysis
     assert family_link.family.data_delivery in [DataDelivery.FASTQ, DataDelivery.NO_DELIVERY]
 
 
-def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, ticket: str):
+def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, ticket_id: str):
     # GIVEN a basic store with no samples and a fastq order
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -288,7 +289,7 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, tic
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=fastq_status_data["samples"],
     )
 
@@ -298,8 +299,8 @@ def test_store_samples_sex_stored(orders_api, base_store, fastq_status_data, tic
 
 def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq_status_data):
     # GIVEN a basic store with no samples and a non-tumour fastq order as wgs
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
     base_store.get_application_by_tag(
         fastq_status_data["samples"][0]["application"]
     ).prep_category = PrepCategory.WHOLE_GENOME_SEQUENCING
@@ -321,11 +322,11 @@ def test_store_fastq_samples_non_tumour_wgs_to_mip(orders_api, base_store, fastq
 
 
 def test_store_fastq_samples_tumour_wgs_to_fastq(
-    orders_api, base_store, fastq_status_data, ticket: str
+    orders_api, base_store, fastq_status_data, ticket_id: str
 ):
     # GIVEN a basic store with no samples and a tumour fastq order as wgs
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
     base_store.get_application_by_tag(
         fastq_status_data["samples"][0]["application"]
     ).prep_category = PrepCategory.WHOLE_GENOME_SEQUENCING
@@ -338,7 +339,7 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=fastq_status_data["samples"],
     )
 
@@ -347,11 +348,11 @@ def test_store_fastq_samples_tumour_wgs_to_fastq(
 
 
 def test_store_fastq_samples_non_wgs_as_fastq(
-    orders_api, base_store, fastq_status_data, ticket: str
+    orders_api, base_store, fastq_status_data, ticket_id: str
 ):
     # GIVEN a basic store with no samples and a fastq order as non wgs
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
     non_wgs_prep_category = PrepCategory.WHOLE_EXOME_SEQUENCING
     assert base_store.get_applications_by_prep_category(prep_category=non_wgs_prep_category)
     for sample in fastq_status_data["samples"]:
@@ -366,7 +367,7 @@ def test_store_fastq_samples_non_wgs_as_fastq(
         customer_id=fastq_status_data["customer"],
         order=fastq_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=fastq_status_data["samples"],
     )
 
@@ -374,10 +375,10 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     assert new_samples[0].links[0].family.data_analysis == Pipeline.FASTQ
 
 
-def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data, ticket: str):
+def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data, ticket_id: str):
     # GIVEN a basic store with no samples and a fastq order
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
 
     for sample in fastq_status_data["samples"]:
         sample["application"] = "nonexistingtag"
@@ -391,15 +392,15 @@ def test_store_samples_bad_apptag(orders_api, base_store, fastq_status_data, tic
             customer_id=fastq_status_data["customer"],
             order=fastq_status_data["order"],
             ordered=dt.datetime.now(),
-            ticket_id=ticket,
+            ticket_id=ticket_id,
             items=fastq_status_data["samples"],
         )
 
 
-def test_store_microbial_samples(orders_api, base_store, microbial_status_data, ticket: str):
+def test_store_microbial_samples(orders_api, base_store, microbial_status_data, ticket_id: str):
     # GIVEN a basic store with no samples and a microbial order and one Organism
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
     assert base_store.get_all_organisms().count() == 1
 
     submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -409,7 +410,7 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data, 
         customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -419,18 +420,18 @@ def test_store_microbial_samples(orders_api, base_store, microbial_status_data, 
     # THEN it should store the samples under a case (case) and the used previously unknown
     # organisms
     assert new_samples
-    assert base_store.families().count() == 1
+    assert base_store._get_query(table=Family).count() == 1
     assert len(new_samples) == 5
-    assert len(base_store.get_all_samples()) == 5
+    assert len(base_store.get_samples()) == 5
     assert base_store.get_all_organisms().count() == 3
 
 
 def test_store_microbial_case_data_analysis_stored(
-    orders_api, base_store, microbial_status_data, ticket: str
+    orders_api, base_store, microbial_status_data, ticket_id: str
 ):
     # GIVEN a basic store with no samples and a microbial order and one Organism
-    assert len(base_store.get_all_samples()) == 0
-    assert base_store.families().count() == 0
+    assert not base_store.get_samples()
+    assert base_store._get_query(table=Family).count() == 0
 
     submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -439,7 +440,7 @@ def test_store_microbial_case_data_analysis_stored(
         customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -447,19 +448,19 @@ def test_store_microbial_case_data_analysis_stored(
     )
 
     # THEN store the samples under a case with the microbial data_analysis type on case level
-    assert len(base_store.get_all_samples()) > 0
-    assert base_store.families().count() == 1
+    assert len(base_store.get_samples()) > 0
+    assert base_store._get_query(table=Family).count() == 1
 
-    microbial_case = base_store.families().first()
+    microbial_case = base_store.get_cases()[0]
     assert microbial_case.data_analysis == str(Pipeline.MICROSALT)
     assert microbial_case.data_delivery == str(DataDelivery.FASTQ_QC)
 
 
 def test_store_microbial_sample_priority(
-    orders_api, base_store, microbial_status_data, ticket: str
+    orders_api, base_store, microbial_status_data, ticket_id: str
 ):
     # GIVEN a basic store with no samples
-    assert len(base_store.get_all_samples()) == 0
+    assert not base_store.get_samples()
 
     submitter = MicrobialSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -468,7 +469,7 @@ def test_store_microbial_sample_priority(
         customer_id=microbial_status_data["customer"],
         order=microbial_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=microbial_status_data["samples"],
         comment="",
         data_analysis=Pipeline.MICROSALT,
@@ -476,16 +477,16 @@ def test_store_microbial_sample_priority(
     )
 
     # THEN it should store the sample priority
-    assert len(base_store.get_all_samples()) > 0
-    microbial_sample = base_store.get_all_samples()[0]
+    assert len(base_store.get_samples()) > 0
+    microbial_sample = base_store.get_samples()[0]
 
     assert microbial_sample.priority_human == "research"
 
 
-def test_store_mip(orders_api, base_store, mip_status_data, ticket: str):
+def test_store_mip(orders_api, base_store, mip_status_data, ticket_id: str):
     # GIVEN a basic store with no samples or nothing in it + scout order
-    assert not base_store.get_all_samples()
-    assert base_store.families().first() is None
+    assert not base_store.get_samples()
+    assert not base_store.get_cases()
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -494,7 +495,7 @@ def test_store_mip(orders_api, base_store, mip_status_data, ticket: str):
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=mip_status_data["families"],
     )
 
@@ -529,16 +530,16 @@ def test_store_mip(orders_api, base_store, mip_status_data, ticket: str):
 
     assert new_link.sample.age_at_sampling == 17.18192
 
-    assert base_store.deliveries().count() == len(base_store.get_all_samples())
+    assert base_store.deliveries().count() == len(base_store.get_samples())
     for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
 
-def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str):
+def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket_id: str):
     # GIVEN a basic store with no samples or nothing in it + rna order
     rna_application_tag = "RNAPOAR025"
-    assert not base_store.get_all_samples()
-    assert base_store.families().first() is None
+    assert not base_store.get_samples()
+    assert not base_store.get_cases()
     assert base_store.get_application_by_tag(tag=rna_application_tag)
 
     submitter: MipRnaSubmitter = MipRnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -548,7 +549,7 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str)
         customer_id=mip_rna_status_data["customer"],
         order=mip_rna_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=mip_rna_status_data["families"],
     )
 
@@ -564,9 +565,9 @@ def test_store_mip_rna(orders_api, base_store, mip_rna_status_data, ticket: str)
     assert new_link.sample.application_version.application.tag == rna_application_tag
 
 
-def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data, ticket: str):
+def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data, ticket_id: str):
     # GIVEN a basic store with no samples and a metagenome order
-    assert len(base_store.get_all_samples()) == 0
+    assert not base_store.get_samples()
 
     submitter = MetagenomeSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -575,20 +576,20 @@ def test_store_metagenome_samples(orders_api, base_store, metagenome_status_data
         customer_id=metagenome_status_data["customer"],
         order=metagenome_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=metagenome_status_data["families"],
     )
 
     # THEN it should store the samples
     assert len(new_samples) == 2
-    assert len(base_store.get_all_samples()) == 2
+    assert len(base_store.get_samples()) == 2
 
 
 def test_store_metagenome_samples_bad_apptag(
-    orders_api, base_store, metagenome_status_data, ticket: str
+    orders_api, base_store, metagenome_status_data, ticket_id: str
 ):
     # GIVEN a basic store with no samples and a metagenome order
-    assert len(base_store.get_all_samples()) == 0
+    assert not base_store.get_samples()
 
     for sample in metagenome_status_data["families"][0]["samples"]:
         sample["application"] = "nonexistingtag"
@@ -602,7 +603,7 @@ def test_store_metagenome_samples_bad_apptag(
             customer_id=metagenome_status_data["customer"],
             order=metagenome_status_data["order"],
             ordered=dt.datetime.now(),
-            ticket_id=ticket,
+            ticket_id=ticket_id,
             items=metagenome_status_data["families"],
         )
 
@@ -610,10 +611,12 @@ def test_store_metagenome_samples_bad_apptag(
 @pytest.mark.parametrize(
     "submitter", [BalsamicSubmitter, BalsamicQCSubmitter, BalsamicUmiSubmitter]
 )
-def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, submitter, ticket: str):
+def test_store_cancer_samples(
+    orders_api, base_store, balsamic_status_data, submitter, ticket_id: str
+):
     # GIVEN a basic store with no samples and a cancer order
-    assert not base_store.get_all_samples()
-    assert base_store.families().first() is None
+    assert not base_store.get_samples()
+    assert not base_store.get_cases()
 
     submitter: Submitter = submitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -622,7 +625,7 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
         customer_id=balsamic_status_data["customer"],
         order=balsamic_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=balsamic_status_data["families"],
     )
 
@@ -647,13 +650,13 @@ def test_store_cancer_samples(orders_api, base_store, balsamic_status_data, subm
     assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
 
-    assert base_store.deliveries().count() == len(base_store.get_all_samples())
+    assert base_store.deliveries().count() == len(base_store.get_samples())
     for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
 
 def test_store_existing_single_sample_from_trio(
-    orders_api, base_store, mip_status_data, ticket: str
+    orders_api, base_store, mip_status_data, ticket_id: str
 ):
     # GIVEN a stored trio case
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -661,7 +664,7 @@ def test_store_existing_single_sample_from_trio(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=mip_status_data["families"],
     )
 
@@ -699,7 +702,7 @@ def test_store_existing_single_sample_from_trio(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=mip_status_data["families"],
     )
 
@@ -711,11 +714,11 @@ def test_store_existing_single_sample_from_trio(
 
 
 def test_store_existing_case(
-    orders_api: OrdersAPI, base_store: Store, mip_status_data: dict, ticket: str
+    orders_api: OrdersAPI, base_store: Store, mip_status_data: dict, ticket_id: str
 ):
     # GIVEN a basic store with no samples or nothing in it + scout order
-    assert not base_store.get_all_samples()
-    assert base_store.families().first() is None
+    assert not base_store.get_samples()
+    assert not base_store.get_cases()
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
 
@@ -724,12 +727,12 @@ def test_store_existing_case(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=mip_status_data["families"],
     )
 
     base_store.close()
-    new_cases = base_store.families().all()
+    new_cases: List[Family] = base_store.get_cases()
 
     # Save internal id
     stored_cases_internal_ids = dict([(case["name"], case["internal_id"]) for case in new_cases])
@@ -740,13 +743,13 @@ def test_store_existing_case(
         customer_id=mip_status_data["customer"],
         order=mip_status_data["order"],
         ordered=dt.datetime.now(),
-        ticket_id=ticket,
+        ticket_id=ticket_id,
         items=mip_status_data["families"],
     )
 
     base_store.close()
-    rerun_cases = base_store.families().all()
+    rerun_cases: List[Family] = base_store.get_cases()
 
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
-    assert rerun_cases[0].tickets == f"{ticket},{ticket}"
+    assert rerun_cases[0].tickets == f"{ticket_id},{ticket_id}"
     assert rerun_cases[0].action == CaseActions.ANALYZE

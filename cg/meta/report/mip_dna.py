@@ -1,7 +1,9 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Iterable
 
 from cgmodels.cg.constants import Pipeline
+from housekeeper.store.models import Version, File
+from sqlalchemy.orm import Query
 
 from cg.constants import (
     REQUIRED_REPORT_FIELDS,
@@ -25,7 +27,7 @@ from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
 from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
-from cg.store.models import Family, Sample
+from cg.store.models import Family, Sample, Application
 
 LOG = logging.getLogger(__name__)
 
@@ -81,9 +83,13 @@ class MipDNAReportAPI(ReportAPI):
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
 
-        case_sample = self.status_db.family_samples(case.internal_id)[0].sample
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )[0].sample
         lims_sample = self.get_lims_sample(case_sample.internal_id)
-        application = self.status_db.get_application_by_tag(tag=lims_sample.get("application"))
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
 
         return application.analysis_type if application else None
 
@@ -151,3 +157,19 @@ class MipDNAReportAPI(ReportAPI):
         """Retrieves MIP DNA upload case tags."""
 
         return MIP_CASE_TAGS
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """Returns the file path of the uploaded to Scout file given its tag."""
+
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
+        uploaded_files: Iterable[File] = self.housekeeper_api.get_files(
+            bundle=case_id, tags=tags, version=version.id
+        )
+        if not tags or not any(uploaded_files):
+            LOG.info(
+                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
+            )
+            return None
+
+        return uploaded_files[0].full_path

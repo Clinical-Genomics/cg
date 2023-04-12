@@ -1,11 +1,10 @@
-"""File includes api to uploading data into Scout"""
+"""File includes api to uploading data into Scout."""
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set
 
-from housekeeper.store import models as hk_models
-from sqlalchemy.orm import Query
+from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -30,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 
 class UploadScoutAPI:
-    """Class that handles everything that has to do with uploading to Scout"""
+    """Class that handles everything that has to do with uploading to Scout."""
 
     def __init__(
         self,
@@ -54,9 +53,7 @@ class UploadScoutAPI:
 
         # Fetch last version from housekeeper
         # This should be safe since analyses are only added if data is analysed
-        hk_version_obj: hk_models.Version = self.housekeeper.last_version(
-            analysis_obj.family.internal_id
-        )
+        hk_version_obj: Version = self.housekeeper.last_version(analysis_obj.family.internal_id)
         LOG.debug("Found housekeeper version %s", hk_version_obj.id)
 
         load_config: ScoutLoadConfig
@@ -69,14 +66,14 @@ class UploadScoutAPI:
 
     @staticmethod
     def get_load_config_tag() -> str:
-        """Get the hk tag for a scout load config"""
+        """Get the Housekeeper tag for a Scout load config."""
         return "scout-load-config"
 
     @staticmethod
     def save_config_file(upload_config: ScoutLoadConfig, file_path: Path) -> None:
-        """Save a scout load config file to <file_path>"""
+        """Save a Scout load config file to the supplied file path."""
 
-        LOG.info("Save Scout load config to %s", file_path)
+        LOG.info(f"Save Scout load config to {file_path.as_posix()}")
         WriteFile.write_file_from_content(
             content=upload_config.dict(exclude_none=True),
             file_format=FileFormat.YAML,
@@ -85,37 +82,37 @@ class UploadScoutAPI:
 
     def add_scout_config_to_hk(
         self, config_file_path: Path, case_id: str, delete: bool = False
-    ) -> hk_models.File:
-        """Add scout load config to hk bundle"""
-        LOG.info("Adding load config %s to housekeeper", config_file_path)
+    ) -> File:
+        """Add Scout load config to Housekeeper bundle."""
+        LOG.info(f"Adding load config {config_file_path} to Housekeeper")
         tag_name: str = self.get_load_config_tag()
-        version_obj: hk_models.Version = self.housekeeper.last_version(bundle=case_id)
-        uploaded_config_file: Optional[hk_models.File] = self.housekeeper.fetch_file_from_version(
-            version_obj=version_obj, tags={tag_name}
+        version: Version = self.housekeeper.last_version(bundle=case_id)
+        uploaded_config_file: Optional[File] = self.housekeeper.get_latest_file_from_version(
+            version=version, tags={tag_name}
         )
         if uploaded_config_file:
-            LOG.info("Found config file: %s", uploaded_config_file)
+            LOG.info(f"Found config file: {uploaded_config_file}")
             if not delete:
                 raise FileExistsError("Upload config already exists")
             self.housekeeper.delete_file(uploaded_config_file.id)
 
-        file_obj: hk_models.File = self.housekeeper.add_file(
-            path=str(config_file_path), version_obj=version_obj, tags=tag_name
+        file_obj: File = self.housekeeper.add_file(
+            path=str(config_file_path), version_obj=version, tags=tag_name
         )
-        self.housekeeper.include_file(file_obj=file_obj, version_obj=version_obj)
+        self.housekeeper.include_file(file_obj=file_obj, version_obj=version)
         self.housekeeper.add_commit(file_obj)
 
-        LOG.info("Added scout load config to housekeeper: %s", config_file_path)
+        LOG.info(f"Added Scout load config to Housekeeper: {config_file_path}")
         return file_obj
 
-    def get_fusion_report(self, case_id: str, research: bool) -> Optional[hk_models.File]:
+    def get_fusion_report(self, case_id: str, research: bool) -> Optional[File]:
         """Get a fusion report for case in housekeeper
 
         Args:
             case_id     (string):       Case identifier
             research    (bool):         Research report
         Returns:
-            File in housekeeper (Optional[hk_models.File])
+            File in housekeeper (Optional[File])
         """
 
         # This command can be executed as:
@@ -126,26 +123,26 @@ class UploadScoutAPI:
         else:
             tags.add("clinical")
 
-        fusion_report: Optional[hk_models.File] = self.housekeeper.get_file_from_latest_version(
+        fusion_report: Optional[File] = self.housekeeper.get_file_from_latest_version(
             bundle_name=case_id, tags=tags
         )
 
         return fusion_report
 
-    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
+    def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
         """Get a splice junctions bed file for case in housekeeper
 
         Args:
             case_id     (string):       Case identifier
             sample_id   (string):       Sample identifier
         Returns:
-            File in housekeeper (Optional[hk_models.File])
+            File in housekeeper (Optional[File])
         """
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag junction --tag bed <sample_id>´
         tags: {str} = {"junction", "bed", sample_id}
-        splice_junctions_bed: Optional[hk_models.File]
+        splice_junctions_bed: Optional[File]
         try:
             splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
                 bundle_name=case_id, tags=tags
@@ -155,23 +152,23 @@ class UploadScoutAPI:
 
         return splice_junctions_bed
 
-    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[hk_models.File]:
+    def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
         """Get a rna coverage bigwig file for case in housekeeper
 
         Args:
             case_id     (string):       Case identifier
             sample_id   (string):       Sample identifier
         Returns:
-            File in housekeeper (Optional[hk_models.File])
+            File in housekeeper (Optional[File])
         """
 
         # This command can be executed as:
         # ´housekeeper get file -V --tag coverage --tag bigwig <sample_id>´
         tags: {str} = {"coverage", "bigwig", sample_id}
 
-        rna_coverage_bigwig: Optional[
-            hk_models.File
-        ] = self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
+        rna_coverage_bigwig: Optional[File] = self.housekeeper.get_file_from_latest_version(
+            bundle_name=case_id, tags=tags
+        )
 
         return rna_coverage_bigwig
 
@@ -195,13 +192,13 @@ class UploadScoutAPI:
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         report_type: str = "Research" if research else "Clinical"
-        rna_case: Family = status_db.family(case_id)
+        rna_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
         )
         unique_dna_cases: Set[str] = set()
-        fusion_report: Optional[hk_models.File] = self.get_fusion_report(case_id, research)
+        fusion_report: Optional[File] = self.get_fusion_report(case_id, research)
         if fusion_report is None:
             raise FileNotFoundError(
                 f"{report_type} fusion report was not found in housekeeper for {case_id}"
@@ -244,12 +241,12 @@ class UploadScoutAPI:
 
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
-        rna_case = status_db.family(case_id)
+        rna_case = status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
         )
         for rna_sample_id in rna_dna_sample_case_map:
-            rna_coverage_bigwig: Optional[hk_models.File] = self.get_rna_coverage_bigwig(
+            rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_id
             )
 
@@ -295,13 +292,13 @@ class UploadScoutAPI:
         """
         scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
-        rna_case: Family = status_db.family(case_id)
+        rna_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=rna_case
         )
         for rna_sample_id in rna_dna_sample_case_map:
-            splice_junctions_bed: Optional[hk_models.File] = self.get_splice_junctions_bed(
+            splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
             )
 
@@ -429,8 +426,10 @@ class UploadScoutAPI:
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
 
-        subject_id_samples: List[Sample] = self.status_db.get_samples_by_subject_id_and_is_tumour(
-            customer_id=rna_sample.customer.internal_id,
+        subject_id_samples: List[
+            Sample
+        ] = self.status_db.get_samples_by_customer_subject_id_and_is_tumour(
+            customer_internal_id=rna_sample.customer.internal_id,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
