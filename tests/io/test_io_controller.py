@@ -43,7 +43,7 @@ def test_get_content_from_file_when_json(json_file_path: Path):
 
 def test_get_content_from_file_when_csv(csv_file_path: Path):
     """
-    Tests get_content_from_file when csv.
+    Tests getting content from file when in CSV format.
     """
     # GIVEN a csv file
 
@@ -88,7 +88,7 @@ def test_get_content_from_stream_when_json(json_stream: str):
 
 def test_get_content_from_stream_when_csv(csv_stream: str):
     """
-    Tests read_csv_stream.
+    Tests read a CVS stream.
     """
     # GIVEN a string in csv format
 
@@ -164,7 +164,7 @@ def test_write_file_from_content_when_json(json_file_path: Path, json_temp_path:
 
 def test_write_file_from_content_when_csv(csv_file_path: Path, csv_temp_path: Path):
     """
-    Tests write_file_from_content when csv.
+    Tests write file from content when CSV.
     """
     # GIVEN a csv file
 
@@ -232,7 +232,7 @@ def test_write_json_stream_from_content(json_stream: str):
 
 def test_write_csv_stream_from_content(csv_stream: str):
     """
-    Tests read_csv_stream.
+    Tests read CSV stream.
     """
     # GIVEN a string in csv format
 
@@ -245,5 +245,5 @@ def test_write_csv_stream_from_content(csv_stream: str):
         content=raw_content, file_format=FileFormat.CSV
     )
 
-    # THEN assert all data is kept abd in csv format
+    # THEN assert all data is kept and in csv format
     assert csv_stream == csv_content

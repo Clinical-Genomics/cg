@@ -5,7 +5,7 @@ from cg.io.csv import read_csv, write_csv, read_csv_stream, write_csv_stream
 
 def test_get_content_from_file(csv_file_path: Path):
     """
-    Tests read_csv.
+    Tests read CSV.
     """
     # GIVEN a csv file
 
@@ -18,7 +18,7 @@ def test_get_content_from_file(csv_file_path: Path):
 
 def test_get_content_from_stream(csv_stream: str):
     """
-    Tests read_csv_stream.
+    Tests read CSV stream.
     """
     # GIVEN a string in csv format
 
@@ -35,7 +35,7 @@ def test_get_content_from_stream(csv_stream: str):
 
 def test_write_csv(csv_file_path: Path, csv_temp_path: Path):
     """
-    Tests write_csv.
+    Tests write CSV.
     """
     # GIVEN a csv file
 
@@ -59,7 +59,7 @@ def test_write_csv(csv_file_path: Path, csv_temp_path: Path):
 
 def test_write_csv_stream(csv_stream: str):
     """
-    Tests write_csv_stream.
+    Tests write CSV stream.
     """
     # GIVEN a list of lists
 
