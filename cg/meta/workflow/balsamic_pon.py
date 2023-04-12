@@ -2,7 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
+
+from cg.store.models import Family
 
 from cg.utils.utils import build_command_from_dict
 
@@ -18,7 +20,7 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
-    """Handles communication between Balsamic processes and the rest of CG infrastructure."""
+    """Handles communication between Balsamic PON processes and the rest of CG infrastructure."""
 
     def __init__(
         self,
@@ -39,24 +41,24 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
         dry_run: bool = False,
     ) -> None:
         """Creates a config file for BALSAMIC PON analysis."""
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        sample_data = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_data: dict = self.get_sample_params(case_id=case_id, panel_bed=panel_bed)
         if len(sample_data) == 0:
-            raise BalsamicStartError(f"{case_id} has no samples tagged for BALSAMIC PON analysis!")
-        verified_panel_bed = self.get_verified_bed(panel_bed, sample_data)
-        command = ["config", "pon"]
-        options = build_command_from_dict(
+            LOG.error(f"{case_id} has no samples tagged for Balsamic PON analysis")
+            raise BalsamicStartError()
+        verified_panel_bed: str = self.get_verified_bed(panel_bed, sample_data)
+        options: List[str] = build_command_from_dict(
             {
-                "--case-id": case_obj.internal_id,
+                "--case-id": case.internal_id,
                 "--analysis-dir": self.root_dir,
-                "--fastq-path": self.get_sample_fastq_destination_dir(case_obj),
+                "--fastq-path": self.get_sample_fastq_destination_dir(case),
                 "--panel-bed": verified_panel_bed,
                 "--genome-version": genome_version,
                 "--balsamic-cache": self.balsamic_cache,
                 "--version": self.get_next_pon_version(verified_panel_bed),
             }
         )
-        parameters = command + options
+        parameters: List[str] = ["config", "pon"] + options
         self.process.run_command(parameters=parameters, dry_run=dry_run)
 
     def get_case_config_path(self, case_id: str) -> Path:
@@ -65,7 +67,7 @@ class BalsamicPonAnalysisAPI(BalsamicAnalysisAPI):
 
     def get_next_pon_version(self, panel_bed: str) -> str:
         """Returns the next PON version to be generated."""
-        latest_pon_file = self.get_latest_pon_file(panel_bed)
+        latest_pon_file: str = self.get_latest_pon_file(panel_bed)
         next_version = (
             int(Path(latest_pon_file).stem.split("_v")[ListIndexes.LAST.value]) + 1
             if latest_pon_file
