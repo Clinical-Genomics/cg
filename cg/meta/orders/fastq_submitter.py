@@ -12,7 +12,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.constants.priority import Priority
-from cg.store.models import Sample, Family, FamilySample, Customer
+from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationVersion
 
 
 class FastqSubmitter(Submitter):
@@ -104,12 +104,14 @@ class FastqSubmitter(Submitter):
                     tumour=sample["tumour"],
                     capture_kit=sample["capture_kit"],
                 )
-                new_sample.customer = customer
-                application_tag = sample["application"]
-                application_version = self.status.current_application_version(tag=application_tag)
+                new_sample.customer: Customer = customer
+                application_tag: str = sample["application"]
+                application_version: ApplicationVersion = (
+                    self.status.get_current_application_version_by_tag(tag=application_tag)
+                )
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
-                new_sample.application_version = application_version
+                new_sample.application_version: ApplicationVersion = application_version
                 new_samples.append(new_sample)
                 if not case:
                     case = self.status.add_case(

@@ -59,8 +59,11 @@ def nipt_upload_all(context: click.Context, dry_run: bool):
     LOG.info("*** UPLOAD ALL AVAILABLE NIPT RESULTS ***")
 
     nipt_upload_api = NiptUploadAPI(context.obj)
-    upload_nipt_analyses = nipt_upload_api.get_all_upload_analyses()
+    analyses = nipt_upload_api.get_all_upload_analyses()
+    if not analyses:
+        LOG.info("No analyses found for upload")
+        return
 
-    for analysis in upload_nipt_analyses:
+    for analysis in analyses:
         case_id = analysis.family.internal_id
         context.invoke(nipt_upload_case, case_id=case_id, dry_run=dry_run)
