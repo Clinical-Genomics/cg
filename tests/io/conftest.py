@@ -45,13 +45,13 @@ def fixture_invalid_yaml_file(project_dir: Path) -> Path:
 
 @pytest.fixture(name="csv_file_path")
 def fixture_csv_file_path(fixtures_dir: Path) -> Path:
-    """Return a file path to example csv file"""
+    """Return a file path to example csv file."""
     return Path(fixtures_dir, "io", "example_csv.csv")
 
 
 @pytest.fixture(name="csv_stream")
 def fixture_csv_stream() -> str:
-    """Return string with csv format"""
+    """Return string with csv format."""
     _content = """Lorem,ipsum
 sit,amet
 """
@@ -60,5 +60,5 @@ sit,amet
 
 @pytest.fixture(name="csv_temp_path")
 def fixture_csv_temp_path(cg_dir: Path) -> Path:
-    """Return a temp file path to use when writing csv"""
+    """Return a temp file path to use when writing csv."""
     return Path(cg_dir, "write_csv.csv")
