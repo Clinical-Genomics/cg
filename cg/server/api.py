@@ -18,14 +18,13 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis
+from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis, User
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
-from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
@@ -78,13 +77,13 @@ def before_request():
             )
         )
 
-    user = db.get_user_by_email(user_data["email"])
+    user: User = db.get_user_by_email(user_data["email"])
     if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
-    g.current_user = user
+    g.current_user: User = user
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])

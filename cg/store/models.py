@@ -693,10 +693,16 @@ class User(Model):
     customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 
     def to_dict(self) -> dict:
-        """Represent as dictionary"""
-        data = super(User, self).to_dict()
-        data["customers"] = [record.to_dict() for record in self.customers]
-        return data
+        """Represent as dictionary."""
+        dict_representation: dict = super(User, self).to_dict()
+        dict_representation["customers"] = [customer.to_dict() for customer in self.customers]
+        dict_representation["is_trusted"] = self.is_trusted
+        return dict_representation
+
+    @property
+    def is_trusted(self) -> bool:
+        """Returns whether the user is linked to a trusted customer."""
+        return any(customer.is_trusted for customer in self.customers)
 
     def __str__(self) -> str:
         return self.name
