@@ -29,7 +29,7 @@ def write_csv(content: List[List[Any]], file_path: Path) -> None:
 def write_csv_stream(content: List[List[Any]]) -> str:
     """Write content to a csv stream"""
     csv_stream = io.StringIO()
-    csv_writer = csv.writer(csv_stream)
+    csv_writer = csv.writer(csv_stream, lineterminator="\n")
     for row in content:
         csv_writer.writerow(row)
     return csv_stream.getvalue()
