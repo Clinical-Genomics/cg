@@ -35,7 +35,8 @@ BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 cache = TTLCache(maxsize=1, ttl=3600)
 
 
-def get_certificate_ttl(response_data):
+def get_certificate_ttl(response_data) -> int:
+    """Extract time to live in seconds for certificate from response headers."""
     expires_header = response_data.headers.get("Expires")
     expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
     ttl = int((expires - datetime.utcnow().replace(tzinfo=timezone.utc)).total_seconds())
@@ -43,32 +44,29 @@ def get_certificate_ttl(response_data):
     return ttl
 
 
-def get_certificate(response_data):
-    cert_key = next(iter(response_data))
-    certificate = response_data[cert_key]
-    return certificate
-
-
-def fetch_and_cache_google_oauth2_certificate():
+def fetch_and_cache_google_oauth2_certificates():
+    """Fetch and cache Google OAuth2 certificates."""
     url = "https://www.googleapis.com/oauth2/v1/certs"
     response = requests.get(url)
     response.raise_for_status()
-    data = response.json()
 
-    ttl = get_certificate_ttl(response_data=data)
-    cert = get_certificate(response_data=data)
-    cache.set("cert", cert, ttl=ttl)
+    certs = response.json()
+    ttl = get_certificate_ttl(response_data=response)
 
-    return data
+    cache = TTLCache(maxsize=1, ttl=ttl)
+    cache["certs"] = certs
+
+    return certs
 
 
-def get_google_oauth2_certificate():
-    cert = cache.get("cert")
+def get_google_oauth2_certificates():
+    """Get Google OAuth2 certificates from cache or fetch and cache them."""
+    certs = cache.get("certs")
 
-    if not cert:
-        cert = fetch_and_cache_google_oauth2_certificate()
+    if not certs:
+        certs = fetch_and_cache_google_oauth2_certificates()
 
-    return cert
+    return certs
 
 
 def is_public(route_function):
@@ -107,7 +105,7 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificate())
+        user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificates())
     except ValueError:
         return abort(
             make_response(
