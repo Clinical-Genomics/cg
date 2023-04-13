@@ -33,6 +33,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_identifier_name_and_value,
 )
 from tests.store.conftest import StoreConftestFixture
+from tests.store.api.conftest import fixture_cust123
 
 
 def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
@@ -612,30 +613,32 @@ def test_filter_get_samples_by_subject_id(
 
 def test_filter_get_samples_by_customer_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    customer_id: int = 1,
 ):
     """Test that a sample is returned when there is a sample with the given customer id."""
-    # GIVEN a store with two samples of which one has a customer id
+    # GIVEN a store with samples with different customer ids
+    samples: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+        table=Sample
+    )
+    customer_id: int = samples.first().customer_id
+    assert customer_id != samples.order_by(Sample.customer_id.desc()).first().customer_id
 
-    # WHEN getting a sample by customer id
-    samples: Query = filter_samples_by_entry_customer_ids(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        ),
+    # WHEN filtering the sample query by customer id
+    filtered_query: Query = filter_samples_by_entry_customer_ids(
+        samples=samples,
         customer_entry_ids=[customer_id],
     )
 
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
+    # ASSERT that the result of the filtering is a query
+    assert isinstance(filtered_query, Query)
 
-    # THEN samples should contain the test sample
-    assert samples.all()
+    # THEN the filtered query is not empty
+    assert filtered_query.all()
 
-    # THEN samples should contain two samples
-    assert len(samples.all()) == 2
+    # THEN the filtered query has fewer elements than the unfiltered query
+    assert filtered_query.count() < samples.count()
 
-    # THEN the sample should have the correct customer id
-    assert samples[0].customer_id == customer_id
+    # THEN a sample in the filtered query should have the correct customer id
+    assert filtered_query.first().customer_id == customer_id
 
 
 def test_filter_get_samples_by_name_pattern(
@@ -747,7 +750,7 @@ def test_filter_samples_by_identifier_name_and_value(
             identifier_name=key,
             identifier_value=value,
         )
-        # THEN the filtered query has ponly one element
+        # THEN the filtered query has only one element for every attribute
         assert filtered_sample_query.count() == 1
-        # THEN the element in the filtered query is the sample
+        # THEN the element in the filtered query is the sample for every attribute
         assert filtered_sample_query.first() == sample

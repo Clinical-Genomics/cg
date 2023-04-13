@@ -18,7 +18,7 @@ class StoreConftestFixture(enum.Enum):
     INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     NAME_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES: int = 2
-    CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES: str = "cust099"
+    CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES: str = "1"
     SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES: str = "test_subject_id"
     ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES: str = "locusdb_id"
