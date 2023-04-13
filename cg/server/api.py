@@ -41,7 +41,7 @@ def get_certificate_ttl(response_data) -> int:
     """Extract time to live in seconds for certificate from response headers."""
     expires_header = response_data.headers.get("Expires")
     expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
-    ttl = int((expires - datetime.utcnow().replace(tzinfo=timezone.utc)).total_seconds())
+    ttl = int((expires - datetime.utcnow()).total_seconds())
 
     return ttl
 
