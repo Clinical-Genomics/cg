@@ -116,10 +116,6 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE],
         ).all()
 
-    def get_analyses_for_each_case_with_latest_started_at_date(self) -> List[Analysis]:
-        """Return analysis for all cases and latest started at date."""
-        return self._get_latest_analyses_for_cases_query().all()
-
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
         """Return latest not uploaded analysis for each case given a pipeline."""
         filter_functions: List[AnalysisFilter] = [
