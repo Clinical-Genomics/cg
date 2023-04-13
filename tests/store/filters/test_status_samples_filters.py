@@ -1,4 +1,5 @@
-from alchy import Query
+from sqlalchemy.orm import Query
+from typing import Dict, Any
 from cg.constants.subject import PhenotypeStatus
 from cg.constants.constants import SampleType
 from cg.store import Store
@@ -29,6 +30,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_entry_customer_ids,
     filter_samples_by_name_pattern,
     filter_samples_by_internal_id_pattern,
+    filter_samples_by_identifier_name_and_value,
 )
 from tests.store.conftest import StoreConftestFixture
 
@@ -690,3 +692,62 @@ def test_filter_get_samples_by_internal_id_pattern(
 
     # THEN the sample should have the correct name
     assert samples[0].internal_id == StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
+
+
+def test_filter_samples_by_identifier_name_and_value(
+    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
+):
+    """."""
+    # GIVEN a store with at least two samples
+    sample_query: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+        table=Sample
+    )
+    assert sample_query.count() > 1
+
+    # GIVEN a sample in store that has all attributes
+    sample: Sample = sample_query.first()
+
+    # WHEN filtering the sample query with every existing attribute of the sample
+    identifiers: Dict[str, Any] = {
+        "age_at_sampling": sample.age_at_sampling,
+        "application_version_id": sample.application_version_id,
+        "capture_kit": sample.capture_kit,
+        "comment": sample.comment,
+        "control": sample.control,
+        "created_at": sample.created_at,
+        "customer_id": sample.customer_id,
+        "delivered_at": sample.delivered_at,
+        "downsampled_to": sample.downsampled_to,
+        "from_sample": sample.from_sample,
+        "id": sample.id,
+        "internal_id": sample.internal_id,
+        "invoice_id": sample.invoice_id,
+        "invoiced_at": sample.invoiced_at,
+        "is_tumour": sample.is_tumour,
+        "loqusdb_id": sample.loqusdb_id,
+        "name": sample.name,
+        "no_invoice": sample.no_invoice,
+        "order": sample.order,
+        "ordered_at": sample.ordered_at,
+        "organism_id": sample.organism_id,
+        "original_ticket": sample.original_ticket,
+        "prepared_at": sample.prepared_at,
+        "priority": sample.priority,
+        "reads": sample.reads,
+        "received_at": sample.received_at,
+        "reference_genome": sample.reference_genome,
+        "sequence_start": sample.sequence_start,
+        "sex": sample.sex,
+        "sequenced_at": sample.sequenced_at,
+        "subject_id": sample.subject_id,
+    }
+    for key, value in identifiers.items():
+        filtered_sample_query: Query = filter_samples_by_identifier_name_and_value(
+            samples=sample_query,
+            identifier_name=key,
+            identifier_value=value,
+        )
+        # THEN the filtered query has ponly one element
+        assert filtered_sample_query.count() == 1
+        # THEN the element in the filtered query is the sample
+        assert filtered_sample_query.first() == sample
