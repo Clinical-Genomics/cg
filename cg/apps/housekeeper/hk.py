@@ -30,11 +30,11 @@ class HousekeeperAPI:
 
     def new_bundle(self, name: str, created_at: dt.datetime = None) -> Bundle:
         """Create a new file bundle."""
-        return self._store.new_bundle(name, created_at)
+        return self._store.create_bundle(name, created_at)
 
     def add_bundle(self, bundle_data) -> Tuple[Bundle, Version]:
         """Build a new bundle version of files."""
-        return self._store.add_bundle(bundle_data)
+        return self._store.create_bundle_and_version(bundle_data)
 
     def bundle(self, name: str) -> Bundle:
         """Fetch a bundle."""
@@ -42,7 +42,7 @@ class HousekeeperAPI:
 
     def bundles(self) -> List[Bundle]:
         """Fetch bundles."""
-        return self._store.bundles()
+        return self._store.get_bundles()
 
     def create_new_bundle_and_version(self, name: str) -> Bundle:
         """Create new bundle with version."""
@@ -65,7 +65,7 @@ class HousekeeperAPI:
         """Create a new file."""
         if tags is None:
             tags = []
-        return self._store.new_file(path, checksum, to_archive, tags)
+        return self._store.create_file(path, checksum, to_archive, tags)
 
     def get_file(self, file_id: int) -> Optional[File]:
         """Get a file based on file id."""
@@ -227,7 +227,7 @@ class HousekeeperAPI:
 
     def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None) -> Version:
         """Create a new bundle version."""
-        return self._store.new_version(created_at, expires_at)
+        return self._store.create_version(created_at, expires_at)
 
     def version(self, bundle: str, date: dt.datetime) -> Version:
         """Fetch a version."""
@@ -274,11 +274,11 @@ class HousekeeperAPI:
 
     def new_tag(self, name: str, category: str = None):
         """Create a new tag."""
-        return self._store.new_tag(name, category)
+        return self._store.create_tag(name, category)
 
     def add_tag(self, name: str, category: str = None) -> models.Tag:
         """Add a tag to the database."""
-        tag_obj = self._store.new_tag(name, category)
+        tag_obj = self._store.create_tag(name, category)
         self.add_commit(tag_obj)
         return tag_obj
 
