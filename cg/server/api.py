@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import http
 import logging
 import json
@@ -5,6 +6,7 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from cachetools import TTLCache
 
 import requests
 from sqlalchemy.exc import IntegrityError
@@ -25,11 +27,48 @@ from flask import Blueprint, abort, current_app, g, jsonify, make_response, requ
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
-from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
+
+cache = TTLCache(maxsize=1, ttl=3600)
+
+
+def extract_certificate_expiration_in_seconds(response_data):
+    expires_header = response_data.headers.get("Expires")
+    expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
+    ttl = int((expires - datetime.utcnow().replace(tzinfo=timezone.utc)).total_seconds())
+
+    return ttl
+
+
+def extract_certificate(response_data):
+    cert_key = next(iter(response_data))
+    certificate = response_data[cert_key]
+    return certificate
+
+
+def update_certificate_cache():
+    url = "https://www.googleapis.com/oauth2/v1/certs"
+    response = requests.get(url)
+    response.raise_for_status()
+    data = response.json()
+
+    ttl = extract_certificate_expiration_in_seconds(response_data=data)
+    cert = extract_certificate(response_data=data)
+    cache.set("cert", cert, ttl=ttl)
+
+    return data
+
+
+def get_certificate_from_cache():
+    cert = cache.get("cert")
+
+    if not cert:
+        cert = update_certificate_cache()
+
+    return cert
 
 
 def is_public(route_function):
@@ -68,9 +107,7 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(
-            jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
-        )
+        user_data = jwt.decode(jwt_token, certs=get_certificate_from_cache())
     except ValueError:
         return abort(
             make_response(
