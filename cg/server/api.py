@@ -46,6 +46,8 @@ def get_certificate_ttl(response_data) -> int:
 
 def fetch_and_cache_google_oauth2_certificates():
     """Fetch and cache Google OAuth2 certificates."""
+    global cache
+
     url = "https://www.googleapis.com/oauth2/v1/certs"
     response = requests.get(url)
     response.raise_for_status()
