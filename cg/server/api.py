@@ -33,6 +33,8 @@ LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
 
 cache = TTLCache(maxsize=1, ttl=3600)
+cache_certificates_key = "certs"
+cache[cache_certificates_key] = None
 
 
 def get_certificate_ttl(response_data) -> int:
@@ -56,14 +58,14 @@ def fetch_and_cache_google_oauth2_certificates():
     ttl = get_certificate_ttl(response_data=response)
 
     cache = TTLCache(maxsize=1, ttl=ttl)
-    cache["certs"] = certs
+    cache[cache_certificates_key] = certs
 
     return certs
 
 
 def get_google_oauth2_certificates():
     """Get Google OAuth2 certificates from cache or fetch and cache them."""
-    certs = cache.get("certs")
+    certs = cache.get(cache_certificates_key)
 
     if not certs:
         certs = fetch_and_cache_google_oauth2_certificates()
