@@ -172,7 +172,7 @@ def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
 def filter_samples_by_identifier_name_and_value(
     samples: Query, identifier_name: str, identifier_value: Any
 ) -> Query:
-    """Filters the sample query by the given identifier name and value if they are attributes of Sample."""
+    """Filters the sample query by the given identifier name and value."""
     return samples.filter(getattr(Sample, identifier_name) == identifier_value)
 
 

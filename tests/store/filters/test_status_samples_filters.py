@@ -700,7 +700,7 @@ def test_filter_get_samples_by_internal_id_pattern(
 def test_filter_samples_by_identifier_name_and_value(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
-    """."""
+    """Test that the function filters correctly for any identifier."""
     # GIVEN a store with at least two samples
     sample_query: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
         table=Sample
