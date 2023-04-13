@@ -31,20 +31,21 @@ jobs:
           PYTHON_VERSION: ${{ matrix.python-version}}
           OLD_VERSION: 3.7
 
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('**/requirements*.txt') }}
+
       - name: Production Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           pip install .
           pip check
 
       - name: Development Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           pip install -r requirements-dev.txt
           pip check
-
-      - name: Cache installed packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
