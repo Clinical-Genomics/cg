@@ -19,7 +19,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
-          cache: 'pip'
 
       - name: Intall pip
         # Make sure that we have correct python version and pip version
@@ -41,3 +40,11 @@ jobs:
         run: |
           pip install -r requirements-dev.txt
           pip check
+
+      - name: Cache installed packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
