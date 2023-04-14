@@ -405,13 +405,13 @@ class FindBusinessDataHandler(BaseHandler):
             FlowCellFilter.GET_WITH_STATUSES,
             FlowCellFilter.GET_BY_NAME_PATTERN,
         ]
-        flow_cells: List[Flowcell] = apply_flow_cell_filter(
+        flow_cells: Query = apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             name_pattern=name_pattern,
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=filter_functions,
         )
-        return flow_cells
+        return flow_cells.all()
 
     def get_flow_cells_by_case(self, case: Family) -> Optional[List[Flowcell]]:
         """Return flow cells for case."""
