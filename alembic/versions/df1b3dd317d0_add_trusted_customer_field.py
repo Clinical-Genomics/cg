@@ -31,7 +31,7 @@ class Customer(Base):
     is_trusted = Column(type_=types.Boolean)
 
 
-TRUSTED_CUSTOMERS = ["cust144"]
+TRUSTED_CUSTOMERS = ["cust143"]
 
 
 def upgrade():

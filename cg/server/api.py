@@ -411,7 +411,11 @@ def parse_options():
         applications=app_tag_groups,
         beds=[bed.name for bed in db.get_active_beds()],
         customers=[
-            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
+            {
+                "text": f"{customer.name} ({customer.internal_id})",
+                "value": customer.internal_id,
+                "isTrusted": customer.is_trusted,
+            }
             for customer in customers
         ],
         organisms=[
@@ -425,11 +429,6 @@ def parse_options():
         ],
         panels=[panel.abbrev for panel in db.get_panels()],
         sources=source_groups,
-        trusted_customers=[
-            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
-            for customer in customers
-            if customer.is_trusted
-        ],
     )
 
 
