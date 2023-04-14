@@ -368,12 +368,12 @@ def parse_options():
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 
     return jsonify(
+        applications=app_tag_groups,
+        beds=[bed.name for bed in db.get_active_beds()],
         customers=[
             {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
             for customer in customers
         ],
-        applications=app_tag_groups,
-        panels=[panel.abbrev for panel in db.get_panels()],
         organisms=[
             {
                 "name": organism.name,
@@ -383,8 +383,13 @@ def parse_options():
             }
             for organism in db.get_all_organisms()
         ],
+        panels=[panel.abbrev for panel in db.get_panels()],
         sources=source_groups,
-        beds=[bed.name for bed in db.get_active_beds()],
+        trusted_customers=[
+            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
+            for customer in customers
+            if customer.is_trusted
+        ],
     )
 
 
