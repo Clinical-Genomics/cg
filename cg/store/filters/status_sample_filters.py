@@ -245,4 +245,5 @@ class SampleFilter(Enum):
     FILTER_BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
     FILTER_BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search
+    FILTER_BY_IDENTIFIER_NAME_AND_VALUE: Callable = filter_samples_by_identifier_name_and_value
     ORDER_BY_CREATED_AT_DESC: Callable = order_samples_by_created_at_desc

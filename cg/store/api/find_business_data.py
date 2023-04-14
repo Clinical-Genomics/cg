@@ -30,11 +30,7 @@ from cg.store.filters.status_pool_filters import apply_pool_filter, PoolFilter
 
 from cg.store.filters.status_flow_cell_filters import apply_flow_cell_filter, FlowCellFilter
 from cg.store.filters.status_case_sample_filters import apply_case_sample_filter, CaseSampleFilter
-from cg.store.filters.status_sample_filters import (
-    apply_sample_filter,
-    SampleFilter,
-    filter_samples_by_identifier_name_and_value,
-)
+from cg.store.filters.status_sample_filters import apply_sample_filter, SampleFilter
 
 from cg.store.filters.status_analysis_filters import apply_analysis_filter, AnalysisFilter
 from cg.store.filters.status_customer_filters import apply_customer_filter, CustomerFilter
@@ -666,7 +662,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Return a sample query filtered by the given names and values of Sample attributes."""
         samples: Query = self._get_query(table=Sample)
         for identifier_name, identifier_value in identifiers.items():
-            samples: Query = filter_samples_by_identifier_name_and_value(
+            samples: Query = SampleFilter.FILTER_BY_IDENTIFIER_NAME_AND_VALUE(
                 samples=samples, identifier_name=identifier_name, identifier_value=identifier_value
             )
         return samples.order_by(Sample.internal_id.desc())

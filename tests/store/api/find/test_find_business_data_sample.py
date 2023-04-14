@@ -1,4 +1,4 @@
-"""Tests the find_business_data part of the Cg store API related to sample model."""
+"""Tests the find business data part of the Cg store API related to sample model."""
 
 import pytest
 from typing import List, Dict, Any
