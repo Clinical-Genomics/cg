@@ -802,4 +802,3 @@ def test_fetch_cases_newer_than_date_all_cases(store_with_multiple_cases_and_sam
 
     # THEN all cases should be returned
     assert len(cases) == len(all_cases)
-
