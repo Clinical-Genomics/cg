@@ -8,13 +8,14 @@ from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Analysis, Family, Sample
 from cg.store.filters.status_case_filters import (
     filter_cases_by_case_search,
     filter_cases_by_customer_entry_ids,
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
     filter_cases_by_name,
+    filter_cases_not_analysed,
     get_running_cases,
     filter_cases_by_ticket_id,
     get_cases_with_pipeline,
@@ -755,3 +756,53 @@ def test_filter_cases_by_search_pattern(store_with_multiple_cases_and_samples: S
         or case.name.startswith(test_name_pattern)
         for case in filtered_cases
     )
+
+
+def test_filter_cases_not_analysed_no_cases(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that no cases are returned when all cases have been analysed."""
+    # GIVEN a store containing only cases that have been analysed
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    for case in cases_query.all():
+        case.analyses.append(Analysis(completed_at=datetime.now()))
+
+    # WHEN filtering cases for cases that have not been analysed
+    filtered_cases: Query = filter_cases_not_analysed(cases=cases_query)
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0
+
+
+def test_filter_cases_not_analysed_no_cases_in_progress(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that all cases are returned when no cases are in progress."""
+    # GIVEN a store containing cases that have not been analysed and no cases are in progress
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    for case in cases_query.all():
+        case.analyses = []
+        case.action = CaseActions.HOLD
+
+    # WHEN filtering cases for cases that have not been analysed
+    filtered_cases: Query = filter_cases_not_analysed(cases=cases_query)
+
+    # THEN the query should return all cases
+    assert filtered_cases.count() == cases_query.count()
+
+
+def test_filter_cases_not_analysed_in_progress(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that no cases in progress are returned."""
+    # GIVEN a store containing cases that have not been analysed and at least one case is in progress
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    for case in cases_query.all():
+        case.analyses = []
+        case.action = CaseActions.ANALYZE
+
+    # WHEN filtering cases for cases that have not been analysed
+    filtered_cases: Query = filter_cases_not_analysed(cases=cases_query)
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0
