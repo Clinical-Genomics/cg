@@ -660,12 +660,15 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_samples_by_any_id(self, **identifiers: Dict) -> Query:
         """Return a sample query filtered by the given names and values of Sample attributes."""
-        samples: Query = self._get_query(table=Sample)
+        samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
         for identifier_name, identifier_value in identifiers.items():
-            samples: Query = SampleFilter.FILTER_BY_IDENTIFIER_NAME_AND_VALUE(
-                samples=samples, identifier_name=identifier_name, identifier_value=identifier_value
+            samples: Query = apply_sample_filter(
+                filter_functions=[SampleFilter.FILTER_BY_IDENTIFIER_NAME_AND_VALUE],
+                samples=samples,
+                identifier_name=identifier_name,
+                identifier_value=identifier_value,
             )
-        return samples.order_by(Sample.internal_id.desc())
+        return samples
 
     def get_sample_by_name(self, name: str) -> Sample:
         """Get sample by name."""

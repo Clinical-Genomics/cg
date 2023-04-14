@@ -170,7 +170,7 @@ def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
 
 
 def filter_samples_by_identifier_name_and_value(
-    samples: Query, identifier_name: str, identifier_value: Any
+    samples: Query, identifier_name: str, identifier_value: Any, **kwargs
 ) -> Query:
     """Filters the sample query by the given identifier name and value."""
     return samples.filter(getattr(Sample, identifier_name) == identifier_value)
@@ -191,6 +191,8 @@ def apply_sample_filter(
     name_pattern: Optional[str] = None,
     internal_id_pattern: Optional[str] = None,
     search_pattern: Optional[str] = None,
+    identifier_name: str = None,
+    identifier_value: Any = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
@@ -209,6 +211,8 @@ def apply_sample_filter(
             name_pattern=name_pattern,
             internal_id_pattern=internal_id_pattern,
             search_pattern=search_pattern,
+            identifier_name=identifier_name,
+            identifier_value=identifier_value,
         )
     return samples
 
