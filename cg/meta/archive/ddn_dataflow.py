@@ -217,3 +217,6 @@ class DDNDataFlowApi:
             headers=dict(self.headers, **self.auth_header),
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
+
+    def is_task_completed(self, task_id: int) -> bool:
+        pass

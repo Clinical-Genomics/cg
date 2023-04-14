@@ -272,6 +272,11 @@ class HousekeeperAPI:
             last_version: Version = bundle_result[1]
         return last_version
 
+    def get_bundle_id_from_file(self, file: Path) -> str:
+        """Returns the bundle to which the file is linked."""
+        bundle: Bundle = self._store.get_bundle_from_file(file.as_posix())
+        return bundle.name
+
     def new_tag(self, name: str, category: str = None):
         """Create a new tag."""
         return self._store.new_tag(name, category)
@@ -393,6 +398,14 @@ class HousekeeperAPI:
                 all(sample_file_in_hk) if sample_file_in_hk else False
             )
         return all(sequencing_files_in_hk.values())
+
+    def get_file_paths(
+        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
+    ) -> List[Path]:
+        """Returns a list of the file matching the tags, bundle and version given."""
+        return [
+            Path(file.path) for file in self.get_files(bundle=bundle, tags=tags, version=version)
+        ]
 
     def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: List[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are on disk for the given bundles."""

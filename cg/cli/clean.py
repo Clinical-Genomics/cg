@@ -3,6 +3,8 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
+
+from cg.meta.archive.ddn_dataflow import DDNDataFlowApi
 from cg.utils.dispatcher import Dispatcher
 
 import click
@@ -524,3 +526,17 @@ def _get_confirm_question(bundle, file_obj) -> str:
         if file_obj.is_included
         else f"{bundle}: remove file from database: {file_obj.full_path}"
     )
+
+
+def clean_archived_spring_files(
+    ddn_api: DDNDataFlowApi, housekeeper_api: HousekeeperAPI, status_db: Store
+):
+    files_to_remove: List[Path] = housekeeper_api.get_files_to_remove()
+    for file in files_to_remove:
+        task_id: int = housekeeper_api.get_file_task_id(file)
+        sample_id: str = housekeeper_api.get_bundle_id_from_file(file=file)
+        if status_db.has_active_cases_for_sample(internal_id=sample_id):
+            continue
+        if ddn_api.is_task_complete(task_id):
+            file.unlink()
+            housekeeper_api.set_file_to_archived()
