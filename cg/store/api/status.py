@@ -544,7 +544,7 @@ class StatusHandler(BaseHandler):
         filter_case_order_date = None
         if days != 0:
             filter_case_order_date = datetime.now() - timedelta(days=days)
-            filter_functions.append(CaseFilter.GET_NEW)
+            filter_functions.append(CaseFilter.GET_OLD)
         if case_action:
             filter_functions.append(CaseFilter.FILTER_BY_ACTION)
         if priority:
