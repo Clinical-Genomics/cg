@@ -101,6 +101,7 @@ class FileFormat(StrEnum):
     FASTQ: str = "fastq"
     JSON: str = "json"
     YAML: str = "yaml"
+    CSV: str = "csv"
 
 
 class GenomeVersion(StrEnum):

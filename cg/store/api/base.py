@@ -1,9 +1,9 @@
 """All models aggregated in a base class"""
-from typing import Type
+from typing import Type, List
 
 from alchy import Query, ModelBase
+from sqlalchemy import and_, func
 from dataclasses import dataclass
-
 from cg.store.models import (
     Analysis,
     Application,
@@ -23,6 +23,7 @@ from cg.store.models import (
     Sample,
     User,
 )
+from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 
 
 @dataclass
@@ -95,4 +96,30 @@ class BaseHandler:
         """Return join sample to application version query."""
         return self._get_query(table=Sample).join(
             Sample.application_version, ApplicationVersion.application
+        )
+
+    def _get_join_analysis_sample_family_query(self) -> Query:
+        """Return join analysis to sample to case query."""
+        return self._get_query(table=Analysis).join(Family, Family.links, FamilySample.sample)
+
+    def _get_subquery_with_latest_case_analysis_date(self) -> Query:
+        """Return a subquery with the case internal id and the date of its latest analysis."""
+        case_and_date: Query = (
+            self._get_join_analysis_case_query()
+            .group_by(Family.id)
+            .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
+            .subquery()
+        )
+        return case_and_date
+
+    def _get_latest_analyses_for_cases_query(self) -> Query:
+        """Return a join query for the latest analysis for each case."""
+        analyses: Query = self._get_query(table=Analysis)
+        case_and_date_subquery: Query = self._get_subquery_with_latest_case_analysis_date()
+        return analyses.join(
+            case_and_date_subquery,
+            and_(
+                self.Analysis.family_id == case_and_date_subquery.c.family_id,
+                self.Analysis.started_at == case_and_date_subquery.c.started_at,
+            ),
         )

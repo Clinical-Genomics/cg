@@ -99,7 +99,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
     status_db: Store = context.obj.status_db
 
     exit_code = 0
-    for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in status_db.get_analyses_to_upload(pipeline=pipeline):
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
                 f"Skipping upload for case {analysis_obj.family.internal_id}. "

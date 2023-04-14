@@ -14,7 +14,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.samples import Of1508Sample, OrderInSample
 
 from cg.constants import Priority
-from cg.store.models import Customer, Family, Sample, FamilySample
+from cg.store.models import Customer, Family, Sample, FamilySample, ApplicationVersion
 
 LOG = logging.getLogger(__name__)
 
@@ -73,8 +73,8 @@ class CaseSubmitter(Submitter):
                 internal_id=sample.internal_id
             )
 
-            data_customer: Customer = self.status.get_customer_by_customer_id(
-                customer_id=customer_id
+            data_customer: Customer = self.status.get_customer_by_internal_id(
+                customer_internal_id=customer_id
             )
 
             if existing_sample.customer not in data_customer.collaborators:
@@ -85,7 +85,9 @@ class CaseSubmitter(Submitter):
     ) -> None:
         """Validate that the names of all cases are unused for all samples"""
 
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
 
         sample: Of1508Sample
         for sample in samples:
@@ -225,7 +227,9 @@ class CaseSubmitter(Submitter):
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Family]:
         """Store cases, samples and their relationship in the Status database."""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         new_cases: List[Family] = []
 
         for case in items:
@@ -266,8 +270,9 @@ class CaseSubmitter(Submitter):
                 sample_mother: Sample = case_samples.get(sample.get(Pedigree.MOTHER))
                 sample_father: Sample = case_samples.get(sample.get(Pedigree.FATHER))
                 with self.status.session.no_autoflush:
-                    case_sample: FamilySample = self.status.link(
-                        family_id=status_db_case.internal_id, sample_id=sample["internal_id"]
+                    case_sample: FamilySample = self.status.get_case_sample_link(
+                        case_internal_id=status_db_case.internal_id,
+                        sample_internal_id=sample["internal_id"],
                     )
                 if not case_sample:
                     case_sample: FamilySample = self._create_link(
@@ -341,8 +346,8 @@ class CaseSubmitter(Submitter):
         sample_obj.customer = customer_obj
         with self.status.session.no_autoflush:
             application_tag = sample["application"]
-            sample_obj.application_version = self.status.current_application_version(
-                application_tag
+            sample_obj.application_version: ApplicationVersion = (
+                self.status.get_current_application_version_by_tag(tag=application_tag)
             )
         self.status.add(sample_obj)
         new_delivery = self.status.add_delivery(destination="caesar", sample=sample_obj)

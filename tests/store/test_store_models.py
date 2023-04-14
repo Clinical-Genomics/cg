@@ -59,7 +59,7 @@ def test_no_collaborators(base_store):
 
 def test_collaborators(base_store, customer_id):
     # GIVEN a customer with one collaboration
-    customer: Customer = base_store.get_customer_by_customer_id(customer_id=customer_id)
+    customer: Customer = base_store.get_customer_by_internal_id(customer_internal_id=customer_id)
     assert all(
         customer_obj.internal_id
         in [
@@ -98,7 +98,9 @@ def test_multiple_collaborations(base_store, customer_id):
         invoice_address="Test street",
         invoice_reference="ABCDEF",
     )
-    prod_customer: Customer = base_store.get_customer_by_customer_id(customer_id=customer_id)
+    prod_customer: Customer = base_store.get_customer_by_internal_id(
+        customer_internal_id=customer_id
+    )
     collaboration.customers.extend([prod_customer, new_customer])
     base_store.add_commit(new_customer, collaboration)
     base_store.refresh(collaboration)

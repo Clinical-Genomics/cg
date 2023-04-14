@@ -129,12 +129,12 @@ class DeleteDemuxAPI:
             )
             self._delete_fastq_and_spring_housekeeper()
 
-    def delete_flow_cell_statusdb(self) -> None:
-        """Delete any presence of a flow cell in status-db"""
+    def delete_flow_cell_in_status_db(self) -> None:
+        """Delete a flow cell in Status db."""
         if self.dry_run:
             log.info(f"DeleteDemuxAPI-StatusDB: Would remove {self.flow_cell_name}")
         else:
-            self.status_db.delete_flow_cell(flow_cell_name=self.flow_cell_name)
+            self.status_db.delete_flow_cell(flow_cell_id=self.flow_cell_name)
             log.info(f"DeleteDemuxAPI-StatusDB: Deleted flowcell {self.flow_cell_name}")
 
     def delete_flow_cell_cgstats(self) -> None:
@@ -239,7 +239,7 @@ class DeleteDemuxAPI:
         init_files: bool,
         status_db: bool,
     ) -> None:
-        """Master command to delete the presence of a flowcell in all services"""
+        """Master command to delete the presence of a flow cell in all services."""
         self.check_active_samples()
         if status_db:
             self.delete_flow_cell_hasta(
@@ -248,7 +248,7 @@ class DeleteDemuxAPI:
             )
             self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
-            self.delete_flow_cell_statusdb()
+            self.delete_flow_cell_in_status_db()
         if demultiplexing_dir or run_dir:
             self.delete_flow_cell_hasta(
                 demultiplexing_dir=demultiplexing_dir,

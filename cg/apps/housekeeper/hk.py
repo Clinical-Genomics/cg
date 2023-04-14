@@ -128,19 +128,30 @@ class HousekeeperAPI:
         )
 
     @staticmethod
-    def fetch_file_from_version(version_obj: Version, tags: Set[str]) -> Optional[File]:
-        """Fetch file that includes at least all tags in 'tags'.
-
-        Return None if no file could be found.
-        """
-        LOG.debug("Fetch files from version with tags %s", tags)
-        for file_obj in version_obj.files:
-            tag: models.Tag
-            file_tags = {tag.name for tag in file_obj.tags}
+    def get_files_from_version(version: Version, tags: Set[str]) -> Optional[List[File]]:
+        """Return a list of files associated with the given version and tags."""
+        LOG.debug(f"Getting files from version with tags {tags}")
+        files: List[File] = []
+        for file in list(version.files):
+            file_tags = {tag.name for tag in file.tags}
             if tags.issubset(file_tags):
-                LOG.debug("Found file %s", file_obj)
-                return file_obj
-        LOG.info("Could not find any files matching the tags")
+                LOG.debug(f"Found file {file}")
+                files.append(file)
+        if not files:
+            LOG.warning(f"Could not find any files matching the tags {tags}")
+        return files
+
+    @staticmethod
+    def get_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+        """Return the first file matching the given tags."""
+        files: List[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
+        return files[0] if files else None
+
+    @staticmethod
+    def get_latest_file_from_version(version: Version, tags: Set[str]) -> Optional[File]:
+        """Return the latest file from Housekeeper given its version and tags."""
+        files: List[File] = HousekeeperAPI.get_files_from_version(version=version, tags=tags)
+        return sorted(files, key=lambda file_obj: file_obj.id)[-1] if files else None
 
     def rollback(self):
         """Wrap method in Housekeeper Store."""
@@ -157,6 +168,13 @@ class HousekeeperAPI:
         version.
         """
         return self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
+
+    def get_latest_file(
+        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
+    ) -> Optional[File]:
+        """Return latest file from Housekeeper, filtered by bundle and/or tags and/or version."""
+        files: Query = self._store.get_files(bundle_name=bundle, tag_names=tags, version_id=version)
+        return files.order_by(File.id.desc()).first()
 
     def check_bundle_files(
         self,
@@ -199,11 +217,12 @@ class HousekeeperAPI:
             LOG.warning(
                 f"Another file with identical included file path: {new_path} already exist. Skip linking of: {file_obj.path}"
             )
+            file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
             return file_obj
         # hardlink file to the internal structure
         os.link(file_obj.path, new_path)
         LOG.info(f"Linked file: {file_obj.path} -> {new_path}")
-        file_obj.path: str = str(new_path).replace(f"{global_root_dir}/", "", 1)
+        file_obj.path = str(new_path).replace(f"{global_root_dir}/", "", 1)
         return file_obj
 
     def new_version(self, created_at: dt.datetime, expires_at: dt.datetime = None) -> Version:
