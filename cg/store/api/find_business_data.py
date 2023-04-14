@@ -1,9 +1,9 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import List, Optional, Iterator, Union
+from typing import Callable, List, Optional, Iterator, Union
 
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus, Pipeline
@@ -78,59 +78,57 @@ class FindBusinessDataHandler(BaseHandler):
             .sample.application_version.application
         )
 
-    def analyses_ready_for_vogue_upload(
+    def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
+        """Return all cases completed after a given date that have not been uploaded to Vogue."""
+        filter_functions = [
+            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
+            AnalysisFilter.FILTER_COMPLETED_AT_AFTER,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=filter_functions,
+            completed_at_date=completed_at_after,
+        ).all()
+
+    def get_analysis_for_vogue_upload_completed_before(self, completed_at_before: dt.datetime):
+        """Return all cases completed before a given date that have not been uploaded to Vogue."""
+        filter_functions = [
+            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
+            AnalysisFilter.FILTER_COMPLETED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=filter_functions,
+            completed_at_date=completed_at_before,
+        ).all()
+
+    def get_analyses_for_vogue_upload(
         self,
-        completed_after: Optional[dt.date],
-        completed_before: Optional[dt.date],
-    ) -> Query:
-        """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
-        Optionally fetch those cases finished before and/or after a specified date"""
-        records = self.latest_analyses().filter(Analysis.uploaded_to_vogue_at.is_(None))
+    ) -> List[Analysis]:
+        """Return the latest analysis not uploaded to Vogue for each case."""
 
-        if completed_after:
-            records = records.filter(Analysis.completed_at > completed_after)
-        if completed_before:
-            records = records.filter(Analysis.completed_at < completed_before)
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=[AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE],
+        ).all()
 
-        return records
-
-    def get_latest_nipt_analysis_to_upload(self):
-        """Return latest nipt analysis."""
-        latest_nipt_analyses = self.latest_analyses().filter(Analysis.pipeline == Pipeline.FLUFFY)
-        return latest_nipt_analyses.filter(Analysis.uploaded_at.is_(None))
-
-    def get_latest_microsalt_analysis_to_upload(self):
-        """Return latest mircosalt analysis."""
-        return (
-            self.latest_analyses()
-            .filter(Analysis.pipeline == Pipeline.MICROSALT)
-            .filter(Analysis.uploaded_at.is_(None))
-        )
-
-    def latest_analyses(self) -> Query:
-        """Fetch latest analysis for all cases."""
-
-        records = self.Analysis.query
-        sub_query = (
-            self.Analysis.query.join(Analysis.family)
-            .group_by(Family.id)
-            .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
-            .subquery()
-        )
-        records = records.join(
-            sub_query,
-            and_(
-                self.Analysis.family_id == sub_query.c.family_id,
-                self.Analysis.started_at == sub_query.c.started_at,
-            ),
-        )
-        return records
+    def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
+        """Return latest not uploaded analysis for each case given a pipeline."""
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=filter_functions,
+            pipeline=pipeline,
+        ).all()
 
     def get_analysis_by_case_entry_id_and_started_at(
         self, case_entry_id: int, started_at_date: dt.datetime
     ) -> Analysis:
         """Fetch an analysis."""
-        filter_functions = [
+        filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
             AnalysisFilter.FILTER_BY_STARTED_AT,
         ]
@@ -146,56 +144,124 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all deliveries."""
         return self.Delivery.query
 
-    def families(
+    def get_cases_by_customer_and_case_name_search(
+        self, customer: Customer, case_name_search: str
+    ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by a customer and matching names.
+
+        Args:
+            customer (Customer): The customer object to filter cases by.
+            case_name_search (str): The case name search string to filter cases by.
+
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time.
+        """
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            CaseFilter.FILTER_BY_NAME_SEARCH,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
+
+        return apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_id=customer.id,
+            name_search=case_name_search,
+        ).all()
+
+    def get_cases_by_customers_action_and_case_search(
         self,
-        *,
-        action: Optional[str] = None,
-        data_analysis: Optional[str] = None,
-        customers: List[Customer] = None,
-        enquiry: Optional[str] = None,
-    ) -> Query:
-        """Fetch families."""
+        customers: Optional[List[Customer]],
+        action: Optional[str],
+        case_search: Optional[str],
+        limit: Optional[int] = 30,
+    ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by customers, action, and matching names or internal ids.
 
-        records = self.Family.query
+        Args:
+            customers (Optional[List[Customer]]): A list of customer objects to filter cases by.
+            action (Optional[str]): The action string to filter cases by.
+            case_search (Optional[str]): The case search string to filter cases by.
+            limit (Optional[int], default=30): The maximum number of cases to return.
 
-        if customers:
-            customer_ids = [customer.id for customer in customers]
-            records = records.filter(Family.customer_id.in_(customer_ids))
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+        """
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
+            CaseFilter.FILTER_BY_ACTION,
+            CaseFilter.FILTER_BY_CASE_SEARCH,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
 
-        records = (
-            records.filter(
-                or_(
-                    Family.name.like(f"%{enquiry}%"),
-                    Family.internal_id.like(f"%{enquiry}%"),
-                )
-            )
-            if enquiry
-            else records
+        customer_entry_ids: List[int] = (
+            [customer.id for customer in customers] if customers else None
         )
-        records = records.filter_by(action=action) if action else records
-        records = records.filter_by(data_analysis=data_analysis) if data_analysis else records
-        return records.order_by(Family.created_at.desc())
 
-    def family_samples(self, family_id: str) -> List[FamilySample]:
+        filtered_cases: Query = apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_ids=customer_entry_ids,
+            action=action,
+            case_search=case_search,
+        )
+        return filtered_cases.limit(limit=limit).all()
+
+    def get_cases_by_customer_pipeline_and_case_search(
+        self,
+        customer: Optional[Customer],
+        pipeline: Optional[str],
+        case_search: Optional[str],
+        limit: Optional[int] = 30,
+    ) -> List[Family]:
+        """
+        Retrieve a list of cases filtered by customer, pipeline, and matching names or internal ids.
+
+        Args:
+            customer (Optional[Customer]): A customer object to filter cases by.
+            pipeline (Optional[str]): The pipeline string to filter cases by.
+            case_search (Optional[str]): The case search string to filter cases by.
+            limit (Optional[int], default=30): The maximum number of cases to return.
+
+        Returns:
+            List[Family]: A list of filtered cases sorted by creation time and limited by the specified number.
+        """
+        filter_functions: List[Callable] = [
+            CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
+            CaseFilter.FILTER_BY_CASE_SEARCH,
+            CaseFilter.GET_WITH_PIPELINE,
+            CaseFilter.ORDER_BY_CREATED_AT,
+        ]
+
+        customer_entry_id: int = customer.id if customer else None
+
+        filtered_cases: Query = apply_case_filter(
+            cases=self._get_query(table=Family),
+            filter_functions=filter_functions,
+            customer_entry_id=customer_entry_id,
+            case_search=case_search,
+            pipeline=pipeline,
+        )
+        return filtered_cases.limit(limit=limit).all()
+
+    def get_cases(self) -> List[Family]:
+        """Return all cases."""
+        return self._get_query(table=Family).all()
+
+    def get_case_samples_by_case_id(self, case_internal_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
-            case_id=family_id,
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
+            case_internal_id=case_internal_id,
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
-    def get_sample_cases(self, sample_id: str) -> Query:
-        """Return the case-sample links associated with a sample."""
-        return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE],
-            sample_id=sample_id,
-            case_samples=self._get_join_case_sample_query(),
-        )
-
-    def get_cases_from_sample(self, sample_entry_id: str) -> Query:
+    def get_case_samples_from_sample_entry_id(self, sample_entry_id: str) -> Query:
         """Return cases related to a given sample."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID],
+            filter_functions=[CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_ENTRY_ID],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_join_case_sample_query(),
         )
@@ -421,13 +487,18 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def link(self, family_id: str, sample_id: str) -> FamilySample:
-        """Find a link between a family and a sample."""
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Family.internal_id == family_id, Sample.internal_id == sample_id)
-            .first()
-        )
+    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> FamilySample:
+        """Return a case-sample link between a family and a sample."""
+        filter_functions: List[CaseSampleFilter] = [
+            CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID,
+            CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID,
+        ]
+        return apply_case_sample_filter(
+            filter_functions=filter_functions,
+            case_samples=self._get_join_case_sample_query(),
+            case_internal_id=case_internal_id,
+            sample_internal_id=sample_internal_id,
+        ).first()
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
@@ -515,21 +586,20 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Sample]:
         """Get samples by customer and sample internal id  or sample name pattern."""
         samples: Query = self._get_query(table=Sample)
-        customer_entry_ids = None
+        customer_entry_ids: List[int] = []
         filter_functions: List[SampleFilter] = []
         if customers:
-            customer_entry_ids: List[int] = [customer.id for customer in customers]
+            if not isinstance(customers, list):
+                customers = list(customers)
+            customer_entry_ids = [customer.id for customer in customers]
             filter_functions.append(SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS)
         if pattern:
-            filter_functions.extend(
-                [SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN, SampleFilter.FILTER_BY_NAME_PATTERN]
-            )
+            filter_functions.extend([SampleFilter.FILTER_BY_INTERNAL_ID_OR_NAME_SEARCH])
         filter_functions.append(SampleFilter.ORDER_BY_CREATED_AT_DESC)
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_entry_ids,
-            name_pattern=pattern,
-            internal_id_pattern=pattern,
+            search_pattern=pattern,
             filter_functions=filter_functions,
         ).all()
 
@@ -607,9 +677,9 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
             case_samples=self._get_join_sample_family_query(),
-            case_id=case_id,
+            case_internal_id=case_id,
         )
         samples: Query = apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITH_TYPE],

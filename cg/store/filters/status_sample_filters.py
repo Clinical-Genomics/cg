@@ -1,6 +1,7 @@
 from typing import Optional, List, Callable
 from enum import Enum
 from sqlalchemy.orm import Query
+from sqlalchemy import and_, or_
 
 from cg.constants.constants import SampleType
 from cg.store.models import Sample, Customer
@@ -146,6 +147,18 @@ def filter_samples_by_internal_id_pattern(
     return samples.filter(Sample.internal_id.like(f"%{internal_id_pattern}%"))
 
 
+def filter_samples_by_internal_id_or_name_search(
+    samples: Query, search_pattern: str, **kwargs
+) -> Query:
+    """Return samples matching the internal id or name search."""
+    return samples.filter(
+        or_(
+            Sample.name.like(f"%{search_pattern}%"),
+            Sample.internal_id.like(f"%{search_pattern}%"),
+        )
+    )
+
+
 def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
     """Return samples by customer."""
     return samples.filter(Sample.customer == customer)
@@ -170,6 +183,7 @@ def apply_sample_filter(
     customer: Optional[Customer] = None,
     name_pattern: Optional[str] = None,
     internal_id_pattern: Optional[str] = None,
+    search_pattern: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
@@ -187,6 +201,7 @@ def apply_sample_filter(
             customer=customer,
             name_pattern=name_pattern,
             internal_id_pattern=internal_id_pattern,
+            search_pattern=search_pattern,
         )
     return samples
 
@@ -222,4 +237,5 @@ class SampleFilter(Enum):
     FILTER_BY_NAME_PATTERN: Callable = filter_samples_by_name_pattern
     FILTER_BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
+    FILTER_BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search
     ORDER_BY_CREATED_AT_DESC: Callable = order_samples_by_created_at_desc

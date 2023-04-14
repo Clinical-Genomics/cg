@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import http
 import logging
 import json
@@ -5,6 +6,7 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from cachetools import TTLCache
 
 import requests
 from sqlalchemy.exc import IntegrityError
@@ -18,18 +20,57 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell
+from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
-from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
+
+cache = TTLCache(maxsize=1, ttl=3600)
+cache_certificates_key = "certs"
+cache[cache_certificates_key] = None
+
+
+def get_certificate_ttl(response_data) -> int:
+    """Extract time to live in seconds for certificate from response headers."""
+    expires_header = response_data.headers.get("Expires")
+    expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
+    ttl = int((expires - datetime.utcnow()).total_seconds())
+
+    return ttl
+
+
+def fetch_and_cache_google_oauth2_certificates():
+    """Fetch and cache Google OAuth2 certificates."""
+    global cache
+
+    url = "https://www.googleapis.com/oauth2/v1/certs"
+    response = requests.get(url)
+    response.raise_for_status()
+
+    certs = response.json()
+    ttl = get_certificate_ttl(response_data=response)
+
+    cache = TTLCache(maxsize=1, ttl=ttl)
+    cache[cache_certificates_key] = certs
+
+    return certs
+
+
+def get_google_oauth2_certificates():
+    """Get Google OAuth2 certificates from cache or fetch and cache them."""
+    certs = cache.get(cache_certificates_key)
+
+    if not certs:
+        certs = fetch_and_cache_google_oauth2_certificates()
+
+    return certs
 
 
 def is_public(route_function):
@@ -68,9 +109,7 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(
-            jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
-        )
+        user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificates())
     except ValueError:
         return abort(
             make_response(
@@ -149,40 +188,62 @@ def parse_cases():
     return jsonify(cases=cases, total=len(cases))
 
 
+def _get_current_customers() -> Optional[List[Customer]]:
+    """Return customers if the current user is not an admin."""
+    if not g.current_user.is_admin:
+        return g.current_user.customers
+    return None
+
+
+def _get_cases(
+    status: str, enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
+) -> List[Family]:
+    """Get cases based on the provided filters."""
+    if status == "analysis":
+        return db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+
+    return db.get_cases_by_customers_action_and_case_search(
+        case_search=enquiry,
+        customers=customers,
+        action=action,
+    )
+
+
 @BLUEPRINT.route("/families")
-def parse_families():
-    """Return families."""
-    if request.args.get("status") == "analysis":
-        cases: List[Family] = db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
-        count = len(cases)
-    else:
-        customers: Optional[List[Customer]] = (
-            None if g.current_user.is_admin else g.current_user.customers
-        )
-        cases_query: Query = db.families(
-            enquiry=request.args.get("enquiry"),
-            customers=customers,
-            action=request.args.get("action"),
-        )
-        count = cases_query.count()
-        cases = cases_query.limit(30)
-    parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=parsed_cases, total=count)
+def get_families():
+    """Return cases."""
+    status: str = request.args.get("status")
+    enquiry: str = request.args.get("enquiry")
+    action: str = request.args.get("action")
+
+    customers: List[Customer] = _get_current_customers()
+    cases: List[Family] = _get_cases(
+        status=status, enquiry=enquiry, action=action, customers=customers
+    )
+
+    count = len(cases)
+    case_dicts = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=case_dicts, total=count)
 
 
 @BLUEPRINT.route("/families_in_collaboration")
 def parse_families_in_collaboration():
-    """Return families in collaboration."""
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
-    data_analysis: str = request.args.get("data_analysis")
-    cases_query: Query = db.families(
-        enquiry=request.args.get("enquiry"),
-        customers=customer.collaborators,
-        data_analysis=data_analysis,
+    """Return cases in collaboration."""
+
+    customer_internal_id = request.args.get("customer")
+    pipeline = request.args.get("data_analysis")
+    case_search_pattern = request.args.get("enquiry")
+
+    customer = db.get_customer_by_internal_id(customer_internal_id=customer_internal_id)
+
+    cases = db.get_cases_by_customer_pipeline_and_case_search(
+        case_search=case_search_pattern,
+        customer=customer,
+        pipeline=pipeline,
     )
-    cases = cases_query.limit(30)
-    parsed_cases: List[Dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=parsed_cases, total=cases_query.count())
+
+    case_dicts = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=case_dicts, total=len(cases))
 
 
 @BLUEPRINT.route("/families/<family_id>")
@@ -200,7 +261,9 @@ def parse_family(family_id):
 def parse_family_in_collaboration(family_id):
     """Return a family with links."""
     case: Family = db.get_case_by_internal_id(internal_id=family_id)
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    customer: Customer = db.get_customer_by_internal_id(
+        customer_internal_id=request.args.get("customer")
+    )
     if case.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     return jsonify(**case.to_dict(links=True, analyses=True))
@@ -232,7 +295,9 @@ def parse_samples():
 @BLUEPRINT.route("/samples_in_collaboration")
 def parse_samples_in_collaboration():
     """Return samples in a customer group."""
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    customer: Customer = db.get_customer_by_internal_id(
+        customer_internal_id=request.args.get("customer")
+    )
     samples: List[Sample] = db.get_samples_by_customer_id_and_pattern(
         pattern=request.args.get("enquiry"), customers=customer.collaborators
     )
@@ -256,7 +321,9 @@ def parse_sample(sample_id):
 def parse_sample_in_collaboration(sample_id):
     """Return a single sample."""
     sample: Sample = db.get_sample_by_internal_id(sample_id)
-    customer: Customer = db.get_customer_by_customer_id(customer_id=request.args.get("customer"))
+    customer: Customer = db.get_customer_by_internal_id(
+        customer_internal_id=request.args.get("customer")
+    )
     if sample.customer not in customer.collaborators:
         return abort(http.HTTPStatus.FORBIDDEN)
     return jsonify(**sample.to_dict(links=True, flowcells=True))
@@ -310,13 +377,13 @@ def parse_flow_cell(flowcell_id):
 def parse_analyses():
     """Return analyses."""
     if request.args.get("status") == "delivery":
-        analyses: Query = db.analyses_to_deliver()
+        analyses: List[Analysis] = db.get_analyses_to_deliver_for_pipeline()
     elif request.args.get("status") == "upload":
-        analyses: Query = db.analyses_to_upload()
+        analyses: List[Analysis] = db.get_analyses_to_upload()
     else:
-        analyses: Query = db.Analysis.query
-    parsed_analysis: List[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses.limit(30)]
-    return jsonify(analyses=parsed_analysis, total=analyses.count())
+        analyses: List[Analysis] = db.get_analyses()
+    parsed_analysis: List[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses[:30]]
+    return jsonify(analyses=parsed_analysis, total=len(analyses))
 
 
 @BLUEPRINT.route("/options")

@@ -93,7 +93,9 @@ def test_analyses_to_upload_when_not_completed_at(helpers, sample_store):
     helpers.add_analysis(store=sample_store)
 
     # WHEN fetching all analyses that are ready for upload
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload()]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload()
+    ]
 
     # THEN no analysis object should be returned since they did not have a completed_at entry
     assert len(records) == 0
@@ -105,7 +107,9 @@ def test_analyses_to_upload_when_no_pipeline(helpers, sample_store, timestamp):
     helpers.add_analysis(store=sample_store, completed_at=timestamp)
 
     # WHEN fetching all analysis that are ready for upload without specifying pipeline
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+    ]
 
     # THEN one analysis object should be returned
     assert len(records) == 1
@@ -117,7 +121,9 @@ def test_analyses_to_upload_when_analysis_has_pipeline(helpers, sample_store, ti
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that are ready for upload and analysed with MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=None)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=None)
+    ]
 
     # THEN one analysis object should be returned
     assert len(records) == 1
@@ -130,7 +136,9 @@ def test_analyses_to_upload_when_filtering_with_pipeline(helpers, sample_store, 
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=pipeline)
 
     # WHEN fetching all pipelines that are analysed with MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=pipeline)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+    ]
 
     for analysis_obj in records:
         # THEN pipeline should be MIP in the analysis object
@@ -144,7 +152,9 @@ def test_analyses_to_upload_with_pipeline_and_no_complete_at(helpers, sample_sto
     helpers.add_analysis(store=sample_store, completed_at=None, pipeline=pipeline)
 
     # WHEN fetching all analyses that are ready for upload and analysed by MIP
-    records = [analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=pipeline)]
+    records: List[Analysis] = [
+        analysis_obj for analysis_obj in sample_store.get_analyses_to_upload(pipeline=pipeline)
+    ]
 
     # THEN no analysis object should be returned since they where not completed
     assert len(records) == 0
@@ -156,45 +166,13 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     helpers.add_analysis(store=sample_store, completed_at=timestamp, pipeline=Pipeline.MIP_DNA)
 
     # WHEN fetching all analyses that was analysed with MIP
-    records = [
-        analysis_obj for analysis_obj in sample_store.analyses_to_upload(pipeline=Pipeline.FASTQ)
+    records: List[Analysis] = [
+        analysis_obj
+        for analysis_obj in sample_store.get_analyses_to_upload(pipeline=Pipeline.FASTQ)
     ]
 
     # THEN no analysis object should be returned since there where no MIP analyses
     assert len(records) == 0
-
-
-def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yesterday):
-    """Tests that analyses that are not latest are not returned."""
-
-    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
-    case = helpers.add_case(analysis_store)
-    analysis_oldest = helpers.add_analysis(
-        analysis_store,
-        case=case,
-        started_at=timestamp_yesterday,
-        uploaded_at=timestamp_yesterday,
-        delivery_reported_at=None,
-    )
-    analysis_store.add_commit(analysis_oldest)
-    analysis_newest = helpers.add_analysis(
-        analysis_store,
-        case=case,
-        started_at=timestamp_now,
-        uploaded_at=timestamp_now,
-        delivery_reported_at=None,
-    )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    analysis_store.relate_sample(
-        family=analysis_oldest.family, sample=sample, status=PhenotypeStatus.UNKNOWN
-    )
-
-    # WHEN calling the analyses_to_delivery_report
-    analyses = analysis_store.latest_analyses().all()
-
-    # THEN only the newest analysis should be returned
-    assert analysis_newest in analyses
-    assert analysis_oldest not in analyses
 
 
 def test_set_case_action(analysis_store, case_id):

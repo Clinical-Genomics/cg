@@ -6,7 +6,7 @@ from typing import Generator, List
 import pytest
 
 from cg.constants import Pipeline
-from cg.constants.subject import Gender
+from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Analysis, Application, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
@@ -39,7 +39,7 @@ class StoreConftestFixture(enum.Enum):
     INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
 
     @staticmethod
-    def generate_year_interval(n_entries, old_timestamp: dt.datetime) -> List[int]:
+    def generate_year_interval(n_entries: int, old_timestamp: dt.datetime) -> List[int]:
         """Create a list of approximately uniformly distributed year numbers from 1 to present."""
         start: int = old_timestamp.year
         stop: int = dt.date.today().year
@@ -128,8 +128,8 @@ def fixture_microbial_store(
     base_store: Store, microbial_submitted_order: dict
 ) -> Generator[Store, None, None]:
     """Set up a microbial store instance."""
-    customer: Customer = base_store.get_customer_by_customer_id(
-        customer_id=microbial_submitted_order["customer"]
+    customer: Customer = base_store.get_customer_by_internal_id(
+        customer_internal_id=microbial_submitted_order["customer"]
     )
 
     for sample_data in microbial_submitted_order["items"]:
@@ -166,7 +166,7 @@ def fixture_analysis_obj(analysis_store: Store) -> Analysis:
 @pytest.fixture(name="case_obj")
 def fixture_case_obj(analysis_store: Store) -> Family:
     """Return a case models object."""
-    return analysis_store.families()[0]
+    return analysis_store.get_cases()[0]
 
 
 @pytest.fixture(name="sample_obj")
@@ -185,6 +185,12 @@ def fixture_sequencer_name() -> str:
 def fixture_invalid_application_id() -> int:
     """Return an invalid application id."""
     return -1
+
+
+@pytest.fixture(name="invalid_application_tag")
+def fixture_invalid_application_tag() -> str:
+    """Return an invalid application tag."""
+    return "invalid-tag"
 
 
 @pytest.fixture(name="invalid_application_version_version")
@@ -377,3 +383,39 @@ def fixture_store_with_older_and_newer_analyses(
         )
 
     yield base_store
+
+
+@pytest.fixture(name="store_with_analyses_for_cases")
+def fixture_store_with_analyses_for_cases(
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: dt.datetime,
+    timestamp_yesterday: dt.datetime,
+) -> Store:
+    """Return a store with two analyses for two cases."""
+    case_one = analysis_store.get_case_by_internal_id("yellowhog")
+    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
+
+    cases = [case_one, case_two]
+    for case in cases:
+        oldest_analysis = helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_yesterday,
+            uploaded_at=timestamp_yesterday,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_yesterday,
+        )
+        helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_now,
+            uploaded_at=timestamp_now,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_now,
+        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        analysis_store.relate_sample(
+            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        )
+    return analysis_store

@@ -77,7 +77,7 @@ class MockScoutAPI(ScoutAPI):
 
     # Overridden functions
 
-    def upload(self, data: dict, threshold: int = 5, force: bool = False):
+    def upload(self, data: dict, force: bool = False):
         """Load analysis of a new case into Scout."""
         LOG.debug("Case loaded successfully to Scout")
 

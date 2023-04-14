@@ -50,7 +50,9 @@ def test_get_case_analysis_files(populated_deliver_api: DeliverAPI, case_id: str
     assert version
 
     # GIVEN that a case object exists in the database
-    link_objs: List[FamilySample] = deliver_api.store.family_samples(case_id)
+    link_objs: List[FamilySample] = deliver_api.store.get_case_samples_by_case_id(
+        case_internal_id=case_id
+    )
     samples: List[Sample] = [link.sample for link in link_objs]
     sample_ids: Set[str] = set([sample.internal_id for sample in samples])
 
@@ -98,7 +100,7 @@ def test_get_case_files_from_version(
     assert len(version.files) == 2
 
     # GIVEN the sample ids of the samples
-    link_objs: List[FamilySample] = analysis_store.family_samples(case_id)
+    link_objs: List[FamilySample] = analysis_store.get_case_samples_by_case_id(case_id)
     samples: List[Sample] = [link.sample for link in link_objs]
     sample_ids: Set[str] = set([sample.internal_id for sample in samples])
 

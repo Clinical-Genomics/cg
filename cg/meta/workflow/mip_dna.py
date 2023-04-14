@@ -6,7 +6,7 @@ from cg.constants.gene_panel import GENOME_BUILD_37
 from cg.constants.pedigree import Pedigree
 from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import FamilySample
+from cg.store.models import Family, FamilySample
 from cg.utils import Process
 
 
