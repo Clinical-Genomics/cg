@@ -746,7 +746,7 @@ def test_upload_report_to_scout(
     )
 
 
-def test_upload_rna_report_to_scout(
+def test_upload_rna_report_to_dna_case_in_scout(
     caplog,
     rna_case_id: str,
     rna_store: Store,
@@ -766,7 +766,7 @@ def test_upload_rna_report_to_scout(
     )[0]
 
     # WHEN uploading a report to Scout
-    upload_mip_analysis_scout_api.upload_rna_report_to_scout(
+    upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
         dry_run=False,
         rna_case_id=rna_case_id,
         report_type=ScoutCustomCaseReportTags.MULTIQC,

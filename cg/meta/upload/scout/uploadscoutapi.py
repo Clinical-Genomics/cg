@@ -42,7 +42,7 @@ class UploadScoutAPI:
         status_db: Store,
     ):
         self.housekeeper = hk_api
-        self.scout = scout_api
+        self.scout_api = scout_api
         self.madeline_api = madeline_api
         self.mip_analysis_api = analysis_api
         self.lims = lims_api
@@ -199,7 +199,7 @@ class UploadScoutAPI:
 
         LOG.info(f"Upload {report_type} fusion report finished!")
 
-    def upload_rna_report_to_scout(
+    def upload_rna_report_to_dna_case_in_scout(
         self,
         dry_run: bool,
         report_type: str,
@@ -229,7 +229,7 @@ class UploadScoutAPI:
 
         if dry_run:
             return
-        self.scout.upload_report(
+        self.scout_api.upload_report(
             case_id=case_id,
             report_path=report_file.full_path,
             report_type=report_type,
@@ -240,7 +240,6 @@ class UploadScoutAPI:
     def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
         """Upload rna_coverage_bigwig file for a case to Scout."""
 
-        scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         rna_case = status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
@@ -268,7 +267,7 @@ class UploadScoutAPI:
                 if dry_run:
                     continue
 
-                scout_api.upload_rna_coverage_bigwig(
+                self.scout_api.upload_rna_coverage_bigwig(
                     file_path=rna_coverage_bigwig.full_path,
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_id,
@@ -282,7 +281,6 @@ class UploadScoutAPI:
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout."""
 
-        scout_api: ScoutAPI = self.scout
         status_db: Store = self.status_db
         rna_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
@@ -311,7 +309,7 @@ class UploadScoutAPI:
                 if dry_run:
                     continue
 
-                scout_api.upload_splice_junctions_bed(
+                self.scout_api.upload_splice_junctions_bed(
                     file_path=splice_junctions_bed.full_path,
                     case_id=dna_case_id,
                     customer_sample_id=dna_sample_id,
@@ -366,9 +364,7 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
-    def create_rna_dna_sample_case_map(
-        self, rna_case: Family
-    ) -> Dict[str, Dict[str, List[str]]]:
+    def create_rna_dna_sample_case_map(self, rna_case: Family) -> Dict[str, Dict[str, List[str]]]:
         """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
         subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
         """
