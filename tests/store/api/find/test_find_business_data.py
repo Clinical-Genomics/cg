@@ -6,9 +6,11 @@ from typing import List
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
+from cg.constants.constants import CaseActions
 from cg.store import Store
 from cg.constants.indexes import ListIndexes
 from cg.store.models import (
+    Analysis,
     Application,
     ApplicationVersion,
     Flowcell,
@@ -731,3 +733,45 @@ def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_
     assert filtered_case is not None
     assert filtered_case.customer_id == customer.id
     assert filtered_case.name == case.name
+
+
+def test_get_cases_not_analysed_by_sample_internal_id_empty_query(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that an empty query is returned if no cases match the sample internal id."""
+    # GIVEN a store with no cases matching the sample internal id
+    sample_internal_id = "nonexistent_sample_internal_id"
+
+    # WHEN getting cases not analysed by the sample internal id
+    cases = store_with_multiple_cases_and_samples.get_cases_not_analysed_by_sample_internal_id(
+        sample_internal_id
+    )
+
+    # THEN an empty list should be returned
+    assert cases == []
+
+
+def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
+    store_with_multiple_cases_and_samples: Store,
+    sample_id_in_multiple_cases: str,
+):
+    """Test that multiple cases are returned when more than one case matches the sample internal id."""
+    # GIVEN a store with multiple cases having the same sample internal id
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # Set all cases to not analysed and HOLD action
+    for case in cases_query.all():
+        case.action = CaseActions.HOLD
+
+    # WHEN getting cases not analysed by the shared sample internal id
+    cases = store_with_multiple_cases_and_samples.get_cases_not_analysed_by_sample_internal_id(
+        sample_id_in_multiple_cases
+    )
+
+    # THEN multiple cases should be returned
+    assert len(cases) > 1
+
+    # Check that all returned cases have the matching sample and are not analysed
+    for case in cases:
+        assert not case.analyses
+        assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
