@@ -144,6 +144,15 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all deliveries."""
         return self.Delivery.query
 
+    def get_cases_created_within_days(self, days: int) -> List[Family]:
+        """Fetch all cases created within the past days."""
+        newer_than_date = dt.datetime.now() - dt.timedelta(days=days)
+        return apply_case_filter(
+            filter_functions=[CaseFilter.GET_NEW],
+            cases=self._get_query(table=Family),
+            date=newer_than_date,
+        ).all()
+
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
     ) -> List[Family]:

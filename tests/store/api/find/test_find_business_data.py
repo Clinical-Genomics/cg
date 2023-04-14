@@ -1,6 +1,6 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from sqlalchemy.orm import Query
@@ -731,3 +731,32 @@ def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_
     assert filtered_case is not None
     assert filtered_case.customer_id == customer.id
     assert filtered_case.name == case.name
+
+
+def test_fetch_cases_newer_than_date_no_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that no cases are returned when there are no cases newer than the given date."""
+    # GIVEN a store with cases older than 7 days
+    older_than_date = datetime.now() - timedelta(days=10)
+    for case in store_with_multiple_cases_and_samples._get_query(table=Family):
+        case.created_at = older_than_date
+
+    # WHEN fetching cases newer than 7 days
+    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+
+    # THEN no cases should be returned
+    assert len(cases) == 0
+
+
+def test_fetch_cases_newer_than_date_all_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that all cases are returned when all cases newer than the given date."""
+    # GIVEN a store with cases newer than 7 days
+    older_than_date = datetime.now() - timedelta(days=5)
+    all_cases = store_with_multiple_cases_and_samples._get_query(table=Family).all()
+    for case in all_cases:
+        case.created_at = older_than_date
+
+    # WHEN fetching cases newer than 7 days
+    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+
+    # THEN all cases should be returned
+    assert len(cases) == len(all_cases)
