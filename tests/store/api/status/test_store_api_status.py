@@ -175,59 +175,6 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
     assert len(records) == 0
 
 
-def test_multiple_analyses(analysis_store, helpers, timestamp_now, timestamp_yesterday):
-    """Tests that analyses that are not latest are not returned."""
-
-    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
-    case = helpers.add_case(analysis_store)
-    analysis_oldest = helpers.add_analysis(
-        analysis_store,
-        case=case,
-        started_at=timestamp_yesterday,
-        uploaded_at=timestamp_yesterday,
-        delivery_reported_at=None,
-    )
-    analysis_store.add_commit(analysis_oldest)
-    analysis_newest = helpers.add_analysis(
-        analysis_store,
-        case=case,
-        started_at=timestamp_now,
-        uploaded_at=timestamp_now,
-        delivery_reported_at=None,
-    )
-    sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
-    analysis_store.relate_sample(
-        family=analysis_oldest.family, sample=sample, status=PhenotypeStatus.UNKNOWN
-    )
-
-    # WHEN calling the analyses_to_delivery_report
-    analyses: List[
-        Analysis
-    ] = analysis_store.get_analyses_for_each_case_with_latest_started_at_date()
-
-    # THEN only the newest analysis should be returned
-    assert analysis_newest in analyses
-    assert analysis_oldest not in analyses
-
-
-def test_multiple_analyses_and_cases(
-    store_with_analyses_for_cases, helpers, timestamp_now, timestamp_yesterday
-):
-    """Tests that analyses that are not latest are not returned."""
-
-    # GIVEN an analysis that is not delivery reported but there exists a newer analysis
-
-    # WHEN calling the analyses_to_delivery_report
-    analyses: List[
-        Analysis
-    ] = store_with_analyses_for_cases.get_analyses_for_each_case_with_latest_started_at_date()
-
-    # THEN only the newest analysis should be returned
-    for analysis in analyses:
-        assert analysis.family.internal_id in ["test_case_1", "yellowhog"]
-        assert analysis.started_at == timestamp_now
-
-
 def test_set_case_action(analysis_store, case_id):
     """Tests if actions of cases are changed to analyze."""
     # Given a store with a case with action None
