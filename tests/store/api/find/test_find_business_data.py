@@ -86,7 +86,7 @@ def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: 
 
     # WHEN fetching the latest flow cell
     flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry(
-        flow_cell_id_enquiry=flow_cell_id[:4]
+        name_pattern=flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
@@ -186,7 +186,7 @@ def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sam
 
     # WHEN fetching the latest flow cell
     flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK], flow_cell_id_enquiry=flow_cell_id[:4]
+        flow_cell_statuses=[FlowCellStatus.ON_DISK], name_pattern=flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database

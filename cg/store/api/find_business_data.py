@@ -377,12 +377,12 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[FlowCellFilter.GET_BY_ID],
         ).first()
 
-    def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Flowcell:
+    def get_flow_cell_by_enquiry(self, name_pattern: str) -> Flowcell:
         """Return flow cell enquiry."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id_enquiry,
-            filter_functions=[FlowCellFilter.GET_BY_ID_AND_ENQUIRY],
+            name_pattern=name_pattern,
+            filter_functions=[FlowCellFilter.GET_BY_NAME_PATTERN],
         ).first()
 
     def get_flow_cells(self) -> List[Flowcell]:
@@ -398,16 +398,16 @@ class FindBusinessDataHandler(BaseHandler):
         )
 
     def get_flow_cell_by_enquiry_and_status(
-        self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
+        self, flow_cell_statuses: List[str], name_pattern: str
     ) -> List[Flowcell]:
         """Return flow cell enquiry snd status."""
         filter_functions: List[FlowCellFilter] = [
             FlowCellFilter.GET_WITH_STATUSES,
-            FlowCellFilter.GET_BY_ID_AND_ENQUIRY,
+            FlowCellFilter.GET_BY_NAME_PATTERN,
         ]
         flow_cells: List[Flowcell] = apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id_enquiry,
+            name_pattern=name_pattern,
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=filter_functions,
         )
