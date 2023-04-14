@@ -25,7 +25,7 @@ from cg.store.filters.status_case_filters import (
     get_cases_with_loqusdb_supported_pipeline,
     get_cases_with_loqusdb_supported_sequencing_method,
     get_inactive_analysis_cases,
-    get_new_cases,
+    get_older_cases,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -526,7 +526,7 @@ def test_get_new_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_new_cases(cases=cases, date=timestamp_in_2_weeks)
+    cases: Query = get_older_cases(cases=cases, date=timestamp_in_2_weeks)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -549,7 +549,7 @@ def test_get_new_cases_when_too_new(
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_new_cases(cases=cases, date=timestamp_yesterday)
+    cases: Query = get_older_cases(cases=cases, date=timestamp_yesterday)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)

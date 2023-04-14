@@ -184,7 +184,7 @@ def submit_order(order_type):
 @BLUEPRINT.route("/cases")
 def parse_cases():
     """Fetch cases."""
-    cases: List[Family] = db.get_cases_in_past_days(days=31)
+    cases: List[Family] = db.get_cases_created_within_days(days=31)
     return jsonify(cases=cases, total=len(cases))
 
 
