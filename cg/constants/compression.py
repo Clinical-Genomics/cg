@@ -46,6 +46,7 @@ BALSAMIC_VALIDATION_CASES = [
     "fleetjay",  # BALSAMIC validation case tumor-normal wgs
     "grandmarmot",  # BALSAMIC validation case tumor-normal wgs
     "unitedbeagle",  # BALSAMIC validation case tumor-normal panel
+    "livedeer",  # BALSAMIC validation case tumor-only wes
     "eagerox",  # BALSAMIC validation case from cust087, tumor-only panel
     "casualweasel",  # BALSAMIC validation case from cust087, tumor-only panel
     "acetuna",  # BALSAMIC validation case from cust087, tumor-only panel
