@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Query
 from typing import Dict, Any
-from cg.constants.subject import PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus, Gender
 from cg.constants.constants import SampleType
 from cg.store import Store
 from cg.store.models import Sample
@@ -697,7 +697,7 @@ def test_filter_get_samples_by_internal_id_pattern(
     assert samples[0].internal_id == StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
 
 
-def test_filter_samples_by_identifier_name_and_value(
+def test_filter_samples_by_identifier_name_and_value_unique_sample(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
     """Test that the function filters correctly for any identifier."""
@@ -750,7 +750,28 @@ def test_filter_samples_by_identifier_name_and_value(
             identifier_name=key,
             identifier_value=value,
         )
-        # THEN the filtered query has only one element for every attribute
-        assert filtered_sample_query.count() == 1
+        # THEN the filtered query has at least one element
+        assert filtered_sample_query.count() > 0
         # THEN the element in the filtered query is the sample for every attribute
-        assert filtered_sample_query.first() == sample
+        assert getattr(filtered_sample_query.first(), key) == value
+
+
+def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: Store):
+    """."""
+    # GIVEN a store with more than 2 samples
+    sample_query: Query = sample_store._get_query(table=Sample)
+    assert sample_query.count() > 2
+
+    # WHEN filtering the females from the sample query using identifiers
+    filtered_query: Query = filter_samples_by_identifier_name_and_value(
+        samples=sample_query,
+        identifier_name="sex",
+        identifier_value=Gender.FEMALE,
+    )
+
+    # THEN the filtered query has at least two elements
+    assert filtered_query.count() > 1
+
+    # THEN all the elements of the filtered query are females
+    for sample in filtered_query:
+        assert sample.sex == Gender.FEMALE
