@@ -335,7 +335,7 @@ def test_get_samples_by_any_id_not_an_attribute_fails(
             **identifiers
         )
 
-    # THEN the function fails
+    # THEN the error message should contain the non-existent-attribute
     assert str(exc_info.value) == "type object 'Sample' has no attribute 'non-existent-attribute'"
 
 

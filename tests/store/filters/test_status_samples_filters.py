@@ -628,7 +628,7 @@ def test_filter_get_samples_by_customer_id(
         customer_entry_ids=[customer_id],
     )
 
-    # ASSERT that the result of the filtering is a query
+    # THEN the result of the filtering is a query
     assert isinstance(filtered_query, Query)
 
     # THEN the filtered query is not empty
