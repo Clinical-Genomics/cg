@@ -720,9 +720,9 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Family]:
         """Get cases to analyse by sample internal id."""
 
-        query = self._get_join_case_and_sample_query()
+        query: Query = self._get_join_case_and_sample_query()
 
-        not_analysed_cases = apply_case_filter(
+        not_analysed_cases: Query = apply_case_filter(
             cases=query,
             filter_functions=[
                 CaseFilter.GET_NOT_ANALYSED,

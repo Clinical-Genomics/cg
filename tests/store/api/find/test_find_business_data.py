@@ -736,15 +736,13 @@ def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_
 
 
 def test_get_cases_not_analysed_by_sample_internal_id_empty_query(
-    store_with_multiple_cases_and_samples: Store,
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
 ):
     """Test that an empty query is returned if no cases match the sample internal id."""
-    # GIVEN a store with no cases matching the sample internal id
-    sample_internal_id = "nonexistent_sample_internal_id"
-
+    # GIVEN a store
     # WHEN getting cases not analysed by the sample internal id
     cases = store_with_multiple_cases_and_samples.get_cases_not_analysed_by_sample_internal_id(
-        sample_internal_id
+        sample_internal_id=non_existent_id
     )
 
     # THEN an empty list should be returned
