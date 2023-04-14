@@ -98,7 +98,7 @@ def get_cases_for_analysis(cases: Query, **kwargs) -> Query:
 
 def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
     """Filter cases that have not been analysed and are not currently being analysed."""
-    not_analyzed_condition = Family.analyses.all(Analysis.completed_at.is_(None))
+    not_analyzed_condition = not_(Family.analyses.any(Analysis.completed_at.isnot(None)))
     not_in_progress_condition = Family.action != CaseActions.ANALYZE
 
     return cases.filter(and_(not_analyzed_condition, not_in_progress_condition))
