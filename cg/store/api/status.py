@@ -564,7 +564,7 @@ class StatusHandler(BaseHandler):
             priority=priority,
             internal_id_search=internal_id,
             name_search=name,
-            data_analysis=data_analysis,
+            pipeline_search=data_analysis,
         )
 
         # customer filters
