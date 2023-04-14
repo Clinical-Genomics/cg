@@ -233,7 +233,7 @@ class StatusHandler(BaseHandler):
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: List[CaseFilter] = [
             CaseFilter.GET_HAS_INACTIVE_ANALYSIS,
-            CaseFilter.GET_NEW,
+            CaseFilter.GET_OLD,
         ]
         return apply_case_filter(
             filter_functions=case_filter_functions,
