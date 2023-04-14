@@ -737,7 +737,7 @@ def test_fetch_cases_newer_than_date_no_cases(store_with_multiple_cases_and_samp
     """Test that no cases are returned when there are no cases newer than the given date."""
     # GIVEN a store with cases older than 7 days
     older_than_date = datetime.now() - timedelta(days=10)
-    for case in store_with_multiple_cases_and_samples._get_query(table=Family).all():
+    for case in store_with_multiple_cases_and_samples._get_query(table=Family):
         case.created_at = older_than_date
 
     # WHEN fetching cases newer than 7 days

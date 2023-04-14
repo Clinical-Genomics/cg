@@ -220,7 +220,7 @@ class CaseFilter(Enum):
     GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
     GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
     GET_OLD: Callable = get_older_cases
-    GET_NEW: callable = get_newer_cases
+    GET_NEW: Callable = get_newer_cases
     GET_WITH_PIPELINE: Callable = get_cases_with_pipeline
     GET_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
     GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
