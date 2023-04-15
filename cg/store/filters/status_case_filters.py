@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List, Callable
 from enum import Enum
 from cgmodels.cg.constants import Pipeline
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
@@ -100,6 +100,14 @@ def get_cases_for_analysis(cases: Query, **kwargs) -> Query:
             ),
         )
     )
+
+
+def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
+    """Filter cases that have not been analysed and are not currently being analysed."""
+    not_analyzed_condition = not_(Family.analyses.any(Analysis.completed_at.isnot(None)))
+    not_in_progress_condition = Family.action != CaseActions.ANALYZE
+
+    return cases.filter(and_(not_analyzed_condition, not_in_progress_condition))
 
 
 def get_cases_with_scout_data_delivery(cases: Query, **kwargs) -> Query:
@@ -241,6 +249,7 @@ class CaseFilter(Enum):
         get_cases_with_loqusdb_supported_sequencing_method
     )
     GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
+    GET_NOT_ANALYSED: Callable = filter_cases_not_analysed
     GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
     FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
