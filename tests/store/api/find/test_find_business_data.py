@@ -741,7 +741,7 @@ def test_get_cases_not_analysed_by_sample_internal_id_empty_query(
     """Test that an empty query is returned if no cases match the sample internal id."""
     # GIVEN a store
     # WHEN getting cases not analysed by the sample internal id
-    cases = store_with_multiple_cases_and_samples.get_cases_not_analysed_by_sample_internal_id(
+    cases = store_with_multiple_cases_and_samples.get_not_analysed_cases_by_sample_internal_id(
         sample_internal_id=non_existent_id
     )
 
@@ -762,7 +762,7 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
         case.action = CaseActions.HOLD
 
     # WHEN getting cases not analysed by the shared sample internal id
-    cases = store_with_multiple_cases_and_samples.get_cases_not_analysed_by_sample_internal_id(
+    cases = store_with_multiple_cases_and_samples.get_not_analysed_cases_by_sample_internal_id(
         sample_id_in_multiple_cases
     )
 

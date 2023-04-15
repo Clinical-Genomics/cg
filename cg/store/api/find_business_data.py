@@ -723,11 +723,11 @@ class FindBusinessDataHandler(BaseHandler):
             pipeline=pipeline,
         ).all()
 
-    def get_cases_not_analysed_by_sample_internal_id(
+    def get_not_analysed_cases_by_sample_internal_id(
         self,
         sample_internal_id: str,
     ) -> List[Family]:
-        """Get cases to analyse by sample internal id."""
+        """Get not analysed cases by sample internal id."""
 
         query: Query = self._get_join_case_and_sample_query()
 
