@@ -151,7 +151,7 @@ class TrailblazerAPI:
         email: str = None,
         data_analysis: Pipeline = None,
         ticket: str = None,
-        use_tower: bool = False,
+        task_manager: str = "NF_tower",
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
@@ -162,7 +162,7 @@ class TrailblazerAPI:
             "priority": slurm_quality_of_service,
             "data_analysis": str(data_analysis).upper(),
             "ticket": ticket,
-            "use_tower": use_tower,
+            "task_manager": task_manager,
         }
         LOG.debug("Submitting job to Trailblazer: %s", request_body)
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
