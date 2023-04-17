@@ -85,7 +85,7 @@ def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: 
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry(
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern(
         name_pattern=flow_cell_id[:4]
     )
 

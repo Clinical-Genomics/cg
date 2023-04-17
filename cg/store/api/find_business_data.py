@@ -377,8 +377,8 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[FlowCellFilter.GET_BY_ID],
         ).first()
 
-    def get_flow_cell_by_enquiry(self, name_pattern: str) -> Flowcell:
-        """Return flow cell enquiry."""
+    def get_flow_cell_by_name_pattern(self, name_pattern: str) -> Flowcell:
+        """Return flow cell by name pattern."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             name_pattern=name_pattern,
@@ -405,13 +405,12 @@ class FindBusinessDataHandler(BaseHandler):
             FlowCellFilter.GET_WITH_STATUSES,
             FlowCellFilter.GET_BY_NAME_PATTERN,
         ]
-        flow_cells: Query = apply_flow_cell_filter(
+        return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
             name_pattern=name_pattern,
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=filter_functions,
-        )
-        return flow_cells.all()
+        ).all()
 
     def get_flow_cells_by_case(self, case: Family) -> Optional[List[Flowcell]]:
         """Return flow cells for case."""
