@@ -29,7 +29,7 @@ from cg.models.report.report import (
     ScoutReportFiles,
 )
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
-from cg.store.models import Analysis, Application, Family, Sample
+from cg.store.models import Analysis, Application, Family, Sample, FamilySample
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 LOG = logging.getLogger(__name__)
@@ -97,33 +97,20 @@ class ReportAPI(MetaAPI):
         """Extracts the delivery reports of a specific case stored in HK."""
 
         version: Version = self.housekeeper_api.last_version(case_id)
-        delivery_report_files: Query = self.housekeeper_api.get_files(
+        delivery_report: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=[HK_DELIVERY_REPORT_TAG], version=version.id
         )
 
-        if delivery_report_files.count() == 0:
+        if not delivery_report:
             LOG.warning(f"No existing delivery report found in housekeeper for {case_id}")
             raise FileNotFoundError
 
-        return delivery_report_files[0].full_path
+        return delivery_report.full_path
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
-        """Returns the file path of the uploaded to Scout file given its tag."""
+        """Return the file path of the uploaded to Scout file given its tag."""
 
-        version: Version = self.housekeeper_api.last_version(bundle=case_id)
-        tags: list = self.get_hk_scout_file_tags(scout_tag)
-        uploaded_files: Query = self.housekeeper_api.get_files(
-            bundle=case_id, tags=tags, version=version.id
-        )
-
-        if not tags or uploaded_files.count() == 0:
-            LOG.info(
-                f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
-            )
-
-            return None
-
-        return uploaded_files[0].full_path
+        raise NotImplementedError
 
     def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template."""
@@ -267,7 +254,9 @@ class ReportAPI(MetaAPI):
         """Extracts all the samples associated to a specific case and their attributes."""
 
         samples = list()
-        case_samples: List[FamilySample] = self.status_db.family_samples(case.internal_id)
+        case_samples: List[FamilySample] = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )
 
         for case_sample in case_samples:
             sample: Sample = case_sample.sample

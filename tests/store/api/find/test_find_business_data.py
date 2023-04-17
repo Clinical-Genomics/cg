@@ -1,14 +1,16 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
+from cg.constants.constants import CaseActions
 from cg.store import Store
 from cg.constants.indexes import ListIndexes
 from cg.store.models import (
+    Analysis,
     Application,
     ApplicationVersion,
     Flowcell,
@@ -79,14 +81,14 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     assert flow_cell.name == flow_cell_id
 
 
-def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: Store):
+def test_get_flow_cell_by_name_pattern(flow_cell_id: str, re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database by enquiry."""
 
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry(
-        flow_cell_id_enquiry=flow_cell_id[:4]
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern(
+        name_pattern=flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
@@ -185,8 +187,8 @@ def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sam
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK], flow_cell_id_enquiry=flow_cell_id[:4]
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
+        flow_cell_statuses=[FlowCellStatus.ON_DISK], name_pattern=flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
@@ -405,6 +407,45 @@ def test_get_application_by_case(case_id: str, rml_pool_store: Store):
     assert application_version.application == application
 
 
+def test_get_case_samples_by_case_id(
+    store_with_analyses_for_cases: Store,
+    case_id: str,
+):
+    """Test that getting case-samples by case id returns a list of FamilySamples."""
+    # GIVEN a store with case-samples and a case id
+
+    # WHEN fetching the case-samples matching the case id
+    case_samples: List[FamilySample] = store_with_analyses_for_cases.get_case_samples_by_case_id(
+        case_internal_id=case_id
+    )
+
+    # THEN a list of case-samples should be returned
+    assert case_samples
+    assert isinstance(case_samples, List)
+    assert isinstance(case_samples[0], FamilySample)
+
+
+def test_get_case_sample_link(
+    store_with_analyses_for_cases: Store,
+    case_id: str,
+    sample_id: str,
+):
+    """Test that the returned element is a FamilySample with the correct case and sample internal ids."""
+    # GIVEN a store with case-samples and valid case and sample internal ids
+
+    # WHEN fetching a case-sample with case and sample internal ids
+    case_sample: FamilySample = store_with_analyses_for_cases.get_case_sample_link(
+        case_internal_id=case_id,
+        sample_internal_id=sample_id,
+    )
+
+    # THEN the returned element is a FamilySample object
+    assert isinstance(case_sample, FamilySample)
+    # THEN the returned family sample has the correct case and sample internal ids
+    assert case_sample.family.internal_id == case_id
+    assert case_sample.sample.internal_id == sample_id
+
+
 def test_find_single_case_for_sample(
     sample_id_in_single_case: str, store_with_multiple_cases_and_samples: Store
 ):
@@ -418,7 +459,9 @@ def test_find_single_case_for_sample(
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    cases: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample.id
     ).all()
 
@@ -436,7 +479,9 @@ def test_find_multiple_cases_for_sample(
     assert sample
 
     # WHEN the cases associated with the sample is fetched
-    cases: List[FamilySample] = store_with_multiple_cases_and_samples.get_cases_from_sample(
+    cases: List[
+        FamilySample
+    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
         sample_entry_id=sample.id
     ).all()
 
@@ -688,3 +733,72 @@ def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_
     assert filtered_case is not None
     assert filtered_case.customer_id == customer.id
     assert filtered_case.name == case.name
+
+
+def test_get_cases_not_analysed_by_sample_internal_id_empty_query(
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
+):
+    """Test that an empty query is returned if no cases match the sample internal id."""
+    # GIVEN a store
+    # WHEN getting cases not analysed by the sample internal id
+    cases = store_with_multiple_cases_and_samples.get_not_analysed_cases_by_sample_internal_id(
+        sample_internal_id=non_existent_id
+    )
+
+    # THEN an empty list should be returned
+    assert cases == []
+
+
+def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
+    store_with_multiple_cases_and_samples: Store,
+    sample_id_in_multiple_cases: str,
+):
+    """Test that multiple cases are returned when more than one case matches the sample internal id."""
+    # GIVEN a store with multiple cases having the same sample internal id
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # Set all cases to not analysed and HOLD action
+    for case in cases_query.all():
+        case.action = CaseActions.HOLD
+
+    # WHEN getting cases not analysed by the shared sample internal id
+    cases = store_with_multiple_cases_and_samples.get_not_analysed_cases_by_sample_internal_id(
+        sample_id_in_multiple_cases
+    )
+
+    # THEN multiple cases should be returned
+    assert len(cases) > 1
+
+    # Check that all returned cases have the matching sample and are not analysed
+    for case in cases:
+        assert not case.analyses
+        assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
+
+
+def test_fetch_cases_newer_than_date_no_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that no cases are returned when there are no cases newer than the given date."""
+    # GIVEN a store with cases older than 7 days
+    older_than_date = datetime.now() - timedelta(days=10)
+    for case in store_with_multiple_cases_and_samples._get_query(table=Family):
+        case.created_at = older_than_date
+
+    # WHEN fetching cases newer than 7 days
+    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+
+    # THEN no cases should be returned
+    assert len(cases) == 0
+
+
+def test_fetch_cases_newer_than_date_all_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that all cases are returned when all cases newer than the given date."""
+    # GIVEN a store with cases newer than 7 days
+    older_than_date = datetime.now() - timedelta(days=5)
+    all_cases = store_with_multiple_cases_and_samples._get_query(table=Family).all()
+    for case in all_cases:
+        case.created_at = older_than_date
+
+    # WHEN fetching cases newer than 7 days
+    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+
+    # THEN all cases should be returned
+    assert len(cases) == len(all_cases)

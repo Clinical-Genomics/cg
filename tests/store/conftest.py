@@ -6,7 +6,7 @@ from typing import Generator, List
 import pytest
 
 from cg.constants import Pipeline
-from cg.constants.subject import Gender
+from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Analysis, Application, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
@@ -17,8 +17,23 @@ from tests.conftest import fixture_old_timestamp
 class StoreConftestFixture(enum.Enum):
     INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     NAME_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
+    APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES: int = 2
+    CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES: str = "1"
     SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES: str = "test_subject_id"
+    ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
+    LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES: str = "locusdb_id"
+    READS_SAMPLE_WITH_ATTRIBUTES: int = 100
     DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES: int = 1
+    AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES: float = 45
+    COMMENT_SAMPLE_WITH_ATTRIBUTES: str = "comment"
+    CONTROL_SAMPLE_WITH_ATTRIBUTES: str = "negative"
+    CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES: str = "capture_kit"
+    PRIORITY_SAMPLE_WITH_ATTRIBUTES: str = "research"
+    ORDER_SAMPLE_WITH_ATTRIBUTES: str = "order"
+    REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES: str = "NC_222"
+    ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES: str = "ticket"
+    FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES: str = "sample_1"
+    SEX_SAMPLE_WITH_ATTRIBUTES: str = "male"
     ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
@@ -39,7 +54,7 @@ class StoreConftestFixture(enum.Enum):
     INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES: int = 2
 
     @staticmethod
-    def generate_year_interval(n_entries, old_timestamp: dt.datetime) -> List[int]:
+    def generate_year_interval(n_entries: int, old_timestamp: dt.datetime) -> List[int]:
         """Create a list of approximately uniformly distributed year numbers from 1 to present."""
         start: int = old_timestamp.year
         stop: int = dt.date.today().year
@@ -187,6 +202,12 @@ def fixture_invalid_application_id() -> int:
     return -1
 
 
+@pytest.fixture(name="invalid_application_tag")
+def fixture_invalid_application_tag() -> str:
+    """Return an invalid application tag."""
+    return "invalid-tag"
+
+
 @pytest.fixture(name="invalid_application_version_version")
 def fixture_invalid_application_version_version() -> int:
     """Return an invalid version of an Application Version."""
@@ -201,23 +222,42 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
 ) -> Store:
     """Return a store with a sample that has many attributes and one without."""
     helpers.add_sample(
-        store,
+        store=store,
         internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
         name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
         is_external=True,
         is_tumour=True,
+        ordered_at=timestamp_now,
+        created_at=timestamp_now,
+        sequence_start=timestamp_now,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
         sequenced_at=timestamp_now,
         prepared_at=timestamp_now,
+        invoiced_at=timestamp_now,
+        application_version_id=StoreConftestFixture.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        customer_id=StoreConftestFixture.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         subject_id=StoreConftestFixture.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConftestFixture.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        organism_id=StoreConftestFixture.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        loqusdb_id=StoreConftestFixture.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        reads=StoreConftestFixture.READS_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConftestFixture.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
+        original_ticket=StoreConftestFixture.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
+        age_at_sampling=StoreConftestFixture.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
+        capture_kit=StoreConftestFixture.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
+        comment=StoreConftestFixture.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
+        control=StoreConftestFixture.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
+        from_sample=StoreConftestFixture.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
+        order=StoreConftestFixture.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
+        priority=StoreConftestFixture.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
+        reference_genome=StoreConftestFixture.REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES.value,
+        sex=StoreConftestFixture.SEX_SAMPLE_WITH_ATTRIBUTES.value,
     )
 
     helpers.add_sample(
-        store,
+        store=store,
         internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
         name=StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         is_external=False,
@@ -377,3 +417,39 @@ def fixture_store_with_older_and_newer_analyses(
         )
 
     yield base_store
+
+
+@pytest.fixture(name="store_with_analyses_for_cases")
+def fixture_store_with_analyses_for_cases(
+    analysis_store: Store,
+    helpers: StoreHelpers,
+    timestamp_now: dt.datetime,
+    timestamp_yesterday: dt.datetime,
+) -> Store:
+    """Return a store with two analyses for two cases."""
+    case_one = analysis_store.get_case_by_internal_id("yellowhog")
+    case_two = helpers.add_case(analysis_store, internal_id="test_case_1")
+
+    cases = [case_one, case_two]
+    for case in cases:
+        oldest_analysis = helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_yesterday,
+            uploaded_at=timestamp_yesterday,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_yesterday,
+        )
+        helpers.add_analysis(
+            analysis_store,
+            case=case,
+            started_at=timestamp_now,
+            uploaded_at=timestamp_now,
+            delivery_reported_at=None,
+            uploaded_to_vogue_at=timestamp_now,
+        )
+        sample = helpers.add_sample(analysis_store, delivered_at=timestamp_now)
+        analysis_store.relate_sample(
+            family=oldest_analysis.family, sample=sample, status=PhenotypeStatus.UNKNOWN
+        )
+    return analysis_store

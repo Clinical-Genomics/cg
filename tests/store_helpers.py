@@ -1,7 +1,7 @@
 """Utility functions to simply add test data in a cg store."""
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from housekeeper.store.models import Bundle, Version
 
@@ -102,16 +102,37 @@ class StoreHelpers:
             PriorityTerms.EXPRESS: 30,
             PriorityTerms.RESEARCH: 5,
         }
-        application_version: ApplicationVersion = store.application_version(
-            application=application, version=version
-        )
-        if not application_version:
-            application_version: ApplicationVersion = store.add_version(
-                application=application, version=version, valid_from=valid_from, prices=prices
-            )
 
-            store.add_commit(application_version)
+        application_version: ApplicationVersion = StoreHelpers.add_application_version(
+            store=store,
+            application=application,
+            prices=prices,
+            version=version,
+            valid_from=valid_from,
+        )
         return application_version
+
+    @staticmethod
+    def add_application_version(
+        store: Store,
+        application: Application,
+        prices: Dict,
+        version: int = 1,
+        valid_from: datetime = datetime.now(),
+    ) -> ApplicationVersion:
+        """Add an application version to store."""
+        new_record: ApplicationVersion = store.get_application_version_by_application_entry_id(
+            application_entry_id=application.id
+        )
+        if not new_record:
+            new_record: ApplicationVersion = store.add_application_version(
+                application=application,
+                version=version,
+                valid_from=valid_from,
+                prices=prices,
+            )
+        store.add_commit(new_record)
+        return new_record
 
     @staticmethod
     def ensure_application(

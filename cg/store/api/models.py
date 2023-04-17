@@ -30,6 +30,7 @@ class ApplicationSchema(BaseModel):
     is_external: int
     limitations: Optional[str]
     minimum_order: int
+    min_sequencing_depth: Optional[int]
     percent_kth: Optional[int]
     percent_reads_guaranteed: Optional[int]
     prep_category: str

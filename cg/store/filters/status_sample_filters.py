@@ -1,6 +1,7 @@
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, Any
 from enum import Enum
 from sqlalchemy.orm import Query
+from sqlalchemy import and_, or_
 
 from cg.constants.constants import SampleType
 from cg.store.models import Sample, Customer
@@ -8,12 +9,12 @@ from cg.store.models import Sample, Customer
 
 def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Query:
     """Return sample by internal id."""
-    return samples.filter_by(internal_id=internal_id)
+    return samples.filter(Sample.internal_id == internal_id)
 
 
 def filter_samples_by_name(name: str, samples: Query, **kwargs) -> Query:
     """Return sample with sample name."""
-    return samples.filter_by(name=name)
+    return samples.filter(Sample.name == name)
 
 
 def filter_samples_with_type(samples: Query, tissue_type: SampleType, **kwargs) -> Query:
@@ -146,6 +147,18 @@ def filter_samples_by_internal_id_pattern(
     return samples.filter(Sample.internal_id.like(f"%{internal_id_pattern}%"))
 
 
+def filter_samples_by_internal_id_or_name_search(
+    samples: Query, search_pattern: str, **kwargs
+) -> Query:
+    """Return samples matching the internal id or name search."""
+    return samples.filter(
+        or_(
+            Sample.name.like(f"%{search_pattern}%"),
+            Sample.internal_id.like(f"%{search_pattern}%"),
+        )
+    )
+
+
 def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> Query:
     """Return samples by customer."""
     return samples.filter(Sample.customer == customer)
@@ -154,6 +167,13 @@ def filter_samples_by_customer(samples: Query, customer: Customer, **kwargs) -> 
 def order_samples_by_created_at_desc(samples: Query, **kwargs) -> Query:
     """Return samples ordered by created_at descending."""
     return samples.order_by(Sample.created_at.desc())
+
+
+def filter_samples_by_identifier_name_and_value(
+    samples: Query, identifier_name: str, identifier_value: Any, **kwargs
+) -> Query:
+    """Filters the sample query by the given identifier name and value."""
+    return samples.filter(getattr(Sample, identifier_name) == identifier_value)
 
 
 def apply_sample_filter(
@@ -170,6 +190,9 @@ def apply_sample_filter(
     customer: Optional[Customer] = None,
     name_pattern: Optional[str] = None,
     internal_id_pattern: Optional[str] = None,
+    search_pattern: Optional[str] = None,
+    identifier_name: str = None,
+    identifier_value: Any = None,
 ) -> Query:
     """Apply filtering functions to the sample queries and return filtered results."""
 
@@ -187,6 +210,9 @@ def apply_sample_filter(
             customer=customer,
             name_pattern=name_pattern,
             internal_id_pattern=internal_id_pattern,
+            search_pattern=search_pattern,
+            identifier_name=identifier_name,
+            identifier_value=identifier_value,
         )
     return samples
 
@@ -222,4 +248,6 @@ class SampleFilter(Enum):
     FILTER_BY_NAME_PATTERN: Callable = filter_samples_by_name_pattern
     FILTER_BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
+    FILTER_BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search
+    FILTER_BY_IDENTIFIER_NAME_AND_VALUE: Callable = filter_samples_by_identifier_name_and_value
     ORDER_BY_CREATED_AT_DESC: Callable = order_samples_by_created_at_desc

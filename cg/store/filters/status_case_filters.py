@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List, Callable
 from enum import Enum
 from cgmodels.cg.constants import Pipeline
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm import Query
 
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY
@@ -35,9 +35,15 @@ def get_running_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.action == CaseActions.RUNNING)
 
 
-def get_new_cases(cases: Query, date: datetime, **kwargs) -> Query:
-    """Return old cases compared to date."""
+def get_older_cases(cases: Query, date: datetime, **kwargs) -> Query:
+    """Return older cases compared to date."""
     cases = cases.filter(Family.created_at < date)
+    return cases.order_by(Family.created_at.asc())
+
+
+def get_newer_cases(cases: Query, date: datetime, **kwargs) -> Query:
+    """Return newer cases compared to date."""
+    cases = cases.filter(Family.created_at > date)
     return cases.order_by(Family.created_at.asc())
 
 
@@ -94,6 +100,14 @@ def get_cases_for_analysis(cases: Query, **kwargs) -> Query:
             ),
         )
     )
+
+
+def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
+    """Filter cases that have not been analysed and are not currently being analysed."""
+    not_analyzed_condition = not_(Family.analyses.any(Analysis.completed_at.isnot(None)))
+    not_in_progress_condition = Family.action != CaseActions.ANALYZE
+
+    return cases.filter(and_(not_analyzed_condition, not_in_progress_condition))
 
 
 def get_cases_with_scout_data_delivery(cases: Query, **kwargs) -> Query:
@@ -213,13 +227,15 @@ class CaseFilter(Enum):
 
     GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
     GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
-    GET_NEW: Callable = get_new_cases
+    GET_OLD: Callable = get_older_cases
+    GET_NEW: Callable = get_newer_cases
     GET_WITH_PIPELINE: Callable = get_cases_with_pipeline
     GET_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
     GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
         get_cases_with_loqusdb_supported_sequencing_method
     )
     GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
+    GET_NOT_ANALYSED: Callable = filter_cases_not_analysed
     GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
     GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
     FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
