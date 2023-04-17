@@ -16,8 +16,10 @@ from cg.store.filters.status_case_filters import (
     filter_case_by_internal_id,
     filter_cases_by_name,
     filter_cases_by_pipeline_search,
+    filter_cases_by_priority,
     filter_cases_not_analysed,
     get_newer_cases_by_creation_date,
+    get_newer_cases_by_order_date,
     get_running_cases,
     filter_cases_by_ticket_id,
     get_cases_with_pipeline,
@@ -902,3 +904,126 @@ def test_filter_cases_by_pipeline_search_exact_match(
     assert filtered_cases.count() > 0
     for case in filtered_cases:
         assert case.data_analysis == pipeline_search
+
+
+def test_filter_cases_by_priority_no_matching_priority(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that no cases are returned when there are no cases with matching priority."""
+    # GIVEN a store containing cases with different priorities
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    non_existent_priority = "non_existent_priority"
+
+    # WHEN filtering cases by a non-matching priority
+    filtered_cases: Query = filter_cases_by_priority(
+        cases=cases_query, priority=non_existent_priority
+    )
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0
+
+
+def test_filter_cases_by_priority_matching_priority(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that cases with matching priority are returned."""
+    # GIVEN a store containing cases with different priorities
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    existing_priority = cases_query.first().priority
+
+    # WHEN filtering cases by a matching priority
+    filtered_cases: Query = filter_cases_by_priority(cases=cases_query, priority=existing_priority)
+
+    # THEN the query should return the cases with matching priority
+    assert filtered_cases.count() > 0
+    for case in filtered_cases:
+        assert case.priority == existing_priority
+
+
+def test_filter_cases_by_priority_all_priorities(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that filtering cases by all available priorities returns all cases."""
+    # GIVEN a store containing cases with different priorities
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    all_priorities = set(case.priority for case in cases_query)
+
+    # WHEN filtering cases by all available priorities
+    filtered_cases = []
+    for priority in all_priorities:
+        filtered_cases.extend(filter_cases_by_priority(cases=cases_query, priority=priority).all())
+
+    # THEN the query should return all cases
+    assert len(filtered_cases) == cases_query.count()
+
+
+def test_get_newer_cases_by_order_date_no_newer_cases(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that no cases are returned when there are no cases with a newer order date."""
+    # GIVEN a store containing cases with different order dates
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    latest_order_date = max(case.ordered_at for case in cases_query)
+
+    # WHEN filtering cases by a date that is later than the latest order date
+    filtered_cases: Query = get_newer_cases_by_order_date(
+        cases=cases_query, order_date=latest_order_date
+    )
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0
+
+
+def test_get_newer_cases_by_order_date_some_newer_cases(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that cases with order dates newer than the given date are returned."""
+    # GIVEN a store containing cases with different order dates
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    some_order_date = cases_query.first().ordered_at
+
+    # WHEN filtering cases by a date that is earlier than some order dates
+    filtered_cases: Query = get_newer_cases_by_order_date(
+        cases=cases_query, order_date=some_order_date
+    )
+
+    # THEN the query should return the cases with order dates newer than the given date
+    assert filtered_cases.count() > 0
+    for case in filtered_cases:
+        assert case.ordered_at > some_order_date
+
+
+def test_get_newer_cases_by_created_date_no_newer_cases(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that no cases are returned when there are no cases with a newer order date."""
+    # GIVEN a store containing cases with different order dates
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    latest_created_date = max(case.created_at for case in cases_query)
+
+    # WHEN filtering cases by a date that is later than the latest order date
+    filtered_cases: Query = get_newer_cases_by_order_date(
+        cases=cases_query, order_date=latest_created_date
+    )
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0
+
+
+def test_get_newer_cases_by_order_date_some_newer_cases(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that cases with order dates newer than the given date are returned."""
+    # GIVEN a store containing cases with different order dates
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    some_order_date = cases_query.first().ordered_at
+
+    # WHEN filtering cases by a date that is earlier than some order dates
+    filtered_cases: Query = get_newer_cases_by_order_date(
+        cases=cases_query, order_date=some_order_date
+    )
+
+    # THEN the query should return the cases with order dates newer than the given date
+    assert filtered_cases.count() > 0
+    for case in filtered_cases:
+        assert case.ordered_at > some_order_date
