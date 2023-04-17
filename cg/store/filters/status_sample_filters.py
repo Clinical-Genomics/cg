@@ -9,12 +9,12 @@ from cg.store.models import Sample, Customer
 
 def filter_samples_by_internal_id(internal_id: str, samples: Query, **kwargs) -> Query:
     """Return sample by internal id."""
-    return samples.filter_by(internal_id=internal_id)
+    return samples.filter(Sample.internal_id == internal_id)
 
 
 def filter_samples_by_name(name: str, samples: Query, **kwargs) -> Query:
     """Return sample with sample name."""
-    return samples.filter_by(name=name)
+    return samples.filter(Sample.name == name)
 
 
 def filter_samples_with_type(samples: Query, tissue_type: SampleType, **kwargs) -> Query:

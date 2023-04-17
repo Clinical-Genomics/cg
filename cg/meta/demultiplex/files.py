@@ -8,23 +8,6 @@ from cg.constants.symbols import UNDERSCORE
 LOG = logging.getLogger(__name__)
 
 
-def rename_index_dir(unaligned_dir: Path, dry_run: bool = False) -> None:
-    """Rename the index directory by adding the prefix Project_"""
-    for sub_dir in unaligned_dir.iterdir():
-        if not sub_dir.is_dir():
-            continue
-        if sub_dir.name != "indexcheck":
-            continue
-        if sub_dir.name.startswith("Project_"):
-            LOG.debug("%s is already renamed", sub_dir)
-            continue
-        index_directory: Path = unaligned_dir / "_".join(["Project", sub_dir.name])
-        LOG.debug("Move index directory %s", sub_dir)
-        if not dry_run:
-            LOG.debug("Move directory to %s", index_directory)
-            sub_dir.rename(index_directory)
-
-
 def rename_project_directory(
     project_directory: Path, flow_cell_id: str, dry_run: bool = False
 ) -> None:

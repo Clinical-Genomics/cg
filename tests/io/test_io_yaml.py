@@ -1,12 +1,6 @@
 from pathlib import Path
 
-from cg.io.yaml import (
-    read_yaml,
-    write_yaml,
-    read_yaml_stream,
-    write_yaml_stream,
-    is_valid_yaml_file,
-)
+from cg.io.yaml import read_yaml, write_yaml, read_yaml_stream, write_yaml_stream
 from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
@@ -27,32 +21,6 @@ def test_get_content_from_file(case_qc_sample_info_path: Path):
 
     # THEN assert that it was successfully created
     assert isinstance(sample_info_object, MipBaseSampleInfo)
-
-
-def test_is_valid_yaml_file_when_yaml(case_qc_sample_info_path: Path):
-    """
-    Tests is_valid_yaml_file when loading yaml
-    """
-    # GIVEN a yaml file
-
-    # WHEN reading the yaml file
-    is_yaml: bool = is_valid_yaml_file(file_path=case_qc_sample_info_path)
-
-    # Then assert is_valid_yaml_file returns true
-    assert is_yaml
-
-
-def test_is_valid_yaml_file_when_not_yaml(invalid_yaml_file: Path):
-    """
-    Tests is_valid_yaml_file when not loading yaml
-    """
-    # GIVEN a file which is not yaml
-
-    # WHEN reading the file
-    is_yaml: bool = is_valid_yaml_file(file_path=invalid_yaml_file)
-
-    # Then assert is_valid_yaml_file returns false
-    assert not is_yaml
 
 
 def test_get_content_from_stream(yaml_stream: str):
