@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, List, Optional, Iterator, Union, Dict
+from typing import Callable, List, Optional, Iterator, Union
 
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query
@@ -667,17 +667,14 @@ class FindBusinessDataHandler(BaseHandler):
             ],
         ).all()
 
-    def get_samples_by_any_id(self, **identifiers: Dict) -> Query:
-        """Return a sample query filtered by the given names and values of Sample attributes."""
-        samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
+    def get_samples_by_any_id(self, **identifiers: dict) -> Query:
+        records = self._get_query(table=Sample)
+
         for identifier_name, identifier_value in identifiers.items():
-            samples: Query = apply_sample_filter(
-                filter_functions=[SampleFilter.FILTER_BY_IDENTIFIER_NAME_AND_VALUE],
-                samples=samples,
-                identifier_name=identifier_name,
-                identifier_value=identifier_value,
-            )
-        return samples
+            identifier = getattr(Sample, identifier_name)
+            records = records.filter(identifier.contains(identifier_value))
+
+        return records.order_by(Sample.internal_id.desc())
 
     def get_sample_by_name(self, name: str) -> Sample:
         """Get sample by name."""

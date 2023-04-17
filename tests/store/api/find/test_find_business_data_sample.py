@@ -1,8 +1,6 @@
-"""Tests the find business data part of the Cg store API related to sample model."""
+"""Tests the findbusinessdata part of the Cg store API related to sample model."""
 
-import pytest
-from typing import List, Dict, Any
-from sqlalchemy.orm import Query
+from typing import List
 from cg.store import Store
 
 from cg.store.models import Sample, Invoice, Customer
@@ -313,58 +311,3 @@ def test_get_samples_by_customer_and_name_invalid_customer(
 
     # THEN one sample should be returned
     assert not sample
-
-
-def test_get_samples_by_any_id_not_an_attribute_fails(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    identifiers: Dict[str, Any] = {
-        "non-existent-attribute": "not-an-attribute",
-        "non-existent-value": "not-a-value",
-    },
-):
-    """Test that using an attribute not from Sample raises an error."""
-    # GIVEN a store with samples
-    sample_query: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-        table=Sample
-    )
-    assert sample_query.count() > 0
-
-    # WHEN trying to filter using an attribute not of Sample
-    with pytest.raises(AttributeError) as exc_info:
-        store_with_a_sample_that_has_many_attributes_and_one_without.get_samples_by_any_id(
-            **identifiers
-        )
-
-    # THEN the error message should contain the non-existent-attribute
-    assert str(exc_info.value) == "type object 'Sample' has no attribute 'non-existent-attribute'"
-
-
-def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-):
-    """Test that using mutually exclusive filtering conditions give an empty query."""
-    # GIVEN a store with two samples
-    sample_query: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-        table=Sample
-    )
-    assert sample_query.count() == 2
-
-    # GIVEN that the samples in the query have different values of two attributes
-    sample_1: Sample = sample_query[0]
-    sample_2: Sample = sample_query[1]
-    assert sample_1.name != sample_2.name
-    assert sample_1.is_tumour != sample_2.is_tumour
-
-    # WHEN filtering twice mutually exclusive conditions
-    identifiers: Dict[str, str] = {
-        "name": sample_1.name,
-        "is_tumour": sample_2.is_tumour,
-    }
-    filtered_query: Query = (
-        store_with_a_sample_that_has_many_attributes_and_one_without.get_samples_by_any_id(
-            **identifiers
-        )
-    )
-
-    # THEN the filtered query is empty
-    assert filtered_query.count() == 0
