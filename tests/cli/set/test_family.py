@@ -96,17 +96,17 @@ def test_set_family_customer(
     """Test to set a case using an existing customer"""
     # GIVEN a database with a case and a customer not yet on the case
     customer_id = helpers.ensure_customer(base_store, customer_id="a_customer").internal_id
-    case: Family = helpers.add_case(base_store)
-    assert customer_id != case.customer.internal_id
+    case_obj: Family = helpers.add_case(base_store)
+    assert customer_id != case_obj.customer.internal_id
 
     # WHEN setting a customer of a case
     result = cli_runner.invoke(
-        case, [case.internal_id, "--customer-id", customer_id], obj=base_context
+        case, [case_obj.internal_id, "--customer-id", customer_id], obj=base_context
     )
 
     # THEN it should set customer on the case
     assert result.exit_code == SUCCESS
-    assert customer_id == case.customer.internal_id
+    assert customer_id == case_obj.customer.internal_id
 
 
 def test_set_family_bad_data_analysis(
