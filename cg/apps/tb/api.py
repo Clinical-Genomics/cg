@@ -151,7 +151,7 @@ class TrailblazerAPI:
         email: str = None,
         data_analysis: Pipeline = None,
         ticket: str = None,
-        task_manager: str = "NF_tower",
+        task_manager: str = "Slurm",
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
