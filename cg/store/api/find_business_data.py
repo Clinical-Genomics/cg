@@ -427,7 +427,7 @@ class FindBusinessDataHandler(BaseHandler):
             flow_cells=self._get_join_flow_cell_sample_links_query(),
             filter_functions=[FlowCellFilter.GET_BY_CASE],
             case=case,
-        )
+        ).all()
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
@@ -439,9 +439,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
-        flow_cells: Optional[List[Flowcell]] = list(
-            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=case_id))
+        flow_cells: Optional[List[Flowcell]] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=case_id)
         )
+
         if not flow_cells:
             LOG.info("No flow cells found")
             return False
