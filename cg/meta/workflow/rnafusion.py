@@ -160,7 +160,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         config_path = self.get_trailblazer_config_path(case_id=case_id)
         LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
         WriteFile.write_file_from_content(
-            content={case_id: tower_id},
+            content={case_id: [tower_id]},
             file_format=FileFormat.YAML,
             file_path=config_path,
         )
