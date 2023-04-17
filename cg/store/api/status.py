@@ -9,6 +9,7 @@ from typing_extensions import Literal
 from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
 from cg.store.models import (
     Analysis,
     Application,
@@ -568,19 +569,31 @@ class StatusHandler(BaseHandler):
         )
 
         # customer filters
+        customer_filters = []
         if customer_id or exclude_customer_id:
             cases_query = cases_query.join(Family.customer)
 
         if customer_id:
-            cases_query = cases_query.filter(Customer.internal_id == customer_id)
+            customer_filters.append(CustomerFilter.FILTER_BY_INTERNAL_ID)
 
         if exclude_customer_id:
-            cases_query = cases_query.filter(Customer.internal_id != exclude_customer_id)
+            customer_filters.append(CustomerFilter.EXCLUDE_INTERNAL_ID)
+
+        cases_query = apply_customer_filter(
+            customers=cases_query,
+            filter_functions=customer_filters,
+            customer_internal_id=customer_id,
+            exclude_customer_internal_id=exclude_customer_id,
+        )
 
         # sample filters
         if sample_id:
             cases_query = cases_query.join(Family.links, FamilySample.sample)
-            cases_query = cases_query.filter(Sample.internal_id.ilike(f"%{sample_id}%"))
+            cases_query = apply_sample_filter(
+                samples=cases_query,
+                filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID_PATTERN],
+                internal_id_pattern=sample_id,
+            )
         else:
             cases_query = cases_query.outerjoin(Family.links, FamilySample.sample)
 
