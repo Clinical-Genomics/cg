@@ -60,27 +60,25 @@ def case(
     abort_on_empty_options(options=options)
 
     status_db: Store = context.status_db
-    case_object: Family = get_case(case_id=case_id, status_db=status_db)
+    case: Family = get_case(case_id=case_id, status_db=status_db)
 
     if action:
-        update_action(case=case_object, action=action)
+        update_action(case=case, action=action)
 
     if customer_id:
-        update_customer(case=case_object, customer_id=customer_id, status_db=status_db)
+        update_customer(case=case, customer_id=customer_id, status_db=status_db)
 
     if data_analysis:
-        update_data_analysis(case=case_object, data_analysis=data_analysis)
+        update_data_analysis(case=case, data_analysis=data_analysis)
 
     if data_delivery:
-        update_data_delivery(case=case_object, data_delivery=data_delivery)
+        update_data_delivery(case=case, data_delivery=data_delivery)
 
     if panel_abbreviations:
-        update_panels(
-            case=case_object, panel_abbreviations=panel_abbreviations, status_db=status_db
-        )
+        update_panels(case=case, panel_abbreviations=panel_abbreviations, status_db=status_db)
 
     if priority:
-        update_priority(case=case_object, priority=priority)
+        update_priority(case=case, priority=priority)
 
     status_db.commit()
 
