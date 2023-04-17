@@ -406,10 +406,10 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[FlowCellFilter.GET_WITH_STATUSES],
         )
 
-    def get_flow_cell_by_enquiry_and_status(
+    def get_flow_cell_by_name_pattern_and_status(
         self, flow_cell_statuses: List[str], name_pattern: str
     ) -> List[Flowcell]:
-        """Return flow cell enquiry snd status."""
+        """Return flow cell by name pattern and status."""
         filter_functions: List[FlowCellFilter] = [
             FlowCellFilter.GET_WITH_STATUSES,
             FlowCellFilter.GET_BY_NAME_PATTERN,
