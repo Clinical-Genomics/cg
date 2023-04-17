@@ -1,7 +1,7 @@
 """Handler to find business data objects."""
 import datetime as dt
 import logging
-from typing import Callable, List, Optional, Iterator, Union
+from typing import Callable, List, Optional, Iterator, Union, Dict
 
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Query
@@ -386,12 +386,12 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[FlowCellFilter.GET_BY_ID],
         ).first()
 
-    def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Flowcell:
-        """Return flow cell enquiry."""
+    def get_flow_cell_by_name_pattern(self, name_pattern: str) -> Flowcell:
+        """Return flow cell by name pattern."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id_enquiry,
-            filter_functions=[FlowCellFilter.GET_BY_ID_AND_ENQUIRY],
+            name_pattern=name_pattern,
+            filter_functions=[FlowCellFilter.GET_BY_NAME_PATTERN],
         ).first()
 
     def get_flow_cells(self) -> List[Flowcell]:
@@ -406,21 +406,20 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[FlowCellFilter.GET_WITH_STATUSES],
         )
 
-    def get_flow_cell_by_enquiry_and_status(
-        self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
+    def get_flow_cell_by_name_pattern_and_status(
+        self, flow_cell_statuses: List[str], name_pattern: str
     ) -> List[Flowcell]:
-        """Return flow cell enquiry snd status."""
+        """Return flow cell by name pattern and status."""
         filter_functions: List[FlowCellFilter] = [
             FlowCellFilter.GET_WITH_STATUSES,
-            FlowCellFilter.GET_BY_ID_AND_ENQUIRY,
+            FlowCellFilter.GET_BY_NAME_PATTERN,
         ]
-        flow_cells: List[Flowcell] = apply_flow_cell_filter(
+        return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id_enquiry,
+            name_pattern=name_pattern,
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=filter_functions,
-        )
-        return flow_cells
+        ).all()
 
     def get_flow_cells_by_case(self, case: Family) -> Optional[List[Flowcell]]:
         """Return flow cells for case."""
@@ -667,14 +666,17 @@ class FindBusinessDataHandler(BaseHandler):
             ],
         ).all()
 
-    def get_samples_by_any_id(self, **identifiers: dict) -> Query:
-        records = self._get_query(table=Sample)
-
+    def get_samples_by_any_id(self, **identifiers: Dict) -> Query:
+        """Return a sample query filtered by the given names and values of Sample attributes."""
+        samples: Query = self._get_query(table=Sample).order_by(Sample.internal_id.desc())
         for identifier_name, identifier_value in identifiers.items():
-            identifier = getattr(Sample, identifier_name)
-            records = records.filter(identifier.contains(identifier_value))
-
-        return records.order_by(Sample.internal_id.desc())
+            samples: Query = apply_sample_filter(
+                filter_functions=[SampleFilter.FILTER_BY_IDENTIFIER_NAME_AND_VALUE],
+                samples=samples,
+                identifier_name=identifier_name,
+                identifier_value=identifier_value,
+            )
+        return samples
 
     def get_sample_by_name(self, name: str) -> Sample:
         """Get sample by name."""
