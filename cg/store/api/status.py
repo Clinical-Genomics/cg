@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 
 from sqlalchemy.orm import Query
@@ -233,12 +233,12 @@ class StatusHandler(BaseHandler):
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: List[CaseFilter] = [
             CaseFilter.GET_HAS_INACTIVE_ANALYSIS,
-            CaseFilter.GET_OLD,
+            CaseFilter.GET_OLD_BY_CREATION_DATE,
         ]
         return apply_case_filter(
             filter_functions=case_filter_functions,
             cases=self._get_query(table=Family),
-            date=date_threshold,
+            creation_date=date_threshold,
         ).all()
 
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
@@ -538,39 +538,55 @@ class StatusHandler(BaseHandler):
         priority: str,
         sample_id: str,
     ) -> Query:
-        case_q = self.Family.query
-        # family filters
+        cases_query: Query = self._get_query(table=Family)
+        filter_functions: List[Callable] = []
+
+        filter_case_order_date = None
         if days != 0:
-            filter_date = datetime.now() - timedelta(days=days)
-            case_q = case_q.filter(Family.ordered_at > filter_date)
+            filter_case_order_date = datetime.now() - timedelta(days=days)
+            filter_functions.append(CaseFilter.GET_NEW_BY_ORDER_DATE)
         if case_action:
-            case_q = case_q.filter(Family.action == case_action)
+            filter_functions.append(CaseFilter.FILTER_BY_ACTION)
         if priority:
-            case_q = case_q.filter(Family.priority == priority)
+            filter_functions.append(CaseFilter.FILTER_BY_PRIORITY)
         if internal_id:
-            case_q = case_q.filter(Family.internal_id.ilike(f"%{internal_id}%"))
+            filter_functions.append(CaseFilter.FILTER_BY_INTERNAL_ID_SEARCH)
         if name:
-            case_q = case_q.filter(Family.name.ilike(f"%{name}%"))
+            filter_functions.append(CaseFilter.FILTER_BY_NAME_SEARCH)
         if data_analysis:
-            case_q = case_q.filter(Family.data_analysis.ilike(f"%{data_analysis}%"))
+            filter_functions.append(CaseFilter.FILTER_BY_PIPELINE_SEARCH)
+
+        cases_query = apply_case_filter(
+            cases=cases_query,
+            filter_functions=filter_functions,
+            order_date=filter_case_order_date,
+            action=case_action,
+            priority=priority,
+            internal_id_search=internal_id,
+            name_search=name,
+            pipeline_search=data_analysis,
+        )
+
         # customer filters
         if customer_id or exclude_customer_id:
-            case_q = case_q.join(Family.customer)
+            cases_query = cases_query.join(Family.customer)
 
         if customer_id:
-            case_q = case_q.filter(Customer.internal_id == customer_id)
+            cases_query = cases_query.filter(Customer.internal_id == customer_id)
 
         if exclude_customer_id:
-            case_q = case_q.filter(Customer.internal_id != exclude_customer_id)
+            cases_query = cases_query.filter(Customer.internal_id != exclude_customer_id)
+
         # sample filters
         if sample_id:
-            case_q = case_q.join(Family.links, FamilySample.sample)
-            case_q = case_q.filter(Sample.internal_id.ilike(f"%{sample_id}%"))
+            cases_query = cases_query.join(Family.links, FamilySample.sample)
+            cases_query = cases_query.filter(Sample.internal_id.ilike(f"%{sample_id}%"))
         else:
-            case_q = case_q.outerjoin(Family.links, FamilySample.sample)
+            cases_query = cases_query.outerjoin(Family.links, FamilySample.sample)
+
         # other joins
-        case_q = case_q.outerjoin(Family.analyses, Sample.invoice, Sample.flowcells)
-        return case_q
+        cases_query = cases_query.outerjoin(Family.analyses, Sample.invoice, Sample.flowcells)
+        return cases_query
 
     @staticmethod
     def _is_rerun(
