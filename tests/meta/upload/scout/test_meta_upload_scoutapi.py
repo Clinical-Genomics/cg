@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from cg.io.yaml import is_valid_yaml_file
+from cg.io.yaml import read_yaml
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig, ScoutLoadConfig
@@ -68,8 +68,8 @@ def test_save_config_creates_yaml(
     # WHEN calling method to save config
     upload_scout_api.save_config_file(upload_config=mip_load_config, file_path=tmp_file)
 
-    # THEN the should be of yaml type
-    assert is_valid_yaml_file(file_path=tmp_file)
+    # THEN it is possible to read the file as yaml
+    assert read_yaml(file_path=tmp_file)
 
 
 def test_add_scout_config_to_hk(upload_scout_api: UploadScoutAPI, tmp_file):

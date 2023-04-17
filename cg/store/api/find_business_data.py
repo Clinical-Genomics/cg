@@ -112,10 +112,6 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE],
         ).all()
 
-    def get_analyses_for_each_case_with_latest_started_at_date(self) -> List[Analysis]:
-        """Return analysis for all cases and latest started at date."""
-        return self._get_latest_analyses_for_cases_query().all()
-
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
         """Return latest not uploaded analysis for each case given a pipeline."""
         filter_functions: List[AnalysisFilter] = [
@@ -147,6 +143,15 @@ class FindBusinessDataHandler(BaseHandler):
     def deliveries(self) -> Query:
         """Fetch all deliveries."""
         return self.Delivery.query
+
+    def get_cases_created_within_days(self, days: int) -> List[Family]:
+        """Fetch all cases created within the past days."""
+        newer_than_date = dt.datetime.now() - dt.timedelta(days=days)
+        return apply_case_filter(
+            filter_functions=[CaseFilter.GET_NEW],
+            cases=self._get_query(table=Family),
+            date=newer_than_date,
+        ).all()
 
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
@@ -716,4 +721,25 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[CaseFilter.GET_WITH_PIPELINE, CaseFilter.IS_RUNNING],
             cases=self._get_query(table=Family),
             pipeline=pipeline,
+        ).all()
+
+    def get_not_analysed_cases_by_sample_internal_id(
+        self,
+        sample_internal_id: str,
+    ) -> List[Family]:
+        """Get not analysed cases by sample internal id."""
+
+        query: Query = self._get_join_case_and_sample_query()
+
+        not_analysed_cases: Query = apply_case_filter(
+            cases=query,
+            filter_functions=[
+                CaseFilter.GET_NOT_ANALYSED,
+            ],
+        )
+
+        return apply_sample_filter(
+            samples=not_analysed_cases,
+            filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
+            internal_id=sample_internal_id,
         ).all()
