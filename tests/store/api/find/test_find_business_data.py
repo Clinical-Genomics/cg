@@ -60,7 +60,7 @@ def test_get_flow_cells(re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the flow cells
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
 
     # THEN a flow cells should be returned
     assert flow_cells
@@ -148,7 +148,7 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
     # GIVEN a store with two flow cells
 
     # GIVEN a flow cell that exist in status db with status "requested"
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
     flow_cells[0].status = FlowCellStatus.REQUESTED
     re_sequenced_sample_store.add_commit(flow_cells[0])
 
