@@ -17,7 +17,9 @@ depends_on = None
 
 
 def upgrade():
-    op.drop_table("backup")
+    table_name = "backup"
+    if table_name in op.get_context().bind.table_names():
+        op.drop_table(table_name)
 
 
 def downgrade():
