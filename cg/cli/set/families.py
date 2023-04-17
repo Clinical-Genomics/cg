@@ -49,7 +49,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Famil
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
 @click.pass_context
-def families(
+def cases(
     context: click.Context,
     action: Optional[str],
     priority: Optional[Priority],

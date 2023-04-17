@@ -2,7 +2,7 @@
 import logging
 
 import pytest
-from cg.cli.set.families import families
+from cg.cli.set.families import cases
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family, Sample
@@ -27,7 +27,7 @@ def test_set_families_by_sample_identifiers(
 
     # WHEN calling set families with valid sample identifiers
     cli_runner.invoke(
-        families,
+        cases,
         ["--sample-identifier", identifier_key, identifier_value],
         obj=base_context,
     )
