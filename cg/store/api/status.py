@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 
 from sqlalchemy.orm import Query
@@ -538,9 +538,9 @@ class StatusHandler(BaseHandler):
         priority: str,
         sample_id: str,
     ) -> Query:
-        case_q = self._get_query(table=Family)
-        filter_functions = []
-        # family filters
+        cases_query: Query = self._get_query(table=Family)
+        filter_functions: List[Callable] = []
+
         filter_case_order_date = None
         if days != 0:
             filter_case_order_date = datetime.now() - timedelta(days=days)
@@ -556,8 +556,8 @@ class StatusHandler(BaseHandler):
         if data_analysis:
             filter_functions.append(CaseFilter.FILTER_BY_PIPELINE_SEARCH)
 
-        case_q = apply_case_filter(
-            cases=case_q,
+        cases_query = apply_case_filter(
+            cases=cases_query,
             filter_functions=filter_functions,
             order_date=filter_case_order_date,
             action=case_action,
@@ -569,24 +569,24 @@ class StatusHandler(BaseHandler):
 
         # customer filters
         if customer_id or exclude_customer_id:
-            case_q = case_q.join(Family.customer)
+            cases_query = cases_query.join(Family.customer)
 
         if customer_id:
-            case_q = case_q.filter(Customer.internal_id == customer_id)
+            cases_query = cases_query.filter(Customer.internal_id == customer_id)
 
         if exclude_customer_id:
-            case_q = case_q.filter(Customer.internal_id != exclude_customer_id)
+            cases_query = cases_query.filter(Customer.internal_id != exclude_customer_id)
 
         # sample filters
         if sample_id:
-            case_q = case_q.join(Family.links, FamilySample.sample)
-            case_q = case_q.filter(Sample.internal_id.ilike(f"%{sample_id}%"))
+            cases_query = cases_query.join(Family.links, FamilySample.sample)
+            cases_query = cases_query.filter(Sample.internal_id.ilike(f"%{sample_id}%"))
         else:
-            case_q = case_q.outerjoin(Family.links, FamilySample.sample)
+            cases_query = cases_query.outerjoin(Family.links, FamilySample.sample)
 
         # other joins
-        case_q = case_q.outerjoin(Family.analyses, Sample.invoice, Sample.flowcells)
-        return case_q
+        cases_query = cases_query.outerjoin(Family.analyses, Sample.invoice, Sample.flowcells)
+        return cases_query
 
     @staticmethod
     def _is_rerun(

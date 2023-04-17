@@ -181,12 +181,7 @@ def filter_cases_by_name_search(cases: Query, name_search: str, **kwargs) -> Que
     return cases.filter(Family.name.like(f"%{name_search}%"))
 
 
-def filter_cases_by_pipeline_search(cases: Query, pipeline_search: str, **kwargs) -> Query:
-    """Return cases with pipeline matching the search pattern."""
-    return cases.filter(Family.data_analysis.ilike(f"%{pipeline_search}%"))
-
-
-def filter_cases_by_priority(cases: Query, priority: int, **kwargs) -> Query:
+def filter_cases_by_priority(cases: Query, priority: str, **kwargs) -> Query:
     """Return cases with matching priority."""
     return cases.filter(Family.priority == priority)
 
@@ -200,6 +195,11 @@ def get_newer_cases_by_order_date(cases: Query, order_date: datetime, **kwargs) 
     """Return cases newer than date."""
     cases = cases.filter(Family.ordered_at > order_date)
     return cases.order_by(Family.ordered_at.asc())
+
+
+def filter_cases_by_pipeline_search(cases: Query, pipeline_search: str, **kwargs) -> Query:
+    """Return cases with pipeline search pattern."""
+    return cases.filter(Family.data_analysis.ilike(f"%{pipeline_search}%"))
 
 
 def apply_case_filter(
@@ -217,9 +217,9 @@ def apply_case_filter(
     internal_id_search: Optional[str] = None,
     name_search: Optional[str] = None,
     case_search: Optional[str] = None,
-    pipeline_search: Optional[str] = None,
-    priority: Optional[int] = None,
+    priority: Optional[str] = None,
     order_date: Optional[datetime] = None,
+    pipeline_search: Optional[str] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
@@ -237,9 +237,9 @@ def apply_case_filter(
             internal_id_search=internal_id_search,
             name_search=name_search,
             case_search=case_search,
-            pipeline_search=pipeline_search,
             priority=priority,
             order_date=order_date,
+            pipeline_search=pipeline_search,
         )
     return cases
 
@@ -272,6 +272,6 @@ class CaseFilter(Enum):
     FILTER_BY_CASE_SEARCH: Callable = filter_cases_by_case_search
     FILTER_BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
     FILTER_BY_NAME_SEARCH: Callable = filter_cases_by_name_search
-    FILTER_BY_PIPELINE_SEARCH: Callable = filter_cases_by_pipeline_search
     FILTER_BY_PRIORITY: Callable = filter_cases_by_priority
     ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
+    FILTER_BY_PIPELINE_SEARCH: Callable = filter_cases_by_pipeline_search
