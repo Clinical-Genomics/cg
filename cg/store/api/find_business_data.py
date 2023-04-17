@@ -3,7 +3,7 @@ import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union
 
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus, Pipeline
@@ -78,59 +78,57 @@ class FindBusinessDataHandler(BaseHandler):
             .sample.application_version.application
         )
 
-    def analyses_ready_for_vogue_upload(
+    def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
+        """Return all cases completed after a given date that have not been uploaded to Vogue."""
+        filter_functions = [
+            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
+            AnalysisFilter.FILTER_COMPLETED_AT_AFTER,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=filter_functions,
+            completed_at_date=completed_at_after,
+        ).all()
+
+    def get_analysis_for_vogue_upload_completed_before(self, completed_at_before: dt.datetime):
+        """Return all cases completed before a given date that have not been uploaded to Vogue."""
+        filter_functions = [
+            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
+            AnalysisFilter.FILTER_COMPLETED_AT_BEFORE,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=filter_functions,
+            completed_at_date=completed_at_before,
+        ).all()
+
+    def get_analyses_for_vogue_upload(
         self,
-        completed_after: Optional[dt.date],
-        completed_before: Optional[dt.date],
-    ) -> Query:
-        """Fetch all cases with a finished analysis that has not been uploaded to Vogue.
-        Optionally fetch those cases finished before and/or after a specified date"""
-        records = self.latest_analyses().filter(Analysis.uploaded_to_vogue_at.is_(None))
+    ) -> List[Analysis]:
+        """Return the latest analysis not uploaded to Vogue for each case."""
 
-        if completed_after:
-            records = records.filter(Analysis.completed_at > completed_after)
-        if completed_before:
-            records = records.filter(Analysis.completed_at < completed_before)
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=[AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE],
+        ).all()
 
-        return records
-
-    def get_latest_nipt_analysis_to_upload(self):
-        """Return latest nipt analysis."""
-        latest_nipt_analyses = self.latest_analyses().filter(Analysis.pipeline == Pipeline.FLUFFY)
-        return latest_nipt_analyses.filter(Analysis.uploaded_at.is_(None))
-
-    def get_latest_microsalt_analysis_to_upload(self):
-        """Return latest mircosalt analysis."""
-        return (
-            self.latest_analyses()
-            .filter(Analysis.pipeline == Pipeline.MICROSALT)
-            .filter(Analysis.uploaded_at.is_(None))
-        )
-
-    def latest_analyses(self) -> Query:
-        """Fetch latest analysis for all cases."""
-
-        records = self.Analysis.query
-        sub_query = (
-            self.Analysis.query.join(Analysis.family)
-            .group_by(Family.id)
-            .with_entities(Analysis.family_id, func.max(Analysis.started_at).label("started_at"))
-            .subquery()
-        )
-        records = records.join(
-            sub_query,
-            and_(
-                self.Analysis.family_id == sub_query.c.family_id,
-                self.Analysis.started_at == sub_query.c.started_at,
-            ),
-        )
-        return records
+    def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
+        """Return latest not uploaded analysis for each case given a pipeline."""
+        filter_functions: List[AnalysisFilter] = [
+            AnalysisFilter.FILTER_WITH_PIPELINE,
+            AnalysisFilter.FILTER_IS_NOT_UPLOADED,
+        ]
+        return apply_analysis_filter(
+            analyses=self._get_latest_analyses_for_cases_query(),
+            filter_functions=filter_functions,
+            pipeline=pipeline,
+        ).all()
 
     def get_analysis_by_case_entry_id_and_started_at(
         self, case_entry_id: int, started_at_date: dt.datetime
     ) -> Analysis:
         """Fetch an analysis."""
-        filter_functions = [
+        filter_functions: List[AnalysisFilter] = [
             AnalysisFilter.FILTER_BY_CASE_ENTRY_ID,
             AnalysisFilter.FILTER_BY_STARTED_AT,
         ]
@@ -145,6 +143,15 @@ class FindBusinessDataHandler(BaseHandler):
     def deliveries(self) -> Query:
         """Fetch all deliveries."""
         return self.Delivery.query
+
+    def get_cases_created_within_days(self, days: int) -> List[Family]:
+        """Fetch all cases created within the past days."""
+        newer_than_date = dt.datetime.now() - dt.timedelta(days=days)
+        return apply_case_filter(
+            filter_functions=[CaseFilter.GET_NEW],
+            cases=self._get_query(table=Family),
+            date=newer_than_date,
+        ).all()
 
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
@@ -252,26 +259,18 @@ class FindBusinessDataHandler(BaseHandler):
         """Return all cases."""
         return self._get_query(table=Family).all()
 
-    def family_samples(self, family_id: str) -> List[FamilySample]:
+    def get_case_samples_by_case_id(self, case_internal_id: str) -> List[FamilySample]:
         """Return the case-sample links associated with a case."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
-            case_id=family_id,
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
+            case_internal_id=case_internal_id,
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
-    def get_sample_cases(self, sample_id: str) -> Query:
-        """Return the case-sample links associated with a sample."""
-        return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE],
-            sample_id=sample_id,
-            case_samples=self._get_join_case_sample_query(),
-        )
-
-    def get_cases_from_sample(self, sample_entry_id: str) -> Query:
+    def get_case_samples_from_sample_entry_id(self, sample_entry_id: str) -> Query:
         """Return cases related to a given sample."""
         return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_ASSOCIATED_WITH_SAMPLE_BY_ENTRY_ID],
+            filter_functions=[CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_ENTRY_ID],
             sample_entry_id=sample_entry_id,
             case_samples=self._get_join_case_sample_query(),
         )
@@ -497,13 +496,18 @@ class FindBusinessDataHandler(BaseHandler):
         ).all()
         return pools + samples
 
-    def link(self, family_id: str, sample_id: str) -> FamilySample:
-        """Find a link between a family and a sample."""
-        return (
-            self.FamilySample.query.join(FamilySample.family, FamilySample.sample)
-            .filter(Family.internal_id == family_id, Sample.internal_id == sample_id)
-            .first()
-        )
+    def get_case_sample_link(self, case_internal_id: str, sample_internal_id: str) -> FamilySample:
+        """Return a case-sample link between a family and a sample."""
+        filter_functions: List[CaseSampleFilter] = [
+            CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID,
+            CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID,
+        ]
+        return apply_case_sample_filter(
+            filter_functions=filter_functions,
+            case_samples=self._get_join_case_sample_query(),
+            case_internal_id=case_internal_id,
+            sample_internal_id=sample_internal_id,
+        ).first()
 
     def new_invoice_id(self) -> int:
         """Fetch invoices."""
@@ -682,9 +686,9 @@ class FindBusinessDataHandler(BaseHandler):
     def get_samples_by_type(self, case_id: str, sample_type: SampleType) -> Optional[List[Sample]]:
         """Get samples given a tissue type."""
         samples: Query = apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_SAMPLES_ASSOCIATED_WITH_CASE],
+            filter_functions=[CaseSampleFilter.GET_SAMPLES_IN_CASE_BY_INTERNAL_ID],
             case_samples=self._get_join_sample_family_query(),
-            case_id=case_id,
+            case_internal_id=case_id,
         )
         samples: Query = apply_sample_filter(
             filter_functions=[SampleFilter.FILTER_WITH_TYPE],
@@ -717,4 +721,25 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[CaseFilter.GET_WITH_PIPELINE, CaseFilter.IS_RUNNING],
             cases=self._get_query(table=Family),
             pipeline=pipeline,
+        ).all()
+
+    def get_not_analysed_cases_by_sample_internal_id(
+        self,
+        sample_internal_id: str,
+    ) -> List[Family]:
+        """Get not analysed cases by sample internal id."""
+
+        query: Query = self._get_join_case_and_sample_query()
+
+        not_analysed_cases: Query = apply_case_filter(
+            cases=query,
+            filter_functions=[
+                CaseFilter.GET_NOT_ANALYSED,
+            ],
+        )
+
+        return apply_sample_filter(
+            samples=not_analysed_cases,
+            filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
+            internal_id=sample_internal_id,
         ).all()

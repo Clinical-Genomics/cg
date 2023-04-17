@@ -25,6 +25,7 @@ werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
 # utils
 ansi
+cachetools
 cgmodels>=0.10.5
 coloredlogs
 email-validator

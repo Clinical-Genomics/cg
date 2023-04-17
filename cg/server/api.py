@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import http
 import logging
 import json
@@ -5,6 +6,7 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from cachetools import TTLCache
 
 import requests
 from sqlalchemy.exc import IntegrityError
@@ -18,18 +20,57 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell
+from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
-from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
+
+cache = TTLCache(maxsize=1, ttl=3600)
+cache_certificates_key = "certs"
+cache[cache_certificates_key] = None
+
+
+def get_certificate_ttl(response_data) -> int:
+    """Extract time to live in seconds for certificate from response headers."""
+    expires_header = response_data.headers.get("Expires")
+    expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
+    ttl = int((expires - datetime.utcnow()).total_seconds())
+
+    return ttl
+
+
+def fetch_and_cache_google_oauth2_certificates():
+    """Fetch and cache Google OAuth2 certificates."""
+    global cache
+
+    url = "https://www.googleapis.com/oauth2/v1/certs"
+    response = requests.get(url)
+    response.raise_for_status()
+
+    certs = response.json()
+    ttl = get_certificate_ttl(response_data=response)
+
+    cache = TTLCache(maxsize=1, ttl=ttl)
+    cache[cache_certificates_key] = certs
+
+    return certs
+
+
+def get_google_oauth2_certificates():
+    """Get Google OAuth2 certificates from cache or fetch and cache them."""
+    certs = cache.get(cache_certificates_key)
+
+    if not certs:
+        certs = fetch_and_cache_google_oauth2_certificates()
+
+    return certs
 
 
 def is_public(route_function):
@@ -68,9 +109,7 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(
-            jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
-        )
+        user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificates())
     except ValueError:
         return abort(
             make_response(
@@ -145,7 +184,7 @@ def submit_order(order_type):
 @BLUEPRINT.route("/cases")
 def parse_cases():
     """Fetch cases."""
-    cases: List[Family] = db.cases(days=31)
+    cases: List[Family] = db.get_cases_created_within_days(days=31)
     return jsonify(cases=cases, total=len(cases))
 
 
@@ -338,13 +377,13 @@ def parse_flow_cell(flowcell_id):
 def parse_analyses():
     """Return analyses."""
     if request.args.get("status") == "delivery":
-        analyses: Query = db.analyses_to_deliver()
+        analyses: List[Analysis] = db.get_analyses_to_deliver_for_pipeline()
     elif request.args.get("status") == "upload":
-        analyses: Query = db.analyses_to_upload()
+        analyses: List[Analysis] = db.get_analyses_to_upload()
     else:
-        analyses: Query = db.Analysis.query
-    parsed_analysis: List[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses.limit(30)]
-    return jsonify(analyses=parsed_analysis, total=analyses.count())
+        analyses: List[Analysis] = db.get_analyses()
+    parsed_analysis: List[Dict] = [analysis_obj.to_dict() for analysis_obj in analyses[:30]]
+    return jsonify(analyses=parsed_analysis, total=len(analyses))
 
 
 @BLUEPRINT.route("/options")
