@@ -59,7 +59,7 @@ def test_set_case_bad_panel(
 def test_set_case_panel(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
-    """Test to set a case using an existing panel"""
+    """Test to set a case using an existing panel."""
     # GIVEN a database with a case and a panel not yet added to the case
     panel_id: str = helpers.ensure_panel(store=base_store, panel_abbreviation="a_panel").name
     case_id: str = helpers.add_case(store=base_store).internal_id
@@ -76,7 +76,7 @@ def test_set_case_panel(
 def test_set_case_priority(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
-    """Test that the added case gets the priority we send in"""
+    """Test that the added case gets the priority we send in."""
     # GIVEN a database with a case
     case_id: str = helpers.add_case(base_store).internal_id
     priority: str = "priority"
@@ -96,7 +96,7 @@ def test_set_case_priority(
 def test_set_case_customer(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
-    """Test to set a case using an existing customer"""
+    """Test to set a case using an existing customer."""
     # GIVEN a database with a case and a customer not yet on the case
     customer_id: str = helpers.ensure_customer(
         store=base_store, customer_id="a_customer"
@@ -117,7 +117,7 @@ def test_set_case_customer(
 def test_set_case_bad_data_analysis(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
-    """Test to set a case using a non-existing data_analysis"""
+    """Test to set a case using a non-existing data_analysis."""
     # GIVEN a database with a case
 
     # WHEN setting a data_analysis on a case
@@ -133,7 +133,7 @@ def test_set_case_bad_data_analysis(
 def test_set_case_data_analysis(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
-    """Test to set a case using an existing data_analysis"""
+    """Test to set a case using an existing data_analysis."""
 
     # GIVEN a database with a case and a data_analysis not yet set on the case
     data_analysis: str = Pipeline.FASTQ
@@ -155,7 +155,7 @@ def test_set_case_data_analysis(
 def test_set_case_bad_data_delivery(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
-    """Test to set a case using a non-existing data_delivery"""
+    """Test to set a case using a non-existing data_delivery."""
     # GIVEN a database with a case
 
     # WHEN setting a data_delivery on a case
@@ -171,7 +171,7 @@ def test_set_case_bad_data_delivery(
 def test_set_case_data_delivery(
     cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers: StoreHelpers
 ):
-    """Test to set a case using an existing data_delivery"""
+    """Test to set a case using an existing data_delivery."""
 
     # GIVEN a database with a case and a data_delivery not yet set on the case
     data_delivery: str = DataDelivery.FASTQ

@@ -2,13 +2,11 @@ import logging
 from typing import List, Optional, Set, Tuple
 
 import click
-from cg.constants import CASE_ACTIONS
+from cg.constants import CASE_ACTIONS, Priority
+from cg.cli.set.case import case
 from cg.store import Store
 from cg.store.models import Family, Sample
-
-from .case import case
-from ...constants import Priority
-from ...utils.click.EnumChoice import EnumChoice
+from cg.utils.click.EnumChoice import EnumChoice
 
 CONFIRM = "Continue?"
 
