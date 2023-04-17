@@ -5,7 +5,7 @@ import logging
 from typing import Iterable, List, Optional
 
 import click
-from cg.cli.set.families import cases
+from cg.cli.set.cases import cases
 from cg.cli.set.family import case
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError

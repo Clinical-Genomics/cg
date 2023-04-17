@@ -1,10 +1,10 @@
-"""Test methods for cg/cli/set/families"""
+"""This script tests the cli methods to set values of several cases in status-db."""
 import logging
 from click.testing import CliRunner
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.cli.set.families import cases
+from cg.cli.set.cases import cases
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family, Sample
