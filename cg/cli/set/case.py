@@ -60,7 +60,7 @@ def case(
     abort_on_empty_options(options=options)
 
     status_db: Store = context.status_db
-    case_object: Family = get_case(case_id, status_db)
+    case_object: Family = get_case(case_id=case_id, status_db=status_db)
 
     if action:
         update_action(case=case_object, action=action)

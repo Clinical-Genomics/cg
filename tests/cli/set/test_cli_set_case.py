@@ -163,7 +163,7 @@ def test_set_case_bad_data_delivery(
     case_id: str = helpers.add_case(base_store).internal_id
     result = cli_runner.invoke(case, [case_id, "--data-delivery", data_delivery], obj=base_context)
 
-    # THEN it should complain in non valid data_delivery instead of setting a value
+    # THEN it should complain in invalid data_delivery instead of setting a value
     assert result.exit_code != EXIT_SUCCESS
     assert str(data_delivery) != base_store.Family.query.first().data_delivery
 

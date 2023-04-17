@@ -22,12 +22,12 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
 def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Family]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id: List[Sample] = _get_samples_by_identifiers(identifiers, store)
-    case_list: Set[Family] = set()
+    cases: Set[Family] = set()
     for sample in samples_by_id:
         for link in sample.links:
-            case_list.add(link.family)
+            cases.add(link.family)
 
-    return list(case_list)
+    return list(cases)
 
 
 @click.command()
@@ -57,21 +57,21 @@ def cases(
 ):
     """Set values on many families at the same time"""
     store: Store = context.obj.status_db
-    case_list: List[Family] = _get_cases(identifiers, store)
+    cases: List[Family] = _get_cases(identifiers, store)
 
-    if not case_list:
+    if not cases:
         LOG.error("No cases to alter!")
         raise click.Abort
 
     LOG.info("Would alter cases:")
 
-    for case_obj in case_list:
+    for case_obj in cases:
         LOG.info(case_obj)
 
     if not (click.confirm(CONFIRM)):
         raise click.Abort
 
-    for case_obj in case_list:
+    for case_obj in cases:
         context.invoke(
             case,
             action=action,
