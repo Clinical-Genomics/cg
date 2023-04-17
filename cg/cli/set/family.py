@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
-@click.argument("family_id")
+@click.argument("case_id")
 @click.pass_obj
 def case(
     context: CGConfig,
@@ -44,7 +44,7 @@ def case(
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
     panel_abbreviations: Optional[Tuple[str]],
-    family_id: str,
+    case_id: str,
     customer_id: Optional[str],
 ):
     """Update information about a case."""
@@ -60,25 +60,27 @@ def case(
     abort_on_empty_options(options=options)
 
     status_db: Store = context.status_db
-    case: Family = get_case(family_id, status_db)
+    case_object: Family = get_case(case_id, status_db)
 
     if action:
-        update_action(case=case, action=action)
+        update_action(case=case_object, action=action)
 
     if customer_id:
-        update_customer(case=case, customer_id=customer_id, status_db=status_db)
+        update_customer(case=case_object, customer_id=customer_id, status_db=status_db)
 
     if data_analysis:
-        update_data_analysis(case=case, data_analysis=data_analysis)
+        update_data_analysis(case=case_object, data_analysis=data_analysis)
 
     if data_delivery:
-        update_data_delivery(case=case, data_delivery=data_delivery)
+        update_data_delivery(case=case_object, data_delivery=data_delivery)
 
     if panel_abbreviations:
-        update_panels(case=case, panel_abbreviations=panel_abbreviations, status_db=status_db)
+        update_panels(
+            case=case_object, panel_abbreviations=panel_abbreviations, status_db=status_db
+        )
 
     if priority:
-        update_priority(case=case, priority=priority)
+        update_priority(case=case_object, priority=priority)
 
     status_db.commit()
 
