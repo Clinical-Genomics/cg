@@ -69,7 +69,7 @@ def test_flow_cell_exists_in_statusdb_(
 ):
     # GIVEN a flow cell that exists in statusdb
     flow_cell_path = request.getfixturevalue(flow_cell_path)
-    mock_statusdb.get_flow_cell.return_value = statusdb_return_value
+    mock_statusdb.get_flow_cell_by_name.return_value = statusdb_return_value
     mock_hk.files.return_value.count.return_value = 1
     flow_cell_obj = DemultiplexedRunsFlowCell(
         flow_cell_path=flow_cell_path,

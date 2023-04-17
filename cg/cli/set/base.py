@@ -288,7 +288,7 @@ def _update_comment(comment, obj):
 def flowcell(context: CGConfig, flowcell_name: str, status: Optional[str]):
     """Update information about a flow cell."""
     status_db: Store = context.status_db
-    flowcell_obj: Flowcell = status_db.get_flow_cell(flowcell_name)
+    flowcell_obj: Flowcell = status_db.get_flow_cell_by_name(flowcell_name)
 
     if flowcell_obj is None:
         LOG.warning(f"flow cell not found: {flowcell_name}")
