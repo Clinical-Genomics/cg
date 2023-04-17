@@ -6,7 +6,7 @@ from typing import Iterable, List, Optional
 
 import click
 from cg.cli.set.cases import cases
-from cg.cli.set.family import case
+from cg.cli.set.case import case
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig

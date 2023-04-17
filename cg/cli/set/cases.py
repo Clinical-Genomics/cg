@@ -6,7 +6,7 @@ from cg.constants import CASE_ACTIONS
 from cg.store import Store
 from cg.store.models import Family, Sample
 
-from .family import case
+from .case import case
 from ...constants import Priority
 from ...utils.click.EnumChoice import EnumChoice
 

@@ -1,7 +1,7 @@
 """This script tests the cli methods to set values of a case in status-db."""
 from click.testing import CliRunner
 
-from cg.cli.set.family import case
+from cg.cli.set.case import case
 from cg.constants import DataDelivery, Pipeline, EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.store import Store
