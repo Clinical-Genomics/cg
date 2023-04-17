@@ -5,7 +5,7 @@ import subprocess
 
 import mock
 import pytest
-from mock import call
+from mock import call, patch
 
 from cg.constants.sequencing import Sequencers
 from tests.mocks.hk_mock import MockFile
@@ -32,9 +32,7 @@ def test_maximum_processing_queue_full(mock_store):
     )
 
     # WHEN there's already a flow cell being retrieved from PDC
-    mock_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.PROCESSING]
-    ).return_value = ["flow_cell"]
+    mock_store.get_flow_cells_by_statuses.return_value = [[mock.Mock()]]
 
     # THEN this method should return False
     assert backup_api.check_processing() is False
