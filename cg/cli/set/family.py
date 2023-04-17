@@ -37,7 +37,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.argument("family_id")
 @click.pass_obj
-def family(
+def case(
     context: CGConfig,
     action: Optional[str],
     data_analysis: Optional[Pipeline],

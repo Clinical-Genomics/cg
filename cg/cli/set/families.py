@@ -6,7 +6,7 @@ from cg.constants import CASE_ACTIONS
 from cg.store import Store
 from cg.store.models import Family, Sample
 
-from .family import family
+from .family import case
 from ...constants import Priority
 from ...utils.click.EnumChoice import EnumChoice
 
@@ -75,7 +75,7 @@ def families(
 
     for case in cases:
         context.invoke(
-            family,
+            case,
             action=action,
             priority=priority,
             panel_abbreviations=panel_abbreviations,

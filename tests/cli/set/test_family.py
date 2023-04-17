@@ -1,10 +1,11 @@
 """This script tests the cli methods to set values of cases in status-db"""
 from click.testing import CliRunner
 
-from cg.cli.set.family import family
+from cg.cli.set.family import case
 from cg.constants import DataDelivery, Pipeline
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+from cg.store.models import Family
 
 SUCCESS = 0
 
@@ -18,7 +19,7 @@ def test_set_family_without_options(
     assert base_store.Family.query.count() == 1
 
     # WHEN setting a case
-    result = cli_runner.invoke(family, [case_id], obj=base_context)
+    result = cli_runner.invoke(case, [case_id], obj=base_context)
 
     # THEN it should abort
     assert result.exit_code != SUCCESS
@@ -30,7 +31,7 @@ def test_set_family_bad_family(cli_runner, base_context):
 
     # WHEN setting a case
     case_id = "dummy_name"
-    result = cli_runner.invoke(family, [case_id], obj=base_context)
+    result = cli_runner.invoke(case, [case_id], obj=base_context)
 
     # THEN it should complain on missing case
     assert result.exit_code != SUCCESS
@@ -45,7 +46,7 @@ def test_set_family_bad_panel(
     # WHEN setting a case
     panel_id = "dummy_panel"
     case_id = helpers.add_case(base_store).internal_id
-    result = cli_runner.invoke(family, [case_id, "--panel", panel_id], obj=base_context)
+    result = cli_runner.invoke(case, [case_id, "--panel", panel_id], obj=base_context)
 
     # THEN it should complain in missing panel instead of setting a value
     assert result.exit_code != SUCCESS
@@ -62,7 +63,7 @@ def test_set_family_panel(
     assert panel_id not in base_store.Family.query.first().panels
 
     # WHEN setting a panel of a case
-    result = cli_runner.invoke(family, [case_id, "--panel", panel_id], obj=base_context)
+    result = cli_runner.invoke(case, [case_id, "--panel", panel_id], obj=base_context)
 
     # THEN it should set panel on the case
     assert result.exit_code == SUCCESS
@@ -80,7 +81,7 @@ def test_set_family_priority(
 
     # WHEN setting a case
     result = cli_runner.invoke(
-        family, [case_id, "--priority", priority], obj=base_context, catch_exceptions=False
+        case, [case_id, "--priority", priority], obj=base_context, catch_exceptions=False
     )
 
     # THEN it should have been set
@@ -95,12 +96,12 @@ def test_set_family_customer(
     """Test to set a case using an existing customer"""
     # GIVEN a database with a case and a customer not yet on the case
     customer_id = helpers.ensure_customer(base_store, customer_id="a_customer").internal_id
-    case = helpers.add_case(base_store)
+    case: Family = helpers.add_case(base_store)
     assert customer_id != case.customer.internal_id
 
     # WHEN setting a customer of a case
     result = cli_runner.invoke(
-        family, [case.internal_id, "--customer-id", customer_id], obj=base_context
+        case, [case.internal_id, "--customer-id", customer_id], obj=base_context
     )
 
     # THEN it should set customer on the case
@@ -117,9 +118,7 @@ def test_set_family_bad_data_analysis(
     # WHEN setting a data_analysis on a case
     data_analysis = "dummy_pipeline"
     case_id = helpers.add_case(base_store).internal_id
-    result = cli_runner.invoke(
-        family, [case_id, "--data-analysis", data_analysis], obj=base_context
-    )
+    result = cli_runner.invoke(case, [case_id, "--data-analysis", data_analysis], obj=base_context)
 
     # THEN it should complain in non valid data_analysis instead of setting a value
     assert result.exit_code != SUCCESS
@@ -138,7 +137,7 @@ def test_set_family_data_analysis(
 
     # WHEN setting a data_analysis of a case
     result = cli_runner.invoke(
-        family,
+        case,
         [case_obj.internal_id, "--data-analysis", str(data_analysis)],
         obj=base_context,
     )
@@ -157,9 +156,7 @@ def test_set_family_bad_data_delivery(
     # WHEN setting a data_delivery on a case
     data_delivery = "dummy_delivery"
     case_id = helpers.add_case(base_store).internal_id
-    result = cli_runner.invoke(
-        family, [case_id, "--data-delivery", data_delivery], obj=base_context
-    )
+    result = cli_runner.invoke(case, [case_id, "--data-delivery", data_delivery], obj=base_context)
 
     # THEN it should complain in non valid data_delivery instead of setting a value
     assert result.exit_code != SUCCESS
@@ -178,7 +175,7 @@ def test_set_family_data_delivery(
 
     # WHEN setting a data_delivery of a case
     result = cli_runner.invoke(
-        family,
+        case,
         [case_obj.internal_id, "--data-delivery", str(data_delivery)],
         obj=base_context,
     )
