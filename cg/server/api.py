@@ -356,7 +356,7 @@ def parse_pool(pool_id):
 @BLUEPRINT.route("/flowcells")
 def parse_flow_cells() -> Any:
     """Return flow cells."""
-    flow_cells: List[Flowcell] = db.get_flow_cell_by_enquiry_and_status(
+    flow_cells: List[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
         flow_cell_statuses=[request.args.get("status")],
         name_pattern=request.args.get("enquiry"),
     )
