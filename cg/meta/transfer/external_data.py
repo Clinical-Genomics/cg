@@ -183,7 +183,9 @@ class ExternalDataAPI(MetaAPI):
         cases_to_start: List[dict] = []
         for sample in available_samples:
             cases_to_start.extend(
-                self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
+                self.status_db.get_not_analysed_cases_by_sample_internal_id(
+                    sample_internal_id=sample.internal_id
+                )
             )
             last_version: Version = self.housekeeper_api.get_create_version(
                 bundle_name=sample.internal_id

@@ -725,3 +725,24 @@ class FindBusinessDataHandler(BaseHandler):
             cases=self._get_query(table=Family),
             pipeline=pipeline,
         ).all()
+
+    def get_not_analysed_cases_by_sample_internal_id(
+        self,
+        sample_internal_id: str,
+    ) -> List[Family]:
+        """Get not analysed cases by sample internal id."""
+
+        query: Query = self._get_join_case_and_sample_query()
+
+        not_analysed_cases: Query = apply_case_filter(
+            cases=query,
+            filter_functions=[
+                CaseFilter.GET_NOT_ANALYSED,
+            ],
+        )
+
+        return apply_sample_filter(
+            samples=not_analysed_cases,
+            filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
+            internal_id=sample_internal_id,
+        ).all()
