@@ -35,15 +35,15 @@ def get_running_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.action == CaseActions.RUNNING)
 
 
-def get_older_cases(cases: Query, date: datetime, **kwargs) -> Query:
+def get_older_cases_by_creation_date(cases: Query, creation_date: datetime, **kwargs) -> Query:
     """Return older cases compared to date."""
-    cases = cases.filter(Family.created_at < date)
+    cases = cases.filter(Family.created_at < creation_date)
     return cases.order_by(Family.created_at.asc())
 
 
-def get_newer_cases(cases: Query, date: datetime, **kwargs) -> Query:
+def get_newer_cases_by_creation_date(cases: Query, creation_date: datetime, **kwargs) -> Query:
     """Return newer cases compared to date."""
-    cases = cases.filter(Family.created_at > date)
+    cases = cases.filter(Family.created_at > creation_date)
     return cases.order_by(Family.created_at.asc())
 
 
@@ -196,10 +196,16 @@ def order_cases_by_created_at(cases: Query, **kwargs) -> Query:
     return cases.order_by(Family.created_at.desc())
 
 
+def get_newer_cases_by_order_date(cases: Query, order_date: datetime, **kwargs) -> Query:
+    """Return cases newer than date."""
+    cases = cases.filter(Family.ordered_at > order_date)
+    return cases.order_by(Family.ordered_at.asc())
+
+
 def apply_case_filter(
     cases: Query,
     filter_functions: List[Callable],
-    date: Optional[datetime] = None,
+    creation_date: Optional[datetime] = None,
     pipeline: Optional[Pipeline] = None,
     internal_id: Optional[str] = None,
     entry_id: Optional[int] = None,
@@ -213,12 +219,13 @@ def apply_case_filter(
     case_search: Optional[str] = None,
     pipeline_search: Optional[str] = None,
     priority: Optional[int] = None,
+    order_date: Optional[datetime] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
     for function in filter_functions:
         cases: Query = function(
             cases=cases,
-            date=date,
+            creation_date=creation_date,
             pipeline=pipeline,
             internal_id=internal_id,
             entry_id=entry_id,
@@ -232,6 +239,7 @@ def apply_case_filter(
             case_search=case_search,
             pipeline_search=pipeline_search,
             priority=priority,
+            order_date=order_date,
         )
     return cases
 
@@ -241,8 +249,9 @@ class CaseFilter(Enum):
 
     GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
     GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
-    GET_OLD: Callable = get_older_cases
-    GET_NEW: Callable = get_newer_cases
+    GET_OLD_BY_CREATION_DATE: Callable = get_older_cases_by_creation_date
+    GET_NEW_BY_CREATION_DATE: Callable = get_newer_cases_by_creation_date
+    GET_NEW_BY_ORDER_DATE: Callable = get_newer_cases_by_order_date
     GET_WITH_PIPELINE: Callable = get_cases_with_pipeline
     GET_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
     GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (

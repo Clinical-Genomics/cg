@@ -148,9 +148,9 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all cases created within the past days."""
         newer_than_date = dt.datetime.now() - dt.timedelta(days=days)
         return apply_case_filter(
-            filter_functions=[CaseFilter.GET_NEW],
+            filter_functions=[CaseFilter.GET_NEW_BY_CREATION_DATE],
             cases=self._get_query(table=Family),
-            date=newer_than_date,
+            creation_date=newer_than_date,
         ).all()
 
     def get_cases_by_customer_and_case_name_search(

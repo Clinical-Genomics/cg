@@ -16,7 +16,7 @@ from cg.store.filters.status_case_filters import (
     filter_case_by_internal_id,
     filter_cases_by_name,
     filter_cases_not_analysed,
-    get_newer_cases,
+    get_newer_cases_by_creation_date,
     get_running_cases,
     filter_cases_by_ticket_id,
     get_cases_with_pipeline,
@@ -27,7 +27,7 @@ from cg.store.filters.status_case_filters import (
     get_cases_with_loqusdb_supported_pipeline,
     get_cases_with_loqusdb_supported_sequencing_method,
     get_inactive_analysis_cases,
-    get_older_cases,
+    get_older_cases_by_creation_date,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -528,7 +528,7 @@ def test_get_old_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_older_cases(cases=cases, date=timestamp_in_2_weeks)
+    cases: Query = get_older_cases_by_creation_date(cases=cases, creation_date=timestamp_in_2_weeks)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -551,7 +551,7 @@ def test_get_old_cases_none_when_all_cases_are_too_new(
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_older_cases(cases=cases, date=timestamp_yesterday)
+    cases: Query = get_older_cases_by_creation_date(cases=cases, creation_date=timestamp_yesterday)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -570,7 +570,7 @@ def test_get_newer_cases_none_when_all_cases_older(
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting newer cases
-    cases: Query = get_newer_cases(cases=cases, date=timestamp_in_2_weeks)
+    cases: Query = get_newer_cases_by_creation_date(cases=cases, creation_date=timestamp_in_2_weeks)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -588,7 +588,9 @@ def test_get_newer_cases_all_when_all_cases_newer(
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting newer cases
-    filtered_cases: Query = get_newer_cases(cases=cases, date=timestamp_yesterday)
+    filtered_cases: Query = get_newer_cases_by_creation_date(
+        cases=cases, creation_date=timestamp_yesterday
+    )
 
     # ASSERT that cases is a query
     assert isinstance(filtered_cases, Query)

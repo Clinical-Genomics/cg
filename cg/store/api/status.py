@@ -233,12 +233,12 @@ class StatusHandler(BaseHandler):
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: List[CaseFilter] = [
             CaseFilter.GET_HAS_INACTIVE_ANALYSIS,
-            CaseFilter.GET_OLD,
+            CaseFilter.GET_OLD_BY_CREATION_DATE,
         ]
         return apply_case_filter(
             filter_functions=case_filter_functions,
             cases=self._get_query(table=Family),
-            date=date_threshold,
+            creation_date=date_threshold,
         ).all()
 
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
@@ -544,7 +544,7 @@ class StatusHandler(BaseHandler):
         filter_case_order_date = None
         if days != 0:
             filter_case_order_date = datetime.now() - timedelta(days=days)
-            filter_functions.append(CaseFilter.GET_OLD)
+            filter_functions.append(CaseFilter.GET_NEW_BY_ORDER_DATE)
         if case_action:
             filter_functions.append(CaseFilter.FILTER_BY_ACTION)
         if priority:
@@ -559,7 +559,7 @@ class StatusHandler(BaseHandler):
         case_q = apply_case_filter(
             cases=case_q,
             filter_functions=filter_functions,
-            date=filter_case_order_date,
+            order_date=filter_case_order_date,
             action=case_action,
             priority=priority,
             internal_id_search=internal_id,
