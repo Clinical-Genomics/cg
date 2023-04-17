@@ -15,6 +15,7 @@ from cg.store.filters.status_case_filters import (
     filter_cases_by_entry_id,
     filter_case_by_internal_id,
     filter_cases_by_name,
+    filter_cases_by_pipeline_search,
     filter_cases_not_analysed,
     get_newer_cases_by_creation_date,
     get_running_cases,
@@ -846,3 +847,58 @@ def test_filter_cases_not_analysed_in_progress(
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
+
+
+def test_filter_cases_by_pipeline_search_no_matching_pipeline(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that no cases are returned when there are no cases with matching pipeline search."""
+    # GIVEN a store containing cases with different pipeline names
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    pipeline_search = "non_existent_pipeline"
+
+    # WHEN filtering cases by a non-matching pipeline search
+    filtered_cases: Query = filter_cases_by_pipeline_search(
+        cases=cases_query, pipeline_search=pipeline_search
+    )
+
+    # THEN the query should return no cases
+    assert filtered_cases.count() == 0
+
+
+def test_filter_cases_by_pipeline_search_partial_match(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that cases with partially matching pipeline search are returned."""
+    # GIVEN a store containing cases with different pipeline names
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    pipeline_search = cases_query.first().data_analysis[:3]
+
+    # WHEN filtering cases by a partially matching pipeline search
+    filtered_cases: Query = filter_cases_by_pipeline_search(
+        cases=cases_query, pipeline_search=pipeline_search
+    )
+
+    # THEN the query should return the cases with partially matching pipeline names
+    assert filtered_cases.count() > 0
+    for case in filtered_cases:
+        assert pipeline_search in case.data_analysis
+
+
+def test_filter_cases_by_pipeline_search_exact_match(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that cases with exactly matching pipeline search are returned."""
+    # GIVEN a store containing cases with different pipeline names
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+    pipeline_search = cases_query.first().data_analysis
+
+    # WHEN filtering cases by an exactly matching pipeline search
+    filtered_cases: Query = filter_cases_by_pipeline_search(
+        cases=cases_query, pipeline_search=pipeline_search
+    )
+
+    # THEN the query should return the cases with exactly matching pipeline names
+    assert filtered_cases.count() > 0
+    for case in filtered_cases:
+        assert case.data_analysis == pipeline_search
