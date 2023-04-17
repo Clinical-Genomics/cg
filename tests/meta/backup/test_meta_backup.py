@@ -34,7 +34,7 @@ def test_maximum_processing_queue_full(mock_store):
     # WHEN there's already a flow cell being retrieved from PDC
     mock_store.get_flow_cells_by_statuses(
         flow_cell_statuses=[FlowCellStatus.PROCESSING]
-    ).count.return_value = 1
+    ).return_value = ["flow_cell"]
 
     # THEN this method should return False
     assert backup_api.check_processing() is False
@@ -55,7 +55,7 @@ def test_maximum_processing_queue_not_full(mock_store):
     # WHEN there are no flow cells being retrieved from PDC
     mock_store.get_flow_cells_by_statuses(
         flow_cell_statuses=[FlowCellStatus.PROCESSING]
-    ).count.return_value = 0
+    ).return_value = 0
 
     # THEN this method should return True
     assert backup_api.check_processing() is True
@@ -78,7 +78,7 @@ def test_get_first_flow_cell_next_requested(mock_store, mock_flow_cell):
     # WHEN a flow cell is requested to be retrieved from PDC
     mock_store.get_flow_cells_by_statuses(
         flow_cell_statuses=[FlowCellStatus.REQUESTED]
-    ).first.return_value = mock_flow_cell
+    ).return_value = mock_flow_cell
 
     popped_flow_cell = backup_api.get_first_flow_cell()
 
@@ -100,9 +100,7 @@ def test_get_first_flow_cell_no_flow_cell_requested(mock_store):
     )
 
     # WHEN there are no flow cells requested to be retrieved from PDC
-    mock_store.get_flow_cells_by_statuses(
-        flow_cell_statuses=[FlowCellStatus.REQUESTED]
-    ).first.return_value = None
+    mock_store.get_flow_cells_by_statuses.return_value = []
 
     popped_flow_cell = backup_api.get_first_flow_cell()
 
