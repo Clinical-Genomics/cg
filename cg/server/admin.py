@@ -82,7 +82,7 @@ class ApplicationView(BaseView):
     ]
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
-    form_excluded_columns = ["category"]
+    form_excluded_columns = ["category", "versions"]
 
     @staticmethod
     def view_application_link(unused1, unused2, model, unused3):
