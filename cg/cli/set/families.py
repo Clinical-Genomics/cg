@@ -24,12 +24,12 @@ def _get_samples_by_identifiers(identifiers: click.Tuple([str, str]), store: Sto
 def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Family]:
     """Get cases that have samples that match identifiers if given"""
     samples_by_id: List[Sample] = _get_samples_by_identifiers(identifiers, store)
-    cases: Set[Family] = set()
+    case_list: Set[Family] = set()
     for sample in samples_by_id:
         for link in sample.links:
-            cases.add(link.family)
+            case_list.add(link.family)
 
-    return list(cases)
+    return list(case_list)
 
 
 @click.command()
@@ -42,7 +42,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Famil
     help="Give an identifier on sample and the value to use it with, e.g. --sample-identifier "
     "name Prov52",
 )
-@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update family action")
+@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(
@@ -59,26 +59,26 @@ def cases(
 ):
     """Set values on many families at the same time"""
     store: Store = context.obj.status_db
-    cases: List[Family] = _get_cases(identifiers, store)
+    case_list: List[Family] = _get_cases(identifiers, store)
 
-    if not cases:
+    if not case_list:
         LOG.error("No cases to alter!")
         raise click.Abort
 
     LOG.info("Would alter cases:")
 
-    for case in cases:
-        LOG.info(case)
+    for case_obj in case_list:
+        LOG.info(case_obj)
 
     if not (click.confirm(CONFIRM)):
         raise click.Abort
 
-    for case in cases:
+    for case_obj in case_list:
         context.invoke(
             case,
             action=action,
             priority=priority,
             panel_abbreviations=panel_abbreviations,
-            family_id=case.internal_id,
+            family_id=case_obj.internal_id,
             customer_id=customer_id,
         )
