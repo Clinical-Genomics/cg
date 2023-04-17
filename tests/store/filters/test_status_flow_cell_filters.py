@@ -9,7 +9,7 @@ from cg.store.filters.status_flow_cell_filters import (
     get_flow_cell_by_id,
     get_flow_cells_with_statuses,
     get_flow_cells_by_case,
-    get_flow_cell_by_id_and_by_enquiry,
+    filter_flow_cell_by_name_pattern,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -92,8 +92,8 @@ def test_get_flow_cell_by_id_and_by_enquiry(
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
-    returned_flow_cell: List[Flowcell] = get_flow_cell_by_id_and_by_enquiry(
-        flow_cells=base_store._get_query(table=Flowcell), flow_cell_id=flow_cell_id[:4]
+    returned_flow_cell: List[Flowcell] = filter_flow_cell_by_name_pattern(
+        flow_cells=base_store._get_query(table=Flowcell), name_pattern=flow_cell_id[:4]
     )
 
     # THEN a list of flow cells should be returned

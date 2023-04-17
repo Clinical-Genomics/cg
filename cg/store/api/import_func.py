@@ -183,6 +183,7 @@ def add_application_object(application: ApplicationSchema, sign: str, store: Sto
         turnaround_time=application.turnaround_time,
         minimum_order=application.minimum_order,
         sequencing_depth=application.sequencing_depth,
+        min_sequencing_depth=application.min_sequencing_depth,
         target_reads=application.target_reads,
         sample_amount=application.sample_amount,
         sample_volume=application.sample_volume,
