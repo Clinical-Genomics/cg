@@ -77,6 +77,6 @@ def cases(
             action=action,
             priority=priority,
             panel_abbreviations=panel_abbreviations,
-            family_id=case_obj.internal_id,
+            case_id=case_obj.internal_id,
             customer_id=customer_id,
         )
