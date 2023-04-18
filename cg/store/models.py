@@ -2,7 +2,7 @@ import datetime as dt
 import re
 from typing import List, Optional, Set, Dict
 
-import alchy
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.util import deprecated
 
@@ -19,7 +19,8 @@ from cg.constants import (
 
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
 
-Model = alchy.make_declarative_base(Base=alchy.ModelBase)
+Model = declarative_base()
+
 flowcell_sample = Table(
     "flowcell_sample",
     Model.metadata,
@@ -76,6 +77,8 @@ class PriorityMixin:
 
 
 class Application(Model):
+    __tablename__ = "application"
+
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
     prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
@@ -129,6 +132,7 @@ class Application(Model):
 
 
 class ApplicationVersion(Model):
+    __tablename__ = "application_version"  # Add this line
     __table_args__ = (UniqueConstraint("application_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
@@ -158,6 +162,8 @@ class ApplicationVersion(Model):
 
 
 class Analysis(Model):
+    __tablename__ = "analysis"
+
     id = Column(types.Integer, primary_key=True)
     pipeline = Column(types.Enum(*list(Pipeline)))
     pipeline_version = Column(types.String(32))
@@ -188,6 +194,7 @@ class Analysis(Model):
 class Bed(Model):
     """Model for bed target captures"""
 
+    __tablename__ = "bed"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
     comment = Column(types.Text)
@@ -204,6 +211,7 @@ class Bed(Model):
 class BedVersion(Model):
     """Model for bed target captures versions"""
 
+    __tablename__ = "bed_version"
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
@@ -231,6 +239,7 @@ class BedVersion(Model):
 
 
 class Customer(Model):
+    __tablename__ = "customer"
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
     comment = Column(types.Text)
@@ -272,6 +281,7 @@ class Customer(Model):
 
 
 class Collaboration(Model):
+    __tablename__ = "collaboration"
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -291,6 +301,7 @@ class Collaboration(Model):
 
 
 class Delivery(Model):
+    __tablename__ = "delivery"
     id = Column(types.Integer, primary_key=True)
     delivered_at = Column(types.DateTime)
     removed_at = Column(types.DateTime)
@@ -301,6 +312,7 @@ class Delivery(Model):
 
 
 class Family(Model, PriorityMixin):
+    __tablename__ = "family"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
     action = Column(types.Enum(*CASE_ACTIONS))
@@ -431,6 +443,7 @@ class Family(Model, PriorityMixin):
 
 
 class FamilySample(Model):
+    __tablename__ = "family_sample"
     __table_args__ = (UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
 
     id = Column(types.Integer, primary_key=True)
@@ -468,6 +481,7 @@ class FamilySample(Model):
 
 
 class Flowcell(Model):
+    __tablename__ = "flowcell"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
     sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq"))
@@ -491,6 +505,7 @@ class Flowcell(Model):
 
 
 class Organism(Model):
+    __tablename__ = "organism"
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(255), nullable=False, unique=True)
@@ -509,6 +524,7 @@ class Organism(Model):
 
 
 class Panel(Model):
+    __tablename__ = "panel"
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -523,6 +539,7 @@ class Panel(Model):
 
 
 class Pool(Model):
+    __tablename__ = "pool"
     __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
 
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
@@ -546,6 +563,7 @@ class Pool(Model):
 
 
 class Sample(Model, PriorityMixin):
+    __tablename__ = "sample"
     age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(
@@ -659,6 +677,7 @@ class Sample(Model, PriorityMixin):
 
 
 class Invoice(Model):
+    __tablename__ = "invoice"
     id = Column(types.Integer, primary_key=True)
     customer_id = Column(ForeignKey("customer.id"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
@@ -684,6 +703,7 @@ class Invoice(Model):
 
 
 class User(Model):
+    __tablename__ = "user"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(128), nullable=False)
     email = Column(types.String(128), unique=True, nullable=False)

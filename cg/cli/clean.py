@@ -6,7 +6,7 @@ from typing import List, Optional
 from cg.utils.dispatcher import Dispatcher
 
 import click
-from alchy import Query
+from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
 from tabulate import tabulate

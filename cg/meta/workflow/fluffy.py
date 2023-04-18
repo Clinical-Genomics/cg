@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import pandas as pd
-from alchy import Query
+from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.exc import CgError

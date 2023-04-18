@@ -69,13 +69,13 @@ def import_application_versions(
             sign=sign,
             store=store,
         )
-        store.add(new_version)
+        store.session.add(new_version)
 
     if not dry_run:
         LOG.info(
             "all application versions successfully added to transaction, committing " "transaction"
         )
-        store.commit()
+        store.session.commit()
     else:
         LOG.error("Dry-run, rolling back transaction.")
         store.rollback()
@@ -108,11 +108,11 @@ def import_applications(
 
         LOG.info("adding new application to transaction %s", application.tag)
         new_application = add_application_object(application=application, sign=sign, store=store)
-        store.add(new_application)
+        store.session.add(new_application)
 
     if not dry_run:
         LOG.info("all applications successfully added to transaction, committing transaction")
-        store.commit()
+        store.session.commit()
     else:
         LOG.error("Dry-run, rolling back transaction.")
         store.rollback()
@@ -287,7 +287,7 @@ def import_apptags(
         store.rollback()
     else:
         LOG.info("all applications successfully synced, committing transaction")
-        store.commit()
+        store.session.commit()
 
 
 def get_cells_from_excel(

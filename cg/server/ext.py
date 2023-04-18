@@ -1,15 +1,11 @@
 from flask_admin import Admin
-from flask_alchy import Alchy
+from sqlalchemy.orm import scoped_session, sessionmaker
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.store import api, models
-
-
-class CgAlchy(Alchy, api.CoreHandler):
-    pass
 
 
 class FlaskLims(LimsAPI):
@@ -30,7 +26,11 @@ class FlaskLims(LimsAPI):
 
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 csrf = CSRFProtect()
-db = CgAlchy(Model=models.Model)
+
+session_factory = sessionmaker(autocommit=False, autoflush=False)
+db_session = scoped_session(session_factory)
+db = api.CoreHandler(session=db_session)
+
 admin = Admin(name="Clinical Genomics")
 lims = FlaskLims()
 osticket = OsTicket()

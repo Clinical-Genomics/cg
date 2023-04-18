@@ -3,8 +3,7 @@ import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union, Dict
 
-from sqlalchemy import and_, func
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
@@ -41,6 +40,9 @@ LOG = logging.getLogger(__name__)
 
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
+
+    def __init__(self, session: Session):
+        super().__init__(session=session)
 
     def get_analyses_by_case_entry_id(self, case_entry_id: int) -> List[Analysis]:
         """Return analysis by case entry id."""

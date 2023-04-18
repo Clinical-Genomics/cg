@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TextIO, Optional, List
 
 import requests
-from alchy import Query
+from sqlalchemy.orm import Query
 
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version

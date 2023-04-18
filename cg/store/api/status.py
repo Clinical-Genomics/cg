@@ -1,15 +1,14 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
 from cg.store.models import (
     Analysis,
     Application,
@@ -33,6 +32,9 @@ from cg.store.filters.status_application_filters import apply_application_filter
 
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database."""
+
+    def __init__(self, session: Session):
+        super().__init__(session=session)
 
     def get_samples_to_receive(self, external: bool = False) -> List[Sample]:
         """Return samples to receive."""
