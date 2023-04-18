@@ -6,7 +6,7 @@ from sqlalchemy.orm import Query
 from cg.store.models import Flowcell, FamilySample, Family
 
 
-def get_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
+def filter_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
     """Return flow cells by case id."""
     return flow_cells.filter(FamilySample.family == case)
 
@@ -21,7 +21,7 @@ def filter_flow_cell_by_name_search(flow_cells: Query, name_search: str, **kwarg
     return flow_cells.filter(Flowcell.name.like(f"%{name_search}%"))
 
 
-def get_flow_cells_with_statuses(
+def filter_flow_cells_with_statuses(
     flow_cells: Query, flow_cell_statuses: List[str], **kwargs
 ) -> Query:
     """Return flow cells by flow cell statuses."""
