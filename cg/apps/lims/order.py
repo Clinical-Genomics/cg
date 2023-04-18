@@ -19,6 +19,7 @@ class OrderHandler:
         """Post the data to the server."""
         data = etree.tostring(document, xml_declaration=True)
         LOG.debug(data)
+        print(data)
         result = self.post(uri, data)
         return result
 
