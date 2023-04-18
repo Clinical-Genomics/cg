@@ -378,25 +378,21 @@ class FindBusinessDataHandler(BaseHandler):
             name=sample_name,
         ).first()
 
-    def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
-        """Return flow cell by flow cell id."""
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
+        """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id,
-            filter_functions=[FlowCellFilter.GET_BY_ID],
+            flow_cell_name=flow_cell_name,
+            filter_functions=[FlowCellFilter.GET_BY_NAME],
         ).first()
 
     def get_flow_cell_by_name_pattern(self, name_pattern: str) -> Flowcell:
         """Return flow cell by name pattern."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            name_pattern=name_pattern,
-            filter_functions=[FlowCellFilter.GET_BY_NAME_PATTERN],
+            name_search=name_pattern,
+            filter_functions=[FlowCellFilter.GET_BY_NAME_SEARCH],
         ).first()
-
-    def get_flow_cells(self) -> List[Flowcell]:
-        """Return all flow cells."""
-        return self._get_query(table=Flowcell)
 
     def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
         """Return flow cells with supplied statuses."""
@@ -412,11 +408,11 @@ class FindBusinessDataHandler(BaseHandler):
         """Return flow cell by name pattern and status."""
         filter_functions: List[FlowCellFilter] = [
             FlowCellFilter.GET_WITH_STATUSES,
-            FlowCellFilter.GET_BY_NAME_PATTERN,
+            FlowCellFilter.GET_BY_NAME_SEARCH,
         ]
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            name_pattern=name_pattern,
+            name_search=name_pattern,
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=filter_functions,
         ).all()
@@ -431,7 +427,7 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
-        flow_cell: Flowcell = self.get_flow_cell(flow_cell_id=flow_cell_id)
+        flow_cell: Flowcell = self.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
         if flow_cell:
             return flow_cell.samples
 
