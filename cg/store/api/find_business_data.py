@@ -11,11 +11,16 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
+from cg.store.filters.status_application_version_filters import (
+    ApplicationVersionFilter,
+    apply_application_versions_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
 
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationVersion,
     Customer,
     Flowcell,
     Family,
@@ -77,6 +82,20 @@ class FindBusinessDataHandler(BaseHandler):
             .links[ListIndexes.FIRST.value]
             .sample.application_version.application
         )
+
+    def get_application_tag_by_application_version_entry_id(
+        self,
+        application_version_entry_id: str,
+    ) -> str:
+        """Return the application tag of an application version."""
+
+        application_version = apply_application_versions_filter(
+            application_versions=self._get_query(ApplicationVersion),
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
+            application_version_entry_id=application_version_entry_id,
+        ).first()
+
+        return application_version.application.tag
 
     def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
         """Return all cases completed after a given date that have not been uploaded to Vogue."""
