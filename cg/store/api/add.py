@@ -217,7 +217,7 @@ class AddHandler(BaseHandler):
 
     def add_flow_cell(
         self,
-        flow_cell_id: str,
+        flow_cell_name: str,
         sequencer_name: str,
         sequencer_type: str,
         date: dt.datetime,
@@ -225,7 +225,7 @@ class AddHandler(BaseHandler):
     ) -> Flowcell:
         """Build a new Flowcell record."""
         return self.Flowcell(
-            name=flow_cell_id,
+            name=flow_cell_name,
             sequencer_name=sequencer_name,
             sequencer_type=sequencer_type,
             sequenced_at=date,

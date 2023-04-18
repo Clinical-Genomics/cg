@@ -19,7 +19,7 @@ def test_run_fetch_flow_cell_dry_run_no_flow_cell_specified(
     # GIVEN that there are no flow cells set to "requested" in status_db
     assert not backup_context.status_db.get_flow_cells_by_statuses(
         flow_cell_statuses=[FlowCellStatus.REQUESTED]
-    ).first()
+    )
 
     # WHEN running the fetch flow cell command without specifying any flow cell in dry run mode
     result = cli_runner.invoke(fetch_flow_cell, ["--dry-run"], obj=backup_context)
@@ -43,7 +43,7 @@ def test_run_fetch_flow_cell_dry_run_retrieval_time(
     # GIVEN that there are no flow cells set to "requested" in status_db
     assert not backup_context.status_db.get_flow_cells_by_statuses(
         flow_cell_statuses=[FlowCellStatus.REQUESTED]
-    ).first()
+    )
 
     # GIVEN that the backup api returns a retrieval time
     expected_time = 60
@@ -65,7 +65,7 @@ def test_run_fetch_flow_cell_non_existing_flow_cell(
     # GIVEN a context with a backup api
     # GIVEN a non existing flow cell id
     flow_cell_id = "hello"
-    assert backup_context.status_db.get_flow_cell(flow_cell_id) is None
+    assert backup_context.status_db.get_flow_cell_by_name(flow_cell_id) is None
 
     # WHEN running the command with the non existing flow cell id
     result = cli_runner.invoke(

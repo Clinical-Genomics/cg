@@ -72,7 +72,7 @@ def test_get_presence_status_status_db(
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
     helpers.add_flowcell(
-        store=wipe_demux_api.status_db, flow_cell_id=flow_cell_id, sequencer_type="novaseq"
+        store=wipe_demux_api.status_db, flow_cell_name=flow_cell_id, sequencer_type="novaseq"
     )
     populated_presence: bool = wipe_demux_api.status_db_presence
 
@@ -307,7 +307,9 @@ def test_delete_flow_cell_hasta(
 
     caplog.set_level(logging.INFO)
     wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
-    flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell(wipe_demux_api.flow_cell_name)
+    flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell_by_name(
+        wipe_demux_api.flow_cell_name
+    )
     wipe_demux_api.set_dry_run(dry_run=False)
 
     # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"
