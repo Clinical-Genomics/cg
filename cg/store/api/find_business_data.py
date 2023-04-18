@@ -313,11 +313,11 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
         """Fetch the latest sequenced flow cell related to a sample on a case."""
-        flow_cells_on_case: List[Flowcell] = list(
-            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=family_id))
+        flow_cells_on_case: List[Flowcell] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=family_id)
         )
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
-        return flow_cells_on_case[-1]
+        return flow_cells_on_case[-1] if flow_cells_on_case else None
 
     def _is_case_found(self, case: Family, case_id: str) -> None:
         """Raise error if case is false."""
@@ -423,7 +423,7 @@ class FindBusinessDataHandler(BaseHandler):
             flow_cells=self._get_join_flow_cell_sample_links_query(),
             filter_functions=[FlowCellFilter.GET_BY_CASE],
             case=case,
-        )
+        ).all()
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
@@ -435,9 +435,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
-        flow_cells: Optional[List[Flowcell]] = list(
-            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=case_id))
+        flow_cells: Optional[List[Flowcell]] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=case_id)
         )
+
         if not flow_cells:
             LOG.info("No flow cells found")
             return False
