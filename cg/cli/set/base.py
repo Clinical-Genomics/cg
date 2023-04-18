@@ -5,8 +5,8 @@ import logging
 from typing import Iterable, List, Optional
 
 import click
-from cg.cli.set.families import families
-from cg.cli.set.family import family
+from cg.cli.set.cases import cases
+from cg.cli.set.case import case
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
@@ -300,5 +300,5 @@ def flowcell(context: CGConfig, flow_cell_name: str, status: Optional[str]):
     LOG.info(f"{flow_cell_name} set: {prev_status} -> {status}")
 
 
-set_cmd.add_command(family)
-set_cmd.add_command(families)
+set_cmd.add_command(case)
+set_cmd.add_command(cases)
