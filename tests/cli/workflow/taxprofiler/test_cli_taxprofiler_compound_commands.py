@@ -25,6 +25,5 @@ def test_taxprofiler_no_args(cli_runner: CliRunner, taxprofiler_context: CGConfi
     print(result.output)
 
     assert result.exit_code == EXIT_SUCCESS
-
     # THEN help should be printed
     assert "help" in result.output
