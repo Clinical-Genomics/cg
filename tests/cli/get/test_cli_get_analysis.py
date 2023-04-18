@@ -28,7 +28,7 @@ def test_get_analysis_required(
     # GIVEN a database with an analysis
     analysis: Analysis = helpers.add_analysis(disk_store, pipeline_version="9.3")
     internal_id = analysis.family.internal_id
-    assert disk_store.Analysis.query.count() == 1
+    assert disk_store._get_query(table=Analysis).count() == 1
 
     # WHEN getting a analysis
     result = cli_runner.invoke(get, ["analysis", internal_id], obj=base_context)

@@ -178,13 +178,14 @@ def test_analyses_to_upload_when_filtering_with_missing_pipeline(helpers, sample
 def test_set_case_action(analysis_store, case_id):
     """Tests if actions of cases are changed to analyze."""
     # Given a store with a case with action None
-    action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
+    case_query = analysis_store._get_query(table=Family)
+    action = case_query.filter(Family.internal_id == case_id).first().action
 
     assert action == None
 
     # When setting the case to "analyze"
     analysis_store.set_case_action(case_internal_id=case_id, action="analyze")
-    new_action = analysis_store.Family.query.filter(Family.internal_id == case_id).first().action
+    new_action = case_query.filter(Family.internal_id == case_id).first().action
 
     # Then the action should be set to analyze
     assert new_action == "analyze"
