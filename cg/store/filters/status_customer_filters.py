@@ -16,7 +16,7 @@ def filter_customer_by_customer_internal_id(
 def filter_customer_by_exclude_customer_internal_id(
     customers: Query, exclude_customer_internal_id: str, **kwargs
 ) -> Query:
-    """Return customer by customer internal id."""
+    """Return customer excluded by customer internal id."""
     return customers.filter(Customer.internal_id != exclude_customer_internal_id)
 
 

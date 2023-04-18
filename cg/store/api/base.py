@@ -28,6 +28,7 @@ from cg.store.models import (
     User,
 )
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
+from cg.utils.date import get_date_days_ago
 
 
 @dataclass
@@ -149,7 +150,7 @@ class BaseHandler:
 
         filter_case_order_date = None
         if days != 0:
-            filter_case_order_date = datetime.datetime.now() - datetime.timedelta(days=days)
+            filter_case_order_date = get_date_days_ago(days=days)
             filter_functions.append(CaseFilter.GET_NEW_BY_ORDER_DATE)
         if case_action:
             filter_functions.append(CaseFilter.FILTER_BY_ACTION)
