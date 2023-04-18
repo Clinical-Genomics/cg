@@ -22,14 +22,14 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     """Handles communication between taxprofiler processes
     and the rest of CG infrastructure."""
 
-    # def __init__(
-    #    self,
-    #    config: CGConfig,
-    #    pipeline: Pipeline = Pipeline.taxprofiler,
-    # ):
-    #    super().__init__(config=config, pipeline=pipeline)
-    #    self.root_dir: str = config.taxprofiler.root
+    def __init__(
+        self,
+        config: CGConfig,
+        pipeline: Pipeline = Pipeline.taxprofiler,
+    ):
+        super().__init__(config=config, pipeline=pipeline)
+        self.root_dir: str = config.taxprofiler.root
 
-    # @property
-    # def root(self) -> str:
-    #    return self.root_dir
+    @property
+    def root(self) -> str:
+        return self.root_dir

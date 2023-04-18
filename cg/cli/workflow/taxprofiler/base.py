@@ -40,10 +40,10 @@ def taxprofiler(context: click.Context) -> None:
     AnalysisAPI.get_help(context)
 
 
-#    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
-#        config=context.obj,
-#    )
+    context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
+        config=context.obj,
+    )
 
 
-# taxprofiler.add_command(link)
+taxprofiler.add_command(link)
 # taxprofiler.add_command(resolve_compression)
