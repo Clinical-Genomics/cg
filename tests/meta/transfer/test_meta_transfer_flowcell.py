@@ -43,8 +43,8 @@ def test_add_flow_cell_to_status_db(
     # GIVEN transfer flow cell API
 
     # GIVEN a flow cell that does not exist in status db
-    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell(
-        flow_cell_id=yet_another_flow_cell_id
+    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell_by_name(
+        flow_cell_name=yet_another_flow_cell_id
     )
 
     assert flow_cell is None
@@ -75,8 +75,10 @@ def test_add_flow_cell_to_status_db_existing_flow_cell(
     # GIVEN transfer flow cell API
 
     # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(store=flowcell_store, flow_cell_id=flow_cell_id)
-    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell(flow_cell_id=flow_cell_id)
+    helpers.add_flowcell(store=flowcell_store, flow_cell_name=flow_cell_id)
+    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell_by_name(
+        flow_cell_name=flow_cell_id
+    )
 
     assert flow_cell is not None
 
@@ -364,7 +366,7 @@ def test_parse_flow_cell_samples(
 
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(
-        store=flowcell_store, flow_cell_id=yet_another_flow_cell_id
+        store=flowcell_store, flow_cell_name=yet_another_flow_cell_id
     )
 
     # GIVEN no sample in flow cell
@@ -401,7 +403,7 @@ def test_parse_flow_cell_samples_when_no_cgstats_sample(
 
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(
-        store=flowcell_store, flow_cell_id=yet_another_flow_cell_id
+        store=flowcell_store, flow_cell_name=yet_another_flow_cell_id
     )
 
     # GIVEN no sample in flow cell
