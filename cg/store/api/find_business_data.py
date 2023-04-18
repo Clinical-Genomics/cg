@@ -400,7 +400,7 @@ class FindBusinessDataHandler(BaseHandler):
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=[FlowCellFilter.GET_WITH_STATUSES],
-        )
+        ).all()
 
     def get_flow_cell_by_name_pattern_and_status(
         self, flow_cell_statuses: List[str], name_pattern: str
