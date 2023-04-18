@@ -64,7 +64,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
     elif family_id:  # Provided case ID without a subcommand: upload everything
         try:
             upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
-            case: Family = upload_api.status_db.family(family_id)
+            case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=family_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
@@ -98,7 +98,7 @@ def auto(context: click.Context, pipeline: Pipeline = None):
     status_db: Store = context.obj.status_db
 
     exit_code = 0
-    for analysis_obj in status_db.analyses_to_upload(pipeline=pipeline):
+    for analysis_obj in status_db.get_analyses_to_upload(pipeline=pipeline):
         if analysis_obj.family.analyses[0].uploaded_at is not None:
             LOG.warning(
                 f"Skipping upload for case {analysis_obj.family.internal_id}. "

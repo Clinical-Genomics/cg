@@ -204,22 +204,22 @@
               <p>Varianter finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
               <ul>
                 {% if case.data_analysis.scout_files.snv_vcf != 'N/A' %}
-                  <li><strong>Clinical SNV and INDELs fil</strong>: <em>{{ case.data_analysis.scout_files.snv_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Kliniskt relevanta förvärvade SNVs och INDELs</strong>: <em>{{ case.data_analysis.scout_files.snv_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.snv_research_vcf != 'N/A' %}
-                  <li><strong>Research SNV and INDELs fil</strong>: <em>{{ case.data_analysis.scout_files.snv_research_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Förvärvade SNVs och INDELs för forskning</strong>: <em>{{ case.data_analysis.scout_files.snv_research_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_vcf != 'N/A' %}
-                  <li><strong>Clinical structural variants fil</strong>: <em>{{ case.data_analysis.scout_files.sv_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Kliniskt relevanta förvärvade SVs</strong>: <em>{{ case.data_analysis.scout_files.sv_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.sv_research_vcf != 'N/A' %}
-                  <li><strong>Research structural variants fil</strong>: <em>{{ case.data_analysis.scout_files.sv_research_vcf.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Förvärvade SVs för forskning</strong>: <em>{{ case.data_analysis.scout_files.sv_research_vcf.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.vcf_str != 'N/A' %}
-                  <li><strong>Clinical STR variants fil</strong>: <em>{{ case.data_analysis.scout_files.vcf_str.replace(case.id, case.name) }}</em></li>
+                  <li><strong>Kliniskt relevanta STRs</strong>: <em>{{ case.data_analysis.scout_files.vcf_str.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 {% if case.data_analysis.scout_files.smn_tsv != 'N/A' %}
-                  <li><strong>SMN CN fil</strong>: <em>{{ case.data_analysis.scout_files.smn_tsv.replace(case.id, case.name) }}</em></li>
+                  <li><strong>SMN CN varianter</strong>: <em>{{ case.data_analysis.scout_files.smn_tsv.replace(case.id, case.name) }}</em></li>
                 {% endif %}
                 </ul>
             </div>

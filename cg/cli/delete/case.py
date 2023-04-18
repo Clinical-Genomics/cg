@@ -29,7 +29,7 @@ def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     sample.
     """
     status_db: Store = context.obj.status_db
-    case: Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     if not case:
         LOG.error(f"Could not find case {case_id}")
         raise click.Abort

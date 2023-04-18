@@ -82,7 +82,7 @@ class ApplicationView(BaseView):
     ]
     column_filters = ["prep_category", "is_accredited"]
     column_searchable_list = ["tag", "prep_category"]
-    form_excluded_columns = ["category"]
+    form_excluded_columns = ["category", "versions"]
 
     @staticmethod
     def view_application_link(unused1, unused2, model, unused3):
@@ -252,7 +252,7 @@ class FamilyView(BaseView):
         "Are you sure you want to set the action for selected families to hold?",
     )
     def action_set_hold(self, ids: List[str]):
-        self.set_action_for_batch(action=CaseActions.HOLD, entry_ids=ids)
+        self.set_action_for_cases(action=CaseActions.HOLD, case_entry_ids=ids)
 
     @action(
         "set_empty",
@@ -260,23 +260,25 @@ class FamilyView(BaseView):
         "Are you sure you want to set the action for selected families to Empty?",
     )
     def action_set_empty(self, ids: List[str]):
-        self.set_action_for_batch(action=None, entry_ids=ids)
+        self.set_action_for_cases(action=None, case_entry_ids=ids)
 
-    def set_action_for_batch(self, action: Union[CaseActions, None], entry_ids: List[str]):
+    def set_action_for_cases(self, action: Union[CaseActions, None], case_entry_ids: List[str]):
         try:
-            query: Query = db.Family.query.filter(db.Family.id.in_(entry_ids))
-            family: Family
-            for family in query.all():
-                family.action = action
+            for entry_id in case_entry_ids:
+                family = self.get_case_by_entry_id(entry_id=entry_id)
+                if family:
+                    family.action = action
 
-            flash(
-                ngettext(
-                    f"Families were set to {action}.",
-                    f"{len(entry_ids)} families were set to {action}.",
-                    len(entry_ids),
-                )
-            )
             db.commit()
+
+            num_families = len(case_entry_ids)
+            action_message = (
+                f"Families were set to {action}."
+                if num_families == 1
+                else f"{num_families} families were set to {action}."
+            )
+            flash(action_message)
+
         except Exception as ex:
             if not self.handle_view_exception(ex):
                 raise
@@ -456,7 +458,7 @@ class SampleView(BaseView):
             self.write_cancel_comment(sample=sample)
 
         case_ids: List[str] = list(all_associated_case_ids)
-        db.delete_cases_without_samples(case_ids=case_ids)
+        db.delete_cases_without_samples(case_internal_ids=case_ids)
         cases_with_remaining_samples: List[str] = db.filter_cases_with_samples(case_ids=case_ids)
 
         self.display_cancel_confirmation(

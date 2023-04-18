@@ -12,7 +12,7 @@ from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store.models import Family, Sample
+from cg.store.models import Family, Flowcell, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -50,7 +50,9 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Location in case folder where sample sheet is expected to be stored. Sample sheet is used as a config
         required to run Fluffy
         """
-        starlims_id: str = self.status_db.family(case_id).links[0].sample.order
+        starlims_id: str = (
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample.order
+        )
         return Path(self.root_dir, case_id, f"SampleSheet_{starlims_id}.csv")
 
     def get_workdir_path(self, case_id: str) -> Path:
@@ -93,7 +95,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         """
         Links fastq files from Housekeeper to case working directory
         """
-        case_obj: Family = self.status_db.family(case_id)
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         latest_flow_cell = self.status_db.get_latest_flow_cell_on_case(family_id=case_id)
         workdir_path = self.get_workdir_path(case_id=case_id)
         if workdir_path.exists() and not dry_run:

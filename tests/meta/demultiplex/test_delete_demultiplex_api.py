@@ -116,7 +116,7 @@ def test_no_active_samples_on_flow_cell(
     )
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
-        active: bool = store_.active_sample(internal_id=sample.internal_id)
+        active: bool = store_.has_active_cases_for_sample(internal_id=sample.internal_id)
         assert not active
 
     # WHEN checking for active samples on flowcell
@@ -144,7 +144,7 @@ def test_active_samples_on_flow_cell(
 
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
-        active: bool = store_.active_sample(internal_id=sample.internal_id)
+        active: bool = store_.has_active_cases_for_sample(internal_id=sample.internal_id)
         assert active
 
     # WHEN checking for active samples on flowcell
@@ -280,7 +280,7 @@ def test_delete_flow_cell_statusdb(
 
     # WHEN removing the object from the database
 
-    wipe_demux_api.delete_flow_cell_statusdb()
+    wipe_demux_api.delete_flow_cell_in_status_db()
 
     # THEN the user should be informed that the object was removed
 

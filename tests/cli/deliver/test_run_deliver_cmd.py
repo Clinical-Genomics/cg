@@ -43,7 +43,7 @@ def test_run_deliver_non_existing_case(
     # GIVEN a cli runner and a base context
     # GIVEN a case_id that does not exist in the database
     store: Store = base_context.status_db
-    assert store.family(case_id) is None
+    assert store.get_case_by_internal_id(internal_id=case_id) is None
 
     # WHEN running the deliver command with the non existing case
     result = cli_runner.invoke(
@@ -108,7 +108,7 @@ def test_delivery_ticket_id(
     cli_runner: CliRunner,
     populated_mip_context: CGConfig,
     delivery_inbox: Path,
-    ticket: str,
+    ticket_id: str,
 ):
     """Test that to run the deliver command with ticket nr"""
     # GIVEN a context with a case that have files in housekeeper to deliver
@@ -119,7 +119,7 @@ def test_delivery_ticket_id(
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        ["--ticket", ticket, "--delivery-type", "mip-dna"],
+        ["--ticket", ticket_id, "--delivery-type", "mip-dna"],
         obj=populated_mip_context,
     )
 
@@ -181,7 +181,7 @@ def test_case_file_is_delivered(
 def test_delivering_analysis_with_missing_bundle_errors(
     cli_runner: CliRunner,
     context_with_missing_bundle: CGConfig,
-    ticket: str,
+    ticket_id: str,
 ):
     """Test that the deliver command fails when a bundle is missing."""
     # GIVEN a context with a case that does not have files in housekeeper to deliver.
@@ -189,7 +189,7 @@ def test_delivering_analysis_with_missing_bundle_errors(
     # WHEN running the deliver analysis command
     result = cli_runner.invoke(
         deliver_analysis,
-        ["--ticket", ticket, "--delivery-type", "mip-dna"],
+        ["--ticket", ticket_id, "--delivery-type", "mip-dna"],
         obj=context_with_missing_bundle,
     )
 
@@ -201,7 +201,7 @@ def test_delivering_analysis_with_missing_bundle_ignoring_errors(
     cli_runner: CliRunner,
     context_with_missing_bundle: CGConfig,
     delivery_inbox: Path,
-    ticket: str,
+    ticket_id: str,
 ):
     """Test that it is possible to deliver analysis with a missing bundle using the --ignore-missing-bundles flag."""
     # GIVEN a context without files in housekeeper to deliver.
@@ -212,7 +212,7 @@ def test_delivering_analysis_with_missing_bundle_ignoring_errors(
     # WHEN running the deliver analysis command
     cli_runner.invoke(
         deliver_analysis,
-        ["--ticket", ticket, "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
+        ["--ticket", ticket_id, "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
         obj=context_with_missing_bundle,
     )
 
@@ -221,7 +221,7 @@ def test_delivering_analysis_with_missing_bundle_ignoring_errors(
 
 
 def test_deliver_ticket_with_missing_bundle(
-    cli_runner: CliRunner, context_with_missing_bundle: CGConfig, caplog, ticket
+    cli_runner: CliRunner, context_with_missing_bundle: CGConfig, caplog, ticket_id
 ):
     caplog.set_level(logging.INFO)
 
@@ -229,7 +229,14 @@ def test_deliver_ticket_with_missing_bundle(
     # WHEN running cg deliver ticket
     result = cli_runner.invoke(
         deliver_ticket,
-        ["--ticket", ticket, "--dry-run", "--ignore-missing-bundles", "--delivery-type", "mip-dna"],
+        [
+            "--ticket",
+            ticket_id,
+            "--dry-run",
+            "--ignore-missing-bundles",
+            "--delivery-type",
+            "mip-dna",
+        ],
         obj=context_with_missing_bundle,
     )
 

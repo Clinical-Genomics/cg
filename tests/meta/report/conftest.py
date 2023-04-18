@@ -46,21 +46,21 @@ def report_api_balsamic(cg_context: CGConfig, lims_samples) -> BalsamicReportAPI
 def case_mip_dna(case_id, report_api_mip_dna) -> Family:
     """MIP DNA case instance."""
 
-    return report_api_mip_dna.status_db.family(case_id)
+    return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function", name="case_balsamic")
 def case_balsamic(case_id, report_api_balsamic) -> Family:
     """BALSAMIC case instance."""
 
-    return report_api_balsamic.status_db.family(case_id)
+    return report_api_balsamic.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
 @pytest.fixture(scope="function", name="case_samples_data")
 def case_samples_data(case_id, report_api_mip_dna):
     """MIP DNA family sample object."""
 
-    return report_api_mip_dna.status_db.family_samples(case_id)
+    return report_api_mip_dna.status_db.get_case_samples_by_case_id(case_internal_id=case_id)
 
 
 @pytest.fixture(name="mip_analysis_api")
@@ -89,14 +89,16 @@ def fixture_lims_samples(lims_family: dict) -> List[dict]:
 def report_store(analysis_store, helpers, timestamp_yesterday):
     """A mock store instance for report testing."""
 
-    case = analysis_store.families()[0]
+    case = analysis_store.get_cases()[0]
     helpers.add_analysis(
         analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=timestamp_yesterday
     )
     helpers.add_analysis(analysis_store, case, pipeline=Pipeline.MIP_DNA, started_at=datetime.now())
 
     # Mock sample dates to calculate processing times
-    for family_sample in analysis_store.family_samples(case.internal_id):
+    for family_sample in analysis_store.get_case_samples_by_case_id(
+        case_internal_id=case.internal_id
+    ):
         family_sample.sample.ordered_at = timestamp_yesterday - timedelta(days=2)
         family_sample.sample.received_at = timestamp_yesterday - timedelta(days=1)
         family_sample.sample.prepared_at = timestamp_yesterday

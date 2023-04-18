@@ -78,7 +78,7 @@ def families(
             family,
             action=action,
             priority=priority,
-            panels=panel_abbreviations,
+            panel_abbreviations=panel_abbreviations,
             family_id=case.internal_id,
             customer_id=customer_id,
         )

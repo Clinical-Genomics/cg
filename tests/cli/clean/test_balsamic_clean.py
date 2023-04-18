@@ -47,7 +47,9 @@ def test_with_yes(
     # GIVEN a case on disk that could be deleted
     analysis_api = clean_context.meta_apis["analysis_api"]
 
-    analysis_to_clean = analysis_api.status_db.family(balsamic_case_clean).analyses[0]
+    analysis_to_clean = analysis_api.status_db.get_case_by_internal_id(
+        balsamic_case_clean
+    ).analyses[0]
     case_path = analysis_api.get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
@@ -85,7 +87,7 @@ def test_dry_run(
         cleaned_at=None,
     )
 
-    analysis_to_clean = base_store.family(balsamic_case_clean).analyses[0]
+    analysis_to_clean = base_store.get_case_by_internal_id(balsamic_case_clean).analyses[0]
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
 
@@ -98,7 +100,7 @@ def test_dry_run(
     assert result.exit_code == EXIT_SUCCESS
     assert "Would have deleted" in caplog.text
     assert balsamic_case_clean in caplog.text
-    assert analysis_to_clean in base_store.analyses_to_clean(pipeline=Pipeline.BALSAMIC)
+    assert analysis_to_clean in base_store.get_analyses_to_clean(pipeline=Pipeline.BALSAMIC)
 
 
 def test_cleaned_at_valid(
@@ -118,7 +120,7 @@ def test_cleaned_at_valid(
 
     # THEN command should say it would have deleted
     assert result.exit_code == EXIT_SUCCESS
-    assert base_store.family("balsamic_case_clean").analyses[0].cleaned_at
+    assert base_store.get_case_by_internal_id("balsamic_case_clean").analyses[0].cleaned_at
     assert not Path(case_path).exists()
 
 
@@ -130,12 +132,12 @@ def test_cleaned_at_invalid(
     base_store = clean_context.status_db
     case_path = clean_context.meta_apis["analysis_api"].get_case_path(balsamic_case_not_clean)
     Path(case_path).mkdir(exist_ok=True, parents=True)
-    assert not base_store.family(balsamic_case_not_clean).analyses[0].cleaned_at
+    assert not base_store.get_case_by_internal_id(balsamic_case_not_clean).analyses[0].cleaned_at
     # WHEN dry running with dry run specified
 
     result = cli_runner.invoke(past_run_dirs, ["2020-12-01", "-d", "-y"], obj=clean_context)
 
     # THEN case directory should not have been cleaned
     assert result.exit_code == EXIT_SUCCESS
-    assert not base_store.family(balsamic_case_not_clean).analyses[0].cleaned_at
+    assert not base_store.get_case_by_internal_id(balsamic_case_not_clean).analyses[0].cleaned_at
     assert Path(case_path).exists()

@@ -108,7 +108,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def write_samplesheet(self, case_id: str, strandedness: str, dry_run: bool = False) -> None:
         """Write sample sheet for rnafusion analysis in case folder."""
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         if len(case_obj.links) != 1:
             raise NotImplementedError(
                 "Case objects are assumed to be related to a single sample (one link)"
@@ -132,9 +132,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 ),
             )
 
-    def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
+    def write_params_file(
+        self, case_id: str, genomes_base: Optional[Path] = None, dry_run: bool = False
+    ) -> None:
         """Write params-file for rnafusion analysis in case folder."""
         default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
+        if genomes_base:
+            default_options["genomes_base"] = genomes_base
         LOG.info(default_options)
         if dry_run:
             return
@@ -176,6 +180,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         strandedness: str,
+        genomes_base: Path,
         dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
@@ -185,7 +190,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         LOG.info("Generating samplesheet")
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Generating parameters file")
-        self.write_params_file(case_id=case_id, dry_run=dry_run)
+        self.write_params_file(case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return

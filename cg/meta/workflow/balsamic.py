@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from housekeeper.store.models import Version, File
 from pydantic import ValidationError
 
 from cg.constants import Pipeline
@@ -126,10 +127,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         Analysis types are any of ["tumor_wgs", "tumor_normal_wgs", "tumor_panel", "tumor_normal_panel"]
         """
         LOG.debug("Fetch analysis type for %s", case_id)
-        number_of_samples: int = len(self.status_db.family(case_id).links)
+        number_of_samples: int = len(
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links
+        )
 
         application_type: str = self.get_application_type(
-            self.status_db.family(case_id).links[0].sample
+            self.status_db.get_case_by_internal_id(internal_id=case_id).links[0].sample
         )
         sample_type = "tumor"
         if number_of_samples == 2:
@@ -145,7 +148,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         return Path(self.get_case_path(case.internal_id), FileFormat.FASTQ)
 
     def link_fastq_files(self, case_id: str, dry_run: bool = False) -> None:
-        case_obj = self.status_db.family(case_id)
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             self.link_fastq_files_for_sample(
                 case_obj=case_obj, sample_obj=link.sample, concatenate=True
@@ -346,12 +349,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         }
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
-        """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
+        """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
 
-        version = self.housekeeper_api.last_version(bundle=case_id)
-        raw_file = self.housekeeper_api.get_files(
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        raw_file: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, version=version.id, tags=tags
-        ).first()
+        )
 
         if not raw_file:
             raise FileNotFoundError(
@@ -513,7 +516,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def build_case_id_map_string(self, case_id: str) -> Optional[str]:
         """Creates case info string for balsamic with format panel_shortname:case_name:application_tag."""
 
-        case: Family = self.status_db.family(internal_id=case_id)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         sample: Sample = case.links[0].sample
         if sample.from_sample:
             sample: Sample = self.status_db.get_sample_by_internal_id(
@@ -571,7 +574,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
                 "application_type": self.get_application_type(link_object.sample),
                 "target_bed": self.resolve_target_bed(panel_bed=panel_bed, link_object=link_object),
             }
-            for link_object in self.status_db.family(case_id).links
+            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
         }
 
         self.print_sample_params(case_id=case_id, sample_data=sample_data)
@@ -580,7 +583,7 @@ class BalsamicAnalysisAPI(AnalysisAPI):
     def get_case_application_type(self, case_id: str) -> str:
         application_types = {
             self.get_application_type(link_object.sample)
-            for link_object in self.status_db.family(case_id).links
+            for link_object in self.status_db.get_case_by_internal_id(internal_id=case_id).links
         }
 
         if application_types:
@@ -601,32 +604,6 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.JSON, file_path=self.get_case_config_path(case_id=case_id)
         )
         return config_data["analysis"]["BALSAMIC_version"]
-
-    def family_has_correct_number_tumor_normal_samples(self, case_id: str) -> bool:
-        """Evaluates if a case has exactly one tumor and up to one normal sample in ClinicalDB.
-        This check is only applied to filter jobs which start automatically"""
-        query = (
-            self.status_db.query(Sample)
-            .join(Family.links, FamilySample.sample)
-            .filter(Family.internal_id == case_id)
-            .filter(Family.data_analysis == self.pipeline)
-        )
-        return all(
-            [
-                len(query.filter(Sample.is_tumour == False).all()) <= 1,
-                len(query.filter(Sample.is_tumour == True).all()) == 1,
-            ]
-        )
-
-    def get_valid_cases_to_analyze(self) -> list:
-        """Retrieve a list of balsamic cases without analysis,
-        where samples have enough reads to be analyzed"""
-
-        return [
-            case_object.internal_id
-            for case_object in self.get_cases_to_analyze()
-            if self.family_has_correct_number_tumor_normal_samples(case_object.internal_id)
-        ]
 
     def config_case(
         self,

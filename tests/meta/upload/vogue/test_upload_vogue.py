@@ -91,5 +91,4 @@ def test_update_analysis_uploaded_to_vogue_date_now(
         ).update_analysis_uploaded_to_vogue_date(mock_analysis)
 
     # THEN the analysis object should have a vogue_uploaded_date set to the default value
-    # dt.datetime.now()
     assert result.uploaded_to_vogue_at == timestamp_now

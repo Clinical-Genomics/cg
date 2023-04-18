@@ -30,7 +30,7 @@ def get_report_case(context: click.Context, case_id: str) -> Family:
         else MipDNAReportAPI(config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj))
     )
 
-    case: Family = report_api.status_db.family(case_id)
+    case: Family = report_api.status_db.get_case_by_internal_id(internal_id=case_id)
 
     # Missing or not valid internal case ID
     if not case_id or not case:
@@ -111,11 +111,13 @@ def get_report_analysis_started(
 
     if not analysis_started_at:
         analysis_started_at: datetime = (
-            report_api.status_db.family(case.internal_id).analyses[0].started_at
+            report_api.status_db.get_case_by_internal_id(case.internal_id).analyses[0].started_at
         )
 
     # If there is no analysis for the provided date
-    if not report_api.status_db.analysis(case, analysis_started_at):
+    if not report_api.status_db.get_analysis_by_case_entry_id_and_started_at(
+        case_entry_id=case.id, started_at_date=analysis_started_at
+    ):
         LOG.error(f"There is no analysis started at {analysis_started_at}")
         raise click.Abort
 
