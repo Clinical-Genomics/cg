@@ -1,5 +1,6 @@
-from alchy import Query
-from cg.constants.subject import PhenotypeStatus
+from sqlalchemy.orm import Query
+from typing import Dict, Any
+from cg.constants.subject import PhenotypeStatus, Gender
 from cg.constants.constants import SampleType
 from cg.store import Store
 from cg.store.models import Sample
@@ -29,8 +30,10 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_entry_customer_ids,
     filter_samples_by_name_pattern,
     filter_samples_by_internal_id_pattern,
+    filter_samples_by_identifier_name_and_value,
 )
 from tests.store.conftest import StoreConftestFixture
+from tests.store.api.conftest import fixture_cust123
 
 
 def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
@@ -610,30 +613,32 @@ def test_filter_get_samples_by_subject_id(
 
 def test_filter_get_samples_by_customer_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    customer_id: int = 1,
 ):
     """Test that a sample is returned when there is a sample with the given customer id."""
-    # GIVEN a store with two samples of which one has a customer id
+    # GIVEN a store with samples with different customer ids
+    samples: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+        table=Sample
+    )
+    customer_id: int = samples.first().customer_id
+    assert customer_id != samples.order_by(Sample.customer_id.desc()).first().customer_id
 
-    # WHEN getting a sample by customer id
-    samples: Query = filter_samples_by_entry_customer_ids(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        ),
+    # WHEN filtering the sample query by customer id
+    filtered_query: Query = filter_samples_by_entry_customer_ids(
+        samples=samples,
         customer_entry_ids=[customer_id],
     )
 
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
+    # THEN the result of the filtering is a query
+    assert isinstance(filtered_query, Query)
 
-    # THEN samples should contain the test sample
-    assert samples.all()
+    # THEN the filtered query is not empty
+    assert filtered_query.all()
 
-    # THEN samples should contain two samples
-    assert len(samples.all()) == 2
+    # THEN the filtered query has fewer elements than the unfiltered query
+    assert filtered_query.count() < samples.count()
 
-    # THEN the sample should have the correct customer id
-    assert samples[0].customer_id == customer_id
+    # THEN a sample in the filtered query should have the correct customer id
+    assert filtered_query.first().customer_id == customer_id
 
 
 def test_filter_get_samples_by_name_pattern(
@@ -690,3 +695,83 @@ def test_filter_get_samples_by_internal_id_pattern(
 
     # THEN the sample should have the correct name
     assert samples[0].internal_id == StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
+
+
+def test_filter_samples_by_identifier_name_and_value_unique_sample(
+    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
+):
+    """Test that the function filters correctly for any identifier."""
+    # GIVEN a store with at least two samples
+    sample_query: Query = store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
+        table=Sample
+    )
+    assert sample_query.count() > 1
+
+    # GIVEN a sample in store that has all attributes
+    sample: Sample = sample_query.first()
+
+    # WHEN filtering the sample query with every existing attribute of the sample
+    identifiers: Dict[str, Any] = {
+        "age_at_sampling": sample.age_at_sampling,
+        "application_version_id": sample.application_version_id,
+        "capture_kit": sample.capture_kit,
+        "comment": sample.comment,
+        "control": sample.control,
+        "created_at": sample.created_at,
+        "customer_id": sample.customer_id,
+        "delivered_at": sample.delivered_at,
+        "downsampled_to": sample.downsampled_to,
+        "from_sample": sample.from_sample,
+        "id": sample.id,
+        "internal_id": sample.internal_id,
+        "invoice_id": sample.invoice_id,
+        "invoiced_at": sample.invoiced_at,
+        "is_tumour": sample.is_tumour,
+        "loqusdb_id": sample.loqusdb_id,
+        "name": sample.name,
+        "no_invoice": sample.no_invoice,
+        "order": sample.order,
+        "ordered_at": sample.ordered_at,
+        "organism_id": sample.organism_id,
+        "original_ticket": sample.original_ticket,
+        "prepared_at": sample.prepared_at,
+        "priority": sample.priority,
+        "reads": sample.reads,
+        "received_at": sample.received_at,
+        "reference_genome": sample.reference_genome,
+        "sequence_start": sample.sequence_start,
+        "sex": sample.sex,
+        "sequenced_at": sample.sequenced_at,
+        "subject_id": sample.subject_id,
+    }
+    for key, value in identifiers.items():
+        filtered_sample_query: Query = filter_samples_by_identifier_name_and_value(
+            samples=sample_query,
+            identifier_name=key,
+            identifier_value=value,
+        )
+        # THEN the filtered query has at least one element
+        assert filtered_sample_query.count() > 0
+        # THEN the element in the filtered query is the sample for every attribute
+        assert getattr(filtered_sample_query.first(), key) == value
+
+
+def test_filter_samples_by_identifier_name_and_value_two_samples(sample_store: Store):
+    """."""
+    # GIVEN a store with more than 2 samples
+    sample_query: Query = sample_store._get_query(table=Sample)
+    assert sample_query.count() > 2
+
+    # WHEN filtering the females from the sample query using identifiers
+    filtered_query: Query = filter_samples_by_identifier_name_and_value(
+        samples=sample_query,
+        identifier_name="sex",
+        identifier_value=Gender.FEMALE,
+    )
+
+    # THEN the filtered query has at least two elements
+    assert filtered_query.count() > 1
+
+    # THEN all the elements of the filtered query are females
+    for sample in filtered_query:
+        assert sample.sex == Gender.FEMALE

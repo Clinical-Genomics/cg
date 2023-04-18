@@ -86,7 +86,7 @@ class Application(Model):
     turnaround_time = Column(types.Integer)
     minimum_order = Column(types.Integer, default=1)
     sequencing_depth = Column(types.Integer)
-    min_sequencing_depth = Column(types.Integer)
+    min_sequencing_depth = Column(types.Integer, default=0, nullable=False)
     target_reads = Column(types.BigInteger, default=0)
     percent_reads_guaranteed = Column(types.Integer, nullable=False)
     sample_amount = Column(types.Integer)

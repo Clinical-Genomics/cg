@@ -1,6 +1,7 @@
 """CLI support to create config and/or start RNAFUSION."""
 
 import logging
+from pathlib import Path
 
 import click
 from pydantic import ValidationError
@@ -18,7 +19,11 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_USE_NEXTFLOW,
     OPTION_WORKDIR,
 )
-from cg.cli.workflow.rnafusion.options import OPTION_FROM_START, OPTION_STRANDEDNESS
+from cg.cli.workflow.rnafusion.options import (
+    OPTION_FROM_START,
+    OPTION_REFERENCES,
+    OPTION_STRANDEDNESS,
+)
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
@@ -48,15 +53,20 @@ rnafusion.add_command(resolve_compression)
 @rnafusion.command("config-case")
 @ARGUMENT_CASE_ID
 @OPTION_STRANDEDNESS
+@OPTION_REFERENCES
 @DRY_RUN
 @click.pass_obj
-def config_case(context: CGConfig, case_id: str, strandedness: str, dry_run: bool) -> None:
+def config_case(
+    context: CGConfig, case_id: str, strandedness: str, genomes_base: Path, dry_run: bool
+) -> None:
     """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     LOG.info(f"Creating sample sheet file for {case_id}.")
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
-        analysis_api.config_case(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
+        analysis_api.config_case(
+            case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
+        )
 
     except CgError as error:
         LOG.error(f"Could not create sample sheet: {error}")
@@ -149,6 +159,7 @@ def run(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_REFERENCES
 @DRY_RUN
 @click.pass_context
 def start(
@@ -164,6 +175,7 @@ def start(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
+    genomes_base: Path,
     dry_run: bool,
 ) -> None:
     """Start full workflow for CASE ID."""
@@ -174,7 +186,7 @@ def start(
     except DecompressionNeededError as error:
         LOG.error(error)
         raise click.Abort() from error
-    context.invoke(config_case, case_id=case_id, dry_run=dry_run)
+    context.invoke(config_case, case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
     context.invoke(
         run,
         case_id=case_id,
