@@ -394,10 +394,6 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[FlowCellFilter.GET_BY_NAME_PATTERN],
         ).first()
 
-    def get_flow_cells(self) -> List[Flowcell]:
-        """Return all flow cells."""
-        return self._get_query(table=Flowcell)
-
     def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
         """Return flow cells with supplied statuses."""
         return apply_flow_cell_filter(
