@@ -14,8 +14,8 @@ class DeleteDataHandler(BaseHandler):
         """Delete flow cell."""
         flow_cell: Flowcell = apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id,
-            filter_functions=[FlowCellFilter.GET_BY_ID],
+            flow_cell_name=flow_cell_id,
+            filter_functions=[FlowCellFilter.GET_BY_NAME],
         ).first()
 
         if flow_cell:
