@@ -179,7 +179,7 @@ def case(
 def flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
     """Get information about a flow cell and the samples on it."""
     status_db: Store = context.obj.status_db
-    existing_flow_cell: Flowcell = status_db.get_flow_cell(flow_cell_id=flow_cell_id)
+    existing_flow_cell: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
     if not existing_flow_cell:
         LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort
