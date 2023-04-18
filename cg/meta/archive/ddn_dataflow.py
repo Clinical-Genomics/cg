@@ -218,5 +218,5 @@ class DDNDataFlowApi:
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
 
-    def is_task_completed(self, task_id: int) -> bool:
+    def is_task_completed(self, archiving_task: int) -> bool:
         pass

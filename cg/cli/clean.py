@@ -536,7 +536,14 @@ def clean_archived_spring_files(
         task_id: int = housekeeper_api.get_file_task_id(file)
         sample_id: str = housekeeper_api.get_bundle_id_from_file(file=file)
         if status_db.has_active_cases_for_sample(internal_id=sample_id):
+            LOG.info(f"Sample {sample_id} is related to an active case, skipping cleaning.")
             continue
-        if ddn_api.is_task_complete(task_id):
+        if ddn_api.is_archived(task_id):
             file.unlink()
             housekeeper_api.set_file_to_archived()
+            LOG.info(f"Removed file {file}")
+            continue
+        LOG.warning(
+            f"Archiving task {task_id} for file {file} has failed. Please make sure the "
+            f"file is successfully archive before removing it."
+        )

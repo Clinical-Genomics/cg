@@ -277,6 +277,11 @@ class HousekeeperAPI:
         bundle: Bundle = self._store.get_bundle_from_file(file.as_posix())
         return bundle.name
 
+    def finished_tasks_to_update(self) -> Set[int]:
+        """Returns the task ids for all task whose completion has not been recorded."""
+        files_with_started_archiving: List[File] = self._store.get_files_with_started_archiving()
+        return {file.archiving_task for file in files_with_started_archiving}
+
     def new_tag(self, name: str, category: str = None):
         """Create a new tag."""
         return self._store.new_tag(name, category)
