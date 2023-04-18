@@ -8,8 +8,8 @@ from typing import Iterable, List, Optional, Set, Tuple, Dict
 from alchy import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
-from housekeeper.store import Store, models
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store import Store
+from housekeeper.store.models import Bundle, File, Version, Tag
 
 from cg.constants import SequencingFileTag
 from cg.exc import HousekeeperBundleVersionMissingError
@@ -242,7 +242,7 @@ class HousekeeperAPI:
         return (
             self._store.Version.query.join(Version.bundle)
             .filter(Bundle.name == bundle)
-            .order_by(models.Version.created_at.desc())
+            .order_by(Version.created_at.desc())
             .first()
         )
 
@@ -274,17 +274,17 @@ class HousekeeperAPI:
 
     def new_tag(self, name: str, category: str = None):
         """Create a new tag."""
-        return self._store.create_tag(name, category)
+        return self._store.create_tag(name=name, category=category)
 
-    def add_tag(self, name: str, category: str = None) -> models.Tag:
+    def add_tag(self, name: str, category: str = None) -> Tag:
         """Add a tag to the database."""
-        tag_obj = self._store.create_tag(name, category)
+        tag_obj = self._store.create_tag(name=name, category=category)
         self.add_commit(tag_obj)
         return tag_obj
 
-    def get_tag(self, name: str) -> models.Tag:
+    def get_tag(self, name: str) -> Tag:
         """Fetch a tag."""
-        return self._store.get_tag(name)
+        return self._store.get_tag(tag_name=name)
 
     @staticmethod
     def get_tag_names_from_file(file: File) -> List[str]:
