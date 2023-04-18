@@ -39,7 +39,6 @@ def taxprofiler(context: click.Context) -> None:
     """nf-core/taxprofiler analysis workflow."""
     AnalysisAPI.get_help(context)
 
-
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
         config=context.obj,
     )
