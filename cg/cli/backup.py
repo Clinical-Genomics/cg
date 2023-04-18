@@ -50,7 +50,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
 
     status_api: Store = context.status_db
     flow_cell: Optional[Flowcell] = (
-        status_api.get_flow_cell(flow_cell_id=flow_cell_id) if flow_cell_id else None
+        status_api.get_flow_cell_by_name(flow_cell_name=flow_cell_id) if flow_cell_id else None
     )
 
     if not flow_cell and flow_cell_id:

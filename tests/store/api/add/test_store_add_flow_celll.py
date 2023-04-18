@@ -20,7 +20,7 @@ def test_add_flowcell(
 
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=flow_cell_id,
         sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
@@ -47,7 +47,7 @@ def test_add_flowcell_status(
 
     # WHEN adding flow cell
     flow_cell: Flowcell = base_store.add_flow_cell(
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=flow_cell_id,
         sequencer_name=sequencer_name,
         sequencer_type=Sequencers.NOVASEQ,
         date=timestamp_now,
