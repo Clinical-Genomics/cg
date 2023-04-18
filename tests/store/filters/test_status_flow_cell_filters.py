@@ -6,9 +6,9 @@ from cg.constants import FlowCellStatus
 from cg.store import Store
 from cg.store.models import Flowcell, Family, Sample
 from cg.store.filters.status_flow_cell_filters import (
+    filter_flow_cells_with_statuses,
     get_flow_cell_by_name,
-    get_flow_cells_with_statuses,
-    get_flow_cells_by_case,
+    filter_flow_cells_by_case,
     filter_flow_cell_by_name_search,
 )
 from tests.store_helpers import StoreHelpers
