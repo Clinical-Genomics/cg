@@ -37,7 +37,7 @@ def test_sequenced_date_from_statusdb(
 ):
     # GIVEN a flow cell with a sequenced_at date in statusdb
     flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
-    mock_statusdb.get_flow_cell.return_value.sequenced_at = timestamp_yesterday
+    mock_statusdb.get_flow_cell_by_name.return_value.sequenced_at = timestamp_yesterday
 
     # WHEN determining the age of a flow cell
     result = flow_cell.sequenced_date
@@ -56,7 +56,7 @@ def test_sequenced_date_from_run_name(
 ):
     # GIVEN a flow cell that does not exist in statusdb
     flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
-    mock_statusdb.get_flow_cell.return_value = None
+    mock_statusdb.get_flow_cell_by_name.return_value = None
 
     # WHEN determining the age of a flow cell
     result = flow_cell.sequenced_date

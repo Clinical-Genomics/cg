@@ -148,9 +148,9 @@ class FindBusinessDataHandler(BaseHandler):
         """Fetch all cases created within the past days."""
         newer_than_date = dt.datetime.now() - dt.timedelta(days=days)
         return apply_case_filter(
-            filter_functions=[CaseFilter.GET_NEW],
+            filter_functions=[CaseFilter.GET_NEW_BY_CREATION_DATE],
             cases=self._get_query(table=Family),
-            date=newer_than_date,
+            creation_date=newer_than_date,
         ).all()
 
     def get_cases_by_customer_and_case_name_search(
@@ -313,11 +313,11 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
         """Fetch the latest sequenced flow cell related to a sample on a case."""
-        flow_cells_on_case: List[Flowcell] = list(
-            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=family_id))
+        flow_cells_on_case: List[Flowcell] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=family_id)
         )
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
-        return flow_cells_on_case[-1]
+        return flow_cells_on_case[-1] if flow_cells_on_case else None
 
     def _is_case_found(self, case: Family, case_id: str) -> None:
         """Raise error if case is false."""
@@ -378,25 +378,21 @@ class FindBusinessDataHandler(BaseHandler):
             name=sample_name,
         ).first()
 
-    def get_flow_cell(self, flow_cell_id: str) -> Flowcell:
-        """Return flow cell by flow cell id."""
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
+        """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id,
-            filter_functions=[FlowCellFilter.GET_BY_ID],
+            flow_cell_name=flow_cell_name,
+            filter_functions=[FlowCellFilter.GET_BY_NAME],
         ).first()
 
-    def get_flow_cell_by_enquiry(self, flow_cell_id_enquiry: str) -> Flowcell:
-        """Return flow cell enquiry."""
+    def get_flow_cell_by_name_pattern(self, name_pattern: str) -> Flowcell:
+        """Return flow cell by name pattern."""
         return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id_enquiry,
-            filter_functions=[FlowCellFilter.GET_BY_ID_AND_ENQUIRY],
+            name_search=name_pattern,
+            filter_functions=[FlowCellFilter.GET_BY_NAME_SEARCH],
         ).first()
-
-    def get_flow_cells(self) -> List[Flowcell]:
-        """Return all flow cells."""
-        return self._get_query(table=Flowcell)
 
     def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
         """Return flow cells with supplied statuses."""
@@ -404,23 +400,22 @@ class FindBusinessDataHandler(BaseHandler):
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=[FlowCellFilter.GET_WITH_STATUSES],
-        )
+        ).all()
 
-    def get_flow_cell_by_enquiry_and_status(
-        self, flow_cell_statuses: List[str], flow_cell_id_enquiry: str
+    def get_flow_cell_by_name_pattern_and_status(
+        self, flow_cell_statuses: List[str], name_pattern: str
     ) -> List[Flowcell]:
-        """Return flow cell enquiry snd status."""
+        """Return flow cell by name pattern and status."""
         filter_functions: List[FlowCellFilter] = [
             FlowCellFilter.GET_WITH_STATUSES,
-            FlowCellFilter.GET_BY_ID_AND_ENQUIRY,
+            FlowCellFilter.GET_BY_NAME_SEARCH,
         ]
-        flow_cells: List[Flowcell] = apply_flow_cell_filter(
+        return apply_flow_cell_filter(
             flow_cells=self._get_query(table=Flowcell),
-            flow_cell_id=flow_cell_id_enquiry,
+            name_search=name_pattern,
             flow_cell_statuses=flow_cell_statuses,
             filter_functions=filter_functions,
-        )
-        return flow_cells
+        ).all()
 
     def get_flow_cells_by_case(self, case: Family) -> Optional[List[Flowcell]]:
         """Return flow cells for case."""
@@ -428,11 +423,11 @@ class FindBusinessDataHandler(BaseHandler):
             flow_cells=self._get_join_flow_cell_sample_links_query(),
             filter_functions=[FlowCellFilter.GET_BY_CASE],
             case=case,
-        )
+        ).all()
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
-        flow_cell: Flowcell = self.get_flow_cell(flow_cell_id=flow_cell_id)
+        flow_cell: Flowcell = self.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
         if flow_cell:
             return flow_cell.samples
 
@@ -440,9 +435,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
-        flow_cells: Optional[List[Flowcell]] = list(
-            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=case_id))
+        flow_cells: Optional[List[Flowcell]] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=case_id)
         )
+
         if not flow_cells:
             LOG.info("No flow cells found")
             return False

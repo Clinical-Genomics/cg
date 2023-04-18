@@ -49,9 +49,7 @@ class DeleteDemuxAPI:
     @property
     def status_db_presence(self) -> bool:
         """Update about the presence of given flow cell in status_db"""
-        return bool(
-            self.status_db.query(Flowcell).filter(Flowcell.name == self.flow_cell_name).first()
-        )
+        return bool(self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name))
 
     @staticmethod
     def set_dry_run(dry_run: bool) -> bool:
@@ -61,12 +59,8 @@ class DeleteDemuxAPI:
 
     def _set_samples_on_flow_cell(self) -> None:
         """Set a list of samples related to a flow cell in status-db"""
-        self.samples_on_flow_cell: List[Sample] = (
-            self.status_db.query(Flowcell)
-            .filter(Flowcell.name == self.flow_cell_name)
-            .first()
-            .samples
-        )
+        flow_cell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name)
+        self.samples_on_flow_cell: List[Sample] = flow_cell.samples
 
     def active_samples_on_flow_cell(self) -> Optional[List[str]]:
         """Check if there are any active cases related to samples of a flow cell"""
@@ -172,7 +166,9 @@ class DeleteDemuxAPI:
             )
             return
         if demultiplexing_dir and run_dir and self.status_db_presence:
-            flow_cell_obj: Flowcell = self.status_db.get_flow_cell(self.flow_cell_name)
+            flow_cell_obj: Flowcell = self.status_db.get_flow_cell_by_name(
+                flow_cell_name=self.flow_cell_name
+            )
             flow_cell_obj.status = "removed"
             self.status_db.commit()
         if demultiplexing_dir and self.demultiplexing_path.exists():

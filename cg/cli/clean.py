@@ -337,10 +337,8 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
 
-    flow_cells_in_statusdb: List[Flowcell] = list(
-        status_db.get_flow_cells_by_statuses(
-            flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REMOVED]
-        )
+    flow_cells_in_statusdb: List[Flowcell] = status_db.get_flow_cells_by_statuses(
+        flow_cell_statuses=[FlowCellStatus.ON_DISK, FlowCellStatus.REMOVED]
     )
 
     LOG.info(

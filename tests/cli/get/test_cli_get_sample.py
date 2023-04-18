@@ -197,7 +197,7 @@ def test_hide_sample_flowcells_without_flowcell(
     """Test that we can query samples and hide flow cell even when there are none."""
     # GIVEN a database with a sample without related flow cell
     sample = helpers.add_sample(disk_store)
-    returned_flow_cell: List[Flowcell] = disk_store.get_flow_cells()
+    returned_flow_cell: List[Flowcell] = disk_store._get_query(table=Flowcell)
     assert not list(returned_flow_cell)
 
     # WHEN getting a sample with the --hide-flow-cell flag
@@ -216,7 +216,7 @@ def test_get_sample_flowcells_with_flowcell(
     # GIVEN a database with a sample and a related flow cell
     flow_cell = helpers.add_flowcell(disk_store)
     sample = helpers.add_sample(disk_store, flowcell=flow_cell)
-    returned_flow_cell: Flowcell = disk_store.get_flow_cell(flow_cell_id=flow_cell.name)
+    returned_flow_cell: Flowcell = disk_store.get_flow_cell_by_name(flow_cell_name=flow_cell.name)
     assert sample in returned_flow_cell.samples
 
     # WHEN getting a sample with the --hide-flow-cell flag

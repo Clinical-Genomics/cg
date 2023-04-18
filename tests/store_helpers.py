@@ -582,7 +582,7 @@ class StoreHelpers:
     @staticmethod
     def add_flowcell(
         store: Store,
-        flow_cell_id: str = "flowcell_test",
+        flow_cell_name: str = "flowcell_test",
         archived_at: datetime = None,
         sequencer_type: str = Sequencers.HISEQX,
         samples: List[Sample] = None,
@@ -591,7 +591,7 @@ class StoreHelpers:
     ) -> Flowcell:
         """Utility function to add a flow cell to the store and return an object."""
         flow_cell = store.add_flow_cell(
-            flow_cell_id=flow_cell_id,
+            flow_cell_name=flow_cell_name,
             sequencer_name="dummy_sequencer",
             sequencer_type=sequencer_type,
             date=date,

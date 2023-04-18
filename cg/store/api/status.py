@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 
 from sqlalchemy.orm import Query
@@ -9,6 +9,7 @@ from typing_extensions import Literal
 from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
+from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
 from cg.store.models import (
     Analysis,
     Application,
@@ -233,12 +234,12 @@ class StatusHandler(BaseHandler):
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: List[CaseFilter] = [
             CaseFilter.GET_HAS_INACTIVE_ANALYSIS,
-            CaseFilter.GET_OLD,
+            CaseFilter.GET_OLD_BY_CREATION_DATE,
         ]
         return apply_case_filter(
             filter_functions=case_filter_functions,
             cases=self._get_query(table=Family),
-            date=date_threshold,
+            creation_date=date_threshold,
         ).all()
 
     def get_sample_by_entry_id(self, entry_id: int) -> Sample:
@@ -525,52 +526,6 @@ class StatusHandler(BaseHandler):
         )
         case_data.max_tat = self._get_max_tat(links=case_obj.links)
         return case_data
-
-    def _get_filtered_case_query(
-        self,
-        case_action: Optional[str],
-        customer_id: str,
-        data_analysis: str,
-        days: int,
-        exclude_customer_id: bool,
-        internal_id: str,
-        name: str,
-        priority: str,
-        sample_id: str,
-    ) -> Query:
-        case_q = self.Family.query
-        # family filters
-        if days != 0:
-            filter_date = datetime.now() - timedelta(days=days)
-            case_q = case_q.filter(Family.ordered_at > filter_date)
-        if case_action:
-            case_q = case_q.filter(Family.action == case_action)
-        if priority:
-            case_q = case_q.filter(Family.priority == priority)
-        if internal_id:
-            case_q = case_q.filter(Family.internal_id.ilike(f"%{internal_id}%"))
-        if name:
-            case_q = case_q.filter(Family.name.ilike(f"%{name}%"))
-        if data_analysis:
-            case_q = case_q.filter(Family.data_analysis.ilike(f"%{data_analysis}%"))
-        # customer filters
-        if customer_id or exclude_customer_id:
-            case_q = case_q.join(Family.customer)
-
-        if customer_id:
-            case_q = case_q.filter(Customer.internal_id == customer_id)
-
-        if exclude_customer_id:
-            case_q = case_q.filter(Customer.internal_id != exclude_customer_id)
-        # sample filters
-        if sample_id:
-            case_q = case_q.join(Family.links, FamilySample.sample)
-            case_q = case_q.filter(Sample.internal_id.ilike(f"%{sample_id}%"))
-        else:
-            case_q = case_q.outerjoin(Family.links, FamilySample.sample)
-        # other joins
-        case_q = case_q.outerjoin(Family.analyses, Sample.invoice, Sample.flowcells)
-        return case_q
 
     @staticmethod
     def _is_rerun(
