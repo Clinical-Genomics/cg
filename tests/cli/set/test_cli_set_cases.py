@@ -22,12 +22,12 @@ def test_set_cases_by_sample_identifiers(
 ):
     # GIVEN a database with a case with a sample
     base_store: Store = base_context.status_db
-    sample_obj: Sample = helpers.add_sample(base_store)
-    sample_obj.original_ticket: str = ticket_id
-    sample_obj.order: str = "An order"
+    new_sample: Sample = helpers.add_sample(base_store)
+    new_sample.original_ticket: str = ticket_id
+    new_sample.order: str = "An order"
     case: Family = helpers.add_case(base_store)
-    helpers.add_relationship(base_store, sample=sample_obj, case=case)
-    identifier_value = getattr(sample_obj, identifier_key)
+    helpers.add_relationship(base_store, sample=new_sample, case=case)
+    identifier_value = getattr(new_sample, identifier_key)
 
     caplog.set_level(logging.INFO)
 

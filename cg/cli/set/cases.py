@@ -57,26 +57,26 @@ def cases(
 ):
     """Set values on many families at the same time"""
     store: Store = context.obj.status_db
-    cases: List[Family] = _get_cases(identifiers, store)
+    cases_to_alter: List[Family] = _get_cases(identifiers, store)
 
-    if not cases:
+    if not cases_to_alter:
         LOG.error("No cases to alter!")
         raise click.Abort
 
     LOG.info("Would alter cases:")
 
-    for case_obj in cases:
-        LOG.info(case_obj)
+    for case_to_alter in cases_to_alter:
+        LOG.info(case_to_alter)
 
     if not (click.confirm(CONFIRM)):
         raise click.Abort
 
-    for case_obj in cases:
+    for case_to_alter in cases_to_alter:
         context.invoke(
             case,
             action=action,
             priority=priority,
             panel_abbreviations=panel_abbreviations,
-            case_id=case_obj.internal_id,
+            case_id=case_to_alter.internal_id,
             customer_id=customer_id,
         )
