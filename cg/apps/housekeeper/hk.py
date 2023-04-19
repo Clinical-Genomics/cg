@@ -88,8 +88,8 @@ class HousekeeperAPI:
             Path(file_obj.full_path).unlink()
 
         LOG.info(f"Deleting file {file_id} from housekeeper")
-        file_obj.delete()
-        self._store.commit()
+        self._store.session.delete(file_obj)
+        self._store.session.commit()
 
         return file_obj
 

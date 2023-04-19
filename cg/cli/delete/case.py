@@ -103,7 +103,7 @@ def _delete_sample(dry_run: bool, sample: Sample, status_db: Store, yes: bool):
         return
 
     LOG.info("Deleting sample: %s", sample)
-    status_db.delete(sample)
+    status_db.session.delete(sample)
 
 
 def _log_sample_process_information(sample: Sample):

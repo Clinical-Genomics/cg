@@ -44,7 +44,7 @@ def undo_invoice(invoice_id):
     records: List[Union[Pool, Sample]] = db.get_pools_and_samples_for_invoice_by_invoice_id(
         invoice_id=invoice_id
     )
-    invoice_obj.delete()
+    db.session.delete(invoice_obj)
     for record in records:
         record.invoice_id = None
     db.session.commit()
