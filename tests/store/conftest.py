@@ -154,7 +154,7 @@ def fixture_microbial_store(
         organism = base_store.Organism(
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
-        base_store.add(organism)
+        base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
             sex=Gender.UNKNOWN,
@@ -166,7 +166,7 @@ def fixture_microbial_store(
         sample.application_version = application_version
         sample.customer = customer
         sample.organism = organism
-        base_store.add(sample)
+        base_store.session.add(sample)
 
     base_store.session.commit()
     yield base_store

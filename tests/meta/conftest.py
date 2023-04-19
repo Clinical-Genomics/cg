@@ -226,7 +226,7 @@ def fixture_flowcell_store(
         sample.customer = customer
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
-        base_store.add(sample)
+        base_store.session.add(sample)
     base_store.session.commit()
     yield base_store
 
@@ -267,7 +267,7 @@ def fixture_invoice_api_nipt_customer(
     customer_id: str = CustomerNames.cust032,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with a pool for NIPT customer."""
-    pool = helpers.ensure_pool(store, customer_id=customer_id)
+    pool = helpers.ensure_pool(store=store, customer_id=customer_id)
     invoice: Invoice = helpers.ensure_invoice(
         store,
         invoice_id=invoice_id,
@@ -287,7 +287,7 @@ def fixture_invoice_api_pool_generic_customer(
     customer_id: str = CustomerNames.cust132,
 ) -> InvoiceAPI:
     """Return an InvoiceAPI with a pool."""
-    pool = helpers.ensure_pool(store, customer_id=customer_id)
+    pool = helpers.ensure_pool(store=store, customer_id=customer_id)
     invoice: Invoice = helpers.ensure_invoice(
         store,
         invoice_id=invoice_id,

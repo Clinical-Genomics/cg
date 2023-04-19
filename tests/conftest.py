@@ -1318,10 +1318,8 @@ def sample_store(base_store: Store) -> Store:
             received=datetime.now(),
             prepared_at=datetime.now(),
         ),
-        base_store.add_sample("external", sex=Gender.FEMALE, external=True),
-        base_store.add_sample(
-            name="external-received", sex=Gender.FEMALE, received=datetime.now(), external=True
-        ),
+        base_store.add_sample(name="external", sex=Gender.FEMALE),
+        base_store.add_sample(name="external-received", sex=Gender.FEMALE, received=datetime.now()),
         base_store.add_sample(
             name="sequenced",
             sex=Gender.MALE,

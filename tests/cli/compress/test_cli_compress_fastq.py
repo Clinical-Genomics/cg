@@ -37,7 +37,7 @@ def test_get_cases_to_process(
         action=None,
     )
     valid_compressable_case.created_at = dt.datetime.now() - dt.timedelta(days=1000)
-    status_db.commit()
+    status_db.session.commit()
 
     # WHEN running the compress command
     cases: List[Family] = get_cases_to_process(days_back=1, store=status_db)
