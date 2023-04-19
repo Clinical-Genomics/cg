@@ -36,7 +36,7 @@ class OrderInSample(BaseModel):
     _suitable_project: OrderType = None
     application: constr(max_length=Application.tag.property.columns[0].type.length)
     comment: Optional[constr(max_length=Sample.comment.property.columns[0].type.length)]
-    skip_reception_control: Optional[str] = False
+    skip_reception_control: Optional[bool] = None
     data_analysis: Pipeline
     data_delivery: DataDelivery
     name: constr(
