@@ -76,7 +76,7 @@ class DeliverAPI:
                 LOG.info(f"Could not find any version for {case_id}")
             elif not self.skip_missing_bundle:
                 raise SyntaxError(f"Could not find any version for {case_id}")
-        links: List[FamilySample] = self.store.family_samples(case_id)
+        links: List[FamilySample] = self.store.get_case_samples_by_case_id(case_internal_id=case_id)
         if not links:
             LOG.warning(f"Could not find any samples linked to case {case_id}")
             return
@@ -236,7 +236,6 @@ class DeliverAPI:
         At least one tag should match between file and tags.
         Do not include files with sample tags.
         """
-        tag: Tag
         file_tags = {tag.name for tag in file.tags}
         if self.all_case_tags.isdisjoint(file_tags):
             LOG.debug("No tags are matching")

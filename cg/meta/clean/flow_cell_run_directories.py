@@ -4,7 +4,7 @@ import logging
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from housekeeper.store.models import Bundle
 
@@ -55,7 +55,7 @@ class RunDirFlowCell:
     def sequenced_date(self) -> datetime:
         """The date on which the flow cell was sequenced."""
         if self._sequenced_date is None:
-            flow_cell: Flowcell = self.status_db.get_flow_cell(flow_cell_id=self.id)
+            flow_cell: Flowcell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.id)
             if flow_cell:
                 LOG.info(f"Found flow cell {self.id} in Statusdb, getting sequenced date.")
                 self._sequenced_date: datetime = flow_cell.sequenced_at
@@ -77,7 +77,9 @@ class RunDirFlowCell:
     def flow_cell_status(self) -> str:
         """Return status of the flow cell."""
         if self._flow_cell_status is None:
-            self._flow_cell_status = self.status_db.get_flow_cell(flow_cell_id=self.id).status
+            self._flow_cell_status = self.status_db.get_flow_cell_by_name(
+                flow_cell_name=self.id
+            ).status
         return self._flow_cell_status
 
     @property
@@ -85,7 +87,7 @@ class RunDirFlowCell:
         """The flow cell exists in Statusdb."""
         if self._exists_in_statusdb is None:
             self._exists_in_statusdb = (
-                self.status_db.get_flow_cell(flow_cell_id=self.id) is not None
+                self.status_db.get_flow_cell_by_name(flow_cell_name=self.id) is not None
             )
         return self._exists_in_statusdb
 
@@ -102,14 +104,15 @@ class RunDirFlowCell:
             return
         LOG.info("Sample sheet found!")
         hk_bundle: Bundle = self.hk.bundle(name=self.id)
+        hk_tags: List[str] = [SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id]
         if hk_bundle is None:
             LOG.info(f"Creating bundle with name {self.id}")
             self.hk.create_new_bundle_and_version(name=self.id)
-        try:
-            self.hk.add_and_include_file_to_latest_version(
-                bundle_name=self.id,
-                file=self.sample_sheet_path,
-                tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id],
-            )
-        except FileExistsError:
+        elif self.hk.get_file_from_latest_version(bundle_name=hk_bundle.name, tags=hk_tags):
             LOG.warning("Sample sheet already included!")
+            return
+        self.hk.add_and_include_file_to_latest_version(
+            bundle_name=self.id,
+            file=self.sample_sheet_path,
+            tags=hk_tags,
+        )

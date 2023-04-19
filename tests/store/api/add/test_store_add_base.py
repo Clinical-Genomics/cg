@@ -1,12 +1,13 @@
 from datetime import datetime as dt
 
 from cg.store import Store
-from cg.store.models import Customer
+from cg.store.models import ApplicationVersion, Collaboration, Customer, Organism, Sample, User
 
 
 def test_add_collaboration(store: Store):
     # GIVEN an empty database
-    assert store.Collaboration.query.first() is None
+    collaboration_query = store._get_query(table=Collaboration)
+    assert collaboration_query.first() is None
     internal_id, name = "cust_group", "Test customer group"
 
     # WHEN adding a new customer group
@@ -14,7 +15,7 @@ def test_add_collaboration(store: Store):
     store.add_commit(new_collaboration)
 
     # THEN it should be stored in the database
-    assert store.Collaboration.query.first() == new_collaboration
+    assert collaboration_query.first() == new_collaboration
 
 
 def test_add_user(store: Store):
@@ -35,12 +36,13 @@ def test_add_user(store: Store):
     store.add_commit(new_user)
 
     # THEN it should be stored in the database
-    assert store.User.query.first() == new_user
+    assert store._get_query(table=User).first() == new_user
 
 
 def test_add_microbial_sample(base_store: Store, helpers):
     # GIVEN an empty database
-    assert base_store.Sample.query.first() is None
+    sample_query = base_store._get_query(table=Sample)
+    assert sample_query.first() is None
     customer_obj = helpers.ensure_customer(base_store)
     assert customer_obj
     name = "microbial_sample"
@@ -48,9 +50,9 @@ def test_add_microbial_sample(base_store: Store, helpers):
     internal_id = "lims-id"
     reference_genome = "ref_gen"
     priority = "research"
-    application_version = base_store.ApplicationVersion.query.first()
+    application_version = base_store._get_query(table=ApplicationVersion).first()
     base_store.add_organism(organism_name, organism_name, reference_genome)
-    organism = base_store.Organism.query.first()
+    organism = base_store._get_query(table=Organism).first()
 
     # WHEN adding a new microbial sample
     new_sample = base_store.add_sample(
@@ -66,8 +68,8 @@ def test_add_microbial_sample(base_store: Store, helpers):
     base_store.add_commit(new_sample)
 
     # THEN it should be stored in the database
-    assert base_store.Sample.query.first() == new_sample
-    stored_microbial_sample = base_store.Sample.query.first()
+    assert sample_query.first() == new_sample
+    stored_microbial_sample = sample_query.first()
     assert stored_microbial_sample.name == name
     assert stored_microbial_sample.internal_id == internal_id
     assert stored_microbial_sample.reference_genome == reference_genome
@@ -77,11 +79,13 @@ def test_add_microbial_sample(base_store: Store, helpers):
 
 
 def test_add_pool(rml_pool_store: Store):
-    """Tests whether new pools are invoiced as default"""
+    """Tests whether new pools are invoiced as default."""
     # GIVEN a valid customer and a valid application_version
     customer: Customer = rml_pool_store.get_customers()[0]
     application = rml_pool_store.get_application_by_tag(tag="RMLP05R800")
-    app_version = rml_pool_store.application_version(application=application, version=1)
+    app_version = rml_pool_store.get_application_version_by_application_entry_id(
+        application_entry_id=application.id
+    )
 
     # WHEN adding a new pool
     new_pool = rml_pool_store.add_pool(

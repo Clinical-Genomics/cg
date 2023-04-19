@@ -5,13 +5,14 @@ from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery, GenePanelMasterList
 from cg.constants.constants import PrepCategory
+from cg.constants.invoice import CustomerNames
 from cg.exc import OrderError
 from cg.meta.orders.lims import process_lims
 from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.constants.priority import Priority
-from cg.store.models import Sample, Family, FamilySample, Customer
+from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationVersion
 
 
 class FastqSubmitter(Submitter):
@@ -67,7 +68,9 @@ class FastqSubmitter(Submitter):
             priority=Priority.research,
             ticket=sample_obj.original_ticket,
         )
-        case.customer: Customer = self.status.get_customer_by_customer_id(customer_id="cust000")
+        case.customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=CustomerNames.CG_INTERNAL_CUSTOMER
+        )
         relationship: FamilySample = self.status.relate_sample(
             family=case, sample=sample_obj, status=StatusEnum.unknown
         )
@@ -77,7 +80,9 @@ class FastqSubmitter(Submitter):
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
     ) -> List[Sample]:
         """Store fastq samples in the status database including family connection and delivery"""
-        customer: Customer = self.status.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = self.status.get_customer_by_internal_id(
+            customer_internal_id=customer_id
+        )
         if not customer:
             raise OrderError(f"Unknown customer: {customer_id}")
         new_samples = []
@@ -99,12 +104,14 @@ class FastqSubmitter(Submitter):
                     tumour=sample["tumour"],
                     capture_kit=sample["capture_kit"],
                 )
-                new_sample.customer = customer
-                application_tag = sample["application"]
-                application_version = self.status.current_application_version(tag=application_tag)
+                new_sample.customer: Customer = customer
+                application_tag: str = sample["application"]
+                application_version: ApplicationVersion = (
+                    self.status.get_current_application_version_by_tag(tag=application_tag)
+                )
                 if application_version is None:
                     raise OrderError(f"Invalid application: {sample['application']}")
-                new_sample.application_version = application_version
+                new_sample.application_version: ApplicationVersion = application_version
                 new_samples.append(new_sample)
                 if not case:
                     case = self.status.add_case(

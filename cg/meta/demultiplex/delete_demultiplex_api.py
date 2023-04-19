@@ -49,9 +49,7 @@ class DeleteDemuxAPI:
     @property
     def status_db_presence(self) -> bool:
         """Update about the presence of given flow cell in status_db"""
-        return bool(
-            self.status_db.query(Flowcell).filter(Flowcell.name == self.flow_cell_name).first()
-        )
+        return bool(self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name))
 
     @staticmethod
     def set_dry_run(dry_run: bool) -> bool:
@@ -61,12 +59,8 @@ class DeleteDemuxAPI:
 
     def _set_samples_on_flow_cell(self) -> None:
         """Set a list of samples related to a flow cell in status-db"""
-        self.samples_on_flow_cell: List[Sample] = (
-            self.status_db.query(Flowcell)
-            .filter(Flowcell.name == self.flow_cell_name)
-            .first()
-            .samples
-        )
+        flow_cell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.flow_cell_name)
+        self.samples_on_flow_cell: List[Sample] = flow_cell.samples
 
     def active_samples_on_flow_cell(self) -> Optional[List[str]]:
         """Check if there are any active cases related to samples of a flow cell"""
@@ -129,12 +123,12 @@ class DeleteDemuxAPI:
             )
             self._delete_fastq_and_spring_housekeeper()
 
-    def delete_flow_cell_statusdb(self) -> None:
-        """Delete any presence of a flow cell in status-db"""
+    def delete_flow_cell_in_status_db(self) -> None:
+        """Delete a flow cell in Status db."""
         if self.dry_run:
             log.info(f"DeleteDemuxAPI-StatusDB: Would remove {self.flow_cell_name}")
         else:
-            self.status_db.delete_flow_cell(flow_cell_name=self.flow_cell_name)
+            self.status_db.delete_flow_cell(flow_cell_id=self.flow_cell_name)
             log.info(f"DeleteDemuxAPI-StatusDB: Deleted flowcell {self.flow_cell_name}")
 
     def delete_flow_cell_cgstats(self) -> None:
@@ -172,7 +166,9 @@ class DeleteDemuxAPI:
             )
             return
         if demultiplexing_dir and run_dir and self.status_db_presence:
-            flow_cell_obj: Flowcell = self.status_db.get_flow_cell(self.flow_cell_name)
+            flow_cell_obj: Flowcell = self.status_db.get_flow_cell_by_name(
+                flow_cell_name=self.flow_cell_name
+            )
             flow_cell_obj.status = "removed"
             self.status_db.commit()
         if demultiplexing_dir and self.demultiplexing_path.exists():
@@ -239,7 +235,7 @@ class DeleteDemuxAPI:
         init_files: bool,
         status_db: bool,
     ) -> None:
-        """Master command to delete the presence of a flowcell in all services"""
+        """Master command to delete the presence of a flow cell in all services."""
         self.check_active_samples()
         if status_db:
             self.delete_flow_cell_hasta(
@@ -248,7 +244,7 @@ class DeleteDemuxAPI:
             )
             self.delete_flow_cell_cgstats()
             self.delete_flow_cell_housekeeper()
-            self.delete_flow_cell_statusdb()
+            self.delete_flow_cell_in_status_db()
         if demultiplexing_dir or run_dir:
             self.delete_flow_cell_hasta(
                 demultiplexing_dir=demultiplexing_dir,

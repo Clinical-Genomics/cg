@@ -80,21 +80,23 @@ class AddHandler(BaseHandler):
         percent_kth: int,
         percent_reads_guaranteed: int,
         is_accredited: bool = False,
+        min_sequencing_depth: int = 0,
         **kwargs,
     ) -> Application:
-        """Build a new application  record."""
+        """Build a new application record."""
 
         return self.Application(
             tag=tag,
             prep_category=prep_category,
             description=description,
             is_accredited=is_accredited,
+            min_sequencing_depth=min_sequencing_depth,
             percent_kth=percent_kth,
             percent_reads_guaranteed=percent_reads_guaranteed,
             **kwargs,
         )
 
-    def add_version(
+    def add_application_version(
         self,
         application: Application,
         version: int,
@@ -215,7 +217,7 @@ class AddHandler(BaseHandler):
 
     def add_flow_cell(
         self,
-        flow_cell_id: str,
+        flow_cell_name: str,
         sequencer_name: str,
         sequencer_type: str,
         date: dt.datetime,
@@ -223,7 +225,7 @@ class AddHandler(BaseHandler):
     ) -> Flowcell:
         """Build a new Flowcell record."""
         return self.Flowcell(
-            name=flow_cell_id,
+            name=flow_cell_name,
             sequencer_name=sequencer_name,
             sequencer_type=sequencer_type,
             sequenced_at=date,

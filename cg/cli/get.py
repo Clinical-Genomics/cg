@@ -135,12 +135,12 @@ def case(
     status_db: Store = context.obj.status_db
     status_db_cases: List[Family] = []
     if name:
-        customer: Customer = status_db.get_customer_by_customer_id(customer_id=customer_id)
+        customer: Customer = status_db.get_customer_by_internal_id(customer_internal_id=customer_id)
         if not customer:
             LOG.error(f"{customer_id}: customer not found")
             raise click.Abort
-        status_db_cases: Iterable[Family] = status_db.families(
-            customers=[customer], enquiry=case_ids[-1]
+        status_db_cases: Iterable[Family] = status_db.get_cases_by_customer_and_case_name_search(
+            customer=customer, case_name_search=case_ids[-1]
         )
     else:
         for case_id in case_ids:
@@ -179,7 +179,7 @@ def case(
 def flow_cell(context: click.Context, samples: bool, flow_cell_id: str):
     """Get information about a flow cell and the samples on it."""
     status_db: Store = context.obj.status_db
-    existing_flow_cell: Flowcell = status_db.get_flow_cell(flow_cell_id=flow_cell_id)
+    existing_flow_cell: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
     if not existing_flow_cell:
         LOG.error(f"{flow_cell_id}: flow cell not found")
         raise click.Abort

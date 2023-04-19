@@ -5,8 +5,8 @@ import logging
 from typing import Iterable, List, Optional
 
 import click
-from cg.cli.set.families import families
-from cg.cli.set.family import family
+from cg.cli.set.cases import cases
+from cg.cli.set.case import case
 from cg.constants import FLOWCELL_STATUS
 from cg.exc import LimsDataError
 from cg.models.cg_config import CGConfig
@@ -79,7 +79,7 @@ def samples(
 ):
     """Set values on many samples at the same time."""
     store: Store = context.obj.status_db
-    sample_objs = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
+    sample_objs: List[Sample] = _get_samples(case_id=case_id, identifiers=identifiers, store=store)
 
     if not sample_objs:
         LOG.error("No samples to alter!")
@@ -108,7 +108,7 @@ def _get_samples(case_id: str, identifiers: click.Tuple([str, str]), store: Stor
         samples_by_case_id: List[Sample] = store.get_samples_by_case_id(case_id=case_id)
 
     if identifiers:
-        samples_by_id = _get_samples_by_identifiers(identifiers, store)
+        samples_by_id: List[Sample] = _get_samples_by_identifiers(identifiers, store)
 
     if case_id and identifiers:
         sample_objs = set(set(samples_by_case_id) & set(samples_by_id))
@@ -223,9 +223,13 @@ def sample(
                 if isinstance(value, str) and not value.isdigit():
                     new_key = "priority_human"
             elif key == "customer":
-                new_value: Customer = status_db.get_customer_by_customer_id(customer_id=value)
+                new_value: Customer = status_db.get_customer_by_internal_id(
+                    customer_internal_id=value
+                )
             elif key == "application_version":
-                new_value: ApplicationVersion = status_db.current_application_version(value)
+                new_value: ApplicationVersion = status_db.get_current_application_version_by_tag(
+                    tag=value
+                )
 
             if not new_value:
                 LOG.error(f"{key} {value} not found, aborting")
@@ -279,22 +283,22 @@ def _update_comment(comment, obj):
 
 @set_cmd.command()
 @click.option("-s", "--status", type=click.Choice(FLOWCELL_STATUS))
-@click.argument("flowcell_name")
+@click.argument("flow_cell_name")
 @click.pass_obj
-def flowcell(context: CGConfig, flowcell_name: str, status: Optional[str]):
+def flowcell(context: CGConfig, flow_cell_name: str, status: Optional[str]):
     """Update information about a flow cell."""
     status_db: Store = context.status_db
-    flowcell_obj: Flowcell = status_db.get_flow_cell(flowcell_name)
+    flowcell_obj: Flowcell = status_db.get_flow_cell_by_name(flow_cell_name=flow_cell_name)
 
     if flowcell_obj is None:
-        LOG.warning(f"flow cell not found: {flowcell_name}")
+        LOG.warning(f"flow cell not found: {flow_cell_name}")
         raise click.Abort
     prev_status: str = flowcell_obj.status
     flowcell_obj.status = status
 
     status_db.commit()
-    LOG.info(f"{flowcell_name} set: {prev_status} -> {status}")
+    LOG.info(f"{flow_cell_name} set: {prev_status} -> {status}")
 
 
-set_cmd.add_command(family)
-set_cmd.add_command(families)
+set_cmd.add_command(case)
+set_cmd.add_command(cases)

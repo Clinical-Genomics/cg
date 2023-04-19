@@ -151,7 +151,9 @@ class ExternalDataAPI(MetaAPI):
 
     def curate_sample_folder(self, cust_name: str, force: bool, sample_folder: Path) -> None:
         """Changes the name of the folder to the internal_id. If force is true replaces any previous folder."""
-        customer: Customer = self.status_db.get_customer_by_customer_id(customer_id=cust_name)
+        customer: Customer = self.status_db.get_customer_by_internal_id(
+            customer_internal_id=cust_name
+        )
         customer_folder: Path = sample_folder.parent
         sample: Sample = self.status_db.get_sample_by_customer_and_name(
             customer_entry_id=[customer.id], sample_name=sample_folder.name
@@ -181,7 +183,9 @@ class ExternalDataAPI(MetaAPI):
         cases_to_start: List[dict] = []
         for sample in available_samples:
             cases_to_start.extend(
-                self.status_db.cases(sample_id=sample.internal_id, exclude_analysed=True)
+                self.status_db.get_not_analysed_cases_by_sample_internal_id(
+                    sample_internal_id=sample.internal_id
+                )
             )
             last_version: Version = self.housekeeper_api.get_create_version(
                 bundle_name=sample.internal_id

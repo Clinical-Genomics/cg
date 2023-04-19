@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from housekeeper.store.models import Version, File
 from pydantic import ValidationError
 
 from cg.constants import Pipeline
@@ -348,12 +349,12 @@ class BalsamicAnalysisAPI(AnalysisAPI):
         }
 
     def get_latest_raw_file_data(self, case_id: str, tags: list) -> Union[dict, list]:
-        """Retrieves the data of the latest file associated to a specific case ID and a list of tags"""
+        """Retrieves the data of the latest file associated to a specific case ID and a list of tags."""
 
-        version = self.housekeeper_api.last_version(bundle=case_id)
-        raw_file = self.housekeeper_api.get_files(
+        version: Version = self.housekeeper_api.last_version(bundle=case_id)
+        raw_file: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, version=version.id, tags=tags
-        ).first()
+        )
 
         if not raw_file:
             raise FileNotFoundError(
@@ -532,11 +533,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             panel_shortname: str = "Whole_Genome"
         else:
             return
-        application_tag = (
-            self.status_db.query(ApplicationVersion)
-            .filter(ApplicationVersion.id == case.links[0].sample.application_version_id)
-            .first()
-            .application.tag
+
+        application_tag = self.status_db.get_application_tag_by_application_version_entry_id(
+            application_version_entry_id=case.links[0].sample.application_version_id
         )
         return f"{panel_shortname}:{case.name}:{application_tag}"
 

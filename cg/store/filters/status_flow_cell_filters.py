@@ -6,22 +6,22 @@ from sqlalchemy.orm import Query
 from cg.store.models import Flowcell, FamilySample, Family
 
 
-def get_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
+def filter_flow_cells_by_case(case: Family, flow_cells: Query, **kwargs) -> Query:
     """Return flow cells by case id."""
     return flow_cells.filter(FamilySample.family == case)
 
 
-def get_flow_cell_by_id(flow_cells: Query, flow_cell_id: str, **kwargs) -> Query:
+def get_flow_cell_by_name(flow_cells: Query, flow_cell_name: str, **kwargs) -> Query:
     """Return flow cell by flow cell id."""
-    return flow_cells.filter(Flowcell.name == flow_cell_id)
+    return flow_cells.filter(Flowcell.name == flow_cell_name)
 
 
-def get_flow_cell_by_id_and_by_enquiry(flow_cells: Query, flow_cell_id: str, **kwargs) -> Query:
+def filter_flow_cell_by_name_search(flow_cells: Query, name_search: str, **kwargs) -> Query:
     """Return flow cell by flow cell id enquiry."""
-    return flow_cells.filter(Flowcell.name.like(f"%{flow_cell_id}%"))
+    return flow_cells.filter(Flowcell.name.like(f"%{name_search}%"))
 
 
-def get_flow_cells_with_statuses(
+def filter_flow_cells_with_statuses(
     flow_cells: Query, flow_cell_statuses: List[str], **kwargs
 ) -> Query:
     """Return flow cells by flow cell statuses."""
@@ -32,7 +32,8 @@ def apply_flow_cell_filter(
     flow_cells: Query,
     filter_functions: List[Callable],
     case: Optional[Family] = None,
-    flow_cell_id: Optional[str] = None,
+    flow_cell_name: Optional[str] = None,
+    name_search: Optional[str] = None,
     flow_cell_statuses: Optional[List[str]] = None,
 ) -> Query:
     """Apply filtering functions and return filtered results."""
@@ -40,8 +41,9 @@ def apply_flow_cell_filter(
         flow_cells: Query = function(
             flow_cells=flow_cells,
             case=case,
-            flow_cell_id=flow_cell_id,
+            flow_cell_name=flow_cell_name,
             flow_cell_statuses=flow_cell_statuses,
+            name_search=name_search,
         )
     return flow_cells
 
@@ -49,7 +51,7 @@ def apply_flow_cell_filter(
 class FlowCellFilter(Enum):
     """Define FlowCell filter functions."""
 
-    GET_BY_CASE: Callable = get_flow_cells_by_case
-    GET_BY_ID: Callable = get_flow_cell_by_id
-    GET_BY_ID_AND_ENQUIRY: Callable = get_flow_cell_by_id_and_by_enquiry
-    GET_WITH_STATUSES: Callable = get_flow_cells_with_statuses
+    GET_BY_CASE: Callable = filter_flow_cells_by_case
+    GET_BY_NAME: Callable = get_flow_cell_by_name
+    GET_BY_NAME_SEARCH: Callable = filter_flow_cell_by_name_search
+    GET_WITH_STATUSES: Callable = filter_flow_cells_with_statuses
