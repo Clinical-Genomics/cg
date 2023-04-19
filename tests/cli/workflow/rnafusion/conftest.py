@@ -41,12 +41,6 @@ def fixture_no_sample_case_id() -> str:
     return "no_sample_case"
 
 
-@pytest.fixture(name="not_existing_case_id")
-def fixture_not_existing_case_id() -> str:
-    """Returns a case id not existing in dbs."""
-    return "soberelephant"
-
-
 @pytest.fixture(name="rnafusion_sample_id")
 def fixture_rnafusion_sample_id() -> str:
     """Returns a rnafusion sample id."""

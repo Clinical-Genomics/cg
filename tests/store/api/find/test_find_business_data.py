@@ -222,9 +222,9 @@ def test_get_latest_flow_cell_on_case(
     """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
-        Flowcell.name == flow_cell_id
-    ).first()
+    latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
+        flow_cell_name=flow_cell_id
+    )
 
     # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
     latest_flow_cell_on_case: Flowcell = re_sequenced_sample_store.get_latest_flow_cell_on_case(
