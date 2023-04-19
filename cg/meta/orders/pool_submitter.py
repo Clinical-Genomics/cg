@@ -165,7 +165,7 @@ class PoolSubmitter(Submitter):
                 new_samples.append(new_sample)
                 self.status.relate_sample(family=case, sample=new_sample, status="unknown")
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)
-            self.status.add(new_delivery)
+            self.status.session.add(new_delivery)
             new_pools.append(new_pool)
         self.status.session.add_all(new_pools)
         self.status.session.commit()

@@ -277,7 +277,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         housekeeper_api.rollback()
-        status_db.rollback()
+        status_db.session.rollback()
         raise click.Abort()
 
 

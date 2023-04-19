@@ -322,7 +322,7 @@ class CaseSubmitter(Submitter):
             mother=mother_obj,
             father=father_obj,
         )
-        self.status.add(link_obj)
+        self.status.session.add(link_obj)
         return link_obj
 
     def _create_sample(self, case, customer_obj, order, ordered, sample, ticket):
@@ -350,9 +350,9 @@ class CaseSubmitter(Submitter):
             sample_obj.application_version: ApplicationVersion = (
                 self.status.get_current_application_version_by_tag(tag=application_tag)
             )
-        self.status.add(sample_obj)
+        self.status.session.add(sample_obj)
         new_delivery = self.status.add_delivery(destination="caesar", sample=sample_obj)
-        self.status.add(new_delivery)
+        self.status.session.add(new_delivery)
         return sample_obj
 
     def _create_case(self, case: dict, customer_obj: Customer, ticket: str):
