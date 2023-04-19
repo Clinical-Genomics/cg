@@ -28,22 +28,24 @@ def test_with_missing_case(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
-    not_existing_case_id: str,
+    case_id_does_not_exist: str,
 ):
     """Test command with invalid case to start with."""
     caplog.set_level(logging.WARNING)
 
     # GIVEN case_id not in database
-    assert not rnafusion_context.status_db.get_case_by_internal_id(internal_id=not_existing_case_id)
+    assert not rnafusion_context.status_db.get_case_by_internal_id(
+        internal_id=case_id_does_not_exist
+    )
 
     # WHEN running
-    result = cli_runner.invoke(report_deliver, [not_existing_case_id], obj=rnafusion_context)
+    result = cli_runner.invoke(report_deliver, [case_id_does_not_exist], obj=rnafusion_context)
 
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN ERROR log should be printed containing invalid case_id
-    assert not_existing_case_id in caplog.text
+    assert case_id_does_not_exist in caplog.text
     assert "could not be found" in caplog.text
 
 

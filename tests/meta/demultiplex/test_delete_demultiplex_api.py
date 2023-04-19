@@ -3,6 +3,7 @@ import pytest
 
 from pathlib import Path
 from typing import List, Optional
+from sqlalchemy.orm import Query
 
 from cg.apps.cgstats.db import models
 from cg.apps.cgstats.stats import StatsAPI
@@ -72,7 +73,7 @@ def test_get_presence_status_status_db(
 
     # WHEN adding a flowcell into the statusdb and checking its updated presence
     helpers.add_flowcell(
-        store=wipe_demux_api.status_db, flow_cell_id=flow_cell_id, sequencer_type="novaseq"
+        store=wipe_demux_api.status_db, flow_cell_name=flow_cell_id, sequencer_type="novaseq"
     )
     populated_presence: bool = wipe_demux_api.status_db_presence
 
@@ -110,13 +111,13 @@ def test_no_active_samples_on_flow_cell(
     """Test if the function to find no active samples works correctly"""
 
     # GIVEN a flow cell with no active samples related to it
-    store_: Store = populated_wipe_demultiplex_api.status_db
-    samples_on_flow_cell: List[Sample] = (
-        store_.query(Flowcell).filter(Flowcell.name == flow_cell_id).first().samples
-    )
+    store: Store = populated_wipe_demultiplex_api.status_db
+    flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    samples_on_flow_cell: List[Sample] = flow_cell.samples
+
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
-        active: bool = store_.has_active_cases_for_sample(internal_id=sample.internal_id)
+        active: bool = store.has_active_cases_for_sample(internal_id=sample.internal_id)
         assert not active
 
     # WHEN checking for active samples on flowcell
@@ -136,15 +137,13 @@ def test_active_samples_on_flow_cell(
 ):
     """Test if the function to find active samples works correctly"""
     # GIVEN a flow cell with active samples related to it
-    store_: Store = active_flow_cell_store
-
-    samples_on_flow_cell: List[Sample] = (
-        store_.query(Flowcell).filter(Flowcell.name == flow_cell_id).first().samples
-    )
+    store: Store = active_flow_cell_store
+    flow_cell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    samples_on_flow_cell: List[Sample] = flow_cell.samples
 
     assert samples_on_flow_cell
     for sample in samples_on_flow_cell:
-        active: bool = store_.has_active_cases_for_sample(internal_id=sample.internal_id)
+        active: bool = store.has_active_cases_for_sample(internal_id=sample.internal_id)
         assert active
 
     # WHEN checking for active samples on flowcell
@@ -267,34 +266,21 @@ def test_delete_flow_cell_statusdb(
     caplog.set_level(logging.INFO)
 
     # GIVEN a context, with a status db filled with a flow cell object
-
     wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
     wipe_demux_api.set_dry_run(dry_run=False)
+    store = populated_wipe_demux_context.status_db
+    flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    assert flow_cell
 
-    existing_object: Flowcell = (
-        populated_wipe_demux_context.status_db.query(Flowcell)
-        .filter(Flowcell.name == flow_cell_id)
-        .first()
-    )
-    assert existing_object
-
-    # WHEN removing the object from the database
-
+    # WHEN removing the flow cell from the database
     wipe_demux_api.delete_flow_cell_in_status_db()
 
-    # THEN the user should be informed that the object was removed
-
+    # THEN the user should be informed that the flow cell was removed
     assert f"StatusDB: Deleted flowcell {wipe_demux_api.flow_cell_name}" in caplog.text
 
-    # AND the object should no longer exist in status db
-
-    existing_object: Flowcell = (
-        populated_wipe_demux_context.status_db.query(Flowcell)
-        .filter(Flowcell.name == flow_cell_id)
-        .first()
-    )
-
-    assert not existing_object
+    # AND the flow cell should no longer exist in status db
+    flow_cell: Flowcell = store.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    assert not flow_cell
 
 
 def test_delete_flow_cell_hasta(
@@ -307,7 +293,9 @@ def test_delete_flow_cell_hasta(
 
     caplog.set_level(logging.INFO)
     wipe_demux_api: DeleteDemuxAPI = populated_wipe_demultiplex_api
-    flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell(wipe_demux_api.flow_cell_name)
+    flow_cell_obj: Flowcell = wipe_demux_api.status_db.get_flow_cell_by_name(
+        wipe_demux_api.flow_cell_name
+    )
     wipe_demux_api.set_dry_run(dry_run=False)
 
     # GIVEN an existing demultiplexing and run directory of a flow cell, with a status "ondisk"

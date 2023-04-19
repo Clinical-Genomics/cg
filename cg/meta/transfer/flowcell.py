@@ -60,7 +60,7 @@ class TransferFlowCell:
         cgstats_flow_cell: StatsFlowcell = self.stats.flowcell(flowcell_name=flow_cell_id)
         flow_cell: Flowcell = self._add_flow_cell_to_status_db(
             cgstats_flow_cell=cgstats_flow_cell,
-            flow_cell=self.db.get_flow_cell(flow_cell_id=flow_cell_id),
+            flow_cell=self.db.get_flow_cell_by_name(flow_cell_name=flow_cell_id),
             flow_cell_id=flow_cell_id,
         )
 
@@ -132,7 +132,7 @@ class TransferFlowCell:
         """Add a flow cell to the status database."""
         if not flow_cell:
             flow_cell: Flowcell = self.db.add_flow_cell(
-                flow_cell_id=flow_cell_id,
+                flow_cell_name=flow_cell_id,
                 sequencer_name=cgstats_flow_cell.sequencer,
                 sequencer_type=cgstats_flow_cell.sequencer_type,
                 date=cgstats_flow_cell.date,
