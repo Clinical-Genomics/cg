@@ -396,7 +396,7 @@ def fixture_store_with_older_and_newer_analyses(
     old_timestamp: dt.datetime,
 ) -> Store:
     """Return a store with  older and newer analyses."""
-    analysis = base_store.Analysis.query.first()
+    analysis = base_store._get_query(table=Analysis).first()
     analysis.uploaded_at = timestamp_now
     analysis.uploaded_to_vogue_at = timestamp_now
     analysis.cleaned_at = timestamp_now
