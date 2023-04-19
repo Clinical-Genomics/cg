@@ -4,6 +4,8 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
+from cg.store.models import User
+
 
 def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN a database with a customer in it that we can connect the user to
@@ -18,7 +20,8 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
     )
     disk_store.add_commit(customer)
     # GIVEN that there is a certain number of users
-    nr_users = disk_store.User.query.count()
+    user_query = disk_store._get_query(table=User)
+    nr_users = user_query.count()
 
     # WHEN adding a new user
     name, email = "Paul T. Anderson", "paul.anderson@magnolia.com"
@@ -26,4 +29,4 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
 
     # THEN exit successfully
     assert result.exit_code == EXIT_SUCCESS
-    assert disk_store.User.query.count() == nr_users + 1
+    assert user_query.count() == nr_users + 1

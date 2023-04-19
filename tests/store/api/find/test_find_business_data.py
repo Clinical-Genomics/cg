@@ -60,7 +60,7 @@ def test_get_flow_cells(re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the flow cells
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
 
     # THEN a flow cells should be returned
     assert flow_cells
@@ -75,7 +75,9 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
+    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
+        flow_cell_name=flow_cell_id
+    )
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id
@@ -106,9 +108,9 @@ def test_get_flow_cells_by_case(
     """Test returning the latest flow cell from the database by case."""
 
     # GIVEN a store with two flow cell
-    helpers.add_flowcell(store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj])
+    helpers.add_flowcell(store=base_store, flow_cell_name=flow_cell_id, samples=[sample_obj])
 
-    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case_obj)
@@ -148,7 +150,7 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
     # GIVEN a store with two flow cells
 
     # GIVEN a flow cell that exist in status db with status "requested"
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
     flow_cells[0].status = FlowCellStatus.REQUESTED
     re_sequenced_sample_store.add_commit(flow_cells[0])
 
@@ -220,9 +222,9 @@ def test_get_latest_flow_cell_on_case(
     """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
-        Flowcell.name == flow_cell_id
-    ).first()
+    latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
+        flow_cell_name=flow_cell_id
+    )
 
     # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
     latest_flow_cell_on_case: Flowcell = re_sequenced_sample_store.get_latest_flow_cell_on_case(
@@ -265,14 +267,14 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.PROCESSING,
     )
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=another_flow_cell_id,
+        flow_cell_name=another_flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.RETRIEVED,
     )
@@ -302,14 +304,14 @@ def test_is_all_flow_cells_on_disk_when_requested(
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.REMOVED,
     )
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=another_flow_cell_id,
+        flow_cell_name=another_flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.REQUESTED,
     )
@@ -340,10 +342,10 @@ def test_is_all_flow_cells_on_disk(
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
-        store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj]
+        store=base_store, flow_cell_name=flow_cell_id, samples=[sample_obj]
     )
 
-    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
