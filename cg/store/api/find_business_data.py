@@ -89,7 +89,7 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> str:
         """Return the application tag of an application version."""
 
-        application_version = apply_application_versions_filter(
+        application_version: ApplicationVersion = apply_application_versions_filter(
             application_versions=self._get_query(ApplicationVersion),
             filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
             application_version_entry_id=application_version_entry_id,
