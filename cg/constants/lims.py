@@ -2,7 +2,7 @@
 
 from cg.utils.enums import StrEnum
 
-YES_NO_LIMS_BOOLEANS = ["require_qcok", "skip_reception_control", "tumour"]
+YES_NO_LIMS_BOOLEANS = ["require_qcok", "tumour", "verified_organism"]
 
 PROP2UDF = {
     "application": "Sequencing Analysis",
