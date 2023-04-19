@@ -143,6 +143,7 @@ class AnalysisAPI(MetaAPI):
             AnalysisType.TARGETED_GENOME_SEQUENCING,
             AnalysisType.WHOLE_EXOME_SEQUENCING,
             AnalysisType.WHOLE_GENOME_SEQUENCING,
+            AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
         return AnalysisType.OTHER
