@@ -93,16 +93,11 @@ class StatusHandler(BaseHandler):
 
     def get_families_with_analyses(self) -> Query:
         """Return all cases in the database with an analysis."""
-        return self.Family.query.outerjoin(Analysis).join(
-            Family.links,
-            FamilySample.sample,
-            ApplicationVersion,
-            Application,
-        )
+        return self._get_outer_join_cases_with_analyses_query()
 
     def get_families_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
-        return self.Family.query.join(Family.links, FamilySample.sample, Family.customer)
+        return self._get_join_cases_with_samples_query()
 
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
