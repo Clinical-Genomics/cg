@@ -54,7 +54,8 @@ def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
         return
 
     LOG.info(f"Deleting case: {case_id}")
-    status_db.delete_commit(case)
+    status_db.session.delete(case)
+    status_db.session.commit()
 
 
 def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store, yes: bool):
@@ -70,7 +71,8 @@ def _delete_links_and_samples(case_obj: Family, dry_run: bool, status_db: Store,
             LOG.info("Link: %s was NOT deleted due to --dry-run", case_link)
         else:
             LOG.info("Deleting link: %s", case_link)
-            status_db.delete_commit(case_link)
+            status_db.session.delete(case_link)
+            status_db.session.commit()
 
     for sample in samples_to_delete:
         _delete_sample(dry_run=dry_run, sample=sample, status_db=status_db, yes=yes)
