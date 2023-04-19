@@ -162,10 +162,6 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=filter_functions,
         ).first()
 
-    def deliveries(self) -> Query:
-        """Fetch all deliveries."""
-        return self.Delivery.query
-
     def get_cases_created_within_days(self, days: int) -> List[Family]:
         """Fetch all cases created within the past days."""
         newer_than_date = dt.datetime.now() - dt.timedelta(days=days)

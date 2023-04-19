@@ -21,7 +21,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.meta.orders import OrdersAPI
 from cg.store import Store
-from cg.store.models import Family, Pool
+from cg.store.models import Delivery, Family, Pool
 from cg.constants import Priority
 
 
@@ -530,7 +530,7 @@ def test_store_mip(orders_api, base_store, mip_status_data, ticket_id: str):
 
     assert new_link.sample.age_at_sampling == 17.18192
 
-    assert base_store.deliveries().count() == len(base_store.get_samples())
+    assert base_store._get_query(table=Delivery).count() == len(base_store.get_samples())
     for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
@@ -612,7 +612,7 @@ def test_store_metagenome_samples_bad_apptag(
     "submitter", [BalsamicSubmitter, BalsamicQCSubmitter, BalsamicUmiSubmitter]
 )
 def test_store_cancer_samples(
-    orders_api, base_store, balsamic_status_data, submitter, ticket_id: str
+    orders_api, base_store: Store, balsamic_status_data, submitter, ticket_id: str
 ):
     # GIVEN a basic store with no samples and a cancer order
     assert not base_store.get_samples()
@@ -650,7 +650,7 @@ def test_store_cancer_samples(
     assert new_link.sample.comment == "other Elution buffer"
     assert new_link.sample.is_tumour
 
-    assert base_store.deliveries().count() == len(base_store.get_samples())
+    assert base_store._get_query(table=Delivery).count() == len(base_store.get_samples())
     for link in new_case.links:
         assert len(link.sample.deliveries) == 1
 
@@ -731,7 +731,7 @@ def test_store_existing_case(
         items=mip_status_data["families"],
     )
 
-    base_store.close()
+    base_store.session.close()
     new_cases: List[Family] = base_store.get_cases()
 
     # Save internal id
@@ -747,7 +747,7 @@ def test_store_existing_case(
         items=mip_status_data["families"],
     )
 
-    base_store.close()
+    base_store.session.close()
     rerun_cases: List[Family] = base_store.get_cases()
 
     # THEN the sample ticket should be appended to previos ticket and action set to analyze
