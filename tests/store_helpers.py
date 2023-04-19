@@ -238,7 +238,7 @@ class StoreHelpers:
             )
             customer.collaborations.append(collaboration)
             store.session.add(customer)
-        store.session.commit()
+            store.session.commit()
         return customer
 
     @staticmethod
@@ -366,7 +366,7 @@ class StoreHelpers:
                 genes=1,
             )
             store.session.add(panel)
-        store.session.commit()
+            store.session.commit()
         return panel
 
     @staticmethod
@@ -789,7 +789,7 @@ class StoreHelpers:
         if not user:
             user = store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
             store.session.add(user)
-        store.session.commit()
+            store.session.commit()
         return user
 
     @classmethod
@@ -823,7 +823,7 @@ class StoreHelpers:
                 invoiced_at=invoiced_at,
             )
             store.session.add(invoice)
-        store.session.commit()
+            store.session.commit()
         return invoice
 
     @classmethod
