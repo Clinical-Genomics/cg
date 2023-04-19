@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
 
 from typing import List

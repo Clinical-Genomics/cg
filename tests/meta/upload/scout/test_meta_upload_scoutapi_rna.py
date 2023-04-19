@@ -4,7 +4,7 @@ from typing import Generator, List
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
