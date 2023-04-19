@@ -18,7 +18,7 @@ def test_set_case_without_options(
     """Test to set a case using only the required arguments."""
     # GIVEN a database with a case
     case_id: str = helpers.add_case(store=base_store).internal_id
-    assert base_store.Family.query.count() == 1
+    assert base_store._get_query(table=Family).count() == 1
 
     # WHEN setting a case
     result = cli_runner.invoke(case, [case_id], obj=base_context)
@@ -53,7 +53,7 @@ def test_set_case_bad_panel(
 
     # THEN it should complain in missing panel instead of setting a value
     assert result.exit_code != EXIT_SUCCESS
-    assert panel_id not in base_store.Family.query.first().panels
+    assert panel_id not in base_store._get_query(table=Family).first().panels
 
 
 def test_set_case_panel(
@@ -63,14 +63,16 @@ def test_set_case_panel(
     # GIVEN a database with a case and a panel not yet added to the case
     panel_id: str = helpers.ensure_panel(store=base_store, panel_abbreviation="a_panel").name
     case_id: str = helpers.add_case(store=base_store).internal_id
-    assert panel_id not in base_store.Family.query.first().panels
+    case_query = base_store._get_query(table=Family)
+
+    assert panel_id not in case_query.first().panels
 
     # WHEN setting a panel of a case
     result = cli_runner.invoke(case, [case_id, "--panel", panel_id], obj=base_context)
 
     # THEN it should set panel on the case
     assert result.exit_code == EXIT_SUCCESS
-    assert panel_id in base_store.Family.query.first().panels
+    assert panel_id in case_query.first().panels
 
 
 def test_set_case_priority(
@@ -80,7 +82,9 @@ def test_set_case_priority(
     # GIVEN a database with a case
     case_id: str = helpers.add_case(base_store).internal_id
     priority: str = "priority"
-    assert base_store.Family.query.first().priority_human != priority
+    case_query = base_store._get_query(table=Family)
+
+    assert case_query.first().priority_human != priority
 
     # WHEN setting a case
     result = cli_runner.invoke(
@@ -89,8 +93,8 @@ def test_set_case_priority(
 
     # THEN it should have been set
     assert result.exit_code == EXIT_SUCCESS
-    assert base_store.Family.query.count() == 1
-    assert base_store.Family.query.first().priority_human == priority
+    assert case_query.count() == 1
+    assert case_query.first().priority_human == priority
 
 
 def test_set_case_customer(
@@ -127,7 +131,7 @@ def test_set_case_bad_data_analysis(
 
     # THEN it should complain in invalid data_analysis instead of setting a value
     assert result.exit_code != EXIT_SUCCESS
-    assert str(data_analysis) != base_store.Family.query.first().data_analysis
+    assert str(data_analysis) != base_store._get_query(table=Family).first().data_analysis
 
 
 def test_set_case_data_analysis(
@@ -165,7 +169,7 @@ def test_set_case_bad_data_delivery(
 
     # THEN it should complain in invalid data_delivery instead of setting a value
     assert result.exit_code != EXIT_SUCCESS
-    assert str(data_delivery) != base_store.Family.query.first().data_delivery
+    assert str(data_delivery) != base_store._get_query(table=Family).first().data_delivery
 
 
 def test_set_case_data_delivery(

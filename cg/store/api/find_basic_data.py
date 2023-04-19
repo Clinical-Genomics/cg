@@ -99,7 +99,7 @@ class FindBasicDataHandler(BaseHandler):
         application_versions = self._get_query(table=ApplicationVersion)
         return apply_application_versions_filter(
             application_versions=application_versions,
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_APPLICATION_ENTRY_ID],
             application_entry_id=application_entry_id,
         ).first()
 
@@ -110,7 +110,7 @@ class FindBasicDataHandler(BaseHandler):
             return None
         return apply_application_versions_filter(
             filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_ENTRY_ID,
+                ApplicationVersionFilter.FILTER_BY_APPLICATION_ENTRY_ID,
                 ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
                 ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
             ],
