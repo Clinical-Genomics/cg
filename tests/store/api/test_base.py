@@ -1,5 +1,6 @@
 """Tests for the BaseHandle class."""
 from typing import Type
+from mock import MagicMock
 
 import pytest
 from dataclasses import astuple
@@ -9,7 +10,7 @@ from cg.constants.subject import PhenotypeStatus
 from cg.store.api.base import BaseHandler
 
 
-@pytest.mark.parametrize("table", astuple(BaseHandler()))
+@pytest.mark.parametrize("table", astuple(BaseHandler(MagicMock())))
 def test__get_query(base_store, table: Type[ModelBase]):
     """Tests the _get_query function for all attributes of BaseHandler ie tables in the database."""
     assert isinstance(base_store._get_query(table=table), Query)

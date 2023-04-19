@@ -183,7 +183,8 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        self.status_db.add_commit(new_analysis)
+        self.status_db.session.add(new_analysis)
+        self.status_db.session.commit()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
