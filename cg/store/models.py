@@ -21,6 +21,12 @@ from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
 
 Model = declarative_base()
 
+
+def to_dict(model_instance):
+    if hasattr(model_instance, "__table__"):
+        return {c.name: getattr(model_instance, c.name) for c in model_instance.__table__.columns}
+
+
 flowcell_sample = Table(
     "flowcell_sample",
     Model.metadata,
@@ -130,6 +136,9 @@ class Application(Model):
             else PrepCategory.WHOLE_EXOME_SEQUENCING.value
         )
 
+    def to_dict(self):
+        return to_dict(model_instance=Application)
+
 
 class ApplicationVersion(Model):
     __tablename__ = "application_version"  # Add this line
@@ -155,7 +164,7 @@ class ApplicationVersion(Model):
 
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
-        data = super(ApplicationVersion, self).to_dict()
+        data = to_dict(model_instance=ApplicationVersion)
         if application:
             data["application"] = self.application.to_dict()
         return data
@@ -185,7 +194,7 @@ class Analysis(Model):
 
     def to_dict(self, family: bool = True):
         """Represent as dictionary"""
-        data = super(Analysis, self).to_dict()
+        data = to_dict(model_instance=Analysis)
         if family:
             data["family"] = self.family.to_dict()
         return data
@@ -232,7 +241,7 @@ class BedVersion(Model):
 
     def to_dict(self, bed: bool = True):
         """Represent as dictionary"""
-        data = super(BedVersion, self).to_dict()
+        data = to_dict(model_instance=BedVersion)
         if bed:
             data["bed"] = self.bed.to_dict()
         return data
@@ -278,6 +287,9 @@ class Customer(Model):
         }
         customers.add(self)
         return customers
+
+    def to_dict(self):
+        return to_dict(model_instance=Customer)
 
 
 class Collaboration(Model):
@@ -429,7 +441,7 @@ class Family(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""
-        data = super(Family, self).to_dict()
+        data = to_dict(model_instance=Family)
         data["panels"] = self.panels
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
@@ -464,7 +476,7 @@ class FamilySample(Model):
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
-        data = super(FamilySample, self).to_dict()
+        data = to_dict(model_instance=FamilySample)
         if samples:
             data["sample"] = self.sample.to_dict()
             data["mother"] = self.mother.to_dict() if self.mother else None
@@ -498,7 +510,7 @@ class Flowcell(Model):
 
     def to_dict(self, samples: bool = False):
         """Represent as dictionary"""
-        data = super(Flowcell, self).to_dict()
+        data = to_dict(model_instance=Flowcell)
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
         return data
@@ -520,7 +532,7 @@ class Organism(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        return super(Organism, self).to_dict()
+        return to_dict(model_instance=Organism)
 
 
 class Panel(Model):
@@ -664,7 +676,7 @@ class Sample(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
-        data = super(Sample, self).to_dict()
+        data = to_dict(model_instance=Sample)
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
@@ -699,7 +711,7 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        return super(Invoice, self).to_dict()
+        return to_dict(model_instance=Invoice)
 
 
 class User(Model):
@@ -714,7 +726,7 @@ class User(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        data = super(User, self).to_dict()
+        data = to_dict(model_instance=User)
         data["customers"] = [record.to_dict() for record in self.customers]
         return data
 

@@ -34,8 +34,8 @@ class Store(CoreHandler):
 
     def __init__(self, uri):
         self.uri = uri
-        engine = create_engine(uri)
-        session_factory = sessionmaker(bind=engine)
+        self.engine = create_engine(uri)
+        session_factory = sessionmaker(bind=self.engine)
         self.session = session_factory()
         super(Store, self).__init__(self.session)
 

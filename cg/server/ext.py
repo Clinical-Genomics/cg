@@ -5,7 +5,7 @@ from flask_wtf.csrf import CSRFProtect
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
-from cg.store import api, models
+from cg.store.api.core import Store
 
 
 class FlaskLims(LimsAPI):
@@ -24,12 +24,19 @@ class FlaskLims(LimsAPI):
         super(FlaskLims, self).__init__(config)
 
 
+class FlaskStore(Store):
+    def __init__(self, app=None):
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        uri = app.config["SQLALCHEMY_DATABASE_URI"]
+        super(FlaskStore, self).__init__(uri)
+
+
 cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 csrf = CSRFProtect()
-
-session_factory = sessionmaker(autocommit=False, autoflush=False)
-db_session = scoped_session(session_factory)
-db = api.CoreHandler(session=db_session)
+db = FlaskStore()
 
 admin = Admin(name="Clinical Genomics")
 lims = FlaskLims()

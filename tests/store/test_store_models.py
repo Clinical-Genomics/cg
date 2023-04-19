@@ -103,9 +103,9 @@ def test_multiple_collaborations(base_store, customer_id):
         customer_internal_id=customer_id
     )
     collaboration.customers.extend([prod_customer, new_customer])
-    base_store.session.add(new_customer, collaboration)
+    base_store.session.add_all([new_customer, collaboration])
     base_store.session.commit()
-    base_store.refresh(collaboration)
+    base_store.session.refresh(collaboration)
     # WHEN calling the collaborators property
     collaborators = prod_customer.collaborators
     # THEN all customers in both collaborations should be returned
