@@ -38,9 +38,16 @@ class TowerAnalysisAPI:
 
     @staticmethod
     def get_tower_id(stdout_lines: Iterable) -> str:
-        """Parse the stdout and return a workflow id."""
+        """Parse the stdout and return a workflow id. An example of the output to parse is:
+        Case <CASE_ID> exists in status db
+        Running RNAFUSION analysis for <CASE_ID>
+        Pipeline will be executed using tower
+        Running command <COMMAND>
+
+          Workflow 1uxZE9JM7Tl58r submitted at [<WORKSPACE>] workspace.
+
+        https://<URL_TO_TOWER_CASE>
+        Action running set for case <CASE_ID>"""
         for line in stdout_lines:
             if line.strip().startswith("Workflow"):
                 return line.strip().split()[1]
-            else:
-                continue
