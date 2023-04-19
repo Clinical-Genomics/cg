@@ -10,7 +10,7 @@ from google.auth.crypt import RSASigner
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
 from cg.constants.constants import APIMethods, FileFormat
-from cg.constants.priority import SlurmQos
+from cg.constants.priority import SlurmQos, WorkflowManager
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream
@@ -151,7 +151,7 @@ class TrailblazerAPI:
         email: str = None,
         data_analysis: Pipeline = None,
         ticket: str = None,
-        workflow_manager: str = "slurm",
+        workflow_manager: str = WorkflowManager.Slurm,
     ) -> TrailblazerAnalysis:
         request_body = {
             "case_id": case_id,
