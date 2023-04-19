@@ -5,6 +5,7 @@ from cg.cli.delete.case import case as delete_case_command
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
+from cg.store.models import Family, FamilySample, Sample
 from tests.store_helpers import StoreHelpers
 
 SUCCESS = 0
@@ -17,7 +18,8 @@ def test_delete_case_without_options(
     # GIVEN a database with a case
     base_store: Store = base_context.status_db
     helpers.add_case(base_store)
-    assert base_store.Family.query.count() == 1
+    case_query = base_store._get_query(table=Family)
+    assert case_query.count() == 1
 
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, obj=base_context)
@@ -52,7 +54,7 @@ def test_delete_case_without_links(
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
     # THEN it should have been deleted
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 0
+    assert base_store._get_query(table=Family).count() == 0
 
 
 def test_delete_case_with_analysis(
@@ -70,7 +72,7 @@ def test_delete_case_with_analysis(
 
     # THEN it should not have been deleted
     assert result.exit_code != SUCCESS
-    assert base_store.Family.query.count() == 1
+    assert base_store._get_query(table=Family).count() == 1
 
 
 def test_delete_case_with_dry_run(
@@ -83,9 +85,14 @@ def test_delete_case_with_dry_run(
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
-    assert base_store.Family.query.count() == 1
-    assert base_store.FamilySample.query.count() == 1
-    assert base_store.Sample.query.count() == 1
+
+    case_query = base_store._get_query(table=Family)
+    family_sample_query = base_store._get_query(table=FamilySample)
+    sample_query = base_store._get_query(table=Sample)
+
+    assert case_query.count() == 1
+    assert family_sample_query.count() == 1
+    assert sample_query.count() == 1
 
     # WHEN deleting a case
     caplog.set_level(logging.DEBUG)
@@ -95,9 +102,9 @@ def test_delete_case_with_dry_run(
 
     # THEN it should not have been deleted
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 1
-    assert base_store.FamilySample.query.count() == 1
-    assert base_store.Sample.query.count() == 1
+    assert case_query.count() == 1
+    assert family_sample_query.count() == 1
+    assert sample_query.count() == 1
     assert "Link:" in caplog.text
     assert "Sample is linked" in caplog.text
     assert "Case:" in caplog.text
@@ -119,7 +126,8 @@ def test_delete_case_without_yes(
 
     # THEN it should not have been deleted
     assert result.exit_code != SUCCESS
-    assert base_store.Family.query.count() == 1
+    case_query = base_store._get_query(table=Family)
+    assert case_query.count() == 1
 
 
 def test_delete_case_with_links(cli_runner: CliRunner, base_context: CGConfig, helpers):
@@ -130,18 +138,23 @@ def test_delete_case_with_links(cli_runner: CliRunner, base_context: CGConfig, h
     case_id = case_obj.internal_id
     sample = helpers.add_sample(base_store)
     helpers.add_relationship(store=base_store, case=case_obj, sample=sample)
-    assert base_store.Family.query.count() > 0
-    assert base_store.FamilySample.query.count() > 0
-    assert base_store.Sample.query.count() > 0
+
+    case_query = base_store._get_query(table=Family)
+    family_sample_query = base_store._get_query(table=FamilySample)
+    sample_query = base_store._get_query(table=Sample)
+
+    assert case_query.count() > 0
+    assert family_sample_query.count() > 0
+    assert sample_query.count() > 0
 
     # WHEN deleting a case with links
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
 
     # THEN it should have been deleted
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 0
-    assert base_store.FamilySample.query.count() == 0
-    assert base_store.Sample.query.count() == 0
+    assert case_query.count() == 0
+    assert family_sample_query.count() == 0
+    assert sample_query.count() == 0
 
 
 def test_delete_case_with_links_to_other_case(
@@ -157,9 +170,13 @@ def test_delete_case_with_links_to_other_case(
     case_obj2 = helpers.add_case(base_store, "second_case_linked_to_sample")
     helpers.add_relationship(store=base_store, case=case_obj2, sample=sample)
 
-    assert base_store.Family.query.count() == 2
-    assert base_store.FamilySample.query.count() == 2
-    assert base_store.Sample.query.count() == 1
+    case_query = base_store._get_query(table=Family)
+    family_sample_query = base_store._get_query(table=FamilySample)
+    sample_query = base_store._get_query(table=Sample)
+
+    assert case_query.count() == 2
+    assert family_sample_query.count() == 2
+    assert sample_query.count() == 1
 
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
@@ -167,9 +184,9 @@ def test_delete_case_with_links_to_other_case(
     # THEN the first case should be gone with its link to the sample but not the other or
     # the sample
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 1
-    assert base_store.FamilySample.query.count() == 1
-    assert base_store.Sample.query.count() == 1
+    assert case_query.count() == 1
+    assert family_sample_query.count() == 1
+    assert sample_query.count() == 1
 
 
 def test_delete_case_with_father_links(
@@ -187,10 +204,13 @@ def test_delete_case_with_father_links(
     helpers.add_relationship(
         store=base_store, case=case_obj2, sample=sample_child, father=sample_father
     )
+    case_query = base_store._get_query(table=Family)
+    family_sample_query = base_store._get_query(table=FamilySample)
+    sample_query = base_store._get_query(table=Sample)
 
-    assert base_store.Family.query.count() == 2
-    assert base_store.FamilySample.query.count() == 2
-    assert base_store.Sample.query.count() == 2
+    assert case_query.count() == 2
+    assert family_sample_query.count() == 2
+    assert sample_query.count() == 2
 
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
@@ -198,9 +218,9 @@ def test_delete_case_with_father_links(
     # THEN the first case should be gone with its link to the sample but not the other or
     # the father sample
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 1
-    assert base_store.FamilySample.query.count() == 1
-    assert base_store.Sample.query.count() == 2
+    assert case_query.count() == 1
+    assert family_sample_query.count() == 1
+    assert sample_query.count() == 2
 
 
 def test_delete_mother_case(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
@@ -217,18 +237,22 @@ def test_delete_mother_case(cli_runner: CliRunner, base_context: CGConfig, helpe
         store=base_store, case=case_child, sample=sample_child, mother=sample_mother
     )
 
-    assert base_store.Family.query.count() == 2
-    assert base_store.FamilySample.query.count() == 2
-    assert base_store.Sample.query.count() == 2
+    case_query = base_store._get_query(table=Family)
+    family_sample_query = base_store._get_query(table=FamilySample)
+    sample_query = base_store._get_query(table=Sample)
+
+    assert case_query.count() == 2
+    assert family_sample_query.count() == 2
+    assert sample_query.count() == 2
 
     # WHEN deleting the mother case
     result = cli_runner.invoke(delete_case_command, [case_mother_id, "--yes"], obj=base_context)
 
     # THEN the mother sample is not deletable
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 1
-    assert base_store.FamilySample.query.count() == 1
-    assert base_store.Sample.query.count() == 2
+    assert case_query.count() == 1
+    assert family_sample_query.count() == 1
+    assert sample_query.count() == 2
 
 
 def test_delete_child_case(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
@@ -245,18 +269,22 @@ def test_delete_child_case(cli_runner: CliRunner, base_context: CGConfig, helper
         store=base_store, case=case_child, sample=sample_child, mother=sample_mother
     )
 
-    assert base_store.Family.query.count() == 2
-    assert base_store.FamilySample.query.count() == 2
-    assert base_store.Sample.query.count() == 2
+    case_query = base_store._get_query(table=Family)
+    family_sample_query = base_store._get_query(table=FamilySample)
+    sample_query = base_store._get_query(table=Sample)
+
+    assert case_query.count() == 2
+    assert family_sample_query.count() == 2
+    assert sample_query.count() == 2
 
     # WHEN deleting the child case
     result = cli_runner.invoke(delete_case_command, [case_child_id, "--yes"], obj=base_context)
 
     # THEN the child sample is deletable
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 1
-    assert base_store.FamilySample.query.count() == 1
-    assert base_store.Sample.query.count() == 1
+    assert case_query.count() == 1
+    assert family_sample_query.count() == 1
+    assert sample_query.count() == 1
 
 
 def test_delete_trio_case(cli_runner: CliRunner, base_context: CGConfig, helpers):
@@ -277,16 +305,19 @@ def test_delete_trio_case(cli_runner: CliRunner, base_context: CGConfig, helpers
         mother=sample_mother,
         father=sample_father,
     )
+    case_query = base_store._get_query(table=Family)
+    family_sample_query = base_store._get_query(table=FamilySample)
+    sample_query = base_store._get_query(table=Sample)
 
-    assert base_store.Family.query.count() == 1
-    assert base_store.FamilySample.query.count() == 3
-    assert base_store.Sample.query.count() == 3
+    assert case_query.count() == 1
+    assert family_sample_query.count() == 3
+    assert sample_query.count() == 3
 
     # WHEN deleting a case
     result = cli_runner.invoke(delete_case_command, [case_id, "--yes"], obj=base_context)
 
     # THEN the trio case should be gone
     assert result.exit_code == SUCCESS
-    assert base_store.Family.query.count() == 0
-    assert base_store.FamilySample.query.count() == 0
-    assert base_store.Sample.query.count() == 0
+    assert case_query.count() == 0
+    assert family_sample_query.count() == 0
+    assert sample_query.count() == 0
