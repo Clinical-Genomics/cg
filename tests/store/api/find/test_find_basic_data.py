@@ -36,7 +36,8 @@ def test_get_active_beds_when_archived(base_store: Store):
     beds: Query = base_store.get_active_beds()
     for bed in beds:
         bed.is_archived = True
-        base_store.add_commit(bed)
+        base_store.session.add(bed)
+        base_store.session.commit()
 
     # WHEN fetching beds
     active_beds: Query = base_store.get_active_beds()

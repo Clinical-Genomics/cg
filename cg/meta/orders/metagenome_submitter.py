@@ -134,5 +134,6 @@ class MetagenomeSubmitter(Submitter):
                 )
                 self.status.add(new_relationship)
 
-        self.status.add_commit(new_samples)
+        self.status.session.add_all(new_samples)
+        self.status.session.commit()
         return new_samples

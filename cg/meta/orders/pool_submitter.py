@@ -136,7 +136,7 @@ class PoolSubmitter(Submitter):
                     ticket=ticket_id,
                 )
                 case.customer = customer
-                self.status.add_commit(case)
+                self.status.session.add(case)
 
             new_pool: Pool = self.status.add_pool(
                 application_version=application_version,
@@ -167,8 +167,8 @@ class PoolSubmitter(Submitter):
             new_delivery = self.status.add_delivery(destination="caesar", pool=new_pool)
             self.status.add(new_delivery)
             new_pools.append(new_pool)
-        self.status.add_commit(new_pools)
-
+        self.status.session.add_all(new_pools)
+        self.status.session.commit()
         return new_pools
 
     def _validate_case_names_are_available(

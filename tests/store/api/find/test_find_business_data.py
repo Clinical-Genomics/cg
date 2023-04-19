@@ -152,7 +152,8 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
     # GIVEN a flow cell that exist in status db with status "requested"
     flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
     flow_cells[0].status = FlowCellStatus.REQUESTED
-    re_sequenced_sample_store.add_commit(flow_cells[0])
+    re_sequenced_sample_store.session.add(flow_cells[0])
+    re_sequenced_sample_store.session.commit()
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(

@@ -30,7 +30,8 @@ def test_get_latest_analyses_for_cases_query(
         uploaded_at=timestamp_yesterday,
         delivery_reported_at=None,
     )
-    analysis_store.add_commit(analysis_oldest)
+    analysis_store.session.add(analysis_oldest)
+    analysis_store.session.commit()
     analysis_newest = helpers.add_analysis(
         analysis_store,
         case=case,

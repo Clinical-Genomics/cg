@@ -289,7 +289,8 @@ class CaseSubmitter(Submitter):
                     mother_obj=sample_mother,
                     sample=sample,
                 )
-            self.status.add_commit(new_cases)
+            self.status.session.add_all(new_cases)
+            self.status.session.commit()
         return new_cases
 
     @staticmethod

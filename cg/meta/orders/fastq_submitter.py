@@ -135,5 +135,6 @@ class FastqSubmitter(Submitter):
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
                 self.status.add(case, new_relationship, new_delivery)
 
-        self.status.add_commit(new_samples)
+        self.status.session.add_all(new_samples)
+        self.status.session.commit()
         return new_samples

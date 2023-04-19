@@ -402,7 +402,8 @@ def fixture_store_with_older_and_newer_analyses(
     analysis.cleaned_at = timestamp_now
     analysis.started_at = timestamp_now
     analysis.completed_at = timestamp_now
-    base_store.add_commit(analysis)
+    base_store.session.add(analysis)
+    base_store.session.commit()
     times = [timestamp_now, timestamp_yesterday, old_timestamp]
     for time in times:
         helpers.add_analysis(

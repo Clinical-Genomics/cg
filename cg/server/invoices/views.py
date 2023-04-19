@@ -80,7 +80,8 @@ def make_new_invoice():
             record_type="Sample",
         )
 
-    db.add_commit(new_invoice)
+    db.session.add(new_invoice)
+    db.session.commit()
     return url_for(".invoice", invoice_id=new_invoice.id)
 
 
