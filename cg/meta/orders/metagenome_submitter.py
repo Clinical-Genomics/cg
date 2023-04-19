@@ -128,6 +128,7 @@ class MetagenomeSubmitter(Submitter):
                     )
                     case.customer: Customer = customer
                     self.status.session.add(case)
+                    self.status.session.commit()
 
                 new_relationship: FamilySample = self.status.relate_sample(
                     family=case, sample=new_sample, status=StatusEnum.unknown
