@@ -101,11 +101,10 @@ class AnalysisAPI(MetaAPI):
         return PRIORITY_TO_SLURM_QOS[priority]
 
     def get_workflow_manager(self) -> str:
-        """Get task manager for a given pipeline."""
+        """Get workflow manager for a given pipeline."""
         if hasattr(self, "workflow_manager"):
             return self.workflow_manager
-        else:
-            return WorkflowManager.Slurm.value
+        return WorkflowManager.Slurm.value
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
         """Path to case working directory."""

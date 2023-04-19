@@ -9,8 +9,8 @@ from google.auth.crypt import RSASigner
 
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Pipeline
-from cg.constants.constants import APIMethods, FileFormat
-from cg.constants.priority import SlurmQos, WorkflowManager
+from cg.constants.constants import APIMethods, FileFormat, WorkflowManager
+from cg.constants.priority import SlurmQos
 from cg.constants.tb import AnalysisStatus
 from cg.exc import TrailblazerAPIHTTPError
 from cg.io.controller import APIRequest, ReadStream

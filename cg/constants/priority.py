@@ -1,8 +1,6 @@
 """Priority specific constants"""
 from enum import IntEnum
 
-from cgmodels.cg.constants import Pipeline
-
 from cg.utils.enums import StrEnum
 
 
@@ -43,8 +41,3 @@ PRIORITY_TO_SLURM_QOS = {
     Priority.express: SlurmQos.EXPRESS,
     Priority.clinical_trials: SlurmQos.NORMAL,
 }
-
-
-class WorkflowManager(StrEnum):
-    Slurm: str = "slurm"
-    Tower: str = "nf_tower"
