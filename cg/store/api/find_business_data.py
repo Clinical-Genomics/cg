@@ -10,11 +10,16 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError
 from cg.store.api.base import BaseHandler
+from cg.store.filters.status_application_version_filters import (
+    ApplicationVersionFilter,
+    apply_application_versions_filter,
+)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
 
 from cg.store.models import (
     Analysis,
     Application,
+    ApplicationVersion,
     Customer,
     Flowcell,
     Family,
@@ -79,6 +84,21 @@ class FindBusinessDataHandler(BaseHandler):
             .links[ListIndexes.FIRST.value]
             .sample.application_version.application
         )
+
+    def get_application_tag_by_application_version_entry_id(
+        self,
+        application_version_entry_id: str,
+    ) -> Optional[str]:
+        """Return the application tag of an application version."""
+
+        application_version: ApplicationVersion = apply_application_versions_filter(
+            application_versions=self._get_query(ApplicationVersion),
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
+            application_version_entry_id=application_version_entry_id,
+        ).first()
+
+        if application_version and application_version.application:
+            return application_version.application.tag
 
     def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
         """Return all cases completed after a given date that have not been uploaded to Vogue."""
@@ -315,11 +335,11 @@ class FindBusinessDataHandler(BaseHandler):
 
     def get_latest_flow_cell_on_case(self, family_id: str) -> Flowcell:
         """Fetch the latest sequenced flow cell related to a sample on a case."""
-        flow_cells_on_case: List[Flowcell] = list(
-            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=family_id))
+        flow_cells_on_case: List[Flowcell] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=family_id)
         )
         flow_cells_on_case.sort(key=lambda flow_cell: flow_cell.sequenced_at)
-        return flow_cells_on_case[-1]
+        return flow_cells_on_case[-1] if flow_cells_on_case else None
 
     def _is_case_found(self, case: Family, case_id: str) -> None:
         """Raise error if case is false."""
@@ -425,7 +445,7 @@ class FindBusinessDataHandler(BaseHandler):
             flow_cells=self._get_join_flow_cell_sample_links_query(),
             filter_functions=[FlowCellFilter.GET_BY_CASE],
             case=case,
-        )
+        ).all()
 
     def get_samples_from_flow_cell(self, flow_cell_id: str) -> Optional[List[Sample]]:
         """Return samples present on flow cell."""
@@ -437,9 +457,10 @@ class FindBusinessDataHandler(BaseHandler):
         """Check if flow cells are on disk for sample before starting the analysis.
         Flow cells not on disk will be requested.
         """
-        flow_cells: Optional[List[Flowcell]] = list(
-            self.get_flow_cells_by_case(case=self.get_case_by_internal_id(internal_id=case_id))
+        flow_cells: Optional[List[Flowcell]] = self.get_flow_cells_by_case(
+            case=self.get_case_by_internal_id(internal_id=case_id)
         )
+
         if not flow_cells:
             LOG.info("No flow cells found")
             return False

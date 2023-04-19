@@ -35,16 +35,16 @@ LOG = logging.getLogger(__name__)
 @click.option(
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
-@click.argument("family_id")
+@click.argument("case_id")
 @click.pass_obj
-def family(
+def case(
     context: CGConfig,
     action: Optional[str],
     data_analysis: Optional[Pipeline],
     data_delivery: Optional[DataDelivery],
     priority: Optional[Priority],
     panel_abbreviations: Optional[Tuple[str]],
-    family_id: str,
+    case_id: str,
     customer_id: Optional[str],
 ):
     """Update information about a case."""
@@ -60,7 +60,7 @@ def family(
     abort_on_empty_options(options=options)
 
     status_db: Store = context.status_db
-    case: Family = get_case(family_id, status_db)
+    case: Family = get_case(case_id=case_id, status_db=status_db)
 
     if action:
         update_action(case=case, action=action)

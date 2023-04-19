@@ -68,14 +68,12 @@ def test_get_destination_path(
 
 def test_transfer_sample_files_from_source(
     caplog,
-    cg_context: CGConfig,
     customer_id: str,
     cust_sample_id: str,
     external_data_api: ExternalDataAPI,
     external_data_directory: Path,
     helpers,
     mocker,
-    sample_store: Store,
     ticket_id: str,
 ):
     caplog.set_level(logging.INFO)
@@ -154,10 +152,10 @@ def test_add_transfer_to_housekeeper(
 ):
     """Test adding samples from a case to Housekeeper"""
     # GIVEN a Store with a DNA case, which is available for analysis
-    cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
+    case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     mocker.patch.object(Store, "get_cases_by_ticket_id")
-    Store.get_cases_by_ticket_id.return_value = cases
-    samples = [fam_sample.sample for fam_sample in cases.all()[0].links]
+    Store.get_cases_by_ticket_id.return_value = [case]
+    samples = [fam_sample.sample for fam_sample in case.links]
 
     # GIVEN a list of paths and only two samples being available
     mocker.patch.object(ExternalDataAPI, "get_all_paths")
@@ -203,8 +201,6 @@ def test_add_transfer_to_housekeeper(
 
 
 def test_get_available_samples(
-    analysis_store_trio,
-    customer_id: str,
     external_data_api: ExternalDataAPI,
     sample_obj: Sample,
     ticket_id: str,
@@ -222,8 +218,8 @@ def test_get_available_samples(
 def test_curate_sample_folder(
     case_id, customer_id, dna_case, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
-    cases = external_data_api.status_db.query(Family).filter(Family.internal_id == case_id)
-    sample: Sample = cases.first().links[0].sample
+    case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
+    sample: Sample = case.links[0].sample
     tmp_folder = Path(tmpdir_factory.mktemp(sample.name, numbered=False))
     external_data_api.curate_sample_folder(
         cust_name=customer_id, sample_folder=tmp_folder, force=False
@@ -233,8 +229,6 @@ def test_curate_sample_folder(
 
 
 def test_get_available_samples_no_samples_avail(
-    analysis_store_trio,
-    customer_id: str,
     external_data_api: ExternalDataAPI,
     ticket_id: str,
     tmpdir_factory,

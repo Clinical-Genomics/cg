@@ -6,7 +6,7 @@ from cg.store.models import Customer
 @pytest.mark.parametrize("contact_type", ["delivery", "primary", "invoice"])
 def test_contact_storing(store: Store, contact_type, helpers):
     # GIVEN an empty database
-    assert store.Customer.query.first() is None
+    assert store._get_query(table=Customer).first() is None
     internal_id, name, scout_access = "cust000", "Test customer", True
     contact_email = f"{contact_type}.contact@customer.se"
     contact_name = contact_type
