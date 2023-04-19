@@ -735,7 +735,7 @@ def test_store_existing_case(
     new_cases: List[Family] = base_store.get_cases()
 
     # Save internal id
-    stored_cases_internal_ids = dict([(case["name"], case["internal_id"]) for case in new_cases])
+    stored_cases_internal_ids = dict([(case.name, case.internal_id) for case in new_cases])
     for case in mip_status_data["families"]:
         case["internal_id"] = stored_cases_internal_ids[case["name"]]
 

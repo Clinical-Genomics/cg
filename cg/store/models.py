@@ -137,7 +137,7 @@ class Application(Model):
         )
 
     def to_dict(self):
-        return to_dict(model_instance=Application)
+        return to_dict(model_instance=self)
 
 
 class ApplicationVersion(Model):
@@ -164,7 +164,7 @@ class ApplicationVersion(Model):
 
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
-        data = to_dict(model_instance=ApplicationVersion)
+        data = to_dict(model_instance=self)
         if application:
             data["application"] = self.application.to_dict()
         return data
@@ -194,7 +194,7 @@ class Analysis(Model):
 
     def to_dict(self, family: bool = True):
         """Represent as dictionary"""
-        data = to_dict(model_instance=Analysis)
+        data = to_dict(model_instance=self)
         if family:
             data["family"] = self.family.to_dict()
         return data
@@ -241,7 +241,7 @@ class BedVersion(Model):
 
     def to_dict(self, bed: bool = True):
         """Represent as dictionary"""
-        data = to_dict(model_instance=BedVersion)
+        data = to_dict(model_instance=self)
         if bed:
             data["bed"] = self.bed.to_dict()
         return data
@@ -289,7 +289,7 @@ class Customer(Model):
         return customers
 
     def to_dict(self):
-        return to_dict(model_instance=Customer)
+        return to_dict(model_instance=self)
 
 
 class Collaboration(Model):
@@ -441,7 +441,7 @@ class Family(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""
-        data = to_dict(model_instance=Family)
+        data = to_dict(model_instance=self)
         data["panels"] = self.panels
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
@@ -476,7 +476,7 @@ class FamilySample(Model):
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
-        data = to_dict(model_instance=FamilySample)
+        data = to_dict(model_instance=self)
         if samples:
             data["sample"] = self.sample.to_dict()
             data["mother"] = self.mother.to_dict() if self.mother else None
@@ -532,7 +532,7 @@ class Organism(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        return to_dict(model_instance=Organism)
+        return to_dict(model_instance=self)
 
 
 class Panel(Model):
@@ -676,7 +676,7 @@ class Sample(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
-        data = to_dict(model_instance=Sample)
+        data = to_dict(model_instance=self)
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
@@ -711,7 +711,7 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        return to_dict(model_instance=Invoice)
+        return to_dict(model_instance=self)
 
 
 class User(Model):
@@ -726,7 +726,7 @@ class User(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        data = to_dict(model_instance=User)
+        data = to_dict(model_instance=self)
         data["customers"] = [record.to_dict() for record in self.customers]
         return data
 
