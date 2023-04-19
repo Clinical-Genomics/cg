@@ -100,6 +100,13 @@ class AnalysisAPI(MetaAPI):
         priority: int = self.get_priority_for_case(case_id=case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
+    def get_workflow_manager(self) -> str:
+        """Get task manager for a given pipeline."""
+        if hasattr(self, "workflow_manager"):
+            return self.workflow_manager
+        else:
+            return WorkflowManager.Slurm.value
+
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
         """Path to case working directory."""
         raise NotImplementedError
@@ -206,6 +213,7 @@ class AnalysisAPI(MetaAPI):
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
+            workflow_manager=self.get_workflow_manager(),
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:

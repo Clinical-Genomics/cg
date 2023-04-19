@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from cg import resources
 from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
+from cg.constants.priority import WorkflowManager
 from cg.constants.rnafusion import (
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
@@ -34,6 +35,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self,
         config: CGConfig,
         pipeline: Pipeline = Pipeline.RNAFUSION,
+        workflow_manager: WorkflowManager = WorkflowManager.Tower,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir: str = config.rnafusion.root
