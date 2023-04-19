@@ -269,7 +269,7 @@ class FamilyView(BaseView):
                 if family:
                     family.action = action
 
-            db.commit()
+            db.session.commit()
 
             num_families = len(case_entry_ids)
             action_message = (

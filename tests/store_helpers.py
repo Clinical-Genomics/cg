@@ -642,7 +642,7 @@ class StoreHelpers:
             LOG.warning("Could not find case")
             return None
         case_obj.synopsis = synopsis
-        store.commit()
+        store.session.commit()
         return case_obj
 
     @staticmethod
@@ -657,7 +657,7 @@ class StoreHelpers:
             LOG.warning("Could not find sample")
             return None
         sample_obj.phenotype_groups = phenotype_groups
-        store.commit()
+        store.session.commit()
         return sample_obj
 
     @staticmethod
@@ -672,7 +672,7 @@ class StoreHelpers:
             LOG.warning("Could not find sample")
             return None
         sample_obj.phenotype_terms = phenotype_terms
-        store.commit()
+        store.session.commit()
         return sample_obj
 
     @staticmethod
@@ -685,7 +685,7 @@ class StoreHelpers:
             LOG.warning("Could not find sample")
             return None
         sample_obj.subject_id = subject_id
-        store.commit()
+        store.session.commit()
         return sample_obj
 
     @classmethod

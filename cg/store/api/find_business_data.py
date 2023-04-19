@@ -474,7 +474,7 @@ class FindBusinessDataHandler(BaseHandler):
                 flow_cell.status = FlowCellStatus.REQUESTED
             elif flow_cell.status != FlowCellStatus.ON_DISK:
                 LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
-        self.commit()
+        self.session.commit()
         return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
     def get_invoices_by_status(self, is_invoiced: bool = None) -> List[Invoice]:

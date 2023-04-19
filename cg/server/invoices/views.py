@@ -104,7 +104,7 @@ def upload_invoice_news_to_db():
     ki_excel_file = request.files.get("KI_excel")
     if ki_excel_file:
         invoice_obj.excel_ki = ki_excel_file.stream.read()
-    db.commit()
+    db.session.commit()
     return url_for("invoices.invoice", invoice_id=invoice_id)
 
 

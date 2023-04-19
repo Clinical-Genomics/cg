@@ -227,7 +227,7 @@ def fixture_flowcell_store(
         sample.application_version = application_version
         sample.received_at = dt.datetime.now()
         base_store.add(sample)
-    base_store.commit()
+    base_store.session.commit()
     yield base_store
 
 

@@ -168,7 +168,7 @@ def fixture_microbial_store(
         sample.organism = organism
         base_store.add(sample)
 
-    base_store.commit()
+    base_store.session.commit()
     yield base_store
 
 

@@ -1859,7 +1859,7 @@ def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     for email, name, is_admin in user_details:
         store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
 
-    store.commit()
+    store.session.commit()
 
     yield store
 
@@ -1902,5 +1902,5 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
             action=action.value,
             customer=customer,
         )
-    store.commit()
+    store.session.commit()
     yield store

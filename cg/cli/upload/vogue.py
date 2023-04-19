@@ -269,7 +269,7 @@ def bioinfo_all(
             context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
             if not dry:
                 UploadVogueAPI.update_analysis_uploaded_to_vogue_date(analysis=analysis)
-                status_db.commit()
+                status_db.session.commit()
         except AnalysisUploadError:
             LOG.error("Case upload failed: %s", case_name, exc_info=True)
 

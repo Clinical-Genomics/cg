@@ -163,7 +163,7 @@ class ReportAPI(MetaAPI):
             case_entry_id=case.id, started_at_date=analysis_date
         )
         analysis.delivery_report_created_at = datetime.now()
-        self.status_db.commit()
+        self.status_db.session.commit()
 
     def get_report_data(self, case_id: str, analysis_date: datetime) -> ReportModel:
         """Fetches all the data needed to generate a delivery report."""

@@ -138,7 +138,7 @@ def test_compress_fastq_cli_case_id(
         sample=sample2,
         case=valid_compressable_case,
     )
-    status_db.commit()
+    status_db.session.commit()
 
     # GIVEN no adjusting according to readsa
     mocker.patch(MOCK_SET_MEM_ACCORDING_TO_READS_PATH, return_value=None)

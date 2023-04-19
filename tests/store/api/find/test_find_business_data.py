@@ -515,7 +515,7 @@ def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_i
     # GIVEN a case where all samples are down sampled
     for sample in case_obj.samples:
         sample.from_sample = sample_id
-    base_store.commit()
+    base_store.session.commit()
 
     # WHEN checking if all sample in the case are down sampled
     is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
@@ -547,7 +547,7 @@ def test_is_case_external_true(
     )
     for sample in case_obj.samples:
         sample.application_version = external_application_version
-    base_store.commit()
+    base_store.session.commit()
 
     # WHEN checking if all sample in the case are external
     is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)

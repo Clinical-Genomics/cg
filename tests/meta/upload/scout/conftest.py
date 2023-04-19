@@ -238,7 +238,7 @@ def fixture_rna_store(
     for link in dna_case.links:
         link.sample.internal_id = link.sample.name
 
-    store.commit()
+    store.session.commit()
     return store
 
 

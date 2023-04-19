@@ -214,7 +214,7 @@ class StatusHandler(BaseHandler):
         """Sets the action of provided cases to None or the given action."""
         case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
         case.action = action
-        self.commit()
+        self.session.commit()
 
     def add_sample_comment(self, sample: Sample, comment: str) -> None:
         """Update comment on sample with the provided comment."""
@@ -222,7 +222,7 @@ class StatusHandler(BaseHandler):
             sample.comment = sample.comment + " " + comment
         else:
             sample.comment = comment
-        self.commit()
+        self.session.commit()
 
     def get_flow_cells_by_case(self, case: Family) -> List[Flowcell]:
         """Return flow cells for case."""
