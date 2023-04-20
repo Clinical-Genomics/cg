@@ -88,3 +88,10 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
+
+
+class SampleSheetType(StrEnum):
+    """Define sample sheet type."""
+
+    S2: str = "S2"
+    S4: str = "S4"

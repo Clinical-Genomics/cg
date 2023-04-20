@@ -13,8 +13,10 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
     flowcell_samples,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants import FileExtensions
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, SampleSheetType
 from cg.exc import FlowCellError
+from cg.io.validate_psth import validate_file_suffix
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
@@ -29,19 +31,23 @@ def sample_sheet_commands():
 
 @sample_sheet_commands.command(name="validate")
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--sheet-type",
+    default=SampleSheetType.S4,
+    show_default=True,
+    type=click.Choice(SampleSheetType),
+    help="Type of sample sheet",
+)
 @OPTION_BCL_CONVERTER
-def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
-    """Command to validate a sample sheet"""
+def validate_sample_sheet(bcl_converter: str, sheet: click.Path, sheet_type: str):
+    """Command to validate a sample sheet."""
     LOG.info(
         f"Validating sample sheet {sheet}",
     )
     sheet: Path = Path(str(sheet))
-    if sheet.suffix != ".csv":
-        LOG.warning(f"File {sheet} seems to be in wrong format")
-        LOG.warning(f"Suffix {sheet.suffix} is not '.csv'")
-        raise click.Abort
+    validate_file_suffix(path_to_validate=sheet, target_suffix=FileExtensions.CSV)
     try:
-        get_sample_sheet_from_file(infile=sheet, sheet_type="S4", bcl_converter=bcl_converter)
+        get_sample_sheet_from_file(infile=sheet, sheet_type=sheet_type, bcl_converter=bcl_converter)
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
