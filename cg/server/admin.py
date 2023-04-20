@@ -9,7 +9,6 @@ from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
 from flask_dance.contrib.google import google
 from markupsafe import Markup
-from sqlalchemy.orm import Query
 
 from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
@@ -269,7 +268,7 @@ class FamilyView(BaseView):
                 if family:
                     family.action = action
 
-            db.commit()
+            db.session.commit()
 
             num_families = len(case_entry_ids)
             action_message = (

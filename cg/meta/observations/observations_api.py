@@ -96,7 +96,7 @@ class ObservationsAPI:
         """Update Loqusdb ID field in StatusDB for each of the provided samples."""
         for sample in samples:
             sample.loqusdb_id = loqusdb_id
-        self.store.commit()
+        self.store.session.commit()
 
     def check_customer_loqusdb_permissions(self, customer: Customer) -> None:
         """Verifies that the customer is whitelisted for Loqusdb uploads."""

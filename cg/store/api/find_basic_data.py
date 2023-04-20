@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List, Optional
 
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 
 from cg.store.models import (
     Application,
@@ -35,6 +35,9 @@ from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 
 class FindBasicDataHandler(BaseHandler):
     """Contains methods to find basic data model instances."""
+
+    def __init__(self, session: Session):
+        super().__init__(session=session)
 
     def get_application_by_tag(self, tag: str) -> Application:
         """Return an application by tag."""

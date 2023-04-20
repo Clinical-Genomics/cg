@@ -188,7 +188,8 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        self.status_db.add_commit(new_analysis)
+        self.status_db.session.add(new_analysis)
+        self.status_db.session.commit()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
@@ -249,7 +250,7 @@ class AnalysisAPI(MetaAPI):
         if action in [None, *CASE_ACTIONS]:
             case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case_obj.action = action
-            self.status_db.commit()
+            self.status_db.session.commit()
             LOG.info("Action %s set for case %s", action, case_id)
             return
         LOG.warning(
@@ -455,7 +456,7 @@ class AnalysisAPI(MetaAPI):
         LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
-            self.status_db.commit()
+            self.status_db.session.commit()
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directory."""
