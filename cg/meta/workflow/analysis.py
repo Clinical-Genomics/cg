@@ -11,7 +11,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType
+from cg.constants.constants import AnalysisType, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -100,6 +100,10 @@ class AnalysisAPI(MetaAPI):
         priority: int = self.get_priority_for_case(case_id=case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for a given pipeline."""
+        return WorkflowManager.Slurm.value
+
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
         """Path to case working directory."""
         raise NotImplementedError
@@ -137,6 +141,7 @@ class AnalysisAPI(MetaAPI):
             AnalysisType.TARGETED_GENOME_SEQUENCING,
             AnalysisType.WHOLE_EXOME_SEQUENCING,
             AnalysisType.WHOLE_GENOME_SEQUENCING,
+            AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
         return AnalysisType.OTHER
@@ -207,6 +212,7 @@ class AnalysisAPI(MetaAPI):
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
+            workflow_manager=self.get_workflow_manager(),
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:

@@ -145,6 +145,8 @@ def run(
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
+    if not dry_run:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
 
 
 @rnafusion.command("start")
