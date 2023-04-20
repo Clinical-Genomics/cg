@@ -1,5 +1,5 @@
 from cg.apps.cgstats.crud import create, find
-from cg.apps.cgstats.db import models as stats_models
+from cg.apps.cgstats.db.models import Supportparams, Datasource, Flowcell
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults
 
@@ -18,7 +18,7 @@ def test_create_support_parameters(stats_api: StatsAPI, bcl2fastq_demux_results:
 
 def test_create_data_source(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):
     # GIVEN a api with some support parameters
-    support_parameters: stats_models.Supportparams = create.create_support_parameters(
+    support_parameters: Supportparams = create.create_support_parameters(
         manager=stats_api, demux_results=bcl2fastq_demux_results
     )
     # GIVEN that there are no data source for the given run
@@ -48,13 +48,13 @@ def test_create_flowcell(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResu
 
 def test_create_demux(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):
     # GIVEN a database with a flowcell and a data source
-    support_parameters: stats_models.Supportparams = create.create_support_parameters(
+    support_parameters: Supportparams = create.create_support_parameters(
         manager=stats_api, demux_results=bcl2fastq_demux_results
     )
-    flowcell: stats_models.Flowcell = create.create_flowcell(
+    flowcell: Flowcell = create.create_flowcell(
         manager=stats_api, demux_results=bcl2fastq_demux_results
     )
-    data_source: stats_models.Datasource = create.create_datasource(
+    data_source: Datasource = create.create_datasource(
         manager=stats_api,
         demux_results=bcl2fastq_demux_results,
         support_parameters_id=support_parameters.supportparams_id,
@@ -76,13 +76,13 @@ def test_create_demux(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
 
 def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxResults):
     # GIVEN a database with a flowcell and a data source
-    support_parameters: stats_models.Supportparams = create.create_support_parameters(
+    support_parameters: Supportparams = create.create_support_parameters(
         manager=stats_api, demux_results=dragen_demux_results
     )
-    flowcell: stats_models.Flowcell = create.create_flowcell(
+    flowcell: Flowcell = create.create_flowcell(
         manager=stats_api, demux_results=dragen_demux_results
     )
-    data_source: stats_models.Datasource = create.create_datasource(
+    data_source: Datasource = create.create_datasource(
         manager=stats_api,
         demux_results=dragen_demux_results,
         support_parameters_id=support_parameters.supportparams_id,
