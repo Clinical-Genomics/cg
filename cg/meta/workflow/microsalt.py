@@ -164,7 +164,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         If sample_id is specified, will return a list with only this sample_id.
         Otherwise, returns all samples in given case"""
         if sample_id:
-            return [self.status_db.query(Sample).filter(Sample.internal_id == sample_id).first()]
+            return [self.status_db.get_sample_by_internal_id(internal_id=sample_id)]
 
         case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         return [link.sample for link in case_obj.links]
@@ -318,14 +318,12 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         """If sample is specified, finds the corresponding case_id to which this sample belongs.
         The case_id is to be used for identifying the appropriate path to link fastq files and store the analysis output
         """
-        sample_obj: Sample = (
-            self.status_db.query(Sample).filter(Sample.internal_id == unique_id).first()
-        )
-        if not sample_obj:
+        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=unique_id)
+        if not sample:
             LOG.error("No sample found with id: %s", unique_id)
             raise click.Abort
-        case_id = sample_obj.links[0].family.internal_id
-        sample_id = sample_obj.internal_id
+        case_id = sample.links[0].family.internal_id
+        sample_id = sample.internal_id
         return case_id, sample_id
 
     def get_case_id_from_case(self, unique_id: str) -> Tuple[str, None]:

@@ -5,7 +5,7 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
-from cg.store.models import Customer
+from cg.store.models import Customer, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -34,7 +34,7 @@ def test_add_sample_missing_customer(cli_runner: CliRunner, base_context: CGConf
 
     # THEN it should complain about missing customer instead of adding a sample
     assert result.exit_code == 1
-    assert disk_store.Sample.query.count() == 0
+    assert disk_store._get_query(table=Sample).count() == 0
 
 
 def test_add_sample_bad_application(
@@ -64,7 +64,7 @@ def test_add_sample_bad_application(
 
     # THEN it should complain about missing application instead of adding a sample
     assert result.exit_code == 1
-    assert disk_store.Sample.query.count() == 0
+    assert disk_store._get_query(table=Sample).count() == 0
 
 
 def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
@@ -94,9 +94,10 @@ def test_add_sample_required(cli_runner: CliRunner, base_context: CGConfig, help
 
     # THEN it should be added
     assert result.exit_code == EXIT_SUCCESS
-    assert disk_store.Sample.query.count() == 1
-    assert disk_store.Sample.query.first().name == name
-    assert disk_store.Sample.query.first().sex == Gender.MALE
+    sample_query = disk_store._get_query(table=Sample)
+    assert sample_query.count() == 1
+    assert sample_query.first().name == name
+    assert sample_query.first().sex == Gender.MALE
 
 
 def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
@@ -129,8 +130,9 @@ def test_add_sample_lims_id(cli_runner: CliRunner, base_context: CGConfig, helpe
 
     # THEN it should be added
     assert result.exit_code == EXIT_SUCCESS
-    assert disk_store.Sample.query.count() == 1
-    assert disk_store.Sample.query.first().internal_id == lims_id
+    sample_query = disk_store._get_query(table=Sample)
+    assert sample_query.count() == 1
+    assert sample_query.first().internal_id == lims_id
 
 
 def test_add_sample_order(
@@ -167,8 +169,9 @@ def test_add_sample_order(
 
     # THEN it should be added
     assert result.exit_code == EXIT_SUCCESS
-    assert disk_store.Sample.query.count() == 1
-    assert disk_store.Sample.query.first().order == order
+    sample_query = disk_store._get_query(table=Sample)
+    assert sample_query.count() == 1
+    assert sample_query.first().order == order
 
 
 def test_add_sample_when_down_sampled(
@@ -205,8 +208,9 @@ def test_add_sample_when_down_sampled(
 
     # THEN it should be added
     assert result.exit_code == EXIT_SUCCESS
-    assert disk_store.Sample.query.count() == 1
-    assert str(disk_store.Sample.query.first().downsampled_to) == down_sampled_to
+    sample_query = disk_store._get_query(table=Sample)
+    assert sample_query.count() == 1
+    assert str(sample_query.first().downsampled_to) == down_sampled_to
 
 
 def test_add_sample_priority(
@@ -242,5 +246,6 @@ def test_add_sample_priority(
 
     # THEN it should be added
     assert result.exit_code == EXIT_SUCCESS
-    assert disk_store.Sample.query.count() == 1
-    assert disk_store.Sample.query.first().priority_human == Priority.priority.name
+    sample_query = disk_store._get_query(table=Sample)
+    assert sample_query.count() == 1
+    assert sample_query.first().priority_human == Priority.priority.name

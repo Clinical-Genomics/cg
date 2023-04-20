@@ -8,12 +8,14 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
+from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -149,10 +151,24 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             ),
         )
 
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        """Return the path to a trailblazer config file containing Tower IDs."""
+        return Path(self.root_dir, case_id, "tower_ids.yaml")
+
+    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
+        """Write Tower IDs to a .YAML file used as the trailblazer config."""
+        config_path = self.get_trailblazer_config_path(case_id=case_id)
+        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={case_id: [tower_id]},
+            file_format=FileFormat.YAML,
+            file_path=config_path,
+        )
+
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
-            return genomes_base
-        return Path(self.references)
+            return genomes_base.absolute()
+        return Path(self.references).absolute()
 
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default RNAFusion parameters."""
@@ -245,6 +261,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             self.process.run_command(parameters=parameters, dry_run=dry_run)
             if self.process.stderr:
                 LOG.error(self.process.stderr)
+            if not dry_run:
+                tower_id = TowerAnalysisAPI.get_tower_id(stdout_lines=self.process.stdout_lines())
+                self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
 
     def verify_case_config_file_exists(self, case_id: str) -> None:
