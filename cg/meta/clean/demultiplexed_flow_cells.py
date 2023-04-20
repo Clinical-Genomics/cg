@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from sqlalchemy.orm import Query
+from alchy import Query
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI

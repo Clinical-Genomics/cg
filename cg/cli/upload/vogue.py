@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple, Dict
 
 import click
-from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline

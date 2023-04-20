@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple, Dict
 
-from sqlalchemy.orm import Query
+from alchy import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
