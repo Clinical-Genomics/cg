@@ -10,8 +10,6 @@ from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Analysis, Application, Family, Sample, Customer
 from tests.store_helpers import StoreHelpers
-from tests.store.api.conftest import fixture_applications_store
-from tests.conftest import fixture_old_timestamp
 
 
 class StoreConftestFixture(enum.Enum):
@@ -330,6 +328,15 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
+@pytest.fixture(name="applications_store")
+def fixture_applications_store(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store populated with applications from excel file"""
+    app_tags: List[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
+    for app_tag in app_tags:
+        helpers.ensure_application(store=store, tag=app_tag)
+    return store
+
+
 @pytest.fixture(name="store_with_different_application_versions")
 def fixture_store_with_different_application_versions(
     applications_store: Store,
@@ -396,7 +403,7 @@ def fixture_store_with_older_and_newer_analyses(
     old_timestamp: dt.datetime,
 ) -> Store:
     """Return a store with  older and newer analyses."""
-    analysis = base_store.Analysis.query.first()
+    analysis = base_store._get_query(table=Analysis).first()
     analysis.uploaded_at = timestamp_now
     analysis.uploaded_to_vogue_at = timestamp_now
     analysis.cleaned_at = timestamp_now

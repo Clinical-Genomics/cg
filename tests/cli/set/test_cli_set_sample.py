@@ -8,6 +8,8 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner
 
+from cg.store.models import Sample
+
 
 def test_invalid_sample(cli_runner: CliRunner, base_context: CGConfig):
     # GIVEN an empty database
@@ -192,7 +194,9 @@ def test_invalid_customer(
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     customer_id = "dummy_customer_id"
-    assert base_store.Sample.query.first().customer.internal_id != customer_id
+    sample_query = base_store._get_query(table=Sample)
+
+    assert sample_query.first().customer.internal_id != customer_id
 
     # WHEN calling set sample with an invalid customer
     result = cli_runner.invoke(
@@ -201,14 +205,16 @@ def test_invalid_customer(
 
     # THEN it should error about missing customer instead of setting the value
     assert result.exit_code != EXIT_SUCCESS
-    assert base_store.Sample.query.first().customer.internal_id != customer_id
+    assert sample_query.first().customer.internal_id != customer_id
 
 
 def test_customer(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
     # GIVEN a database with a sample and two customers
     sample_id = helpers.add_sample(base_store).internal_id
     customer_id = helpers.ensure_customer(base_store, "another_customer").internal_id
-    assert base_store.Sample.query.first().customer.internal_id != customer_id
+    sample_query = base_store._get_query(table=Sample)
+
+    assert sample_query.first().customer.internal_id != customer_id
 
     # WHEN calling set sample with a valid customer
     result = cli_runner.invoke(
@@ -217,7 +223,7 @@ def test_customer(cli_runner: CliRunner, base_context: CGConfig, base_store: Sto
 
     # THEN it should set the customer of the sample
     assert result.exit_code == EXIT_SUCCESS
-    assert base_store.Sample.query.first().customer.internal_id == customer_id
+    assert sample_query.first().customer.internal_id == customer_id
 
 
 def test_invalid_downsampled_to(cli_runner: CliRunner, base_context: CGConfig):
@@ -237,7 +243,9 @@ def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_stor
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     downsampled_to = 111111
-    assert base_store.Sample.query.first().downsampled_to != downsampled_to
+    sample_query = base_store._get_query(table=Sample)
+
+    assert sample_query.first().downsampled_to != downsampled_to
 
     # WHEN calling set sample with a valid value of downsampled to
     result = cli_runner.invoke(
@@ -246,7 +254,7 @@ def test_downsampled_to(cli_runner: CliRunner, base_context: CGConfig, base_stor
 
     # THEN the value should have been set on the sample
     assert result.exit_code == EXIT_SUCCESS
-    assert base_store.Sample.query.first().downsampled_to == downsampled_to
+    assert sample_query.first().downsampled_to == downsampled_to
 
 
 def test_reset_downsampled_to(
@@ -255,7 +263,9 @@ def test_reset_downsampled_to(
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     downsampled_to = 0
-    assert base_store.Sample.query.first().downsampled_to != downsampled_to
+    sample_query = base_store._get_query(table=Sample)
+
+    assert sample_query.first().downsampled_to != downsampled_to
 
     # WHEN calling set sample with a valid reset value of downsampled to
     result = cli_runner.invoke(
@@ -264,7 +274,7 @@ def test_reset_downsampled_to(
 
     # THEN the value should have been set on the sample
     assert result.exit_code == EXIT_SUCCESS
-    assert not base_store.Sample.query.first().downsampled_to
+    assert not sample_query.first().downsampled_to
 
 
 def test_invalid_application(
@@ -273,7 +283,9 @@ def test_invalid_application(
     # GIVEN a database with a sample
     sample_id = helpers.add_sample(base_store).internal_id
     application_tag = "dummy_application"
-    assert base_store.Sample.query.first().application_version.application.tag != application_tag
+    sample_query = base_store._get_query(table=Sample)
+
+    assert sample_query.first().application_version.application.tag != application_tag
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(
@@ -284,7 +296,7 @@ def test_invalid_application(
 
     # THEN it should error about missing application instead of setting the value
     assert result.exit_code != EXIT_SUCCESS
-    assert base_store.Sample.query.first().application_version.application.tag != application_tag
+    assert sample_query.first().application_version.application.tag != application_tag
 
 
 def test_application(cli_runner: CliRunner, base_context: CGConfig, base_store: Store, helpers):
@@ -293,7 +305,9 @@ def test_application(cli_runner: CliRunner, base_context: CGConfig, base_store: 
     application_tag = helpers.ensure_application_version(
         base_store, "another_application"
     ).application.tag
-    assert base_store.Sample.query.first().application_version.application.tag != application_tag
+    sample_query = base_store._get_query(table=Sample)
+
+    assert sample_query.first().application_version.application.tag != application_tag
 
     # WHEN calling set sample with an invalid application
     result = cli_runner.invoke(

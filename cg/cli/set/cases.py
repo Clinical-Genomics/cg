@@ -2,13 +2,11 @@ import logging
 from typing import List, Optional, Set, Tuple
 
 import click
-from cg.constants import CASE_ACTIONS
+from cg.constants import CASE_ACTIONS, Priority
+from cg.cli.set.case import case
 from cg.store import Store
 from cg.store.models import Family, Sample
-
-from .family import family
-from ...constants import Priority
-from ...utils.click.EnumChoice import EnumChoice
+from cg.utils.click.EnumChoice import EnumChoice
 
 CONFIRM = "Continue?"
 
@@ -42,14 +40,14 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Famil
     help="Give an identifier on sample and the value to use it with, e.g. --sample-identifier "
     "name Prov52",
 )
-@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update family action")
+@click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option("-g", "--panel", "panel_abbreviations", multiple=True, help="update gene panels")
 @click.option(
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
 @click.pass_context
-def families(
+def cases(
     context: click.Context,
     action: Optional[str],
     priority: Optional[Priority],
@@ -59,26 +57,26 @@ def families(
 ):
     """Set values on many families at the same time"""
     store: Store = context.obj.status_db
-    cases: List[Family] = _get_cases(identifiers, store)
+    cases_to_alter: List[Family] = _get_cases(identifiers, store)
 
-    if not cases:
+    if not cases_to_alter:
         LOG.error("No cases to alter!")
         raise click.Abort
 
     LOG.info("Would alter cases:")
 
-    for case in cases:
-        LOG.info(case)
+    for case_to_alter in cases_to_alter:
+        LOG.info(case_to_alter)
 
     if not (click.confirm(CONFIRM)):
         raise click.Abort
 
-    for case in cases:
+    for case_to_alter in cases_to_alter:
         context.invoke(
-            family,
+            case,
             action=action,
             priority=priority,
             panel_abbreviations=panel_abbreviations,
-            family_id=case.internal_id,
+            case_id=case_to_alter.internal_id,
             customer_id=customer_id,
         )

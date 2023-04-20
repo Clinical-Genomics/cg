@@ -67,23 +67,6 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_applications_by_prep_category_and_is_not_archived(
-        self, prep_category: str
-    ) -> List[Application]:
-        """Return applications by prep category that are not archived."""
-        return (
-            apply_application_filter(
-                applications=self._get_query(table=Application),
-                filter_functions=[
-                    ApplicationFilter.FILTER_BY_PREP_CATEGORY,
-                    ApplicationFilter.FILTER_IS_NOT_ARCHIVED,
-                ],
-                prep_category=prep_category,
-            )
-            .order_by(self.Application.prep_category, self.Application.tag)
-            .all()
-        )
-
     def get_applications_by_prep_category_and_is_archived(
         self, prep_category: str
     ) -> List[Application]:
@@ -116,7 +99,7 @@ class FindBasicDataHandler(BaseHandler):
         application_versions = self._get_query(table=ApplicationVersion)
         return apply_application_versions_filter(
             application_versions=application_versions,
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_APPLICATION_ENTRY_ID],
             application_entry_id=application_entry_id,
         ).first()
 
@@ -127,7 +110,7 @@ class FindBasicDataHandler(BaseHandler):
             return None
         return apply_application_versions_filter(
             filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_ENTRY_ID,
+                ApplicationVersionFilter.FILTER_BY_APPLICATION_ENTRY_ID,
                 ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
                 ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
             ],
