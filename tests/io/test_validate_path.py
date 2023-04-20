@@ -8,7 +8,7 @@ from cg.io.validate_psth import validate_file_suffix
 
 
 def test_validate_file_suffix_correct_suffix(csv_file_path: Path):
-    """Test validate sample sheet when sample sheet is in correct format."""
+    """Test validate file suffix when file suffix is in correct format."""
     # GIVEN a existing file in the correct file format
     assert csv_file_path.exists()
 
@@ -22,7 +22,7 @@ def test_validate_file_suffix_correct_suffix(csv_file_path: Path):
 
 
 def test_validate_file_suffix_wrong_suffix(caplog, json_file_path: Path):
-    """Test validate sample sheet when sample sheet is in wrong format."""
+    """Test validate file suffix when file suffix is in wrong format."""
     # GIVEN a existing file in the wrong file format
     assert json_file_path.exists()
     assert json_file_path.suffix != FileExtensions.CSV
