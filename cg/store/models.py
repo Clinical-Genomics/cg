@@ -141,7 +141,7 @@ class Application(Model):
 
 
 class ApplicationVersion(Model):
-    __tablename__ = "application_version"  # Add this line
+    __tablename__ = "application_version"
     __table_args__ = (UniqueConstraint("application_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
