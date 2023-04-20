@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
     RNAFUSION_SAMPLESHEET_HEADERS,
@@ -73,6 +73,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         if profile:
             return profile
         return self.profile
+
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for rnafusion."""
+        return WorkflowManager.Tower.value
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
