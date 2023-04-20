@@ -8,6 +8,9 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
+from cg.constants.taxprofiler import (
+    TaxprofilerDefaults,
+)
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -19,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TaxprofilerAnalysisAPI(AnalysisAPI):
-    """Handles communication between taxprofiler processes
+    """Handles communication between Taxprofiler processes
     and the rest of CG infrastructure."""
 
     def __init__(
@@ -28,8 +31,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.TAXPROFILER,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        #self.root_dir: str = config.taxprofiler.root
+        # self.root_dir: str = config.taxprofiler.root
 
-    @property
-    def root(self) -> str:
-        return self.root_dir
+    # @property
+    # def root(self) -> str:
+    #    return self.root_dir

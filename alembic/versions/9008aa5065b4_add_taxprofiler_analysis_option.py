@@ -10,8 +10,8 @@ from sqlalchemy.dialects import mysql
 
 
 # revision identifiers, used by Alembic.
-revision = '9008aa5065b4'
-down_revision = '554140bc13e4'
+revision = "9008aa5065b4"
+down_revision = "554140bc13e4"
 branch_labels = None
 depends_on = None
 
