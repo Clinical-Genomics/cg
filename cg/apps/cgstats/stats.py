@@ -142,27 +142,3 @@ class StatsAPI(alchy.Manager):
         for fastq_pattern in (base_pattern, alt_pattern):
             pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
             yield from self.root_dir.glob(pattern)
-
-    def document_path(self, flowcell_name: str) -> str:
-        """Get the latest document path of a flowcell from supportparams"""
-        query = (
-            self.session.query(
-                models.Supportparams.document_path,
-            )
-            .join(models.Flowcell.demux, models.Demux.datasource, models.Datasource.supportparams)
-            .filter(models.Flowcell.flowcellname == flowcell_name)
-            .order_by(models.Supportparams.supportparams_id.desc())
-            .first()
-        )
-        return query.document_path
-
-    def run_name(self, flowcell_name: str) -> str:
-        """Get the latest run name of a flowcell from datasource"""
-        query = (
-            self.session.query(models.Datasource.runname)
-            .join(models.Flowcell.demux, models.Demux.datasource)
-            .filter(models.Flowcell.flowcellname == flowcell_name)
-            .order_by(models.Datasource.time.desc())
-            .first()
-        )
-        return query.runname
