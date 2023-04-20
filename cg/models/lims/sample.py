@@ -39,7 +39,7 @@ class Udf(BaseModel):
     reference_genome: Optional[str]
     region: Optional[str]
     region_code: Optional[str]
-    require_qcok: bool = False
+    require_qc_ok: bool = False
     rml_plate_name: Optional[str]
     selection_criteria: Optional[str]
     sex: Literal["M", "F", "unknown"] = "unknown"

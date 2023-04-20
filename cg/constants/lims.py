@@ -2,7 +2,7 @@
 
 from cg.utils.enums import StrEnum
 
-YES_NO_LIMS_BOOLEANS = ["require_qcok", "tumour", "verified_organism"]
+YES_NO_LIMS_BOOLEANS = ["require_qc_ok", "tumour", "verified_organism"]
 
 PROP2UDF = {
     "application": "Sequencing Analysis",
@@ -36,7 +36,7 @@ PROP2UDF = {
     "reference_genome": "Reference Genome Microbial",
     "region": "Region",
     "region_code": "Region Code",
-    "require_qcok": "Process only if QC OK",
+    "require_qc_ok": "Process only if QC OK",
     "rml_plate_name": "RML plate name",
     "selection_criteria": "Selection Criteria",
     "sequencing_qc_pass": "Passed Sequencing QC",
