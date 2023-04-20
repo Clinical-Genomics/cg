@@ -24,7 +24,10 @@ Model = declarative_base()
 
 def to_dict(model_instance):
     if hasattr(model_instance, "__table__"):
-        return {c.name: getattr(model_instance, c.name) for c in model_instance.__table__.columns}
+        return {
+            column.name: getattr(model_instance, column.name)
+            for column in model_instance.__table__.columns
+        }
 
 
 flowcell_sample = Table(

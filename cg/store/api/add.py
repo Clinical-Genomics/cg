@@ -209,7 +209,7 @@ class AddHandler(BaseHandler):
     ) -> FamilySample:
         """Relate a sample record to a family record."""
 
-        new_record = FamilySample(status=status)
+        new_record: FamilySample = FamilySample(status=status)
         new_record.family = family
         new_record.sample = sample
         new_record.mother = mother
@@ -265,7 +265,7 @@ class AddHandler(BaseHandler):
     ) -> Panel:
         """Build a new panel record."""
 
-        new_record = Panel(
+        new_record: Panel = Panel(
             name=name, abbrev=abbrev, current_version=version, date=date, gene_count=genes
         )
         new_record.customer = customer
@@ -287,7 +287,7 @@ class AddHandler(BaseHandler):
     ) -> Pool:
         """Build a new Pool record."""
 
-        new_record = Pool(
+        new_record: Pool = Pool(
             name=name,
             ordered_at=ordered or dt.datetime.now(),
             order=order,
@@ -313,7 +313,7 @@ class AddHandler(BaseHandler):
 
         if not any([sample, pool]):
             raise ValueError("you have to provide a sample or a pool")
-        new_record = Delivery(destination=destination, comment=comment)
+        new_record: Delivery = Delivery(destination=destination, comment=comment)
         new_record.sample = sample
         new_record.pool = pool
         return new_record
@@ -332,7 +332,7 @@ class AddHandler(BaseHandler):
         """Build a new Invoice record."""
 
         new_id = self.new_invoice_id()
-        new_invoice = Invoice(
+        new_invoice: Invoice = Invoice(
             comment=comment,
             discount=discount,
             id=new_id,
