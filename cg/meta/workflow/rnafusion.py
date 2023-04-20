@@ -36,7 +36,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self,
         config: CGConfig,
         pipeline: Pipeline = Pipeline.RNAFUSION,
-        workflow_manager: WorkflowManager = WorkflowManager.Tower,
     ):
         super().__init__(config=config, pipeline=pipeline)
         self.root_dir: str = config.rnafusion.root
@@ -74,6 +73,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         if profile:
             return profile
         return self.profile
+
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for rnafusion."""
+        return WorkflowManager.Tower.value
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)

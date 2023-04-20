@@ -102,8 +102,6 @@ class AnalysisAPI(MetaAPI):
 
     def get_workflow_manager(self) -> str:
         """Get workflow manager for a given pipeline."""
-        if hasattr(self, "workflow_manager"):
-            return self.workflow_manager
         return WorkflowManager.Slurm.value
 
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
