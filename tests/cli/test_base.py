@@ -32,10 +32,10 @@ def test_missing_command(cli_runner: CliRunner):
     assert result.exit_code != 0
 
 
-def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog):
+def test_cli_init(cli_runner: CliRunner, base_context: CGConfig, caplog, tmp_path: Path):
     caplog.set_level(logging.INFO)
     # GIVEN you want to setup a new database using the CLI
-    database = "./test_db.sqlite3"
+    database = Path(tmp_path, "test_db.sqlite3")
     database_path = Path(database)
     database_uri = f"sqlite:///{database}"
     base_context.status_db_ = Store(uri=database_uri)
