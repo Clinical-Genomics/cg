@@ -155,7 +155,7 @@ class HousekeeperAPI:
 
     def rollback(self):
         """Wrap method in Housekeeper Store."""
-        return self._store.rollback()
+        return self._store.session.rollback()
 
     def session_no_autoflush(self):
         """Wrap property in Housekeeper Store."""
