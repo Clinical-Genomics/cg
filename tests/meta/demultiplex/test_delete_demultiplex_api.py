@@ -3,7 +3,6 @@ import pytest
 
 from pathlib import Path
 from typing import List, Optional
-from sqlalchemy.orm import Query
 
 from cg.apps.cgstats.db import models
 from cg.apps.cgstats.stats import StatsAPI
