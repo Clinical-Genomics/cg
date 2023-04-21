@@ -88,8 +88,8 @@ class HousekeeperAPI:
             Path(file_obj.full_path).unlink()
 
         LOG.info(f"Deleting file {file_id} from housekeeper")
-        file_obj.delete()
-        self._store.commit()
+        self._store.session.delete(file_obj)
+        self.commit()
 
         return file_obj
 
@@ -298,11 +298,12 @@ class HousekeeperAPI:
 
     def add_commit(self, *args, **kwargs):
         """Wrap method in Housekeeper Store."""
-        return self._store.add_commit(*args, **kwargs)
+        self._store.session.add(*args, **kwargs)
+        return self._store.session.commit()
 
     def commit(self):
         """Wrap method in Housekeeper Store."""
-        return self._store.commit()
+        return self._store.session.commit()
 
     def get_root_dir(self) -> str:
         """Returns the root dir of Housekeeper."""
