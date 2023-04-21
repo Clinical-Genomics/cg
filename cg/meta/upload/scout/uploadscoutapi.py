@@ -109,7 +109,7 @@ class UploadScoutAPI:
     def get_multiqc_html_report(
         self, case_id: str, pipeline: Pipeline
     ) -> Tuple[ScoutCustomCaseReportTags, Optional[File]]:
-        """Get a multiqc report for a case in housekeeper."""
+        """Return a multiqc report for a case in Housekeeper."""
         if pipeline == Pipeline.MIP_RNA:
             return (
                 ScoutCustomCaseReportTags.MULTIQC_RNA,
@@ -121,7 +121,7 @@ class UploadScoutAPI:
         )
 
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[File]:
-        """Get a fusion report for case in housekeeper."""
+        """Return a fusion report for case in housekeeper."""
 
         tags = {"fusion"}
         if research:
@@ -132,7 +132,7 @@ class UploadScoutAPI:
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
-        """Get a splice junctions bed file for case in housekeeper."""
+        """Return a splice junctions bed file for case in housekeeper."""
 
         tags: Set[str] = {"junction", "bed", sample_id}
         splice_junctions_bed: Optional[File]
@@ -146,7 +146,7 @@ class UploadScoutAPI:
         return splice_junctions_bed
 
     def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
-        """Get a RNA coverage bigwig file for case in housekeeper."""
+        """Return a RNA coverage bigwig file for case in housekeeper."""
 
         tags: Set[str] = {"coverage", "bigwig", sample_id}
 
@@ -327,7 +327,7 @@ class UploadScoutAPI:
 
     @staticmethod
     def _get_sample(case: Family, subject_id: str) -> Optional[Sample]:
-        """Get sample of a case for a subject_id."""
+        """Return sample of a case for a subject_id."""
 
         link: FamilySample
         for link in case.links:
