@@ -240,7 +240,8 @@ class HousekeeperAPI:
         """Gets the latest version of a bundle."""
         LOG.info(f"Fetch latest version from bundle {bundle}")
         return (
-            self._store._get_query(table=Version).join(Version.bundle)
+            self._store._get_query(table=Version)
+            .join(Version.bundle)
             .filter(Bundle.name == bundle)
             .order_by(models.Version.created_at.desc())
             .first()
