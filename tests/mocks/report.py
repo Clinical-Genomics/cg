@@ -97,13 +97,6 @@ class MockMipDNAReportAPI(MockHousekeeperMipDNAReportAPI):
         return file_path
 
 
-class MockDB(Store):
-    """Mock database"""
-
-    def __init__(self, store):
-        self.store = store
-
-
 class MockChanjo(ChanjoAPI):
     """Chanjo mock class"""
 

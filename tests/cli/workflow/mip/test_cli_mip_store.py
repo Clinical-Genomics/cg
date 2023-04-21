@@ -194,7 +194,7 @@ def test_cli_store_available_case_not_running(
 
     # GIVEN that case action is None
     mip_analysis_api.status_db.get_case_by_internal_id(internal_id=mip_case_id).action = None
-    mip_analysis_api.status_db.commit()
+    mip_analysis_api.status_db.session.commit()
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(MipDNAAnalysisAPI, "get_deliverables_file_path")

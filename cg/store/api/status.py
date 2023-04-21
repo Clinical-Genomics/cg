@@ -1,15 +1,14 @@
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 from typing_extensions import Literal
 
 from cg.constants import CASE_ACTIONS, Pipeline, FlowCellStatus
 from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
-from cg.store.filters.status_customer_filters import CustomerFilter, apply_customer_filter
 from cg.store.models import (
     Analysis,
     Application,
@@ -33,6 +32,9 @@ from cg.store.filters.status_application_filters import apply_application_filter
 
 class StatusHandler(BaseHandler):
     """Handles status states for entities in the database."""
+
+    def __init__(self, session: Session):
+        super().__init__(session=session)
 
     def get_samples_to_receive(self, external: bool = False) -> List[Sample]:
         """Return samples to receive."""
@@ -91,16 +93,11 @@ class StatusHandler(BaseHandler):
 
     def get_families_with_analyses(self) -> Query:
         """Return all cases in the database with an analysis."""
-        return self.Family.query.outerjoin(Analysis).join(
-            Family.links,
-            FamilySample.sample,
-            ApplicationVersion,
-            Application,
-        )
+        return self._get_outer_join_cases_with_analyses_query()
 
     def get_families_with_samples(self) -> Query:
         """Return all cases in the database with samples."""
-        return self.Family.query.join(Family.links, FamilySample.sample, Family.customer)
+        return self._get_join_cases_with_samples_query()
 
     def cases_to_analyze(
         self, pipeline: Pipeline = None, threshold: bool = False, limit: int = None
@@ -212,7 +209,7 @@ class StatusHandler(BaseHandler):
         """Sets the action of provided cases to None or the given action."""
         case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
         case.action = action
-        self.commit()
+        self.session.commit()
 
     def add_sample_comment(self, sample: Sample, comment: str) -> None:
         """Update comment on sample with the provided comment."""
@@ -220,7 +217,7 @@ class StatusHandler(BaseHandler):
             sample.comment = sample.comment + " " + comment
         else:
             sample.comment = comment
-        self.commit()
+        self.session.commit()
 
     def get_flow_cells_by_case(self, case: Family) -> List[Flowcell]:
         """Return flow cells for case."""

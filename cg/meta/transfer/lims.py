@@ -90,7 +90,7 @@ class TransferLims(object):
                 )
 
                 setattr(sample_obj, f"{status_type.value}_at", lims_date)
-                self.status.commit()
+                self.status.session.commit()
             else:
                 LOG.debug(f"no {status_type.value} date found for {sample_obj.internal_id}")
 
@@ -131,7 +131,7 @@ class TransferLims(object):
                     status_date,
                 )
                 setattr(pool_obj, f"{status_type.value}_at", status_date)
-                self.status.commit()
+                self.status.session.commit()
                 break
 
     def _get_samples_in_step(self, status_type) -> List[Sample]:

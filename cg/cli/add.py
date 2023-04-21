@@ -88,7 +88,8 @@ def customer(
     )
     for collaboration in collaborations:
         new_customer.collaborations.append(collaboration)
-    status_db.add_commit(new_customer)
+    status_db.session.add(new_customer)
+    status_db.session.commit()
     message: str = f"customer added: {new_customer.internal_id} ({new_customer.id})"
     LOG.info(message)
 
@@ -118,7 +119,8 @@ def user(context: CGConfig, admin: bool, customer_id: str, email: str, name: str
     new_user: User = status_db.add_user(
         customer=customer_obj, email=email, name=name, is_admin=admin
     )
-    status_db.add_commit(new_user)
+    status_db.session.add(new_user)
+    status_db.session.commit()
     LOG.info(f"User added: {new_user.email} ({new_user.id})")
 
 
@@ -181,7 +183,8 @@ def sample(
         status_db.get_current_application_version_by_tag(tag=application_tag)
     )
     new_record.customer: Customer = customer
-    status_db.add_commit(new_record)
+    status_db.session.add(new_record)
+    status_db.session.commit()
     LOG.info(f"{new_record.internal_id}: new sample added")
 
 
@@ -248,7 +251,8 @@ def case(
     )
 
     new_case.customer: Customer = customer
-    status_db.add_commit(new_case)
+    status_db.session.add(new_case)
+    status_db.session.commit()
     LOG.info(f"{new_case.internal_id}: new case added")
 
 
@@ -296,7 +300,8 @@ def relationship(
     new_record: FamilySample = status_db.relate_sample(
         family=case_obj, sample=sample, status=status, mother=mother, father=father
     )
-    status_db.add_commit(new_record)
+    status_db.session.add(new_record)
+    status_db.session.commit()
     LOG.info("related %s to %s", case_obj.internal_id, sample.internal_id)
 
 

@@ -56,7 +56,9 @@ class DemuxPostProcessingAPI:
         if self.dry_run:
             LOG.info("Dry run will not commit flow cell to database")
             return
-        self.status_db.add_commit(flow_cell)
+        self.status_db.session.add(flow_cell)
+        self.status_db.session.commit()
+
         LOG.info(f"Flow cell added: {flow_cell}")
 
 

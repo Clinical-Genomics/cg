@@ -1,4 +1,4 @@
-from alchy import Query
+from sqlalchemy.orm import Query
 from cg.store import Store
 from cg.store.models import Pool
 from cg.store.filters.status_pool_filters import (

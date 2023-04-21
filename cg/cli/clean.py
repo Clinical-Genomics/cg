@@ -375,7 +375,7 @@ def fix_flow_cell_status(context: CGConfig, dry_run: bool):
             if dry_run:
                 continue
             flow_cell.status: str = new_status
-            status_db.commit()
+            status_db.session.commit()
 
 
 @clean.command("remove-old-flow-cell-run-dirs")
