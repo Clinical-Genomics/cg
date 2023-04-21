@@ -16,7 +16,6 @@ from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationV
 from cg.constants.constants import PrepCategory
 
 
-
 class FastqSubmitter(Submitter):
     def submit_order(self, order: OrderIn) -> dict:
         """Submit a batch of samples for FASTQ delivery."""
