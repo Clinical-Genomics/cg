@@ -40,24 +40,6 @@ class BaseHandler:
     def __init__(self, session: Session):
         self.session = session
 
-    Analysis: Type[ModelBase] = Analysis
-    Application: Type[ModelBase] = Application
-    ApplicationVersion: Type[ModelBase] = ApplicationVersion
-    Bed: Type[ModelBase] = Bed
-    BedVersion: Type[ModelBase] = BedVersion
-    Collaboration: Type[ModelBase] = Collaboration
-    Customer: Type[ModelBase] = Customer
-    Delivery: Type[ModelBase] = Delivery
-    Family: Type[ModelBase] = Family
-    FamilySample: Type[ModelBase] = FamilySample
-    Flowcell: Type[ModelBase] = Flowcell
-    Invoice: Type[ModelBase] = Invoice
-    Organism: Type[ModelBase] = Organism
-    Panel: Type[ModelBase] = Panel
-    Pool: Type[ModelBase] = Pool
-    Sample: Type[ModelBase] = Sample
-    User: Type[ModelBase] = User
-
     def _get_query(self, table: Type[ModelBase]) -> Query:
         """Return a query for the given table."""
         return self.session.query(table)
@@ -132,8 +114,8 @@ class BaseHandler:
         return analyses.join(
             case_and_date_subquery,
             and_(
-                self.Analysis.family_id == case_and_date_subquery.c.family_id,
-                self.Analysis.started_at == case_and_date_subquery.c.started_at,
+                Analysis.family_id == case_and_date_subquery.c.family_id,
+                Analysis.started_at == case_and_date_subquery.c.started_at,
             ),
         )
 

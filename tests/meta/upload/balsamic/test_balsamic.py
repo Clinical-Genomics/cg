@@ -2,7 +2,7 @@
 
 from cg.meta.upload.gt import UploadGenotypesAPI
 from cg.models.cg_config import CGConfig
-from cg.store import models
+from cg.store.models import Family
 from tests.cli.workflow.balsamic.conftest import (
     fixture_balsamic_context,
     balsamic_lims,
@@ -24,7 +24,7 @@ def test_genotype_check_wgs_normal(balsamic_context: CGConfig):
     """Test a cancer case with WGS and normal sample that is Genotype compatible."""
     # GIVEN a balsamic case with WGS tag and a normal sample
     internal_id = "balsamic_case_wgs_paired_enough_reads"
-    case_obj: models.Family = balsamic_context.status_db.get_case_by_internal_id(
+    case_obj: Family = balsamic_context.status_db.get_case_by_internal_id(
         internal_id=internal_id
     )
 
@@ -39,7 +39,7 @@ def test_genotype_check_non_wgs_normal(balsamic_context: CGConfig):
     """Test a cancer case with no WGS sample that is not Genotype compatible."""
     # GIVEN a balsamic case with a normal sample, but no WGS tag
     internal_id = "balsamic_case_tgs_paired"
-    case_obj: models.Family = balsamic_context.status_db.get_case_by_internal_id(
+    case_obj: Family = balsamic_context.status_db.get_case_by_internal_id(
         internal_id=internal_id
     )
 
@@ -54,7 +54,7 @@ def test_genotype_check_only_tumour(balsamic_context: CGConfig):
     """Test a cancer case with only a tumour sample that is not Genotype compatible."""
     # GIVEN a balsamic case with only tumour sample
     internal_id = "balsamic_case_wgs_single"
-    case_obj: models.Family = balsamic_context.status_db.get_case_by_internal_id(
+    case_obj: Family = balsamic_context.status_db.get_case_by_internal_id(
         internal_id=internal_id
     )
 

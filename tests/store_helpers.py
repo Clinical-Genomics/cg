@@ -455,7 +455,7 @@ class StoreHelpers:
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
-        case_obj = store.Family(
+        case_obj = Family(
             name=case_info["name"],
             panels=case_info["panels"],
             internal_id=case_info["internal_id"],
