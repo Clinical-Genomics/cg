@@ -168,7 +168,7 @@ class UploadScoutAPI:
         return unique_dna_cases_related_to_rna_case
 
     def upload_fusion_report_to_scout(
-        self, dry_run: bool, case_id: str, research: bool = False, update: bool = False
+        self, dry_run: bool, case_id: str, research: bool = False
     ) -> None:
         """Upload fusion report file for a case to Scout."""
 
@@ -191,7 +191,6 @@ class UploadScoutAPI:
                 case_id=dna_case_id,
                 report_path=fusion_report.full_path,
                 research=research,
-                update=update,
             )
             LOG.info(
                 f"Uploaded {report_type} fusion report",

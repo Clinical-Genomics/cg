@@ -3,7 +3,6 @@ import copy
 import http
 import logging
 import os
-import random
 import shutil
 from datetime import datetime, timedelta, MAXYEAR
 from pathlib import Path
@@ -187,12 +186,6 @@ def fixture_family_name() -> str:
 def fixture_customer_id() -> str:
     """Return a customer id."""
     return "cust000"
-
-
-@pytest.fixture(name="random_customer_int_id")
-def fixture_random_customer_int_id() -> int:
-    """Fixture to generate a random customer ID."""
-    return random.randint(100, 1000000)
 
 
 @pytest.fixture(name="sbatch_job_number")
