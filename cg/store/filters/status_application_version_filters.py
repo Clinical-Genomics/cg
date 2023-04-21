@@ -32,10 +32,20 @@ def order_application_versions_by_valid_from_desc(application_versions: Query, *
     return application_versions.order_by(ApplicationVersion.valid_from.desc())
 
 
+def filter_application_versions_by_application_version_entry_id(
+    application_versions: Query,
+    application_version_entry_id,
+    **kwargs,
+) -> Query:
+    """Return the application versions given an application version entry id."""
+    return application_versions.filter(ApplicationVersion.id == application_version_entry_id)
+
+
 def apply_application_versions_filter(
     filter_functions: List[Callable],
     application_versions: Query,
     application_entry_id: int = None,
+    application_version_entry_id: int = None,
     version: int = None,
     valid_from: datetime = None,
 ) -> Query:
@@ -44,6 +54,7 @@ def apply_application_versions_filter(
         application_versions: Query = filter_function(
             application_versions=application_versions,
             application_entry_id=application_entry_id,
+            application_version_entry_id=application_version_entry_id,
             version=version,
             valid_from=valid_from,
         )
@@ -53,7 +64,8 @@ def apply_application_versions_filter(
 class ApplicationVersionFilter(Enum):
     """Define Application Version filter functions."""
 
-    FILTER_BY_ENTRY_ID = filter_application_versions_by_application_entry_id
+    FILTER_BY_APPLICATION_ENTRY_ID = filter_application_versions_by_application_entry_id
+    FILTER_BY_ENTRY_ID = filter_application_versions_by_application_version_entry_id
     FILTER_BY_VALID_FROM_BEFORE = filter_application_versions_before_valid_from
     FILTER_BY_VERSION = filter_application_versions_by_version
     ORDER_BY_VALID_FROM_DESC = order_application_versions_by_valid_from_desc

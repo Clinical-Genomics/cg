@@ -184,7 +184,7 @@ def submit_order(order_type):
 @BLUEPRINT.route("/cases")
 def parse_cases():
     """Fetch cases."""
-    cases: List[Family] = db.cases(days=31)
+    cases: List[Family] = db.get_cases_created_within_days(days=31)
     return jsonify(cases=cases, total=len(cases))
 
 
@@ -356,9 +356,9 @@ def parse_pool(pool_id):
 @BLUEPRINT.route("/flowcells")
 def parse_flow_cells() -> Any:
     """Return flow cells."""
-    flow_cells: List[Flowcell] = db.get_flow_cell_by_enquiry_and_status(
+    flow_cells: List[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
         flow_cell_statuses=[request.args.get("status")],
-        flow_cell_id_enquiry=request.args.get("enquiry"),
+        name_pattern=request.args.get("enquiry"),
     )
     parsed_flow_cells: List[Dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
     return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
@@ -367,7 +367,7 @@ def parse_flow_cells() -> Any:
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def parse_flow_cell(flowcell_id):
     """Return a single flowcell."""
-    flow_cell: Flowcell = db.get_flow_cell(flowcell_id)
+    flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
     if flow_cell is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**flow_cell.to_dict(samples=True))

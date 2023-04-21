@@ -75,7 +75,7 @@ class FastqSubmitter(Submitter):
         relationship: FamilySample = self.status.relate_sample(
             family=case, sample=sample_obj, status=StatusEnum.unknown
         )
-        self.status.add(case, relationship)
+        self.status.session.add_all([case, relationship])
 
     def store_items_in_status(
         self, customer_id: str, order: str, ordered: dt.datetime, ticket_id: str, items: List[dict]
@@ -133,7 +133,8 @@ class FastqSubmitter(Submitter):
                     family=case, sample=new_sample, status=StatusEnum.unknown
                 )
                 new_delivery = self.status.add_delivery(destination="caesar", sample=new_sample)
-                self.status.add(case, new_relationship, new_delivery)
+                self.status.session.add_all([case, new_relationship, new_delivery])
 
-        self.status.add_commit(new_samples)
+        self.status.session.add_all(new_samples)
+        self.status.session.commit()
         return new_samples

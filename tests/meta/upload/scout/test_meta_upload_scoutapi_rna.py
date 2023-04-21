@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
@@ -53,7 +53,7 @@ def ensure_two_dna_tumour_matches(
         application_type=SequencingMethod.WGS,
     )
     helpers.add_relationship(store=rna_store, sample=another_sample_id, case=dna_extra_case)
-    rna_store.commit()
+    rna_store.session.commit()
 
 
 def ensure_extra_rna_case_match(
@@ -261,7 +261,7 @@ def test_upload_rna_fusion_report_to_scout_no_subject_id(
         link.sample.subject_id = ""
     for link in rna_store.get_case_by_internal_id(dna_case_id).links:
         link.sample.subject_id = ""
-    rna_store.commit()
+    rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
@@ -289,7 +289,7 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
         link.sample.subject_id = ""
     for link in rna_store.get_case_by_internal_id(dna_case_id).links:
         link.sample.subject_id = ""
-    rna_store.commit()
+    rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
@@ -317,7 +317,7 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
         link.sample.subject_id = ""
     for link in rna_store.get_case_by_internal_id(dna_case_id).links:
         link.sample.subject_id = ""
-    rna_store.commit()
+    rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper
@@ -342,7 +342,7 @@ def test_upload_rna_fusion_report_to_scout_tumour_non_matching(
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
     set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
     set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
-    rna_store.commit()
+    rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA case has a research fusion report in Housekeeper
@@ -368,7 +368,7 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_non_matching(
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
     set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
     set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
-    rna_store.commit()
+    rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a bigWig in Housekeeper
@@ -394,7 +394,7 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
     # GIVEN a sample in the RNA case is NOT connected to a sample in the DNA case via is_tumour (i.e. different is_tumour)
     set_is_tumour_on_case(store=rna_store, case_id=rna_case_id, is_tumour=True)
     set_is_tumour_on_case(store=rna_store, case_id=dna_case_id, is_tumour=False)
-    rna_store.commit()
+    rna_store.session.commit()
     upload_scout_api.status_db = rna_store
 
     # GIVEN the connected RNA sample has a junction bed in Housekeeper

@@ -36,7 +36,8 @@ def test_validate_case_name(rml_order_to_submit: dict, base_store: Store, helper
             data_analysis=Pipeline.FLUFFY,
             data_delivery=DataDelivery.STATINA,
         )
-        base_store.add_commit(case)
+        base_store.session.add(case)
+        base_store.session.commit()
 
     # WHEN validating the order
     # THEN it should be regarded as invalid

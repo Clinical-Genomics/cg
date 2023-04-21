@@ -1,14 +1,16 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
+from cg.constants.constants import CaseActions
 from cg.store import Store
 from cg.constants.indexes import ListIndexes
 from cg.store.models import (
+    Analysis,
     Application,
     ApplicationVersion,
     Flowcell,
@@ -58,7 +60,7 @@ def test_get_flow_cells(re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the flow cells
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
 
     # THEN a flow cells should be returned
     assert flow_cells
@@ -73,20 +75,22 @@ def test_get_flow_cell(flow_cell_id: str, re_sequenced_sample_store: Store):
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell(flow_cell_id=flow_cell_id)
+    flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
+        flow_cell_name=flow_cell_id
+    )
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cell.name == flow_cell_id
 
 
-def test_get_flow_cell_by_enquiry(flow_cell_id: str, re_sequenced_sample_store: Store):
+def test_get_flow_cell_by_name_pattern(flow_cell_id: str, re_sequenced_sample_store: Store):
     """Test returning the latest flow cell from the database by enquiry."""
 
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry(
-        flow_cell_id_enquiry=flow_cell_id[:4]
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern(
+        name_pattern=flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
@@ -104,9 +108,9 @@ def test_get_flow_cells_by_case(
     """Test returning the latest flow cell from the database by case."""
 
     # GIVEN a store with two flow cell
-    helpers.add_flowcell(store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj])
+    helpers.add_flowcell(store=base_store, flow_cell_name=flow_cell_id, samples=[sample_obj])
 
-    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case_obj)
@@ -146,9 +150,10 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
     # GIVEN a store with two flow cells
 
     # GIVEN a flow cell that exist in status db with status "requested"
-    flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells()
+    flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
     flow_cells[0].status = FlowCellStatus.REQUESTED
-    re_sequenced_sample_store.add_commit(flow_cells[0])
+    re_sequenced_sample_store.session.add(flow_cells[0])
+    re_sequenced_sample_store.session.commit()
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
@@ -185,8 +190,8 @@ def test_get_flow_cell_by_enquiry_and_status(flow_cell_id: str, re_sequenced_sam
     # GIVEN a store with two flow cells
 
     # WHEN fetching the latest flow cell
-    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_enquiry_and_status(
-        flow_cell_statuses=[FlowCellStatus.ON_DISK], flow_cell_id_enquiry=flow_cell_id[:4]
+    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern_and_status(
+        flow_cell_statuses=[FlowCellStatus.ON_DISK], name_pattern=flow_cell_id[:4]
     )
 
     # THEN the returned flow cell should have the same name as the one in the database
@@ -218,9 +223,9 @@ def test_get_latest_flow_cell_on_case(
     """Test returning the latest sequenced flow cell on a case."""
 
     # GIVEN a store with two flow cells in it, one being the latest sequenced of the two
-    latest_flow_cell: Flowcell = re_sequenced_sample_store.Flowcell.query.filter(
-        Flowcell.name == flow_cell_id
-    ).first()
+    latest_flow_cell: Flowcell = re_sequenced_sample_store.get_flow_cell_by_name(
+        flow_cell_name=flow_cell_id
+    )
 
     # WHEN fetching the latest flow cell on a case with a sample that has been sequenced on both flow cells
     latest_flow_cell_on_case: Flowcell = re_sequenced_sample_store.get_latest_flow_cell_on_case(
@@ -263,14 +268,14 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.PROCESSING,
     )
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=another_flow_cell_id,
+        flow_cell_name=another_flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.RETRIEVED,
     )
@@ -300,14 +305,14 @@ def test_is_all_flow_cells_on_disk_when_requested(
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=flow_cell_id,
+        flow_cell_name=flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.REMOVED,
     )
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
-        flow_cell_id=another_flow_cell_id,
+        flow_cell_name=another_flow_cell_id,
         samples=[sample_obj],
         status=FlowCellStatus.REQUESTED,
     )
@@ -338,10 +343,10 @@ def test_is_all_flow_cells_on_disk(
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
-        store=base_store, flow_cell_id=flow_cell_id, samples=[sample_obj]
+        store=base_store, flow_cell_name=flow_cell_id, samples=[sample_obj]
     )
 
-    helpers.add_flowcell(store=base_store, flow_cell_id=another_flow_cell_id)
+    helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
     is_on_disk = base_store.is_all_flow_cells_on_disk(case_id=case_id)
@@ -510,7 +515,7 @@ def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_i
     # GIVEN a case where all samples are down sampled
     for sample in case_obj.samples:
         sample.from_sample = sample_id
-    base_store.commit()
+    base_store.session.commit()
 
     # WHEN checking if all sample in the case are down sampled
     is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
@@ -542,7 +547,7 @@ def test_is_case_external_true(
     )
     for sample in case_obj.samples:
         sample.application_version = external_application_version
-    base_store.commit()
+    base_store.session.commit()
 
     # WHEN checking if all sample in the case are external
     is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)
@@ -731,3 +736,72 @@ def test_get_case_by_name_and_customer_case_found(store_with_multiple_cases_and_
     assert filtered_case is not None
     assert filtered_case.customer_id == customer.id
     assert filtered_case.name == case.name
+
+
+def test_get_cases_not_analysed_by_sample_internal_id_empty_query(
+    store_with_multiple_cases_and_samples: Store, non_existent_id: str
+):
+    """Test that an empty query is returned if no cases match the sample internal id."""
+    # GIVEN a store
+    # WHEN getting cases not analysed by the sample internal id
+    cases = store_with_multiple_cases_and_samples.get_not_analysed_cases_by_sample_internal_id(
+        sample_internal_id=non_existent_id
+    )
+
+    # THEN an empty list should be returned
+    assert cases == []
+
+
+def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
+    store_with_multiple_cases_and_samples: Store,
+    sample_id_in_multiple_cases: str,
+):
+    """Test that multiple cases are returned when more than one case matches the sample internal id."""
+    # GIVEN a store with multiple cases having the same sample internal id
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
+
+    # Set all cases to not analysed and HOLD action
+    for case in cases_query.all():
+        case.action = CaseActions.HOLD
+
+    # WHEN getting cases not analysed by the shared sample internal id
+    cases = store_with_multiple_cases_and_samples.get_not_analysed_cases_by_sample_internal_id(
+        sample_id_in_multiple_cases
+    )
+
+    # THEN multiple cases should be returned
+    assert len(cases) > 1
+
+    # Check that all returned cases have the matching sample and are not analysed
+    for case in cases:
+        assert not case.analyses
+        assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
+
+
+def test_fetch_cases_newer_than_date_no_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that no cases are returned when there are no cases newer than the given date."""
+    # GIVEN a store with cases older than 7 days
+    older_than_date = datetime.now() - timedelta(days=10)
+    for case in store_with_multiple_cases_and_samples._get_query(table=Family):
+        case.created_at = older_than_date
+
+    # WHEN fetching cases newer than 7 days
+    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+
+    # THEN no cases should be returned
+    assert len(cases) == 0
+
+
+def test_fetch_cases_newer_than_date_all_cases(store_with_multiple_cases_and_samples: Store):
+    """Test that all cases are returned when all cases newer than the given date."""
+    # GIVEN a store with cases newer than 7 days
+    older_than_date = datetime.now() - timedelta(days=5)
+    all_cases = store_with_multiple_cases_and_samples._get_query(table=Family).all()
+    for case in all_cases:
+        case.created_at = older_than_date
+
+    # WHEN fetching cases newer than 7 days
+    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
+
+    # THEN all cases should be returned
+    assert len(cases) == len(all_cases)

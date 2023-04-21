@@ -166,7 +166,7 @@ def test_store_available(
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=balsamic_context)
     balsamic_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
-    balsamic_context.status_db.commit()
+    balsamic_context.status_db.session.commit()
 
     # THEN command exits with 1 because one of the cases threw errors
     assert result.exit_code == 1

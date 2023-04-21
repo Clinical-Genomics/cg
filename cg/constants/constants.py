@@ -5,6 +5,7 @@ from cgmodels.cg.constants import StrEnum
 
 from cg.constants.sequencing import Sequencers
 from cg.utils.date import get_date
+from cg.utils.enums import StrEnum
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -191,3 +192,8 @@ DRY_RUN_MESSAGE = "Dry run: process call will not be executed!"
 
 class MetaApis:
     ANALYSIS_API: str = "analysis_api"
+
+
+class WorkflowManager(StrEnum):
+    Slurm: str = "slurm"
+    Tower: str = "nf_tower"

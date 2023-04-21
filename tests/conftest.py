@@ -1179,7 +1179,7 @@ def fixture_base_store(
     """Setup and example store."""
     collaboration = store.add_collaboration(internal_id=collaboration_id, name=collaboration_id)
 
-    store.add_commit(collaboration)
+    store.session.add(collaboration)
     customers: List[Customer] = []
     customer_map: Dict[str, str] = {
         customer_id: "Production",
@@ -1200,7 +1200,7 @@ def fixture_base_store(
 
     for customer in customers:
         collaboration.customers.append(customer)
-    store.add_commit(customers)
+    store.session.add_all(customers)
     applications = [
         store.add_application(
             tag="WGXCUSC000",
@@ -1227,7 +1227,7 @@ def fixture_base_store(
             prep_category="wgs",
             description="WGS, double",
             sequencing_depth=30,
-            accredited=True,
+            is_accredited=True,
             percent_kth=80,
             percent_reads_guaranteed=75,
             target_reads=10,
@@ -1287,7 +1287,7 @@ def fixture_base_store(
             percent_kth=80,
             percent_reads_guaranteed=75,
             sequencing_depth=25,
-            accredited=True,
+            is_accredited=True,
             target_reads=10,
             min_sequencing_depth=30,
         ),
@@ -1302,7 +1302,7 @@ def fixture_base_store(
         ),
     ]
 
-    store.add_commit(applications)
+    store.session.add_all(applications)
 
     versions = [
         store.add_application_version(
@@ -1310,10 +1310,10 @@ def fixture_base_store(
         )
         for application in applications
     ]
-    store.add_commit(versions)
+    store.session.add_all(versions)
 
     beds: List[Bed] = [store.add_bed(name=bed_name)]
-    store.add_commit(beds)
+    store.session.add_all(beds)
     bed_versions: List[BedVersion] = [
         store.add_bed_version(
             bed=bed,
@@ -1323,10 +1323,11 @@ def fixture_base_store(
         )
         for bed in beds
     ]
-    store.add_commit(bed_versions)
+    store.session.add_all(bed_versions)
 
     organism = store.add_organism("C. jejuni", "C. jejuni")
-    store.add_commit(organism)
+    store.session.add(organism)
+    store.session.commit()
 
     yield store
 
@@ -1343,10 +1344,8 @@ def sample_store(base_store: Store) -> Store:
             received=datetime.now(),
             prepared_at=datetime.now(),
         ),
-        base_store.add_sample("external", sex=Gender.FEMALE, external=True),
-        base_store.add_sample(
-            name="external-received", sex=Gender.FEMALE, received=datetime.now(), external=True
-        ),
+        base_store.add_sample(name="external", sex=Gender.FEMALE),
+        base_store.add_sample(name="external-received", sex=Gender.FEMALE, received=datetime.now()),
         base_store.add_sample(
             name="sequenced",
             sex=Gender.MALE,
@@ -1381,7 +1380,8 @@ def sample_store(base_store: Store) -> Store:
     for sample in new_samples:
         sample.customer = customer
         sample.application_version = external_app if "external" in sample.name else wgs_app
-    base_store.add_commit(new_samples)
+    base_store.session.add_all(new_samples)
+    base_store.session.commit()
     return base_store
 
 
@@ -1835,7 +1835,8 @@ def fixture_store_with_organisms(store: Store, helpers: StoreHelpers) -> Store:
         organism: Organism = helpers.add_organism(store, internal_id=internal_id, name=name)
         organisms.append(organism)
 
-    store.add_commit(organisms)
+    store.session.add_all(organisms)
+    store.session.commit()
     yield store
 
 
@@ -1882,7 +1883,7 @@ def fixture_store_with_users(store: Store, helpers: StoreHelpers) -> Store:
     for email, name, is_admin in user_details:
         store.add_user(customer=customer, email=email, name=name, is_admin=is_admin)
 
-    store.commit()
+    store.session.commit()
 
     yield store
 
@@ -1925,5 +1926,5 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
             action=action.value,
             customer=customer,
         )
-    store.commit()
+    store.session.commit()
     yield store

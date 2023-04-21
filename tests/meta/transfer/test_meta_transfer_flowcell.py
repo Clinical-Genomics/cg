@@ -43,8 +43,8 @@ def test_add_flow_cell_to_status_db(
     # GIVEN transfer flow cell API
 
     # GIVEN a flow cell that does not exist in status db
-    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell(
-        flow_cell_id=yet_another_flow_cell_id
+    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell_by_name(
+        flow_cell_name=yet_another_flow_cell_id
     )
 
     assert flow_cell is None
@@ -75,8 +75,10 @@ def test_add_flow_cell_to_status_db_existing_flow_cell(
     # GIVEN transfer flow cell API
 
     # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(store=flowcell_store, flow_cell_id=flow_cell_id)
-    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell(flow_cell_id=flow_cell_id)
+    helpers.add_flowcell(store=flowcell_store, flow_cell_name=flow_cell_id)
+    flow_cell: Flowcell = transfer_flow_cell_api.db.get_flow_cell_by_name(
+        flow_cell_name=flow_cell_id
+    )
 
     assert flow_cell is not None
 
@@ -364,7 +366,7 @@ def test_parse_flow_cell_samples(
 
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(
-        store=flowcell_store, flow_cell_id=yet_another_flow_cell_id
+        store=flowcell_store, flow_cell_name=yet_another_flow_cell_id
     )
 
     # GIVEN no sample in flow cell
@@ -401,7 +403,7 @@ def test_parse_flow_cell_samples_when_no_cgstats_sample(
 
     # GIVEN a flow cell that exist in status db
     flow_cell: Flowcell = helpers.add_flowcell(
-        store=flowcell_store, flow_cell_id=yet_another_flow_cell_id
+        store=flowcell_store, flow_cell_name=yet_another_flow_cell_id
     )
 
     # GIVEN no sample in flow cell
@@ -433,7 +435,7 @@ def test_transfer(
     # GIVEN a store with a received but not sequenced sample
     housekeeper_api: HousekeeperAPI = transfer_flow_cell_api.hk
     assert len(flowcell_store.get_samples()) == 2
-    assert flowcell_store.get_flow_cells().count() == 0
+    assert flowcell_store._get_query(table=Flowcell).count() == 0
     assert housekeeper_api.bundles().count() == 0
 
     # GIVEN a sample sheet
@@ -447,7 +449,7 @@ def test_transfer(
         )
 
     # THEN it should create a new flow cell record
-    assert flowcell_store.get_flow_cells().count() == 1
+    assert flowcell_store._get_query(table=Flowcell).count() == 1
     assert flow_cell.status == FlowCellStatus.ON_DISK
     assert isinstance(flow_cell.id, int)
     assert flow_cell.name == yet_another_flow_cell_id

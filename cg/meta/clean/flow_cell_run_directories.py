@@ -55,7 +55,7 @@ class RunDirFlowCell:
     def sequenced_date(self) -> datetime:
         """The date on which the flow cell was sequenced."""
         if self._sequenced_date is None:
-            flow_cell: Flowcell = self.status_db.get_flow_cell(flow_cell_id=self.id)
+            flow_cell: Flowcell = self.status_db.get_flow_cell_by_name(flow_cell_name=self.id)
             if flow_cell:
                 LOG.info(f"Found flow cell {self.id} in Statusdb, getting sequenced date.")
                 self._sequenced_date: datetime = flow_cell.sequenced_at
@@ -77,7 +77,9 @@ class RunDirFlowCell:
     def flow_cell_status(self) -> str:
         """Return status of the flow cell."""
         if self._flow_cell_status is None:
-            self._flow_cell_status = self.status_db.get_flow_cell(flow_cell_id=self.id).status
+            self._flow_cell_status = self.status_db.get_flow_cell_by_name(
+                flow_cell_name=self.id
+            ).status
         return self._flow_cell_status
 
     @property
@@ -85,7 +87,7 @@ class RunDirFlowCell:
         """The flow cell exists in Statusdb."""
         if self._exists_in_statusdb is None:
             self._exists_in_statusdb = (
-                self.status_db.get_flow_cell(flow_cell_id=self.id) is not None
+                self.status_db.get_flow_cell_by_name(flow_cell_name=self.id) is not None
             )
         return self._exists_in_statusdb
 

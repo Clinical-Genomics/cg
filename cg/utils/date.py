@@ -52,15 +52,6 @@ def get_date(date: Optional[str] = None, date_format: Optional[str] = None) -> d
     raise ValueError(f"Date {date} is invalid")
 
 
-def get_date_str(date_time_obj: datetime = None, date_format: str = None) -> str:
-    """Convert a datetime object to a string. Defaults to simple date string: 2020-06-15"""
-    if date_format is None:
-        date_format = SIMPLE_DATE_FORMAT
-    if date_time_obj is None:
-        date_time_obj = datetime.now()
-    return date_time_obj.strftime(date_format)
-
-
 def get_timedelta_from_date(date: datetime) -> timedelta:
     """Return the number of days ago from date to now."""
     return datetime.now() - date

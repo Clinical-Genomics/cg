@@ -16,15 +16,15 @@ from tests.apps.scout.conftest import MockScoutApi
 from tests.mocks.balsamic_analysis_mock import MockBalsamicAnalysis
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.mip_analysis_mock import MockMipAnalysis
-from tests.mocks.report import MockChanjo, MockDB, MockHousekeeperMipDNAReportAPI
+from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI
 
 
 @pytest.fixture(scope="function", name="report_api_mip_dna")
-def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
+def report_api_mip_dna(cg_context: CGConfig, lims_samples, report_store) -> MipDNAReportAPI:
     """MIP DNA ReportAPI fixture."""
 
     cg_context.meta_apis["analysis_api"] = MockMipAnalysis()
-    cg_context.status_db_ = MockDB(report_store)
+    cg_context.status_db_ = report_store
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.chanjo_api_ = MockChanjo()
     cg_context.scout_api_ = MockScoutApi(cg_context)
@@ -32,11 +32,11 @@ def report_api_mip_dna(cg_context: CGConfig, lims_samples) -> MipDNAReportAPI:
 
 
 @pytest.fixture(scope="function", name="report_api_balsamic")
-def report_api_balsamic(cg_context: CGConfig, lims_samples) -> BalsamicReportAPI:
+def report_api_balsamic(cg_context: CGConfig, lims_samples, report_store) -> BalsamicReportAPI:
     """BALSAMIC ReportAPI fixture."""
 
     cg_context.meta_apis["analysis_api"] = MockBalsamicAnalysis(cg_context)
-    cg_context.status_db_ = MockDB(report_store)
+    cg_context.status_db_ = report_store
     cg_context.lims_api_ = MockLimsAPI(cg_context, lims_samples)
     cg_context.scout_api_ = MockScoutApi(cg_context)
     return BalsamicReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
