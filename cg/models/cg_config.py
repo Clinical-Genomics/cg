@@ -159,9 +159,11 @@ class RnafusionConfig(CommonAppConfig):
     binary_path: str
     pipeline_path: str
     conda_env: str
+    compute_env: str
     profile: str
     conda_binary: Optional[str] = None
     launch_directory: str
+    revision: str
     slurm: SlurmConfig
     tower_binary_path: str
     tower_pipeline: str
