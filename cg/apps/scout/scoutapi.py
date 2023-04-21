@@ -218,9 +218,7 @@ class ScoutAPI:
         except CalledProcessError:
             LOG.warning(f"Something went wrong when uploading {report_type} for case {case_id}")
 
-    def upload_fusion_report(
-        self, case_id: str, report_path: str, research: bool
-    ) -> None:
+    def upload_fusion_report(self, case_id: str, report_path: str, research: bool) -> None:
         """Load a fusion report into a case in the database."""
 
         report_type: str = (

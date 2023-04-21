@@ -677,7 +677,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # GIVEN that the DNA case has a different customer than the expected customer
-    dna_case.customer_id: int = random.randomint(2,1000)
+    dna_case.customer_id: int = random.randomint(2, 1000)
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
     upload_scout_api._map_dna_cases_to_dna_sample(
