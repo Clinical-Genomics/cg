@@ -426,9 +426,7 @@ class UploadScoutAPI:
                 f"Failed on RNA sample {rna_sample.internal_id} as subject_id field is empty"
             )
 
-        collaborator_ids = [
-            rna_sample.customer.id
-        ]  # internal_id #[customer.internal_id for customer in rna_sample.customer.collaborators]
+        collaborator_ids = [customer.id for customer in rna_sample.customer.collaborators]
 
         subject_id_samples: List[
             Sample
