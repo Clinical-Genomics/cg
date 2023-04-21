@@ -240,7 +240,7 @@ class HousekeeperAPI:
         """Gets the latest version of a bundle."""
         LOG.info(f"Fetch latest version from bundle {bundle}")
         return (
-            self._store.Version.query.join(Version.bundle)
+            self._store._get_query(table=Version).join(Version.bundle)
             .filter(Bundle.name == bundle)
             .order_by(models.Version.created_at.desc())
             .first()
@@ -296,9 +296,9 @@ class HousekeeperAPI:
         include_version(self.get_root_dir(), version_obj)
         version_obj.included_at = dt.datetime.now()
 
-    def add_commit(self, *args, **kwargs):
+    def add_commit(self, obj):
         """Wrap method in Housekeeper Store."""
-        self._store.session.add(*args, **kwargs)
+        self._store.session.add(obj)
         return self._store.session.commit()
 
     def commit(self):

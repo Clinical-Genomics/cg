@@ -109,7 +109,7 @@ def hk_alignment_files(
 
             LOG.info(f"Deleting {file_path} from database")
             if not dry_run:
-                hk_file.delete()
+                housekeeper_api._store.session.delete(hk_file)
                 housekeeper_api.commit()
 
 
