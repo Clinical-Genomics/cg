@@ -51,7 +51,8 @@ class StoreHelpers:
 
         if not bundle_exists:
             _bundle, _version = store.add_bundle(bundle_data)
-            store.add_commit(_bundle, _version)
+            store.add_commit(_bundle)
+            store.add_commit(_version)
 
         if include:
             store.include(_version)

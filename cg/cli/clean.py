@@ -6,7 +6,7 @@ from typing import List, Optional
 from cg.utils.dispatcher import Dispatcher
 
 import click
-from alchy import Query
+from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import File, Version
 from tabulate import tabulate
@@ -109,7 +109,7 @@ def hk_alignment_files(
 
             LOG.info(f"Deleting {file_path} from database")
             if not dry_run:
-                hk_file.delete()
+                housekeeper_api.delete_file(file_id=hk_file.id)
                 housekeeper_api.commit()
 
 
