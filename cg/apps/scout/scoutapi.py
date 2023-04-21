@@ -84,7 +84,7 @@ class ScoutAPI:
 
         return list(self.process.stdout_lines())
 
-    def get_genes(self, panel_id: str, build: str = None) -> list:
+    def get_genes(self, panel_id: str, build: str = None) -> List[dict]:
         """Fetch panel genes."""
         export_panel_command = ["export", "panel", panel_id]
         if build:
