@@ -758,7 +758,7 @@ def test_upload_rna_report_to_dna_case_in_scout(
     caplog.set_level(logging.INFO)
 
     # GIVEN an RNA case, and an store with an rna connected to it
-    upload_mip_analysis_scout_api.status_db = rna_store
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
 
     # GIVEN an RNA case with a multiqc-htlml report
     multiqc_file: File = mip_rna_analysis_hk_api.files(

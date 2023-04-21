@@ -435,25 +435,25 @@ def fixture_os_ticket(ticket_id: str) -> MockOsTicket:
 
 @pytest.fixture(name="snv_vcf_file")
 def fixture_snv_vcf_file() -> str:
-    """Return a snv file name."""
+    """Return a single nucleotide variant file name."""
     return f"snv{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="sv_vcf_file")
 def fixture_sv_vcf_file() -> str:
-    """Return a snv file name."""
+    """Return a structural variant file name."""
     return f"sv{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="snv_research_vcf_file")
 def fixture_snv_research_vcf_file() -> str:
-    """Return a snv file name."""
+#    """Return a single nucleotide variant research file name."""
     return f"snv_research{FileExtensions.VCF}"
 
 
 @pytest.fixture(name="sv_research_vcf_file")
 def fixture_sv_research_vcf_file() -> str:
-    """Return a snv file name."""
+    """Return a structural variant research file name."""
     return f"sv_research{FileExtensions.VCF}"
 
 
