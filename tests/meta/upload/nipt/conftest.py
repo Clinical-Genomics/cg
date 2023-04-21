@@ -1,11 +1,14 @@
 import pytest
 from sqlalchemy import update
 
-from cg.apps.cgstats.db.models import Sample, Unaligned
+from cg.apps.cgstats.db import models as stats_models
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Application
+
+from cg.store.models import Application, Sample
+from tests.apps.cgstats.conftest import fixture_nipt_stats_api, fixture_stats_api
+from tests.store.api.conftest import fixture_re_sequenced_sample_store
 
 
 @pytest.fixture(name="nipt_upload_api_context")
@@ -26,10 +29,12 @@ def fixture_nipt_upload_api_failed_fc_context(
     stats_api = nipt_upload_api_context.cg_stats_api
     status_db = nipt_upload_api_context.status_db
     stats_sample_id: int = (
-        stats_api.Sample.query.filter(Sample.limsid == sample_id).first().sample_id
+        stats_api.Sample.query.filter(stats_models.Sample.limsid == sample_id).first().sample_id
     )
     stats_api.session.execute(
-        update(Unaligned).where(Unaligned.sample_id == stats_sample_id).values(readcounts=10)
+        update(stats_models.Unaligned)
+        .where(stats_models.Unaligned.sample_id == stats_sample_id)
+        .values(readcounts=10)
     )
     stats_api.session.commit()
     application = status_db.get_sample_by_internal_id(
