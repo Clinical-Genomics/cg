@@ -236,7 +236,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     status_db: Store = context.status_db
-    case: Family = status_db.family(case_id)
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
         case_id=case_id, pipeline=case.data_analysis
     )
