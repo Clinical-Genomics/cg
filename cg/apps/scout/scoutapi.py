@@ -43,7 +43,7 @@ class ScoutAPI:
                 LOG.info("update existing Scout case")
             else:
                 existing_date = existing_case.analysis_date.date()
-                LOG.warning(f"analysis of case already loaded: {existing_date}")
+                LOG.warning(f"Analysis of case already loaded: {existing_date}")
                 return
         LOG.debug("load new Scout case")
         self.process.run_command(load_command)
@@ -85,7 +85,7 @@ class ScoutAPI:
         return list(self.process.stdout_lines())
 
     def get_genes(self, panel_id: str, build: str = None) -> List[dict]:
-        """Fetch panel genes."""
+        """Return panel genes."""
         export_panel_command = ["export", "panel", panel_id]
         if build:
             export_panel_command.extend(["--build", build])

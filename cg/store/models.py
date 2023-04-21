@@ -632,7 +632,7 @@ class Sample(Model, PriorityMixin):
 
     @property
     def prep_category(self) -> str:
-        """Return the prep category of the sample."""
+        """Return the preparation category of the sample."""
         return self.application_version.application.prep_category
 
     @property
