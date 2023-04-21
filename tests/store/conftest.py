@@ -149,9 +149,7 @@ def fixture_microbial_store(
         application_version = base_store.get_application_by_tag(
             sample_data["application"]
         ).versions[0]
-        organism = Organism(
-            internal_id=sample_data["organism"], name=sample_data["organism"]
-        )
+        organism = Organism(internal_id=sample_data["organism"], name=sample_data["organism"])
         base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
