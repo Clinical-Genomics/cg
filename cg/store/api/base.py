@@ -2,7 +2,6 @@
 from typing import Callable, Optional, Type, List
 
 from sqlalchemy.orm import Query, Session
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import and_, func
 from dataclasses import dataclass
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
@@ -12,20 +11,11 @@ from cg.store.models import (
     Analysis,
     Application,
     ApplicationVersion,
-    Bed,
-    BedVersion,
-    Collaboration,
     Customer,
-    Delivery,
     Family,
     FamilySample,
     Flowcell,
-    Invoice,
-    Organism,
-    Panel,
-    Pool,
     Sample,
-    User,
 )
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.utils.date import get_date_days_ago
