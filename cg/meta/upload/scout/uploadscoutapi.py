@@ -451,7 +451,7 @@ class UploadScoutAPI:
     def _get_application_prep_category(
         subject_id_samples: List[Sample],
     ) -> List[Optional[Sample]]:
-        """Filter a models.Sample list, returning DNA samples selected on their prep_category."""
+        """Filter a models Sample list, returning DNA samples selected on their preparation category."""
         subject_id_dna_samples: List[Optional[Sample]] = [
             sample
             for sample in subject_id_samples
