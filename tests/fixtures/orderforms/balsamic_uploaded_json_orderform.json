@@ -37,7 +37,7 @@
       "subject_id": "2020-12345-67-id",
       "synopsis": [],
       "tumour": true,
-      "volume": "1",
+      "volume": "111",
       "well_position": ""
     },
     {
@@ -63,7 +63,7 @@
       "subject_id": "2020-56789-10-id",
       "synopsis": "",
       "tumour": true,
-      "volume": "1",
+      "volume": "111",
       "well_position": ""
     },
     {
@@ -89,7 +89,7 @@
       "subject_id": "2020-89101-11-id",
       "synopsis": [""],
       "tumour": true,
-      "volume": "1",
+      "volume": "111",
       "well_position": ""
     },
     {
@@ -114,7 +114,7 @@
       "subject_id": "2020-12131-41-id",
       "synopsis": "",
       "tumour": true,
-      "volume": "1",
+      "volume": "111",
       "well_position": ""
     },
     {
@@ -140,7 +140,7 @@
       "subject_id": "2020-16171-81-id",
       "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
       "tumour": true,
-      "volume": "1",
+      "volume": "111",
       "well_position": "A1"
     },
     {
@@ -166,7 +166,7 @@
       "subject_id": "2020-20212-23-id",
       "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
       "tumour": false,
-      "volume": "1",
+      "volume": "111",
       "well_position": ""
     },
     {
@@ -191,7 +191,7 @@
       "subject_id": "2020-20212-22-id",
       "synopsis": "",
       "tumour": true,
-      "volume": "1",
+      "volume": "111",
       "well_position": ""
     },
     {
@@ -216,7 +216,7 @@
       "subject_id": "2020-24252-62-id",
       "synopsis": "",
       "tumour": true,
-      "volume": "1",
+      "volume": "111",
       "well_position": ""
     }
   ]
