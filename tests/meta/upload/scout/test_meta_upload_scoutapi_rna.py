@@ -564,7 +564,7 @@ def test_link_rna_sample_to_dna_sample(
 
     # WHEN adding the RNA sample to the rna_dna_case_map
     rna_dna_case_map: dict = {}
-    upload_scout_api._map_rna_sample(
+    upload_scout_api.build_rna_sample_map(
         rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
     )
 
@@ -592,7 +592,7 @@ def test_add_dna_cases_to_dna_sample(
 
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_case_map: dict = {}
-    upload_scout_api._map_rna_sample(
+    upload_scout_api.build_rna_sample_map(
         rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
     )
 

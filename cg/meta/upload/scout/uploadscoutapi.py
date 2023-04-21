@@ -370,12 +370,12 @@ class UploadScoutAPI:
         """
         rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
         for link in rna_case.links:
-            self._map_rna_sample(
+            self.build_rna_sample_map(
                 rna_sample=link.sample, rna_dna_sample_case_map=rna_dna_sample_case_map
             )
         return rna_dna_sample_case_map
 
-    def _map_rna_sample(
+    def build_rna_sample_map(
         self, rna_sample: Sample, rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]]
     ) -> None:
         """Create a dictionary of all DNA samples, and their related cases, related to a RNA sample."""
