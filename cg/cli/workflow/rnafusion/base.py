@@ -124,8 +124,8 @@ def run(
             case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
         ),
         "name": case_id,
-        "compute-env": compute_env,
-        "revision": revision,
+        "compute-env": compute_env or analysis_api.compute_env,
+        "revision": revision or analysis_api.revision,
         "wait": "SUBMITTED",
     }
 
