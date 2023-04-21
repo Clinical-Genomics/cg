@@ -454,7 +454,7 @@ def fixture_sv_vcf_file() -> str:
 
 @pytest.fixture(name="snv_research_vcf_file")
 def fixture_snv_research_vcf_file() -> str:
-#    """Return a single nucleotide variant research file name."""
+    #    """Return a single nucleotide variant research file name."""
     return f"snv_research{FileExtensions.VCF}"
 
 
