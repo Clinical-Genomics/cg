@@ -1,8 +1,8 @@
 """All models aggregated in a base class"""
-import datetime
 from typing import Callable, Optional, Type, List
 
-from alchy import Query, ModelBase
+from sqlalchemy.orm import Query, Session
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import and_, func
 from dataclasses import dataclass
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
@@ -30,10 +30,15 @@ from cg.store.models import (
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.utils.date import get_date_days_ago
 
+from cg.store.models import Model as ModelBase
+
 
 @dataclass
 class BaseHandler:
     """All models in one base class."""
+
+    def __init__(self, session: Session):
+        self.session = session
 
     Analysis: Type[ModelBase] = Analysis
     Application: Type[ModelBase] = Application
@@ -53,10 +58,9 @@ class BaseHandler:
     Sample: Type[ModelBase] = Sample
     User: Type[ModelBase] = User
 
-    @staticmethod
-    def _get_query(table: Type[ModelBase]) -> Query:
+    def _get_query(self, table: Type[ModelBase]) -> Query:
         """Return a query for the given table."""
-        return table.query
+        return self.session.query(table)
 
     def _get_outer_join_cases_with_analyses_query(self) -> Query:
         """Return a query for all cases in the database with an analysis."""

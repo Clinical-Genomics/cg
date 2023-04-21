@@ -15,7 +15,7 @@ def test_auto_fastq_not_started(
     # GIVEN a case to be delivered
     analysis_obj.pipeline = Pipeline.FASTQ
     analysis_obj.family.data_delivery = DataDelivery.FASTQ
-    base_context.status_db.commit()
+    base_context.status_db.session.commit()
     base_context.status_db.session.close()
     # WHEN the upload command is invoked with dry run
     cli_runner.invoke(auto_fastq, ["--dry-run"], obj=base_context)

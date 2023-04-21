@@ -727,22 +727,23 @@ def fixture_balsamic_context(
     bed1_filename = "balsamic_bed_1.bed"
     Path(cg_dir, bed1_filename).touch(exist_ok=True)
     bed1 = status_db.add_bed(name=bed1_name)
-    status_db.add_commit(bed1)
+    status_db.session.add(bed1)
     version1 = status_db.add_bed_version(
         bed=bed1, version=1, filename=bed1_filename, shortname=bed1_name
     )
-    status_db.add_commit(version1)
+    status_db.session.add(version1)
 
     # Create BED2 version 1
     bed2_name = "BalsamicBed2"
     bed2_filename = "balsamic_bed_2.bed"
     Path(cg_dir, bed2_filename).touch(exist_ok=True)
     bed2 = status_db.add_bed(name=bed2_name)
-    status_db.add_commit(bed2)
+    status_db.session.add(bed2)
     version2 = status_db.add_bed_version(
         bed=bed2, version=1, filename=bed2_filename, shortname=bed2_name
     )
-    status_db.add_commit(version2)
+    status_db.session.add(version2)
+    status_db.session.commit()
     return cg_context
 
 

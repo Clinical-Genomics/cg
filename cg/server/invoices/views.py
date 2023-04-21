@@ -44,7 +44,7 @@ def undo_invoice(invoice_id):
     records: List[Union[Pool, Sample]] = db.get_pools_and_samples_for_invoice_by_invoice_id(
         invoice_id=invoice_id
     )
-    invoice_obj.delete()
+    db.session.delete(invoice_obj)
     for record in records:
         record.invoice_id = None
     db.session.commit()
@@ -80,7 +80,8 @@ def make_new_invoice():
             record_type="Sample",
         )
 
-    db.add_commit(new_invoice)
+    db.session.add(new_invoice)
+    db.session.commit()
     return url_for(".invoice", invoice_id=new_invoice.id)
 
 
@@ -103,7 +104,7 @@ def upload_invoice_news_to_db():
     ki_excel_file = request.files.get("KI_excel")
     if ki_excel_file:
         invoice_obj.excel_ki = ki_excel_file.stream.read()
-    db.commit()
+    db.session.commit()
     return url_for("invoices.invoice", invoice_id=invoice_id)
 
 

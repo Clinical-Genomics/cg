@@ -114,7 +114,7 @@ class StatsAPI(alchy.Manager):
             models.Flowcell.flowcellname == flow_cell_name
         ).first()
 
-        if flow_cell_obj.exists(flowcell_name=flow_cell_name):
+        if flow_cell_obj and flow_cell_obj.exists(flowcell_name=flow_cell_name):
             sample_count: int = 0
             q30_list: List[float] = []
 

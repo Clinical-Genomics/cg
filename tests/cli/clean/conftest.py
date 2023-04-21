@@ -70,7 +70,7 @@ def clean_context(
         data_analysis=Pipeline.BALSAMIC,
     )
     case_to_not_clean.action = "running"
-    store.commit()
+    store.session.commit()
 
     sample_case_to_not_clean = helpers.add_sample(
         store,
