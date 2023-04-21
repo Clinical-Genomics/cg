@@ -586,8 +586,8 @@ def test_add_dna_cases_to_dna_sample(
     """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
-    rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
-    dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
     dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
     # WHEN adding the RNA sample rna_dna_case_map
@@ -612,8 +612,8 @@ def test_map_dna_cases_to_dna_sample(
 
     # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
 
-    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna_dna_case_map
     upload_scout_api._map_dna_cases_to_dna_sample(
@@ -638,9 +638,9 @@ def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
 
     # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
 
-    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
-    dna_case: models.Family = rna_store.family(dna_case_id)
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
+    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # GIVEN that the DNA case has a different pipeline than the expected pipeline
     dna_case.data_analysis: Pipeline = Pipeline.FASTQ
@@ -671,9 +671,9 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
 
     # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
 
-    dna_sample: models.Sample = rna_store.sample(dna_sample_son_id)
-    dna_case: models.Family = rna_store.family(dna_case_id)
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
+    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # GIVEN that the DNA case has a different customer than the expected customer
     dna_case.customer_id: int = 1000000
@@ -701,7 +701,7 @@ def test_get_multiqc_html_report(
     """Test that the multiqc html report is returned."""
 
     # GIVEN an DNA case with a multiqc-htlml report
-    case: models.Family = rna_store.family(dna_case_id)
+    case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
     multiqc_file: File = mip_dna_analysis_hk_api.files(
         bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]

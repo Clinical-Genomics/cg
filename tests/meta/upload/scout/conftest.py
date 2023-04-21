@@ -17,7 +17,7 @@ from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.models.scout.scout_load_config import MipLoadConfig
 from cg.store import Store
-from cg.store.models import Analysis, Family
+from cg.store.models import Analysis, Family, Sample
 
 # Mocks
 from tests.mocks.hk_mock import MockHousekeeperAPI
@@ -714,7 +714,7 @@ def fixture_rna_dna_sample_case_map(
     upload_scout_api: UploadScoutAPI,
 ) -> Dict[str, List[str]]:
     """Return a valid RNA-DNA case map."""
-    rna_sample: models.Sample = rna_store.sample(rna_sample_son_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}

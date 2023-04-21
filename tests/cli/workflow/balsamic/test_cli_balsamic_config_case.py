@@ -8,6 +8,7 @@ from _pytest.logging import LogCaptureFixture
 from cg.cli.workflow.balsamic.base import config_case
 from click.testing import CliRunner
 
+from cg.store import Store
 from cg.models.cg_config import CGConfig
 
 EXIT_SUCCESS = 0
@@ -99,6 +100,8 @@ def test_target_bed(
     caplog: LogCaptureFixture,
 ):
     """Test command with --panel-bed option."""
+    status_db: Store = balsamic_context.status_db
+    case_obj = status_db.get_case_by_internal_id("balsamic_case_tgs_single")
     caplog.set_level(logging.INFO)
     # GIVEN VALID case_id of application type that requires BED
     case_id = "balsamic_case_tgs_single"
