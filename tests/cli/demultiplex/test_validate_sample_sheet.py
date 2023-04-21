@@ -74,12 +74,12 @@ def test_validate_correct_bcl2fastq_sample_sheet(
 def test_validate_correct_dragen_sample_sheet(
     cli_runner: CliRunner, sample_sheet_context: dict, novaseq_dragen_sample_sheet_path: Path
 ):
-    """Test validate sample sheet when using a dragen sample sheet."""
+    """Test validate sample sheet when using a Dragen sample sheet."""
 
     # GIVEN the path to a bcl2fastq sample sheet that exists
     sample_sheet: Path = novaseq_dragen_sample_sheet_path
-    bcl_converter = "dragen"
     assert sample_sheet.exists()
+
     # GIVEN that the sample sheet is correct
     get_sample_sheet_from_file(
         infile=sample_sheet, sheet_type=SampleSheetType.S2, bcl_converter=BclConverter.DRAGEN
