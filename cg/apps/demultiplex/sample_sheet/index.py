@@ -4,7 +4,7 @@ import logging
 from typing import Dict, List, Set
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.resources import valid_indexes_path
+from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel
 
@@ -16,7 +16,7 @@ REAGENT_KIT_PARAMETER_TO_VERSION = {"1": "1.0", "3": "1.5"}
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
-    """Determines if a index is already present in the existing indexes"""
+    """Determines if an index is already present in the existing indexes."""
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
@@ -37,9 +37,10 @@ class Index(BaseModel):
 
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
-    LOG.info("Fetch valid indexes from %s", valid_indexes_path)
+    """Return list of indexes from the valid indexes' path."""
+    LOG.info("Fetch valid indexes from %s", VALID_INDEXES_PATH)
     indexes: List[Index] = []
-    with open(valid_indexes_path, "r") as csv_file:
+    with open(VALID_INDEXES_PATH, "r") as csv_file:
         indexes_csv = csv.reader(csv_file)
         for row in indexes_csv:
             index_name = row[0]

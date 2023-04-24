@@ -13,7 +13,7 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
     flowcell_samples,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, OPTION_SHEET_VERSION
 from cg.exc import FlowCellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
@@ -51,11 +51,17 @@ def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
 @sample_sheet_commands.command(name="create")
 @click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
+@OPTION_SHEET_VERSION
 @click.option("--dry-run", is_flag=True)
 @click.option("--force", is_flag=True, help="Skips the validation of the sample sheet")
 @click.pass_obj
 def create_sheet(
-    context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool = False
+    context: CGConfig,
+    flow_cell_name: str,
+    bcl_converter: str,
+    sheet_version: str,
+    dry_run: bool,
+    force: bool = False,
 ):
     """Command to create a sample sheet.
     flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
@@ -85,7 +91,11 @@ def create_sheet(
         raise click.Abort
     try:
         sample_sheet: str = create_sample_sheet(
-            bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
+            bcl_converter=bcl_converter,
+            flow_cell=flow_cell,
+            lims_samples=lims_samples,
+            sheet_version=sheet_version,
+            force=force,
         )
     except (FileNotFoundError, FileExistsError) as error:
         raise click.Abort from error
@@ -100,9 +110,10 @@ def create_sheet(
 
 @sample_sheet_commands.command(name="create-all")
 @OPTION_BCL_CONVERTER
+@OPTION_SHEET_VERSION
 @click.option("--dry-run", is_flag=True)
 @click.pass_obj
-def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
+def create_all_sheets(context: CGConfig, bcl_converter: str, sheet_version: str, dry_run: bool):
     """Command to create sample sheets for all flow cells that lack a sample sheet.
 
     Search flow cell directories for run parameters and create a sample sheets based on the
@@ -135,7 +146,10 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
 
         try:
             sample_sheet: str = create_sample_sheet(
-                flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
+                flow_cell=flow_cell,
+                lims_samples=lims_samples,
+                bcl_converter=bcl_converter,
+                sheet_version=sheet_version,
             )
         except (FileNotFoundError, FileExistsError):
             continue

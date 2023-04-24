@@ -75,6 +75,7 @@ def test_create_dragen_sample_sheet(
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
     lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
+    sample_sheet_version_1: str,
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters

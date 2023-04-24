@@ -9,7 +9,7 @@ class BclConverter(StrEnum):
     BCL2FASTQ: str = "bcl2fastq"
 
 
-SAMPLE_SHEET_HEADERS = {
+SAMPLE_SHEET_DATA_COLUMNS = {
     "bcl2fastq": [
         "FCID",
         "Lane",
@@ -38,6 +38,13 @@ SAMPLE_SHEET_HEADERS = {
     ],
 }
 
+SAMPLE_SHEET_HEADER = "[Header]"
+SAMPLE_SHEET_HEADER_FILE_FORMAT_V2 = "FileFormatVersion,2"
+SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX = "NovaSeqX"
+SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM = "NovaSeqXSeries"
+
+SAMPLE_SHEET_READS_HEADER = "[Reads]"
+
 SAMPLE_SHEET_DATA_HEADER = "[Data]"
 
 SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
@@ -53,6 +60,14 @@ OPTION_BCL_CONVERTER = click.option(
     default="bcl2fastq",
     help="Specify bcl conversion software. Choose between bcl2fastq and dragen. Default is "
     "bcl2fastq.",
+)
+
+OPTION_SHEET_VERSION = click.option(
+    "-v",
+    "--sheet-version",
+    type=click.Choice(["v1", "v2"]),
+    default="v1",
+    help="Specify the sheet version. Choose between v1 and v2. Default is v1.",
 )
 
 FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]

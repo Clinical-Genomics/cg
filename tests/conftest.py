@@ -770,6 +770,16 @@ def fixture_bcl2fastq_demux_results(
     )
 
 
+@pytest.fixture(name="sample_sheet_version_1")
+def fixture_sample_sheet_version_1() -> str:
+    return "v1"
+
+
+@pytest.fixture(name="sample_sheet_version_2")
+def fixture_sample_sheet_version_2() -> str:
+    return "v2"
+
+
 # Genotype file fixture
 
 

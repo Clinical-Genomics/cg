@@ -1,4 +1,4 @@
-""" Create a samplesheet for Novaseq flowcells """
+""" Create a sample sheet for Novaseq flow cells """
 
 import logging
 from typing import Dict, List, Set
@@ -8,11 +8,17 @@ from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
+    SAMPLE_SHEET_HEADER,
+    SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
+    SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,
+    SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,
+    SAMPLE_SHEET_READS_HEADER,
     SAMPLE_SHEET_DATA_HEADER,
-    SAMPLE_SHEET_HEADERS,
+    SAMPLE_SHEET_DATA_COLUMNS,
     SAMPLE_SHEET_SETTINGS_HEADER,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
+    BclConverter,
 )
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet
@@ -21,7 +27,7 @@ LOG = logging.getLogger(__name__)
 
 
 class SampleSheetCreator:
-    """Create a raw sample sheet for Novaseq flowcells"""
+    """Create a raw sample sheet for Novaseq flow cells."""
 
     def __init__(
         self,
@@ -29,12 +35,14 @@ class SampleSheetCreator:
         flowcell_id: str,
         lims_samples: List[LimsFlowcellSample],
         run_parameters: RunParameters,
+        sheet_version: str,
         force: bool = False,
     ):
         self.bcl_converter = bcl_converter
         self.flowcell_id: str = flowcell_id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = run_parameters
+        self.sheet_version: str = sheet_version
         self.force = force
 
     @property
@@ -42,7 +50,7 @@ class SampleSheetCreator:
         return index.get_valid_indexes(dual_indexes_only=True)
 
     def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non existing indexes to samples
+        """Add all dummy samples with non-existing indexes to samples
 
         dummy samples are added if there are indexes that are not used by the actual samples.
         This means that we will add each dummy sample (that is needed) to each lane
@@ -88,22 +96,37 @@ class SampleSheetCreator:
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
+    def create_v2_sample_sheet_sections(self) -> List[str]:
+        """Create the header and read sections of a v2 sample sheet in a list."""
+        return [
+            SAMPLE_SHEET_HEADER,
+            SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
+            SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,  # HARD-WIRED VALUE
+            SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,  # HARD-WIRED VALUE
+            SAMPLE_SHEET_READS_HEADER,
+            "Read1Cycles," + str(self.run_parameters.read_one_nr_cycles()),
+            "Read2Cycles," + str(self.run_parameters.read_two_nr_cycles()),
+            "Index1Cycles," + str(self.run_parameters.index_read_one()),
+            "Index2Cycles," + str(self.run_parameters.index_read_two()),
+        ]
+
     def convert_to_sample_sheet(self) -> str:
         """Convert all samples to a string with the sample sheet"""
         LOG.info("Convert samples to string")
-        sample_sheet = [
+        sample_sheet = self.create_v2_sample_sheet_sections() if self.sheet_version == "v2" else []
+        sample_sheet = sample_sheet + [
             SAMPLE_SHEET_SETTINGS_HEADER,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
             SAMPLE_SHEET_DATA_HEADER,
-            ",".join(SAMPLE_SHEET_HEADERS[self.bcl_converter]),
+            ",".join(SAMPLE_SHEET_DATA_COLUMNS[self.bcl_converter]),
         ]
         for sample in self.lims_samples:
             sample_sheet.append(
                 ",".join(
                     self.convert_sample_to_header_dict(
                         sample=sample,
-                        sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
+                        sample_sheet_headers=SAMPLE_SHEET_DATA_COLUMNS[self.bcl_converter],
                     )
                 )
             )

@@ -14,6 +14,7 @@ def create_sample_sheet(
     bcl_converter: str,
     flow_cell: FlowCell,
     lims_samples: List[LimsFlowcellSample],
+    sheet_version: str,
     force: bool = False,
 ) -> str:
     """Create a sample sheet for a flow cell."""
@@ -34,6 +35,7 @@ def create_sample_sheet(
         flowcell_id=flow_cell.id,
         lims_samples=lims_samples,
         run_parameters=run_parameters,
+        sheet_version=sheet_version,
         force=force,
     )
     return sample_sheet_creator.construct_sample_sheet()
