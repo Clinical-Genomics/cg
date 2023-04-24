@@ -14,7 +14,7 @@ class OrderIn(BaseModel):
     comment: Optional[str]
     customer: constr(min_length=1, max_length=Customer.internal_id.property.columns[0].type.length)
     samples: conlist(Any, min_items=1)
-    skip_reception_control: Optional[bool] = False
+    skip_reception_control: Optional[bool] = None
     ticket: Optional[str]
 
     @classmethod
