@@ -259,6 +259,7 @@ class Customer(Model):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
+    is_trusted = Column(types.Boolean, nullable=False, default=False)
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
     name = Column(types.String(128), nullable=False)
     organisation_number = Column(types.String(32))
@@ -728,10 +729,10 @@ class User(Model):
     customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 
     def to_dict(self) -> dict:
-        """Represent as dictionary"""
-        data = to_dict(model_instance=self)
-        data["customers"] = [record.to_dict() for record in self.customers]
-        return data
+        """Represent as dictionary."""
+        dict_representation: dict = to_dict(model_instance=self)
+        dict_representation["customers"] = [customer.to_dict() for customer in self.customers]
+        return dict_representation
 
     def __str__(self) -> str:
         return self.name
