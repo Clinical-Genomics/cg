@@ -456,7 +456,7 @@ class StoreHelpers:
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
-        case_obj = Family(
+        case = Family(
             name=case_info["name"],
             panels=case_info["panels"],
             internal_id=case_info["internal_id"],
@@ -468,8 +468,8 @@ class StoreHelpers:
             tickets=case_info["tickets"],
         )
 
-        case_obj = StoreHelpers.add_case(
-            store, case_obj=case_obj, customer_id=customer_obj.internal_id
+        case: Family = StoreHelpers.add_case(
+            store, case_obj=case, customer_id=customer_obj.internal_id
         )
 
         app_tag = app_tag or "WGSPCFC030"
@@ -502,7 +502,7 @@ class StoreHelpers:
                 mother = sample_objs[sample_data[Pedigree.MOTHER]]
             StoreHelpers.add_relationship(
                 store,
-                case=case_obj,
+                case=case,
                 sample=sample_obj,
                 status=sample_data.get("status", PhenotypeStatus.UNKNOWN),
                 father=father,
@@ -512,10 +512,10 @@ class StoreHelpers:
         StoreHelpers.add_analysis(
             store,
             pipeline=Pipeline.MIP_DNA,
-            case=case_obj,
+            case=case,
             completed_at=completed_at or datetime.now(),
         )
-        return case_obj
+        return case
 
     @staticmethod
     def add_organism(
