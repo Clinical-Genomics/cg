@@ -20,7 +20,7 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis
+from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis, User
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
@@ -117,13 +117,13 @@ def before_request():
             )
         )
 
-    user = db.get_user_by_email(user_data["email"])
+    user: User = db.get_user_by_email(user_data["email"])
     if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
-    g.current_user = user
+    g.current_user: User = user
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
@@ -408,12 +408,16 @@ def parse_options():
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 
     return jsonify(
+        applications=app_tag_groups,
+        beds=[bed.name for bed in db.get_active_beds()],
         customers=[
-            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
+            {
+                "text": f"{customer.name} ({customer.internal_id})",
+                "value": customer.internal_id,
+                "isTrusted": customer.is_trusted,
+            }
             for customer in customers
         ],
-        applications=app_tag_groups,
-        panels=[panel.abbrev for panel in db.get_panels()],
         organisms=[
             {
                 "name": organism.name,
@@ -423,8 +427,8 @@ def parse_options():
             }
             for organism in db.get_all_organisms()
         ],
+        panels=[panel.abbrev for panel in db.get_panels()],
         sources=source_groups,
-        beds=[bed.name for bed in db.get_active_beds()],
     )
 
 

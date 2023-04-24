@@ -46,7 +46,7 @@ class ExcelSample(OrderSample):
     reference_genome: str = Field(None, alias="UDF/Reference Genome Microbial")
     region: str = Field(None, alias="UDF/Region")
     region_code: str = Field(None, alias="UDF/Region Code")
-    require_qcok: bool = Field(None, alias="UDF/Process only if QC OK")
+    require_qc_ok: bool = Field(None, alias="UDF/Process only if QC OK")
     rml_plate_name: str = Field(None, alias="UDF/RML plate name")
     selection_criteria: str = Field(None, alias="UDF/Selection Criteria")
     sex: str = Field(None, alias="UDF/Gender")
