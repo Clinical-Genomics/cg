@@ -4,7 +4,6 @@ from typing import Dict, Iterable, Optional, Union
 import sqlalchemy
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
-from cg.apps.cgstats.crud import find
 from cg.apps.cgstats.db.models import (
     Datasource,
     Demux,
@@ -199,7 +198,7 @@ def _calculate_read_counts(demux_sample: DragenDemuxSample) -> int:
 def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str, int]:
     project_name_to_id: Dict[str, int] = {}
     for project_name in project_names:
-        project_id: Optional[int] = find.get_project_id(project_name=project_name)
+        project_id: Optional[int] = manager.find_handler.get_project_id(project_name=project_name)
         if not project_id:
             project_object: Project = create_project(manager=manager, project_name=project_name)
             project_id: int = project_object.project_id
@@ -216,7 +215,9 @@ def _create_samples(
 
     barcode = f"{sample.index}+{sample.second_index}" if sample.second_index else sample.index
 
-    sample_id: Optional[int] = find.get_sample_id(sample_id=sample.sample_id, barcode=barcode)
+    sample_id: Optional[int] = manager.find_handler.get_sample_id(
+        sample_id=sample.sample_id, barcode=barcode
+    )
     if sample.project == "indexcheck":
         LOG.debug("Skip adding indexcheck sample to database")
         return
@@ -256,7 +257,7 @@ def _create_dragen_samples(
         if not sample_id:
             continue
 
-        unaligned_id: Optional[int] = find.get_unaligned_id(
+        unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
             sample_id=sample_id, demux_id=demux_id, lane=sample.lane
         )
         if not unaligned_id:
@@ -294,7 +295,7 @@ def _create_bcl2fastq_samples(
         if not sample_id:
             continue
 
-        unaligned_id: Optional[int] = find.get_unaligned_id(
+        unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
             sample_id=sample_id, demux_id=demux_id, lane=sample.lane
         )
         if not unaligned_id:
@@ -330,7 +331,7 @@ def create_samples(
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     LOG.info("Adding flowcell information to cgstats")
-    support_parameters_id: Optional[int] = find.get_support_parameters_id(
+    support_parameters_id: Optional[int] = manager.find_handler.get_support_parameters_id(
         demux_results=demux_results
     )
     if not support_parameters_id:
@@ -341,7 +342,9 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     else:
         LOG.info("Support parameters already exists")
 
-    datasource_id: Optional[int] = find.get_datasource_id(demux_results=demux_results)
+    datasource_id: Optional[int] = manager.find_handler.get_datasource_id(
+        demux_results=demux_results
+    )
     if not datasource_id:
         datasource_object: Datasource = create_datasource(
             manager=manager,
@@ -351,7 +354,9 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         datasource_id: int = datasource_object.datasource_id
     else:
         LOG.info("Data source already exists")
-    flowcell_id: Optional[int] = find.get_flowcell_id(flowcell_name=demux_results.flow_cell.id)
+    flowcell_id: Optional[int] = manager.find_handler.get_flowcell_id(
+        flowcell_name=demux_results.flow_cell.id
+    )
 
     if not flowcell_id:
         flowcell: Flowcell = create_flowcell(manager=manager, demux_results=demux_results)
@@ -359,7 +364,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     else:
         LOG.info("Flowcell already exists")
 
-    demux_id: Optional[int] = find.get_demux_id(flowcell_object_id=flowcell_id)
+    demux_id: Optional[int] = manager.find_handler.get_demux_id(flowcell_object_id=flowcell_id)
     if not demux_id:
         demux_object: Demux = create_demux(
             manager=manager,
