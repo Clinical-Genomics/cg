@@ -3,11 +3,12 @@ from typing import Optional
 from sqlalchemy import Column, ForeignKey, UniqueConstraint, orm, types
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base import Model
+from .base import Base
 
 
-class Demux(Model):
+class Demux(Base):
     __table_args__ = (UniqueConstraint("flowcell_id", "basemask", name="demux_ibuk_1"),)
+    __tablename__ = "demux"
 
     demux_id = Column(types.Integer, primary_key=True)
     flowcell_id = Column(ForeignKey("flowcell.flowcell_id", ondelete="CASCADE"), nullable=False)

@@ -3,10 +3,11 @@ from typing import Optional
 from sqlalchemy import Column, ForeignKey, types
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base import Model
+from .base import Base
 
 
-class Unaligned(Model):
+class Unaligned(Base):
+    __tablename__ = "unaligned"
     unaligned_id = Column(types.Integer, primary_key=True)
     sample_id = Column(ForeignKey("sample.sample_id", ondelete="CASCADE"), nullable=False)
     demux_id = Column(ForeignKey("demux.demux_id", ondelete="CASCADE"), nullable=False)

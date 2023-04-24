@@ -3,10 +3,11 @@ from typing import Optional
 from sqlalchemy import Column, orm, types
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base import Model
+from .base import Base
 
 
-class Flowcell(Model):
+class Flowcell(Base):
+    __tablename__ = "flowcell"
     flowcell_id = Column(types.Integer, primary_key=True)
     flowcellname = Column(types.String(255), nullable=False, unique=True)
     flowcell_pos = Column(types.Enum("A", "B"), nullable=False)

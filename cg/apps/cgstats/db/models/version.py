@@ -1,9 +1,10 @@
 from sqlalchemy import Column, UniqueConstraint, types
 
-from .base import Model
+from .base import Base
 
 
-class Version(Model):
+class Version(Base):
+    __tablename__ = "version"
     __table_args__ = (
         UniqueConstraint("name", "major", "minor", "patch", name="name_major_minor_patch_uc"),
     )

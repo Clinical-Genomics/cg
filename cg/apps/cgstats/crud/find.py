@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-import alchy
+from sqlalchemy.orm import Query
 from sqlalchemy import or_
 
 from cg.apps.cgstats.db.models import (
@@ -95,8 +95,8 @@ def get_unaligned_id(sample_id: int, demux_id: int, lane: int) -> Optional[int]:
     return None
 
 
-def get_samples(flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
-    query: alchy.Query = Sample.query.join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
+def get_samples(flowcell: str, project_name: Optional[str] = None) -> Query:
+    query: Query = Sample.query.join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
     if project_name:
         query = query.join(Sample.project).filter(Project.projectname == project_name)
 
@@ -106,6 +106,6 @@ def get_samples(flowcell: str, project_name: Optional[str] = None) -> alchy.Quer
 
 
 def project_sample_stats(flowcell: str, project_name: Optional[str] = None) -> List[StatsSample]:
-    samples_query: alchy.Query = get_samples(flowcell=flowcell, project_name=project_name)
+    samples_query: Query = get_samples(flowcell=flowcell, project_name=project_name)
     db_sample: Sample
     return [StatsSample.from_orm(db_sample) for db_sample in samples_query]

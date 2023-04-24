@@ -2,7 +2,8 @@ import logging
 from pathlib import Path
 from typing import Dict, Iterator, List, Union
 
-import alchy
+from sqlalchemy.orm import sessionmaker, Query
+from sqlalchemy import create_engine
 import sqlalchemy as sqa
 
 from cg.apps.cgstats.crud import find
@@ -10,7 +11,6 @@ from cg.apps.cgstats.db.models import (
     Datasource,
     Demux,
     Flowcell,
-    Model,
     Project,
     Sample,
     Unaligned,
@@ -22,7 +22,7 @@ from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
 LOG = logging.getLogger(__name__)
 
 
-class StatsAPI(alchy.Manager):
+class StatsAPI:
     Project = Project
     Sample = Sample
     Unaligned = Unaligned
@@ -33,8 +33,12 @@ class StatsAPI(alchy.Manager):
 
     def __init__(self, config: dict):
         LOG.info("Instantiating cgstats api")
-        alchy_config = dict(SQLALCHEMY_DATABASE_URI=config["cgstats"]["database"])
-        super(StatsAPI, self).__init__(config=alchy_config, Model=Model)
+        db_config = dict(SQLALCHEMY_DATABASE_URI=config["cgstats"]["database"])
+
+        engine = create_engine(db_config["SQLALCHEMY_DATABASE_URI"])
+        session_factory = sessionmaker(bind=engine)
+        self.session = session_factory()
+
         self.root_dir: Path = Path(config["cgstats"]["root"])
         self.binary: str = config["cgstats"]["binary_path"]
         self.db_uri: str = config["cgstats"]["database"]
@@ -72,9 +76,9 @@ class StatsAPI(alchy.Manager):
 
     def flowcell(self, flowcell_name: str) -> StatsFlowcell:
         """Fetch information about a flowcell."""
-        flowcell_object: Flowcell = self.Flowcell.query.filter_by(
-            flowcellname=flowcell_name
-        ).first()
+        flowcell_object: Flowcell = (
+            self.session.query(Flowcell).filter_by(flowcellname=flowcell_name).first()
+        )
         flowcell_data = {
             "name": flowcell_object.flowcellname,
             "sequencer": flowcell_object.demux[0].datasource.machine,
@@ -87,8 +91,10 @@ class StatsAPI(alchy.Manager):
 
     def flowcell_samples(self, flowcell_obj: Flowcell) -> Iterator[Sample]:
         """Fetch all the samples from a flowcell."""
-        return self.Sample.query.join(Sample.unaligned, Unaligned.demux).filter(
-            Demux.flowcell == flowcell_obj
+        return (
+            self.session.query(Sample)
+            .join(Sample.unaligned, Unaligned.demux)
+            .filter(Demux.flowcell == flowcell_obj)
         )
 
     def is_lane_pooled(self, flowcell_obj: Flowcell, lane: str) -> bool:
@@ -101,7 +107,7 @@ class StatsAPI(alchy.Manager):
         )
         return query.first().sample_count > 1
 
-    def sample_reads(self, sample_obj: Sample) -> alchy.Query:
+    def sample_reads(self, sample_obj: Sample) -> Query:
         """Calculate reads for a sample."""
         return (
             self.session.query(
@@ -119,9 +125,9 @@ class StatsAPI(alchy.Manager):
 
     def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
-        flow_cell_obj: Flowcell = self.Flowcell.query.filter(
-            Flowcell.flowcellname == flow_cell_name
-        ).first()
+        flow_cell_obj: Flowcell = (
+            self.session.query(Flowcell).filter(Flowcell.flowcellname == flow_cell_name).first()
+        )
 
         if flow_cell_obj and flow_cell_obj.exists(flowcell_name=flow_cell_name):
             sample_count: int = 0

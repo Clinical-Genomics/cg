@@ -3,10 +3,11 @@ from typing import Optional
 from sqlalchemy import Column, ForeignKey, orm, types
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base import Model
+from .base import Base
 
 
-class Datasource(Model):
+class Datasource(Base):
+    __tablename__ = "datasource"
     datasource_id = Column(types.Integer, primary_key=True)
     supportparams_id = Column(
         ForeignKey("supportparams.supportparams_id", ondelete="CASCADE"), nullable=False
