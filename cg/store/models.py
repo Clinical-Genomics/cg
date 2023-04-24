@@ -219,6 +219,9 @@ class Bed(Model):
     def __str__(self) -> str:
         return self.name
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class BedVersion(Model):
     """Model for bed target captures versions"""
@@ -314,6 +317,9 @@ class Collaboration(Model):
             "internal_id": self.internal_id,
         }
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class Delivery(Model):
     __tablename__ = "delivery"
@@ -324,6 +330,9 @@ class Delivery(Model):
     sample_id = Column(ForeignKey("sample.id", ondelete="CASCADE"))
     pool_id = Column(ForeignKey("pool.id", ondelete="CASCADE"))
     comment = Column(types.Text)
+
+    def to_dict(self):
+        return to_dict(model_instance=self)
 
 
 class Family(Model, PriorityMixin):
@@ -552,6 +561,9 @@ class Panel(Model):
     def __str__(self):
         return f"{self.abbrev} ({self.current_version})"
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class Pool(Model):
     __tablename__ = "pool"
@@ -575,6 +587,9 @@ class Pool(Model):
     ordered_at = Column(types.DateTime, nullable=False)
     received_at = Column(types.DateTime)
     ticket = Column(types.String(32))
+
+    def to_dict(self):
+        return to_dict(model_instance=self)
 
 
 class Sample(Model, PriorityMixin):
