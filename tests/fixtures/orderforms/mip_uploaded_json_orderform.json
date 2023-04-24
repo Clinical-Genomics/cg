@@ -28,13 +28,13 @@
       ],
       "priority": "research",
       "quantity": "200",
-      "require_qc_ok": true,
+      "require_qcok": true,
       "sex": "male",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-12345-67-id",
       "synopsis": [],
-      "volume": "111",
+      "volume": "1",
       "well_position": ""
     },
     {
@@ -62,13 +62,13 @@
       ],
       "priority": "Standard",
       "quantity": "200",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "sex": "female",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-56789-10-id",
       "synopsis": "",
-      "volume": "111",
+      "volume": "1",
       "well_position": ""
     },
     {
@@ -96,13 +96,13 @@
       ],
       "priority": "priority",
       "quantity": "200",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "sex": "female",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-89101-11-id",
       "synopsis": [""],
-      "volume": "111",
+      "volume": "1",
       "well_position": ""
     },
     {
@@ -129,13 +129,13 @@
       ],
       "priority": "express",
       "quantity": "200",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "sex": "male",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-12131-41-id",
       "synopsis": "",
-      "volume": "111",
+      "volume": "1",
       "well_position": ""
     },
     {
@@ -166,13 +166,13 @@
       ],
       "priority": "clinical trials",
       "quantity": "200",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "sex": "female",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-16171-81-id",
       "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
-      "volume": "111",
+      "volume": "1",
       "well_position": "A1"
     },
     {
@@ -201,13 +201,13 @@
       ],
       "priority": "clinical trials",
       "quantity": "200",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "sex": "male",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-20212-23-id",
       "synopsis": ["H\u00e4r kommer det att komma en v\u00e4ldigt l\u00e5ng text f\u00f6r synopsis."],
-      "volume": "111",
+      "volume": "1",
       "well_position": ""
     },
     {
@@ -234,13 +234,13 @@
       ],
       "priority": "Priority",
       "quantity": "200",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "sex": "male",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-20212-22-id",
       "synopsis": "",
-      "volume": "111",
+      "volume": "1",
       "well_position": ""
     },
     {
@@ -267,13 +267,13 @@
       ],
       "priority": "Standard",
       "quantity": "200",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "sex": "male",
       "source": "blood",
       "status": "affected",
       "subject_id": "2020-24252-62-id",
       "synopsis": "",
-      "volume": "111",
+      "volume": "1",
       "well_position": ""
     }
   ]

@@ -39,11 +39,10 @@ class Udf(BaseModel):
     reference_genome: Optional[str]
     region: Optional[str]
     region_code: Optional[str]
-    require_qc_ok: bool = False
+    require_qcok: bool = False
     rml_plate_name: Optional[str]
     selection_criteria: Optional[str]
     sex: Literal["M", "F", "unknown"] = "unknown"
-    skip_reception_control: Optional[bool] = None
     source: str = "NA"
     tissue_block_size: Optional[str]
     tumour: Optional[bool] = False

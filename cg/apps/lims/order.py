@@ -5,7 +5,7 @@ from genologics.entities import Container, Containertype, Project, Researcher, S
 from lxml import etree
 from lxml.objectify import ObjectifiedElement
 
-from cg.constants.lims import PROP2UDF, YES_NO_LIMS_BOOLEANS
+from cg.constants.lims import PROP2UDF
 from cg.exc import OrderError
 
 from . import batch
@@ -18,6 +18,7 @@ class OrderHandler:
     def save_xml(self, uri: str, document: ObjectifiedElement):
         """Post the data to the server."""
         data = etree.tostring(document, xml_declaration=True)
+        LOG.debug(data)
         result = self.post(uri, data)
         return result
 
@@ -142,7 +143,7 @@ class OrderHandler:
                             LOG.debug(f"{key}: skipping null value UDF")
                             continue
                         if key in PROP2UDF:
-                            if key in YES_NO_LIMS_BOOLEANS:
+                            if isinstance(value, bool):
                                 value = "yes" if value else "no"
                             new_sample["udfs"][PROP2UDF[key]] = value
                         else:

@@ -98,7 +98,7 @@ def fixture_microbial_submitted_order() -> dict:
             well_position_rml=None,
             sex=None,
             panels=None,
-            require_qc_ok=True,
+            require_qcok=True,
             application="MWRNXTR003",
             source=None,
             status=None,
