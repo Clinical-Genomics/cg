@@ -40,12 +40,12 @@ def test_contact_structure(store: Store, contact_type):
     # WHEN checking the structure of Customer
 
     # THEN contact email and name should not be present
-    assert not hasattr(store.Customer, contact_type + "_contact_email")
-    assert not hasattr(store.Customer, contact_type + "_contact_name")
+    assert not hasattr(Customer, contact_type + "_contact_email")
+    assert not hasattr(Customer, contact_type + "_contact_name")
 
     # THEN deprecated attributes should not be present
-    assert hasattr(store.Customer, contact_type + "_contact_id")
-    assert hasattr(store.Customer, contact_type + "_contact")
+    assert hasattr(Customer, contact_type + "_contact_id")
+    assert hasattr(Customer, contact_type + "_contact")
 
 
 def test_add_basic(store: Store):

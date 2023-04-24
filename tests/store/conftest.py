@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Family, Sample, Customer
+from cg.store.models import Analysis, Application, Family, Organism, Sample, Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -98,7 +98,7 @@ def fixture_microbial_submitted_order() -> dict:
             well_position_rml=None,
             sex=None,
             panels=None,
-            require_qcok=True,
+            require_qc_ok=True,
             application="MWRNXTR003",
             source=None,
             status=None,
@@ -149,7 +149,7 @@ def fixture_microbial_store(
         application_version = base_store.get_application_by_tag(
             sample_data["application"]
         ).versions[0]
-        organism = base_store.Organism(
+        organism: Organism = Organism(
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
         base_store.session.add(organism)
