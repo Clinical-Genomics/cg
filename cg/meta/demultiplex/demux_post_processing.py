@@ -199,9 +199,8 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         """Add the information from demultiplexing to cgstats"""
         create.create_novaseq_flowcell(manager=self.stats_api, demux_results=demux_results)
 
-    @staticmethod
-    def fetch_report_samples(flow_cell_id: str, project_name: str) -> List[StatsSample]:
-        samples: List[StatsSample] = find.project_sample_stats(
+    def fetch_report_samples(self, flow_cell_id: str, project_name: str) -> List[StatsSample]:
+        samples: List[StatsSample] = self.stats_api.find_handler.project_sample_stats(
             flowcell=flow_cell_id, project_name=project_name
         )
         LOG.info(
