@@ -100,7 +100,7 @@ class OrderSample(BaseModel):
     ]
     region: Optional[str]
     region_code: Optional[str]
-    require_qc_ok: bool = False
+    require_qcok: bool = False
     rml_plate_name: Optional[str]
     selection_criteria: Optional[str]
     sex: SexEnum = SexEnum.unknown

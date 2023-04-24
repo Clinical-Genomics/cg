@@ -26,7 +26,7 @@
       "reference_genome": "NC_111",
       "region": "Stockholm",
       "region_code": "01",
-      "require_qc_ok": true,
+      "require_qcok": true,
       "selection_criteria": "1. Allmän övervakning",
       "volume": "1",
       "well_position": "A:1"
@@ -52,7 +52,7 @@
       "reference_genome": "NC_222",
       "region": "Stockholm",
       "region_code": "01",
-      "require_qc_ok": true,
+      "require_qcok": true,
       "selection_criteria": "1. Allmän övervakning",
       "volume": "2",
       "well_position": ""
@@ -78,7 +78,7 @@
       "reference_genome": "NC_333",
       "region": "Stockholm",
       "region_code": "01",
-      "require_qc_ok": true,
+      "require_qcok": true,
       "selection_criteria": "1. Allmän övervakning",
       "volume": "3",
       "well_position": "A:2"
@@ -104,7 +104,7 @@
       "reference_genome": "NC_444",
       "region": "Stockholm",
       "region_code": "01",
-      "require_qc_ok": true,
+      "require_qcok": true,
       "selection_criteria": "1. Allmän övervakning",
       "volume": "4",
       "well_position": ""
@@ -132,7 +132,7 @@
       "reference_genome": "NC_555",
       "region": "Stockholm",
       "region_code": "01",
-      "require_qc_ok": false,
+      "require_qcok": false,
       "selection_criteria": "1. Allmän övervakning",
       "volume": "5",
       "well_position": ""
