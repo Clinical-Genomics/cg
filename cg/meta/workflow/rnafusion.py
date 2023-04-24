@@ -48,6 +48,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
+        self.compute_env: str = config.rnafusion.compute_env
+        self.revision: str = config.rnafusion.revision
 
     @property
     def root(self) -> str:
