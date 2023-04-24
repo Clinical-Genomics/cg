@@ -5,7 +5,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
 
-from cg.apps.cgstats.crud import create, find
+from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
