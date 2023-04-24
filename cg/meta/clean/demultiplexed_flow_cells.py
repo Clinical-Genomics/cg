@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from housekeeper.store.models import Bundle, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -244,7 +244,7 @@ class DemultiplexedRunsFlowCell:
             self.status_db.get_flow_cell_by_name(
                 flow_cell_name=self.id
             ).status = FlowCellStatus.REMOVED
-        self.status_db.commit()
+        self.status_db.session.commit()
 
     def remove_failed_flow_cell(self) -> None:
         """Performs the two removal actions for failed flow cells."""

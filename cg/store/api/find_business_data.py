@@ -3,8 +3,7 @@ import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union, Dict
 
-from sqlalchemy import and_, func
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
@@ -46,6 +45,9 @@ LOG = logging.getLogger(__name__)
 
 class FindBusinessDataHandler(BaseHandler):
     """Contains methods to find business data model instances"""
+
+    def __init__(self, session: Session):
+        super().__init__(session=session)
 
     def get_analyses_by_case_entry_id(self, case_entry_id: int) -> List[Analysis]:
         """Return analysis by case entry id."""
@@ -159,10 +161,6 @@ class FindBusinessDataHandler(BaseHandler):
             started_at_date=started_at_date,
             filter_functions=filter_functions,
         ).first()
-
-    def deliveries(self) -> Query:
-        """Fetch all deliveries."""
-        return self.Delivery.query
 
     def get_cases_created_within_days(self, days: int) -> List[Family]:
         """Fetch all cases created within the past days."""
@@ -472,7 +470,7 @@ class FindBusinessDataHandler(BaseHandler):
                 flow_cell.status = FlowCellStatus.REQUESTED
             elif flow_cell.status != FlowCellStatus.ON_DISK:
                 LOG.warning(f"{flow_cell.name}: {flow_cell.status}")
-        self.commit()
+        self.session.commit()
         return all(status == FlowCellStatus.ON_DISK for status in statuses)
 
     def get_invoices_by_status(self, is_invoiced: bool = None) -> List[Invoice]:

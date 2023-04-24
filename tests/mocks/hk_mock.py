@@ -523,6 +523,28 @@ class MockHousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
+    def delete_file(self, file_id: int) -> Optional[File]:
+        """Mock deleting a file both from database and disk (if included)."""
+        file_obj = self._get_mock_file(file_id)
+        if not file_obj:
+            LOG.info(f"Could not find file {file_id}")
+            return
+
+        if file_obj.is_included and Path(file_obj.full_path).exists():
+            LOG.info(f"Deleting file {file_obj.full_path} from disc")
+            Path(file_obj.full_path).unlink()
+
+        LOG.info(f"Deleting file {file_id} from mock housekeeper")
+        self._files.remove(file_obj)
+
+        return file_obj
+
+    def _get_mock_file(self, file_id: int) -> Optional[File]:
+        for file_obj in self._files:
+            if file_obj.id == file_id:
+                return file_obj
+        return None
+
     @staticmethod
     def get_tag_names_from_file(file) -> [str]:
         """Fetch a tag"""

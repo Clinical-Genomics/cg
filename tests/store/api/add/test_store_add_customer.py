@@ -23,7 +23,8 @@ def test_contact_storing(store: Store, contact_type, helpers):
 
     contact_field = f"{contact_type}_contact"
     setattr(new_customer, contact_field, new_user)
-    store.add_commit(new_customer)
+    store.session.add(new_customer)
+    store.session.commit()
 
     # THEN contact should be stored on the customer
     assert (
@@ -39,12 +40,12 @@ def test_contact_structure(store: Store, contact_type):
     # WHEN checking the structure of Customer
 
     # THEN contact email and name should not be present
-    assert not hasattr(store.Customer, contact_type + "_contact_email")
-    assert not hasattr(store.Customer, contact_type + "_contact_name")
+    assert not hasattr(Customer, contact_type + "_contact_email")
+    assert not hasattr(Customer, contact_type + "_contact_name")
 
     # THEN deprecated attributes should not be present
-    assert hasattr(store.Customer, contact_type + "_contact_id")
-    assert hasattr(store.Customer, contact_type + "_contact")
+    assert hasattr(Customer, contact_type + "_contact_id")
+    assert hasattr(Customer, contact_type + "_contact")
 
 
 def test_add_basic(store: Store):
@@ -62,7 +63,8 @@ def test_add_basic(store: Store):
         invoice_reference="dummy nr",
     )
     new_customer.collaborations.append(collaboration)
-    store.add_commit(new_customer)
+    store.session.add(new_customer)
+    store.session.commit()
 
     # THEN it should be stored in the database
     assert (store._get_query(table=Customer)).first() == new_customer

@@ -1,6 +1,6 @@
 """Tests for store API status module."""
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from typing import List
 from cg.constants import Pipeline, Priority
 from cg.constants.subject import PhenotypeStatus

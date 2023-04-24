@@ -18,7 +18,8 @@ def test_add_user(cli_runner: CliRunner, base_context: CGConfig):
         invoice_address="Street nr, 12345 Uppsala",
         invoice_reference="ABCDEF",
     )
-    disk_store.add_commit(customer)
+    disk_store.session.add(customer)
+    disk_store.session.commit()
     # GIVEN that there is a certain number of users
     user_query = disk_store._get_query(table=User)
     nr_users = user_query.count()

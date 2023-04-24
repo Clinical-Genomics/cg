@@ -8,7 +8,7 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Family, Sample, Customer
+from cg.store.models import Analysis, Application, Family, Organism, Sample, Customer
 from tests.store_helpers import StoreHelpers
 
 
@@ -149,10 +149,10 @@ def fixture_microbial_store(
         application_version = base_store.get_application_by_tag(
             sample_data["application"]
         ).versions[0]
-        organism = base_store.Organism(
+        organism: Organism = Organism(
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
-        base_store.add(organism)
+        base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
             sex=Gender.UNKNOWN,
@@ -164,9 +164,9 @@ def fixture_microbial_store(
         sample.application_version = application_version
         sample.customer = customer
         sample.organism = organism
-        base_store.add(sample)
+        base_store.session.add(sample)
 
-    base_store.commit()
+    base_store.session.commit()
     yield base_store
 
 
@@ -409,7 +409,8 @@ def fixture_store_with_older_and_newer_analyses(
     analysis.cleaned_at = timestamp_now
     analysis.started_at = timestamp_now
     analysis.completed_at = timestamp_now
-    base_store.add_commit(analysis)
+    base_store.session.add(analysis)
+    base_store.session.commit()
     times = [timestamp_now, timestamp_yesterday, old_timestamp]
     for time in times:
         helpers.add_analysis(

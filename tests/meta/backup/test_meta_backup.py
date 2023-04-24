@@ -226,7 +226,7 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     assert mock_flow_cell.status == "retrieved"
 
     # AND status-db is updated with the new status
-    assert mock_store.commit.called
+    assert mock_store.session.commit.called
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -291,7 +291,7 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     assert mock_flow_cell.status == "retrieved"
 
     # AND status-db is updated with the new status
-    assert mock_store.commit.called
+    assert mock_store.session.commit.called
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
@@ -401,7 +401,7 @@ def test_fetch_flow_cell_integration(
     assert mock_flow_cell.status == "retrieved"
 
     # AND status-db is updated with the new status
-    assert mock_store.commit.called
+    assert mock_store.session.commit.called
 
     # AND the elapsed time of the retrieval process is returned
     assert result > 0
