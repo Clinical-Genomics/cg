@@ -55,7 +55,7 @@ class FindBasicDataHandler(BaseHandler):
                 filter_functions=[ApplicationFilter.FILTER_BY_PREP_CATEGORY],
                 prep_category=prep_category,
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -66,7 +66,7 @@ class FindBasicDataHandler(BaseHandler):
                 applications=self._get_query(table=Application),
                 filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -83,7 +83,7 @@ class FindBasicDataHandler(BaseHandler):
                 ],
                 prep_category=prep_category,
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -91,7 +91,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return all applications."""
         return (
             self._get_query(table=Application)
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
