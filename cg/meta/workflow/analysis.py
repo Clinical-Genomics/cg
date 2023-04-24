@@ -165,7 +165,8 @@ class AnalysisAPI(MetaAPI):
             )
             return
         self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object, bundle_version)
+        self.housekeeper_api.add_commit(bundle_object)
+        self.housekeeper_api.add_commit(bundle_version)
         LOG.info(
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
