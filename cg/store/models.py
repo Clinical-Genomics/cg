@@ -5,7 +5,7 @@ from typing import List, Optional, Set, Dict
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.util import deprecated
-from sqlalchemy.orm import InstrumentedAttribute
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from cg.constants import (
     CASE_ACTIONS,
