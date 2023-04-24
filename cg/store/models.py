@@ -5,6 +5,7 @@ from typing import List, Optional, Set, Dict
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.util import deprecated
+from sqlalchemy.orm import InstrumentedAttribute
 
 from cg.constants import (
     CASE_ACTIONS,
@@ -27,6 +28,7 @@ def to_dict(model_instance):
         return {
             column.name: getattr(model_instance, column.name)
             for column in model_instance.__table__.columns
+            if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
         }
 
 
