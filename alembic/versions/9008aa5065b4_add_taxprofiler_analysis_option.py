@@ -1,7 +1,7 @@
 """Add taxprofiler analysis option
 
 Revision ID: 9008aa5065b4
-Revises: 554140bc13e4
+Revises: df1b3dd317d0
 Create Date: 2023-04-19 13:46:29.137152
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
 revision = "9008aa5065b4"
-down_revision = "554140bc13e4"
+down_revision = "df1b3dd317d0"
 branch_labels = None
 depends_on = None
 
