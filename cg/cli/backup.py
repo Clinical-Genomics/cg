@@ -70,7 +70,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     if not dry_run and flow_cell:
         LOG.info(f"{flow_cell}: updating flow cell status to {FlowCellStatus.REQUESTED}")
         flow_cell.status = FlowCellStatus.REQUESTED
-        status_api.commit()
+        status_api.session.commit()
 
 
 @backup.command("archive-spring-files")

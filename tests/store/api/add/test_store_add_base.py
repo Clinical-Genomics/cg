@@ -12,7 +12,8 @@ def test_add_collaboration(store: Store):
 
     # WHEN adding a new customer group
     new_collaboration = store.add_collaboration(internal_id=internal_id, name=name)
-    store.add_commit(new_collaboration)
+    store.session.add(new_collaboration)
+    store.session.commit()
 
     # THEN it should be stored in the database
     assert collaboration_query.first() == new_collaboration
@@ -27,13 +28,14 @@ def test_add_user(store: Store):
         invoice_address="dummy street 1",
         invoice_reference="dummy nr",
     )
-    store.add_commit(customer)
+    store.session.add(customer)
 
     # WHEN adding a new user
     name, email = "Paul T. Anderson", "paul.anderson@magnolia.com"
     new_user = store.add_user(customer=customer, email=email, name=name)
 
-    store.add_commit(new_user)
+    store.session.add(new_user)
+    store.session.commit()
 
     # THEN it should be stored in the database
     assert store._get_query(table=User).first() == new_user
@@ -65,7 +67,8 @@ def test_add_microbial_sample(base_store: Store, helpers):
         reference_genome=reference_genome,
     )
     new_sample.customer = customer_obj
-    base_store.add_commit(new_sample)
+    base_store.session.add(new_sample)
+    base_store.session.commit()
 
     # THEN it should be stored in the database
     assert sample_query.first() == new_sample
@@ -96,7 +99,8 @@ def test_add_pool(rml_pool_store: Store):
         application_version=app_version,
     )
 
-    rml_pool_store.add_commit(new_pool)
+    rml_pool_store.session.add(new_pool)
+    rml_pool_store.session.commit()
     # THEN the new pool should have no_invoice = False
     pool = rml_pool_store.get_pool_by_entry_id(entry_id=2)
     assert pool.no_invoice is False

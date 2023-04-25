@@ -101,7 +101,7 @@ def fixture_rml_pool_store(
         invoice_address="skolgatan 15",
         invoice_reference="abc",
     )
-    store.add_commit(new_customer)
+    store.session.add(new_customer)
 
     application = store.add_application(
         tag="RMLP05R800",
@@ -112,7 +112,7 @@ def fixture_rml_pool_store(
         sequencing_depth=0,
         target_reads=800,
     )
-    store.add_commit(application)
+    store.session.add(application)
 
     app_version = store.add_application_version(
         application=application,
@@ -125,7 +125,7 @@ def fixture_rml_pool_store(
             PriorityTerms.RESEARCH: 12,
         },
     )
-    store.add_commit(app_version)
+    store.session.add(app_version)
 
     new_pool = store.add_pool(
         customer=new_customer,
@@ -134,13 +134,13 @@ def fixture_rml_pool_store(
         ordered=dt.datetime.now(),
         application_version=app_version,
     )
-    store.add_commit(new_pool)
+    store.session.add(new_pool)
     new_case = helpers.add_case(
         store=store,
         internal_id=case_id,
         name=PoolSubmitter.create_case_name(ticket=ticket_id, pool_name="Test"),
     )
-    store.add_commit(new_case)
+    store.session.add(new_case)
 
     new_sample = helpers.add_sample(
         store=store,
@@ -150,7 +150,8 @@ def fixture_rml_pool_store(
         customer_id=new_customer.id,
     )
     new_sample.application_version = app_version
-    store.add_commit(new_sample)
+    store.session.add(new_sample)
+    store.session.commit()
 
     helpers.add_relationship(
         store=store,

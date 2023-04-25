@@ -1,5 +1,6 @@
 """RNAFUSION upload API."""
 
+import datetime as dt
 import logging
 
 import click
@@ -29,3 +30,8 @@ class RnafusionUploadAPI(UploadAPI):
 
         if DataDelivery.SCOUT in case.data_delivery:
             ctx.invoke(scout, case_id=case.internal_id, re_upload=restart)
+
+        LOG.info(
+            f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
+        )
+        self.update_uploaded_at(analysis)

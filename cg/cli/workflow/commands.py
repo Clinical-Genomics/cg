@@ -117,7 +117,7 @@ def store(context: CGConfig, case_id: str, dry_run: bool):
         analysis_api.set_statusdb_action(case_id=case_id, action=None)
     except Exception as exception_object:
         housekeeper_api.rollback()
-        status_db.rollback()
+        status_db.session.rollback()
         LOG.error("Error storing deliverables for case %s - %s", case_id, exception_object)
         raise
 

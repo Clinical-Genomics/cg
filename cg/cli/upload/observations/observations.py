@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional, Union
 
 import click
-from alchy import Query
+from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
 from pydantic import ValidationError
 

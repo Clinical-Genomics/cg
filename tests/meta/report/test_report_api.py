@@ -9,7 +9,7 @@ from cg.models.report.sample import SampleModel, ApplicationModel, MethodsModel,
 
 from cg.models.mip.mip_analysis import MipAnalysis
 
-from cg.store.models import Analysis
+from cg.store.models import Analysis, FamilySample
 
 from cg.constants import REPORT_GENDER
 from cg.exc import DeliveryReportError
@@ -220,7 +220,7 @@ def test_get_samples_data(
 
     # GIVEN an expected output
     expected_lims_data: dict = lims_samples[0]
-    expected_sample_data: models.FamilySample = case_samples_data[0]
+    expected_sample_data: FamilySample = case_samples_data[0]
 
     # GIVEN a mip analysis mock metadata
     mip_metadata: MipAnalysis = mip_analysis_api.get_latest_metadata(case_mip_dna.internal_id)

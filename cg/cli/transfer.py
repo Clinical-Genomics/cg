@@ -50,7 +50,8 @@ def flow_cell(context: CGConfig, flow_cell_dir: str, flow_cell_id: str, store: b
     new_record: Flowcell = transfer_api.transfer(
         flow_cell_dir=flow_cell_dir, flow_cell_id=flow_cell_id, store=store
     )
-    status_db.add_commit(new_record)
+    status_db.session.add(new_record)
+    status_db.session.commit()
     LOG.info(f"flow cell added: {new_record}")
 
 
