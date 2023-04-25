@@ -48,6 +48,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
+        self.compute_env: str = config.rnafusion.compute_env
+        self.revision: str = config.rnafusion.revision
 
     @property
     def root(self) -> str:
@@ -185,13 +187,17 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             ).as_posix(),
             "genomes_base": self.get_references_path().as_posix(),
             "trim": RnafusionDefaults.TRIM,
+            "fastp_trim": RnafusionDefaults.FASTP_TRIM,
+            "trim_tail": RnafusionDefaults.TRIM_TAIL,
             "fusioninspector_filter": RnafusionDefaults.FUSIONINSPECTOR_FILTER,
+            "fusionreport_filter": RnafusionDefaults.FUSIONREPORT_FILTER,
             "all": RnafusionDefaults.ALL,
             "pizzly": RnafusionDefaults.PIZZLY,
             "squid": RnafusionDefaults.SQUID,
             "starfusion": RnafusionDefaults.STARFUSION,
             "fusioncatcher": RnafusionDefaults.FUSIONCATCHER,
             "arriba": RnafusionDefaults.ARRIBA,
+            "cram": RnafusionDefaults.CRAM,
             "priority": self.account,
             "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
         }
