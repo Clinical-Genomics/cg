@@ -248,7 +248,7 @@ def sample(
             setattr(sample, new_key, new_value)
             _update_comment(_generate_comment(new_key, old_value, new_value), sample)
 
-        status_db.commit()
+        status_db.session.commit()
 
     if not skip_lims:
         for key, value in kwargs:
@@ -296,7 +296,7 @@ def flowcell(context: CGConfig, flow_cell_name: str, status: Optional[str]):
     prev_status: str = flowcell_obj.status
     flowcell_obj.status = status
 
-    status_db.commit()
+    status_db.session.commit()
     LOG.info(f"{flow_cell_name} set: {prev_status} -> {status}")
 
 

@@ -193,7 +193,7 @@ def test_store_available(
     # Ensure case was successfully picked up by start-available and status set to running
     result = cli_runner.invoke(start_available, ["--dry-run"], obj=rnafusion_context)
     rnafusion_context.status_db.get_case_by_internal_id(case_id_success).action = "running"
-    rnafusion_context.status_db.commit()
+    rnafusion_context.status_db.session.commit()
 
     # THEN command exits with 0
     assert result.exit_code == EXIT_SUCCESS

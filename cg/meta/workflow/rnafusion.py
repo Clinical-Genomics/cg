@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
     RNAFUSION_SAMPLESHEET_HEADERS,
@@ -48,6 +48,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
+        self.compute_env: str = config.rnafusion.compute_env
+        self.revision: str = config.rnafusion.revision
 
     @property
     def root(self) -> str:
@@ -73,6 +75,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         if profile:
             return profile
         return self.profile
+
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for rnafusion."""
+        return WorkflowManager.Tower.value
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
@@ -181,13 +187,17 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             ).as_posix(),
             "genomes_base": self.get_references_path().as_posix(),
             "trim": RnafusionDefaults.TRIM,
+            "fastp_trim": RnafusionDefaults.FASTP_TRIM,
+            "trim_tail": RnafusionDefaults.TRIM_TAIL,
             "fusioninspector_filter": RnafusionDefaults.FUSIONINSPECTOR_FILTER,
+            "fusionreport_filter": RnafusionDefaults.FUSIONREPORT_FILTER,
             "all": RnafusionDefaults.ALL,
             "pizzly": RnafusionDefaults.PIZZLY,
             "squid": RnafusionDefaults.SQUID,
             "starfusion": RnafusionDefaults.STARFUSION,
             "fusioncatcher": RnafusionDefaults.FUSIONCATCHER,
             "arriba": RnafusionDefaults.ARRIBA,
+            "cram": RnafusionDefaults.CRAM,
             "priority": self.account,
             "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
         }

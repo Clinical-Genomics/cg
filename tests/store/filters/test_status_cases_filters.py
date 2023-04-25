@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
 from datetime import datetime
 

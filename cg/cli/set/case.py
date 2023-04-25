@@ -80,7 +80,7 @@ def case(
     if priority:
         update_priority(case=case, priority=priority)
 
-    status_db.commit()
+    status_db.session.commit()
 
 
 def abort_on_empty_options(options: List[str]) -> None:

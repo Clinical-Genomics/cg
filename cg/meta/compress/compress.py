@@ -209,9 +209,8 @@ class CompressAPI:
     def delete_fastq_housekeeper(self, hk_fastq_first: File, hk_fastq_second: File) -> None:
         """Delete fastq files from Housekeeper."""
         LOG.info("Deleting FASTQ files from Housekeeper")
-        hk_fastq_first.delete()
-        hk_fastq_second.delete()
-        self.hk_api.commit()
+        self.hk_api.delete_file(file_id=hk_fastq_first.id)
+        self.hk_api.delete_file(file_id=hk_fastq_second.id)
         LOG.debug("FASTQ files deleted from Housekeeper")
 
     # Methods to update housekeeper
