@@ -23,10 +23,10 @@ class CoreHandler(
     """Aggregating class for the store api handlers."""
 
     def __init__(self, session):
-        DeleteDataHandler.__init__(self, session)
-        FindBasicDataHandler.__init__(self, session)
-        FindBusinessDataHandler.__init__(self, session)
-        StatusHandler.__init__(self, session)
+        DeleteDataHandler(session=session)
+        FindBasicDataHandler(session=session)
+        FindBusinessDataHandler(session=session)
+        StatusHandler(session=session)
 
 
 class Store(CoreHandler):
@@ -37,7 +37,7 @@ class Store(CoreHandler):
         self.engine = create_engine(uri)
         session_factory = sessionmaker(bind=self.engine)
         self.session = session_factory()
-        super(Store, self).__init__(self.session)
+        super().__init__(session=self.session)
 
     def create_all(self):
         """Create all tables in the database."""

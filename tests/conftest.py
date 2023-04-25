@@ -4,7 +4,7 @@ import http
 import logging
 import os
 import shutil
-from datetime import datetime, timedelta, MAXYEAR
+from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
@@ -17,7 +17,7 @@ from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FileExtensions, Pipeline
-from cg.constants.constants import FileFormat, CaseActions
+from cg.constants.constants import CaseActions, FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
@@ -1674,12 +1674,14 @@ def fixture_context_config(
         },
         "rnafusion": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "compute_env": "nf_tower_compute_env",
             "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
             "conda_env": "S_RNAFUSION",
             "launch_directory": Path("path", "to", "launchdir").as_posix(),
             "pipeline_path": Path("pipeline", "path").as_posix(),
             "profile": "myprofile",
             "references": Path("path", "to", "references").as_posix(),
+            "revision": "2.2.0",
             "root": str(rnafusion_dir),
             "slurm": {
                 "account": "development",
