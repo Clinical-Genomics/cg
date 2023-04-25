@@ -62,14 +62,14 @@ class RunParameters:
 
     @property
     def run_type(self) -> Literal["wgs", "fluffy"]:
-        """Fetch what type of run the parameters is"""
+        """Return the run type of the sequencing."""
         if self.index_length == 8:
             return "fluffy"
         return "wgs"
 
     @staticmethod
     def node_not_found(node: Optional[ElementTree.Element], name: str) -> None:
-        """Raise exception if node if not found"""
+        """Raise exception if the given node is not found."""
         if node is None:
             message = f"Could not determine {name}"
             LOG.warning(message)
@@ -81,36 +81,36 @@ class RunParameters:
         return int(xml_node.text)
 
     def index_read_one(self) -> int:
-        """Get the value for index read one"""
+        """Get the value for index read one."""
         node_name = "./IndexRead1NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of index one")
 
     def index_read_two(self) -> int:
-        """Get the value for index read one"""
+        """Get the value for index read one."""
         node_name = "./IndexRead2NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of index two")
 
     def read_one_nr_cycles(self) -> int:
-        """Get the nr of cycles for read one"""
+        """Get the nr of cycles for read one."""
         node_name = "./Read1NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of reads one")
 
     def read_two_nr_cycles(self) -> int:
-        """Get the nr of cycles for read one"""
+        """Get the nr of cycles for read one."""
         node_name = "./Read2NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
 
     def base_mask(self) -> str:
-        """create the bcl2fastq basemask for novaseq flowcells
+        """Create the bcl2fastq basemask for novaseq flowcells.
 
         Basemask is used in this comma format as an argument to bcl2fastq.
-        When creating the unaligned path the commas are stripped
+        When creating the unaligned path the commas are stripped.
         """
         return (
             f"Y{self.read_one_nr_cycles()},"
             f"I{self.index_read_one()},"
-            f"I{self.read_two_nr_cycles()},"
-            f"Y{self.index_read_two()}"
+            f"I{self.index_read_two()}"
+            f"Y{self.read_two_nr_cycles()},"
         )
 
     def __str__(self):
