@@ -12,11 +12,15 @@ class RnafusionDefaults:
     """Rnafusion default parameters"""
 
     STRANDEDNESS: str = "reverse"
-    TRIM: bool = True
-    FUSIONINSPECTOR_FILTER: bool = True
-    ALL: bool = True
-    PIZZLY: bool = True
-    SQUID: bool = True
+    TRIM: bool = False
+    FASTP_TRIM: bool = True
+    TRIM_TAIL: int = 50
+    FUSIONREPORT_FILTER: int = 1
+    FUSIONINSPECTOR_FILTER: bool = False
+    ALL: bool = False
+    PIZZLY: bool = False
+    SQUID: bool = False
     STARFUSION: bool = True
     FUSIONCATCHER: bool = True
     ARRIBA: bool = True
+    CRAM: str = "arriba,starfusion"
