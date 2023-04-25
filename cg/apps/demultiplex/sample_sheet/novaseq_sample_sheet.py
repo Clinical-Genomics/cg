@@ -133,7 +133,7 @@ class SampleSheetCreator:
         return "\n".join(sample_sheet)
 
     def construct_sample_sheet(self) -> str:
-        """Construct the sample sheet"""
+        """Construct the sample sheet."""
         LOG.info("Constructing sample sheet for %s", self.flowcell_id)
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.run_type == "wgs":
