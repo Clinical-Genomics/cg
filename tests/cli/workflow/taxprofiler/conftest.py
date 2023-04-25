@@ -7,19 +7,21 @@ from typing import List
 
 import pytest
 
-#from cg.apps.hermes.hermes_api import HermesApi
-#from cg.apps.housekeeper.hk import HousekeeperAPI
+# from cg.apps.hermes.hermes_api import HermesApi
+# from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-#from cg.io.controller import WriteFile, WriteStream
+
+# from cg.io.controller import WriteFile, WriteStream
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
-#from cg.store import Store
-#from cg.store.models import Family, Sample
-#from tests.mocks.limsmock import MockLimsAPI
-#from tests.mocks.process_mock import ProcessMock
-#from tests.mocks.tb_mock import MockTB
-#from tests.store_helpers import StoreHelpers
+
+# from cg.store import Store
+# from cg.store.models import Family, Sample
+# from tests.mocks.limsmock import MockLimsAPI
+# from tests.mocks.process_mock import ProcessMock
+# from tests.mocks.tb_mock import MockTB
+# from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function", name="taxprofiler_context")

@@ -168,8 +168,9 @@ class RnafusionConfig(CommonAppConfig):
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    #root: str
+    # root: str
     pass
+
 
 class CGStatsConfig(BaseModel):
     binary_path: str

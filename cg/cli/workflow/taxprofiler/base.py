@@ -8,12 +8,15 @@ from pydantic import ValidationError
 from cg.cli.workflow.commands import link
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import MetaApis
-#from cg.exc import CgError, DecompressionNeededError
+
+# from cg.exc import CgError, DecompressionNeededError
 from cg.meta.workflow.analysis import AnalysisAPI
-#from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+
+# from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
-#from cg.store import Store
+
+# from cg.store import Store
 
 LOG = logging.getLogger(__name__)
 

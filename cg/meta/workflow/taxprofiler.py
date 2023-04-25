@@ -28,6 +28,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         super().__init__(config=config, pipeline=pipeline)
         # self.root_dir: str = config.taxprofiler.root
 
-    #@property
-    #def root(self) -> str:
+    # @property
+    # def root(self) -> str:
     #    return self.root_dir
