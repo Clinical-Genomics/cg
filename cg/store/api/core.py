@@ -1,6 +1,6 @@
 import logging
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from cg.store.models import Model
 from cg.store.api.delete import DeleteDataHandler
@@ -9,6 +9,7 @@ from cg.store.api.find_business_data import FindBusinessDataHandler
 from .add import AddHandler
 from .find_basic_data import FindBasicDataHandler
 from .status import StatusHandler
+
 
 LOG = logging.getLogger(__name__)
 
@@ -35,8 +36,7 @@ class Store(CoreHandler):
     def __init__(self, uri):
         self.uri = uri
         self.engine = create_engine(uri)
-        session_factory = sessionmaker(bind=self.engine)
-        self.session = session_factory()
+        self.session = scoped_session(sessionmaker(bind=self.engine))
         super().__init__(session=self.session)
 
     def create_all(self):

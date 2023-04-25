@@ -55,6 +55,10 @@ def _configure_extensions(app: Flask):
         ext.osticket.init_app(app)
     ext.admin.init_app(app, index_view=AdminIndexView(endpoint="admin"))
 
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        ext.db.session.remove()
+
 
 def _initialize_logging(app):
     coloredlogs.install(level="DEBUG" if app.debug else "INFO")
