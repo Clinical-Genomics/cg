@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import http
 import logging
 import json
@@ -5,6 +6,7 @@ import tempfile
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from cachetools import TTLCache
 
 import requests
 from sqlalchemy.exc import IntegrityError
@@ -18,18 +20,57 @@ from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis
+from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis, User
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
-from sqlalchemy.orm import Query
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
 BLUEPRINT = Blueprint("api", __name__, url_prefix="/api/v1")
+
+cache = TTLCache(maxsize=1, ttl=3600)
+cache_certificates_key = "certs"
+cache[cache_certificates_key] = None
+
+
+def get_certificate_ttl(response_data) -> int:
+    """Extract time to live in seconds for certificate from response headers."""
+    expires_header = response_data.headers.get("Expires")
+    expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
+    ttl = int((expires - datetime.utcnow()).total_seconds())
+
+    return ttl
+
+
+def fetch_and_cache_google_oauth2_certificates():
+    """Fetch and cache Google OAuth2 certificates."""
+    global cache
+
+    url = "https://www.googleapis.com/oauth2/v1/certs"
+    response = requests.get(url)
+    response.raise_for_status()
+
+    certs = response.json()
+    ttl = get_certificate_ttl(response_data=response)
+
+    cache = TTLCache(maxsize=1, ttl=ttl)
+    cache[cache_certificates_key] = certs
+
+    return certs
+
+
+def get_google_oauth2_certificates():
+    """Get Google OAuth2 certificates from cache or fetch and cache them."""
+    certs = cache.get(cache_certificates_key)
+
+    if not certs:
+        certs = fetch_and_cache_google_oauth2_certificates()
+
+    return certs
 
 
 def is_public(route_function):
@@ -68,9 +109,7 @@ def before_request():
 
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
-        user_data = jwt.decode(
-            jwt_token, certs=requests.get("https://www.googleapis.com/oauth2/v1/certs").json()
-        )
+        user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificates())
     except ValueError:
         return abort(
             make_response(
@@ -78,13 +117,13 @@ def before_request():
             )
         )
 
-    user = db.get_user_by_email(user_data["email"])
+    user: User = db.get_user_by_email(user_data["email"])
     if user is None or not user.order_portal_login:
         message = f"{user_data['email']} doesn't have access"
         LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
-    g.current_user = user
+    g.current_user: User = user
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
@@ -145,7 +184,7 @@ def submit_order(order_type):
 @BLUEPRINT.route("/cases")
 def parse_cases():
     """Fetch cases."""
-    cases: List[Family] = db.cases(days=31)
+    cases: List[Family] = db.get_cases_created_within_days(days=31)
     return jsonify(cases=cases, total=len(cases))
 
 
@@ -317,9 +356,9 @@ def parse_pool(pool_id):
 @BLUEPRINT.route("/flowcells")
 def parse_flow_cells() -> Any:
     """Return flow cells."""
-    flow_cells: List[Flowcell] = db.get_flow_cell_by_enquiry_and_status(
+    flow_cells: List[Flowcell] = db.get_flow_cell_by_name_pattern_and_status(
         flow_cell_statuses=[request.args.get("status")],
-        flow_cell_id_enquiry=request.args.get("enquiry"),
+        name_pattern=request.args.get("enquiry"),
     )
     parsed_flow_cells: List[Dict] = [flow_cell.to_dict() for flow_cell in flow_cells[:50]]
     return jsonify(flowcells=parsed_flow_cells, total=len(flow_cells))
@@ -328,7 +367,7 @@ def parse_flow_cells() -> Any:
 @BLUEPRINT.route("/flowcells/<flowcell_id>")
 def parse_flow_cell(flowcell_id):
     """Return a single flowcell."""
-    flow_cell: Flowcell = db.get_flow_cell(flowcell_id)
+    flow_cell: Flowcell = db.get_flow_cell_by_name(flow_cell_name=flowcell_id)
     if flow_cell is None:
         return abort(http.HTTPStatus.NOT_FOUND)
     return jsonify(**flow_cell.to_dict(samples=True))
@@ -369,12 +408,16 @@ def parse_options():
     source_groups = {"metagenome": METAGENOME_SOURCES, "analysis": ANALYSIS_SOURCES}
 
     return jsonify(
+        applications=app_tag_groups,
+        beds=[bed.name for bed in db.get_active_beds()],
         customers=[
-            {"text": f"{customer.name} ({customer.internal_id})", "value": customer.internal_id}
+            {
+                "text": f"{customer.name} ({customer.internal_id})",
+                "value": customer.internal_id,
+                "isTrusted": customer.is_trusted,
+            }
             for customer in customers
         ],
-        applications=app_tag_groups,
-        panels=[panel.abbrev for panel in db.get_panels()],
         organisms=[
             {
                 "name": organism.name,
@@ -384,8 +427,8 @@ def parse_options():
             }
             for organism in db.get_all_organisms()
         ],
+        panels=[panel.abbrev for panel in db.get_panels()],
         sources=source_groups,
-        beds=[bed.name for bed in db.get_active_beds()],
     )
 
 

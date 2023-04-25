@@ -21,7 +21,8 @@ def test_application_version_has_application(store: Store, helpers: StoreHelpers
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):
     # GIVEN a store with a Microbial sample
     sample_obj = helpers.add_microbial_sample(microbial_store)
-    microbial_store.add_commit(sample_obj)
+    microbial_store.session.add(sample_obj)
+    microbial_store.session.commit()
     assert sample_obj
 
     # WHEN running to dict on that sample
@@ -102,8 +103,9 @@ def test_multiple_collaborations(base_store, customer_id):
         customer_internal_id=customer_id
     )
     collaboration.customers.extend([prod_customer, new_customer])
-    base_store.add_commit(new_customer, collaboration)
-    base_store.refresh(collaboration)
+    base_store.session.add_all([new_customer, collaboration])
+    base_store.session.commit()
+    base_store.session.refresh(collaboration)
     # WHEN calling the collaborators property
     collaborators = prod_customer.collaborators
     # THEN all customers in both collaborations should be returned

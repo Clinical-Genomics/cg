@@ -2,9 +2,10 @@ import datetime as dt
 import re
 from typing import List, Optional, Set, Dict
 
-import alchy
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.util import deprecated
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from cg.constants import (
     CASE_ACTIONS,
@@ -19,7 +20,18 @@ from cg.constants import (
 
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
 
-Model = alchy.make_declarative_base(Base=alchy.ModelBase)
+Model = declarative_base()
+
+
+def to_dict(model_instance):
+    if hasattr(model_instance, "__table__"):
+        return {
+            column.name: getattr(model_instance, column.name)
+            for column in model_instance.__table__.columns
+            if not isinstance(getattr(model_instance, column.name), InstrumentedAttribute)
+        }
+
+
 flowcell_sample = Table(
     "flowcell_sample",
     Model.metadata,
@@ -76,6 +88,8 @@ class PriorityMixin:
 
 
 class Application(Model):
+    __tablename__ = "application"
+
     id = Column(types.Integer, primary_key=True)
     tag = Column(types.String(32), unique=True, nullable=False)
     prep_category = Column(types.Enum(*PREP_CATEGORIES), nullable=False)
@@ -86,7 +100,7 @@ class Application(Model):
     turnaround_time = Column(types.Integer)
     minimum_order = Column(types.Integer, default=1)
     sequencing_depth = Column(types.Integer)
-    min_sequencing_depth = Column(types.Integer)
+    min_sequencing_depth = Column(types.Integer, default=0, nullable=False)
     target_reads = Column(types.BigInteger, default=0)
     percent_reads_guaranteed = Column(types.Integer, nullable=False)
     sample_amount = Column(types.Integer)
@@ -127,8 +141,12 @@ class Application(Model):
             else PrepCategory.WHOLE_EXOME_SEQUENCING.value
         )
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class ApplicationVersion(Model):
+    __tablename__ = "application_version"
     __table_args__ = (UniqueConstraint("application_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
@@ -151,13 +169,15 @@ class ApplicationVersion(Model):
 
     def to_dict(self, application: bool = True):
         """Represent as dictionary"""
-        data = super(ApplicationVersion, self).to_dict()
+        data = to_dict(model_instance=self)
         if application:
             data["application"] = self.application.to_dict()
         return data
 
 
 class Analysis(Model):
+    __tablename__ = "analysis"
+
     id = Column(types.Integer, primary_key=True)
     pipeline = Column(types.Enum(*list(Pipeline)))
     pipeline_version = Column(types.String(32))
@@ -179,7 +199,7 @@ class Analysis(Model):
 
     def to_dict(self, family: bool = True):
         """Represent as dictionary"""
-        data = super(Analysis, self).to_dict()
+        data = to_dict(model_instance=self)
         if family:
             data["family"] = self.family.to_dict()
         return data
@@ -188,6 +208,7 @@ class Analysis(Model):
 class Bed(Model):
     """Model for bed target captures"""
 
+    __tablename__ = "bed"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
     comment = Column(types.Text)
@@ -200,10 +221,14 @@ class Bed(Model):
     def __str__(self) -> str:
         return self.name
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class BedVersion(Model):
     """Model for bed target captures versions"""
 
+    __tablename__ = "bed_version"
     __table_args__ = (UniqueConstraint("bed_id", "version", name="_app_version_uc"),)
 
     id = Column(types.Integer, primary_key=True)
@@ -224,13 +249,14 @@ class BedVersion(Model):
 
     def to_dict(self, bed: bool = True):
         """Represent as dictionary"""
-        data = super(BedVersion, self).to_dict()
+        data = to_dict(model_instance=self)
         if bed:
             data["bed"] = self.bed.to_dict()
         return data
 
 
 class Customer(Model):
+    __tablename__ = "customer"
     agreement_date = Column(types.DateTime)
     agreement_registration = Column(types.String(32))
     comment = Column(types.Text)
@@ -238,6 +264,7 @@ class Customer(Model):
     internal_id = Column(types.String(32), unique=True, nullable=False)
     invoice_address = Column(types.Text, nullable=False)
     invoice_reference = Column(types.String(32), nullable=False)
+    is_trusted = Column(types.Boolean, nullable=False, default=False)
     loqus_upload = Column(types.Boolean, nullable=False, default=False)
     name = Column(types.String(128), nullable=False)
     organisation_number = Column(types.String(32))
@@ -270,8 +297,12 @@ class Customer(Model):
         customers.add(self)
         return customers
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class Collaboration(Model):
+    __tablename__ = "collaboration"
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), unique=True, nullable=False)
     name = Column(types.String(128), nullable=False)
@@ -289,8 +320,12 @@ class Collaboration(Model):
             "internal_id": self.internal_id,
         }
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class Delivery(Model):
+    __tablename__ = "delivery"
     id = Column(types.Integer, primary_key=True)
     delivered_at = Column(types.DateTime)
     removed_at = Column(types.DateTime)
@@ -299,8 +334,12 @@ class Delivery(Model):
     pool_id = Column(ForeignKey("pool.id", ondelete="CASCADE"))
     comment = Column(types.Text)
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class Family(Model, PriorityMixin):
+    __tablename__ = "family"
     __table_args__ = (UniqueConstraint("customer_id", "name", name="_customer_name_uc"),)
 
     action = Column(types.Enum(*CASE_ACTIONS))
@@ -417,7 +456,7 @@ class Family(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, analyses: bool = False) -> dict:
         """Represent as dictionary."""
-        data = super(Family, self).to_dict()
+        data = to_dict(model_instance=self)
         data["panels"] = self.panels
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
@@ -431,6 +470,7 @@ class Family(Model, PriorityMixin):
 
 
 class FamilySample(Model):
+    __tablename__ = "family_sample"
     __table_args__ = (UniqueConstraint("family_id", "sample_id", name="_family_sample_uc"),)
 
     id = Column(types.Integer, primary_key=True)
@@ -451,7 +491,7 @@ class FamilySample(Model):
 
     def to_dict(self, parents: bool = False, samples: bool = False, family: bool = False) -> dict:
         """Represent as dictionary"""
-        data = super(FamilySample, self).to_dict()
+        data = to_dict(model_instance=self)
         if samples:
             data["sample"] = self.sample.to_dict()
             data["mother"] = self.mother.to_dict() if self.mother else None
@@ -468,6 +508,7 @@ class FamilySample(Model):
 
 
 class Flowcell(Model):
+    __tablename__ = "flowcell"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(32), unique=True, nullable=False)
     sequencer_type = Column(types.Enum("hiseqga", "hiseqx", "novaseq"))
@@ -484,13 +525,14 @@ class Flowcell(Model):
 
     def to_dict(self, samples: bool = False):
         """Represent as dictionary"""
-        data = super(Flowcell, self).to_dict()
+        data = to_dict(model_instance=Flowcell)
         if samples:
             data["samples"] = [sample.to_dict() for sample in self.samples]
         return data
 
 
 class Organism(Model):
+    __tablename__ = "organism"
     id = Column(types.Integer, primary_key=True)
     internal_id = Column(types.String(32), nullable=False, unique=True)
     name = Column(types.String(255), nullable=False, unique=True)
@@ -505,10 +547,11 @@ class Organism(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        return super(Organism, self).to_dict()
+        return to_dict(model_instance=self)
 
 
 class Panel(Model):
+    __tablename__ = "panel"
     abbrev = Column(types.String(32), unique=True)
     current_version = Column(types.Float, nullable=False)
     customer_id = Column(ForeignKey("customer.id", ondelete="CASCADE"), nullable=False)
@@ -521,8 +564,12 @@ class Panel(Model):
     def __str__(self):
         return f"{self.abbrev} ({self.current_version})"
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class Pool(Model):
+    __tablename__ = "pool"
     __table_args__ = (UniqueConstraint("order", "name", name="_order_name_uc"),)
 
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
@@ -544,8 +591,12 @@ class Pool(Model):
     received_at = Column(types.DateTime)
     ticket = Column(types.String(32))
 
+    def to_dict(self):
+        return to_dict(model_instance=self)
+
 
 class Sample(Model, PriorityMixin):
+    __tablename__ = "sample"
     age_at_sampling = Column(types.FLOAT)
     application_version_id = Column(ForeignKey("application_version.id"), nullable=False)
     application_version = orm.relationship(
@@ -646,7 +697,7 @@ class Sample(Model, PriorityMixin):
 
     def to_dict(self, links: bool = False, flowcells: bool = False) -> dict:
         """Represent as dictionary"""
-        data = super(Sample, self).to_dict()
+        data = to_dict(model_instance=self)
         data["priority"] = self.priority_human
         data["customer"] = self.customer.to_dict()
         data["application_version"] = self.application_version.to_dict()
@@ -659,6 +710,7 @@ class Sample(Model, PriorityMixin):
 
 
 class Invoice(Model):
+    __tablename__ = "invoice"
     id = Column(types.Integer, primary_key=True)
     customer_id = Column(ForeignKey("customer.id"), nullable=False)
     customer = orm.relationship(Customer, foreign_keys=[customer_id])
@@ -680,10 +732,11 @@ class Invoice(Model):
 
     def to_dict(self) -> dict:
         """Represent as dictionary"""
-        return super(Invoice, self).to_dict()
+        return to_dict(model_instance=self)
 
 
 class User(Model):
+    __tablename__ = "user"
     id = Column(types.Integer, primary_key=True)
     name = Column(types.String(128), nullable=False)
     email = Column(types.String(128), unique=True, nullable=False)
@@ -693,10 +746,10 @@ class User(Model):
     customers = orm.relationship("Customer", secondary=customer_user, backref="users")
 
     def to_dict(self) -> dict:
-        """Represent as dictionary"""
-        data = super(User, self).to_dict()
-        data["customers"] = [record.to_dict() for record in self.customers]
-        return data
+        """Represent as dictionary."""
+        dict_representation: dict = to_dict(model_instance=self)
+        dict_representation["customers"] = [customer.to_dict() for customer in self.customers]
+        return dict_representation
 
     def __str__(self) -> str:
         return self.name

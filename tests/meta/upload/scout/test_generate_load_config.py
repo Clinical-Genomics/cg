@@ -131,7 +131,7 @@ def test_generate_config_adds_sample_paths(
 
 def test_generate_config_adds_case_paths(
     sample_id: str,
-    mip_dna_analysis: Store.Analysis,
+    mip_dna_analysis: Analysis,
     upload_mip_analysis_scout_api: UploadScoutAPI,
 ):
     """Test that generate config adds case file paths"""

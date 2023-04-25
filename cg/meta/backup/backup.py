@@ -50,9 +50,9 @@ class BackupAPI:
 
     def check_processing(self) -> bool:
         """Check if the processing queue for flow cells is not full."""
-        processing_flow_cells_count: int = self.status.get_flow_cells_by_statuses(
-            flow_cell_statuses=[FlowCellStatus.PROCESSING]
-        ).count()
+        processing_flow_cells_count: int = len(
+            self.status.get_flow_cells_by_statuses(flow_cell_statuses=[FlowCellStatus.PROCESSING])
+        )
         LOG.debug(f"Processing flow cells: {processing_flow_cells_count}")
         return processing_flow_cells_count < MAX_PROCESSING_FLOW_CELLS
 
@@ -60,8 +60,8 @@ class BackupAPI:
         """Get the first flow cell from the requested queue."""
         flow_cell: Optional[Flowcell] = self.status.get_flow_cells_by_statuses(
             flow_cell_statuses=[FlowCellStatus.REQUESTED]
-        ).first()
-        return flow_cell or None
+        )
+        return flow_cell[0] if flow_cell else None
 
     def fetch_flow_cell(self, flow_cell: Optional[Flowcell] = None) -> Optional[float]:
         """Start fetching a flow cell from backup if possible.
@@ -82,7 +82,7 @@ class BackupAPI:
 
         flow_cell.status: FlowCellStatus = FlowCellStatus.PROCESSING
         if not self.dry_run:
-            self.status.commit()
+            self.status.session.commit()
             LOG.info(f"{flow_cell.name}: retrieving from PDC")
 
         try:
@@ -130,7 +130,7 @@ class BackupAPI:
             LOG.error(f"Decryption failed: {error.stderr}")
             if not self.dry_run:
                 flow_cell.status: str = FlowCellStatus.REQUESTED
-                self.status.commit()
+                self.status.session.commit()
             raise error
 
         return get_elapsed_time(start_time=start_time)
@@ -218,7 +218,7 @@ class BackupAPI:
                 LOG.error(f"{flow_cell.name}: key retrieval failed")
                 if not self.dry_run:
                     flow_cell.status = FlowCellStatus.REQUESTED
-                    self.status.commit()
+                    self.status.session.commit()
                 raise error
 
     def retrieve_archived_flow_cell(
@@ -243,12 +243,12 @@ class BackupAPI:
                 LOG.error(f"{flow_cell.name}: run directory retrieval failed")
                 if not self.dry_run:
                     flow_cell.status = FlowCellStatus.REQUESTED
-                    self.status.commit()
+                    self.status.session.commit()
                 raise error
 
     def _set_flow_cell_status_to_retrieved(self, flow_cell: Flowcell):
         flow_cell.status = FlowCellStatus.RETRIEVED
-        self.status.commit()
+        self.status.session.commit()
         LOG.info(f"Status for flow cell {flow_cell.name} set to {flow_cell.status}")
 
     def query_pdc_for_flow_cell(self, flow_cell_id) -> List[str]:

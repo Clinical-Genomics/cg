@@ -264,7 +264,7 @@ def upload_analysis_vogue(context: CGConfig, unique_id: str, dry_run: bool) -> N
     )
     analysis_api.vogue_api.load_bioinfo_sample(load_bioinfo_inputs=vogue_load_args)
     case_obj.analyses[0].uploaded_at = dt.datetime.now()
-    analysis_api.status_db.commit()
+    analysis_api.status_db.session.commit()
     LOG.info("Successfully uploaded latest analysis data for case %s to Vogue!", unique_id)
 
 

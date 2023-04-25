@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Iterable, List, Optional, Set, Tuple, Dict
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from housekeeper.include import checksum as hk_checksum
 from housekeeper.include import include_version
 from housekeeper.store import Store, models
@@ -88,8 +88,8 @@ class HousekeeperAPI:
             Path(file_obj.full_path).unlink()
 
         LOG.info(f"Deleting file {file_id} from housekeeper")
-        file_obj.delete()
-        self._store.commit()
+        self._store.session.delete(file_obj)
+        self.commit()
 
         return file_obj
 
@@ -155,7 +155,7 @@ class HousekeeperAPI:
 
     def rollback(self):
         """Wrap method in Housekeeper Store."""
-        return self._store.rollback()
+        return self._store.session.rollback()
 
     def session_no_autoflush(self):
         """Wrap property in Housekeeper Store."""
@@ -240,7 +240,8 @@ class HousekeeperAPI:
         """Gets the latest version of a bundle."""
         LOG.info(f"Fetch latest version from bundle {bundle}")
         return (
-            self._store.Version.query.join(Version.bundle)
+            self._store._get_query(table=Version)
+            .join(Version.bundle)
             .filter(Bundle.name == bundle)
             .order_by(models.Version.created_at.desc())
             .first()
@@ -306,13 +307,14 @@ class HousekeeperAPI:
         include_version(self.get_root_dir(), version_obj)
         version_obj.included_at = dt.datetime.now()
 
-    def add_commit(self, *args, **kwargs):
+    def add_commit(self, obj):
         """Wrap method in Housekeeper Store."""
-        return self._store.add_commit(*args, **kwargs)
+        self._store.session.add(obj)
+        return self._store.session.commit()
 
     def commit(self):
         """Wrap method in Housekeeper Store."""
-        return self._store.commit()
+        return self._store.session.commit()
 
     def get_root_dir(self) -> str:
         """Returns the root dir of Housekeeper."""

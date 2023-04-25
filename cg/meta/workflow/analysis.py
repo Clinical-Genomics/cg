@@ -11,7 +11,7 @@ from housekeeper.store.models import Bundle, Version
 
 from cg.apps.environ import environ_email
 from cg.constants import CASE_ACTIONS, EXIT_FAIL, EXIT_SUCCESS, Pipeline, Priority
-from cg.constants.constants import AnalysisType
+from cg.constants.constants import AnalysisType, WorkflowManager
 from cg.constants.priority import PRIORITY_TO_SLURM_QOS
 from cg.exc import BundleAlreadyAddedError, CgDataError, CgError
 from cg.meta.meta import MetaAPI
@@ -100,6 +100,10 @@ class AnalysisAPI(MetaAPI):
         priority: int = self.get_priority_for_case(case_id=case_id)
         return PRIORITY_TO_SLURM_QOS[priority]
 
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for a given pipeline."""
+        return WorkflowManager.Slurm.value
+
     def get_case_path(self, case_id: str) -> Union[List[Path], Path]:
         """Path to case working directory."""
         raise NotImplementedError
@@ -137,6 +141,7 @@ class AnalysisAPI(MetaAPI):
             AnalysisType.TARGETED_GENOME_SEQUENCING,
             AnalysisType.WHOLE_EXOME_SEQUENCING,
             AnalysisType.WHOLE_GENOME_SEQUENCING,
+            AnalysisType.WHOLE_TRANSCRIPTOME_SEQUENCING,
         }:
             return prep_category.lower()
         return AnalysisType.OTHER
@@ -160,7 +165,8 @@ class AnalysisAPI(MetaAPI):
             )
             return
         self.housekeeper_api.include(bundle_version)
-        self.housekeeper_api.add_commit(bundle_object, bundle_version)
+        self.housekeeper_api.add_commit(bundle_object)
+        self.housekeeper_api.add_commit(bundle_version)
         LOG.info(
             f"Analysis successfully stored in Housekeeper: {case_id} : {bundle_version.created_at}"
         )
@@ -183,7 +189,8 @@ class AnalysisAPI(MetaAPI):
         if dry_run:
             LOG.info("Dry-run: StatusDB changes will not be commited")
             return
-        self.status_db.add_commit(new_analysis)
+        self.status_db.session.add(new_analysis)
+        self.status_db.session.commit()
         LOG.info(f"Analysis successfully stored in StatusDB: {case_id} : {analysis_start}")
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
@@ -206,6 +213,7 @@ class AnalysisAPI(MetaAPI):
             slurm_quality_of_service=self.get_slurm_qos_for_case(case_id=case_id),
             data_analysis=str(self.pipeline),
             ticket=self.status_db.get_latest_ticket_from_case(case_id),
+            workflow_manager=self.get_workflow_manager(),
         )
 
     def get_hermes_transformed_deliverables(self, case_id: str) -> dict:
@@ -243,7 +251,7 @@ class AnalysisAPI(MetaAPI):
         if action in [None, *CASE_ACTIONS]:
             case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
             case_obj.action = action
-            self.status_db.commit()
+            self.status_db.session.commit()
             LOG.info("Action %s set for case %s", action, case_id)
             return
         LOG.warning(
@@ -449,7 +457,7 @@ class AnalysisAPI(MetaAPI):
         LOG.info(f"Adding a cleaned at date for case {case_id}")
         for analysis_obj in analyses:
             analysis_obj.cleaned_at = analysis_obj.cleaned_at or dt.datetime.now()
-            self.status_db.commit()
+            self.status_db.session.commit()
 
     def clean_run_dir(self, case_id: str, yes: bool, case_path: Union[List[Path], Path]) -> int:
         """Remove workflow run directory."""
