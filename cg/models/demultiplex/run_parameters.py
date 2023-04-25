@@ -109,8 +109,8 @@ class RunParameters:
         return (
             f"Y{self.read_one_nr_cycles()},"
             f"I{self.index_read_one()},"
-            f"I{self.index_read_two()}"
-            f"Y{self.read_two_nr_cycles()},"
+            f"I{self.index_read_two()},"
+            f"Y{self.read_two_nr_cycles()}"
         )
 
     def __str__(self):
