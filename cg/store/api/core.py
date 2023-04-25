@@ -10,7 +10,6 @@ from .add import AddHandler
 from .find_basic_data import FindBasicDataHandler
 from .status import StatusHandler
 
-
 LOG = logging.getLogger(__name__)
 
 

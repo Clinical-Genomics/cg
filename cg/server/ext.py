@@ -1,8 +1,6 @@
 from flask_admin import Admin
-from sqlalchemy.orm import scoped_session, sessionmaker
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
-from flask_sqlalchemy import SQLAlchemy
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
 from cg.store.api.core import Store
