@@ -54,7 +54,8 @@ def test_get_version_existing(
     """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api
     bundle_obj, version_obj = housekeeper_api.add_bundle(hk_bundle_data)
-    housekeeper_api.add_commit(bundle_obj, version_obj)
+    housekeeper_api.add_commit(bundle_obj)
+    housekeeper_api.add_commit(version_obj)
 
     # WHEN fetching a version
     fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=timestamp)

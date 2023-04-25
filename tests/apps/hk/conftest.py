@@ -34,7 +34,8 @@ def fixture_populated_housekeeper_api(
     """Setup Moch Housekeeper store and return API."""
     _api: MockHousekeeperAPI = housekeeper_api
     bundle_obj, version_obj = _api.add_bundle(hk_bundle_data)
-    _api.add_commit(bundle_obj, version_obj)
+    _api.add_commit(bundle_obj)
+    _api.add_commit(version_obj)
     return _api
 
 

@@ -8,12 +8,14 @@ from pydantic import ValidationError
 
 from cg import resources
 from cg.constants import Pipeline
+from cg.constants.constants import FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
+from cg.io.controller import WriteFile
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -46,6 +48,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self.tower_pipeline: str = config.rnafusion.tower_pipeline
         self.account: str = config.rnafusion.slurm.account
         self.email: str = config.rnafusion.slurm.mail_user
+        self.compute_env: str = config.rnafusion.compute_env
+        self.revision: str = config.rnafusion.revision
 
     @property
     def root(self) -> str:
@@ -71,6 +75,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         if profile:
             return profile
         return self.profile
+
+    def get_workflow_manager(self) -> str:
+        """Get workflow manager for rnafusion."""
+        return WorkflowManager.Tower.value
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
@@ -132,9 +140,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 ),
             )
 
-    def write_params_file(self, case_id: str, dry_run: bool = False) -> None:
+    def write_params_file(
+        self, case_id: str, genomes_base: Optional[Path] = None, dry_run: bool = False
+    ) -> None:
         """Write params-file for rnafusion analysis in case folder."""
         default_options: Dict[str, str] = self.get_default_parameters(case_id=case_id)
+        if genomes_base:
+            default_options["genomes_base"] = genomes_base
         LOG.info(default_options)
         if dry_run:
             return
@@ -145,10 +157,24 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             ),
         )
 
+    def get_trailblazer_config_path(self, case_id: str) -> Path:
+        """Return the path to a trailblazer config file containing Tower IDs."""
+        return Path(self.root_dir, case_id, "tower_ids.yaml")
+
+    def write_trailblazer_config(self, case_id: str, tower_id: str) -> None:
+        """Write Tower IDs to a .YAML file used as the trailblazer config."""
+        config_path = self.get_trailblazer_config_path(case_id=case_id)
+        LOG.info(f"Writing Tower ID to {config_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={case_id: [tower_id]},
+            file_format=FileFormat.YAML,
+            file_path=config_path,
+        )
+
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
-            return genomes_base
-        return Path(self.references)
+            return genomes_base.absolute()
+        return Path(self.references).absolute()
 
     def get_default_parameters(self, case_id: str) -> Dict:
         """Returns a dictionary with default RNAFusion parameters."""
@@ -161,13 +187,17 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             ).as_posix(),
             "genomes_base": self.get_references_path().as_posix(),
             "trim": RnafusionDefaults.TRIM,
+            "fastp_trim": RnafusionDefaults.FASTP_TRIM,
+            "trim_tail": RnafusionDefaults.TRIM_TAIL,
             "fusioninspector_filter": RnafusionDefaults.FUSIONINSPECTOR_FILTER,
+            "fusionreport_filter": RnafusionDefaults.FUSIONREPORT_FILTER,
             "all": RnafusionDefaults.ALL,
             "pizzly": RnafusionDefaults.PIZZLY,
             "squid": RnafusionDefaults.SQUID,
             "starfusion": RnafusionDefaults.STARFUSION,
             "fusioncatcher": RnafusionDefaults.FUSIONCATCHER,
             "arriba": RnafusionDefaults.ARRIBA,
+            "cram": RnafusionDefaults.CRAM,
             "priority": self.account,
             "clusterOptions": f"--qos={self.get_slurm_qos_for_case(case_id=case_id)}",
         }
@@ -176,6 +206,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         self,
         case_id: str,
         strandedness: str,
+        genomes_base: Path,
         dry_run: bool,
     ) -> None:
         """Create sample sheet file for RNAFUSION analysis."""
@@ -185,7 +216,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         LOG.info("Generating samplesheet")
         self.write_samplesheet(case_id=case_id, strandedness=strandedness, dry_run=dry_run)
         LOG.info("Generating parameters file")
-        self.write_params_file(case_id=case_id, dry_run=dry_run)
+        self.write_params_file(case_id=case_id, genomes_base=genomes_base, dry_run=dry_run)
         if dry_run:
             LOG.info("Dry run: Config files will not be written")
             return
@@ -240,6 +271,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             self.process.run_command(parameters=parameters, dry_run=dry_run)
             if self.process.stderr:
                 LOG.error(self.process.stderr)
+            if not dry_run:
+                tower_id = TowerAnalysisAPI.get_tower_id(stdout_lines=self.process.stdout_lines())
+                self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
 
     def verify_case_config_file_exists(self, case_id: str) -> None:

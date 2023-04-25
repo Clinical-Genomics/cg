@@ -36,7 +36,8 @@ def test_get_active_beds_when_archived(base_store: Store):
     beds: Query = base_store.get_active_beds()
     for bed in beds:
         bed.is_archived = True
-        base_store.add_commit(bed)
+        base_store.session.add(bed)
+        base_store.session.commit()
 
     # WHEN fetching beds
     active_beds: Query = base_store.get_active_beds()
@@ -140,28 +141,6 @@ def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATION
 
     # THEN return a application with the supplied application tag
     assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS
-
-
-def test_get_applications_by_prep_category_and_is_not_archived(
-    microbial_store: Store,
-    EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS,
-    prep_category=MicrosaltAppTags.PREP_CATEGORY,
-):
-    """Test function to return the application by prep category and not archived."""
-
-    # GIVEN a store with application records
-
-    # WHEN getting the query for the flow cells
-    applications: List[
-        Application
-    ] = microbial_store.get_applications_by_prep_category_and_is_not_archived(
-        prep_category=prep_category
-    )
-
-    # THEN return a application with the supplied application tag
-    assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
-    assert (application.prep_category == prep_category for application in applications)
-    assert (application.is_archived is False for application in applications)
 
 
 def test_get_bed_version_query(base_store: Store):

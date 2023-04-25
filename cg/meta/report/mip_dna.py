@@ -3,7 +3,6 @@ from typing import List, Optional, Iterable
 
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version, File
-from sqlalchemy.orm import Query
 
 from cg.constants import (
     REQUIRED_REPORT_FIELDS,

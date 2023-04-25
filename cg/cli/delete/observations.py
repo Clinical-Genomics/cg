@@ -4,7 +4,7 @@ import logging
 from typing import Optional, Union
 
 import click
-from alchy import Query
+from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
 
 from cg.cli.upload.observations.utils import get_observations_api, get_observations_case

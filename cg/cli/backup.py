@@ -50,7 +50,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
 
     status_api: Store = context.status_db
     flow_cell: Optional[Flowcell] = (
-        status_api.get_flow_cell(flow_cell_id=flow_cell_id) if flow_cell_id else None
+        status_api.get_flow_cell_by_name(flow_cell_name=flow_cell_id) if flow_cell_id else None
     )
 
     if not flow_cell and flow_cell_id:
@@ -70,7 +70,7 @@ def fetch_flow_cell(context: CGConfig, dry_run: bool, flow_cell_id: Optional[str
     if not dry_run and flow_cell:
         LOG.info(f"{flow_cell}: updating flow cell status to {FlowCellStatus.REQUESTED}")
         flow_cell.status = FlowCellStatus.REQUESTED
-        status_api.commit()
+        status_api.session.commit()
 
 
 @backup.command("archive-spring-files")

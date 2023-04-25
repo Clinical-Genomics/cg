@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List, Optional
 
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 
 from cg.store.models import (
     Application,
@@ -36,6 +36,9 @@ from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 class FindBasicDataHandler(BaseHandler):
     """Contains methods to find basic data model instances."""
 
+    def __init__(self, session: Session):
+        super().__init__(session=session)
+
     def get_application_by_tag(self, tag: str) -> Application:
         """Return an application by tag."""
         return apply_application_filter(
@@ -52,7 +55,7 @@ class FindBasicDataHandler(BaseHandler):
                 filter_functions=[ApplicationFilter.FILTER_BY_PREP_CATEGORY],
                 prep_category=prep_category,
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -63,24 +66,7 @@ class FindBasicDataHandler(BaseHandler):
                 applications=self._get_query(table=Application),
                 filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
-            .all()
-        )
-
-    def get_applications_by_prep_category_and_is_not_archived(
-        self, prep_category: str
-    ) -> List[Application]:
-        """Return applications by prep category that are not archived."""
-        return (
-            apply_application_filter(
-                applications=self._get_query(table=Application),
-                filter_functions=[
-                    ApplicationFilter.FILTER_BY_PREP_CATEGORY,
-                    ApplicationFilter.FILTER_IS_NOT_ARCHIVED,
-                ],
-                prep_category=prep_category,
-            )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -97,7 +83,7 @@ class FindBasicDataHandler(BaseHandler):
                 ],
                 prep_category=prep_category,
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -105,7 +91,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return all applications."""
         return (
             self._get_query(table=Application)
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -116,7 +102,7 @@ class FindBasicDataHandler(BaseHandler):
         application_versions = self._get_query(table=ApplicationVersion)
         return apply_application_versions_filter(
             application_versions=application_versions,
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
+            filter_functions=[ApplicationVersionFilter.FILTER_BY_APPLICATION_ENTRY_ID],
             application_entry_id=application_entry_id,
         ).first()
 
@@ -127,7 +113,7 @@ class FindBasicDataHandler(BaseHandler):
             return None
         return apply_application_versions_filter(
             filter_functions=[
-                ApplicationVersionFilter.FILTER_BY_ENTRY_ID,
+                ApplicationVersionFilter.FILTER_BY_APPLICATION_ENTRY_ID,
                 ApplicationVersionFilter.FILTER_BY_VALID_FROM_BEFORE,
                 ApplicationVersionFilter.ORDER_BY_VALID_FROM_DESC,
             ],

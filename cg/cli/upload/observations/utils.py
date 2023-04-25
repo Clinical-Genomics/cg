@@ -3,7 +3,7 @@
 import logging
 from typing import Union
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants.observations import LOQUSDB_SUPPORTED_PIPELINES

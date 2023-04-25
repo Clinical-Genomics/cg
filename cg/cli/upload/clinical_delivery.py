@@ -115,4 +115,4 @@ def auto_fastq(context: click.Context, dry_run: bool):
         analysis_obj.upload_started_at = dt.datetime.now()
         context.invoke(clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
         if not dry_run:
-            status_db.commit()
+            status_db.session.commit()

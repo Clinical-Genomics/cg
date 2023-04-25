@@ -533,11 +533,9 @@ class BalsamicAnalysisAPI(AnalysisAPI):
             panel_shortname: str = "Whole_Genome"
         else:
             return
-        application_tag = (
-            self.status_db.query(ApplicationVersion)
-            .filter(ApplicationVersion.id == case.links[0].sample.application_version_id)
-            .first()
-            .application.tag
+
+        application_tag = self.status_db.get_application_tag_by_application_version_entry_id(
+            application_version_entry_id=case.links[0].sample.application_version_id
         )
         return f"{panel_shortname}:{case.name}:{application_tag}"
 

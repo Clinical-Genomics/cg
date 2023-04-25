@@ -8,17 +8,30 @@ import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Family, Sample, Customer
+from cg.store.models import Analysis, Application, Family, Organism, Sample, Customer
 from tests.store_helpers import StoreHelpers
-from tests.store.api.conftest import fixture_applications_store
-from tests.conftest import fixture_old_timestamp
 
 
 class StoreConftestFixture(enum.Enum):
     INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     NAME_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
+    APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES: int = 2
+    CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES: str = "1"
     SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES: str = "test_subject_id"
+    ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
+    LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES: str = "locusdb_id"
+    READS_SAMPLE_WITH_ATTRIBUTES: int = 100
     DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES: int = 1
+    AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES: float = 45
+    COMMENT_SAMPLE_WITH_ATTRIBUTES: str = "comment"
+    CONTROL_SAMPLE_WITH_ATTRIBUTES: str = "negative"
+    CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES: str = "capture_kit"
+    PRIORITY_SAMPLE_WITH_ATTRIBUTES: str = "research"
+    ORDER_SAMPLE_WITH_ATTRIBUTES: str = "order"
+    REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES: str = "NC_222"
+    ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES: str = "ticket"
+    FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES: str = "sample_1"
+    SEX_SAMPLE_WITH_ATTRIBUTES: str = "male"
     ENTRY_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INVOICE_ID_SAMPLE_WITH_ATTRIBUTES: int = 1
     INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES: str = "sample_without_attributes"
@@ -85,7 +98,7 @@ def fixture_microbial_submitted_order() -> dict:
             well_position_rml=None,
             sex=None,
             panels=None,
-            require_qcok=True,
+            require_qc_ok=True,
             application="MWRNXTR003",
             source=None,
             status=None,
@@ -136,10 +149,10 @@ def fixture_microbial_store(
         application_version = base_store.get_application_by_tag(
             sample_data["application"]
         ).versions[0]
-        organism = base_store.Organism(
+        organism: Organism = Organism(
             internal_id=sample_data["organism"], name=sample_data["organism"]
         )
-        base_store.add(organism)
+        base_store.session.add(organism)
         sample = base_store.add_sample(
             name=sample_data["name"],
             sex=Gender.UNKNOWN,
@@ -151,9 +164,9 @@ def fixture_microbial_store(
         sample.application_version = application_version
         sample.customer = customer
         sample.organism = organism
-        base_store.add(sample)
+        base_store.session.add(sample)
 
-    base_store.commit()
+    base_store.session.commit()
     yield base_store
 
 
@@ -207,23 +220,42 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
 ) -> Store:
     """Return a store with a sample that has many attributes and one without."""
     helpers.add_sample(
-        store,
+        store=store,
         internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
         name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
         is_external=True,
         is_tumour=True,
+        ordered_at=timestamp_now,
+        created_at=timestamp_now,
+        sequence_start=timestamp_now,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
         sequenced_at=timestamp_now,
         prepared_at=timestamp_now,
+        invoiced_at=timestamp_now,
+        application_version_id=StoreConftestFixture.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        customer_id=StoreConftestFixture.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
         subject_id=StoreConftestFixture.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
         invoice_id=StoreConftestFixture.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        organism_id=StoreConftestFixture.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        loqusdb_id=StoreConftestFixture.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        reads=StoreConftestFixture.READS_SAMPLE_WITH_ATTRIBUTES.value,
         downsampled_to=StoreConftestFixture.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
+        original_ticket=StoreConftestFixture.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
+        age_at_sampling=StoreConftestFixture.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
+        capture_kit=StoreConftestFixture.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
+        comment=StoreConftestFixture.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
+        control=StoreConftestFixture.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
+        from_sample=StoreConftestFixture.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
+        order=StoreConftestFixture.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
+        priority=StoreConftestFixture.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
+        reference_genome=StoreConftestFixture.REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES.value,
+        sex=StoreConftestFixture.SEX_SAMPLE_WITH_ATTRIBUTES.value,
     )
 
     helpers.add_sample(
-        store,
+        store=store,
         internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
         name=StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         is_external=False,
@@ -296,6 +328,15 @@ def fixture_store_with_an_application_with_and_without_attributes(
     return store
 
 
+@pytest.fixture(name="applications_store")
+def fixture_applications_store(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store populated with applications from excel file"""
+    app_tags: List[str] = ["PGOTTTR020", "PGOTTTR030", "PGOTTTR040"]
+    for app_tag in app_tags:
+        helpers.ensure_application(store=store, tag=app_tag)
+    return store
+
+
 @pytest.fixture(name="store_with_different_application_versions")
 def fixture_store_with_different_application_versions(
     applications_store: Store,
@@ -362,13 +403,14 @@ def fixture_store_with_older_and_newer_analyses(
     old_timestamp: dt.datetime,
 ) -> Store:
     """Return a store with  older and newer analyses."""
-    analysis = base_store.Analysis.query.first()
+    analysis = base_store._get_query(table=Analysis).first()
     analysis.uploaded_at = timestamp_now
     analysis.uploaded_to_vogue_at = timestamp_now
     analysis.cleaned_at = timestamp_now
     analysis.started_at = timestamp_now
     analysis.completed_at = timestamp_now
-    base_store.add_commit(analysis)
+    base_store.session.add(analysis)
+    base_store.session.commit()
     times = [timestamp_now, timestamp_yesterday, old_timestamp]
     for time in times:
         helpers.add_analysis(
