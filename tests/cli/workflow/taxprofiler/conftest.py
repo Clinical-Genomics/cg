@@ -11,6 +11,7 @@ from cg.constants.constants import FileFormat
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 
+
 @pytest.fixture(scope="function", name="taxprofiler_context")
 def fixture_taxprofiler_context(
     cg_context: CGConfig,
