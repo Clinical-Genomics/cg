@@ -14,7 +14,6 @@ from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.exc import CgDataError, ScoutUploadError
 from cg.io.controller import WriteStream
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -225,8 +224,8 @@ def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool
 @click.argument("case_id")
 @click.pass_obj
 def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Upload RNA multiqc report to Scout."""
-    LOG.info("----------------- UPLOAD MULTIQC RNA TO SCOUT -----------------------")
+    """Upload multiqc report to Scout."""
+    LOG.info("----------------- UPLOAD MULTIQC TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     status_db: Store = context.status_db
@@ -234,7 +233,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
     scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
         case_id=case_id, pipeline=case.data_analysis
     )
-    if case.data_analysis == Pipeline.MIP_RNA:
+    if scout_report_type == ScoutCustomCaseReportTags.MULTIQC_RNA:
         scout_upload_api.upload_rna_report_to_dna_case_in_scout(
             dry_run=dry_run,
             rna_case_id=case_id,
