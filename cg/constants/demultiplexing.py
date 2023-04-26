@@ -11,7 +11,7 @@ class BclConverter(StrEnum):
 
 SAMPLE_SHEET_DATA_COLUMNS = {
     "bcl2fastq": [
-        "FCID",
+        # "FCID",
         "Lane",
         "SampleID",
         "SampleRef",
@@ -24,7 +24,7 @@ SAMPLE_SHEET_DATA_COLUMNS = {
         "Project",
     ],
     "dragen": [
-        "FCID",
+        # "FCID",
         "Lane",
         "Sample_ID",
         "SampleRef",

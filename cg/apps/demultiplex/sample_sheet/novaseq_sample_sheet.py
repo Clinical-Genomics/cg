@@ -109,7 +109,7 @@ class SampleSheetCreator:
             "Index2Cycles," + str(self.run_parameters.index_read_two()),
             # SETTINGS
             SAMPLE_SHEET_SETTINGS_HEADER[self.bcl_converter],
-            # SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION,  # HARD-WIRED VALUE
+            SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION,  # HARD-WIRED VALUE
             # SAMPLE_SHEET_SETTINGS_APP_VERSION,  # HARD-WIRED VALUE
             # SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT[self.bcl_converter],
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
