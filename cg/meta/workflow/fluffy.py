@@ -155,7 +155,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def is_data_header(line: str) -> bool:
-        """Returns true if the given line is the Data header."""
+        """Returns true if the given line is the Data header of a sample sheet."""
         return any(header in line for header in SAMPLE_SHEET_DATA_HEADER.values())
 
     def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
