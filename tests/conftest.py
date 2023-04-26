@@ -6,7 +6,7 @@ import os
 import shutil
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple, Union
+from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
 from housekeeper.store.models import File, Version
@@ -29,7 +29,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Family, Organism, User
+from cg.store.models import Bed, BedVersion, Customer, Organism
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -768,16 +768,6 @@ def fixture_bcl2fastq_demux_results(
     return DemuxResults(
         demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter=BclConverter.BCL2FASTQ
     )
-
-
-@pytest.fixture(name="sample_sheet_version_1")
-def fixture_sample_sheet_version_1() -> str:
-    return "v1"
-
-
-@pytest.fixture(name="sample_sheet_version_2")
-def fixture_sample_sheet_version_2() -> str:
-    return "v2"
 
 
 # Genotype file fixture

@@ -62,14 +62,6 @@ OPTION_BCL_CONVERTER = click.option(
     "bcl2fastq.",
 )
 
-OPTION_SHEET_VERSION = click.option(
-    "-v",
-    "--sheet-version",
-    type=click.Choice(["v1", "v2"]),
-    default="v1",
-    help="Specify the sheet version. Choose between v1 and v2. Default is v1.",
-)
-
 FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
 
 DEMUX_STATS_PATH = {

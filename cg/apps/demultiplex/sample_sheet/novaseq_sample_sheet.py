@@ -35,14 +35,12 @@ class SampleSheetCreator:
         flowcell_id: str,
         lims_samples: List[LimsFlowcellSample],
         run_parameters: RunParameters,
-        sheet_version: str,
         force: bool = False,
     ):
         self.bcl_converter = bcl_converter
         self.flowcell_id: str = flowcell_id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = run_parameters
-        self.sheet_version: str = sheet_version
         self.force = force
 
     @property
@@ -96,9 +94,10 @@ class SampleSheetCreator:
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
-    def create_v2_sample_sheet_sections(self) -> List[str]:
-        """Create the header and read sections of a v2 sample sheet in a list."""
-        return [
+    def convert_to_sample_sheet(self) -> str:
+        """Convert all samples to a string with the sample sheet"""
+        LOG.info("Convert samples to string")
+        sample_sheet = [
             SAMPLE_SHEET_HEADER,
             SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
             SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,  # HARD-WIRED VALUE
@@ -108,13 +107,6 @@ class SampleSheetCreator:
             "Read2Cycles," + str(self.run_parameters.read_two_nr_cycles()),
             "Index1Cycles," + str(self.run_parameters.index_read_one()),
             "Index2Cycles," + str(self.run_parameters.index_read_two()),
-        ]
-
-    def convert_to_sample_sheet(self) -> str:
-        """Convert all samples to a string with the sample sheet"""
-        LOG.info("Convert samples to string")
-        sample_sheet = self.create_v2_sample_sheet_sections() if self.sheet_version == "v2" else []
-        sample_sheet = sample_sheet + [
             SAMPLE_SHEET_SETTINGS_HEADER,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,

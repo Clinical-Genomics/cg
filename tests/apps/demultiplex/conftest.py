@@ -136,14 +136,12 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
     flow_cell_id: str,
     lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
     novaseq_run_parameters_object: RunParameters,
-    sample_sheet_version_1: str,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
         flowcell_id=flow_cell_id,
         lims_samples=lims_novaseq_bcl2fastq_samples,
         run_parameters=novaseq_run_parameters_object,
         bcl_converter="bcl2fastq",
-        sheet_version=sample_sheet_version_1,
     )
 
 
@@ -152,12 +150,10 @@ def fixture_novaseq_dragen_sample_sheet_object(
     flow_cell_id: str,
     lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
     novaseq_run_parameters_object: RunParameters,
-    sample_sheet_version_1: str,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
         flowcell_id=flow_cell_id,
         lims_samples=lims_novaseq_dragen_samples,
         run_parameters=novaseq_run_parameters_object,
         bcl_converter="dragen",
-        sheet_version=sample_sheet_version_1,
     )
