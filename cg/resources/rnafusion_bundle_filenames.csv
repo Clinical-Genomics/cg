@@ -34,6 +34,12 @@
   path_index: ~
   step: squid
   tag: squid
+- format: cram
+  id: CASEID
+  path: PATHTOCASE/cram_starfusion/CASEID.cram
+  path_index: ~
+  step: star-fusion
+  tag: star-fusion-cram
 - format: html
   id: CASEID
   path: PATHTOCASE/fusionreport/CASEID/index.html
