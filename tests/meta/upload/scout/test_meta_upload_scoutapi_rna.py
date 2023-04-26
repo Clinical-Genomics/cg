@@ -1,6 +1,8 @@
 """Tests for RNA part of the scout upload API"""
 import logging
+import os
 from typing import Generator, List
+from mock import MagicMock
 import pytest
 from _pytest.logging import LogCaptureFixture
 
@@ -99,6 +101,36 @@ def test_upload_rna_junctions_to_scout(
     # THEN the 2 files should have been uploaded to the connected sample on the dna case in scout
     assert "Upload splice junctions bed file finished!" in caplog.text
     assert "Upload RNA coverage bigwig file finished!" in caplog.text
+
+
+def test_upload_rna_coverage_bigwig_to_scout_no_bigwig_found(
+    caplog: Generator[LogCaptureFixture, None, None],
+    mip_rna_analysis_hk_api: HousekeeperAPI,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+):
+    """Test that FileNotFoundError is raised when no rna_coverage_bigwig is found"""
+
+    # GIVEN an existing RNA case with related sample
+    # GIVEN an existing DNA case with related sample
+    # GIVEN a sample in the RNA case is connected to a sample in the DNA case via subject_id (i.e. same subject_id)
+    upload_scout_api.status_db = rna_store
+
+    # GIVEN the connected RNA sample does not have a bigWig in Housekeeper
+    # Remove the bigWig file from the HousekeeperAPI (mip_rna_analysis_hk_api)
+    mock_files = MagicMock()
+    mock_files.return_value = None
+    mip_rna_analysis_hk_api.files = mock_files
+    # WHEN running the method to upload RNA files to Scout
+    caplog.set_level(logging.INFO)
+
+    # THEN a FileNotFoundError should be raised
+    with pytest.raises(FileNotFoundError):
+        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+
+    # THEN the error message should mention that no RNA coverage bigwig file was found
+    assert "No RNA coverage bigwig file was found" in caplog.text
 
 
 def test_upload_splice_junctions_bed_to_scout(
