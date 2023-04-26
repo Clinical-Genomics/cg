@@ -15,7 +15,7 @@ class RnafusionDefaults:
     TRIM: bool = False
     FASTP_TRIM: bool = True
     TRIM_TAIL: int = 50
-    FUSIONREPORT_FILTER: int = 1
+    FUSIONREPORT_FILTER: bool = False
     FUSIONINSPECTOR_FILTER: bool = False
     ALL: bool = False
     PIZZLY: bool = False
