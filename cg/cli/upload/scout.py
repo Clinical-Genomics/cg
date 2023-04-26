@@ -192,16 +192,10 @@ def upload_rna_to_scout(
 @click.command(name="rna-fusion-report-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("--research", is_flag=True)
-@click.option(
-    "-u",
-    "--update",
-    is_flag=True,
-    help="Overwrite existing report",
-)
 @click.argument("case_id")
 @click.pass_obj
 def upload_rna_fusion_report_to_scout(
-    context: CGConfig, dry_run: bool, case_id: str, update: bool, research: bool
+    context: CGConfig, dry_run: bool, case_id: str, research: bool
 ) -> None:
     """Upload fusion report file for a case to Scout."""
 
