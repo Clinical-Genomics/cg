@@ -203,7 +203,7 @@ def upload_rna_fusion_report_to_scout(
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
     scout_upload_api.upload_fusion_report_to_scout(
-        dry_run=dry_run, research=research, case_id=case_id, update=update
+        dry_run=dry_run, research=research, case_id=case_id
     )
 
 
