@@ -6,7 +6,6 @@ from cg.cli.workflow.taxprofiler.base import (
     taxprofiler,
 )
 from cg.constants import EXIT_SUCCESS
-from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 
 
@@ -21,5 +20,6 @@ def test_taxprofiler_no_args(cli_runner: CliRunner, taxprofiler_context: CGConfi
     print(result.output)
 
     assert result.exit_code == EXIT_SUCCESS
+
     ## THEN help should be printed
     assert "help" in result.output

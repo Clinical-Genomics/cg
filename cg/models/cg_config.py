@@ -170,7 +170,6 @@ class RnafusionConfig(CommonAppConfig):
 
 
 class TaxprofilerConfig(CommonAppConfig):
-    # root: str
     pass
 
 
