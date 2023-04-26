@@ -5,7 +5,7 @@ from typing import Dict, Iterator, List, Union
 import alchy
 import sqlalchemy as sqa
 
-from cg.apps.cgstats.crud import find
+from cg.apps.cgstats.crud.find import FindHandler
 from cg.apps.cgstats.db.models import (
     Datasource,
     Demux,
@@ -38,6 +38,7 @@ class StatsAPI(alchy.Manager):
         self.root_dir: Path = Path(config["cgstats"]["root"])
         self.binary: str = config["cgstats"]["binary_path"]
         self.db_uri: str = config["cgstats"]["database"]
+        self.find_handler = FindHandler()
 
     @staticmethod
     def get_curated_sample_name(sample_name: str) -> str:
@@ -139,10 +140,9 @@ class StatsAPI(alchy.Manager):
 
         return flow_cell_reads_and_q30_summary
 
-    @staticmethod
-    def sample(sample_name: str) -> Sample:
+    def sample(self, sample_name: str) -> Sample:
         """Fetch a sample for the database by name."""
-        return find.get_sample(sample_name).first()
+        return self.find_handler.get_sample(sample_name).first()
 
     def fastqs(self, flowcell: str, sample_obj: Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
