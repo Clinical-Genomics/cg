@@ -148,10 +148,15 @@ class FluffyAnalysisAPI(AnalysisAPI):
             csv_reader = reader(read_obj)
             header_line_count: int = 1
             for line in csv_reader:
-                if SAMPLE_SHEET_DATA_HEADER in line:
+                if self.is_data_header(line):
                     break
                 header_line_count += 1
         return header_line_count
+
+    @staticmethod
+    def is_data_header(line: str) -> bool:
+        """Returns true if the given line is the Data header."""
+        return any(header in line for header in SAMPLE_SHEET_DATA_HEADER.values())
 
     def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
         """

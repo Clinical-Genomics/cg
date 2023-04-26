@@ -40,18 +40,22 @@ SAMPLE_SHEET_DATA_COLUMNS = {
 
 SAMPLE_SHEET_HEADER = "[Header]"
 SAMPLE_SHEET_HEADER_FILE_FORMAT_V2 = "FileFormatVersion,2"
-SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX = "InstrumentType,NovaSeqX"
+SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX = "InstrumentType,NovaSeqXPlus"
 SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM = "InstrumentPlatform,NovaSeqXSeries"
 
 SAMPLE_SHEET_READS_HEADER = "[Reads]"
 
-SAMPLE_SHEET_DATA_HEADER = "[Data]"
-
-SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
-
+SAMPLE_SHEET_SETTINGS_HEADER = {"bcl2fastq": "[Settings]", "dragen": "[BCLConvert_Settings]"}
+SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION = "SoftwareVersion,x.y.z"
+SAMPLE_SHEET_SETTINGS_APP_VERSION = "AppVersion,1.0.0"
+SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT = {
+    "bcl2fastq": "FastqCompressionFormat,gzip",
+    "dragen": "FastqCompressionFormat,dragen",
+}
 SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = "BarcodeMismatchesIndex1,0"
-
 SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2,0"
+
+SAMPLE_SHEET_DATA_HEADER = {"bcl2fastq": "[Data]", "dragen": "[BCLConvert_Data]"}
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",

@@ -13,12 +13,14 @@ from cg.constants.demultiplexing import (
     SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,
     SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,
     SAMPLE_SHEET_READS_HEADER,
-    SAMPLE_SHEET_DATA_HEADER,
-    SAMPLE_SHEET_DATA_COLUMNS,
     SAMPLE_SHEET_SETTINGS_HEADER,
+    SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION,
+    SAMPLE_SHEET_SETTINGS_APP_VERSION,
+    SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
-    BclConverter,
+    SAMPLE_SHEET_DATA_HEADER,
+    SAMPLE_SHEET_DATA_COLUMNS,
 )
 from cg.models.demultiplex.run_parameters import RunParameters
 from cgmodels.demultiplex.sample_sheet import get_sample_sheet
@@ -95,22 +97,29 @@ class SampleSheetCreator:
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
     def convert_to_sample_sheet(self) -> str:
-        """Convert all samples to a string with the sample sheet"""
+        """Convert all samples to a string with the sample sheet."""
         LOG.info("Convert samples to string")
         sample_sheet = [
+            # HEADER
             SAMPLE_SHEET_HEADER,
             SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
             SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,  # HARD-WIRED VALUE
             SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,  # HARD-WIRED VALUE
+            # READS
             SAMPLE_SHEET_READS_HEADER,
             "Read1Cycles," + str(self.run_parameters.read_one_nr_cycles()),
             "Read2Cycles," + str(self.run_parameters.read_two_nr_cycles()),
             "Index1Cycles," + str(self.run_parameters.index_read_one()),
             "Index2Cycles," + str(self.run_parameters.index_read_two()),
-            SAMPLE_SHEET_SETTINGS_HEADER,
+            # SETTINGS
+            SAMPLE_SHEET_SETTINGS_HEADER[self.bcl_converter],
+            SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION,  # HARD-WIRED VALUE
+            SAMPLE_SHEET_SETTINGS_APP_VERSION,  # HARD-WIRED VALUE
+            SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT[self.bcl_converter],
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
-            SAMPLE_SHEET_DATA_HEADER,
+            # DATA
+            SAMPLE_SHEET_DATA_HEADER[self.bcl_converter],
             ",".join(SAMPLE_SHEET_DATA_COLUMNS[self.bcl_converter]),
         ]
         for sample in self.lims_samples:
