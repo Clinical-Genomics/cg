@@ -63,7 +63,7 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             # If normal sample analysed as tumor, it will be treated as tumor in terms of ID for the Scout upload
             config_sample.sample_id = (
                 SampleType.TUMOR.value.upper()
-                if SampleType.TUMOR in config_sample.alignment_path
+                if config_sample.alignment_path and SampleType.TUMOR in config_sample.alignment_path
                 else SampleType.NORMAL.value.upper()
             )
 
