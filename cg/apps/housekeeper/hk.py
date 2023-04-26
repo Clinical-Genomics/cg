@@ -406,16 +406,39 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
-    def get_file_paths(
-        self, bundle: str, tags: Optional[list] = None, version: Optional[int] = None
-    ) -> List[Path]:
-        """Returns a list of the file matching the tags, bundle and version given."""
-        return [
-            Path(file.path) for file in self.get_files(bundle=bundle, tags=tags, version=version)
-        ]
+    # TODO Docstrings and type hints
+    def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[Path]:
+        """Returns all files from given bundle, with given tag, which have not been archived."""
+        return self._store.get_non_archived_files(bundle=bundle_name, tags=tags)
+
+    def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[Path]:
+        """Returns all files from given bundle, with given tag, which have been archived."""
+        return self._store.get_archived_files(bundle=bundle_name, tags=tags)
+
+    def add_archives(self, files: List[Path], archive_task_id: int) -> None:
+        """Creates an archive object for the given files, and adds the archive task id to them."""
+        for file in files:
+            archive = self._store.add_archive(file, archive_task_id=archive_task_id)
+            self.add(archive)
+        self.commit()
+
+    def add_retrieve_task(self, files: List[Path], retrieve_task_id: int) -> None:
+        """Adds the retrieval task id to the archives of the given files."""
+        for file in files:
+            archive = self._store.get_archive(file=file)
+            archive.retrieval_task_id = retrieve_task_id
+        self.commit()
+
+    def get_unfinished_tasks(self) -> List[int]:
+        """Returns all archiving or retrieval tasks which have not been recorded as finished."""
+        return self._store.get_unfinished_tasks()
+
+    def set_archive_time_stamps(self, task_id: int) -> None:
+        """Sets the archival or retrieval timestamps for any archive with the given task_id."""
+        return self._store.set_archive_time_stamps()
 
     def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: List[str]) -> bool:
-        """Return whether or not all FASTQ/SPRING files are on disk for the given bundles."""
+        """Return whether all FASTQ/SPRING files are on disk for the given bundles."""
         sequencing_files_on_disk: Dict[str, bool] = {}
         if not bundle_names:
             return False

@@ -186,13 +186,11 @@ class DDNDataFlowApi:
             self._refresh_auth_token()
         return {"Authorization": f"Bearer {self.auth_token}"}
 
-    def archive_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
+    def archive_folders(self, sources_and_destinations: List[TransferData]) -> bool:
         """Archives all folders provided, to their corresponding destination, as given by sources and destination parameter."""
-        transfer_data: List[TransferData] = [
-            TransferData(source=source.as_posix(), destination=destination.as_posix())
-            for source, destination in sources_and_destinations.items()
-        ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+        transfer_request: TransferPayload = TransferPayload(
+            files_to_transfer=sources_and_destinations
+        )
         transfer_request.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.local_storage, destination_prefix=self.archive_repository
@@ -202,13 +200,11 @@ class DDNDataFlowApi:
             url=urljoin(base=self.url, url=DataflowEndpoints.ARCHIVE_FILES),
         )
 
-    def retrieve_folders(self, sources_and_destinations: Dict[Path, Path]) -> bool:
+    def retrieve_folders(self, sources_and_destinations: List[TransferData]) -> bool:
         """Retrieves all folders provided, to their corresponding destination, as given by the sources and destination parameter."""
-        transfer_data: List[TransferData] = [
-            TransferData(source=source.as_posix(), destination=destination.as_posix())
-            for source, destination in sources_and_destinations.items()
-        ]
-        transfer_request: TransferPayload = TransferPayload(files_to_transfer=transfer_data)
+        transfer_request: TransferPayload = TransferPayload(
+            files_to_transfer=sources_and_destinations
+        )
         transfer_request.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
         transfer_request.add_repositories(
             source_prefix=self.archive_repository, destination_prefix=self.local_storage
@@ -218,5 +214,5 @@ class DDNDataFlowApi:
             url=urljoin(base=self.url, url=DataflowEndpoints.RETRIEVE_FILES),
         )
 
-    def is_task_completed(self, archiving_task: int) -> bool:
+    def is_task_completed(self, task_id: int) -> bool:
         pass
