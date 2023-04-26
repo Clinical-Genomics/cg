@@ -10,8 +10,6 @@ from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
     SAMPLE_SHEET_HEADER,
     SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
-    SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,
-    SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,
     SAMPLE_SHEET_READS_HEADER,
     SAMPLE_SHEET_SETTINGS_HEADER,
     SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION,
@@ -103,8 +101,6 @@ class SampleSheetCreator:
             # HEADER
             SAMPLE_SHEET_HEADER,
             SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
-            SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,  # HARD-WIRED VALUE
-            SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,  # HARD-WIRED VALUE
             # READS
             SAMPLE_SHEET_READS_HEADER,
             "Read1Cycles," + str(self.run_parameters.read_one_nr_cycles()),
