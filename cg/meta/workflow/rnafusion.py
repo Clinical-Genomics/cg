@@ -347,13 +347,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 metrics_values.update(list(section.values())[0])
         return [
             {
-                "header": "null",
+                "header": None,
                 "id": case_id,
                 "input": "multiqc_data.json",
                 "name": metric_name,
                 "step": "multiqc",
                 "value": metric_value,
-                "condition": RNAFUSION_METRIC_CONDITIONS.get(metric_name, "null"),
+                "condition": RNAFUSION_METRIC_CONDITIONS.get(metric_name, None),
             }
             for metric_name, metric_value in metrics_values.items()
         ]
