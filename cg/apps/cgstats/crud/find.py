@@ -37,15 +37,19 @@ class FindHandler:
             "bcl2fastq": demux_results.conversion_stats_path,
             "dragen": demux_results.demux_stats_path,
         }
-        LOG.debug("Search for datasource with file %s", stats_path[demux_results.bcl_converter])
-        datasource_id: Optional[int] = Datasource.exists(
-            str(stats_path[demux_results.bcl_converter])
-        )
-        if datasource_id:
-            LOG.debug("Found datasource with id %s", datasource_id)
-            return datasource_id
+        document_path: str = str(stats_path[demux_results.bcl_converter])
+        LOG.debug(f"Search for datasource with file {document_path}")
+        datasource: Datasource = self.get_datasource_by_document_path(document_path=document_path)
+
+        if datasource:
+            LOG.debug(f"Found datasource with id {datasource.datasource_id}")
+            return datasource.datasource_id
+
         LOG.debug("Could not find datasource")
         return None
+
+    def get_datasource_by_document_path(document_path: str) -> Optional[Datasource]:
+        return Datasource.query.filter_by(document_path=document_path).first()
 
     def get_flowcell_id(self, flowcell_name: str) -> Optional[int]:
         LOG.debug("Search for flowcell %s", flowcell_name)
