@@ -24,6 +24,7 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
+from cg.models.rnafusion.metrics import MultiqcDataJson
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
 
@@ -337,11 +338,13 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def parse_multiqc_json(self, case_id: str) -> List[Dict]:
         """Parses a multiqc_data.json file and returns metrics and values formatted."""
-        multiqc_json = read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
-        metrics_values = {
-            i.values() for i in multiqc_json["report_general_stats_data"] if case_id in i
-        }
-
+        multiqc_json = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics_values = {}
+        for section in multiqc_json.report_general_stats_data:
+            if case_id in section:
+                metrics_values.update(list(section.values())[0])
         return [
             {
                 "header": "null",
@@ -359,6 +362,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Write <case>_metrics_deliverables.yaml file."""
         deliverables_path = self.get_metrics_deliverables_path(case_id=case_id)
         LOG.info(f"Writing metrics deliverables file to {deliverables_path.as_posix()}")
+
         WriteFile.write_file_from_content(
             content={"metrics": self.parse_multiqc_json(case_id=case_id)},
             file_format=FileFormat.YAML,
