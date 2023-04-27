@@ -6,6 +6,9 @@ import pytest
 from pydantic import BaseModel
 
 from cg.apps.cgstats.crud import create
+from cg.apps.cgstats.db.database import (
+    initialise_test_engine_and_session_factory,
+)
 from cg.apps.cgstats.db.models import Supportparams, Sample, Project, Datasource, Demux
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -86,9 +89,8 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
             }
         }
     )
-    _store.create_all()
+    initialise_test_engine_and_session_factory()
     yield _store
-    _store.drop_all()
 
 
 @pytest.fixture(name="nipt_stats_api")

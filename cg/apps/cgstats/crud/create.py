@@ -3,6 +3,7 @@ from typing import Dict, Iterable, Optional, Union
 
 import sqlalchemy
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
+from cg.apps.cgstats.db.database import session_scope
 
 from cg.apps.cgstats.db.models import (
     Datasource,
@@ -35,10 +36,12 @@ def create_support_parameters(manager: StatsAPI, demux_results: DemuxResults) ->
     support_parameters.sampleconfig_path = str(demux_results.sample_sheet_path)
     support_parameters.sampleconfig = demux_results.sample_sheet_path.read_text()
     support_parameters.time = logfile_parameters.time
-    manager.session.add(support_parameters)
-    manager.session.flush()
-    LOG.info("Creating new support parameters object %s", support_parameters)
-    return support_parameters
+
+    with session_scope() as session:
+        session.add(support_parameters)
+        session.flush()
+        LOG.info("Creating new support parameters object %s", support_parameters)
+        return support_parameters
 
 
 def create_datasource(
@@ -54,10 +57,11 @@ def create_datasource(
     datasource.time = sqlalchemy.func.now()
     datasource.supportparams_id = support_parameters_id
 
-    manager.session.add(datasource)
-    manager.session.flush()
-    LOG.info("Creating new datasource object %s", datasource)
-    return datasource
+    with session_scope() as session:
+        session.add(datasource)
+        session.flush()
+        LOG.info("Creating new datasource object %s", datasource)
+        return datasource
 
 
 def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
@@ -67,10 +71,11 @@ def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
     flowcell.hiseqtype = "novaseq"
     flowcell.time = sqlalchemy.func.now()
 
-    manager.session.add(flowcell)
-    manager.session.flush()
-    LOG.info("Creating new flowcell object %s", flowcell)
-    return flowcell
+    with session_scope() as session:
+        session.add(flowcell)
+        session.flush()
+        LOG.info("Creating new flowcell object %s", flowcell)
+        return flowcell
 
 
 def create_demux(
@@ -88,20 +93,22 @@ def create_demux(
         demux.basemask = ""
     demux.time = sqlalchemy.func.now()
 
-    manager.session.add(demux)
-    manager.session.flush()
-    LOG.info("Creating new demux object %s", demux)
-    return demux
+    with session_scope() as session:
+        session.add(demux)
+        session.flush()
+        LOG.info("Creating new demux object %s", demux)
+        return demux
 
 
 def create_project(manager: StatsAPI, project_name: str) -> Project:
     project: Project = manager.Project()
     project.projectname = project_name
     project.time = sqlalchemy.func.now()
-    manager.session.add(project)
-    manager.session.flush()
-    LOG.info("Creating new project object %s", project)
-    return project
+    with session_scope() as session:
+        session.add(project)
+        session.flush()
+        LOG.info("Creating new project object %s", project)
+        return project
 
 
 def create_sample(manager: StatsAPI, sample_id: str, barcode: str, project_id: int) -> Sample:
@@ -112,9 +119,10 @@ def create_sample(manager: StatsAPI, sample_id: str, barcode: str, project_id: i
     sample.barcode = barcode
     sample.time = sqlalchemy.func.now()
 
-    manager.session.add(sample)
-    manager.session.flush()
-    return sample
+    with session_scope() as session:
+        session.add(sample)
+        session.flush()
+        return sample
 
 
 def create_unaligned(
@@ -137,9 +145,10 @@ def create_unaligned(
     unaligned.mean_quality_score = demux_sample.pass_filter_qscore
     unaligned.time = sqlalchemy.func.now()
 
-    manager.session.add(unaligned)
-    manager.session.flush()
-    return unaligned
+    with session_scope() as session:
+        session.add(unaligned)
+        session.flush()
+        return unaligned
 
 
 def create_dragen_unaligned(
@@ -158,9 +167,10 @@ def create_dragen_unaligned(
     unaligned.mean_quality_score: float = demux_sample.mean_quality_score
     unaligned.time: sqlalchemy.sql.func.now = sqlalchemy.func.now()
 
-    manager.session.add(unaligned)
-    manager.session.flush()
-    return unaligned
+    with session_scope() as session:
+        session.add(unaligned)
+        session.flush()
+        return unaligned
 
 
 def _calculate_perfect_indexreads_pct(demux_sample: DragenDemuxSample) -> float:

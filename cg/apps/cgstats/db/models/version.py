@@ -1,6 +1,6 @@
 from sqlalchemy import Column, UniqueConstraint, types
 
-from .base import Base
+from cg.apps.cgstats.db.database import Base
 
 
 class Version(Base):

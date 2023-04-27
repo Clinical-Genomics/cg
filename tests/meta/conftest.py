@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
+from cg.apps.cgstats.db.database import initialise_test_engine_and_session_factory
 
 from cg.apps.cgstats.db.models import (
     Datasource,
@@ -164,9 +165,8 @@ def fixture_store_stats() -> Generator[StatsAPI, None, None]:
             }
         }
     )
-    _store.create_all()
+    initialise_test_engine_and_session_factory()
     yield _store
-    _store.drop_all()
 
 
 @pytest.fixture(name="base_store_stats")
@@ -208,8 +208,8 @@ def fixture_base_store_stats(
             demuxes[sample_data["flowcell"]] = demux
 
         unaligned.demux = demux
-        store_stats.session.add(unaligned)
-    store_stats.session.commit()
+        store_stats.add(unaligned)
+    store_stats.commit()
     yield store_stats
 
 

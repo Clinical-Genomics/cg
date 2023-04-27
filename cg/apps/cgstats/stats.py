@@ -1,13 +1,12 @@
 import logging
 from pathlib import Path
 from typing import Dict, Iterator, List, Union
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker, Query, Session
 import sqlalchemy as sqa
 
+from sqlalchemy.orm import Query
 
 from cg.apps.cgstats.crud.find import FindHandler
+from cg.apps.cgstats.db.database import initialise_engine_and_session_factory, session_scope
 from cg.apps.cgstats.db.models import (
     Datasource,
     Demux,
@@ -19,7 +18,6 @@ from cg.apps.cgstats.db.models import (
 )
 from cg.constants import FLOWCELL_Q30_THRESHOLD
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
-from cg.apps.cgstats.db.models.base import Base
 
 LOG = logging.getLogger(__name__)
 
@@ -35,26 +33,15 @@ class StatsAPI:
 
     def __init__(self, config: dict):
         LOG.info("Instantiating cgstats api")
+
         db_config = dict(SQLALCHEMY_DATABASE_URI=config["cgstats"]["database"])
-
-        engine = create_engine(db_config["SQLALCHEMY_DATABASE_URI"])
-        session_factory = sessionmaker(bind=engine)
-        self.session = scoped_session(session_factory)
-
-        Base.query = self.session.query_property()
+        db_url = db_config["SQLALCHEMY_DATABASE_URI"]
+        initialise_engine_and_session_factory(url=db_url)
 
         self.root_dir: Path = Path(config["cgstats"]["root"])
         self.binary: str = config["cgstats"]["binary_path"]
-        self.db_uri: str = config["cgstats"]["database"]
+
         self.find_handler = FindHandler()
-
-    def create_all(self):
-        """Create all tables in the database."""
-        Base.metadata.create_all(bind=self.session.get_bind())
-
-    def drop_all(self):
-        """Drop all tables in the database."""
-        Base.metadata.drop_all(bind=self.session.get_bind())
 
     @staticmethod
     def get_curated_sample_name(sample_name: str) -> str:
@@ -108,29 +95,31 @@ class StatsAPI:
 
     def is_lane_pooled(self, flowcell_obj: Flowcell, lane: str) -> bool:
         """Check whether a lane is pooled or not."""
-        query = (
-            self.session.query(sqa.func.count(Unaligned.sample_id).label("sample_count"))
-            .join(Unaligned.demux)
-            .filter(Demux.flowcell == flowcell_obj)
-            .filter(Unaligned.lane == lane)
-        )
-        return query.first().sample_count > 1
+        with session_scope() as session:
+            query = (
+                session.query(sqa.func.count(Unaligned.sample_id).label("sample_count"))
+                .join(Unaligned.demux)
+                .filter(Demux.flowcell == flowcell_obj)
+                .filter(Unaligned.lane == lane)
+            )
+            return query.first().sample_count > 1
 
     def sample_reads(self, sample_obj: Sample) -> Query:
         """Calculate reads for a sample."""
-        return (
-            self.session.query(
-                Flowcell.flowcellname.label("name"),
-                Flowcell.hiseqtype.label("type"),
-                Unaligned.lane,
-                Demux.basemask.label("base_mask"),
-                sqa.func.sum(Unaligned.readcounts).label("reads"),
-                sqa.func.min(Unaligned.q30_bases_pct).label("q30"),
+        with session_scope() as session:
+            return (
+                session.query(
+                    Flowcell.flowcellname.label("name"),
+                    Flowcell.hiseqtype.label("type"),
+                    Unaligned.lane,
+                    Demux.basemask.label("base_mask"),
+                    sqa.func.sum(Unaligned.readcounts).label("reads"),
+                    sqa.func.min(Unaligned.q30_bases_pct).label("q30"),
+                )
+                .join(Flowcell.demux, Demux.unaligned)
+                .filter(Unaligned.sample == sample_obj)
+                .group_by(Flowcell.flowcellname)
             )
-            .join(Flowcell.demux, Demux.unaligned)
-            .filter(Unaligned.sample == sample_obj)
-            .group_by(Flowcell.flowcellname)
-        )
 
     def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}

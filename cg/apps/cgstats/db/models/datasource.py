@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import Column, ForeignKey, orm, types
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base import Base
+from cg.apps.cgstats.db.database import Base
 
 
 class Datasource(Base):
