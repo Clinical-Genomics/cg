@@ -343,8 +343,7 @@ def test_delete_flow_cell_cgstats(
     # GIVEN an existing object in cg-stags database
 
     existing_object: models.Flowcell = (
-        populated_wipe_demux_context.cg_stats_api.query(models.Flowcell)
-        .filter(models.Flowcell.flowcellname == flow_cell_id)
+        models.Flowcell.query.filter(models.Flowcell.flowcellname == flow_cell_id)
         .first()
     )
 
@@ -361,7 +360,7 @@ def test_delete_flow_cell_cgstats(
     # AND the object should no longer exist
 
     existing_object: models.Flowcell = (
-        populated_wipe_demux_context.cg_stats_api.query(models.Flowcell)
+        models.Flowcell.query
         .filter(models.Flowcell.flowcellname == flow_cell_id)
         .first()
     )

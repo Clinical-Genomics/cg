@@ -208,8 +208,8 @@ def fixture_base_store_stats(
             demuxes[sample_data["flowcell"]] = demux
 
         unaligned.demux = demux
-        store_stats.add(unaligned)
-    store_stats.commit()
+        store_stats.session.add(unaligned)
+    store_stats.session.commit()
     yield store_stats
 
 
