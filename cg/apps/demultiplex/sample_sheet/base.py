@@ -20,23 +20,7 @@ class SampleSheetError(ModelError):
     """Raised when something is wrong with the order form."""
 
 
-class BaseSample(BaseModel):
-    """This model is used when creating sample sheets."""
-
-    flow_cell: str
-    lane: int
-    sample_id: str
-    reference: str
-    index: str
-    second_index: str = None
-    sample_name: str
-    control: str
-    recipe: str
-    operator: str
-    project: str
-
-
-class Sample(BaseModel):
+class NovaSeqSample(BaseModel):
     """This model is used when parsing/validating existing sample sheets."""
 
     flow_cell: str = Field(..., alias="FCID")
@@ -49,32 +33,27 @@ class Sample(BaseModel):
     recipe: str = Field(..., alias="Recipe")
     operator: str = Field(..., alias="Operator")
     project: str = Field(..., alias="Project")
-
-
-class NovaSeqSample(Sample):
-    """This model is used when parsing/validating existing novaseq sample sheets."""
-
     second_index: str = Field(..., alias="index2")
 
 
-class NovaSeqSampleBcl2Fastq(NovaSeqSample):
+class SampleBcl2Fastq(NovaSeqSample):
     sample_id: str = Field(..., alias="SampleID")
     project: str = Field(..., alias="Project")
 
 
-class NovaSeqSampleDragen(NovaSeqSample):
+class SampleDragen(NovaSeqSample):
     sample_id: str = Field(..., alias="Sample_ID")
     project: str = Field(..., alias="Sample_Project")
 
 
 class SampleSheet(BaseModel):
     type: str
-    samples: List[Sample]
+    samples: List[NovaSeqSample]
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
-    samples: List[NovaSeqSampleBcl2Fastq]
+    samples: List[SampleBcl2Fastq]
 
 
 class SampleSheetDragen(SampleSheet):
-    samples: List[NovaSeqSampleDragen]
+    samples: List[SampleDragen]

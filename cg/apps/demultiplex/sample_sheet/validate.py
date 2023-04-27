@@ -1,22 +1,21 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List
 from pydantic import parse_obj_as
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.base import (
-    Sample,
+    NovaSeqSample,
     SampleSheet,
-    NovaSeqSampleBcl2Fastq,
-    NovaSeqSampleDragen,
+    SampleBcl2Fastq,
+    SampleDragen,
     SampleSheetError,
 )
-from cg.constants.demultiplexing import BclConverter
 
 LOG = logging.getLogger(__name__)
 
 
-def validate_unique_sample(samples: List[Sample]) -> None:
+def are_samples_unique(samples: List[NovaSeqSample]) -> bool:
     """Validate that each sample only exists once."""
     sample_ids: set = set()
     for sample in samples:
@@ -26,12 +25,16 @@ def validate_unique_sample(samples: List[Sample]) -> None:
             LOG.warning(message)
             raise SampleSheetError(message)
         sample_ids.add(sample_id)
+    if len(sample_ids) == 0:
+        LOG.warning("No samples were found")
+        return False
+    return True
 
 
-def samples_by_lane(samples: List[Sample]) -> Dict[int, List[Sample]]:
+def get_samples_by_lane(samples: List[NovaSeqSample]) -> Dict[int, List[NovaSeqSample]]:
     """Group samples by lane."""
     LOG.info("Order samples by lane")
-    sample_by_lane: Dict[int, List[Sample]] = {}
+    sample_by_lane: Dict[int, List[NovaSeqSample]] = {}
     for sample in samples:
         if sample.lane not in sample_by_lane:
             sample_by_lane[sample.lane] = []
@@ -39,13 +42,13 @@ def samples_by_lane(samples: List[Sample]) -> Dict[int, List[Sample]]:
     return sample_by_lane
 
 
-def validate_samples_unique_per_lane(samples: List[Sample]) -> None:
+def validate_samples_unique_per_lane(samples: List[NovaSeqSample]) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
 
-    sample_by_lane: Dict[int, List[Sample]] = samples_by_lane(samples)
+    sample_by_lane: Dict[int, List[NovaSeqSample]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
         LOG.info("Validate that samples are unique in lane %s", lane)
-        validate_unique_sample(lane_samples)
+        are_samples_unique(lane_samples)
 
 
 def get_raw_samples(sample_sheet: str) -> List[Dict[str, str]]:
@@ -84,9 +87,9 @@ def get_sample_sheet(
     return the information as a SampleSheet object
     """
     # Skip the [data] header
-    novaseq_sample = {"bcl2fastq": NovaSeqSampleBcl2Fastq, "dragen": NovaSeqSampleDragen}
+    novaseq_sample = {"bcl2fastq": SampleBcl2Fastq, "dragen": SampleDragen}
     raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet)
-    sample_type = Sample if sheet_type == "2500" else novaseq_sample[bcl_converter]
+    sample_type = novaseq_sample[bcl_converter]
     samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples)
     return SampleSheet(type=sheet_type, samples=samples)
