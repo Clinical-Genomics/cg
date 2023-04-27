@@ -1,38 +1,7 @@
 import logging
-from copy import deepcopy
 from pydantic import BaseModel, Field
 from typing import List
 
-SAMPLE_SHEET_HEADER = [
-    "FCID",
-    "Lane",
-    "SampleID",
-    "SampleRef",
-    "index",
-    "SampleName",
-    "Control",
-    "Recipe",
-    "Operator",
-    "Project",
-]
-
-NOVASEQ_HEADER = deepcopy(SAMPLE_SHEET_HEADER)
-NOVASEQ_HEADER.extend("index2")
-
-# This is a map from the headers to the keys to simplify creation of sample sheets
-HEADER_MAP = {
-    "FCID": "flow_cell",
-    "Lane": "lane",
-    "SampleID": "sample_id",
-    "SampleRef": "reference",
-    "index": "index",
-    "index2": "second_index",
-    "SampleName": "sample_name",
-    "Control": "control",
-    "Recipe": "recipe",
-    "Operator": "operator",
-    "Project": "project",
-}
 LOG = logging.getLogger(__name__)
 
 
@@ -48,7 +17,7 @@ class ModelError(Exception):
 
 
 class SampleSheetError(ModelError):
-    """Raised when something is wrong with the orderform."""
+    """Raised when something is wrong with the order form."""
 
 
 class BaseSample(BaseModel):

@@ -157,3 +157,128 @@ def fixture_novaseq_dragen_sample_sheet_object(
         run_parameters=novaseq_run_parameters_object,
         bcl_converter="dragen",
     )
+
+
+# Sample sheet validation
+
+
+@pytest.fixture(name="bcl2fastq_sample_sheet_no_samples")
+def fixture_bcl2fastq_sample_sheet_no_samples() -> str:
+    """Return the content of a bcl2fastq sample sheet without samples."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project\n"
+    )
+
+
+@pytest.fixture(name="dragen_sample_sheet_no_samples")
+def fixture_dragen_sample_sheet_no_samples() -> str:
+    """Return the content of a dragen sample sheet without samples."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,"
+        "Sample_Project\n"
+    )
+
+
+@pytest.fixture(name="sample_sheet_no_sample_header_str")
+def fixture_sample_sheet_no_sample_header_str() -> str:
+    """Return the content of a sample sheet with samples but without a sample header."""
+    return (
+        "[Data]\n"
+        "HWHMWDMXX,1,ACC7628A68,hg19,ATTCCACACT,TGGTCTTGTT,814206,N,R1,script,814206\n"
+        "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206\n"
+    )
+
+
+@pytest.fixture(name="valid_bcl2fastq_sample_sheet_str")
+def fixture_valid_bcl2fastq_sample_sheet_str() -> str:
+    """Return the content of a valid bcl2fastq sample sheet."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project\n"
+        "HWHMWDMXX,1,ACC7628A68,hg19,ATTCCACACT,TGGTCTTGTT,814206,N,R1,script,814206\n"
+        "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="bcl2fastq_sample_sheet_duplicate_same_lane_str")
+def fixture_bcl2fastq_sample_sheet_duplicate_same_lane_str(valid_bcl2fastq_sample_sheet_str):
+    """Return the content of a bcl2fastq sample sheet with a duplicated sample in the same lane."""
+    return (
+        valid_bcl2fastq_sample_sheet_str
+        + "\n"
+        + "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="bcl2fastq_sample_sheet_duplicate_different_lane_str")
+def fixture_bcl2fastq_sample_sheet_duplicate_different_lane_str(valid_bcl2fastq_sample_sheet_str):
+    """Return the content of a bcl2fastq sample sheet with a duplicated sample in a different lane."""
+    return (
+        valid_bcl2fastq_sample_sheet_str
+        + "\n"
+        + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="valid_dragen_sample_sheet_str")
+def fixture_valid_dragen_sample_sheet_str() -> str:
+    """Return the content of a valid dragen sample sheet."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,"
+        "Sample_Project\n"
+        "HWHMWDMXX,1,ACC7628A68,hg19,ATTCCACACT,TGGTCTTGTT,814206,N,R1,script,814206\n"
+        "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="dragen_sample_sheet_duplicate_same_lane_str")
+def fixture_dragen_sample_sheet_duplicate_same_lane_str(valid_dragen_sample_sheet_str):
+    """Return the content of a dragen sample sheet with a duplicated sample in the same lane."""
+    return (
+        valid_dragen_sample_sheet_str
+        + "\n"
+        + "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="dragen_sample_sheet_duplicate_different_lane_str")
+def fixture_dragen_sample_sheet_duplicate_different_lane_str(valid_dragen_sample_sheet_str):
+    """Return the content of aa dragen sample sheet with a duplicated sample in a different lane."""
+    return (
+        valid_dragen_sample_sheet_str
+        + "\n"
+        + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="s2_sample_sheet_type")
+def fixture_s2_sample_sheet_type() -> str:
+    """Returns the S2 sample sheet type."""
+    return "S2"
+
+
+@pytest.fixture(name="bcl2fastq_converter")
+def fixture_bcl2fastq_converter() -> str:
+    """Return the name of the bcl2fastq converter."""
+    return "bcl2fastq"
+
+
+@pytest.fixture(name="dragen_converter")
+def fixture_dragen_converter() -> str:
+    """Return the name of the dragen converter."""
+    return "dragen"
+
+
+@pytest.fixture(name="valid_s2_sheet_bcl2fastq_path")
+def fixture_valid_s2_sheet_bcl2fastq() -> Path:
+    """Return the path to a NovaSeq S2 sample sheet, used in bcl2fastq demultiplexing."""
+    return Path("tests/fixtures/apps/demultiplexing/SampleSheetS2_Bcl2Fastq.csv")
+
+
+@pytest.fixture(name="valid_s2_sheet_dragen_path")
+def fixture_valid_s2_sheet_dragen() -> Path:
+    """Return the path to a NovaSeq S2 sample sheet, used in dragen demultiplexing."""
+    return Path("tests/fixtures/apps/demultiplexing/SampleSheetS2_Dragen.csv")
