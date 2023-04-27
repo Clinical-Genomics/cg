@@ -11,11 +11,13 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
+    RNAFUSION_METRIC_CONDITIONS,
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
 from cg.io.controller import WriteFile
+from cg.io.json import read_json
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -323,4 +325,42 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                     case_id=case_id, root_dir=self.root_dir
                 )
             )
+        )
+
+    def get_multiqc_json_path(self, case_id: str) -> Path:
+        """Genereates a path where the multiqc_data.json file should be located."""
+        return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
+
+    def get_metrics_deliverables_path(self, case_id: str) -> Path:
+        """Genereates a path where the <case>_metrics_deliverables.yaml file should be located."""
+        return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
+
+    def parse_multiqc_json(self, case_id: str) -> List[Dict]:
+        """Parses a multiqc_data.json file and returns metrics and values formatted."""
+        multiqc_json = read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        metrics_values = {
+            i.values() for i in multiqc_json["report_general_stats_data"] if case_id in i
+        }
+
+        return [
+            {
+                "header": "null",
+                "id": case_id,
+                "input": "multiqc_data.json",
+                "name": metric_name,
+                "step": "multiqc",
+                "value": metric_value,
+                "condition": RNAFUSION_METRIC_CONDITIONS.get(metric_name, "null"),
+            }
+            for metric_name, metric_value in metrics_values.items()
+        ]
+
+    def write_metrics_deliverables(self, case_id: str):
+        """Write <case>_metrics_deliverables.yaml file."""
+        deliverables_path = self.get_metrics_deliverables_path(case_id=case_id)
+        LOG.info(f"Writing metrics deliverables file to {deliverables_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={"metrics": self.parse_multiqc_json(case_id=case_id)},
+            file_format=FileFormat.YAML,
+            file_path=deliverables_path,
         )

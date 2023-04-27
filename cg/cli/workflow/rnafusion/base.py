@@ -236,7 +236,7 @@ def start_available(context: click.Context, dry_run: bool = False) -> None:
 def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create a housekeeper deliverables file for given CASE ID."""
 
-    analysis_api: AnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
@@ -251,6 +251,30 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     except Exception as error:
         LOG.error(f"Could not create report file: {error}")
         raise click.Abort()
+
+
+@rnafusion.command("metrics-deliver")
+@ARGUMENT_CASE_ID
+@DRY_RUN
+@click.pass_obj
+def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Create a metrics deliverables file for given CASE ID."""
+
+    analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
+
+    try:
+        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.verify_analysis_finished(case_id=case_id)
+        if not dry_run:
+            analysis_api.write_metrics_deliverables(case_id=case_id)
+        else:
+            LOG.info("Dry-run")
+    except CgError as error:
+        LOG.error(f"Could not create metrics deliverables file: {error}")
+        raise click.Abort() from error
+    except Exception as error:
+        LOG.error(f"Could not create metrics deliverables  file: {error}")
+        raise click.Abort() from error
 
 
 @rnafusion.command("store-housekeeper")

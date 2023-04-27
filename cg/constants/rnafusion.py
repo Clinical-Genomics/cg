@@ -6,6 +6,7 @@ from cg.constants.nextflow import NFX_SAMPLESHEET_HEADERS
 RNAFUSION_ACCEPTED_STRANDEDNESS = ["forward", "reverse", "unstranded"]
 RNAFUSION_STRANDEDNESS_HEADER = "strandedness"
 RNAFUSION_SAMPLESHEET_HEADERS = NFX_SAMPLESHEET_HEADERS + [RNAFUSION_STRANDEDNESS_HEADER]
+RNAFUSION_METRIC_CONDITIONS: dict = {"percent_duplicates": {"norm": "lt", "threshold": 40}}
 
 
 class RnafusionDefaults:
