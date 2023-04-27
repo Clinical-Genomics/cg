@@ -46,7 +46,7 @@ class StatsAPI:
         self.root_dir: Path = Path(config["cgstats"]["root"])
         self.binary: str = config["cgstats"]["binary_path"]
         self.db_uri: str = config["cgstats"]["database"]
-        self.find_handler = FindHandler(session=self.session)
+        self.find_handler = FindHandler()
 
     def create_all(self):
         """Create all tables in the database."""

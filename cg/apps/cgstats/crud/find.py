@@ -21,9 +21,6 @@ SAMPLE_PATTERN = "{}\_%"
 
 
 class FindHandler:
-    def __init__(self, session: Session) -> None:
-        self.session = session
-
     def get_support_parameters_id(self, demux_results: DemuxResults) -> Optional[int]:
         """Fetch the id of the support parameters if post exists"""
         LOG.debug("Search for support parameters with file %s", demux_results.results_dir)
