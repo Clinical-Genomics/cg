@@ -77,10 +77,14 @@ class FindHandler:
         return None
 
     def get_project_id(self, project_name: str) -> Optional[int]:
-        project_id: Optional[int] = Project.exists(project_name=project_name)
-        if project_id:
-            return project_id
+        project: Project = self.get_project_by_name(project_name=project_name)
+
+        if project:
+            return project.project_id
         return None
+
+    def get_project_by_name(self, project_name: str) -> Optional[Project]:
+        return Project.query.filter_by(projectname=project_name).first()
 
     def get_sample(self, sample_id: str):
         """Get a unique demux sample."""
