@@ -53,7 +53,6 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
     def build_config_sample(self, case_sample: FamilySample) -> ScoutCancerIndividual:
         """Build a sample with balsamic specific information."""
         config_sample = ScoutCancerIndividual()
-
         self.add_common_sample_info(config_sample=config_sample, case_sample=case_sample)
         self.add_common_sample_files(config_sample=config_sample, case_sample=case_sample)
         if BalsamicAnalysisAPI.get_sample_type(sample_obj=case_sample.sample) == SampleType.TUMOR:
@@ -61,7 +60,12 @@ class BalsamicConfigBuilder(ScoutConfigBuilder):
             config_sample.sample_id = SampleType.TUMOR.value.upper()
         else:
             config_sample.phenotype = PhenotypeStatus.UNAFFECTED.value
-            config_sample.sample_id = SampleType.NORMAL.value.upper()
+            # If normal sample analysed as tumor, it will be treated as tumor in terms of ID for the Scout upload
+            config_sample.sample_id = (
+                SampleType.TUMOR.value.upper()
+                if config_sample.alignment_path and SampleType.TUMOR in config_sample.alignment_path
+                else SampleType.NORMAL.value.upper()
+            )
 
         config_sample.analysis_type = self.get_balsamic_analysis_type(sample=case_sample.sample)
 
