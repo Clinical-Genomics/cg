@@ -108,7 +108,6 @@ class FindHandler:
         ).first()
 
     def get_sample_id(self, sample_id: str, barcode: str) -> Optional[int]:
-        sample_id: Optional[int] = Sample.exists(sample_name=sample_id, barcode=barcode)
         sample: Sample = self.get_sample_by_name_and_barcode(sample_name=sample_id, barcode=barcode)
         if sample:
             return sample.sample_id
