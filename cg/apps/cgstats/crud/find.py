@@ -91,9 +91,13 @@ class FindHandler:
 
     def get_sample_id(self, sample_id: str, barcode: str) -> Optional[int]:
         sample_id: Optional[int] = Sample.exists(sample_name=sample_id, barcode=barcode)
-        if sample_id:
-            return sample_id
+        sample: Sample = self.get_sample_by_name_and_barcode(sample_name=sample_id, barcode=barcode)
+        if sample:
+            return sample.sample_id
         return None
+
+    def get_sample_by_name_and_barcode(self, sample_name: str, barcode: str) -> Optional[Sample]:
+        return Sample.query.filter_by(samplename=sample_name).filter_by(barcode=barcode).first()
 
     def get_unaligned_id(self, sample_id: int, demux_id: int, lane: int) -> Optional[int]:
         unaligned: Unaligned = self.get_unaligned_by_sample_id_demux_id_and_lane(
