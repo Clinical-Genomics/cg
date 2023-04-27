@@ -1,5 +1,4 @@
 # database
-Alchy
 alembic
 pymysql
 SQLAlchemy<1.4
