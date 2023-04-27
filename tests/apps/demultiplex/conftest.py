@@ -162,18 +162,18 @@ def fixture_novaseq_dragen_sample_sheet_object(
 # Sample sheet validation
 
 
-@pytest.fixture(name="bcl2fastq_sample_sheet_no_samples")
-def fixture_bcl2fastq_sample_sheet_no_samples() -> str:
-    """Return the content of a bcl2fastq sample sheet without samples."""
+@pytest.fixture(name="bcl2fastq_sample_sheet_data_header")
+def fixture_bcl2fastq_sample_sheet_data_header() -> str:
+    """Return the content of a bcl2fastq sample sheet data header without samples."""
     return (
         "[Data]\n"
         "FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project\n"
     )
 
 
-@pytest.fixture(name="dragen_sample_sheet_no_samples")
-def fixture_dragen_sample_sheet_no_samples() -> str:
-    """Return the content of a dragen sample sheet without samples."""
+@pytest.fixture(name="dragen_sample_sheet_data_header")
+def fixture_dragen_sample_sheet_data_header() -> str:
+    """Return the content of a dragen sample sheet data_header without samples."""
     return (
         "[Data]\n"
         "FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,"
@@ -181,18 +181,21 @@ def fixture_dragen_sample_sheet_no_samples() -> str:
     )
 
 
-@pytest.fixture(name="sample_sheet_no_sample_header_str")
-def fixture_sample_sheet_no_sample_header_str() -> str:
+@pytest.fixture(name="sample_sheet_samples_no_header")
+def fixture_sample_sheet_no_sample_header() -> str:
     """Return the content of a sample sheet with samples but without a sample header."""
     return (
         "[Data]\n"
         "HWHMWDMXX,1,ACC7628A68,hg19,ATTCCACACT,TGGTCTTGTT,814206,N,R1,script,814206\n"
-        "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206\n"
+        "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
     )
 
 
-@pytest.fixture(name="valid_bcl2fastq_sample_sheet_str")
-def fixture_valid_bcl2fastq_sample_sheet_str() -> str:
+@pytest.fixture(name="valid_bcl2fastq_sample_sheet")
+def fixture_valid_bcl2fastq_sample_sheet(
+    bcl2fastq_sample_sheet_data_header: str,
+    sample_sheet_samples_no_header: str,
+) -> str:
     """Return the content of a valid bcl2fastq sample sheet."""
     return (
         "[Data]\n"
@@ -202,28 +205,31 @@ def fixture_valid_bcl2fastq_sample_sheet_str() -> str:
     )
 
 
-@pytest.fixture(name="bcl2fastq_sample_sheet_duplicate_same_lane_str")
-def fixture_bcl2fastq_sample_sheet_duplicate_same_lane_str(valid_bcl2fastq_sample_sheet_str):
+@pytest.fixture(name="bcl2fastq_sample_sheet_duplicate_same_lane")
+def fixture_bcl2fastq_sample_sheet_duplicate_same_lane(valid_bcl2fastq_sample_sheet: str):
     """Return the content of a bcl2fastq sample sheet with a duplicated sample in the same lane."""
     return (
-        valid_bcl2fastq_sample_sheet_str
+        valid_bcl2fastq_sample_sheet
         + "\n"
         + "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
     )
 
 
-@pytest.fixture(name="bcl2fastq_sample_sheet_duplicate_different_lane_str")
-def fixture_bcl2fastq_sample_sheet_duplicate_different_lane_str(valid_bcl2fastq_sample_sheet_str):
+@pytest.fixture(name="bcl2fastq_sample_sheet_duplicate_different_lane")
+def fixture_bcl2fastq_sample_sheet_duplicate_different_lane(valid_bcl2fastq_sample_sheet: str):
     """Return the content of a bcl2fastq sample sheet with a duplicated sample in a different lane."""
     return (
-        valid_bcl2fastq_sample_sheet_str
+        valid_bcl2fastq_sample_sheet
         + "\n"
         + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
     )
 
 
-@pytest.fixture(name="valid_dragen_sample_sheet_str")
-def fixture_valid_dragen_sample_sheet_str() -> str:
+@pytest.fixture(name="valid_dragen_sample_sheet")
+def fixture_valid_dragen_sample_sheet(
+    dragen_sample_sheet_data_header: str,
+    sample_sheet_samples_no_header: str,
+) -> str:
     """Return the content of a valid dragen sample sheet."""
     return (
         "[Data]\n"
@@ -234,21 +240,21 @@ def fixture_valid_dragen_sample_sheet_str() -> str:
     )
 
 
-@pytest.fixture(name="dragen_sample_sheet_duplicate_same_lane_str")
-def fixture_dragen_sample_sheet_duplicate_same_lane_str(valid_dragen_sample_sheet_str):
+@pytest.fixture(name="dragen_sample_sheet_duplicate_same_lane")
+def fixture_dragen_sample_sheet_duplicate_same_lane(valid_dragen_sample_sheet: str):
     """Return the content of a dragen sample sheet with a duplicated sample in the same lane."""
     return (
-        valid_dragen_sample_sheet_str
+        valid_dragen_sample_sheet
         + "\n"
         + "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
     )
 
 
-@pytest.fixture(name="dragen_sample_sheet_duplicate_different_lane_str")
-def fixture_dragen_sample_sheet_duplicate_different_lane_str(valid_dragen_sample_sheet_str):
+@pytest.fixture(name="dragen_sample_sheet_duplicate_different_lane")
+def fixture_dragen_sample_sheet_duplicate_different_lane(valid_dragen_sample_sheet: str):
     """Return the content of aa dragen sample sheet with a duplicated sample in a different lane."""
     return (
-        valid_dragen_sample_sheet_str
+        valid_dragen_sample_sheet
         + "\n"
         + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
     )

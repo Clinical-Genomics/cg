@@ -7,7 +7,7 @@ from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet, get_samp
 
 
 def test_get_sample_sheet_s2_bcl2fastq(
-    valid_bcl2fastq_sample_sheet_str: str,
+    valid_bcl2fastq_sample_sheet: str,
     s2_sample_sheet_type: str,
     bcl2fastq_converter: str,
 ):
@@ -16,7 +16,7 @@ def test_get_sample_sheet_s2_bcl2fastq(
 
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=valid_bcl2fastq_sample_sheet_str,
+        sample_sheet=valid_bcl2fastq_sample_sheet,
         sheet_type=s2_sample_sheet_type,
         bcl_converter=bcl2fastq_converter,
     )
@@ -25,7 +25,7 @@ def test_get_sample_sheet_s2_bcl2fastq(
 
 
 def test_get_sample_sheet_s2_dragen(
-    valid_dragen_sample_sheet_str: str,
+    valid_dragen_sample_sheet: str,
     s2_sample_sheet_type: str,
     dragen_converter: str,
 ):
@@ -34,7 +34,7 @@ def test_get_sample_sheet_s2_dragen(
 
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=valid_dragen_sample_sheet_str,
+        sample_sheet=valid_dragen_sample_sheet,
         sheet_type=s2_sample_sheet_type,
         bcl_converter=dragen_converter,
     )
@@ -43,7 +43,7 @@ def test_get_sample_sheet_s2_dragen(
 
 
 def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
-    bcl2fastq_sample_sheet_duplicate_same_lane_str: str,
+    bcl2fastq_sample_sheet_duplicate_same_lane: str,
     s2_sample_sheet_type: str,
     bcl2fastq_converter: str,
 ):
@@ -54,14 +54,14 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=bcl2fastq_sample_sheet_duplicate_same_lane_str,
+            sample_sheet=bcl2fastq_sample_sheet_duplicate_same_lane,
             sheet_type=s2_sample_sheet_type,
             bcl_converter=bcl2fastq_converter,
         )
 
 
 def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
-    dragen_sample_sheet_duplicate_same_lane_str: str,
+    dragen_sample_sheet_duplicate_same_lane: str,
     s2_sample_sheet_type: str,
     dragen_converter: str,
 ):
@@ -72,14 +72,14 @@ def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=dragen_sample_sheet_duplicate_same_lane_str,
+            sample_sheet=dragen_sample_sheet_duplicate_same_lane,
             sheet_type=s2_sample_sheet_type,
             bcl_converter=dragen_converter,
         )
 
 
 def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
-    bcl2fastq_sample_sheet_duplicate_different_lane_str: str,
+    bcl2fastq_sample_sheet_duplicate_different_lane: str,
     s2_sample_sheet_type: str,
     bcl2fastq_converter: str,
 ):
@@ -88,7 +88,7 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
 
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=bcl2fastq_sample_sheet_duplicate_different_lane_str,
+        sample_sheet=bcl2fastq_sample_sheet_duplicate_different_lane,
         sheet_type=s2_sample_sheet_type,
         bcl_converter=bcl2fastq_converter,
     )
@@ -98,7 +98,7 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
 
 
 def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
-    dragen_sample_sheet_duplicate_different_lane_str: str,
+    dragen_sample_sheet_duplicate_different_lane: str,
     s2_sample_sheet_type: str,
     dragen_converter: str,
 ):
@@ -107,7 +107,7 @@ def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
 
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=dragen_sample_sheet_duplicate_different_lane_str,
+        sample_sheet=dragen_sample_sheet_duplicate_different_lane,
         sheet_type=s2_sample_sheet_type,
         bcl_converter=dragen_converter,
     )
@@ -117,7 +117,7 @@ def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
 
 
 def test_get_sample_sheet_s2_bcl2fastq_missing_header(
-    sample_sheet_no_sample_header_str: str,
+    sample_sheet_samples_no_header: str,
     s2_sample_sheet_type: str,
     bcl2fastq_converter: str,
 ):
@@ -128,14 +128,14 @@ def test_get_sample_sheet_s2_bcl2fastq_missing_header(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=sample_sheet_no_sample_header_str,
+            sample_sheet=sample_sheet_samples_no_header,
             sheet_type=s2_sample_sheet_type,
             bcl_converter=bcl2fastq_converter,
         )
 
 
 def test_get_sample_sheet_s2_dragen_missing_header(
-    sample_sheet_no_sample_header_str: str,
+    sample_sheet_samples_no_header: str,
     s2_sample_sheet_type: str,
     dragen_converter: str,
 ):
@@ -146,14 +146,14 @@ def test_get_sample_sheet_s2_dragen_missing_header(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=sample_sheet_no_sample_header_str,
+            sample_sheet=sample_sheet_samples_no_header,
             sheet_type=s2_sample_sheet_type,
             bcl_converter=dragen_converter,
         )
 
 
 def test_get_sample_sheet_s2_bcl2fastq_missing_samples(
-    bcl2fastq_sample_sheet_no_samples: str, s2_sample_sheet_type, bcl2fastq_converter: str
+    bcl2fastq_sample_sheet_data_header: str, s2_sample_sheet_type, bcl2fastq_converter: str
 ):
     """Test that creating a bcl2fastq sample sheet without samples fails."""
     # GIVEN a bcl2fastq sample sheet without samples
@@ -162,14 +162,14 @@ def test_get_sample_sheet_s2_bcl2fastq_missing_samples(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=bcl2fastq_sample_sheet_no_samples,
+            sample_sheet=bcl2fastq_sample_sheet_data_header,
             sheet_type=s2_sample_sheet_type,
             bcl_converter=bcl2fastq_converter,
         )
 
 
 def test_get_sample_sheet_s2_dragen_missing_samples(
-    dragen_sample_sheet_no_samples: str, s2_sample_sheet_type, dragen_converter: str
+    dragen_sample_sheet_data_header: str, s2_sample_sheet_type, dragen_converter: str
 ):
     """Test that creating a dragen sample sheet without samples fails."""
     # GIVEN a dragen sample sheet without samples
@@ -178,7 +178,7 @@ def test_get_sample_sheet_s2_dragen_missing_samples(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=dragen_sample_sheet_no_samples,
+            sample_sheet=dragen_sample_sheet_data_header,
             sheet_type=s2_sample_sheet_type,
             bcl_converter=dragen_converter,
         )
