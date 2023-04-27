@@ -358,11 +358,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             for metric_name, metric_value in metrics_values.items()
         ]
 
-    def write_metrics_deliverables(self, case_id: str):
+    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False):
         """Write <case>_metrics_deliverables.yaml file."""
         deliverables_path = self.get_metrics_deliverables_path(case_id=case_id)
+        if dry_run:
+            LOG.info(
+                f"Dry run: metrics deliverables file would be written to {deliverables_path.as_posix()}"
+            )
+            return
         LOG.info(f"Writing metrics deliverables file to {deliverables_path.as_posix()}")
-
         WriteFile.write_file_from_content(
             content={"metrics": self.parse_multiqc_json(case_id=case_id)},
             file_format=FileFormat.YAML,

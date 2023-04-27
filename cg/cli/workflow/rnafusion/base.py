@@ -265,10 +265,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_analysis_finished(case_id=case_id)
-        if not dry_run:
-            analysis_api.write_metrics_deliverables(case_id=case_id)
-        else:
-            LOG.info("Dry-run")
+        analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
     except CgError as error:
         LOG.error(f"Could not create metrics deliverables file: {error}")
         raise click.Abort() from error
