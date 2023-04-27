@@ -76,10 +76,15 @@ class FindHandler:
 
     def get_demux_id(self, flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
         """Flowcell object id refers to a database object"""
-        demux_id: Optional[int] = Demux.exists(flowcell_id=flowcell_object_id, basemask=base_mask)
-        if demux_id:
-            return demux_id
+        demux: Demux = self.get_demux_by_flowcell_id_and_base_mask(
+            flowcell_id=flowcell_object_id, base_mask=base_mask
+        )
+        if demux:
+            return demux.demux_id
         return None
+
+    def get_demux_by_flowcell_id_and_base_mask(flowcell_id: int, base_mask: str) -> Optional[Demux]:
+        return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
 
     def get_project_id(self, project_name: str) -> Optional[int]:
         project: Project = self.get_project_by_name(project_name=project_name)

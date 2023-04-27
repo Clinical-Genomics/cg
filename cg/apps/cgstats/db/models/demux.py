@@ -29,14 +29,3 @@ class Demux(Model):
         cascade="all",
         backref=orm.backref("demuxes"),
     )
-
-    @staticmethod
-    def exists(flowcell_id: int, basemask: str) -> Optional[int]:
-        """Checks if the Demux entry already exists"""
-        try:
-            demux: Demux = (
-                Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=basemask).one()
-            )
-            return demux.demux_id
-        except NoResultFound:
-            return None
