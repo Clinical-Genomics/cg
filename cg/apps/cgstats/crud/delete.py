@@ -15,5 +15,5 @@ def delete_flowcell(manager: StatsAPI, flowcell_name: str):
         flowcell: List[Flowcell] = manager.Flowcell.query.filter_by(flowcell_id=flowcell_id).all()
         for entry in flowcell:
             log.info("Removing entry %s in from cgstats", entry.flowcellname)
-            manager.delete(flowcell)
-            manager.commit()
+            manager.session.delete(entry)
+            manager.session.commit()

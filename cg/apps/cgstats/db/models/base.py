@@ -12,7 +12,7 @@ def json_serial(obj):
 
 class JsonModel:
     def to_json(self, pretty: bool = False):
-        """Serialize to JSON. Handle DateTime objects."""
+        """Serialize to JSON."""
         kwargs = dict(indent=4, sort_keys=True) if pretty else dict()
         return json.dumps(self.to_dict(), default=json_serial, **kwargs)
 

@@ -2,9 +2,10 @@ import logging
 from pathlib import Path
 from typing import Dict, Iterator, List, Union
 
-from sqlalchemy.orm import sessionmaker, Query
 from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker, Query, Session
 import sqlalchemy as sqa
+
 
 from cg.apps.cgstats.crud.find import FindHandler
 from cg.apps.cgstats.db.models import (
@@ -18,6 +19,7 @@ from cg.apps.cgstats.db.models import (
 )
 from cg.constants import FLOWCELL_Q30_THRESHOLD
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
+from cg.apps.cgstats.db.models.base import Base
 
 LOG = logging.getLogger(__name__)
 
@@ -37,12 +39,23 @@ class StatsAPI:
 
         engine = create_engine(db_config["SQLALCHEMY_DATABASE_URI"])
         session_factory = sessionmaker(bind=engine)
-        self.session = session_factory()
+        self.session = scoped_session(session_factory)
+
+        Base.query = self.session.query_property()
 
         self.root_dir: Path = Path(config["cgstats"]["root"])
         self.binary: str = config["cgstats"]["binary_path"]
         self.db_uri: str = config["cgstats"]["database"]
-        self.find_handler = FindHandler()
+        self.find_handler = FindHandler(session=self.session)
+
+    def create_all(self):
+        """Create all tables in the database."""
+        Base.metadata.create_all(bind=self.session.get_bind())
+
+    def drop_all(self):
+        """Drop all tables in the database."""
+        Base.metadata.drop_all(bind=self.session.get_bind())
+
 
     @staticmethod
     def get_curated_sample_name(sample_name: str) -> str:
@@ -77,9 +90,9 @@ class StatsAPI:
 
     def flowcell(self, flowcell_name: str) -> StatsFlowcell:
         """Fetch information about a flowcell."""
-        flowcell_object: Flowcell = (
-            self.session.query(Flowcell).filter_by(flowcellname=flowcell_name).first()
-        )
+        flowcell_object: Flowcell = Flowcell.query.filter_by(
+            flowcellname=flowcell_name
+        ).first()
         flowcell_data = {
             "name": flowcell_object.flowcellname,
             "sequencer": flowcell_object.demux[0].datasource.machine,
@@ -92,10 +105,8 @@ class StatsAPI:
 
     def flowcell_samples(self, flowcell_obj: Flowcell) -> Iterator[Sample]:
         """Fetch all the samples from a flowcell."""
-        return (
-            self.session.query(Sample)
-            .join(Sample.unaligned, Unaligned.demux)
-            .filter(Demux.flowcell == flowcell_obj)
+        return Sample.query.join(Sample.unaligned, Unaligned.demux).filter(
+            Demux.flowcell == flowcell_obj
         )
 
     def is_lane_pooled(self, flowcell_obj: Flowcell, lane: str) -> bool:
@@ -126,9 +137,9 @@ class StatsAPI:
 
     def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
-        flow_cell_obj: Flowcell = (
-            self.session.query(Flowcell).filter(Flowcell.flowcellname == flow_cell_name).first()
-        )
+        flow_cell_obj: Flowcell = Flowcell.query.filter(
+            Flowcell.flowcellname == flow_cell_name
+        ).first()
 
         if flow_cell_obj and flow_cell_obj.exists(flowcell_name=flow_cell_name):
             sample_count: int = 0

@@ -35,8 +35,8 @@ def create_support_parameters(manager: StatsAPI, demux_results: DemuxResults) ->
     support_parameters.sampleconfig_path = str(demux_results.sample_sheet_path)
     support_parameters.sampleconfig = demux_results.sample_sheet_path.read_text()
     support_parameters.time = logfile_parameters.time
-    manager.add(support_parameters)
-    manager.flush()
+    manager.session.add(support_parameters)
+    manager.session.flush()
     LOG.info("Creating new support parameters object %s", support_parameters)
     return support_parameters
 
@@ -54,8 +54,8 @@ def create_datasource(
     datasource.time = sqlalchemy.func.now()
     datasource.supportparams_id = support_parameters_id
 
-    manager.add(datasource)
-    manager.flush()
+    manager.session.add(datasource)
+    manager.session.flush()
     LOG.info("Creating new datasource object %s", datasource)
     return datasource
 
@@ -67,8 +67,8 @@ def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
     flowcell.hiseqtype = "novaseq"
     flowcell.time = sqlalchemy.func.now()
 
-    manager.add(flowcell)
-    manager.flush()
+    manager.session.add(flowcell)
+    manager.session.flush()
     LOG.info("Creating new flowcell object %s", flowcell)
     return flowcell
 
@@ -88,8 +88,8 @@ def create_demux(
         demux.basemask = ""
     demux.time = sqlalchemy.func.now()
 
-    manager.add(demux)
-    manager.flush()
+    manager.session.add(demux)
+    manager.session.flush()
     LOG.info("Creating new demux object %s", demux)
     return demux
 
@@ -98,8 +98,8 @@ def create_project(manager: StatsAPI, project_name: str) -> Project:
     project: Project = manager.Project()
     project.projectname = project_name
     project.time = sqlalchemy.func.now()
-    manager.add(project)
-    manager.flush()
+    manager.session.add(project)
+    manager.session.flush()
     LOG.info("Creating new project object %s", project)
     return project
 
@@ -112,8 +112,8 @@ def create_sample(manager: StatsAPI, sample_id: str, barcode: str, project_id: i
     sample.barcode = barcode
     sample.time = sqlalchemy.func.now()
 
-    manager.add(sample)
-    manager.flush()
+    manager.session.add(sample)
+    manager.session.flush()
     return sample
 
 
@@ -137,8 +137,8 @@ def create_unaligned(
     unaligned.mean_quality_score = demux_sample.pass_filter_qscore
     unaligned.time = sqlalchemy.func.now()
 
-    manager.add(unaligned)
-    manager.flush()
+    manager.session.add(unaligned)
+    manager.session.flush()
     return unaligned
 
 
@@ -158,8 +158,8 @@ def create_dragen_unaligned(
     unaligned.mean_quality_score: float = demux_sample.mean_quality_score
     unaligned.time: sqlalchemy.sql.func.now = sqlalchemy.func.now()
 
-    manager.add(unaligned)
-    manager.flush()
+    manager.session.add(unaligned)
+    manager.session.flush()
     return unaligned
 
 
@@ -384,4 +384,4 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         project_name_to_id=project_name_to_id,
         demux_id=demux_id,
     )
-    manager.commit()
+    manager.session.commit()

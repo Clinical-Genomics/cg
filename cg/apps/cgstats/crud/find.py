@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 from sqlalchemy import or_
 
 from cg.apps.cgstats.db.models import (
@@ -21,6 +21,10 @@ SAMPLE_PATTERN = "{}\_%"
 
 
 class FindHandler:
+
+    def __init__(self, session: Session) -> None:
+        self.session = session
+        
     def get_support_parameters_id(self, demux_results: DemuxResults) -> Optional[int]:
         """Fetch the id of the support parameters if post exists"""
         LOG.debug("Search for support parameters with file %s", demux_results.results_dir)
@@ -72,7 +76,7 @@ class FindHandler:
     def get_sample(self, sample_id: str):
         """Get a unique demux sample."""
         pattern = SAMPLE_PATTERN.format(sample_id)
-        return Sample.query.filter(
+        return self.session.query(Sample).filter(
             or_(Sample.samplename.like(pattern), Sample.samplename == sample_id)
         ).first()
 
@@ -90,8 +94,8 @@ class FindHandler:
             return unaligned_id
         return None
 
-    def get_samples(self, flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
-        query: alchy.Query = Sample.query.join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
+    def get_samples(self, flowcell: str, project_name: Optional[str] = None) -> Query:
+        query: Query = self.session.query(Sample).join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
         if project_name:
             query = query.join(Sample.project).filter(Project.projectname == project_name)
 
@@ -102,6 +106,6 @@ class FindHandler:
     def project_sample_stats(
         self, flowcell: str, project_name: Optional[str] = None
     ) -> List[StatsSample]:
-        samples_query: alchy.Query = self.get_samples(flowcell=flowcell, project_name=project_name)
+        samples_query: Query = self.get_samples(flowcell=flowcell, project_name=project_name)
         db_sample: Sample
         return [StatsSample.from_orm(db_sample) for db_sample in samples_query]
