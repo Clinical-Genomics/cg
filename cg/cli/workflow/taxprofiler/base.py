@@ -20,6 +20,3 @@ def taxprofiler(context: click.Context) -> None:
     context.obj.meta_apis[MetaApis.ANALYSIS_API] = TaxprofilerAnalysisAPI(
         config=context.obj,
     )
-
-
-# taxprofiler.add_command(link)

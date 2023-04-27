@@ -169,10 +169,6 @@ class RnafusionConfig(CommonAppConfig):
     tower_pipeline: str
 
 
-class TaxprofilerConfig(CommonAppConfig):
-    pass
-
-
 class CGStatsConfig(BaseModel):
     binary_path: str
     database: str

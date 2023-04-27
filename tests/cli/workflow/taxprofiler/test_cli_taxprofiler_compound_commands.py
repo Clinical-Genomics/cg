@@ -16,9 +16,6 @@ def test_taxprofiler_no_args(cli_runner: CliRunner, taxprofiler_context: CGConfi
     # WHEN running command
     result = cli_runner.invoke(taxprofiler, [], obj=taxprofiler_context)
 
-    # THEN command runs successfully
-    print(result.output)
-
     assert result.exit_code == EXIT_SUCCESS
 
     ## THEN help should be printed
