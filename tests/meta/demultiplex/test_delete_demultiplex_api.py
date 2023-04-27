@@ -342,10 +342,9 @@ def test_delete_flow_cell_cgstats(
 
     # GIVEN an existing object in cg-stags database
 
-    existing_object: models.Flowcell = (
-        models.Flowcell.query.filter(models.Flowcell.flowcellname == flow_cell_id)
-        .first()
-    )
+    existing_object: models.Flowcell = models.Flowcell.query.filter(
+        models.Flowcell.flowcellname == flow_cell_id
+    ).first()
 
     assert existing_object
 
@@ -359,11 +358,9 @@ def test_delete_flow_cell_cgstats(
 
     # AND the object should no longer exist
 
-    existing_object: models.Flowcell = (
-        models.Flowcell.query
-        .filter(models.Flowcell.flowcellname == flow_cell_id)
-        .first()
-    )
+    existing_object: models.Flowcell = models.Flowcell.query.filter(
+        models.Flowcell.flowcellname == flow_cell_id
+    ).first()
 
     assert not existing_object
 

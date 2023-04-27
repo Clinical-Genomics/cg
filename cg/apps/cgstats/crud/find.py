@@ -21,10 +21,9 @@ SAMPLE_PATTERN = "{}\_%"
 
 
 class FindHandler:
-
     def __init__(self, session: Session) -> None:
         self.session = session
-        
+
     def get_support_parameters_id(self, demux_results: DemuxResults) -> Optional[int]:
         """Fetch the id of the support parameters if post exists"""
         LOG.debug("Search for support parameters with file %s", demux_results.results_dir)
@@ -76,7 +75,7 @@ class FindHandler:
     def get_sample(self, sample_id: str):
         """Get a unique demux sample."""
         pattern = SAMPLE_PATTERN.format(sample_id)
-        return self.session.query(Sample).filter(
+        return Sample.query.filter(
             or_(Sample.samplename.like(pattern), Sample.samplename == sample_id)
         ).first()
 
@@ -95,7 +94,7 @@ class FindHandler:
         return None
 
     def get_samples(self, flowcell: str, project_name: Optional[str] = None) -> Query:
-        query: Query = self.session.query(Sample).join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
+        query: Query = Sample.query.join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
         if project_name:
             query = query.join(Sample.project).filter(Project.projectname == project_name)
 

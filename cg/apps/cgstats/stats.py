@@ -56,7 +56,6 @@ class StatsAPI:
         """Drop all tables in the database."""
         Base.metadata.drop_all(bind=self.session.get_bind())
 
-
     @staticmethod
     def get_curated_sample_name(sample_name: str) -> str:
         """Create new sample name"""
@@ -90,9 +89,7 @@ class StatsAPI:
 
     def flowcell(self, flowcell_name: str) -> StatsFlowcell:
         """Fetch information about a flowcell."""
-        flowcell_object: Flowcell = Flowcell.query.filter_by(
-            flowcellname=flowcell_name
-        ).first()
+        flowcell_object: Flowcell = Flowcell.query.filter_by(flowcellname=flowcell_name).first()
         flowcell_data = {
             "name": flowcell_object.flowcellname,
             "sequencer": flowcell_object.demux[0].datasource.machine,
