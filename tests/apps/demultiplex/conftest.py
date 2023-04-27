@@ -295,11 +295,11 @@ def fixture_novaseq_sample_1() -> NovaSeqSample:
         SampleRef="hg19",
         index="ATTCCACACT",
         index2="TGGTCTTGTT",
-        SampleName=814206,
+        SampleName="814206",
         Control="N",
         Recipe="R1",
         Operator="script",
-        Project=814206,
+        Project="814206",
     )
 
 
@@ -313,9 +313,9 @@ def fixture_novaseq_sample_2() -> NovaSeqSample:
         SampleRef="hg19",
         index="ATTCCACACT",
         index2="TGGTCTTGTT",
-        SampleName=814206,
+        SampleName="814206",
         Control="N",
         Recipe="R1",
         Operator="script",
-        Project=814206,
+        Project="814206",
     )
