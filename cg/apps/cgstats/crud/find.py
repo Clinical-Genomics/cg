@@ -83,12 +83,21 @@ class FindHandler:
         return None
 
     def get_unaligned_id(self, sample_id: int, demux_id: int, lane: int) -> Optional[int]:
-        unaligned_id: Optional[int] = Unaligned.exists(
+        unaligned: Unaligned = self.get_unaligned_by_sample_id_demux_id_and_lane(
             sample_id=sample_id, demux_id=demux_id, lane=lane
         )
-        if unaligned_id:
-            return unaligned_id
-        return None
+        if unaligned:
+            return unaligned.unaligned_id
+
+    def get_unaligned_by_sample_id_demux_id_and_lane(
+        self, sample_id: int, demux_id: int, lane: int
+    ) -> Optional[Unaligned]:
+        return (
+            Unaligned.query.filter_by(sample_id=sample_id)
+            .filter_by(demux_id=demux_id)
+            .filter_by(lane=lane)
+            .first()
+        )
 
     def get_samples(self, flowcell: str, project_name: Optional[str] = None) -> alchy.Query:
         query: alchy.Query = Sample.query.join(Sample.unaligned, Unaligned.demux, Demux.flowcell)
