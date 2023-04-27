@@ -120,11 +120,11 @@ class StatsAPI(alchy.Manager):
 
     def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
-        flow_cell_obj: Flowcell = self.Flowcell.query.filter(
-            Flowcell.flowcellname == flow_cell_name
-        ).first()
+        flow_cell_obj: Flowcell = self.find_handler.get_flowcell_by_name(
+            flowcell_name=flow_cell_name
+        )
 
-        if flow_cell_obj and flow_cell_obj.exists(flowcell_name=flow_cell_name):
+        if flow_cell_obj:
             sample_count: int = 0
             q30_list: List[float] = []
 
