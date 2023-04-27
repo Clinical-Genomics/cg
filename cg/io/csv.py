@@ -1,7 +1,7 @@
 """Module for reading and writing comma separated values (CSV) formatted files."""
 import csv
 import io
-from typing import Any, List, Tuple
+from typing import Any, List
 from pathlib import Path
 
 
