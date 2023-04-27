@@ -37,7 +37,9 @@ class FindHandler:
         LOG.debug("Could not find support parameters")
         return None
 
-    def get_support_parameters_by_document_path(document_path: str) -> Optional[Supportparams]:
+    def get_support_parameters_by_document_path(
+        self, document_path: str
+    ) -> Optional[Supportparams]:
         return Supportparams.query.filter_by(document_path=document_path).first()
 
     def get_datasource_id(self, demux_results: DemuxResults) -> Optional[int]:
@@ -57,7 +59,7 @@ class FindHandler:
         LOG.debug("Could not find datasource")
         return None
 
-    def get_datasource_by_document_path(document_path: str) -> Optional[Datasource]:
+    def get_datasource_by_document_path(self, document_path: str) -> Optional[Datasource]:
         return Datasource.query.filter_by(document_path=document_path).first()
 
     def get_flowcell_id(self, flowcell_name: str) -> Optional[int]:
@@ -71,7 +73,7 @@ class FindHandler:
         LOG.debug("Could not find flowcell")
         return None
 
-    def get_flowcell_by_name(flowcell_name: str):
+    def get_flowcell_by_name(self, flowcell_name: str):
         return Flowcell.query.filter_by(flowcellname=flowcell_name).first()
 
     def get_demux_id(self, flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
@@ -83,7 +85,9 @@ class FindHandler:
             return demux.demux_id
         return None
 
-    def get_demux_by_flowcell_id_and_base_mask(flowcell_id: int, base_mask: str) -> Optional[Demux]:
+    def get_demux_by_flowcell_id_and_base_mask(
+        self, flowcell_id: int, base_mask: str
+    ) -> Optional[Demux]:
         return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
 
     def get_project_id(self, project_name: str) -> Optional[int]:
