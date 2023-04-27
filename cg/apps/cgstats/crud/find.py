@@ -23,13 +23,22 @@ SAMPLE_PATTERN = "{}\_%"
 class FindHandler:
     def get_support_parameters_id(self, demux_results: DemuxResults) -> Optional[int]:
         """Fetch the id of the support parameters if post exists"""
-        LOG.debug("Search for support parameters with file %s", demux_results.results_dir)
-        support_parameters_id: Optional[int] = Supportparams.exists(str(demux_results.results_dir))
-        if support_parameters_id:
-            LOG.debug("Found support parameters with id %s", support_parameters_id)
+        LOG.debug(f"Search for support parameters with file {demux_results.results_dir}")
+
+        support_parameters: Supportparams = self.get_support_parameters_by_document_path(
+            document_path=str(demux_results.results_dir)
+        )
+
+        if support_parameters:
+            support_parameters_id = support_parameters.supportparams_id
+            LOG.debug(f"Found support parameters with id {support_parameters_id}")
             return support_parameters_id
+
         LOG.debug("Could not find support parameters")
         return None
+
+    def get_support_parameters_by_document_path(document_path: str) -> Optional[Supportparams]:
+        return Supportparams.query.filter_by(document_path=document_path).first()
 
     def get_datasource_id(self, demux_results: DemuxResults) -> Optional[int]:
         """Fetch the datasource id for a certain run"""
