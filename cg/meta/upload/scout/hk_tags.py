@@ -40,7 +40,7 @@ class CaseTags(BaseModel):
     gene_fusion: Set[str] = Field(
         None, description="Arriba report for RNA fusions containing only clinical fusions"
     )
-    gene_fusion_research: Optional[Set[str]] = Field(
+    gene_fusion_report_research: Optional[Set[str]] = Field(
         None, description="Arriba report for RNA fusions containing all fusions"
     )
     RNAfusion_report: Optional[Set[str]] = Field(

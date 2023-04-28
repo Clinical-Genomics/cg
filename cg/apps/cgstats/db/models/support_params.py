@@ -23,14 +23,3 @@ class Supportparams(Base):
 
     def __repr__(self):
         return "{self.__class__.__name__}: {self.document_path}".format(self=self)
-
-    @staticmethod
-    def exists(document_path: str) -> Optional[int]:
-        """Checks if the supportparams entry already exists"""
-        try:
-            support_params: Supportparams = Supportparams.query.filter_by(
-                document_path=document_path
-            ).one()
-            return support_params.supportparams_id
-        except NoResultFound:
-            return None

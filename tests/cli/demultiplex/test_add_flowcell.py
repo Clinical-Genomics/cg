@@ -20,7 +20,7 @@ def test_add_flowcell_cmd(
     assert demultiplexed_flow_cell_finished_working_directory.exists()
 
     # GIVEN that the flowcell does not exist in the cgstats database
-    assert not demultiplex_context.cg_stats_api.find_handler.get_flowcell_id(
+    assert not demultiplex_context.cg_stats_api.find_handler.get_flow_cell_id(
         flowcell_name=flow_cell.id
     )
 
@@ -30,4 +30,6 @@ def test_add_flowcell_cmd(
     # THEN assert that the run was success
     assert result.exit_code == 0
     # THEN assert that the flowcell was added to cgstats
-    assert demultiplex_context.cg_stats_api.find_handler.get_flowcell_id(flowcell_name=flow_cell.id)
+    assert demultiplex_context.cg_stats_api.find_handler.get_flow_cell_id(
+        flowcell_name=flow_cell.id
+    )

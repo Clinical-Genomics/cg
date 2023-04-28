@@ -17,12 +17,3 @@ class Project(Base):
 
     def __repr__(self):
         return "{self.__class__.__name__}: {self.project_id}".format(self=self)
-
-    @staticmethod
-    def exists(project_name: str) -> Optional[int]:
-        """Checks if the Project entry already exists"""
-        try:
-            project: Project = Project.query.filter_by(projectname=project_name).one()
-            return project.project_id
-        except NoResultFound:
-            return None
