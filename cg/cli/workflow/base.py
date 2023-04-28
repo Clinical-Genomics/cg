@@ -13,6 +13,7 @@ from cg.cli.workflow.mip_dna.base import mip_dna
 from cg.cli.workflow.mip_rna.base import mip_rna
 from cg.cli.workflow.mutant.base import mutant
 from cg.cli.workflow.rnafusion.base import rnafusion
+from cg.cli.workflow.taxprofiler.base import taxprofiler
 from cg.cli.workflow.fastq.base import fastq
 
 
@@ -31,4 +32,5 @@ workflow.add_command(mip_rna)
 workflow.add_command(fluffy)
 workflow.add_command(mutant)
 workflow.add_command(rnafusion)
+workflow.add_command(taxprofiler)
 workflow.add_command(fastq)
