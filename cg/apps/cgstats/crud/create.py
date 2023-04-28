@@ -354,7 +354,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         datasource_id: int = datasource_object.datasource_id
     else:
         LOG.info("Data source already exists")
-    flowcell_id: Optional[int] = manager.find_handler.get_flowcell_id(
+    flowcell_id: Optional[int] = manager.find_handler.get_flow_cell_id(
         flowcell_name=demux_results.flow_cell.id
     )
 

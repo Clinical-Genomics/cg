@@ -64,34 +64,34 @@ class FindHandler:
         """Get data source by document path."""
         return Datasource.query.filter_by(document_path=document_path).first()
 
-    def get_flowcell_id(self, flowcell_name: str) -> Optional[int]:
-        LOG.debug(f"Search for flowcell {flowcell_name}")
+    def get_flow_cell_id(self, flowcell_name: str) -> Optional[int]:
+        LOG.debug(f"Search for flow cell {flowcell_name}")
 
-        flowcell: Flowcell = self.get_flowcell_by_name(flowcell_name=flowcell_name)
+        flowcell: Flowcell = self.get_flow_cell_by_name(flowcell_name=flowcell_name)
         if flowcell:
-            LOG.debug(f"Found flowcell with id {flowcell.flowcell_id}")
+            LOG.debug(f"Found flow cell with id {flowcell.flowcell_id}")
             return flowcell.flowcell_id
 
-        LOG.debug("Could not find flowcell")
+        LOG.debug("Could not find flow cell")
         return None
 
-    def get_flowcell_by_name(self, flowcell_name: str):
+    def get_flow_cell_by_name(self, flowcell_name: str):
         """Get flow cell by name."""
         return Flowcell.query.filter_by(flowcellname=flowcell_name).first()
 
     def get_demux_id(self, flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
         """Flowcell object id refers to a database object"""
-        demux: Demux = self.get_demux_by_flowcell_id_and_base_mask(
+        demux: Demux = self.get_demux_by_flow_cell_id_and_base_mask(
             flowcell_id=flowcell_object_id, base_mask=base_mask
         )
         if demux:
             return demux.demux_id
         return None
 
-    def get_demux_by_flowcell_id_and_base_mask(
+    def get_demux_by_flow_cell_id_and_base_mask(
         self, flowcell_id: int, base_mask: str
     ) -> Optional[Demux]:
-        """Get demux by flowcell id and base mask."""
+        """Get demux by flow cell id and base mask."""
         return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
 
     def get_project_id(self, project_name: str) -> Optional[int]:
