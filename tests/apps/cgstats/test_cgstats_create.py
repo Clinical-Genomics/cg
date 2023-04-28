@@ -27,8 +27,10 @@ def test_create_data_source(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxR
     support_parameters: Supportparams = create.create_support_parameters(
         manager=stats_api, demux_results=bcl2fastq_demux_results
     )
+    document_path: str = str(bcl2fastq_demux_results.conversion_stats_path)
+
     # GIVEN that there are no data source for the given run
-    assert not stats_api.find_handler.get_datasource_id(demux_results=bcl2fastq_demux_results)
+    assert not stats_api.find_handler.get_datasource_by_document_path(document_path=document_path)
 
     # WHEN creating a new datasource
     create.create_datasource(
@@ -38,7 +40,7 @@ def test_create_data_source(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxR
     )
 
     # THEN assert that the datasource exists
-    assert stats_api.find_handler.get_datasource_id(demux_results=bcl2fastq_demux_results)
+    assert stats_api.find_handler.get_datasource_by_document_path(document_path=document_path)
 
 
 def test_create_flowcell(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):

@@ -28,7 +28,9 @@ class FindHandler:
 
         LOG.debug(f"Searching for support parameters with file {document_path}")
 
-        support_params = Supportparams.query.filter_by(document_path=document_path).first()
+        support_params: Supportparams = Supportparams.query.filter_by(
+            document_path=document_path
+        ).first()
 
         if support_params:
             LOG.debug(f"Found support parameters with id {support_params.supportparams_id}")
@@ -37,26 +39,18 @@ class FindHandler:
 
         return support_params
 
-    def get_datasource_id(self, demux_results: DemuxResults) -> Optional[int]:
-        """Get the datasource id for a certain run"""
-        stats_path = {
-            "bcl2fastq": demux_results.conversion_stats_path,
-            "dragen": demux_results.demux_stats_path,
-        }
-        document_path: str = str(stats_path[demux_results.bcl_converter])
+    def get_datasource_by_document_path(self, document_path: str) -> Optional[Datasource]:
+        """Get data source by document path."""
         LOG.debug(f"Search for datasource with file {document_path}")
-        datasource: Datasource = self.get_datasource_by_document_path(document_path=document_path)
+
+        datasource: Datasource = Datasource.query.filter_by(document_path=document_path).first()
 
         if datasource:
             LOG.debug(f"Found datasource with id {datasource.datasource_id}")
-            return datasource.datasource_id
+        else:
+            LOG.debug("Could not find datasource")
 
-        LOG.debug("Could not find datasource")
-        return None
-
-    def get_datasource_by_document_path(self, document_path: str) -> Optional[Datasource]:
-        """Get data source by document path."""
-        return Datasource.query.filter_by(document_path=document_path).first()
+        return datasource
 
     def get_flow_cell_id(self, flowcell_name: str) -> Optional[int]:
         LOG.debug(f"Search for flow cell {flowcell_name}")

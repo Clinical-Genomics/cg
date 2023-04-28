@@ -346,24 +346,43 @@ def get_or_create_support_parameters(
     return support_parameters
 
 
+def get_document_stats_path_from_demux(demux_results: DemuxResults):
+    stats_path = {
+        "bcl2fastq": demux_results.conversion_stats_path,
+        "dragen": demux_results.demux_stats_path,
+    }
+    document_path: str = str(stats_path[demux_results.bcl_converter])
+    return document_path
+
+
+def get_or_create_datasource(
+    manager: StatsAPI, demux_results: DemuxResults, support_parameters_id: int
+):
+    """Create datasource for demux or retrieve it if it already exists."""
+
+    document_path: str = get_document_stats_path_from_demux(demux_results=demux_results)
+
+    datasource: Datasource = manager.find_handler.get_datasource_by_document_path(
+        document_path=document_path
+    )
+
+    if not datasource:
+        datasource = create_datasource(manager, demux_results, support_parameters_id)
+    else:
+        LOG.info("Data source already exists")
+
+    return datasource
+
+
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     LOG.info("Adding flowcell information to cgstats")
 
     support_parameters = get_or_create_support_parameters(manager, demux_results)
+    support_parameters_id = support_parameters.supportparams_id
 
-    datasource_id: Optional[int] = manager.find_handler.get_datasource_id(
-        demux_results=demux_results
-    )
-    if not datasource_id:
-        datasource_object: Datasource = create_datasource(
-            manager=manager,
-            demux_results=demux_results,
-            support_parameters_id=support_parameters.supportparams_id,
-        )
-        datasource_id: int = datasource_object.datasource_id
-    else:
-        LOG.info("Data source already exists")
+    datasource = get_or_create_datasource(manager, demux_results, support_parameters_id)
+
     flowcell_id: Optional[int] = manager.find_handler.get_flow_cell_id(
         flowcell_name=demux_results.flow_cell.id
     )
@@ -380,7 +399,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
             manager=manager,
             demux_results=demux_results,
             flowcell_id=flowcell_id,
-            datasource_id=datasource_id,
+            datasource_id=datasource.datasource_id,
         )
         demux_id: int = demux_object.demux_id
     else:
