@@ -4,7 +4,7 @@ from typing import List, Dict
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet, SampleSheetError, NovaSeqSample
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet, NovaSeqSample
 from cg.apps.demultiplex.sample_sheet.validate import (
     get_raw_samples,
     get_sample_sheet,
@@ -12,6 +12,7 @@ from cg.apps.demultiplex.sample_sheet.validate import (
     get_samples_by_lane,
     are_samples_unique,
 )
+from cg.exc import SampleSheetError
 
 
 def test_are_samples_unique(

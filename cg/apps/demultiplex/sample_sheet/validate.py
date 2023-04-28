@@ -9,9 +9,9 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
     SampleBcl2Fastq,
     SampleDragen,
-    SampleSheetError,
 )
 from cg.constants.demultiplexing import BclConverter
+from cg.exc import SampleSheetError
 
 LOG = logging.getLogger(__name__)
 
