@@ -27,12 +27,3 @@ class Datasource(Model):
 
     def __repr__(self):
         return "{self.__class__.__name__}: {self.runname}".format(self=self)
-
-    @staticmethod
-    def exists(document_path: str) -> Optional[str]:
-        """Checks if the Datasource entry already exists"""
-        try:
-            datasource: Datasource = Datasource.query.filter_by(document_path=document_path).one()
-            return datasource.datasource_id
-        except NoResultFound:
-            return None
