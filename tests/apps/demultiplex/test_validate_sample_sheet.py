@@ -10,48 +10,38 @@ from cg.apps.demultiplex.sample_sheet.validate import (
     get_sample_sheet,
     get_sample_sheet_from_file,
     get_samples_by_lane,
-    are_samples_unique,
+    validate_samples_are_unique,
 )
 from cg.exc import SampleSheetError
 
 
-def test_are_samples_unique(
-    novaseq_sample_1: NovaSeqSample, novaseq_sample_2: NovaSeqSample, caplog
+def test_validate_samples_are_unique(
+    novaseq_sample_1: NovaSeqSample,
+    novaseq_sample_2: NovaSeqSample,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
-    caplog.set_level(logging.INFO)
+    assert novaseq_sample_1 != novaseq_sample_2
 
     # WHEN validating the samples
+    validate_samples_are_unique(samples=[novaseq_sample_1, novaseq_sample_2])
 
-    # THEN the unique samples are identified as different without error
-    assert are_samples_unique(samples=[novaseq_sample_1, novaseq_sample_2])
+    # THEN no error is raised
 
 
-def test_are_samples_unique_not_unique(novaseq_sample_1: NovaSeqSample, caplog):
+def test_validate_samples_are_unique_not_unique(novaseq_sample_1: NovaSeqSample, caplog):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
     caplog.set_level(logging.INFO)
 
     # WHEN validating the samples
     with pytest.raises(SampleSheetError):
-        are_samples_unique(samples=[novaseq_sample_1, novaseq_sample_1])
+        validate_samples_are_unique(samples=[novaseq_sample_1, novaseq_sample_1])
 
     # THEN a sample sheet error is raised due to the samples being identical
-    assert "exists multiple times in sample sheet" in caplog.text
-
-
-def test_are_samples_unique_no_samples(caplog):
-    """Test that validating an empty list returns false."""
-    # GIVEN a list with no samples
-    caplog.set_level(logging.INFO)
-
-    # WHEN validating the list for sample uniqueness
-
-    # THEN the function returns false
-    assert not are_samples_unique(samples=[])
-    # THEN a warning is printed
-    assert "No samples were found" in caplog.text
+    assert (
+        f"Sample {novaseq_sample_1.sample_id} exists multiple times in sample sheet" in caplog.text
+    )
 
 
 def test_get_samples_by_lane(

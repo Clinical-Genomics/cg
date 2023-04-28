@@ -16,7 +16,7 @@ from cg.exc import SampleSheetError
 LOG = logging.getLogger(__name__)
 
 
-def are_samples_unique(samples: List[NovaSeqSample]) -> bool:
+def validate_samples_are_unique(samples: List[NovaSeqSample]) -> None:
     """Validate that each sample only exists once."""
     sample_ids: set = set()
     for sample in samples:
@@ -26,10 +26,6 @@ def are_samples_unique(samples: List[NovaSeqSample]) -> bool:
             LOG.warning(message)
             raise SampleSheetError(message)
         sample_ids.add(sample_id)
-    if len(sample_ids) == 0:
-        LOG.warning("No samples were found")
-        return False
-    return True
 
 
 def get_samples_by_lane(samples: List[NovaSeqSample]) -> Dict[int, List[NovaSeqSample]]:
@@ -48,8 +44,8 @@ def validate_samples_unique_per_lane(samples: List[NovaSeqSample]) -> None:
 
     sample_by_lane: Dict[int, List[NovaSeqSample]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
-        LOG.info("Validate that samples are unique in lane %s", lane)
-        are_samples_unique(lane_samples)
+        LOG.info(f"Validate that samples are unique in lane {lane}")
+        validate_samples_are_unique(lane_samples)
 
 
 def get_raw_samples(sample_sheet: str) -> List[Dict[str, str]]:
