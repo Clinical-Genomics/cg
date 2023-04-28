@@ -39,8 +39,7 @@ def create_support_parameters(manager: StatsAPI, demux_results: DemuxResults) ->
 
     with session_scope() as session:
         session.add(support_parameters)
-        session.flush()
-        LOG.info("Creating new support parameters object %s", support_parameters)
+        LOG.info(f"Creating new support parameters object {support_parameters}")
         return support_parameters
 
 
@@ -59,8 +58,7 @@ def create_datasource(
 
     with session_scope() as session:
         session.add(datasource)
-        session.flush()
-        LOG.info("Creating new datasource object %s", datasource)
+        LOG.info(f"Creating new datasource object {datasource}")
         return datasource
 
 
@@ -73,8 +71,7 @@ def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
 
     with session_scope() as session:
         session.add(flowcell)
-        session.flush()
-        LOG.info("Creating new flowcell object %s", flowcell)
+        LOG.info(f"Creating new flowcell object {flowcell}")
         return flowcell
 
 
@@ -95,8 +92,7 @@ def create_demux(
 
     with session_scope() as session:
         session.add(demux)
-        session.flush()
-        LOG.info("Creating new demux object %s", demux)
+        LOG.info(f"Creating new demux object {demux}")
         return demux
 
 
@@ -106,8 +102,7 @@ def create_project(manager: StatsAPI, project_name: str) -> Project:
     project.time = sqlalchemy.func.now()
     with session_scope() as session:
         session.add(project)
-        session.flush()
-        LOG.info("Creating new project object %s", project)
+        LOG.info(f"Creating new project object {project}")
         return project
 
 
@@ -121,7 +116,6 @@ def create_sample(manager: StatsAPI, sample_id: str, barcode: str, project_id: i
 
     with session_scope() as session:
         session.add(sample)
-        session.flush()
         return sample
 
 
@@ -147,7 +141,6 @@ def create_unaligned(
 
     with session_scope() as session:
         session.add(unaligned)
-        session.flush()
         return unaligned
 
 
@@ -169,7 +162,6 @@ def create_dragen_unaligned(
 
     with session_scope() as session:
         session.add(unaligned)
-        session.flush()
         return unaligned
 
 
