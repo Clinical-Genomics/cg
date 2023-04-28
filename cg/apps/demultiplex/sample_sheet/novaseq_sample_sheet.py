@@ -50,10 +50,10 @@ class SampleSheetCreator:
         LOG.info("Adding dummy samples for unused indexes")
         indexes_by_lane: Dict[int, Set[str]] = index.get_indexes_by_lane(samples=self.lims_samples)
         for lane, lane_indexes in indexes_by_lane.items():
-            LOG.debug("Add dummy samples for lane %s", lane)
+            LOG.debug(f"Add dummy samples for lane {lane}")
             for index_obj in self.valid_indexes:
                 if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
-                    LOG.debug("Index %s already in use", index_obj.sequence)
+                    LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
                 dummy_sample_obj: LimsFlowcellSample = dummy_sample(
                     flowcell=self.flowcell_id,
@@ -62,7 +62,7 @@ class SampleSheetCreator:
                     name=index_obj.name,
                     bcl_converter=self.bcl_converter,
                 )
-                LOG.debug("Adding dummy sample %s to lane %s", dummy_sample_obj, lane)
+                LOG.debug(f"Adding dummy sample {dummy_sample_obj} to lane {lane}")
                 self.lims_samples.append(dummy_sample_obj)
 
     def remove_unwanted_samples(self) -> None:
@@ -72,7 +72,7 @@ class SampleSheetCreator:
         sample: LimsFlowcellSample
         for sample in self.lims_samples:
             if not index.is_dual_index(sample.index):
-                LOG.warning("Removing sample %s since it does not have dual index", sample)
+                LOG.warning(f"Removing sample {sample} since it does not have dual index")
                 continue
             samples_to_keep.append(sample)
         self.lims_samples = samples_to_keep
@@ -84,7 +84,7 @@ class SampleSheetCreator:
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet
         headers"""
-        LOG.debug("Use sample sheet header %s", sample_sheet_headers)
+        LOG.debug(f"Use sample sheet header {sample_sheet_headers}")
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
@@ -111,7 +111,7 @@ class SampleSheetCreator:
 
     def construct_sample_sheet(self) -> str:
         """Construct the sample sheet"""
-        LOG.info("Constructing sample sheet for %s", self.flowcell_id)
+        LOG.info(f"Constructing sample sheet for {self.flowcell_id}")
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.run_type == "wgs":
             self.add_dummy_samples()
