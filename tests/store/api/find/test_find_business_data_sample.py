@@ -157,7 +157,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
 
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
     samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-        customer_ids=customer_ids, subject_id=subject_id
+        customer_ids=customer_ids, subject_id=subject_id, is_tumour=is_tumour
     )
 
     # THEN two samples should be returned, one for each customer ID, with the specified subject ID and tumour status
@@ -198,7 +198,7 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_e
     # WHEN fetching the samples by customer ID list, subject ID, and tumour status
     non_existing_customer_id = [3]
     samples = store_with_samples_customer_id_and_subject_id_and_tumour_status.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
-        customer_ids=non_existing_customer_id, subject_id="test_subject"
+        customer_ids=non_existing_customer_id, subject_id="test_subject", is_tumour=True
     )
 
     # THEN no samples should be returned

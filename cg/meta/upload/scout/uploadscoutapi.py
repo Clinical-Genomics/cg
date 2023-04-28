@@ -396,13 +396,16 @@ class UploadScoutAPI:
                 f"Failed to link RNA sample {rna_sample.internal_id} to dna samples - subject_id field is empty"
             )
 
+        collaborator_ids = [customer.id for customer in rna_sample.customer.collaborators]
+
         subject_id_samples: List[
             Sample
-        ] = self.status_db.get_samples_by_customer_subject_id_and_is_tumour(
-            customer_internal_id=rna_sample.customer.internal_id,
+        ] = self.status_db.get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
+            customer_ids=collaborator_ids,
             subject_id=rna_sample.subject_id,
             is_tumour=rna_sample.is_tumour,
         )
+
         subject_id_dna_samples: List[Sample] = self._get_application_prep_category(
             subject_id_samples=subject_id_samples
         )
@@ -440,7 +443,7 @@ class UploadScoutAPI:
         for case in cases_related_to_dna_sample:
             if (
                 case.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
-                and case.customer_id == rna_sample.customer_id
+                and case_object.customer in rna_sample.customer.collaborators
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
                     case.internal_id
