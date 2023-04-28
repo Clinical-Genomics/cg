@@ -1,4 +1,4 @@
-""" Create a samplesheet for Novaseq flowcells """
+""" Create a sample sheet for Novaseq flow cells """
 
 import logging
 from typing import Dict, List, Set
@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 
 class SampleSheetCreator:
-    """Create a raw sample sheet for Novaseq flowcells"""
+    """Create a raw sample sheet for Novaseq flow cells"""
 
     def __init__(
         self,
@@ -42,7 +42,7 @@ class SampleSheetCreator:
         return index.get_valid_indexes(dual_indexes_only=True)
 
     def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non existing indexes to samples
+        """Add all dummy samples with non-existing indexes to samples
 
         dummy samples are added if there are indexes that are not used by the actual samples.
         This means that we will add each dummy sample (that is needed) to each lane
