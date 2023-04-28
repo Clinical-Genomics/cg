@@ -72,7 +72,9 @@ def test_create_demux(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
         support_parameters_id=support_parameters.supportparams_id,
     )
     # GIVEN that there is not demux object in the database
-    assert not stats_api.find_handler.get_demux_id(flowcell_object_id=flowcell.flowcell_id)
+    assert not stats_api.find_handler.get_demux_by_flow_cell_id_and_base_mask(
+        flowcell_id=flowcell.flowcell_id
+    )
 
     # WHEN creating a demux object
     create.create_demux(
@@ -83,7 +85,9 @@ def test_create_demux(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
     )
 
     # THEN assert that a demux object was created
-    assert stats_api.find_handler.get_demux_id(flowcell_object_id=flowcell.flowcell_id)
+    assert stats_api.find_handler.get_demux_by_flow_cell_id_and_base_mask(
+        flowcell_id=flowcell.flowcell_id
+    )
 
 
 def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxResults):
@@ -100,7 +104,9 @@ def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxRes
         support_parameters_id=support_parameters.supportparams_id,
     )
     # GIVEN that there is not demux object in the database
-    assert not stats_api.find_handler.get_demux_id(flowcell_object_id=flowcell.flowcell_id)
+    assert not stats_api.find_handler.get_demux_by_flow_cell_id_and_base_mask(
+        flowcell_id=flowcell.flowcell_id
+    )
 
     # WHEN creating a demux object
     demux_object = create.create_demux(
@@ -111,6 +117,6 @@ def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxRes
     )
 
     # THEN assert that a demux object was created
-    assert stats_api.find_handler.get_demux_id(
-        flowcell_object_id=flowcell.flowcell_id, base_mask=demux_object.basemask
+    assert stats_api.find_handler.get_demux_by_flow_cell_id_and_base_mask(
+        flowcell_id=flowcell.flowcell_id, base_mask=demux_object.basemask
     )

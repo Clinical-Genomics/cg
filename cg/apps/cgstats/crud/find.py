@@ -65,17 +65,8 @@ class FindHandler:
 
         return flowcell
 
-    def get_demux_id(self, flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
-        """Flowcell object id refers to a database object"""
-        demux: Demux = self.get_demux_by_flow_cell_id_and_base_mask(
-            flowcell_id=flowcell_object_id, base_mask=base_mask
-        )
-        if demux:
-            return demux.demux_id
-        return None
-
     def get_demux_by_flow_cell_id_and_base_mask(
-        self, flowcell_id: int, base_mask: str
+        self, flowcell_id: int, base_mask: str = ""
     ) -> Optional[Demux]:
         """Get demux by flow cell id and base mask."""
         return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
