@@ -328,6 +328,41 @@ def create_samples(
     )
 
 
+def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
+    """Add a novaseq flowcell to CG stats"""
+    LOG.info("Adding flowcell information to cgstats")
+
+    support_parameters: Supportparams = get_or_create_support_parameters(
+        manager=manager, demux_results=demux_results
+    )
+
+    datasource: Datasource = get_or_create_datasource(
+        manager=manager,
+        demux_results=demux_results,
+        support_parameters_id=support_parameters.supportparams_id,
+    )
+
+    flow_cell: Flowcell = get_or_create_flow_cell(manager=manager, demux_results=demux_results)
+
+    demux: Demux = get_or_create_demux(
+        manager=manager,
+        demux_results=demux_results,
+        flow_cell_id=flow_cell.flowcell_id,
+        datasource_id=datasource.datasource_id,
+    )
+
+    project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
+
+    create_samples(
+        manager=manager,
+        demux_results=demux_results,
+        project_name_to_id=project_name_to_id,
+        demux_id=demux.demux_id,
+    )
+
+    manager.commit()
+
+
 def get_or_create_support_parameters(
     manager: StatsAPI, demux_results: DemuxResults
 ) -> Supportparams:
@@ -402,38 +437,3 @@ def get_or_create_demux(
         LOG.info("Demux object already exists")
 
     return demux
-
-
-def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
-    """Add a novaseq flowcell to CG stats"""
-    LOG.info("Adding flowcell information to cgstats")
-
-    support_parameters: Supportparams = get_or_create_support_parameters(
-        manager=manager, demux_results=demux_results
-    )
-
-    datasource: Datasource = get_or_create_datasource(
-        manager=manager,
-        demux_results=demux_results,
-        support_parameters_id=support_parameters.supportparams_id,
-    )
-
-    flow_cell: Flowcell = get_or_create_flow_cell(manager=manager, demux_results=demux_results)
-
-    demux: Demux = get_or_create_demux(
-        manager=manager,
-        demux_results=demux_results,
-        flow_cell_id=flow_cell.flowcell_id,
-        datasource_id=datasource.datasource_id,
-    )
-
-    project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
-
-    create_samples(
-        manager=manager,
-        demux_results=demux_results,
-        project_name_to_id=project_name_to_id,
-        demux_id=demux.demux_id,
-    )
-
-    manager.commit()
