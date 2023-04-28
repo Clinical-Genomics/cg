@@ -328,19 +328,29 @@ def create_samples(
     )
 
 
+def get_or_create_support_parameters(
+    manager: StatsAPI, demux_results: DemuxResults
+) -> Supportparams:
+    """Create support parameters for demux or retrieve them if they already exist."""
+    document_path = str(demux_results.results_dir)
+
+    support_parameters = manager.find_handler.get_support_parameters_by_document_path(
+        document_path=document_path
+    )
+
+    if not support_parameters:
+        support_parameters = create_support_parameters(manager, demux_results)
+    else:
+        LOG.info("Support parameters already exists")
+
+    return support_parameters
+
+
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     LOG.info("Adding flowcell information to cgstats")
-    support_parameters_id: Optional[int] = manager.find_handler.get_support_parameters_id(
-        demux_results=demux_results
-    )
-    if not support_parameters_id:
-        support_parameters: Supportparams = create_support_parameters(
-            manager=manager, demux_results=demux_results
-        )
-        support_parameters_id: int = support_parameters.supportparams_id
-    else:
-        LOG.info("Support parameters already exists")
+
+    support_parameters = get_or_create_support_parameters(manager, demux_results)
 
     datasource_id: Optional[int] = manager.find_handler.get_datasource_id(
         demux_results=demux_results
@@ -349,7 +359,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         datasource_object: Datasource = create_datasource(
             manager=manager,
             demux_results=demux_results,
-            support_parameters_id=support_parameters_id,
+            support_parameters_id=support_parameters.supportparams_id,
         )
         datasource_id: int = datasource_object.datasource_id
     else:

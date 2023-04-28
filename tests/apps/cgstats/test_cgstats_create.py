@@ -6,18 +6,20 @@ from cg.models.demultiplex.demux_results import DemuxResults
 
 def test_create_support_parameters(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):
     # GIVEN a cg stats api without any support parameter for the demux result
-    assert not stats_api.find_handler.get_support_parameters_id(
-        demux_results=bcl2fastq_demux_results
+    document_path = str(bcl2fastq_demux_results.results_dir)
+    assert not stats_api.find_handler.get_support_parameters_by_document_path(
+        document_path=document_path
     )
 
     # WHEN creating the new support parameters
     create.create_support_parameters(manager=stats_api, demux_results=bcl2fastq_demux_results)
 
     # THEN assert that the parameters was created
-    support_parameters_id = stats_api.find_handler.get_support_parameters_id(
-        demux_results=bcl2fastq_demux_results
+    document_path: str = str(bcl2fastq_demux_results.results_dir)
+    support_parameters = stats_api.find_handler.get_support_parameters_by_document_path(
+        document_path=document_path
     )
-    assert isinstance(support_parameters_id, int)
+    assert isinstance(support_parameters, Supportparams)
 
 
 def test_create_data_source(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):
