@@ -6,6 +6,7 @@ from typing import Dict, List, Set
 from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
+from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
     SAMPLE_SHEET_DATA_HEADER,
@@ -15,7 +16,6 @@ from cg.constants.demultiplexing import (
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
 )
 from cg.models.demultiplex.run_parameters import RunParameters
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet
 
 LOG = logging.getLogger(__name__)
 

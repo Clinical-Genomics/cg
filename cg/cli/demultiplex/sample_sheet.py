@@ -18,7 +18,6 @@ from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 
 LOG = logging.getLogger(__name__)
 

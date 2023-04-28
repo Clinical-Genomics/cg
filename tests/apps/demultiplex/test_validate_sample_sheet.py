@@ -4,7 +4,7 @@ from typing import List, Dict
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.base import SampleSheet, SampleSheetError, NovaSeqSample
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet, SampleSheetError, NovaSeqSample
 from cg.apps.demultiplex.sample_sheet.validate import (
     get_raw_samples,
     get_sample_sheet,
