@@ -24,9 +24,9 @@ from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 LOG = logging.getLogger(__name__)
 
 
-def create_support_parameters(manager: StatsAPI, demux_results: DemuxResults) -> Supportparams:
+def create_support_parameters(demux_results: DemuxResults) -> Supportparams:
     logfile_parameters: LogfileParameters = demux_results.get_logfile_parameters()
-    support_parameters = manager.Supportparams()
+    support_parameters = Supportparams()
     support_parameters.document_path = str(
         demux_results.results_dir
     )  # This is the unaligned directory
@@ -37,16 +37,12 @@ def create_support_parameters(manager: StatsAPI, demux_results: DemuxResults) ->
     support_parameters.sampleconfig = demux_results.sample_sheet_path.read_text()
     support_parameters.time = logfile_parameters.time
 
-    with session_scope() as session:
-        session.add(support_parameters)
-        LOG.info(f"Creating new support parameters object {support_parameters}")
-        return support_parameters
+    LOG.info(f"Creating new support parameters object {support_parameters}")
+    return support_parameters
 
 
-def create_datasource(
-    manager: StatsAPI, demux_results: DemuxResults, support_parameters_id: int
-) -> Datasource:
-    datasource = manager.Datasource()
+def create_datasource(demux_results: DemuxResults, support_parameters_id: int) -> Datasource:
+    datasource = Datasource()
     datasource.runname = demux_results.run_name
     datasource.rundate = demux_results.run_date
     datasource.machine = demux_results.machine_name
@@ -56,32 +52,27 @@ def create_datasource(
     datasource.time = sqlalchemy.func.now()
     datasource.supportparams_id = support_parameters_id
 
-    with session_scope() as session:
-        session.add(datasource)
-        LOG.info(f"Creating new datasource object {datasource}")
-        return datasource
+    LOG.info(f"Creating new datasource object {datasource}")
+    return datasource
 
 
-def create_flowcell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
-    flowcell = manager.Flowcell()
+def create_flowcell(demux_results: DemuxResults) -> Flowcell:
+    flowcell = Flowcell()
     flowcell.flowcellname = demux_results.flow_cell.id
     flowcell.flowcell_pos = demux_results.flow_cell.position
     flowcell.hiseqtype = "novaseq"
     flowcell.time = sqlalchemy.func.now()
 
-    with session_scope() as session:
-        session.add(flowcell)
-        LOG.info(f"Creating new flowcell object {flowcell}")
-        return flowcell
+    LOG.info(f"Creating new flowcell object {flowcell}")
+    return flowcell
 
 
 def create_demux(
-    manager: StatsAPI,
     datasource_id: int,
     demux_results: DemuxResults,
     flowcell_id: int,
 ) -> Demux:
-    demux: Demux = manager.Demux()
+    demux: Demux = Demux()
     demux.flowcell_id = flowcell_id
     demux.datasource_id = datasource_id
     if demux_results.bcl_converter == "dragen":
@@ -90,39 +81,32 @@ def create_demux(
         demux.basemask = ""
     demux.time = sqlalchemy.func.now()
 
-    with session_scope() as session:
-        session.add(demux)
-        LOG.info(f"Creating new demux object {demux}")
-        return demux
+    LOG.info(f"Creating new demux object {demux}")
+    return demux
 
 
-def create_project(manager: StatsAPI, project_name: str) -> Project:
-    project: Project = manager.Project()
+def create_project(project_name: str) -> Project:
+    project: Project = Project()
     project.projectname = project_name
     project.time = sqlalchemy.func.now()
-    with session_scope() as session:
-        session.add(project)
-        LOG.info(f"Creating new project object {project}")
-        return project
+
+    LOG.info(f"Creating new project object {project}")
+    return project
 
 
-def create_sample(manager: StatsAPI, sample_id: str, barcode: str, project_id: int) -> Sample:
-    sample: Sample = manager.Sample()
+def create_sample(sample_id: str, barcode: str, project_id: int) -> Sample:
+    sample: Sample = Sample()
     sample.project_id = project_id
     sample.samplename = sample_id
     sample.limsid = sample_id.split("_")[0]
     sample.barcode = barcode
     sample.time = sqlalchemy.func.now()
 
-    with session_scope() as session:
-        session.add(sample)
-        return sample
+    return sample
 
 
-def create_unaligned(
-    manager: StatsAPI, demux_sample: DemuxSample, sample_id: int, demux_id: int
-) -> Unaligned:
-    unaligned: Unaligned = manager.Unaligned()
+def create_unaligned(demux_sample: DemuxSample, sample_id: int, demux_id: int) -> Unaligned:
+    unaligned: Unaligned = Unaligned()
     unaligned.sample_id = sample_id
     unaligned.demux_id = demux_id
     unaligned.lane = demux_sample.lane
@@ -139,16 +123,14 @@ def create_unaligned(
     unaligned.mean_quality_score = demux_sample.pass_filter_qscore
     unaligned.time = sqlalchemy.func.now()
 
-    with session_scope() as session:
-        session.add(unaligned)
-        return unaligned
+    return unaligned
 
 
 def create_dragen_unaligned(
-    manager: StatsAPI, demux_sample: DragenDemuxSample, sample_id: int, demux_id: int
+    demux_sample: DragenDemuxSample, sample_id: int, demux_id: int
 ) -> Unaligned:
     """Create an unaligned object in cgstats for a sample demultiplexed with Dragen"""
-    unaligned: Unaligned = manager.Unaligned()
+    unaligned: Unaligned = Unaligned()
     unaligned.sample_id: int = sample_id
     unaligned.demux_id: int = demux_id
     unaligned.lane: int = demux_sample.lane
@@ -160,9 +142,7 @@ def create_dragen_unaligned(
     unaligned.mean_quality_score: float = demux_sample.mean_quality_score
     unaligned.time: sqlalchemy.sql.func.now = sqlalchemy.func.now()
 
-    with session_scope() as session:
-        session.add(unaligned)
-        return unaligned
+    return unaligned
 
 
 def _calculate_perfect_indexreads_pct(demux_sample: DragenDemuxSample) -> float:
@@ -205,7 +185,7 @@ def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str
             project_object: Project = create_project(manager=manager, project_name=project_name)
             project_id: int = project_object.project_id
         else:
-            LOG.info("Project %s already exists", project_name)
+            LOG.info(f"Project {project_name} already exists")
         project_name_to_id[project_name] = project_id
     return project_name_to_id
 
@@ -333,57 +313,62 @@ def create_samples(
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     LOG.info("Adding flowcell information to cgstats")
-    support_parameters_id: Optional[int] = manager.find_handler.get_support_parameters_id(
-        demux_results=demux_results
-    )
-    if not support_parameters_id:
-        support_parameters: Supportparams = create_support_parameters(
-            manager=manager, demux_results=demux_results
-        )
-        support_parameters_id: int = support_parameters.supportparams_id
-    else:
-        LOG.info("Support parameters already exists")
 
-    datasource_id: Optional[int] = manager.find_handler.get_datasource_id(
-        demux_results=demux_results
-    )
-    if not datasource_id:
-        datasource_object: Datasource = create_datasource(
+    with session_scope() as session:
+        support_parameters_id: Optional[int] = manager.find_handler.get_support_parameters_id(
+            demux_results=demux_results
+        )
+        if not support_parameters_id:
+            support_parameters: Supportparams = create_support_parameters(
+                demux_results=demux_results
+            )
+            session.add(support_parameters)
+            support_parameters_id: int = support_parameters.supportparams_id
+        else:
+            LOG.info("Support parameters already exists")
+
+        datasource_id: Optional[int] = manager.find_handler.get_datasource_id(
+            demux_results=demux_results
+        )
+        if not datasource_id:
+            datasource: Datasource = create_datasource(
+                manager=manager,
+                demux_results=demux_results,
+                support_parameters_id=support_parameters_id,
+            )
+            session.add(datasource)
+            datasource_id: int = datasource.datasource_id
+        else:
+            LOG.info("Data source already exists")
+
+        flowcell_id: Optional[int] = manager.find_handler.get_flow_cell_id(
+            flowcell_name=demux_results.flow_cell.id
+        )
+
+        if not flowcell_id:
+            flowcell: Flowcell = create_flowcell(manager=manager, demux_results=demux_results)
+            session.add(flowcell)
+            flowcell_id: int = flowcell.flowcell_id
+        else:
+            LOG.info("Flowcell already exists")
+
+        demux_id: Optional[int] = manager.find_handler.get_demux_id(flowcell_object_id=flowcell_id)
+        if not demux_id:
+            demux: Demux = create_demux(
+                demux_results=demux_results,
+                flowcell_id=flowcell_id,
+                datasource_id=datasource_id,
+            )
+            session.add(demux)
+            demux_id: int = demux.demux_id
+        else:
+            LOG.info("Demux object already exists")
+
+        project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
+
+        create_samples(
             manager=manager,
             demux_results=demux_results,
-            support_parameters_id=support_parameters_id,
+            project_name_to_id=project_name_to_id,
+            demux_id=demux_id,
         )
-        datasource_id: int = datasource_object.datasource_id
-    else:
-        LOG.info("Data source already exists")
-    flowcell_id: Optional[int] = manager.find_handler.get_flow_cell_id(
-        flowcell_name=demux_results.flow_cell.id
-    )
-
-    if not flowcell_id:
-        flowcell: Flowcell = create_flowcell(manager=manager, demux_results=demux_results)
-        flowcell_id: int = flowcell.flowcell_id
-    else:
-        LOG.info("Flowcell already exists")
-
-    demux_id: Optional[int] = manager.find_handler.get_demux_id(flowcell_object_id=flowcell_id)
-    if not demux_id:
-        demux_object: Demux = create_demux(
-            manager=manager,
-            demux_results=demux_results,
-            flowcell_id=flowcell_id,
-            datasource_id=datasource_id,
-        )
-        demux_id: int = demux_object.demux_id
-    else:
-        LOG.info("Demux object already exists")
-
-    project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
-
-    create_samples(
-        manager=manager,
-        demux_results=demux_results,
-        project_name_to_id=project_name_to_id,
-        demux_id=demux_id,
-    )
-    manager.session.commit()
