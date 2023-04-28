@@ -2,7 +2,7 @@
 import datetime as dt
 from typing import List, Optional
 
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 
 from cg.store.models import (
     Application,
@@ -36,6 +36,9 @@ from cg.store.filters.status_user_filters import apply_user_filter, UserFilter
 class FindBasicDataHandler(BaseHandler):
     """Contains methods to find basic data model instances."""
 
+    def __init__(self, session: Session):
+        super().__init__(session=session)
+
     def get_application_by_tag(self, tag: str) -> Application:
         """Return an application by tag."""
         return apply_application_filter(
@@ -52,7 +55,7 @@ class FindBasicDataHandler(BaseHandler):
                 filter_functions=[ApplicationFilter.FILTER_BY_PREP_CATEGORY],
                 prep_category=prep_category,
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -63,7 +66,7 @@ class FindBasicDataHandler(BaseHandler):
                 applications=self._get_query(table=Application),
                 filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -80,7 +83,7 @@ class FindBasicDataHandler(BaseHandler):
                 ],
                 prep_category=prep_category,
             )
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 
@@ -88,7 +91,7 @@ class FindBasicDataHandler(BaseHandler):
         """Return all applications."""
         return (
             self._get_query(table=Application)
-            .order_by(self.Application.prep_category, self.Application.tag)
+            .order_by(Application.prep_category, Application.tag)
             .all()
         )
 

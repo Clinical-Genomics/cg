@@ -152,7 +152,8 @@ def test_get_flow_cells_by_statuses_when_multiple_matches(
     # GIVEN a flow cell that exist in status db with status "requested"
     flow_cells: List[Flowcell] = re_sequenced_sample_store._get_query(table=Flowcell)
     flow_cells[0].status = FlowCellStatus.REQUESTED
-    re_sequenced_sample_store.add_commit(flow_cells[0])
+    re_sequenced_sample_store.session.add(flow_cells[0])
+    re_sequenced_sample_store.session.commit()
 
     # WHEN fetching the latest flow cell
     flow_cells: List[Flowcell] = re_sequenced_sample_store.get_flow_cells_by_statuses(
@@ -514,7 +515,7 @@ def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_i
     # GIVEN a case where all samples are down sampled
     for sample in case_obj.samples:
         sample.from_sample = sample_id
-    base_store.commit()
+    base_store.session.commit()
 
     # WHEN checking if all sample in the case are down sampled
     is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
@@ -546,7 +547,7 @@ def test_is_case_external_true(
     )
     for sample in case_obj.samples:
         sample.application_version = external_application_version
-    base_store.commit()
+    base_store.session.commit()
 
     # WHEN checking if all sample in the case are external
     is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)

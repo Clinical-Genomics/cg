@@ -1,8 +1,7 @@
 """All models aggregated in a base class"""
-import datetime
 from typing import Callable, Optional, Type, List
 
-from alchy import Query, ModelBase
+from sqlalchemy.orm import Query, Session
 from sqlalchemy import and_, func
 from dataclasses import dataclass
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
@@ -12,51 +11,28 @@ from cg.store.models import (
     Analysis,
     Application,
     ApplicationVersion,
-    Bed,
-    BedVersion,
-    Collaboration,
     Customer,
-    Delivery,
     Family,
     FamilySample,
     Flowcell,
-    Invoice,
-    Organism,
-    Panel,
-    Pool,
     Sample,
-    User,
 )
 from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.utils.date import get_date_days_ago
+
+from cg.store.models import Model as ModelBase
 
 
 @dataclass
 class BaseHandler:
     """All models in one base class."""
 
-    Analysis: Type[ModelBase] = Analysis
-    Application: Type[ModelBase] = Application
-    ApplicationVersion: Type[ModelBase] = ApplicationVersion
-    Bed: Type[ModelBase] = Bed
-    BedVersion: Type[ModelBase] = BedVersion
-    Collaboration: Type[ModelBase] = Collaboration
-    Customer: Type[ModelBase] = Customer
-    Delivery: Type[ModelBase] = Delivery
-    Family: Type[ModelBase] = Family
-    FamilySample: Type[ModelBase] = FamilySample
-    Flowcell: Type[ModelBase] = Flowcell
-    Invoice: Type[ModelBase] = Invoice
-    Organism: Type[ModelBase] = Organism
-    Panel: Type[ModelBase] = Panel
-    Pool: Type[ModelBase] = Pool
-    Sample: Type[ModelBase] = Sample
-    User: Type[ModelBase] = User
+    def __init__(self, session: Session):
+        self.session = session
 
-    @staticmethod
-    def _get_query(table: Type[ModelBase]) -> Query:
+    def _get_query(self, table: Type[ModelBase]) -> Query:
         """Return a query for the given table."""
-        return table.query
+        return self.session.query(table)
 
     def _get_outer_join_cases_with_analyses_query(self) -> Query:
         """Return a query for all cases in the database with an analysis."""
@@ -128,8 +104,8 @@ class BaseHandler:
         return analyses.join(
             case_and_date_subquery,
             and_(
-                self.Analysis.family_id == case_and_date_subquery.c.family_id,
-                self.Analysis.started_at == case_and_date_subquery.c.started_at,
+                Analysis.family_id == case_and_date_subquery.c.family_id,
+                Analysis.started_at == case_and_date_subquery.c.started_at,
             ),
         )
 

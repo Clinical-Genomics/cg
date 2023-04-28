@@ -99,7 +99,8 @@ class MicrobialSubmitter(Submitter):
                         ticket=ticket_id,
                     )
                     case.customer: Customer = customer
-                    self.status.add_commit(case)
+                    self.status.session.add(case)
+                    self.status.session.commit()
 
                 application_tag: str = sample_data["application"]
                 application_version: ApplicationVersion = (
@@ -115,7 +116,8 @@ class MicrobialSubmitter(Submitter):
                         name=sample_data["organism_id"],
                         reference_genome=sample_data["reference_genome"],
                     )
-                    self.status.add_commit(organism)
+                    self.status.session.add(organism)
+                    self.status.session.commit()
 
                 if comment:
                     case.comment: str = f"Order comment: {comment}"
@@ -142,7 +144,8 @@ class MicrobialSubmitter(Submitter):
                 new_samples.append(new_sample)
 
             case.priority = priority
-            self.status.add_commit(new_samples)
+            self.status.session.add_all(new_samples)
+            self.status.session.commit()
         return sample_objs
 
     def _fill_in_sample_verified_organism(self, samples: List[MicrobialSample]):

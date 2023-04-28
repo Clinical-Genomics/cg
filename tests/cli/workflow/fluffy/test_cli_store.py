@@ -181,7 +181,7 @@ def test_cli_store_available_case_not_running(
     fluffy_analysis_api.status_db.get_case_by_internal_id(
         internal_id=fluffy_case_id_existing
     ).action = None
-    fluffy_analysis_api.status_db.commit()
+    fluffy_analysis_api.status_db.session.commit()
 
     # GIVEN deliverables were generated and could be found
     mocker.patch.object(FluffyAnalysisAPI, "get_deliverables_file_path")

@@ -170,7 +170,7 @@ class DeleteDemuxAPI:
                 flow_cell_name=self.flow_cell_name
             )
             flow_cell_obj.status = "removed"
-            self.status_db.commit()
+            self.status_db.session.commit()
         if demultiplexing_dir and self.demultiplexing_path.exists():
             self._delete_demultiplexing_dir_hasta()
         else:

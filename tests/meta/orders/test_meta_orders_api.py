@@ -154,11 +154,11 @@ def test_submit_illegal_sample_customer(
         invoice_address="dummy street",
         invoice_reference="dummy nr",
     )
-    sample_store.add_commit(new_customer)
+    sample_store.session.add(new_customer)
     existing_sample: Sample = sample_store.get_samples()[0]
     existing_sample.customer = new_customer
-    sample_store.add_commit(existing_sample)
-
+    sample_store.session.add(existing_sample)
+    sample_store.session.commit()
     for sample in order_data.samples:
         sample.internal_id = existing_sample.internal_id
 
@@ -193,7 +193,7 @@ def test_submit_scout_legal_sample_customer(
     # GIVEN we have an order with a customer that is in the same customer group as customer
     # that the samples originate from
     collaboration = sample_store.add_collaboration("customer999only", "customer 999 only group")
-    sample_store.add_commit(collaboration)
+    sample_store.session.add(collaboration)
     sample_customer = sample_store.add_customer(
         "customer1",
         "customer 1",
@@ -210,11 +210,11 @@ def test_submit_scout_legal_sample_customer(
     )
     sample_customer.collaborations.append(collaboration)
     order_customer.collaborations.append(collaboration)
-    sample_store.add_commit(sample_customer)
-    sample_store.add_commit(order_customer)
+    sample_store.session.add(sample_customer)
+    sample_store.session.add(order_customer)
     existing_sample: Sample = sample_store.get_samples()[0]
     existing_sample.customer = sample_customer
-    sample_store.commit()
+    sample_store.session.commit()
     order_data.customer = order_customer.internal_id
 
     for sample in order_data.samples:
@@ -256,7 +256,8 @@ def test_submit_duplicate_sample_case_name(
                 ticket=ticket_id,
             )
             case.customer = customer
-            store.add_commit(case)
+            store.session.add(case)
+        store.session.commit()
         assert store.get_case_by_name_and_customer(customer=customer, case_name=case_id)
 
     monkeypatch_process_lims(monkeypatch, order_data)
@@ -360,7 +361,8 @@ def test_validate_sex_inconsistent_sex(
             gender="male" if sample.sex == "female" else "female",
             customer_id=customer.internal_id,
         )
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
         assert sample_obj.sex != sample.sex
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -389,7 +391,8 @@ def test_validate_sex_consistent_sex(
             gender=sample.sex,
             customer_id=customer.internal_id,
         )
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
         assert sample_obj.sex == sample.sex
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -419,7 +422,8 @@ def test_validate_sex_unknown_existing_sex(
             gender="unknown",
             customer_id=customer.internal_id,
         )
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
         assert sample_obj.sex != sample.sex
 
     submitter: MipDnaSubmitter = MipDnaSubmitter(lims=orders_api.lims, status=orders_api.status)
@@ -449,7 +453,8 @@ def test_validate_sex_unknown_new_sex(
             customer_id=customer.internal_id,
         )
         sample.sex = "unknown"
-        store.add_commit(sample_obj)
+        store.session.add(sample_obj)
+        store.session.commit()
 
     for sample in order_data.samples:
         assert sample_obj.sex != sample.sex
@@ -542,7 +547,8 @@ def store_samples_with_names_from_order(store: Store, helpers: StoreHelpers, ord
             sample_obj = helpers.add_sample(
                 store=store, name=sample_name, customer_id=customer.internal_id
             )
-            store.add_commit(sample_obj)
+            store.session.add(sample_obj)
+            store.session.commit()
 
 
 @patch("cg.meta.orders.ticket_handler.FormDataRequest.submit", return_value=None)

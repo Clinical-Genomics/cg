@@ -1,7 +1,7 @@
 """This script tests the cli methods to add cases to status-db"""
 from typing import List, Union
 
-from alchy import Query
+from sqlalchemy.orm import Query
 from datetime import datetime
 
 from cg.constants import Pipeline

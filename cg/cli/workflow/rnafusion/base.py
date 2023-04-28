@@ -124,8 +124,8 @@ def run(
             case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
         ),
         "name": case_id,
-        "compute-env": compute_env,
-        "revision": revision,
+        "compute-env": compute_env or analysis_api.compute_env,
+        "revision": revision or analysis_api.revision,
         "wait": "SUBMITTED",
     }
 
@@ -145,6 +145,8 @@ def run(
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
+    if not dry_run:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
 
 
 @rnafusion.command("start")
@@ -277,7 +279,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     except Exception as error:
         LOG.error(f"Could not store bundle in Housekeeper and StatusDB: {error}!")
         housekeeper_api.rollback()
-        status_db.rollback()
+        status_db.session.rollback()
         raise click.Abort()
 
 

@@ -6,9 +6,8 @@ import pytest
 from pydantic import BaseModel
 
 from cg.apps.cgstats.crud import create
-from cg.apps.cgstats.db import models as stats_models
+from cg.apps.cgstats.db.models import Supportparams, Sample, Project, Datasource, Demux
 from cg.apps.cgstats.stats import StatsAPI
-from cg.apps.cgstats.parsers.run_info import RunInfo
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from tests.models.demultiplexing.conftest import (
@@ -106,27 +105,25 @@ def fixture_nipt_stats_api(
         flow_cell_full_name=flow_cell_full_name, sample_sheet_path=novaseq_dragen_sample_sheet_path
     )
 
-    project_obj: stats_models.Project = create.create_project(
-        manager=nipt_stats_api, project_name=ticket_id
-    )
-    support_parameters_obj: stats_models.Supportparams = create.create_support_parameters(
+    project_obj: Project = create.create_project(manager=nipt_stats_api, project_name=ticket_id)
+    support_parameters_obj: Supportparams = create.create_support_parameters(
         manager=nipt_stats_api, demux_results=mock_demux_results
     )
-    flowcell_obj: stats_models.FlowCell = create.create_flowcell(
+    flowcell_obj: FlowCell = create.create_flowcell(
         manager=nipt_stats_api, demux_results=mock_demux_results
     )
-    datasource_obj: stats_models.Datasource = create.create_datasource(
+    datasource_obj: Datasource = create.create_datasource(
         manager=nipt_stats_api,
         demux_results=mock_demux_results,
         support_parameters_id=support_parameters_obj.supportparams_id,
     )
-    demux_obj: stats_models.Demux = create.create_demux(
+    demux_obj: Demux = create.create_demux(
         manager=nipt_stats_api,
         flowcell_id=flowcell_obj.flowcell_id,
         datasource_id=datasource_obj.datasource_id,
         demux_results=mock_demux_results,
     )
-    sample_obj: stats_models.Sample = create.create_sample(
+    sample_obj: Sample = create.create_sample(
         manager=nipt_stats_api,
         sample_id=sample_id,
         barcode="51,8,8,51",

@@ -1512,5 +1512,6 @@ def add_case(
     case.ordered_at = datetime.now() - timedelta(days=ordered_days_ago)
     if action:
         case.action = action
-    disk_store.add_commit(case)
+    disk_store.session.add(case)
+    disk_store.session.commit()
     return case

@@ -38,7 +38,8 @@ def store_fastq_analysis(context: click.Context, case_id: str, dry_run: bool = F
     )
     if dry_run:
         return
-    status_db.add_commit(new_analysis)
+    status_db.session.add(new_analysis)
+    status_db.session.commit()
 
 
 @fastq.command("store-available")

@@ -282,7 +282,7 @@ class FOHMUploadAPI:
             return
         case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].upload_started_at = dt.datetime.now()
-        self.status_db.commit()
+        self.status_db.session.commit()
 
     def update_uploaded_at(self, case_id: str) -> None:
         """Update timestamp for cases which uploaded successfully"""
@@ -290,4 +290,4 @@ class FOHMUploadAPI:
             return
         case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         case_obj.analyses[0].uploaded_at = dt.datetime.now()
-        self.status_db.commit()
+        self.status_db.session.commit()
