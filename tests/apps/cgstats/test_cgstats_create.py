@@ -45,16 +45,16 @@ def test_create_data_source(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxR
 
 def test_create_flowcell(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults):
     # GIVEN a api without a flowcell object
-    assert not stats_api.find_handler.get_flow_cell_id(
-        flowcell_name=bcl2fastq_demux_results.flow_cell.id
+    assert not stats_api.find_handler.get_flow_cell_by_name(
+        flow_cell_name=bcl2fastq_demux_results.flow_cell.id
     )
 
     # WHEN creating a new flowcell
     create.create_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
 
     # THEN assert that the flowcell was created
-    assert stats_api.find_handler.get_flow_cell_id(
-        flowcell_name=bcl2fastq_demux_results.flow_cell.id
+    assert stats_api.find_handler.get_flow_cell_by_name(
+        flow_cell_name=bcl2fastq_demux_results.flow_cell.id
     )
 
 

@@ -374,6 +374,17 @@ def get_or_create_datasource(
     return datasource
 
 
+def get_or_create_flow_cell(manager: StatsAPI, demux_results: DemuxResults):
+    flowcell = manager.find_handler.get_flow_cell_by_name(flow_cell_name=demux_results.flow_cell.id)
+
+    if not flowcell:
+        flowcell = create_flowcell(manager, demux_results)
+    else:
+        LOG.info("Flowcell already exists")
+
+    return flowcell
+
+
 def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     LOG.info("Adding flowcell information to cgstats")
@@ -382,24 +393,18 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     support_parameters_id = support_parameters.supportparams_id
 
     datasource = get_or_create_datasource(manager, demux_results, support_parameters_id)
+    datasource_id = datasource.datasource_id
 
-    flowcell_id: Optional[int] = manager.find_handler.get_flow_cell_id(
-        flowcell_name=demux_results.flow_cell.id
-    )
+    flow_cell = get_or_create_flow_cell(manager, demux_results)
+    flow_cell_id = flow_cell.flowcell_id
 
-    if not flowcell_id:
-        flowcell: Flowcell = create_flowcell(manager=manager, demux_results=demux_results)
-        flowcell_id: int = flowcell.flowcell_id
-    else:
-        LOG.info("Flowcell already exists")
-
-    demux_id: Optional[int] = manager.find_handler.get_demux_id(flowcell_object_id=flowcell_id)
+    demux_id: Optional[int] = manager.find_handler.get_demux_id(flowcell_object_id=flow_cell_id)
     if not demux_id:
         demux_object: Demux = create_demux(
             manager=manager,
             demux_results=demux_results,
-            flowcell_id=flowcell_id,
-            datasource_id=datasource.datasource_id,
+            flowcell_id=flow_cell_id,
+            datasource_id=datasource_id,
         )
         demux_id: int = demux_object.demux_id
     else:

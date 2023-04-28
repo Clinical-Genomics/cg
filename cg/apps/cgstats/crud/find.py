@@ -52,20 +52,18 @@ class FindHandler:
 
         return datasource
 
-    def get_flow_cell_id(self, flowcell_name: str) -> Optional[int]:
-        LOG.debug(f"Search for flow cell {flowcell_name}")
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Optional[Flowcell]:
+        """Get flow cell by name."""
+        LOG.debug(f"Searching for flow cell {flow_cell_name}")
 
-        flowcell: Flowcell = self.get_flow_cell_by_name(flowcell_name=flowcell_name)
+        flowcell = Flowcell.query.filter_by(flowcellname=flow_cell_name).first()
+
         if flowcell:
             LOG.debug(f"Found flow cell with id {flowcell.flowcell_id}")
-            return flowcell.flowcell_id
+        else:
+            LOG.debug("Flow cell not found")
 
-        LOG.debug("Could not find flow cell")
-        return None
-
-    def get_flow_cell_by_name(self, flowcell_name: str):
-        """Get flow cell by name."""
-        return Flowcell.query.filter_by(flowcellname=flowcell_name).first()
+        return flowcell
 
     def get_demux_id(self, flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
         """Flowcell object id refers to a database object"""
