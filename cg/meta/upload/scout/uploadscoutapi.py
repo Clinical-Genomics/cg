@@ -458,11 +458,13 @@ class UploadScoutAPI:
     ) -> None:
         for dna_sample.link in dna_sample.links:
             case_object: Family = dna_sample.link.family
-            if (
-                case_object.data_analysis
-                in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
-                and case_object.customer.id in customer.id
-                for customer in rna_sample.customer.collaborators
+            if any(
+                [
+                    case_object.data_analysis
+                    in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
+                    and case_object.customer.id
+                    in [customer.id for customer in rna_sample.customer.collaborators]
+                ]
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
                     case_object.internal_id
