@@ -134,10 +134,6 @@ class UploadGenotypesAPI(object):
 
         samples: List[Sample] = case_obj.samples
         return any(
-            (
-                not sample.is_tumour
-                and PrepCategory.WHOLE_GENOME_SEQUENCING
-                == sample.prep_category
-            )
+            (not sample.is_tumour and PrepCategory.WHOLE_GENOME_SEQUENCING == sample.prep_category)
             for sample in samples
         )
