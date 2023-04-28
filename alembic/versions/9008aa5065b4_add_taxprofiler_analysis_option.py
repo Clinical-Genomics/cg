@@ -10,6 +10,7 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 
 import sqlalchemy as sa
+from cg.constants import Pipeline
 
 
 # revision identifiers, used by Alembic.
@@ -43,13 +44,15 @@ new_enum = mysql.ENUM(*new_options)
 
 
 class Analysis(Base):
-    __tablename__ = "pipeline"
+    __tablename__ = "analysis"
     id = sa.Column(sa.types.Integer, primary_key=True)
+    pipeline = sa.Column(sa.types.Enum(*list(Pipeline)))
 
 
 class Family(Base):
-    __tablename__ = "data_analysis"
+    __tablename__ = "family"
     id = sa.Column(sa.types.Integer, primary_key=True)
+    data_analysis = sa.Column(sa.types.Enum(*list(Pipeline)))
 
 
 def upgrade():
