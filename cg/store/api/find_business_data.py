@@ -670,18 +670,13 @@ class FindBusinessDataHandler(BaseHandler):
     ) -> List[Sample]:
         """Return a list of samples matching a list of customers with given subject id and is a tumour or not."""
         samples = self._get_query(table=Sample)
-        if is_tumour:
-            filter_functions = [
-                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
-                SampleFilter.FILTER_BY_SUBJECT_ID,
-                SampleFilter.FILTER_IS_TUMOUR,
-            ]
-        else:
-            filter_functions = [
-                SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
-                SampleFilter.FILTER_BY_SUBJECT_ID,
-                SampleFilter.FILTER_IS_NOT_TUMOUR,
-            ]
+        filter_functions = [
+            SampleFilter.FILTER_BY_CUSTOMER_ENTRY_IDS,
+            SampleFilter.FILTER_BY_SUBJECT_ID,
+        ]
+        filter_functions.append(
+            SampleFilter.FILTER_IS_TUMOUR
+        ) if is_tumour else filter_functions.append(SampleFilter.FILTER_IS_NOT_TUMOUR)
         return apply_sample_filter(
             samples=samples,
             customer_entry_ids=customer_ids,
