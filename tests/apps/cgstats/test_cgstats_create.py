@@ -80,7 +80,7 @@ def test_create_demux(stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
     create.create_demux(
         manager=stats_api,
         demux_results=bcl2fastq_demux_results,
-        flowcell_id=flowcell.flowcell_id,
+        flow_cell_id=flowcell.flowcell_id,
         datasource_id=data_source.datasource_id,
     )
 
@@ -112,7 +112,7 @@ def test_create_dragen_demux(stats_api: StatsAPI, dragen_demux_results: DemuxRes
     demux_object = create.create_demux(
         manager=stats_api,
         demux_results=dragen_demux_results,
-        flowcell_id=flowcell.flowcell_id,
+        flow_cell_id=flowcell.flowcell_id,
         datasource_id=data_source.datasource_id,
     )
 

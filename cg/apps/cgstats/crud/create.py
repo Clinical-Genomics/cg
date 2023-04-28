@@ -77,10 +77,10 @@ def create_demux(
     manager: StatsAPI,
     datasource_id: int,
     demux_results: DemuxResults,
-    flowcell_id: int,
+    flow_cell_id: int,
 ) -> Demux:
     demux: Demux = manager.Demux()
-    demux.flowcell_id = flowcell_id
+    demux.flowcell_id = flow_cell_id
     demux.datasource_id = datasource_id
     if demux_results.bcl_converter == "dragen":
         demux.basemask: str = demux_results.run_info.basemask
@@ -392,7 +392,12 @@ def get_or_create_demux(
         flowcell_id=flow_cell_id
     )
     if not demux:
-        demux = create_demux(manager, demux_results, flow_cell_id, datasource_id)
+        demux = create_demux(
+            manager=manager,
+            demux_results=demux_results,
+            flow_cell_id=flow_cell_id,
+            datasource_id=datasource_id,
+        )
     else:
         LOG.info("Demux object already exists")
 
@@ -403,17 +408,24 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     LOG.info("Adding flowcell information to cgstats")
 
-    support_parameters = get_or_create_support_parameters(manager, demux_results)
-    support_parameters_id = support_parameters.supportparams_id
+    support_parameters: Supportparams = get_or_create_support_parameters(
+        manager=manager, demux_results=demux_results
+    )
 
-    datasource = get_or_create_datasource(manager, demux_results, support_parameters_id)
-    datasource_id = datasource.datasource_id
+    datasource: Datasource = get_or_create_datasource(
+        manager=manager,
+        demux_results=demux_results,
+        support_parameters_id=support_parameters.supportparams_id,
+    )
 
-    flow_cell = get_or_create_flow_cell(manager, demux_results)
-    flow_cell_id = flow_cell.flowcell_id
+    flow_cell: Flowcell = get_or_create_flow_cell(manager=manager, demux_results=demux_results)
 
-    demux = get_or_create_demux(manager, demux_results, flow_cell_id, datasource_id)
-    demux_id = demux.demux_id
+    demux: Demux = get_or_create_demux(
+        manager=manager,
+        demux_results=demux_results,
+        flow_cell_id=flow_cell.flowcell_id,
+        datasource_id=datasource.datasource_id,
+    )
 
     project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
 
@@ -421,6 +433,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         manager=manager,
         demux_results=demux_results,
         project_name_to_id=project_name_to_id,
-        demux_id=demux_id,
+        demux_id=demux.demux_id,
     )
+
     manager.commit()
