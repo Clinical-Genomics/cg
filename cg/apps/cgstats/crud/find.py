@@ -56,7 +56,7 @@ class FindHandler:
         """Get flow cell by name."""
         LOG.debug(f"Searching for flow cell {flow_cell_name}")
 
-        flowcell = Flowcell.query.filter_by(flowcellname=flow_cell_name).first()
+        flowcell: Flowcell = Flowcell.query.filter_by(flowcellname=flow_cell_name).first()
 
         if flowcell:
             LOG.debug(f"Found flow cell with id {flowcell.flowcell_id}")

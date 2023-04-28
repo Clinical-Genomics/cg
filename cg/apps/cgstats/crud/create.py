@@ -257,17 +257,15 @@ def _create_dragen_samples(
         if not sample_id:
             continue
 
-        unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
-            sample_id=sample_id, demux_id=demux_id, lane=sample.lane
+        dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
+
+        get_or_create_dragen_unaligned(
+            manager=manager,
+            dragen_demux_sample=dragen_demux_sample,
+            sample_id=sample_id,
+            demux_id=demux_id,
+            lane=sample.lane,
         )
-        if not unaligned_id:
-            dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
-            create_dragen_unaligned(
-                manager=manager,
-                demux_sample=dragen_demux_sample,
-                sample_id=sample_id,
-                demux_id=demux_id,
-            )
 
 
 def _create_bcl2fastq_samples(
@@ -363,6 +361,27 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     manager.commit()
 
 
+def get_or_create_dragen_unaligned(
+    manager: StatsAPI,
+    dragen_demux_sample: DragenDemuxSample,
+    sample_id: int,
+    demux_id: int,
+    lane: int,
+) -> Unaligned:
+    unaligned = manager.find_handler.get_unaligned_by_sample_id_demux_id_and_lane(
+        sample_id=sample_id, demux_id=demux_id, lane=lane
+    )
+
+    if not unaligned:
+        unaligned = create_dragen_unaligned(
+            manager=manager,
+            demux_sample=dragen_demux_sample,
+            sample_id=sample_id,
+            demux_id=demux_id,
+        )
+    return unaligned
+
+
 def get_or_create_support_parameters(
     manager: StatsAPI, demux_results: DemuxResults
 ) -> Supportparams:
@@ -381,7 +400,7 @@ def get_or_create_support_parameters(
     return support_parameters
 
 
-def get_document_stats_path_from_demux(demux_results: DemuxResults):
+def get_document_stats_path_from_demux(demux_results: DemuxResults) -> str:
     stats_path = {
         "bcl2fastq": demux_results.conversion_stats_path,
         "dragen": demux_results.demux_stats_path,
@@ -392,7 +411,7 @@ def get_document_stats_path_from_demux(demux_results: DemuxResults):
 
 def get_or_create_datasource(
     manager: StatsAPI, demux_results: DemuxResults, support_parameters_id: int
-):
+) -> Datasource:
     """Create datasource for demux or retrieve it if it already exists."""
 
     document_path: str = get_document_stats_path_from_demux(demux_results=demux_results)
@@ -409,7 +428,7 @@ def get_or_create_datasource(
     return datasource
 
 
-def get_or_create_flow_cell(manager: StatsAPI, demux_results: DemuxResults):
+def get_or_create_flow_cell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
     flowcell = manager.find_handler.get_flow_cell_by_name(flow_cell_name=demux_results.flow_cell.id)
 
     if not flowcell:
