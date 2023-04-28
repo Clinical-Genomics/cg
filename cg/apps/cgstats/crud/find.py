@@ -22,7 +22,7 @@ SAMPLE_PATTERN = "{}\_%"
 
 class FindHandler:
     def get_support_parameters_id(self, demux_results: DemuxResults) -> Optional[int]:
-        """Fetch the id of the support parameters if post exists"""
+        """Get the id of the support parameters if post exists"""
         LOG.debug(f"Search for support parameters with file {demux_results.results_dir}")
 
         support_parameters: Supportparams = self.get_support_parameters_by_document_path(
@@ -40,10 +40,11 @@ class FindHandler:
     def get_support_parameters_by_document_path(
         self, document_path: str
     ) -> Optional[Supportparams]:
+        """Get support parameters by document path."""
         return Supportparams.query.filter_by(document_path=document_path).first()
 
     def get_datasource_id(self, demux_results: DemuxResults) -> Optional[int]:
-        """Fetch the datasource id for a certain run"""
+        """Get the datasource id for a certain run"""
         stats_path = {
             "bcl2fastq": demux_results.conversion_stats_path,
             "dragen": demux_results.demux_stats_path,
@@ -60,6 +61,7 @@ class FindHandler:
         return None
 
     def get_datasource_by_document_path(self, document_path: str) -> Optional[Datasource]:
+        """Get data source by document path."""
         return Datasource.query.filter_by(document_path=document_path).first()
 
     def get_flowcell_id(self, flowcell_name: str) -> Optional[int]:
@@ -74,6 +76,7 @@ class FindHandler:
         return None
 
     def get_flowcell_by_name(self, flowcell_name: str):
+        """Get flow cell by name."""
         return Flowcell.query.filter_by(flowcellname=flowcell_name).first()
 
     def get_demux_id(self, flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
@@ -88,9 +91,11 @@ class FindHandler:
     def get_demux_by_flowcell_id_and_base_mask(
         self, flowcell_id: int, base_mask: str
     ) -> Optional[Demux]:
+        """Get demux by flowcell id and base mask."""
         return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
 
     def get_project_id(self, project_name: str) -> Optional[int]:
+        """Get project id by name."""
         project: Project = self.get_project_by_name(project_name=project_name)
 
         if project:
@@ -98,6 +103,7 @@ class FindHandler:
         return None
 
     def get_project_by_name(self, project_name: str) -> Optional[Project]:
+        """Get project by name."""
         return Project.query.filter_by(projectname=project_name).first()
 
     def get_sample(self, sample_id: str):
@@ -108,15 +114,18 @@ class FindHandler:
         ).first()
 
     def get_sample_id(self, sample_id: str, barcode: str) -> Optional[int]:
+        """Get sample id by name and barcode."""
         sample: Sample = self.get_sample_by_name_and_barcode(sample_name=sample_id, barcode=barcode)
         if sample:
             return sample.sample_id
         return None
 
     def get_sample_by_name_and_barcode(self, sample_name: str, barcode: str) -> Optional[Sample]:
+        """Get sample by name and barcode."""
         return Sample.query.filter_by(samplename=sample_name).filter_by(barcode=barcode).first()
 
     def get_unaligned_id(self, sample_id: int, demux_id: int, lane: int) -> Optional[int]:
+        """Get unaligned id by sample id, demux id and lane."""
         unaligned: Unaligned = self.get_unaligned_by_sample_id_demux_id_and_lane(
             sample_id=sample_id, demux_id=demux_id, lane=lane
         )
@@ -126,6 +135,7 @@ class FindHandler:
     def get_unaligned_by_sample_id_demux_id_and_lane(
         self, sample_id: int, demux_id: int, lane: int
     ) -> Optional[Unaligned]:
+        """Get unaligned by sample id, demux id and lane."""
         return (
             Unaligned.query.filter_by(sample_id=sample_id)
             .filter_by(demux_id=demux_id)

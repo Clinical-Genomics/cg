@@ -119,6 +119,7 @@ class StatsAPI(alchy.Manager):
         )
 
     def flow_cell_reads_and_q30_summary(self, flow_cell_name: str) -> Dict[str, Union[int, float]]:
+        """Calculate reads and q30 for a flow cell."""
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
         flow_cell_obj: Flowcell = self.find_handler.get_flowcell_by_name(
             flowcell_name=flow_cell_name
