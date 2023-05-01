@@ -7,7 +7,7 @@ def test_delete_flowcell(populated_stats_api: StatsAPI, flow_cell_name: str):
     """Test to delete a flowcell from cg-stats"""
 
     # GIVEN a populated StatsAPI, with an existing flow cell
-    flow_cell_id = populated_stats_api.find_handler.get_flowcell_id(flowcell_name=flow_cell_name)
+    flow_cell_id = populated_stats_api.find_handler.get_flow_cell_id(flowcell_name=flow_cell_name)
     assert flow_cell_id
 
     # WHEN deleting a flow cell from the StatsAPI
