@@ -23,7 +23,7 @@ from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MultiqcDataJson
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
@@ -336,7 +336,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
         return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
 
-    def get_multiqc_json_metrics(self, case_id: str) -> List[Dict]:
+    def get_multiqc_json_metrics(self, case_id: str) -> List[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
@@ -346,15 +346,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             if case_id in key:
                 metrics_values.update(list(key.values())[0])
         return [
-            {
-                "header": None,
-                "id": case_id,
-                "input": "multiqc_data.json",
-                "name": metric_name,
-                "step": "multiqc",
-                "value": metric_value,
-                "condition": RNAFUSION_METRIC_CONDITIONS.get(metric_name, None),
-            }
+            MetricsBase(
+                header=None,
+                id=case_id,
+                input="multiqc_data.json",
+                name=metric_name,
+                step="multiqc",
+                value=metric_value,
+                condition=RNAFUSION_METRIC_CONDITIONS.get(metric_name, None),
+            )
             for metric_name, metric_value in metrics_values.items()
         ]
 
