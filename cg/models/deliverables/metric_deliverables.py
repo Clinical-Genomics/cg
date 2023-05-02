@@ -45,8 +45,20 @@ def add_sample_id_metrics(parsed_metric: Any, values: dict) -> List[Any]:
     return sample_id_metrics
 
 
+class MetricCondition(BaseModel):
+    """Metric condition model
+
+    Attributes:
+        norm: validation condition
+        threshold: validation cut off
+    """
+
+    norm: str
+    threshold: float
+
+
 class MetricsBase(BaseModel):
-    """Definition for elements in deliverables metrics file"""
+    """Definition for elements in deliverables metrics file."""
 
     header: Optional[str]
     id: str
@@ -54,6 +66,7 @@ class MetricsBase(BaseModel):
     name: str
     step: str
     value: Any
+    condition: Optional[MetricCondition]
 
 
 class SampleMetric(BaseModel):
