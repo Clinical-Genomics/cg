@@ -132,10 +132,10 @@ class ConditionMetricsDeliverables(MetricsDeliverables):
         if metric.condition is not None:
             try:
                 qc_function: Callable = getattr(operator, metric.condition.norm)
-            except AttributeError:
+            except AttributeError as error:
                 raise CgError(
                     f"{metric.condition.norm} is not an accepted operator for QC metric conditions."
-                )
+                ) from error
             if not qc_function(metric.value, metric.condition.float):
                 failed_metrics.append(f"Metric {metric.name} failed with value: {metric.value}")
         assert len(failed_metrics) == 0, ";".join(failed_metrics)

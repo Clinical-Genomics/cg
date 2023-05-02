@@ -368,7 +368,11 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             return
         LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
         WriteFile.write_file_from_content(
-            content={"metrics": self.get_multiqc_json_metrics(case_id=case_id)},
+            content={
+                "metrics": [
+                    metric.dict() for metric in self.get_multiqc_json_metrics(case_id=case_id)
+                ]
+            },
             file_format=FileFormat.YAML,
             file_path=metrics_deliverables_path,
         )
