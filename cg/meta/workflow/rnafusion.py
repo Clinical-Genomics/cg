@@ -281,7 +281,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             LOG.info(f"Command run: {command}")
 
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool) -> None:
-        NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir, dry_run=dry_run)
+        NextflowAnalysisAPI.verify_case_config_file_exists(
+            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
+        )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         return NextflowAnalysisAPI.get_deliverables_file_path(
