@@ -61,6 +61,17 @@ class RunParameters:
         raise FlowCellError(message)
 
     @property
+    def flow_cell_mode(self) -> str:
+        """Return the flow cell mode."""
+        node_name = "/RfidsInfo/FlowCellMode"
+        xml_node = self.tree.find(node_name)
+        if xml_node is None:
+            LOG.warning("Could not determine flow cell mode")
+            LOG.info("Set flow cell mode to None")
+            return
+        return xml_node.text
+
+    @property
     def run_type(self) -> Literal["wgs", "fluffy"]:
         """Return the run type of the sequencing."""
         if self.index_length == 8:

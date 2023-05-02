@@ -9,6 +9,11 @@ class BclConverter(StrEnum):
     BCL2FASTQ: str = "bcl2fastq"
 
 
+SEQUENCING_INSTRUMENTS_NAMES = {
+    "NovaSeq6000": ["A00621", "A00187", "A00689", "A01901"],
+    "NovaSeqX": ["LH00188"],
+}
+
 SAMPLE_SHEET_DATA_COLUMNS = {
     "bcl2fastq": [
         "FCID",
@@ -39,17 +44,17 @@ SAMPLE_SHEET_DATA_COLUMNS = {
 }
 
 SAMPLE_SHEET_HEADER = "[Header]"
+SAMPLE_SHEET_HEADER_FILE_FORMAT_V1 = "FileFormatVersion,1"
 SAMPLE_SHEET_HEADER_FILE_FORMAT_V2 = "FileFormatVersion,2"
+SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX = "InstrumentType,NovaSeqX"
+SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM = "InstrumentPlatform,NovaSeqXSeries"
+SAMPLE_SHEET_HEADER_INDEX_ORIENTATION = "IndexOrientation,Forward"
 
 SAMPLE_SHEET_READS_HEADER = "[Reads]"
 
 SAMPLE_SHEET_SETTINGS_HEADER = {"bcl2fastq": "[Settings]", "dragen": "[BCLConvert_Settings]"}
-SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION = "SoftwareVersion,x.y.z"
-SAMPLE_SHEET_SETTINGS_APP_VERSION = "AppVersion,1.0.0"
-SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT = {
-    "bcl2fastq": "FastqCompressionFormat,gzip",
-    "dragen": "FastqCompressionFormat,dragen",
-}
+SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION = "SoftwareVersion,4.1.5"
+SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT = "FastqCompressionFormat,gzip"
 SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = "BarcodeMismatchesIndex1,0"
 SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2,0"
 

@@ -2,14 +2,14 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 from pydantic import ValidationError
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, SEQUENCING_INSTRUMENTS_NAMES
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -71,8 +71,16 @@ class FlowCell:
         return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
 
     @property
+    def sequencer_type(self) -> str:
+        """Return the sequencer type, either 'NovaSeqX' or 'NovaSeq6000'."""
+        if self.machine_name in SEQUENCING_INSTRUMENTS_NAMES["NovaSeq6000"]:
+            return "NovaSeq6000"
+        return "NovaSeqX"
+
+    @property
     def run_parameters_object(self) -> RunParameters:
         """Return run parameters object."""
+        # TO MODIFY FOR NOVASEQX
         if not self.run_parameters_path.exists():
             message = f"Could not find run parameters file {self.run_parameters_path}"
             LOG.warning(message)

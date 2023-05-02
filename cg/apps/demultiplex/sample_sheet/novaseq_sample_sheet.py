@@ -10,11 +10,14 @@ from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
     SAMPLE_SHEET_HEADER,
+    SAMPLE_SHEET_HEADER_FILE_FORMAT_V1,
     SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
+    SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,
+    SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,
+    SAMPLE_SHEET_HEADER_INDEX_ORIENTATION,
     SAMPLE_SHEET_READS_HEADER,
     SAMPLE_SHEET_SETTINGS_HEADER,
     SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION,
-    SAMPLE_SHEET_SETTINGS_APP_VERSION,
     SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
@@ -48,7 +51,7 @@ class SampleSheetCreator:
         return index.get_valid_indexes(dual_indexes_only=True)
 
     def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non-existing indexes to samples
+        """Add all dummy samples with non-existing indexes to samples.
 
         dummy samples are added if there are indexes that are not used by the actual samples.
         This means that we will add each dummy sample (that is needed) to each lane
@@ -72,7 +75,7 @@ class SampleSheetCreator:
                 self.lims_samples.append(dummy_sample_obj)
 
     def remove_unwanted_samples(self) -> None:
-        """Filter out samples with indexes of unwanted length and single indexes"""
+        """Filter out samples with indexes of unwanted length and single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: LimsFlowcellSample
@@ -89,7 +92,7 @@ class SampleSheetCreator:
         sample_sheet_headers: List[str],
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet
-        headers"""
+        headers."""
         LOG.debug(f"Use sample sheet header {sample_sheet_headers}")
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
@@ -100,7 +103,10 @@ class SampleSheetCreator:
         sample_sheet = [
             # HEADER
             SAMPLE_SHEET_HEADER,
-            SAMPLE_SHEET_HEADER_FILE_FORMAT_V2,
+            SAMPLE_SHEET_HEADER_FILE_FORMAT_V1,
+            # SAMPLE_SHEET_HEADER_INSTRUMENT_TYPE_NOVASEQX,
+            # SAMPLE_SHEET_HEADER_INSTRUMENT_PLATFORM,
+            # SAMPLE_SHEET_HEADER_INDEX_ORIENTATION,
             # READS
             SAMPLE_SHEET_READS_HEADER,
             "Read1Cycles," + str(self.run_parameters.read_one_nr_cycles()),
@@ -110,8 +116,7 @@ class SampleSheetCreator:
             # SETTINGS
             SAMPLE_SHEET_SETTINGS_HEADER[self.bcl_converter],
             SAMPLE_SHEET_SETTINGS_SOFTWARE_VERSION,  # HARD-WIRED VALUE
-            # SAMPLE_SHEET_SETTINGS_APP_VERSION,  # HARD-WIRED VALUE
-            # SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT[self.bcl_converter],
+            SAMPLE_SHEET_SETTINGS_FASTQ_FORMAT,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
             # DATA
