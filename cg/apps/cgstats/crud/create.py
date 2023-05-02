@@ -1,8 +1,19 @@
 import logging
 from typing import Dict, Iterable, Optional, Union
 import sqlalchemy
+from sqlalchemy.orm import Session
 
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
+from cg.apps.cgstats.crud.find import (
+    get_datasource_by_document_path,
+    get_demux_by_flow_cell_id_and_base_mask,
+    get_flow_cell_by_name,
+    get_project_by_name,
+    get_sample_id,
+    get_support_parameters_by_document_path,
+    get_unaligned_by_sample_id_demux_id_and_lane,
+    get_unaligned_id,
+)
 from cg.apps.cgstats.db.database import session_scope
 
 
@@ -74,9 +85,8 @@ def create_demux(
     demux_results: DemuxResults,
     flow_cell_id: int,
 ) -> Demux:
-
     demux: Demux = Demux()
-    demux.flowcell_id = flowcell_id
+    demux.flowcell_id = flow_cell_id
 
     demux.datasource_id = datasource_id
     if demux_results.bcl_converter == "dragen":
@@ -181,36 +191,31 @@ def _calculate_read_counts(demux_sample: DragenDemuxSample) -> int:
     return demux_sample.reads * 2
 
 
-def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str, int]:
+def create_projects(project_names: Iterable[str], session: Session) -> Dict[str, int]:
     project_name_to_id: Dict[str, int] = {}
     for project_name in project_names:
-        project_id: Optional[int] = manager.find_handler.get_project_id(project_name=project_name)
-        if not project_id:
-            project_object: Project = create_project(manager=manager, project_name=project_name)
-            project_id: int = project_object.project_id
+        project: Optional[Project] = get_project_by_name(project_name=project_name, session=session)
+        if not project:
+            project: Project = create_project(project_name=project_name)
+            session.add(project)
         else:
             LOG.info(f"Project {project_name} already exists")
-        project_name_to_id[project_name] = project_id
+        project_name_to_id[project_name] = project.project_id
     return project_name_to_id
 
 
-def _create_samples(
-    manager: StatsAPI, sample: NovaSeqSample, project_name_to_id: Dict[str, int]
-) -> Union[int, None]:
+def _create_samples(sample: NovaSeqSample, project_name_to_id: Dict[str, int]) -> Union[int, None]:
     """handles sample objects creation for the table `Sample` in cgstats"""
 
     barcode = f"{sample.index}+{sample.second_index}" if sample.second_index else sample.index
 
-    sample_id: Optional[int] = manager.find_handler.get_sample_id(
-        sample_id=sample.sample_id, barcode=barcode
-    )
+    sample_id: Optional[int] = get_sample_id(sample_id=sample.sample_id, barcode=barcode)
     if sample.project == "indexcheck":
         LOG.debug("Skip adding indexcheck sample to database")
         return
     if not sample_id:
         project_id: int = project_name_to_id[sample.project]
         sample_object: Sample = create_sample(
-            manager=manager,
             sample_id=sample.sample_id,
             barcode=barcode,
             project_id=project_id,
@@ -220,7 +225,6 @@ def _create_samples(
 
 
 def _create_dragen_samples(
-    manager: StatsAPI,
     demux_results: DemuxResults,
     project_name_to_id: Dict[str, int],
     demux_id: int,
@@ -236,9 +240,7 @@ def _create_dragen_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id: int = _create_samples(
-            manager=manager, sample=sample, project_name_to_id=project_name_to_id
-        )
+        sample_id: int = _create_samples(sample=sample, project_name_to_id=project_name_to_id)
 
         if not sample_id:
             continue
@@ -246,7 +248,6 @@ def _create_dragen_samples(
         dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
 
         get_or_create_dragen_unaligned(
-            manager=manager,
             dragen_demux_sample=dragen_demux_sample,
             sample_id=sample_id,
             demux_id=demux_id,
@@ -255,7 +256,6 @@ def _create_dragen_samples(
 
 
 def _create_bcl2fastq_samples(
-    manager: StatsAPI,
     demux_results: DemuxResults,
     project_name_to_id: Dict[str, int],
     demux_id: int,
@@ -272,20 +272,18 @@ def _create_bcl2fastq_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id: int = _create_samples(
-            manager=manager, sample=sample, project_name_to_id=project_name_to_id
-        )
+        sample_id: int = _create_samples(sample=sample, project_name_to_id=project_name_to_id)
 
         if not sample_id:
             continue
 
-        unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
+        unaligned: Optional[Unaligned] = get_unaligned_by_sample_id_demux_id_and_lane(
             sample_id=sample_id, demux_id=demux_id, lane=sample.lane
         )
-        if not unaligned_id:
+        if not unaligned:
             demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
+
             create_unaligned(
-                manager=manager,
                 demux_sample=demux_sample,
                 sample_id=sample_id,
                 demux_id=demux_id,
@@ -293,7 +291,6 @@ def _create_bcl2fastq_samples(
 
 
 def create_samples(
-    manager: StatsAPI,
     demux_results: DemuxResults,
     project_name_to_id: Dict[str, int],
     demux_id: int,
@@ -308,63 +305,55 @@ def create_samples(
         "bcl2fastq": _create_bcl2fastq_samples,
     }
     create_samples_function[demux_results.bcl_converter](
-        manager, demux_results, project_name_to_id, demux_id, sample_sheet
+        demux_results, project_name_to_id, demux_id, sample_sheet
     )
 
 
-def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
+def create_novaseq_flowcell(demux_results: DemuxResults):
     """Add a novaseq flowcell to CG stats"""
     LOG.info("Adding flowcell information to cgstats")
 
     with session_scope() as session:
-      support_parameters: Supportparams = get_or_create_support_parameters(
-          manager=manager, demux_results=demux_results
-      )
-      session.add(support_parameters)
+        support_parameters: Supportparams = get_or_create_support_parameters(
+            demux_results=demux_results, session=session
+        )
 
-      datasource: Datasource = get_or_create_datasource(
-          manager=manager,
-          demux_results=demux_results,
-          support_parameters_id=support_parameters.supportparams_id,
-      )
-      session.add(datasource)
+        datasource: Datasource = get_or_create_datasource(
+            demux_results=demux_results,
+            support_parameters_id=support_parameters.supportparams_id,
+            session=session,
+        )
 
-      flow_cell: Flowcell = get_or_create_flow_cell(manager=manager, demux_results=demux_results)
+        flow_cell: Flowcell = get_or_create_flow_cell(demux_results=demux_results, session=session)
 
-      demux: Demux = get_or_create_demux(
-          manager=manager,
-          demux_results=demux_results,
-          flow_cell_id=flow_cell.flowcell_id,
-          datasource_id=datasource.datasource_id,
-      )
-      session.add(demux)
+        demux: Demux = get_or_create_demux(
+            demux_results=demux_results,
+            flow_cell_id=flow_cell.flowcell_id,
+            datasource_id=datasource.datasource_id,
+            session=session,
+        )
 
-      project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
+        project_name_to_id = create_projects(project_names=demux_results.projects)
 
-      create_samples(
-          manager=manager,
-          demux_results=demux_results,
-          project_name_to_id=project_name_to_id,
-          demux_id=demux.demux_id,
-      )
-
-      session.commit()
+        create_samples(
+            demux_results=demux_results,
+            project_name_to_id=project_name_to_id,
+            demux_id=demux.demux_id,
+        )
 
 
 def get_or_create_dragen_unaligned(
-    manager: StatsAPI,
     dragen_demux_sample: DragenDemuxSample,
     sample_id: int,
     demux_id: int,
     lane: int,
 ) -> Unaligned:
-    unaligned = manager.find_handler.get_unaligned_by_sample_id_demux_id_and_lane(
+    unaligned = get_unaligned_by_sample_id_demux_id_and_lane(
         sample_id=sample_id, demux_id=demux_id, lane=lane
     )
 
     if not unaligned:
         unaligned = create_dragen_unaligned(
-            manager=manager,
             demux_sample=dragen_demux_sample,
             sample_id=sample_id,
             demux_id=demux_id,
@@ -373,17 +362,18 @@ def get_or_create_dragen_unaligned(
 
 
 def get_or_create_support_parameters(
-    manager: StatsAPI, demux_results: DemuxResults
+    demux_results: DemuxResults, session: Session
 ) -> Supportparams:
-    """Create support parameters for demux or retrieve them if they already exist."""
+    """Retrieve or create support parameters and add them to the session."""
     document_path = str(demux_results.results_dir)
 
-    support_parameters = manager.find_handler.get_support_parameters_by_document_path(
-        document_path=document_path
+    support_parameters = get_support_parameters_by_document_path(
+        document_path=document_path, session=session
     )
 
     if not support_parameters:
-        support_parameters = create_support_parameters(manager, demux_results)
+        support_parameters = create_support_parameters(demux_results)
+        session.add(support_parameters)
     else:
         LOG.info("Support parameters already exists")
 
@@ -400,29 +390,34 @@ def get_document_stats_path_from_demux(demux_results: DemuxResults) -> str:
 
 
 def get_or_create_datasource(
-    manager: StatsAPI, demux_results: DemuxResults, support_parameters_id: int
+    demux_results: DemuxResults, support_parameters_id: int, session: Session
 ) -> Datasource:
-    """Create datasource for demux or retrieve it if it already exists."""
+    """Retrieve or create datasource for demux."""
 
     document_path: str = get_document_stats_path_from_demux(demux_results=demux_results)
 
-    datasource: Datasource = manager.find_handler.get_datasource_by_document_path(
-        document_path=document_path
+    datasource: Datasource = get_datasource_by_document_path(
+        document_path=document_path, session=session
     )
 
     if not datasource:
-        datasource = create_datasource(manager, demux_results, support_parameters_id)
+        datasource = create_datasource(demux_results, support_parameters_id)
+        session.add(datasource)
     else:
         LOG.info("Data source already exists")
 
     return datasource
 
 
-def get_or_create_flow_cell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
-    flowcell = manager.find_handler.get_flow_cell_by_name(flow_cell_name=demux_results.flow_cell.id)
+def get_or_create_flow_cell(demux_results: DemuxResults, session: Session) -> Flowcell:
+    flowcell: Optional[Flowcell] = get_flow_cell_by_name(
+        flow_cell_name=demux_results.flow_cell.id, session=session
+    )
 
     if not flowcell:
-        flowcell = create_flowcell(manager, demux_results)
+        flowcell: Flowcell = create_flowcell(demux_results=demux_results)
+        session.add(flowcell)
+
     else:
         LOG.info("Flowcell already exists")
 
@@ -430,18 +425,21 @@ def get_or_create_flow_cell(manager: StatsAPI, demux_results: DemuxResults) -> F
 
 
 def get_or_create_demux(
-    manager: StatsAPI, demux_results: DemuxResults, flow_cell_id: int, datasource_id: int
+    demux_results: DemuxResults,
+    flow_cell_id: int,
+    datasource_id: int,
+    session: Session,
 ) -> Demux:
-    demux: Optional[Demux] = manager.find_handler.get_demux_by_flow_cell_id_and_base_mask(
-        flowcell_id=flow_cell_id
+    demux: Optional[Demux] = get_demux_by_flow_cell_id_and_base_mask(
+        flowcell_id=flow_cell_id, session=session
     )
     if not demux:
-        demux = create_demux(
-            manager=manager,
+        demux: Demux = create_demux(
             demux_results=demux_results,
             flow_cell_id=flow_cell_id,
             datasource_id=datasource_id,
         )
+        session.add(demux)
     else:
         LOG.info("Demux object already exists")
 

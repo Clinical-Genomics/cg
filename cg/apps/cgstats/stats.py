@@ -4,8 +4,8 @@ from typing import Dict, Iterator, List, Union
 import sqlalchemy as sqa
 
 from sqlalchemy.orm import Query
+from cg.apps.cgstats.crud.find import get_flow_cell_by_name
 
-from cg.apps.cgstats.crud.find import FindHandler
 from cg.apps.cgstats.db.database import initialise_engine_and_session_factory, session_scope
 from cg.apps.cgstats.db.models import (
     Datasource,
@@ -40,8 +40,6 @@ class StatsAPI:
 
         self.root_dir: Path = Path(config["cgstats"]["root"])
         self.binary: str = config["cgstats"]["binary_path"]
-
-        self.find_handler = FindHandler()
 
     @staticmethod
     def get_curated_sample_name(sample_name: str) -> str:
@@ -125,9 +123,7 @@ class StatsAPI:
         """Calculate reads and q30 for a flow cell."""
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
 
-        flow_cell_obj: Flowcell = self.find_handler.get_flow_cell_by_name(
-            flow_cell_name=flow_cell_name
-        )
+        flow_cell_obj: Flowcell = get_flow_cell_by_name(flow_cell_name=flow_cell_name)
 
         if flow_cell_obj:
             sample_count: int = 0
@@ -144,10 +140,6 @@ class StatsAPI:
             LOG.error(f"StatsAPI: Could not find flowcell in database with name: {flow_cell_name}")
 
         return flow_cell_reads_and_q30_summary
-
-    def sample(self, sample_name: str) -> Sample:
-        """Fetch a sample for the database by name."""
-        return self.find_handler.get_sample(sample_name).first()
 
     def fastqs(self, flowcell: str, sample_obj: Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
