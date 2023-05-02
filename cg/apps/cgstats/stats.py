@@ -141,10 +141,6 @@ class StatsAPI(alchy.Manager):
 
         return flow_cell_reads_and_q30_summary
 
-    def sample(self, sample_name: str) -> Sample:
-        """Fetch a sample for the database by name."""
-        return self.find_handler.get_sample(sample_name).first()
-
     def fastqs(self, flowcell: str, sample_obj: Sample) -> Iterator[Path]:
         """Fetch FASTQ files for a sample."""
         base_pattern = "*{}/Unaligned*/Project_*/Sample_{}/*.fastq.gz"
