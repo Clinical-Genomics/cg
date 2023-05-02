@@ -38,7 +38,7 @@ class Index(BaseModel):
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
     """Return list of indexes from the valid indexes' path."""
-    LOG.info("Fetch valid indexes from %s", VALID_INDEXES_PATH)
+    LOG.info(f"Fetch valid indexes from {valid_indexes_path}")
     indexes: List[Index] = []
     with open(VALID_INDEXES_PATH, "r") as csv_file:
         indexes_csv = csv.reader(csv_file)
@@ -53,7 +53,7 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
 
 def get_reagent_kit_version(reagent_kit_version: str) -> str:
     """Derives the reagent kit version from the run parameters"""
-    LOG.info("Converting reagent kit parameter %s to version", reagent_kit_version)
+    LOG.info(f"Converting reagent kit parameter {reagent_kit_version} to version")
     if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
 
@@ -68,14 +68,13 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
     LOG.info("Check if run is reverse complement")
     if version.parse(control_software_version) < version.parse(NEW_CONTROL_SOFTWARE_VERSION):
         LOG.warning(
-            "Old software version %s, no need for reverse complement", control_software_version
+            f"Old software version {control_software_version}, no need for reverse complement"
         )
         return False
     reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version_string)
     if version.parse(reagent_kit_version) < version.parse(NEW_REAGENT_KIT_VERSION):
         LOG.warning(
-            "Reagent kit version %s does not does not need reverse complement",
-            reagent_kit_version,
+            f"Reagent kit version {reagent_kit_version} does not does not need reverse complement"
         )
         return False
     LOG.info("Run is reverse complement")
@@ -84,7 +83,7 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
     """Generates the reverse complement of a DNA sequence"""
-    LOG.debug("Reverse complement string %s", dna)
+    LOG.debug(f"Reverse complement string {dna}")
 
     return "".join(DNA_COMPLEMENTS[base] for base in reversed(dna))
 

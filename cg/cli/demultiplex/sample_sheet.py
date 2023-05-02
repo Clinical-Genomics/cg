@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
+from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.apps.lims.samplesheet import (
     LimsFlowcellSample,
     LimsFlowcellSampleBcl2Fastq,
@@ -17,7 +18,6 @@ from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ def sample_sheet_commands():
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
 @OPTION_BCL_CONVERTER
 def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
-    """Command to validate a sample sheet"""
+    """Command to validate a sample sheet."""
     LOG.info(
         f"Validating sample sheet {sheet}",
     )

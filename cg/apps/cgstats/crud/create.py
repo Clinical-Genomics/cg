@@ -2,7 +2,6 @@ import logging
 from typing import Dict, Iterable, Optional, Union
 
 import sqlalchemy
-from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
 from cg.apps.cgstats.db.models import (
     Datasource,
@@ -16,6 +15,7 @@ from cg.apps.cgstats.db.models import (
 from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples, get_dragen_demux_samples
 from cg.apps.cgstats.dragen_demux_sample import DragenDemuxSample
 from cg.apps.cgstats.stats import StatsAPI
+from cg.apps.demultiplex.sample_sheet.models import NovaSeqSample, SampleSheet
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
@@ -354,7 +354,7 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
         datasource_id: int = datasource_object.datasource_id
     else:
         LOG.info("Data source already exists")
-    flowcell_id: Optional[int] = manager.find_handler.get_flowcell_id(
+    flowcell_id: Optional[int] = manager.find_handler.get_flow_cell_id(
         flowcell_name=demux_results.flow_cell.id
     )
 
