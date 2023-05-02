@@ -261,7 +261,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 dry_run=dry_run,
             )
             LOG.info(f"Nextflow head job running as job {sbatch_number}")
-            LOG.info(f"Command run: {command}")
 
         else:
             LOG.info("Pipeline will be executed using tower")
@@ -276,9 +275,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 tower_id = TowerAnalysisAPI.get_tower_id(stdout_lines=self.process.stdout_lines())
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
-
-            command = self.process.get_command(parameters=parameters)
-            LOG.info(f"Command run: {command}")
 
     def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
         NextflowAnalysisAPI.verify_case_config_file_exists(
