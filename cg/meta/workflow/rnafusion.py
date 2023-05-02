@@ -280,7 +280,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             command = self.process.get_command(parameters=parameters)
             LOG.info(f"Command run: {command}")
 
-    def verify_case_config_file_exists(self, case_id: str, dry_run: bool) -> None:
+    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
         NextflowAnalysisAPI.verify_case_config_file_exists(
             case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
         )
