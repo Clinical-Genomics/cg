@@ -34,7 +34,7 @@ class DemultiplexingAPI:
         self.run_dir: Path = Path(config["demultiplex"]["run_dir"])
         self.out_dir: Path = out_dir or Path(config["demultiplex"]["out_dir"])
         self.environment: str = config.get("environment", "stage")
-        LOG.info("Set environment to %s", self.environment)
+        LOG.info(f"Set environment to {self.environment}")
         self.dry_run: bool = False
 
     @property
@@ -186,7 +186,7 @@ class DemultiplexingAPI:
     @staticmethod
     def write_trailblazer_config(content: dict, file_path: Path) -> None:
         """Write the content to a yaml file"""
-        LOG.info("Writing yaml content %s to %s", content, file_path)
+        LOG.info(f"Writing yaml content {content} to {file_path}")
         WriteFile.write_file_from_content(
             content=content, file_format=FileFormat.YAML, file_path=file_path
         )
