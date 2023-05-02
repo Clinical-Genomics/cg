@@ -1,9 +1,10 @@
 import logging
 from typing import Dict, Iterable, Optional, Union
-
 import sqlalchemy
+
 from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 from cg.apps.cgstats.db.database import session_scope
+
 
 from cg.apps.cgstats.db.models import (
     Datasource,
@@ -17,6 +18,7 @@ from cg.apps.cgstats.db.models import (
 from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples, get_dragen_demux_samples
 from cg.apps.cgstats.dragen_demux_sample import DragenDemuxSample
 from cg.apps.cgstats.stats import StatsAPI
+from cg.apps.demultiplex.sample_sheet.models import NovaSeqSample, SampleSheet
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
@@ -70,10 +72,12 @@ def create_flowcell(demux_results: DemuxResults) -> Flowcell:
 def create_demux(
     datasource_id: int,
     demux_results: DemuxResults,
-    flowcell_id: int,
+    flow_cell_id: int,
 ) -> Demux:
+
     demux: Demux = Demux()
     demux.flowcell_id = flowcell_id
+
     demux.datasource_id = datasource_id
     if demux_results.bcl_converter == "dragen":
         demux.basemask: str = demux_results.run_info.basemask
@@ -239,17 +243,15 @@ def _create_dragen_samples(
         if not sample_id:
             continue
 
-        unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
-            sample_id=sample_id, demux_id=demux_id, lane=sample.lane
+        dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
+
+        get_or_create_dragen_unaligned(
+            manager=manager,
+            dragen_demux_sample=dragen_demux_sample,
+            sample_id=sample_id,
+            demux_id=demux_id,
+            lane=sample.lane,
         )
-        if not unaligned_id:
-            dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
-            create_dragen_unaligned(
-                manager=manager,
-                demux_sample=dragen_demux_sample,
-                sample_id=sample_id,
-                demux_id=demux_id,
-            )
 
 
 def _create_bcl2fastq_samples(
@@ -315,60 +317,132 @@ def create_novaseq_flowcell(manager: StatsAPI, demux_results: DemuxResults):
     LOG.info("Adding flowcell information to cgstats")
 
     with session_scope() as session:
-        support_parameters_id: Optional[int] = manager.find_handler.get_support_parameters_id(
-            demux_results=demux_results
-        )
-        if not support_parameters_id:
-            support_parameters: Supportparams = create_support_parameters(
-                demux_results=demux_results
-            )
-            session.add(support_parameters)
-            support_parameters_id: int = support_parameters.supportparams_id
-        else:
-            LOG.info("Support parameters already exists")
+      support_parameters: Supportparams = get_or_create_support_parameters(
+          manager=manager, demux_results=demux_results
+      )
+      session.add(support_parameters)
 
-        datasource_id: Optional[int] = manager.find_handler.get_datasource_id(
-            demux_results=demux_results
-        )
-        if not datasource_id:
-            datasource: Datasource = create_datasource(
-                manager=manager,
-                demux_results=demux_results,
-                support_parameters_id=support_parameters_id,
-            )
-            session.add(datasource)
-            datasource_id: int = datasource.datasource_id
-        else:
-            LOG.info("Data source already exists")
+      datasource: Datasource = get_or_create_datasource(
+          manager=manager,
+          demux_results=demux_results,
+          support_parameters_id=support_parameters.supportparams_id,
+      )
+      session.add(datasource)
 
-        flowcell_id: Optional[int] = manager.find_handler.get_flow_cell_id(
-            flowcell_name=demux_results.flow_cell.id
-        )
+      flow_cell: Flowcell = get_or_create_flow_cell(manager=manager, demux_results=demux_results)
 
-        if not flowcell_id:
-            flowcell: Flowcell = create_flowcell(manager=manager, demux_results=demux_results)
-            session.add(flowcell)
-            flowcell_id: int = flowcell.flowcell_id
-        else:
-            LOG.info("Flowcell already exists")
+      demux: Demux = get_or_create_demux(
+          manager=manager,
+          demux_results=demux_results,
+          flow_cell_id=flow_cell.flowcell_id,
+          datasource_id=datasource.datasource_id,
+      )
+      session.add(demux)
 
-        demux_id: Optional[int] = manager.find_handler.get_demux_id(flowcell_object_id=flowcell_id)
-        if not demux_id:
-            demux: Demux = create_demux(
-                demux_results=demux_results,
-                flowcell_id=flowcell_id,
-                datasource_id=datasource_id,
-            )
-            session.add(demux)
-            demux_id: int = demux.demux_id
-        else:
-            LOG.info("Demux object already exists")
+      project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
 
-        project_name_to_id = create_projects(manager=manager, project_names=demux_results.projects)
+      create_samples(
+          manager=manager,
+          demux_results=demux_results,
+          project_name_to_id=project_name_to_id,
+          demux_id=demux.demux_id,
+      )
 
-        create_samples(
+      session.commit()
+
+
+def get_or_create_dragen_unaligned(
+    manager: StatsAPI,
+    dragen_demux_sample: DragenDemuxSample,
+    sample_id: int,
+    demux_id: int,
+    lane: int,
+) -> Unaligned:
+    unaligned = manager.find_handler.get_unaligned_by_sample_id_demux_id_and_lane(
+        sample_id=sample_id, demux_id=demux_id, lane=lane
+    )
+
+    if not unaligned:
+        unaligned = create_dragen_unaligned(
             manager=manager,
-            demux_results=demux_results,
-            project_name_to_id=project_name_to_id,
+            demux_sample=dragen_demux_sample,
+            sample_id=sample_id,
             demux_id=demux_id,
         )
+    return unaligned
+
+
+def get_or_create_support_parameters(
+    manager: StatsAPI, demux_results: DemuxResults
+) -> Supportparams:
+    """Create support parameters for demux or retrieve them if they already exist."""
+    document_path = str(demux_results.results_dir)
+
+    support_parameters = manager.find_handler.get_support_parameters_by_document_path(
+        document_path=document_path
+    )
+
+    if not support_parameters:
+        support_parameters = create_support_parameters(manager, demux_results)
+    else:
+        LOG.info("Support parameters already exists")
+
+    return support_parameters
+
+
+def get_document_stats_path_from_demux(demux_results: DemuxResults) -> str:
+    stats_path = {
+        "bcl2fastq": demux_results.conversion_stats_path,
+        "dragen": demux_results.demux_stats_path,
+    }
+    document_path: str = str(stats_path[demux_results.bcl_converter])
+    return document_path
+
+
+def get_or_create_datasource(
+    manager: StatsAPI, demux_results: DemuxResults, support_parameters_id: int
+) -> Datasource:
+    """Create datasource for demux or retrieve it if it already exists."""
+
+    document_path: str = get_document_stats_path_from_demux(demux_results=demux_results)
+
+    datasource: Datasource = manager.find_handler.get_datasource_by_document_path(
+        document_path=document_path
+    )
+
+    if not datasource:
+        datasource = create_datasource(manager, demux_results, support_parameters_id)
+    else:
+        LOG.info("Data source already exists")
+
+    return datasource
+
+
+def get_or_create_flow_cell(manager: StatsAPI, demux_results: DemuxResults) -> Flowcell:
+    flowcell = manager.find_handler.get_flow_cell_by_name(flow_cell_name=demux_results.flow_cell.id)
+
+    if not flowcell:
+        flowcell = create_flowcell(manager, demux_results)
+    else:
+        LOG.info("Flowcell already exists")
+
+    return flowcell
+
+
+def get_or_create_demux(
+    manager: StatsAPI, demux_results: DemuxResults, flow_cell_id: int, datasource_id: int
+) -> Demux:
+    demux: Optional[Demux] = manager.find_handler.get_demux_by_flow_cell_id_and_base_mask(
+        flowcell_id=flow_cell_id
+    )
+    if not demux:
+        demux = create_demux(
+            manager=manager,
+            demux_results=demux_results,
+            flow_cell_id=flow_cell_id,
+            datasource_id=datasource_id,
+        )
+    else:
+        LOG.info("Demux object already exists")
+
+    return demux

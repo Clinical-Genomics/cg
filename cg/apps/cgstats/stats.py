@@ -126,7 +126,7 @@ class StatsAPI:
         flow_cell_reads_and_q30_summary: Dict[str, Union[int, float]] = {"reads": 0, "q30": 0.0}
 
         flow_cell_obj: Flowcell = self.find_handler.get_flow_cell_by_name(
-            flowcell_name=flow_cell_name
+            flow_cell_name=flow_cell_name
         )
 
         if flow_cell_obj:

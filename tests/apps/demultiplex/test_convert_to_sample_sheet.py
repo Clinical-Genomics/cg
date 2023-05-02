@@ -1,7 +1,8 @@
 from pathlib import Path
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet
 
 
 def test_convert_to_bcl2fastq_sheet(

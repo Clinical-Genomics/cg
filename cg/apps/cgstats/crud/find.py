@@ -21,75 +21,52 @@ SAMPLE_PATTERN = "{}\_%"
 
 
 class FindHandler:
-    def get_support_parameters_id(self, demux_results: DemuxResults) -> Optional[int]:
-        """Get the id of the support parameters if post exists"""
-        LOG.debug(f"Search for support parameters with file {demux_results.results_dir}")
-
-        support_parameters: Supportparams = self.get_support_parameters_by_document_path(
-            document_path=str(demux_results.results_dir)
-        )
-
-        if support_parameters:
-            support_parameters_id = support_parameters.supportparams_id
-            LOG.debug(f"Found support parameters with id {support_parameters_id}")
-            return support_parameters_id
-
-        LOG.debug("Could not find support parameters")
-        return None
-
     def get_support_parameters_by_document_path(
         self, document_path: str
     ) -> Optional[Supportparams]:
         """Get support parameters by document path."""
-        return Supportparams.query.filter_by(document_path=document_path).first()
 
-    def get_datasource_id(self, demux_results: DemuxResults) -> Optional[int]:
-        """Get the datasource id for a certain run"""
-        stats_path = {
-            "bcl2fastq": demux_results.conversion_stats_path,
-            "dragen": demux_results.demux_stats_path,
-        }
-        document_path: str = str(stats_path[demux_results.bcl_converter])
-        LOG.debug(f"Search for datasource with file {document_path}")
-        datasource: Datasource = self.get_datasource_by_document_path(document_path=document_path)
+        LOG.debug(f"Searching for support parameters with file {document_path}")
 
-        if datasource:
-            LOG.debug(f"Found datasource with id {datasource.datasource_id}")
-            return datasource.datasource_id
+        support_params: Supportparams = Supportparams.query.filter_by(
+            document_path=document_path
+        ).first()
 
-        LOG.debug("Could not find datasource")
-        return None
+        if support_params:
+            LOG.debug(f"Found support parameters with id {support_params.supportparams_id}")
+        else:
+            LOG.debug("Support parameters not found")
+
+        return support_params
 
     def get_datasource_by_document_path(self, document_path: str) -> Optional[Datasource]:
         """Get data source by document path."""
-        return Datasource.query.filter_by(document_path=document_path).first()
+        LOG.debug(f"Search for datasource with file {document_path}")
 
-    def get_flow_cell_id(self, flowcell_name: str) -> Optional[int]:
-        LOG.debug(f"Search for flow cell {flowcell_name}")
+        datasource: Datasource = Datasource.query.filter_by(document_path=document_path).first()
 
-        flowcell: Flowcell = self.get_flow_cell_by_name(flowcell_name=flowcell_name)
+        if datasource:
+            LOG.debug(f"Found datasource with id {datasource.datasource_id}")
+        else:
+            LOG.debug("Could not find datasource")
+
+        return datasource
+
+    def get_flow_cell_by_name(self, flow_cell_name: str) -> Optional[Flowcell]:
+        """Get flow cell by name."""
+        LOG.debug(f"Searching for flow cell {flow_cell_name}")
+
+        flowcell: Flowcell = Flowcell.query.filter_by(flowcellname=flow_cell_name).first()
+
         if flowcell:
             LOG.debug(f"Found flow cell with id {flowcell.flowcell_id}")
-            return flowcell.flowcell_id
+        else:
+            LOG.debug("Flow cell not found")
 
-        LOG.debug("Could not find flow cell")
-        return None
-
-    def get_flow_cell_by_name(self, flowcell_name: str):
-        """Get flow cell by name."""
-        return Flowcell.query.filter_by(flowcellname=flowcell_name).first()
-
-    def get_demux_id(self, flowcell_object_id: int, base_mask: str = "") -> Optional[int]:
-        """Flowcell object id refers to a database object"""
-        demux: Demux = self.get_demux_by_flow_cell_id_and_base_mask(
-            flowcell_id=flowcell_object_id, base_mask=base_mask
-        )
-        if demux:
-            return demux.demux_id
-        return None
+        return flowcell
 
     def get_demux_by_flow_cell_id_and_base_mask(
-        self, flowcell_id: int, base_mask: str
+        self, flowcell_id: int, base_mask: str = ""
     ) -> Optional[Demux]:
         """Get demux by flow cell id and base mask."""
         return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
