@@ -23,8 +23,8 @@ from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import MultiqcDataJson
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
-from cg.models.rnafusion.metrics import MultiqcDataJson
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
 

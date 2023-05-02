@@ -104,3 +104,10 @@ class MetricsDeliverables(BaseModel):
         for metric in raw_metrics:
             sample_ids.append(metric.id)
         return set(sample_ids)
+
+
+class MultiqcDataJson(BaseModel):
+    """Multiqc data json model."""
+
+    report_general_stats_data: Optional[List[Dict]]
+    report_data_sources: Optional[Dict]
