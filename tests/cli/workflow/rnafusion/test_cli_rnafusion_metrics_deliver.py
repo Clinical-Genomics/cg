@@ -1,4 +1,4 @@
-"""Tests for the report-deliver cli command"""
+"""Tests for the metrics-deliver cli command."""
 
 import logging
 
@@ -58,10 +58,11 @@ def test_without_samples(
     """Test command with case_id and no samples."""
     caplog.set_level(logging.ERROR)
     # GIVEN case-id
-    case_id: str = no_sample_case_id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(metrics_deliver, [case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        metrics_deliver, [no_sample_case_id, "--dry-run"], obj=rnafusion_context
+    )
 
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
@@ -80,10 +81,9 @@ def test_dry_run(
     """Test command with case_id and analysis_finish which should execute successfully."""
     caplog.set_level(logging.INFO)
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(metrics_deliver, [case_id], obj=rnafusion_context)
+    result = cli_runner.invoke(metrics_deliver, [rnafusion_case_id], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS

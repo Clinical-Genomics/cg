@@ -329,22 +329,22 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         )
 
     def get_multiqc_json_path(self, case_id: str) -> Path:
-        """Genereates a path where the multiqc_data.json file should be located."""
+        """Return the path of the multiqc_data.json file."""
         return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
 
     def get_metrics_deliverables_path(self, case_id: str) -> Path:
-        """Genereates a path where the <case>_metrics_deliverables.yaml file should be located."""
+        """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
         return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
 
-    def parse_multiqc_json(self, case_id: str) -> List[Dict]:
-        """Parses a multiqc_data.json file and returns metrics and values formatted."""
-        multiqc_json = MultiqcDataJson(
+    def get_multiqc_json_metrics(self, case_id: str) -> List[Dict]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
-        metrics_values = {}
-        for section in multiqc_json.report_general_stats_data:
-            if case_id in section:
-                metrics_values.update(list(section.values())[0])
+        metrics_values: Dict = {}
+        for key in multiqc_json.report_general_stats_data:
+            if case_id in key:
+                metrics_values.update(list(key.values())[0])
         return [
             {
                 "header": None,
@@ -360,15 +360,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def write_metrics_deliverables(self, case_id: str, dry_run: bool = False):
         """Write <case>_metrics_deliverables.yaml file."""
-        deliverables_path = self.get_metrics_deliverables_path(case_id=case_id)
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
         if dry_run:
             LOG.info(
-                f"Dry run: metrics deliverables file would be written to {deliverables_path.as_posix()}"
+                f"Dry run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
             )
             return
-        LOG.info(f"Writing metrics deliverables file to {deliverables_path.as_posix()}")
+        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
         WriteFile.write_file_from_content(
-            content={"metrics": self.parse_multiqc_json(case_id=case_id)},
+            content={"metrics": self.get_multiqc_json_metrics(case_id=case_id)},
             file_format=FileFormat.YAML,
-            file_path=deliverables_path,
+            file_path=metrics_deliverables_path,
         )

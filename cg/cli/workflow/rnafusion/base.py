@@ -258,7 +258,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @DRY_RUN
 @click.pass_obj
 def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
-    """Create a metrics deliverables file for given CASE ID."""
+    """Create a metrics deliverables file for given case id."""
 
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
@@ -266,11 +266,8 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.verify_analysis_finished(case_id=case_id)
         analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-    except CgError as error:
+    except (CgError, Exception) as error:
         LOG.error(f"Could not create metrics deliverables file: {error}")
-        raise click.Abort() from error
-    except Exception as error:
-        LOG.error(f"Could not create metrics deliverables  file: {error}")
         raise click.Abort() from error
 
 

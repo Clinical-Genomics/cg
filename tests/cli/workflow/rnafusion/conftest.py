@@ -362,7 +362,7 @@ def rnafusion_metrics_deliverables(rnafusion_case_id: str) -> dict:
 def mock_analysis_finish(
     rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_metrics_deliverables: dict
 ) -> None:
-    """Create analysis_finish file for testing"""
+    """Create analysis_finish file for testing."""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
     Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
