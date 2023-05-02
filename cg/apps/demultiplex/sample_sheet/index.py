@@ -38,7 +38,7 @@ class Index(BaseModel):
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
     """Return list of indexes from the valid indexes' path."""
-    LOG.info(f"Fetch valid indexes from {valid_indexes_path}")
+    LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
     indexes: List[Index] = []
     with open(VALID_INDEXES_PATH, "r") as csv_file:
         indexes_csv = csv.reader(csv_file)
