@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Union
 from pydantic import parse_obj_as
 from typing_extensions import Literal
 
@@ -45,7 +45,7 @@ def validate_samples_unique_per_lane(samples: List[NovaSeqSample]) -> None:
     sample_by_lane: Dict[int, List[NovaSeqSample]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
         LOG.info(f"Validate that samples are unique in lane {lane}")
-        validate_samples_are_unique(lane_samples)
+        validate_samples_are_unique(samples=lane_samples)
 
 
 def get_raw_samples(sample_sheet: str) -> List[Dict[str, str]]:
@@ -54,7 +54,7 @@ def get_raw_samples(sample_sheet: str) -> List[Dict[str, str]]:
     header: List[str] = []
     raw_samples: List[Dict[str, str]] = []
     for line in sample_sheet_rows:
-        # Skip lines that are to short to contain samples
+        # Skip lines that are too short to contain samples
         if not len(line) > 5:
             continue
         line = line.strip()
@@ -83,7 +83,6 @@ def get_sample_sheet(
 
     return the information as a SampleSheet object
     """
-    # Skip the [data] header
     novaseq_sample = {BclConverter.BCL2FASTQ: SampleBcl2Fastq, BclConverter.DRAGEN: SampleDragen}
     raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet)
     sample_type: Union[SampleBcl2Fastq, SampleDragen] = novaseq_sample[bcl_converter]
@@ -97,7 +96,6 @@ def get_sample_sheet_from_file(
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
     with open(infile, "r") as csv_file:
-        # Skip the [data] header
         sample_sheet: SampleSheet = get_sample_sheet(
             sample_sheet=csv_file.read(), sheet_type=sheet_type, bcl_converter=bcl_converter
         )

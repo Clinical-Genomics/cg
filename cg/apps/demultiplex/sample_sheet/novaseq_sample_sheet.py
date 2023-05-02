@@ -1,4 +1,4 @@
-""" Create a sample sheet for Novaseq flow cells """
+""" Create a sample sheet for Novaseq flow cells."""
 
 import logging
 from typing import Dict, List, Set
