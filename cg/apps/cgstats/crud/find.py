@@ -83,7 +83,7 @@ def get_demux_by_flow_cell_id_and_base_mask(
 
 def get_project_id(project_name: str, session: Session) -> Optional[int]:
     """Get project id by name."""
-    project: Project = self.get_project_by_name(project_name=project_name, session=session)
+    project: Project = get_project_by_name(project_name=project_name, session=session)
 
     if project:
         return project.project_id
@@ -105,7 +105,7 @@ def get_sample(sample_id: str):
 
 def get_sample_id(sample_id: str, barcode: str) -> Optional[int]:
     """Get sample id by name and barcode."""
-    sample: Sample = self.get_sample_by_name_and_barcode(sample_name=sample_id, barcode=barcode)
+    sample: Sample = get_sample_by_name_and_barcode(sample_name=sample_id, barcode=barcode)
     if sample:
         return sample.sample_id
     return None
@@ -114,15 +114,6 @@ def get_sample_id(sample_id: str, barcode: str) -> Optional[int]:
 def get_sample_by_name_and_barcode(sample_name: str, barcode: str) -> Optional[Sample]:
     """Get sample by name and barcode."""
     return Sample.query.filter_by(samplename=sample_name).filter_by(barcode=barcode).first()
-
-
-def get_unaligned_id(sample_id: int, demux_id: int, lane: int) -> Optional[int]:
-    """Get unaligned id by sample id, demux id and lane."""
-    unaligned: Unaligned = self.get_unaligned_by_sample_id_demux_id_and_lane(
-        sample_id=sample_id, demux_id=demux_id, lane=lane
-    )
-    if unaligned:
-        return unaligned.unaligned_id
 
 
 def get_unaligned_by_sample_id_demux_id_and_lane(

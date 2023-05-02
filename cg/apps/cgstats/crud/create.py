@@ -12,7 +12,6 @@ from cg.apps.cgstats.crud.find import (
     get_sample_id,
     get_support_parameters_by_document_path,
     get_unaligned_by_sample_id_demux_id_and_lane,
-    get_unaligned_id,
 )
 from cg.apps.cgstats.db.database import session_scope
 
