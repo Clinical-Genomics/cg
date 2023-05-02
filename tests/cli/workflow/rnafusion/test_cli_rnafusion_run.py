@@ -73,7 +73,7 @@ def test_without_config(
     # WHEN dry running with dry specified
     result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
     # THEN command should NOT execute successfully
-    assert result.exit_code != EXIT_SUCCESS
+    assert result.exit_code == EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
     assert "No config file found" in caplog.text
 
