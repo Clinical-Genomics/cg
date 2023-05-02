@@ -295,7 +295,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
         deliverables_content: dict = NextflowAnalysisAPI.get_template_deliverables_file_content(
-            resources.rnafusion_bundle_filenames_path
+            resources.RNAFUSION_BUNDLE_FILENAMES_PATH
         )
         try:
             for index, deliver_file in enumerate(deliverables_content):
