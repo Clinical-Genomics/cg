@@ -7,11 +7,11 @@ from typing import List, Optional
 from pydantic import ValidationError
 from typing_extensions import Literal
 
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.exc import FlowCellError
+from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
-from cgmodels.demultiplex.sample_sheet import SampleSheet, get_sample_sheet_from_file
-from cgmodels.exceptions import SampleSheetError
 
 LOG = logging.getLogger(__name__)
 
