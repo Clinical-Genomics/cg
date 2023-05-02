@@ -122,7 +122,7 @@ class PedigreeConfigError(CgError):
 
 
 class SampleSheetError(CgError):
-    """Raised when something is wrong with the order form."""
+    """Raised when something is wrong with the sample sheet."""
 
 
 class ScoutUploadError(CgError):

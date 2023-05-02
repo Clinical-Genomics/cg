@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 
 class SampleSheetCreator:
-    """Create a raw sample sheet for Novaseq flow cells"""
+    """Create a raw sample sheet for Novaseq flow cells."""
 
     def __init__(
         self,
