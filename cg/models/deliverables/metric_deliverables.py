@@ -1,6 +1,9 @@
-from typing import Any, Dict, List, Optional
+import operator
+from typing import Any, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
+
+from cg.exc import CgError
 
 
 def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
@@ -117,6 +120,26 @@ class MetricsDeliverables(BaseModel):
         for metric in raw_metrics:
             sample_ids.append(metric.id)
         return set(sample_ids)
+
+
+class ConditionMetricsDeliverables(MetricsDeliverables):
+    """Specification for a metric deliverables file with condition sets."""
+
+    @validator("metrics_", always=True)
+    def qc_pass(cls, metric: MetricsBase) -> str:
+        """Verify that metrics met QC conditions."""
+        failed_metrics: List = []
+        if metric.condition is not None:
+            try:
+                qc_function: Callable = getattr(operator, metric.condition.norm)
+            except AttributeError:
+                raise CgError(
+                    f"{metric.condition.norm} is not an accepted operator for QC metric conditions."
+                )
+            if not qc_function(metric.value, metric.condition.float):
+                failed_metrics.append(f"Metric {metric.name} failed with value: {metric.value}")
+        assert len(failed_metrics) == 0, ";".join(failed_metrics)
+        return metric
 
 
 class MultiqcDataJson(BaseModel):
