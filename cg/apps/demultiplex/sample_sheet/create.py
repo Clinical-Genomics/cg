@@ -24,8 +24,10 @@ def create_sample_sheet(
 
     run_parameters: RunParameters = flow_cell.run_parameters_object
 
-    if run_parameters.flowcell_type != "novaseq":
-        message = f"Can only demultiplex novaseq with cg. Found type {run_parameters.flowcell_type}"
+    if run_parameters.flow_cell_type != "novaseq":
+        message = (
+            f"Can only demultiplex novaseq with cg. Found type {run_parameters.flow_cell_type}"
+        )
         LOG.warning(message)
         raise FlowCellError(message=message)
 

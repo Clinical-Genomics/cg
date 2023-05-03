@@ -46,8 +46,8 @@ class RunParameters:
         return xml_node.text
 
     @property
-    def flowcell_type(self) -> Literal["novaseq", "hiseq"]:
-        """Fetch the flowcell type from the run parameters."""
+    def flow_cell_type(self) -> Literal["novaseq", "hiseq"]:
+        """Fetch the flow cell type from the run parameters."""
         # First try with the node name for hiseq
         node_name = "./Setup/ApplicationName"
         xml_node = self.tree.find(node_name)
@@ -55,11 +55,11 @@ class RunParameters:
             # Then try with node name for novaseq
             node_name = ".Application"
             xml_node = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="flowcell type")
+        self.node_not_found(node=xml_node, name="flow cell type")
         for flow_cell_name in ["novaseq", "hiseq"]:
             if flow_cell_name in xml_node.text.lower():
                 return flow_cell_name
-        message = f"Unknown flowcell type {xml_node.text}"
+        message = f"Unknown flow cell type {xml_node.text}"
         LOG.warning(message)
         raise FlowCellError(message)
 
@@ -129,11 +129,11 @@ class RunParameters:
         )
 
     def __str__(self):
-        return f"RunParameters(path={self.path},flowcell_type={self.flowcell_type},run_type={self.run_type}"
+        return f"RunParameters(path={self.path},flow_cell_type={self.flow_cell_type},run_type={self.run_type}"
 
     def __repr__(self):
         return (
-            f"RunParameters(path={self.path},flowcell_type={self.flowcell_type},run_type={self.run_type},"
+            f"RunParameters(path={self.path},flow_cell_type={self.flow_cell_type},run_type={self.run_type},"
             f"reagent_kit_version={self.reagent_kit_version},control_software_version={self.control_software_version},"
             f"index_length={self.index_length})"
         )
