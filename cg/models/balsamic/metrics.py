@@ -2,25 +2,13 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
-from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.deliverables.metric_deliverables import MetricCondition, MetricsBase
 
 
 def percent_value_validation(cls, value: float) -> float:
     """Converts a raw float value to percent"""
 
     return value * 100
-
-
-class MetricCondition(BaseModel):
-    """BALSAMIC metric condition model
-
-    Attributes:
-        norm: validation condition
-        threshold: validation cut off
-    """
-
-    norm: str
-    threshold: float
 
 
 class BalsamicMetricsBase(MetricsBase):
