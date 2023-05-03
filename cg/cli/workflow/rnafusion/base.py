@@ -245,6 +245,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
         analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+        analysis_api.validate_qc_metrics(case_id=case_id)
     except MetricsQCError as error:
         analysis_api.trailblazer_api.set_analysis_status(
             case_id=case_id, status=AnalysisStatus.FAILED
