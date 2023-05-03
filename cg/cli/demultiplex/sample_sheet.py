@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
+from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.apps.lims.samplesheet import (
     LimsFlowcellSample,
     LimsFlowcellSampleBcl2Fastq,
@@ -19,7 +20,6 @@ from cg.exc import FlowCellError
 from cg.io.validate_psth import validate_file_suffix
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 
 LOG = logging.getLogger(__name__)
 

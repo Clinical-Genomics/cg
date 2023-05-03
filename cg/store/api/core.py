@@ -1,6 +1,6 @@
 import logging
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from cg.store.models import Model
 from cg.store.api.delete import DeleteDataHandler
@@ -23,10 +23,10 @@ class CoreHandler(
     """Aggregating class for the store api handlers."""
 
     def __init__(self, session):
-        DeleteDataHandler.__init__(self, session)
-        FindBasicDataHandler.__init__(self, session)
-        FindBusinessDataHandler.__init__(self, session)
-        StatusHandler.__init__(self, session)
+        DeleteDataHandler(session=session)
+        FindBasicDataHandler(session=session)
+        FindBusinessDataHandler(session=session)
+        StatusHandler(session=session)
 
 
 class Store(CoreHandler):
@@ -35,9 +35,8 @@ class Store(CoreHandler):
     def __init__(self, uri):
         self.uri = uri
         self.engine = create_engine(uri)
-        session_factory = sessionmaker(bind=self.engine)
-        self.session = session_factory()
-        super(Store, self).__init__(self.session)
+        self.session = scoped_session(sessionmaker(bind=self.engine))
+        super().__init__(session=self.session)
 
     def create_all(self):
         """Create all tables in the database."""

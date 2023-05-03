@@ -15,24 +15,3 @@ class Version(Model):
     patch = Column(types.Integer)
     comment = Column(types.String(255))
     time = Column(types.DateTime, nullable=False)
-
-    @staticmethod
-    def check(dbname: str, ver: str) -> bool:
-        """Checks version of database against dbname and version
-
-        [normally from the config file]
-
-        Args:
-          dbname (str): database name as stored in table version
-          ver (str): version string in the format major.minor.patch
-
-        Returns:
-          True: if identical
-        """
-        version: Version = Version.get_version()
-        if version is None:
-            return False
-        ver_string = "{0}.{1}.{2}".format(
-            str(version.major), str(version.minor), str(version.patch)
-        )
-        return (ver_string == ver) and (dbname == version.name)

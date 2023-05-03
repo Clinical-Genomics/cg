@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from cg.apps.cgstats.crud.find import get_flowcell_id
 from cg.cli.demultiplex.add import add_flow_cell_cmd
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
@@ -21,7 +20,9 @@ def test_add_flowcell_cmd(
     assert demultiplexed_flow_cell_finished_working_directory.exists()
 
     # GIVEN that the flowcell does not exist in the cgstats database
-    assert not get_flowcell_id(flowcell_name=flow_cell.id)
+    assert not demultiplex_context.cg_stats_api.find_handler.get_flow_cell_by_name(
+        flow_cell_name=flow_cell.id
+    )
 
     # WHEN running the add flowcell command
     result = cli_runner.invoke(add_flow_cell_cmd, [flow_cell.full_name], obj=demultiplex_context)
@@ -29,4 +30,6 @@ def test_add_flowcell_cmd(
     # THEN assert that the run was success
     assert result.exit_code == 0
     # THEN assert that the flowcell was added to cgstats
-    assert get_flowcell_id(flowcell_name=flow_cell.id)
+    assert demultiplex_context.cg_stats_api.find_handler.get_flow_cell_by_name(
+        flow_cell_name=flow_cell.id
+    )

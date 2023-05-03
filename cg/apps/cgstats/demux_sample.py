@@ -7,8 +7,8 @@ from pydantic import BaseModel, validator
 from cg.apps.cgstats.dragen_demux_sample import DragenDemuxSample
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
 from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
+from cg.apps.demultiplex.sample_sheet.models import NovaSeqSample, SampleSheet
 from cg.models.demultiplex.demux_results import DemuxResults
-from cgmodels.demultiplex.sample_sheet import NovaSeqSample, SampleSheet
 
 LOG = logging.getLogger(__name__)
 

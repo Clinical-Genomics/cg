@@ -6,7 +6,14 @@ from typing import Generator
 
 import pytest
 
-from cg.apps.cgstats.db import models as stats_models
+from cg.apps.cgstats.db.models import (
+    Datasource,
+    Flowcell,
+    Project,
+    Sample,
+    Supportparams,
+    Unaligned,
+)
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 
@@ -169,33 +176,29 @@ def fixture_base_store_stats(
     """Setup CGStats store with sample data."""
     demuxes: dict = {}
     for sample_data in stats_sample_data["samples"]:
-        project: stats_models.Project = store_stats.Project(
-            projectname="test", time=dt.datetime.now()
-        )
-        sample: stats_models.Sample = store_stats.Sample(
+        project: Project = store_stats.Project(projectname="test", time=dt.datetime.now())
+        sample: Sample = store_stats.Sample(
             samplename=sample_data["name"],
             barcode=sample_data["index"],
             limsid=sample_data["name"],
         )
         sample.project = project
-        unaligned: stats_models.Unaligned = store_stats.Unaligned(
-            readcounts=300000000, q30_bases_pct=85
-        )
+        unaligned: Unaligned = store_stats.Unaligned(readcounts=300000000, q30_bases_pct=85)
         unaligned.sample = sample
 
         if sample_data["flowcell"] in demuxes:
             demux = demuxes[sample_data["flowcell"]]
         else:
-            flowcell: stats_models.Flowcell = store_stats.Flowcell(
+            flowcell: Flowcell = store_stats.Flowcell(
                 flowcellname=sample_data["flowcell"],
                 flowcell_pos="A",
                 hiseqtype=sample_data["type"],
                 time=dt.datetime.now(),
             )
-            supportparams: stats_models.Supportparams = store_stats.Supportparams(
+            supportparams: Supportparams = store_stats.Supportparams(
                 document_path="NA" + sample_data["name"], idstring="NA"
             )
-            datasource: stats_models.Datasource = store_stats.Datasource(
+            datasource: Datasource = store_stats.Datasource(
                 document_path="NA" + sample_data["name"], document_type="html"
             )
             datasource.supportparams = supportparams

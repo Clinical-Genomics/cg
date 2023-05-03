@@ -2,8 +2,8 @@ from pathlib import Path
 
 from click.testing import CliRunner, Result
 
+from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
-from cgmodels.demultiplex.sample_sheet import get_sample_sheet_from_file
 
 from cg.constants import EXIT_SUCCESS, FileExtensions
 from cg.constants.demultiplexing import BclConverter, SampleSheetType
@@ -22,7 +22,6 @@ def test_validate_non_existing_sample_sheet(cli_runner: CliRunner, sample_sheet_
 
     # THEN assert that it exits with a non-zero exit code
     assert result.exit_code != EXIT_SUCCESS
-
     # THEN assert the correct information was communicated
     assert f'Path "{sample_sheet.name}" does not exist' in result.output
 
