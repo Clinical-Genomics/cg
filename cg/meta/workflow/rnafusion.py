@@ -16,14 +16,18 @@ from cg.constants.rnafusion import (
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
-from cg.io.controller import WriteFile
+from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
+from cg.models.deliverables.metric_deliverables import (
+    ConditionMetricsDeliverables,
+    MetricsBase,
+    MultiqcDataJson,
+)
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
@@ -376,3 +380,11 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML,
             file_path=metrics_deliverables_path,
         )
+
+    def validate_qc_metrics(self, case_id: str) -> ConditionMetricsDeliverables:
+        """Validate the information from a qc metrics deliverable file."""
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=metrics_deliverables_path
+        )
+        return ConditionMetricsDeliverables(**qcmetrics_raw)
