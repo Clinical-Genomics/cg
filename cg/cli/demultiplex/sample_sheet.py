@@ -17,7 +17,7 @@ from cg.apps.lims.samplesheet import (
 from cg.constants import FileExtensions
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, SampleSheetType
 from cg.exc import FlowCellError
-from cg.io.validate_psth import validate_file_suffix
+from cg.io.validate_path import validate_file_suffix
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 
@@ -33,14 +33,14 @@ def sample_sheet_commands():
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
 @click.option(
     "--sheet-type",
-    default=SampleSheetType.S4,
+    default=SampleSheetType.NOVASEQ,
     show_default=True,
     type=click.Choice(SampleSheetType),
-    help="Type of sample sheet",
+    help="Instrument sample sheet type",
 )
 @OPTION_BCL_CONVERTER
 def validate_sample_sheet(bcl_converter: str, sheet: click.Path, sheet_type: str):
-    """Command to validate a sample sheet."""
+    """Validate a sample sheet."""
     LOG.info(
         f"Validating sample sheet {sheet}",
     )

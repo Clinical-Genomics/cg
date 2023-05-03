@@ -93,5 +93,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
 class SampleSheetType(StrEnum):
     """Define sample sheet type."""
 
-    S2: str = "S2"
-    S4: str = "S4"
+    HISEQ_X: str = "SP"
+    NEXTSEQ: str = "S2"
+    NOVASEQ: str = "S4"
+    MISEQ: str = "2500"

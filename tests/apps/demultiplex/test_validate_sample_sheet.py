@@ -12,6 +12,7 @@ from cg.apps.demultiplex.sample_sheet.validate import (
     get_samples_by_lane,
     validate_samples_are_unique,
 )
+from cg.constants.demultiplexing import SampleSheetType, BclConverter
 from cg.exc import SampleSheetError
 
 
@@ -112,27 +113,27 @@ def test_get_sample_sheet_s2_bcl2fastq(
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = get_sample_sheet(
         sample_sheet=valid_sample_sheet_bcl2fastq,
-        sheet_type="S2",
-        bcl_converter="bcl2fastq",
+        sheet_type=SampleSheetType.NEXTSEQ,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
     # THEN it has the correct type
-    assert sheet.type == "S2"
+    assert sheet.type == SampleSheetType.NEXTSEQ
 
 
 def test_get_sample_sheet_s2_dragen(
     valid_sample_sheet_dragen: str,
 ):
-    """Test that a dragen sample sheet created from valid parameters has the correct type."""
-    # GIVEN a valid sample sheet to be used with dragen
+    """Test that a Dragen sample sheet created from valid parameters has the correct type."""
+    # GIVEN a valid sample sheet to be used with Dragen
 
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = get_sample_sheet(
         sample_sheet=valid_sample_sheet_dragen,
-        sheet_type="S2",
-        bcl_converter="dragen",
+        sheet_type=SampleSheetType.NEXTSEQ,
+        bcl_converter=BclConverter.DRAGEN,
     )
     # THEN it has the correct type
-    assert sheet.type == "S2"
+    assert sheet.type == SampleSheetType.NEXTSEQ
 
 
 def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
@@ -146,24 +147,24 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
         # THEN a sample sheet error is raised
         get_sample_sheet(
             sample_sheet=sample_sheet_bcl2fastq_duplicate_same_lane,
-            sheet_type="S2",
-            bcl_converter="bcl2fastq",
+            sheet_type=SampleSheetType.NEXTSEQ,
+            bcl_converter=BclConverter.BCL2FASTQ,
         )
 
 
 def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
     sample_sheet_dragen_duplicate_same_lane: str,
 ):
-    """Test that creating a dragen sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a dragen sample sheet with a sample duplicated in a lane
+    """Test that creating a Dragen sample sheet with duplicated samples in a lane fails."""
+    # GIVEN a Dragen sample sheet with a sample duplicated in a lane
 
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
             sample_sheet=sample_sheet_dragen_duplicate_same_lane,
-            sheet_type="S2",
-            bcl_converter="dragen",
+            sheet_type=SampleSheetType.NEXTSEQ,
+            bcl_converter=BclConverter.DRAGEN,
         )
 
 
@@ -176,8 +177,8 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_sample_sheet(
         sample_sheet=sample_sheet_bcl2fastq_duplicate_different_lane,
-        sheet_type="S2",
-        bcl_converter="bcl2fastq",
+        sheet_type=SampleSheetType.NEXTSEQ,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # THEN a sample sheet is returned with samples in it
@@ -187,14 +188,14 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
 def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
     sample_sheet_dragen_duplicate_different_lane: str,
 ):
-    """Test that dragen a sample sheet created with duplicated samples in different lanes has samples."""
-    # GIVEN a dragen sample sheet with same sample duplicated in different lanes
+    """Test that Dragen a sample sheet created with duplicated samples in different lanes has samples."""
+    # GIVEN a Dragen sample sheet with same sample duplicated in different lanes
 
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_sample_sheet(
         sample_sheet=sample_sheet_dragen_duplicate_different_lane,
-        sheet_type="S2",
-        bcl_converter="dragen",
+        sheet_type=SampleSheetType.NEXTSEQ,
+        bcl_converter=BclConverter.DRAGEN,
     )
 
     # THEN a sample sheet is returned with samples in it
@@ -210,26 +211,26 @@ def test_get_sample_sheet_from_file_s2_bcl2fastq(
     # WHEN creating the sample sheet object
     sheet: SampleSheet = get_sample_sheet_from_file(
         infile=valid_sample_sheet_bcl2fastq_path,
-        sheet_type="S2",
-        bcl_converter="bcl2fastq",
+        sheet_type=SampleSheetType.NEXTSEQ,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # THEN the sample sheet has the correct type
-    assert sheet.type == "S2"
+    assert sheet.type == SampleSheetType.NEXTSEQ
 
 
 def test_get_sample_sheet_from_file_s2_dragen(
     valid_sample_sheet_dragen_path: Path,
 ):
-    """Test that a dragen sample sheet created from a file has the correct type."""
-    # GIVEN a dragen sample sheet file path
+    """Test that a Dragen sample sheet created from a file has the correct type."""
+    # GIVEN a Dragen sample sheet file path
 
     # WHEN creating the sample sheet
     sheet: SampleSheet = get_sample_sheet_from_file(
         infile=valid_sample_sheet_dragen_path,
-        sheet_type="S2",
-        bcl_converter="dragen",
+        sheet_type=SampleSheetType.NEXTSEQ,
+        bcl_converter=BclConverter.DRAGEN,
     )
 
     # THEN the sample sheet has the correct type
-    assert sheet.type == "S2"
+    assert sheet.type == SampleSheetType.NEXTSEQ

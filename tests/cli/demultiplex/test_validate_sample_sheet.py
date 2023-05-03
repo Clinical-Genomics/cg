@@ -58,7 +58,9 @@ def test_validate_correct_bcl2fastq_sample_sheet(
 
     # GIVEN that the sample sheet is correct
     get_sample_sheet_from_file(
-        infile=sample_sheet, sheet_type=SampleSheetType.S2, bcl_converter=BclConverter.BCL2FASTQ
+        infile=sample_sheet,
+        sheet_type=SampleSheetType.NEXTSEQ,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # WHEN validating the sample sheet
@@ -81,7 +83,7 @@ def test_validate_correct_dragen_sample_sheet(
 
     # GIVEN that the sample sheet is correct
     get_sample_sheet_from_file(
-        infile=sample_sheet, sheet_type=SampleSheetType.S2, bcl_converter=BclConverter.DRAGEN
+        infile=sample_sheet, sheet_type=SampleSheetType.NEXTSEQ, bcl_converter=BclConverter.DRAGEN
     )
 
     # WHEN validating the sample sheet

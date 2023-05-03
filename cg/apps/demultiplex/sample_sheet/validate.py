@@ -10,7 +10,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleBcl2Fastq,
     SampleDragen,
 )
-from cg.constants.demultiplexing import BclConverter
+from cg.constants.demultiplexing import BclConverter, SampleSheetType
 from cg.exc import SampleSheetError
 
 LOG = logging.getLogger(__name__)
@@ -77,27 +77,40 @@ def get_raw_samples(sample_sheet: str) -> List[Dict[str, str]]:
 
 
 def get_sample_sheet(
-    sample_sheet: str, sheet_type: Literal["2500", "SP", "S2", "S4"], bcl_converter: str
+    sample_sheet: str,
+    sheet_type: Literal[
+        SampleSheetType.MISEQ,
+        SampleSheetType.HISEQ_X,
+        SampleSheetType.NEXTSEQ,
+        SampleSheetType.NOVASEQ,
+    ],
+    bcl_converter: str,
 ) -> SampleSheet:
-    """Parse and validate a sample sheet.
-
-    return the information as a SampleSheet object
-    """
-    novaseq_sample = {BclConverter.BCL2FASTQ: SampleBcl2Fastq, BclConverter.DRAGEN: SampleDragen}
-    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet)
+    """Return a validated sample sheet object."""
+    novaseq_sample: Dict[str, Union[SampleBcl2Fastq, SampleDragen]] = {
+        BclConverter.BCL2FASTQ: SampleBcl2Fastq,
+        BclConverter.DRAGEN: SampleDragen,
+    }
+    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet=sample_sheet)
     sample_type: Union[SampleBcl2Fastq, SampleDragen] = novaseq_sample[bcl_converter]
     samples = parse_obj_as(List[sample_type], raw_samples)
-    validate_samples_unique_per_lane(samples)
+    validate_samples_unique_per_lane(samples=samples)
     return SampleSheet(type=sheet_type, samples=samples)
 
 
 def get_sample_sheet_from_file(
-    infile: Path, sheet_type: Literal["2500", "SP", "S2", "S4"], bcl_converter: str
+    infile: Path,
+    sheet_type: Literal[
+        SampleSheetType.MISEQ,
+        SampleSheetType.HISEQ_X,
+        SampleSheetType.NEXTSEQ,
+        SampleSheetType.NOVASEQ,
+    ],
+    bcl_converter: str,
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
     with open(infile, "r") as csv_file:
         sample_sheet: SampleSheet = get_sample_sheet(
             sample_sheet=csv_file.read(), sheet_type=sheet_type, bcl_converter=bcl_converter
         )
-
     return sample_sheet

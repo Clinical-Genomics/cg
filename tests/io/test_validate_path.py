@@ -4,7 +4,7 @@ import pytest
 
 from cg.constants import FileExtensions
 from cg.exc import ValidationError
-from cg.io.validate_psth import validate_file_suffix
+from cg.io.validate_path import validate_file_suffix
 
 
 def test_validate_file_suffix_correct_suffix(csv_file_path: Path):
