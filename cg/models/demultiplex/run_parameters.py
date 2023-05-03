@@ -76,7 +76,7 @@ class RunParameters:
 
     @property
     def run_type(self) -> Literal["wgs", "fluffy"]:
-        """Return the run type of the sequencing."""
+        """Return the sequencing run type."""
         if self.index_length == 8:
             return "fluffy"
         return "wgs"
