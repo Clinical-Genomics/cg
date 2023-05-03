@@ -76,7 +76,7 @@ def test_case_not_finished(
     assert result.exit_code != EXIT_SUCCESS
 
     # THEN warning should be printed that no analysis_finish is found
-    assert "Analysis not finished" in caplog.text
+    assert "No deliverables file found for case" in caplog.text
 
 
 def test_case_with_malformed_deliverables_file(
