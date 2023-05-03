@@ -11,7 +11,6 @@ from cg.apps.crunchy import CrunchyAPI
 from cg.apps.crunchy.files import update_metadata_date
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import SequencingFileTag
-from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import files
 from cg.models import CompressionData, FileData
 from cg.store.models import Sample
@@ -28,12 +27,10 @@ class CompressAPI:
         hk_api: HousekeeperAPI,
         demux_root: str,
         crunchy_api: CrunchyAPI,
-        backup_api: SpringBackupAPI = None,
         dry_run: bool = False,
     ):
         self.hk_api: HousekeeperAPI = hk_api
         self.crunchy_api: CrunchyAPI = crunchy_api
-        self.backup_api: SpringBackupAPI = backup_api
         self.demux_root: Path = Path(demux_root)
         self.dry_run: bool = dry_run
 
@@ -42,8 +39,6 @@ class CompressAPI:
         self.dry_run = dry_run
         if self.crunchy_api.dry_run is False:
             self.crunchy_api.set_dry_run(dry_run)
-        if self.backup_api:
-            self.backup_api.dry_run = self.dry_run
 
     def get_flow_cell_id(self, fastq_path: Path) -> str:
         """Extract the flow cell id from a fastq path assuming flow cell id is the first word in the file name."""
@@ -112,20 +107,9 @@ class CompressAPI:
         for compression in compressions:
             if not self.crunchy_api.is_spring_decompression_possible(compression_obj=compression):
                 LOG.info(f"SPRING to FASTQ decompression not possible for {sample_id}")
-                if not self.backup_api.is_to_be_retrieved_and_decrypted(
-                    spring_file_path=compression.spring_path
-                ):
-                    LOG.warning(f"Could not find {compression.spring_path} on disk")
-                    return False
-                LOG.info("Until the SPRING file is retrieved from PDC and decrypted")
-                self.backup_api.retrieve_and_decrypt_spring_file(
-                    spring_file_path=Path(compression.spring_path)
-                )
-
             LOG.info(
                 f"Decompressing {compression.spring_path} to FASTQ format for sample {sample_id}"
             )
-
             self.crunchy_api.spring_to_fastq(compression_obj=compression, sample_id=sample_id)
             update_metadata_date(spring_metadata_path=compression.spring_metadata_path)
         return True

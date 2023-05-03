@@ -9,14 +9,11 @@ from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
 from cg.apps.vogue import VogueAPI
-from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import CompressAPI
-from cg.meta.encryption.encryption import SpringEncryptionAPI
 from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.meta.backup.pdc import PdcAPI
 
 
 class MetaAPI:
@@ -39,13 +36,6 @@ class MetaAPI:
                 hk_api=config.housekeeper_api,
                 crunchy_api=config.crunchy_api,
                 demux_root=config.demultiplex.out_dir,
-                backup_api=SpringBackupAPI(
-                    encryption_api=SpringEncryptionAPI(
-                        binary_path=config.dict()["encryption"]["binary_path"]
-                    ),
-                    hk_api=config.housekeeper_api,
-                    pdc_api=PdcAPI(config.dict()["pdc"]["binary_path"]),
-                ),
             ),
         )
         self.status_db: Store = config.status_db
