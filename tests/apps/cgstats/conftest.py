@@ -119,7 +119,7 @@ def fixture_nipt_stats_api(
     )
     demux_obj: Demux = create.create_demux(
         manager=nipt_stats_api,
-        flowcell_id=flowcell_obj.flowcell_id,
+        flow_cell_id=flowcell_obj.flowcell_id,
         datasource_id=datasource_obj.datasource_id,
         demux_results=mock_demux_results,
     )
