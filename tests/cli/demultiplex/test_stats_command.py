@@ -21,7 +21,7 @@ def test_select_command(
     # GIVEN a stats api with some information about a flowcell
     flowcell_id: str = flow_cell.id
     full_flow_cell_name: str = flow_cell.full_name
-    assert populated_stats_api.find_handler.get_flowcell_id(flowcell_id)
+    assert populated_stats_api.find_handler.get_flow_cell_by_name(flow_cell_name=flowcell_id)
     demux_results = DemuxResults(
         demux_dir=demultiplexed_runs / full_flow_cell_name,
         flow_cell=flow_cell,

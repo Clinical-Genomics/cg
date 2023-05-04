@@ -121,6 +121,10 @@ class PedigreeConfigError(CgError):
         self.errors = errors
 
 
+class SampleSheetError(CgError):
+    """Raised when something is wrong with the sample sheet."""
+
+
 class ScoutUploadError(CgError):
     """Raised when uploading to Scout fails."""
 

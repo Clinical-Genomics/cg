@@ -732,6 +732,48 @@ def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "flowcell-runs")
 
 
+@pytest.fixture(name="novaseq_dir")
+def fixture_novaseq_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
+    """Return the path to the novaseq demultiplex fixtures."""
+    return Path(demux_run_dir, flow_cell_full_name)
+
+
+@pytest.fixture(name="hiseq_dir")
+def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the novaseq demultiplex fixtures."""
+    return Path(demultiplex_fixtures, "hiseq_run")
+
+
+@pytest.fixture(name="unknown_run_parameters")
+def fixture_unknown_run_parameters(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a file with hiseq run parameters with unknown flow cell."""
+    return Path(demultiplex_fixtures, "unknown_run_parameters.xml")
+
+
+@pytest.fixture(name="run_parameters_missing_flowcell_type")
+def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a file with hiseq run parameters without flow cell."""
+    return Path(demultiplex_fixtures, "runParameters_missing_flowcell_run_field.xml")
+
+
+@pytest.fixture(name="hiseq_run_parameters")
+def fixture_hiseq_run_parameters(hiseq_dir: Path) -> Path:
+    """Return the path to a file with hiseq run parameters."""
+    return Path(hiseq_dir, "runParameters.xml")
+
+
+@pytest.fixture(name="novaseq_run_parameters")
+def fixture_novaseq_run_parameters(novaseq_dir: Path) -> Path:
+    """Return the path to a file with novaseq run parameters."""
+    return Path(novaseq_dir, "RunParameters.xml")
+
+
+@pytest.fixture(name="run_parameters_different_index")
+def fixture_run_parameters_different_index(novaseq_dir: Path) -> Path:
+    """Return the path to a file with novaseq run parameters with different index cycles."""
+    return Path(novaseq_dir, "RunParameters_different_index_cycles.xml")
+
+
 @pytest.fixture(name="flow_cell")
 def fixture_flow_cell(demux_run_dir: Path, flow_cell_full_name: str) -> FlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""

@@ -10,6 +10,7 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleBcl2Fastq,
     LimsFlowcellSampleDragen,
 )
+from cg.apps.demultiplex.sample_sheet.validate import NovaSeqSample
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -37,12 +38,6 @@ def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
-@pytest.fixture(name="novaseq_dir")
-def fixture_novaseq_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir, flow_cell_full_name)
-
-
 @pytest.fixture(name="flow_cell_dir_bcl2fastq")
 def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
@@ -53,36 +48,6 @@ def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_
 def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
     return Path(demux_run_dir_dragen, flow_cell_full_name)
-
-
-@pytest.fixture(name="hiseq_dir")
-def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demultiplex_fixtures, "hiseq_run")
-
-
-@pytest.fixture(name="unknown_run_parameters")
-def fixture_unknown_run_parameters(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(demultiplex_fixtures, "unknown_run_parameters.xml")
-
-
-@pytest.fixture(name="run_parameters_missing_flowcell_type")
-def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(demultiplex_fixtures, "runParameters_missing_flowcell_run_field.xml")
-
-
-@pytest.fixture(name="hiseq_run_parameters")
-def fixture_hiseq_run_parameters(hiseq_dir: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(hiseq_dir, "runParameters.xml")
-
-
-@pytest.fixture(name="novaseq_run_parameters")
-def fixture_novaseq_run_parameters(novaseq_dir: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(novaseq_dir, "RunParameters.xml")
 
 
 @pytest.fixture(name="raw_lims_sample")
@@ -156,4 +121,155 @@ def fixture_novaseq_dragen_sample_sheet_object(
         lims_samples=lims_novaseq_dragen_samples,
         run_parameters=novaseq_run_parameters_object,
         bcl_converter="dragen",
+    )
+
+
+# Sample sheet validation
+
+
+@pytest.fixture(name="sample_sheet_line_sample_1")
+def fixture_sample_sheet_line_sample_1() -> str:
+    """Return the line in the sample sheet corresponding to a sample."""
+    return "HWHMWDMXX,1,ACC7628A68,hg19,ATTCCACACT,TGGTCTTGTT,814206,N,R1,script,814206\n"
+
+
+@pytest.fixture(name="sample_sheet_line_sample_2")
+def fixture_sample_sheet_line_sample_2() -> str:
+    """Return the line in the sample sheet corresponding to a sample."""
+    return "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206\n"
+
+
+@pytest.fixture(name="sample_sheet_bcl2fastq_data_header")
+def fixture_sample_sheet_bcl2fastq_data_header() -> str:
+    """Return the content of a bcl2fastq sample sheet data header without samples."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project\n"
+    )
+
+
+@pytest.fixture(name="sample_sheet_dragen_data_header")
+def fixture_sample_sheet_dragen_data_header() -> str:
+    """Return the content of a dragen sample sheet data_header without samples."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,"
+        "Sample_Project\n"
+    )
+
+
+@pytest.fixture(name="sample_sheet_samples_no_header")
+def fixture_sample_sheet_no_sample_header(
+    sample_sheet_line_sample_1: str, sample_sheet_line_sample_2: str
+) -> str:
+    """Return the content of a sample sheet with samples but without a sample header."""
+    return "[Data]\n" + sample_sheet_line_sample_1 + sample_sheet_line_sample_2
+
+
+@pytest.fixture(name="valid_sample_sheet_bcl2fastq")
+def fixture_valid_sample_sheet_bcl2fastq(
+    sample_sheet_line_sample_1: str, sample_sheet_line_sample_2: str
+) -> str:
+    """Return the content of a valid bcl2fastq sample sheet."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project\n"
+        + sample_sheet_line_sample_1
+        + sample_sheet_line_sample_2
+    )
+
+
+@pytest.fixture(name="sample_sheet_bcl2fastq_duplicate_same_lane")
+def fixture_sample_sheet_bcl2fastq_duplicate_same_lane(
+    valid_sample_sheet_bcl2fastq: str, sample_sheet_line_sample_2: str
+):
+    """Return the content of a bcl2fastq sample sheet with a duplicated sample in the same lane."""
+    return valid_sample_sheet_bcl2fastq + "\n" + sample_sheet_line_sample_2
+
+
+@pytest.fixture(name="sample_sheet_bcl2fastq_duplicate_different_lane")
+def fixture_sample_sheet_bcl2fastq_duplicate_different_lane(valid_sample_sheet_bcl2fastq: str):
+    """Return the content of a bcl2fastq sample sheet with a duplicated sample in a different lane."""
+    return (
+        valid_sample_sheet_bcl2fastq
+        + "\n"
+        + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="valid_sample_sheet_dragen")
+def fixture_valid_sample_sheet_dragen(
+    sample_sheet_line_sample_1: str, sample_sheet_line_sample_2: str
+) -> str:
+    """Return the content of a valid dragen sample sheet."""
+    return (
+        "[Data]\n"
+        "FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,"
+        "Sample_Project\n" + sample_sheet_line_sample_1 + sample_sheet_line_sample_2
+    )
+
+
+@pytest.fixture(name="sample_sheet_dragen_duplicate_same_lane")
+def fixture_sample_sheet_dragen_duplicate_same_lane(
+    valid_sample_sheet_dragen: str, sample_sheet_line_sample_2: str
+):
+    """Return the content of a dragen sample sheet with a duplicated sample in the same lane."""
+    return valid_sample_sheet_dragen + "\n" + sample_sheet_line_sample_2
+
+
+@pytest.fixture(name="sample_sheet_dragen_duplicate_different_lane")
+def fixture_sample_sheet_dragen_duplicate_different_lane(valid_sample_sheet_dragen: str):
+    """Return the content of aa dragen sample sheet with a duplicated sample in a different lane."""
+    return (
+        valid_sample_sheet_dragen
+        + "\n"
+        + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+    )
+
+
+@pytest.fixture(name="valid_sample_sheet_bcl2fastq_path")
+def fixture_valid_sample_sheet_bcl2fastq_path() -> Path:
+    """Return the path to a NovaSeq S2 sample sheet, used in bcl2fastq demultiplexing."""
+    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Bcl2Fastq.csv")
+
+
+@pytest.fixture(name="valid_sample_sheet_dragen_path")
+def fixture_valid_sample_sheet_dragen_path() -> Path:
+    """Return the path to a NovaSeq S2 sample sheet, used in dragen demultiplexing."""
+    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Dragen.csv")
+
+
+@pytest.fixture(name="novaseq_sample_1")
+def fixture_novaseq_sample_1() -> NovaSeqSample:
+    """Return a NovaSeq sample."""
+    return NovaSeqSample(
+        FCID="HWHMWDMXX",
+        Lane=1,
+        SampleID="ACC7628A68",
+        SampleRef="hg19",
+        index="ATTCCACACT",
+        index2="TGGTCTTGTT",
+        SampleName="814206",
+        Control="N",
+        Recipe="R1",
+        Operator="script",
+        Project="814206",
+    )
+
+
+@pytest.fixture(name="novaseq_sample_2")
+def fixture_novaseq_sample_2() -> NovaSeqSample:
+    """Return a NovaSeq sample."""
+    return NovaSeqSample(
+        FCID="HWHMWDMXX",
+        Lane=2,
+        SampleID="ACC7628A1",
+        SampleRef="hg19",
+        index="ATTCCACACT",
+        index2="TGGTCTTGTT",
+        SampleName="814206",
+        Control="N",
+        Recipe="R1",
+        Operator="script",
+        Project="814206",
     )
