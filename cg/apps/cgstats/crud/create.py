@@ -205,9 +205,9 @@ def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str
     return project_name_to_id
 
 
-def _create_samples(
+def get_or_create_sample(
     manager: StatsAPI, sample: NovaSeqSample, project_name_to_id: Dict[str, int]
-) -> Optional[int]:
+) -> Sample:
     """Create a new Sample object in the cgstats database if it doesn't already exist."""
 
     if sample.project == "indexcheck":
@@ -216,21 +216,21 @@ def _create_samples(
 
     barcode = f"{sample.index}+{sample.second_index}" if sample.second_index else sample.index
 
-    stats_sample = manager.find_handler.get_sample_by_name_and_barcode(
+    stats_sample: Optional[Sample] = manager.find_handler.get_sample_by_name_and_barcode(
         sample_name=sample.sample_id, barcode=barcode
     )
 
     if not stats_sample:
         project_id = project_name_to_id[sample.project]
 
-        stats_sample = create_sample(
+        stats_sample: Sample = create_sample(
             manager=manager,
             sample_id=sample.sample_id,
             barcode=barcode,
             project_id=project_id,
         )
 
-    return stats_sample.sample_id
+    return stats_sample
 
 
 def _create_dragen_samples(
@@ -250,11 +250,11 @@ def _create_dragen_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id: int = _create_samples(
+        stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
         )
 
-        if not sample_id:
+        if not stats_sample:
             continue
 
         dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
@@ -262,7 +262,7 @@ def _create_dragen_samples(
         get_or_create_dragen_unaligned(
             manager=manager,
             dragen_demux_sample=dragen_demux_sample,
-            sample_id=sample_id,
+            sample_id=stats_sample.sample_id,
             demux_id=demux_id,
             lane=sample.lane,
         )
@@ -286,22 +286,22 @@ def _create_bcl2fastq_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id: int = _create_samples(
+        stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
         )
 
-        if not sample_id:
+        if not stats_sample:
             continue
 
         unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
-            sample_id=sample_id, demux_id=demux_id, lane=sample.lane
+            sample_id=stats_sample.sample_id, demux_id=demux_id, lane=sample.lane
         )
         if not unaligned_id:
             demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
             create_unaligned(
                 manager=manager,
                 demux_sample=demux_sample,
-                sample_id=sample_id,
+                sample_id=stats_sample.sample_id,
                 demux_id=demux_id,
             )
 
