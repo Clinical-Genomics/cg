@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List
 
 from _pytest.logging import LogCaptureFixture
-import logging
 from click.testing import CliRunner
 
 from cg.cli.workflow.taxprofiler.base import config_case
@@ -33,10 +32,9 @@ def test_with_missing_case(
 ):
     """Test command with invalid case to start with."""
     caplog.set_level(logging.ERROR)
-    logger = logging.getLogger("your.logger.name")
-    logger.setLevel(logging.ERROR)
+    LOG.setLevel(logging.ERROR)
     handler = logging.handlers.BufferingHandler(capacity=1)
-    logger.addHandler(handler)
+    LOG.addHandler(handler)
     # GIVEN case_id not in database
     assert not taxprofiler_context.status_db.get_case_by_internal_id(
         internal_id=case_id_does_not_exist
