@@ -42,7 +42,9 @@ def transfer_group(context: CGConfig):
     "--store/--no-store", default=True, help="Store sample bundles of flow cell in Housekeeper"
 )
 @click.pass_obj
-def populate_flow_cell(context: CGConfig, flow_cell_dir: str, flow_cell_id: str, store: bool = True):
+def populate_flow_cell(
+    context: CGConfig, flow_cell_dir: str, flow_cell_id: str, store: bool = True
+):
     """Populate results from a flow cell."""
     flow_cell_dir: Path = Path(flow_cell_dir)
     status_db: Store = context.status_db

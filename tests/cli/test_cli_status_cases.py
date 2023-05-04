@@ -51,7 +51,6 @@ def test_lists_samples_in_unreceived_samples(
     assert "0/2" in result.output
 
 
-
 def test_lists_cases(cli_runner: CliRunner, base_context: CGConfig, helpers: StoreHelpers):
     """Test to that cases displays case in database"""
 
