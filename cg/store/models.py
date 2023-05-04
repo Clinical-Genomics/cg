@@ -519,6 +519,7 @@ class Flowcell(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
+    sequencing_stats = orm.relationship("SequencingStats", back_populates="flowcell")
 
     def __str__(self):
         return self.name
@@ -638,6 +639,7 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
+    sequencing_stat = orm.relationship("SequencingStats", back_populates="sample")
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
@@ -771,3 +773,5 @@ class SequencingStats(Model):
     q30_bases_pct = Column(types.Numeric(10, 5))
     mean_quality_score = Column(types.Numeric(10, 5))
     time = Column(types.DateTime)
+    sample = orm.relationship("Sample", back_populates="sequencing_stats")
+    flowcell = orm.relationship("Flowcell", back_populates="sequencing_stats")

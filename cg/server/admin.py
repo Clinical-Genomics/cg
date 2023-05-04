@@ -534,3 +534,17 @@ class UserView(BaseView):
     column_searchable_list = ["name", "email"]
     create_modal = True
     edit_modal = True
+
+
+class SequencingStatsView(BaseView):
+    """Admin view for the Model.SequencingStats."""
+
+    column_filters = ["sample.internal_id", "flowcell.name"]
+    column_formatters = {
+        "sample": SampleView.view_sample_link,
+        "flowcell": FlowcellView.view_flowcell_link,
+    }
+    column_searchable_list = ["sample.internal_id", "flowcell.name"]
+    column_editable_list = ["read_counts"]
+    create_modal = True
+    edit_modal = True

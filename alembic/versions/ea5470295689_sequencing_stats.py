@@ -1,4 +1,4 @@
-"""sequencing-stats
+"""Add sequencing-stats table
 
 Revision ID: ea5470295689
 Revises: 9008aa5065b4
@@ -25,8 +25,8 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(["sample_internal_id"], ["sample.internal_id"]),
         sa.ForeignKeyConstraint(
-            ["flow_cell_id"],
-            ["flowcell.id"],
+            ["flow_cell_name"],
+            ["flowcell.name"],
         ),
         sa.Column("lane", sa.Integer(), nullable=False),
         sa.Column("yield_mb", sa.Integer(), nullable=False),
