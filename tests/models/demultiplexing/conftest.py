@@ -12,14 +12,9 @@ def fixture_flow_cell_name(flow_cell_full_name: str) -> str:
     return flow_cell_full_name.split("_")[-1][1:]
 
 
-@pytest.fixture(name="flow_cell_runs")
-def fixture_flow_cell_runs(demultiplex_fixtures: Path) -> Path:
-    return Path(demultiplex_fixtures, "flowcell-runs")
-
-
 @pytest.fixture(name="flow_cell_path")
-def fixture_flowcell_path(flow_cell_runs: Path, flow_cell_full_name: str) -> Path:
-    return Path(flow_cell_runs, flow_cell_full_name)
+def fixture_flowcell_path(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
+    return Path(demux_run_dir, flow_cell_full_name)
 
 
 @pytest.fixture(name="flow_cell")
@@ -35,8 +30,8 @@ def fixture_dragen_flow_cell_full_name() -> str:
 
 
 @pytest.fixture(name="dragen_flow_cell_path")
-def fixture_dragen_flow_cell_path(flow_cell_runs: Path, dragen_flow_cell_full_name: str) -> Path:
-    return Path(flow_cell_runs, dragen_flow_cell_full_name)
+def fixture_dragen_flow_cell_path(demux_run_dir: Path, dragen_flow_cell_full_name: str) -> Path:
+    return Path(demux_run_dir, dragen_flow_cell_full_name)
 
 
 @pytest.fixture(name="demultiplexed_dragen_flow_cell")
