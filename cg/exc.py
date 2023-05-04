@@ -183,3 +183,7 @@ class MissingFilesError(CgError):
 
 class MetricsQCError(CgError):
     """Exception raised when QC metrics are not met."""
+
+
+class MissingMetrics(CgError):
+    """Exception raised when mandatory metrics are missing."""
