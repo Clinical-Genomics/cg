@@ -8,7 +8,7 @@ Create Date: 2023-05-04 09:29:09.945895
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy import Column, types, orm, ForeignKey
 
 # revision identifiers, used by Alembic.
 revision = "ea5470295689"
@@ -23,10 +23,12 @@ def upgrade():
     op.create_table(
         "sequencing_stats",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(["sample_internal_id"], ["sample.internal_id"]),
+        sa.Column("sample_id", sa.Integer(), nullable=False),
+        sa.Column("flow_cell_id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(["sample_id"], ["sample.id"]),
         sa.ForeignKeyConstraint(
-            ["flow_cell_name"],
-            ["flowcell.name"],
+            ["flow_cell_id"],
+            ["flowcell.id"],
         ),
         sa.Column("lane", sa.Integer(), nullable=False),
         sa.Column("yield_mb", sa.Integer(), nullable=False),
@@ -40,4 +42,4 @@ def upgrade():
 
 
 def downgrade():
-    op.drop_table("customer_user")
+    op.drop_table("sequencing_stats")
