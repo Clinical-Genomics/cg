@@ -8,6 +8,7 @@ pymysql
 Click<7.0
 
 # server
+blinker
 Flask-Admin
 Flask-CORS
 Flask-Dance
