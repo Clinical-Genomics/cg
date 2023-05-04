@@ -59,7 +59,7 @@ class CaseTags(BaseModel):
     vcf_mei: Optional[Set[str]] = Field(
         None, description="VCF with mobile element insertions, clinical"
     )
-    vcf_mei_research: Optional[set[str]] = Field(
+    vcf_mei_research: Optional[Set[str]] = Field(
         None, description="VCF with mobile element insertions, research"
     )
 
