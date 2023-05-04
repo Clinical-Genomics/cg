@@ -36,7 +36,6 @@ def upgrade():
         sa.Column("passed_filter_pct", sa.Numeric(10, 5), nullable=False),
         sa.Column("mean_quality_score", sa.Numeric(10, 5), nullable=False),
         sa.Column("perfect_index_reads_pct", sa.Numeric(10, 5), nullable=False),
-        sa.Column("time", sa.DateTime(), nullable=False),
     )
 
 

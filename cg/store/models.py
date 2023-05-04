@@ -772,6 +772,5 @@ class SequencingStats(Model):
     perfect_index_reads_pct = Column(types.Numeric(10, 5))
     q30_bases_pct = Column(types.Numeric(10, 5))
     mean_quality_score = Column(types.Numeric(10, 5))
-    time = Column(types.DateTime)
     samples = orm.relationship("Sample", back_populates="sequencing_stats")
     flow_cells = orm.relationship("Flowcell", back_populates="sequencing_stats")
