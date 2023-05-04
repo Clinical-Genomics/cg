@@ -198,39 +198,39 @@ def _calculate_read_counts(demux_sample: DragenDemuxSample) -> int:
 def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str, int]:
     project_name_to_id: Dict[str, int] = {}
     for project_name in project_names:
-        project_id: Optional[int] = manager.find_handler.get_project_id(project_name=project_name)
-        if not project_id:
-            project_object: Project = create_project(manager=manager, project_name=project_name)
-            project_id: int = project_object.project_id
-        else:
-            LOG.info("Project %s already exists", project_name)
-        project_name_to_id[project_name] = project_id
+        project: Optional[Project] = get_or_create_project(
+            manager=manager, project_name=project_name
+        )
+        project_name_to_id[project_name] = project.project_id
     return project_name_to_id
 
 
-def _create_samples(
+def get_or_create_sample(
     manager: StatsAPI, sample: NovaSeqSample, project_name_to_id: Dict[str, int]
-) -> Union[int, None]:
-    """handles sample objects creation for the table `Sample` in cgstats"""
+) -> Sample:
+    """Create a new Sample object in the cgstats database if it doesn't already exist."""
+
+    if sample.project == "indexcheck":
+        LOG.debug("Skip adding indexcheck sample to database")
+        return None
 
     barcode = f"{sample.index}+{sample.second_index}" if sample.second_index else sample.index
 
-    sample_id: Optional[int] = manager.find_handler.get_sample_id(
-        sample_id=sample.sample_id, barcode=barcode
+    stats_sample: Optional[Sample] = manager.find_handler.get_sample_by_name_and_barcode(
+        sample_name=sample.sample_id, barcode=barcode
     )
-    if sample.project == "indexcheck":
-        LOG.debug("Skip adding indexcheck sample to database")
-        return
-    if not sample_id:
-        project_id: int = project_name_to_id[sample.project]
-        sample_object: Sample = create_sample(
+
+    if not stats_sample:
+        project_id = project_name_to_id[sample.project]
+
+        stats_sample: Sample = create_sample(
             manager=manager,
             sample_id=sample.sample_id,
             barcode=barcode,
             project_id=project_id,
         )
-        sample_id: int = sample_object.sample_id
-    return sample_id
+
+    return stats_sample
 
 
 def _create_dragen_samples(
@@ -250,11 +250,11 @@ def _create_dragen_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id: int = _create_samples(
+        stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
         )
 
-        if not sample_id:
+        if not stats_sample:
             continue
 
         dragen_demux_sample: DragenDemuxSample = demux_samples[sample.lane][sample.sample_id]
@@ -262,7 +262,7 @@ def _create_dragen_samples(
         get_or_create_dragen_unaligned(
             manager=manager,
             dragen_demux_sample=dragen_demux_sample,
-            sample_id=sample_id,
+            sample_id=stats_sample.sample_id,
             demux_id=demux_id,
             lane=sample.lane,
         )
@@ -286,22 +286,22 @@ def _create_bcl2fastq_samples(
 
     sample: NovaSeqSample
     for sample in sample_sheet.samples:
-        sample_id: int = _create_samples(
+        stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
         )
 
-        if not sample_id:
+        if not stats_sample:
             continue
 
         unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
-            sample_id=sample_id, demux_id=demux_id, lane=sample.lane
+            sample_id=stats_sample.sample_id, demux_id=demux_id, lane=sample.lane
         )
         if not unaligned_id:
             demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
             create_unaligned(
                 manager=manager,
                 demux_sample=demux_sample,
-                sample_id=sample_id,
+                sample_id=stats_sample.sample_id,
                 demux_id=demux_id,
             )
 
@@ -456,3 +456,13 @@ def get_or_create_demux(
         LOG.info("Demux object already exists")
 
     return demux
+
+
+def get_or_create_project(manager: StatsAPI, project_name: str) -> Project:
+    project: Optional[Project] = manager.find_handler.get_project_by_name(project_name)
+
+    if project:
+        LOG.info(f"Project {project_name} already exists")
+        return project
+
+    return create_project(manager=manager, project_name=project_name)

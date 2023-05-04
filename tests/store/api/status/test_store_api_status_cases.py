@@ -1,10 +1,8 @@
-"""This script tests the cli methods to add families to status-db"""
-from datetime import datetime, timedelta
-
 from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
 from cg.store import Store
 from cg.store.models import Analysis, Family
 from cg.constants import Priority
+from datetime import datetime, timedelta
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):

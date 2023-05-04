@@ -18,10 +18,8 @@ from tests.apps.demultiplex.conftest import (
     fixture_lims_novaseq_bcl2fastq_samples,
     fixture_lims_novaseq_dragen_samples,
     fixture_lims_novaseq_samples,
-    fixture_novaseq_dir,
     fixture_novaseq_dir_bcl2fastq,
     fixture_novaseq_dir_dragen,
-    fixture_novaseq_run_parameters,
 )
 
 LOG = logging.getLogger(__name__)
