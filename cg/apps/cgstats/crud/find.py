@@ -71,14 +71,6 @@ class FindHandler:
         """Get demux by flow cell id and base mask."""
         return Demux.query.filter_by(flowcell_id=flowcell_id).filter_by(basemask=base_mask).first()
 
-    def get_project_id(self, project_name: str) -> Optional[int]:
-        """Get project id by name."""
-        project: Project = self.get_project_by_name(project_name=project_name)
-
-        if project:
-            return project.project_id
-        return None
-
     def get_project_by_name(self, project_name: str) -> Optional[Project]:
         """Get project by name."""
         return Project.query.filter_by(projectname=project_name).first()
@@ -89,13 +81,6 @@ class FindHandler:
         return Sample.query.filter(
             or_(Sample.samplename.like(pattern), Sample.samplename == sample_id)
         ).first()
-
-    def get_sample_id(self, sample_id: str, barcode: str) -> Optional[int]:
-        """Get sample id by name and barcode."""
-        sample: Sample = self.get_sample_by_name_and_barcode(sample_name=sample_id, barcode=barcode)
-        if sample:
-            return sample.sample_id
-        return None
 
     def get_sample_by_name_and_barcode(self, sample_name: str, barcode: str) -> Optional[Sample]:
         """Get sample by name and barcode."""
