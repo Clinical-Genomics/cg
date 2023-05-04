@@ -227,6 +227,7 @@ class UploadScoutAPI:
         LOG.info(f"Uploading {report_type} report to scout for case {case_id}")
 
         if dry_run:
+            LOG.info(f"Would have uploaded {report_type} report")
             return
         self.scout_api.upload_report(
             case_id=case_id,
@@ -439,7 +440,7 @@ class UploadScoutAPI:
         rna_sample: Sample,
     ) -> None:
         """Maps a list of DNA cases linked to DNA sample."""
-        cases_related_to_dna_sample = [link.family for link in dna_sample.links]
+        cases_related_to_dna_sample: List[Family] = [link.family for link in dna_sample.links]
         for case_object in cases_related_to_dna_sample:
             if (
                 case_object.data_analysis
