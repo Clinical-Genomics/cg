@@ -368,7 +368,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
-        if missing_metrics := mandatory_metrics.difference(given_metrics):
+        missing_metrics: set = mandatory_metrics.difference(given_metrics)
+        if missing_metrics:
             LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
             raise MissingMetrics()
 
