@@ -761,7 +761,7 @@ class SequencingStats(Model):
     __tablename__ = "sequencing_stats"
     id = Column(types.Integer, primary_key=True)
     sample_internal_id = Column(
-        ForeignKey("sample.sample_internal_id", ondelete="CASCADE"), nullable=False
+        ForeignKey("sample.internal_id", ondelete="CASCADE"), nullable=False
     )
     flow_cell_id = Column(ForeignKey("flowcell.id", ondelete="CASCADE"), nullable=False)
     lane = Column(types.Integer)
