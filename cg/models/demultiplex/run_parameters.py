@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional
 from xml.etree import ElementTree
 
+from cg.constants.demultiplexing import FlowCellType, UNKNOWN_REAGENT_KIT_VERSION
 from cg.exc import FlowCellError
 from typing_extensions import Literal
 
@@ -29,7 +30,7 @@ class RunParameters:
     @property
     def control_software_version(self) -> str:
         """Return the control software version."""
-        node_name = ".ApplicationVersion"
+        node_name: str = ".ApplicationVersion"
         xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
         self.node_not_found(node=xml_node, name="control software version")
         return xml_node.text
@@ -37,26 +38,26 @@ class RunParameters:
     @property
     def reagent_kit_version(self) -> str:
         """Return the reagent kit version if existent, return 'unknown' otherwise."""
-        node_name = "./RfidsInfo/SbsConsumableVersion"
+        node_name: str = "./RfidsInfo/SbsConsumableVersion"
         xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
         if xml_node is None:
             LOG.warning("Could not determine reagent kit version")
             LOG.info("Set reagent kit version to 'unknown'")
-            return "unknown"
+            return UNKNOWN_REAGENT_KIT_VERSION
         return xml_node.text
 
     @property
-    def flow_cell_type(self) -> Literal["novaseq", "hiseq"]:
+    def flow_cell_type(self) -> Literal[FlowCellType.NOVASEQ, FlowCellType.HISEQ]:
         """Fetch the flow cell type from the run parameters."""
         # First try with the node name for hiseq
-        node_name = "./Setup/ApplicationName"
-        xml_node = self.tree.find(node_name)
+        node_name: str = "./Setup/ApplicationName"
+        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
         if xml_node is None:
             # Then try with node name for novaseq
-            node_name = ".Application"
-            xml_node = self.tree.find(node_name)
+            node_name: str = ".Application"
+            xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
         self.node_not_found(node=xml_node, name="flow cell type")
-        for flow_cell_name in ["novaseq", "hiseq"]:
+        for flow_cell_name in [FlowCellType.NOVASEQ, FlowCellType.HISEQ]:
             if flow_cell_name in xml_node.text.lower():
                 return flow_cell_name
         message = f"Unknown flow cell type {xml_node.text}"
@@ -66,8 +67,8 @@ class RunParameters:
     @property
     def flow_cell_mode(self) -> Optional[str]:
         """Return the flow cell mode."""
-        node_name = "/RfidsInfo/FlowCellMode"
-        xml_node = self.tree.find(node_name)
+        node_name: str = "/RfidsInfo/FlowCellMode"
+        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
         if xml_node is None:
             LOG.warning("Could not determine flow cell mode")
             LOG.info("Set flow cell mode to None")
@@ -75,11 +76,12 @@ class RunParameters:
         return xml_node.text
 
     @property
-    def run_type(self) -> Literal["wgs", "fluffy"]:
-        """Return the sequencing run type."""
-        if self.index_length == 8:
-            return "fluffy"
-        return "wgs"
+    def requires_dummy_samples(self) -> bool:
+        """Return true if the flow cell requires the addition of dummy samples.
+
+        If the number of cycles of both indexes is 8, the flow cell does not need the addition of dummy samples.
+        """
+        return self.index_length != 8
 
     @staticmethod
     def node_not_found(node: Optional[ElementTree.Element], name: str) -> None:
@@ -116,7 +118,7 @@ class RunParameters:
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
 
     def get_base_mask(self) -> str:
-        """Create the bcl2fastq basemask for novaseq flow cells.
+        """Create the basemask for novaseq flow cells.
 
         Basemask is used in this comma format as an argument to bcl2fastq.
         When creating the unaligned path the commas are stripped.
@@ -129,11 +131,15 @@ class RunParameters:
         )
 
     def __str__(self):
-        return f"RunParameters(path={self.path},flow_cell_type={self.flow_cell_type},run_type={self.run_type}"
+        return (
+            f"RunParameters(path={self.path},"
+            f"flow_cell_type={self.flow_cell_type},"
+            f"flow_cell_mode={self.flow_cell_mode})"
+        )
 
     def __repr__(self):
         return (
-            f"RunParameters(path={self.path},flow_cell_type={self.flow_cell_type},run_type={self.run_type},"
+            f"RunParameters(path={self.path},flow_cell_type={self.flow_cell_type},flow_cell_mode={self.flow_cell_mode},"
             f"reagent_kit_version={self.reagent_kit_version},control_software_version={self.control_software_version},"
             f"index_length={self.index_length})"
         )

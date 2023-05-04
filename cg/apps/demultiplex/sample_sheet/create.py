@@ -3,6 +3,7 @@ from typing import List
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.constants.demultiplexing import FlowCellType
 from cg.exc import FlowCellError
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -24,7 +25,7 @@ def create_sample_sheet(
 
     run_parameters: RunParameters = flow_cell.run_parameters_object
 
-    if run_parameters.flow_cell_type != "novaseq":
+    if run_parameters.flow_cell_type != FlowCellType.NOVASEQ:
         message = (
             f"Can only demultiplex novaseq with cg. Found type {run_parameters.flow_cell_type}"
         )
