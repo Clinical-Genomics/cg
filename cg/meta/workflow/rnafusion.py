@@ -392,8 +392,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_path=metrics_deliverables_path,
         )
 
-    def validate_qc_metrics(self, case_id: str) -> None:
+    def validate_qc_metrics(self, case_id: str, dry_run: bool = False) -> None:
         """Validate the information from a qc metrics deliverable file."""
+        if dry_run:
+            return
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=metrics_deliverables_path
