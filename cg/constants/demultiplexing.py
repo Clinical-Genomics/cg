@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import click
+from typing import List
 from cgmodels.cg.constants import StrEnum
 
 
@@ -16,6 +17,15 @@ class FlowCellType(StrEnum):
 
     NOVASEQ: str = "novaseq"
     HISEQ: str = "hiseq"
+
+
+class SequencingInstruments(StrEnum):
+    """Define properties of the sequencing instruments."""
+
+    NOVASEQXPLUS: str = "NovaSeqXPlus"
+    NOVASEQ6000: str = "NovaSeq6000"
+    NOVA_SEQ_6000_NAMES: List[str] = ["A00621", "A00187", "A00689", "A01901"]
+    NOVA_SEQ_X_PLUS_NAMES: str = ["LH00188"]
 
 
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"

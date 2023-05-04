@@ -23,20 +23,17 @@ def create_sample_sheet(
         LOG.warning(message)
         raise FileExistsError(message)
 
-    run_parameters: RunParameters = flow_cell.run_parameters_object
+    flow_cell_type: str = flow_cell.run_parameters_object.flow_cell_type
 
-    if run_parameters.flow_cell_type != FlowCellType.NOVASEQ:
-        message = (
-            f"Can only demultiplex novaseq with cg. Found type {run_parameters.flow_cell_type}"
-        )
+    if flow_cell_type != FlowCellType.NOVASEQ:
+        message = f"Can only demultiplex novaseq with cg. Found type {flow_cell_type}"
         LOG.warning(message)
         raise FlowCellError(message=message)
 
     sample_sheet_creator = SampleSheetCreator(
         bcl_converter=bcl_converter,
-        flowcell_id=flow_cell.id,
+        flow_cell=flow_cell,
         lims_samples=lims_samples,
-        run_parameters=run_parameters,
         force=force,
     )
     return sample_sheet_creator.construct_sample_sheet()

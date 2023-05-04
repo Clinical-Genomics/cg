@@ -15,6 +15,7 @@ from cg.constants.demultiplexing import (
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
 )
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
@@ -26,15 +27,14 @@ class SampleSheetCreator:
     def __init__(
         self,
         bcl_converter: str,
-        flowcell_id: str,
+        flow_cell: FlowCell,
         lims_samples: List[LimsFlowcellSample],
-        run_parameters: RunParameters,
         force: bool = False,
     ):
         self.bcl_converter = bcl_converter
-        self.flowcell_id: str = flowcell_id
+        self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
-        self.run_parameters: RunParameters = run_parameters
+        self.run_parameters: RunParameters = flow_cell.run_parameters_object
         self.force = force
 
     @property
@@ -56,7 +56,7 @@ class SampleSheetCreator:
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
                 dummy_sample_obj: LimsFlowcellSample = dummy_sample(
-                    flowcell=self.flowcell_id,
+                    flowcell=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
@@ -111,7 +111,7 @@ class SampleSheetCreator:
 
     def construct_sample_sheet(self) -> str:
         """Construct the sample sheet"""
-        LOG.info(f"Constructing sample sheet for {self.flowcell_id}")
+        LOG.info(f"Constructing sample sheet for {self.flow_cell_id}")
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()
