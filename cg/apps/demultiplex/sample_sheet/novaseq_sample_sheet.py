@@ -113,7 +113,7 @@ class SampleSheetCreator:
         """Construct the sample sheet"""
         LOG.info(f"Constructing sample sheet for {self.flowcell_id}")
         # Create dummy samples for the indexes that is missing
-        if self.run_parameters.run_type == "wgs":
+        if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()
         else:
             LOG.info("Skip adding dummy samples since run is not WGS")
