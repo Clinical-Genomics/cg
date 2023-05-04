@@ -24,6 +24,7 @@ from cg.cli.upload.scout import (
     create_scout_load_config,
     upload_to_scout,
     upload_case_to_scout,
+    upload_multiqc_to_scout,
     upload_rna_fusion_report_to_scout,
     upload_rna_junctions_to_scout,
     upload_rna_to_scout,
@@ -140,5 +141,6 @@ upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)
 upload.add_command(upload_observations_to_loqusdb)
 upload.add_command(upload_available_observations_to_loqusdb)
+upload.add_command(upload_multiqc_to_scout)
 upload.add_command(validate)
 upload.add_command(vogue)
