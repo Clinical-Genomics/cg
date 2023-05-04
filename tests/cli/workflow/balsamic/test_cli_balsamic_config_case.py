@@ -8,6 +8,7 @@ from _pytest.logging import LogCaptureFixture
 from cg.cli.workflow.balsamic.base import config_case
 from click.testing import CliRunner
 
+from cg.store import Store
 from cg.models.cg_config import CGConfig
 
 EXIT_SUCCESS = 0
