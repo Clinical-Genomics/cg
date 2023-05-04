@@ -5,7 +5,7 @@ import logging
 from typing import List
 
 import click
-from cg.cli.get import case as print_case
+from cg.cli.get import get_case as print_case
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.store import Store
 from cg.store.models import Sample, Family
