@@ -136,9 +136,9 @@ class MetricsDeliverables(BaseModel):
 class ConditionMetricsDeliverables(BaseModel):
     """Specification for a metric deliverables file with conditions sets."""
 
-    metrics_: List[MetricsBase] = Field(..., alias="metrics")
+    metrics: List[MetricsBase]
 
-    @validator("metrics_", always=True)
+    @validator("metrics")
     def validate_metrics(cls, metrics: List[MetricsBase]) -> List[MetricsBase]:
         """Verify that metrics met QC conditions."""
         failed_metrics: List = []
@@ -146,7 +146,7 @@ class ConditionMetricsDeliverables(BaseModel):
             if metric.condition is not None:
                 qc_function: Callable = getattr(operator, metric.condition.norm)
                 if not qc_function(metric.value, metric.condition.threshold):
-                    failed_metrics.append(f"{metric.name}: {metric.value}")
+                    failed_metrics.append(f"{metric.name}={metric.value}")
         if failed_metrics:
             raise MetricsQCError(f"QC failed: {'; '.join(failed_metrics)}")
         return metrics
