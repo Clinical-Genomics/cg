@@ -429,7 +429,9 @@ class UploadScoutAPI:
         rna_sample: Sample,
     ) -> None:
         """Maps a list of DNA cases linked to DNA sample."""
-        cases_related_to_dna_sample: List[Family] = [dna_sample_family_relation.family for dna_sample_family_relation in dna_sample.links]
+        cases_related_to_dna_sample: List[Family] = [
+            dna_sample_family_relation.family for dna_sample_family_relation in dna_sample.links
+        ]
         for case in cases_related_to_dna_sample:
             if (
                 case.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
