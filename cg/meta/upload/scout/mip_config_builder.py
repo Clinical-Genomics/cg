@@ -100,15 +100,17 @@ class MipConfigBuilder(ScoutConfigBuilder):
     def include_case_files(self):
         """Include case level files for mip case"""
         LOG.info("Including MIP specific case level files")
-        self.load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
-        self.load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
-        self.load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
-        self.load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
-        self.load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
+        self.load_config.peddy_check = self.get_file_from_hk(self.case_tags.peddy_check)
         self.load_config.peddy_ped = self.get_file_from_hk(self.case_tags.peddy_ped)
         self.load_config.peddy_sex = self.get_file_from_hk(self.case_tags.peddy_sex)
-        self.load_config.peddy_check = self.get_file_from_hk(self.case_tags.peddy_check)
         self.load_config.smn_tsv = self.get_file_from_hk(self.case_tags.smn_tsv)
+        self.load_config.vcf_mei = self.get_file_from_hk(self.case_tags.vcf_mei)
+        self.load_config.vcf_mei_research = self.get_file_from_hk(self.case_tags.vcf_mei_research)
+        self.load_config.vcf_snv = self.get_file_from_hk(self.case_tags.snv_vcf)
+        self.load_config.vcf_snv_research = self.get_file_from_hk(self.case_tags.snv_research_vcf)
+        self.load_config.vcf_str = self.get_file_from_hk(self.case_tags.vcf_str)
+        self.load_config.vcf_sv = self.get_file_from_hk(self.case_tags.sv_vcf)
+        self.load_config.vcf_sv_research = self.get_file_from_hk(self.case_tags.sv_research_vcf)
         self.include_multiqc_report()
         self.include_delivery_report()
 
