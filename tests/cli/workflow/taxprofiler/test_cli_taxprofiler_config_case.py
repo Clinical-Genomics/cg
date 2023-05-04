@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List
 
 from _pytest.logging import LogCaptureFixture
+import logging
 from click.testing import CliRunner
 
 from cg.cli.workflow.taxprofiler.base import config_case
