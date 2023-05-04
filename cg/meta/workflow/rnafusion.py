@@ -25,8 +25,8 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import (
-    ConditionMetricsDeliverables,
     MetricsBase,
+    MetricsDeliverablesCondition,
     MultiqcDataJson,
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
@@ -365,7 +365,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def ensure_mandatory_metrics_present(metrics: List[MetricsBase]) -> None:
-        """Check that all mandatory metrics are present. Raise MissingMetrics error if missing."""
+        """Check that all mandatory metrics are present. Raise error if missing."""
         given_metrics: set = {metric.name for metric in metrics}
         mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
         if missing_metrics := mandatory_metrics.difference(given_metrics):
@@ -397,4 +397,4 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         qcmetrics_raw: dict = ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=metrics_deliverables_path
         )
-        ConditionMetricsDeliverables(**qcmetrics_raw)
+        MetricsDeliverablesCondition(**qcmetrics_raw)

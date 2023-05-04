@@ -61,7 +61,7 @@ class MetricCondition(BaseModel):
 
     @validator("norm")
     def validate_operator(cls, norm: str) -> str:
-        """Validate than an operator is accepted."""
+        """Validate that an operator is accepted."""
         try:
             getattr(operator, norm)
         except AttributeError as error:
@@ -133,7 +133,7 @@ class MetricsDeliverables(BaseModel):
         return set(sample_ids)
 
 
-class ConditionMetricsDeliverables(BaseModel):
+class MetricsDeliverablesCondition(BaseModel):
     """Specification for a metric deliverables file with conditions sets."""
 
     metrics: List[MetricsBase]
