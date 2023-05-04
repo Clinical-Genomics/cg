@@ -154,10 +154,10 @@ class UploadScoutAPI:
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
         """Return a set of unique dna cases related to a RNA case"""
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[
             str, Dict[str, List[str]]
-        ] = self.create_rna_dna_sample_case_map(rna_case=case_obj)
+        ] = self.create_rna_dna_sample_case_map(rna_case=case)
         dna_sample_case_dict: Dict[str, List[str]]
         unique_dna_cases_related_to_rna_case: Set[str] = set()
         for dna_sample_case_dict in rna_dna_sample_case_map.values():
@@ -421,17 +421,6 @@ class UploadScoutAPI:
                 rna_dna_sample_case_map[rna_sample.internal_id][sample.name]: List[str] = []
                 return sample
 
-    def validate_number_of_dna_samples_by_subject_id(
-        self, samples_by_subject_id: List[Sample]
-    ) -> None:
-        """Validates that there are two DNA samples with the same subject_id."""
-
-        if len(samples_by_subject_id) != 1:
-            raise CgDataError(
-                f"Unexpected number of DNA sample matches for subject_id.\n"
-                f"Number of matches: {len(samples_by_subject_id)}"
-            )
-
     @staticmethod
     def _map_dna_cases_to_dna_sample(
         dna_sample: Sample,
@@ -440,14 +429,13 @@ class UploadScoutAPI:
     ) -> None:
         """Maps a list of DNA cases linked to DNA sample."""
         cases_related_to_dna_sample = [link.family for link in dna_sample.links]
-        for case_object in cases_related_to_dna_sample:
+        for case in cases_related_to_dna_sample:
             if (
-                case_object.data_analysis
-                in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
-                and case_object.customer in rna_sample.customer.collaborators
+                case.data_analysis in [Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI]
+                and case.customer in rna_sample.customer.collaborators
             ):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
-                    case_object.internal_id
+                    case.internal_id
                 )
 
     @staticmethod
