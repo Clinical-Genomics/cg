@@ -29,7 +29,7 @@ from cg.store.models import Family
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("scout")
 @click.option(
     "-r",
     "--re-upload",
@@ -39,7 +39,7 @@ LOG = logging.getLogger(__name__)
 @click.option("-p", "--print", "print_console", is_flag=True, help="print config values")
 @click.argument("case_id", required=False)
 @click.pass_context
-def scout(context, re_upload: bool, print_console: bool, case_id: str):
+def upload_to_scout(context, re_upload: bool, print_console: bool, case_id: str):
     """Upload variants from analysis to Scout."""
     status_db: Store = context.obj.status_db
 

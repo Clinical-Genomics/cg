@@ -4,7 +4,7 @@ import logging
 from click.testing import CliRunner
 
 from cg.constants import EXIT_SUCCESS
-from cg.cli.upload.gens import gens as upload_gens_cmd
+from cg.cli.upload.gens import upload_to_gens as upload_gens_cmd
 from cg.models.cg_config import CGConfig
 
 
