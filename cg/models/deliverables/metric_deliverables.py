@@ -59,6 +59,17 @@ class MetricCondition(BaseModel):
     norm: str
     threshold: float
 
+    @validator("norm")
+    def validate_operator(cls, norm: str) -> str:
+        """Validate than an operator is accepted."""
+        try:
+            getattr(operator, norm)
+        except AttributeError as error:
+            raise CgError(
+                f"{norm} is not an accepted operator for QC metric conditions."
+            ) from error
+        return norm
+
 
 class MetricsBase(BaseModel):
     """Definition for elements in deliverables metrics file."""
@@ -128,21 +139,17 @@ class ConditionMetricsDeliverables(BaseModel):
     metrics_: List[MetricsBase] = Field(..., alias="metrics")
 
     @validator("metrics_", always=True)
-    def qc_pass(cls, metrics: List[MetricsBase]) -> str:
+    def validate_metrics(cls, metrics: List[MetricsBase]) -> List[MetricsBase]:
         """Verify that metrics met QC conditions."""
         failed_metrics: List = []
         for metric in metrics:
             if metric.condition is not None:
-                try:
-                    qc_function: Callable = getattr(operator, metric.condition.norm)
-                except AttributeError as error:
-                    raise CgError(
-                        f"{metric.condition.norm} is not an accepted operator for QC metric conditions."
-                    ) from error
+                qc_function: Callable = getattr(operator, metric.condition.norm)
                 if not qc_function(metric.value, metric.condition.threshold):
                     failed_metrics.append(f"{metric.name}: {metric.value}")
-        if len(failed_metrics) != 0:
-            raise MetricsQCError(f"{';'.join(['QC failed'] + failed_metrics)}")
+        if failed_metrics:
+            raise MetricsQCError(f"QC failed: {'; '.join(failed_metrics)}")
+        return metrics
 
 
 class MultiqcDataJson(BaseModel):
