@@ -162,12 +162,6 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.command(name="rna-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")
-@click.option(
-    "-u",
-    "--update-fusion-report",
-    is_flag=True,
-    help="re-upload existing fusion report",
-)
 @click.argument("case_id")
 @click.pass_context
 def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) -> None:
