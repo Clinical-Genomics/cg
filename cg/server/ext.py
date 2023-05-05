@@ -36,6 +36,7 @@ allowed_domains = [
     "https://clinical-genomics-stage.web.app",
     "https://clinical-genomics-5b3cd.web.app ",
     "https://cg-statusdb-stage.scilifelab.se",
+    "https://clinical-stage.scilifelab.se",
 ]
 
 
