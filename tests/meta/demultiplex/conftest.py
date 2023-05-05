@@ -26,7 +26,6 @@ from tests.cli.demultiplex.conftest import (
 )
 from tests.models.demultiplexing.conftest import (
     fixture_flowcell_path,
-    fixture_flow_cell_runs,
 )
 from tests.store_helpers import StoreHelpers
 

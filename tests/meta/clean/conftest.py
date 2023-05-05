@@ -5,7 +5,6 @@ import pytest
 from tests.cli.demultiplex.conftest import fixture_demultiplexed_flow_cells_working_directory
 from tests.models.demultiplexing.conftest import (
     fixture_flowcell_path,
-    fixture_flow_cell_runs,
 )
 
 
