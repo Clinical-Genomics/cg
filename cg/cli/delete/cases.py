@@ -4,7 +4,7 @@ import click
 from cg.store import Store
 from cg.store.models import Family, Sample
 
-from .case import delete_case
+from cg.cli.delete.case import delete_case
 
 CONFIRM = "Continue?"
 
