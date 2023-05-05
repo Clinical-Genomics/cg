@@ -780,7 +780,7 @@ def fixture_run_parameters_different_index(bcl2fastq_flow_cell_dir: Path) -> Pat
     return Path(bcl2fastq_flow_cell_dir, "RunParameters_different_index_cycles.xml")
 
 
-@pytest.fixture(name="flow_cell")
+@pytest.fixture(name="bcl2fastq_flow_cell")
 def fixture_flow_cell(bcl2fastq_flow_cell_dir: str) -> FlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
@@ -793,9 +793,9 @@ def fixture_dragen_flow_cell(dragen_flow_cell_dir: str) -> FlowCell:
 
 
 @pytest.fixture(name="flow_cell_id")
-def fixture_flow_cell_id(flow_cell: FlowCell) -> str:
+def fixture_flow_cell_id(bcl2fastq_flow_cell: FlowCell) -> str:
     """Return flow cell id from flow cell object."""
-    return flow_cell.id
+    return bcl2fastq_flow_cell.id
 
 
 @pytest.fixture(name="another_flow_cell_id")
@@ -805,15 +805,15 @@ def fixture_another_flow_cell_id() -> str:
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")
-def fixture_demultiplexing_delivery_file(flow_cell: FlowCell) -> Path:
+def fixture_demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCell) -> Path:
     """Return demultiplexing delivery started file."""
-    return Path(flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
-def fixture_hiseq_x_tile_dir(flow_cell: FlowCell) -> Path:
+def fixture_hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCell) -> Path:
     """Return Hiseq X tile dir."""
-    return Path(flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
@@ -849,10 +849,12 @@ def fixture_demultiplexed_flow_cell(demultiplexed_runs: Path, flow_cell_full_nam
 
 @pytest.fixture(name="bcl2fastq_demux_results")
 def fixture_bcl2fastq_demux_results(
-    demultiplexed_flow_cell: Path, flow_cell: FlowCell
+    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCell
 ) -> DemuxResults:
     return DemuxResults(
-        demux_dir=demultiplexed_flow_cell, flow_cell=flow_cell, bcl_converter=BclConverter.BCL2FASTQ
+        demux_dir=demultiplexed_flow_cell,
+        flow_cell=bcl2fastq_flow_cell,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
 

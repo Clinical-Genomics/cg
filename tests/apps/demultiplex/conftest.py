@@ -99,11 +99,11 @@ def fixture_novaseq_run_parameters_object(novaseq_run_parameters: Path) -> RunPa
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
-        flow_cell=flow_cell,
+        flow_cell=bcl2fastq_flow_cell,
         lims_samples=lims_novaseq_bcl2fastq_samples,
         bcl_converter="bcl2fastq",
     )
@@ -111,12 +111,12 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_object")
 def fixture_novaseq_dragen_sample_sheet_object(
-    flow_cell: FlowCell,
+    dragen_flow_cell: FlowCell,
     lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
     novaseq_run_parameters_object: RunParameters,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
-        flow_cell=flow_cell,
+        flow_cell=dragen_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
         bcl_converter="dragen",
     )

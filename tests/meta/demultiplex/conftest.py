@@ -72,11 +72,13 @@ def fixture_tmp_flow_cell_run_path(project_dir: Path, flow_cell_full_name: str) 
 
 
 @pytest.fixture(name="cgstats_select_project_log_file")
-def fixture_cgstats_select_project_log_file(flow_cell: FlowCell, flow_cell_project_id: int) -> Path:
+def fixture_cgstats_select_project_log_file(
+    bcl2fastq_flow_cell: FlowCell, flow_cell_project_id: int
+) -> Path:
     """Return cgstats select project out file."""
     return Path(
-        flow_cell.path,
-        "-".join(["stats", str(flow_cell_project_id), flow_cell.id]) + ".txt",
+        bcl2fastq_flow_cell.path,
+        "-".join(["stats", str(flow_cell_project_id), bcl2fastq_flow_cell.id]) + ".txt",
     )
 
 
@@ -87,9 +89,9 @@ def fixture_flow_cell_project_id() -> int:
 
 
 @pytest.fixture(name="hiseq_x_copy_complete_file")
-def fixture_hiseq_x_copy_complete_file(flow_cell: FlowCell) -> Path:
+def fixture_hiseq_x_copy_complete_file(bcl2fastq_flow_cell: FlowCell) -> Path:
     """Return Hiseq X flow cell copy complete file."""
-    return Path(flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_COPY_COMPLETE)
 
 
 @pytest.fixture(name="populated_flow_cell_store")

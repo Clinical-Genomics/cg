@@ -12,13 +12,6 @@ def fixture_flow_cell_name(flow_cell_full_name: str) -> str:
     return flow_cell_full_name.split("_")[-1][1:]
 
 
-@pytest.fixture(name="flow_cell")
-def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCell:
-    flow_cell = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
-    flow_cell.parse_flow_cell_name()
-    return FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
-
-
 @pytest.fixture(name="dragen_flow_cell_full_name")
 def fixture_dragen_flow_cell_full_name() -> str:
     return "211101_A00187_0615_AHLG5GDRXY"
