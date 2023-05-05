@@ -18,8 +18,10 @@ def fixture_dragen_flow_cell_full_name() -> str:
 
 
 @pytest.fixture(name="dragen_flow_cell_path")
-def fixture_dragen_flow_cell_path(demux_run_dir: Path, dragen_flow_cell_full_name: str) -> Path:
-    return Path(demux_run_dir, dragen_flow_cell_full_name)
+def fixture_dragen_flow_cell_path(
+    flow_cell_runs_dir: Path, dragen_flow_cell_full_name: str
+) -> Path:
+    return Path(flow_cell_runs_dir, dragen_flow_cell_full_name)
 
 
 @pytest.fixture(name="demultiplexed_dragen_flow_cell")

@@ -726,22 +726,24 @@ def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "demultiplexed-runs")
 
 
-@pytest.fixture(name="demux_run_dir")
+@pytest.fixture(name="flow_cell_runs_dir")
 def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with flow cells ready for demultiplexing."""
-    return Path(demultiplex_fixtures, "flowcell-runs")
+    return Path(demultiplex_fixtures, "flow-cell-runs")
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell_dir")
-def fixture_bcl2fastq_flow_cell_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
+def fixture_bcl2fastq_flow_cell_dir(flow_cell_runs_dir: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the bcl2fastq flow cell demultiplex fixture directory."""
-    return Path(demux_run_dir, flow_cell_full_name)
+    return Path(flow_cell_runs_dir, flow_cell_full_name)
 
 
 @pytest.fixture(name="dragen_flow_cell_dir")
-def fixture_dragen_flow_cell_path(demux_run_dir: Path, dragen_flow_cell_full_name: str) -> Path:
+def fixture_dragen_flow_cell_path(
+    flow_cell_runs_dir: Path, dragen_flow_cell_full_name: str
+) -> Path:
     """Return the path to the dragen flow cell demultiplex fixture directory."""
-    return Path(demux_run_dir, dragen_flow_cell_full_name)
+    return Path(flow_cell_runs_dir, dragen_flow_cell_full_name)
 
 
 @pytest.fixture(name="hiseq_dir")
@@ -1679,7 +1681,7 @@ def fixture_context_config(
             "mail_user": "an@email.com",
         },
         "demultiplex": {
-            "run_dir": "tests/fixtures/apps/demultiplexing/flowcell-runs",
+            "run_dir": "tests/fixtures/apps/demultiplexing/flow-cell-runs",
             "out_dir": "tests/fixtures/apps/demultiplexing/demultiplexed-runs",
             "slurm": {
                 "account": "development",

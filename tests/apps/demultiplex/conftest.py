@@ -23,15 +23,15 @@ def fixture_output_dirs_bcl2fastq(demultiplexed_runs: Path) -> Path:
 
 
 @pytest.fixture(name="demux_run_dir_bcl2fastq")
-def fixture_demux_run_dir_bcl2fastq(demux_run_dir: Path) -> Path:
+def fixture_demux_run_dir_bcl2fastq(flow_cell_runs_dir: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(demux_run_dir, "bcl2fastq")
+    return Path(flow_cell_runs_dir, "bcl2fastq")
 
 
 @pytest.fixture(name="demux_run_dir_dragen")
-def fixture_demux_run_dir_dragen(demux_run_dir: Path) -> Path:
+def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(demux_run_dir, "dragen")
+    return Path(flow_cell_runs_dir, "dragen")
 
 
 @pytest.fixture(name="index_obj")

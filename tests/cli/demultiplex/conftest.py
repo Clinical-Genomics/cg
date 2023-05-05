@@ -40,7 +40,7 @@ def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> P
 @pytest.fixture(name="flow_cell_runs_working_directory")
 def fixture_flow_cell_runs_working_directory(project_dir: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(project_dir, "flowcell-runs")
+    working_dir: Path = Path(project_dir, "flow-cell-runs")
     working_dir.mkdir(parents=True)
     return working_dir
 
