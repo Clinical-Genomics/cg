@@ -132,14 +132,14 @@ def fixture_yet_another_flow_cell_id() -> str:
 
 @pytest.fixture(name="stats_sample_data")
 def fixture_stats_sample_data(
-    sample_id: str, flow_cell_id: str, yet_another_flow_cell_id: str
+    sample_id: str, bcl2fastq_flow_cell_id: str, yet_another_flow_cell_id: str
 ) -> dict:
     return {
         "samples": [
             {
                 "name": sample_id,
                 "index": "ACGTACAT",
-                "flowcell": flow_cell_id,
+                "flowcell": bcl2fastq_flow_cell_id,
                 "type": Sequencers.HISEQX,
             },
             {
