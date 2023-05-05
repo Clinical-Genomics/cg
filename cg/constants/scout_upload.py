@@ -1,11 +1,21 @@
-from typing import Dict, Set
+from cg.utils.enums import StrEnum
 
-from cgmodels.cg.constants import StrEnum
+from typing import Dict, Set
 
 
 class GenomeBuild(StrEnum):
     hg19: str = "37"
     hg38: str = "38"
+
+
+class ScoutCustomCaseReportTags(StrEnum):
+    DELIVERY: str = "delivery_report"
+    CNV: str = "cnv_report"
+    COV_QC: str = "coverage_qc_report"
+    MULTIQC: str = "multiqc"
+    MULTIQC_RNA: str = "multiqc_rna"
+    GENE_FUSION: str = "gene_fusion"
+    GENE_FUSION_RESEARCH: str = "gene_fusion_research"
 
 
 MIP_CASE_TAGS = dict(
@@ -74,4 +84,5 @@ BALSAMIC_UMI_SAMPLE_TAGS = dict(
     alignment_file={"umi-cram"},
 )
 
-RNAFUSION_SAMPLE_TAGS = dict()
+
+RNAFUSION_SAMPLE_TAGS = {}
