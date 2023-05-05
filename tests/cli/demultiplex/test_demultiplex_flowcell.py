@@ -273,7 +273,7 @@ def test_delete_flow_cell_dry_run_status_db(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
     bcl2fastq_flow_cell_id: str,
     caplog,
 ):
@@ -314,7 +314,7 @@ def test_delete_flow_cell_dry_run_status_db(
     assert f"DeleteDemuxAPI-CGStats: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
     assert (
         "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
-        f"{demultiplex_context.demultiplex_api.out_dir / Path(flow_cell_full_name)}\n"
+        f"{demultiplex_context.demultiplex_api.out_dir / Path(bcl2fastq_flow_cell_full_name)}\n"
         f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flow_cell}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text

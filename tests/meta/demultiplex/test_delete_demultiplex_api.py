@@ -19,7 +19,7 @@ def test_initiate_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flow_cells_working_directory: Path,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
 ):
     """Test to initialize the DeleteDemuxAPI"""
 
@@ -33,7 +33,7 @@ def test_initiate_delete_demux_api(
         config=config,
         demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=True,
-        run_path=flow_cell_full_name,
+        run_path=bcl2fastq_flow_cell_full_name,
     )
 
     # THEN the API should be correctly initialized
@@ -86,7 +86,7 @@ def test_set_dry_run_delete_demux_api(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flow_cells_working_directory: Path,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
     stats_api: StatsAPI,
 ):
     """Test to test function to set the API to run in dry run mode"""
@@ -98,7 +98,7 @@ def test_set_dry_run_delete_demux_api(
         config=cg_context,
         demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=True,
-        run_path=flow_cell_full_name,
+        run_path=bcl2fastq_flow_cell_full_name,
     )
 
     # THEN the dry run parameter should be set to True and it should be logged
@@ -176,7 +176,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
     caplog,
     cg_context: CGConfig,
     demultiplexed_flow_cells_working_directory: Path,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
     populated_flow_cell_store: Store,
     sample_level_housekeeper_api: HousekeeperAPI,
 ):
@@ -194,7 +194,7 @@ def test_delete_flow_cell_housekeeper_only_sample_level(
         config=cg_context,
         demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=Path(flow_cell_full_name),
+        run_path=Path(bcl2fastq_flow_cell_full_name),
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 
@@ -218,7 +218,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
     cg_context: CGConfig,
     demultiplexed_flow_cells_working_directory: Path,
     flow_cell_name_housekeeper_api: HousekeeperAPI,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
     populated_flow_cell_store: Store,
     tmp_sample_sheet_path: Path,
 ):
@@ -236,7 +236,7 @@ def test_delete_flow_cell_housekeeper_flowcell_name(
         config=cg_context,
         demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=Path(flow_cell_full_name),
+        run_path=Path(bcl2fastq_flow_cell_full_name),
     )
     wipe_demultiplex_api._set_samples_on_flow_cell()
 

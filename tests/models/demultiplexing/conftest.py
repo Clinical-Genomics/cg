@@ -8,15 +8,8 @@ from cg.models.demultiplex.flow_cell import FlowCell
 
 
 @pytest.fixture(name="flow_cell_name")
-def fixture_flow_cell_name(flow_cell_full_name: str) -> str:
-    return flow_cell_full_name.split("_")[-1][1:]
-
-
-@pytest.fixture(name="dragen_flow_cell_path")
-def fixture_dragen_flow_cell_path(
-    flow_cell_runs_dir: Path, dragen_flow_cell_full_name: str
-) -> Path:
-    return Path(flow_cell_runs_dir, dragen_flow_cell_full_name)
+def fixture_flow_cell_name(bcl2fastq_flow_cell_full_name: str) -> str:
+    return bcl2fastq_flow_cell_full_name.split("_")[-1][1:]
 
 
 @pytest.fixture(name="demultiplexed_dragen_flow_cell")

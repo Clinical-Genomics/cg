@@ -29,12 +29,6 @@ def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "demultiplexed-runs-unfinished")
 
 
-@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
-def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a Novaseq bcl2fastq sample sheet."""
-    return Path(demultiplex_fixtures, "SampleSheetS2_Bcl2Fastq.csv")
-
-
 @pytest.fixture(name="flow_cell_runs_working_directory")
 def fixture_flow_cell_runs_working_directory(project_dir: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
@@ -73,11 +67,13 @@ def fixture_demultiplexed_flow_cells_working_directory(project_dir: Path) -> Pat
 def fixture_demultiplexed_flow_cell_working_directory(
     demux_results_not_finished_dir: Path,
     demultiplexed_flow_cells_working_directory: Path,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    source: Path = Path(demux_results_not_finished_dir, flow_cell_full_name)
-    destination: Path = Path(demultiplexed_flow_cells_working_directory, flow_cell_full_name)
+    source: Path = Path(demux_results_not_finished_dir, bcl2fastq_flow_cell_full_name)
+    destination: Path = Path(
+        demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_full_name
+    )
     shutil.copytree(src=source, dst=destination)
     return destination
 
@@ -86,11 +82,13 @@ def fixture_demultiplexed_flow_cell_working_directory(
 def fixture_demultiplexed_flow_cell_finished_working_directory(
     demultiplexed_runs: Path,
     demultiplexed_flow_cells_working_directory: Path,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
 ) -> Path:
     """Copy the content of a demultiplexed but not finished directory to a temporary location."""
-    source: Path = Path(demultiplexed_runs, flow_cell_full_name)
-    destination: Path = Path(demultiplexed_flow_cells_working_directory, flow_cell_full_name)
+    source: Path = Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+    destination: Path = Path(
+        demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_full_name
+    )
     shutil.copytree(src=source, dst=destination)
     return destination
 

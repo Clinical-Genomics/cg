@@ -29,11 +29,11 @@ from tests.store_helpers import StoreHelpers
 
 @pytest.fixture(name="tmp_demulitplexing_dir")
 def fixture_tmp_demulitplexing_dir(
-    demultiplexed_flow_cells_working_directory: Path, flow_cell_full_name: str
+    demultiplexed_flow_cells_working_directory: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
     """Return a tmp directory in demultiplexed-runs."""
     tmp_demulitplexing_dir: Path = Path(
-        demultiplexed_flow_cells_working_directory, flow_cell_full_name
+        demultiplexed_flow_cells_working_directory, bcl2fastq_flow_cell_full_name
     )
     tmp_demulitplexing_dir.mkdir(exist_ok=True, parents=True)
     return tmp_demulitplexing_dir
@@ -62,10 +62,10 @@ def fixture_tmp_samplesheet_path(tmp_demulitplexing_dir: Path) -> Path:
 
 
 @pytest.fixture(name="tmp_flow_cell_run_path")
-def fixture_tmp_flow_cell_run_path(project_dir: Path, flow_cell_full_name: str) -> Path:
+def fixture_tmp_flow_cell_run_path(project_dir: Path, bcl2fastq_flow_cell_full_name: str) -> Path:
     """Flow cell run directory in temporary folder."""
 
-    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run", flow_cell_full_name)
+    tmp_flow_cell_run_path: Path = Path(project_dir, "flow_cell_run", bcl2fastq_flow_cell_full_name)
     tmp_flow_cell_run_path.mkdir(exist_ok=True, parents=True)
 
     return tmp_flow_cell_run_path
@@ -254,14 +254,14 @@ def fixture_populated_wipe_demultiplex_api(
 def fixture_active_wipe_demultiplex_api(
     active_wipe_demux_context: CGConfig,
     demultiplexed_flow_cells_working_directory: Path,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
 ) -> DeleteDemuxAPI:
     """Return an instantiated DeleteDemuxAPI with active samples on a flow cell."""
     return DeleteDemuxAPI(
         config=active_wipe_demux_context,
         demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=Path(flow_cell_full_name),
+        run_path=Path(bcl2fastq_flow_cell_full_name),
     )
 
 
@@ -269,7 +269,7 @@ def fixture_active_wipe_demultiplex_api(
 def fixture_wipe_demultiplex_api(
     cg_context: CGConfig,
     demultiplexed_flow_cells_working_directory: Path,
-    flow_cell_full_name: str,
+    bcl2fastq_flow_cell_full_name: str,
     stats_api: StatsAPI,
 ) -> DeleteDemuxAPI:
     """Return an initialized DeleteDemuxAPI."""
@@ -278,7 +278,7 @@ def fixture_wipe_demultiplex_api(
         config=cg_context,
         demultiplex_base=demultiplexed_flow_cells_working_directory,
         dry_run=False,
-        run_path=Path(flow_cell_full_name),
+        run_path=Path(bcl2fastq_flow_cell_full_name),
     )
 
 

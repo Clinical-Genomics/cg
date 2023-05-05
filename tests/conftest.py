@@ -708,9 +708,15 @@ def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     return Path(apps_dir, "demultiplexing")
 
 
+@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
+def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a Novaseq bcl2fastq sample sheet."""
+    return Path(demultiplex_fixtures, "SampleSheetS2_Bcl2Fastq.csv")
+
+
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
 def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a novaseq bcl2fastq sample sheet."""
+    """Return the path to a Novaseq dragen sample sheet."""
     return Path(demultiplex_fixtures, "SampleSheetS2_Dragen.csv")
 
 
@@ -733,9 +739,11 @@ def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell_dir")
-def fixture_bcl2fastq_flow_cell_dir(flow_cell_runs_dir: Path, flow_cell_full_name: str) -> Path:
+def fixture_bcl2fastq_flow_cell_dir(
+    flow_cell_runs_dir: Path, bcl2fastq_flow_cell_full_name: str
+) -> Path:
     """Return the path to the bcl2fastq flow cell demultiplex fixture directory."""
-    return Path(flow_cell_runs_dir, flow_cell_full_name)
+    return Path(flow_cell_runs_dir, bcl2fastq_flow_cell_full_name)
 
 
 @pytest.fixture(name="dragen_flow_cell_dir")
@@ -838,7 +846,7 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
     )
 
 
-@pytest.fixture(name="flow_cell_full_name")
+@pytest.fixture(name="bcl2fastq_flow_cell_full_name")
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
@@ -851,8 +859,10 @@ def fixture_dragen_flow_cell_full_name() -> str:
 
 
 @pytest.fixture(name="demultiplexed_flow_cell")
-def fixture_demultiplexed_flow_cell(demultiplexed_runs: Path, flow_cell_full_name: str) -> Path:
-    return Path(demultiplexed_runs, flow_cell_full_name)
+def fixture_demultiplexed_flow_cell(
+    demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str
+) -> Path:
+    return Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
 
 
 @pytest.fixture(name="bcl2fastq_demux_results")

@@ -15,14 +15,14 @@ from tests.store_helpers import StoreHelpers
 
 
 def test_get_flow_cell_id_when_hiseqx(
-    compress_api: CompressAPI, bcl2fastq_flow_cell_id: str, flow_cell_full_name: str
+    compress_api: CompressAPI, bcl2fastq_flow_cell_id: str, bcl2fastq_flow_cell_full_name: str
 ):
     """Test extracting the flow cell id from a fastq file path."""
 
     # GIVEN a CompressAPI and a flow cell id within a fastq file path
     fastq_path: Path = compress_api.demux_root.joinpath(
         Path(
-            flow_cell_full_name,
+            bcl2fastq_flow_cell_full_name,
             f"{bcl2fastq_flow_cell_id}-l6t11_Undetermined_GACGTCTT_L006_R1_001.fastq.gz",
         )
     )
@@ -35,13 +35,16 @@ def test_get_flow_cell_id_when_hiseqx(
 
 
 def test_get_flow_cell_id_when_novaseq(
-    compress_api: CompressAPI, bcl2fastq_flow_cell_id: str, flow_cell_full_name: str
+    compress_api: CompressAPI, bcl2fastq_flow_cell_id: str, bcl2fastq_flow_cell_full_name: str
 ):
     """Test extracting the flow cell id from a fastq file path."""
 
     # GIVEN a CompressAPI and a flow cell id within a fastq file path
     fastq_path: Path = compress_api.demux_root.joinpath(
-        Path(flow_cell_full_name, f"{bcl2fastq_flow_cell_id}_ACC10950A36_S36_L001_R1_001.fastq.gz")
+        Path(
+            bcl2fastq_flow_cell_full_name,
+            f"{bcl2fastq_flow_cell_id}_ACC10950A36_S36_L001_R1_001.fastq.gz",
+        )
     )
 
     # WHEN retrieving the flow cell id
