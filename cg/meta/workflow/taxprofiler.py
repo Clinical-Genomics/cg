@@ -41,4 +41,4 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         """Create sample sheet file for Taxprofiler analysis."""
         # NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         # self.write_samplesheet(case_id, strandedness)
-        LOG.info("Samplesheet written")
+        # LOG.info("Samplesheet written")
