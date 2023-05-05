@@ -760,7 +760,6 @@ class User(Model):
 class SequencingStats(Model):
     __tablename__ = "sequencing_stats"
     id = Column(types.Integer, primary_key=True)
-
     lane = Column(types.Integer)
     yield_mb = Column(types.Integer)
     passed_filter_pct = Column(types.Numeric(10, 5))
@@ -769,7 +768,7 @@ class SequencingStats(Model):
     perfect_index_reads_pct = Column(types.Numeric(10, 5))
     q30_bases_pct = Column(types.Numeric(10, 5))
     mean_quality_score = Column(types.Numeric(10, 5))
-    sample = orm.relationship("Sample", back_populates="sequencing_stats")
-    flowcell = orm.relationship("Flowcell", back_populates="sequencing_stats")
     sample_id = Column(types.Integer, ForeignKey("sample.id"), nullable=False)
     flow_cell_id = Column(types.Integer, ForeignKey("flowcell.id"), nullable=False)
+    sample_internal_id = Column(types.String(128), nullable=False)
+    flow_cell_name = Column(types.String(128), nullable=False)

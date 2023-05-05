@@ -25,11 +25,8 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("sample_id", sa.Integer(), nullable=False),
         sa.Column("flow_cell_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(["sample_id"], ["sample.id"]),
-        sa.ForeignKeyConstraint(
-            ["flow_cell_id"],
-            ["flowcell.id"],
-        ),
+        sa.Column("flow_cell_name", sa.String(), nullable=False),
+        sa.Column("sample_internal_id", sa.String(), nullable=False),
         sa.Column("lane", sa.Integer(), nullable=False),
         sa.Column("yield_mb", sa.Integer(), nullable=False),
         sa.Column("read_counts", sa.Integer(), nullable=False),
