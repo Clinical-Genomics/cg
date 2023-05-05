@@ -56,6 +56,12 @@ class CaseTags(BaseModel):
         None, description="RNAfusion inspector report containing all fusions"
     )
     multiqc_rna: Optional[Set[str]] = Field(None, description="MultiQC report for RNA samples")
+    vcf_mei: Optional[Set[str]] = Field(
+        None, description="VCF with mobile element insertions, clinical"
+    )
+    vcf_mei_research: Optional[Set[str]] = Field(
+        None, description="VCF with mobile element insertions, research"
+    )
 
 
 class SampleTags(BaseModel):

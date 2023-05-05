@@ -4,7 +4,7 @@ import logging
 from typing import Dict, List, Set
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.resources import valid_indexes_path
+from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel
 
@@ -37,9 +37,9 @@ class Index(BaseModel):
 
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
-    LOG.info(f"Fetch valid indexes from {valid_indexes_path}")
+    LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
     indexes: List[Index] = []
-    with open(valid_indexes_path, "r") as csv_file:
+    with open(VALID_INDEXES_PATH, "r") as csv_file:
         indexes_csv = csv.reader(csv_file)
         for row in indexes_csv:
             index_name = row[0]

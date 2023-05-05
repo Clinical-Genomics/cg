@@ -8,10 +8,12 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.constants import Pipeline
+from cg.constants.constants import FileFormat
+from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.exc import CgDataError, ScoutUploadError
 from cg.io.controller import WriteStream
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
@@ -117,8 +119,8 @@ def create_scout_load_config(context: CGConfig, case_id: str, print_console: boo
             config_file_path=file_path, case_id=case_id, delete=re_upload
         )
     except FileExistsError as error:
-        LOG.warning("%s, consider removing the file from housekeeper and try again", str(error))
-        raise click.Abort
+        LOG.warning(f"{error}, consider removing the file from housekeeper and try again")
+        raise click.Abort from error
 
 
 @click.command(name="upload-case-to-scout")
@@ -170,100 +172,81 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.pass_context
 def upload_rna_to_scout(
     context, case_id: str, dry_run: bool, update_fusion_report: bool, research: bool
-) -> int:
-    """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id
-
-    Args:
-        case_id                 (string):       RNA case identifier
-        dry_run                 (bool):         Skip uploading
-        research                (bool):         Upload research report instead of clinical
-        update_fusion_report    (bool):         Overwrite existing fusion report
-    Returns:
-
-    """
+) -> None:
+    """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
-    result: int = context.invoke(
+    context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
+    context.invoke(
         upload_rna_fusion_report_to_scout,
         case_id=case_id,
         dry_run=dry_run,
         research=research,
         update=update_fusion_report,
     )
-    if result == 0:
-        result = context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
-    return result
+    context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
 
 @click.command(name="rna-fusion-report-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("--research", is_flag=True)
-@click.option(
-    "-u",
-    "--update",
-    is_flag=True,
-    help="Overwrite existing report",
-)
 @click.argument("case_id")
 @click.pass_obj
 def upload_rna_fusion_report_to_scout(
-    context: CGConfig, dry_run: bool, case_id: str, update: bool, research: bool
-) -> int:
-    """Upload fusion report file for a case to Scout.
-    This can also be run as
-    `housekeeper get file -V --tag fusion --tag pdf --tag clinical/research <case_id>`
-    `scout load gene-fusion-report [-r] <case_id> <path/to/research_gene_fusion_report.pdf>`
+    context: CGConfig, dry_run: bool, case_id: str, research: bool
+) -> None:
+    """Upload fusion report file for a case to Scout."""
 
-    Args:
-        dry_run     (bool):         Skip uploading
-        case_id     (string):       RNA case identifier
-        research    (bool):         Upload research report instead of clinical
-        update      (bool):         Overwrite existing report
-    Returns:
-
-    """
     LOG.info("----------------- UPLOAD RNA FUSION REPORT TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    try:
-        scout_upload_api.upload_fusion_report_to_scout(
-            dry_run=dry_run, research=research, case_id=case_id, update=update
-        )
-    except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error)
-        return 1
-    return 0
+    scout_upload_api.upload_fusion_report_to_scout(
+        dry_run=dry_run, research=research, case_id=case_id
+    )
 
 
 @click.command(name="rna-junctions-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.argument("case_id")
 @click.pass_obj
-def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> int:
-    """Upload RNA junctions splice files to Scout.
-        This can also be run as
-        `housekeeper get file -V --tag junction --tag bed <sample_id>`
-        `scout update individual -c <case_id> -n <customer_sample_id> splice_junctions_bed <path/to/junction_file.bed>`
-        `housekeeper get file -V --tag coverage --tag bigwig <sample_id>`
-        scout update individual -c <case_id> -n <customer_sample_id> rna_coverage_bigwig <path/to/coverage_file.bigWig>
-    `   ```
-
-        Args:
-            dry_run     (bool):         Skip uploading
-            case_id     (string):       RNA case identifier
-        Returns:
-
-    """
+def upload_rna_junctions_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Upload RNA junctions splice files to Scout."""
     LOG.info("----------------- UPLOAD RNA JUNCTIONS TO SCOUT -----------------------")
 
     scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
-    try:
-        scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
-    except (CgDataError, ScoutUploadError) as error:
-        LOG.error(error)
-        return 1
-    return 0
+
+    scout_upload_api.upload_rna_junctions_to_scout(dry_run=dry_run, case_id=case_id)
+
+
+@click.command(name="multiqc-to-scout")
+@click.option("--dry-run", is_flag=True)
+@click.argument("case_id")
+@click.pass_obj
+def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> None:
+    """Upload multiqc report to Scout."""
+    LOG.info("----------------- UPLOAD MULTIQC TO SCOUT -----------------------")
+
+    scout_upload_api: UploadScoutAPI = context.meta_apis["upload_api"].scout_upload_api
+    status_db: Store = context.status_db
+    case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
+    scout_report_type, multiqc_report = scout_upload_api.get_multiqc_html_report(
+        case_id=case_id, pipeline=case.data_analysis
+    )
+    if scout_report_type == ScoutCustomCaseReportTags.MULTIQC_RNA:
+        scout_upload_api.upload_rna_report_to_dna_case_in_scout(
+            dry_run=dry_run,
+            rna_case_id=case_id,
+            report_type=scout_report_type,
+            report_file=multiqc_report,
+        )
+    else:
+        scout_upload_api.upload_report_to_scout(
+            dry_run=dry_run,
+            case_id=case_id,
+            report_type=scout_report_type,
+            report_file=multiqc_report,
+        )
 
 
 def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:

@@ -18,7 +18,7 @@ from cg.constants.constants import (
     FlowCellStatus,
 )
 from cg.constants.gene_panel import GenePanelMasterList
-from cg.constants.housekeeper_tags import HK_FASTQ_TAGS, SequencingFileTag
+from cg.constants.housekeeper_tags import HK_FASTQ_TAGS, HK_MULTIQC_HTML_TAG, SequencingFileTag
 from cg.constants.paths import TMP_DIR
 from cg.constants.priority import Priority
 from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS, RETURN_SUCCESS
