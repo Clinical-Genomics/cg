@@ -1474,6 +1474,11 @@ def fixture_rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
 
 
+@pytest.fixture(name="taxprofiler_dir")
+def fixture_taxprofiler_dir(tmpdir_factory) -> Path:
+    return tmpdir_factory.mktemp("taxprofiler")
+
+
 @pytest.fixture(name="cg_dir")
 def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
