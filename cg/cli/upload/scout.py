@@ -170,19 +170,14 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 )
 @click.argument("case_id")
 @click.pass_context
-def upload_rna_to_scout(
-    context, case_id: str, dry_run: bool, research: bool
-) -> None:
+def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) -> None:
     """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(
-        upload_rna_fusion_report_to_scout,
-        case_id=case_id,
-        dry_run=dry_run,
-        research=research
+        upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
     )
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
