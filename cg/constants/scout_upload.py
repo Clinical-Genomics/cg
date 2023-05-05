@@ -1,6 +1,6 @@
 from typing import Dict, Set
 
-from cgmodels.cg.constants import StrEnum
+from cg.utils.enums import StrEnum
 
 
 class GenomeBuild(StrEnum):

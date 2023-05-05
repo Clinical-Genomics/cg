@@ -1,11 +1,9 @@
 """Constants for cg."""
 
 import click
-from cgmodels.cg.constants import StrEnum
 
-from cg.constants.sequencing import Sequencers
-from cg.utils.date import get_date
 from cg.utils.enums import StrEnum
+from cg.utils.date import get_date
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
@@ -63,12 +61,6 @@ class FlowCellStatus(StrEnum):
 
 
 FLOWCELL_STATUS = [status.value for status in FlowCellStatus]
-
-FLOWCELL_Q30_THRESHOLD = {
-    Sequencers.HISEQX: 75,
-    Sequencers.HISEQGA: 80,
-    Sequencers.NOVASEQ: 75,
-}
 
 
 class AnalysisType(StrEnum):

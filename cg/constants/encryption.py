@@ -1,7 +1,6 @@
 """Constants specific for encryption"""
 
-from cgmodels.cg.constants import StrEnum
-
+from cg.utils.enums import StrEnum
 from cg.utils.enums import ListEnum
 
 

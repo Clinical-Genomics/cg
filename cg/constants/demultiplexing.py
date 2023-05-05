@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import click
-from cgmodels.cg.constants import StrEnum
+from cg.utils.enums import StrEnum
 
 
 class BclConverter(StrEnum):
