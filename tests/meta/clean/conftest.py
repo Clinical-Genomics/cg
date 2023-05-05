@@ -3,9 +3,6 @@ from pathlib import Path
 import pytest
 
 from tests.cli.demultiplex.conftest import fixture_demultiplexed_flow_cells_working_directory
-from tests.models.demultiplexing.conftest import (
-    fixture_flowcell_path,
-)
 
 
 @pytest.fixture(name="correct_flow_cell")

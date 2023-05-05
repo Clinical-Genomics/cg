@@ -3,24 +3,24 @@ from pathlib import Path
 from cg.models.demultiplex.flow_cell import FlowCell
 
 
-def test_flowcell_id(flow_cell_path: Path):
+def test_flowcell_id(bcl2fastq_flow_cell_dir: Path):
     """Test parsing of flow cell id."""
     # GIVEN the path to a finished flow cell run
     # GIVEN the flow cell id
-    flowcell_id: str = flow_cell_path.name.split("_")[-1][1:]
+    flowcell_id: str = bcl2fastq_flow_cell_dir.name.split("_")[-1][1:]
 
     # WHEN instantiating a flow cell object
-    flowcell_obj = FlowCell(flow_cell_path)
+    flowcell_obj = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
 
     # THEN assert that the flow cell id is parsed
     assert flowcell_obj.id == flowcell_id
 
 
-def test_flowcell_position(flow_cell_path: Path):
+def test_flowcell_position(bcl2fastq_flow_cell_dir: Path):
     """Test getting flow cell position."""
     # GIVEN the path to a finished flow cell
     # GIVEN a flow cell object
-    flowcell_obj = FlowCell(flow_cell_path)
+    flowcell_obj = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
 
     # WHEN fetching the flow cell position
     position = flowcell_obj.position

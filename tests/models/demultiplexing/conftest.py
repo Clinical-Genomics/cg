@@ -12,16 +12,11 @@ def fixture_flow_cell_name(flow_cell_full_name: str) -> str:
     return flow_cell_full_name.split("_")[-1][1:]
 
 
-@pytest.fixture(name="flow_cell_path")
-def fixture_flowcell_path(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
-    return Path(demux_run_dir, flow_cell_full_name)
-
-
 @pytest.fixture(name="flow_cell")
-def fixture_flow_cell(flow_cell_path: Path) -> FlowCell:
-    flow_cell = FlowCell(flow_cell_path=flow_cell_path)
+def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCell:
+    flow_cell = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
     flow_cell.parse_flow_cell_name()
-    return FlowCell(flow_cell_path=flow_cell_path)
+    return FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
 
 
 @pytest.fixture(name="dragen_flow_cell_full_name")
