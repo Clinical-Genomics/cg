@@ -32,7 +32,14 @@ class FlaskStore(Store):
         super(FlaskStore, self).__init__(uri)
 
 
-cors = CORS(resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+allowed_domains = [
+    "https://clinical-genomics-stage.web.app",
+    "https://clinical-genomics-5b3cd.web.app ",
+    "https://cg-statusdb-stage.scilifelab.se",
+]
+
+
+cors = CORS(resources={r"/api/*": {"origins": allowed_domains}}, supports_credentials=True)
 csrf = CSRFProtect()
 db = FlaskStore()
 
