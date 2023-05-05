@@ -5,7 +5,6 @@ from pathlib import Path
 
 import click
 
-from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.nextflow.options import (
     OPTION_CONFIG,
@@ -19,12 +18,15 @@ from cg.cli.workflow.nextflow.options import (
 from cg.cli.workflow.taxprofiler.options import (
     OPTION_FROM_START,
 )
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
+from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
+
 
 LOG = logging.getLogger(__name__)
 
@@ -41,6 +43,7 @@ def taxprofiler(context: click.Context) -> None:
 
 @taxprofiler.command("config-case")
 @ARGUMENT_CASE_ID
+@DRY_RUN
 @click.pass_obj
 def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given CASE_ID."""

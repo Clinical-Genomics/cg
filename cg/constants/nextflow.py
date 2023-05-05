@@ -3,8 +3,8 @@ from enum import IntEnum
 
 NFX_WORK_DIR = "work"
 NFX_SAMPLE_HEADER = "sample"
-NXF_RUN_ACCESSION = "run_accession"
-NXF_INSTRUMENT_PLATFORM = "instrument_platform"
+NFX_RUN_ACCESSION = "run_accession"
+NFX_INSTRUMENT_PLATFORM = "instrument_platform"
 NFX_READ1_HEADER = "fastq_1"
 NFX_READ2_HEADER = "fastq_2"
 NXF_FASTA_HEADER = "fasta"
