@@ -39,18 +39,6 @@ def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
-@pytest.fixture(name="flow_cell_dir_bcl2fastq")
-def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_name: str) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir_bcl2fastq, flow_cell_full_name)
-
-
-@pytest.fixture(name="flow_cell_dir_dragen")
-def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flow_cell_full_name: str) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir_dragen, flow_cell_full_name)
-
-
 @pytest.fixture(name="raw_lims_sample")
 def fixture_raw_lims_sample(flow_cell_name: str) -> LimsFlowcellSample:
     """Return a raw lims sample"""
