@@ -20,7 +20,7 @@ from cg.cli.workflow.taxprofiler.options import (
 )
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
+from cg.constants.constants import CaseActions, MetaApis
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -43,15 +43,14 @@ def taxprofiler(context: click.Context) -> None:
 
 @taxprofiler.command("config-case")
 @ARGUMENT_CASE_ID
-@DRY_RUN
 @click.pass_obj
-def config_case(context: CGConfig, case_id: str, dry_run: bool) -> None:
+def config_case(context: CGConfig, case_id: str) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given CASE_ID."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     LOG.info(f"Creating sample sheet file for {case_id}.")
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
-        analysis_api.config_case(case_id=case_id, dry_run=dry_run)
+        analysis_api.config_case(case_id=case_id)
 
     except CgError as error:
         LOG.error(f"Could not create sample sheet: {error}")

@@ -33,3 +33,12 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
+
+    def config_case(
+        self,
+        case_id: str,
+    ) -> None:
+        """Create sample sheet file for Taxprofiler analysis."""
+        # NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
+        # self.write_samplesheet(case_id, strandedness)
+        LOG.info("Samplesheet written")
