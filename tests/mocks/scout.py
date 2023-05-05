@@ -7,6 +7,8 @@ from typing import List
 from typing_extensions import Literal
 
 from cg.apps.scout.scoutapi import ScoutAPI
+from tests.mocks.process_mock import ProcessMock
+
 
 LOG = logging.getLogger(__name__)
 
@@ -57,6 +59,7 @@ class MockScoutAPI(ScoutAPI):
         self._cases = []
         self._upload_report_success = True
         self._alignment_file_updated = 0
+        self.process = ProcessMock(binary="scout", error=False)
 
     # Mock specific functions
 
