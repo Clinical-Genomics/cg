@@ -81,13 +81,14 @@ def get_demux_by_flow_cell_id_and_base_mask(
     )
 
 
-def get_project_id(project_name: str, session: Session) -> Optional[int]:
-    """Get project id by name."""
-    project: Project = get_project_by_name(project_name=project_name, session=session)
+def get_project_by_name(self, project_name: str) -> Optional[Project]:
+    """Get project by name."""
+    return Project.query.filter_by(projectname=project_name).first()
 
-    if project:
-        return project.project_id
-    return None
+
+def get_sample_by_name_and_barcode(self, sample_name: str, barcode: str) -> Optional[Sample]:
+    """Get sample by name and barcode."""
+    return Sample.query.filter_by(samplename=sample_name).filter_by(barcode=barcode).first()
 
 
 def get_project_by_name(project_name: str, session: Session) -> Optional[Project]:

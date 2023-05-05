@@ -11,16 +11,19 @@ from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, WorkflowManager
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.rnafusion import (
+    RNAFUSION_METRIC_CONDITIONS,
     RNAFUSION_SAMPLESHEET_HEADERS,
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
 from cg.io.controller import WriteFile
+from cg.io.json import read_json
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
@@ -295,7 +298,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def report_deliver(self, case_id: str) -> None:
         """Get a deliverables file template from resources, parse it and, then write the deliverables file."""
         deliverables_content: dict = NextflowAnalysisAPI.get_template_deliverables_file_content(
-            resources.rnafusion_bundle_filenames_path
+            resources.RNAFUSION_BUNDLE_FILENAMES_PATH
         )
         try:
             for index, deliver_file in enumerate(deliverables_content):
@@ -323,4 +326,53 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                     case_id=case_id, root_dir=self.root_dir
                 )
             )
+        )
+
+    def get_multiqc_json_path(self, case_id: str) -> Path:
+        """Return the path of the multiqc_data.json file."""
+        return Path(self.root_dir, case_id, "multiqc", "multiqc_data", "multiqc_data.json")
+
+    def get_metrics_deliverables_path(self, case_id: str) -> Path:
+        """Return a path where the <case>_metrics_deliverables.yaml file should be located."""
+        return Path(self.root_dir, case_id, f"{case_id}_metrics_deliverables.yaml")
+
+    def get_multiqc_json_metrics(self, case_id: str) -> List[MetricsBase]:
+        """Get a multiqc_data.json file and returns metrics and values formatted."""
+        multiqc_json: MultiqcDataJson = MultiqcDataJson(
+            **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
+        )
+        metrics_values: Dict = {}
+        for key in multiqc_json.report_general_stats_data:
+            if case_id in key:
+                metrics_values.update(list(key.values())[0])
+        return [
+            MetricsBase(
+                header=None,
+                id=case_id,
+                input="multiqc_data.json",
+                name=metric_name,
+                step="multiqc",
+                value=metric_value,
+                condition=RNAFUSION_METRIC_CONDITIONS.get(metric_name, None),
+            )
+            for metric_name, metric_value in metrics_values.items()
+        ]
+
+    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False):
+        """Write <case>_metrics_deliverables.yaml file."""
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        if dry_run:
+            LOG.info(
+                f"Dry run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
+            )
+            return
+        LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
+        WriteFile.write_file_from_content(
+            content={
+                "metrics": [
+                    metric.dict() for metric in self.get_multiqc_json_metrics(case_id=case_id)
+                ]
+            },
+            file_format=FileFormat.YAML,
+            file_path=metrics_deliverables_path,
         )

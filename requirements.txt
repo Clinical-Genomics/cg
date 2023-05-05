@@ -1,7 +1,7 @@
 # database
 alembic
-pymysql
 SQLAlchemy<1.4
+pymysql
 
 # cli
 Click<7.0
@@ -9,11 +9,9 @@ Click<7.0
 # server
 blinker
 Flask-Admin
-Flask-Alchy
 Flask-CORS
 Flask-Dance
-Flask-SQLAlchemy==2.1
-Flask>=1.1.1                # versioned due to setup.py install misselecting Flask-SQLAlchemy otherwise
+Flask>=1.1.1
 flask_wtf
 google-auth
 gunicorn
@@ -27,7 +25,7 @@ ansi
 cachetools
 cgmodels>=0.11.0
 coloredlogs
-email-validator
+Jinja2
 lxml
 marshmallow>3               # due to code expects behaviour from >3
 markupsafe<2.1            # due to soft_unicode import error from markupsafe
@@ -42,7 +40,7 @@ pyyaml
 setuptools>=39.2.0      # due to WeasyPrint 45, tinycss2 1.0.1 and cairocffi file-.cairocffi-VERSION
 tabulate
 typing_extensions
-wtforms<3.0.0          # wtforms.compat missing in 3.0.0
+urllib3
 
 # apps
 genologics
