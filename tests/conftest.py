@@ -738,6 +738,12 @@ def fixture_novaseq_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
     return Path(demux_run_dir, flow_cell_full_name)
 
 
+@pytest.fixture(name="dragen_flow_cell_path")
+def fixture_dragen_flow_cell_path(demux_run_dir: Path, dragen_flow_cell_full_name: str) -> Path:
+    """Return the path to the novaseq demultiplex fixtures."""
+    return Path(demux_run_dir, dragen_flow_cell_full_name)
+
+
 @pytest.fixture(name="hiseq_dir")
 def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the novaseq demultiplex fixtures."""
@@ -778,6 +784,12 @@ def fixture_run_parameters_different_index(novaseq_dir: Path) -> Path:
 def fixture_flow_cell(novaseq_dir: str) -> FlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCell(flow_cell_path=novaseq_dir)
+
+
+@pytest.fixture(name="dragen_flow_cell")
+def fixture_dragen_flow_cell(dragen_flow_cell_path: str) -> FlowCell:
+    """Create a dragen flow cell object with flow cell that is demultiplexed."""
+    return FlowCell(flow_cell_path=dragen_flow_cell_path)
 
 
 @pytest.fixture(name="flow_cell_id")
@@ -822,6 +834,12 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
+
+
+@pytest.fixture(name="dragen_flow_cell_full_name")
+def fixture_dragen_flow_cell_full_name() -> str:
+    """Return the full name of a dragen flow cell."""
+    return "211101_A00187_0615_AHLG5GDRXY"
 
 
 @pytest.fixture(name="demultiplexed_flow_cell")

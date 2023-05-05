@@ -46,13 +46,6 @@ def fixture_demultiplexed_dragen_flow_cell(
     return Path(demultiplexed_runs, dragen_flow_cell_full_name)
 
 
-@pytest.fixture(name="dragen_flow_cell")
-def fixture_dragen_flow_cell(dragen_flow_cell_path: Path) -> FlowCell:
-    flow_cell = FlowCell(flow_cell_path=dragen_flow_cell_path)
-    flow_cell.parse_flow_cell_name()
-    return FlowCell(flow_cell_path=dragen_flow_cell_path)
-
-
 @pytest.fixture(name="dragen_demux_results")
 def fixture_dragen_demux_results(
     demultiplexed_dragen_flow_cell: Path, dragen_flow_cell: FlowCell
