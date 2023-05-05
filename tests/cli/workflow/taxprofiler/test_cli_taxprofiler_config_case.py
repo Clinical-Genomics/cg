@@ -39,6 +39,7 @@ def test_with_missing_case(
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
+    assert "Case could not be found in StatusDB!" in result.output
     assert "could not be found in StatusDB!" in caplog.text
 
 
