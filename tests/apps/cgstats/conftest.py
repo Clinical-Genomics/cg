@@ -13,7 +13,6 @@ from cg.models.demultiplex.flow_cell import FlowCell
 from tests.models.demultiplexing.conftest import (
     fixture_demultiplexed_dragen_flow_cell,
     fixture_dragen_demux_results,
-    fixture_dragen_flow_cell_full_name,
     fixture_dragen_flow_cell_path,
 )
 
