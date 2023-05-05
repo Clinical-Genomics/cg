@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from tests.apps.demultiplex.conftest import fixture_novaseq_dir
 from tests.cli.demultiplex.conftest import fixture_demultiplexed_flow_cells_working_directory
 from tests.models.demultiplexing.conftest import (
     fixture_flowcell_path,

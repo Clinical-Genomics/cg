@@ -38,12 +38,6 @@ def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
-@pytest.fixture(name="novaseq_dir")
-def fixture_novaseq_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir, flow_cell_full_name)
-
-
 @pytest.fixture(name="flow_cell_dir_bcl2fastq")
 def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
@@ -54,36 +48,6 @@ def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_
 def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flow_cell_full_name: str) -> Path:
     """Return the path to the novaseq demultiplex fixtures"""
     return Path(demux_run_dir_dragen, flow_cell_full_name)
-
-
-@pytest.fixture(name="hiseq_dir")
-def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demultiplex_fixtures, "hiseq_run")
-
-
-@pytest.fixture(name="unknown_run_parameters")
-def fixture_unknown_run_parameters(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(demultiplex_fixtures, "unknown_run_parameters.xml")
-
-
-@pytest.fixture(name="run_parameters_missing_flowcell_type")
-def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(demultiplex_fixtures, "runParameters_missing_flowcell_run_field.xml")
-
-
-@pytest.fixture(name="hiseq_run_parameters")
-def fixture_hiseq_run_parameters(hiseq_dir: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(hiseq_dir, "runParameters.xml")
-
-
-@pytest.fixture(name="novaseq_run_parameters")
-def fixture_novaseq_run_parameters(novaseq_dir: Path) -> Path:
-    """Return the path to a file with hiseq run parameters"""
-    return Path(novaseq_dir, "RunParameters.xml")
 
 
 @pytest.fixture(name="raw_lims_sample")
