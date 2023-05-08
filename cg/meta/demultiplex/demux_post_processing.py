@@ -5,7 +5,6 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
 
-from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
@@ -197,7 +196,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def add_to_cgstats(self, demux_results: DemuxResults) -> None:
         """Add the information from demultiplexing to cgstats"""
-        create.create_novaseq_flowcell(manager=self.stats_api, demux_results=demux_results)
+        self.stats_api.create_novaseq_flow_cell(demux_results=demux_results)
 
     def fetch_report_samples(self, flow_cell_id: str, project_name: str) -> List[StatsSample]:
         samples: List[StatsSample] = self.stats_api.find_handler.project_sample_stats(

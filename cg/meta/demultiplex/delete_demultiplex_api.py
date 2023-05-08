@@ -133,12 +133,11 @@ class DeleteDemuxAPI:
 
     def delete_flow_cell_cgstats(self) -> None:
         """Delete any presence of a flow cell in cgstats"""
-        from cg.apps.cgstats.crud.delete import delete_flowcell
 
         if self.dry_run:
             log.info(f"DeleteDemuxAPI-CGStats: Would remove {self.flow_cell_name}")
         else:
-            delete_flowcell(manager=self.stats_api, flowcell_name=self.flow_cell_name)
+            self.stats_api.delete_flow_cell(flow_cell_name=self.flow_cell_name)
 
     def _delete_demultiplexing_dir_hasta(self) -> None:
         """delete demultiplexing directory on server"""

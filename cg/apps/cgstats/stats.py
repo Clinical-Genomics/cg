@@ -4,6 +4,8 @@ from typing import Dict, Iterator, List, Union
 
 import alchy
 import sqlalchemy as sqa
+from cg.apps.cgstats.crud.create import create_novaseq_flowcell
+from cg.apps.cgstats.crud.delete import delete_flowcell
 
 from cg.apps.cgstats.crud.find import FindHandler
 from cg.apps.cgstats.db.models import (
@@ -18,6 +20,7 @@ from cg.apps.cgstats.db.models import (
 )
 from cg.constants import FLOWCELL_Q30_THRESHOLD
 from cg.models.cgstats.flowcell import StatsFlowcell, StatsSample
+from cg.models.demultiplex.demux_results import DemuxResults
 
 LOG = logging.getLogger(__name__)
 
@@ -148,3 +151,9 @@ class StatsAPI(alchy.Manager):
         for fastq_pattern in (base_pattern, alt_pattern):
             pattern = fastq_pattern.format(flowcell, sample_obj.samplename)
             yield from self.root_dir.glob(pattern)
+
+    def create_novaseq_flow_cell(self, demux_results: DemuxResults):
+        return create_novaseq_flowcell(manager=self, demux_results=demux_results)
+
+    def delete_flow_cell(self, flow_cell_name: str):
+        return delete_flowcell(manager=self, flowcell_name=flow_cell_name)
