@@ -761,7 +761,7 @@ class User(Model):
 
 
 class SequencingStatistics(Model):
-    __tablename__ = "sequencing_stats"
+    __tablename__ = "sequencing_statistics"
     id = Column(types.Integer, primary_key=True)
     flow_cell_name = Column(types.String(128), nullable=False)
     sample_internal_id = Column(types.String(128), nullable=False)

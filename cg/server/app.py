@@ -23,7 +23,7 @@ from cg.store.models import (
     Pool,
     Sample,
     User,
-    SequencingStats,
+    SequencingStatistics,
 )
 
 from . import admin, api, ext, invoices
@@ -109,7 +109,7 @@ def _register_admin_views():
     ext.admin.add_view(admin.OrganismView(Organism, ext.db.session))
     ext.admin.add_view(admin.PanelView(Panel, ext.db.session))
     ext.admin.add_view(admin.UserView(User, ext.db.session))
-    ext.admin.add_view(admin.SequencingStatsView(SequencingStats, ext.db.session))
+    ext.admin.add_view(admin.SequencingStatisticsView(SequencingStatistics, ext.db.session))
 
     # Business data views
     ext.admin.add_view(admin.FamilyView(Family, ext.db.session))

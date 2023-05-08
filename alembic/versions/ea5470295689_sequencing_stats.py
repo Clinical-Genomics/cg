@@ -21,7 +21,7 @@ Base = declarative_base()
 
 def upgrade():
     op.create_table(
-        "sequencing_stats",
+        "sequencing_statistics",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("flow_cell_name", sa.String(), nullable=False),
         sa.Column("sample_internal_id", sa.String(), nullable=False),

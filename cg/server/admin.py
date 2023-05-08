@@ -536,7 +536,7 @@ class UserView(BaseView):
     edit_modal = True
 
 
-class SequencingStatsView(BaseView):
+class SequencingStatisticsView(BaseView):
     """Admin view for the Model.SequencingStats."""
 
     column_filters = ["sample.internal_id", "flowcell.name"]
