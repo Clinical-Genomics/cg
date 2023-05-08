@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Literal
 
 import click
 from pydantic import ValidationError
@@ -39,7 +39,16 @@ def sample_sheet_commands():
     help="Instrument sample sheet flow cell mode",
 )
 @OPTION_BCL_CONVERTER
-def validate_sample_sheet(bcl_converter: str, sheet: click.Path, flow_cell_mode: str):
+def validate_sample_sheet(
+    bcl_converter: str,
+    sheet: click.Path,
+    flow_cell_mode: Literal[
+        FlowCellMode.MISEQ,
+        FlowCellMode.HISEQ_X,
+        FlowCellMode.NEXTSEQ,
+        FlowCellMode.NOVASEQ,
+    ],
+):
     """Validate a sample sheet."""
     LOG.info(
         f"Validating sample sheet {sheet}",
