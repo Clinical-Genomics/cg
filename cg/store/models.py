@@ -755,16 +755,16 @@ class User(Model):
         return self.name
 
 
-class SequencingStats(Model):
+class SequencingStatistics(Model):
     __tablename__ = "sequencing_stats"
     id = Column(types.Integer, primary_key=True)
-    lane = Column(types.Integer)
-    yield_mb = Column(types.Integer)
-    passed_filter_pct = Column(types.Numeric(10, 5))
-    read_counts = Column(types.Integer)
-    raw_clusters_per_lane_pct = Column(types.Numeric(10, 5))
-    perfect_index_reads_pct = Column(types.Numeric(10, 5))
-    q30_bases_pct = Column(types.Numeric(10, 5))
-    mean_quality_score = Column(types.Numeric(10, 5))
-    sample_internal_id = Column(types.String(128), nullable=False)
     flow_cell_name = Column(types.String(128), nullable=False)
+    sample_internal_id = Column(types.String(128), nullable=False)
+    lane = Column(types.Integer)
+    yield_in_megabases = Column(types.Integer)
+    read_counts = Column(types.Integer)
+    passed_filter_percent = Column(types.Numeric(10, 5))
+    raw_clusters_per_lane_percent = Column(types.Numeric(10, 5))
+    perfect_index_reads_percent = Column(types.Numeric(10, 5))
+    bases_with_q30_percent = Column(types.Numeric(10, 5))
+    lanes_mean_quality_score = Column(types.Numeric(10, 5))
