@@ -1,5 +1,6 @@
 import logging
-from typing import List, Optional
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import alchy
 from sqlalchemy import or_
@@ -8,11 +9,16 @@ from cg.apps.cgstats.db.models import (
     Supportparams,
     Datasource,
     Demux,
+    DemuxSample,
+    DragenDemuxSample,
     Flowcell,
     Project,
     Sample,
     Unaligned,
 )
+from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
+from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
+from cg.apps.demultiplex.sample_sheet.models import NovaSeqSample, SampleSheet
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 
@@ -120,3 +126,81 @@ class FindHandler:
         samples_query: alchy.Query = self.get_samples(flowcell=flowcell, project_name=project_name)
         db_sample: Sample
         return [StatsSample.from_orm(db_sample) for db_sample in samples_query]
+
+    def get_dragen_demux_samples(
+        demux_results: DemuxResults,
+        sample_sheet: SampleSheet,
+    ) -> Dict[int, Dict[str, DragenDemuxSample]]:
+        """Gather information from Dragen demultiplexing results and create samples with the correct
+        information"""
+        LOG.info("Gather post Dragen demultiplexing statistics for demultiplexed samples")
+        demux_samples: Dict[int, Dict[str, DragenDemuxSample]] = {}
+
+        for sample in sample_sheet.samples:
+            if sample.lane not in demux_samples:
+                demux_samples[sample.lane] = {}
+
+            demultiplexing_stats = demux_results.demultiplexing_stats.parsed_stats[sample.lane][
+                sample.sample_id
+            ]
+
+            quality_metrics = demux_results.quality_metrics.parsed_metrics[sample.lane][
+                sample.sample_id
+            ]
+
+            adapter_metrics = demux_results.adapter_metrics.parsed_metrics[sample.lane][
+                sample.sample_id
+            ]
+
+            demux_samples[sample.lane][sample.sample_id] = DragenDemuxSample(
+                sample_name=sample.sample_id,
+                flowcell=demux_results.flow_cell.id,
+                lane=sample.lane,
+                reads=int(demultiplexing_stats["# Reads"]),
+                perfect_reads=int(demultiplexing_stats["# Perfect Index Reads"]),
+                one_mismatch_reads=int(demultiplexing_stats["# One Mismatch Index Reads"]),
+                pass_filter_q30=int(quality_metrics["YieldQ30"]),
+                mean_quality_score=float(quality_metrics["Mean Quality Score (PF)"]),
+                r1_sample_bases=int(adapter_metrics["R1_SampleBases"]),
+                r2_sample_bases=int(adapter_metrics["R2_SampleBases"]),
+                read_length=demux_results.run_info.mean_read_length(),
+            )
+
+        return demux_samples
+
+    def get_demux_samples(
+        conversion_stats: ConversionStats, demux_stats_path: Path, sample_sheet: SampleSheet
+    ) -> Dict[int, Dict[str, DemuxSample]]:
+        """Gather information from demultiplexing results and create samples with the correct
+        information"""
+        LOG.info("Gather post demultiplexing statistics for demultiplexed samples")
+        demux_samples: Dict[int, Dict[str, DemuxSample]] = {}
+        demux_stats: DemuxStats = DemuxStats(demux_stats_path=demux_stats_path)
+        raw_clusters: Dict[int, int] = conversion_stats.raw_clusters_per_lane
+        flowcell_id: str = conversion_stats.flowcell_id
+        sample: NovaSeqSample
+        for sample in sample_sheet.samples:
+            lane: int = sample.lane
+            if lane not in demux_samples:
+                demux_samples[lane] = {}
+            barcode = (
+                "+".join([sample.index, sample.second_index])
+                if sample.second_index
+                else sample.index
+            )
+            sample_barcode_stats: SampleBarcodeStats = demux_stats.lanes_to_barcode[lane][barcode]
+            sample_conversion_stats: SampleConversionResults = conversion_stats.lanes_to_barcode[
+                lane
+            ][barcode]
+            lane_raw_cluster: int = raw_clusters[lane]
+            sample_id: str = sample.sample_id
+            demux_samples[lane][sample_id] = DemuxSample(
+                sample_name=sample.sample_id,
+                flowcell=flowcell_id,
+                lane=lane,
+                nr_raw_clusters_=lane_raw_cluster,
+                barcode_stats_=sample_barcode_stats,
+                conversion_stats_=sample_conversion_stats,
+            )
+
+        return demux_samples
