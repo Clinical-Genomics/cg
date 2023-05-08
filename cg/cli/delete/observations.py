@@ -20,12 +20,12 @@ from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("observations")
 @ARGUMENT_CASE_ID
 @SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_obj
-def observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
+def delete_observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
     """Delete a case from Loqusdb and reset the Loqusdb IDs in StatusDB."""
 
     case: Family = get_observations_case(context, case_id, upload=False)
@@ -47,7 +47,7 @@ def observations(context: CGConfig, case_id: str, dry_run: bool, yes: bool):
 @SKIP_CONFIRMATION
 @DRY_RUN
 @click.pass_context
-def available_observations(
+def delete_available_observations(
     context: click.Context, pipeline: Optional[Pipeline], dry_run: bool, yes: bool
 ):
     """Delete available observation from Loqusdb."""
@@ -62,7 +62,12 @@ def available_observations(
         for case in uploaded_observations:
             try:
                 LOG.info(f"Will delete observations for {case.internal_id}")
-                context.invoke(observations, case_id=case.internal_id, dry_run=dry_run, yes=yes)
+                context.invoke(
+                    delete_observations,
+                    case_id=case.internal_id,
+                    dry_run=dry_run,
+                    yes=yes,
+                )
             except (CaseNotFoundError, LoqusdbError) as error:
                 LOG.error(f"Error deleting observations for {case.internal_id}: {error}")
                 continue
