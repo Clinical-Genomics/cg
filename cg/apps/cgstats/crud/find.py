@@ -86,14 +86,6 @@ class FindHandler:
         """Get sample by name and barcode."""
         return Sample.query.filter_by(samplename=sample_name).filter_by(barcode=barcode).first()
 
-    def get_unaligned_id(self, sample_id: int, demux_id: int, lane: int) -> Optional[int]:
-        """Get unaligned id by sample id, demux id and lane."""
-        unaligned: Unaligned = self.get_unaligned_by_sample_id_demux_id_and_lane(
-            sample_id=sample_id, demux_id=demux_id, lane=lane
-        )
-        if unaligned:
-            return unaligned.unaligned_id
-
     def get_unaligned_by_sample_id_demux_id_and_lane(
         self, sample_id: int, demux_id: int, lane: int
     ) -> Optional[Unaligned]:
