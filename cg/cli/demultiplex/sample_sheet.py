@@ -15,7 +15,7 @@ from cg.apps.lims.samplesheet import (
     flowcell_samples,
 )
 from cg.constants import FileExtensions
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, FlowCellMode
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, FlowCellMode, FLOW_CELL_MODES
 from cg.exc import FlowCellError
 from cg.io.validate_path import validate_file_suffix
 from cg.models.cg_config import CGConfig
@@ -35,7 +35,7 @@ def sample_sheet_commands():
     "--flow-cell-mode",
     default=FlowCellMode.NOVASEQ,
     show_default=True,
-    type=click.Choice(FlowCellMode),
+    type=click.Choice(FLOW_CELL_MODES),
     help="Instrument sample sheet flow cell mode",
 )
 @OPTION_BCL_CONVERTER

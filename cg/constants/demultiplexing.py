@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import click
 from cgmodels.cg.constants import StrEnum
@@ -97,3 +98,6 @@ class FlowCellMode(StrEnum):
     NEXTSEQ: str = "S2"
     NOVASEQ: str = "S4"
     MISEQ: str = "2500"
+
+
+FLOW_CELL_MODES: List[str] = [mode.value for mode in FlowCellMode]
