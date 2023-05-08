@@ -2,7 +2,12 @@
 
 import logging
 
-from cg.cli.upload.vogue import flowcells, reagent_labels, samples, bioinfo_all
+from cg.cli.upload.vogue import (
+    load_flowcells,
+    reagent_labels,
+    load_samples,
+    load_bioinfo_all,
+)
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
 
@@ -41,7 +46,7 @@ def test_cli_upload_vogue_samples(upload_context: CGConfig, cli_runner: CliRunne
     caplog.set_level(logging.DEBUG)
 
     # WHEN running vogue load samples with the days argument
-    result = cli_runner.invoke(cli=samples, args=["-d", 1], obj=upload_context)
+    result = cli_runner.invoke(cli=load_samples, args=["-d", 1], obj=upload_context)
 
     # THEN assert that the correct information was communicated
     assert "SAMPLES" in caplog.text
@@ -55,7 +60,7 @@ def test_cli_upload_vogue_samples_no_days(upload_context: CGConfig, cli_runner: 
     # GIVEN a vogue api
 
     # WHEN running vogue load samples without the days argument
-    result = cli_runner.invoke(cli=samples, args=[], obj=upload_context)
+    result = cli_runner.invoke(cli=load_samples, args=[], obj=upload_context)
 
     # THEN assert that the program exits with a non zero exit code
     assert result.exit_code != 0
@@ -68,7 +73,7 @@ def test_cli_upload_vogue_flowcells(upload_context: CGConfig, cli_runner: CliRun
     caplog.set_level(logging.DEBUG)
 
     # WHEN running vogue load flowcells with the days argument
-    result = cli_runner.invoke(cli=flowcells, args=["-d", 1], obj=upload_context)
+    result = cli_runner.invoke(cli=load_flowcells, args=["-d", 1], obj=upload_context)
 
     # THEN assert that the correct information was communicated
     assert "FLOWCELLS" in caplog.text
@@ -82,7 +87,7 @@ def test_cli_upload_vogue_flowcells_no_days(upload_context: CGConfig, cli_runner
     # GIVEN a vogue api
 
     # WHEN running vogue load flowcells without the days argument
-    result = cli_runner.invoke(cli=flowcells, args=[], obj=upload_context)
+    result = cli_runner.invoke(cli=load_flowcells, args=[], obj=upload_context)
 
     # THEN assert that the program exits with a non zero exit code
     assert result.exit_code != 0
@@ -94,7 +99,7 @@ def test_cli_upload_vogue_bioinfo_all(upload_context: CGConfig, cli_runner: CliR
     # GIVEN a vogue api
 
     # WHEN running vogue upload bioinfo_all the days argument
-    result = cli_runner.invoke(cli=bioinfo_all, args=["-a", "2020-01-01"], obj=upload_context)
+    result = cli_runner.invoke(cli=load_bioinfo_all, args=["-a", "2020-01-01"], obj=upload_context)
 
     # THEN assert that the program exits with a  zero exit code
     assert result.exit_code == 0

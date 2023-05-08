@@ -9,7 +9,6 @@ from cg.constants.constants import (
     COMBOS,
     CONTAINER_OPTIONS,
     DEFAULT_CAPTURE_KIT,
-    FLOWCELL_Q30_THRESHOLD,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
     SEX_OPTIONS,
@@ -26,3 +25,4 @@ from cg.constants.process import EXIT_FAIL, EXIT_SUCCESS, RETURN_SUCCESS
 from cg.constants.report import *
 from cg.constants.sample_sources import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.symbols import SINGLE_QUOTE, SPACE
+from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD

@@ -5,7 +5,7 @@ import logging
 from typing import List
 
 import click
-from cg.cli.get import case as print_case
+from cg.cli.get import get_case as print_case
 from cg.constants.constants import DRY_RUN, SKIP_CONFIRMATION
 from cg.store import Store
 from cg.store.models import Sample, Family
@@ -13,12 +13,12 @@ from cg.store.models import Sample, Family
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("case")
 @click.argument("case_id")
 @DRY_RUN
 @SKIP_CONFIRMATION
 @click.pass_context
-def case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
+def delete_case(context: click.Context, case_id: str, dry_run: bool, yes: bool):
     """Delete case with links and samples.
 
     The command will stop if the case has any analyses made on it.
