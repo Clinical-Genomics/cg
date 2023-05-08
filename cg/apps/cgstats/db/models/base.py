@@ -1,7 +1,6 @@
 import json
 from datetime import datetime
-
-from alchy import ModelBase, make_declarative_base
+from sqlalchemy.ext.declarative import declarative_base
 
 
 def json_serial(obj):
@@ -11,7 +10,7 @@ def json_serial(obj):
     raise TypeError("Type not serializable")
 
 
-class JsonModel(ModelBase):
+class JsonModel:
     def to_json(self, pretty: bool = False):
         """Serialize to JSON.
 
@@ -21,4 +20,4 @@ class JsonModel(ModelBase):
         return json.dumps(self.to_dict(), default=json_serial, **kwargs)
 
 
-Model = make_declarative_base(Base=JsonModel)
+Base = declarative_base(JsonModel)

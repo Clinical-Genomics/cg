@@ -3,10 +3,11 @@ from typing import Optional
 from sqlalchemy import Column, types
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base import Model
+from .base import Base
 
 
-class Supportparams(Model):
+class Supportparams(Base):
+    __tablename__ = "supportparams"
     supportparams_id = Column(types.Integer, primary_key=True)
     document_path = Column(types.String(255), nullable=False, unique=True)
     systempid = Column(types.String(255))

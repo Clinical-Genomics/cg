@@ -1,4 +1,4 @@
-from .base import Model
+from .base import Base
 from .datasource import Datasource
 from .demux import Demux
 from .flowcell import Flowcell
