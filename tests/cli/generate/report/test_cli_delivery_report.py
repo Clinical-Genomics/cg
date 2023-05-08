@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 
-from cg.cli.generate.report.base import delivery_report
+from cg.cli.generate.report.base import generate_delivery_report
 from cg.constants import EXIT_SUCCESS, EXIT_FAIL
 
 
@@ -16,7 +16,7 @@ def test_delivery_report_invalid_case(mip_dna_context, cli_runner, caplog):
 
     # WHEN calling delivery_report with an invalid case name
     result = cli_runner.invoke(
-        delivery_report,
+        generate_delivery_report,
         ["not a case"],
         obj=mip_dna_context,
     )
@@ -36,7 +36,7 @@ def test_delivery_report_dry_run(mip_dna_context, cli_runner, case_id, caplog):
 
     # WHEN calling delivery_report with a dry option
     result = cli_runner.invoke(
-        delivery_report,
+        generate_delivery_report,
         [case_id, "--dry-run"],
         obj=mip_dna_context,
     )
@@ -58,7 +58,7 @@ def test_delivery_report(mip_dna_context, cli_runner, case_id, caplog):
 
     # WHEN calling delivery_report with a dry option
     cli_runner.invoke(
-        delivery_report,
+        generate_delivery_report,
         [case_id],
         obj=mip_dna_context,
     )
