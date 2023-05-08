@@ -128,6 +128,7 @@ class FindHandler:
         return [StatsSample.from_orm(db_sample) for db_sample in samples_query]
 
     def get_dragen_demux_samples(
+        self,
         demux_results: DemuxResults,
         sample_sheet: SampleSheet,
     ) -> Dict[int, Dict[str, DragenDemuxSample]]:
@@ -169,7 +170,7 @@ class FindHandler:
         return demux_samples
 
     def get_demux_samples(
-        conversion_stats: ConversionStats, demux_stats_path: Path, sample_sheet: SampleSheet
+        self, conversion_stats: ConversionStats, demux_stats_path: Path, sample_sheet: SampleSheet
     ) -> Dict[int, Dict[str, DemuxSample]]:
         """Gather information from demultiplexing results and create samples with the correct
         information"""
