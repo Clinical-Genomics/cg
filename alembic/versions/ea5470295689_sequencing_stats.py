@@ -33,6 +33,7 @@ def upgrade():
         sa.Column("q30_bases_percent", sa.Numeric(10, 5), nullable=False),
         sa.Column("perfect_index_reads_percent", sa.Numeric(10, 5), nullable=False),
         sa.Column("lanes_mean_quality_score", sa.Numeric(10, 5), nullable=False),
+        sa.Column("started_at", sa.DateTime(), nullable=False),
     )
 
 

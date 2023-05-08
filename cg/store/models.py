@@ -773,3 +773,4 @@ class SequencingStatistics(Model):
     perfect_index_reads_percent = Column(types.Numeric(10, 5))
     bases_with_q30_percent = Column(types.Numeric(10, 5))
     lanes_mean_quality_score = Column(types.Numeric(10, 5))
+    started_at = Column(types.DateTime)
