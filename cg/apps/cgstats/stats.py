@@ -10,7 +10,7 @@ from cg.apps.cgstats.db.models import (
     Datasource,
     Demux,
     Flowcell,
-    Model,
+    Base,
     Project,
     Sample,
     Unaligned,
@@ -34,7 +34,7 @@ class StatsAPI(alchy.Manager):
     def __init__(self, config: dict):
         LOG.info("Instantiating cgstats api")
         alchy_config = dict(SQLALCHEMY_DATABASE_URI=config["cgstats"]["database"])
-        super(StatsAPI, self).__init__(config=alchy_config, Model=Model)
+        super(StatsAPI, self).__init__(config=alchy_config, Model=Base)
         self.root_dir: Path = Path(config["cgstats"]["root"])
         self.binary: str = config["cgstats"]["binary_path"]
         self.db_uri: str = config["cgstats"]["database"]
