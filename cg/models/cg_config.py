@@ -173,11 +173,6 @@ class TaxprofilerConfig(CommonAppConfig):
     root: str
     binary_path: str
     pipeline_path: str
-    conda_env: str
-    compute_env: str
-    profile: str
-    launch_directory: str
-    revision: str
 
 
 class CGStatsConfig(BaseModel):

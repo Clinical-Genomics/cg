@@ -30,7 +30,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.TAXPROFILER,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir: str = config.taxprofiler.root
+        self.root_dir = config.taxprofiler.root
+
+    @property
+    def root(self) -> str:
+        return self.root_dir
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
