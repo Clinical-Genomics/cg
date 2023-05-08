@@ -21,11 +21,11 @@ from cg.cli.workflow.commands import (
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("gens")
 @ARGUMENT_CASE_ID
 @OPTION_DRY
 @click.pass_obj
-def gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
+def upload_to_gens(context: CGConfig, case_id: Optional[str], dry_run: bool):
     """Upload data from an analysis to Gens."""
 
     click.echo(click.style("----------------- GENS -------------------"))
