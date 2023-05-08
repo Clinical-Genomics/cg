@@ -15,7 +15,7 @@ from .utils import suggest_cases_to_upload
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("genotypes")
 @click.option(
     "-r",
     "--re-upload",
@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.argument("family_id", required=False)
 @click.pass_obj
-def genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
+def upload_genotypes(context: CGConfig, re_upload: bool, family_id: Optional[str]):
     """Upload genotypes from an analysis to Genotype."""
 
     status_db: Store = context.status_db

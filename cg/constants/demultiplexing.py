@@ -2,13 +2,24 @@ from pathlib import Path
 from typing import List
 
 import click
-from cgmodels.cg.constants import StrEnum
+from cg.utils.enums import StrEnum
 
 
 class BclConverter(StrEnum):
+    """Define the BCL converter."""
+
     DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
 
+
+class FlowCellType(StrEnum):
+    """Define the flow cell type."""
+
+    NOVASEQ: str = "novaseq"
+    HISEQ: str = "hiseq"
+
+
+UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [

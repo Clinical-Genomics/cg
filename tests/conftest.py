@@ -430,6 +430,32 @@ def fixture_os_ticket(ticket_id: str) -> MockOsTicket:
 
 # Files fixtures
 
+# Common file name fixtures
+
+
+@pytest.fixture(name="snv_vcf_file")
+def fixture_snv_vcf_file() -> str:
+    """Return a single nucleotide variant file name."""
+    return f"snv{FileExtensions.VCF}"
+
+
+@pytest.fixture(name="sv_vcf_file")
+def fixture_sv_vcf_file() -> str:
+    """Return a structural variant file name."""
+    return f"sv{FileExtensions.VCF}"
+
+
+@pytest.fixture(name="snv_research_vcf_file")
+def fixture_snv_research_vcf_file() -> str:
+    #    """Return a single nucleotide variant research file name."""
+    return f"snv_research{FileExtensions.VCF}"
+
+
+@pytest.fixture(name="sv_research_vcf_file")
+def fixture_sv_research_vcf_file() -> str:
+    """Return a structural variant research file name."""
+    return f"sv_research{FileExtensions.VCF}"
+
 
 # Common file fixtures
 @pytest.fixture(scope="session", name="fixtures_dir")
@@ -704,6 +730,48 @@ def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
 def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with flow cells ready for demultiplexing."""
     return Path(demultiplex_fixtures, "flowcell-runs")
+
+
+@pytest.fixture(name="novaseq_dir")
+def fixture_novaseq_dir(demux_run_dir: Path, flow_cell_full_name: str) -> Path:
+    """Return the path to the novaseq demultiplex fixtures."""
+    return Path(demux_run_dir, flow_cell_full_name)
+
+
+@pytest.fixture(name="hiseq_dir")
+def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
+    """Return the path to the novaseq demultiplex fixtures."""
+    return Path(demultiplex_fixtures, "hiseq_run")
+
+
+@pytest.fixture(name="unknown_run_parameters")
+def fixture_unknown_run_parameters(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a file with hiseq run parameters with unknown flow cell."""
+    return Path(demultiplex_fixtures, "unknown_run_parameters.xml")
+
+
+@pytest.fixture(name="run_parameters_missing_flowcell_type")
+def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
+    """Return the path to a file with hiseq run parameters without flow cell."""
+    return Path(demultiplex_fixtures, "runParameters_missing_flowcell_run_field.xml")
+
+
+@pytest.fixture(name="hiseq_run_parameters")
+def fixture_hiseq_run_parameters(hiseq_dir: Path) -> Path:
+    """Return the path to a file with hiseq run parameters."""
+    return Path(hiseq_dir, "runParameters.xml")
+
+
+@pytest.fixture(name="novaseq_run_parameters")
+def fixture_novaseq_run_parameters(novaseq_dir: Path) -> Path:
+    """Return the path to a file with novaseq run parameters."""
+    return Path(novaseq_dir, "RunParameters.xml")
+
+
+@pytest.fixture(name="run_parameters_different_index")
+def fixture_run_parameters_different_index(novaseq_dir: Path) -> Path:
+    """Return the path to a file with novaseq run parameters with different index cycles."""
+    return Path(novaseq_dir, "RunParameters_different_index_cycles.xml")
 
 
 @pytest.fixture(name="flow_cell")

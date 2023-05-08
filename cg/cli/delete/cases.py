@@ -4,7 +4,7 @@ import click
 from cg.store import Store
 from cg.store.models import Family, Sample
 
-from .case import case
+from cg.cli.delete.case import delete_case
 
 CONFIRM = "Continue?"
 
@@ -28,7 +28,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Family]:
     return _cases
 
 
-@click.command()
+@click.command("cases")
 @click.option("--dry-run", is_flag=True)
 @click.option(
     "--sample-identifier",
@@ -40,7 +40,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> [Family]:
     "name Prov52",
 )
 @click.pass_context
-def cases(
+def delete_cases(
     context: click.Context,
     dry_run: bool,
     identifiers: click.Tuple([str, str]),
@@ -66,7 +66,7 @@ def cases(
 
     for _case in _cases:
         context.invoke(
-            case,
+            delete_case,
             case_id=_case.internal_id,
             dry_run=dry_run,
         )

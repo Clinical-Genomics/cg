@@ -130,20 +130,22 @@ class BalsamicUmiLoadConfig(BalsamicLoadConfig):
 
 
 class MipLoadConfig(ScoutLoadConfig):
-    smn_tsv: Optional[str] = None
     chromograph_image_files: Optional[List[str]]
     chromograph_prefixes: Optional[List[str]]
-    vcf_snv: str = None
-    vcf_sv: Optional[str] = None
-    vcf_str: Optional[str] = None
-    vcf_snv_research: Optional[str] = None
-    vcf_sv_research: Optional[str] = None
+    madeline: Optional[str] = None
+    peddy_check: Optional[str] = None
     peddy_ped: Optional[str] = None
     peddy_sex: Optional[str] = None
-    peddy_check: Optional[str] = None
-    madeline: Optional[str] = None
     samples: List[ScoutMipIndividual] = []
+    smn_tsv: Optional[str] = None
     variant_catalog: Optional[str] = None
+    vcf_mei: Optional[str] = None
+    vcf_mei_research: Optional[str] = None
+    vcf_snv: str = None
+    vcf_snv_research: Optional[str] = None
+    vcf_str: Optional[str] = None
+    vcf_sv: Optional[str] = None
+    vcf_sv_research: Optional[str] = None
 
     @validator("vcf_snv", "vcf_sv", "vcf_snv_research", "vcf_sv_research")
     def check_mandatory_files(cls, vcf):
