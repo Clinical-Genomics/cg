@@ -1,6 +1,8 @@
 """Tests for RNA part of the scout upload API"""
 import logging
-from typing import Generator, List
+from typing import Dict, Generator, List, Set
+from pathlib import Path
+
 import pytest
 from _pytest.logging import LogCaptureFixture
 
@@ -8,11 +10,14 @@ from sqlalchemy.orm import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod
+from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.exc import CgDataError
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
 from cg.store.models import Family, Sample
 import cg.store as Store
 from tests.store_helpers import StoreHelpers
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from housekeeper.store.models import File
 
 
 def set_is_tumour_on_case(store: Store, case_id: str, is_tumour: bool):
@@ -559,7 +564,7 @@ def test_link_rna_sample_to_dna_sample(
 
     # WHEN adding the RNA sample to the rna_dna_case_map
     rna_dna_case_map: dict = {}
-    upload_scout_api._add_rna_sample(
+    upload_scout_api.build_rna_sample_map(
         rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
     )
 
@@ -581,16 +586,205 @@ def test_add_dna_cases_to_dna_sample(
     """Test for a given RNA sample, the DNA case name matches to the case name of the DNA sample in rna_dna_case_map."""
 
     # GIVEN an RNA sample, a DNA sample, and a DNA case
-    rna_sample: Sample = rna_store.get_sample_by_internal_id(rna_sample_son_id)
-    dna_sample: Sample = rna_store.get_sample_by_internal_id(dna_sample_son_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
     dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
 
     # WHEN adding the RNA sample rna_dna_case_map
     rna_dna_case_map: dict = {}
-    upload_scout_api._add_rna_sample(
+    upload_scout_api.build_rna_sample_map(
         rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_case_map
     )
 
     # THEN the rna_dna_case_map should contain the DNA_case name associated with the DNA sample
     case_names: list = rna_dna_case_map[rna_sample.internal_id][dna_sample.name]
     assert dna_case.internal_id in case_names
+
+
+def test_map_dna_cases_to_dna_sample(
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+    dna_sample_son_id: str,
+    rna_sample_son_id: str,
+    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]],
+):
+    """Test that the DNA case name is mapped to the DNA sample name in the rna_dna_case_map."""
+
+    # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
+
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
+
+    # WHEN mapping the DNA case name to the DNA sample name in the rna_dna_case_map
+    upload_scout_api._map_dna_cases_to_dna_sample(
+        dna_sample=dna_sample,
+        rna_dna_sample_case_map=rna_dna_sample_case_map,
+        rna_sample=rna_sample,
+    )
+
+    # THEN the rna_dna_case_map should contain the DNA case name associated with the DNA sample name
+    assert dna_sample.name in rna_dna_sample_case_map[rna_sample.internal_id]
+
+
+def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+    dna_sample_son_id: str,
+    dna_case_id: str,
+    rna_sample_son_id: str,
+    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]],
+):
+    """Test that the DNA case name is not mapped to the DNA sample name in the rna-dna-sample-case map."""
+
+    # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
+
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
+    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
+
+    # GIVEN that the DNA case has a different pipeline than the expected pipeline
+    dna_case.data_analysis: Pipeline = Pipeline.FASTQ
+
+    # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
+    upload_scout_api._map_dna_cases_to_dna_sample(
+        dna_sample=dna_sample,
+        rna_dna_sample_case_map=rna_dna_sample_case_map,
+        rna_sample=rna_sample,
+    )
+
+    # THEN the rna-dna-sample-case map should not contain the DNA case name associated with the DNA sample name
+    assert (
+        dna_case.internal_id
+        not in rna_dna_sample_case_map[rna_sample.internal_id][dna_sample_son_id]
+    )
+
+
+def test_map_dna_cases_to_dna_sample_incorrect_customer(
+    rna_store: Store,
+    upload_scout_api: UploadScoutAPI,
+    dna_sample_son_id: str,
+    dna_case_id: str,
+    rna_sample_son_id: str,
+    rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]],
+):
+    """Test that the DNA case name is not mapped to the DNA sample name in the rna-dna-sample-case map."""
+
+    # GIVEN an RNA sample, a DNA sample, and a rna-dna case map
+
+    dna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=dna_sample_son_id)
+    dna_case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
+
+    # GIVEN that the DNA case has a different customer than the expected customer
+    dna_case.customer_id: int = 1000
+
+    # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
+    upload_scout_api._map_dna_cases_to_dna_sample(
+        dna_sample=dna_sample,
+        rna_dna_sample_case_map=rna_dna_sample_case_map,
+        rna_sample=rna_sample,
+    )
+
+    # THEN the rna-dna-sample-case map should not contain the DNA case name associated with the DNA sample name
+    assert (
+        dna_case.internal_id
+        not in rna_dna_sample_case_map[rna_sample.internal_id][dna_sample_son_id]
+    )
+
+
+def test_get_multiqc_html_report(
+    dna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_dna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the multiqc html report is returned."""
+
+    # GIVEN an DNA case with a multiqc-htlml report
+    case: Family = rna_store.get_case_by_internal_id(internal_id=dna_case_id)
+    multiqc_file: File = mip_dna_analysis_hk_api.files(
+        bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+    )[0]
+
+    # WHEN getting the multiqc html report
+    report_type, multiqc_report = upload_mip_analysis_scout_api.get_multiqc_html_report(
+        case_id=dna_case_id, pipeline=case.data_analysis
+    )
+
+    # THEN the multiqc html report should be returned and the correct report type
+    assert multiqc_report.full_path == multiqc_file.full_path
+    assert report_type == ScoutCustomCaseReportTags.MULTIQC
+
+
+def test_upload_report_to_scout(
+    caplog,
+    dna_case_id: str,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_dna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the uploaded of a report to Scout is possible."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an DNA case with a multiqc-htlml report
+    multiqc_file: File = mip_dna_analysis_hk_api.files(
+        bundle=dna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+    )[0]
+    assert multiqc_file
+
+    # WHEN uploading a report to Scout
+    upload_mip_analysis_scout_api.upload_report_to_scout(
+        dry_run=False,
+        case_id=dna_case_id,
+        report_type=ScoutCustomCaseReportTags.MULTIQC,
+        report_file=multiqc_file,
+    )
+
+    # THEN the report should be uploaded to Scout
+    assert (
+        f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to case {dna_case_id}" in caplog.text
+    )
+
+
+def test_upload_rna_report_to_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_rna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
+    multiqc_file: File = mip_rna_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+    )[0]
+
+    # WHEN uploading a report to Scout
+    upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
+        dry_run=False,
+        rna_case_id=rna_case_id,
+        report_type=ScoutCustomCaseReportTags.MULTIQC,
+        report_file=multiqc_file,
+    )
+
+    # WHEN finding the related DNA case
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+        case_id=rna_case_id
+    )
+
+    # THEN the api should know that it should find related DNA cases
+
+    assert f"Finding DNA cases related to RNA case {rna_case_id}" in caplog.text
+
+    # THEN the report should be uploaded to Scout
+    for case_id in dna_case_ids:
+        assert (
+            f"Uploading {ScoutCustomCaseReportTags.MULTIQC} report to scout for case {case_id}"
+            in caplog.text
+        )

@@ -136,7 +136,7 @@ class AnalysisAPI(MetaAPI):
         Gets application type for sample. Only application types supported by trailblazer (or other)
         are valid outputs.
         """
-        prep_category: str = sample_obj.application_version.application.prep_category
+        prep_category: str = sample_obj.prep_category
         if prep_category and prep_category.lower() in {
             AnalysisType.TARGETED_GENOME_SEQUENCING,
             AnalysisType.WHOLE_EXOME_SEQUENCING,
