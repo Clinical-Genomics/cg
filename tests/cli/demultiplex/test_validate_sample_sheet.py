@@ -6,7 +6,7 @@ from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 
 from cg.constants import EXIT_SUCCESS, FileExtensions
-from cg.constants.demultiplexing import BclConverter, SampleSheetType
+from cg.constants.demultiplexing import BclConverter, FlowCellMode
 
 
 def test_validate_non_existing_sample_sheet(cli_runner: CliRunner, sample_sheet_context: dict):
@@ -59,7 +59,7 @@ def test_validate_correct_bcl2fastq_sample_sheet(
     # GIVEN that the sample sheet is correct
     get_sample_sheet_from_file(
         infile=sample_sheet,
-        sheet_type=SampleSheetType.NEXTSEQ,
+        flow_cell_mode=FlowCellMode.NEXTSEQ,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
@@ -83,7 +83,7 @@ def test_validate_correct_dragen_sample_sheet(
 
     # GIVEN that the sample sheet is correct
     get_sample_sheet_from_file(
-        infile=sample_sheet, sheet_type=SampleSheetType.NEXTSEQ, bcl_converter=BclConverter.DRAGEN
+        infile=sample_sheet, flow_cell_mode=FlowCellMode.NEXTSEQ, bcl_converter=BclConverter.DRAGEN
     )
 
     # WHEN validating the sample sheet

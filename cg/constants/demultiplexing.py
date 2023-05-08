@@ -90,8 +90,8 @@ class DemultiplexingDirsAndFiles(StrEnum):
     UNALIGNED_DIR_NAME: str = "Unaligned"
 
 
-class SampleSheetType(StrEnum):
-    """Define sample sheet type."""
+class FlowCellMode(StrEnum):
+    """Define sample sheet flow cell mode."""
 
     HISEQ_X: str = "SP"
     NEXTSEQ: str = "S2"

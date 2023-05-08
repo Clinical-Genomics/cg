@@ -131,7 +131,7 @@ class SampleSheetCreator:
         LOG.info("Validating sample sheet")
         get_sample_sheet(
             sample_sheet=sample_sheet,
-            sheet_type="S2",
+            flow_cell_mode="S2",
             bcl_converter=self.bcl_converter,
         )
         LOG.info("Sample sheet looks fine")
