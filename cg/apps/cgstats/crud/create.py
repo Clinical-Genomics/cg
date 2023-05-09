@@ -293,10 +293,12 @@ def _create_bcl2fastq_samples(
         if not stats_sample:
             continue
 
-        unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
+        unaligned: Optional[
+            Unaligned
+        ] = manager.find_handler.get_unaligned_by_sample_id_demux_id_and_lane(
             sample_id=stats_sample.sample_id, demux_id=demux_id, lane=sample.lane
         )
-        if not unaligned_id:
+        if not unaligned:
             demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
             create_unaligned(
                 manager=manager,
