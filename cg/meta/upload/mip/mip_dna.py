@@ -10,7 +10,7 @@ from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.genotype import upload_genotypes
 from cg.cli.upload.gens import upload_to_gens
-from cg.cli.upload.observations import observations
+from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.cli.upload.validate import validate
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
@@ -39,7 +39,7 @@ class MipDNAUploadAPI(UploadAPI):
         ctx.invoke(upload_coverage, family_id=case.internal_id, re_upload=restart)
         ctx.invoke(validate, family_id=case.internal_id)
         ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
-        ctx.invoke(observations, case_id=case.internal_id)
+        ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         ctx.invoke(upload_to_gens, case_id=case.internal_id)
 
         # Delivery report generation

@@ -8,7 +8,7 @@ import click
 from cg.cli.generate.report.base import generate_delivery_report
 from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.genotype import upload_genotypes
-from cg.cli.upload.observations import observations
+from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.constants.sequencing import SequencingMethod
@@ -59,7 +59,7 @@ class BalsamicUploadAPI(UploadAPI):
 
         # Observations upload
         if self.analysis_api.get_case_application_type(case.internal_id) == SequencingMethod.WGS:
-            ctx.invoke(observations, case_id=case.internal_id)
+            ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         else:
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Observations upload")
 
