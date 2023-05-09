@@ -153,7 +153,7 @@ class StatsAPI(alchy.Manager):
             yield from self.root_dir.glob(pattern)
 
     def create_novaseq_flow_cell(self, demux_results: DemuxResults):
-        return create_novaseq_flowcell(manager=self, demux_results=demux_results)
+        return create_novaseq_flowcell(session=self.session, demux_results=demux_results)
 
     def delete_flow_cell(self, flow_cell_name: str):
-        return delete_flowcell(manager=self, flowcell_name=flow_cell_name)
+        return delete_flowcell(session=self.session, flowcell_name=flow_cell_name)

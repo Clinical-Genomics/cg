@@ -105,32 +105,34 @@ def fixture_nipt_stats_api(
         flow_cell_full_name=flow_cell_full_name, sample_sheet_path=novaseq_dragen_sample_sheet_path
     )
 
-    project_obj: Project = create.create_project(manager=nipt_stats_api, project_name=ticket_id)
+    project_obj: Project = create.create_project(
+        session=nipt_stats_api.session, project_name=ticket_id
+    )
     support_parameters_obj: Supportparams = create.create_support_parameters(
-        manager=nipt_stats_api, demux_results=mock_demux_results
+        session=nipt_stats_api.session, demux_results=mock_demux_results
     )
     flowcell_obj: FlowCell = create.create_flowcell(
-        manager=nipt_stats_api, demux_results=mock_demux_results
+        session=nipt_stats_api.session, demux_results=mock_demux_results
     )
     datasource_obj: Datasource = create.create_datasource(
-        manager=nipt_stats_api,
+        session=nipt_stats_api.session,
         demux_results=mock_demux_results,
         support_parameters_id=support_parameters_obj.supportparams_id,
     )
     demux_obj: Demux = create.create_demux(
-        manager=nipt_stats_api,
+        session=nipt_stats_api.session,
         flow_cell_id=flowcell_obj.flowcell_id,
         datasource_id=datasource_obj.datasource_id,
         demux_results=mock_demux_results,
     )
     sample_obj: Sample = create.create_sample(
-        manager=nipt_stats_api,
+        session=nipt_stats_api.session,
         sample_id=sample_id,
         barcode="51,8,8,51",
         project_id=project_obj.project_id,
     )
     create.create_unaligned(
-        manager=nipt_stats_api,
+        session=nipt_stats_api.session,
         demux_id=demux_obj.demux_id,
         demux_sample=mock_demux_sample,
         sample_id=sample_obj.sample_id,
@@ -142,7 +144,7 @@ def fixture_nipt_stats_api(
 def fixture_populated_stats_api(
     stats_api: StatsAPI, bcl2fastq_demux_results: DemuxResults
 ) -> StatsAPI:
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
+    create.create_novaseq_flowcell(session=stats_api.session, demux_results=bcl2fastq_demux_results)
     return stats_api
 
 

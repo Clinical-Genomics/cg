@@ -12,7 +12,7 @@ def test_create_novaseq_flowcell(stats_api: StatsAPI, bcl2fastq_demux_results: D
     )
 
     # WHEN creating the novaseq flowcell
-    create.create_novaseq_flowcell(manager=stats_api, demux_results=bcl2fastq_demux_results)
+    create.create_novaseq_flowcell(session=stats_api.session, demux_results=bcl2fastq_demux_results)
 
     # THEN assert that the flowcell was created
     assert stats_api.find_handler.get_flow_cell_by_name(
