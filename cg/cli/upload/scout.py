@@ -239,7 +239,7 @@ def upload_multiqc_to_scout(context: CGConfig, case_id: str, dry_run: bool) -> N
 def get_upload_api(case: Family, cg_config: CGConfig) -> UploadAPI:
     """Return the upload API based on the data analysis type"""
 
-    analysis_apis: dict = {
+    analysis_apis: Dict[Pipeline, UploadAPI] = {
         Pipeline.BALSAMIC: BalsamicAnalysisAPI,
         Pipeline.BALSAMIC_UMI: BalsamicUmiAnalysisAPI,
         Pipeline.MIP_RNA: MipRNAAnalysisAPI,
