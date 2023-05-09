@@ -14,7 +14,7 @@ from cg.constants import Priority
 LOG = logging.getLogger(__name__)
 
 
-@click.command()
+@click.command("case")
 @click.option("-a", "--action", type=click.Choice(CASE_ACTIONS), help="update case action")
 @click.option("-c", "--customer-id", type=click.STRING, help="update customer")
 @click.option(
@@ -37,7 +37,7 @@ LOG = logging.getLogger(__name__)
 )
 @click.argument("case_id")
 @click.pass_obj
-def case(
+def set_case(
     context: CGConfig,
     action: Optional[str],
     data_analysis: Optional[Pipeline],

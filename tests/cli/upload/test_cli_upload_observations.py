@@ -7,7 +7,7 @@ from _pytest.logging import LogCaptureFixture
 from cgmodels.cg.constants import Pipeline
 from click.testing import CliRunner
 
-from cg.cli.upload.observations import observations
+from cg.cli.upload.observations import upload_observations_to_loqusdb
 from cg.cli.upload.observations.utils import (
     get_observations_case,
     get_observations_case_to_upload,
@@ -39,7 +39,9 @@ def test_observations(
     store.relate_sample(family=case, sample=sample, status=PhenotypeStatus.UNKNOWN)
 
     # WHEN trying to do a dry run upload to Loqusdb
-    result = cli_runner.invoke(observations, [case.internal_id, "--dry-run"], obj=base_context)
+    result = cli_runner.invoke(
+        upload_observations_to_loqusdb, [case.internal_id, "--dry-run"], obj=base_context
+    )
 
     # THEN the execution should have been successful and stop at a dry run step
     assert result.exit_code == EXIT_SUCCESS

@@ -4,7 +4,7 @@ from click.testing import CliRunner
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from cg.cli.set.cases import cases
+from cg.cli.set.cases import set_cases
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family, Sample
@@ -33,7 +33,7 @@ def test_set_cases_by_sample_identifiers(
 
     # WHEN calling set families with valid sample identifiers
     cli_runner.invoke(
-        cases,
+        set_cases,
         ["--sample-identifier", identifier_key, identifier_value],
         obj=base_context,
     )
