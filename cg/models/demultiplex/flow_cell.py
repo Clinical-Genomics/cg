@@ -85,7 +85,7 @@ class FlowCell:
     def sequencer_type(
         self,
     ) -> Literal[SequencingInstruments.NOVASEQXPLUS, SequencingInstruments.NOVASEQ6000]:
-        """Return the sequencer type, either 'NovaSeqX' or 'NovaSeq6000'."""
+        """Return the sequencer type."""
         if self.machine_name in SequencingInstruments.NOVA_SEQ_6000_NAMES:
             return SequencingInstruments.NOVASEQ6000
         return SequencingInstruments.NOVASEQXPLUS
