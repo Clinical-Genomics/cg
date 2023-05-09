@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 @click.pass_context
 @click.argument("case_id", required=True)
 @DRY_RUN
-def clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
+def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool):
     """Links the appropriate files for a case, based on the data_delivery, to the customer folder
     and subsequently uses rsync to upload it to caesar."""
 
@@ -113,6 +113,6 @@ def auto_fastq(context: click.Context, dry_run: bool):
         case: Family = analysis_obj.family
         LOG.info("Uploading family: %s", case.internal_id)
         analysis_obj.upload_started_at = dt.datetime.now()
-        context.invoke(clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
+        context.invoke(upload_clinical_delivery, case_id=case.internal_id, dry_run=dry_run)
         if not dry_run:
             status_db.session.commit()
