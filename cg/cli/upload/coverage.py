@@ -9,7 +9,7 @@ from cg.store.models import Family
 from .utils import suggest_cases_to_upload
 
 
-@click.command()
+@click.command("coverage")
 @click.option(
     "-r",
     "--re-upload",
@@ -18,7 +18,7 @@ from .utils import suggest_cases_to_upload
 )
 @click.argument("family_id", required=False)
 @click.pass_obj
-def coverage(context: CGConfig, re_upload, family_id):
+def upload_coverage(context: CGConfig, re_upload, family_id):
     """Upload coverage from an analysis to Chanjo."""
 
     click.echo(click.style("----------------- COVERAGE --------------------"))

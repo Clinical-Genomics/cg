@@ -38,7 +38,7 @@ LOG = logging.getLogger(__name__)
 @OPTION_DRY_RUN
 @OPTION_STARTED_AT
 @click.pass_context
-def delivery_report(
+def generate_delivery_report(
     context: click.Context,
     case_id: str,
     force_report: bool,
@@ -84,7 +84,7 @@ def delivery_report(
 @OPTION_FORCE_REPORT
 @OPTION_DRY_RUN
 @click.pass_context
-def available_delivery_reports(
+def generate_available_delivery_reports(
     context: click.Context, pipeline: Pipeline, force_report: bool, dry_run: bool
 ):
     """Generates delivery reports for all cases that need one and stores them in housekeeper."""
@@ -110,7 +110,7 @@ def available_delivery_reports(
             LOG.info("Generating delivery report for case: %s", case_id)
             try:
                 context.invoke(
-                    delivery_report,
+                    generate_delivery_report,
                     case_id=case_id,
                     force_report=force_report,
                     dry_run=dry_run,

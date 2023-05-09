@@ -49,7 +49,7 @@ def vogue(context: CGConfig):
     "-d", "--days", type=int, required="True", help="load X days old sampels from genotype to vogue"
 )
 @click.pass_obj
-def genotype(context: CGConfig, days: int):
+def load_genotype(context: CGConfig, days: int):
     """Loading samples from the genotype database to the trending database"""
 
     upload_vogue_api = UploadVogueAPI(
@@ -62,7 +62,7 @@ def genotype(context: CGConfig, days: int):
 
 @vogue.command("apptags", short_help="Getting application tags to the trending database.")
 @click.pass_obj
-def apptags(context: CGConfig):
+def load_apptags(context: CGConfig):
     """Loading apptags from status db to the trending database"""
 
     upload_vogue_api = UploadVogueAPI(
@@ -77,7 +77,7 @@ def apptags(context: CGConfig):
     "-d", "--days", type=int, required="True", help="load X days old runs from lims to vogue"
 )
 @click.pass_obj
-def flowcells(context: CGConfig, days: int):
+def load_flowcells(context: CGConfig, days: int):
     """Loading runs from lims to the trending database"""
     LOG.info("----------------- FLOWCELLS -----------------------")
     context.vogue_api.load_flowcells(days=days)
@@ -88,7 +88,7 @@ def flowcells(context: CGConfig, days: int):
     "-d", "--days", type=int, required="True", help="load X days old sampels from lims to vogue"
 )
 @click.pass_obj
-def samples(context: CGConfig, days: int):
+def load_samples(context: CGConfig, days: int):
     """Loading samples from lims to the trending database"""
     LOG.info("----------------- SAMPLES -----------------------")
     context.vogue_api.load_samples(days=days)
@@ -131,7 +131,7 @@ def reagent_labels(context: CGConfig, days: int):
 )
 @click.option("--dry/--no-dry", default=False, help="Dry run...")
 @click.pass_obj
-def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, dry: bool):
+def load_bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, dry: bool):
     """Load bioinfo case results to the trending database"""
     status_db: Store = context.status_db
     housekeeper_api: HousekeeperAPI = context.housekeeper_api
@@ -214,7 +214,7 @@ def bioinfo(context: CGConfig, case_name: str, cleanup: bool, target_load: str, 
     help="Only upload cases with an analysis that was completed before this date",
 )
 @click.pass_context
-def bioinfo_all(
+def load_bioinfo_all(
     context: click.Context,
     completed_after: Optional[str],
     completed_before: Optional[str],
@@ -265,7 +265,9 @@ def bioinfo_all(
 
         LOG.info("Found multiqc for %s, %s", case_name, existing_multiqc_file)
         try:
-            context.invoke(bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry)
+            context.invoke(
+                load_bioinfo, case_name=case_name, cleanup=True, target_load="all", dry=dry
+            )
             if not dry:
                 UploadVogueAPI.update_analysis_uploaded_to_vogue_date(analysis=analysis)
                 status_db.session.commit()

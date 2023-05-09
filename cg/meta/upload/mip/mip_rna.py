@@ -5,7 +5,7 @@ import logging
 
 import click
 
-from cg.cli.upload.clinical_delivery import clinical_delivery
+from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_rna_to_scout
 from cg.constants import DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
@@ -30,7 +30,7 @@ class MipRNAUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis=analysis)
 
         # Clinical delivery upload
-        ctx.invoke(clinical_delivery, case_id=case.internal_id)
+        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:

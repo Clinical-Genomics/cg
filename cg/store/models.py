@@ -682,6 +682,11 @@ class Sample(Model, PriorityMixin):
         self._phenotype_terms = ",".join(phenotype_term_list) if phenotype_term_list else None
 
     @property
+    def prep_category(self) -> str:
+        """Return the preparation category of the sample."""
+        return self.application_version.application.prep_category
+
+    @property
     def state(self) -> str:
         """Get the current sample state."""
         if self.delivered_at:
@@ -753,3 +758,19 @@ class User(Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class SequencingStatistics(Model):
+    __tablename__ = "sequencing_statistics"
+    id = Column(types.Integer, primary_key=True)
+    flow_cell_name = Column(types.String(128), nullable=False)
+    sample_internal_id = Column(types.String(128), nullable=False)
+    lane = Column(types.Integer)
+    yield_in_megabases = Column(types.Integer)
+    read_counts = Column(types.Integer)
+    passed_filter_percent = Column(types.Numeric(10, 5))
+    raw_clusters_per_lane_percent = Column(types.Numeric(10, 5))
+    perfect_index_reads_percent = Column(types.Numeric(10, 5))
+    bases_with_q30_percent = Column(types.Numeric(10, 5))
+    lanes_mean_quality_score = Column(types.Numeric(10, 5))
+    started_at = Column(types.DateTime)
