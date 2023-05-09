@@ -77,10 +77,10 @@ def test_without_config_dry_run(
 
 
 def test_without_config(
-        cli_runner: CliRunner,
-        rnafusion_context: CGConfig,
-        caplog: LogCaptureFixture,
-        rnafusion_case_id: str,
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
 ):
     """Test command with case_id and no config file."""
     caplog.set_level(logging.ERROR)
