@@ -34,7 +34,7 @@ class SampleSheetCreator:
         self.bcl_converter = bcl_converter
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
-        self.run_parameters: RunParameters = flow_cell.run_parameters_object
+        self.run_parameters: RunParameters = flow_cell.run_parameters
         self.force = force
 
     @property

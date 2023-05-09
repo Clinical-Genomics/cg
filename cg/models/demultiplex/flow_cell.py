@@ -71,7 +71,7 @@ class FlowCell:
         return Path(self.path, DemultiplexingDirsAndFiles.RUN_PARAMETERS)
 
     @property
-    def run_parameters_object(self) -> RunParameters:
+    def run_parameters(self) -> RunParameters:
         """Return run parameters object."""
         if not self.run_parameters_path.exists():
             message = f"Could not find run parameters file {self.run_parameters_path}"

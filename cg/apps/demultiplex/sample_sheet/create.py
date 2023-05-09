@@ -23,7 +23,7 @@ def create_sample_sheet(
         LOG.warning(message)
         raise FileExistsError(message)
 
-    flow_cell_type: str = flow_cell.run_parameters_object.flow_cell_type
+    flow_cell_type: str = flow_cell.run_parameters.flow_cell_type
 
     if flow_cell_type != FlowCellType.NOVASEQ:
         message = f"Can only demultiplex novaseq with cg. Found type {flow_cell_type}"
