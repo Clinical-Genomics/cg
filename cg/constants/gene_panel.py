@@ -1,7 +1,7 @@
 """Gene panel specific constants."""
 from typing import List
 
-from cgmodels.cg.constants import StrEnum
+from cg.utils.enums import StrEnum
 
 GENOME_BUILD_37 = "37"
 GENOME_BUILD_38 = "GRCh38"

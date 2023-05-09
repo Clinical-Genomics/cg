@@ -3,7 +3,7 @@ import logging
 
 import pytest
 
-from cg.cli.delete.cases import cases
+from cg.cli.delete.cases import delete_cases
 from cg.store import Store
 
 SUCCESS = 0
@@ -25,7 +25,7 @@ def test_set_cases_by_sample_identifiers(
 
     # WHEN calling delete cases with valid sample identifiers
     cli_runner.invoke(
-        cases,
+        delete_cases,
         ["--sample-identifier", identifier_key, identifier_value],
         obj=base_context,
     )
@@ -46,7 +46,7 @@ def test_delete_cases_with_dry_run(cli_runner, base_context, base_store: Store, 
     # WHEN deleting a case
     caplog.set_level(logging.DEBUG)
     cli_runner.invoke(
-        cases,
+        delete_cases,
         ["--sample-identifier", "name", sample.name, "--dry-run"],
         obj=base_context,
     )

@@ -3,7 +3,7 @@ from typing import List, Optional, Set, Tuple
 
 import click
 from cg.constants import CASE_ACTIONS, Priority
-from cg.cli.set.case import case
+from cg.cli.set.case import set_case
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.utils.click.EnumChoice import EnumChoice
@@ -30,7 +30,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Famil
     return list(cases)
 
 
-@click.command()
+@click.command("cases")
 @click.option(
     "--sample-identifier",
     "identifiers",
@@ -47,7 +47,7 @@ def _get_cases(identifiers: click.Tuple([str, str]), store: Store) -> List[Famil
     "-p", "--priority", type=EnumChoice(Priority, use_value=False), help="update priority"
 )
 @click.pass_context
-def cases(
+def set_cases(
     context: click.Context,
     action: Optional[str],
     priority: Optional[Priority],
@@ -73,7 +73,7 @@ def cases(
 
     for case_to_alter in cases_to_alter:
         context.invoke(
-            case,
+            set_case,
             action=action,
             priority=priority,
             panel_abbreviations=panel_abbreviations,

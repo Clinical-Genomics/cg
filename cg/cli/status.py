@@ -56,10 +56,10 @@ def status():
     pass
 
 
-@status.command()
+@status.command("analysis")
 @click.pass_obj
-def analysis(context: CGConfig):
-    """Which families will be analyzed?"""
+def cases_to_be_analysed(context: CGConfig):
+    """Which cases will be analysed?"""
     records: List[Family] = context.status_db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
     for case_obj in records:
         click.echo(case_obj)
@@ -106,7 +106,7 @@ def present_string(a_dict, param, show_negative):
     return "" if not value else value or str(value)
 
 
-@status.command()
+@status.command("cases")
 @click.pass_obj
 @click.option(
     "-o",
@@ -144,7 +144,7 @@ def present_string(a_dict, param, show_negative):
 )
 @click.option("-i", "--only-invoiced", is_flag=True, help="only completely invoiced cases")
 @click.option("-I", "--exclude-invoiced", is_flag=True, help="exclude completely invoiced cases")
-def cases(
+def status_of_cases(
     context: CGConfig,
     output_type,
     verbose,
@@ -350,10 +350,10 @@ def cases(
     click.echo(header_description)
 
 
-@status.command()
+@status.command("samples")
 @click.option("-s", "--skip", default=0, help="skip initial records")
 @click.pass_obj
-def samples(context: CGConfig, skip: int):
+def status_of_samples(context: CGConfig, skip: int):
     """View status of samples."""
     status_db: Store = context.status_db
     records: List[Sample] = status_db.get_samples()[skip : skip + 30]
@@ -374,10 +374,10 @@ def samples(context: CGConfig, skip: int):
         click.echo(click.style(message, fg=color))
 
 
-@status.command()
+@status.command("families")
 @click.option("-s", "--skip", default=0, help="skip initial records")
 @click.pass_obj
-def families(context: CGConfig, skip: int):
+def status_of_families(context: CGConfig, skip: int):
     """View status of families."""
     click.echo("red: prio > 1, blue: prio = 1, green: completed, yellow: action")
     status_db: Store = context.status_db
