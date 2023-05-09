@@ -1,5 +1,5 @@
 """Constants related to all things sequencing"""
-from cgmodels.cg.constants import StrEnum
+from cg.utils.enums import StrEnum
 
 
 class Sequencers(StrEnum):
@@ -32,6 +32,12 @@ sequencer_types = {
     "A00621": Sequencers.NOVASEQ,
     "A00689": Sequencers.NOVASEQ,
     "A01901": Sequencers.NOVASEQ,
+}
+
+FLOWCELL_Q30_THRESHOLD = {
+    Sequencers.HISEQX: 75,
+    Sequencers.HISEQGA: 80,
+    Sequencers.NOVASEQ: 75,
 }
 
 
