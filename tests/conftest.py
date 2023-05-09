@@ -1773,7 +1773,6 @@ def fixture_context_config(
         "pdc": {"binary_path": "/bin/dsmc"},
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
-            "pipeline_path": Path("pipeline", "path").as_posix(),
             "root": str(taxprofiler_dir),
         },
         "scout": {

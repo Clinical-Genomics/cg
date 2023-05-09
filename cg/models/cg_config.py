@@ -172,7 +172,6 @@ class RnafusionConfig(CommonAppConfig):
 class TaxprofilerConfig(CommonAppConfig):
     root: str
     binary_path: str
-    pipeline_path: str
 
 
 class CGStatsConfig(BaseModel):
