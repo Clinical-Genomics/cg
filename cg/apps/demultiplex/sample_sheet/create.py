@@ -16,7 +16,7 @@ def create_sample_sheet(
     flow_cell: FlowCell,
     lims_samples: List[LimsFlowcellSample],
     force: bool = False,
-) -> str:
+) -> List[List[str]]:
     """Create a sample sheet for a flow cell."""
     if flow_cell.sample_sheet_path.exists():
         message = f"Sample sheet {flow_cell.sample_sheet_path} already exists!"

@@ -14,8 +14,10 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
     flowcell_samples,
 )
+from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
+from cg.io.controller import WriteFile
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 
@@ -84,7 +86,7 @@ def create_sheet(
         LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
         raise click.Abort
     try:
-        sample_sheet: str = create_sample_sheet(
+        sample_sheet: List[List[str]] = create_sample_sheet(
             bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
         )
     except (FileNotFoundError, FileExistsError) as error:
@@ -94,8 +96,11 @@ def create_sheet(
         click.echo(sample_sheet)
         return
     LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
-    with open(flow_cell.sample_sheet_path, "w") as outfile:
-        outfile.write(sample_sheet)
+    WriteFile.write_file_from_content(
+        content=sample_sheet,
+        file_format=FileFormat.CSV,
+        file_path=flow_cell.sample_sheet_path,
+    )
 
 
 @sample_sheet_commands.command(name="create-all")
@@ -134,7 +139,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
 
         try:
-            sample_sheet: str = create_sample_sheet(
+            sample_sheet: List[List[str]] = create_sample_sheet(
                 flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
             )
         except (FileNotFoundError, FileExistsError):
@@ -144,5 +149,8 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             click.echo(sample_sheet)
             return
         LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
-        with open(flow_cell.sample_sheet_path, "w") as outfile:
-            outfile.write(sample_sheet)
+        WriteFile.write_file_from_content(
+            content=sample_sheet,
+            file_format=FileFormat.CSV,
+            file_path=flow_cell.sample_sheet_path,
+        )

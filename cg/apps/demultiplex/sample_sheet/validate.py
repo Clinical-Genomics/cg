@@ -10,8 +10,10 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleBcl2Fastq,
     SampleDragen,
 )
+from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
+from cg.io.controller import ReadFile
 
 LOG = logging.getLogger(__name__)
 
@@ -48,23 +50,21 @@ def validate_samples_unique_per_lane(samples: List[NovaSeqSample]) -> None:
         validate_samples_are_unique(samples=lane_samples)
 
 
-def get_raw_samples(sample_sheet: str) -> List[Dict[str, str]]:
+def get_raw_samples(sample_sheet: List[List[str]]) -> List[Dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
-    sample_sheet_rows: List[str] = sample_sheet.split("\n")
     header: List[str] = []
     raw_samples: List[Dict[str, str]] = []
-    for line in sample_sheet_rows:
+
+    for line in sample_sheet:
         # Skip lines that are too short to contain samples
-        if not len(line) > 5:
+        if len(line) <= 5:
             continue
-        line = line.strip()
-        # Check if we are on the header row
-        if line.startswith("FCID"):
-            header = line.split(",")
+        if line[0] == "FCID":
+            header = line
             continue
         if not header:
             continue
-        raw_samples.append(dict(zip(header, line.split(","))))
+        raw_samples.append(dict(zip(header, line)))
     if not header:
         message = "Could not find header in sample sheet"
         LOG.warning(message)
@@ -77,14 +77,14 @@ def get_raw_samples(sample_sheet: str) -> List[Dict[str, str]]:
 
 
 def get_sample_sheet(
-    sample_sheet: str, sheet_type: Literal["2500", "SP", "S2", "S4"], bcl_converter: str
+    sample_sheet: List[List[str]], sheet_type: Literal["2500", "SP", "S2", "S4"], bcl_converter: str
 ) -> SampleSheet:
     """Parse and validate a sample sheet.
 
     return the information as a SampleSheet object
     """
     novaseq_sample = {BclConverter.BCL2FASTQ: SampleBcl2Fastq, BclConverter.DRAGEN: SampleDragen}
-    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet)
+    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet=sample_sheet)
     sample_type: Union[SampleBcl2Fastq, SampleDragen] = novaseq_sample[bcl_converter]
     samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples)
@@ -95,9 +95,9 @@ def get_sample_sheet_from_file(
     infile: Path, sheet_type: Literal["2500", "SP", "S2", "S4"], bcl_converter: str
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
-    with open(infile, "r") as csv_file:
-        sample_sheet: SampleSheet = get_sample_sheet(
-            sample_sheet=csv_file.read(), sheet_type=sheet_type, bcl_converter=bcl_converter
-        )
-
-    return sample_sheet
+    csv_file_content: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=infile
+    )
+    return get_sample_sheet(
+        sample_sheet=csv_file_content, sheet_type=sheet_type, bcl_converter=bcl_converter
+    )

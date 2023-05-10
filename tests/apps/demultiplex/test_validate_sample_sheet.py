@@ -120,7 +120,7 @@ def test_get_sample_sheet_s2_bcl2fastq(
 
 
 def test_get_sample_sheet_s2_dragen(
-    valid_sample_sheet_dragen: str,
+    valid_sample_sheet_dragen: list,
 ):
     """Test that a dragen sample sheet created from valid parameters has the correct type."""
     # GIVEN a valid sample sheet to be used with dragen
@@ -136,7 +136,7 @@ def test_get_sample_sheet_s2_dragen(
 
 
 def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
-    sample_sheet_bcl2fastq_duplicate_same_lane: str,
+    sample_sheet_bcl2fastq_duplicate_same_lane: list,
 ):
     """Test that creating a bcl2fastq sample sheet with duplicated samples in a lane fails."""
     # GIVEN a bcl2fastq sample sheet with a sample duplicated in a lane
@@ -152,10 +152,10 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
 
 
 def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
-    sample_sheet_dragen_duplicate_same_lane: str,
+    sample_sheet_dragen_duplicate_same_lane: list,
 ):
-    """Test that creating a dragen sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a dragen sample sheet with a sample duplicated in a lane
+    """Test that creating a Dragen sample sheet with duplicated samples in a lane fails."""
+    # GIVEN a Dragen sample sheet with a sample duplicated in a lane
 
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
