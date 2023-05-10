@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 from xml.etree import ElementTree
 
-from cg.constants.demultiplexing import FlowCellType, UNKNOWN_REAGENT_KIT_VERSION
+from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
 from cg.exc import FlowCellError
 from typing_extensions import Literal
 
@@ -45,24 +45,6 @@ class RunParameters:
             LOG.info("Set reagent kit version to 'unknown'")
             return UNKNOWN_REAGENT_KIT_VERSION
         return xml_node.text
-
-    @property
-    def flow_cell_type(self) -> Literal[FlowCellType.NOVASEQ, FlowCellType.HISEQ]:
-        """Fetch the flow cell type from the run parameters."""
-        # First try with the node name for hiseq
-        node_name: str = "./Setup/ApplicationName"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        if xml_node is None:
-            # Then try with node name for novaseq
-            node_name: str = ".Application"
-            xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="flow cell type")
-        for flow_cell_name in [FlowCellType.NOVASEQ, FlowCellType.HISEQ]:
-            if flow_cell_name in xml_node.text.lower():
-                return flow_cell_name
-        message = f"Unknown flow cell type {xml_node.text}"
-        LOG.warning(message)
-        raise FlowCellError(message)
 
     @property
     def flow_cell_mode(self) -> Optional[str]:
@@ -131,15 +113,11 @@ class RunParameters:
         )
 
     def __str__(self):
-        return (
-            f"RunParameters(path={self.path},"
-            f"flow_cell_type={self.flow_cell_type},"
-            f"flow_cell_mode={self.flow_cell_mode})"
-        )
+        return f"RunParameters(path={self.path}," f"flow_cell_mode={self.flow_cell_mode})"
 
     def __repr__(self):
         return (
-            f"RunParameters(path={self.path},flow_cell_type={self.flow_cell_type},flow_cell_mode={self.flow_cell_mode},"
+            f"RunParameters(path={self.path},flow_cell_mode={self.flow_cell_mode},"
             f"reagent_kit_version={self.reagent_kit_version},control_software_version={self.control_software_version},"
             f"index_length={self.index_length})"
         )
