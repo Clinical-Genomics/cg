@@ -6,6 +6,14 @@ from cg.store.models import (
 )
 
 
+class SequencingMetricsCalculator:
+    pass
+
+
+class SequencingMetricsParser:
+    pass
+
+
 def parse_bcl2fastq_metrics(demultiplexing_directory: str) -> List[SequencingStatistics]:
     """
     Parse the sequencing metrics for a flow cell demultiplexed using bcl2fastq.
