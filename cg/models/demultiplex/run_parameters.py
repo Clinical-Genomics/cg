@@ -5,7 +5,6 @@ from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
 from cg.exc import FlowCellError
-from typing_extensions import Literal
 
 LOG = logging.getLogger(__name__)
 
