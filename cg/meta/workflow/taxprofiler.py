@@ -71,11 +71,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def write_samplesheet(self, case_id: str) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if len(case_obj.links) != 1:
-            raise NotImplementedError(
-                "Case objects are assumed to be related to a single sample (one link)"
-            )
-
         for link in case_obj.links:
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
@@ -93,6 +88,9 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                     case_id=case_id, root_dir=self.root_dir
                 ),
             )
+
+
+
 
     def config_case(self, case_id: str) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
