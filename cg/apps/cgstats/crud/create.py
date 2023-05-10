@@ -6,14 +6,14 @@ import sqlalchemy
 from cg.apps.cgstats.db.models import (
     Datasource,
     Demux,
+    DemuxSample,
+    DragenDemuxSample,
     Flowcell,
     Project,
     Supportparams,
     Sample,
     Unaligned,
 )
-from cg.apps.cgstats.demux_sample import DemuxSample, get_demux_samples, get_dragen_demux_samples
-from cg.apps.cgstats.dragen_demux_sample import DragenDemuxSample
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.sample_sheet.models import NovaSeqSample, SampleSheet
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
@@ -243,7 +243,7 @@ def _create_dragen_samples(
     """Handles sample creation: creates sample objects and unaligned objects in their respective
     tables in cgstats for samples demultiplexed with Dragen"""
 
-    demux_samples: Dict[int, dict] = get_dragen_demux_samples(
+    demux_samples: Dict[int, dict] = manager.find_handler.get_dragen_demux_samples(
         demux_results=demux_results,
         sample_sheet=sample_sheet,
     )
@@ -278,7 +278,7 @@ def _create_bcl2fastq_samples(
     """Handles sample creation: creates sample objects and unaligned objects in their respective
     tables in cgstats for samples demultiplexed with bcl2fastq"""
 
-    demux_samples: Dict[int, Dict[str, DemuxSample]] = get_demux_samples(
+    demux_samples: Dict[int, Dict[str, DemuxSample]] = manager.find_handler.get_demux_samples(
         conversion_stats=demux_results.conversion_stats,
         demux_stats_path=demux_results.demux_stats_path,
         sample_sheet=sample_sheet,
@@ -293,10 +293,12 @@ def _create_bcl2fastq_samples(
         if not stats_sample:
             continue
 
-        unaligned_id: Optional[int] = manager.find_handler.get_unaligned_id(
+        unaligned: Optional[
+            Unaligned
+        ] = manager.find_handler.get_unaligned_by_sample_id_demux_id_and_lane(
             sample_id=stats_sample.sample_id, demux_id=demux_id, lane=sample.lane
         )
-        if not unaligned_id:
+        if not unaligned:
             demux_sample: DemuxSample = demux_samples[sample.lane][sample.sample_id]
             create_unaligned(
                 manager=manager,

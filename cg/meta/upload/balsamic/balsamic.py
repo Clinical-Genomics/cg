@@ -5,11 +5,11 @@ import logging
 
 import click
 
-from cg.cli.generate.report.base import delivery_report
-from cg.cli.upload.clinical_delivery import clinical_delivery
-from cg.cli.upload.genotype import genotypes
-from cg.cli.upload.observations import observations
-from cg.cli.upload.scout import scout
+from cg.cli.generate.report.base import generate_delivery_report
+from cg.cli.upload.clinical_delivery import upload_clinical_delivery
+from cg.cli.upload.genotype import upload_genotypes
+from cg.cli.upload.observations import upload_observations_to_loqusdb
+from cg.cli.upload.scout import upload_to_scout
 from cg.constants import REPORT_SUPPORTED_DATA_DELIVERY, DataDelivery
 from cg.constants.sequencing import SequencingMethod
 from cg.meta.upload.gt import UploadGenotypesAPI
@@ -37,14 +37,14 @@ class BalsamicUploadAPI(UploadAPI):
 
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
-            ctx.invoke(delivery_report, case_id=case.internal_id)
+            ctx.invoke(generate_delivery_report, case_id=case.internal_id)
 
         # Clinical delivery
-        ctx.invoke(clinical_delivery, case_id=case.internal_id)
+        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
-            ctx.invoke(scout, case_id=case.internal_id, re_upload=restart)
+            ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
         else:
             LOG.warning(
                 f"There is nothing to upload to Scout for case {case.internal_id} and "
@@ -53,13 +53,13 @@ class BalsamicUploadAPI(UploadAPI):
 
         # Genotype specific upload
         if UploadGenotypesAPI.is_suitable_for_genotype_upload(case):
-            ctx.invoke(genotypes, family_id=case.internal_id, re_upload=restart)
+            ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
         else:
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Genotype upload")
 
         # Observations upload
         if self.analysis_api.get_case_application_type(case.internal_id) == SequencingMethod.WGS:
-            ctx.invoke(observations, case_id=case.internal_id)
+            ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         else:
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Observations upload")
 

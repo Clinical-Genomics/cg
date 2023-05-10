@@ -3,7 +3,7 @@
 import logging
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.upload.genotype import genotypes as upload_genotypes_cmd
+from cg.cli.upload.genotype import upload_genotypes as upload_genotypes_cmd
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from click.testing import CliRunner

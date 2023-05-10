@@ -1,8 +1,6 @@
 """Constants specific for encryption"""
 
-from cgmodels.cg.constants import StrEnum
-
-from cg.utils.enums import ListEnum
+from cg.utils.enums import ListEnum, StrEnum
 
 
 class CipherAlgorithm(StrEnum):
