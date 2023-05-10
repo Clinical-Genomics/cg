@@ -1,18 +1,17 @@
 """Module for Taxprofiler Analysis API."""
 
 import logging
+from typing import Dict, List, Optional
 from cg.constants import Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.constants import Pipeline
-from cg.constants.nextflow import (
-    NFX_READ1_HEADER,
-    NFX_READ2_HEADER,
-    NFX_SAMPLE_HEADER,
-    NFX_RUN_ACCESSION,
-    NFX_INSTRUMENT_PLATFORM,
-)
+from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
 from cg.constants.taxprofiler import (
+    TAXPROFILER_INSTRUMENT_PLATFORM,
+    TAXPROFILER_RUN_ACCESSION,
+    TAXPROFILER_SAMPLESHEET_HEADERS,
+    TAXPROFILER_ACCEPTED_PLATFORMS,
     TaxprofilerDefaults,
 )
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -39,12 +38,39 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
+    def write_samplesheet(self, case_id: str, instrument_platform: str) -> None:
+        """Write sample sheet for taxprofiler analysis in case folder."""
+        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        if len(case_obj.links) != 1:
+            raise NotImplementedError(
+                "Case objects are assumed to be related to a single sample (one link)"
+            )
+
+        for link in case_obj.links:
+            sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
+            fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
+            fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
+            # samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
+            #     case_id, fastq_r1, fastq_r2, instrument_platform
+            # )
+            # LOG.info(samplesheet_content)
+            # if dry_run:
+            #     continue
+            NextflowAnalysisAPI.create_samplesheet_csv(
+                samplesheet_content=samplesheet_content,
+                headers=TAXPROFILER_SAMPLESHEET_HEADERS,
+                config_path=NextflowAnalysisAPI.get_case_config_path(
+                    case_id=case_id, root_dir=self.root_dir
+                ),
+            )
+
     def config_case(
         self,
         case_id: str,
+        instrument_platform: str,
     ) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
         NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         LOG.info("Generating samplesheet")
-        # self.write_samplesheet(case_id, strandedness)
+        self.write_samplesheet(case_id=case_id, instrument_platform=instrument_platform)
         # LOG.info("Samplesheet written")
