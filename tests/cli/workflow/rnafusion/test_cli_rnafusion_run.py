@@ -60,6 +60,22 @@ def test_without_samples(
     assert "no samples" in caplog.text
 
 
+def test_without_config_dry_run(
+    cli_runner: CliRunner,
+    rnafusion_context: CGConfig,
+    caplog: LogCaptureFixture,
+    rnafusion_case_id: str,
+):
+    """Test command dry-run with case_id and no config file."""
+    caplog.set_level(logging.ERROR)
+    # GIVEN case-id
+    case_id: str = rnafusion_case_id
+    # WHEN dry running with dry specified
+    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
+    # THEN command should execute successfully (dry-run)
+    assert result.exit_code == EXIT_SUCCESS
+
+
 def test_without_config(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
@@ -71,7 +87,7 @@ def test_without_config(
     # GIVEN case-id
     case_id: str = rnafusion_case_id
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(run, [case_id], obj=rnafusion_context)
     # THEN command should NOT execute successfully
     assert result.exit_code != EXIT_SUCCESS
     # THEN warning should be printed that no config file is found
