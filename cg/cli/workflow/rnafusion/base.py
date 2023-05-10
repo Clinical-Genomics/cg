@@ -1,6 +1,7 @@
 """CLI support to create config and/or start RNAFUSION."""
 
 import logging
+import sys
 from pathlib import Path
 
 import click
@@ -36,6 +37,14 @@ from cg.models.cg_config import CGConfig
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    """
+    Global exception handler that will be called every time an unhandled exception occurs in the code.
+    """
+    LOG.error(f"An unhandled error occurred. Error: {exc_type.__name__}: {exc_value}")
+    raise click.Abort()
 
 
 @click.group(invoke_without_command=True)
@@ -241,16 +250,19 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
+    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
+        LOG.error(f"Analysis is not in QC step. Metrics cannot be generated.")
+        click.Abort()
+        return
+    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-        analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id)
-        analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
         analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
     except MetricsQCError as error:
         analysis_api.trailblazer_api.set_analysis_status(
             case_id=case_id, status=AnalysisStatus.FAILED
         )
-        analysis_api.trailblazer_api.add_comment(case_id=case_id, comment=error)
+        analysis_api.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
         return
     except CgError as error:
         LOG.error(f"Could not create metrics deliverables file: {error}")
@@ -347,3 +359,6 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             exit_code: int = EXIT_FAIL
     if exit_code:
         raise click.Abort
+
+
+sys.excepthook = handle_exception
