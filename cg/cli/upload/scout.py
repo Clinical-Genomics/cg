@@ -8,8 +8,6 @@ from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import Pipeline
-from cg.constants.constants import FileFormat
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Pipeline
@@ -17,6 +15,7 @@ from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
 from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -162,28 +161,16 @@ def upload_case_to_scout(context: CGConfig, re_upload: bool, dry_run: bool, case
 @click.command(name="rna-to-scout")
 @click.option("--dry-run", is_flag=True)
 @click.option("-r", "--research", is_flag=True, help="Upload research report instead of clinical")
-@click.option(
-    "-u",
-    "--update-fusion-report",
-    is_flag=True,
-    help="re-upload existing fusion report",
-)
 @click.argument("case_id")
 @click.pass_context
-def upload_rna_to_scout(
-    context, case_id: str, dry_run: bool, update_fusion_report: bool, research: bool
-) -> None:
+def upload_rna_to_scout(context, case_id: str, dry_run: bool, research: bool) -> None:
     """Upload an RNA case's gene fusion report and junction splice files for all samples connect via subject_id."""
 
     LOG.info("----------------- UPLOAD RNA TO SCOUT -----------------------")
 
     context.invoke(upload_multiqc_to_scout, case_id=case_id, dry_run=dry_run)
     context.invoke(
-        upload_rna_fusion_report_to_scout,
-        case_id=case_id,
-        dry_run=dry_run,
-        research=research,
-        update=update_fusion_report,
+        upload_rna_fusion_report_to_scout, case_id=case_id, dry_run=dry_run, research=research
     )
     context.invoke(upload_rna_junctions_to_scout, case_id=case_id, dry_run=dry_run)
 
