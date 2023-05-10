@@ -2,6 +2,8 @@
 
 import logging
 from typing import Dict, List, Optional
+
+from pydantic import ValidationError
 from cg.constants import Pipeline
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -15,6 +17,7 @@ from cg.constants.taxprofiler import (
     TaxprofilerDefaults,
 )
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
+from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 
 LOG = logging.getLogger(__name__)
 
@@ -38,6 +41,37 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
+    @staticmethod
+    def build_samplesheet_content(
+        case_id: str, fastq_r1: List[str], fastq_r2: List[str], instrument_platform: str
+    ) -> Dict[str, List[str]]:
+        """Build samplesheet headers and lists"""
+        try:
+            TaxprofilerSample(
+                sample=case_id,
+                fastq_r1=fastq_r1,
+                fastq_r2=fastq_r2,
+                instrument_platform=instrument_platform,
+            )
+        except ValidationError as error:
+            LOG.error(error)
+            raise ValueError
+
+        # samples_full_list: list = []
+        # strandedness_full_list: list = []
+        # Complete sample and strandedness lists to the same length as fastq_r1:
+        # for _ in range(len(fastq_r1)):
+        #    samples_full_list.append(case_id)
+        #    strandedness_full_list.append(strandedness)
+
+        # samplesheet_content: dict = {
+        #   NFX_SAMPLE_HEADER: samples_full_list,
+        #    NFX_READ1_HEADER: fastq_r1,
+        #    NFX_READ2_HEADER: fastq_r2,
+        #    RNAFUSION_STRANDEDNESS_HEADER: strandedness_full_list,
+        # }
+        # return samplesheet_content
+
     def write_samplesheet(self, case_id: str, instrument_platform: str) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -50,10 +84,10 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
-            # samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
-            #     case_id, fastq_r1, fastq_r2, instrument_platform
-            # )
-            # LOG.info(samplesheet_content)
+            samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
+                case_id, fastq_r1, fastq_r2, instrument_platform
+            )
+            LOG.info(samplesheet_content)
             # if dry_run:
             #     continue
             NextflowAnalysisAPI.create_samplesheet_csv(
