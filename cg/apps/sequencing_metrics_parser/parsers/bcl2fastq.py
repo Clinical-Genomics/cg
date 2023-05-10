@@ -115,6 +115,21 @@ def get_yield(conversion_result):
     return conversion_result["Yield"]
 
 
+def get_total_clusters_passing_filter(conversion_result):
+    """Extract the total clusters passing the filter from the conversion result."""
+    return conversion_result["TotalClustersPF"]
+
+
+def get_total_raw_clusters(conversion_result):
+    """Extract the total number of clusters initially generated, regardless of quality."""
+    return conversion_result["TotalClustersRaw"]
+
+
+def get_quality_scores(read_metric):
+    """Extract the sum of quality scores of all the bases from the read metrics."""
+    return read_metric["QualityScoreSum"]
+
+
 def calculate_aggregate_yield_q30(lane_read_metrics):
     """Calculate the aggregated Q30 yield for the lane from the read metrics."""
     return sum(get_yield_q30(metric) for metric in lane_read_metrics)
@@ -126,7 +141,7 @@ def calculate_aggregate_yield(read_metrics):
 
 def calculate_aggregate_quality_score_sum(lane_read_metrics):
     """Calculate the aggregated quality score sum for the lane from the read metrics."""
-    return sum(metric["QualityScoreSum"] for metric in lane_read_metrics)
+    return sum(get_quality_scores(read_metric) for read_metric in lane_read_metrics)
 
 
 def calculate_yield_in_megabases(conversion_result):
@@ -137,12 +152,15 @@ def calculate_yield_in_megabases(conversion_result):
 
 def calculate_passed_filter_percent(conversion_result):
     """Calculate the passed filter percent for the lane from the conversion result."""
-    return conversion_result["TotalClustersPF"] / conversion_result["TotalClustersRaw"]
+    total_clusters_passing_filter = get_total_clusters_passing_filter(conversion_result)
+    total_raw_clusters = get_total_raw_clusters(conversion_result)
+    return total_clusters_passing_filter / total_raw_clusters
 
 
 def calculate_raw_clusters_per_lane_percent(conversion_result, number_of_lanes):
     """Calculate the raw clusters per lane percent from the conversion result."""
-    return conversion_result["TotalClustersRaw"] / number_of_lanes
+    total_raw_clusters = get_total_raw_clusters(conversion_result)
+    return total_raw_clusters / number_of_lanes
 
 
 def calculate_bases_with_q30_percent(lane_read_metrics):
