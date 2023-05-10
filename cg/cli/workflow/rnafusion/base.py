@@ -255,8 +255,12 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
         LOG.error("Analysis is not in QC step. Metrics cannot be generated.")
         return
     analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+    if dry_run:
+        LOG.info("Dry-run: QC metrics validation would be performed.")
+        return
     try:
-        analysis_api.validate_qc_metrics(case_id=case_id, dry_run=dry_run)
+        LOG.info("Validating QC metrics.")
+        analysis_api.validate_qc_metrics(case_id=case_id)
     except MetricsQCError as error:
         analysis_api.trailblazer_api.set_analysis_status(
             case_id=case_id, status=AnalysisStatus.FAILED
@@ -269,6 +273,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             case_id=case_id, status=AnalysisStatus.ERROR
         )
         raise click.Abort() from error
+
     analysis_api.trailblazer_api.set_analysis_status(
         case_id=case_id, status=AnalysisStatus.COMPLETED
     )
