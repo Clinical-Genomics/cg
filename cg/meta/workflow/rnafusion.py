@@ -279,8 +279,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 self.write_trailblazer_config(case_id=case_id, tower_id=tower_id)
             LOG.info(self.process.stdout)
 
-    def verify_case_config_file_exists(self, case_id: str) -> None:
-        NextflowAnalysisAPI.verify_case_config_file_exists(case_id=case_id, root_dir=self.root_dir)
+    def verify_case_config_file_exists(self, case_id: str, dry_run: bool = False) -> None:
+        NextflowAnalysisAPI.verify_case_config_file_exists(
+            case_id=case_id, root_dir=self.root_dir, dry_run=dry_run
+        )
 
     def get_deliverables_file_path(self, case_id: str) -> Path:
         return NextflowAnalysisAPI.get_deliverables_file_path(
