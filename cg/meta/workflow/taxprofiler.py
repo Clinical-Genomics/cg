@@ -73,11 +73,13 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
+            LOG.info("Test " + sample_metadata)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2
             )
+            LOG.info("Content" + samplesheet_content)
             LOG.info(samplesheet_content)
             # if dry_run:
             #     continue
