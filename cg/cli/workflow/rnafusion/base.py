@@ -252,8 +252,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        LOG.error(f"Analysis is not in QC step. Metrics cannot be generated.")
-        click.Abort()
+        LOG.error("Analysis is not in QC step. Metrics cannot be generated.")
         return
     analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
     try:
