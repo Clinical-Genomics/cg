@@ -16,7 +16,7 @@ from cg.cli.workflow.nextflow.options import (
     OPTION_WORKDIR,
 )
 from cg.cli.workflow.taxprofiler.options import (
-    OPTION_FROM_START,
+    OPTION_INSTRUMENT_PLATFORM,
 )
 from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
@@ -43,8 +43,9 @@ def taxprofiler(context: click.Context) -> None:
 
 @taxprofiler.command("config-case")
 @ARGUMENT_CASE_ID
+@OPTION_INSTRUMENT_PLATFORM
 @click.pass_obj
-def config_case(context: CGConfig, case_id: str) -> None:
+def config_case(context: CGConfig, case_id: str, instrument_platform: str) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given CASE_ID."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     # LOG.info(f"Creating sample sheet file for {case_id}.")

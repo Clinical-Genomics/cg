@@ -9,3 +9,11 @@ OPTION_FROM_START = click.option(
     show_default=True,
     help="Start pipeline from start without resuming execution",
 )
+
+OPTION_INSTRUMENT_PLATFORM = click.option(
+    "--instrument",
+    type=str,
+    default=TaxprofilerDefaults.INSTRUMENT_PLATFORM,
+    show_default=True,
+    help="Instrument platform: Illumina or Oxford Nanopore (default)",
+)
