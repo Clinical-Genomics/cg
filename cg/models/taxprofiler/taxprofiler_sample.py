@@ -9,10 +9,12 @@ class TaxprofilerSample(NextflowSample):
         instrument_platform: taxprofiler config file attributes model
     """
 
-    instrument_platform: str
+    pass
 
-    @validator("instrument_platform", always=True)
-    def valid_instrument_platform(cls, value) -> str:
-        """Verify that the instrument platform is accepted."""
-        assert value in TAXPROFILER_ACCEPTED_PLATFORMS
-        return "Instrument platform not valid"
+    # instrument_platform: str
+
+    # @validator("instrument_platform", always=True)
+    # def valid_instrument_platform(cls, value) -> str:
+    #    """Verify that the instrument platform is accepted."""
+    #    assert value in TAXPROFILER_ACCEPTED_PLATFORMS
+    #    return "Instrument platform not valid"
