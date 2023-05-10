@@ -11,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleDragen,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import BclConverter
+from cg.constants.demultiplexing import BclConverter, SampleSheetHeader
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
 
@@ -50,16 +50,16 @@ def validate_samples_unique_per_lane(samples: List[NovaSeqSample]) -> None:
         validate_samples_are_unique(samples=lane_samples)
 
 
-def get_raw_samples(sample_sheet: List[List[str]]) -> List[Dict[str, str]]:
+def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
     header: List[str] = []
     raw_samples: List[Dict[str, str]] = []
 
-    for line in sample_sheet:
+    for line in sample_sheet_content:
         # Skip lines that are too short to contain samples
         if len(line) <= 5:
             continue
-        if line[0] == "FCID":
+        if line[0] == SampleSheetHeader.FLOW_CELL_ID:
             header = line
             continue
         if not header:
@@ -77,14 +77,16 @@ def get_raw_samples(sample_sheet: List[List[str]]) -> List[Dict[str, str]]:
 
 
 def get_sample_sheet(
-    sample_sheet: List[List[str]], sheet_type: Literal["2500", "SP", "S2", "S4"], bcl_converter: str
+    sample_sheet_content: List[List[str]],
+    sheet_type: Literal["2500", "SP", "S2", "S4"],
+    bcl_converter: str,
 ) -> SampleSheet:
     """Parse and validate a sample sheet.
 
-    return the information as a SampleSheet object
+    Return the information as a SampleSheet object.
     """
     novaseq_sample = {BclConverter.BCL2FASTQ: SampleBcl2Fastq, BclConverter.DRAGEN: SampleDragen}
-    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet=sample_sheet)
+    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
     sample_type: Union[SampleBcl2Fastq, SampleDragen] = novaseq_sample[bcl_converter]
     samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples)
@@ -95,9 +97,11 @@ def get_sample_sheet_from_file(
     infile: Path, sheet_type: Literal["2500", "SP", "S2", "S4"], bcl_converter: str
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
-    csv_file_content: List[List[str]] = ReadFile.get_content_from_file(
+    sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=infile
     )
     return get_sample_sheet(
-        sample_sheet=csv_file_content, sheet_type=sheet_type, bcl_converter=bcl_converter
+        sample_sheet_content=sample_sheet_content,
+        sheet_type=sheet_type,
+        bcl_converter=bcl_converter,
     )

@@ -128,7 +128,7 @@ class SampleSheetCreator:
             return sample_sheet
         LOG.info("Validating sample sheet")
         get_sample_sheet(
-            sample_sheet=sample_sheet,
+            sample_sheet_content=sample_sheet,
             sheet_type="S2",
             bcl_converter=self.bcl_converter,
         )

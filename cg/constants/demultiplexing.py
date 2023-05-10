@@ -18,6 +18,10 @@ class FlowCellType(StrEnum):
     HISEQ: str = "hiseq"
 
 
+class SampleSheetHeader(StrEnum):
+    FLOW_CELL_ID: str = "FCID"
+
+
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 SAMPLE_SHEET_HEADERS = {

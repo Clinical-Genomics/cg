@@ -67,7 +67,9 @@ def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: str):
     # GIVEN a valid sample sheet
 
     # WHEN getting the list of raw samples from it
-    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet=valid_sample_sheet_bcl2fastq)
+    raw_samples: List[Dict[str, str]] = get_raw_samples(
+        sample_sheet_content=valid_sample_sheet_bcl2fastq
+    )
 
     # THEN it returns a list with 2 dictionaries
     assert len(raw_samples) == 2
@@ -84,7 +86,7 @@ def test_get_raw_samples_no_header(sample_sheet_samples_no_header: str, caplog):
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples(sample_sheet=sample_sheet_samples_no_header)
+        get_raw_samples(sample_sheet_content=sample_sheet_samples_no_header)
 
     # THEN an exception is raised because of the missing header
     assert "Could not find header in sample sheet" in caplog.text
@@ -97,7 +99,7 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: str, cap
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples(sample_sheet=sample_sheet_bcl2fastq_data_header)
+        get_raw_samples(sample_sheet_content=sample_sheet_bcl2fastq_data_header)
 
     # THEN an exception is raised because of the missing samples
     assert "Could not find any samples in sample sheet" in caplog.text
@@ -111,7 +113,7 @@ def test_get_sample_sheet_s2_bcl2fastq(
 
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=valid_sample_sheet_bcl2fastq,
+        sample_sheet_content=valid_sample_sheet_bcl2fastq,
         sheet_type="S2",
         bcl_converter="bcl2fastq",
     )
@@ -127,7 +129,7 @@ def test_get_sample_sheet_s2_dragen(
 
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=valid_sample_sheet_dragen,
+        sample_sheet_content=valid_sample_sheet_dragen,
         sheet_type="S2",
         bcl_converter="dragen",
     )
@@ -145,7 +147,7 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=sample_sheet_bcl2fastq_duplicate_same_lane,
+            sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
             sheet_type="S2",
             bcl_converter="bcl2fastq",
         )
@@ -161,7 +163,7 @@ def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         get_sample_sheet(
-            sample_sheet=sample_sheet_dragen_duplicate_same_lane,
+            sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
             sheet_type="S2",
             bcl_converter="dragen",
         )
@@ -175,7 +177,7 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
 
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=sample_sheet_bcl2fastq_duplicate_different_lane,
+        sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
         sheet_type="S2",
         bcl_converter="bcl2fastq",
     )
@@ -192,7 +194,7 @@ def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
 
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=sample_sheet_dragen_duplicate_different_lane,
+        sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
         sheet_type="S2",
         bcl_converter="dragen",
     )
