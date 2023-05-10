@@ -15,11 +15,9 @@ from cg.apps.lims.samplesheet import (
     flowcell_samples,
 )
 from cg.constants.constants import FileFormat
-from cg.constants import FileExtensions
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, FlowCellMode, FLOW_CELL_MODES
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile
-from cg.io.validate_path import validate_file_suffix
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 
@@ -51,7 +49,6 @@ def validate_sample_sheet(
         f"Validating sample sheet {sheet}",
     )
     sheet: Path = Path(str(sheet))
-    validate_file_suffix(path_to_validate=sheet, target_suffix=FileExtensions.CSV)
     try:
         get_sample_sheet_from_file(
             infile=sheet, flow_cell_mode=flow_cell_mode, bcl_converter=bcl_converter
@@ -98,18 +95,18 @@ def create_sheet(
         LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
         raise click.Abort
     try:
-        sample_sheet: List[List[str]] = create_sample_sheet(
+        sample_sheet_content: List[List[str]] = create_sample_sheet(
             bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
         )
     except (FileNotFoundError, FileExistsError) as error:
         raise click.Abort from error
 
     if dry_run:
-        click.echo(sample_sheet)
+        click.echo(sample_sheet_content)
         return
     LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
     WriteFile.write_file_from_content(
-        content=sample_sheet,
+        content=sample_sheet_content,
         file_format=FileFormat.CSV,
         file_path=flow_cell.sample_sheet_path,
     )
@@ -151,18 +148,18 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
 
         try:
-            sample_sheet: List[List[str]] = create_sample_sheet(
+            sample_sheet_content: List[List[str]] = create_sample_sheet(
                 flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
             )
         except (FileNotFoundError, FileExistsError):
             continue
 
         if dry_run:
-            click.echo(sample_sheet)
+            click.echo(sample_sheet_content)
             return
         LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
         WriteFile.write_file_from_content(
-            content=sample_sheet,
+            content=sample_sheet_content,
             file_format=FileFormat.CSV,
             file_path=flow_cell.sample_sheet_path,
         )

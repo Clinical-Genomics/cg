@@ -4,9 +4,13 @@ import io
 from typing import Any, List
 from pathlib import Path
 
+from cg.constants import FileExtensions
+from cg.io.validate_path import validate_file_suffix
+
 
 def read_csv(file_path: Path) -> List[List[str]]:
     """Read content in a CSV file."""
+    validate_file_suffix(path_to_validate=file_path, target_suffix=FileExtensions.CSV)
     with open(file_path, "r") as file:
         csv_reader = csv.reader(file)
         return list(csv_reader)

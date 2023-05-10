@@ -76,7 +76,7 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
     return raw_samples
 
 
-def get_sample_sheet(
+def validate_sample_sheet(
     sample_sheet_content: List[List[str]],
     flow_cell_mode: Literal[
         FlowCellMode.MISEQ,
@@ -84,14 +84,14 @@ def get_sample_sheet(
         FlowCellMode.NEXTSEQ,
         FlowCellMode.NOVASEQ,
     ],
-    bcl_converter: str,
+    bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
     novaseq_sample: Dict[str, Union[SampleBcl2Fastq, SampleDragen]] = {
         BclConverter.BCL2FASTQ: SampleBcl2Fastq,
         BclConverter.DRAGEN: SampleDragen,
     }
-    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet=sample_sheet)
+    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
     sample_type: Union[SampleBcl2Fastq, SampleDragen] = novaseq_sample[bcl_converter]
     samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples=samples)
@@ -106,14 +106,14 @@ def get_sample_sheet_from_file(
         FlowCellMode.NEXTSEQ,
         FlowCellMode.NOVASEQ,
     ],
-    bcl_converter: str,
+    bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=infile
     )
-    return get_sample_sheet(
+    return validate_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        sheet_type=sheet_type,
+        flow_cell_mode=flow_cell_mode,
         bcl_converter=bcl_converter,
     )

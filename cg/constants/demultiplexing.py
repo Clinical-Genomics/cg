@@ -27,7 +27,7 @@ UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
-        "FCID",
+        SampleSheetHeader.FLOW_CELL_ID,
         "Lane",
         "SampleID",
         "SampleRef",
@@ -40,7 +40,7 @@ SAMPLE_SHEET_HEADERS = {
         "Project",
     ],
     "dragen": [
-        "FCID",
+        SampleSheetHeader.FLOW_CELL_ID,
         "Lane",
         "Sample_ID",
         "SampleRef",

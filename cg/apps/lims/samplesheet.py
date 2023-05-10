@@ -8,11 +8,13 @@ from pydantic import BaseModel, Field
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
+from cg.constants.demultiplexing import SampleSheetHeader
+
 LOG = logging.getLogger(__name__)
 
 
 class LimsFlowcellSample(BaseModel):
-    flowcell_id: str = Field(..., alias="FCID")
+    flowcell_id: str = Field(..., alias=SampleSheetHeader.FLOW_CELL_ID.value)
     lane: int = Field(..., alias="Lane")
     sample_id: str
     sample_ref: str = Field("hg19", alias="SampleRef")

@@ -1,9 +1,9 @@
 import logging
-from typing import List
+from typing import List, Literal
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.constants.demultiplexing import FlowCellType
+from cg.constants.demultiplexing import FlowCellType, BclConverter
 from cg.exc import FlowCellError
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 
 def create_sample_sheet(
-    bcl_converter: str,
+    bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
     flow_cell: FlowCell,
     lims_samples: List[LimsFlowcellSample],
     force: bool = False,
@@ -27,7 +27,7 @@ def create_sample_sheet(
 
     if run_parameters.flow_cell_type != FlowCellType.NOVASEQ:
         message = (
-            f"Can only demultiplex novaseq with cg. Found type {run_parameters.flow_cell_type}"
+            f"Can only demultiplex Novaseq with Cg. Found type {run_parameters.flow_cell_type}"
         )
         LOG.warning(message)
         raise FlowCellError(message=message)
