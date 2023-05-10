@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import click
 from cg.utils.enums import StrEnum
@@ -103,3 +104,15 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
+
+
+class FlowCellMode(StrEnum):
+    """Define sample sheet flow cell mode."""
+
+    HISEQ_X: str = "SP"
+    NEXTSEQ: str = "S2"
+    NOVASEQ: str = "S4"
+    MISEQ: str = "2500"
+
+
+FLOW_CELL_MODES: List[str] = [mode.value for mode in FlowCellMode]

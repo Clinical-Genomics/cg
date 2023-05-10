@@ -15,9 +15,11 @@ from cg.apps.lims.samplesheet import (
     flowcell_samples,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants import FileExtensions
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, FlowCellMode, FLOW_CELL_MODES
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile
+from cg.io.validate_path import validate_file_suffix
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 
@@ -31,19 +33,29 @@ def sample_sheet_commands():
 
 @sample_sheet_commands.command(name="validate")
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--flow-cell-mode",
+    default=FlowCellMode.NOVASEQ,
+    show_default=True,
+    type=click.Choice(FLOW_CELL_MODES),
+    help="Instrument sample sheet flow cell mode",
+)
 @OPTION_BCL_CONVERTER
-def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
-    """Command to validate a sample sheet."""
+def validate_sample_sheet(
+    bcl_converter: str,
+    sheet: click.Path,
+    flow_cell_mode: str,
+):
+    """Validate a sample sheet."""
     LOG.info(
         f"Validating sample sheet {sheet}",
     )
     sheet: Path = Path(str(sheet))
-    if sheet.suffix != ".csv":
-        LOG.warning(f"File {sheet} seems to be in wrong format")
-        LOG.warning(f"Suffix {sheet.suffix} is not '.csv'")
-        raise click.Abort
+    validate_file_suffix(path_to_validate=sheet, target_suffix=FileExtensions.CSV)
     try:
-        get_sample_sheet_from_file(infile=sheet, sheet_type="S4", bcl_converter=bcl_converter)
+        get_sample_sheet_from_file(
+            infile=sheet, flow_cell_mode=flow_cell_mode, bcl_converter=bcl_converter
+        )
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
