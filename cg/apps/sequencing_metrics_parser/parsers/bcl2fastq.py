@@ -35,17 +35,14 @@ def parse_bcl2fastq_stats_json(stats_json_path: str) -> List[SequencingStatistic
 
             read_metrics = get_read_metrics(demux_result)
 
-            quality_score_sum_total = calculate_aggregate_quality_score_sum(read_metrics)
             yield_in_megabases = calculate_yield_in_megabases(conversion_result)
             passed_filter_percent = calculate_passed_filter_percent(conversion_result)
             raw_clusters_per_lane_percent = calculate_raw_clusters_per_lane_percent(
                 conversion_result, number_of_lanes
             )
 
-            yield_q30_total = calculate_aggregate_yield_q30(read_metrics)
-            yield_total = calculate_aggregate_yield(read_metrics)
-            bases_with_q30_percent = yield_q30_total / yield_total
-            lanes_mean_quality_score = quality_score_sum_total / yield_total
+            bases_with_q30_percent = calculate_bases_with_q30_percent(read_metrics)
+            lanes_mean_quality_score = calculate_lanes_mean_quality_score(read_metrics)
 
             statistics = SequencingStatistics(
                 flow_cell_name=flow_cell_name,
@@ -107,8 +104,16 @@ def calculate_raw_clusters_per_lane_percent(conversion_result, number_of_lanes):
     return conversion_result["TotalClustersRaw"] / number_of_lanes
 
 
-def calculate_bases_with_q30_percent(conversion_result):
-    return conversion_result["TotalYieldQ30"] / conversion_result["TotalYield"]
+def calculate_bases_with_q30_percent(read_metrics):
+    yield_q30_total = calculate_aggregate_yield_q30(read_metrics)
+    yield_total = calculate_aggregate_yield(read_metrics)
+    return yield_q30_total / yield_total
+
+
+def calculate_lanes_mean_quality_score(read_metrics):
+    quality_score_sum_total = calculate_aggregate_quality_score_sum(read_metrics)
+    yield_total = calculate_aggregate_yield(read_metrics)
+    return quality_score_sum_total / yield_total
 
 
 def get_read_metrics(demux_result):
