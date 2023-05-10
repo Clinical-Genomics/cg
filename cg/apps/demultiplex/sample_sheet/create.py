@@ -3,10 +3,9 @@ from typing import List
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.constants.demultiplexing import FlowCellType
+from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 from cg.models.demultiplex.flow_cell import FlowCell
-from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
 
@@ -23,10 +22,10 @@ def create_sample_sheet(
         LOG.warning(message)
         raise FileExistsError(message)
 
-    flow_cell_type: str = flow_cell.run_parameters.flow_cell_type
+    flow_cell_sequencer: str = flow_cell.sequencer_type
 
-    if flow_cell_type != FlowCellType.NOVASEQ:
-        message = f"Can only demultiplex novaseq with cg. Found type {flow_cell_type}"
+    if flow_cell_sequencer not in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
+        message = f"Can only demultiplex novaseq with cg. Found type {flow_cell_sequencer}"
         LOG.warning(message)
         raise FlowCellError(message=message)
 

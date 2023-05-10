@@ -9,7 +9,8 @@ from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, SequencingInstruments
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -84,11 +85,9 @@ class FlowCell:
     @property
     def sequencer_type(
         self,
-    ) -> Literal[SequencingInstruments.NOVASEQXPLUS, SequencingInstruments.NOVASEQ6000]:
+    ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
         """Return the sequencer type."""
-        if self.machine_name in SequencingInstruments.NOVA_SEQ_6000_NAMES:
-            return SequencingInstruments.NOVASEQ6000
-        return SequencingInstruments.NOVASEQXPLUS
+        return sequencer_types[self.machine_name]
 
     @property
     def rta_complete_path(self) -> Path:
