@@ -51,7 +51,7 @@ def config_case(context: CGConfig, case_id: str, instrument_platform: str) -> No
     # LOG.info(f"Creating sample sheet file for {case_id}.")
     analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
-        analysis_api.config_case(case_id=case_id)
+        analysis_api.config_case(case_id=case_id, instrument_platform=instrument_platform)
 
     except CgError as error:
         LOG.error(f"Could not create sample sheet: {error}")
