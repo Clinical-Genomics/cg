@@ -11,8 +11,8 @@ from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.constants.demultiplexing import (
     DemultiplexingDirsAndFiles,
-    sequencer_flow_cell_modes,
     FlowCellMode,
+    sequencer_flow_cell_modes,
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
