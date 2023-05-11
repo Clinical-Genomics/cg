@@ -39,18 +39,6 @@ from cg.store import Store
 LOG = logging.getLogger(__name__)
 
 
-def handle_exception(exc_type, exc_value, exc_traceback):
-    """
-    Global exception handler that will be called every time an unhandled exception occurs in the code.
-    """
-    # Ignore KeyboardInterrupt so a console python program can exit with Ctrl + C
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    LOG.error(f"Uncaught exception: {exc_type.__name__}: {exc_value}")
-    raise click.Abort()
-
-
 @click.group(invoke_without_command=True)
 @click.pass_context
 def rnafusion(context: click.Context) -> None:
@@ -253,16 +241,15 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     If failed, it sets it as failed and adds a comment with information of the failed metrics."""
 
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
-    if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        LOG.error("Analysis is not in QC step. Metrics cannot be generated.")
-        return
-    analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
-    if dry_run:
-        LOG.info("Dry-run: QC metrics validation would be performed.")
-        return
     try:
+        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
+            LOG.error("Analysis is not in QC step. Metrics cannot be generated.")
+            return
+        analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
+        if dry_run:
+            LOG.info("Dry-run: QC metrics validation would be performed.")
+            return
         LOG.info("Validating QC metrics.")
         analysis_api.validate_qc_metrics(case_id=case_id)
     except MetricsQCError as error:
@@ -369,6 +356,3 @@ def store_available(context: click.Context, dry_run: bool) -> None:
             exit_code: int = EXIT_FAIL
     if exit_code:
         raise click.Abort
-
-
-sys.excepthook = handle_exception
