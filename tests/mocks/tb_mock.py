@@ -41,3 +41,9 @@ class MockTB:
 
     def is_latest_analysis_completed(self, case_id: str):
         return True
+
+    def is_latest_analysis_qc(self, case_id: str):
+        return True
+
+    def set_analysis_status(self, case_id: str, status: str):
+        return

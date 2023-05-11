@@ -140,7 +140,7 @@ class FlowCell:
         """Validate if sample sheet is on correct format."""
         try:
             get_sample_sheet_from_file(
-                infile=self.sample_sheet_path, sheet_type="S4", bcl_converter=self.bcl_converter
+                infile=self.sample_sheet_path, flow_cell_mode="S4", bcl_converter=self.bcl_converter
             )
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
@@ -151,7 +151,7 @@ class FlowCell:
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path, sheet_type="S4", bcl_converter=self.bcl_converter
+            infile=self.sample_sheet_path, flow_cell_mode="S4", bcl_converter=self.bcl_converter
         )
 
     def is_sequencing_done(self) -> bool:
