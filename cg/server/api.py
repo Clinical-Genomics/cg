@@ -110,7 +110,8 @@ def before_request():
     jwt_token = auth_header.split("Bearer ")[-1]
     try:
         user_data = jwt.decode(jwt_token, certs=get_google_oauth2_certificates())
-    except ValueError:
+    except ValueError as e:
+        LOG.error(f"Error occurred while decoding JWT token: {e}")
         return abort(
             make_response(
                 jsonify(message="outdated login certificate"), http.HTTPStatus.UNAUTHORIZED
