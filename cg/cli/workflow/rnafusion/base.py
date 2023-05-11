@@ -257,7 +257,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
             case_id=case_id, status=AnalysisStatus.FAILED
         )
         analysis_api.trailblazer_api.add_comment(case_id=case_id, comment=str(error))
-        return
+        raise click.Abort() from error
     except CgError as error:
         LOG.error(f"Could not create metrics deliverables file: {error}")
         analysis_api.trailblazer_api.set_analysis_status(
