@@ -2,6 +2,7 @@ from pathlib import Path
 
 import click
 from typing import List
+from cg.constants.sequencing import Sequencers
 from cg.utils.enums import StrEnum
 
 
@@ -98,7 +99,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
 class FlowCellMode(StrEnum):
     """Define sample sheet flow cell mode."""
 
-    HISEQ_X: str = "SP"
+    HISEQX: str = "SP"
     NEXTSEQ: str = "S2"
     NOVASEQ: str = "S4"
     MISEQ: str = "2500"
