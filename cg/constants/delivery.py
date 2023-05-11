@@ -155,6 +155,8 @@ RNAFUSION_ANALYSIS_CASE_TAGS = [
     {"arriba-visualisation", "research"},
     {"multiqc-html", "rna"},
     {"software-versions"},
+    {"qc-metrics"},
+    {"multiqc-json"},
 ]
 
 RNAFUSION_ANALYSIS_SAMPLE_TAGS = []
