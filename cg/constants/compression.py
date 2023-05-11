@@ -129,7 +129,7 @@ RNAFUSION_VALIDATION_CASES = [
     "nearbyjoey",
 ]
 
-TAXPROFILER_VALIDATION_CASES: List[str] = [
+TAXPROFILER_VALIDATION_CASES = [
     "richurchin",
 ]
 
