@@ -57,7 +57,7 @@ def validate_sample_sheet(
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
-    LOG.info("Sample sheet looks fine")
+    LOG.info("Sample sheet validated successfully")
 
 
 @sample_sheet_commands.command(name="create")

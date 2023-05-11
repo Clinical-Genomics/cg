@@ -3,6 +3,7 @@ from pathlib import Path
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet
+from cg.constants.demultiplexing import FlowCellMode
 
 
 def test_convert_to_bcl2fastq_sheet(
@@ -17,7 +18,7 @@ def test_convert_to_bcl2fastq_sheet(
     # THEN assert a correctly formatted sample sheet was created
     sample_sheet_object: SampleSheet = get_sample_sheet(
         sample_sheet=sample_sheet,
-        flow_cell_mode="S4",
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=novaseq_bcl2fastq_sample_sheet_object.bcl_converter,
     )
     assert sample_sheet_object.samples
@@ -35,7 +36,7 @@ def test_convert_to_dragen_sheet(
     # THEN assert a correctly formatted sample sheet was created
     sample_sheet_object: SampleSheet = get_sample_sheet(
         sample_sheet=sample_sheet,
-        flow_cell_mode="S4",
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=novaseq_dragen_sample_sheet_object.bcl_converter,
     )
     assert sample_sheet_object.samples

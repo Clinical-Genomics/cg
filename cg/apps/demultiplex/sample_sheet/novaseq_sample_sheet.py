@@ -135,5 +135,5 @@ class SampleSheetCreator:
             flow_cell_mode=self.flow_cell_mode,
             bcl_converter=self.bcl_converter,
         )
-        LOG.info("Sample sheet looks fine")
+        LOG.info("Sample sheet validated successfully")
         return sample_sheet
