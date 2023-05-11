@@ -51,16 +51,16 @@ def create_sequencing_statistics(
     lane_number = get_lane_number(conversion_result)
     read_counts = get_number_of_reads(lane_demultiplexing_result)
 
-    lane_read_metrics = get_read_metrics(lane_demultiplexing_result)
-
     yield_in_megabases = calculate_yield_in_megabases(conversion_result)
     passed_filter_percent = calculate_passed_filter_percent(conversion_result)
     raw_clusters_per_lane_percent = calculate_raw_clusters_per_lane_percent(
         conversion_result, number_of_lanes
     )
 
+    lane_read_metrics = get_read_metrics(lane_demultiplexing_result)
     bases_with_q30_percent = calculate_bases_with_q30_percent(lane_read_metrics)
     lanes_mean_quality_score = calculate_lanes_mean_quality_score(lane_read_metrics)
+    perfect_index_reads_percent = calculate_perfect_index_reads_percent(lane_read_metrics)
 
     return SequencingStatistics(
         flow_cell_name=flow_cell_name,
@@ -72,6 +72,7 @@ def create_sequencing_statistics(
         raw_clusters_per_lane_percent=raw_clusters_per_lane_percent,
         bases_with_q30_percent=bases_with_q30_percent,
         lanes_mean_quality_score=lanes_mean_quality_score,
+        perfect_index_reads_percent=perfect_index_reads_percent,
     )
 
 
@@ -175,3 +176,30 @@ def calculate_lanes_mean_quality_score(lane_read_metrics):
     quality_score_sum_total = calculate_aggregate_quality_score_sum(lane_read_metrics)
     yield_total = calculate_aggregate_yield(lane_read_metrics)
     return quality_score_sum_total / yield_total
+
+
+def calculate_perfect_index_reads_percent(demux_result):
+    """
+    This function calculates the perfect index reads percentage for a sample from the provided Illumina demultiplexing result.
+
+    The perfect index reads percentage is calculated as the number of reads with 0 mismatches (perfect reads)
+    divided by the total number of reads (perfect reads + reads with 1 mismatch), multiplied by 100.
+
+    Args:
+    demux_result (dict): A dictionary representing the demultiplexing result for a sample. This should include
+                         'IndexMetrics' with 'MismatchCounts' that has keys '0' and '1' representing perfect
+                         reads and reads with 1 mismatch, respectively.
+
+    Assumes that there is only one index metric per sample in the demultiplexing result.
+    Returns:
+    float: The perfect index reads percentage for the sample.
+    """
+    index_metric = demux_result["IndexMetrics"][0]
+    mismatch_counts = index_metric["MismatchCounts"]
+    perfect_reads = int(mismatch_counts.get("0", 0))
+    mismatch_reads = int(mismatch_counts.get("1", 0))
+    total_reads = perfect_reads + mismatch_reads
+
+    perfect_index_reads_percent = (perfect_reads / total_reads) * 100
+
+    return perfect_index_reads_percent
