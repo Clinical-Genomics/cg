@@ -180,19 +180,12 @@ def calculate_lanes_mean_quality_score(lane_read_metrics):
 
 def calculate_perfect_index_reads_percent(demux_result):
     """
-    This function calculates the perfect index reads percentage for a sample from the provided Illumina demultiplexing result.
+    Calculate the perfect index reads percentage for a sample.
 
-    The perfect index reads percentage is calculated as the number of reads with 0 mismatches (perfect reads)
-    divided by the total number of reads (perfect reads + reads with 1 mismatch), multiplied by 100.
-
-    Args:
-    demux_result (dict): A dictionary representing the demultiplexing result for a sample. This should include
-                         'IndexMetrics' with 'MismatchCounts' that has keys '0' and '1' representing perfect
-                         reads and reads with 1 mismatch, respectively.
+    The perfect index reads percentage is defined as the number of reads with 0 mismatches
+    divided by the total number of reads, multiplied by 100.
 
     Assumes that there is only one index metric per sample in the demultiplexing result.
-    Returns:
-    float: The perfect index reads percentage for the sample.
     """
     index_metric = demux_result["IndexMetrics"][0]
     mismatch_counts = index_metric["MismatchCounts"]
