@@ -43,7 +43,11 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     """
     Global exception handler that will be called every time an unhandled exception occurs in the code.
     """
-    LOG.error(f"An unhandled error occurred. Error: {exc_type.__name__}: {exc_value}")
+    # Ignore KeyboardInterrupt so a console python program can exit with Ctrl + C
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    LOG.error(f"Uncaught exception: {exc_type.__name__}: {exc_value}")
     raise click.Abort()
 
 
@@ -338,9 +342,11 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
 @DRY_RUN
 @click.pass_context
 def store(context: click.Context, case_id: str, dry_run: bool) -> None:
-    """Generate Housekeeper report for CASE ID and store in Housekeeper."""
-    LOG.info(f"Storing analysis for {case_id}")
+    """Generate deliverables files for a case and store in Housekeeper if they
+    pass QC metrics checks."""
+    LOG.info("Generating metrics file and performing QC checks for %s", case_id)
     context.invoke(metrics_deliver, case_id=case_id, dry_run=dry_run)
+    LOG.info(f"Storing analysis for {case_id}")
     context.invoke(report_deliver, case_id=case_id, dry_run=dry_run)
     context.invoke(store_housekeeper, case_id=case_id, dry_run=dry_run)
 
@@ -354,7 +360,7 @@ def store_available(context: click.Context, dry_run: bool) -> None:
     analysis_api: AnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
 
     exit_code: int = EXIT_SUCCESS
-    for case_obj in analysis_api.get_cases_to_store():
+    for case_obj in analysis_api.get_cases_to_qc():
         LOG.info("Storing RNAFUSION deliverables for %s", case_obj.internal_id)
         try:
             context.invoke(store, case_id=case_obj.internal_id, dry_run=dry_run)
