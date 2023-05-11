@@ -17,7 +17,7 @@ def test_convert_to_bcl2fastq_sheet(
     # THEN assert a correctly formatted sample sheet was created
     sample_sheet_object: SampleSheet = get_sample_sheet(
         sample_sheet=sample_sheet,
-        sheet_type="S4",
+        flow_cell_mode="S4",
         bcl_converter=novaseq_bcl2fastq_sample_sheet_object.bcl_converter,
     )
     assert sample_sheet_object.samples
@@ -35,7 +35,7 @@ def test_convert_to_dragen_sheet(
     # THEN assert a correctly formatted sample sheet was created
     sample_sheet_object: SampleSheet = get_sample_sheet(
         sample_sheet=sample_sheet,
-        sheet_type="S4",
+        flow_cell_mode="S4",
         bcl_converter=novaseq_dragen_sample_sheet_object.bcl_converter,
     )
     assert sample_sheet_object.samples
