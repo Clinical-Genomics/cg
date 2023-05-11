@@ -12,7 +12,7 @@ from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.constants.demultiplexing import (
     DemultiplexingDirsAndFiles,
     FlowCellMode,
-    sequencer_flow_cell_modes,
+    SEQUENCER_FLOW_CELL_MODES,
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
@@ -100,7 +100,7 @@ class FlowCell:
         FlowCellMode.MISEQ, FlowCellMode.NOVASEQ, FlowCellMode.NEXTSEQ, FlowCellMode.HISEQX
     ]:
         """Return the flow cell mode."""
-        return self.run_parameters.flow_cell_mode or sequencer_flow_cell_modes[self.sequencer_type]
+        return self.run_parameters.flow_cell_mode or SEQUENCER_FLOW_CELL_MODES[self.sequencer_type]
 
     @property
     def rta_complete_path(self) -> Path:

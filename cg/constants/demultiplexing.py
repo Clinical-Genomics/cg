@@ -105,7 +105,7 @@ class FlowCellMode(StrEnum):
     MISEQ: str = "2500"
 
 
-sequencer_flow_cell_modes: Dict[str, str] = {
+SEQUENCER_FLOW_CELL_MODES: Dict[str, str] = {
     Sequencers.__members__[mode.name].value: mode.value for mode in FlowCellMode
 }
-FLOW_CELL_MODES: List[str] = list(sequencer_flow_cell_modes.values())
+FLOW_CELL_MODES: List[str] = list(SEQUENCER_FLOW_CELL_MODES.values())
