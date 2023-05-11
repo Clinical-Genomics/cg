@@ -9,6 +9,7 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
+from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 
@@ -20,7 +21,7 @@ def test_create_sample_sheet_no_run_parameters(
     caplog,
     mocker,
 ):
-    # GIVEN a folder with a non existing sample sheet
+    # GIVEN a folder with a non-existing sample sheet
     flowcell_object: FlowCell = FlowCell(flow_cell_working_directory_no_run_parameters)
     assert flowcell_object.run_parameters_path.exists() is False
     mocker.patch("cg.cli.demultiplex.sample_sheet.flowcell_samples", return_value=[{"sample": 1}])
@@ -33,9 +34,9 @@ def test_create_sample_sheet_no_run_parameters(
         create_sheet, [flowcell_object.full_name], obj=sample_sheet_context
     )
 
-    # THEN assert it exits with a non zero exit code
-    assert result.exit_code != 0
-    # THEN assert the correct information is communicated
+    # THEN the process exits with a non-zero exit code
+    assert result.exit_code != EXIT_SUCCESS
+    # THEN the correct information is communicated
     assert "Could not find run parameters file" in caplog.text
 
 
@@ -62,11 +63,11 @@ def test_create_bcl2fastq_sample_sheet(
         create_sheet, [str(flow_cell_working_directory)], obj=sample_sheet_context
     )
 
-    # THEN assert it exits with success
-    assert result.exit_code == 0
-    # THEN assert that the sample sheet was created
+    # THEN the process finishes successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN the sample sheet was created
     assert flowcell.sample_sheet_exists()
-    # THEN assert that the sample sheet is on the correct format
+    # THEN the sample sheet is on the correct format
     assert flowcell.validate_sample_sheet()
 
 
@@ -93,9 +94,9 @@ def test_create_dragen_sample_sheet(
         create_sheet, [str(flow_cell_working_directory), "-b", "dragen"], obj=sample_sheet_context
     )
 
-    # THEN assert it exits with success
-    assert result.exit_code == 0
-    # THEN assert that the sample sheet was created
+    # THEN the process finishes successfully
+    assert result.exit_code == EXIT_SUCCESS
+    # THEN the sample sheet was created
     assert flowcell.sample_sheet_exists()
-    # THEN assert that the sample sheet is on the correct format
+    # THEN the sample sheet is on the correct format
     assert flowcell.validate_sample_sheet()
