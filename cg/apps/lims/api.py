@@ -3,8 +3,7 @@ import datetime as dt
 import logging
 from typing import Generator, Optional, Union, Dict, List, Tuple
 
-# fixes https://github.com/Clinical-Genomics/servers/issues/30
-import requests_cache
+
 from dateutil.parser import parse as parse_date
 from genologics.entities import Process, Project, Sample, Artifact
 from genologics.lims import Lims
@@ -15,8 +14,6 @@ from cg.exc import LimsDataError
 
 from .order import OrderHandler
 from ...constants import Priority
-
-requests_cache.install_cache(backend="memory")
 
 SEX_MAP = {"F": "female", "M": "male", "Unknown": "unknown", "unknown": "unknown"}
 REV_SEX_MAP = {value: key for key, value in SEX_MAP.items()}
