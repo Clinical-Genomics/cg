@@ -9,6 +9,7 @@ class Sequencers(StrEnum):
     HISEQX: str = "hiseqx"
     HISEQGA: str = "hiseqga"
     NOVASEQ: str = "novaseq"
+    NOVASEQX: str = "novaseqx"
     OTHER: str = "other"
 
 
@@ -32,6 +33,7 @@ sequencer_types = {
     "A00621": Sequencers.NOVASEQ,
     "A00689": Sequencers.NOVASEQ,
     "A01901": Sequencers.NOVASEQ,
+    "LH00188": Sequencers.NOVASEQX,
 }
 
 FLOWCELL_Q30_THRESHOLD = {
