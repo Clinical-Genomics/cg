@@ -16,12 +16,12 @@ REAGENT_KIT_PARAMETER_TO_VERSION = {"1": "1.0", "3": "1.5"}
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
-    """Determines if a index is already present in the existing indexes"""
+    """Determines if an index is already present in the existing indexes."""
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
 def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]]:
-    """Group the indexes from samples by lane"""
+    """Group the indexes from samples by lane."""
     indexes_by_lane = {}
     for sample in samples:
         lane: int = sample.lane
@@ -51,7 +51,7 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
 
 
 def get_reagent_kit_version(reagent_kit_version: str) -> str:
-    """Derives the reagent kit version from the run parameters"""
+    """Derives the reagent kit version from the run parameters."""
     LOG.info(f"Converting reagent kit parameter {reagent_kit_version} to version")
     if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
@@ -81,19 +81,19 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
 
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
-    """Generates the reverse complement of a DNA sequence"""
+    """Generates the reverse complement of a DNA sequence."""
     LOG.debug(f"Reverse complement string {dna}")
 
     return "".join(DNA_COMPLEMENTS[base] for base in reversed(dna))
 
 
 def pad_index_one(index_string: str) -> str:
-    """Adds bases 'AT' to index one"""
+    """Adds bases 'AT' to index one."""
     return index_string + "AT"
 
 
 def pad_index_two(index_string: str, reverse_complement: bool) -> str:
-    """Adds bases to index two depending on if it should be reverse complement or not"""
+    """Adds bases to index two depending on if it should be reverse complement or not."""
     if reverse_complement:
         return "AC" + index_string
     return index_string + "AC"
@@ -131,5 +131,5 @@ def adapt_indexes(
 
 
 def is_dual_index(index: str) -> bool:
-    """Determines if an index in the raw sample sheet is dual index or not"""
+    """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index
