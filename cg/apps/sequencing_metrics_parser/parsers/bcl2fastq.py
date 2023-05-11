@@ -1,3 +1,4 @@
+from typing import List
 from cg.io.json import read_json
 
 
@@ -75,80 +76,80 @@ def get_flow_cell_name(stats_data) -> str:
     return stats_data["Flowcell"]
 
 
-def get_sample_id(demux_result):
+def get_sample_id(demux_result) -> str:
     """Extract the sample id from a demultiplexing result."""
     return demux_result["SampleId"]
 
 
-def get_number_of_reads_for_sample_in_lane(demux_result):
+def get_number_of_reads_for_sample_in_lane(demux_result) -> int:
     """Extract the number of reads for a sample in a lane."""
     return demux_result["NumberReads"]
 
 
-def get_lane_number(conversion_result):
+def get_lane_number(conversion_result) -> int:
     """Extract the lane number from a conversion result."""
     return conversion_result["LaneNumber"]
 
 
-def get_yield_q30(lane_read_metrics):
+def get_yield_q30(lane_read_metrics) -> int:
     """Extract the yield Q30 from the read metrics."""
     return lane_read_metrics["YieldQ30"]
 
 
-def get_lane_yield_in_bases(conversion_result):
+def get_lane_yield_in_bases(conversion_result) -> int:
     """Extract the yield from the read metrics."""
     return conversion_result["Yield"]
 
 
-def get_total_clusters_passing_filter(conversion_result):
+def get_total_clusters_passing_filter(conversion_result) -> int:
     """Extract the total clusters passing the filter from the conversion result."""
     return conversion_result["TotalClustersPF"]
 
 
-def get_total_raw_clusters(conversion_result):
+def get_total_raw_clusters(conversion_result) -> int:
     """Extract the total number of clusters initially generated, regardless of quality."""
     return conversion_result["TotalClustersRaw"]
 
 
-def get_quality_score(read_metric):
+def get_quality_score(read_metric) -> int:
     """Extract the sum of quality scores of all the bases from the read metrics."""
     return read_metric["QualityScoreSum"]
 
 
-def get_lane_yield_q30_values(demux_result):
+def get_lane_yield_q30_values(demux_result) -> List[int]:
     """Extract the yield Q30 values for the lane from the read metrics."""
     lane_read_metrics = get_read_metrics(demux_result)
     return [get_yield_q30(metric) for metric in lane_read_metrics]
 
 
-def get_lane_yield_values(demux_result):
+def get_lane_yield_values(demux_result) -> List[int]:
     lane_read_metrics = get_read_metrics(demux_result)
     return [get_lane_yield_in_bases(metric) for metric in lane_read_metrics]
 
 
-def get_lane_read_quality_score_values(demux_result):
+def get_lane_read_quality_score_values(demux_result) -> List[int]:
     """Extract the quality score values for the lane from the read metrics."""
     lane_read_metrics = get_read_metrics(demux_result)
     return [get_quality_score(read_metric) for read_metric in lane_read_metrics]
 
 
-def get_perfect_reads_for_lane(demux_result):
+def get_perfect_reads_for_lane(demux_result) -> int:
     """Extract the number of perfect reads for the lane from the read metrics."""
     lane_index_metrics = get_index_metrics(demux_result)
     counts = lane_index_metrics["MismatchCounts"]
     return int(counts.get("0", 0))
 
 
-def calculate_aggregate_lane_read_quality_score(lane_read_quality_score_values):
+def calculate_aggregate_lane_read_quality_score(lane_read_quality_score_values) -> List[int]:
     return sum(lane_read_quality_score_values)
 
 
-def calculate_total_yield_q30(lane_yield_q30_values):
+def calculate_total_yield_q30(lane_yield_q30_values: List[int]) -> int:
     """Calculate the aggregated Q30 yield for the lane from its yield Q30 values."""
     return sum(lane_yield_q30_values)
 
 
-def calculate_total_lane_yield(lane_yield_values):
+def calculate_total_lane_yield(lane_yield_values: List[int]) -> int:
     """Calculate the aggregated yield for the lane from its yield values."""
     return sum(lane_yield_values)
 
