@@ -129,6 +129,10 @@ RNAFUSION_VALIDATION_CASES = [
     "nearbyjoey",
 ]
 
+TAXPROFILER_VALIDATION_CASES = [
+    "richurchin",
+]
+
 OTHER_VALIDATION_CASES = [
     "bigdrum",
     "busycolt",
