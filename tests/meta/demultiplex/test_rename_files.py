@@ -9,7 +9,7 @@ from cg.models.demultiplex.flow_cell import FlowCell
 def test_rename_demux_result(
     demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
 ):
     # GIVEN that this is the location of the demultiplex api
     demultiplex_context.demultiplex_api_.out_dir = demultiplexed_flow_cell_working_directory
@@ -18,7 +18,7 @@ def test_rename_demux_result(
     )
     demux_dir: Path = demultiplexed_flow_cell_working_directory
     demux_results: DemuxResults = DemuxResults(
-        demux_dir=demux_dir, flow_cell=flow_cell, bcl_converter="bcl2fastq"
+        demux_dir=demux_dir, flow_cell=bcl2fastq_flow_cell, bcl_converter="bcl2fastq"
     )
     # GIVEN that there are no projects with the correct file name
     assert not list(demux_results.projects)
