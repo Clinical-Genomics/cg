@@ -4,27 +4,40 @@ import logging
 from pathlib import Path
 from typing import Dict
 from cg.store.models import SequencingStatistics
-from cg.apps.sequencing_metrics_parser.utils.bclconvert import BclConvertSampleMetrics
+from cg.apps.sequencing_metrics_parser.utils.bclconvert import BclConvertMetrics
 
 LOG = logging.getLogger(__name__)
 
 
-def parse_bclconvert_demux_stats_file(demux_stats_path: Path) -> Dict[int, dict]:
-    """Parse the BCLconvert demultiplexing stats file."""
-    LOG.info(f"Parsing BCLConvert demultiplexing stats file {demux_stats_path}")
-    parsed_stats = read_bclconvert_metric_file_to_dict()
-
-
-def read_bclconvert_metric_file_to_dict(bcl_convert_metrics_file_path: Path) -> Dict[int, dict]:
-    """Read the BCLconvert demultiplexing stats file."""
+def parse_bcl_convert_metrics_file(
+    bcl_convert_metrics_file_path: Path, sample_sheet_path: Path, quality_metrics_path: Path
+) -> BclConvertMetrics:
+    """Parse the BCLconvert demultiplexing stats file into the BCLconvertMetrics model."""
     LOG.info(f"Parsing BCLConvert demultiplexing stats file {bcl_convert_metrics_file_path}")
-    parsed_stats = {}
-    with open(bcl_convert_metrics_file_path, mode="r") as stats_file:
+    # Read demux metrics
+    read_metrics = read_metric_file_to_dict()
+    # Read Quality Metrics
+    quality_metrics = read_metrics_file_to_dict()
+    # Read Sample sheet
+    sample_sheet = read_metrics_file_to_dict()
+
+    for lane in read_metrics:
+        for sample_id in read_metrics[lane]:
+            read_metrics[lane][sample_id]["Lane"] = lane
+            read_metrics[lane][sample_id]["SampleID"] = sample_id
+
+
+def read_metric_file_to_dict(
+    metric_file_path: Path,
+) -> Dict[int, dict]:
+    """Read the BCLconvert demultiplexing stats file."""
+    LOG.info(f"Parsing BCLConvert demultiplexing stats file {metric_file_path}")
+    read_metrics = {}
+    with open(metric_file_path, mode="r") as stats_file:
         stats_reader = csv.DictReader(stats_file)
         for row in stats_reader:
             lane = int(row["Lane"])
             sample_id = row["SampleID"]
-            parsed_stats[lane] = parsed_stats.get(lane, {})
-            parsed_stats[lane][sample_id] = row
-            parsed_stats
-    return parsed_stats
+            read_metrics[lane] = read_metrics.get(lane, {})
+            read_metrics[lane][sample_id] = row
+        return read_metrics

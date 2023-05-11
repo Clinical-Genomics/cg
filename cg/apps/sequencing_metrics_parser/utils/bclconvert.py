@@ -4,20 +4,34 @@ from pydantic import BaseModel
 from typing import List
 
 
-class BclConvertSampleMetrics(BaseModel):
+class BclConvertMetrics(BaseModel):
     """Gather metric from the BCL convert for a sample"""
 
-    sample_internal_id: List[str]
-    flow_cell_name: List[str]
-    lane: int
-    reads: int = 0
-    perfect_reads: int = 0
-    one_mismatch_reads: int = 0
-    pass_filter_q30: int = 0
-    mean_quality_score: float = 0.00
-    r1_sample_bases: int = 0
-    r2_sample_bases: int = 0
-    read_length: int = 0
+    def __init__(
+        self,
+        sample_internal_id: str,
+        flow_cell_name: str,
+        lane: int,
+        reads: int,
+        perfect_reads: int,
+        one_mismatch_reads: int,
+        pass_filter_q30: int,
+        mean_quality_score: float,
+        r1_sample_bases: int,
+        r2_sample_bases: int,
+        read_length: int,
+    ):
+        self.sample_internal_id: str = sample_internal_id
+        self.flow_cell_name: str = flow_cell_name
+        self.lane: int = lane
+        self.reads: int = reads
+        self.perfect_reads: int = perfect_reads
+        self.one_mismatch_reads: int = one_mismatch_reads
+        self.pass_filter_q30: int = pass_filter_q30
+        self.mean_quality_score: float = mean_quality_score
+        self.r1_sample_bases: int = r1_sample_bases
+        self.r2_sample_bases: int = r2_sample_bases
+        self.read_length: int = read_length
 
     def _calculate_perfect_index_reads_pct(self) -> float:
         """calculates the percentage of perfect index reads"""
