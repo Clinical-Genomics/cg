@@ -148,15 +148,12 @@ RNAFUSION_ANALYSIS_CASE_TAGS = [
     {"fusion", "star-fusion"},
     {"fusion", "fusioncatcher"},
     {"cram"},
-    {"fusioncatcher-summary"},
     {"fusioninspector"},
     {"fusionreport", "research"},
     {"fusioninspector-html", "research"},
     {"arriba-visualisation", "research"},
     {"multiqc-html", "rna"},
     {"software-versions"},
-    {"qc-metrics"},
-    {"multiqc-json"},
 ]
 
 RNAFUSION_ANALYSIS_SAMPLE_TAGS = []
