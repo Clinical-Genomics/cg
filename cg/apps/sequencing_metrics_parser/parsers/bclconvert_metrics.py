@@ -2,8 +2,9 @@
 import csv
 import logging
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 from cg.store.models import SequencingStatistics
+from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.apps.sequencing_metrics_parser.utils.bclconvert import BclConvertMetrics
 
 LOG = logging.getLogger(__name__)
@@ -11,26 +12,46 @@ LOG = logging.getLogger(__name__)
 
 def parse_bcl_convert_metrics_file(
     bcl_convert_metrics_file_path: Path, sample_sheet_path: Path, quality_metrics_path: Path
-) -> BclConvertMetrics:
+) -> List[BclConvertMetrics]:
     """Parse the BCLconvert demultiplexing stats file into the BCLconvertMetrics model."""
     LOG.info(f"Parsing BCLConvert demultiplexing stats file {bcl_convert_metrics_file_path}")
-    # Read demux metrics
-    read_metrics = read_metric_file_to_dict()
-    # Read Quality Metrics
-    quality_metrics = read_metrics_file_to_dict()
-    # Read Sample sheet
-    sample_sheet = read_metrics_file_to_dict()
-
-    for lane in read_metrics:
-        for sample_id in read_metrics[lane]:
-            read_metrics[lane][sample_id]["Lane"] = lane
-            read_metrics[lane][sample_id]["SampleID"] = sample_id
+    demux_metrics: Dict[int, dict] = read_metric_file_to_dict(
+        metric_file_path=bcl_convert_metrics_file_path
+    )
+    quality_metrics: Dict[int, dict] = read_metric_file_to_dict(
+        metric_file_path=quality_metrics_path
+    )
+    sample_sheet: Dict[int, dict] = read_bcl_convert_sample_sheet_file_to_dict(
+        bcl_convert_sample_sheet_path=sample_sheet_path
+    )
+    bcl_convert_model_list: List[BclConvertMetrics] = []
+    for lane in sample_sheet:
+        lane = int(lane)
+        for sample_id in sample_sheet[lane]:
+            bcl_convert_model_list.append(
+                BclConvertMetrics(
+                    sample_internal_id=demux_metrics[lane][sample_id]["SampleID"],
+                    flow_cell_name=sample_sheet[lane][sample_id].get("FCID"),
+                    lane=demux_metrics[lane][sample_id]["Lane"],
+                    reads=demux_metrics[lane][sample_id]["# Reads"],
+                    perfect_index_reads=demux_metrics[lane][sample_id]["# Perfect Index Reads"],
+                    perfect_index_reads_percent=demux_metrics[lane][sample_id][
+                        "% Perfect Index Reads"
+                    ],
+                    one_mismatch_reads=demux_metrics[lane][sample_id]["# One Mismatch Index Reads"],
+                    mean_quality_score=quality_metrics[lane][sample_id]["Mean Quality Score (PF)"],
+                    yield_bases=quality_metrics[lane][sample_id]["Yield"],
+                    yield_q30=quality_metrics[lane][sample_id]["YieldQ30"],
+                    q30_bases_percent=quality_metrics[lane][sample_id]["% Q30"],
+                )
+            )
+    return bcl_convert_model_list
 
 
 def read_metric_file_to_dict(
     metric_file_path: Path,
 ) -> Dict[int, dict]:
-    """Read the BCLconvert demultiplexing stats file."""
+    """Reads a BCL convert demux or quality metrics file into a dictionary."""
     LOG.info(f"Parsing BCLConvert demultiplexing stats file {metric_file_path}")
     read_metrics = {}
     with open(metric_file_path, mode="r") as stats_file:
@@ -41,3 +62,42 @@ def read_metric_file_to_dict(
             read_metrics[lane] = read_metrics.get(lane, {})
             read_metrics[lane][sample_id] = row
         return read_metrics
+
+
+def get_nr_of_header_lines_in_sample_sheet(
+    bcl_convert_sample_sheet_path: Path,
+) -> int:
+    """
+    Return the number of header lines in a sample sheet.
+    Any lines before and including the line starting with [Data] is considered the header.
+    """
+    with bcl_convert_sample_sheet_path.open("r") as read_obj:
+        csv_reader = csv.reader(read_obj)
+        header_line_count: int = 1
+        for line in csv_reader:
+            if SAMPLE_SHEET_DATA_HEADER in line:
+                break
+            header_line_count += 1
+    return header_line_count
+
+
+def read_bcl_convert_sample_sheet_file_to_dict(
+    bcl_convert_sample_sheet_path: Path,
+) -> Dict[int, dict]:
+    """
+    Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER.
+    """
+    header_line_count: int = get_nr_of_header_lines_in_sample_sheet(
+        bcl_convert_sample_sheet_path=bcl_convert_sample_sheet_path
+    )
+    sample_sheet_dict = {}
+    with open(bcl_convert_sample_sheet_path, "r") as sample_sheet_file:
+        for _ in range(header_line_count):
+            next(sample_sheet_file)
+        reader = csv.DictReader(sample_sheet_file)
+        for row in reader:
+            lane = int(row["Lane"])
+            sample_id = row["Sample_ID"]
+            sample_sheet_dict[lane] = sample_sheet_dict.get(lane, {})
+            sample_sheet_dict[lane][sample_id] = row
+        return sample_sheet_dict

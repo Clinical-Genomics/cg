@@ -4,6 +4,12 @@ from pydantic import BaseModel
 from typing import List
 
 
+class BaseModel:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
 class BclConvertMetrics(BaseModel):
     """Gather metric from the BCL convert for a sample"""
 
@@ -13,45 +19,25 @@ class BclConvertMetrics(BaseModel):
         flow_cell_name: str,
         lane: int,
         reads: int,
-        perfect_reads: int,
+        perfect_index_reads: int,
+        perfect_index_reads_percent,
         one_mismatch_reads: int,
-        pass_filter_q30: int,
         mean_quality_score: float,
-        r1_sample_bases: int,
-        r2_sample_bases: int,
-        read_length: int,
+        yield_bases: float,
+        yield_q30: float,
+        q30_bases_percent: float,
     ):
-        self.sample_internal_id: str = sample_internal_id
-        self.flow_cell_name: str = flow_cell_name
-        self.lane: int = lane
-        self.reads: int = reads
-        self.perfect_reads: int = perfect_reads
-        self.one_mismatch_reads: int = one_mismatch_reads
-        self.pass_filter_q30: int = pass_filter_q30
-        self.mean_quality_score: float = mean_quality_score
-        self.r1_sample_bases: int = r1_sample_bases
-        self.r2_sample_bases: int = r2_sample_bases
-        self.read_length: int = read_length
-
-    def _calculate_perfect_index_reads_pct(self) -> float:
-        """calculates the percentage of perfect index reads"""
-        return round(self.perfect_reads / self.reads * 100, 2) if self.reads else 0
-
-    def _calculate_q30_bases_pct(self) -> float:
-        """calculates the percentage of bases with a sequencing quality score of 30 or over"""
-        return (
-            round(
-                self.pass_filter_q30 / (self.r1_sample_bases + self.r2_sample_bases) * 100,
-                2,
-            )
-            if self.r1_sample_bases + self.r2_sample_bases
-            else 0
-        )
-
-    def _calculate_yield(self) -> float:
-        """calculates the amount of data produced in MB"""
-        total_reads = self._calculate_read_counts()
-        return round(total_reads * self.read_length / 1000000, 0)
+        self.sample_internal_id = sample_internal_id
+        self.flow_cell_name = flow_cell_name
+        self.lane = lane
+        self.reads = reads
+        self.perfect_index_reads = perfect_index_reads
+        self.perfect_index_reads_percent = perfect_index_reads_percent
+        self.one_mismatch_reads = one_mismatch_reads
+        self.mean_quality_score = mean_quality_score
+        self.yield_bases = yield_bases
+        self.yield_q30 = yield_q30
+        self.q30_bases_percent = q30_bases_percent
 
     def _calculate_read_counts(self) -> int:
         """calculates the number of reads from the number of clusters"""
