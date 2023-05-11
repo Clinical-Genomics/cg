@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import click
-from typing import List
+from typing import List, Dict
 from cg.constants.sequencing import Sequencers
 from cg.utils.enums import StrEnum
 
@@ -105,4 +105,7 @@ class FlowCellMode(StrEnum):
     MISEQ: str = "2500"
 
 
-FLOW_CELL_MODES: List[str] = [mode.value for mode in FlowCellMode]
+sequencer_flow_cell_modes: Dict[str, str] = {
+    Sequencers.__members__[mode.name].value: mode.value for mode in FlowCellMode
+}
+FLOW_CELL_MODES: List[str] = list(sequencer_flow_cell_modes.values())

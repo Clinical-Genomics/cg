@@ -35,6 +35,7 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.flow_cell_mode: str = flow_cell.mode
         self.force = force
 
     @property
@@ -131,7 +132,7 @@ class SampleSheetCreator:
         LOG.info("Validating sample sheet")
         get_sample_sheet(
             sample_sheet=sample_sheet,
-            flow_cell_mode="S2",
+            flow_cell_mode=self.flow_cell_mode,
             bcl_converter=self.bcl_converter,
         )
         LOG.info("Sample sheet looks fine")

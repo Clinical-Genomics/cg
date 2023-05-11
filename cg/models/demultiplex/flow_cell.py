@@ -9,7 +9,11 @@ from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import (
+    DemultiplexingDirsAndFiles,
+    sequencer_flow_cell_modes,
+    FlowCellMode,
+)
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -90,6 +94,15 @@ class FlowCell:
         return sequencer_types[self.machine_name]
 
     @property
+    def mode(
+        self,
+    ) -> Literal[
+        FlowCellMode.MISEQ, FlowCellMode.NOVASEQ, FlowCellMode.NEXTSEQ, FlowCellMode.HISEQX
+    ]:
+        """Return the flow cell mode."""
+        return self.run_parameters.flow_cell_mode or sequencer_flow_cell_modes[self.sequencer_type]
+
+    @property
     def rta_complete_path(self) -> Path:
         """Return RTAComplete path."""
         return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
@@ -148,7 +161,9 @@ class FlowCell:
         """Validate if sample sheet is on correct format."""
         try:
             get_sample_sheet_from_file(
-                infile=self.sample_sheet_path, flow_cell_mode="S4", bcl_converter=self.bcl_converter
+                infile=self.sample_sheet_path,
+                flow_cell_mode=self.mode,
+                bcl_converter=self.bcl_converter,
             )
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
@@ -159,7 +174,9 @@ class FlowCell:
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path, flow_cell_mode="S4", bcl_converter=self.bcl_converter
+            infile=self.sample_sheet_path,
+            flow_cell_mode=self.mode,
+            bcl_converter=self.bcl_converter,
         )
 
     def is_sequencing_done(self) -> bool:
