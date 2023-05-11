@@ -1,5 +1,6 @@
 """Constants specific for compression."""
 import datetime
+from typing import List
 
 # Constants for crunchy
 FASTQ_FIRST_READ_SUFFIX: str = "_R1_001.fastq.gz"
@@ -129,6 +130,10 @@ RNAFUSION_VALIDATION_CASES = [
     "nearbyjoey",
 ]
 
+TAXPROFILER_VALIDATION_CASES: List[str] = [
+    "richurchin",
+]
+
 OTHER_VALIDATION_CASES = [
     "bigdrum",
     "busycolt",
@@ -157,4 +162,5 @@ CASES_TO_IGNORE = (
     + FLUFFY_VALIDATION_CASES
     + MIP_VALIDATION_CASES
     + RNAFUSION_VALIDATION_CASES
+    + TAXPROFILER_VALIDATION_CASES
 )

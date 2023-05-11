@@ -3,21 +3,23 @@ from cg.store import Store
 from cg.store.models import Flowcell, Family, FamilySample, Sample
 
 
-def test_delete_flow_cell(flow_cell_id: str, populated_flow_cell_store: Store):
+def test_delete_flow_cell(bcl2fastq_flow_cell_id: str, populated_flow_cell_store: Store):
     """Test deleting a flow cell in Store."""
 
     # GIVEN a database containing a flow cell
     flow_cell: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
-        flow_cell_name=flow_cell_id
+        flow_cell_name=bcl2fastq_flow_cell_id
     )
 
     assert flow_cell
 
     # WHEN removing flow cell
-    populated_flow_cell_store.delete_flow_cell(flow_cell_id=flow_cell_id)
+    populated_flow_cell_store.delete_flow_cell(flow_cell_id=bcl2fastq_flow_cell_id)
 
     # THEN no entry should be found for the flow cell
-    results: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(flow_cell_name=flow_cell_id)
+    results: Flowcell = populated_flow_cell_store.get_flow_cell_by_name(
+        flow_cell_name=bcl2fastq_flow_cell_id
+    )
 
     assert not results
 

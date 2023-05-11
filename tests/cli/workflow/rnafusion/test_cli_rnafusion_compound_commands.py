@@ -6,14 +6,10 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.cli.workflow.rnafusion.base import (
-    rnafusion,
-    start,
-    start_available,
-    store,
-    store_available,
-)
+from cg.apps.tb import TrailblazerAPI
+from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
 from cg.constants import EXIT_SUCCESS
+from cg.constants.tb import AnalysisStatus
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -112,6 +108,7 @@ def test_store_fail(
     mock_analysis_finish,
     caplog: LogCaptureFixture,
     hermes_deliverables: dict,
+    mocker,
 ):
     """Test store command fails when a case did not finish."""
     caplog.set_level(logging.INFO)
