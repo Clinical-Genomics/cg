@@ -9,6 +9,7 @@ from cg.constants.demultiplexing import FlowCellMode
 def test_convert_to_bcl2fastq_sheet(
     novaseq_bcl2fastq_sample_sheet_object: SampleSheetCreator, project_dir: Path
 ):
+    """Test that a created bcl2fastq sample sheet has samples."""
     # GIVEN a sample sheet object populated with samples
     assert novaseq_bcl2fastq_sample_sheet_object.lims_samples
 
@@ -27,6 +28,7 @@ def test_convert_to_bcl2fastq_sheet(
 def test_convert_to_dragen_sheet(
     novaseq_dragen_sample_sheet_object: SampleSheetCreator, project_dir: Path
 ):
+    """Test that a created bcl2fastq sample sheet has samples."""
     # GIVEN a sample sheet object populated with samples
     assert novaseq_dragen_sample_sheet_object.lims_samples
 
