@@ -16,14 +16,19 @@ from cg.constants.rnafusion import (
     RNAFUSION_STRANDEDNESS_HEADER,
     RnafusionDefaults,
 )
-from cg.io.controller import WriteFile
+from cg.exc import MissingMetrics
+from cg.io.controller import ReadFile, WriteFile
 from cg.io.json import read_json
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.fastq import RnafusionFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.tower_common import TowerAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
+from cg.models.deliverables.metric_deliverables import (
+    MetricsBase,
+    MetricsDeliverablesCondition,
+    MultiqcDataJson,
+)
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
@@ -360,21 +365,39 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             for metric_name, metric_value in metrics_values.items()
         ]
 
-    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False):
+    @staticmethod
+    def ensure_mandatory_metrics_present(metrics: List[MetricsBase]) -> None:
+        """Check that all mandatory metrics are present. Raise error if missing."""
+        given_metrics: set = {metric.name for metric in metrics}
+        mandatory_metrics: set = set(RNAFUSION_METRIC_CONDITIONS.keys())
+        missing_metrics: set = mandatory_metrics.difference(given_metrics)
+        if missing_metrics:
+            LOG.error(f"Some mandatory metrics are missing: {', '.join(missing_metrics)}")
+            raise MissingMetrics()
+
+    def write_metrics_deliverables(self, case_id: str, dry_run: bool = False) -> None:
         """Write <case>_metrics_deliverables.yaml file."""
         metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        metrics = self.get_multiqc_json_metrics(case_id=case_id)
+        self.ensure_mandatory_metrics_present(metrics=metrics)
+
         if dry_run:
             LOG.info(
                 f"Dry run: metrics deliverables file would be written to {metrics_deliverables_path.as_posix()}"
             )
             return
+
         LOG.info(f"Writing metrics deliverables file to {metrics_deliverables_path.as_posix()}")
         WriteFile.write_file_from_content(
-            content={
-                "metrics": [
-                    metric.dict() for metric in self.get_multiqc_json_metrics(case_id=case_id)
-                ]
-            },
+            content={"metrics": [metric.dict() for metric in metrics]},
             file_format=FileFormat.YAML,
             file_path=metrics_deliverables_path,
         )
+
+    def validate_qc_metrics(self, case_id: str) -> None:
+        """Validate the information from a qc metrics deliverable file."""
+        metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
+        qcmetrics_raw: dict = ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=metrics_deliverables_path
+        )
+        MetricsDeliverablesCondition(**qcmetrics_raw)

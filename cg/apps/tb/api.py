@@ -27,8 +27,14 @@ class TrailblazerAPI:
         AnalysisStatus.PENDING,
         AnalysisStatus.RUNNING,
         AnalysisStatus.ERROR,
+        AnalysisStatus.QC,
     ]
-    __ONGOING_STATUSES = [AnalysisStatus.PENDING, AnalysisStatus.RUNNING, AnalysisStatus.ERROR]
+    __ONGOING_STATUSES = [
+        AnalysisStatus.PENDING,
+        AnalysisStatus.RUNNING,
+        AnalysisStatus.ERROR,
+        AnalysisStatus.QC,
+    ]
 
     def __init__(self, config: dict):
         self.service_account = config["trailblazer"]["service_account"]
@@ -122,6 +128,9 @@ class TrailblazerAPI:
     def is_latest_analysis_completed(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.COMPLETED
 
+    def is_latest_analysis_qc(self, case_id: str) -> bool:
+        return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.QC
+
     def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
         """Raises TrailblazerAPIHTTPError"""
         request_body = {"analysis_id": analysis_id, "force": force}
@@ -180,11 +189,11 @@ class TrailblazerAPI:
         )
 
     def set_analysis_status(self, case_id: str, status: str) -> datetime:
-        """Set an analysis to failed."""
+        """Set an analysis to a given status."""
         request_body = {"case_id": case_id, "status": status}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Setting analysis status to failed for case {case_id}")
+        LOG.info(f"Setting analysis status to {status} for case {case_id}")
         self.query_trailblazer(
             command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
         )
