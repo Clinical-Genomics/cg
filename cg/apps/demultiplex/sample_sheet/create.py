@@ -27,7 +27,7 @@ def create_sample_sheet(
     flow_cell_sequencer: str = flow_cell.sequencer_type
 
     if flow_cell_sequencer not in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
-        message = f"Can only demultiplex Novaseq with Cg. Found type {flow_cell_sequencer}"
+        message = f"Only demultiplexing of Novaseq sequence data is currently supported. Found sequencer type: {flow_cell_sequencer}"
         LOG.warning(message)
         raise FlowCellError(message=message)
 
