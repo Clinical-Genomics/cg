@@ -1,3 +1,5 @@
+from unittest import mock
+from pytest import MonkeyPatch
 from cg.apps.sequencing_metrics_parser import (
     get_yield_values,
     get_read_metrics,
@@ -14,11 +16,13 @@ from cg.apps.sequencing_metrics_parser import (
     get_lane_yield_q30_values,
     get_lane_read_quality_score_values,
     get_perfect_reads_for_sample_in_lane,
+    parse_bcl2fastq_sequencing_metrics,
+    SequencingMetricsForLaneAndSample,
 )
 
 
-def test_get_flow_cell_name(bcl2fastq_sequencing_metrics_data, flow_cell_name):
-    assert get_flow_cell_name(bcl2fastq_sequencing_metrics_data) == flow_cell_name
+def test_get_flow_cell_name(sequencing_metrics_json, flow_cell_name):
+    assert get_flow_cell_name(sequencing_metrics_json) == flow_cell_name
 
 
 def test_get_read_metrics(demux_result, read_metrics):
@@ -75,3 +79,12 @@ def test_get_quality_score(read_metrics, lane_read_quality_score_values):
 
 def test_get_perfect_reads_for_sample_in_lane(demux_result, perfect_reads):
     assert get_perfect_reads_for_sample_in_lane(demux_result) == perfect_reads
+
+
+@mock.patch("cg.apps.sequencing_metrics_parser.parsers.bcl2fastq.read_json")
+def test_parsing_json(mock_read_json, sequencing_metrics_json):
+    mock_read_json.return_value = sequencing_metrics_json
+    metrics = parse_bcl2fastq_sequencing_metrics("some_path")
+
+    assert metrics
+    assert isinstance(metrics[0], SequencingMetricsForLaneAndSample)

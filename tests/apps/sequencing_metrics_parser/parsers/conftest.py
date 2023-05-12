@@ -7,11 +7,6 @@ def flow_cell_name():
 
 
 @pytest.fixture
-def bcl2fastq_sequencing_metrics_data(flow_cell_name):
-    return {"Flowcell": flow_cell_name}
-
-
-@pytest.fixture
 def perfect_reads():
     return 33476720
 
@@ -111,4 +106,13 @@ def conversion_result(
         "Yield": lane_yield_in_bases,
         "TotalClustersPF": total_clusters_passing_filter,
         "TotalClustersRaw": total_raw_clusters,
+    }
+
+
+@pytest.fixture
+def sequencing_metrics_json(conversion_result, flow_cell_name):
+    return {
+        "Flowcell": flow_cell_name,
+        "ReadInfosForLanes": [{"LaneNumber": 1}],
+        "ConversionResults": [conversion_result],
     }
