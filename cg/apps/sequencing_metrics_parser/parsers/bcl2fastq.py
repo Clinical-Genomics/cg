@@ -44,7 +44,7 @@ def parse_bcl2fastq_sequencing_metrics(
 
     for conversion_result in data["ConversionResults"]:
         for demux_result in conversion_result["DemuxResults"]:
-            metrics = parse_sequencing_metrics(
+            metrics = parse_sequencing_metrics_for_sample_in_lane(
                 conversion_result=conversion_result,
                 demux_result=demux_result,
                 number_of_lanes=number_of_lanes,
@@ -55,7 +55,7 @@ def parse_bcl2fastq_sequencing_metrics(
     return parsed_metrics
 
 
-def parse_sequencing_metrics(
+def parse_sequencing_metrics_for_sample_in_lane(
     conversion_result: Dict, demux_result: Dict, number_of_lanes: int, flow_cell_name: str
 ) -> SequencingMetricsForLaneAndSample:
     """Parse and validate data for a single lane and sample."""
@@ -166,6 +166,6 @@ def get_lane_read_quality_score_values(demux_result: Dict) -> List[int]:
 
 def get_perfect_reads_for_sample_in_lane(demux_result: Dict) -> int:
     """Extract the number of perfect reads for the lane from the read metrics."""
-    lane_index_metrics = get_index_metrics(demux_result)
-    counts = lane_index_metrics["MismatchCounts"]
+    index_metrics = get_index_metrics(demux_result)
+    counts = index_metrics["MismatchCounts"]
     return int(counts.get("0", 0))

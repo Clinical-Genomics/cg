@@ -7,4 +7,11 @@ from .parsers.bcl2fastq import (
     get_number_of_reads_for_sample_in_lane,
     get_lane_number,
     get_yield_q30,
+    get_lane_yield_in_bases,
+    get_total_clusters_passing_filter,
+    get_total_raw_clusters,
+    get_quality_score,
+    get_lane_yield_q30_values,
+    get_lane_read_quality_score_values,
+    get_perfect_reads_for_sample_in_lane,
 )
