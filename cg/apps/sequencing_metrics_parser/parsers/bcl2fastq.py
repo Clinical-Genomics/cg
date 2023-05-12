@@ -1,6 +1,6 @@
 from cg.io.json import read_json
 from pydantic import BaseModel, Field, validator
-from typing import List
+from typing import Dict, List
 
 
 class SequencingMetricsForLaneAndSample(BaseModel):
@@ -84,84 +84,84 @@ def parse_sequencing_metrics(
     )
 
 
-def get_read_metrics(demux_result):
+def get_read_metrics(demux_result: Dict) -> List[Dict]:
     """Extract the read metrics for a lane from a demultiplexing result."""
     return demux_result["ReadMetrics"]
 
 
-def get_index_metrics(demux_result):
+def get_index_metrics(demux_result: Dict) -> Dict:
     """Extract the index metrics for a lane from a demultiplexing result."""
     return demux_result["IndexMetrics"][0]
 
 
-def get_number_of_lanes_for_flow_cell(stats_data) -> int:
+def get_number_of_lanes_for_flow_cell(stats_data: Dict) -> int:
     """Extract the number of lanes from the stats data."""
     return len(stats_data["ReadInfosForLanes"])
 
 
-def get_flow_cell_name(stats_data) -> str:
+def get_flow_cell_name(stats_data: Dict) -> str:
     """Extract the flow cell name from the stats data."""
     return stats_data["Flowcell"]
 
 
-def get_sample_id(demux_result) -> str:
+def get_sample_id(demux_result: Dict) -> str:
     """Extract the sample id from a demultiplexing result."""
     return demux_result["SampleId"]
 
 
-def get_number_of_reads_for_sample_in_lane(demux_result) -> int:
+def get_number_of_reads_for_sample_in_lane(demux_result: Dict) -> int:
     """Extract the number of reads for a sample in a lane."""
     return demux_result["NumberReads"]
 
 
-def get_lane_number(conversion_result) -> int:
-    """Extract the lane number from a conversion result."""
+def get_lane_number(conversion_result: Dict) -> int:
+    """Extract the lane number from the conversion result."""
     return conversion_result["LaneNumber"]
 
 
-def get_yield_q30(lane_read_metrics) -> int:
+def get_yield_q30(lane_read_metrics: Dict) -> int:
     """Extract the yield Q30 from the read metrics."""
     return lane_read_metrics["YieldQ30"]
 
 
-def get_lane_yield_in_bases(conversion_result) -> int:
+def get_lane_yield_in_bases(conversion_result: Dict) -> int:
     """Extract the yield from the read metrics."""
     return conversion_result["Yield"]
 
 
-def get_total_clusters_passing_filter(conversion_result) -> int:
+def get_total_clusters_passing_filter(conversion_result: Dict) -> int:
     """Extract the total clusters passing the filter from the conversion result."""
     return conversion_result["TotalClustersPF"]
 
 
-def get_total_raw_clusters(conversion_result) -> int:
+def get_total_raw_clusters(conversion_result: Dict) -> int:
     """Extract the total number of clusters initially generated, regardless of quality."""
     return conversion_result["TotalClustersRaw"]
 
 
-def get_quality_score(read_metric) -> int:
+def get_quality_score(read_metric: Dict) -> int:
     """Extract the sum of quality scores of all the bases from the read metrics."""
     return read_metric["QualityScoreSum"]
 
 
-def get_lane_yield_q30_values(demux_result) -> List[int]:
+def get_lane_yield_q30_values(demux_result: Dict) -> List[int]:
     """Extract the yield Q30 values for the lane from the read metrics."""
     lane_read_metrics = get_read_metrics(demux_result)
     return [get_yield_q30(metric) for metric in lane_read_metrics]
 
 
-def get_yield_values(demux_result) -> List[int]:
+def get_yield_values(demux_result: Dict) -> List[int]:
     lane_read_metrics = get_read_metrics(demux_result)
     return [get_lane_yield_in_bases(metric) for metric in lane_read_metrics]
 
 
-def get_lane_read_quality_score_values(demux_result) -> List[int]:
+def get_lane_read_quality_score_values(demux_result: Dict) -> List[int]:
     """Extract the quality score values for the lane from the read metrics."""
     lane_read_metrics = get_read_metrics(demux_result)
     return [get_quality_score(read_metric) for read_metric in lane_read_metrics]
 
 
-def get_perfect_reads_for_sample_in_lane(demux_result) -> int:
+def get_perfect_reads_for_sample_in_lane(demux_result: Dict) -> int:
     """Extract the number of perfect reads for the lane from the read metrics."""
     lane_index_metrics = get_index_metrics(demux_result)
     counts = lane_index_metrics["MismatchCounts"]
