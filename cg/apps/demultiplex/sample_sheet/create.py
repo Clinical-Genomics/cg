@@ -1,5 +1,6 @@
 import logging
-from typing import List, Literal
+from typing import List
+from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.lims.samplesheet import LimsFlowcellSample
