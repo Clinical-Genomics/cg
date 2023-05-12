@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import click
-from typing import List
+from typing import List, Dict
+from cg.constants.sequencing import Sequencers
 from cg.utils.enums import StrEnum
 
 
@@ -98,10 +99,13 @@ class DemultiplexingDirsAndFiles(StrEnum):
 class FlowCellMode(StrEnum):
     """Define sample sheet flow cell mode."""
 
-    HISEQ_X: str = "SP"
+    HISEQX: str = "SP"
     NEXTSEQ: str = "S2"
     NOVASEQ: str = "S4"
     MISEQ: str = "2500"
 
 
-FLOW_CELL_MODES: List[str] = [mode.value for mode in FlowCellMode]
+SEQUENCER_FLOW_CELL_MODES: Dict[str, str] = {
+    Sequencers.__members__[mode.name].value: mode.value for mode in FlowCellMode
+}
+FLOW_CELL_MODES: List[str] = list(SEQUENCER_FLOW_CELL_MODES.values())
