@@ -44,24 +44,34 @@ def parse_bcl2fastq_sequencing_metrics(
 
     for conversion_result in data["ConversionResults"]:
         for demux_result in conversion_result["DemuxResults"]:
-            metrics = SequencingMetricsPerLaneAndSample()
+            flow_cell_name = flow_cell_name
+            lane_number = get_lane_number(conversion_result)
+            number_of_lanes = number_of_lanes
+            yield_in_bases = get_lane_yield_in_bases(conversion_result)
+            passing_filter_clusters_count = get_total_clusters_passing_filter(conversion_result)
 
-            metrics.flow_cell_name = flow_cell_name
-            metrics.lane_number = get_lane_number(conversion_result)
-            metrics.number_of_lanes = number_of_lanes
-            metrics.yield_in_bases = get_lane_yield_in_bases(conversion_result)
-            metrics.passing_filter_clusters_count = get_total_clusters_passing_filter(
-                conversion_result
+            raw_clusters_count = get_total_raw_clusters(conversion_result)
+            sample_id = get_sample_id(demux_result)
+            read_count = get_number_of_reads_for_sample_in_lane(demux_result)
+            perfect_reads_for_sample = get_perfect_reads_for_sample_in_lane(demux_result)
+            q30_yield_values = get_lane_yield_q30_values(demux_result)
+            yield_values = get_yield_values(demux_result)
+            quality_score_values = get_lane_read_quality_score_values(demux_result)
+
+            metrics = SequencingMetricsPerLaneAndSample(
+                flow_cell_name=flow_cell_name,
+                number_of_lanes=number_of_lanes,
+                lane_number=lane_number,
+                sample_id=sample_id,
+                yield_in_bases=yield_in_bases,
+                passing_filter_clusters_count=passing_filter_clusters_count,
+                raw_clusters_count=raw_clusters_count,
+                read_count=read_count,
+                perfect_reads_for_sample=perfect_reads_for_sample,
+                yield_values=yield_values,
+                q30_yield_values=q30_yield_values,
+                quality_score_values=quality_score_values,
             )
-
-            metrics.raw_clusters_count = get_total_raw_clusters(conversion_result)
-            metrics.sample_id = get_sample_id(demux_result)
-            metrics.read_count = get_number_of_reads_for_sample_in_lane(demux_result)
-            metrics.perfect_reads_for_sample = get_perfect_reads_for_sample_in_lane(demux_result)
-            metrics.q30_yield_values = get_lane_yield_q30_values(demux_result)
-            metrics.yield_values = get_yield_values(demux_result)
-            metrics.quality_score_values = get_lane_read_quality_score_values(demux_result)
-
             parsed_metrics.append(metrics)
 
     return parsed_metrics
