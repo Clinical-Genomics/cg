@@ -13,11 +13,11 @@ from tests.mocks.hk_mock import MockBundle
 def test_age(
     mock_statusdb,
     mock_hk,
-    flow_cell_path,
+    bcl2fastq_flow_cell_dir,
     timestamp_yesterday,
 ):
     # GIVEN a flow cell with a sequenced date:
-    flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
+    flow_cell: RunDirFlowCell = RunDirFlowCell(bcl2fastq_flow_cell_dir, mock_statusdb, mock_hk)
     flow_cell._sequenced_date = timestamp_yesterday
 
     # WHEN determining the age of a flow cell
@@ -32,11 +32,11 @@ def test_age(
 def test_sequenced_date_from_statusdb(
     mock_statusdb,
     mock_hk,
-    flow_cell_path,
+    bcl2fastq_flow_cell_dir,
     timestamp_yesterday,
 ):
     # GIVEN a flow cell with a sequenced_at date in statusdb
-    flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
+    flow_cell: RunDirFlowCell = RunDirFlowCell(bcl2fastq_flow_cell_dir, mock_statusdb, mock_hk)
     mock_statusdb.get_flow_cell_by_name.return_value.sequenced_at = timestamp_yesterday
 
     # WHEN determining the age of a flow cell
@@ -52,10 +52,10 @@ def test_sequenced_date_from_statusdb(
 def test_sequenced_date_from_run_name(
     mock_statusdb,
     mock_hk,
-    flow_cell_path,
+    bcl2fastq_flow_cell_dir,
 ):
     # GIVEN a flow cell that does not exist in statusdb
-    flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
+    flow_cell: RunDirFlowCell = RunDirFlowCell(bcl2fastq_flow_cell_dir, mock_statusdb, mock_hk)
     mock_statusdb.get_flow_cell_by_name.return_value = None
 
     # WHEN determining the age of a flow cell
@@ -68,11 +68,13 @@ def test_sequenced_date_from_run_name(
 
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
-def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, flow_cell_path, novaseq_dir):
+def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, bcl2fastq_flow_cell_dir):
     # GIVEN a flow cell
-    flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
+    flow_cell: RunDirFlowCell = RunDirFlowCell(bcl2fastq_flow_cell_dir, mock_statusdb, mock_hk)
     # GIVEN a sample sheet connected to the flow cell
-    flow_cell.sample_sheet_path = novaseq_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    flow_cell.sample_sheet_path = (
+        bcl2fastq_flow_cell_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
     # GIVEN there is no bundle for the flow cell
     mock_hk.bundle.return_value = None
     # GIVEN the sample sheet does not exist in Housekeeper
@@ -95,14 +97,16 @@ def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, flow_cell_path, 
 
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
 @mock.patch("cg.store.Store")
-def test_archive_sample_sheet_included(mock_statusdb, mock_hk, flow_cell_path, novaseq_dir, caplog):
+def test_archive_sample_sheet_included(mock_statusdb, mock_hk, bcl2fastq_flow_cell_dir, caplog):
     """Test archive of a sample sheet when it has been already included in HK."""
 
     # GIVEN a flow cell
-    flow_cell: RunDirFlowCell = RunDirFlowCell(flow_cell_path, mock_statusdb, mock_hk)
+    flow_cell: RunDirFlowCell = RunDirFlowCell(bcl2fastq_flow_cell_dir, mock_statusdb, mock_hk)
 
     # GIVEN a sample sheet connected to the flow cell
-    flow_cell.sample_sheet_path = novaseq_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    flow_cell.sample_sheet_path = (
+        bcl2fastq_flow_cell_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+    )
 
     # GIVEN the sample sheet does exist in Housekeeper
     mock_hk.get_file_from_latest_version.return_value = True

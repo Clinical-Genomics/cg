@@ -20,4 +20,4 @@ def test_get_run_parameters_when_non_existing(fixtures_dir: Path):
     # WHEN fetching the run parameters object
     with pytest.raises(FileNotFoundError):
         # THEN assert that a FileNotFound error is raised
-        flow_cell.run_parameters_object
+        flow_cell.run_parameters

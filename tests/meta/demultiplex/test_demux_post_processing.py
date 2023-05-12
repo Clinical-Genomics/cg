@@ -35,7 +35,7 @@ def test_set_dry_run(
 def test_add_to_cgstats_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -50,7 +50,7 @@ def test_add_to_cgstats_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When adding to cgstats
-    post_demux_api.add_to_cgstats(flow_cell_path=flow_cell.path)
+    post_demux_api.add_to_cgstats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should just log and exit
     assert "Dry run will not add flow cell stats" in caplog.text
@@ -59,7 +59,7 @@ def test_add_to_cgstats_dry_run(
 def test_add_to_cgstats(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -71,16 +71,16 @@ def test_add_to_cgstats(
     )
 
     # When adding to cgstats
-    post_demux_api.add_to_cgstats(flow_cell_path=flow_cell.path)
+    post_demux_api.add_to_cgstats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should run the command
-    assert f"add --machine X -u Unaligned {flow_cell.path}" in caplog.text
+    assert f"add --machine X -u Unaligned {bcl2fastq_flow_cell.path}" in caplog.text
 
 
 def test_cgstats_select_project_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -94,7 +94,7 @@ def test_cgstats_select_project_dry_run(
     )
 
     # GIVEN an unaligned project directory
-    Path(flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
+    Path(bcl2fastq_flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
         parents=True, exist_ok=True
     )
 
@@ -102,7 +102,9 @@ def test_cgstats_select_project_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When processing project with cgstats
-    post_demux_api.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_select_project(
+        flow_cell_id=bcl2fastq_flow_cell.id, flow_cell_path=bcl2fastq_flow_cell.path
+    )
 
     # THEN we should just log and exit
     assert "Dry run will not process selected project" in caplog.text
@@ -111,7 +113,7 @@ def test_cgstats_select_project_dry_run(
 def test_cgstats_select_project(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -125,12 +127,14 @@ def test_cgstats_select_project(
     )
 
     # GIVEN an unaligned project directory
-    Path(flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
+    Path(bcl2fastq_flow_cell.path, "Unaligned", f"Project_{flow_cell_project_id}").mkdir(
         parents=True, exist_ok=True
     )
 
     # When processing project with cgstats
-    post_demux_api.cgstats_select_project(flow_cell_id=flow_cell.id, flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_select_project(
+        flow_cell_id=bcl2fastq_flow_cell.id, flow_cell_path=bcl2fastq_flow_cell.path
+    )
 
     # THEN we should have created a stats outfile
     assert cgstats_select_project_log_file.exists()
@@ -139,13 +143,13 @@ def test_cgstats_select_project(
     cgstats_select_project_log_file.unlink()
 
     # THEN we should run the command
-    assert f"select --project {flow_cell_project_id} {flow_cell.id}" in caplog.text
+    assert f"select --project {flow_cell_project_id} {bcl2fastq_flow_cell.id}" in caplog.text
 
 
 def test_cgstats_lanestats_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -160,7 +164,7 @@ def test_cgstats_lanestats_dry_run(
     post_demux_api.set_dry_run(dry_run=True)
 
     # When processing lane stats with cgstats
-    post_demux_api.cgstats_lanestats(flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_lanestats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should run the command
     assert "Dry run will not add lane stats" in caplog.text
@@ -169,7 +173,7 @@ def test_cgstats_lanestats_dry_run(
 def test_cgstats_lanestats(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
 ):
     caplog.set_level(logging.INFO)
 
@@ -181,16 +185,16 @@ def test_cgstats_lanestats(
     )
 
     # When processing lane stats with cgstats
-    post_demux_api.cgstats_lanestats(flow_cell_path=flow_cell.path)
+    post_demux_api.cgstats_lanestats(flow_cell_path=bcl2fastq_flow_cell.path)
 
     # THEN we should run the command
-    assert f"lanestats {flow_cell.path}" in caplog.text
+    assert f"lanestats {bcl2fastq_flow_cell.path}" in caplog.text
 
 
 def test_finish_flow_cell_copy_not_completed(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -209,22 +213,22 @@ def test_finish_flow_cell_copy_not_completed(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that copy is not complete
-    assert f"{flow_cell.full_name} is not yet completely copied" in caplog.text
+    assert f"{bcl2fastq_flow_cell.full_name} is not yet completely copied" in caplog.text
 
 
 def test_finish_flow_cell_delivery_started(
     caplog,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -241,21 +245,24 @@ def test_finish_flow_cell_delivery_started(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # Clean up
     demultiplexing_delivery_file.unlink()
 
     # THEN we should log that the delivery has already started
-    assert f"{flow_cell.full_name} copy is complete and delivery has already started" in caplog.text
+    assert (
+        f"{bcl2fastq_flow_cell.full_name} copy is complete and delivery has already started"
+        in caplog.text
+    )
 
 
 def test_finish_flow_cell_delivery_not_hiseq_x(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     hiseq_x_tile_dir: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -274,18 +281,18 @@ def test_finish_flow_cell_delivery_not_hiseq_x(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # THEN we should log that this is not an Hiseq X flow cell
-    assert f"{flow_cell.full_name} is not an Hiseq X flow cell" in caplog.text
+    assert f"{bcl2fastq_flow_cell.full_name} is not an Hiseq X flow cell" in caplog.text
 
 
 def test_finish_flow_cell_ready(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     flow_cell_project_id: int,
     demultiplexing_delivery_file: Path,
     hiseq_x_tile_dir: Path,
@@ -308,7 +315,7 @@ def test_finish_flow_cell_ready(
 
     # GIVEN an unaligned project directory
     Path(
-        flow_cell.path,
+        bcl2fastq_flow_cell.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
@@ -316,12 +323,14 @@ def test_finish_flow_cell_ready(
     # WHEN finishing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # THEN we should log that post-processing will begin
-    assert f"{flow_cell.full_name} copy is complete and delivery will start" in caplog.text
+    assert (
+        f"{bcl2fastq_flow_cell.full_name} copy is complete and delivery will start" in caplog.text
+    )
 
 
 def test_post_process_flow_cell_dry_run(
@@ -329,7 +338,7 @@ def test_post_process_flow_cell_dry_run(
     caplog,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -349,7 +358,7 @@ def test_post_process_flow_cell_dry_run(
 
     # GIVEN an unaligned project directory
     Path(
-        flow_cell.path,
+        bcl2fastq_flow_cell.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
@@ -373,7 +382,7 @@ def test_post_process_flow_cell(
     cgstats_select_project_log_file: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -393,7 +402,7 @@ def test_post_process_flow_cell(
 
     # GIVEN an unaligned project directory
     Path(
-        flow_cell.path,
+        bcl2fastq_flow_cell.path,
         DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
         f"Project_{flow_cell_project_id}",
     ).mkdir(parents=True, exist_ok=True)
@@ -409,13 +418,13 @@ def test_post_process_flow_cell(
     demultiplexing_delivery_file.unlink()
 
     # THEN we should also transfer the flow cell
-    assert f"Flow cell added: {flow_cell.id}" in caplog.text
+    assert f"Flow cell added: {bcl2fastq_flow_cell.id}" in caplog.text
 
 
 def test_finish_flow_cell(
     caplog,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -433,22 +442,22 @@ def test_finish_flow_cell(
     # When post-processing flow cell
     post_demux_api.finish_flow_cell(
         bcl_converter=BclConverter.BCL2FASTQ,
-        flow_cell_name=flow_cell.full_name,
-        flow_cell_path=flow_cell.path,
+        flow_cell_name=bcl2fastq_flow_cell.full_name,
+        flow_cell_path=bcl2fastq_flow_cell.path,
     )
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flow_cell.full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
 
 
 def test_finish_all_flowcells(
     caplog,
     demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -472,4 +481,4 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.touch()
 
     # THEN we should log that we are checking flow cell
-    assert f"Check demultiplexed flow cell {flow_cell.full_name}" in caplog.text
+    assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text

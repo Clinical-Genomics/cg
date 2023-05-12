@@ -13,12 +13,6 @@ from cg.models.demultiplex.flow_cell import FlowCell
 from tests.models.demultiplexing.conftest import (
     fixture_demultiplexed_dragen_flow_cell,
     fixture_dragen_demux_results,
-    fixture_dragen_flow_cell_full_name,
-    fixture_dragen_flow_cell,
-    fixture_dragen_flow_cell_path,
-    fixture_flow_cell,
-    fixture_flowcell_path,
-    fixture_flow_cell_runs,
 )
 
 
@@ -94,15 +88,16 @@ def fixture_stats_api(project_dir: Path) -> StatsAPI:
 @pytest.fixture(name="nipt_stats_api")
 def fixture_nipt_stats_api(
     stats_api: StatsAPI,
-    flow_cell_full_name: str,
-    novaseq_dragen_sample_sheet_path: Path,
+    bcl2fastq_flow_cell_full_name: str,
+    novaseq_bcl2fastq_sample_sheet_path: Path,
     sample_id: str,
     ticket_id: str,
 ):
     nipt_stats_api: StatsAPI = stats_api
     mock_demux_sample = MockDemuxSample(pass_filter_clusters=600000000, pass_filter_Q30=0.90)
     mock_demux_results = MockDemuxResults(
-        flow_cell_full_name=flow_cell_full_name, sample_sheet_path=novaseq_dragen_sample_sheet_path
+        flow_cell_full_name=bcl2fastq_flow_cell_full_name,
+        sample_sheet_path=novaseq_bcl2fastq_sample_sheet_path,
     )
 
     project_obj: Project = create.create_project(manager=nipt_stats_api, project_name=ticket_id)
