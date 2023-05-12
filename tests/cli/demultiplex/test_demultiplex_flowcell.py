@@ -198,7 +198,7 @@ def test_start_demultiplex_flow_cell(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     mocker,
 ):
     caplog.set_level(logging.DEBUG)
@@ -207,13 +207,13 @@ def test_start_demultiplex_flow_cell(
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
 
     # GIVEN that demultiplexing has started
-    flow_cell.demultiplexing_started_path.touch()
+    bcl2fastq_flow_cell.demultiplexing_started_path.touch()
 
     # GIVEN a out dir that exist
-    demux_api.flow_cell_out_dir_path(flow_cell).mkdir(parents=True)
+    demux_api.flow_cell_out_dir_path(bcl2fastq_flow_cell).mkdir(parents=True)
 
     # GIVEN that demultiplexing is completed
-    demux_api.demultiplexing_completed_path(flow_cell=flow_cell).touch()
+    demux_api.demultiplexing_completed_path(flow_cell=bcl2fastq_flow_cell).touch()
 
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
 
@@ -228,7 +228,7 @@ def test_start_demultiplex_flow_cell(
     assert result.exit_code == 0
 
     # THEN assert it was communicated that previous demux was deleted
-    assert f"Removing flow cell demultiplexing directory {flow_cell.path}"
+    assert f"Removing flow cell demultiplexing directory {bcl2fastq_flow_cell.path}"
 
     # THEN demultiplexing was started
     assert f"Demultiplexing running as job" in caplog.text
@@ -238,14 +238,14 @@ def test_delete_flow_cell_dry_run_cgstats(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
-    flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
     caplog,
 ):
     """Test if logic work - call function in dry run."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cell to be deleted
-    assert flow_cell_id in demultiplex_ready_flow_cell.name
+    assert bcl2fastq_flow_cell_id in demultiplex_ready_flow_cell.name
 
     # WHEN executing the commando to remove flow cell from cgstats in dry run mode
     result: testing.Result = cli_runner.invoke(
@@ -266,22 +266,22 @@ def test_delete_flow_cell_dry_run_cgstats(
     assert result.exit_code == 0
 
     # THEN the appropriate flow cell should be prompted for removal
-    assert f"DeleteDemuxAPI-CGStats: Would remove {flow_cell_id}" in caplog.text
+    assert f"DeleteDemuxAPI-CGStats: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
 
 
 def test_delete_flow_cell_dry_run_status_db(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
-    flow_cell_full_name: str,
-    flow_cell_id: str,
+    bcl2fastq_flow_cell_full_name: str,
+    bcl2fastq_flow_cell_id: str,
     caplog,
 ):
     """Test if logic work - call all true if status_db passed."""
     caplog.set_level(logging.DEBUG)
 
     # GIVEN a flow cell to be deleted
-    assert flow_cell_id in demultiplex_ready_flow_cell.name
+    assert bcl2fastq_flow_cell_id in demultiplex_ready_flow_cell.name
 
     # WHEN deleting a flowcell from status db in dry run mode
     result: testing.Result = cli_runner.invoke(
@@ -303,18 +303,18 @@ def test_delete_flow_cell_dry_run_status_db(
 
     # THEN it should be notified that it was going to remove all but init-files
     assert (
-        f"DeleteDemuxAPI-Housekeeper: Would delete sample sheet files with tag {flow_cell_id}"
+        f"DeleteDemuxAPI-Housekeeper: Would delete sample sheet files with tag {bcl2fastq_flow_cell_id}"
         in caplog.text
     )
     assert (
-        f"DeleteDemuxAPI-Housekeeper: Would delete fastq and spring files related to flow cell {flow_cell_id}"
+        f"DeleteDemuxAPI-Housekeeper: Would delete fastq and spring files related to flow cell {bcl2fastq_flow_cell_id}"
         in caplog.text
     )
-    assert f"DeleteDemuxAPI-StatusDB: Would remove {flow_cell_id}" in caplog.text
-    assert f"DeleteDemuxAPI-CGStats: Would remove {flow_cell_id}" in caplog.text
+    assert f"DeleteDemuxAPI-StatusDB: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
+    assert f"DeleteDemuxAPI-CGStats: Would remove {bcl2fastq_flow_cell_id}" in caplog.text
     assert (
         "DeleteDemuxAPI-Hasta: Would have removed the following directory: "
-        f"{demultiplex_context.demultiplex_api.out_dir / Path(flow_cell_full_name)}\n"
+        f"{demultiplex_context.demultiplex_api.out_dir / Path(bcl2fastq_flow_cell_full_name)}\n"
         f"DeleteDemuxAPI-Hasta: Would have removed the following directory: {demultiplex_ready_flow_cell}"
     ) in caplog.text
     assert "DeleteDemuxAPI-Init-files: Would have removed" not in caplog.text

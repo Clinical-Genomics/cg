@@ -121,7 +121,7 @@ def test_store_case(
 def test_store_flow_cell(
     caplog,
     cli_runner: CliRunner,
-    flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
     mocker,
     populated_compress_context: CGConfig,
     sample_id: str,
@@ -140,7 +140,9 @@ def test_store_flow_cell(
     CompressAPI.add_decompressed_fastq.return_value = True
 
     # WHEN running the store flow cell command
-    res = cli_runner.invoke(store_flow_cell, [flow_cell_id], obj=populated_compress_context)
+    res = cli_runner.invoke(
+        store_flow_cell, [bcl2fastq_flow_cell_id], obj=populated_compress_context
+    )
 
     # THEN assert that the command exits successfully
     assert res.exit_code == EXIT_SUCCESS
@@ -178,7 +180,7 @@ def test_store_ticket(
 def test_store_store_demultiplexed_flow_cell(
     caplog,
     cli_runner: CliRunner,
-    flow_cell_id: str,
+    bcl2fastq_flow_cell_id: str,
     helpers,
     mocker,
     real_populated_compress_context: CGConfig,
@@ -198,7 +200,7 @@ def test_store_store_demultiplexed_flow_cell(
 
     # WHEN running the store demultiplexed flow cell command
     res = cli_runner.invoke(
-        store_demultiplexed_flow_cell, [flow_cell_id], obj=real_populated_compress_context
+        store_demultiplexed_flow_cell, [bcl2fastq_flow_cell_id], obj=real_populated_compress_context
     )
 
     # THEN assert that the command exits successfully
