@@ -14,6 +14,7 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLESHEET_HEADERS,
     TAXPROFILER_ACCEPTED_PLATFORMS,
+    TAXPROFILER_FASTA_HEADER,
     TaxprofilerDefaults,
 )
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -67,6 +68,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             TAXPROFILER_INSTRUMENT_PLATFORM: TAXPROFILER_INSTRUMENT_PLATFORM,
             NFX_READ1_HEADER: fastq_r1,
             NFX_READ2_HEADER: fastq_r2,
+            TAXPROFILER_FASTA_HEADER: TAXPROFILER_FASTA_HEADER
         }
         return samplesheet_content
 
