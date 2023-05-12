@@ -58,11 +58,6 @@ def number_of_reads():
 
 
 @pytest.fixture
-def yield_q30():
-    4072773293
-
-
-@pytest.fixture
 def demux_result(read_metrics, index_metrics, sample_id, number_of_reads):
     return {
         "SampleId": sample_id,
