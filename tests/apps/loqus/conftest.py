@@ -20,18 +20,18 @@ LOQUSDB_OUTPUT = (
     b"established\n2018-11-29 08:41:38 130-229-8-20-dhcp.local "
     b"mongo_adapter.adapter[77135] INFO"
     b" Use database loqusdb\n2018-11-29 08:41:38 130-229-8-20-dhcp.local "
-    b"loqusdb.utils.vcf[77135]"
+    b"loqusdb.models.vcf[77135]"
     b" INFO Check if vcf is on correct format...\n"
     b"2018-11-29 08:41:38 130-229-8-20-dhcp.local"
-    b" loqusdb.utils.vcf[77135] INFO Vcf file "
+    b" loqusdb.models.vcf[77135] INFO Vcf file "
     b"/Users/username/Projects/loqusdb/tests/fixtures"
     b"/test.vcf.gz looks fine\n2018-11-29 "
-    b"08:41:38 130-229-8-20-dhcp.local loqusdb.utils.vcf[77135]"
+    b"08:41:38 130-229-8-20-dhcp.local loqusdb.models.vcf[77135]"
     b" INFO Nr of variants in vcf: 15\n2018-11-29 "
-    b"08:41:38 130-229-8-20-dhcp.local loqusdb.utils."
+    b"08:41:38 130-229-8-20-dhcp.local loqusdb.models."
     b"vcf[77135] INFO Type of variants in vcf: snv\n"
     b"Inserting variants\n2018-11-29 08:41:38 130-22"
-    b"9-8-20-dhcp.local loqusdb.utils.load[77135] "
+    b"9-8-20-dhcp.local loqusdb.models.load[77135] "
     b"INFO Inserted 15 variants of type snv\n2018-11-2"
     b"9 08:41:38 130-229-8-20-dhcp.local loqusdb.commands.load[77135] "
     b"INFO Nr variants inserted: "
@@ -86,8 +86,8 @@ LOQUSDB_DELETE_STDERR = b"""2022-09-22 12:30:07 username loqusdb.commands.cli[20
 2022-09-22 12:30:07 username mongo_adapter.client[20689] INFO Connection established
 2022-09-22 12:30:07 username mongo_adapter.adapter[20689] INFO Use database loqusdb
 2022-09-22 12:30:07 username loqusdb.plugins.mongo.case[20689] INFO Removing case yellowhog from database
-2022-09-22 12:30:07 username loqusdb.utils.delete[20689] INFO deleting variants
-2022-09-22 12:30:07 username loqusdb.utils.delete[20689] INFO Start deleting chromosome 1"""
+2022-09-22 12:30:07 username loqusdb.models.delete[20689] INFO deleting variants
+2022-09-22 12:30:07 username loqusdb.models.delete[20689] INFO Start deleting chromosome 1"""
 
 LOQUSDB_DELETE_NONEXISTING_STDERR = b"""2022-09-22 11:40:04 username loqusdb.commands.cli[19944] INFO Running loqusdb version 2.6.9
 2022-09-22 11:40:04 username mongo_adapter.client[19944] INFO Connecting to uri:mongodb://None:None@localhost:27017

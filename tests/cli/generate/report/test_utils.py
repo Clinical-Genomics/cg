@@ -1,4 +1,4 @@
-"""Tests utils for generating delivery reports"""
+"""Tests models for generating delivery reports"""
 from datetime import datetime
 
 import click.exceptions

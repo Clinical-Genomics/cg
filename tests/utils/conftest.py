@@ -1,4 +1,4 @@
-"""Fixtures for utils"""
+"""Fixtures for models"""
 
 import pytest
 
