@@ -80,7 +80,7 @@ def get_sample_sheet(
     sample_sheet: str,
     flow_cell_mode: Literal[
         FlowCellMode.MISEQ,
-        FlowCellMode.HISEQ_X,
+        FlowCellMode.HISEQX,
         FlowCellMode.NEXTSEQ,
         FlowCellMode.NOVASEQ,
     ],
@@ -102,7 +102,7 @@ def get_sample_sheet_from_file(
     infile: Path,
     flow_cell_mode: Literal[
         FlowCellMode.MISEQ,
-        FlowCellMode.HISEQ_X,
+        FlowCellMode.HISEQX,
         FlowCellMode.NEXTSEQ,
         FlowCellMode.NOVASEQ,
     ],
