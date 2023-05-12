@@ -88,7 +88,7 @@ def parse_sequencing_metrics(
 
 
 def get_read_metrics(demux_result: Dict) -> List[Dict]:
-    """Extract the read metrics for a lane from a demultiplexing result."""
+    """Extract the read metrics from a demultiplexing result."""
     return demux_result["ReadMetrics"]
 
 
@@ -97,14 +97,14 @@ def get_index_metrics(demux_result: Dict) -> Dict:
     return demux_result["IndexMetrics"][0]
 
 
-def get_number_of_lanes_for_flow_cell(stats_data: Dict) -> int:
+def get_number_of_lanes_for_flow_cell(metrics_data: Dict) -> int:
     """Extract the number of lanes from the stats data."""
-    return len(stats_data["ReadInfosForLanes"])
+    return len(metrics_data["ReadInfosForLanes"])
 
 
-def get_flow_cell_name(stats_data: Dict) -> str:
+def get_flow_cell_name(metrics_data: Dict) -> str:
     """Extract the flow cell name from the stats data."""
-    return stats_data["Flowcell"]
+    return metrics_data["Flowcell"]
 
 
 def get_sample_id(demux_result: Dict) -> str:
@@ -122,9 +122,9 @@ def get_lane_number(conversion_result: Dict) -> int:
     return conversion_result["LaneNumber"]
 
 
-def get_yield_q30(lane_read_metrics: Dict) -> int:
+def get_yield_q30(read_metrics_for_sample_in_lane: Dict) -> int:
     """Extract the yield Q30 from the read metrics."""
-    return lane_read_metrics["YieldQ30"]
+    return read_metrics_for_sample_in_lane["YieldQ30"]
 
 
 def get_lane_yield_in_bases(conversion_result: Dict) -> int:
@@ -149,19 +149,19 @@ def get_quality_score(read_metric: Dict) -> int:
 
 def get_lane_yield_q30_values(demux_result: Dict) -> List[int]:
     """Extract the yield Q30 values for the lane from the read metrics."""
-    lane_read_metrics = get_read_metrics(demux_result)
-    return [get_yield_q30(metric) for metric in lane_read_metrics]
+    read_metrics_for_sample_in_lane = get_read_metrics(demux_result)
+    return [get_yield_q30(metric) for metric in read_metrics_for_sample_in_lane]
 
 
 def get_yield_values(demux_result: Dict) -> List[int]:
-    lane_read_metrics = get_read_metrics(demux_result)
-    return [get_lane_yield_in_bases(metric) for metric in lane_read_metrics]
+    read_metrics_for_sample_in_lane = get_read_metrics(demux_result)
+    return [get_lane_yield_in_bases(metric) for metric in read_metrics_for_sample_in_lane]
 
 
 def get_lane_read_quality_score_values(demux_result: Dict) -> List[int]:
     """Extract the quality score values for the lane from the read metrics."""
-    lane_read_metrics = get_read_metrics(demux_result)
-    return [get_quality_score(read_metric) for read_metric in lane_read_metrics]
+    read_metrics_for_sample_in_lane = get_read_metrics(demux_result)
+    return [get_quality_score(read_metric) for read_metric in read_metrics_for_sample_in_lane]
 
 
 def get_perfect_reads_for_sample_in_lane(demux_result: Dict) -> int:
