@@ -15,5 +15,4 @@ from .parsers.bcl2fastq import (
     get_lane_read_quality_score_values,
     get_perfect_reads_for_sample_in_lane,
     parse_bcl2fastq_sequencing_metrics,
-    SequencingMetricsForLaneAndSample,
 )

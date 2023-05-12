@@ -1,5 +1,4 @@
 from unittest import mock
-from pytest import MonkeyPatch
 from cg.apps.sequencing_metrics_parser import (
     get_yield_values,
     get_read_metrics,
@@ -17,8 +16,8 @@ from cg.apps.sequencing_metrics_parser import (
     get_lane_read_quality_score_values,
     get_perfect_reads_for_sample_in_lane,
     parse_bcl2fastq_sequencing_metrics,
-    SequencingMetricsForLaneAndSample,
 )
+from cg.apps.sequencing_metrics_parser.models import SequencingMetricsForLaneAndSample
 
 
 def test_get_flow_cell_name(sequencing_metrics_json, flow_cell_name):
