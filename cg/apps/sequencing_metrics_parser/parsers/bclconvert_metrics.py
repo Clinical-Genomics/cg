@@ -2,7 +2,7 @@
 import csv
 import logging
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from cg.store.models import SequencingStatistics
 from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
 from cg.apps.sequencing_metrics_parser.utils.bclconvert import BclConvertMetrics
@@ -11,19 +11,41 @@ LOG = logging.getLogger(__name__)
 
 
 def parse_bcl_convert_metrics_file(
-    bcl_convert_metrics_file_path: Path, sample_sheet_path: Path, quality_metrics_path: Path
+    bcl_convert_metrics_file_path: Path,
+    bcl_convert_sample_sheet_path: Path,
+    bcl_convert_quality_metrics_path: Path,
+    bcl_convert_adapter_metrics_path: Path,
 ) -> List[BclConvertMetrics]:
     """Parse the BCLconvert demultiplexing stats file into the BCLconvertMetrics model."""
-    LOG.info(f"Parsing BCLConvert demultiplexing stats file {bcl_convert_metrics_file_path}")
     demux_metrics: Dict[int, dict] = read_metric_file_to_dict(
         metric_file_path=bcl_convert_metrics_file_path
     )
-    quality_metrics: Dict[int, dict] = read_metric_file_to_dict(
-        metric_file_path=quality_metrics_path
+    quality_metrics: Dict[int, dict] = read_quality_metrics_file_to_dict(
+        metric_file_path=bcl_convert_quality_metrics_path
+    )
+
+    adapter_metrics: Dict[int, dict] = read_quality_metrics_file_to_dict(
+        metric_file_path=bcl_convert_adapter_metrics_path
     )
     sample_sheet: Dict[int, dict] = read_bcl_convert_sample_sheet_file_to_dict(
-        bcl_convert_sample_sheet_path=sample_sheet_path
+        bcl_convert_sample_sheet_path=bcl_convert_sample_sheet_path
     )
+
+    return write_dict_into_bcl_metrics_model(
+        demux_metrics=demux_metrics,
+        quality_metrics=quality_metrics,
+        sample_sheet=sample_sheet,
+        adapter_metrics=adapter_metrics,
+    )
+
+
+def write_dict_into_bcl_metrics_model(
+    demux_metrics: Dict[int, dict],
+    adapter_metrics: Dict[int, dict],
+    quality_metrics: Dict[int, dict],
+    sample_sheet: Dict[int, dict],
+) -> List[BclConvertMetrics]:
+    """Write a dictionary into a BclConvertMetrics model."""
     bcl_convert_model_list: List[BclConvertMetrics] = []
     for lane in sample_sheet:
         lane = int(lane)
@@ -33,7 +55,7 @@ def parse_bcl_convert_metrics_file(
                     sample_internal_id=demux_metrics[lane][sample_id]["SampleID"],
                     flow_cell_name=sample_sheet[lane][sample_id].get("FCID"),
                     lane=demux_metrics[lane][sample_id]["Lane"],
-                    reads=demux_metrics[lane][sample_id]["# Reads"],
+                    read_pairs=demux_metrics[lane][sample_id]["# Reads"],
                     perfect_index_reads=demux_metrics[lane][sample_id]["# Perfect Index Reads"],
                     perfect_index_reads_percent=demux_metrics[lane][sample_id][
                         "% Perfect Index Reads"
@@ -51,8 +73,8 @@ def parse_bcl_convert_metrics_file(
 def read_metric_file_to_dict(
     metric_file_path: Path,
 ) -> Dict[int, dict]:
-    """Reads a BCL convert demux or quality metrics file into a dictionary."""
-    LOG.info(f"Parsing BCLConvert demultiplexing stats file {metric_file_path}")
+    """Reads a BCL convert metrics file with summarised read pair information into a dictionary."""
+    LOG.info(f"Parsing BCLConvert metrics file: {metric_file_path}")
     read_metrics = {}
     with open(metric_file_path, mode="r") as stats_file:
         stats_reader = csv.DictReader(stats_file)
@@ -62,6 +84,81 @@ def read_metric_file_to_dict(
             read_metrics[lane] = read_metrics.get(lane, {})
             read_metrics[lane][sample_id] = row
         return read_metrics
+
+
+def read_quality_metrics_file_to_dict(
+    metric_file_path: Path,
+) -> Dict[int, dict]:
+    """Parse the BCL convert metrics file with read pair format into a dictionary."""
+    LOG.info(f"Parsing BCLConvert metrics file: {metric_file_path}")
+    parsed_metrics = {}
+    with open(metric_file_path, mode="r") as metrics_file:
+        metrics_reader = csv.DictReader(metrics_file)
+        for row in metrics_reader:
+            lane = int(row["Lane"])
+            read_number = row["ReadNumber"]
+            sample_id = row["SampleID"]
+            parsed_metrics[lane] = parsed_metrics.get(lane, {})
+            row["YieldQ30"] = int(row["YieldQ30"])
+            parsed_metrics[lane][(read_number, sample_id)] = row
+    return parsed_metrics
+
+
+def summarise_quality_metrics_for_sample(
+    quality_metrics: Dict[int, dict],
+) -> Dict[int, dict]:
+    """Summarise the quality metrics for each sample."""
+    summarised_quality_metrics = {}
+    for lane in quality_metrics:
+        # Iterate over all samples in lane
+        summarised_quality_metrics[lane] = summarised_quality_metrics.get(lane, {})
+        for value in quality_metrics[lane].values():
+            value["YieldQ30"] = int(value["YieldQ30"])
+            value["Mean Quality Score (PF)"] = float(value["Mean Quality Score (PF)"])
+            value["QualityScoreSum"] = int(value["QualityScoreSum"])
+            sample_id = value.get("SampleID")
+            if sample_id not in summarised_quality_metrics[lane]:
+                summarised_quality_metrics[lane][sample_id] = value
+                continue
+            summarised_quality_metrics[lane][sample_id]["YieldQ30"] += value.get("YieldQ30")
+            summarised_quality_metrics[lane][sample_id]["Mean Quality Score (PF)"] += value.get(
+                "Mean Quality Score (PF)"
+            )
+            summarised_quality_metrics[lane][sample_id]["QualityScoreSum"] += value.get(
+                "QualityScoreSum"
+            )
+    return summarised_quality_metrics
+
+
+def read_adapter_metrics_file_to_dict(metrics_file_path) -> Dict[int, dict]:
+    """Parse the Dragen adapter metrics file."""
+    LOG.info(f"Parsing BCL convert adapter metrics file {metrics_file_path}")
+    parsed_metrics = {}
+    with metrics_file_path.open("r") as metrics_file:
+        metrics_reader = csv.DictReader(metrics_file)
+        for row in metrics_reader:
+            lane = int(row["Lane"])
+            read_number = row["ReadNumber"]
+            sample_id = row["Sample_ID"]
+            parsed_metrics[lane] = parsed_metrics.get(lane, {})
+            parsed_metrics[lane][(read_number, sample_id)] = row
+    return summarise_adapter_metrics_for_sample(parsed_metrics=parsed_metrics)
+
+
+def summarise_adapter_metrics_for_sample(parsed_metrics: Dict[int, dict]) -> Dict[int, dict]:
+    """Summerise forward and reverse read information for each sample in each lane."""
+    summarised_metrics = {}
+    for lane in parsed_metrics:
+        # Iterate over all samples in lane
+        summarised_metrics[lane] = summarised_metrics.get(lane, {})
+        for value in parsed_metrics[lane].values():
+            sample_id = value.get("Sample_ID")
+            summarised_metrics[lane][sample_id] = summarised_metrics[lane].get(sample_id, value)
+            summarised_metrics[lane][sample_id][
+                "R" + value.get("ReadNumber") + "_SampleBases"
+            ] = value.get("SampleBases")
+
+    return summarised_metrics
 
 
 def get_nr_of_header_lines_in_sample_sheet(
@@ -87,6 +184,7 @@ def read_bcl_convert_sample_sheet_file_to_dict(
     """
     Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER.
     """
+    LOG.info(f"Parsing BCLConvert sample sheet file: {bcl_convert_sample_sheet_path}")
     header_line_count: int = get_nr_of_header_lines_in_sample_sheet(
         bcl_convert_sample_sheet_path=bcl_convert_sample_sheet_path
     )

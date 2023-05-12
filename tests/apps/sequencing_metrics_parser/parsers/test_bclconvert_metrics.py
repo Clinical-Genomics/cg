@@ -4,6 +4,10 @@ from cg.apps.sequencing_metrics_parser.parsers.bclconvert_metrics import (
     read_metric_file_to_dict,
     read_bcl_convert_sample_sheet_file_to_dict,
     parse_bcl_convert_metrics_file,
+    read_quality_metrics_file_to_dict,
+    summarise_quality_metrics_for_sample,
+    summarise_adapter_metrics_for_sample,
+    read_adapter_metrics_file_to_dict,
 )
 
 
@@ -25,7 +29,7 @@ def test_read_bcl_convert_quality_metrics_file_to_dict(bcl_convert_quality_metri
     # GIVEN a path to a BCLConvert quality metrics file
 
     # WHEN reading the file into a dictionary
-    parsed_quality_metrics = read_metric_file_to_dict(bcl_convert_quality_metric_file_path)
+    parsed_quality_metrics = read_quality_metrics_file_to_dict(bcl_convert_quality_metric_file_path)
 
     # THEN assert that the dictionary is not empty
     assert parsed_quality_metrics
@@ -57,9 +61,23 @@ def test_parse_bcl_convert_metrics_file(
     # WHEN parsing the file
     parsed_metrics = parse_bcl_convert_metrics_file(
         bcl_convert_metrics_file_path=bcl_convert_demux_metric_file_path,
-        quality_metrics_path=bcl_convert_quality_metric_file_path,
-        sample_sheet_path=bcl_convert_sample_sheet_file_path,
+        bcl_convert_quality_metrics_path=bcl_convert_quality_metric_file_path,
+        bcl_convert_sample_sheet_path=bcl_convert_sample_sheet_file_path,
     )
 
     # THEN assert that the dictionary is not empty
     assert parsed_metrics
+
+
+def test_read_bcl_convert_adapter_metrics_file_to_dict(bcl_convert_adapter_metrics_file_path: Path):
+    """Test to read the BCLconvert adapter metrics file into a dictionary."""
+
+    # GIVEN a path to a BCLConvert adapter metrics file
+
+    # WHEN reading the file into a dictionary
+    parsed_adapter_metrics = read_adapter_metrics_file_to_dict(
+        bcl_convert_adapter_metrics_file_path
+    )
+
+    # THEN assert that the dictionary is not empty
+    assert parsed_adapter_metrics

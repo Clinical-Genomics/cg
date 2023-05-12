@@ -18,7 +18,7 @@ class BclConvertMetrics(BaseModel):
         sample_internal_id: str,
         flow_cell_name: str,
         lane: int,
-        reads: int,
+        read_pairs: int,
         perfect_index_reads: int,
         perfect_index_reads_percent,
         one_mismatch_reads: int,
@@ -30,7 +30,7 @@ class BclConvertMetrics(BaseModel):
         self.sample_internal_id = sample_internal_id
         self.flow_cell_name = flow_cell_name
         self.lane = lane
-        self.reads = reads
+        self.read_pairs = reads_pairs
         self.perfect_index_reads = perfect_index_reads
         self.perfect_index_reads_percent = perfect_index_reads_percent
         self.one_mismatch_reads = one_mismatch_reads
@@ -39,6 +39,6 @@ class BclConvertMetrics(BaseModel):
         self.yield_q30 = yield_q30
         self.q30_bases_percent = q30_bases_percent
 
-    def _calculate_read_counts(self) -> int:
-        """calculates the number of reads from the number of clusters"""
-        return self.reads * 2
+    def _calculate_total_read_counts(self) -> int:
+        """calculates the number of reads from reported number of read pairs"""
+        return self.read_pairs * 2
