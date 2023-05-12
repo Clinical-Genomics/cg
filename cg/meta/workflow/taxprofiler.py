@@ -52,15 +52,18 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 sample=case_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
+                instrument_platform=TaxprofilerDefaults.INSTRUMENT_PLATFORM,
             )
         except ValidationError as error:
             LOG.error(error)
             raise ValueError
 
         samples_full_list: list = []
+        instrument_full_list: list = []
         # Complete sample lists to the same length as fastq_r1:
         for _ in range(len(fastq_r1)):
             samples_full_list.append(case_id)
+            instrument_full_list.append(TaxprofilerDefaults.INSTRUMENT_PLATFORM)
 
         samplesheet_content: dict = {
             NFX_SAMPLE_HEADER: samples_full_list,
