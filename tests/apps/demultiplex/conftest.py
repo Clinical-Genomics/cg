@@ -11,7 +11,7 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
 )
 from cg.apps.demultiplex.sample_sheet.validate import NovaSeqSample
-from cg.constants.demultiplexing import SampleSheetHeader
+from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -154,9 +154,9 @@ def fixture_sample_sheet_line_sample_2() -> List[str]:
 def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
     """Return the content of a Bcl2fastq sample sheet data header without samples."""
     return [
-        ["[Data]"],
+        [SampleSheetHeaderColumnNames.DATA],
         [
-            SampleSheetHeader.FLOW_CELL_ID,
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
             "Lane",
             "SampleID",
             "SampleRef",
@@ -175,9 +175,9 @@ def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
 def fixture_sample_sheet_dragen_data_header() -> List[List[str]]:
     """Return the content of a Dragen sample sheet data header without samples."""
     return [
-        ["[Data]"],
+        [SampleSheetHeaderColumnNames.DATA],
         [
-            SampleSheetHeader.FLOW_CELL_ID,
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
             "Lane",
             "SampleID",
             "SampleRef",
@@ -198,7 +198,7 @@ def fixture_sample_sheet_no_sample_header(
 ) -> List[List[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
     return [
-        ["[Data]"],
+        [SampleSheetHeaderColumnNames.DATA],
         sample_sheet_line_sample_1,
         sample_sheet_line_sample_2,
     ]
@@ -210,9 +210,9 @@ def fixture_valid_sample_sheet_bcl2fastq(
 ) -> List[List[str]]:
     """Return the content of a valid Bcl2fastq sample sheet."""
     return [
-        ["[Data]"],
+        [SampleSheetHeaderColumnNames.DATA],
         [
-            SampleSheetHeader.FLOW_CELL_ID,
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
             "Lane",
             "SampleID",
             "SampleRef",
@@ -267,9 +267,9 @@ def fixture_valid_sample_sheet_dragen(
 ) -> List[List[str]]:
     """Return the content of a valid Dragen sample sheet."""
     return [
-        ["[Data]"],
+        [SampleSheetHeaderColumnNames.DATA],
         [
-            SampleSheetHeader.FLOW_CELL_ID,
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
             "Lane",
             "Sample_ID",
             "SampleRef",

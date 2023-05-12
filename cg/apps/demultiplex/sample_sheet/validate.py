@@ -11,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleDragen,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import BclConverter, FlowCellMode, SampleSheetHeader
+from cg.constants.demultiplexing import BclConverter, FlowCellMode, SampleSheetHeaderColumnNames
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
 
@@ -59,7 +59,7 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
         # Skip lines that are too short to contain samples
         if len(line) <= 5:
             continue
-        if line[0] == SampleSheetHeader.FLOW_CELL_ID:
+        if line[0] == SampleSheetHeaderColumnNames.FLOW_CELL_ID:
             header = line
             continue
         if not header:

@@ -13,7 +13,8 @@ class BclConverter(StrEnum):
     BCL2FASTQ: str = "bcl2fastq"
 
 
-class SampleSheetHeader(StrEnum):
+class SampleSheetHeaderColumnNames(StrEnum):
+    DATA: str = "[Data]"
     FLOW_CELL_ID: str = "FCID"
 
 
@@ -21,7 +22,7 @@ UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
-        SampleSheetHeader.FLOW_CELL_ID,
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "SampleID",
         "SampleRef",
@@ -34,7 +35,7 @@ SAMPLE_SHEET_HEADERS = {
         "Project",
     ],
     "dragen": [
-        SampleSheetHeader.FLOW_CELL_ID,
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "Sample_ID",
         "SampleRef",
@@ -47,8 +48,6 @@ SAMPLE_SHEET_HEADERS = {
         "Sample_Project",
     ],
 }
-
-SAMPLE_SHEET_DATA_HEADER = "[Data]"
 
 SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
 

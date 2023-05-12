@@ -9,11 +9,12 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
-from cg.constants import EXIT_SUCCESS
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
+
+FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.flowcell_samples"
 
 
 def test_create_sample_sheet_no_run_parameters(
@@ -30,7 +31,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # GIVEN flow cell samples
     mocker.patch(
-        "cg.cli.demultiplex.sample_sheet.flowcell_samples",
+        FLOW_CELL_FUNCTION_NAME,
         return_value=lims_novaseq_bcl2fastq_samples,
     )
 
@@ -67,7 +68,7 @@ def test_create_bcl2fastq_sample_sheet(
 
     # GIVEN flow cell samples
     mocker.patch(
-        "cg.cli.demultiplex.sample_sheet.flowcell_samples",
+        FLOW_CELL_FUNCTION_NAME,
         return_value=lims_novaseq_bcl2fastq_samples,
     )
     # GIVEN a lims api that returns some samples
@@ -103,7 +104,7 @@ def test_create_dragen_sample_sheet(
 
     # GIVEN flow cell samples
     mocker.patch(
-        "cg.cli.demultiplex.sample_sheet.flowcell_samples",
+        FLOW_CELL_FUNCTION_NAME,
         return_value=lims_novaseq_dragen_samples,
     )
     # GIVEN a lims api that returns some samples

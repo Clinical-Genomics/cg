@@ -9,11 +9,11 @@ from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
-    SAMPLE_SHEET_DATA_HEADER,
     SAMPLE_SHEET_HEADERS,
     SAMPLE_SHEET_SETTINGS_HEADER,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
+    SampleSheetHeaderColumnNames,
 )
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -96,7 +96,7 @@ class SampleSheetCreator:
             [SAMPLE_SHEET_SETTINGS_HEADER],
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
-            [SAMPLE_SHEET_DATA_HEADER],
+            [SampleSheetHeaderColumnNames.DATA],
             SAMPLE_SHEET_HEADERS[self.bcl_converter],
         ]
         for sample in self.lims_samples:
