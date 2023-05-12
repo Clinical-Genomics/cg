@@ -78,7 +78,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
                 case_id, fastq_r1, fastq_r2
             )
-            LOG.info("Content" + samplesheet_content)
             LOG.info(samplesheet_content)
             # if dry_run:
             #     continue
