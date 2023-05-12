@@ -64,6 +64,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         samplesheet_content: dict = {
             NFX_SAMPLE_HEADER: samples_full_list,
             TAXPROFILER_RUN_ACCESSION: samples_full_list,
+            TAXPROFILER_INSTRUMENT_PLATFORM: TAXPROFILER_INSTRUMENT_PLATFORM,
             NFX_READ1_HEADER: fastq_r1,
             NFX_READ2_HEADER: fastq_r2,
         }
