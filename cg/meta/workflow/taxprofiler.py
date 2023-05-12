@@ -83,7 +83,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             #     continue
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=samplesheet_content,
-                headers=TAXPROFILER_SAMPLESHEET_HEADERS,
+                headers=",".join(TAXPROFILER_SAMPLESHEET_HEADERS),  #
                 config_path=NextflowAnalysisAPI.get_case_config_path(
                     case_id=case_id, root_dir=self.root_dir
                 ),
