@@ -45,7 +45,10 @@ def parse_bcl2fastq_sequencing_metrics(
     for conversion_result in data["ConversionResults"]:
         for demux_result in conversion_result["DemuxResults"]:
             metrics = parse_sequencing_metrics(
-                conversion_result, demux_result, number_of_lanes, flow_cell_name
+                conversion_result=conversion_result,
+                demux_result=demux_result,
+                number_of_lanes=number_of_lanes,
+                flow_cell_name=flow_cell_name,
             )
             parsed_metrics.append(metrics)
 
@@ -53,7 +56,7 @@ def parse_bcl2fastq_sequencing_metrics(
 
 
 def parse_sequencing_metrics(
-    conversion_result, demux_result, number_of_lanes, flow_cell_name
+    conversion_result: Dict, demux_result: Dict, number_of_lanes: int, flow_cell_name: str
 ) -> SequencingMetricsForLaneAndSample:
     """Parse and validate data for a single lane and sample."""
     lane_number = get_lane_number(conversion_result)
