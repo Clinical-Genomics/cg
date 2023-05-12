@@ -56,9 +56,7 @@ def parse_sequencing_metrics(
     conversion_result, demux_result, number_of_lanes, flow_cell_name
 ) -> SequencingMetricsForLaneAndSample:
     """Parse and validate data for a single lane and sample."""
-    flow_cell_name = flow_cell_name
     lane_number = get_lane_number(conversion_result)
-    number_of_lanes = number_of_lanes
     yield_in_bases = get_lane_yield_in_bases(conversion_result)
     passing_filter_clusters_count = get_total_clusters_passing_filter(conversion_result)
 
