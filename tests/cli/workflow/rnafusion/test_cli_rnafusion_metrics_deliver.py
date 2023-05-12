@@ -71,7 +71,7 @@ def test_without_samples(
     assert "no samples" in caplog.text
 
 
-def test_dry_run(
+def test_metrics_deliver(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mock_analysis_finish,

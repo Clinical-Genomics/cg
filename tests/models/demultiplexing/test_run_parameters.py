@@ -2,59 +2,9 @@ import logging
 from pathlib import Path
 
 import pytest
-from cg.constants.demultiplexing import FlowCellType, UNKNOWN_REAGENT_KIT_VERSION
+from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
 from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
-
-
-def test_get_flow_cell_type_hiseq_run_parameters(hiseq_run_parameters: Path):
-    """Test that reading a hiseq run_parameters file assigns the correct flow cell type."""
-    # GIVEN a RunParameters object created from a Hiseq run parameters file
-    run_parameters = RunParameters(run_parameters_path=hiseq_run_parameters)
-
-    # WHEN fetching the flow cell type
-
-    # THEN the flow cell type is hiseq
-    assert run_parameters.flow_cell_type == FlowCellType.HISEQ
-
-
-def test_get_flow_cell_type_novaseq_run_parameters(novaseq_run_parameters: Path):
-    """Test that reading a Novaseq run_parameters file assigns the correct flow cell type."""
-    # GIVEN a RunParameters object created from a Novaseq run parameters file
-    run_parameters = RunParameters(run_parameters_path=novaseq_run_parameters)
-
-    # WHEN fetching the flow cell type
-
-    # THEN assert that the flow cell type is novaseq
-    assert run_parameters.flow_cell_type == FlowCellType.NOVASEQ
-
-
-def test_get_unknown_type_run_parameters(unknown_run_parameters: Path, caplog):
-    """Test that reading a run_parameters with unknown flow cell file raises an error."""
-    caplog.set_level(logging.INFO)
-    # GIVEN a RunParameters object created from a run parameters file with unknown flow cell
-    run_parameters = RunParameters(run_parameters_path=unknown_run_parameters)
-
-    # WHEN fetching the flow cell type
-    with pytest.raises(FlowCellError):
-        # THEN assert that an exception was raised since the flow cell type was unknown
-        run_parameters.flow_cell_type
-
-    assert "Unknown flow cell type" in caplog.text
-
-
-def test_get_flow_cell_type_when_missing(run_parameters_missing_flowcell_type: Path, caplog):
-    """Test that reading a run_parameters with missing flow cell file raises an error."""
-    caplog.set_level(logging.INFO)
-    # GIVEN a RunParameters object created from a run parameters file with missing flow cell
-    run_parameters = RunParameters(run_parameters_path=run_parameters_missing_flowcell_type)
-
-    # WHEN parsing the run parameters
-    with pytest.raises(FlowCellError):
-        # THEN assert that an exception was raised since the flow cell type was unknown
-        run_parameters.flow_cell_type
-
-    assert "Could not determine flow cell type" in caplog.text
 
 
 def test_get_base_mask(novaseq_run_parameters: Path):

@@ -15,6 +15,7 @@ from cg.constants.demultiplexing import (
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
 )
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
@@ -26,15 +27,15 @@ class SampleSheetCreator:
     def __init__(
         self,
         bcl_converter: str,
-        flowcell_id: str,
+        flow_cell: FlowCell,
         lims_samples: List[LimsFlowcellSample],
-        run_parameters: RunParameters,
         force: bool = False,
     ):
         self.bcl_converter = bcl_converter
-        self.flowcell_id: str = flowcell_id
+        self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
-        self.run_parameters: RunParameters = run_parameters
+        self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.flow_cell_mode: str = flow_cell.mode
         self.force = force
 
     @property
@@ -42,10 +43,10 @@ class SampleSheetCreator:
         return index.get_valid_indexes(dual_indexes_only=True)
 
     def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non-existing indexes to samples
+        """Add all dummy samples with non-existing indexes to samples.
 
-        dummy samples are added if there are indexes that are not used by the actual samples.
-        This means that we will add each dummy sample (that is needed) to each lane
+        Dummy samples are added if there are indexes that are not used by the actual samples.
+        This means that we will add each dummy sample (that is needed) to each lane.
         """
         LOG.info("Adding dummy samples for unused indexes")
         indexes_by_lane: Dict[int, Set[str]] = index.get_indexes_by_lane(samples=self.lims_samples)
@@ -56,7 +57,7 @@ class SampleSheetCreator:
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
                 dummy_sample_obj: LimsFlowcellSample = dummy_sample(
-                    flowcell=self.flowcell_id,
+                    flowcell=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
@@ -66,7 +67,7 @@ class SampleSheetCreator:
                 self.lims_samples.append(dummy_sample_obj)
 
     def remove_unwanted_samples(self) -> None:
-        """Filter out samples with indexes of unwanted length and single indexes"""
+        """Filter out samples with indexes of unwanted length and single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: LimsFlowcellSample
@@ -83,13 +84,13 @@ class SampleSheetCreator:
         sample_sheet_headers: List[str],
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet
-        headers"""
+        headers."""
         LOG.debug(f"Use sample sheet header {sample_sheet_headers}")
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
     def convert_to_sample_sheet(self) -> str:
-        """Convert all samples to a string with the sample sheet"""
+        """Convert all samples to a string with the sample sheet."""
         LOG.info("Convert samples to string")
         sample_sheet = [
             SAMPLE_SHEET_SETTINGS_HEADER,
@@ -110,8 +111,8 @@ class SampleSheetCreator:
         return "\n".join(sample_sheet)
 
     def construct_sample_sheet(self) -> str:
-        """Construct the sample sheet"""
-        LOG.info(f"Constructing sample sheet for {self.flowcell_id}")
+        """Construct the sample sheet."""
+        LOG.info(f"Constructing sample sheet for {self.flow_cell_id}")
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()
@@ -131,8 +132,8 @@ class SampleSheetCreator:
         LOG.info("Validating sample sheet")
         get_sample_sheet(
             sample_sheet=sample_sheet,
-            sheet_type="S2",
+            flow_cell_mode=self.flow_cell_mode,
             bcl_converter=self.bcl_converter,
         )
-        LOG.info("Sample sheet looks fine")
+        LOG.info("Sample sheet passed validation")
         return sample_sheet
