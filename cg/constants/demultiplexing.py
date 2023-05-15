@@ -34,6 +34,7 @@ SAMPLE_SHEET_HEADERS = {
         "Operator",
         "Project",
     ],
+    # TO MODIFY
     "dragen": [
         SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
