@@ -115,11 +115,11 @@ def test_get_sample_sheet_s2_bcl2fastq(
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=valid_sample_sheet_bcl2fastq,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
     # THEN it has the correct type
-    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ
+    assert sheet.flow_cell_mode == FlowCellMode.NOVASEQ
 
 
 def test_get_sample_sheet_s2_dragen(
@@ -131,11 +131,11 @@ def test_get_sample_sheet_s2_dragen(
     # WHEN creating the sample sheet object from a string
     sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=valid_sample_sheet_dragen,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=BclConverter.DRAGEN,
     )
     # THEN it has the correct type
-    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ
+    assert sheet.flow_cell_mode == FlowCellMode.NOVASEQ
 
 
 def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
@@ -149,7 +149,7 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
         # THEN a sample sheet error is raised
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
-            flow_cell_mode=FlowCellMode.NEXTSEQ,
+            flow_cell_mode=FlowCellMode.NOVASEQ,
             bcl_converter=BclConverter.BCL2FASTQ,
         )
 
@@ -165,7 +165,7 @@ def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
         # THEN a sample sheet error is raised
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
-            flow_cell_mode=FlowCellMode.NEXTSEQ,
+            flow_cell_mode=FlowCellMode.NOVASEQ,
             bcl_converter=BclConverter.DRAGEN,
         )
 
@@ -179,7 +179,7 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
@@ -196,7 +196,7 @@ def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=BclConverter.DRAGEN,
     )
 
@@ -213,12 +213,12 @@ def test_get_sample_sheet_from_file_s2_bcl2fastq(
     # WHEN creating the sample sheet object
     sheet: SampleSheet = get_sample_sheet_from_file(
         infile=valid_sample_sheet_bcl2fastq_path,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # THEN the sample sheet has the correct type
-    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ
+    assert sheet.flow_cell_mode == FlowCellMode.NOVASEQ
 
 
 def test_get_sample_sheet_from_file_s2_dragen(
@@ -230,9 +230,9 @@ def test_get_sample_sheet_from_file_s2_dragen(
     # WHEN creating the sample sheet
     sheet: SampleSheet = get_sample_sheet_from_file(
         infile=valid_sample_sheet_dragen_path,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        flow_cell_mode=FlowCellMode.NOVASEQ,
         bcl_converter=BclConverter.DRAGEN,
     )
 
     # THEN the sample sheet has the correct type
-    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ
+    assert sheet.flow_cell_mode == FlowCellMode.NOVASEQ

@@ -103,7 +103,6 @@ class FlowCellMode(StrEnum):
     """Define sample sheet flow cell mode."""
 
     HISEQX: str = "SP"
-    NEXTSEQ: str = "S2"
     NOVASEQ: str = "S4"
     MISEQ: str = "2500"
 

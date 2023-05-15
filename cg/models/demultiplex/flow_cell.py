@@ -96,9 +96,7 @@ class FlowCell:
     @property
     def mode(
         self,
-    ) -> Literal[
-        FlowCellMode.MISEQ, FlowCellMode.NOVASEQ, FlowCellMode.NEXTSEQ, FlowCellMode.HISEQX
-    ]:
+    ) -> Literal[FlowCellMode.MISEQ, FlowCellMode.NOVASEQ, FlowCellMode.HISEQX]:
         """Return the flow cell mode."""
         return self.run_parameters.flow_cell_mode or SEQUENCER_FLOW_CELL_MODES[self.sequencer_type]
 

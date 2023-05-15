@@ -7,7 +7,6 @@ class Sequencers(StrEnum):
 
     ALL: str = "all"
     MISEQ: str = "miseq"
-    NEXTSEQ: str = "nextseq"
     HISEQX: str = "hiseqx"
     HISEQGA: str = "hiseqga"
     NOVASEQ: str = "novaseq"

@@ -81,7 +81,6 @@ def validate_sample_sheet(
     flow_cell_mode: Literal[
         FlowCellMode.MISEQ,
         FlowCellMode.HISEQX,
-        FlowCellMode.NEXTSEQ,
         FlowCellMode.NOVASEQ,
     ],
     bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
@@ -103,7 +102,6 @@ def get_sample_sheet_from_file(
     flow_cell_mode: Literal[
         FlowCellMode.MISEQ,
         FlowCellMode.HISEQX,
-        FlowCellMode.NEXTSEQ,
         FlowCellMode.NOVASEQ,
     ],
     bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
