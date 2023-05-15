@@ -16,6 +16,20 @@ def test_get_content_from_file(csv_file_path: Path):
     assert isinstance(raw_csv_content, List)
 
 
+def test_get_content_from_file_to_dict(csv_file_path: Path):
+    """
+    Tests read CSV into a list of dictionaries.
+    """
+    # GIVEN a csv file
+
+    # WHEN reading the csv file
+    raw_csv_content: List[List[str]] = read_csv(file_path=csv_file_path, read_to_dict=True)
+
+    # Then assert a list is returned
+    assert isinstance(raw_csv_content, List)
+    assert isinstance(raw_csv_content[0], dict)
+
+
 def test_get_content_from_stream(csv_stream: str):
     """
     Tests read CSV stream.
