@@ -13,11 +13,16 @@ class BclConverter(StrEnum):
     BCL2FASTQ: str = "bcl2fastq"
 
 
+class SampleSheetHeaderColumnNames(StrEnum):
+    DATA: str = "[Data]"
+    FLOW_CELL_ID: str = "FCID"
+
+
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
-        "FCID",
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "SampleID",
         "SampleRef",
@@ -30,7 +35,7 @@ SAMPLE_SHEET_HEADERS = {
         "Project",
     ],
     "dragen": [
-        "FCID",
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "Sample_ID",
         "SampleRef",
@@ -44,13 +49,11 @@ SAMPLE_SHEET_HEADERS = {
     ],
 }
 
-SAMPLE_SHEET_DATA_HEADER = "[Data]"
-
 SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = "BarcodeMismatchesIndex1,0"
+SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = ["BarcodeMismatchesIndex1", "0"]
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2,0"
+SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = ["BarcodeMismatchesIndex2", "0"]
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",
