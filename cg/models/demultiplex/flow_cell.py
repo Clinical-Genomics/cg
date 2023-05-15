@@ -82,6 +82,7 @@ class FlowCell:
             message = f"Could not find run parameters file {self.run_parameters_path}"
             LOG.warning(message)
             raise FileNotFoundError(message)
+        # TODO: Create V2 RunParameter class and update here
         if not self._run_parameters:
             self._run_parameters = RunParameters(run_parameters_path=self.run_parameters_path)
         return self._run_parameters
