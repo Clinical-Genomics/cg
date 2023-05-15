@@ -6,14 +6,14 @@ from typing import Dict, List, Set
 from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet
+from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
-    SAMPLE_SHEET_DATA_HEADER,
     SAMPLE_SHEET_HEADERS,
     SAMPLE_SHEET_SETTINGS_HEADER,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
     SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
+    SampleSheetHeaderColumnNames,
 )
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -89,28 +89,26 @@ class SampleSheetCreator:
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
-    def convert_to_sample_sheet(self) -> str:
-        """Convert all samples to a string with the sample sheet."""
-        LOG.info("Convert samples to string")
-        sample_sheet = [
-            SAMPLE_SHEET_SETTINGS_HEADER,
+    def create_sample_sheet_content(self) -> List[List[str]]:
+        """Create sample sheet with samples."""
+        LOG.info("Create sample sheet for samples")
+        sample_sheet_content: List[List[str]] = [
+            [SAMPLE_SHEET_SETTINGS_HEADER],
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
-            SAMPLE_SHEET_DATA_HEADER,
-            ",".join(SAMPLE_SHEET_HEADERS[self.bcl_converter]),
+            [SampleSheetHeaderColumnNames.DATA],
+            SAMPLE_SHEET_HEADERS[self.bcl_converter],
         ]
         for sample in self.lims_samples:
-            sample_sheet.append(
-                ",".join(
-                    self.convert_sample_to_header_dict(
-                        sample=sample,
-                        sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
-                    )
+            sample_sheet_content.append(
+                self.convert_sample_to_header_dict(
+                    sample=sample,
+                    sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
                 )
             )
-        return "\n".join(sample_sheet)
+        return sample_sheet_content
 
-    def construct_sample_sheet(self) -> str:
+    def construct_sample_sheet(self) -> List[List[str]]:
         """Construct the sample sheet."""
         LOG.info(f"Constructing sample sheet for {self.flow_cell_id}")
         # Create dummy samples for the indexes that is missing
@@ -125,15 +123,15 @@ class SampleSheetCreator:
             reagent_kit_version=self.run_parameters.reagent_kit_version,
             expected_index_length=self.run_parameters.index_length,
         )
-        sample_sheet: str = self.convert_to_sample_sheet()
+        sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
         if self.force:
             LOG.info("Skipping validation of sample sheet due to force flag")
-            return sample_sheet
+            return sample_sheet_content
         LOG.info("Validating sample sheet")
-        get_sample_sheet(
-            sample_sheet=sample_sheet,
+        validate_sample_sheet(
+            sample_sheet_content=sample_sheet_content,
             flow_cell_mode=self.flow_cell_mode,
             bcl_converter=self.bcl_converter,
         )
         LOG.info("Sample sheet passed validation")
-        return sample_sheet
+        return sample_sheet_content
