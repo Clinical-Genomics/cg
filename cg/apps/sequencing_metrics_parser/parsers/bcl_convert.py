@@ -5,7 +5,8 @@ import logging
 from pathlib import Path
 from typing import List
 
-from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
+from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
@@ -34,7 +35,7 @@ class BclConvertMetricsParser:
         self.sample_sheet_path: Path = bcl_convert_sample_sheet_file_path
         self.run_info_path: Path = bcl_convert_run_info_file_path
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_quality_metrics_file()
-        self.demux_metrix: List[BclConvertDemuxMetrics] = self.parse_demux_metrics_file()
+        self.demux_metrics: List[BclConvertDemuxMetrics] = self.parse_demux_metrics_file()
         self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_adapter_metrics_file()
         self.sample_sheet: List[BclConvertSampleSheet] = self.parse_sample_sheet_file()
         self.run_info: BclConvertRunInfo = self.parse_run_info_file()
@@ -45,7 +46,7 @@ class BclConvertMetricsParser:
         """Parse the BCL convert metrics file with read pair format into a BclConvertQualityMetrics model."""
         LOG.info(f"Parsing BCLConvert metrics file: {self.quality_metrics_path}")
         parsed_metrics: List[BclConvertQualityMetrics] = []
-        with open(self.metrics_path, mode="r") as metrics_file:
+        with open(self.quality_metrics_path, mode="r") as metrics_file:
             metrics_reader = csv.DictReader(metrics_file)
             for row in metrics_reader:
                 parsed_metrics.append(
@@ -54,9 +55,9 @@ class BclConvertMetricsParser:
                         sample_internal_id=row["SampleID"],
                         read_pair_number=row["ReadNumber"],
                         yield_bases=int(row["Yield"]),
-                        yield_q30=int(row["YieldQ30"]),
+                        yield_q30_bases=int(row["YieldQ30"]),
                         quality_score_sum=int(row["QualityScoreSum"]),
-                        mean_quality_score=float(row["Mean Quality Score (PF)"]),
+                        mean_quality_score_q30=float(row["Mean Quality Score (PF)"]),
                         q30_bases_percent=float(row["% Q30"]),
                     )
                 )
@@ -109,7 +110,7 @@ class BclConvertMetricsParser:
             csv_reader = csv.reader(read_obj)
             header_line_count: int = 1
             for line in csv_reader:
-                if SAMPLE_SHEET_DATA_HEADER in line:
+                if SampleSheetHeaderColumnNames.DATA.value in line:
                     break
                 header_line_count += 1
         return header_line_count
@@ -122,18 +123,18 @@ class BclConvertMetricsParser:
         with open(self.sample_sheet_path, "r") as sample_sheet_file:
             for _ in range(header_line_count):
                 next(sample_sheet_file)
-                reader = csv.DictReader(sample_sheet_file)
-                for row in reader:
-                    sample_sheet.append(
-                        BclConvertSampleSheet(
-                            flow_cell_name=row["FCID"],
-                            lane=row["Lane"],
-                            sample_internal_id=row["Sample_ID"],
-                            sample_name=row["Sample_Name"],
-                            control=row["Control"],
-                            sample_project=row["Sample_Project"],
-                        )
+            reader = csv.DictReader(sample_sheet_file)
+            for row in reader:
+                sample_sheet.append(
+                    BclConvertSampleSheet(
+                        flow_cell_name=row["FCID"],
+                        lane=row["Lane"],
+                        sample_internal_id=row["Sample_ID"],
+                        sample_name=row["SampleName"],
+                        control=row["Control"],
+                        sample_project=row["Sample_Project"],
                     )
+                )
         return sample_sheet
 
     def parse_run_info_file(self) -> BclConvertRunInfo:

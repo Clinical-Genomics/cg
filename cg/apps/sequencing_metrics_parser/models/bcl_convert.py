@@ -12,7 +12,7 @@ class BclConvertQualityMetrics:
         yield_q30_bases: int,
         quality_score_sum: int,
         mean_quality_score_q30: float,
-        percent_q30: float,
+        q30_bases_percent: float,
     ):
         self.lane = lane
         self.sample_internal_id = sample_internal_id
@@ -21,7 +21,7 @@ class BclConvertQualityMetrics:
         self.yield_q30_bases = yield_q30_bases
         self.quality_score_sum = quality_score_sum
         self.mean_quality_score_q30 = mean_quality_score_q30
-        self.percent_q30 = percent_q30
+        self.percent_q30 = q30_bases_percent
 
     def _get_read_pair_summarised_yield(self) -> int:
         """Summarise the yield for the read pair"""
@@ -52,21 +52,21 @@ class BclConvertDemuxMetrics:
         lane: int,
         sample_internal_id: str,
         sample_project: str,
-        read_pairs_count: int,
+        read_pair_count: int,
         perfect_index_reads_count: int,
         perfect_index_reads_percent: float,
-        one_mismatch_reads_count: int,
-        two_mismatch_reads_count: int,
+        one_mismatch_index_reads_count: int,
+        two_mismatch_index_reads_count: int,
     ):
 
         self.sample_internal_id = sample_internal_id
         self.lane = lane
         self.sample_project = sample_project
-        self.read_pairs = read_pairs_count
+        self.read_pairs = read_pair_count
         self.perfect_index_reads = perfect_index_reads_count
         self.perfect_index_reads_percent = perfect_index_reads_percent
-        self.one_mismatch_reads = one_mismatch_reads_count
-        self.two_mismatch_reads = two_mismatch_reads_count
+        self.one_mismatch_reads = one_mismatch_index_reads_count
+        self.two_mismatch_reads = two_mismatch_index_reads_count
 
     def _calculate_total_read_counts(self) -> int:
         """calculates the number of reads from reported number of read pairs"""
@@ -99,7 +99,7 @@ class BclConvertAdapterMetrics:
 class BclConvertSampleSheet:
     """Model for the BCL Convert sample sheet."""
 
-    def __init(
+    def __init__(
         self,
         flow_cell_name: str,
         lane: int,
