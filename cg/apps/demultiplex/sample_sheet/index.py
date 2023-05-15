@@ -1,4 +1,4 @@
-"""Functions that deals with modifications of the indexes"""
+"""Functions that deal with modifications of the indexes."""
 import csv
 import logging
 from typing import Dict, List, Set

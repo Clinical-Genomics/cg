@@ -34,19 +34,12 @@ SAMPLE_SHEET_HEADERS = {
         "Operator",
         "Project",
     ],
-    # TO MODIFY
     "dragen": [
-        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "Sample_ID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Sample_Project",
+        "Index",
+        "Index2",
+        "OverrideCycles",
     ],
 }
 

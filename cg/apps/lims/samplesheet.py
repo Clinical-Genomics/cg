@@ -3,7 +3,7 @@ import logging
 import re
 from typing import Iterable, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, Extra
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
@@ -15,31 +15,40 @@ LOG = logging.getLogger(__name__)
 
 
 class LimsFlowcellSample(BaseModel):
-    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
+    flowcell_id: str = None
     lane: int = Field(..., alias="Lane")
     sample_id: str
-    sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
+    sample_ref: str = None
     index: str
     index2: str = ""
     description: str = ""
-    sample_name: str = Field(..., alias="SampleName")
-    control: str = Field("N", alias="Control")
-    recipe: str = Field("R1", alias="Recipe")
-    operator: str = Field("script", alias="Operator")
+    sample_name: str = None
+    control: str = None
+    recipe: str = None
+    operator: str = None
     project: str
 
     class Config:
         allow_population_by_field_name = True
+        extra = Extra.ignore
 
 
 class LimsFlowcellSampleBcl2Fastq(LimsFlowcellSample):
+    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
     sample_id: str = Field(..., alias="SampleID")
+    sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
+    sample_name: str = Field(..., alias="SampleName")
+    control: str = Field("N", alias="Control")
+    recipe: str = Field("R1", alias="Recipe")
+    operator: str = Field("script", alias="Operator")
     project: str = Field(..., alias="Project")
 
 
 class LimsFlowcellSampleDragen(LimsFlowcellSample):
     sample_id: str = Field(..., alias="Sample_ID")
-    project: str = Field(..., alias="Sample_Project")
+    index: str = Field(..., alias="Index")
+    index2: str = Field(default="", alias="Index2")
+    override_cycles: str = Field(default="", alias="OverrideCycles")
 
 
 def get_placement_lane(lane: str) -> int:
