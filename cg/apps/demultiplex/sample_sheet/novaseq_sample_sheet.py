@@ -92,7 +92,7 @@ class SampleSheetCreator:
     def create_sample_sheet_content(self) -> List[List[str]]:
         """Create sample sheet with samples."""
         LOG.info("Create sample sheet for samples")
-        sample_sheet: List[List[str]] = [
+        sample_sheet_content: List[List[str]] = [
             [SAMPLE_SHEET_SETTINGS_HEADER],
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
@@ -100,13 +100,13 @@ class SampleSheetCreator:
             SAMPLE_SHEET_HEADERS[self.bcl_converter],
         ]
         for sample in self.lims_samples:
-            sample_sheet.append(
+            sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
                     sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
                 )
             )
-        return sample_sheet
+        return sample_sheet_content
 
     def construct_sample_sheet(self) -> List[List[str]]:
         """Construct the sample sheet."""
