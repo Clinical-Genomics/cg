@@ -17,6 +17,7 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_FASTA_HEADER,
     TaxprofilerDefaults,
 )
+from cg.meta.workflow.fastq import TaxprofilerFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
 
@@ -39,12 +40,16 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def root(self) -> str:
         return self.root_dir
 
+    @property
+    def fastq_handler(self):
+        return TaxprofilerFastqHandler
+
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
     @staticmethod
     def build_samplesheet_content(
-        case_id: str, fastq_r1: List[str], fastq_r2: List[str]
+        case_id: str, fastq_r1: List[str], fastq_r2: List[str], instrument_platform: str
     ) -> Dict[str, List[str]]:
         """Build samplesheet headers and lists"""
         try:
@@ -52,7 +57,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 sample=case_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
-                instrument_platform=TaxprofilerDefaults.INSTRUMENT_PLATFORM,
+                instrument_platform=instrument_platform,
             )
         except ValidationError as error:
             LOG.error(error)
@@ -63,15 +68,15 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         # Complete sample lists to the same length as fastq_r1:
         for _ in range(len(fastq_r1)):
             samples_full_list.append(case_id)
-            instrument_full_list.append(TaxprofilerDefaults.INSTRUMENT_PLATFORM)
+            instrument_full_list.append(instrument_platform)
 
         samplesheet_content: dict = {
             NFX_SAMPLE_HEADER: samples_full_list,
             TAXPROFILER_RUN_ACCESSION: samples_full_list,
-            TAXPROFILER_INSTRUMENT_PLATFORM: TaxprofilerDefaults.INSTRUMENT_PLATFORM,
+            TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
             NFX_READ1_HEADER: fastq_r1,
             NFX_READ2_HEADER: fastq_r2,
-            TAXPROFILER_FASTA_HEADER: TAXPROFILER_FASTA_HEADER,
+            # TAXPROFILER_FASTA_HEADER: TAXPROFILER_FASTA_HEADER,
         }
         return samplesheet_content
 
