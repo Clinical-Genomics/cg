@@ -1,4 +1,4 @@
-"""Tests for the models module"""
+"""Tests for the utils module"""
 
 from cg.utils.utils import get_string_from_list_by_pattern
 

@@ -12,7 +12,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ProcessMock(Process):
-    """Mock the models.commands.Process class"""
+    """Mock the utils.commands.Process class"""
 
     def __init__(
         self,
