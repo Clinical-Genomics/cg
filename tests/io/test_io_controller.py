@@ -67,7 +67,7 @@ def test_get_content_from_file_to_dict_when_csv(csv_file_path: Path):
         file_format=FileFormat.CSV, file_path=csv_file_path, read_to_dict=True
     )
 
-    # Then assert a list is returned
+    # Then assert a list is returned and that the first element is a dict
     assert isinstance(raw_csv_content, list)
     assert isinstance(raw_csv_content[0], dict)
 

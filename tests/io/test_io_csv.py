@@ -25,7 +25,7 @@ def test_get_content_from_file_to_dict(csv_file_path: Path):
     # WHEN reading the csv file
     raw_csv_content: List[List[str]] = read_csv(file_path=csv_file_path, read_to_dict=True)
 
-    # Then assert a list is returned
+    # Then assert a list is returned and that the first element is a dict
     assert isinstance(raw_csv_content, List)
     assert isinstance(raw_csv_content[0], dict)
 
