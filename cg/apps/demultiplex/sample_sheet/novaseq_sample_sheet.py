@@ -135,3 +135,11 @@ class SampleSheetCreator:
         )
         LOG.info("Sample sheet passed validation")
         return sample_sheet_content
+
+
+class SampleSheetCreatorV1(SampleSheetCreator):
+    pass
+
+
+class SampleSheetCreatorV2(SampleSheetCreator):
+    pass
