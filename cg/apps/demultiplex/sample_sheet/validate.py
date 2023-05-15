@@ -79,7 +79,6 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
 def validate_sample_sheet(
     sample_sheet_content: List[List[str]],
     flow_cell_mode: Literal[
-        FlowCellMode.MISEQ,
         FlowCellMode.HISEQX,
         FlowCellMode.NOVASEQ,
     ],
@@ -100,7 +99,6 @@ def validate_sample_sheet(
 def get_sample_sheet_from_file(
     infile: Path,
     flow_cell_mode: Literal[
-        FlowCellMode.MISEQ,
         FlowCellMode.HISEQX,
         FlowCellMode.NOVASEQ,
     ],

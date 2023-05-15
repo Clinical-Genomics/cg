@@ -6,7 +6,6 @@ class Sequencers(StrEnum):
     """Sequencer instruments."""
 
     ALL: str = "all"
-    MISEQ: str = "miseq"
     HISEQX: str = "hiseqx"
     HISEQGA: str = "hiseqga"
     NOVASEQ: str = "novaseq"

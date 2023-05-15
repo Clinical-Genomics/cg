@@ -104,7 +104,6 @@ class FlowCellMode(StrEnum):
 
     HISEQX: str = "SP"
     NOVASEQ: str = "S4"
-    MISEQ: str = "2500"
 
 
 SEQUENCER_FLOW_CELL_MODES: Dict[str, str] = {
