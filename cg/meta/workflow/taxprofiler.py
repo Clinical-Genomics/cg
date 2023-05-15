@@ -80,7 +80,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         }
         return samplesheet_content
 
-    def write_samplesheet(self, case_id: str) -> None:
+    def write_samplesheet(self, case_id: str, instrument_platform: str) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
@@ -88,7 +88,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             samplesheet_content: Dict[str, List[str]] = self.build_samplesheet_content(
-                case_id, fastq_r1, fastq_r2
+                case_id, fastq_r1, fastq_r2, instrument_platform
             )
             LOG.info(samplesheet_content)
             # if dry_run:
