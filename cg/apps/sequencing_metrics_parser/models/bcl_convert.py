@@ -2,7 +2,9 @@ from pydantic import BaseModel
 import xml.etree.ElementTree as ET
 
 
-class BclConvertQualityMetrics:
+class BclConvertQualityMetrics(BaseModel):
+    """Model for the BCL Convert quality metrics"""
+
     def __init__(
         self,
         lane: int,
@@ -23,7 +25,7 @@ class BclConvertQualityMetrics:
         self.mean_quality_score_q30 = mean_quality_score_q30
         self.percent_q30 = q30_bases_percent
 
-    def _get_read_pair_summarised_yield(self) -> int:
+    def get_read_pair_summarised_yield(self) -> int:
         """Summarise the yield for the read pair"""
         pass
 
@@ -44,7 +46,7 @@ class BclConvertQualityMetrics:
         pass
 
 
-class BclConvertDemuxMetrics:
+class BclConvertDemuxMetrics(BaseModel):
     """Model for the BCL Convert demultiplexing metrics."""
 
     def __init__(
@@ -73,7 +75,7 @@ class BclConvertDemuxMetrics:
         return self.read_pairs * 2
 
 
-class BclConvertAdapterMetrics:
+class BclConvertAdapterMetrics(BaseModel):
     """Model for the BCL Convert adapter metrics."""
 
     def __init__(
@@ -96,7 +98,7 @@ class BclConvertAdapterMetrics:
         pass
 
 
-class BclConvertSampleSheet:
+class BclConvertSampleSheet(BaseModel):
     """Model for the BCL Convert sample sheet."""
 
     def __init__(
@@ -117,13 +119,13 @@ class BclConvertSampleSheet:
         self.sample_project = sample_project
 
 
-class BclConvertRunInfo:
+class BclConvertRunInfo(BaseModel):
     """Model for the BCL convert run info file."""
 
     def __init__(self, tree: ET.Element):
         self.tree = tree
 
-    def _calculate_mean_read_length_from_run_info(self) -> int:
+    def calculate_mean_read_length_from_run_info(self) -> int:
         """Get the mean read length for this flowcell"""
         read_lengths = [
             int(read.attrib["NumCycles"])
