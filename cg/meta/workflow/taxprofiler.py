@@ -76,7 +76,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
             NFX_READ1_HEADER: fastq_r1,
             NFX_READ2_HEADER: fastq_r2,
-            # TAXPROFILER_FASTA_HEADER: TAXPROFILER_FASTA_HEADER,
+            TAXPROFILER_FASTA_HEADER: "",
         }
         return samplesheet_content
 
