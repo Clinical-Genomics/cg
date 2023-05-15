@@ -40,6 +40,7 @@ class LimsFlowcellSampleBcl2Fastq(LimsFlowcellSample):
 class LimsFlowcellSampleDragen(LimsFlowcellSample):
     sample_id: str = Field(..., alias="Sample_ID")
     project: str = Field(..., alias="Sample_Project")
+    override_cycles: str = Field(default="", alias="OverrideCycles")
 
 
 def get_placement_lane(lane: str) -> int:

@@ -34,7 +34,6 @@ SAMPLE_SHEET_HEADERS = {
         "Operator",
         "Project",
     ],
-    # TO MODIFY
     "dragen": [
         SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
@@ -47,6 +46,13 @@ SAMPLE_SHEET_HEADERS = {
         "Recipe",
         "Operator",
         "Sample_Project",
+    ],
+    "novaseqx": [
+        "Lane",
+        "Sample_ID",
+        "Index",
+        "Index2",
+        "OverrideCycles",
     ],
 }
 
