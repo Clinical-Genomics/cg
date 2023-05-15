@@ -65,6 +65,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
         samples_full_list: list = []
         instrument_full_list: list = []
+        fasta_full_list: list = []
         # Complete sample lists to the same length as fastq_r1:
         for _ in range(len(fastq_r1)):
             samples_full_list.append(case_id)
@@ -76,7 +77,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
             NFX_READ1_HEADER: fastq_r1,
             NFX_READ2_HEADER: fastq_r2,
-            TAXPROFILER_FASTA_HEADER: "",
+            TAXPROFILER_FASTA_HEADER: fasta_full_list,
         }
         return samplesheet_content
 
