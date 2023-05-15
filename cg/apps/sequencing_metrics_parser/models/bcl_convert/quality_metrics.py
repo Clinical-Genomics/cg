@@ -7,7 +7,7 @@ class BaseModel:
             setattr(self, key, value)
 
 
-class QualityMetrics(BaseModel):
+class BclConvertQualityMetrics(BaseModel):
     def __init__(
         self,
         lane: int,

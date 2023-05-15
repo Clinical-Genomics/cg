@@ -1,7 +1,9 @@
 """Parse the quality metrics file from BCL convert into a pydantic model."""
 
 from pydantic import BaseModel
-from cg.apps.sequencing_metrics_parser.models.bcl_convert.quality_metrics import QualityMetrics
+from cg.apps.sequencing_metrics_parser.models.bcl_convert.quality_metrics import (
+    BclConvertQualityMetrics,
+)
 from typing import Dict, Tuple, List
 from pathlib import Path
 import logging
@@ -9,22 +11,22 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-class BclConvertQualityMetrics(BaseModel):
+class BclConvertQualityMetricsParser(BaseModel):
     def __init__(self, bcl_convert_quality_metrics_path: Path):
         self.metrics_path: Path = bcl_convert_quality_metrics_path
-        self.parsed_metrics: List[QualityMetrics] = self.parse_quality_metrics_file()
+        self.parsed_metrics: List[BclConvertQualityMetrics] = self.parse_quality_metrics_file()
 
     def parse_quality_metrics_file(
         self,
-    ) -> List[QualityMetrics]:
-        """Parse the BCL convert metrics file with read pair format into a dictionary."""
+    ) -> List[BclConvertQualityMetrics]:
+        """Parse the BCL convert metrics file with read pair format into a BclConvertQualityMetrics model."""
         LOG.info(f"Parsing BCLConvert metrics file: {self.metrics_path}")
-        parsed_metrics: List[QualityMetrics] = []
+        parsed_metrics: List[BclConvertQualityMetrics] = []
         with open(self.metrics_path, mode="r") as metrics_file:
             metrics_reader = csv.DictReader(metrics_file)
             for row in metrics_reader:
                 parsed_metrics.append(
-                    QualityMetrics(
+                    BclConvertQualityMetrics(
                         lane=int(row["Lane"]),
                         sample_internal_id=row["SampleID"],
                         read_pair_number=row["ReadNumber"],
