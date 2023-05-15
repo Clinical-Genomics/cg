@@ -5,6 +5,7 @@ import logging
 
 import click
 
+from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_to_scout
 from cg.constants import DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
@@ -28,6 +29,10 @@ class RnafusionUploadAPI(UploadAPI):
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis)
 
+        # Clinical delivery
+        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
+
+        # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
             ctx.invoke(upload_to_scout, case_id=case.internal_id, re_upload=restart)
 

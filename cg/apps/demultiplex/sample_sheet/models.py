@@ -2,13 +2,15 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
+from cg.constants.demultiplexing import FlowCellMode, SampleSheetHeaderColumnNames
+
 LOG = logging.getLogger(__name__)
 
 
 class NovaSeqSample(BaseModel):
     """This model is used when parsing/validating existing sample sheets."""
 
-    flow_cell: str = Field(..., alias="FCID")
+    flow_cell: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
     lane: int = Field(..., alias="Lane")
     sample_id: str = Field(..., alias="SampleID")
     reference: str = Field(..., alias="SampleRef")
@@ -32,8 +34,11 @@ class SampleDragen(NovaSeqSample):
 
 
 class SampleSheet(BaseModel):
-    type: str
+    flow_cell_mode: FlowCellMode
     samples: List[NovaSeqSample]
+
+    class Config:
+        use_enum_values = True
 
 
 class SampleSheetBcl2Fastq(SampleSheet):

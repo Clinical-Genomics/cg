@@ -14,8 +14,10 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
     flowcell_samples,
 )
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
+from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, FlowCellMode, FLOW_CELL_MODES
 from cg.exc import FlowCellError
+from cg.io.controller import WriteFile
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 
@@ -29,23 +31,32 @@ def sample_sheet_commands():
 
 @sample_sheet_commands.command(name="validate")
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--flow-cell-mode",
+    default=FlowCellMode.NOVASEQ,
+    show_default=True,
+    type=click.Choice(FLOW_CELL_MODES),
+    help="Instrument sample sheet flow cell mode",
+)
 @OPTION_BCL_CONVERTER
-def validate_sample_sheet(sheet: click.Path, bcl_converter: str):
-    """Command to validate a sample sheet."""
+def validate_sample_sheet(
+    bcl_converter: str,
+    sheet: click.Path,
+    flow_cell_mode: str,
+):
+    """Validate a sample sheet."""
     LOG.info(
         f"Validating sample sheet {sheet}",
     )
     sheet: Path = Path(str(sheet))
-    if sheet.suffix != ".csv":
-        LOG.warning(f"File {sheet} seems to be in wrong format")
-        LOG.warning(f"Suffix {sheet.suffix} is not '.csv'")
-        raise click.Abort
     try:
-        get_sample_sheet_from_file(infile=sheet, sheet_type="S4", bcl_converter=bcl_converter)
+        get_sample_sheet_from_file(
+            infile=sheet, flow_cell_mode=flow_cell_mode, bcl_converter=bcl_converter
+        )
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
-    LOG.info("Sample sheet looks fine")
+    LOG.info("Sample sheet passed validation")
 
 
 @sample_sheet_commands.command(name="create")
@@ -84,18 +95,21 @@ def create_sheet(
         LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
         raise click.Abort
     try:
-        sample_sheet: str = create_sample_sheet(
+        sample_sheet_content: List[List[str]] = create_sample_sheet(
             bcl_converter=bcl_converter, flow_cell=flow_cell, lims_samples=lims_samples, force=force
         )
     except (FileNotFoundError, FileExistsError) as error:
         raise click.Abort from error
 
     if dry_run:
-        click.echo(sample_sheet)
+        click.echo(sample_sheet_content)
         return
     LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
-    with open(flow_cell.sample_sheet_path, "w") as outfile:
-        outfile.write(sample_sheet)
+    WriteFile.write_file_from_content(
+        content=sample_sheet_content,
+        file_format=FileFormat.CSV,
+        file_path=flow_cell.sample_sheet_path,
+    )
 
 
 @sample_sheet_commands.command(name="create-all")
@@ -134,15 +148,18 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
 
         try:
-            sample_sheet: str = create_sample_sheet(
+            sample_sheet_content: List[List[str]] = create_sample_sheet(
                 flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
             )
         except (FileNotFoundError, FileExistsError):
             continue
 
         if dry_run:
-            click.echo(sample_sheet)
+            click.echo(sample_sheet_content)
             return
         LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
-        with open(flow_cell.sample_sheet_path, "w") as outfile:
-            outfile.write(sample_sheet)
+        WriteFile.write_file_from_content(
+            content=sample_sheet_content,
+            file_format=FileFormat.CSV,
+            file_path=flow_cell.sample_sheet_path,
+        )

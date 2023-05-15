@@ -11,6 +11,8 @@ from cg.apps.lims.samplesheet import (
     LimsFlowcellSampleDragen,
 )
 from cg.apps.demultiplex.sample_sheet.validate import NovaSeqSample
+from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
@@ -22,32 +24,20 @@ def fixture_output_dirs_bcl2fastq(demultiplexed_runs: Path) -> Path:
 
 
 @pytest.fixture(name="demux_run_dir_bcl2fastq")
-def fixture_demux_run_dir_bcl2fastq(demux_run_dir: Path) -> Path:
+def fixture_demux_run_dir_bcl2fastq(flow_cell_runs_dir: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(demux_run_dir, "bcl2fastq")
+    return Path(flow_cell_runs_dir, "bcl2fastq")
 
 
 @pytest.fixture(name="demux_run_dir_dragen")
-def fixture_demux_run_dir_dragen(demux_run_dir: Path) -> Path:
+def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(demux_run_dir, "dragen")
+    return Path(flow_cell_runs_dir, "dragen")
 
 
 @pytest.fixture(name="index_obj")
 def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
-
-
-@pytest.fixture(name="flow_cell_dir_bcl2fastq")
-def fixture_novaseq_dir_bcl2fastq(demux_run_dir_bcl2fastq: Path, flow_cell_full_name: str) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir_bcl2fastq, flow_cell_full_name)
-
-
-@pytest.fixture(name="flow_cell_dir_dragen")
-def fixture_novaseq_dir_dragen(demux_run_dir_dragen: Path, flow_cell_full_name: str) -> Path:
-    """Return the path to the novaseq demultiplex fixtures"""
-    return Path(demux_run_dir_dragen, flow_cell_full_name)
 
 
 @pytest.fixture(name="raw_lims_sample")
@@ -98,28 +88,25 @@ def fixture_novaseq_run_parameters_object(novaseq_run_parameters: Path) -> RunPa
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
-    flow_cell_id: str,
+    bcl2fastq_flow_cell: FlowCell,
     lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
-    novaseq_run_parameters_object: RunParameters,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
-        flowcell_id=flow_cell_id,
+        flow_cell=bcl2fastq_flow_cell,
         lims_samples=lims_novaseq_bcl2fastq_samples,
-        run_parameters=novaseq_run_parameters_object,
         bcl_converter="bcl2fastq",
     )
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_object")
 def fixture_novaseq_dragen_sample_sheet_object(
-    flow_cell_id: str,
+    dragen_flow_cell: FlowCell,
     lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
     novaseq_run_parameters_object: RunParameters,
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
-        flowcell_id=flow_cell_id,
+        flow_cell=dragen_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
-        run_parameters=novaseq_run_parameters_object,
         bcl_converter="dragen",
     )
 
@@ -128,103 +115,207 @@ def fixture_novaseq_dragen_sample_sheet_object(
 
 
 @pytest.fixture(name="sample_sheet_line_sample_1")
-def fixture_sample_sheet_line_sample_1() -> str:
+def fixture_sample_sheet_line_sample_1() -> List[str]:
     """Return the line in the sample sheet corresponding to a sample."""
-    return "HWHMWDMXX,1,ACC7628A68,hg19,ATTCCACACT,TGGTCTTGTT,814206,N,R1,script,814206\n"
+    return [
+        "HWHMWDMXX",
+        "1",
+        "ACC7628A68",
+        "hg19",
+        "ATTCCACACT",
+        "TGGTCTTGTT",
+        "814206",
+        "N",
+        "R1",
+        "script",
+        "814206",
+    ]
 
 
 @pytest.fixture(name="sample_sheet_line_sample_2")
-def fixture_sample_sheet_line_sample_2() -> str:
+def fixture_sample_sheet_line_sample_2() -> List[str]:
     """Return the line in the sample sheet corresponding to a sample."""
-    return "HWHMWDMXX,1,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206\n"
+    return [
+        "HWHMWDMXX",
+        "1",
+        "ACC7628A1",
+        "hg19",
+        "AGTTAGCTGG",
+        "GATGAGAATG",
+        "814206",
+        "N",
+        "R1",
+        "script",
+        "814206",
+    ]
 
 
 @pytest.fixture(name="sample_sheet_bcl2fastq_data_header")
-def fixture_sample_sheet_bcl2fastq_data_header() -> str:
-    """Return the content of a bcl2fastq sample sheet data header without samples."""
-    return (
-        "[Data]\n"
-        "FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project\n"
-    )
+def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
+    """Return the content of a Bcl2fastq sample sheet data header without samples."""
+    return [
+        [SampleSheetHeaderColumnNames.DATA],
+        [
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            "Lane",
+            "SampleID",
+            "SampleRef",
+            "index",
+            "index2",
+            "SampleName",
+            "Control",
+            "Recipe",
+            "Operator",
+            "Project",
+        ],
+    ]
 
 
 @pytest.fixture(name="sample_sheet_dragen_data_header")
-def fixture_sample_sheet_dragen_data_header() -> str:
-    """Return the content of a dragen sample sheet data_header without samples."""
-    return (
-        "[Data]\n"
-        "FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,"
-        "Sample_Project\n"
-    )
+def fixture_sample_sheet_dragen_data_header() -> List[List[str]]:
+    """Return the content of a Dragen sample sheet data header without samples."""
+    return [
+        [SampleSheetHeaderColumnNames.DATA],
+        [
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            "Lane",
+            "SampleID",
+            "SampleRef",
+            "index",
+            "index2",
+            "SampleName",
+            "Control",
+            "Recipe",
+            "Operator",
+            "Sample_Project",
+        ],
+    ]
 
 
 @pytest.fixture(name="sample_sheet_samples_no_header")
 def fixture_sample_sheet_no_sample_header(
-    sample_sheet_line_sample_1: str, sample_sheet_line_sample_2: str
-) -> str:
+    sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
+) -> List[List[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
-    return "[Data]\n" + sample_sheet_line_sample_1 + sample_sheet_line_sample_2
+    return [
+        [SampleSheetHeaderColumnNames.DATA],
+        sample_sheet_line_sample_1,
+        sample_sheet_line_sample_2,
+    ]
 
 
 @pytest.fixture(name="valid_sample_sheet_bcl2fastq")
 def fixture_valid_sample_sheet_bcl2fastq(
-    sample_sheet_line_sample_1: str, sample_sheet_line_sample_2: str
-) -> str:
-    """Return the content of a valid bcl2fastq sample sheet."""
-    return (
-        "[Data]\n"
-        "FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project\n"
-        + sample_sheet_line_sample_1
-        + sample_sheet_line_sample_2
-    )
+    sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
+) -> List[List[str]]:
+    """Return the content of a valid Bcl2fastq sample sheet."""
+    return [
+        [SampleSheetHeaderColumnNames.DATA],
+        [
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            "Lane",
+            "SampleID",
+            "SampleRef",
+            "index",
+            "index2",
+            "SampleName",
+            "Control",
+            "Recipe",
+            "Operator",
+            "Project",
+        ],
+        sample_sheet_line_sample_1,
+        sample_sheet_line_sample_2,
+    ]
 
 
 @pytest.fixture(name="sample_sheet_bcl2fastq_duplicate_same_lane")
 def fixture_sample_sheet_bcl2fastq_duplicate_same_lane(
-    valid_sample_sheet_bcl2fastq: str, sample_sheet_line_sample_2: str
-):
-    """Return the content of a bcl2fastq sample sheet with a duplicated sample in the same lane."""
-    return valid_sample_sheet_bcl2fastq + "\n" + sample_sheet_line_sample_2
+    valid_sample_sheet_bcl2fastq: List[List[str]], sample_sheet_line_sample_2: List[str]
+) -> List[List[str]]:
+    """Return the content of a Bcl2fastq sample sheet with a duplicated sample in the same lane."""
+    valid_sample_sheet_bcl2fastq.append(sample_sheet_line_sample_2)
+    return valid_sample_sheet_bcl2fastq
 
 
 @pytest.fixture(name="sample_sheet_bcl2fastq_duplicate_different_lane")
-def fixture_sample_sheet_bcl2fastq_duplicate_different_lane(valid_sample_sheet_bcl2fastq: str):
-    """Return the content of a bcl2fastq sample sheet with a duplicated sample in a different lane."""
-    return (
-        valid_sample_sheet_bcl2fastq
-        + "\n"
-        + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+def fixture_sample_sheet_bcl2fastq_duplicate_different_lane(
+    valid_sample_sheet_bcl2fastq: List[List[str]],
+) -> List[List[str]]:
+    """Return the content of a Bcl2fastq sample sheet with a duplicated sample in a different lane."""
+    valid_sample_sheet_bcl2fastq.append(
+        [
+            "HWHMWDMXX",
+            "2",
+            "ACC7628A1",
+            "hg19",
+            "AGTTAGCTGG",
+            "GATGAGAATG",
+            "814206",
+            "N",
+            "R1",
+            "script",
+            "814206",
+        ]
     )
+    return valid_sample_sheet_bcl2fastq
 
 
 @pytest.fixture(name="valid_sample_sheet_dragen")
 def fixture_valid_sample_sheet_dragen(
-    sample_sheet_line_sample_1: str, sample_sheet_line_sample_2: str
-) -> str:
-    """Return the content of a valid dragen sample sheet."""
-    return (
-        "[Data]\n"
-        "FCID,Lane,Sample_ID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,"
-        "Sample_Project\n" + sample_sheet_line_sample_1 + sample_sheet_line_sample_2
-    )
+    sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
+) -> List[List[str]]:
+    """Return the content of a valid Dragen sample sheet."""
+    return [
+        [SampleSheetHeaderColumnNames.DATA],
+        [
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            "Lane",
+            "Sample_ID",
+            "SampleRef",
+            "index",
+            "index2",
+            "SampleName",
+            "Control",
+            "Recipe",
+            "Operator",
+            "Sample_Project",
+        ],
+        sample_sheet_line_sample_1,
+        sample_sheet_line_sample_2,
+    ]
 
 
 @pytest.fixture(name="sample_sheet_dragen_duplicate_same_lane")
 def fixture_sample_sheet_dragen_duplicate_same_lane(
-    valid_sample_sheet_dragen: str, sample_sheet_line_sample_2: str
-):
-    """Return the content of a dragen sample sheet with a duplicated sample in the same lane."""
-    return valid_sample_sheet_dragen + "\n" + sample_sheet_line_sample_2
+    valid_sample_sheet_dragen: List[List[str]], sample_sheet_line_sample_2: List[str]
+) -> List[List[str]]:
+    """Return the content of a Dragen sample sheet with a duplicated sample in the same lane."""
+    valid_sample_sheet_dragen.append(sample_sheet_line_sample_2)
+    return valid_sample_sheet_dragen
 
 
 @pytest.fixture(name="sample_sheet_dragen_duplicate_different_lane")
-def fixture_sample_sheet_dragen_duplicate_different_lane(valid_sample_sheet_dragen: str):
-    """Return the content of aa dragen sample sheet with a duplicated sample in a different lane."""
-    return (
-        valid_sample_sheet_dragen
-        + "\n"
-        + "HWHMWDMXX,2,ACC7628A1,hg19,AGTTAGCTGG,GATGAGAATG,814206,N,R1,script,814206"
+def fixture_sample_sheet_dragen_duplicate_different_lane(
+    valid_sample_sheet_dragen: List[List[str]],
+) -> List[List[str]]:
+    """Return the content of a Dragen sample sheet with a duplicated sample in a different lane."""
+    valid_sample_sheet_dragen.append(
+        [
+            "HWHMWDMXX",
+            "2",
+            "ACC7628A1",
+            "hg19",
+            "AGTTAGCTGG",
+            "GATGAGAATG",
+            "814206",
+            "N",
+            "R1",
+            "script",
+            "814206",
+        ]
     )
+    return valid_sample_sheet_dragen
 
 
 @pytest.fixture(name="valid_sample_sheet_bcl2fastq_path")

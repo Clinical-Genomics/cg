@@ -7,11 +7,12 @@ import pytest
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet, NovaSeqSample
 from cg.apps.demultiplex.sample_sheet.validate import (
     get_raw_samples,
-    get_sample_sheet,
+    validate_sample_sheet,
     get_sample_sheet_from_file,
     get_samples_by_lane,
     validate_samples_are_unique,
 )
+from cg.constants.demultiplexing import FlowCellMode, BclConverter
 from cg.exc import SampleSheetError
 
 
@@ -62,12 +63,14 @@ def test_get_samples_by_lane(
     assert len(samples_per_lane) == 2
 
 
-def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: str):
+def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: List[List[str]]):
     """Test that getting raw samples from a valid sample sheet gets a correct list of dictionaries."""
     # GIVEN a valid sample sheet
 
     # WHEN getting the list of raw samples from it
-    raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet=valid_sample_sheet_bcl2fastq)
+    raw_samples: List[Dict[str, str]] = get_raw_samples(
+        sample_sheet_content=valid_sample_sheet_bcl2fastq
+    )
 
     # THEN it returns a list with 2 dictionaries
     assert len(raw_samples) == 2
@@ -77,107 +80,107 @@ def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: str):
     assert "Lane" in raw_samples[0].keys()
 
 
-def test_get_raw_samples_no_header(sample_sheet_samples_no_header: str, caplog):
+def test_get_raw_samples_no_header(sample_sheet_samples_no_header: List[List[str]], caplog):
     """Test that getting samples from a sample sheet without header fails."""
     # GIVEN a sample sheet without header
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples(sample_sheet=sample_sheet_samples_no_header)
+        get_raw_samples(sample_sheet_content=sample_sheet_samples_no_header)
 
     # THEN an exception is raised because of the missing header
     assert "Could not find header in sample sheet" in caplog.text
 
 
-def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: str, caplog):
+def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: List[List[str]], caplog):
     """Test that getting samples from a sample sheet without samples fails."""
     # GIVEN a sample sheet without samples
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples(sample_sheet=sample_sheet_bcl2fastq_data_header)
+        get_raw_samples(sample_sheet_content=sample_sheet_bcl2fastq_data_header)
 
     # THEN an exception is raised because of the missing samples
     assert "Could not find any samples in sample sheet" in caplog.text
 
 
 def test_get_sample_sheet_s2_bcl2fastq(
-    valid_sample_sheet_bcl2fastq: str,
+    valid_sample_sheet_bcl2fastq: List[List[str]],
 ):
-    """Test that a bcl2fastq sample sheet created from valid parameters has the correct type."""
-    # GIVEN a valid sample sheet to be used with bcl2fastq
+    """Test that a Bcl2fastq sample sheet created from valid parameters has the correct type."""
+    # GIVEN a valid sample sheet to be used with Bcl2fastq
 
     # WHEN creating the sample sheet object from a string
-    sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=valid_sample_sheet_bcl2fastq,
-        sheet_type="S2",
-        bcl_converter="bcl2fastq",
+    sheet: SampleSheet = validate_sample_sheet(
+        sample_sheet_content=valid_sample_sheet_bcl2fastq,
+        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
     # THEN it has the correct type
-    assert sheet.type == "S2"
+    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ
 
 
 def test_get_sample_sheet_s2_dragen(
-    valid_sample_sheet_dragen: str,
+    valid_sample_sheet_dragen: List[List[str]],
 ):
-    """Test that a dragen sample sheet created from valid parameters has the correct type."""
-    # GIVEN a valid sample sheet to be used with dragen
+    """Test that a Dragen sample sheet created from valid parameters has the correct type."""
+    # GIVEN a valid sample sheet to be used with Dragen
 
     # WHEN creating the sample sheet object from a string
-    sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=valid_sample_sheet_dragen,
-        sheet_type="S2",
-        bcl_converter="dragen",
+    sheet: SampleSheet = validate_sample_sheet(
+        sample_sheet_content=valid_sample_sheet_dragen,
+        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        bcl_converter=BclConverter.DRAGEN,
     )
     # THEN it has the correct type
-    assert sheet.type == "S2"
+    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ
 
 
 def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
-    sample_sheet_bcl2fastq_duplicate_same_lane: str,
+    sample_sheet_bcl2fastq_duplicate_same_lane: List[List[str]],
 ):
-    """Test that creating a bcl2fastq sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a bcl2fastq sample sheet with a sample duplicated in a lane
+    """Test that creating a Bcl2fastq sample sheet with duplicated samples in a lane fails."""
+    # GIVEN a Bcl2fastq sample sheet with a sample duplicated in a lane
 
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
-        get_sample_sheet(
-            sample_sheet=sample_sheet_bcl2fastq_duplicate_same_lane,
-            sheet_type="S2",
-            bcl_converter="bcl2fastq",
+        validate_sample_sheet(
+            sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
+            flow_cell_mode=FlowCellMode.NEXTSEQ,
+            bcl_converter=BclConverter.BCL2FASTQ,
         )
 
 
 def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
-    sample_sheet_dragen_duplicate_same_lane: str,
+    sample_sheet_dragen_duplicate_same_lane: List[List[str]],
 ):
-    """Test that creating a dragen sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a dragen sample sheet with a sample duplicated in a lane
+    """Test that creating a Dragen sample sheet with duplicated samples in a lane fails."""
+    # GIVEN a Dragen sample sheet with a sample duplicated in a lane
 
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
-        get_sample_sheet(
-            sample_sheet=sample_sheet_dragen_duplicate_same_lane,
-            sheet_type="S2",
-            bcl_converter="dragen",
+        validate_sample_sheet(
+            sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
+            flow_cell_mode=FlowCellMode.NEXTSEQ,
+            bcl_converter=BclConverter.DRAGEN,
         )
 
 
 def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
-    sample_sheet_bcl2fastq_duplicate_different_lane: str,
+    sample_sheet_bcl2fastq_duplicate_different_lane: List[List[str]],
 ):
-    """Test that bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
-    # GIVEN a bcl2fastq sample sheet with same sample duplicated in different lanes
+    """Test that Bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
+    # GIVEN a Bcl2fastq sample sheet with same sample duplicated in different lanes
 
     # WHEN creating the sample sheet object
-    sample_sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=sample_sheet_bcl2fastq_duplicate_different_lane,
-        sheet_type="S2",
-        bcl_converter="bcl2fastq",
+    sample_sheet: SampleSheet = validate_sample_sheet(
+        sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
+        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # THEN a sample sheet is returned with samples in it
@@ -185,16 +188,16 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
 
 
 def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
-    sample_sheet_dragen_duplicate_different_lane: str,
+    sample_sheet_dragen_duplicate_different_lane: List[List[str]],
 ):
-    """Test that dragen a sample sheet created with duplicated samples in different lanes has samples."""
-    # GIVEN a dragen sample sheet with same sample duplicated in different lanes
+    """Test that Dragen a sample sheet created with duplicated samples in different lanes has samples."""
+    # GIVEN a Dragen sample sheet with same sample duplicated in different lanes
 
     # WHEN creating the sample sheet object
-    sample_sheet: SampleSheet = get_sample_sheet(
-        sample_sheet=sample_sheet_dragen_duplicate_different_lane,
-        sheet_type="S2",
-        bcl_converter="dragen",
+    sample_sheet: SampleSheet = validate_sample_sheet(
+        sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
+        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        bcl_converter=BclConverter.DRAGEN,
     )
 
     # THEN a sample sheet is returned with samples in it
@@ -204,32 +207,32 @@ def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
 def test_get_sample_sheet_from_file_s2_bcl2fastq(
     valid_sample_sheet_bcl2fastq_path: Path,
 ):
-    """Test that a bcl2fastq sample sheet created from a file has the correct type."""
-    # GIVEN a bcl2fastq sample sheet file path
+    """Test that a Bcl2fastq sample sheet created from a file has the correct type."""
+    # GIVEN a Bcl2fastq sample sheet file path
 
     # WHEN creating the sample sheet object
     sheet: SampleSheet = get_sample_sheet_from_file(
         infile=valid_sample_sheet_bcl2fastq_path,
-        sheet_type="S2",
-        bcl_converter="bcl2fastq",
+        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
     # THEN the sample sheet has the correct type
-    assert sheet.type == "S2"
+    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ
 
 
 def test_get_sample_sheet_from_file_s2_dragen(
     valid_sample_sheet_dragen_path: Path,
 ):
-    """Test that a dragen sample sheet created from a file has the correct type."""
-    # GIVEN a dragen sample sheet file path
+    """Test that a Dragen sample sheet created from a file has the correct type."""
+    # GIVEN a Dragen sample sheet file path
 
     # WHEN creating the sample sheet
     sheet: SampleSheet = get_sample_sheet_from_file(
         infile=valid_sample_sheet_dragen_path,
-        sheet_type="S2",
-        bcl_converter="dragen",
+        flow_cell_mode=FlowCellMode.NEXTSEQ,
+        bcl_converter=BclConverter.DRAGEN,
     )
 
     # THEN the sample sheet has the correct type
-    assert sheet.type == "S2"
+    assert sheet.flow_cell_mode == FlowCellMode.NEXTSEQ

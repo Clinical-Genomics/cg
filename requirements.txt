@@ -17,7 +17,6 @@ flask_wtf
 google-auth
 gunicorn
 requests[security]
-requests_cache
 sendmail-container
 werkzeug<1.0.0              # due to breaking changes in 1.0.0
 
