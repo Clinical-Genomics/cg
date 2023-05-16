@@ -3,10 +3,12 @@ import logging
 from datetime import datetime, timedelta
 from typing import List
 
+import pytest
 from sqlalchemy.orm import Query
 
 from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions
+from cg.exc import CgError
 from cg.store import Store
 from cg.constants.indexes import ListIndexes
 from cg.store.models import (
@@ -525,11 +527,47 @@ def test_validate_case_exists(
 
     # WHEN validating if the case exists
     store_with_multiple_cases_and_samples.validate_case_exists(
-        case_id=case_id_with_multiple_samples
+        case_internal_id=case_id_with_multiple_samples
     )
 
     # THEN the case is found
-    assert f"Case {case_id_with_multiple_samples} exists in Status db" in caplog.text
+    assert f"Case {case_id_with_multiple_samples} exists in Status DB" in caplog.text
+
+
+def test_validate_case_exists_with_none_existing_case(
+    caplog, case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
+):
+    """Test validating a case that does not exist in the database."""
+
+    # GIVEN a database containing the case
+
+    with pytest.raises(CgError):
+
+        # WHEN validating if the case exists
+        store_with_multiple_cases_and_samples.validate_case_exists(
+            case_internal_id=case_id_does_not_exist
+        )
+
+        # THEN the case is not found
+        assert f"Case {case_id_does_not_exist} could not be found in Status DB!" in caplog.text
+
+
+def test_validate_case_exists_with_no_case_samples(
+    caplog, case_id_without_samples: str, store_with_multiple_cases_and_samples: Store
+):
+    """Test validating a case without samples that exist in the database."""
+
+    # GIVEN a database containing the case
+
+    with pytest.raises(CgError):
+
+        # WHEN validating if the case exists
+        store_with_multiple_cases_and_samples.validate_case_exists(
+            case_internal_id=case_id_without_samples
+        )
+
+        # THEN the case is found, but has no samples
+        assert "Case {case_id} has no samples in in Status DB!" in caplog.text
 
 
 def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):

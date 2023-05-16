@@ -735,17 +735,17 @@ class FindBusinessDataHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def validate_case_exists(self, case_id: str) -> None:
-        """Passes silently if case exists in StatusDB, raises error if case is missing."""
+    def validate_case_exists(self, case_internal_id: str) -> None:
+        """Passes silently if case exists in Status DB, raises error if no case or case samples."""
 
-        case: Family = self.get_case_by_internal_id(internal_id=case_id)
+        case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
         if not case:
-            LOG.error(f"Case {case_id} could not be found in StatusDB!")
+            LOG.error(f"Case {case_internal_id} could not be found in Status DB!")
             raise CgError
         if not case.links:
-            LOG.error(f"Case {case_id} has no samples in in StatusDB!")
+            LOG.error(f"Case {case_internal_id} has no samples in in Status DB!")
             raise CgError
-        LOG.info(f"Case {case_id} exists in Status db")
+        LOG.info(f"Case {case_internal_id} exists in Status DB")
 
     def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
         """Get all running cases in a pipeline."""
