@@ -71,6 +71,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         for _ in range(len(fastq_r1)):
             samples_full_list.append(case_id)
             instrument_full_list.append(instrument_platform)
+            fasta_full_list.append(fasta)
 
         samplesheet_content: dict = {
             NFX_SAMPLE_HEADER: samples_full_list,
@@ -102,6 +103,20 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                     case_id=case_id, root_dir=self.root_dir
                 ),
             )
+
+    @classmethod
+    def create_samplesheet_csv(
+        cls,
+        samplesheet_content: Dict[str, List[str]],
+        headers: List[str],
+        config_path: Path,
+    ) -> None:
+        """Write sample sheet csv file."""
+        with open(config_path, "w") as outfile:
+            outfile.write(",".join(headers))
+            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+                outfile.write("\n")
+                outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
 
     def config_case(self, case_id: str, instrument_platform: str, fasta: str) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
