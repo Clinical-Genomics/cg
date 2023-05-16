@@ -6,6 +6,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertSampleSheet,
     BclConvertAdapterMetrics,
 )
+from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 import pytest
 
 
@@ -109,4 +110,22 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
         sample_name="p023BCR",
         control="N",
         sample_project="405887",
+    )
+
+
+@pytest.fixture(name="parsed_bcl_convert_metrics")
+def fixture_parsed_bcl_convert_metrics(
+    bcl_convert_quality_metric_file_path,
+    bcl_convert_demux_metric_file_path,
+    bcl_convert_sample_sheet_file_path,
+    bcl_convert_adapter_metrics_file_path,
+    bcl_convert_run_info_file_path,
+) -> BclConvertMetricsParser:
+    """Return a dictionary with parsed BCLConvert metrics."""
+    return BclConvertMetricsParser(
+        bcl_convert_quality_metrics_path=bcl_convert_quality_metric_file_path,
+        bcl_convert_demux_metrics_file_path=bcl_convert_demux_metric_file_path,
+        bcl_convert_sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
+        bcl_convert_adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
+        bcl_convert_run_info_file_path=bcl_convert_run_info_file_path,
     )
