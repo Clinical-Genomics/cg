@@ -53,7 +53,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: str,
-        fasta: str | None,
+        fasta: Optional[str],
     ) -> Dict[str, List[str]]:
         """Build samplesheet headers and lists"""
         try:
@@ -87,7 +87,9 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         }
         return samplesheet_content
 
-    def write_samplesheet(self, case_id: str, instrument_platform: str, fasta: str | None) -> None:
+    def write_samplesheet(
+        self, case_id: str, instrument_platform: str, fasta: Optional[str]
+    ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
@@ -108,7 +110,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 ),
             )
 
-    def config_case(self, case_id: str, instrument_platform: str, fasta: str) -> None:
+    def config_case(self, case_id: str, instrument_platform: str, fasta: Optional[str]) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
         NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         LOG.info("Generating samplesheet")
