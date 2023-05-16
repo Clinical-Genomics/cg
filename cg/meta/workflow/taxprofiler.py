@@ -102,9 +102,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 ),
             )
 
-    def config_case(self, case_id: str, instrument_platform: str) -> None:
+    def config_case(self, case_id: str, instrument_platform: str, fasta: str) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
         NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         LOG.info("Generating samplesheet")
-        self.write_samplesheet(case_id=case_id, instrument_platform=instrument_platform)
+        self.write_samplesheet(
+            case_id=case_id, instrument_platform=instrument_platform, fasta=fasta
+        )
         # LOG.info("Samplesheet written")
