@@ -3,7 +3,7 @@ import csv
 import xml.etree.ElementTree as ET
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Union
 from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.constants.constants import FileFormat
@@ -143,3 +143,34 @@ class BclConvertMetricsParser:
         LOG.info(f"Parsing Run info XML {self.run_info_path}")
         parsed_metrics = BclConvertRunInfo(tree=ET.parse(self.run_info_path))
         return parsed_metrics
+
+    def get_metrics_for_sample_internal_id(
+        self, sample_internal_id: str, metrics: List
+    ) -> List[
+        Union[
+            BclConvertQualityMetrics,
+            BclConvertDemuxMetrics,
+            BclConvertAdapterMetrics,
+            BclConvertSampleSheet,
+        ]
+    ]:
+        """Return all quality metrics for a given sample internal id."""
+        return [metric for metric in metrics if metric.sample_internal_id == sample_internal_id]
+
+    def _calculate_total_read_counts_for_sample_internal_id(
+        self, sample_internal_id: str, metrics: List[BclConvertDemuxMetrics]
+    ) -> int:
+        """Calculate the total number of reads for a given sample internal id."""
+        total_reads = 0
+        for metric in self.get_metrics_for_sample_internal_id(sample_internal_id, metrics):
+            total_reads += int(metric.read_pair_count)
+        return total_reads
+
+    def _calculate_mean_read_length_for_run_info_flow_cell(self) -> float:
+        """Get the mean read length for flowcell in run info XML."""
+        read_lengths = [
+            int(read.attrib["NumCycles"])
+            for read in self.run_info.tree.findall("Run/Reads/Read")
+            if read.attrib["IsIndexedRead"] == "N"
+        ]
+        return round(sum(read_lengths) / len(read_lengths), 0)
