@@ -49,7 +49,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def build_samplesheet_content(
-        case_id: str, fastq_r1: List[str], fastq_r2: List[str], instrument_platform: str, fasta: str
+        case_id: str,
+        fastq_r1: List[str],
+        fastq_r2: List[str],
+        instrument_platform: str,
+        fasta: str | None,
     ) -> Dict[str, List[str]]:
         """Build samplesheet headers and lists"""
         try:
@@ -83,7 +87,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         }
         return samplesheet_content
 
-    def write_samplesheet(self, case_id: str, instrument_platform: str, fasta: str) -> None:
+    def write_samplesheet(self, case_id: str, instrument_platform: str, fasta: str | None) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
