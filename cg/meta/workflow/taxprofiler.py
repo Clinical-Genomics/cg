@@ -49,7 +49,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def build_samplesheet_content(
-        case_id: str, fastq_r1: List[str], fastq_r2: List[str], instrument_platform: str
+        case_id: str, fastq_r1: List[str], fastq_r2: List[str], instrument_platform: str, fasta: str
     ) -> Dict[str, List[str]]:
         """Build samplesheet headers and lists"""
         try:
@@ -58,6 +58,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
+                fasta=fasta,
             )
         except ValidationError as error:
             LOG.error(error)
