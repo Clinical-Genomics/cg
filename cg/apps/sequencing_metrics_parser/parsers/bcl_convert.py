@@ -174,3 +174,31 @@ class BclConvertMetricsParser:
             if read.attrib["IsIndexedRead"] == "N"
         ]
         return round(sum(read_lengths) / len(read_lengths), 0)
+
+    def get_read_pair_summarised_yield(self) -> int:
+        """Summarise the yield for the read pair"""
+        pass
+
+    def _get_read_pair_summarised_yield_q30(self) -> int:
+        """Summarise the yield passing q30 for the read pair"""
+        pass
+
+    def _get_read_pair_summarised_quality_score_sum(self) -> int:
+        """Summarise the yield for the read pair"""
+        pass
+
+    def _get_read_pair_summarised_mean_quality_score_q30(self) -> int:
+        """Summarise the yield for the read pair"""
+        pass
+
+    def _get_read_pair_summarised_percent_q30(self) -> int:
+        """Summarise the yield for the read pair"""
+        pass
+
+    def _calculate_total_read_counts(self) -> int:
+        """calculates the number of reads from reported number of read pairs"""
+        return self.read_pair_count * 2
+
+    def _calculate_sample_bases_for_read_pair(self) -> int:
+        """calculates the total number of bases for a read pair."""
+        pass
