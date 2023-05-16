@@ -2,7 +2,7 @@ from pydantic import BaseModel
 import xml.etree.ElementTree as ET
 
 
-class BclConvertQualityMetrics(BaseModel):
+class BclConvertQualityMetrics:
     """Model for the BCL Convert quality metrics"""
 
     def __init__(
@@ -46,7 +46,7 @@ class BclConvertQualityMetrics(BaseModel):
         pass
 
 
-class BclConvertDemuxMetrics(BaseModel):
+class BclConvertDemuxMetrics:
     """Model for the BCL Convert demultiplexing metrics."""
 
     def __init__(
@@ -75,7 +75,7 @@ class BclConvertDemuxMetrics(BaseModel):
         return self.read_pairs * 2
 
 
-class BclConvertAdapterMetrics(BaseModel):
+class BclConvertAdapterMetrics:
     """Model for the BCL Convert adapter metrics."""
 
     def __init__(
@@ -98,7 +98,7 @@ class BclConvertAdapterMetrics(BaseModel):
         pass
 
 
-class BclConvertSampleSheet(BaseModel):
+class BclConvertSampleSheet:
     """Model for the BCL Convert sample sheet."""
 
     def __init__(
@@ -119,7 +119,7 @@ class BclConvertSampleSheet(BaseModel):
         self.sample_project = sample_project
 
 
-class BclConvertRunInfo(BaseModel):
+class BclConvertRunInfo:
     """Model for the BCL convert run info file."""
 
     def __init__(self, tree: ET.Element):
