@@ -4,9 +4,9 @@ import xml.etree.ElementTree as ET
 import logging
 from pathlib import Path
 from typing import List
-
+from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
-
+from cg.constants.constants import FileFormat
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
@@ -46,59 +46,62 @@ class BclConvertMetricsParser:
         """Parse the BCL convert metrics file with read pair format into a BclConvertQualityMetrics model."""
         LOG.info(f"Parsing BCLConvert metrics file: {self.quality_metrics_path}")
         parsed_metrics: List[BclConvertQualityMetrics] = []
-        with open(self.quality_metrics_path, mode="r") as metrics_file:
-            metrics_reader = csv.DictReader(metrics_file)
-            for row in metrics_reader:
-                parsed_metrics.append(
-                    BclConvertQualityMetrics(
-                        lane=int(row["Lane"]),
-                        sample_internal_id=row["SampleID"],
-                        read_pair_number=row["ReadNumber"],
-                        yield_bases=int(row["Yield"]),
-                        yield_q30_bases=int(row["YieldQ30"]),
-                        quality_score_sum=int(row["QualityScoreSum"]),
-                        mean_quality_score_q30=float(row["Mean Quality Score (PF)"]),
-                        q30_bases_percent=float(row["% Q30"]),
-                    )
+        metrics_reader = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=self.quality_metrics_path, read_to_dict=True
+        )
+        for row in metrics_reader:
+            parsed_metrics.append(
+                BclConvertQualityMetrics(
+                    lane=int(row["Lane"]),
+                    sample_internal_id=row["SampleID"],
+                    read_pair_number=row["ReadNumber"],
+                    yield_bases=int(row["Yield"]),
+                    yield_q30_bases=int(row["YieldQ30"]),
+                    quality_score_sum=int(row["QualityScoreSum"]),
+                    mean_quality_score_q30=float(row["Mean Quality Score (PF)"]),
+                    q30_bases_percent=float(row["% Q30"]),
                 )
+            )
         return parsed_metrics
 
     def parse_demux_metrics_file(self) -> List[BclConvertDemuxMetrics]:
         """Reads a BCL convert demux metrics file into the BclConvertDemuxMetrics model."""
         LOG.info(f"Parsing BCLConvert metrics file: {self.demux_metrics_path}")
         parsed_metrics = []
-        with open(self.demux_metrics_path, mode="r") as stats_file:
-            stats_reader = csv.DictReader(stats_file)
-            for row in stats_reader:
-                parsed_metrics.append(
-                    BclConvertDemuxMetrics(
-                        lane=int(row["Lane"]),
-                        sample_internal_id=row["SampleID"],
-                        sample_project=row["Sample_Project"],
-                        read_pair_count=row["# Reads"],
-                        perfect_index_reads_count=row["# Perfect Index Reads"],
-                        perfect_index_reads_percent=row["% Perfect Index Reads"],
-                        one_mismatch_index_reads_count=row["# One Mismatch Index Reads"],
-                        two_mismatch_index_reads_count=row["# Two Mismatch Index Reads"],
-                    )
+        metrics_reader = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=self.demux_metrics_path, read_to_dict=True
+        )
+        for row in metrics_reader:
+            parsed_metrics.append(
+                BclConvertDemuxMetrics(
+                    lane=int(row["Lane"]),
+                    sample_internal_id=row["SampleID"],
+                    sample_project=row["Sample_Project"],
+                    read_pair_count=row["# Reads"],
+                    perfect_index_reads_count=row["# Perfect Index Reads"],
+                    perfect_index_reads_percent=row["% Perfect Index Reads"],
+                    one_mismatch_index_reads_count=row["# One Mismatch Index Reads"],
+                    two_mismatch_index_reads_count=row["# Two Mismatch Index Reads"],
                 )
+            )
             return parsed_metrics
 
     def parse_adapter_metrics_file(self) -> List[BclConvertAdapterMetrics]:
         LOG.info(f"Parsing BCL convert adapter metrics file {self.adapter_metrics_path}")
         parsed_metrics: List[BclConvertAdapterMetrics] = []
-        with self.adapter_metrics_path.open("r") as metrics_file:
-            metrics_reader = csv.DictReader(metrics_file)
-            for row in metrics_reader:
-                parsed_metrics.append(
-                    BclConvertAdapterMetrics(
-                        lane=int(row["Lane"]),
-                        sample_internal_id=row["Sample_ID"],
-                        sample_project=row["Sample_Project"],
-                        read_number=row["ReadNumber"],
-                        sample_bases=row["SampleBases"],
-                    )
+        metrics_reader = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=self.adapter_metrics_path, read_to_dict=True
+        )
+        for row in metrics_reader:
+            parsed_metrics.append(
+                BclConvertAdapterMetrics(
+                    lane=int(row["Lane"]),
+                    sample_internal_id=row["Sample_ID"],
+                    sample_project=row["Sample_Project"],
+                    read_number=row["ReadNumber"],
+                    sample_bases=row["SampleBases"],
                 )
+            )
         return parsed_metrics
 
     def get_nr_of_header_lines_in_sample_sheet(
@@ -106,13 +109,12 @@ class BclConvertMetricsParser:
     ) -> int:
         """Return the number of header lines in a sample sheet.
         Any lines before and including the line starting with [Data] is considered the header."""
-        with self.sample_sheet_path.open("r") as read_obj:
-            csv_reader = csv.reader(read_obj)
-            header_line_count: int = 1
-            for line in csv_reader:
-                if SampleSheetHeaderColumnNames.DATA.value in line:
-                    break
-                header_line_count += 1
+        csv_reader = ReadFile.get_content_from_file(FileFormat.CSV, self.sample_sheet_path)
+        header_line_count: int = 1
+        for line in csv_reader:
+            if SampleSheetHeaderColumnNames.DATA.value in line:
+                break
+            header_line_count += 1
         return header_line_count
 
     def parse_sample_sheet_file(self):

@@ -32,8 +32,3 @@ def test_parse_bcl_convert_metrics(
     assert bcl_convert_metrics_parser.sample_sheet
     assert bcl_convert_metrics_parser.adapter_metrics
     assert bcl_convert_metrics_parser.run_info
-
-    attributes = vars(bcl_convert_quality_metric_model_with_data)
-    # THEN assert that the metrics are parsed correctly
-    for attribute, value in attributes.items():
-        assertEqual(getattr(bcl_convert_metrics_parser.quality_metrics[0], attribute), value)

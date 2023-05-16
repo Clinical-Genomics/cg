@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, BaseConfig, Field
 import xml.etree.ElementTree as ET
 
 
@@ -77,10 +77,17 @@ class BclConvertSampleSheet(BaseModel):
     sample_project: str
 
 
+class CustomConfig(BaseConfig):
+    arbitrary_types_allowed = True
+
+
 class BclConvertRunInfo(BaseModel):
     """Model for the BCL convert run info file."""
 
-    tree: ET.Element
+    tree: ET.ElementTree
+
+    class Config(CustomConfig):
+        pass
 
     def calculate_mean_read_length_from_run_info(self) -> int:
         """Get the mean read length for this flowcell"""
