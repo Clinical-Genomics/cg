@@ -132,7 +132,6 @@ class NextflowAnalysisAPI:
         with open(config_path, "w") as outfile:
             outfile.write(",".join(headers))
             for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
-                print(samplesheet_content[NFX_SAMPLE_HEADER])
                 outfile.write("\n")
                 outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
 
