@@ -13,6 +13,30 @@ class BclConverter(StrEnum):
     BCL2FASTQ: str = "bcl2fastq"
 
 
+class SampleSheetV2Sections:
+    """Class that groups all constants to build a sample sheet v2."""
+
+    class Header(StrEnum):
+        HEADER: str = "[Header]"
+        FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
+        RUN_NAME: str = "RunName, "
+        INSTRUMENT_TYPE: List[str] = ["InstrumentType", "NovaSeqxPlus"]
+        INSTRUMENT_PLATFORM: List[str] = ["InstrumentPlatform", "NovaSeqXSeries"]
+        INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "forward"]
+
+    class Reads(StrEnum):
+        HEADER: str = "[Reads]"
+        READ_CYCLES_1: str = "Read1Cycles"
+        READ_CYCLES_2: str = "Read2Cycles"
+        INDEX_CYCLES_1: str = "Index1Cycles"
+        INDEX_CYCLES_2: str = "Index2Cycles"
+
+    class Settings(StrEnum):
+        HEADER: str = "[BCLConvert_Settings]"
+        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
+        FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
+
+
 class SampleSheetHeaderColumnNames(StrEnum):
     DATA: str = "[Data]"
     FLOW_CELL_ID: str = "FCID"
@@ -55,12 +79,6 @@ SAMPLE_SHEET_HEADERS = {
         "OverrideCycles",
     ],
 }
-
-SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
-
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = ["BarcodeMismatchesIndex1", "0"]
-
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = ["BarcodeMismatchesIndex2", "0"]
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",
