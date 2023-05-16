@@ -735,7 +735,7 @@ class FindBusinessDataHandler(BaseHandler):
             internal_id=internal_id,
         ).first()
 
-    def validate_case_exists(self, case_internal_id: str) -> None:
+    def verify_case_exists(self, case_internal_id: str) -> None:
         """Passes silently if case exists in Status DB, raises error if no case or case samples."""
 
         case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)

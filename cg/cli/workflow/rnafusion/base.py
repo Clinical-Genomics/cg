@@ -36,6 +36,7 @@ from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -64,7 +65,7 @@ def config_case(
     """Create sample sheet file for RNAFUSION analysis for a given CASE_ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     LOG.info(f"Creating sample sheet file for {case_id}.")
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     try:
         analysis_api.config_case(
             case_id=case_id, strandedness=strandedness, genomes_base=genomes_base, dry_run=dry_run
@@ -108,7 +109,7 @@ def run(
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
     command_args = {
         "log": NextflowAnalysisAPI.get_log_path(
@@ -242,7 +243,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
 
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     except CgError as error:
         raise click.Abort() from error
 
@@ -284,7 +285,7 @@ def report_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
         if not dry_run:
             analysis_api.report_deliver(case_id=case_id)
@@ -309,7 +310,7 @@ def store_housekeeper(context: CGConfig, case_id: str, dry_run: bool) -> None:
     status_db: Store = context.status_db
 
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.trailblazer_api.is_latest_analysis_completed(case_id=case_id)
         analysis_api.verify_deliverables_file_exists(case_id=case_id)
         analysis_api.upload_bundle_housekeeper(case_id=case_id, dry_run=dry_run)

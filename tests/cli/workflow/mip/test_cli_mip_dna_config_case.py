@@ -47,4 +47,4 @@ def test_cg_workflow_mip_dna_config_case_error(cli_runner, caplog, case_id, mip_
     assert result.exit_code == 1
 
     # THEN an error should be logged
-    assert f"could not be found in StatusDB" in caplog.text
+    assert f"could not be found in Status DB" in caplog.text
