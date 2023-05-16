@@ -131,7 +131,9 @@ class NextflowAnalysisAPI:
         """Write sample sheet csv file."""
         with open(config_path, "w") as outfile:
             outfile.write(",".join(headers))
-            for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+            sample_header_length = len(samplesheet_content.get(NFX_SAMPLE_HEADER, []))
+            # for i in range(len(samplesheet_content[NFX_SAMPLE_HEADER])):
+            for i in range(sample_header_length):
                 outfile.write("\n")
                 outfile.write(",".join([samplesheet_content[k][i] for k in headers]))
 
