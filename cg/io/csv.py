@@ -11,12 +11,8 @@ from cg.io.validate_path import validate_file_suffix
 def read_csv(file_path: Path, read_to_dict: bool = False) -> Union[List[List[str]], List[dict]]:
     """Read content in a CSV file to a list of list or list of dict."""
     validate_file_suffix(path_to_validate=file_path, target_suffix=FileExtensions.CSV)
-    if read_to_dict:
-        with open(file_path, "r") as file:
-            csv_reader = csv.DictReader(file)
-            return list(csv_reader)
     with open(file_path, "r") as file:
-        csv_reader = csv.reader(file)
+        csv_reader = csv.DictReader(file) if read_to_dict else csv.reader(file)
         return list(csv_reader)
 
 

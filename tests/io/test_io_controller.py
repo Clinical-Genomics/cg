@@ -58,12 +58,12 @@ def test_get_content_from_file_when_csv(csv_file_path: Path):
 
 def test_get_content_from_file_to_dict_when_csv(csv_file_path: Path):
     """
-    Tests getting content from file when in CSV format.
+    Tests getting content from file using DictReader when in CSV format.
     """
     # GIVEN a csv file
 
     # WHEN reading the csv file
-    raw_csv_content: list = ReadFile.get_content_from_file(
+    raw_csv_content: List[dict] = ReadFile.get_content_from_file(
         file_format=FileFormat.CSV, file_path=csv_file_path, read_to_dict=True
     )
 
