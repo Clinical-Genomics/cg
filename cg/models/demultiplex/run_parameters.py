@@ -1,6 +1,7 @@
+"""Module for modeling run parameters files parsing."""
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
@@ -10,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 
 class RunParameters:
-    """Class to handle the run parameters from a sequencing run."""
+    """Base class with basic functions to handle the run parameters from a sequencing run."""
 
     def __init__(self, run_parameters_path: Path):
         self.path: Path = run_parameters_path
@@ -25,36 +26,6 @@ class RunParameters:
         if index_one_length != index_two_length:
             raise FlowCellError("Index lengths are not the same!")
         return index_one_length
-
-    @property
-    def control_software_version(self) -> str:
-        """Return the control software version."""
-        node_name: str = ".ApplicationVersion"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="control software version")
-        return xml_node.text
-
-    @property
-    def reagent_kit_version(self) -> str:
-        """Return the reagent kit version if existent, return 'unknown' otherwise."""
-        node_name: str = "./RfidsInfo/SbsConsumableVersion"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        if xml_node is None:
-            LOG.warning("Could not determine reagent kit version")
-            LOG.info("Set reagent kit version to 'unknown'")
-            return UNKNOWN_REAGENT_KIT_VERSION
-        return xml_node.text
-
-    @property
-    def flow_cell_mode(self) -> Optional[str]:
-        """Return the flow cell mode."""
-        node_name: str = "/RfidsInfo/FlowCellMode"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        if xml_node is None:
-            LOG.warning("Could not determine flow cell mode")
-            LOG.info("Set flow cell mode to None")
-            return
-        return xml_node.text
 
     @property
     def requires_dummy_samples(self) -> bool:
@@ -80,6 +51,54 @@ class RunParameters:
 
     def get_index1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
+        pass
+
+    def get_index2_cycles(self) -> int:
+        """Return the number of cycles in the second index read."""
+        pass
+
+    def get_read1_cycles(self) -> int:
+        """Return the number of cycles in the first read."""
+        pass
+
+    def get_read2_cycles(self) -> int:
+        """Return the number of cycles in the second read."""
+        pass
+
+    def __str__(self):
+        return f"RunParameters(path={self.path}," f"flow_cell_mode={self.flow_cell_mode})"
+
+    def __repr__(self):
+        return (
+            f"RunParameters(path={self.path},flow_cell_mode={self.flow_cell_mode},"
+            f"index_length={self.index_length})"
+        )
+
+
+class RunParametersV1(RunParameters):
+    """Specific class for parsing run parameters for v1 sample sheets."""
+
+    @property
+    def control_software_version(self) -> str:
+        """Return the control software version."""
+        node_name: str = ".ApplicationVersion"
+        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        self.node_not_found(node=xml_node, name="control software version")
+        return xml_node.text
+
+    @property
+    def reagent_kit_version(self) -> str:
+        """Return the reagent kit version if existent, return 'unknown' otherwise."""
+        node_name: str = "./RfidsInfo/SbsConsumableVersion"
+        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        if xml_node is None:
+            LOG.warning("Could not determine reagent kit version")
+            LOG.info("Set reagent kit version to 'unknown'")
+            return UNKNOWN_REAGENT_KIT_VERSION
+        return xml_node.text
+
+    def get_index1_cycles(self) -> int:
+        """Return the number of cycles in the first index read."""
         node_name = "./IndexRead1NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of index one")
 
@@ -98,12 +117,43 @@ class RunParameters:
         node_name = "./Read2NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
 
-    def __str__(self):
-        return f"RunParameters(path={self.path}," f"flow_cell_mode={self.flow_cell_mode})"
+    @property
+    def flow_cell_mode(self) -> Optional[str]:
+        """Return the flow cell mode."""
+        node_name: str = "/RfidsInfo/FlowCellMode"
+        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        if xml_node is None:
+            LOG.warning("Could not determine flow cell mode")
+            LOG.info("Set flow cell mode to None")
+            return
+        return xml_node.text
 
-    def __repr__(self):
-        return (
-            f"RunParameters(path={self.path},flow_cell_mode={self.flow_cell_mode},"
-            f"reagent_kit_version={self.reagent_kit_version},control_software_version={self.control_software_version},"
-            f"index_length={self.index_length})"
-        )
+
+class RunParametersV2(RunParameters):
+    """Specific class for parsing run parameters for v2 sample sheets."""
+
+    @property
+    def planned_reads(self) -> Dict[str, int]:
+        """."""
+        cycle_mapping: Dict[str, int] = {}
+        for read_elem in self.tree.findall(".//Read"):
+            read_name = read_elem.get("ReadName")
+            cycles = self.get_node_integer_value(read_elem, "Cycles")
+            cycle_mapping[read_name] = cycles
+        return cycle_mapping
+
+    def get_index1_cycles(self) -> int:
+        """Return the number of cycles in the first index read."""
+        return self.planned_reads.get("Index1")
+
+    def get_index2_cycles(self) -> int:
+        """Return the number of cycles in the second index read."""
+        return self.planned_reads.get("Index2")
+
+    def get_read1_cycles(self) -> int:
+        """Return the number of cycles in the first read."""
+        return self.planned_reads.get("Read1")
+
+    def get_read2_cycles(self) -> int:
+        """Return the number of cycles in the second read."""
+        return self.planned_reads.get("Read2")

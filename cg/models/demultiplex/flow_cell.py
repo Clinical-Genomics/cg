@@ -2,7 +2,7 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -16,7 +16,7 @@ from cg.constants.demultiplexing import (
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
-from cg.models.demultiplex.run_parameters import RunParameters
+from cg.models.demultiplex.run_parameters import RunParameters, RunParametersV1, RunParametersV2
 
 LOG = logging.getLogger(__name__)
 
@@ -82,9 +82,12 @@ class FlowCell:
             message = f"Could not find run parameters file {self.run_parameters_path}"
             LOG.warning(message)
             raise FileNotFoundError(message)
-        # TODO: Create V2 RunParameter class and update here
         if not self._run_parameters:
-            self._run_parameters = RunParameters(run_parameters_path=self.run_parameters_path)
+            self._run_parameters = (
+                RunParametersV2(run_parameters_path=self.run_parameters_path)
+                if self.sequencer_type == Sequencers.NOVASEQX
+                else RunParametersV1(run_parameters_path=self.run_parameters_path)
+            )
         return self._run_parameters
 
     @property
