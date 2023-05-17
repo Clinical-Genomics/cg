@@ -19,9 +19,9 @@ class ReadFile:
     }
 
     @classmethod
-    def get_content_from_file(cls, file_format: str, file_path: Path) -> Any:
+    def get_content_from_file(cls, file_format: str, file_path: Path, **kwargs) -> Any:
         """Read file using file format dispatch table."""
-        return cls.read_file[file_format](file_path=file_path)
+        return cls.read_file[file_format](file_path=file_path, **kwargs)
 
 
 class ReadStream:
