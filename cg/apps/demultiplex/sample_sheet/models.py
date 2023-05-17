@@ -34,7 +34,6 @@ class SampleDragen(NovaSeqSample):
 
 
 class SampleSheet(BaseModel):
-    flow_cell_mode: FlowCellMode
     samples: List[NovaSeqSample]
 
     class Config:

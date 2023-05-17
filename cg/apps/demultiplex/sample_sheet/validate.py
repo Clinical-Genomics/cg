@@ -95,7 +95,7 @@ def validate_sample_sheet(
     sample_type: Union[SampleBcl2Fastq, SampleDragen] = novaseq_sample[bcl_converter]
     samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples=samples)
-    return SampleSheet(flow_cell_mode=flow_cell_mode, samples=samples)
+    return SampleSheet(samples=samples)
 
 
 def get_sample_sheet_from_file(
