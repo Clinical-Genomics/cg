@@ -28,7 +28,7 @@ def test_get_source_and_destination_paths(
     RsyncAPI.get_all_cases_from_ticket.return_value = [case]
 
     # WHEN the source path is created
-    source_and_destination_paths = rsync_api.get_source_and_destination_paths(ticket=ticket_id)
+    source_and_destination_paths = rsync_api.get_source_and_destination_paths(ticket=ticket_id, customer_id=case.customer.internal_id)
 
     # THEN the source path ends with a customer id, followed by "inbox" and a ticket_id id
     assert (
@@ -41,23 +41,6 @@ def test_get_source_and_destination_paths(
         source_and_destination_paths["rsync_destination_path"].as_posix()
         == "server.name.se:/some/cust000/inbox"
     )
-
-
-def test_get_source_path_no_case(rsync_api: RsyncAPI, ticket_id: str, mocker, helpers, caplog):
-    """Test generating the source path before rsync when there is no case"""
-    caplog.set_level(logging.WARNING)
-
-    # GIVEN file exists
-    mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
-    RsyncAPI.get_all_cases_from_ticket.return_value = None
-
-    with pytest.raises(CgError):
-        # WHEN the source path is collected
-        rsync_api.get_source_and_destination_paths(ticket=ticket_id)
-
-        # THEN the source path ends with a customer id, followed by "inbox" and a ticket_id id
-        assert "Could not find any cases for ticket_id" in caplog.text
-
 
 def test_set_log_dir(rsync_api: RsyncAPI, ticket_id: str, caplog):
     """Test function to set log dir for path"""
@@ -117,6 +100,23 @@ def test_run_rsync_on_slurm(
 
     # THEN check that an integer was returned as sbatch number
     assert isinstance(sbatch_number, int)
+
+def test_run_rsync_on_slurm_no_cases(
+        rsync_api: RsyncAPI, ticket_id: str, caplog, mocker, helpers
+):
+    """Test for running rsync using SLURM when there are no cases on the ticket."""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN ticket without any cases
+    mocker.patch.object(RsyncAPI, "get_all_cases_from_ticket")
+    RsyncAPI.get_all_cases_from_ticket.return_value = None
+
+    # WHEN the job is submitted
+    with pytest.raises(CgError):
+        sbatch_number: int = rsync_api.run_rsync_on_slurm(ticket=ticket_id, dry_run=True)
+        # THEN check that error is raised based on no cases being present
+        assert "Could not find any cases for ticket" in caplog.text
+
 
 
 def test_get_folders_to_deliver(
@@ -205,7 +205,7 @@ def test_slurm_rsync_single_case(
     sbatch_number: int
     is_complete_delivery: bool
     is_complete_delivery, sbatch_number = rsync_api.slurm_rsync_single_case(
-        case_id=case_obj.internal_id,
+        case=case_obj,
         case_files_present=True,
         dry_run=True,
         sample_files_present=True,
@@ -245,7 +245,7 @@ def test_slurm_rsync_single_case_missing_file(
     sbatch_number: int
     is_complete_delivery: bool
     is_complete_delivery, sbatch_number = rsync_api.slurm_rsync_single_case(
-        case_id=case_obj.internal_id,
+        case=case_obj,
         case_files_present=True,
         dry_run=True,
         sample_files_present=True,

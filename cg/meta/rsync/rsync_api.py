@@ -100,19 +100,12 @@ class RsyncAPI(MetaAPI):
     def get_all_cases_from_ticket(self, ticket: str) -> List[Family]:
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
-    def get_source_and_destination_paths(self, ticket: str) -> Dict[str, Path]:
-        cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
-        source_and_destination_paths: Dict[str, Path] = {}
-        if not cases:
-            LOG.warning("Could not find any cases for ticket %s", ticket)
-            raise CgError()
-        customer_id: str = cases[0].customer.internal_id
-        source_and_destination_paths["delivery_source_path"]: Path = Path(
+    def get_source_and_destination_paths(self, ticket: str, customer_id: str) -> Dict[str, Path]:
+        source_and_destination_paths: Dict[str, Path] = {"delivery_source_path": Path(
             self.delivery_path, customer_id, INBOX_NAME, ticket
-        )
-        source_and_destination_paths["rsync_destination_path"]: Path = Path(
+        ), "rsync_destination_path": Path(
             self.destination_path, customer_id, INBOX_NAME
-        )
+        )}
         return source_and_destination_paths
 
     def add_to_trailblazer_api(
@@ -180,16 +173,18 @@ class RsyncAPI(MetaAPI):
 
     def slurm_rsync_single_case(
         self,
-        case_id: str,
+        case: Family,
         dry_run: bool,
         sample_files_present: bool = False,
         case_files_present: bool = False,
     ) -> Tuple[bool, int]:
         """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
+        case_id: str = case.internal_id
 
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket=ticket
+            ticket=ticket,
+            customer_id=case.customer.internal_id
         )
         self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
@@ -218,11 +213,15 @@ class RsyncAPI(MetaAPI):
         """Runs rsync of a whole ticket folder to the delivery server."""
         self.set_log_dir(folder_prefix=ticket)
         self.create_log_dir(dry_run=dry_run)
-        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket=ticket
-        )
         cases: List[Family] = self.get_all_cases_from_ticket(ticket=ticket)
+        if not cases:
+            LOG.warning("Could not find any cases for ticket %s", ticket)
+            raise CgError()
         customer_id: str = cases[0].customer.internal_id
+        source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
+            ticket=ticket,
+            customer_id=customer_id
+        )
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
             commands = COVID_RSYNC.format(
