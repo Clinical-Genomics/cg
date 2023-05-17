@@ -1,5 +1,5 @@
-from cg.constants.taxprofiler import TAXPROFILER_ACCEPTED_PLATFORMS
-from cg.models.nextflow.sample import NextflowSample, validator
+from cg.constants.sequencing import SequencingPlatform
+from cg.models.nextflow.sample import NextflowSample
 
 
 class TaxprofilerSample(NextflowSample):
@@ -9,10 +9,4 @@ class TaxprofilerSample(NextflowSample):
         instrument_platform: taxprofiler config file attributes model
     """
 
-    instrument_platform: str
-
-    @validator("instrument_platform", always=True)
-    def valid_instrument_platform(cls, value) -> str:
-        """Verify that the instrument platform is accepted."""
-        assert value in TAXPROFILER_ACCEPTED_PLATFORMS
-        return "Instrument platform not valid"
+    instrument_platform: SequencingPlatform
