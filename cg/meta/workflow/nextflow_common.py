@@ -44,7 +44,6 @@ class NextflowAnalysisAPI:
         ):
             raise ValueError(f"No config file found for case {case_id}")
 
-    # Rename and use refactor option
     @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
         """Generates a path where the sample sheet for the case_id should be located."""
