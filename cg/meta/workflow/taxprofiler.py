@@ -34,7 +34,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         pipeline: Pipeline = Pipeline.TAXPROFILER,
     ):
         super().__init__(config=config, pipeline=pipeline)
-        self.root_dir = config.taxprofiler.root
+        self.root_dir: str = config.taxprofiler.root
 
     @property
     def root(self) -> str:
