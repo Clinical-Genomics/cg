@@ -318,7 +318,7 @@ class TaxprofilerFastqHandler(FastqHandler):
         undetermined: Optional[str] = None,
         meta: Optional[str] = None,
     ) -> str:
-        """Name a FASTQ file,no naming constrains from pipeline."""
+        """Name a FASTQ file, no naming constrains from pipeline."""
         flow_cell: str = f"{flow_cell}-undetermined" if undetermined else flow_cell
         date: str = date if isinstance(date, str) else date.strftime("%y%m%d")
         return f"{lane}_{date}_{flow_cell}_{sample}_{index}_{read}.fastq.gz"
