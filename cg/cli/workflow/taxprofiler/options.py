@@ -1,6 +1,7 @@
 import click
 
 from cg.constants.taxprofiler import TaxprofilerDefaults
+from cg.constants.constants import InstrumentPlatform
 
 OPTION_FROM_START = click.option(
     "--from-start",
@@ -12,8 +13,8 @@ OPTION_FROM_START = click.option(
 
 OPTION_INSTRUMENT_PLATFORM = click.option(
     "--instrument-platform",
-    type=str,
-    default=TaxprofilerDefaults.INSTRUMENT_PLATFORM,
     show_default=True,
-    help="Instrument platform: Illumina or Oxford Nanopore (default)",
+    default=InstrumentPlatform.illumina,
+    type=click.Choice([InstrumentPlatform.illumina, InstrumentPlatform.oxford_nanopore]),
+    help="Instrument platform.Set this option to override the default.",
 )
