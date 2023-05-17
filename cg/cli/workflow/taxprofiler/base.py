@@ -8,6 +8,7 @@ import click
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.taxprofiler.options import OPTION_INSTRUMENT_PLATFORM
 from cg.constants.constants import MetaApis
+from cg.constants.sequencing import SequencingPlatform
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
@@ -31,7 +32,7 @@ def taxprofiler(context: click.Context) -> None:
 @ARGUMENT_CASE_ID
 @OPTION_INSTRUMENT_PLATFORM
 @click.pass_obj
-def config_case(context: CGConfig, case_id: str, instrument_platform: str) -> None:
+def config_case(context: CGConfig, case_id: str, instrument_platform: SequencingPlatform) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given case_id."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 

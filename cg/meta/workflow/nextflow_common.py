@@ -46,7 +46,7 @@ class NextflowAnalysisAPI:
 
     @classmethod
     def get_case_config_path(cls, case_id: str, root_dir: str) -> str:
-        """Generates a path where the sample sheet for the case_id should be located."""
+        """Return a path where the sample sheet for the case_id should be located."""
         return (
             Path((cls.get_case_path(case_id, root_dir)), f"{case_id}_samplesheet.csv")
             .absolute()

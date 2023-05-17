@@ -51,7 +51,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         case_id: str,
         fastq_r1: List[str],
         fastq_r2: List[str],
-        instrument_platform: str,
+        instrument_platform: SequencingPlatform,
         fasta: Optional[str],
     ) -> Dict[str, List[str]]:
         """Build sample sheet headers and lists."""
@@ -67,16 +67,15 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             LOG.error(error)
             raise ValueError
 
-        samples_full_list: list = []
-        instrument_full_list: list = []
-        fasta_full_list: list = []
+        samples_full_list: List[str]
+        instrument_full_list: List[str]
+        fasta_full_list: List[str]
         # Complete sample lists to the same length as fastq_r1:
-        for _ in range(len(fastq_r1)):
-            samples_full_list.append(case_id)
-            instrument_full_list.append(instrument_platform)
-            fasta_full_list.append(fasta)
+        samples_full_list: List[str] = [case_id] * len(fastq_r1)
+        instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
+        fasta_full_list: List[str] = [fasta] * len(fastq_r1)
 
-        samplesheet_content: dict = {
+        samplesheet_content: Dict[str, str] = {
             NFX_SAMPLE_HEADER: samples_full_list,
             TAXPROFILER_RUN_ACCESSION: samples_full_list,
             TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
@@ -87,10 +86,10 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         return samplesheet_content
 
     def write_samplesheet(
-        self, case_id: str, instrument_platform: str, fasta: Optional[str]
+        self, case_id: str, instrument_platform: SequencingPlatform, fasta: Optional[str]
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
-        case_obj = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         for link in case_obj.links:
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
@@ -107,7 +106,9 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 ),
             )
 
-    def config_case(self, case_id: str, instrument_platform: str, fasta: Optional[str]) -> None:
+    def config_case(
+        self, case_id: str, instrument_platform: SequencingPlatform, fasta: Optional[str]
+    ) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
         NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         LOG.info("Generating samplesheet")
