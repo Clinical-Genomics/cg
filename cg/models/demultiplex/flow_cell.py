@@ -11,9 +11,6 @@ from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.constants.demultiplexing import (
     DemultiplexingDirsAndFiles,
-    FlowCellMode,
-    S1_MODE,
-    SEQUENCER_FLOW_CELL_MODES,
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
@@ -93,15 +90,6 @@ class FlowCell:
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
         """Return the sequencer type."""
         return sequencer_types[self.machine_name]
-
-    @property
-    def mode(
-        self,
-    ) -> Literal[
-        FlowCellMode.MISEQ, FlowCellMode.NOVASEQ, FlowCellMode.NEXTSEQ, FlowCellMode.HISEQX, S1_MODE
-    ]:
-        """Return the flow cell mode."""
-        return self.run_parameters.flow_cell_mode or SEQUENCER_FLOW_CELL_MODES[self.sequencer_type]
 
     @property
     def rta_complete_path(self) -> Path:
