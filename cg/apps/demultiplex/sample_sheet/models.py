@@ -2,7 +2,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
-from cg.constants.demultiplexing import FlowCellMode, SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 
 LOG = logging.getLogger(__name__)
 
