@@ -17,6 +17,7 @@ def test_without_options(cli_runner: CliRunner, taxprofiler_context: CGConfig):
     # GIVEN NO options
     # WHEN dry running without anything specified
     result = cli_runner.invoke(config_case, obj=taxprofiler_context)
+
     # THEN command should output missing argument message
     assert result.exit_code != EXIT_SUCCESS
     assert "Missing argument" in result.output
