@@ -113,4 +113,4 @@ S1_MODE = "S1"
 SEQUENCER_FLOW_CELL_MODES: Dict[str, str] = {
     Sequencers.__members__[mode.name].value: mode.value for mode in FlowCellMode
 }
-FLOW_CELL_MODES: List[str] = list(SEQUENCER_FLOW_CELL_MODES.values())
+FLOW_CELL_MODES: List[str] = list(SEQUENCER_FLOW_CELL_MODES.values()) + [S1_MODE]
