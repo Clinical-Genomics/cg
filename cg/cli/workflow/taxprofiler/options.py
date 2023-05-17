@@ -11,7 +11,7 @@ OPTION_FROM_START = click.option(
 )
 
 OPTION_INSTRUMENT_PLATFORM = click.option(
-    "--instrument_platform",
+    "--instrument-platform",
     type=str,
     default=TaxprofilerDefaults.INSTRUMENT_PLATFORM,
     show_default=True,
