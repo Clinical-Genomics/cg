@@ -54,10 +54,10 @@ class BclConvertMetricsParser:
         parsed_metrics: List[
             Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
         ] = []
-        metrics_reader: List[Dict] = ReadFile.get_content_from_file(
+        metrics_content: List[Dict] = ReadFile.get_content_from_file(
             file_format=FileFormat.CSV, file_path=metrics_file_path, read_to_dict=True
         )
-        for sample_metrics_dict in metrics_reader:
+        for sample_metrics_dict in metrics_content:
             parsed_metrics.append(metrics_model(**sample_metrics_dict))
         return parsed_metrics
 
@@ -83,8 +83,8 @@ class BclConvertMetricsParser:
             for _ in range(header_line_count):
                 next(sample_sheet_file)
             reader = csv.DictReader(sample_sheet_file)
-            for sample_sheet in reader:
-                sample_sheet_list.append(BclConvertSampleSheetData(**sample_sheet))
+            for sample_sheet_content in reader:
+                sample_sheet_list.append(BclConvertSampleSheetData(**sample_sheet_content))
         return sample_sheet_list
 
     def parse_run_info_file(self) -> BclConvertRunInfo:
