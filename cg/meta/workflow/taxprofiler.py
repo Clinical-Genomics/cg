@@ -9,7 +9,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
-from cg.constants.constants import InstrumentPlatform
+from cg.constants.sequencing import SequencingPlatform
 from cg.constants.taxprofiler import (
     TAXPROFILER_INSTRUMENT_PLATFORM,
     TAXPROFILER_RUN_ACCESSION,
