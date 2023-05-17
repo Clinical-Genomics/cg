@@ -12,7 +12,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
     BclConvertRunInfo,
-    BclConvertSampleSheet,
+    BclConvertSampleSheetData,
 )
 
 
@@ -43,7 +43,7 @@ class BclConvertMetricsParser:
         self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_metrics_file(
             metrics_file_path=self.adapter_metrics_path, metrics_model=BclConvertAdapterMetrics
         )
-        self.sample_sheet: List[BclConvertSampleSheet] = self.parse_sample_sheet_file()
+        self.sample_sheet: List[BclConvertSampleSheetData] = self.parse_sample_sheet_file()
         self.run_info: BclConvertRunInfo = self.parse_run_info_file()
 
     def parse_metrics_file(
@@ -78,13 +78,13 @@ class BclConvertMetricsParser:
         """Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER."""
         LOG.info(f"Parsing BCLConvert sample sheet file: {self.sample_sheet_path}")
         header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet()
-        sample_sheet_list: List[BclConvertSampleSheet] = []
+        sample_sheet_list: List[BclConvertSampleSheetData] = []
         with open(self.sample_sheet_path, "r") as sample_sheet_file:
             for _ in range(header_line_count):
                 next(sample_sheet_file)
             reader = csv.DictReader(sample_sheet_file)
             for sample_sheet in reader:
-                sample_sheet_list.append(BclConvertSampleSheet(**sample_sheet))
+                sample_sheet_list.append(BclConvertSampleSheetData(**sample_sheet))
         return sample_sheet_list
 
     def parse_run_info_file(self) -> BclConvertRunInfo:

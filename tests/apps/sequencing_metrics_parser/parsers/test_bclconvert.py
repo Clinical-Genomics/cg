@@ -5,7 +5,7 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetr
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertQualityMetrics,
     BclConvertDemuxMetrics,
-    BclConvertSampleSheet,
+    BclConvertSampleSheetData,
     BclConvertAdapterMetrics,
 )
 
@@ -80,13 +80,13 @@ def test_parse_bcl_convert_demux_metrics(
 
 def test_parse_bcl_convert_sample_sheet(
     parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    bcl_convert_sample_sheet_model_with_data: BclConvertSampleSheet,
+    bcl_convert_sample_sheet_model_with_data: BclConvertSampleSheetData,
 ):
     """Test to parse BCLConvert sample sheet."""
     # GIVEN a parsed BCLConvert metrics
 
     # ASSERT that the parsed sample sheet is correct
-    sample_sheet_model: BclConvertSampleSheet = parsed_bcl_convert_metrics.sample_sheet[0]
+    sample_sheet_model: BclConvertSampleSheetData = parsed_bcl_convert_metrics.sample_sheet[0]
 
     for attr_name, attr_value in sample_sheet_model.dict().items():
         assert getattr(bcl_convert_sample_sheet_model_with_data, attr_name) == attr_value

@@ -9,7 +9,7 @@ from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 
 
 class BclConvertQualityMetrics(BaseModel):
-    """Model for the BCL Convert quality metrics"""
+    """Model for the BCL Convert quality metrics."""
 
     lane: int = Field(..., alias=BclConvertQualityMetricsColumnNames.LANE.value)
     sample_internal_id: str = Field(
@@ -66,7 +66,7 @@ class BclConvertAdapterMetrics(BaseModel):
     sample_bases: int = Field(..., alias=BclConvertAdapterMetricsColumnNames.SAMPLE_BASES.value)
 
 
-class BclConvertSampleSheet(BaseModel):
+class BclConvertSampleSheetData(BaseModel):
     """Model for the BCL Convert sample sheet."""
 
     flow_cell_name: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)

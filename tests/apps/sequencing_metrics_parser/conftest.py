@@ -3,7 +3,7 @@ from pathlib import Path
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
     BclConvertQualityMetrics,
-    BclConvertSampleSheet,
+    BclConvertSampleSheetData,
     BclConvertAdapterMetrics,
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
@@ -114,8 +114,8 @@ def fixture_bcl_convert_quality_metric_model_with_data(
 @pytest.fixture(name="bcl_convert_sample_sheet_model_with_data")
 def fixture_bcl_convert_sample_sheet_model_with_data(
     test_sample_internal_id,
-) -> BclConvertSampleSheet:
-    return BclConvertSampleSheet(
+) -> BclConvertSampleSheetData:
+    return BclConvertSampleSheetData(
         **{
             SampleSheetHeaderColumnNames.FLOW_CELL_ID.value: "HY7FFDRX2",
             SampleSheetHeaderColumnNames.LANE.value: 1,
