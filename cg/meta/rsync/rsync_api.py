@@ -101,11 +101,10 @@ class RsyncAPI(MetaAPI):
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(self, ticket: str, customer_id: str) -> Dict[str, Path]:
-        source_and_destination_paths: Dict[str, Path] = {"delivery_source_path": Path(
-            self.delivery_path, customer_id, INBOX_NAME, ticket
-        ), "rsync_destination_path": Path(
-            self.destination_path, customer_id, INBOX_NAME
-        )}
+        source_and_destination_paths: Dict[str, Path] = {
+            "delivery_source_path": Path(self.delivery_path, customer_id, INBOX_NAME, ticket),
+            "rsync_destination_path": Path(self.destination_path, customer_id, INBOX_NAME),
+        }
         return source_and_destination_paths
 
     def add_to_trailblazer_api(
@@ -183,8 +182,7 @@ class RsyncAPI(MetaAPI):
 
         ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket=ticket,
-            customer_id=case.customer.internal_id
+            ticket=ticket, customer_id=case.customer.internal_id
         )
         self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
@@ -219,8 +217,7 @@ class RsyncAPI(MetaAPI):
             raise CgError()
         customer_id: str = cases[0].customer.internal_id
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
-            ticket=ticket,
-            customer_id=customer_id
+            ticket=ticket, customer_id=customer_id
         )
         if cases[0].data_analysis == Pipeline.SARS_COV_2:
             LOG.info("Delivering report for SARS-COV-2 analysis")
