@@ -31,18 +31,10 @@ def sample_sheet_commands():
 
 @sample_sheet_commands.command(name="validate")
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
-@click.option(
-    "--flow-cell-mode",
-    default=FlowCellMode.NOVASEQ,
-    show_default=True,
-    type=click.Choice(FLOW_CELL_MODES),
-    help="Instrument sample sheet flow cell mode",
-)
 @OPTION_BCL_CONVERTER
 def validate_sample_sheet(
     bcl_converter: str,
     sheet: click.Path,
-    flow_cell_mode: str,
 ):
     """Validate a sample sheet."""
     LOG.info(
