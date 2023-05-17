@@ -1,4 +1,4 @@
-"""Tests cli methods to create the case config for Taxprofiler"""
+"""Tests cli methods to create the case config for Taxprofiler."""
 
 import logging
 from pathlib import Path
@@ -13,11 +13,11 @@ from cg.models.cg_config import CGConfig
 
 
 def test_without_options(cli_runner: CliRunner, taxprofiler_context: CGConfig):
-    """Test command without case_id."""
-    # GIVEN NO case_id
+    """Test command without options."""
+    # GIVEN NO options
     # WHEN dry running without anything specified
     result = cli_runner.invoke(config_case, obj=taxprofiler_context)
-    # THEN command should mention argument
+    # THEN command should output missing argument message
     assert result.exit_code != EXIT_SUCCESS
     assert "Missing argument" in result.output
 
@@ -30,7 +30,7 @@ def test_with_missing_case(
 ):
     """Test command with invalid case to start with."""
     caplog.set_level(logging.ERROR)
-    # GIVEN case_id not in database
+    # GIVEN case id not in database
     assert not taxprofiler_context.status_db.get_case_by_internal_id(
         internal_id=case_id_does_not_exist
     )
