@@ -37,7 +37,3 @@ class BclConvertAdapterMetricsColumnNames(Enum):
     SAMPLE_PROJECT: str = "Sample_Project"
     READ_NUMBER: str = "ReadNumber"
     SAMPLE_BASES: str = "SampleBases"
-
-
-class BclConvertSampleSheetColumnNames(Enum):
-    pass
