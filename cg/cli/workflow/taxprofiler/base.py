@@ -5,23 +5,11 @@ from pathlib import Path
 
 import click
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
-from cg.cli.workflow.nextflow.options import (
-    OPTION_CONFIG,
-    OPTION_LOG,
-    OPTION_PARAMS_FILE,
-    OPTION_PROFILE,
-    OPTION_REVISION,
-    OPTION_USE_NEXTFLOW,
-    OPTION_WORKDIR,
-)
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.taxprofiler.options import OPTION_INSTRUMENT_PLATFORM
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
-from cg.constants import EXIT_FAIL, EXIT_SUCCESS
-from cg.constants.constants import CaseActions, MetaApis
+from cg.constants.constants import MetaApis
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
 
