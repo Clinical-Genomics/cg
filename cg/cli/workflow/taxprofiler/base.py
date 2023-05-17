@@ -47,7 +47,6 @@ def config_case(context: CGConfig, case_id: str, instrument_platform: str) -> No
     """Create sample sheet file for Taxprofiler analysis for a given case_id."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
     try:
         analysis_api.verify_case_id_in_statusdb(case_id=case_id)
         analysis_api.config_case(case_id=case_id, instrument_platform=instrument_platform, fasta="")
