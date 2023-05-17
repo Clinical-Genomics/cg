@@ -52,7 +52,7 @@ def test_parse_bcl_convert_quality_metrics(
 
 def test_parse_bcl_convert_adapter_metrics(
     parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    bcl_convert_adapter_metrics_model_with_data: BclConvertAdapterMetrics,
+    bcl_convert_adapter_metric_model_with_data: BclConvertAdapterMetrics,
 ):
     """Test to parse BCLConvert adapter metrics."""
     # GIVEN a parsed BCLConvert metrics
@@ -61,12 +61,12 @@ def test_parse_bcl_convert_adapter_metrics(
     adapter_metrics_model: BclConvertAdapterMetrics = parsed_bcl_convert_metrics.adapter_metrics[0]
 
     for attr_name, attr_value in adapter_metrics_model.dict().items():
-        assert getattr(bcl_convert_adapter_metrics_model_with_data, attr_name) == attr_value
+        assert getattr(bcl_convert_adapter_metric_model_with_data, attr_name) == attr_value
 
 
 def test_parse_bcl_convert_demux_metrics(
     parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    bcl_convert_demux_metrics_model_with_data: BclConvertDemuxMetrics,
+    bcl_convert_demux_metric_model_with_data: BclConvertDemuxMetrics,
 ):
     """Test to parse BCLConvert demux metrics."""
     # GIVEN a parsed BCLConvert metrics
@@ -75,7 +75,7 @@ def test_parse_bcl_convert_demux_metrics(
     demux_metrics_model: BclConvertDemuxMetrics = parsed_bcl_convert_metrics.demux_metrics[0]
 
     for attr_name, attr_value in demux_metrics_model.dict().items():
-        assert getattr(bcl_convert_demux_metrics_model_with_data, attr_name) == attr_value
+        assert getattr(bcl_convert_demux_metric_model_with_data, attr_name) == attr_value
 
 
 def test_parse_bcl_convert_sample_sheet(

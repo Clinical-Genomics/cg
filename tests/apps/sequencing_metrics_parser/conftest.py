@@ -1,4 +1,4 @@
-"""Fixtures for the sequencing metics parser tests."""
+"""Fixtures for the sequencing metrics parser tests."""
 from pathlib import Path
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertDemuxMetrics,
@@ -8,6 +8,12 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 import pytest
+from cg.constants.bcl_convert_metrics import (
+    BclConvertQualityMetricsColumnNames,
+    BclConvertDemuxMetricsColumnNames,
+    BclConvertAdapterMetricsColumnNames,
+)
+from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 
 
 @pytest.fixture(name="bcl_convert_demux_metric_file_path")
@@ -59,14 +65,16 @@ def fixture_bcl_convert_demux_metric_model_with_data(
     test_sample_internal_id,
 ) -> BclConvertDemuxMetrics:
     return BclConvertDemuxMetrics(
-        lane=1,
-        sample_internal_id=test_sample_internal_id,
-        sample_project="405887",
-        read_pair_count=15962796,
-        perfect_index_reads_count=15962796,
-        perfect_index_reads_percent=1.0000,
-        one_mismatch_index_reads_count=0,
-        two_mismatch_index_reads_count=0,
+        **{
+            BclConvertDemuxMetricsColumnNames.LANE.value: 1,
+            BclConvertDemuxMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
+            BclConvertDemuxMetricsColumnNames.SAMPLE_PROJECT.value: "405887",
+            BclConvertDemuxMetricsColumnNames.READ_PAIR_COUNT.value: 15962796,
+            BclConvertDemuxMetricsColumnNames.PERFECT_INDEX_READS_COUNT.value: 15962796,
+            BclConvertDemuxMetricsColumnNames.PERFECT_INDEX_READS_PERCENT.value: 1.0000,
+            BclConvertDemuxMetricsColumnNames.ONE_MISMATCH_INDEX_READS_COUNT.value: 0,
+            BclConvertDemuxMetricsColumnNames.TWO_MISMATCH_INDEX_READS_COUNT.value: 0,
+        }
     )
 
 
@@ -75,11 +83,13 @@ def fixture_bcl_convert_adapter_metric_model_with_data(
     test_sample_internal_id,
 ) -> BclConvertAdapterMetrics:
     return BclConvertAdapterMetrics(
-        lane=1,
-        sample_internal_id=test_sample_internal_id,
-        sample_project="405887",
-        read_number=1,
-        sample_bases=415032696,
+        **{
+            BclConvertAdapterMetricsColumnNames.LANE.value: 1,
+            BclConvertAdapterMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
+            BclConvertAdapterMetricsColumnNames.SAMPLE_PROJECT.value: "405887",
+            BclConvertAdapterMetricsColumnNames.READ_NUMBER.value: 1,
+            BclConvertAdapterMetricsColumnNames.SAMPLE_BASES.value: 415032696,
+        }
     )
 
 
@@ -88,14 +98,16 @@ def fixture_bcl_convert_quality_metric_model_with_data(
     test_sample_internal_id,
 ) -> BclConvertQualityMetrics:
     return BclConvertQualityMetrics(
-        lane=1,
-        sample_internal_id=test_sample_internal_id,
-        read_pair_number=1,
-        yield_bases=415032696,
-        yield_q30_bases=393745856,
-        quality_score_sum=15004333259,
-        mean_quality_score_q30=36.15,
-        q30_bases_percent=0.95,
+        **{
+            BclConvertQualityMetricsColumnNames.LANE.value: 1,
+            BclConvertQualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
+            BclConvertQualityMetricsColumnNames.READ_PAIR_NUMBER.value: 1,
+            BclConvertQualityMetricsColumnNames.YIELD_BASES.value: 415032696,
+            BclConvertQualityMetricsColumnNames.YIELD_Q30.value: 393745856,
+            BclConvertQualityMetricsColumnNames.QUALITY_SCORE_SUM.value: 15004333259,
+            BclConvertQualityMetricsColumnNames.MEAN_QUALITY_SCORE_Q30.value: 36.15,
+            BclConvertQualityMetricsColumnNames.Q30_BASES_PERCENT.value: 0.95,
+        }
     )
 
 
@@ -104,12 +116,14 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
     test_sample_internal_id,
 ) -> BclConvertSampleSheet:
     return BclConvertSampleSheet(
-        flow_cell_name="HY7FFDRX2",
-        lane=1,
-        sample_internal_id=test_sample_internal_id,
-        sample_name="p023BCR",
-        control="N",
-        sample_project="405887",
+        **{
+            SampleSheetHeaderColumnNames.FLOW_CELL_ID.value: "HY7FFDRX2",
+            SampleSheetHeaderColumnNames.LANE.value: 1,
+            SampleSheetHeaderColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
+            SampleSheetHeaderColumnNames.SAMPLE_NAME.value: "p023BCR",
+            SampleSheetHeaderColumnNames.CONTROL.value: "N",
+            SampleSheetHeaderColumnNames.SAMPLE_PROJECT.value: "405887",
+        }
     )
 
 

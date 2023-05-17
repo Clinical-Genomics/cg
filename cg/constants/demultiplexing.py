@@ -16,6 +16,11 @@ class BclConverter(StrEnum):
 class SampleSheetHeaderColumnNames(StrEnum):
     DATA: str = "[Data]"
     FLOW_CELL_ID: str = "FCID"
+    LANE: str = "Lane"
+    SAMPLE_INTERNAL_ID: str = "Sample_ID"
+    SAMPLE_NAME: str = "SampleName"
+    SAMPLE_PROJECT: str = "Sample_Project"
+    CONTROL: str = "Control"
 
 
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"

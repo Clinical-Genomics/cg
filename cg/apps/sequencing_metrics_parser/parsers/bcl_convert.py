@@ -3,7 +3,7 @@ import csv
 import xml.etree.ElementTree as ET
 import logging
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Dict, Callable
 from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.constants.constants import FileFormat
@@ -34,74 +34,31 @@ class BclConvertMetricsParser:
         self.adapter_metrics_path: Path = bcl_convert_adapter_metrics_file_path
         self.sample_sheet_path: Path = bcl_convert_sample_sheet_file_path
         self.run_info_path: Path = bcl_convert_run_info_file_path
-        self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_quality_metrics_file()
-        self.demux_metrics: List[BclConvertDemuxMetrics] = self.parse_demux_metrics_file()
-        self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_adapter_metrics_file()
+        self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
+            metrics_file_path=self.quality_metrics_path, metrics_model=BclConvertQualityMetrics
+        )
+        self.demux_metrics: List[BclConvertDemuxMetrics] = self.parse_metrics_file(
+            metrics_file_path=self.demux_metrics_path, metrics_model=BclConvertDemuxMetrics
+        )
+        self.adapter_metrics: List[BclConvertAdapterMetrics] = self.parse_metrics_file(
+            metrics_file_path=self.adapter_metrics_path, metrics_model=BclConvertAdapterMetrics
+        )
         self.sample_sheet: List[BclConvertSampleSheet] = self.parse_sample_sheet_file()
         self.run_info: BclConvertRunInfo = self.parse_run_info_file()
 
-    def parse_quality_metrics_file(
-        self,
-    ) -> List[BclConvertQualityMetrics]:
-        """Parse the BCL convert metrics file with read pair format into a BclConvertQualityMetrics model."""
-        LOG.info(f"Parsing BCLConvert metrics file: {self.quality_metrics_path}")
-        parsed_metrics: List[BclConvertQualityMetrics] = []
-        metrics_reader = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=self.quality_metrics_path, read_to_dict=True
+    def parse_metrics_file(
+        self, metrics_file_path, metrics_model: Callable
+    ) -> List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]]:
+        """Parse the BCL convert metrics file into the respective model."""
+        LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
+        parsed_metrics: List[
+            Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
+        ] = []
+        metrics_reader: List[Dict] = ReadFile.get_content_from_file(
+            file_format=FileFormat.CSV, file_path=metrics_file_path, read_to_dict=True
         )
-        for row in metrics_reader:
-            parsed_metrics.append(
-                BclConvertQualityMetrics(
-                    lane=int(row["Lane"]),
-                    sample_internal_id=row["SampleID"],
-                    read_pair_number=row["ReadNumber"],
-                    yield_bases=int(row["Yield"]),
-                    yield_q30_bases=int(row["YieldQ30"]),
-                    quality_score_sum=int(row["QualityScoreSum"]),
-                    mean_quality_score_q30=float(row["Mean Quality Score (PF)"]),
-                    q30_bases_percent=float(row["% Q30"]),
-                )
-            )
-        return parsed_metrics
-
-    def parse_demux_metrics_file(self) -> List[BclConvertDemuxMetrics]:
-        """Reads a BCL convert demux metrics file into the BclConvertDemuxMetrics model."""
-        LOG.info(f"Parsing BCLConvert metrics file: {self.demux_metrics_path}")
-        parsed_metrics = []
-        metrics_reader = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=self.demux_metrics_path, read_to_dict=True
-        )
-        for row in metrics_reader:
-            parsed_metrics.append(
-                BclConvertDemuxMetrics(
-                    lane=int(row["Lane"]),
-                    sample_internal_id=row["SampleID"],
-                    sample_project=row["Sample_Project"],
-                    read_pair_count=row["# Reads"],
-                    perfect_index_reads_count=row["# Perfect Index Reads"],
-                    perfect_index_reads_percent=row["% Perfect Index Reads"],
-                    one_mismatch_index_reads_count=row["# One Mismatch Index Reads"],
-                    two_mismatch_index_reads_count=row["# Two Mismatch Index Reads"],
-                )
-            )
-            return parsed_metrics
-
-    def parse_adapter_metrics_file(self) -> List[BclConvertAdapterMetrics]:
-        LOG.info(f"Parsing BCL convert adapter metrics file {self.adapter_metrics_path}")
-        parsed_metrics: List[BclConvertAdapterMetrics] = []
-        metrics_reader = ReadFile.get_content_from_file(
-            file_format=FileFormat.CSV, file_path=self.adapter_metrics_path, read_to_dict=True
-        )
-        for row in metrics_reader:
-            parsed_metrics.append(
-                BclConvertAdapterMetrics(
-                    lane=int(row["Lane"]),
-                    sample_internal_id=row["Sample_ID"],
-                    sample_project=row["Sample_Project"],
-                    read_number=row["ReadNumber"],
-                    sample_bases=row["SampleBases"],
-                )
-            )
+        for sample_metrics_dict in metrics_reader:
+            parsed_metrics.append(metrics_model(**sample_metrics_dict))
         return parsed_metrics
 
     def get_nr_of_header_lines_in_sample_sheet(
@@ -121,84 +78,16 @@ class BclConvertMetricsParser:
         """Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER."""
         LOG.info(f"Parsing BCLConvert sample sheet file: {self.sample_sheet_path}")
         header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet()
-        sample_sheet: List[BclConvertSampleSheet] = []
+        sample_sheet_list: List[BclConvertSampleSheet] = []
         with open(self.sample_sheet_path, "r") as sample_sheet_file:
             for _ in range(header_line_count):
                 next(sample_sheet_file)
             reader = csv.DictReader(sample_sheet_file)
-            for row in reader:
-                sample_sheet.append(
-                    BclConvertSampleSheet(
-                        flow_cell_name=row["FCID"],
-                        lane=row["Lane"],
-                        sample_internal_id=row["Sample_ID"],
-                        sample_name=row["SampleName"],
-                        control=row["Control"],
-                        sample_project=row["Sample_Project"],
-                    )
-                )
-        return sample_sheet
+            for sample_sheet in reader:
+                sample_sheet_list.append(BclConvertSampleSheet(**sample_sheet))
+        return sample_sheet_list
 
     def parse_run_info_file(self) -> BclConvertRunInfo:
         LOG.info(f"Parsing Run info XML {self.run_info_path}")
         parsed_metrics = BclConvertRunInfo(tree=ET.parse(self.run_info_path))
         return parsed_metrics
-
-    def get_metrics_for_sample_internal_id(
-        self, sample_internal_id: str, metrics: List
-    ) -> List[
-        Union[
-            BclConvertQualityMetrics,
-            BclConvertDemuxMetrics,
-            BclConvertAdapterMetrics,
-            BclConvertSampleSheet,
-        ]
-    ]:
-        """Return all quality metrics for a given sample internal id."""
-        return [metric for metric in metrics if metric.sample_internal_id == sample_internal_id]
-
-    def _calculate_total_read_counts_for_sample_internal_id(
-        self, sample_internal_id: str, metrics: List[BclConvertDemuxMetrics]
-    ) -> int:
-        """Calculate the total number of reads for a given sample internal id."""
-        total_reads = 0
-        for metric in self.get_metrics_for_sample_internal_id(sample_internal_id, metrics):
-            total_reads += int(metric.read_pair_count)
-        return total_reads
-
-    def _calculate_mean_read_length_for_run_info_flow_cell(self) -> float:
-        """Get the mean read length for flowcell in run info XML."""
-        read_lengths = [
-            int(read.attrib["NumCycles"])
-            for read in self.run_info.tree.findall("Run/Reads/Read")
-            if read.attrib["IsIndexedRead"] == "N"
-        ]
-        return round(sum(read_lengths) / len(read_lengths), 0)
-
-    def get_read_pair_summarised_yield(self) -> int:
-        """Summarise the yield for the read pair"""
-        pass
-
-    def _get_read_pair_summarised_yield_q30(self) -> int:
-        """Summarise the yield passing q30 for the read pair"""
-        pass
-
-    def _get_read_pair_summarised_quality_score_sum(self) -> int:
-        """Summarise the yield for the read pair"""
-        pass
-
-    def _get_read_pair_summarised_mean_quality_score_q30(self) -> int:
-        """Summarise the yield for the read pair"""
-        pass
-
-    def _get_read_pair_summarised_percent_q30(self) -> int:
-        """Summarise the yield for the read pair"""
-        pass
-
-    def _calculate_total_read_counts(self) -> int:
-        """calculates the number of reads from reported number of read pairs"""
-        return self.read_pair_count * 2
-
-    def _calculate_sample_bases_for_read_pair(self) -> int:
-        """calculates the total number of bases for a read pair."""
-        pass
