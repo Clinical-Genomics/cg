@@ -3,11 +3,8 @@ from enum import IntEnum
 
 NFX_WORK_DIR = "work"
 NFX_SAMPLE_HEADER = "sample"
-NFX_RUN_ACCESSION = "run_accession"
-NFX_INSTRUMENT_PLATFORM = "instrument_platform"
 NFX_READ1_HEADER = "fastq_1"
 NFX_READ2_HEADER = "fastq_2"
-NXF_FASTA_HEADER = "fasta"
 NFX_SAMPLESHEET_READS_HEADERS = [NFX_READ1_HEADER, NFX_READ2_HEADER]
 NFX_SAMPLESHEET_HEADERS = [NFX_SAMPLE_HEADER] + NFX_SAMPLESHEET_READS_HEADERS
 DELIVER_FILE_HEADERS = ["format", "id", "path", "path_index", "step", "tag"]

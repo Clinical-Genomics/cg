@@ -40,22 +40,3 @@ def test_with_missing_case(
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
     assert "could not be found in StatusDB!" in caplog.text
-
-
-# def test_without_samples(
-#    cli_runner: CliRunner,
-#    rnafusion_context: CGConfig,
-#    caplog: LogCaptureFixture,
-#    no_sample_case_id: str,
-# ):
-#    """Test command with case_id and no samples."""
-#    caplog.set_level(logging.ERROR)
-#    # GIVEN case-id
-#    case_id: str = no_sample_case_id
-#    # WHEN running config case
-#    result = cli_runner.invoke(config_case, [case_id], obj=rnafusion_context)
-#    # THEN command should print the rnafusion command-string
-#    assert result.exit_code != EXIT_SUCCESS
-#    # THEN warning should be printed that no sample is found
-#    assert case_id in caplog.text
-#    assert "has no samples" in caplog.text

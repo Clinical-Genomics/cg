@@ -100,11 +100,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 case_id, fastq_r1, fastq_r2, instrument_platform, fasta
             )
             LOG.info(samplesheet_content)
-            # if dry_run:
-            #     continue
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=samplesheet_content,
-                # headers=[str(header) for header in TAXPROFILER_SAMPLESHEET_HEADERS],
                 headers=TAXPROFILER_SAMPLESHEET_HEADERS,
                 config_path=NextflowAnalysisAPI.get_case_config_path(
                     case_id=case_id, root_dir=self.root_dir
@@ -118,4 +115,4 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         self.write_samplesheet(
             case_id=case_id, instrument_platform=instrument_platform, fasta=fasta
         )
-        # LOG.info("Samplesheet written")
+        LOG.info("Samplesheet written")
