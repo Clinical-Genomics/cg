@@ -16,3 +16,5 @@ jobs:
 
       - name: Set up Black
         uses: psf/black@stable
+        with:
+          options: ". --check --line-length 100"

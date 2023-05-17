@@ -534,7 +534,7 @@ def test_verify_case_exists(
     assert f"Case {case_id_with_multiple_samples} exists in Status DB" in caplog.text
 
 
-def test_verify_case_exists_with_none_existing_case(
+def test_verify_case_exists_with_non_existing_case(
     caplog, case_id_does_not_exist: str, store_with_multiple_cases_and_samples: Store
 ):
     """Test validating a case that does not exist in the database."""
@@ -542,7 +542,6 @@ def test_verify_case_exists_with_none_existing_case(
     # GIVEN a database containing the case
 
     with pytest.raises(CgError):
-
         # WHEN validating if the case exists
         store_with_multiple_cases_and_samples.verify_case_exists(
             case_internal_id=case_id_does_not_exist
@@ -560,7 +559,6 @@ def test_verify_case_exists_with_no_case_samples(
     # GIVEN a database containing the case
 
     with pytest.raises(CgError):
-
         # WHEN validating if the case exists
         store_with_multiple_cases_and_samples.verify_case_exists(
             case_internal_id=case_id_without_samples
