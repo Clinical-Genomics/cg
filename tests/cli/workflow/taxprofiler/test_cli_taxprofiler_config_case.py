@@ -38,6 +38,7 @@ def test_with_missing_case(
 
     # WHEN running
     result = cli_runner.invoke(config_case, [case_id_does_not_exist], obj=taxprofiler_context)
+
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
