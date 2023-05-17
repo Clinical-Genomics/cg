@@ -130,7 +130,6 @@ class SampleSheetCreator:
         LOG.info("Validating sample sheet")
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_content,
-            flow_cell_mode=self.flow_cell_mode,
             bcl_converter=self.bcl_converter,
         )
         LOG.info("Sample sheet passed validation")

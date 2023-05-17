@@ -8,11 +8,10 @@ from cg.apps.demultiplex.sample_sheet.models import SampleSheet, NovaSeqSample
 from cg.apps.demultiplex.sample_sheet.validate import (
     get_raw_samples,
     validate_sample_sheet,
-    get_sample_sheet_from_file,
     get_samples_by_lane,
     validate_samples_are_unique,
 )
-from cg.constants.demultiplexing import FlowCellMode, BclConverter
+from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 
 
@@ -117,7 +116,6 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
         # THEN a sample sheet error is raised
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
-            flow_cell_mode=FlowCellMode.NEXTSEQ,
             bcl_converter=BclConverter.BCL2FASTQ,
         )
 
@@ -133,7 +131,6 @@ def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
         # THEN a sample sheet error is raised
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
-            flow_cell_mode=FlowCellMode.NEXTSEQ,
             bcl_converter=BclConverter.DRAGEN,
         )
 
@@ -147,7 +144,6 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
@@ -164,7 +160,6 @@ def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
         bcl_converter=BclConverter.DRAGEN,
     )
 

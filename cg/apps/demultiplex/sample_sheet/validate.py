@@ -78,12 +78,6 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
 
 def validate_sample_sheet(
     sample_sheet_content: List[List[str]],
-    flow_cell_mode: Literal[
-        FlowCellMode.MISEQ,
-        FlowCellMode.HISEQX,
-        FlowCellMode.NEXTSEQ,
-        FlowCellMode.NOVASEQ,
-    ],
     bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
@@ -114,6 +108,5 @@ def get_sample_sheet_from_file(
     )
     return validate_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        flow_cell_mode=flow_cell_mode,
         bcl_converter=bcl_converter,
     )
