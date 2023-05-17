@@ -99,13 +99,6 @@ def validate_sample_sheet(
 
 def get_sample_sheet_from_file(
     infile: Path,
-    flow_cell_mode: Literal[
-        FlowCellMode.MISEQ,
-        FlowCellMode.HISEQX,
-        FlowCellMode.NEXTSEQ,
-        FlowCellMode.NOVASEQ,
-        S1_MODE,
-    ],
     bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""

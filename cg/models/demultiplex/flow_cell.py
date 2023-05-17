@@ -163,7 +163,6 @@ class FlowCell:
         try:
             get_sample_sheet_from_file(
                 infile=self.sample_sheet_path,
-                flow_cell_mode=self.mode,
                 bcl_converter=self.bcl_converter,
             )
         except (SampleSheetError, ValidationError) as error:
@@ -176,7 +175,6 @@ class FlowCell:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
             infile=self.sample_sheet_path,
-            flow_cell_mode=self.mode,
             bcl_converter=self.bcl_converter,
         )
 

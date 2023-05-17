@@ -50,9 +50,7 @@ def validate_sample_sheet(
     )
     sheet: Path = Path(str(sheet))
     try:
-        get_sample_sheet_from_file(
-            infile=sheet, flow_cell_mode=flow_cell_mode, bcl_converter=bcl_converter
-        )
+        get_sample_sheet_from_file(infile=sheet, bcl_converter=bcl_converter)
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
