@@ -15,7 +15,7 @@ from cg.apps.lims.samplesheet import (
     flowcell_samples,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, FlowCellMode, FLOW_CELL_MODES
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile
 from cg.models.cg_config import CGConfig

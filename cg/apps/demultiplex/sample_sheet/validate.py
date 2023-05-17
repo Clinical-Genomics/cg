@@ -13,9 +13,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
     BclConverter,
-    FlowCellMode,
     SampleSheetHeaderColumnNames,
-    S1_MODE,
 )
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
