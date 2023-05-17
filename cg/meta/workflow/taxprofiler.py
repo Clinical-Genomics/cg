@@ -55,7 +55,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         instrument_platform: str,
         fasta: Optional[str],
     ) -> Dict[str, List[str]]:
-        """Build samplesheet headers and lists"""
+        """Build sample sheet headers and lists."""
         try:
             TaxprofilerSample(
                 sample=case_id,
