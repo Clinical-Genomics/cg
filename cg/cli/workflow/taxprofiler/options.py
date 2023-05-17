@@ -7,7 +7,7 @@ OPTION_FROM_START = click.option(
     is_flag=True,
     default=False,
     show_default=True,
-    help="Start pipeline from start without resuming execution",
+    help="Start pipeline from the start",
 )
 
 OPTION_INSTRUMENT_PLATFORM = click.option(
