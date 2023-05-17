@@ -190,8 +190,3 @@ class MetaApis:
 class WorkflowManager(StrEnum):
     Slurm: str = "slurm"
     Tower: str = "nf_tower"
-
-
-class InstrumentPlatform(StrEnum):
-    illumina: str = "ILLUMINA"
-    oxford_nanopore: str = "OXFORD_NANOPORE"

@@ -9,13 +9,12 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.constants import Pipeline
 from cg.constants.nextflow import NFX_READ1_HEADER, NFX_READ2_HEADER, NFX_SAMPLE_HEADER
+from cg.constants.constants import InstrumentPlatform
 from cg.constants.taxprofiler import (
     TAXPROFILER_INSTRUMENT_PLATFORM,
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
-    TAXPROFILER_ACCEPTED_PLATFORMS,
     TAXPROFILER_FASTA_HEADER,
-    TaxprofilerDefaults,
 )
 from cg.meta.workflow.fastq import TaxprofilerFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI

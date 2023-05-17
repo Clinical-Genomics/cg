@@ -64,3 +64,8 @@ class Variants(StrEnum):
 class RecordType(StrEnum):
     Sample: str = "Sample"
     Pool: str = "Pool"
+
+
+class SequencingPlatform(StrEnum):
+    illumina: str = "ILLUMINA"
+    oxford_nanopore: str = "OXFORD_NANOPORE"
