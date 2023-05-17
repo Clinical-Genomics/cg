@@ -49,7 +49,7 @@ class BclConvertMetricsParser:
     def parse_metrics_file(
         self, metrics_file_path, metrics_model: Callable
     ) -> List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]]:
-        """Parse the BCL convert metrics file into the respective model."""
+        """Parse specified BCL convert metrics file."""
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
         parsed_metrics: List[
             Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
