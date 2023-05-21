@@ -1,18 +1,3 @@
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
-    get_flow_cell_name,
-    get_index_metrics,
-    get_lane_number,
-    get_lane_read_quality_score_values,
-    get_lane_yield_in_bases,
-    get_lane_yield_q30_values,
-    get_number_of_reads_for_sample_in_lane,
-    get_perfect_reads_for_sample_in_lane,
-    get_quality_score,
-    get_read_metrics,
-    get_sample_id,
-    get_total_clusters_passing_filter,
-    get_total_raw_clusters,
-    get_yield_q30,
-    get_yield_values,
     parse_bcl2fastq_sequencing_metrics,
 )
