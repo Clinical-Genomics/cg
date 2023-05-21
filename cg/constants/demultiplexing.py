@@ -13,11 +13,16 @@ class BclConverter(StrEnum):
     BCL2FASTQ: str = "bcl2fastq"
 
 
+class SampleSheetHeaderColumnNames(StrEnum):
+    DATA: str = "[Data]"
+    FLOW_CELL_ID: str = "FCID"
+
+
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
-        "FCID",
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "SampleID",
         "SampleRef",
@@ -30,7 +35,7 @@ SAMPLE_SHEET_HEADERS = {
         "Project",
     ],
     "dragen": [
-        "FCID",
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "Sample_ID",
         "SampleRef",
@@ -44,13 +49,11 @@ SAMPLE_SHEET_HEADERS = {
     ],
 }
 
-SAMPLE_SHEET_DATA_HEADER = "[Data]"
-
 SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = "BarcodeMismatchesIndex1,0"
+SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = ["BarcodeMismatchesIndex1", "0"]
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2,0"
+SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = ["BarcodeMismatchesIndex2", "0"]
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",
@@ -105,7 +108,9 @@ class FlowCellMode(StrEnum):
     MISEQ: str = "2500"
 
 
+S1_MODE = "S1"
+
 SEQUENCER_FLOW_CELL_MODES: Dict[str, str] = {
     Sequencers.__members__[mode.name].value: mode.value for mode in FlowCellMode
 }
-FLOW_CELL_MODES: List[str] = list(SEQUENCER_FLOW_CELL_MODES.values())
+FLOW_CELL_MODES: List[str] = list(SEQUENCER_FLOW_CELL_MODES.values()) + [S1_MODE]
