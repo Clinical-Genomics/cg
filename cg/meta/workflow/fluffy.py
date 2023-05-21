@@ -8,7 +8,7 @@ from typing import List, Optional
 import pandas as pd
 from sqlalchemy.orm import Query
 from cg.constants import Pipeline
-from cg.constants.demultiplexing import SAMPLE_SHEET_DATA_HEADER
+from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.cg_config import CGConfig
@@ -142,20 +142,20 @@ class FluffyAnalysisAPI(AnalysisAPI):
         Any lines before and including the line starting with [Data] is considered the header.
 
         Returns:
-        int: The number of lines before the SAMPLE_SHEET_DATA_HEADER
+        int: The number of lines before the sample sheet data header
         """
         with sample_sheet_housekeeper_path.open("r") as read_obj:
             csv_reader = reader(read_obj)
             header_line_count: int = 1
             for line in csv_reader:
-                if SAMPLE_SHEET_DATA_HEADER in line:
+                if SampleSheetHeaderColumnNames.DATA.value in line:
                     break
                 header_line_count += 1
         return header_line_count
 
     def read_sample_sheet_data(self, sample_sheet_housekeeper_path: Path) -> pd.DataFrame:
         """
-        Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER.
+        Read in a sample sheet starting from the sample sheet data header.
 
         Args:
                         sample_sheet_housekeeper_path (Path): Path to the housekeeper sample sheet file

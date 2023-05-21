@@ -44,4 +44,4 @@ urllib3
 
 # apps
 genologics
-housekeeper==4.1.0
+housekeeper==4.*
