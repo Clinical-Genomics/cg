@@ -18,7 +18,7 @@ google-auth
 gunicorn
 requests[security]
 sendmail-container
-werkzeug<1.0.0              # due to breaking changes in 1.0.0
+werkzeug
 
 # utils
 ansi
@@ -44,4 +44,4 @@ urllib3
 
 # apps
 genologics
-housekeeper==4.1.0
+housekeeper==4.*
