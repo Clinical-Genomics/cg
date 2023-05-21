@@ -10,7 +10,7 @@ class SequencingMetricsForLaneAndSample(BaseModel):
 
     flow_cell_name: str = Field(..., min_length=1)
     number_of_lanes: int = Field(..., gt=0)
-    lane_number: int = Field(..., ge=0)
+    lane_number: int = Field(..., gt=0)
     sample_id: str = Field(..., min_length=1)
 
     yield_in_bases: int = Field(..., ge=0)
