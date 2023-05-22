@@ -185,17 +185,17 @@ class RsyncAPI(MetaAPI):
         case_files_present: bool = False,
     ) -> Tuple[bool, int]:
         """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
-        case_internal_id: str = case.internal_id
+        case_id: str = case.internal_id
 
-        ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_internal_id)
+        ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_internal_id=case.customer.internal_id
         )
-        self.set_log_dir(folder_prefix=case_internal_id)
+        self.set_log_dir(folder_prefix=case_id)
         self.create_log_dir(dry_run=dry_run)
 
         folders: List[str] = self.get_folders_to_deliver(
-            case_id=case_internal_id,
+            case_id=case_id,
             sample_files_present=sample_files_present,
             case_files_present=case_files_present,
         )
@@ -211,7 +211,7 @@ class RsyncAPI(MetaAPI):
         )
         is_complete_delivery: bool = folders == existing_folders
         return is_complete_delivery, self.sbatch_rsync_commands(
-            commands=commands, job_prefix=case_internal_id, dry_run=dry_run
+            commands=commands, job_prefix=case_id, dry_run=dry_run
         )
 
     def run_rsync_on_slurm(self, ticket: str, dry_run: bool) -> int:
