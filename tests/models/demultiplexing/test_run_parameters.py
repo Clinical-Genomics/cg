@@ -7,28 +7,6 @@ from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParametersV1
 
 
-def test_flow_cell_mode(novaseq_run_parameters: Path):
-    """Test that the flow cell mode is of a valid file in the list of expected values."""
-    # GIVEN a RunParameters object created from a valid run parameters file
-    run_parameters = RunParametersV1(run_parameters_path=novaseq_run_parameters)
-
-    # WHEN fetching the flow cell mode
-
-    # THEN the flow cell mode is in the list of expected values
-    assert run_parameters.flow_cell_mode in ["S2", "S4"]
-
-
-def test_flow_cell_mode_missing_mode(run_parameters_missing_flowcell_type: Path):
-    """Test that getting the flow cell mode from a file lacking flow cell mode returns None."""
-    # GIVEN a RunParameters object created from a file without flow cell mode
-    run_parameters = RunParametersV1(run_parameters_path=run_parameters_missing_flowcell_type)
-
-    # WHEN fetching the flow cell mode
-
-    # THEN the flow cell mode is none
-    assert run_parameters.flow_cell_mode is None
-
-
 def test_reagent_kit_version(novaseq_run_parameters: Path):
     """Test that getting reagent kit version from a correct file returns an expected value."""
     # GIVEN a RunParameters object created from a valid run parameters file

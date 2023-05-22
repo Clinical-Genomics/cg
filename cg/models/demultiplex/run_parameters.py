@@ -27,7 +27,6 @@ class RunParameters:
             raise FlowCellError("Index lengths are not the same!")
         return index_one_length
 
-    @property
     def requires_dummy_samples(self) -> bool:
         """Return true if the flow cell requires the addition of dummy samples.
 
@@ -116,17 +115,6 @@ class RunParametersV1(RunParameters):
         """Return the number of cycles in the second read."""
         node_name = "./Read2NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
-
-    @property
-    def flow_cell_mode(self) -> Optional[str]:
-        """Return the flow cell mode."""
-        node_name: str = "/RfidsInfo/FlowCellMode"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        if xml_node is None:
-            LOG.warning("Could not determine flow cell mode")
-            LOG.info("Set flow cell mode to None")
-            return
-        return xml_node.text
 
 
 class RunParametersV2(RunParameters):
