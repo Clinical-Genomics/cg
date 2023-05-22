@@ -1,5 +1,6 @@
 """Constants specific for compression."""
 import datetime
+from typing import List
 
 # Constants for crunchy
 FASTQ_FIRST_READ_SUFFIX: str = "_R1_001.fastq.gz"
@@ -55,6 +56,13 @@ BALSAMIC_VALIDATION_CASES = [
     "savinghorse",  # BALSAMIC validation case from cust087, tumor-only panel
     "rightpup",  # BALSAMIC validation case from cust087, tumor-only panel
     "sureroughy",  # BALSAMIC validation case from cust087, tumor-only panel
+    "notedshark",  # BALSAMIC validation case from cust127, tumor-normal WGS (SV inversion positive control)
+    "wholewhale",  # BALSAMIC validation case from cust143, tumor-normal WGS (SV translocation positive control)
+    "largeturtle",  # BALSAMIC validation case from cust143, tumor-normal WGS (SV translocation positive control)
+    "lightkodiak",  # BALSAMIC validation case from cust143, tumor-normal WGS (SV inversion positive control)
+    "wholecivet",  # BALSAMIC validation case from cust110, tumor-normal WGS (SV inversion positive control)
+    "upwardstork",  # BALSAMIC validation case from cust110, tumor-normal WGS (SV deletion positive control)
+    "suitedgrub",  # BALSAMIC validation case from cust110, tumor-normal WGS (SV deletion positive control)
 ]
 
 FLUFFY_VALIDATION_CASES = [
@@ -122,6 +130,10 @@ RNAFUSION_VALIDATION_CASES = [
     "nearbyjoey",
 ]
 
+TAXPROFILER_VALIDATION_CASES: List[str] = [
+    "richurchin",
+]
+
 OTHER_VALIDATION_CASES = [
     "bigdrum",
     "busycolt",
@@ -150,4 +162,5 @@ CASES_TO_IGNORE = (
     + FLUFFY_VALIDATION_CASES
     + MIP_VALIDATION_CASES
     + RNAFUSION_VALIDATION_CASES
+    + TAXPROFILER_VALIDATION_CASES
 )

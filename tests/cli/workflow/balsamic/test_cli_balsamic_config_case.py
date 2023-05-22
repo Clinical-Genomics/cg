@@ -8,6 +8,7 @@ from _pytest.logging import LogCaptureFixture
 from cg.cli.workflow.balsamic.base import config_case
 from click.testing import CliRunner
 
+from cg.store import Store
 from cg.models.cg_config import CGConfig
 
 EXIT_SUCCESS = 0
@@ -36,7 +37,7 @@ def test_with_missing_case(
     # THEN command should NOT successfully call the command it creates
     assert result.exit_code != EXIT_SUCCESS
     # THEN ERROR log should be printed containing invalid case_id
-    assert "could not be found in StatusDB!" in caplog.text
+    assert "could not be found in Status DB!" in caplog.text
 
 
 def test_without_samples(

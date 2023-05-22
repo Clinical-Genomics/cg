@@ -7,3 +7,5 @@ from .sample import Sample
 from .support_params import Supportparams
 from .unaligned import Unaligned
 from .version import Version
+from .demux_sample import DemuxSample
+from .dragen_demux_sample import DragenDemuxSample

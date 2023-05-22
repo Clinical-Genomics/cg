@@ -1,17 +1,33 @@
 from pathlib import Path
 
 import click
-from cgmodels.cg.constants import StrEnum
+from typing import List, Dict
+from cg.constants.sequencing import Sequencers
+from cg.utils.enums import StrEnum
 
 
 class BclConverter(StrEnum):
+    """Define the BCL converter."""
+
     DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
 
 
+class SampleSheetHeaderColumnNames(StrEnum):
+    DATA: str = "[Data]"
+    FLOW_CELL_ID: str = "FCID"
+    LANE: str = "Lane"
+    SAMPLE_INTERNAL_ID: str = "Sample_ID"
+    SAMPLE_NAME: str = "SampleName"
+    SAMPLE_PROJECT: str = "Sample_Project"
+    CONTROL: str = "Control"
+
+
+UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
+
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
-        "FCID",
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "SampleID",
         "SampleRef",
@@ -24,7 +40,7 @@ SAMPLE_SHEET_HEADERS = {
         "Project",
     ],
     "dragen": [
-        "FCID",
+        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
         "Sample_ID",
         "SampleRef",
@@ -38,13 +54,11 @@ SAMPLE_SHEET_HEADERS = {
     ],
 }
 
-SAMPLE_SHEET_DATA_HEADER = "[Data]"
-
 SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = "BarcodeMismatchesIndex1,0"
+SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = ["BarcodeMismatchesIndex1", "0"]
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2,0"
+SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = ["BarcodeMismatchesIndex2", "0"]
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",

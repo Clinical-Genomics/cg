@@ -67,18 +67,6 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 
-    def verify_case_id_in_statusdb(self, case_id: str) -> None:
-        """Passes silently if case exists in StatusDB, raises error if case is missing"""
-
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if not case_obj:
-            LOG.error("Case %s could not be found in StatusDB!", case_id)
-            raise CgError
-        if not case_obj.links:
-            LOG.error("Case %s has no samples in in StatusDB!", case_id)
-            raise CgError
-        LOG.info("Case %s exists in status db", case_id)
-
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
@@ -136,7 +124,7 @@ class AnalysisAPI(MetaAPI):
         Gets application type for sample. Only application types supported by trailblazer (or other)
         are valid outputs.
         """
-        prep_category: str = sample_obj.application_version.application.prep_category
+        prep_category: str = sample_obj.prep_category
         if prep_category and prep_category.lower() in {
             AnalysisType.TARGETED_GENOME_SEQUENCING,
             AnalysisType.WHOLE_EXOME_SEQUENCING,
@@ -279,6 +267,15 @@ class AnalysisAPI(MetaAPI):
             case_object
             for case_object in self.get_running_cases()
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
+        ]
+
+    def get_cases_to_qc(self) -> List[Family]:
+        """Retrieve a list of cases where analysis finished successfully,
+        and is ready for QC metrics checks."""
+        return [
+            case_object
+            for case_object in self.get_running_cases()
+            if self.trailblazer_api.is_latest_analysis_qc(case_id=case_object.internal_id)
         ]
 
     def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):

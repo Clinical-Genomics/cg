@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
     "--days-back",
     default=60,
     show_default=True,
-    help="Threshold for how long ago family was created",
+    help="Threshold for how long ago was the case created",
 )
 @click.option("--hours", type=int, help="Hours to allocate for slurm job")
 @click.option("-m", "--mem", type=int, help="Memory for slurm job")
@@ -74,7 +74,7 @@ def fastq_cmd(
     "--days-back",
     default=60,
     show_default=True,
-    help="Threshold for how long ago family was created",
+    help="Threshold for how long ago was the case created",
 )
 @DRY_RUN
 @click.pass_obj

@@ -1,6 +1,9 @@
-from typing import Any, Dict, List, Optional
+import operator
+from typing import Any, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, Field, validator
+
+from cg.exc import CgError, MetricsQCError
 
 
 def _get_metric_per_sample_id(sample_id: str, metric_objs: list) -> Any:
@@ -45,8 +48,31 @@ def add_sample_id_metrics(parsed_metric: Any, values: dict) -> List[Any]:
     return sample_id_metrics
 
 
+class MetricCondition(BaseModel):
+    """Metric condition model
+
+    Attributes:
+        norm: validation condition
+        threshold: validation cut off
+    """
+
+    norm: str
+    threshold: float
+
+    @validator("norm")
+    def validate_operator(cls, norm: str) -> str:
+        """Validate that an operator is accepted."""
+        try:
+            getattr(operator, norm)
+        except AttributeError as error:
+            raise CgError(
+                f"{norm} is not an accepted operator for QC metric conditions."
+            ) from error
+        return norm
+
+
 class MetricsBase(BaseModel):
-    """Definition for elements in deliverables metrics file"""
+    """Definition for elements in deliverables metrics file."""
 
     header: Optional[str]
     id: str
@@ -54,6 +80,7 @@ class MetricsBase(BaseModel):
     name: str
     step: str
     value: Any
+    condition: Optional[MetricCondition]
 
 
 class SampleMetric(BaseModel):
@@ -104,3 +131,29 @@ class MetricsDeliverables(BaseModel):
         for metric in raw_metrics:
             sample_ids.append(metric.id)
         return set(sample_ids)
+
+
+class MetricsDeliverablesCondition(BaseModel):
+    """Specification for a metric deliverables file with conditions sets."""
+
+    metrics: List[MetricsBase]
+
+    @validator("metrics")
+    def validate_metrics(cls, metrics: List[MetricsBase]) -> List[MetricsBase]:
+        """Verify that metrics met QC conditions."""
+        failed_metrics: List = []
+        for metric in metrics:
+            if metric.condition is not None:
+                qc_function: Callable = getattr(operator, metric.condition.norm)
+                if not qc_function(metric.value, metric.condition.threshold):
+                    failed_metrics.append(f"{metric.name}={metric.value}")
+        if failed_metrics:
+            raise MetricsQCError(f"QC failed: {'; '.join(failed_metrics)}")
+        return metrics
+
+
+class MultiqcDataJson(BaseModel):
+    """Multiqc data json model."""
+
+    report_general_stats_data: Optional[List[Dict]]
+    report_data_sources: Optional[Dict]

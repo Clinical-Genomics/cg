@@ -7,20 +7,24 @@ from typing import Optional
 import click
 
 from cg.cli.upload import vogue
-from cg.cli.upload.clinical_delivery import auto_fastq, clinical_delivery
-from cg.cli.upload.coverage import coverage
+from cg.cli.upload.clinical_delivery import auto_fastq, upload_clinical_delivery
+from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
 from cg.cli.upload.fohm import fohm
-from cg.cli.upload.genotype import genotypes
-from cg.cli.upload.gens import gens
-from cg.cli.upload.gisaid import gisaid
+from cg.cli.upload.genotype import upload_genotypes
+from cg.cli.upload.gens import upload_to_gens
+from cg.cli.upload.gisaid import upload_to_gisaid
 from cg.cli.upload.mutacc import process_solved, processed_solved
 from cg.cli.upload.nipt import nipt
-from cg.cli.upload.observations import available_observations, observations
+from cg.cli.upload.observations import (
+    upload_available_observations_to_loqusdb,
+    upload_observations_to_loqusdb,
+)
 from cg.cli.upload.scout import (
     create_scout_load_config,
-    scout,
+    upload_to_scout,
     upload_case_to_scout,
+    upload_multiqc_to_scout,
     upload_rna_fusion_report_to_scout,
     upload_rna_junctions_to_scout,
     upload_rna_to_scout,
@@ -36,6 +40,7 @@ from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
+
 from cg.store.models import Family
 from cg.utils.click.EnumChoice import EnumChoice
 
@@ -63,7 +68,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
         context.obj.meta_apis["upload_api"] = upload_api
     elif family_id:  # Provided case ID without a subcommand: upload everything
         try:
-            upload_api.analysis_api.verify_case_id_in_statusdb(case_id=family_id)
+            upload_api.analysis_api.status_db.verify_case_exists(case_internal_id=family_id)
             case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=family_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
@@ -87,10 +92,10 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
         raise click.Abort()
 
 
-@upload.command()
+@upload.command("auto")
 @click.option("--pipeline", type=EnumChoice(Pipeline), help="Limit to specific pipeline")
 @click.pass_context
-def auto(context: click.Context, pipeline: Pipeline = None):
+def upload_all_completed_analyses(context: click.Context, pipeline: Pipeline = None):
     """Upload all completed analyses"""
 
     LOG.info("----------------- AUTO -----------------")
@@ -119,23 +124,24 @@ def auto(context: click.Context, pipeline: Pipeline = None):
 
 
 upload.add_command(auto_fastq)
-upload.add_command(clinical_delivery)
-upload.add_command(coverage)
+upload.add_command(upload_clinical_delivery)
+upload.add_command(upload_coverage)
 upload.add_command(create_scout_load_config)
 upload.add_command(fohm)
-upload.add_command(genotypes)
-upload.add_command(gens)
-upload.add_command(gisaid)
+upload.add_command(upload_genotypes)
+upload.add_command(upload_to_gens)
+upload.add_command(upload_to_gisaid)
 upload.add_command(nipt)
 upload.add_command(process_solved)
 upload.add_command(processed_solved)
-upload.add_command(scout)
+upload.add_command(upload_to_scout)
 upload.add_command(upload_case_to_scout)
 upload.add_command(upload_delivery_report_to_scout)
 upload.add_command(upload_rna_fusion_report_to_scout)
 upload.add_command(upload_rna_junctions_to_scout)
 upload.add_command(upload_rna_to_scout)
-upload.add_command(observations)
-upload.add_command(available_observations)
+upload.add_command(upload_observations_to_loqusdb)
+upload.add_command(upload_available_observations_to_loqusdb)
+upload.add_command(upload_multiqc_to_scout)
 upload.add_command(validate)
 upload.add_command(vogue)

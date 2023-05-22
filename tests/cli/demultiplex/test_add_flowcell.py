@@ -8,7 +8,7 @@ from click.testing import CliRunner
 
 def test_add_flowcell_cmd(
     cli_runner: CliRunner,
-    flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCell,
     demultiplex_context: CGConfig,
     demultiplexed_flow_cell_finished_working_directory: Path,
     demultiplex_ready_flow_cell: Path,
@@ -20,16 +20,18 @@ def test_add_flowcell_cmd(
     assert demultiplexed_flow_cell_finished_working_directory.exists()
 
     # GIVEN that the flowcell does not exist in the cgstats database
-    assert not demultiplex_context.cg_stats_api.find_handler.get_flow_cell_id(
-        flowcell_name=flow_cell.id
+    assert not demultiplex_context.cg_stats_api.find_handler.get_flow_cell_by_name(
+        flow_cell_name=bcl2fastq_flow_cell.id
     )
 
     # WHEN running the add flowcell command
-    result = cli_runner.invoke(add_flow_cell_cmd, [flow_cell.full_name], obj=demultiplex_context)
+    result = cli_runner.invoke(
+        add_flow_cell_cmd, [bcl2fastq_flow_cell.full_name], obj=demultiplex_context
+    )
 
     # THEN assert that the run was success
     assert result.exit_code == 0
     # THEN assert that the flowcell was added to cgstats
-    assert demultiplex_context.cg_stats_api.find_handler.get_flow_cell_id(
-        flowcell_name=flow_cell.id
+    assert demultiplex_context.cg_stats_api.find_handler.get_flow_cell_by_name(
+        flow_cell_name=bcl2fastq_flow_cell.id
     )

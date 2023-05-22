@@ -2,10 +2,11 @@
 
 import datetime as dt
 import logging
+from subprocess import CalledProcessError
 
 import click
 
-from cg.cli.upload.clinical_delivery import clinical_delivery
+from cg.cli.upload.clinical_delivery import upload_clinical_delivery
 from cg.cli.upload.scout import upload_rna_to_scout
 from cg.constants import DataDelivery
 from cg.meta.upload.upload_api import UploadAPI
@@ -30,18 +31,15 @@ class MipRNAUploadAPI(UploadAPI):
         self.update_upload_started_at(analysis=analysis)
 
         # Clinical delivery upload
-        ctx.invoke(clinical_delivery, case_id=case.internal_id)
+        ctx.invoke(upload_clinical_delivery, case_id=case.internal_id)
 
         # Scout specific upload
         if DataDelivery.SCOUT in case.data_delivery:
-            result: int = ctx.invoke(upload_rna_to_scout, case_id=case.internal_id)
-            if result == 0:
-                LOG.info(
-                    f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
-                )
+            try:
+                ctx.invoke(upload_rna_to_scout, case_id=case.internal_id)
                 self.update_uploaded_at(analysis)
-            else:
-                raise RuntimeError(f"Upload to Scout failed for sample {case.internal_id}")
+            except CalledProcessError as error:
+                LOG.error(error)
         else:
             LOG.warning(
                 f"There is nothing to upload to Scout for case {case.internal_id} and "

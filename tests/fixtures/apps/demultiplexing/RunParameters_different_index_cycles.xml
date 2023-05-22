@@ -6,7 +6,7 @@
   <Read1NumberOfCycles>151</Read1NumberOfCycles>
   <Read2NumberOfCycles>151</Read2NumberOfCycles>
   <IndexRead1NumberOfCycles>10</IndexRead1NumberOfCycles>
-  <IndexRead2NumberOfCycles>10</IndexRead2NumberOfCycles>
+  <IndexRead2NumberOfCycles>8</IndexRead2NumberOfCycles>
   <PlannedRead1Cycles>151</PlannedRead1Cycles>
   <PlannedRead2Cycles>151</PlannedRead2Cycles>
   <PlannedIndex1ReadCycles>10</PlannedIndex1ReadCycles>

@@ -41,7 +41,7 @@ def get_low_count_samples(samples: List[SampleConversionResults], lane: int) -> 
 
 
 def get_unknown_barcodes(unknown_barcodes: List[UnknownBarcode], lane: int) -> List[SampleData]:
-    LOG.info("Adding unknown barcodes for lane %s", lane)
+    LOG.info(f"Adding unknown barcodes for lane {lane}")
     return [
         SampleData(
             read_count=unknown.read_count,

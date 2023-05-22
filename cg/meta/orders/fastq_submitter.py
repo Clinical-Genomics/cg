@@ -13,6 +13,7 @@ from cg.models.orders.order import OrderIn
 from cg.models.orders.sample_base import StatusEnum
 from cg.constants.priority import Priority
 from cg.store.models import Sample, Family, FamilySample, Customer, ApplicationVersion
+from cg.constants.constants import PrepCategory
 
 
 class FastqSubmitter(Submitter):
@@ -124,8 +125,7 @@ class FastqSubmitter(Submitter):
                     )
                 if (
                     not new_sample.is_tumour
-                    and new_sample.application_version.application.prep_category
-                    == PrepCategory.WHOLE_GENOME_SEQUENCING
+                    and new_sample.prep_category == PrepCategory.WHOLE_GENOME_SEQUENCING
                 ):
                     self.create_maf_case(sample_obj=new_sample)
                 case.customer = customer

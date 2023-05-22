@@ -4,7 +4,7 @@ import logging
 from typing import Dict, List, Set
 
 from cg.apps.lims.samplesheet import LimsFlowcellSample
-from cg.resources import valid_indexes_path
+from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel
 
@@ -16,12 +16,12 @@ REAGENT_KIT_PARAMETER_TO_VERSION = {"1": "1.0", "3": "1.5"}
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
-    """Determines if a index is already present in the existing indexes"""
+    """Determines if an index is already present in the existing indexes."""
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
 def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]]:
-    """Group the indexes from samples by lane"""
+    """Group the indexes from samples by lane."""
     indexes_by_lane = {}
     for sample in samples:
         lane: int = sample.lane
@@ -37,9 +37,9 @@ class Index(BaseModel):
 
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
-    LOG.info("Fetch valid indexes from %s", valid_indexes_path)
+    LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
     indexes: List[Index] = []
-    with open(valid_indexes_path, "r") as csv_file:
+    with open(VALID_INDEXES_PATH, "r") as csv_file:
         indexes_csv = csv.reader(csv_file)
         for row in indexes_csv:
             index_name = row[0]
@@ -51,8 +51,8 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
 
 
 def get_reagent_kit_version(reagent_kit_version: str) -> str:
-    """Derives the reagent kit version from the run parameters"""
-    LOG.info("Converting reagent kit parameter %s to version", reagent_kit_version)
+    """Derives the reagent kit version from the run parameters."""
+    LOG.info(f"Converting reagent kit parameter {reagent_kit_version} to version")
     if reagent_kit_version not in REAGENT_KIT_PARAMETER_TO_VERSION:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
 
@@ -67,14 +67,13 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
     LOG.info("Check if run is reverse complement")
     if version.parse(control_software_version) < version.parse(NEW_CONTROL_SOFTWARE_VERSION):
         LOG.warning(
-            "Old software version %s, no need for reverse complement", control_software_version
+            f"Old software version {control_software_version}, no need for reverse complement"
         )
         return False
     reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version_string)
     if version.parse(reagent_kit_version) < version.parse(NEW_REAGENT_KIT_VERSION):
         LOG.warning(
-            "Reagent kit version %s does not does not need reverse complement",
-            reagent_kit_version,
+            f"Reagent kit version {reagent_kit_version} does not does not need reverse complement"
         )
         return False
     LOG.info("Run is reverse complement")
@@ -82,19 +81,19 @@ def is_reverse_complement(control_software_version: str, reagent_kit_version_str
 
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
-    """Generates the reverse complement of a DNA sequence"""
-    LOG.debug("Reverse complement string %s", dna)
+    """Generates the reverse complement of a DNA sequence."""
+    LOG.debug(f"Reverse complement string {dna}")
 
     return "".join(DNA_COMPLEMENTS[base] for base in reversed(dna))
 
 
 def pad_index_one(index_string: str) -> str:
-    """Adds bases 'AT' to index one"""
+    """Adds bases 'AT' to index one."""
     return index_string + "AT"
 
 
 def pad_index_two(index_string: str, reverse_complement: bool) -> str:
-    """Adds bases to index two depending on if it should be reverse complement or not"""
+    """Adds bases to index two depending on if it should be reverse complement or not."""
     if reverse_complement:
         return "AC" + index_string
     return index_string + "AC"
@@ -132,5 +131,5 @@ def adapt_indexes(
 
 
 def is_dual_index(index: str) -> bool:
-    """Determines if an index in the raw sample sheet is dual index or not"""
+    """Determines if an index in the raw sample sheet is dual index or not."""
     return "-" in index

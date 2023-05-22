@@ -12,11 +12,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteFile, WriteStream
+from cg.io.json import read_json, write_json
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family, Sample
-from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.process_mock import ProcessMock
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
@@ -225,15 +225,38 @@ def fixture_rnafusion_hermes_process(
     return process
 
 
+@pytest.fixture(name="rnafusion_multiqc_json_metrics")
+def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
+    """Returns a the content of a mock multiqc json file."""
+    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+
+
 @pytest.fixture
-def mock_analysis_finish(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
-    """Create analysis_finish file for testing"""
+def mock_analysis_finish(
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict
+) -> None:
+    """Create analysis_finish file for testing."""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
     Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
         exist_ok=True
     )
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
         exist_ok=True
+    )
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=rnafusion_multiqc_json_metrics,
+        file_path=Path(
+            rnafusion_dir,
+            rnafusion_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data.json",
+        ),
     )
 
 
