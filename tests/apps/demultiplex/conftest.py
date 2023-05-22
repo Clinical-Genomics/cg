@@ -4,7 +4,7 @@ from typing import List
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
+from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreatorV1
 from cg.apps.lims.samplesheet import (
     LimsFlowcellSample,
     LimsFlowcellSampleBcl2Fastq,
@@ -90,8 +90,8 @@ def fixture_novaseq_run_parameters_object(novaseq_run_parameters: Path) -> RunPa
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
     bcl2fastq_flow_cell: FlowCell,
     lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
-) -> SampleSheetCreator:
-    return SampleSheetCreator(
+) -> SampleSheetCreatorV1:
+    return SampleSheetCreatorV1(
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=lims_novaseq_bcl2fastq_samples,
         bcl_converter="bcl2fastq",
@@ -103,8 +103,8 @@ def fixture_novaseq_dragen_sample_sheet_object(
     dragen_flow_cell: FlowCell,
     lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
     novaseq_run_parameters_object: RunParameters,
-) -> SampleSheetCreator:
-    return SampleSheetCreator(
+) -> SampleSheetCreatorV1:
+    return SampleSheetCreatorV1(
         flow_cell=dragen_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
         bcl_converter="dragen",
