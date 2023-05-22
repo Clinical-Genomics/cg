@@ -67,9 +67,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             LOG.error(error)
             raise ValueError
 
-        # samples_full_list: List[str]
-        # instrument_full_list: List[str]
-        # fasta_full_list: List[str]
         # Complete sample lists to the same length as fastq_r1:
         samples_full_list: List[str] = [case_id] * len(fastq_r1)
         instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
