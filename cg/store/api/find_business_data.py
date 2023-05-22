@@ -8,7 +8,7 @@ from sqlalchemy.orm import Query, Session
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
-from cg.exc import CaseNotFoundError
+from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
 from cg.store.filters.status_application_version_filters import (
     ApplicationVersionFilter,
@@ -734,6 +734,18 @@ class FindBusinessDataHandler(BaseHandler):
             cases=self._get_query(table=Family),
             internal_id=internal_id,
         ).first()
+
+    def verify_case_exists(self, case_internal_id: str) -> None:
+        """Passes silently if case exists in Status DB, raises error if no case or case samples."""
+
+        case: Family = self.get_case_by_internal_id(internal_id=case_internal_id)
+        if not case:
+            LOG.error(f"Case {case_internal_id} could not be found in Status DB!")
+            raise CgError
+        if not case.links:
+            LOG.error(f"Case {case_internal_id} has no samples in in Status DB!")
+            raise CgError
+        LOG.info(f"Case {case_internal_id} exists in Status DB")
 
     def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
         """Get all running cases in a pipeline."""

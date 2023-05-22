@@ -35,7 +35,7 @@ def config_case(context: CGConfig, case_id: str, panel_bed: str, dry_run: bool):
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         panel_bed: Optional[str] = analysis_api.get_panel_bed(panel_bed=panel_bed)
         config_data: dict = analysis_api.pedigree_config(case_id=case_id, panel_bed=panel_bed)
     except CgError as error:
@@ -55,7 +55,7 @@ def panel(context: CGConfig, case_id: str, dry_run: bool):
     """Write aggregated gene panel file exported from Scout."""
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
     bed_lines: List[str] = analysis_api.panel(case_id=case_id)
     if dry_run:
@@ -92,7 +92,7 @@ def run(
 
     analysis_api: MipAnalysisAPI = context.meta_apis["analysis_api"]
 
-    analysis_api.verify_case_id_in_statusdb(case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     command_args = dict(
         slurm_quality_of_service=slurm_quality_of_service
         or analysis_api.get_slurm_qos_for_case(case_id),
@@ -159,7 +159,7 @@ def start(
 
     analysis_api: MipAnalysisAPI = context.obj.meta_apis["analysis_api"]
 
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     LOG.info(f"Starting full MIP analysis workflow for case {case_id}")
     try:
         context.invoke(ensure_flow_cells_on_disk, case_id=case_id)

@@ -2,13 +2,13 @@
 from pathlib import Path
 
 import pytest
-from tests.store_helpers import StoreHelpers
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.delivery import INBOX_NAME
 from cg.constants.housekeeper_tags import AlignmentFileTag
 from cg.meta.deliver import DeliverAPI
 from cg.store import Store
 from cg.store.models import Family
+from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(scope="function", name="deliver_api")
@@ -89,7 +89,5 @@ def fixture_samples_missing_in_inbox(
 
 
 @pytest.fixture(name="deliver_api_destination_path")
-def fixture_deliver_api_destination_path(
-    customer_id: str, case_obj: Family, ticket_id: str
-) -> Path:
-    return Path(customer_id, INBOX_NAME, ticket_id, case_obj.name)
+def fixture_deliver_api_destination_path(customer_id: str, case: Family, ticket_id: str) -> Path:
+    return Path(customer_id, INBOX_NAME, ticket_id, case.name)

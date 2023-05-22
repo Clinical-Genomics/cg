@@ -3,12 +3,12 @@ import datetime as dt
 import enum
 from pathlib import Path
 from typing import Generator, List
-import pytest
 
+import pytest
 from cg.constants import Pipeline
 from cg.constants.subject import Gender, PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Family, Organism, Sample, Customer
+from cg.store.models import Analysis, Application, Customer, Family, Organism, Sample
 from tests.store_helpers import StoreHelpers
 
 
@@ -170,19 +170,19 @@ def fixture_microbial_store(
     yield base_store
 
 
-@pytest.fixture(name="analysis_obj")
+@pytest.fixture(name="analysis")
 def fixture_analysis_obj(analysis_store: Store) -> Analysis:
     """Return an analysis object from a populated store."""
     return analysis_store._get_query(table=Analysis)[0]
 
 
-@pytest.fixture(name="case_obj")
+@pytest.fixture(name="case")
 def fixture_case_obj(analysis_store: Store) -> Family:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
 
 
-@pytest.fixture(name="sample_obj")
+@pytest.fixture(name="sample")
 def fixture_sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
     return analysis_store.get_samples()[0]
@@ -397,7 +397,7 @@ def fixture_store_with_case_and_analysis(
 def fixture_store_with_older_and_newer_analyses(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: Family,
+    case: Family,
     timestamp_now: dt.datetime,
     timestamp_yesterday: dt.datetime,
     old_timestamp: dt.datetime,
@@ -415,7 +415,7 @@ def fixture_store_with_older_and_newer_analyses(
     for time in times:
         helpers.add_analysis(
             store=base_store,
-            case=case_obj,
+            case=case,
             pipeline=Pipeline.BALSAMIC,
             started_at=time,
             completed_at=time,
