@@ -10,7 +10,7 @@ from genologics.entities import Process, Project, Sample, Artifact
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 
-from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod
+from cg.constants.lims import MASTER_STEPS_UDFS, PROP2UDF, DocumentationMethod, LimsArtifactTypes
 from cg.exc import LimsDataError
 
 from .order import OrderHandler
@@ -392,20 +392,20 @@ class LimsAPI(Lims, OrderHandler):
     def get_sample_rin(self, sample_id: str) -> float:
         """Return the sample RIN value."""
         sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
-        return sample_artifact.udf.get("RIN")
+        return sample_artifact.udf.get(PROP2UDF["rin"])
 
-    def get_latest_used_rna_input_amount(self, sample_id: str) -> float:
-        """Return the input amount used in the latest preparation of an RNA sample."""
-        step_names_udfs = MASTER_STEPS_UDFS["rna_prep_step"]
+    def _get_rna_input_amounts(self, sample_id: str) -> List[Tuple[dt, float]]:
+        """Return all prep input amounts used for an RNA sample in lims."""
+        step_names_udfs: Dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
 
-        input_amounts = []
+        input_amounts: List[Tuple[dt, float]] = []
 
         for process_type in step_names_udfs:
-            artifacts = self.get_artifacts(
-                samplelimsid=sample_id, process_type=process_type, type="Analyte"
+            artifacts: List[Artifact] = self.get_artifacts(
+                samplelimsid=sample_id, process_type=process_type, type=LimsArtifactTypes.ANALYTE
             )
 
-            udf_key = step_names_udfs[process_type]
+            udf_key: str = step_names_udfs[process_type]
             for artifact in artifacts:
                 input_amounts.append(
                     (
@@ -413,6 +413,14 @@ class LimsAPI(Lims, OrderHandler):
                         artifact.udf.get(udf_key),
                     )
                 )
+        return input_amounts
 
-        sorted_input_amounts = self._sort_by_date_run(input_amounts)
+    def _get_last_used_input_amount(self, input_amounts: List[Tuple[dt, float]]) -> float:
+        """Return the latest used input amount."""
+        sorted_input_amounts: List[Tuple[dt, float]] = self._sort_by_date_run(input_amounts)
         return sorted_input_amounts[0][1]
+
+    def get_latest_rna_input_amount(self, sample_id: str) -> float:
+        """Return the input amount used in the latest preparation of an RNA sample."""
+        input_amounts = self._get_rna_input_amounts(sample_id=sample_id)
+        return self._get_last_used_input_amount(input_amounts=input_amounts)
