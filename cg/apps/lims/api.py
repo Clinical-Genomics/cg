@@ -394,11 +394,11 @@ class LimsAPI(Lims, OrderHandler):
         sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
         return sample_artifact.udf.get(PROP2UDF["rin"])
 
-    def _get_rna_input_amounts(self, sample_id: str) -> List[Tuple[dt, float]]:
+    def _get_rna_input_amounts(self, sample_id: str) -> List[Tuple[dt.datetime, float]]:
         """Return all prep input amounts used for an RNA sample in lims."""
         step_names_udfs: Dict[str] = MASTER_STEPS_UDFS["rna_prep_step"]
 
-        input_amounts: List[Tuple[dt, float]] = []
+        input_amounts: List[Tuple[dt.datetime, float]] = []
 
         for process_type in step_names_udfs:
             artifacts: List[Artifact] = self.get_artifacts(
@@ -415,9 +415,11 @@ class LimsAPI(Lims, OrderHandler):
                 )
         return input_amounts
 
-    def _get_last_used_input_amount(self, input_amounts: List[Tuple[dt, float]]) -> float:
+    def _get_last_used_input_amount(self, input_amounts: List[Tuple[dt.datetime, float]]) -> float:
         """Return the latest used input amount."""
-        sorted_input_amounts: List[Tuple[dt, float]] = self._sort_by_date_run(input_amounts)
+        sorted_input_amounts: List[Tuple[dt.datetime, float]] = self._sort_by_date_run(
+            input_amounts
+        )
         return sorted_input_amounts[0][1]
 
     def get_latest_rna_input_amount(self, sample_id: str) -> float:
