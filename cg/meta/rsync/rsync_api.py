@@ -3,22 +3,22 @@ import datetime as dt
 import glob
 import logging
 from pathlib import Path
-from typing import List, Dict, Iterable, Tuple
+from typing import Dict, Iterable, List, Tuple
 
-from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
 from cg.constants.delivery import INBOX_NAME
-from cg.constants.priority import SlurmQos, SLURM_ACCOUNT_TO_QOS
+from cg.constants.priority import SLURM_ACCOUNT_TO_QOS, SlurmQos
 from cg.exc import CgError
 from cg.io.controller import WriteFile
 from cg.meta.meta import MetaAPI
-from cg.meta.rsync.sbatch import RSYNC_COMMAND, ERROR_RSYNC_FUNCTION, COVID_RSYNC
+from cg.meta.rsync.sbatch import COVID_RSYNC, ERROR_RSYNC_FUNCTION, RSYNC_COMMAND
 from cg.models.cg_config import CGConfig
 from cg.models.slurm.sbatch import Sbatch
 from cg.store.models import Family
-from cg.constants import Pipeline
+from cgmodels.trailblazer.constants import AnalysisTypes
 
 LOG = logging.getLogger(__name__)
 
@@ -101,6 +101,7 @@ class RsyncAPI(MetaAPI):
         return self.status_db.get_cases_by_ticket_id(ticket_id=ticket)
 
     def get_source_and_destination_paths(self, ticket: str, customer_id: str) -> Dict[str, Path]:
+        """Return the source and destination paths."""
         source_and_destination_paths: Dict[str, Path] = {
             "delivery_source_path": Path(self.delivery_path, customer_id, INBOX_NAME, ticket),
             "rsync_destination_path": Path(self.destination_path, customer_id, INBOX_NAME),
@@ -178,17 +179,17 @@ class RsyncAPI(MetaAPI):
         case_files_present: bool = False,
     ) -> Tuple[bool, int]:
         """Runs rsync of a single case to the delivery server, parameters depend on delivery type."""
-        case_id: str = case.internal_id
+        case_internal_id: str = case.internal_id
 
-        ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_id)
+        ticket: str = self.status_db.get_latest_ticket_from_case(case_id=case_internal_id)
         source_and_destination_paths: Dict[str, Path] = self.get_source_and_destination_paths(
             ticket=ticket, customer_id=case.customer.internal_id
         )
-        self.set_log_dir(folder_prefix=case_id)
+        self.set_log_dir(folder_prefix=case_internal_id)
         self.create_log_dir(dry_run=dry_run)
 
         folders: List[str] = self.get_folders_to_deliver(
-            case_id=case_id,
+            case_id=case_internal_id,
             sample_files_present=sample_files_present,
             case_files_present=case_files_present,
         )
@@ -204,7 +205,7 @@ class RsyncAPI(MetaAPI):
         )
         is_complete_delivery: bool = folders == existing_folders
         return is_complete_delivery, self.sbatch_rsync_commands(
-            commands=commands, job_prefix=case_id, dry_run=dry_run
+            commands=commands, job_prefix=case_internal_id, dry_run=dry_run
         )
 
     def run_rsync_on_slurm(self, ticket: str, dry_run: bool) -> int:

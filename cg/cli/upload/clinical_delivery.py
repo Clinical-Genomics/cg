@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Set
 
 import click
-
-from cgmodels.trailblazer.constants import AnalysisTypes
 from cg.apps.tb import TrailblazerAPI
 from cg.constants import Pipeline
 from cg.constants.constants import DRY_RUN
@@ -16,6 +14,7 @@ from cg.meta.deliver import DeliverAPI
 from cg.meta.rsync import RsyncAPI
 from cg.store import Store
 from cg.store.models import Family
+from cgmodels.trailblazer.constants import AnalysisTypes
 
 LOG = logging.getLogger(__name__)
 
@@ -30,8 +29,8 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
 
     click.echo(click.style("----------------- Clinical-delivery -----------------"))
 
-    case_obj: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
-    delivery_types: Set[str] = case_obj.get_delivery_arguments()
+    case: Family = context.obj.status_db.get_case_by_internal_id(internal_id=case_id)
+    delivery_types: Set[str] = case.get_delivery_arguments()
     is_sample_delivery: bool
     is_case_delivery: bool
     is_complete_delivery: bool
@@ -52,11 +51,11 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             sample_tags=PIPELINE_ANALYSIS_TAG_MAP[delivery_type]["sample_tags"],
             delivery_type=delivery_type,
             project_base_path=Path(context.obj.delivery_path),
-        ).deliver_files(case_obj=case_obj)
+        ).deliver_files(case_obj=case)
 
     rsync_api: RsyncAPI = RsyncAPI(context.obj)
     is_complete_delivery, job_id = rsync_api.slurm_rsync_single_case(
-        case=case_obj,
+        case=case,
         dry_run=dry_run,
         sample_files_present=is_sample_delivery,
         case_files_present=is_case_delivery,
@@ -71,9 +70,9 @@ def upload_clinical_delivery(context: click.Context, case_id: str, dry_run: bool
             analysis_type=AnalysisTypes.OTHER,
             config_path=rsync_api.trailblazer_config_path.as_posix(),
             out_dir=rsync_api.log_dir.as_posix(),
-            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case_obj.priority],
+            slurm_quality_of_service=PRIORITY_TO_SLURM_QOS[case.priority],
             data_analysis=Pipeline.RSYNC,
-            ticket=case_obj.latest_ticket,
+            ticket=case.latest_ticket,
         )
     LOG.info("Transfer of case %s started with SLURM job id %s", case_id, job_id)
 

@@ -3,26 +3,25 @@ import logging
 from datetime import datetime, timedelta
 from typing import List
 
-from sqlalchemy.orm import Query
-
 from cg.constants import FlowCellStatus
 from cg.constants.constants import CaseActions
-from cg.store import Store
 from cg.constants.indexes import ListIndexes
+from cg.constants.invoice import CustomerNames
+from cg.store import Store
 from cg.store.models import (
     Analysis,
     Application,
     ApplicationVersion,
-    Flowcell,
-    FamilySample,
+    Customer,
     Family,
-    Sample,
+    FamilySample,
+    Flowcell,
     Invoice,
     Pool,
-    Customer,
+    Sample,
 )
+from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
-from cg.constants.invoice import CustomerNames
 
 
 def test_get_analysis_by_case_entry_id_and_started_at(
@@ -103,26 +102,23 @@ def test_get_flow_cells_by_case(
     base_store: Store,
     bcl2fastq_flow_cell_id: str,
     another_flow_cell_id: str,
-    case_obj: Family,
+    case: Family,
     helpers: StoreHelpers,
-    sample_obj: Sample,
+    sample: Sample,
 ):
     """Test returning the latest flow cell from the database by case."""
 
     # GIVEN a store with two flow cell
-    helpers.add_flowcell(
-        store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample_obj]
-    )
-
+    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
     helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
 
     # WHEN fetching the latest flow cell
-    flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case_obj)
+    flow_cells: List[Flowcell] = base_store.get_flow_cells_by_case(case=case)
 
     # THEN the flow cell samples for the case should be returned
     for flow_cell in flow_cells:
         for sample in flow_cell.samples:
-            assert sample in case_obj.samples
+            assert sample in case.samples
 
     # THEN the returned flow cell should have the same name as the one in the database
     assert flow_cells[0].name == bcl2fastq_flow_cell_id
@@ -267,7 +263,7 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     another_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
-    sample_obj: Sample,
+    sample: Sample,
 ):
     """Test check if all flow cells for samples on a case is on disk when not on disk."""
     caplog.set_level(logging.DEBUG)
@@ -275,14 +271,14 @@ def test_is_all_flow_cells_on_disk_when_not_on_disk(
     flow_cell = helpers.add_flowcell(
         store=base_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
-        samples=[sample_obj],
+        samples=[sample],
         status=FlowCellStatus.PROCESSING,
     )
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
         flow_cell_name=another_flow_cell_id,
-        samples=[sample_obj],
+        samples=[sample],
         status=FlowCellStatus.RETRIEVED,
     )
 
@@ -304,7 +300,7 @@ def test_is_all_flow_cells_on_disk_when_requested(
     another_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
-    sample_obj: Sample,
+    sample: Sample,
 ):
     """Test check if all flow cells for samples on a case is on disk when requested."""
     caplog.set_level(logging.DEBUG)
@@ -312,14 +308,14 @@ def test_is_all_flow_cells_on_disk_when_requested(
     flow_cell = helpers.add_flowcell(
         store=base_store,
         flow_cell_name=bcl2fastq_flow_cell_id,
-        samples=[sample_obj],
+        samples=[sample],
         status=FlowCellStatus.REMOVED,
     )
 
     another_flow_cell = helpers.add_flowcell(
         store=base_store,
         flow_cell_name=another_flow_cell_id,
-        samples=[sample_obj],
+        samples=[sample],
         status=FlowCellStatus.REQUESTED,
     )
 
@@ -343,13 +339,13 @@ def test_is_all_flow_cells_on_disk(
     another_flow_cell_id: str,
     case_id: str,
     helpers: StoreHelpers,
-    sample_obj: Sample,
+    sample: Sample,
 ):
     """Test check if all flow cells for samples on a case is on disk."""
     caplog.set_level(logging.DEBUG)
     # GIVEN a store with two flow cell
     flow_cell = helpers.add_flowcell(
-        store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample_obj]
+        store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample]
     )
 
     helpers.add_flowcell(store=base_store, flow_cell_name=another_flow_cell_id)
@@ -516,60 +512,60 @@ def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples:
     assert not cases
 
 
-def test_is_case_down_sampled_true(base_store: Store, case_obj: Family, sample_id: str):
+def test_is_case_down_sampled_true(base_store: Store, case: Family, sample_id: str):
     """Tests the down sampling check when all samples are down sampled."""
     # GIVEN a case where all samples are down sampled
-    for sample in case_obj.samples:
+    for sample in case.samples:
         sample.from_sample = sample_id
     base_store.session.commit()
 
     # WHEN checking if all sample in the case are down sampled
-    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
+    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case.internal_id)
 
     # THEN the return value should be True
     assert is_down_sampled
 
 
-def test_is_case_down_sampled_false(base_store: Store, case_obj: Family, sample_id: str):
+def test_is_case_down_sampled_false(base_store: Store, case: Family, sample_id: str):
     """Tests the down sampling check when none of the samples are down sampled."""
     # GIVEN a case where all samples are not down sampled
-    for sample in case_obj.samples:
+    for sample in case.samples:
         assert not sample.from_sample
 
     # WHEN checking if all sample in the case are down sampled
-    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case_obj.internal_id)
+    is_down_sampled: bool = base_store.is_case_down_sampled(case_id=case.internal_id)
 
     # THEN the return value should be False
     assert not is_down_sampled
 
 
 def test_is_case_external_true(
-    base_store: Store, case_obj: Family, helpers: StoreHelpers, sample_id: str
+    base_store: Store, case: Family, helpers: StoreHelpers, sample_id: str
 ):
     """Tests the external case check when all the samples are external."""
     # GIVEN a case where all samples are not external
     external_application_version: ApplicationVersion = helpers.ensure_application_version(
         store=base_store, is_external=True
     )
-    for sample in case_obj.samples:
+    for sample in case.samples:
         sample.application_version = external_application_version
     base_store.session.commit()
 
     # WHEN checking if all sample in the case are external
-    is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)
+    is_external: bool = base_store.is_case_external(case_id=case.internal_id)
 
     # THEN the return value should be False
     assert is_external
 
 
-def test_is_case_external_false(base_store: Store, case_obj: Family, sample_id: str):
+def test_is_case_external_false(base_store: Store, case: Family, sample_id: str):
     """Tests the external case check when none of the samples are external."""
     # GIVEN a case where all samples are not external
-    for sample in case_obj.samples:
+    for sample in case.samples:
         assert not sample.application_version.application.is_external
 
     # WHEN checking if all sample in the case are external
-    is_external: bool = base_store.is_case_external(case_id=case_obj.internal_id)
+    is_external: bool = base_store.is_case_external(case_id=case.internal_id)
 
     # THEN the return value should be False
     assert not is_external
