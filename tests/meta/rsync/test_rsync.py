@@ -17,7 +17,7 @@ from tests.store.conftest import fixture_case_obj
 def test_get_source_and_destination_paths(
     mutant_case: Family, rsync_api: RsyncAPI, ticket_id: str, mocker
 ):
-    """Test generating the source path before rsync"""
+    """Test generating the source path before rsync."""
 
     # GIVEN a valid Sars-cov-2 case
     case = mutant_case
@@ -28,7 +28,7 @@ def test_get_source_and_destination_paths(
 
     # WHEN the source path is created
     source_and_destination_paths = rsync_api.get_source_and_destination_paths(
-        ticket=ticket_id, customer_id=case.customer.internal_id
+        ticket=ticket_id, customer_internal_id=case.customer.internal_id
     )
 
     # THEN the source path ends with a customer id, followed by "inbox" and a ticket_id id
@@ -45,7 +45,7 @@ def test_get_source_and_destination_paths(
 
 
 def test_set_log_dir(rsync_api: RsyncAPI, ticket_id: str, caplog):
-    """Test function to set log dir for path"""
+    """Test function to set log dir for path."""
 
     caplog.set_level(logging.INFO)
 
@@ -61,7 +61,7 @@ def test_set_log_dir(rsync_api: RsyncAPI, ticket_id: str, caplog):
 
 
 def test_make_log_dir(rsync_api: RsyncAPI, ticket_id: str, caplog):
-    """Test generating the directory for logging"""
+    """Test generating the directory for logging."""
     caplog.set_level(logging.INFO)
 
     # WHEN the log directory is created
