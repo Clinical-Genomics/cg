@@ -9,8 +9,8 @@ from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
-    SAMPLE_SHEET_DATA_HEADERS,
-    SampleSheetHeaderColumnNames,
+    BclConverter,
+    SampleSheetV1Sections,
     SampleSheetV2Sections,
 )
 from cg.constants.sequencing import Sequencers
@@ -32,16 +32,11 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
-        self.force = force
+        self.force: bool = force
 
     @property
     def valid_indexes(self) -> List[Index]:
         return index.get_valid_indexes(dual_indexes_only=True)
-
-    @property
-    def data_columns(self) -> List[str]:
-        """Return the headers of the data section of the sample sheet as a list."""
-        raise NotImplementedError
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples.
@@ -79,32 +74,37 @@ class SampleSheetCreator:
             samples_to_keep.append(sample)
         self.lims_samples = samples_to_keep
 
+    def get_additional_sections_sample_sheet(self) -> List:
+        """Build all sections of the sample sheet that are not the Data section."""
+        return []
+
+    def get_data_section_header_and_columns(self) -> List[List[str]]:
+        """Return the header and column names of the data section of the sample sheet."""
+        raise NotImplementedError(
+            "Impossible to build sample sheet from abstract class. Must specify version"
+        )
+
     @staticmethod
     def convert_sample_to_list(
         sample: LimsFlowcellSample,
-        sample_sheet_headers: List[str],
+        sample_sheet_column_names: List[str],
     ) -> List[str]:
         """Convert a lims sample object to a list with that corresponds to the sample sheet headers."""
-        LOG.debug(f"Use sample sheet header {sample_sheet_headers}")
+        LOG.debug(f"Use sample sheet header {sample_sheet_column_names}")
         sample_dict = sample.dict(by_alias=True)
-        return [str(sample_dict[header]) for header in sample_sheet_headers]
-
-    def get_additional_sections_sample_sheet(self) -> List:
-        """Build all sections of the sample sheet that is not the Data section."""
-        return []
+        return [str(sample_dict[header]) for header in sample_sheet_column_names]
 
     def create_sample_sheet_content(self) -> List[List[str]]:
         """Create sample sheet with samples."""
         LOG.info("Create sample sheet for samples")
-        sample_sheet_content: List[List[str]] = self.get_additional_sections_sample_sheet() + [
-            [SampleSheetHeaderColumnNames.DATA],
-            self.data_columns,
-        ]
+        sample_sheet_content: List[List[str]] = (
+            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+        )
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_list(
                     sample=sample,
-                    sample_sheet_headers=self.data_columns,
+                    sample_sheet_column_names=self.get_data_section_header_and_columns()[1],
                 )
             )
         return sample_sheet_content
@@ -131,7 +131,6 @@ class SampleSheetCreator:
             LOG.info("Skipping validation of sample sheet due to force flag")
             return sample_sheet_content
         LOG.info("Validating sample sheet")
-        # TODO make this function version specific
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_content,
             bcl_converter=self.bcl_converter,
@@ -141,7 +140,7 @@ class SampleSheetCreator:
 
 
 class SampleSheetCreatorV1(SampleSheetCreator):
-    """."""
+    """Create a raw sample sheet (v1) for NovaSeq600 flow cells."""
 
     def __init__(
         self,
@@ -151,21 +150,31 @@ class SampleSheetCreatorV1(SampleSheetCreator):
         force: bool = False,
     ):
         super().__init__(flow_cell, lims_samples, force)
-        self.bcl_converter = bcl_converter
+        self.bcl_converter: str = bcl_converter
 
-    @property
-    def data_columns(self) -> List[str]:
-        """Return the headers of the data section of the sample sheet as a list."""
-        return SAMPLE_SHEET_DATA_HEADERS[self.bcl_converter]
+    def get_data_section_header_and_columns(self) -> List[List[str]]:
+        """Return the header and column names of the data section of the sample sheet."""
+        return [
+            [SampleSheetV1Sections.Data.HEADER],
+            SampleSheetV1Sections.DATA_COLUMN_NAMES[self.bcl_converter],
+        ]
 
 
 class SampleSheetCreatorV2(SampleSheetCreator):
-    """."""
+    """Create a raw sample sheet (v2) for NovaSeqX flow cells."""
 
-    @property
-    def data_columns(self) -> List[str]:
-        """Return the headers of the data section of the sample sheet as a list."""
-        return SAMPLE_SHEET_DATA_HEADERS[Sequencers.NOVASEQX]
+    def __init__(
+        self,
+        flow_cell: FlowCell,
+        lims_samples: List[LimsFlowcellSample],
+        force: bool = False,
+    ):
+        super().__init__(flow_cell, lims_samples, force)
+        self.bcl_converter: str = BclConverter.DRAGEN
+
+    def get_data_section_header_and_columns(self) -> List[List[str]]:
+        """Return the header and column names of the data section of the sample sheet."""
+        return [[SampleSheetV2Sections.Data.HEADER], SampleSheetV2Sections.Data.COLUMN_NAMES]
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Build all sections of the sample sheet that is not the Data section."""

@@ -2,7 +2,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetV1Sections
 
 LOG = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 class NovaSeqSample(BaseModel):
     """This model is used when parsing/validating existing sample sheets."""
 
-    flow_cell: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
+    flow_cell: str = Field(..., alias=SampleSheetV1Sections.Data.FLOW_CELL_ID.value)
     lane: int = Field(..., alias="Lane")
     sample_id: str = Field(..., alias="SampleID")
     reference: str = Field(..., alias="SampleRef")

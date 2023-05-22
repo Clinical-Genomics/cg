@@ -2,7 +2,6 @@ from pathlib import Path
 
 import click
 from typing import List, Dict
-from cg.constants.sequencing import Sequencers
 from cg.utils.enums import StrEnum
 
 
@@ -11,6 +10,43 @@ class BclConverter(StrEnum):
 
     DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
+
+
+class SampleSheetV1Sections:
+    """Class that groups all constants to build a sample sheet v1."""
+
+    class Data(StrEnum):
+        HEADER: str = "[Data]"
+        FLOW_CELL_ID: str = "FCID"
+
+    DATA_COLUMN_NAMES: Dict[str, List[str]] = {
+        "bcl2fastq": [
+            Data.FLOW_CELL_ID.value,
+            "Lane",
+            "SampleID",
+            "SampleRef",
+            "index",
+            "index2",
+            "SampleName",
+            "Control",
+            "Recipe",
+            "Operator",
+            "Project",
+        ],
+        "dragen": [
+            Data.FLOW_CELL_ID.value,
+            "Lane",
+            "Sample_ID",
+            "SampleRef",
+            "index",
+            "index2",
+            "SampleName",
+            "Control",
+            "Recipe",
+            "Operator",
+            "Sample_Project",
+        ],
+    }
 
 
 class SampleSheetV2Sections:
@@ -36,49 +72,18 @@ class SampleSheetV2Sections:
         SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
         FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
 
-
-class SampleSheetHeaderColumnNames(StrEnum):
-    DATA: str = "[Data]"
-    FLOW_CELL_ID: str = "FCID"
+    class Data(StrEnum):
+        HEADER: str = "[BCLConvert_Data]"
+        COLUMN_NAMES: List[str] = [
+            "Lane",
+            "Sample_ID",
+            "Index",
+            "Index2",
+            "OverrideCycles",
+        ]
 
 
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
-
-SAMPLE_SHEET_DATA_HEADERS = {
-    "bcl2fastq": [
-        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
-        "Lane",
-        "SampleID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Project",
-    ],
-    "dragen": [
-        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
-        "Lane",
-        "Sample_ID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Sample_Project",
-    ],
-    "novaseqx": [
-        "Lane",
-        "Sample_ID",
-        "Index",
-        "Index2",
-        "OverrideCycles",
-    ],
-}
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",

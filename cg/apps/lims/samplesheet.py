@@ -9,13 +9,13 @@ from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
 from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetV1Sections
 
 LOG = logging.getLogger(__name__)
 
 
 class LimsFlowcellSample(BaseModel):
-    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
+    flowcell_id: str = Field(..., alias=SampleSheetV1Sections.Data.FLOW_CELL_ID.value)
     lane: int = Field(..., alias="Lane")
     sample_id: str
     sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")

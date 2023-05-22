@@ -11,10 +11,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleDragen,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import (
-    BclConverter,
-    SampleSheetHeaderColumnNames,
-)
+from cg.constants.demultiplexing import BclConverter, SampleSheetV1Sections, SampleSheetV2Sections
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
 
@@ -60,12 +57,11 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
     found_header: bool = False
 
     for line in sample_sheet_content:
-        # Skip lines that are too short to contain samples
         if found_header:
             header = line
             found_header = False
             continue
-        if line[0].endswith("Data]"):
+        if SampleSheetV1Sections.Data.HEADER in line or SampleSheetV2Sections.Data.HEADER in line:
             found_header = True
             continue
         raw_samples.append(dict(zip(header, line)))
