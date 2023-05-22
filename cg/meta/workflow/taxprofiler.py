@@ -75,7 +75,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
         fasta_full_list: List[str] = [fasta] * len(fastq_r1)
 
-        samplesheet_content: Dict[str, str] = {
+        samplesheet_content: Dict[str, List[str]] = {
             NFX_SAMPLE_HEADER: samples_full_list,
             TAXPROFILER_RUN_ACCESSION: samples_full_list,
             TAXPROFILER_INSTRUMENT_PLATFORM: instrument_full_list,
