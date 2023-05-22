@@ -198,7 +198,6 @@ def fixture_sample_sheet_no_sample_header(
 ) -> List[List[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
         sample_sheet_line_sample_1,
         sample_sheet_line_sample_2,
     ]

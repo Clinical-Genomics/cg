@@ -57,15 +57,16 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
     """Return the samples in a sample sheet as a list of dictionaries."""
     header: List[str] = []
     raw_samples: List[Dict[str, str]] = []
+    found_header: bool = False
 
     for line in sample_sheet_content:
         # Skip lines that are too short to contain samples
-        if len(line) <= 5:
-            continue
-        if line[0] == SampleSheetHeaderColumnNames.FLOW_CELL_ID:
+        if found_header:
             header = line
+            found_header = False
             continue
-        if not header:
+        if line[0].endswith("Data]"):
+            found_header = True
             continue
         raw_samples.append(dict(zip(header, line)))
     if not header:
