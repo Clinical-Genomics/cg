@@ -390,13 +390,12 @@ class LimsAPI(Lims, OrderHandler):
         return self.sample(sample_id).get("project").get("id")
 
     def get_sample_rin(self, sample_id: str) -> float:
-        """Get the sample RIN value determined in the Initial QC steps"""
-        sample_artifact_id = f"{sample_id}PA1"
-        sample_artifact = Artifact(self, id=sample_artifact_id)
+        """Return the sample RIN value."""
+        sample_artifact: Artifact = Artifact(self, id=f"{sample_id}PA1")
         return sample_artifact.udf.get("RIN")
 
-    def get_rna_input_amount(self, sample_id: str) -> float:
-        """Get the input amount used in the latest prep of an RNA sample."""
+    def get_latest_used_rna_input_amount(self, sample_id: str) -> float:
+        """Return the input amount used in the latest preparation of an RNA sample."""
         step_names_udfs = MASTER_STEPS_UDFS["rna_prep_step"]
 
         input_amounts = []
