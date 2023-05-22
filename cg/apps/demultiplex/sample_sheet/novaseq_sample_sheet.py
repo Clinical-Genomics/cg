@@ -9,7 +9,7 @@ from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.lims.samplesheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
-    SAMPLE_SHEET_HEADERS,
+    SAMPLE_SHEET_DATA_HEADERS,
     SampleSheetHeaderColumnNames,
     SampleSheetV2Sections,
 )
@@ -40,8 +40,8 @@ class SampleSheetCreator:
 
     @property
     def data_columns(self) -> List[str]:
-        """."""
-        pass
+        """Return the headers of the data section of the sample sheet as a list."""
+        raise NotImplementedError
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples.
@@ -155,8 +155,8 @@ class SampleSheetCreatorV1(SampleSheetCreator):
 
     @property
     def data_columns(self) -> List[str]:
-        """."""
-        return SAMPLE_SHEET_HEADERS[self.bcl_converter]
+        """Return the headers of the data section of the sample sheet as a list."""
+        return SAMPLE_SHEET_DATA_HEADERS[self.bcl_converter]
 
 
 class SampleSheetCreatorV2(SampleSheetCreator):
@@ -164,8 +164,8 @@ class SampleSheetCreatorV2(SampleSheetCreator):
 
     @property
     def data_columns(self) -> List[str]:
-        """."""
-        return SAMPLE_SHEET_HEADERS[Sequencers.NOVASEQX]
+        """Return the headers of the data section of the sample sheet as a list."""
+        return SAMPLE_SHEET_DATA_HEADERS[Sequencers.NOVASEQX]
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Build all sections of the sample sheet that is not the Data section."""
