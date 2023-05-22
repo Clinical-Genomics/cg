@@ -37,7 +37,7 @@ def config_case(context: CGConfig, case_id: str, instrument_platform: Sequencing
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
-        analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+        analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
         analysis_api.config_case(case_id=case_id, instrument_platform=instrument_platform, fasta="")
 
     except CgError as error:
