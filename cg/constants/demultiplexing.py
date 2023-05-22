@@ -16,6 +16,11 @@ class BclConverter(StrEnum):
 class SampleSheetHeaderColumnNames(StrEnum):
     DATA: str = "[Data]"
     FLOW_CELL_ID: str = "FCID"
+    LANE: str = "Lane"
+    SAMPLE_INTERNAL_ID: str = "Sample_ID"
+    SAMPLE_NAME: str = "SampleName"
+    SAMPLE_PROJECT: str = "Sample_Project"
+    CONTROL: str = "Control"
 
 
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
@@ -97,18 +102,3 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
-
-
-class FlowCellMode(StrEnum):
-    """Define sample sheet flow cell mode."""
-
-    HISEQX: str = "SP"
-    NEXTSEQ: str = "S2"
-    NOVASEQ: str = "S4"
-    MISEQ: str = "2500"
-
-
-SEQUENCER_FLOW_CELL_MODES: Dict[str, str] = {
-    Sequencers.__members__[mode.name].value: mode.value for mode in FlowCellMode
-}
-FLOW_CELL_MODES: List[str] = list(SEQUENCER_FLOW_CELL_MODES.values())

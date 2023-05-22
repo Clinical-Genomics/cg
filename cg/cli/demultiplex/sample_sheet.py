@@ -15,7 +15,7 @@ from cg.apps.lims.samplesheet import (
     flowcell_samples,
 )
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import OPTION_BCL_CONVERTER, FlowCellMode, FLOW_CELL_MODES
+from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile
 from cg.models.cg_config import CGConfig
@@ -31,18 +31,10 @@ def sample_sheet_commands():
 
 @sample_sheet_commands.command(name="validate")
 @click.argument("sheet", type=click.Path(exists=True, dir_okay=False))
-@click.option(
-    "--flow-cell-mode",
-    default=FlowCellMode.NOVASEQ,
-    show_default=True,
-    type=click.Choice(FLOW_CELL_MODES),
-    help="Instrument sample sheet flow cell mode",
-)
 @OPTION_BCL_CONVERTER
 def validate_sample_sheet(
     bcl_converter: str,
     sheet: click.Path,
-    flow_cell_mode: str,
 ):
     """Validate a sample sheet."""
     LOG.info(
@@ -50,9 +42,7 @@ def validate_sample_sheet(
     )
     sheet: Path = Path(str(sheet))
     try:
-        get_sample_sheet_from_file(
-            infile=sheet, flow_cell_mode=flow_cell_mode, bcl_converter=bcl_converter
-        )
+        get_sample_sheet_from_file(infile=sheet, bcl_converter=bcl_converter)
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
@@ -151,7 +141,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             sample_sheet_content: List[List[str]] = create_sample_sheet(
                 flow_cell=flow_cell, lims_samples=lims_samples, bcl_converter=bcl_converter
             )
-        except (FileNotFoundError, FileExistsError):
+        except (FileNotFoundError, FileExistsError, ValidationError):
             continue
 
         if dry_run:

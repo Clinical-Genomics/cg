@@ -46,17 +46,6 @@ class RunParameters:
         return xml_node.text
 
     @property
-    def flow_cell_mode(self) -> Optional[str]:
-        """Return the flow cell mode."""
-        node_name: str = "/RfidsInfo/FlowCellMode"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        if xml_node is None:
-            LOG.warning("Could not determine flow cell mode")
-            LOG.info("Set flow cell mode to None")
-            return
-        return xml_node.text
-
-    @property
     def requires_dummy_samples(self) -> bool:
         """Return true if the flow cell requires the addition of dummy samples.
 
@@ -112,11 +101,11 @@ class RunParameters:
         )
 
     def __str__(self):
-        return f"RunParameters(path={self.path}," f"flow_cell_mode={self.flow_cell_mode})"
+        return f"RunParameters(path={self.path}"
 
     def __repr__(self):
         return (
-            f"RunParameters(path={self.path},flow_cell_mode={self.flow_cell_mode},"
+            f"RunParameters(path={self.path},"
             f"reagent_kit_version={self.reagent_kit_version},control_software_version={self.control_software_version},"
             f"index_length={self.index_length})"
         )
