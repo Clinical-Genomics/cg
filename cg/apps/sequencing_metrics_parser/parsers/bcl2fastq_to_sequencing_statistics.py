@@ -84,19 +84,17 @@ def calculate_perfect_index_reads_percent_from_demux_result(demux_result: DemuxR
 
 
 def calculate_bases_with_q30_percent_from_demux_result(demux_result: DemuxResult) -> float:
-    yield_q30_total = sum([read.yield_q30 for read in demux_result.read_metrics])
-    yield_total = sum([read.yield_ for read in demux_result.read_metrics])
+    q30_yield = sum([read.yield_q30 for read in demux_result.read_metrics])
+    total_yield = sum([read.yield_ for read in demux_result.read_metrics])
 
-    return q30_ratio(q30_yield=yield_q30_total, total_yield=yield_total)
+    return q30_ratio(q30_yield=q30_yield, total_yield=total_yield)
 
 
 def calculate_lane_mean_quality_score_from_demux_result(demux_result: DemuxResult) -> float:
-    quality_score_sum_total = sum([read.quality_score_sum for read in demux_result.read_metrics])
-    yield_total = sum([read.yield_ for read in demux_result.read_metrics])
+    total_quality_score = sum([read.quality_score_sum for read in demux_result.read_metrics])
+    total_yield = sum([read.yield_ for read in demux_result.read_metrics])
 
-    return average_quality_score(
-        total_quality_score=quality_score_sum_total, total_yield=yield_total
-    )
+    return average_quality_score(total_quality_score=total_quality_score, total_yield=total_yield)
 
 
 def calculate_lane_yield_in_megabases_from_conversion_result(
@@ -111,11 +109,11 @@ def calculate_lane_yield_in_megabases_from_conversion_result(
 def calculate_passed_filter_percent_from_conversion_result(
     conversion_result: ConversionResult,
 ) -> float:
-    total_clusters_raw: int = conversion_result.total_clusters_raw
-    total_clusters_pf: int = conversion_result.total_clusters_pf
+    total_clusters: int = conversion_result.total_clusters_raw
+    clusters_passed: int = conversion_result.total_clusters_pf
 
     passed_filter_percent: float = pass_filter_ratio(
-        total_clusters_pf=total_clusters_pf, total_clusters_raw=total_clusters_raw
+        clusters_passed=clusters_passed, total_clusters=total_clusters
     )
 
     return passed_filter_percent
