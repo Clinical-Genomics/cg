@@ -415,11 +415,15 @@ class LimsAPI(Lims, OrderHandler):
                 )
         return input_amounts
 
-    def _get_last_used_input_amount(self, input_amounts: List[Tuple[dt.datetime, float]]) -> float:
+    def _get_last_used_input_amount(
+        self, input_amounts: List[Tuple[dt.datetime, float]]
+    ) -> Optional[float]:
         """Return the latest used input amount."""
         sorted_input_amounts: List[Tuple[dt.datetime, float]] = self._sort_by_date_run(
             input_amounts
         )
+        if not sorted_input_amounts:
+            return None
         return sorted_input_amounts[0][1]
 
     def get_latest_rna_input_amount(self, sample_id: str) -> float:
