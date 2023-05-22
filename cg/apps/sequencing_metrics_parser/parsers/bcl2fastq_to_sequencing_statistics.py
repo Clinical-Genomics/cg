@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Tuple
+from typing import List
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     Bcl2FastqSequencingMetrics,
@@ -38,50 +38,77 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
     sequencing_statistics: List[SequencingStatistics] = []
 
     for conversion_result in raw_sequencing_metrics.conversion_results:
-        yield_in_megabases: int = calculate_yield_in_megabases_from_conversion_result(
-            conversion_result=conversion_result
-        )
-
-        passed_filter_percent: float = calculate_pass_filter_ratio_from_conversion_result(
-            conversion_result=conversion_result
-        )
-
         for demux_result in conversion_result.demux_results:
-            average_quality_score: float = calculate_average_quality_score_from_demux_result(
-                demux_result=demux_result
+            statistics: SequencingStatistics = create_sequencing_statistics(
+                conversion_result=conversion_result,
+                demux_result=demux_result,
+                raw_sequencing_metrics=raw_sequencing_metrics,
             )
-
-            bases_with_q30_percent: float = calculate_q30_ratio_from_demux_result(
-                demux_result=demux_result
-            )
-
-            perfect_reads_ratio: float = calculate_perfect_reads_ratio_from_demux_result(
-                demux_result=demux_result
-            )
-
-            number_of_lanes: int = len(raw_sequencing_metrics.conversion_results)
-            avg_clusters_per_lane = average_clusters_per_lane(
-                total_clusters=conversion_result.total_clusters_raw,
-                lane_count=number_of_lanes,
-            )
-
-            statistics_for_sample_in_lane: SequencingStatistics = SequencingStatistics(
-                flow_cell_name=raw_sequencing_metrics.flowcell,
-                sample_internal_id=demux_result.sample_id,
-                lane=conversion_result.lane_number,
-                yield_in_megabases=yield_in_megabases,
-                read_counts=demux_result.number_reads,
-                passed_filter_percent=passed_filter_percent,
-                raw_clusters_per_lane_percent=avg_clusters_per_lane,
-                perfect_index_reads_percent=perfect_reads_ratio,
-                bases_with_q30_percent=bases_with_q30_percent,
-                lanes_mean_quality_score=average_quality_score,
-                started_at=datetime.now(),
-            )
-
-            sequencing_statistics.append(statistics_for_sample_in_lane)
+            sequencing_statistics.append(statistics)
 
     return sequencing_statistics
+
+
+def create_sequencing_statistics(
+    conversion_result: ConversionResult,
+    demux_result: DemuxResult,
+    raw_sequencing_metrics: Bcl2FastqSequencingMetrics,
+):
+    """
+    Generates a SequencingStatistics object based on the provided conversion and demultiplexing results
+    along with the raw sequencing metrics.
+
+    Args:
+        conversion_result (ConversionResult): A ConversionResult object encapsulating the conversion
+        results for a lane.
+
+        demux_result (DemuxResult): A DemuxResult object encapsulating the result of the demultiplexing
+        for a sample in a lane.
+
+        raw_sequencing_metrics (Bcl2FastqSequencingMetrics): Raw sequencing metrics parsed from the Bcl2Fastq
+        generated stats.json file.
+
+    Returns:
+        SequencingStatistics: A SequencingStatistics object that encapsulates the statistics for a sample
+        in a lane on the flow cell.
+    """
+    yield_in_megabases: int = calculate_yield_in_megabases_from_conversion_result(
+        conversion_result=conversion_result
+    )
+
+    passed_filter_percent: float = calculate_pass_filter_ratio_from_conversion_result(
+        conversion_result=conversion_result
+    )
+
+    average_quality_score: float = calculate_average_quality_score_from_demux_result(
+        demux_result=demux_result
+    )
+
+    bases_with_q30_percent: float = calculate_q30_ratio_from_demux_result(demux_result=demux_result)
+
+    perfect_reads_ratio: float = calculate_perfect_reads_ratio_from_demux_result(
+        demux_result=demux_result
+    )
+
+    number_of_lanes: int = len(raw_sequencing_metrics.conversion_results)
+    avg_clusters_per_lane = average_clusters_per_lane(
+        total_clusters=conversion_result.total_clusters_raw,
+        lane_count=number_of_lanes,
+    )
+
+    return SequencingStatistics(
+        flow_cell_name=raw_sequencing_metrics.flowcell,
+        sample_internal_id=demux_result.sample_id,
+        lane=conversion_result.lane_number,
+        yield_in_megabases=yield_in_megabases,
+        read_counts=demux_result.number_reads,
+        passed_filter_percent=passed_filter_percent,
+        raw_clusters_per_lane_percent=avg_clusters_per_lane,
+        perfect_index_reads_percent=perfect_reads_ratio,
+        bases_with_q30_percent=bases_with_q30_percent,
+        lanes_mean_quality_score=average_quality_score,
+        started_at=datetime.now(),
+    )
 
 
 def calculate_perfect_reads_ratio_from_demux_result(demux_result: DemuxResult):
