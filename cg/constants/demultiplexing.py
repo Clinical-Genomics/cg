@@ -44,7 +44,7 @@ class SampleSheetHeaderColumnNames(StrEnum):
 
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
-SAMPLE_SHEET_HEADERS = {
+SAMPLE_SHEET_DATA_HEADERS = {
     "bcl2fastq": [
         SampleSheetHeaderColumnNames.FLOW_CELL_ID,
         "Lane",
