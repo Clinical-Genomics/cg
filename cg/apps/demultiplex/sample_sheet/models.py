@@ -36,9 +36,6 @@ class SampleDragen(NovaSeqSample):
 class SampleSheet(BaseModel):
     samples: List[NovaSeqSample]
 
-    class Config:
-        use_enum_values = True
-
 
 class SampleSheetBcl2Fastq(SampleSheet):
     samples: List[SampleBcl2Fastq]
