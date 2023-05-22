@@ -118,7 +118,7 @@ def fixture_bcl_convert_quality_metric_model_with_data(
         **{
             BclConvertQualityMetricsColumnNames.LANE.value: test_lane,
             BclConvertQualityMetricsColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            BclConvertQualityMetricsColumnNames.READ_PAIR_NUMBER.value: test_sample_project,
+            BclConvertQualityMetricsColumnNames.READ_PAIR_NUMBER.value: 1,
             BclConvertQualityMetricsColumnNames.YIELD_BASES.value: 415032696,
             BclConvertQualityMetricsColumnNames.YIELD_Q30.value: 393745856,
             BclConvertQualityMetricsColumnNames.QUALITY_SCORE_SUM.value: 15004333259,
