@@ -425,5 +425,5 @@ class LimsAPI(Lims, OrderHandler):
 
     def get_latest_rna_input_amount(self, sample_id: str) -> float:
         """Return the input amount used in the latest preparation of an RNA sample."""
-        input_amounts = self._get_rna_input_amounts(sample_id=sample_id)
+        input_amounts: List[Tuple[dt.datetime, float]] = self._get_rna_input_amounts(sample_id=sample_id)
         return self._get_last_used_input_amount(input_amounts=input_amounts)
