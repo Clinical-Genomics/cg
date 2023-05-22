@@ -6,7 +6,7 @@ from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.cli.demultiplex.sample_sheet import validate_sample_sheet
 
 from cg.constants import EXIT_SUCCESS, FileExtensions
-from cg.constants.demultiplexing import BclConverter, FlowCellMode, S1_MODE
+from cg.constants.demultiplexing import BclConverter
 
 
 def test_validate_non_existing_sample_sheet(cli_runner: CliRunner, sample_sheet_context: dict):
@@ -59,7 +59,6 @@ def test_validate_correct_bcl2fastq_sample_sheet(
     # GIVEN that the sample sheet is correct
     get_sample_sheet_from_file(
         infile=sample_sheet,
-        flow_cell_mode=FlowCellMode.NEXTSEQ,
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
@@ -82,40 +81,13 @@ def test_validate_correct_dragen_sample_sheet(
     assert sample_sheet.exists()
 
     # GIVEN that the sample sheet is correct
-    get_sample_sheet_from_file(
-        infile=sample_sheet, flow_cell_mode=FlowCellMode.NEXTSEQ, bcl_converter=BclConverter.DRAGEN
-    )
+    get_sample_sheet_from_file(infile=sample_sheet, bcl_converter=BclConverter.DRAGEN)
 
     # WHEN validating the sample sheet
     result: Result = cli_runner.invoke(
         validate_sample_sheet,
         [str(sample_sheet), "-b", BclConverter.DRAGEN.value],
         obj=sample_sheet_context,
-    )
-
-    # THEN assert that it exits successfully
-    assert result.exit_code == EXIT_SUCCESS
-
-
-def test_validate_s1_sample_sheet(
-    cli_runner: CliRunner, sample_sheet_context: dict, novaseq_bcl2fastq_sample_sheet_path: Path
-):
-    """Test validate S1 sample sheet."""
-
-    # GIVEN the path to a sample sheet that exists
-    sample_sheet: Path = novaseq_bcl2fastq_sample_sheet_path
-    assert sample_sheet.exists()
-
-    # GIVEN that the sample sheet is called with S1 mode
-    get_sample_sheet_from_file(
-        infile=sample_sheet,
-        flow_cell_mode=S1_MODE,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-    # WHEN validating the sample sheet
-    result: Result = cli_runner.invoke(
-        validate_sample_sheet, [str(sample_sheet)], obj=sample_sheet_context
     )
 
     # THEN assert that it exits successfully
