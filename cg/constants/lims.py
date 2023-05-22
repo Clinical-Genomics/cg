@@ -37,6 +37,7 @@ PROP2UDF = {
     "region": "Region",
     "region_code": "Region Code",
     "require_qc_ok": "Process only if QC OK",
+    "rin": "RIN",
     "rml_plate_name": "RML plate name",
     "selection_criteria": "Selection Criteria",
     "sequencing_qc_pass": "Passed Sequencing QC",
@@ -58,6 +59,9 @@ MASTER_STEPS_UDFS = {
         "Hybridize Library TWIST v1": "Bait Set",
         "Hybridize Library TWIST v2": "Bait Set",
         "Target enrichment TWIST v1": "Bait Set",
+    },
+    "rna_prep_step": {
+        "Aliquot Samples for Fragmentation (RNA) v1": "Amount needed (ng)",
     },
     "prep_method_step": {
         "Library Preparation (Cov) v1": {
@@ -143,3 +147,8 @@ PROCESSES = {"sequenced_date": "AUTOMATED - NovaSeq Run"}
 class DocumentationMethod(StrEnum):
     ATLAS: str = "Atlas"
     AM: str = "AM"
+
+
+class LimsArtifactTypes(StrEnum):
+    ANALYTE: str = "Analyte"
+    RESULT_FILE: str = "ResultFile"
