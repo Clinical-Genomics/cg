@@ -22,14 +22,14 @@ LOG = logging.getLogger(__name__)
 class BclConvertMetricsParser:
     def __init__(
         self,
-        bcl_convert_quality_metrics_path: Path,
+        bcl_convert_quality_metrics_file_path: Path,
         bcl_convert_demux_metrics_file_path: Path,
         bcl_convert_adapter_metrics_file_path: Path,
         bcl_convert_sample_sheet_file_path: Path,
         bcl_convert_run_info_file_path: Path,
     ) -> None:
         """Initialize the class."""
-        self.quality_metrics_path: Path = bcl_convert_quality_metrics_path
+        self.quality_metrics_path: Path = bcl_convert_quality_metrics_file_path
         self.demux_metrics_path: Path = bcl_convert_demux_metrics_file_path
         self.adapter_metrics_path: Path = bcl_convert_adapter_metrics_file_path
         self.sample_sheet_path: Path = bcl_convert_sample_sheet_file_path
@@ -66,26 +66,28 @@ class BclConvertMetricsParser:
     ) -> int:
         """Return the number of header lines in a sample sheet.
         Any lines before and including the line starting with [Data] is considered the header."""
-        csv_reader = ReadFile.get_content_from_file(FileFormat.CSV, self.sample_sheet_path)
+        sample_sheet_content = ReadFile.get_content_from_file(
+            FileFormat.CSV, self.sample_sheet_path
+        )
         header_line_count: int = 1
-        for line in csv_reader:
+        for line in sample_sheet_content:
             if SampleSheetHeaderColumnNames.DATA.value in line:
                 break
             header_line_count += 1
         return header_line_count
 
-    def parse_sample_sheet_file(self):
-        """Read in a sample sheet starting from the SAMPLE_SHEET_DATA_HEADER."""
+    def parse_sample_sheet_file(self) -> List[BclConvertSampleSheetData]:
+        """Return sample sheet sample lines."""
         LOG.info(f"Parsing BCLConvert sample sheet file: {self.sample_sheet_path}")
         header_line_count: int = self.get_nr_of_header_lines_in_sample_sheet()
-        sample_sheet_list: List[BclConvertSampleSheetData] = []
+        sample_sheet_sample_lines: List[BclConvertSampleSheetData] = []
         with open(self.sample_sheet_path, "r") as sample_sheet_file:
             for _ in range(header_line_count):
                 next(sample_sheet_file)
-            reader = csv.DictReader(sample_sheet_file)
-            for sample_sheet_content in reader:
-                sample_sheet_list.append(BclConvertSampleSheetData(**sample_sheet_content))
-        return sample_sheet_list
+            sample_sheet_content = csv.DictReader(sample_sheet_file)
+            for line in sample_sheet_content:
+                sample_sheet_sample_lines.append(BclConvertSampleSheetData(**line))
+        return sample_sheet_sample_lines
 
     def parse_run_info_file(self) -> BclConvertRunInfo:
         LOG.info(f"Parsing Run info XML {self.run_info_path}")

@@ -47,7 +47,6 @@ def add_flow_cell_cmd(context: CGConfig, flow_cell_name: str, bcl_converter: str
     demux_results: DemuxResults = DemuxResults(
         demux_dir=demux_results_path, flow_cell=flow_cell, bcl_converter=bcl_converter
     )
-    ## check for machine and use separate
     create_novaseq_flowcell(manager=stats_api, demux_results=demux_results)
 
 
