@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     Bcl2FastqSequencingMetrics,
@@ -28,7 +28,7 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
 
     Returns:
         List[SequencingStatistics]: A list of SequencingStatistics objects representing the sequencing
-        metrics for each sample in each lane.
+        metrics for each sample in each lane on the flow cell.
     """
 
     raw_sequencing_metrics: Bcl2FastqSequencingMetrics = parse_bcl2fastq_sequencing_metrics(
@@ -47,7 +47,7 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
         )
 
         for demux_result in conversion_result.demux_results:
-            lanes_mean_quality_score: float = calculate_average_quality_score_from_demux_result(
+            average_quality_score: float = calculate_average_quality_score_from_demux_result(
                 demux_result=demux_result
             )
 
@@ -55,12 +55,12 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
                 demux_result=demux_result
             )
 
-            perfect_index_reads_percent: float = calculate_perfect_reads_ratio_from_demux_result(
+            perfect_reads_ratio: float = calculate_perfect_reads_ratio_from_demux_result(
                 demux_result=demux_result
             )
 
             number_of_lanes: int = len(raw_sequencing_metrics.conversion_results)
-            raw_clusters_per_lane_percent = average_clusters_per_lane(
+            avg_clusters_per_lane = average_clusters_per_lane(
                 total_clusters=conversion_result.total_clusters_raw,
                 lane_count=number_of_lanes,
             )
@@ -72,10 +72,10 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
                 yield_in_megabases=yield_in_megabases,
                 read_counts=demux_result.number_reads,
                 passed_filter_percent=passed_filter_percent,
-                raw_clusters_per_lane_percent=raw_clusters_per_lane_percent,
-                perfect_index_reads_percent=perfect_index_reads_percent,
+                raw_clusters_per_lane_percent=avg_clusters_per_lane,
+                perfect_index_reads_percent=perfect_reads_ratio,
                 bases_with_q30_percent=bases_with_q30_percent,
-                lanes_mean_quality_score=lanes_mean_quality_score,
+                lanes_mean_quality_score=average_quality_score,
                 started_at=datetime.now(),
             )
 
