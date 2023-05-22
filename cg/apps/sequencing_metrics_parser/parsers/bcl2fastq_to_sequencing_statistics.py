@@ -8,12 +8,12 @@ from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import parse_bcl2fastq_sequencing_metrics
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
-    calculate_bases_with_q30_percent,
-    calculate_lane_mean_quality_score,
-    calculate_lane_yield_in_megabases,
-    calculate_passed_filter_percent,
-    calculate_perfect_index_reads_percent,
-    calculate_raw_clusters_per_lane_percent,
+    q30_ratio,
+    average_quality_score,
+    yield_in_megabases,
+    pass_filter_ratio,
+    perfect_reads_ratio,
+    average_clusters_per_lane,
 )
 from cg.store.models import SequencingStatistics
 
@@ -50,9 +50,9 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
             )
 
             number_of_lanes: int = len(raw_sequencing_metrics.conversion_results)
-            raw_clusters_per_lane_percent = calculate_raw_clusters_per_lane_percent(
-                total_raw_clusters=conversion_result.total_clusters_raw,
-                number_of_lanes=number_of_lanes,
+            raw_clusters_per_lane_percent = average_clusters_per_lane(
+                total_clusters=conversion_result.total_clusters_raw,
+                lane_count=number_of_lanes,
             )
 
             statistics_for_sample_in_lane: SequencingStatistics = SequencingStatistics(
@@ -80,26 +80,22 @@ def calculate_perfect_index_reads_percent_from_demux_result(demux_result: DemuxR
     )
     sample_read_count_in_lane: int = demux_result.number_reads
 
-    return calculate_perfect_index_reads_percent(
-        perfect_reads=perfect_reads, total_reads=sample_read_count_in_lane
-    )
+    return perfect_reads_ratio(perfect_reads=perfect_reads, total_reads=sample_read_count_in_lane)
 
 
 def calculate_bases_with_q30_percent_from_demux_result(demux_result: DemuxResult) -> float:
     yield_q30_total = sum([read.yield_q30 for read in demux_result.read_metrics])
     yield_total = sum([read.yield_ for read in demux_result.read_metrics])
 
-    return calculate_bases_with_q30_percent(
-        yield_q30_total=yield_q30_total, yield_total=yield_total
-    )
+    return q30_ratio(q30_yield=yield_q30_total, total_yield=yield_total)
 
 
 def calculate_lane_mean_quality_score_from_demux_result(demux_result: DemuxResult) -> float:
     quality_score_sum_total = sum([read.quality_score_sum for read in demux_result.read_metrics])
     yield_total = sum([read.yield_ for read in demux_result.read_metrics])
 
-    return calculate_lane_mean_quality_score(
-        quality_score_sum_total=quality_score_sum_total, yield_total=yield_total
+    return average_quality_score(
+        total_quality_score=quality_score_sum_total, total_yield=yield_total
     )
 
 
@@ -109,7 +105,7 @@ def calculate_lane_yield_in_megabases_from_conversion_result(
     lane_yields_in_bases: List[int] = [demux.yield_ for demux in conversion_result.demux_results]
     total_lane_yield_in_bases: int = sum(lane_yields_in_bases)
 
-    return calculate_lane_yield_in_megabases(lane_yield_in_bases=total_lane_yield_in_bases)
+    return yield_in_megabases(total_bases=total_lane_yield_in_bases)
 
 
 def calculate_passed_filter_percent_from_conversion_result(
@@ -118,7 +114,7 @@ def calculate_passed_filter_percent_from_conversion_result(
     total_clusters_raw: int = conversion_result.total_clusters_raw
     total_clusters_pf: int = conversion_result.total_clusters_pf
 
-    passed_filter_percent: float = calculate_passed_filter_percent(
+    passed_filter_percent: float = pass_filter_ratio(
         total_clusters_pf=total_clusters_pf, total_clusters_raw=total_clusters_raw
     )
 

@@ -1,73 +1,69 @@
-def calculate_lane_yield_in_megabases(lane_yield_in_bases: int) -> int:
+def yield_in_megabases(total_bases: int) -> int:
     """
-    Calculate the lane yield in megabases.
+    Calculate the yield in megabases.
     Args:
-        lane_yield_in_bases (int): The total yield of the lane in bases.
+        total_bases (int): The total yield in bases.
     Returns:
         int: The yield in megabases.
     """
-    return lane_yield_in_bases // 1000000
+    return total_bases // 1000000
 
 
-def calculate_passed_filter_percent(
-    total_lane_clusters_passing_filter: int, total_lane_clusters_raw: int
-) -> float:
+def pass_filter_ratio(clusters_passed: int, total_clusters: int) -> float:
     """
-    Calculate the passed filter percent for the lane.
+    Calculate the ratio of clusters that passed the filter.
     Args:
-        total_lane_clusters_passing_filter (int): The total clusters passing the filter for the lane.
-        total_lane_raw_clusters (int): The total number of clusters initially generated for the lane.
+        clusters_passed (int): The total clusters in a lane passing the filter.
+        total_clusters (int): The total clusters generated in a lane.
     Returns:
-        float: The passed filter percent.
+        float: The pass filter ratio.
     """
-    return total_lane_clusters_passing_filter / total_lane_clusters_raw
+    return clusters_passed / total_clusters
 
 
-def calculate_raw_clusters_per_lane_percent(total_raw_clusters: int, number_of_lanes: int) -> float:
+def average_clusters_per_lane(total_clusters: int, lane_count: int) -> float:
     """
-    Calculate the raw clusters per lane percent.
+    Calculate the average number of clusters per lane.
     Args:
-        total_raw_clusters (int): The total number of clusters initially generated, regardless of quality.
-        number_of_lanes (int): The total number of lanes.
+        total_clusters (int): Total number of clusters generated.
+        lane_count (int): Total number of lanes.
     Returns:
-        float: The raw clusters per lane percent.
+        float: Average clusters per lane.
     """
-    return total_raw_clusters / number_of_lanes
+    return total_clusters / lane_count
 
 
-def calculate_bases_with_q30_percent(yield_q30_total: int, yield_total: int) -> float:
+def q30_ratio(q30_yield: int, total_yield: int) -> float:
     """
-    Calculate the proportion of bases that have a Phred quality score of 30 or more for the lane.
+    Calculate the proportion of bases that have a Phred quality score of 30 or more.
     Args:
-        yield_q30_total (int): The sum of all Q30 yields for samples in the lane.
-        yield_total (int): The total yield for the lane.
+        q30_yield (int): The sum of all Q30 yields.
+        total_yield (int): The total yield.
     Returns:
-        float: The proportion of bases with Q30 in the lane.
+        float: Proportion of bases with Q30.
     """
-    return yield_q30_total / yield_total
+    return q30_yield / total_yield
 
 
-def calculate_lane_mean_quality_score(quality_score_sum_total: int, yield_total: int) -> float:
+def average_quality_score(total_quality_score: int, total_yield: int) -> float:
     """
-    Calculate the mean quality score of all the bases for the lane.
+    Calculate the average quality score of all bases.
     Args:
-        quality_score_sum_total (int): The aggregated quality score sum for the lane.
-        yield_total (int): The total yield for the lane.
+        total_quality_score (int): The sum of quality scores.
+        total_yield (int): The total yield.
     Returns:
-        float: The mean quality score of all the bases for the lane.
+        float: Average quality score of all bases.
     """
-    return quality_score_sum_total / yield_total
+    return total_quality_score / total_yield
 
 
-def calculate_perfect_index_reads_percent(
-    perfect_reads_for_sample_in_lane: int, total_reads_for_sample_in_lane: int
-) -> float:
+def perfect_reads_ratio(perfect_reads: int, total_reads: int) -> float:
     """
-    Calculate the perfect index reads percentage.
+    Calculate the proportion of perfect reads.
     Args:
-        perfect_reads (int): The number of perfect reads for a sample in a lane.
-        total_reads (int): The total number of reads for a sample in a lane.
+        perfect_reads (int): The number of perfect reads for a sample.
+        total_reads (int): The total number of reads for a sample.
     Returns:
-        float: The perfect index reads percentage.
+        float: The perfect reads ratio.
     """
-    return (perfect_reads_for_sample_in_lane / total_reads_for_sample_in_lane) * 100
+    return (perfect_reads / total_reads) * 100
