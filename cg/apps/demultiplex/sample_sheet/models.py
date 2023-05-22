@@ -2,7 +2,7 @@ import logging
 from pydantic import BaseModel, Field
 from typing import List
 
-from cg.constants.demultiplexing import FlowCellMode, SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 
 LOG = logging.getLogger(__name__)
 
@@ -34,11 +34,7 @@ class SampleDragen(NovaSeqSample):
 
 
 class SampleSheet(BaseModel):
-    flow_cell_mode: FlowCellMode
     samples: List[NovaSeqSample]
-
-    class Config:
-        use_enum_values = True
 
 
 class SampleSheetBcl2Fastq(SampleSheet):

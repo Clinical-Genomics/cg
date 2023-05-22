@@ -11,8 +11,6 @@ from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.constants.demultiplexing import (
     DemultiplexingDirsAndFiles,
-    FlowCellMode,
-    SEQUENCER_FLOW_CELL_MODES,
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
@@ -94,15 +92,6 @@ class FlowCell:
         return sequencer_types[self.machine_name]
 
     @property
-    def mode(
-        self,
-    ) -> Literal[
-        FlowCellMode.MISEQ, FlowCellMode.NOVASEQ, FlowCellMode.NEXTSEQ, FlowCellMode.HISEQX
-    ]:
-        """Return the flow cell mode."""
-        return self.run_parameters.flow_cell_mode or SEQUENCER_FLOW_CELL_MODES[self.sequencer_type]
-
-    @property
     def rta_complete_path(self) -> Path:
         """Return RTAComplete path."""
         return Path(self.path, DemultiplexingDirsAndFiles.RTACOMPLETE)
@@ -162,7 +151,6 @@ class FlowCell:
         try:
             get_sample_sheet_from_file(
                 infile=self.sample_sheet_path,
-                flow_cell_mode=self.mode,
                 bcl_converter=self.bcl_converter,
             )
         except (SampleSheetError, ValidationError) as error:
@@ -175,7 +163,6 @@ class FlowCell:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
             infile=self.sample_sheet_path,
-            flow_cell_mode=self.mode,
             bcl_converter=self.bcl_converter,
         )
 
