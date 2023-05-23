@@ -72,7 +72,7 @@ def create_sequencing_statistics(
         SequencingStatistics: A SequencingStatistics object that encapsulates the statistics for a sample
         in a lane on the flow cell.
     """
-    yield_in_megabases: int = calculate_yield_in_megabases(conversion_result=conversion_result)
+    yield_in_megabases: float = calculate_yield_in_megabases(conversion_result=conversion_result)
 
     passed_filter_percent: float = calculate_pass_filter_ratio(conversion_result=conversion_result)
 

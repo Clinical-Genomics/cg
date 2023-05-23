@@ -34,7 +34,7 @@ def test_calculate_yield_in_megabases_from_conversion_result(conversion_result: 
         demux_result.yield_ = YIELD_IN_BASES
 
     # WHEN calculating the yield in megabases
-    yield_in_megabases: int = calculate_yield_in_megabases(conversion_result=conversion_result)
+    yield_in_megabases: float = calculate_yield_in_megabases(conversion_result=conversion_result)
 
     # THEN the yield in megabases should be the sum of the yields for all samples in the lane divided by 1 million
     assert yield_in_megabases == len(conversion_result.demux_results)
