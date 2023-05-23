@@ -21,7 +21,6 @@ class RunParameters:
         self.path: Path = run_parameters_path
         with open(run_parameters_path, "rt") as in_file:
             self.tree: ElementTree = ElementTree.parse(in_file)
-        self.version: str
 
     @property
     def index_length(self) -> int:
@@ -31,14 +30,6 @@ class RunParameters:
         if index_one_length != index_two_length:
             raise FlowCellError("Index lengths are not the same!")
         return index_one_length
-
-    def requires_dummy_samples(self) -> bool:
-        """Return true if the flow cell requires the addition of dummy samples.
-
-        If the number of cycles of both indexes is 8, the flow cell does not need the addition of dummy samples.
-        If the Run Parameters file is V2, it does not need the addition of dummy samples.
-        """
-        return False
 
     @staticmethod
     def node_not_found(node: Optional[ElementTree.Element], name: str) -> None:
@@ -54,39 +45,61 @@ class RunParameters:
         self.node_not_found(node=xml_node, name=name)
         return int(xml_node.text)
 
+    @property
+    def sheet_version(self) -> Optional[str]:
+        """Return the version of the sample sheet associated with the current run parameters."""
+        raise NotImplementedError("Impossible to retrieve sample sheet version from parent class")
+
+    @property
+    def control_software_version(self) -> Optional[str]:
+        """Return the control software version if existent."""
+        raise NotImplementedError(
+            "Impossible to retrieve control software version from parent class"
+        )
+
+    @property
+    def reagent_kit_version(self) -> Optional[str]:
+        """Return the reagent kit version if existent."""
+        raise NotImplementedError("Impossible to retrieve reagent kit version from parent class")
+
+    def requires_dummy_samples(self) -> Optional[bool]:
+        """Return true if the flow cell requires the addition of dummy samples."""
+        raise NotImplementedError("Impossible to know dummy sample requirements of parent class")
+
     def get_index1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
-        pass
+        raise NotImplementedError("Impossible to retrieve index1 cycles from parent class")
 
     def get_index2_cycles(self) -> int:
         """Return the number of cycles in the second index read."""
-        pass
+        raise NotImplementedError("Impossible to retrieve index2 cycles from parent class")
 
     def get_read1_cycles(self) -> int:
         """Return the number of cycles in the first read."""
-        pass
+        raise NotImplementedError("Impossible to retrieve read1 cycles from parent class")
 
     def get_read2_cycles(self) -> int:
         """Return the number of cycles in the second read."""
-        pass
+        raise NotImplementedError("Impossible to retrieve read2 cycles from parent class")
 
     def __str__(self):
-        return f"RunParameters(path={self.path}," f"version={self.version})"
+        return f"RunParameters(path={self.path}," f"version={self.sheet_version})"
 
     def __repr__(self):
         return (
             f"RunParameters(path={self.path},"
             f"index_length={self.index_length},"
-            f"version={self.version})"
+            f"version={self.sheet_version})"
         )
 
 
 class RunParametersV1(RunParameters):
     """Specific class for parsing run parameters for v1 sample sheets."""
 
-    def __init__(self, run_parameters_path: Path):
-        super().__init__(run_parameters_path)
-        self.version: str = SampleSheetV1Sections.VERSION
+    @property
+    def sheet_version(self) -> str:
+        """Return the version of the sample sheet associated with the current run parameters."""
+        return SampleSheetV1Sections.VERSION
 
     @property
     def control_software_version(self) -> str:
@@ -135,13 +148,28 @@ class RunParametersV1(RunParameters):
 class RunParametersV2(RunParameters):
     """Specific class for parsing run parameters for v2 sample sheets."""
 
-    def __init__(self, run_parameters_path: Path):
-        super().__init__(run_parameters_path)
-        self.version: str = SampleSheetV2Sections.VERSION
+    @property
+    def sheet_version(self) -> str:
+        """Return the version of the sample sheet associated with the current run parameters."""
+        return SampleSheetV2Sections.VERSION
+
+    @property
+    def control_software_version(self) -> None:
+        """Return None for run parameters associated with v2 sample sheets."""
+        return
+
+    @property
+    def reagent_kit_version(self) -> None:
+        """Return None for run parameters associated with v2 sample sheets."""
+        return
+
+    def requires_dummy_samples(self) -> bool:
+        """Return false for run parameters associated with v2 sample sheets."""
+        return False
 
     @property
     def planned_reads(self) -> Dict[str, int]:
-        """."""
+        """Return parsed read and index cycle values."""
         cycle_mapping: Dict[str, int] = {}
         for read_elem in self.tree.findall(".//Read"):
             read_name = read_elem.get("ReadName")
