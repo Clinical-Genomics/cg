@@ -22,9 +22,7 @@ from cg.cli.clean import clean
 from cg.cli.compress.base import compress, decompress
 from cg.cli.deliver.base import deliver as deliver_cmd
 from cg.cli.demultiplex.base import demultiplex_cmd_group as demultiplex_cmd
-from cg.cli.export import export
 from cg.cli.get import get
-from cg.cli.status import status
 from cg.cli.transfer import transfer_group
 from cg.cli.upload.base import upload
 from cg.cli.workflow.base import workflow as workflow_cmd
@@ -92,10 +90,8 @@ base.add_command(clean)
 base.add_command(compress)
 base.add_command(decompress)
 base.add_command(delete)
-base.add_command(export)
 base.add_command(get)
 base.add_command(set_cmd)
-base.add_command(status)
 base.add_command(transfer_group)
 base.add_command(upload)
 base.add_command(workflow_cmd)
