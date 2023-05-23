@@ -53,7 +53,7 @@ def create_sequencing_statistics(
     conversion_result: ConversionResult,
     demux_result: DemuxResult,
     raw_sequencing_metrics: Bcl2FastqSequencingMetrics,
-):
+) -> SequencingStatistics:
     """
     Generates a SequencingStatistics object based on the provided conversion and demultiplexing results
     along with the raw sequencing metrics.
@@ -103,7 +103,7 @@ def create_sequencing_statistics(
     )
 
 
-def calculate_perfect_reads_ratio(demux_result: DemuxResult):
+def calculate_perfect_reads_ratio(demux_result: DemuxResult) -> float:
     """
     Calculate the proportion of perfect index reads for a sample in a lane from the demux result,
     which is the portion of reads with no mismatches in the index.

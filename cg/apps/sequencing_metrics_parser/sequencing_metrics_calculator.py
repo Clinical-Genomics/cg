@@ -1,3 +1,6 @@
+SCALE_TO_MEGABASES = 1_000_000
+
+
 def yield_in_megabases(total_bases: int) -> float:
     """
     Calculate the yield in megabases.
@@ -6,7 +9,7 @@ def yield_in_megabases(total_bases: int) -> float:
     Returns:
         int: The yield in megabases.
     """
-    return total_bases / 1000000
+    return total_bases / SCALE_TO_MEGABASES
 
 
 def pass_filter_ratio(clusters_passed: int, total_clusters: int) -> float:

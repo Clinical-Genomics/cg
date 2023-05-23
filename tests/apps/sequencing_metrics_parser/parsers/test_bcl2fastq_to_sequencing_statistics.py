@@ -12,7 +12,9 @@ from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import Conversio
 def test_calculate_pass_ratio_from_conversion_result(
     conversion_result: ConversionResult,
 ):
+    """Test calculating the pass filter ratio from a conversion result."""
     # GIVEN a conversion result with valid total clusters
+
     # WHEN calculating the pass filter ratio
     pass_filter_ratio: float = calculate_pass_filter_ratio(conversion_result=conversion_result)
 
@@ -25,9 +27,11 @@ def test_calculate_pass_ratio_from_conversion_result(
 
 
 def test_calculate_yield_in_megabases_from_conversion_result(conversion_result: ConversionResult):
+    """Test calculating the yield in megabases from a conversion result."""
     # GIVEN a conversion result with a known yield
+    YIELD_IN_BASES = 1_000_000
     for demux_result in conversion_result.demux_results:
-        demux_result.yield_ = 1000000
+        demux_result.yield_ = YIELD_IN_BASES
 
     # WHEN calculating the yield in megabases
     yield_in_megabases: int = calculate_yield_in_megabases(conversion_result=conversion_result)
@@ -37,6 +41,7 @@ def test_calculate_yield_in_megabases_from_conversion_result(conversion_result: 
 
 
 def test_calculate_average_quality_score(conversion_result: ConversionResult):
+    """ "Test calculating the average quality score from a conversion result."""
     # GIVEN a conversion result with a known average quality score
     for read in conversion_result.demux_results[0].read_metrics:
         read.quality_score_sum = 100
@@ -53,6 +58,7 @@ def test_calculate_average_quality_score(conversion_result: ConversionResult):
 
 
 def test_calculate_q30_ratio(conversion_result: ConversionResult):
+    """Test calculating the q30 ratio from a conversion result."""
     # GIVEN a conversion result with a known q30 ratio
     for read in conversion_result.demux_results[0].read_metrics:
         read.yield_q30 = 100
@@ -67,6 +73,7 @@ def test_calculate_q30_ratio(conversion_result: ConversionResult):
 
 
 def test_calculate_perfect_reads_ratio(conversion_result: ConversionResult):
+    """Test calculating the perfect reads ratio from a conversion result."""
     # GIVEN a conversion result with a known perfect reads ratio
     sample_demux_result: DemuxResult = conversion_result.demux_results[0]
 
