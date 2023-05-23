@@ -6,8 +6,10 @@ from unittest.mock import patch
 import pytest
 from requests import Response
 
+from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
+from cg.meta.archive.archive import ArchiveAPI
 from cg.meta.archive.ddn_dataflow import DDNDataFlowApi, TransferData, TransferPayload, ROOT_TO_TRIM
 from cg.models.cg_config import DDNDataFlowConfig
 
@@ -99,3 +101,11 @@ def fixture_full_remote_path(remote_storage_repository: str, remote_path: Path) 
 def fixture_full_local_path(local_storage_repository: str, trimmed_local_directory: Path) -> str:
     """Returns the merged local repository and trimmed path."""
     return local_storage_repository + trimmed_local_directory.as_posix()
+
+
+@pytest.fixture(name="archive_api")
+def fixture_archive_api(
+    populated_housekeeper_api: HousekeeperAPI, ddn_dataflow_api: DDNDataFlowApi
+) -> ArchiveAPI:
+    """Returns an ArchiveAPI with a populated housekeeper store and a DDNDataFlowApi"""
+    return ArchiveAPI(ddn_dataflow_api=ddn_dataflow_api, housekeeper_api=populated_housekeeper_api)

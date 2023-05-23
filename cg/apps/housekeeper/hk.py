@@ -396,6 +396,22 @@ class HousekeeperAPI:
             )
         return all(sequencing_files_in_hk.values())
 
+    def get_non_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[Path]:
+        """Returns all files from given bundle, with given tag, which have not been archived."""
+        return self._store.get_non_archived_files(bundle_name=bundle_name, tags=tags)
+
+    def get_archived_files(self, bundle_name: str, tags: Optional[list] = None) -> List[Path]:
+        """Returns all files from given bundle, with given tag, which have been archived."""
+        return self._store.get_archived_files(bundle_name=bundle_name, tags=tags)
+
+    def add_archives(self, files: List[Path], archive_task_id: int) -> None:
+        """Creates an archive object for the given files, and adds the archive task id to them."""
+        for file in files:
+            archived_file: File = self._store.get_files(file_path=file.as_posix()).first()
+            archive = self._store.create_archive(archived_file.id, archive_task_id=archive_task_id)
+            self.add(archive)
+        self.commit()
+
     def is_fastq_or_spring_on_disk_in_all_bundles(self, bundle_names: List[str]) -> bool:
         """Return whether or not all FASTQ/SPRING files are on disk for the given bundles."""
         sequencing_files_on_disk: Dict[str, bool] = {}

@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from housekeeper.store.models import File, Version
+from housekeeper.store.models import File, Version, Bundle
 from requests import Response
 
 from cg.apps.gens import GensAPI
 from cg.apps.gt import GenotypeAPI
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import FileExtensions, Pipeline
+from cg.constants import FileExtensions, Pipeline, SequencingFileTag
 from cg.constants.constants import CaseActions, FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
@@ -494,6 +494,12 @@ def fixture_fastq_dir(demultiplexed_runs: Path) -> Path:
     return Path(demultiplexed_runs, "fastq")
 
 
+@pytest.fixture(name="spring_dir")
+def fixture_spring_dir(demultiplexed_runs: Path) -> Path:
+    """Return the path to the fastq files dir."""
+    return Path(demultiplexed_runs, "spring")
+
+
 @pytest.fixture(name="project_dir")
 def fixture_project_dir(tmpdir_factory) -> Generator[Path, None, None]:
     """Path to a temporary directory where intermediate files can be stored."""
@@ -649,6 +655,12 @@ def fixture_vcf_file(mip_dna_store_files: Path) -> Path:
 def fixture_fastq_file(fastq_dir: Path) -> Path:
     """Return the path to a FASTQ file."""
     return Path(fastq_dir, "dummy_run_R1_001.fastq.gz")
+
+
+@pytest.fixture(name="spring_file")
+def fixture_spring_file(spring_dir: Path) -> Path:
+    """Return the path to an existing spring file."""
+    return Path(spring_dir, "dummy_run_001.spring")
 
 
 @pytest.fixture(name="madeline_output")
@@ -942,14 +954,37 @@ def fixture_hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
 
 
 @pytest.fixture(name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp: datetime) -> Dict[str, Any]:
+def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp_now: datetime) -> Dict[str, Any]:
     """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
-        "created": timestamp,
-        "expires": timestamp,
+        "created": timestamp_now,
+        "expires": timestamp_now,
         "files": [{"path": bed_file.as_posix(), "archive": False, "tags": ["bed", "sample"]}],
     }
+
+
+@pytest.fixture(name="hk_sample_bundle")
+def fixture_hk_sample_bundle(
+    fastq_file: Path,
+    helpers,
+    sample_hk_bundle_no_files: dict,
+    sample_id: str,
+    spring_file: Path,
+) -> dict:
+    sample_hk_bundle_no_files["files"] = [
+        {
+            "path": spring_file.as_posix(),
+            "archive": False,
+            "tags": [SequencingFileTag.SPRING, sample_id],
+        },
+        {
+            "path": fastq_file.as_posix(),
+            "archive": False,
+            "tags": [SequencingFileTag.FASTQ, sample_id],
+        },
+    ]
+    return sample_hk_bundle_no_files
 
 
 @pytest.fixture(name="sample_hk_bundle_no_files")
@@ -1016,11 +1051,12 @@ def fixture_real_housekeeper_api(hk_config_dict: dict) -> Generator[HousekeeperA
 
 @pytest.fixture(name="populated_housekeeper_api")
 def fixture_populated_housekeeper_api(
-    housekeeper_api: MockHousekeeperAPI, hk_bundle_data: dict, helpers
-) -> MockHousekeeperAPI:
+    real_housekeeper_api: HousekeeperAPI, hk_bundle_data: dict, hk_sample_bundle: dict, helpers
+) -> HousekeeperAPI:
     """Setup a Housekeeper store with some data."""
-    hk_api = housekeeper_api
-    helpers.ensure_hk_bundle(hk_api, hk_bundle_data)
+    hk_api = real_housekeeper_api
+    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_bundle_data)
+    helpers.ensure_hk_bundle(store=hk_api, bundle_data=hk_sample_bundle)
     return hk_api
 
 
