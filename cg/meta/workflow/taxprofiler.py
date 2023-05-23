@@ -100,7 +100,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             )
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
-                sample_sheet_content=sample_sheet_content,
+                samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
                 config_path=NextflowAnalysisAPI.get_case_config_path(
                     case_id=case_id, root_dir=self.root_dir
