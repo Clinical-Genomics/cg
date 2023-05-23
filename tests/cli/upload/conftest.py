@@ -43,31 +43,6 @@ from tests.cli.workflow.mip.conftest import (
 LOG = logging.getLogger(__name__)
 
 
-@pytest.fixture(name="scout_load_config")
-def fixture_scout_load_config(apps_dir: Path) -> Path:
-    """Yaml file with load information from scout"""
-    return apps_dir / "scout/643594.config.yaml"
-
-
-@pytest.fixture(scope="function", name="scout_hk_bundle_data")
-def fixture_scout_hk_bundle_data(case_id: str, scout_load_config: Path, timestamp: datetime):
-    """Get some bundle data for housekeeper"""
-    tag_name = UploadScoutAPI.get_load_config_tag()
-
-    return {
-        "name": case_id,
-        "created": timestamp,
-        "expires": timestamp,
-        "files": [
-            {
-                "path": str(scout_load_config),
-                "archive": False,
-                "tags": [tag_name],
-            }
-        ],
-    }
-
-
 @pytest.fixture(name="upload_genotypes_hk_bundle")
 def fixture_upload_genotypes_hk_bundle(
     case_id: str, timestamp, case_qc_metrics_deliverables: Path, bcf_file: Path

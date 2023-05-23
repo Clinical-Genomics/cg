@@ -77,12 +77,6 @@ def fixture_real_populated_compress_fastq_api(
     return real_compress_api
 
 
-@pytest.fixture(name="samples")
-def fixture_samples() -> List[str]:
-    """Return a list of sample ids."""
-    return ["sample1", "sample2", "sample3"]
-
-
 # Store fixtures
 
 

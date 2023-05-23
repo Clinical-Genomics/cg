@@ -43,19 +43,6 @@ class MockTB:
 
 
 @pytest.fixture
-def tb_api():
-    """Trailblazer API fixture"""
-
-    return MockTB()
-
-
-@pytest.fixture
-def case_id():
-    """the name of a case"""
-    return "angrybird"
-
-
-@pytest.fixture
 def valid_config():
     sample = dict(
         sample_id="sample",
