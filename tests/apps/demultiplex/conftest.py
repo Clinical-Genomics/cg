@@ -272,6 +272,18 @@ def fixture_sample_sheet_dragen_duplicate_different_lane(
     return valid_sample_sheet_dragen
 
 
+@pytest.fixture(name="valid_sample_sheet_bcl2fastq_path")
+def fixture_valid_sample_sheet_bcl2fastq_path() -> Path:
+    """Return the path to a NovaSeq S2 sample sheet, used in bcl2fastq demultiplexing."""
+    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Bcl2Fastq.csv")
+
+
+@pytest.fixture(name="valid_sample_sheet_dragen_path")
+def fixture_valid_sample_sheet_dragen_path() -> Path:
+    """Return the path to a NovaSeq S2 sample sheet, used in dragen demultiplexing."""
+    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Dragen.csv")
+
+
 @pytest.fixture(name="novaseq_sample_1")
 def fixture_novaseq_sample_1() -> NovaSeqSample:
     """Return a NovaSeq sample."""
