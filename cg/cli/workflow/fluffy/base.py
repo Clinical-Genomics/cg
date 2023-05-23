@@ -8,6 +8,7 @@ from cg.meta.workflow.fluffy import FluffyAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.meta.workflow.analysis import AnalysisAPI
 
+
 OPTION_DRY = click.option(
     "-d", "--dry-run", "dry_run", help="Print command to console without executing", is_flag=True
 )
@@ -44,7 +45,7 @@ def create_samplesheet(context: CGConfig, case_id: str, dry_run: bool):
     Write modified samplesheet file to case folder
     """
     analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     analysis_api.make_sample_sheet(case_id=case_id, dry_run=dry_run)
 
 
@@ -59,7 +60,7 @@ def run(context: CGConfig, case_id: str, dry_run: bool, config: str, external_re
     Run Fluffy analysis
     """
     analysis_api: FluffyAnalysisAPI = context.meta_apis["analysis_api"]
-    analysis_api.verify_case_id_in_statusdb(case_id=case_id)
+    analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
     analysis_api.run_fluffy(
         case_id=case_id, workflow_config=config, dry_run=dry_run, external_ref=external_ref
     )

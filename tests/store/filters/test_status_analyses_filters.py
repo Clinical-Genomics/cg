@@ -1,38 +1,37 @@
 from datetime import datetime, timedelta
-
-from sqlalchemy.orm import Query
-from cgmodels.cg.constants import Pipeline
-
 from typing import List
+
 from cg.store import Store
-from cg.store.models import Analysis, Family
 from cg.store.filters.status_analysis_filters import (
-    filter_valid_analyses_in_production,
-    filter_analyses_with_pipeline,
-    filter_completed_analyses,
-    filter_not_completed_analyses,
-    filter_uploaded_analyses,
-    filter_not_uploaded_analyses,
-    filter_analyses_with_delivery_report,
-    filter_analyses_without_delivery_report,
-    filter_report_analyses_by_pipeline,
     filter_analyses_by_case_entry_id,
+    filter_analyses_by_started_at,
     filter_analyses_completed_after,
     filter_analyses_completed_before,
-    filter_analyses_not_uploaded_to_vogue,
     filter_analyses_not_cleaned,
+    filter_analyses_not_uploaded_to_vogue,
     filter_analyses_started_before,
+    filter_analyses_with_delivery_report,
+    filter_analyses_with_pipeline,
+    filter_analyses_without_delivery_report,
+    filter_completed_analyses,
+    filter_not_completed_analyses,
+    filter_not_uploaded_analyses,
+    filter_report_analyses_by_pipeline,
+    filter_uploaded_analyses,
+    filter_valid_analyses_in_production,
     order_analyses_by_completed_at_asc,
     order_analyses_by_uploaded_at_asc,
-    filter_analyses_by_started_at,
 )
+from cg.store.models import Analysis, Family
+from cgmodels.cg.constants import Pipeline
+from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
 
 
 def test_filter_valid_analyses_in_production(
     base_store: Store,
     helpers: StoreHelpers,
-    case_obj: Family,
+    case: Family,
     timestamp_now: datetime,
     old_timestamp: datetime,
 ):
@@ -41,7 +40,7 @@ def test_filter_valid_analyses_in_production(
     # GIVEN a set of mock analyses
     analysis: Analysis = helpers.add_analysis(store=base_store, completed_at=timestamp_now)
     outdated_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case_obj, completed_at=old_timestamp
+        store=base_store, case=case, completed_at=old_timestamp
     )
 
     # WHEN retrieving valid in production analyses
@@ -57,13 +56,13 @@ def test_filter_valid_analyses_in_production(
     assert outdated_analysis not in analyses
 
 
-def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case_obj: Family):
+def test_filter_analyses_with_pipeline(base_store: Store, helpers: StoreHelpers, case: Family):
     """Test analyses filtering by pipeline."""
 
     # GIVEN a set of mock analyses
     balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
     mip_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case_obj, pipeline=Pipeline.MIP_DNA
+        store=base_store, case=case, pipeline=Pipeline.MIP_DNA
     )
 
     # WHEN extracting the analyses
@@ -187,15 +186,13 @@ def test_filter_analyses_without_delivery_report(base_store: Store, helpers: Sto
     assert analysis_without_delivery_report in analyses
 
 
-def test_filter_report_analyses_by_pipeline(
-    base_store: Store, helpers: StoreHelpers, case_obj: Family
-):
+def test_filter_report_analyses_by_pipeline(base_store: Store, helpers: StoreHelpers, case: Family):
     """Test filtering delivery report related analysis by pipeline."""
 
     # GIVEN a set of mock analysis
     balsamic_analysis: Analysis = helpers.add_analysis(store=base_store, pipeline=Pipeline.BALSAMIC)
     fluffy_analysis: Analysis = helpers.add_analysis(
-        store=base_store, case=case_obj, pipeline=Pipeline.FLUFFY
+        store=base_store, case=case, pipeline=Pipeline.FLUFFY
     )
 
     # WHEN filtering delivery report related analyses
@@ -214,7 +211,7 @@ def test_filter_report_analyses_by_pipeline(
 def test_order_analyses_by_completed_at_asc(
     store: Store,
     helpers: StoreHelpers,
-    case_obj: Family,
+    case: Family,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ):
@@ -223,7 +220,7 @@ def test_order_analyses_by_completed_at_asc(
     # GIVEN a set of mock analyses
     new_analysis: Analysis = helpers.add_analysis(store=store, completed_at=timestamp_now)
     old_analysis: Analysis = helpers.add_analysis(
-        store=store, case=case_obj, completed_at=timestamp_yesterday
+        store=store, case=case, completed_at=timestamp_yesterday
     )
 
     # WHEN ordering the analyses by the completed_at field
@@ -240,7 +237,6 @@ def test_order_analyses_by_completed_at_asc(
 def test_order_analyses_by_uploaded_at_asc(
     store_with_older_and_newer_analyses: Store,
     helpers: StoreHelpers,
-    case_obj: Family,
     timestamp_now: datetime,
     timestamp_yesterday: datetime,
 ):
@@ -260,16 +256,16 @@ def test_order_analyses_by_uploaded_at_asc(
         assert analyses.all()[index].uploaded_at <= analyses.all()[index + 1].uploaded_at
 
 
-def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case_obj: Family):
+def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case: Family):
     """Test filtering of analyses by case."""
 
     # GIVEN a set of mock analyses
     analysis: Analysis = helpers.add_analysis(store=base_store)
-    analysis_other_case: Analysis = helpers.add_analysis(store=base_store, case=case_obj)
+    analysis_other_case: Analysis = helpers.add_analysis(store=base_store, case=case)
 
     # WHEN filtering the analyses by case
     analyses: Query = filter_analyses_by_case_entry_id(
-        analyses=base_store._get_query(table=Analysis), case_entry_id=case_obj.id
+        analyses=base_store._get_query(table=Analysis), case_entry_id=case.id
     )
 
     # ASSERT that analyses is a query
@@ -278,7 +274,7 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case_
     # THEN only the analysis belonging to the case should be retrieved
     assert analysis not in analyses
     assert analysis_other_case in analyses
-    assert analysis_other_case.family == case_obj
+    assert analysis_other_case.family == case
 
 
 def test_filter_analysis_completed_before(
