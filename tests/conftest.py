@@ -71,7 +71,7 @@ def fixture_future_date() -> datetime:
     return datetime(MAXYEAR, 1, 1, 1, 1, 1)
 
 
-@pytest.fixture(name="timestamp_now")
+@pytest.fixture(name="timestamp_now", scope="session")
 def fixture_timestamp_now() -> datetime:
     """Return a time stamp of today's date in date time format."""
     return datetime.now()
@@ -954,12 +954,14 @@ def fixture_hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
 
 
 @pytest.fixture(name="hk_bundle_data")
-def fixture_hk_bundle_data(case_id: str, bed_file: Path, timestamp_now: datetime) -> Dict[str, Any]:
+def fixture_hk_bundle_data(
+    case_id: str, bed_file: Path, timestamp_yesterday: datetime
+) -> Dict[str, Any]:
     """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
-        "created": timestamp_now,
-        "expires": timestamp_now,
+        "created": timestamp_yesterday,
+        "expires": timestamp_yesterday,
         "files": [{"path": bed_file.as_posix(), "archive": False, "tags": ["bed", "sample"]}],
     }
 
@@ -1118,11 +1120,18 @@ def fixture_crunchy_api():
 
 @pytest.fixture(name="analysis_store")
 def fixture_analysis_store(
-    base_store: Store, analysis_family: dict, wgs_application_tag: str, helpers: StoreHelpers
+    base_store: Store,
+    analysis_family: dict,
+    wgs_application_tag: str,
+    helpers: StoreHelpers,
+    timestamp_yesterday: datetime,
 ) -> Generator[Store, None, None]:
     """Setup a store instance for testing analysis API."""
     helpers.ensure_case_from_dict(
-        base_store, case_info=analysis_family, app_tag=wgs_application_tag
+        base_store,
+        case_info=analysis_family,
+        app_tag=wgs_application_tag,
+        started_at=timestamp_yesterday,
     )
     yield base_store
 

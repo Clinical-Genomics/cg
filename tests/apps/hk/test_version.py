@@ -48,7 +48,7 @@ def test_get_version_non_existing(
 
 def test_get_version_existing(
     housekeeper_api: MockHousekeeperAPI,
-    timestamp: datetime.datetime,
+    timestamp_now: datetime.datetime,
     hk_bundle_data: Dict[str, Any],
 ):
     """Test to get a version when there is a bundle and a version."""
@@ -58,7 +58,7 @@ def test_get_version_existing(
     housekeeper_api.add_commit(version_obj)
 
     # WHEN fetching a version
-    fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=timestamp)
+    fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=timestamp_now)
 
     # THEN assert that the function returns True
     assert fetched_version
@@ -90,12 +90,12 @@ def test_add_version_existing_bundle(
 
 
 def test_get_last_version(
-    case_id: str, populated_housekeeper_api: MockHousekeeperAPI, later_timestamp: datetime.datetime
+    case_id: str, populated_housekeeper_api: MockHousekeeperAPI, timestamp_now: datetime.datetime
 ):
     """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api and a bundle with two versions
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
-    new_version = populated_housekeeper_api.new_version(created_at=later_timestamp)
+    new_version = populated_housekeeper_api.new_version(created_at=timestamp_now)
     new_version.bundle = bundle_obj
     populated_housekeeper_api.add_commit(new_version)
 
@@ -103,7 +103,7 @@ def test_get_last_version(
     fetched_version = populated_housekeeper_api.last_version(bundle=case_id)
 
     # THEN assert that the later_date version is fetched
-    assert fetched_version.created_at == later_timestamp
+    assert fetched_version.created_at == timestamp_now
 
 
 def test_get_latest_bundle_version_no_housekeeper_bundle(
@@ -124,14 +124,14 @@ def test_get_latest_bundle_version_no_housekeeper_bundle(
 
 
 def test_get_latest_bundle_version_with_housekeeper_bundle(
-    populated_housekeeper_api: MockHousekeeperAPI, later_timestamp: datetime.datetime, case_id: str
+    populated_housekeeper_api: MockHousekeeperAPI, timestamp_now: datetime.datetime, case_id: str
 ):
     """Test to get a version when there is a bundle and a version."""
     # GIVEN a populated housekeeper_api
     bundle_obj = populated_housekeeper_api.bundle(name=case_id)
 
     # GIVEN a bundle with two versions
-    new_version = populated_housekeeper_api.new_version(created_at=later_timestamp)
+    new_version = populated_housekeeper_api.new_version(created_at=timestamp_now)
     new_version.bundle = bundle_obj
     populated_housekeeper_api.add_commit(new_version)
 
@@ -139,7 +139,7 @@ def test_get_latest_bundle_version_with_housekeeper_bundle(
     fetched_version = populated_housekeeper_api.get_latest_bundle_version(bundle_name=case_id)
 
     # THEN assert that the later_date version was fetched
-    assert fetched_version.created_at == later_timestamp
+    assert fetched_version.created_at == timestamp_now
 
 
 def test_get_create_version(

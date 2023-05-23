@@ -1,21 +1,20 @@
 """Tests for coverage meta API"""
 
-import datetime
+from datetime import datetime
 
 from cg.apps.coverage.api import ChanjoAPI
 from cg.meta.upload.coverage import UploadCoverageApi
+from cg.store import Store
+from cg.store.models import Family
+from tests.mocks.hk_mock import MockHousekeeperAPI
 
 
 class MockAnalysis:
     """Mock Analysis object"""
 
-    def __init__(self, case_obj):
+    def __init__(self, case_obj: Family, started_at: datetime):
         self.case_obj = case_obj
-
-    @property
-    def started_at(self):
-        """mock started_at date"""
-        return str(datetime.datetime.today())
+        self.started_at = started_at
 
     @property
     def family(self):
@@ -23,13 +22,18 @@ class MockAnalysis:
         return self.case_obj
 
 
-def test_data(coverage_upload_api, analysis_store, case_id):
+def test_data(
+    coverage_upload_api: UploadCoverageApi,
+    analysis_store: Store,
+    case_id: str,
+    timestamp_yesterday: datetime,
+):
     """test getting data for chanjo"""
     # GIVEN a coverage api and an analysis object
     coverage_api = coverage_upload_api
     case_name = case_id
     case_obj = analysis_store.get_case_by_internal_id(internal_id=case_name)
-    analysis_obj = MockAnalysis(case_obj=case_obj)
+    analysis_obj = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
 
     # WHEN using the data method
     results = coverage_api.data(analysis_obj=analysis_obj)
@@ -40,7 +44,14 @@ def test_data(coverage_upload_api, analysis_store, case_id):
         assert set(sample.keys()) == set(["coverage", "sample", "sample_name"])
 
 
-def test_upload(chanjo_config, populated_housekeeper_api, analysis_store, mocker, case_id):
+def test_upload(
+    chanjo_config: dict,
+    populated_housekeeper_api: MockHousekeeperAPI,
+    analysis_store: Store,
+    mocker,
+    case_id: str,
+    timestamp_yesterday: datetime,
+):
     """test uploading with chanjo."""
     # GIVEN a coverage api and a data dictionary
     mock_upload = mocker.patch.object(ChanjoAPI, "upload")
@@ -51,7 +62,7 @@ def test_upload(chanjo_config, populated_housekeeper_api, analysis_store, mocker
     coverage_api = UploadCoverageApi(status_api=None, hk_api=hk_api, chanjo_api=chanjo_api)
     family_name = case_id
     case_obj = analysis_store.get_case_by_internal_id(family_name)
-    analysis_obj = MockAnalysis(case_obj=case_obj)
+    analysis_obj = MockAnalysis(case_obj=case_obj, started_at=timestamp_yesterday)
     data = coverage_api.data(analysis_obj=analysis_obj)
 
     # WHEN uploading samples in data dictionary

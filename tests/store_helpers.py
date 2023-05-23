@@ -453,6 +453,7 @@ class StoreHelpers:
         ordered_at: datetime = None,
         completed_at: datetime = None,
         created_at: datetime = datetime.now(),
+        started_at: datetime = None,
     ):
         """Load a case with samples and link relations from a dictionary."""
         customer_obj = StoreHelpers.ensure_customer(store)
@@ -514,6 +515,7 @@ class StoreHelpers:
             pipeline=Pipeline.MIP_DNA,
             case=case,
             completed_at=completed_at or datetime.now(),
+            started_at=started_at or datetime.now(),
         )
         return case
 
