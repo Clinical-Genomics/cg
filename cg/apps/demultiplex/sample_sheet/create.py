@@ -39,12 +39,15 @@ def create_sample_sheet(
         )
     elif flow_cell_sequencer == Sequencers.NOVASEQX:
         sample_sheet_creator = SampleSheetCreatorV2(
+            bcl_converter=bcl_converter,
             flow_cell=flow_cell,
             lims_samples=lims_samples,
             force=force,
         )
     else:
-        message = f"Only demultiplexing of Novaseq sequence data is currently supported. Found sequencer type: {flow_cell_sequencer}"
+        message: str = (
+            f"Can demultiplex only Novaseq sequencing data. Found type: {flow_cell_sequencer}"
+        )
         LOG.warning(message)
         raise FlowCellError(message=message)
 

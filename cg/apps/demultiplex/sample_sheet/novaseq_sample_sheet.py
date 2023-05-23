@@ -1,7 +1,6 @@
 """ Create a sample sheet for Novaseq flow cells."""
-
 import logging
-from typing import Dict, List, Set, Union
+from typing import Dict, List, Set, Optional
 
 from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
@@ -13,7 +12,7 @@ from cg.constants.demultiplexing import (
     SampleSheetV1Sections,
     SampleSheetV2Sections,
 )
-from cg.constants.sequencing import Sequencers
+from cg.exc import SampleSheetError
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -25,6 +24,7 @@ class SampleSheetCreator:
 
     def __init__(
         self,
+        bcl_converter: str,
         flow_cell: FlowCell,
         lims_samples: List[LimsFlowcellSample],
         force: bool = False,
@@ -32,17 +32,95 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.bcl_converter: str = bcl_converter
         self.force: bool = force
-        self.is_v2: bool = False
 
     @property
     def valid_indexes(self) -> List[Index]:
         return index.get_valid_indexes(dual_indexes_only=True)
 
-    @property
-    def needs_reverse_complement(self) -> bool:
-        """Returns whether index2 needs to be reversed."""
-        return False
+    def remove_unwanted_samples(self) -> None:
+        """Filter out samples with single indexes."""
+        LOG.info("Removing all samples without dual indexes")
+        samples_to_keep = []
+        sample: LimsFlowcellSample
+        for sample in self.lims_samples:
+            if not index.is_dual_index(sample.index):
+                LOG.warning(f"Removing sample {sample} since it does not have dual index")
+                continue
+            samples_to_keep.append(sample)
+        self.lims_samples = samples_to_keep
+
+    @staticmethod
+    def convert_sample_to_list(
+        sample: LimsFlowcellSample,
+        sample_sheet_column_names: List[str],
+    ) -> List[str]:
+        """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
+        LOG.debug(f"Use sample sheet header {sample_sheet_column_names}")
+        sample_dict = sample.dict(by_alias=True)
+        return [str(sample_dict[header]) for header in sample_sheet_column_names]
+
+    def add_dummy_samples(self) -> None:
+        """Add all dummy samples with non-existing indexes to samples if applicable."""
+        raise NotImplementedError("Impossible to add dummy samples in parent class")
+
+    def add_override_cycles_to_samples(self) -> None:
+        """Add override cycles attribute to samples if sample sheet is v2."""
+        raise NotImplementedError("Impossible to add override cycles to samples from parent class")
+
+    def get_additional_sections_sample_sheet(self) -> Optional[List]:
+        """Build all sections of the sample sheet that are not the Data section."""
+        raise NotImplementedError("Impossible to get sample sheet sections from parent class")
+
+    def get_data_section_header_and_columns(self) -> Optional[List[List[str]]]:
+        """Return the header and column names of the data section of the sample sheet."""
+        raise NotImplementedError("Impossible to get sample sheet sections from parent class")
+
+    def create_sample_sheet_content(self) -> List[List[str]]:
+        """Create sample sheet with samples."""
+        LOG.info("Create sample sheet for samples")
+        sample_sheet_content: List[List[str]] = (
+            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+        )
+        for sample in self.lims_samples:
+            sample_sheet_content.append(
+                self.convert_sample_to_list(
+                    sample=sample,
+                    sample_sheet_column_names=self.get_data_section_header_and_columns()[1],
+                )
+            )
+        return sample_sheet_content
+
+    def construct_sample_sheet(self) -> List[List[str]]:
+        """Construct the sample sheet."""
+        LOG.info(f"Constructing sample sheet for {self.flow_cell_id}")
+        # Create dummy samples for the indexes that is missing
+        if self.run_parameters.requires_dummy_samples:
+            self.add_dummy_samples()
+        else:
+            LOG.info("Skip adding dummy samples since run is not WGS")
+        self.remove_unwanted_samples()
+        index.adapt_indexes(
+            samples=self.lims_samples,
+            run_parameters=self.run_parameters,
+        )
+        self.add_override_cycles_to_samples()
+        sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
+        if self.force:
+            LOG.info("Skipping validation of sample sheet due to force flag")
+            return sample_sheet_content
+        LOG.info("Validating sample sheet")
+        validate_sample_sheet(
+            sample_sheet_content=sample_sheet_content,
+            bcl_converter=self.bcl_converter,
+        )
+        LOG.info("Sample sheet passed validation")
+        return sample_sheet_content
+
+
+class SampleSheetCreatorV1(SampleSheetCreator):
+    """Create a raw sample sheet (v1) for NovaSeq6000 flow cells."""
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples.
@@ -68,103 +146,13 @@ class SampleSheetCreator:
                 LOG.debug(f"Adding dummy sample {dummy_sample_obj} to lane {lane}")
                 self.lims_samples.append(dummy_sample_obj)
 
-    def remove_unwanted_samples(self) -> None:
-        """Filter out samples with indexes of unwanted length and single indexes."""
-        LOG.info("Removing all samples without dual indexes")
-        samples_to_keep = []
-        sample: LimsFlowcellSample
-        for sample in self.lims_samples:
-            if not index.is_dual_index(sample.index):
-                LOG.warning(f"Removing sample {sample} since it does not have dual index")
-                continue
-            samples_to_keep.append(sample)
-        self.lims_samples = samples_to_keep
+    def add_override_cycles_to_samples(self) -> None:
+        """Return None for sample sheet v1."""
+        return
 
     def get_additional_sections_sample_sheet(self) -> List:
-        """Build all sections of the sample sheet that are not the Data section."""
+        """Return empty list for sample sheet v1."""
         return []
-
-    def get_data_section_header_and_columns(self) -> List[List[str]]:
-        """Return the header and column names of the data section of the sample sheet."""
-        raise NotImplementedError(
-            "Impossible to build sample sheet from abstract class. Must specify version"
-        )
-
-    @staticmethod
-    def convert_sample_to_list(
-        sample: LimsFlowcellSample,
-        sample_sheet_column_names: List[str],
-    ) -> List[str]:
-        """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
-        LOG.debug(f"Use sample sheet header {sample_sheet_column_names}")
-        sample_dict = sample.dict(by_alias=True)
-        return [str(sample_dict[header]) for header in sample_sheet_column_names]
-
-    def create_sample_sheet_content(self) -> List[List[str]]:
-        """Create sample sheet with samples."""
-        LOG.info("Create sample sheet for samples")
-        sample_sheet_content: List[List[str]] = (
-            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
-        )
-        for sample in self.lims_samples:
-            sample_sheet_content.append(
-                self.convert_sample_to_list(
-                    sample=sample,
-                    sample_sheet_column_names=self.get_data_section_header_and_columns()[1],
-                )
-            )
-        return sample_sheet_content
-
-    def construct_sample_sheet(self) -> List[List[str]]:
-        """Construct the sample sheet."""
-        LOG.info(f"Constructing sample sheet for {self.flow_cell_id}")
-        # Create dummy samples for the indexes that is missing
-        # TODO risk assessment of dummy sample addition
-        if self.run_parameters.requires_dummy_samples:
-            self.add_dummy_samples()
-        else:
-            LOG.info("Skip adding dummy samples since run is not WGS")
-        self.remove_unwanted_samples()
-        index.adapt_indexes(
-            samples=self.lims_samples,
-            expected_index_length=self.run_parameters.index_length,
-            needs_reverse_complement=self.needs_reverse_complement,
-            # TODO I don't like this solution, think of something better
-            is_v2=self.is_v2,
-        )
-        # TODO implement add_override_cycles and call function here
-        sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
-        if self.force:
-            LOG.info("Skipping validation of sample sheet due to force flag")
-            return sample_sheet_content
-        LOG.info("Validating sample sheet")
-        validate_sample_sheet(
-            sample_sheet_content=sample_sheet_content,
-            bcl_converter=self.bcl_converter,
-        )
-        LOG.info("Sample sheet passed validation")
-        return sample_sheet_content
-
-
-class SampleSheetCreatorV1(SampleSheetCreator):
-    """Create a raw sample sheet (v1) for NovaSeq600 flow cells."""
-
-    def __init__(
-        self,
-        flow_cell: FlowCell,
-        lims_samples: List[LimsFlowcellSample],
-        bcl_converter: str,
-        force: bool = False,
-    ):
-        super().__init__(flow_cell, lims_samples, force)
-        self.bcl_converter: str = bcl_converter
-
-    @property
-    def needs_reverse_complement(self) -> bool:
-        """Returns whether index2 needs to be reversed."""
-        return index.is_reverse_complement(
-            self.run_parameters.control_software_version, self.run_parameters.reagent_kit_version
-        )
 
     def get_data_section_header_and_columns(self) -> List[List[str]]:
         """Return the header and column names of the data section of the sample sheet."""
@@ -179,20 +167,25 @@ class SampleSheetCreatorV2(SampleSheetCreator):
 
     def __init__(
         self,
+        bcl_converter: str,
         flow_cell: FlowCell,
         lims_samples: List[LimsFlowcellSample],
         force: bool = False,
     ):
-        super().__init__(flow_cell, lims_samples, force)
+        super().__init__(bcl_converter, flow_cell, lims_samples, force)
+        if bcl_converter == BclConverter.BCL2FASTQ:
+            raise SampleSheetError(f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2")
         self.bcl_converter: str = BclConverter.DRAGEN
-        self.is_v2: bool = True
+
+    def add_dummy_samples(self) -> None:
+        """Return None for sample sheet v2."""
+        return
 
     def add_override_cycles_to_samples(self) -> None:
-        """."""
+        """Add override cycles attribute to samples."""
         flow_cell_index_len: int = self.run_parameters.index_length
         read1_str: str = "Y" + str(self.run_parameters.get_read1_cycles()) + ";"
         read2_str: str = "Y" + str(self.run_parameters.get_read2_cycles()) + ";"
-        # TODO reduce to one variable as they are always equal
         index1_str: str = "I" + str(self.run_parameters.get_index1_cycles()) + ";"
         index2_str: str = "I" + str(self.run_parameters.get_index2_cycles()) + ";"
         for sample in self.lims_samples:

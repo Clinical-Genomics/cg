@@ -1,10 +1,12 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Literal
 
 from cg.apps.lims.sample_sheet import LimsFlowcellSample
 from cg.constants.constants import FileFormat
+from cg.constants.demultiplexing import SampleSheetV1Sections, SampleSheetV2Sections
 from cg.io.controller import ReadFile
+from cg.models.demultiplex.run_parameters import RunParameters
 from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel
@@ -67,9 +69,12 @@ def get_reagent_kit_version(reagent_kit_version: str) -> str:
 def is_reverse_complement(control_software_version: str, reagent_kit_version_string: str) -> bool:
     """If the run used the new NovaSeq control software version (NEW_CONTROL_SOFTWARE_VERSION)
     and the new reagent kit version (NEW_REAGENT_KIT_VERSION) the second index should be the
-    reverse complement
+    reverse complement. Returns false for NovaSeqX.
     """
     LOG.info("Check if run is reverse complement")
+    if control_software_version is None and reagent_kit_version_string is None:
+        LOG.info("Run is NovaSeqX, no need for reverse complement")
+        return False
     if version.parse(control_software_version) < version.parse(NEW_CONTROL_SOFTWARE_VERSION):
         LOG.warning(
             f"Old software version {control_software_version}, no need for reverse complement"
@@ -106,9 +111,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 def adapt_indexes(
     samples: List[LimsFlowcellSample],
-    expected_index_length: bool,
-    needs_reverse_complement: bool = False,
-    is_v2: bool = False,
+    run_parameters: RunParameters,
 ) -> None:
     """Adapts the indexes: if sample sheet is v1, pads all indexes so that they have a length equal to the
     number  of index reads, and takes the reverse complement of index 2 in case of the new
@@ -116,12 +119,21 @@ def adapt_indexes(
     (version 1.5). If sample sheet is v2, just assign the indexes.
     """
     LOG.info("Fix so that all indexes are on the correct format")
+    expected_index_length: int = run_parameters.index_length
+    sheet_version: Literal[
+        SampleSheetV1Sections.VERSION, SampleSheetV2Sections.VERSION
+    ] = run_parameters.sheet_version
+    needs_reverse_complement: bool = is_reverse_complement(
+        run_parameters.control_software_version, run_parameters.reagent_kit_version
+    )
     for sample in samples:
         index1, index2 = sample.index.split("-")
         index1: str = index1.strip()
         index2: str = index2.strip()
         index_length = len(index1)
-        needs_padding: bool = not is_v2 and (expected_index_length == 10 and index_length == 8)
+        needs_padding: bool = sheet_version == SampleSheetV1Sections.VERSION and (
+            expected_index_length == 10 and index_length == 8
+        )
         if needs_padding:
             LOG.debug("Padding indexes")
             index1 = pad_index_one(index_string=index1)
