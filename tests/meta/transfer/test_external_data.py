@@ -214,7 +214,7 @@ def test_get_available_samples(
 
 
 def test_curate_sample_folder(
-    case_id, customer_id, dna_case, external_data_api: ExternalDataAPI, tmpdir_factory
+    case_id, customer_id, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
     case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = case.links[0].sample

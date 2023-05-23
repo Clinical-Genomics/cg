@@ -68,7 +68,7 @@ def test_submit(
     monkeypatch_process_lims(monkeypatch, order_data)
 
     # GIVEN an order and an empty store
-    assert not base_store.get_samples()
+    assert not base_store._get_query(table=Sample).first()
 
     # WHEN submitting the order
 
@@ -155,7 +155,7 @@ def test_submit_illegal_sample_customer(
         invoice_reference="dummy nr",
     )
     sample_store.session.add(new_customer)
-    existing_sample: Sample = sample_store.get_samples()[0]
+    existing_sample: Sample = sample_store._get_query(table=Sample).first()
     existing_sample.customer = new_customer
     sample_store.session.add(existing_sample)
     sample_store.session.commit()
@@ -212,7 +212,7 @@ def test_submit_scout_legal_sample_customer(
     order_customer.collaborations.append(collaboration)
     sample_store.session.add(sample_customer)
     sample_store.session.add(order_customer)
-    existing_sample: Sample = sample_store.get_samples()[0]
+    existing_sample: Sample = sample_store._get_query(table=Sample).first()
     existing_sample.customer = sample_customer
     sample_store.session.commit()
     order_data.customer = order_customer.internal_id
@@ -495,7 +495,7 @@ def test_submit_unique_sample_name(
     # GIVEN we have an order with a sample that is not existing in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    assert not store.get_samples()
+    assert not store._get_query(table=Sample).first()
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
