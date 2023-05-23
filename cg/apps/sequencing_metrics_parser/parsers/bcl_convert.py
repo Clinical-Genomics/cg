@@ -93,3 +93,69 @@ class BclConvertMetricsParser:
         LOG.info(f"Parsing Run info XML {self.run_info_path}")
         parsed_metrics = BclConvertRunInfo(tree=ET.parse(self.run_info_path))
         return parsed_metrics
+
+    def get_sample_internal_ids(self) -> List[str]:
+        """Return a list of sample internal ids."""
+        sample_internal_ids: List[str] = []
+        for sample_demux_metric in self.demux_metrics:
+            if sample_demux_metric.sample_project not in ["indexcheck", "Undetermined"]:
+                sample_internal_ids.append(sample_demux_metric.sample_internal_id)
+            sample_internal_ids.append(sample_demux_metric.sample_internal_id)
+        return sample_internal_ids
+
+    def get_lanes_for_sample_internal_id(self, sample_internal_id: str) -> List[int]:
+        """Return a list of lanes for a sample."""
+        lanes_for_sample: List[int] = []
+        for sample_demux_metric in self.demux_metrics:
+            if sample_demux_metric.sample_internal_id == sample_internal_id:
+                lanes_for_sample.append(sample_demux_metric.lane)
+        return lanes_for_sample
+
+    def get_metrics_for_sample_internal_id_and_lane(
+        self,
+        metrics_list: List[
+            Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
+        ],
+        sample_internal_id: str,
+        lane: int,
+    ) -> Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]:
+        """Return the metrics for a sample by sample internal id."""
+        for metric in metrics_list:
+            if metric.sample_internal_id == sample_internal_id and lane in metric.lane:
+                return metric
+
+    def calculate_total_reads_per_lane(self, sample_internal_id: str, lane: int) -> int:
+        """Calculate the total reads for a sample in a lane."""
+        metric = self.get_metrics_for_sample_internal_id_and_lane(
+            metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return metric.read_pair_count * 2
+
+    def calculate_total_yield_per_lane_in_mega_bases(
+        self, sample_internal_id: str, lane: int
+    ) -> int:
+        """Calculate the total yield for a sample and lanes."""
+        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
+            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return int(metric.yield_bases / 1000000)
+
+    def get_flow_cell_name(self) -> str:
+        """Return the flow cell name of the demultiplexed flow cell."""
+        return self.sample_sheet[0].flow_cell_name
+
+    def get_q30_bases_percent_per_lane(self, sample_internal_id, lane) -> float:
+        """Return the percent of bases that are Q30 for a sample and lane."""
+        metric = self.get_metrics_for_sample_internal_id_and_lane(
+            metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return metric.q30_bases_percent
+
+    def get_perfect_index_reads_percent_for_sample_per_lane(
+        self, sample_internal_id, lane
+    ) -> float:
+        """Return the percent of perfect index reads for a sample and lane."""
+        metric = self.get_metrics_for_sample_internal_id_and_lane(
+            metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return metric.perfect_index_reads_percent
