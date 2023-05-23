@@ -1,10 +1,12 @@
-"""Delivery report helpers"""
-
+"""Delivery report helpers."""
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, List
 
 import click
+
+from cg.meta.report.rnafusion import RnafusionReportAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES, REPORT_SUPPORTED_DATA_DELIVERY
@@ -36,11 +38,11 @@ def get_report_case(context: click.Context, case_id: str) -> Family:
     if not case_id or not case:
         LOG.warning("Invalid case ID. Retrieving available cases.")
 
-        pipeline = (
+        pipeline: Pipeline = (
             report_api.analysis_api.pipeline if context.obj.meta_apis.get("report_api") else None
         )
 
-        cases_without_delivery_report = (
+        cases_without_delivery_report: List[Family] = (
             report_api.get_cases_without_delivery_report(pipeline)
             if not context.obj.meta_apis.get("upload_api")
             else report_api.get_cases_without_uploaded_delivery_report(pipeline)
@@ -87,9 +89,9 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
     """Resolves the report API given a specific pipeline."""
 
     # Default report API pipeline: MIP-DNA
-    pipeline = pipeline if pipeline else Pipeline.MIP_DNA
+    pipeline: Pipeline = pipeline if pipeline else Pipeline.MIP_DNA
 
-    dispatch_report_api = {
+    dispatch_report_api: Dict[Pipeline, ReportAPI] = {
         Pipeline.MIP_DNA: MipDNAReportAPI(
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
@@ -98,6 +100,9 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
         ),
         Pipeline.BALSAMIC_UMI: BalsamicUmiReportAPI(
             config=context.obj, analysis_api=BalsamicUmiAnalysisAPI(config=context.obj)
+        ),
+        Pipeline.RNAFUSION: RnafusionReportAPI(
+            config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
         ),
     }
 

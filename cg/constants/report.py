@@ -6,7 +6,13 @@ from cg.constants import DataDelivery
 
 BALSAMIC_REPORT_ACCREDITED_PANELS = ["gmsmyeloid"]
 
-REPORT_SUPPORTED_PIPELINES = (Pipeline.MIP_DNA, Pipeline.BALSAMIC, Pipeline.BALSAMIC_UMI)
+REPORT_SUPPORTED_PIPELINES = (
+    Pipeline.MIP_DNA,
+    Pipeline.BALSAMIC,
+    Pipeline.BALSAMIC_UMI,
+    Pipeline.RNAFUSION,
+)
+
 REPORT_SUPPORTED_DATA_DELIVERY = (
     DataDelivery.ANALYSIS_FILES,
     DataDelivery.ANALYSIS_SCOUT,
