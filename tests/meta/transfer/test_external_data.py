@@ -205,12 +205,13 @@ def test_get_available_samples(
     tmpdir_factory,
 ):
     # GIVEN one such sample exists
-    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False)).parent
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False))
     available_samples = external_data_api.get_available_samples(
-        folder=tmp_dir_path, ticket=ticket_id
+        folder=tmp_dir_path.parent, ticket=ticket_id
     )
     # THEN the function should return a list containing the sample object
     assert available_samples == [sample]
+    tmp_dir_path.rmdir()
 
 
 def test_curate_sample_folder(
