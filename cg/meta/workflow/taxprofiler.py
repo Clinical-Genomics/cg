@@ -15,6 +15,7 @@ from cg.constants.taxprofiler import (
     TAXPROFILER_RUN_ACCESSION,
     TAXPROFILER_SAMPLE_SHEET_HEADERS,
     TAXPROFILER_FASTA_HEADER,
+    TEST,
 )
 from cg.meta.workflow.fastq import TaxprofilerFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
@@ -101,7 +102,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
-                headers=[str(header) for header in TAXPROFILER_SAMPLE_SHEET_HEADERS],
+                headers=TEST,
                 config_path=NextflowAnalysisAPI.get_case_config_path(
                     case_id=case_id, root_dir=self.root_dir
                 ),
