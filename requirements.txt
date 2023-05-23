@@ -21,7 +21,6 @@ sendmail-container
 werkzeug
 
 # utils
-ansi
 cachetools
 cgmodels>=0.11.0
 coloredlogs
