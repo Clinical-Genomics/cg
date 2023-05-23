@@ -29,15 +29,6 @@ def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
     return store
 
 
-@pytest.fixture(name="microbial_store_dummy_tag")
-def fixture_microbial_store_dummy_tag(microbial_store: Store, helpers: StoreHelpers) -> Store:
-    """Populate a microbial store with a extra dummy app tag"""
-    helpers.ensure_application(
-        store=microbial_store, tag="dummy_tag", prep_category="mic", is_archived=False
-    )
-    return microbial_store
-
-
 @pytest.fixture(name="rml_pool_store")
 def fixture_rml_pool_store(
     case_id: str,

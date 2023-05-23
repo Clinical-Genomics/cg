@@ -760,22 +760,10 @@ def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "hiseq_run")
 
 
-@pytest.fixture(name="unknown_run_parameters")
-def fixture_unknown_run_parameters(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a file with hiseq run parameters with unknown flow cell."""
-    return Path(demultiplex_fixtures, "unknown_run_parameters.xml")
-
-
 @pytest.fixture(name="run_parameters_missing_flowcell_type")
 def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
     """Return the path to a file with hiseq run parameters without flow cell."""
     return Path(demultiplex_fixtures, "runParameters_missing_flowcell_run_field.xml")
-
-
-@pytest.fixture(name="hiseq_run_parameters")
-def fixture_hiseq_run_parameters(hiseq_dir: Path) -> Path:
-    """Return the path to a file with hiseq run parameters."""
-    return Path(hiseq_dir, "runParameters.xml")
 
 
 @pytest.fixture(name="novaseq_run_parameters")
@@ -806,12 +794,6 @@ def fixture_dragen_flow_cell(dragen_flow_cell_dir: str) -> FlowCell:
 def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCell) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
     return bcl2fastq_flow_cell.id
-
-
-@pytest.fixture(name="dragen_flow_cell_id")
-def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCell) -> str:
-    """Return flow cell id from dragen flow cell object."""
-    return dragen_flow_cell.id
 
 
 @pytest.fixture(name="another_flow_cell_id")

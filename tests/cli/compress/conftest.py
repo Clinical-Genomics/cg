@@ -178,16 +178,6 @@ def fixture_base_compress_context(
     return cg_config_object
 
 
-@pytest.fixture(name="store_fastq_context")
-def fixture_store_fastq_context(
-    compress_api: CompressAPI, store: Store, cg_config_object: CGConfig
-) -> CGConfig:
-    """Return a Compress context."""
-    cg_config_object.meta_apis["compress_api"] = compress_api
-    cg_config_object.status_db_ = store
-    return cg_config_object
-
-
 @pytest.fixture(name="populated_multiple_compress_context")
 def fixture_populated_multiple_compress_context(
     compress_api: CompressAPI, populated_compress_multiple_store: Store, cg_config_object: CGConfig

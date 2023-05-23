@@ -40,31 +40,6 @@ def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
-@pytest.fixture(name="raw_lims_sample")
-def fixture_raw_lims_sample(flow_cell_name: str) -> LimsFlowcellSample:
-    """Return a raw lims sample"""
-    sample = {
-        "flowcell_id": flow_cell_name,
-        "lane": 1,
-        "sample_id": "ACC7628A20",
-        "sample_ref": "hg19",
-        "index": "ACTGGTGTCG-ACAGGACTTG",
-        "description": "",
-        "sample_name": "814206",
-        "control": "N",
-        "recipe": "R1",
-        "operator": "script",
-        "project": "814206",
-    }
-    return LimsFlowcellSample(**sample)
-
-
-@pytest.fixture(name="lims_novaseq_samples")
-def fixture_lims_novaseq_samples(lims_novaseq_samples_raw: List[dict]) -> List[LimsFlowcellSample]:
-    """Return a list of parsed flowcell samples"""
-    return [LimsFlowcellSample(**sample) for sample in lims_novaseq_samples_raw]
-
-
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
 def fixture_lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
