@@ -36,13 +36,6 @@ def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture(name="balsamic_singularity_path")
-def balsamic_singularity_path(balsamic_dir: Path) -> str:
-    balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
-    balsamic_singularity_path.touch(exist_ok=True)
-    return balsamic_singularity_path.as_posix()
-
-
 @pytest.fixture(name="balsamic_pon_1_path")
 def balsamic_pon_1_path(balsamic_dir: Path) -> str:
     balsamic_reference_path = Path(balsamic_dir, "balsamic_bed_1_case_PON_reference.cnn")
