@@ -15,6 +15,8 @@ class BclConverter(StrEnum):
 class SampleSheetV1Sections:
     """Class that groups all constants to build a sample sheet v1."""
 
+    VERSION: str = "v1"
+
     class Data(StrEnum):
         HEADER: str = "[Data]"
         FLOW_CELL_ID: str = "FCID"
@@ -52,6 +54,8 @@ class SampleSheetV1Sections:
 class SampleSheetV2Sections:
     """Class that groups all constants to build a sample sheet v2."""
 
+    VERSION: str = "v2"
+
     class Header(StrEnum):
         HEADER: str = "[Header]"
         FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
@@ -82,6 +86,15 @@ class SampleSheetV2Sections:
             "OverrideCycles",
         ]
 
+
+class SampleSheetHeaderColumnNames(StrEnum):
+    DATA: str = "[Data]"
+    FLOW_CELL_ID: str = "FCID"
+    LANE: str = "Lane"
+    SAMPLE_INTERNAL_ID: str = "Sample_ID"
+    SAMPLE_NAME: str = "SampleName"
+    SAMPLE_PROJECT: str = "Sample_Project"
+    CONTROL: str = "Control"
 
 
 UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"

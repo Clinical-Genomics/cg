@@ -4,7 +4,11 @@ from pathlib import Path
 from typing import Optional, Dict
 from xml.etree import ElementTree
 
-from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
+from cg.constants.demultiplexing import (
+    UNKNOWN_REAGENT_KIT_VERSION,
+    SampleSheetV1Sections,
+    SampleSheetV2Sections,
+)
 from cg.exc import FlowCellError
 
 LOG = logging.getLogger(__name__)
@@ -17,6 +21,7 @@ class RunParameters:
         self.path: Path = run_parameters_path
         with open(run_parameters_path, "rt") as in_file:
             self.tree: ElementTree = ElementTree.parse(in_file)
+        self.version: str
 
     @property
     def index_length(self) -> int:
@@ -31,8 +36,9 @@ class RunParameters:
         """Return true if the flow cell requires the addition of dummy samples.
 
         If the number of cycles of both indexes is 8, the flow cell does not need the addition of dummy samples.
+        If the Run Parameters file is V2, it does not need the addition of dummy samples.
         """
-        return self.index_length != 8
+        return False
 
     @staticmethod
     def node_not_found(node: Optional[ElementTree.Element], name: str) -> None:
@@ -65,17 +71,22 @@ class RunParameters:
         pass
 
     def __str__(self):
-        return f"RunParameters(path={self.path}," f"flow_cell_mode={self.flow_cell_mode})"
+        return f"RunParameters(path={self.path}," f"version={self.version})"
 
     def __repr__(self):
         return (
-            f"RunParameters(path={self.path},flow_cell_mode={self.flow_cell_mode},"
-            f"index_length={self.index_length})"
+            f"RunParameters(path={self.path},"
+            f"index_length={self.index_length},"
+            f"version={self.version})"
         )
 
 
 class RunParametersV1(RunParameters):
     """Specific class for parsing run parameters for v1 sample sheets."""
+
+    def __init__(self, run_parameters_path: Path):
+        super().__init__(run_parameters_path)
+        self.version: str = SampleSheetV1Sections.VERSION
 
     @property
     def control_software_version(self) -> str:
@@ -95,6 +106,10 @@ class RunParametersV1(RunParameters):
             LOG.info("Set reagent kit version to 'unknown'")
             return UNKNOWN_REAGENT_KIT_VERSION
         return xml_node.text
+
+    def requires_dummy_samples(self) -> bool:
+        """Return true if the number of cycles of both indexes is 8."""
+        return self.index_length != 8
 
     def get_index1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
@@ -119,6 +134,10 @@ class RunParametersV1(RunParameters):
 
 class RunParametersV2(RunParameters):
     """Specific class for parsing run parameters for v2 sample sheets."""
+
+    def __init__(self, run_parameters_path: Path):
+        super().__init__(run_parameters_path)
+        self.version: str = SampleSheetV2Sections.VERSION
 
     @property
     def planned_reads(self) -> Dict[str, int]:
