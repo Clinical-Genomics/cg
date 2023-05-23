@@ -13,9 +13,14 @@ def test_calculate_yield_in_megabases():
     assert yield_metric == 5
 
 
-def test_calculate_pass_filter_ratio():
+def test_calculate_valid_pass_filter_ratio():
     passed_filter_percent: float = pass_filter_ratio(clusters_passed=100, total_clusters=200)
     assert passed_filter_percent == 0.5
+
+
+def test_calculate_pass_filter_ratio_when_total_clusters_zero():
+    passed_filter_percent: float = pass_filter_ratio(clusters_passed=100, total_clusters=0)
+    assert passed_filter_percent == 0
 
 
 def test_average_clusters_per_lane():

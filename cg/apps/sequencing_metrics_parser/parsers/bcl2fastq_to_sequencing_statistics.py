@@ -72,23 +72,15 @@ def create_sequencing_statistics(
         SequencingStatistics: A SequencingStatistics object that encapsulates the statistics for a sample
         in a lane on the flow cell.
     """
-    yield_in_megabases: int = calculate_yield_in_megabases_from_conversion_result(
-        conversion_result=conversion_result
-    )
+    yield_in_megabases: int = calculate_yield_in_megabases(conversion_result=conversion_result)
 
-    passed_filter_percent: float = calculate_pass_filter_ratio_from_conversion_result(
-        conversion_result=conversion_result
-    )
+    passed_filter_percent: float = calculate_pass_filter_ratio(conversion_result=conversion_result)
 
-    average_quality_score: float = calculate_average_quality_score_from_demux_result(
-        demux_result=demux_result
-    )
+    average_quality_score: float = calculate_average_quality_score(demux_result=demux_result)
 
-    bases_with_q30_percent: float = calculate_q30_ratio_from_demux_result(demux_result=demux_result)
+    bases_with_q30_percent: float = calculate_q30_ratio(demux_result=demux_result)
 
-    perfect_reads_ratio: float = calculate_perfect_reads_ratio_from_demux_result(
-        demux_result=demux_result
-    )
+    perfect_reads_ratio: float = calculate_perfect_reads_ratio(demux_result=demux_result)
 
     number_of_lanes: int = len(raw_sequencing_metrics.conversion_results)
     avg_clusters_per_lane = average_clusters_per_lane(
@@ -111,7 +103,7 @@ def create_sequencing_statistics(
     )
 
 
-def calculate_perfect_reads_ratio_from_demux_result(demux_result: DemuxResult):
+def calculate_perfect_reads_ratio(demux_result: DemuxResult):
     """
     Calculate the proportion of perfect index reads for a sample in a lane from the demux result,
     which is the portion of reads with no mismatches in the index.
@@ -131,7 +123,7 @@ def calculate_perfect_reads_ratio_from_demux_result(demux_result: DemuxResult):
     return perfect_reads_ratio(perfect_reads=perfect_reads, total_reads=total_reads)
 
 
-def calculate_q30_ratio_from_demux_result(demux_result: DemuxResult) -> float:
+def calculate_q30_ratio(demux_result: DemuxResult) -> float:
     """
     Calculate the proportion of bases that have a Phred quality score of 30 or more (Q30) for a sample
     in a lane from the demux result.
@@ -149,7 +141,7 @@ def calculate_q30_ratio_from_demux_result(demux_result: DemuxResult) -> float:
     return q30_ratio(q30_yield=q30_yield, total_yield=total_yield)
 
 
-def calculate_average_quality_score_from_demux_result(demux_result: DemuxResult) -> float:
+def calculate_average_quality_score(demux_result: DemuxResult) -> float:
     """
     Calculate the mean quality score across all bases for a sample in a lane from the demux result.
 
@@ -166,9 +158,7 @@ def calculate_average_quality_score_from_demux_result(demux_result: DemuxResult)
     return average_quality_score(total_quality_score=total_quality_score, total_yield=total_yield)
 
 
-def calculate_yield_in_megabases_from_conversion_result(
-    conversion_result: ConversionResult,
-) -> int:
+def calculate_yield_in_megabases(conversion_result: ConversionResult) -> int:
     """
     Calculate the total yield in megabases for a lane from the conversion result. The yield is the total
     number of bases generated in the lane.
@@ -186,9 +176,7 @@ def calculate_yield_in_megabases_from_conversion_result(
     return yield_in_megabases(total_bases=total_lane_yield_in_bases)
 
 
-def calculate_pass_filter_ratio_from_conversion_result(
-    conversion_result: ConversionResult,
-) -> float:
+def calculate_pass_filter_ratio(conversion_result: ConversionResult) -> float:
     """
     Calculate the proportion of clusters that passed the filter in a lane from the conversion result.
     Clusters passing the filter are those determined to be good quality.

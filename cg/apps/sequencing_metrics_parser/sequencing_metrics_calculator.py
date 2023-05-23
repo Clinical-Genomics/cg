@@ -1,4 +1,4 @@
-def yield_in_megabases(total_bases: int) -> int:
+def yield_in_megabases(total_bases: int) -> float:
     """
     Calculate the yield in megabases.
     Args:
@@ -6,7 +6,7 @@ def yield_in_megabases(total_bases: int) -> int:
     Returns:
         int: The yield in megabases.
     """
-    return total_bases // 1000000
+    return total_bases / 1000000
 
 
 def pass_filter_ratio(clusters_passed: int, total_clusters: int) -> float:
@@ -18,6 +18,9 @@ def pass_filter_ratio(clusters_passed: int, total_clusters: int) -> float:
     Returns:
         float: The pass filter ratio.
     """
+    if total_clusters == 0:
+        return 0
+
     return clusters_passed / total_clusters
 
 
