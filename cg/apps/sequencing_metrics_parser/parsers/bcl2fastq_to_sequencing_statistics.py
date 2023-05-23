@@ -39,12 +39,12 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
 
     for conversion_result in raw_sequencing_metrics.conversion_results:
         for demux_result in conversion_result.demux_results:
-            statistics: SequencingStatistics = create_sequencing_statistics(
+            statistics_for_sample_in_lane: SequencingStatistics = create_sequencing_statistics(
                 conversion_result=conversion_result,
                 demux_result=demux_result,
                 raw_sequencing_metrics=raw_sequencing_metrics,
             )
-            sequencing_statistics.append(statistics)
+            sequencing_statistics.append(statistics_for_sample_in_lane)
 
     return sequencing_statistics
 
