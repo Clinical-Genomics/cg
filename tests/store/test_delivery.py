@@ -24,10 +24,10 @@ def test_list_samples_to_deliver(base_store, helpers):
     """Test to fetch samples ready for delivery"""
     store = base_store
     # GIVEN a populated store without samples
-    assert len(store.get_samples()) == 0
+    assert len(store._get_query(table=Sample).all()) == 0
     # GIVEN inserting a sample that should be delivered
     helpers.add_sample(store, sequenced_at=dt.datetime.now())
-    assert len(store.get_samples()) == 1
+    assert len(store._get_query(table=Sample).all()) == 1
 
     # WHEN asking for samples to deliver
     samples_to_deliver: List[Sample] = store.get_samples_to_deliver()
@@ -47,7 +47,7 @@ def test_list_samples_to_deliver_multiple_samples(base_store, helpers):
         sequenced_at=dt.datetime.now(),
         delivered_at=dt.datetime.now(),
     )
-    assert len(store.get_samples()) == 2
+    assert len(store._get_query(table=Sample).all()) == 2
 
     # WHEN asking for samples to deliver
     samples_to_deliver: List[Sample] = store.get_samples_to_deliver()
