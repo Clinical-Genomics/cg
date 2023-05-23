@@ -29,10 +29,10 @@ class SampleSheetCreator:
         lims_samples: List[LimsFlowcellSample],
         force: bool = False,
     ):
+        self.bcl_converter: str = bcl_converter
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
-        self.bcl_converter: str = bcl_converter
         self.force: bool = force
 
     @property
@@ -190,7 +190,6 @@ class SampleSheetCreatorV2(SampleSheetCreator):
         index2_str: str = "I" + str(self.run_parameters.get_index2_cycles()) + ";"
         for sample in self.lims_samples:
             sample_index_len: int = len(sample.index)
-            # TODO make this more appropriate to the context (use literal values)
             if sample_index_len != flow_cell_index_len:
                 index1_str = (
                     "I"

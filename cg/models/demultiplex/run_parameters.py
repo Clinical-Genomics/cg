@@ -1,4 +1,4 @@
-"""Module for modeling run parameters files parsing."""
+"""Module for modeling run parameters file parsing."""
 import logging
 from pathlib import Path
 from typing import Optional, Dict
