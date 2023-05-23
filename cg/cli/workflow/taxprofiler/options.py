@@ -13,7 +13,7 @@ OPTION_FROM_START = click.option(
 OPTION_INSTRUMENT_PLATFORM = click.option(
     "--instrument-platform",
     show_default=True,
-    default=SequencingPlatform.illumina,
-    type=click.Choice([SequencingPlatform.illumina, SequencingPlatform.oxford_nanopore]),
-    help="Instrument platform.Set this option to override the default.",
+    default=SequencingPlatform.ILLUMINA,
+    type=click.Choice([SequencingPlatform.ILLUMINA, SequencingPlatform.OXFORD_NANOPORE]),
+    help="Instrument platform. Set this option to override the default.",
 )

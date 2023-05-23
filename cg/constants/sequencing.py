@@ -65,5 +65,5 @@ class RecordType(StrEnum):
 
 
 class SequencingPlatform(StrEnum):
-    illumina: str = "ILLUMINA"
-    oxford_nanopore: str = "OXFORD_NANOPORE"
+    ILLUMINA: str = "ILLUMINA"
+    OXFORD_NANOPORE: str = "OXFORD_NANOPORE"

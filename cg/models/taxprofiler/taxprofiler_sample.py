@@ -3,7 +3,7 @@ from cg.models.nextflow.sample import NextflowSample
 
 
 class TaxprofilerSample(NextflowSample):
-    """Taxprofiler sample model
+    """Taxprofiler sample model is used when building the samplesheet.
 
     Attributes:
         instrument_platform: taxprofiler config file attributes model

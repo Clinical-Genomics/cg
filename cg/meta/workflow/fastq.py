@@ -307,7 +307,7 @@ class RnafusionFastqHandler(FastqHandler):
 
 
 class TaxprofilerFastqHandler(FastqHandler):
-    """Handles Taxprofiler fastq file linking"""
+    """Handles Taxprofiler fastq file linking."""
 
     @staticmethod
     def create_fastq_name(
