@@ -6,7 +6,7 @@ from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import (
     SampleSheetCreatorV1,
     SampleSheetCreatorV2,
 )
-from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.apps.lims.sample_sheet import LimsFlowcellSample
 from cg.constants.sequencing import Sequencers
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError

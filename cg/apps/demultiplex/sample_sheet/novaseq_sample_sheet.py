@@ -7,7 +7,7 @@ from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
-from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.apps.lims.sample_sheet import LimsFlowcellSample
 from cg.constants.demultiplexing import (
     BclConverter,
     SampleSheetV1Sections,
@@ -33,10 +33,16 @@ class SampleSheetCreator:
         self.lims_samples: List[LimsFlowcellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
         self.force: bool = force
+        self.is_v2: bool = False
 
     @property
     def valid_indexes(self) -> List[Index]:
         return index.get_valid_indexes(dual_indexes_only=True)
+
+    @property
+    def needs_reverse_complement(self) -> bool:
+        """Returns whether index2 needs to be reversed."""
+        return False
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples.
@@ -89,7 +95,7 @@ class SampleSheetCreator:
         sample: LimsFlowcellSample,
         sample_sheet_column_names: List[str],
     ) -> List[str]:
-        """Convert a lims sample object to a list with that corresponds to the sample sheet headers."""
+        """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
         LOG.debug(f"Use sample sheet header {sample_sheet_column_names}")
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_column_names]
@@ -119,13 +125,14 @@ class SampleSheetCreator:
         else:
             LOG.info("Skip adding dummy samples since run is not WGS")
         self.remove_unwanted_samples()
-        # TODO make this function receive a RunParameters object and flow cell sequencer
         index.adapt_indexes(
             samples=self.lims_samples,
-            control_software_version=self.run_parameters.control_software_version,
-            reagent_kit_version=self.run_parameters.reagent_kit_version,
             expected_index_length=self.run_parameters.index_length,
+            needs_reverse_complement=self.needs_reverse_complement,
+            # TODO I don't like this solution, think of something better
+            is_v2=self.is_v2,
         )
+        # TODO implement add_override_cycles and call function here
         sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
         if self.force:
             LOG.info("Skipping validation of sample sheet due to force flag")
@@ -152,6 +159,13 @@ class SampleSheetCreatorV1(SampleSheetCreator):
         super().__init__(flow_cell, lims_samples, force)
         self.bcl_converter: str = bcl_converter
 
+    @property
+    def needs_reverse_complement(self) -> bool:
+        """Returns whether index2 needs to be reversed."""
+        return index.is_reverse_complement(
+            self.run_parameters.control_software_version, self.run_parameters.reagent_kit_version
+        )
+
     def get_data_section_header_and_columns(self) -> List[List[str]]:
         """Return the header and column names of the data section of the sample sheet."""
         return [
@@ -171,6 +185,35 @@ class SampleSheetCreatorV2(SampleSheetCreator):
     ):
         super().__init__(flow_cell, lims_samples, force)
         self.bcl_converter: str = BclConverter.DRAGEN
+        self.is_v2: bool = True
+
+    def add_override_cycles_to_samples(self) -> None:
+        """."""
+        flow_cell_index_len: int = self.run_parameters.index_length
+        read1_str: str = "Y" + str(self.run_parameters.get_read1_cycles()) + ";"
+        read2_str: str = "Y" + str(self.run_parameters.get_read2_cycles()) + ";"
+        # TODO reduce to one variable as they are always equal
+        index1_str: str = "I" + str(self.run_parameters.get_index1_cycles()) + ";"
+        index2_str: str = "I" + str(self.run_parameters.get_index2_cycles()) + ";"
+        for sample in self.lims_samples:
+            sample_index_len: int = len(sample.index)
+            # TODO make this more appropriate to the context (use literal values)
+            if sample_index_len != flow_cell_index_len:
+                index1_str = (
+                    "I"
+                    + str(sample_index_len)
+                    + "N"
+                    + str(flow_cell_index_len - sample_index_len)
+                    + ";"
+                )
+                index2_str = (
+                    "N"
+                    + str(flow_cell_index_len - sample_index_len)
+                    + "I"
+                    + str(sample_index_len)
+                    + ";"
+                )
+            sample.override_cycles = read1_str + index1_str + index2_str + read2_str
 
     def get_data_section_header_and_columns(self) -> List[List[str]]:
         """Return the header and column names of the data section of the sample sheet."""

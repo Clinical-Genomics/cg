@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, List, Set
 
-from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.apps.lims.sample_sheet import LimsFlowcellSample
 from cg.constants.constants import FileFormat
 from cg.io.controller import ReadFile
 from cg.resources import VALID_INDEXES_PATH
@@ -106,30 +106,27 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 def adapt_indexes(
     samples: List[LimsFlowcellSample],
-    control_software_version: str,
-    reagent_kit_version: str,
-    expected_index_length: int,
+    expected_index_length: bool,
+    needs_reverse_complement: bool = False,
+    is_v2: bool = False,
 ) -> None:
-    """Adapts the indexes: pads all indexes so that all indexes have a length equal to the
+    """Adapts the indexes: if sample sheet is v1, pads all indexes so that they have a length equal to the
     number  of index reads, and takes the reverse complement of index 2 in case of the new
     novaseq software control version (1.7) in combination with the new reagent kit
-    (version 1.5)
+    (version 1.5). If sample sheet is v2, just assign the indexes.
     """
     LOG.info("Fix so that all indexes are on the correct format")
-    reverse_complement: bool = is_reverse_complement(
-        control_software_version=control_software_version,
-        reagent_kit_version_string=reagent_kit_version,
-    )
     for sample in samples:
         index1, index2 = sample.index.split("-")
         index1: str = index1.strip()
         index2: str = index2.strip()
         index_length = len(index1)
-        if expected_index_length == 10 and index_length == 8:
+        needs_padding: bool = not is_v2 and (expected_index_length == 10 and index_length == 8)
+        if needs_padding:
             LOG.debug("Padding indexes")
             index1 = pad_index_one(index_string=index1)
-            index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
-        if reverse_complement:
+            index2 = pad_index_two(index_string=index2, reverse_complement=needs_reverse_complement)
+        if needs_reverse_complement:
             index2 = get_reverse_complement_dna_seq(index2)
         sample.index = index1
         sample.index2 = index2

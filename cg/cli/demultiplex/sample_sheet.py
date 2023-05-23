@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.apps.lims.samplesheet import (
+from cg.apps.lims.sample_sheet import (
     LimsFlowcellSample,
     LimsFlowcellSampleBcl2Fastq,
     LimsFlowcellSampleDragen,

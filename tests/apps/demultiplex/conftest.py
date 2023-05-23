@@ -5,7 +5,7 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreatorV1
-from cg.apps.lims.samplesheet import (
+from cg.apps.lims.sample_sheet import (
     LimsFlowcellSample,
     LimsFlowcellSampleBcl2Fastq,
     LimsFlowcellSampleDragen,
