@@ -1,39 +1,36 @@
 from typing import List, Optional
 
-from sqlalchemy.orm import Query
-
 from cg.constants import FlowCellStatus
 from cg.store import Store
-from cg.store.models import Flowcell, Family, Sample
 from cg.store.filters.status_flow_cell_filters import (
+    filter_flow_cell_by_name_search,
+    filter_flow_cells_by_case,
     filter_flow_cells_with_statuses,
     get_flow_cell_by_name,
-    filter_flow_cells_by_case,
-    filter_flow_cell_by_name_search,
 )
+from cg.store.models import Family, Flowcell, Sample
+from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
 
 
 def test_get_flow_cells_by_case(
     base_store: Store,
     case_id: str,
-    case_obj: Family,
+    case: Family,
     bcl2fastq_flow_cell_id: str,
     helpers: StoreHelpers,
-    sample_obj: Sample,
+    sample: Sample,
 ):
     """Test that a flow cell is returned when there is a flow cell with matching flow cell case."""
 
     # GIVEN a flow cell that exist in status db
-    helpers.add_flowcell(
-        store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample_obj]
-    )
+    helpers.add_flowcell(store=base_store, flow_cell_name=bcl2fastq_flow_cell_id, samples=[sample])
 
     # GIVEN a flow cell Query
 
     # WHEN getting flow cell
     returned_flow_cell: Optional[List[Flowcell]] = filter_flow_cells_by_case(
-        flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case_obj
+        flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 
     # THEN a Flowcell type should be returned
@@ -46,9 +43,8 @@ def test_get_flow_cells_by_case(
 def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
     base_store: Store,
     case_id: str,
-    case_obj: Family,
+    case: Family,
     helpers: StoreHelpers,
-    sample_obj: Sample,
 ):
     """Test that a flow cell is not returned when there is a flow cell with no matching flow cell for case."""
 
@@ -56,7 +52,7 @@ def test_get_flow_cells_by_case_when_no_flow_cell_for_case(
 
     # WHEN getting flow cell
     returned_flow_cell: Optional[List[Flowcell]] = filter_flow_cells_by_case(
-        flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case_obj
+        flow_cells=base_store._get_join_flow_cell_sample_links_query(), case=case
     )
 
     # THEN returned flow cell should be the original flow cell

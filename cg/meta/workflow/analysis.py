@@ -67,18 +67,6 @@ class AnalysisAPI(MetaAPI):
         if not Path(self.get_case_config_path(case_id=case_id)).exists():
             raise CgError(f"No config file found for case {case_id}")
 
-    def verify_case_id_in_statusdb(self, case_id: str) -> None:
-        """Passes silently if case exists in StatusDB, raises error if case is missing"""
-
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        if not case_obj:
-            LOG.error("Case %s could not be found in StatusDB!", case_id)
-            raise CgError
-        if not case_obj.links:
-            LOG.error("Case %s has no samples in in StatusDB!", case_id)
-            raise CgError
-        LOG.info("Case %s exists in status db", case_id)
-
     def check_analysis_ongoing(self, case_id: str) -> None:
         if self.trailblazer_api.is_latest_analysis_ongoing(case_id=case_id):
             LOG.warning(f"{case_id} : analysis is still ongoing - skipping")
