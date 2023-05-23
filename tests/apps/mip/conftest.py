@@ -24,12 +24,6 @@ def create_file_data(file_path, flowcell, lane, read):
     }
 
 
-@pytest.fixture
-def cg_config():
-    """mock relevant parts of a cg-config"""
-    return {}
-
-
 class MockTB:
     """Trailblazer mock fixture"""
 

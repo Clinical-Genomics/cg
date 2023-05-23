@@ -16,19 +16,6 @@ from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
-@pytest.fixture(name="output_dirs_bcl2fastq")
-def fixture_output_dirs_bcl2fastq(demultiplexed_runs: Path) -> Path:
-    """Return the output path a dir with flow cells that have finished demultiplexing using
-    bcl2fastq."""
-    return Path(demultiplexed_runs, "bcl2fastq")
-
-
-@pytest.fixture(name="demux_run_dir_bcl2fastq")
-def fixture_demux_run_dir_bcl2fastq(flow_cell_runs_dir: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(flow_cell_runs_dir, "bcl2fastq")
-
-
 @pytest.fixture(name="demux_run_dir_dragen")
 def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
@@ -142,27 +129,6 @@ def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
             "Recipe",
             "Operator",
             "Project",
-        ],
-    ]
-
-
-@pytest.fixture(name="sample_sheet_dragen_data_header")
-def fixture_sample_sheet_dragen_data_header() -> List[List[str]]:
-    """Return the content of a Dragen sample sheet data header without samples."""
-    return [
-        [SampleSheetHeaderColumnNames.DATA],
-        [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
-            "Lane",
-            "SampleID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Sample_Project",
         ],
     ]
 
@@ -291,18 +257,6 @@ def fixture_sample_sheet_dragen_duplicate_different_lane(
         ]
     )
     return valid_sample_sheet_dragen
-
-
-@pytest.fixture(name="valid_sample_sheet_bcl2fastq_path")
-def fixture_valid_sample_sheet_bcl2fastq_path() -> Path:
-    """Return the path to a NovaSeq S2 sample sheet, used in bcl2fastq demultiplexing."""
-    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Bcl2Fastq.csv")
-
-
-@pytest.fixture(name="valid_sample_sheet_dragen_path")
-def fixture_valid_sample_sheet_dragen_path() -> Path:
-    """Return the path to a NovaSeq S2 sample sheet, used in dragen demultiplexing."""
-    return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Dragen.csv")
 
 
 @pytest.fixture(name="novaseq_sample_1")
