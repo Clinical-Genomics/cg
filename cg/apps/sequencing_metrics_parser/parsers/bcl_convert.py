@@ -126,7 +126,7 @@ class BclConvertMetricsParser:
 
     def calculate_total_reads_per_lane(self, sample_internal_id: str, lane: int) -> int:
         """Calculate the total reads for a sample in a lane."""
-        metric = self.get_metrics_for_sample_internal_id_and_lane(
+        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_internal_id_and_lane(
             metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.read_pair_count * 2
@@ -146,7 +146,7 @@ class BclConvertMetricsParser:
 
     def get_q30_bases_percent_per_lane(self, sample_internal_id, lane) -> float:
         """Return the percent of bases that are Q30 for a sample and lane."""
-        metric = self.get_metrics_for_sample_internal_id_and_lane(
+        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_internal_id_and_lane(
             metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.q30_bases_percent
@@ -155,7 +155,14 @@ class BclConvertMetricsParser:
         self, sample_internal_id, lane
     ) -> float:
         """Return the percent of perfect index reads for a sample and lane."""
-        metric = self.get_metrics_for_sample_internal_id_and_lane(
+        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_internal_id_and_lane(
             metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.perfect_index_reads_percent
+
+    def get_mean_quality_score_per_lane(self, sample_internal_id, lane) -> float:
+        """Return the mean quality score for a sample and lane."""
+        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
+            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return metric.mean_quality_score_q30

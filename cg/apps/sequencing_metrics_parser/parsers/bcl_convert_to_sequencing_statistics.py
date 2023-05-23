@@ -41,16 +41,18 @@ def get_metrics_from_bcl_convert_metrics_parser(
                         sample_internal_id=sample_internal_id, lane=lane
                     ),
                     passed_filter_percent=DRAGEN_PASSED_FILTER_PCT,
-                    raw_clusters_per_lane_percent=3,
+                    raw_clusters_per_lane_percent=0,
                     perfect_index_reads_percent=metrics_parser.get_perfect_index_reads_percent_for_sample_per_lane(
                         sample_internal_id=sample_internal_id, lane=lane
                     ),
                     bases_with_q30_percent=metrics_parser.get_q30_bases_percent_per_lane(
                         sample_internal_id=sample_internal_id, lane=lane
                     ),
-                    lanes_mean_quality_score=0,
+                    lanes_mean_quality_score=metrics_parser.get_mean_quality_score_per_lane(
+                        sample_internal_id=sample_internal_id, lane=lane
+                    ),
                     started_at=datetime.now(),
                 )
             )
 
-    return []
+    return sequencing_statistics
