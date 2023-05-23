@@ -3,17 +3,15 @@ import logging
 from pathlib import Path
 from typing import List
 
-from tests.cli.workflow.conftest import dna_case
-from tests.mocks.hk_mock import MockHousekeeperAPI
-from tests.store.conftest import fixture_sample_obj
-
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family, Sample
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
-
 from housekeeper.store.models import Version
+from tests.cli.workflow.conftest import dna_case
+from tests.mocks.hk_mock import MockHousekeeperAPI
+from tests.store.conftest import fixture_sample_obj
 
 
 def test_create_log_dir(caplog, external_data_api: ExternalDataAPI, ticket_id: str):
@@ -202,17 +200,17 @@ def test_add_transfer_to_housekeeper(
 
 def test_get_available_samples(
     external_data_api: ExternalDataAPI,
-    sample_obj: Sample,
+    sample: Sample,
     ticket_id: str,
     tmpdir_factory,
 ):
     # GIVEN one such sample exists
-    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample_obj.internal_id, numbered=False)).parent
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False)).parent
     available_samples = external_data_api.get_available_samples(
         folder=tmp_dir_path, ticket=ticket_id
     )
     # THEN the function should return a list containing the sample object
-    assert available_samples == [sample_obj]
+    assert available_samples == [sample]
 
 
 def test_curate_sample_folder(
