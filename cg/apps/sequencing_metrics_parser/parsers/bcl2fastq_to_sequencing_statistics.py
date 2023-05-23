@@ -152,13 +152,13 @@ def calculate_average_quality_score(demux_result: DemuxResult) -> float:
     Returns:
         float: The mean quality score for the sample.
     """
-    total_quality_score = sum([read.quality_score_sum for read in demux_result.read_metrics])
-    total_yield = sum([read.yield_ for read in demux_result.read_metrics])
+    total_quality_score: int = sum([read.quality_score_sum for read in demux_result.read_metrics])
+    total_yield: int = sum([read.yield_ for read in demux_result.read_metrics])
 
     return average_quality_score(total_quality_score=total_quality_score, total_yield=total_yield)
 
 
-def calculate_yield_in_megabases(conversion_result: ConversionResult) -> int:
+def calculate_yield_in_megabases(conversion_result: ConversionResult) -> float:
     """
     Calculate the total yield in megabases for a lane from the conversion result. The yield is the total
     number of bases generated in the lane.
@@ -168,7 +168,7 @@ def calculate_yield_in_megabases(conversion_result: ConversionResult) -> int:
         results for a lane.
 
     Returns:
-        int: The yield in megabases for the lane.
+        float: The yield in megabases for the lane.
     """
     lane_yields_in_bases: List[int] = [demux.yield_ for demux in conversion_result.demux_results]
     total_lane_yield_in_bases: int = sum(lane_yields_in_bases)

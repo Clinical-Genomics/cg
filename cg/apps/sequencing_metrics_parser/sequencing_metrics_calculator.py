@@ -69,4 +69,7 @@ def perfect_reads_ratio(perfect_reads: int, total_reads: int) -> float:
     Returns:
         float: The perfect reads ratio.
     """
+    if total_reads == 0:
+        return 0
+
     return (perfect_reads / total_reads) * 100
