@@ -16,12 +16,6 @@ from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
-@pytest.fixture(name="demux_run_dir_dragen")
-def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
-    """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(flow_cell_runs_dir, "dragen")
-
-
 @pytest.fixture(name="index_obj")
 def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")

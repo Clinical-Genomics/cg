@@ -212,19 +212,6 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     return malformed_deliverable
 
 
-@pytest.fixture(name="rnafusion_hermes_process")
-def fixture_rnafusion_hermes_process(
-    hermes_deliverables: dict, process: ProcessMock
-) -> ProcessMock:
-    """Return a process mock populated with some rnafusion hermes output."""
-    process.set_stdout(
-        text=WriteStream.write_stream_from_content(
-            content=hermes_deliverables, file_format=FileFormat.JSON
-        )
-    )
-    return process
-
-
 @pytest.fixture(name="rnafusion_multiqc_json_metrics")
 def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
     """Returns a the content of a mock multiqc json file."""

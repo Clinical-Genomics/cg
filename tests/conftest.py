@@ -1131,34 +1131,10 @@ def fixture_external_wgs_application_tag() -> str:
     return "WGXCUSC000"
 
 
-@pytest.fixture(name="external_wgs_info")
-def fixture_external_wgs_info(external_wgs_application_tag: str) -> dict:
-    """Return a dictionary with information external WGS application."""
-    return {
-        "application_tag": external_wgs_application_tag,
-        "application_type": "wgs",
-        "description": "External WGS",
-        "is_external": True,
-        "target_reads": 10,
-    }
-
-
 @pytest.fixture(name="external_wes_application_tag")
 def fixture_external_wes_application_tag() -> str:
     """Return the external whole exome sequencing application tag."""
     return "EXXCUSR000"
-
-
-@pytest.fixture(name="external_wes_info")
-def fixture_external_wes_info(external_wes_application_tag: str) -> dict:
-    """Return a dictionary with information external WES application."""
-    return {
-        "application_tag": external_wes_application_tag,
-        "application_type": "wes",
-        "description": "External WES",
-        "is_external": True,
-        "target_reads": 10,
-    }
 
 
 @pytest.fixture(name="wgs_application_tag")

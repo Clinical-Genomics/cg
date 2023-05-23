@@ -110,20 +110,6 @@ def fixture_upload_genotypes_hk_api(
     return real_housekeeper_api
 
 
-@pytest.fixture(name="upload_genotypes_context")
-def fixture_upload_genotypes_context(
-    upload_genotypes_hk_api: HousekeeperAPI,
-    genotype_api: GenotypeAPI,
-    analysis_store_trio: Store,
-    base_context: CGConfig,
-) -> CGConfig:
-    """Create a upload genotypes context"""
-    base_context.genotype_api_ = genotype_api
-    base_context.housekeeper_api_ = upload_genotypes_hk_api
-    base_context.status_db_ = analysis_store_trio
-    return base_context
-
-
 @pytest.fixture(name="upload_gens_hk_bundle")
 def fixture_upload_gens_hk_bundle(
     case_id: str,
@@ -207,22 +193,6 @@ def fixture_upload_report_hk_api(
     hk_version = real_housekeeper_api.last_version(analysis_obj.family.internal_id)
     real_housekeeper_api.include(hk_version)
     return real_housekeeper_api
-
-
-@pytest.fixture(name="scout_load_object")
-def fixture_scout_load_object(case_id: str, timestamp: datetime) -> ScoutLoadConfig:
-    """Create a scout load config case object"""
-    case_data = {
-        "owner": "cust000",
-        "case": case_id,
-        "human_genome_build": "37",
-        "rank_score_threshold": 5,
-        "analysis_date": timestamp,
-        "samples": [
-            {"sample_id": "sample", "sex": "male", "phenotype": "affected", "analysis_type": "wgs"}
-        ],
-    }
-    return ScoutLoadConfig(**case_data)
 
 
 @pytest.fixture(name="base_context")
