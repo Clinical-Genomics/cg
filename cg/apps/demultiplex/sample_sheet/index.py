@@ -1,6 +1,7 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Dict, List, Set, Literal
+from typing import Dict, List, Set
+from typing_extensions import Literal
 
 from cg.apps.lims.sample_sheet import LimsFlowcellSample
 from cg.constants.constants import FileFormat
