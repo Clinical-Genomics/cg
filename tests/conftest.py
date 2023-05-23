@@ -586,12 +586,6 @@ def fixture_balsamic_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "balsamic")
 
 
-@pytest.fixture(name="balsamic_fastq_dir")
-def fixture_balsamic_fastq_dir(analysis_dir: Path) -> Path:
-    """Return the path to the balsamic fastq directory."""
-    return Path(analysis_dir, "fastq")
-
-
 @pytest.fixture(name="balsamic_wgs_analysis_dir")
 def fixture_balsamic_wgs_analysis_dir(balsamic_analysis_dir: Path) -> Path:
     """Return the path to the directory with balsamic analysis files."""
@@ -1094,17 +1088,6 @@ def fixture_collaboration_id() -> str:
     return "hospital_collaboration"
 
 
-@pytest.fixture(name="customer_production")
-def fixture_customer_production(collaboration_id: str, customer_id: str) -> dict:
-    """Return a dictionary with information about the prod customer."""
-    return {
-        "customer_id": customer_id,
-        "name": "Production",
-        "scout_access": True,
-        "collaboration_id": collaboration_id,
-    }
-
-
 @pytest.fixture(name="customer_rare_diseases")
 def fixture_customer_rare_diseases(collaboration_id: str, customer_id: str) -> Customer:
     """Return a Rare Disease customer."""
@@ -1125,12 +1108,6 @@ def fixture_customer_balsamic(collaboration_id: str, customer_id: str) -> Custom
     )
 
 
-@pytest.fixture(name="external_wgs_application_tag")
-def fixture_external_wgs_application_tag() -> str:
-    """Return the external WGS application tag."""
-    return "WGXCUSC000"
-
-
 @pytest.fixture(name="external_wes_application_tag")
 def fixture_external_wes_application_tag() -> str:
     """Return the external whole exome sequencing application tag."""
@@ -1141,20 +1118,6 @@ def fixture_external_wes_application_tag() -> str:
 def fixture_wgs_application_tag() -> str:
     """Return the WGS application tag."""
     return "WGSPCFC030"
-
-
-@pytest.fixture(name="wgs_application_info")
-def fixture_wgs_application_info(wgs_application_tag: str) -> dict:
-    """Return a dictionary with information the WGS application."""
-    return {
-        "application_tag": wgs_application_tag,
-        "application_type": "wgs",
-        "description": "WGS, double",
-        "sequencing_depth": 30,
-        "is_external": True,
-        "is_accredited": True,
-        "target_reads": 10,
-    }
 
 
 @pytest.fixture(name="store")
@@ -1490,14 +1453,6 @@ def fixture_swegen_snv_reference_path(swegen_dir: Path) -> Path:
     return mock_file
 
 
-@pytest.fixture(name="swegen_sv_reference")
-def fixture_swegen_sv_reference_path(swegen_dir: Path) -> Path:
-    """Return a temporary path to a SweGen SV reference file."""
-    mock_file = Path(swegen_dir, "grch37_swegen_10k_sv_-20220101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
 @pytest.fixture(name="observations_dir")
 def fixture_observations_dir(tmpdir_factory, tmp_path) -> Path:
     """Loqusdb temporary directory containing observations mock files."""
@@ -1532,14 +1487,6 @@ def fixture_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
 def fixture_outdated_observations_somatic_snv_file_path(observations_dir: Path) -> Path:
     """Return a temporary path to an outdated cancer somatic SNV file."""
     mock_file = Path(observations_dir, "loqusdb_cancer_somatic_snv_export-20180101-.vcf.gz")
-    mock_file.touch(exist_ok=True)
-    return mock_file
-
-
-@pytest.fixture(name="observations_somatic_sv_file_path")
-def fixture_observations_somatic_sv_file_path(observations_dir: Path) -> Path:
-    """Return a temporary path to a cancer somatic SV file."""
-    mock_file = Path(observations_dir, "loqusdb_cancer_somatic_sv_export-20180101-.vcf.gz")
     mock_file.touch(exist_ok=True)
     return mock_file
 

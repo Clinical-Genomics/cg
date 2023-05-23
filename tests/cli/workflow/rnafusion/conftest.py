@@ -53,13 +53,6 @@ def rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture(name="rnafusion_reference_path")
-def rnafusion_reference_path(rnafusion_dir: Path) -> str:
-    rnafusion_reference_path = Path(rnafusion_dir, "references")
-    rnafusion_reference_path.touch(exist_ok=True)
-    return rnafusion_reference_path.as_posix()
-
-
 @pytest.fixture
 def rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
