@@ -1,32 +1,31 @@
-from datetime import datetime, timezone
 import http
-import logging
 import json
+import logging
 import tempfile
+from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from cachetools import TTLCache
 
 import requests
-from sqlalchemy.exc import IntegrityError
-from urllib3.exceptions import MaxRetryError, NewConnectionError
-
+from cachetools import TTLCache
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
 from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
-from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis, User
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.server.ext import db, lims, osticket
+from cg.store.models import Analysis, Application, Customer, Family, Flowcell, Pool, Sample, User
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
+from sqlalchemy.exc import IntegrityError
+from urllib3.exceptions import MaxRetryError, NewConnectionError
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
@@ -183,10 +182,20 @@ def submit_order(order_type):
 
 
 @BLUEPRINT.route("/cases")
-def parse_cases():
-    """Fetch cases."""
-    cases: List[Family] = db.get_cases_created_within_days(days=31)
-    return jsonify(cases=cases, total=len(cases))
+def get_cases():
+    """Return cases."""
+    status: str = request.args.get("status")
+    enquiry: str = request.args.get("enquiry")
+    action: str = request.args.get("action")
+
+    customers: List[Customer] = _get_current_customers()
+    cases: List[Family] = _get_cases(
+        status=status, enquiry=enquiry, action=action, customers=customers
+    )
+
+    count = len(cases)
+    case_dicts = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=case_dicts, total=count)
 
 
 def _get_current_customers() -> Optional[List[Customer]]:
