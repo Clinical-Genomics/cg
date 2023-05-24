@@ -180,7 +180,9 @@ class ReportAPI(MetaAPI):
             version=self.get_report_version(analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(case_model.samples, analysis_metadata),
+            accredited=self.get_report_accreditation(
+                samples=case_model.samples, _analysis_metadata=analysis_metadata
+            ),
         )
 
     def validate_report_fields(
@@ -403,11 +405,13 @@ class ReportAPI(MetaAPI):
         raise NotImplementedError
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
+        self, samples: List[SampleModel], _analysis_metadata: AnalysisModel
     ) -> bool:
         """Checks if the report is accredited or not."""
-
-        raise NotImplementedError
+        for sample in samples:
+            if not sample.application.accredited:
+                return False
+        return True
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields."""

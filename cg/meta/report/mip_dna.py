@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Iterable
+from typing import Optional, Iterable
 
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version, File
@@ -24,7 +24,6 @@ from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
 from cg.models.mip.mip_analysis import MipAnalysis
 from cg.models.report.metadata import MipDNASampleMetadataModel
 from cg.models.report.report import CaseModel
-from cg.models.report.sample import SampleModel
 from cg.models.mip.mip_metrics_deliverables import get_sample_id_metric
 from cg.store.models import Family, Sample, Application
 
@@ -101,17 +100,6 @@ class MipDNAReportAPI(ReportAPI):
         """Extracts the list of variant-calling filters used during analysis."""
 
         return []
-
-    def get_report_accreditation(
-        self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
-    ) -> bool:
-        """Checks if the report is accredited or not by evaluating each of the sample process accreditations."""
-
-        for sample in samples:
-            if not sample.application.accredited:
-                return False
-
-        return True
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for MIP DNA."""
