@@ -3,7 +3,7 @@ import csv
 import logging
 from typing import Dict, List, Set
 
-from cg.apps.lims.samplesheet import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel

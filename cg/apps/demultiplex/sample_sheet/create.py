@@ -3,7 +3,7 @@ from typing import List
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.lims.samplesheet import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.sequencing import Sequencers
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError

@@ -1,5 +1,5 @@
 """Functions that deals with dummy samples"""
-from cg.apps.lims.samplesheet import (
+from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,

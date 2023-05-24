@@ -4,7 +4,7 @@ from typing import List
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.lims.samplesheet import (
+from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
 )

@@ -2,8 +2,7 @@ from typing import List
 
 from cg.apps.demultiplex.sample_sheet import dummy_sample, index
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.lims.samplesheet import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 
 
 def test_get_valid_indexes():

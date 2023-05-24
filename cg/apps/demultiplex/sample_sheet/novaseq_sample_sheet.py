@@ -7,7 +7,7 @@ from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
-from cg.apps.lims.samplesheet import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import (
     SAMPLE_SHEET_HEADERS,
     SAMPLE_SHEET_SETTINGS_HEADER,

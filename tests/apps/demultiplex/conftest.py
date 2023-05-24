@@ -5,12 +5,11 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.lims.samplesheet import (
+from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
 )
-from cg.apps.demultiplex.sample_sheet.validate import FlowCellSample
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
