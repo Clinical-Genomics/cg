@@ -1,5 +1,4 @@
 """Module for Rnafusion Analysis API."""
-
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -30,6 +29,7 @@ from cg.models.deliverables.metric_deliverables import (
     MultiqcDataJson,
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
+from cg.models.rnafusion.analysis import RnafusionAnalysis
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.utils import Process
 
@@ -401,3 +401,19 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML, file_path=metrics_deliverables_path
         )
         MetricsDeliverablesCondition(**qcmetrics_raw)
+
+    def parse_analysis(self, qc_metrics_raw: List[MetricsBase], **kwargs) -> RnafusionAnalysis:
+        """Parse Rnafusion output analysis files."""
+        sample_metrics: Dict[str, dict] = {}
+        for metric in qc_metrics_raw:
+            metric.name.replace("5_3_bias", "bias_5_3")
+            try:
+                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
+            except KeyError:
+                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
+        return RnafusionAnalysis(sample_metrics=sample_metrics)
+
+    def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
+        """Get the latest metadata of a specific RNAfusion case."""
+        qc_metrics: List[MetricsBase] = self.get_multiqc_json_metrics(case_id)
+        return self.parse_analysis(qc_metrics_raw=qc_metrics)
