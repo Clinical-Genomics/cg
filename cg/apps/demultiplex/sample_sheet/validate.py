@@ -85,8 +85,8 @@ def validate_sample_sheet(
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
     novaseq_sample: Dict[str, Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = {
-        BclConverter.BCL2FASTQ: FlowCellSampleBcl2Fastq,
-        BclConverter.DRAGEN: FlowCellSampleDragen,
+        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
+        BclConverter.DRAGEN.value: FlowCellSampleDragen,
     }
     raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
     sample_type: Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen] = novaseq_sample[

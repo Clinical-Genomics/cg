@@ -5,6 +5,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleDragen,
 )
 from cg.constants.demultiplexing import BclConverter
+from typing import Union
 
 
 def dummy_sample_name(sample_name: str) -> str:
@@ -14,7 +15,7 @@ def dummy_sample_name(sample_name: str) -> str:
 
 def dummy_sample(
     flow_cell_id: str, dummy_index: str, lane: int, name: str, bcl_converter: str
-) -> FlowCellSample:
+) -> Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]:
     """Constructs and returns a dummy sample in novaseq sample sheet format."""
     lims_flowcell_sample = {
         BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,

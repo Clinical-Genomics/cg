@@ -15,8 +15,13 @@ from cg.apps.cgstats.db.models import (
     Unaligned,
 )
 from cg.apps.cgstats.stats import StatsAPI
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
-from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleDragen,
+    SampleSheet,
+)
+from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT, BclConverter
 from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
 
@@ -248,7 +253,7 @@ def _create_dragen_samples(
         sample_sheet=sample_sheet,
     )
 
-    sample: FlowCellSample
+    sample: FlowCellSampleDragen
     for sample in sample_sheet.samples:
         stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
@@ -284,7 +289,7 @@ def _create_bcl2fastq_samples(
         sample_sheet=sample_sheet,
     )
 
-    sample: FlowCellSample
+    sample: FlowCellSampleBcl2Fastq
     for sample in sample_sheet.samples:
         stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
@@ -320,8 +325,8 @@ def create_samples(
     sample_sheet: SampleSheet = demux_results.flow_cell.get_sample_sheet()
 
     create_samples_function = {
-        "dragen": _create_dragen_samples,
-        "bcl2fastq": _create_bcl2fastq_samples,
+        BclConverter.DRAGEN.value: _create_dragen_samples,
+        BclConverter.BCL2FASTQ.value: _create_bcl2fastq_samples,
     }
     create_samples_function[demux_results.bcl_converter](
         manager, demux_results, project_name_to_id, demux_id, sample_sheet
@@ -404,8 +409,8 @@ def get_or_create_support_parameters(
 
 def get_document_stats_path_from_demux(demux_results: DemuxResults) -> str:
     stats_path = {
-        "bcl2fastq": demux_results.conversion_stats_path,
-        "dragen": demux_results.demux_stats_path,
+        BclConverter.BCL2FASTQ.value: demux_results.conversion_stats_path,
+        BclConverter.DRAGEN.value: demux_results.demux_stats_path,
     }
     document_path: str = str(stats_path[demux_results.bcl_converter])
     return document_path
