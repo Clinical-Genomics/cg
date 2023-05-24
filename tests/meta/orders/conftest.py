@@ -113,14 +113,6 @@ def rml_status_data(rml_order_to_submit):
     return RmlSubmitter.order_to_status(order=order)
 
 
-@pytest.fixture
-def fluffy_status_data(fluffy_uploaded_json_order):
-    """Parse fluffy order example."""
-    project: OrderType = OrderType.FLUFFY
-    order: OrderIn = OrderIn.parse_obj(obj=fluffy_uploaded_json_order, project=project)
-    return FluffySubmitter.order_to_status(order=order)
-
-
 @pytest.fixture(scope="function")
 def orders_api(base_store, osticket: MockOsTicket, lims_api: MockLimsAPI):
     return OrdersAPI(lims=lims_api, status=base_store, osticket=osticket)

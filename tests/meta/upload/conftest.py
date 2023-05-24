@@ -85,16 +85,6 @@ def coverage_upload_api(
     )
 
 
-@pytest.fixture(scope="function")
-def analysis(analysis_store, case_id, timestamp):
-    """Fixture to mock an analysis."""
-    _analysis = analysis_store.add_analysis(pipeline=Pipeline.BALSAMIC, version="version")
-    _analysis.family = analysis_store.get_case_by_internal_id(internal_id=case_id)
-    _analysis.config_path = "dummy_path"
-    _analysis.completed_at = timestamp
-    yield _analysis
-
-
 @pytest.fixture(name="genotype_analysis_sex")
 def fixture_genotype_analysis_sex() -> dict:
     """Return predicted sex per sample_id."""

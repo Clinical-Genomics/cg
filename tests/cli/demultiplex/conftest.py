@@ -13,11 +13,8 @@ from cg.models.demultiplex.flow_cell import FlowCell
 from cg.utils import Process
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
 from tests.apps.demultiplex.conftest import (
-    fixture_demux_run_dir_bcl2fastq,
-    fixture_demux_run_dir_dragen,
     fixture_lims_novaseq_bcl2fastq_samples,
     fixture_lims_novaseq_dragen_samples,
-    fixture_lims_novaseq_samples,
 )
 
 LOG = logging.getLogger(__name__)
