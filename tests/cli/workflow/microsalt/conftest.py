@@ -2,10 +2,8 @@
 
 
 import pytest
-from cg.apps.hermes.hermes_api import HermesApi
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
 
