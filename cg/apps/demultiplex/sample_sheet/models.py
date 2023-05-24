@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 class NovaSeqSample(BaseModel):
     """This model is used when parsing/validating existing sample sheets."""
 
-    flow_cell: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
+    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
     lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
     sample_id: str = Field(..., alias="SampleID")
     sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
