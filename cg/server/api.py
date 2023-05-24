@@ -219,8 +219,9 @@ def get_families():
     status: str = request.args.get("status")
     enquiry: str = request.args.get("enquiry")
     action: str = request.args.get("action")
+    pipeline_str = request.args.get("pipeline")
 
-    if pipeline_str := request.args.get("pipeline"):
+    if pipeline_str:
         try:
             pipeline: Pipeline = Pipeline(pipeline_str)
         except:
