@@ -9,9 +9,9 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.apps.lims.samplesheet import (
-    LimsFlowcellSample,
-    LimsFlowcellSampleBcl2Fastq,
-    LimsFlowcellSampleDragen,
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleDragen,
     flowcell_samples,
 )
 from cg.constants.constants import FileFormat
@@ -74,7 +74,7 @@ def create_sheet(
         flow_cell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
-    lims_samples: List[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]] = list(
+    lims_samples: List[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = list(
         flowcell_samples(
             lims=context.lims_api,
             flowcell_id=flow_cell.id,
@@ -126,7 +126,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             LOG.info("Sample sheet already exists")
             continue
         LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
-        lims_samples: List[LimsFlowcellSample] = list(
+        lims_samples: List[FlowCellSample] = list(
             flowcell_samples(
                 lims=context.lims_api,
                 flowcell_id=flow_cell.id,

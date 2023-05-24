@@ -7,7 +7,7 @@ from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
-from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.apps.lims.samplesheet import FlowCellSample
 from cg.constants.demultiplexing import (
     SAMPLE_SHEET_HEADERS,
     SAMPLE_SHEET_SETTINGS_HEADER,
@@ -28,12 +28,12 @@ class SampleSheetCreator:
         self,
         bcl_converter: str,
         flow_cell: FlowCell,
-        lims_samples: List[LimsFlowcellSample],
+        lims_samples: List[FlowCellSample],
         force: bool = False,
     ):
         self.bcl_converter = bcl_converter
         self.flow_cell_id: str = flow_cell.id
-        self.lims_samples: List[LimsFlowcellSample] = lims_samples
+        self.lims_samples: List[FlowCellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
         self.force = force
 
@@ -55,7 +55,7 @@ class SampleSheetCreator:
                 if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
-                dummy_sample_obj: LimsFlowcellSample = dummy_sample(
+                dummy_sample_obj: FlowCellSample = dummy_sample(
                     flowcell=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
@@ -69,7 +69,7 @@ class SampleSheetCreator:
         """Filter out samples with indexes of unwanted length and single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
-        sample: LimsFlowcellSample
+        sample: FlowCellSample
         for sample in self.lims_samples:
             if not index.is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")
@@ -79,7 +79,7 @@ class SampleSheetCreator:
 
     @staticmethod
     def convert_sample_to_header_dict(
-        sample: LimsFlowcellSample,
+        sample: FlowCellSample,
         sample_sheet_headers: List[str],
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet

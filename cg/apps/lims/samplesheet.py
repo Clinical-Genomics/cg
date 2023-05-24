@@ -14,7 +14,7 @@ from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 LOG = logging.getLogger(__name__)
 
 
-class LimsFlowcellSample(BaseModel):
+class FlowCellSample(BaseModel):
     flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
     lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
     sample_id: str
@@ -31,12 +31,12 @@ class LimsFlowcellSample(BaseModel):
         allow_population_by_field_name = True
 
 
-class LimsFlowcellSampleBcl2Fastq(LimsFlowcellSample):
+class FlowCellSampleBcl2Fastq(FlowCellSample):
     sample_id: str = Field(..., alias="SampleID")
     project: str = Field(..., alias="Project")
 
 
-class LimsFlowcellSampleDragen(LimsFlowcellSample):
+class FlowCellSampleDragen(FlowCellSample):
     sample_id: str = Field(..., alias="Sample_ID")
     project: str = Field(..., alias="Sample_Project")
 
@@ -91,10 +91,10 @@ def get_index(lims: Lims, label: str) -> str:
 
 def flowcell_samples(
     lims: Lims, flowcell_id: str, bcl_converter: str
-) -> Iterable[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]]:
+) -> Iterable[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]]:
     lims_flowcell_sample = {
-        "bcl2fastq": LimsFlowcellSampleBcl2Fastq,
-        "dragen": LimsFlowcellSampleDragen,
+        "bcl2fastq": FlowCellSampleBcl2Fastq,
+        "dragen": FlowCellSampleDragen,
     }
     LOG.info("Fetching samples from lims for flowcell %s", flowcell_id)
     containers: List[Container] = lims.get_containers(name=flowcell_id)

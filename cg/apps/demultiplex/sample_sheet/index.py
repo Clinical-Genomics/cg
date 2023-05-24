@@ -3,7 +3,7 @@ import csv
 import logging
 from typing import Dict, List, Set
 
-from cg.apps.lims.samplesheet import LimsFlowcellSample
+from cg.apps.lims.samplesheet import FlowCellSample
 from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ def index_exists(index: str, indexes: Set[str]) -> bool:
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
-def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]]:
+def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
     """Group the indexes from samples by lane."""
     indexes_by_lane = {}
     for sample in samples:
@@ -100,7 +100,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 
 def adapt_indexes(
-    samples: List[LimsFlowcellSample],
+    samples: List[FlowCellSample],
     control_software_version: str,
     reagent_kit_version: str,
     expected_index_length: int,

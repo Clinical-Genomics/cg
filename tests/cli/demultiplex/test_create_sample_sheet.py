@@ -5,8 +5,8 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.lims.samplesheet import (
-    LimsFlowcellSampleBcl2Fastq,
-    LimsFlowcellSampleDragen,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleDragen,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
@@ -21,7 +21,7 @@ def test_create_sample_sheet_no_run_parameters(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
     caplog,
     mocker,
 ):
@@ -56,7 +56,7 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[LimsFlowcellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
@@ -92,7 +92,7 @@ def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_dragen_samples: List[LimsFlowcellSampleDragen],
+    lims_novaseq_dragen_samples: List[FlowCellSampleDragen],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
