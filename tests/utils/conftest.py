@@ -16,16 +16,6 @@ def ls_process():
 
 
 @pytest.fixture(scope="function")
-def echo_process():
-    """
-    echo process
-    """
-    binary = "echo"
-    process = Process(binary=binary)
-    return process
-
-
-@pytest.fixture(scope="function")
 def stderr_output():
     """
     std err lines
