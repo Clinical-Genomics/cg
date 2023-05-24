@@ -10,7 +10,7 @@ from cg.apps.lims.samplesheet import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
 )
-from cg.apps.demultiplex.sample_sheet.validate import NovaSeqSample
+from cg.apps.demultiplex.sample_sheet.validate import FlowCellSample
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -285,7 +285,7 @@ def fixture_valid_sample_sheet_dragen_path() -> Path:
 
 
 @pytest.fixture(name="novaseq_sample_1")
-def fixture_novaseq_sample_1() -> NovaSeqSample:
+def fixture_novaseq_sample_1() -> FlowCellSample:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
@@ -303,7 +303,7 @@ def fixture_novaseq_sample_1() -> NovaSeqSample:
 
 
 @pytest.fixture(name="novaseq_sample_2")
-def fixture_novaseq_sample_2() -> NovaSeqSample:
+def fixture_novaseq_sample_2() -> FlowCellSample:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",

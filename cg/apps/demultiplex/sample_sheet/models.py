@@ -8,7 +8,7 @@ from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 LOG = logging.getLogger(__name__)
 
 
-class NovaSeqSample(BaseModel):
+class FlowCellSample(BaseModel):
     """This model is used when parsing/validating existing sample sheets."""
 
     flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
@@ -27,23 +27,23 @@ class NovaSeqSample(BaseModel):
         allow_population_by_field_name = True
 
 
-class SampleBcl2Fastq(NovaSeqSample):
+class FlowCellSampleBcl2Fastq(FlowCellSample):
     sample_id: str = Field(..., alias="SampleID")
     project: str = Field(..., alias="Project")
 
 
-class SampleDragen(NovaSeqSample):
+class FlowCellSampleDragen(FlowCellSample):
     sample_id: str = Field(..., alias="Sample_ID")
     project: str = Field(..., alias="Sample_Project")
 
 
 class SampleSheet(BaseModel):
-    samples: List[NovaSeqSample]
+    samples: List[FlowCellSample]
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
-    samples: List[SampleBcl2Fastq]
+    samples: List[FlowCellSampleBcl2Fastq]
 
 
 class SampleSheetDragen(SampleSheet):
-    samples: List[SampleDragen]
+    samples: List[FlowCellSampleDragen]

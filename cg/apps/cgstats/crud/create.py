@@ -15,7 +15,7 @@ from cg.apps.cgstats.db.models import (
     Unaligned,
 )
 from cg.apps.cgstats.stats import StatsAPI
-from cg.apps.demultiplex.sample_sheet.models import NovaSeqSample, SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 from cg.constants.symbols import PERIOD
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
@@ -206,7 +206,7 @@ def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str
 
 
 def get_or_create_sample(
-    manager: StatsAPI, sample: NovaSeqSample, project_name_to_id: Dict[str, int]
+    manager: StatsAPI, sample: FlowCellSample, project_name_to_id: Dict[str, int]
 ) -> Sample:
     """Create a new Sample object in the cgstats database if it doesn't already exist."""
 
@@ -248,7 +248,7 @@ def _create_dragen_samples(
         sample_sheet=sample_sheet,
     )
 
-    sample: NovaSeqSample
+    sample: FlowCellSample
     for sample in sample_sheet.samples:
         stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
@@ -284,7 +284,7 @@ def _create_bcl2fastq_samples(
         sample_sheet=sample_sheet,
     )
 
-    sample: NovaSeqSample
+    sample: FlowCellSample
     for sample in sample_sheet.samples:
         stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
