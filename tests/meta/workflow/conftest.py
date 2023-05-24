@@ -209,39 +209,3 @@ def qc_microsalt_context(
     cg_context.meta_apis["analysis_api"] = analysis_api
 
     return cg_context
-
-
-@pytest.fixture(name="balsamic_sample_data")
-def fixture_balsamic_sample_data(
-    sample_id: str,
-    cust_sample_id: str,
-    another_sample_id: str,
-    fastq_file_l_1_r_1: str,
-    fastq_file_l_2_r_1: str,
-    fastq_file_l_2_r_2: str,
-    bed_file: str,
-) -> Dict[str, dict]:
-    """Balsamic sample data dictionary."""
-    return {
-        sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.TUMOR.value,
-            "concatenated_path": fastq_file_l_1_r_1,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-        cust_sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_1,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-        another_sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_2,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-    }

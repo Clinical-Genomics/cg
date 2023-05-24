@@ -53,9 +53,9 @@ class MipRNAAnalysisAPI(MipAnalysisAPI):
     ) -> Dict[str, Union[str, int]]:
         sample_data: Dict[str, Union[str, int]] = self.get_sample_data(link_obj)
         if link_obj.mother:
-            sample_data[Pedigree.MOTHER]: str = link_obj.mother.internal_id
+            sample_data[Pedigree.MOTHER.value]: str = link_obj.mother.internal_id
         if link_obj.father:
-            sample_data[Pedigree.FATHER]: str = link_obj.father.internal_id
+            sample_data[Pedigree.FATHER.value]: str = link_obj.father.internal_id
         return sample_data
 
     def panel(self, case_id: str, genome_build: str = GENOME_BUILD_38) -> List[str]:

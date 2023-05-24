@@ -6,16 +6,14 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
-from cg.io.controller import WriteFile, WriteStream
+from cg.io.controller import WriteFile
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from tests.mocks.limsmock import MockLimsAPI
-from tests.mocks.process_mock import ProcessMock
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
@@ -36,20 +34,6 @@ def fixture_balsamic_case_id() -> str:
 def balsamic_housekeeper_dir(tmpdir_factory, balsamic_dir: Path) -> Path:
     """Return the path to the balsamic housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
-
-
-@pytest.fixture(name="balsamic_singularity_path")
-def balsamic_singularity_path(balsamic_dir: Path) -> str:
-    balsamic_singularity_path = Path(balsamic_dir, "singularity.sif")
-    balsamic_singularity_path.touch(exist_ok=True)
-    return balsamic_singularity_path.as_posix()
-
-
-@pytest.fixture(name="balsamic_reference_path")
-def balsamic_reference_path(balsamic_dir: Path) -> str:
-    balsamic_reference_path = Path(balsamic_dir, "reference.json")
-    balsamic_reference_path.touch(exist_ok=True)
-    return balsamic_reference_path.as_posix()
 
 
 @pytest.fixture(name="balsamic_pon_1_path")
@@ -310,7 +294,6 @@ def fixture_balsamic_context(
     balsamic_lims: MockLimsAPI,
     balsamic_housekeeper: HousekeeperAPI,
     trailblazer_api: MockTB,
-    hermes_api: HermesApi,
     cg_dir,
 ) -> CGConfig:
     """context to use in cli"""
@@ -869,17 +852,6 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable.pop("pipeline")
 
     return malformed_deliverable
-
-
-@pytest.fixture(name="balsamic_hermes_process")
-def fixture_balsamic_hermes_process(hermes_deliverables: dict, process: ProcessMock) -> ProcessMock:
-    """Return a process mock populated with some balsamic hermes output"""
-    process.set_stdout(
-        text=WriteStream.write_stream_from_content(
-            content=hermes_deliverables, file_format=FileFormat.JSON
-        )
-    )
-    return process
 
 
 @pytest.fixture

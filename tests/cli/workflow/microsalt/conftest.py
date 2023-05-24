@@ -89,12 +89,6 @@ def fixture_microbial_sample_id():
     return "microbial_sample_id"
 
 
-@pytest.fixture(name="microbial_sample_name")
-def fixture_microbial_sample_name():
-    """Define a name for a microbial sample"""
-    return "microbial_sample_name"
-
-
 @pytest.fixture(scope="function")
 def invalid_ticket_number() -> str:
     return "1234560000"
