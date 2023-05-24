@@ -4,7 +4,6 @@ import datetime as dt
 from requests.exceptions import HTTPError
 
 
-
 def test_get_received_date(lims_api, mocker):
     """Test to get the received date"""
     # GIVEN a lims api and a mocked sample that returns a received at date
