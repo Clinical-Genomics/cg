@@ -1,4 +1,4 @@
-"""Functions to get sample sheet information from Lims"""
+"""Functions to get sample sheet information from Lims."""
 import logging
 import re
 from typing import Iterable, List, Optional, Union
@@ -13,12 +13,12 @@ LOG = logging.getLogger(__name__)
 
 
 def get_placement_lane(lane: str) -> int:
-    """Parse out the lane information from an artifact.placement"""
+    """Parse out the lane information from an artifact.placement."""
     return int(lane.split(":")[0])
 
 
 def get_non_pooled_artifacts(artifact: Artifact) -> List[Artifact]:
-    """Find the parent artifact of the sample. Should hold the reagent_label"""
+    """Find the parent artifact of the sample. Should hold the reagent_label."""
     artifacts = []
 
     if len(artifact.samples) == 1:
@@ -32,7 +32,7 @@ def get_non_pooled_artifacts(artifact: Artifact) -> List[Artifact]:
 
 
 def get_reagent_label(artifact) -> Optional[str]:
-    """Get the first and only reagent label from an artifact"""
+    """Get the first and only reagent label from an artifact."""
     labels: List[str] = artifact.reagent_labels
     if len(labels) > 1:
         raise ValueError("Expecting at most one reagent label. Got ({}).".format(len(labels)))
@@ -40,7 +40,7 @@ def get_reagent_label(artifact) -> Optional[str]:
 
 
 def get_index(lims: Lims, label: str) -> str:
-    """Parse out the sequence from a reagent label"""
+    """Parse out the sequence from a reagent label."""
 
     reagent_types = lims.get_reagent_types(name=label)
 
@@ -67,7 +67,7 @@ def flowcell_samples(
         BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
         BclConverter.DRAGEN.value: FlowCellSampleDragen,
     }
-    LOG.info("Fetching samples from lims for flowcell %s", flowcell_id)
+    LOG.info(f"Fetching samples from lims for flowcell {flowcell_id}")
     containers: List[Container] = lims.get_containers(name=flowcell_id)
     if not containers:
         return []
