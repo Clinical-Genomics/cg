@@ -592,10 +592,6 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_samples(self) -> List[Sample]:
-        """Return all samples."""
-        return self._get_query(table=Sample).order_by(Sample.created_at.desc()).all()
-
     def get_samples_by_name_pattern(self, name_pattern: str) -> List[Sample]:
         """Return all samples with a name fitting the pattern."""
         return apply_sample_filter(

@@ -63,7 +63,7 @@ def test_transfer_samples_all(transfer_lims_api: TransferLims, timestamp_now: dt
 
 def test_transfer_samples_include_unset_received_at(transfer_lims_api: TransferLims):
     sample_store = transfer_lims_api.status
-    samples = sample_store.get_samples()
+    samples = sample_store._get_query(table=Sample).all()
     assert len(samples) >= 2
 
     # GIVEN sample with unset received_at

@@ -75,7 +75,7 @@ def fixture_upload_genotypes_api(
     return _api
 
 
-@pytest.yield_fixture(scope="function")
+@pytest.fixture(scope="function")
 def coverage_upload_api(
     chanjo_config: Dict[str, Dict[str, str]], populated_housekeeper_api: MockHousekeeperAPI
 ):
