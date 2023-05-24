@@ -49,20 +49,19 @@ def fixture_raw_lims_sample(flow_cell_name: str) -> LimsFlowcellSample:
         "sample_id": "ACC7628A20",
         "sample_ref": "hg19",
         "index": "ACTGGTGTCG-ACAGGACTTG",
-        "description": "",
         "sample_name": "814206",
         "control": "N",
         "recipe": "R1",
         "operator": "script",
         "project": "814206",
     }
-    return LimsFlowcellSample(**sample)
+    return LimsFlowcellSampleBcl2Fastq(**sample)
 
 
 @pytest.fixture(name="lims_novaseq_samples")
 def fixture_lims_novaseq_samples(lims_novaseq_samples_raw: List[dict]) -> List[LimsFlowcellSample]:
     """Return a list of parsed flowcell samples"""
-    return [LimsFlowcellSample(**sample) for sample in lims_novaseq_samples_raw]
+    return [LimsFlowcellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
@@ -333,7 +332,7 @@ def fixture_valid_sample_sheet_dragen_path() -> Path:
 @pytest.fixture(name="novaseq_sample_1")
 def fixture_novaseq_sample_1() -> NovaSeqSample:
     """Return a NovaSeq sample."""
-    return NovaSeqSample(
+    return LimsFlowcellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=1,
         SampleID="ACC7628A68",
@@ -351,7 +350,7 @@ def fixture_novaseq_sample_1() -> NovaSeqSample:
 @pytest.fixture(name="novaseq_sample_2")
 def fixture_novaseq_sample_2() -> NovaSeqSample:
     """Return a NovaSeq sample."""
-    return NovaSeqSample(
+    return LimsFlowcellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=2,
         SampleID="ACC7628A1",

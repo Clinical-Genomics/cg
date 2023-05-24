@@ -13,7 +13,7 @@ class NovaSeqSample(BaseModel):
 
     flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
     lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
-    sample_id: str = Field(..., alias="SampleID")
+    sample_id: str
     sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
     index: str = Field(..., alias="index")
     index2: str = ""

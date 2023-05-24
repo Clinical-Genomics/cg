@@ -19,7 +19,7 @@ class LimsFlowcellSample(BaseModel):
     lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
     sample_id: str
     sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
-    index: str
+    index: str = Field(..., alias="index")
     index2: str = ""
     sample_name: str = Field(..., alias="SampleName")
     control: str = Field("N", alias="Control")
