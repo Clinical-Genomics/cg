@@ -35,7 +35,7 @@ def get_reagent_label(artifact) -> Optional[str]:
     """Get the first and only reagent label from an artifact."""
     labels: List[str] = artifact.reagent_labels
     if len(labels) > 1:
-        raise ValueError("Expecting at most one reagent label. Got ({}).".format(len(labels)))
+        raise ValueError(f"Expecting at most one reagent label. Got ({len(labels)}).")
     return labels[0] if labels else None
 
 
@@ -45,7 +45,7 @@ def get_index(lims: Lims, label: str) -> str:
     reagent_types = lims.get_reagent_types(name=label)
 
     if len(reagent_types) > 1:
-        raise ValueError("Expecting at most one reagent type. Got ({}).".format(len(reagent_types)))
+        raise ValueError(f"Expecting at most one reagent type. Got ({len(reagent_types)}).")
 
     try:
         reagent_type = reagent_types.pop()
