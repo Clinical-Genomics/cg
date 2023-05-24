@@ -790,6 +790,12 @@ def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCell) -> str:
     return bcl2fastq_flow_cell.id
 
 
+@pytest.fixture(name="dragen_flow_cell_id")
+def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCell) -> str:
+    """Return flow cell id from dragen flow cell object."""
+    return dragen_flow_cell.id
+
+
 @pytest.fixture(name="another_flow_cell_id")
 def fixture_another_flow_cell_id() -> str:
     """Return another flow cell id."""
