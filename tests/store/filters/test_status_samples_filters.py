@@ -82,7 +82,6 @@ def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id,
 
 def test_filter_samples_is_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a delivered sample."""
 
@@ -110,7 +109,6 @@ def test_filter_samples_is_delivered(
 
 def test_filter_samples_is_not_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not delivered."""
 
@@ -138,7 +136,6 @@ def test_filter_samples_is_not_delivered(
 
 def test_filter_get_samples_by_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
     invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that has an invoice id."""
@@ -168,7 +165,6 @@ def test_filter_get_samples_by_invoice_id(
 
 def test_filter_samples_without_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that has no invoice id."""
 
@@ -196,7 +192,6 @@ def test_filter_samples_without_invoice_id(
 
 def test_filter_samples_down_sampled(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not down sampled."""
 
@@ -224,7 +219,6 @@ def test_filter_samples_down_sampled(
 
 def test_filter_samples_not_down_sampled(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not down sampled."""
 
@@ -252,7 +246,6 @@ def test_filter_samples_not_down_sampled(
 
 def test_filter_samples_is_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
@@ -280,7 +273,6 @@ def test_filter_samples_is_sequenced(
 
 def test_filter_samples_is_not_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
@@ -308,7 +300,6 @@ def test_filter_samples_is_not_sequenced(
 
 def test_filter_samples_do_invoice(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
@@ -336,7 +327,6 @@ def test_filter_samples_do_invoice(
 
 def test_filter_samples_do_not_invoice(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
@@ -364,7 +354,6 @@ def test_filter_samples_do_not_invoice(
 
 def test_filter_samples_is_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is received."""
 
@@ -392,7 +381,6 @@ def test_filter_samples_is_received(
 
 def test_filter_samples_is_not_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not received."""
 
@@ -417,7 +405,6 @@ def test_filter_samples_is_not_received(
 
 def test_filter_samples_is_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is prepared."""
 
@@ -444,7 +431,6 @@ def test_filter_samples_is_prepared(
 
 def test_filter_samples_is_not_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not prepared."""
 
