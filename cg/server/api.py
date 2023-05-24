@@ -225,6 +225,7 @@ def get_families():
         try:
             pipeline: Pipeline = Pipeline(pipeline_str)
         except ValueError:
+            LOG.error("Invalid Pipeline specified.")
             raise
     else:
         pipeline = Pipeline.MIP_DNA
