@@ -4,26 +4,24 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
 )
+from cg.constants.demultiplexing import BclConverter
 
 
 def dummy_sample_name(sample_name: str) -> str:
-    """Convert a string to a dummy sample name
-
-    Replace space and parentheses with dashes
-    """
+    """Convert a string to a dummy sample name replacing spaces and parentheses with dashes."""
     return sample_name.replace(" ", "-").replace("(", "-").replace(")", "-")
 
 
 def dummy_sample(
-    flowcell: str, dummy_index: str, lane: int, name: str, bcl_converter: str
+    flow_cell_id: str, dummy_index: str, lane: int, name: str, bcl_converter: str
 ) -> FlowCellSample:
-    """Constructs and returns a dummy sample in novaseq sample sheet format"""
+    """Constructs and returns a dummy sample in novaseq sample sheet format."""
     lims_flowcell_sample = {
-        "bcl2fastq": FlowCellSampleBcl2Fastq,
-        "dragen": FlowCellSampleDragen,
+        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
+        BclConverter.DRAGEN.value: FlowCellSampleDragen,
     }
     return lims_flowcell_sample[bcl_converter](
-        flowcell_id=flowcell,
+        flowcell_id=flow_cell_id,
         lane=lane,
         sample_id=dummy_sample_name(sample_name=name),
         index=dummy_index,

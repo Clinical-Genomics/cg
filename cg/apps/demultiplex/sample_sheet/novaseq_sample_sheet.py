@@ -56,7 +56,7 @@ class SampleSheetCreator:
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
                 dummy_sample_obj: FlowCellSample = dummy_sample(
-                    flowcell=self.flow_cell_id,
+                    flow_cell_id=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,

@@ -5,11 +5,7 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
-)
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -284,7 +280,7 @@ def fixture_valid_sample_sheet_dragen_path() -> Path:
 
 
 @pytest.fixture(name="novaseq_sample_1")
-def fixture_novaseq_sample_1() -> FlowCellSample:
+def fixture_novaseq_sample_1() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
@@ -302,7 +298,7 @@ def fixture_novaseq_sample_1() -> FlowCellSample:
 
 
 @pytest.fixture(name="novaseq_sample_2")
-def fixture_novaseq_sample_2() -> FlowCellSample:
+def fixture_novaseq_sample_2() -> FlowCellSampleBcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleBcl2Fastq(
         FCID="HWHMWDMXX",
