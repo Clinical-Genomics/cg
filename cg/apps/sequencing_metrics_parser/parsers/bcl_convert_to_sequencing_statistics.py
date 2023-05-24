@@ -8,7 +8,7 @@ from datetime import datetime
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 
 
-def get_metrics_from_bcl_convert_metrics_parser(
+def create_sequencing_statistics_from_bcl_convert_metrics(
     adapter_metrics_file_path: Path,
     quality_metrics_file_path: Path,
     demux_metrics_file_path: Path,

@@ -14,6 +14,8 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertAdapterMetricsColumnNames,
 )
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.store.models import SequencingStatistics
+from datetime import datetime
 
 
 @pytest.fixture(name="bcl_convert_demux_metric_file_path")
@@ -192,4 +194,30 @@ def fixture_parsed_bcl_convert_metrics(
         bcl_convert_sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
         bcl_convert_adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
         bcl_convert_run_info_file_path=bcl_convert_run_info_file_path,
+    )
+
+
+@pytest.fixture(name="parsed_sequencing_statistics_from_bcl_convert")
+def fixture_parsed_sequencing_statistics_from_bcl_convert(
+    test_sample_internal_id: str,
+    test_lane: int,
+    bcl_convert_test_flow_cell_name: str,
+    bcl_convert_yield_for_test_sample: int,
+    bcl_convert_reads_for_test_sample: int,
+    bcl_convert_test_perfect_index_reads_percent: float,
+    bcl_convert_test_mean_quality_score_per_lane: float,
+    bcl_convert_test_q30_bases_percent_per_lane: float,
+) -> SequencingStatistics:
+    return SequencingStatistics(
+        sample_internal_id=test_sample_internal_id,
+        lane=test_lane,
+        flow_cell_name=bcl_convert_test_flow_cell_name,
+        yield_in_megabases=int(bcl_convert_yield_for_test_sample / 1000000),
+        read_counts=bcl_convert_reads_for_test_sample * 2,
+        perfect_index_reads_percent=bcl_convert_test_perfect_index_reads_percent,
+        lanes_mean_quality_score=bcl_convert_test_mean_quality_score_per_lane,
+        bases_with_q30_percent=bcl_convert_test_q30_bases_percent_per_lane,
+        passed_filter_percent=100.0,
+        raw_clusters_per_lane_percent=0,
+        started_at=datetime.now(),
     )
