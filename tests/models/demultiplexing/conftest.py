@@ -7,11 +7,6 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 
 
-@pytest.fixture(name="flow_cell_name")
-def fixture_flow_cell_name(bcl2fastq_flow_cell_full_name: str) -> str:
-    return bcl2fastq_flow_cell_full_name.split("_")[-1][1:]
-
-
 @pytest.fixture(name="demultiplexed_dragen_flow_cell")
 def fixture_demultiplexed_dragen_flow_cell(
     demultiplexed_runs: Path, dragen_flow_cell_full_name: str

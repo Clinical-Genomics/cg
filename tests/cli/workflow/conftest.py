@@ -23,18 +23,6 @@ def fixture_workflow_case_id() -> str:
     return "dna_case"
 
 
-@pytest.fixture(name="dna_sample_id")
-def fixture_dna_sample_id() -> str:
-    """Return a special sample id"""
-    return "dna_sample"
-
-
-@pytest.fixture(name="rna_sample_id")
-def fixture_rna_sample_id() -> str:
-    """Return a special sample id"""
-    return "rna_sample"
-
-
 @pytest.fixture(scope="function", name="analysis_store")
 def fixture_analysis_store(
     base_store: Store, workflow_case_id: str, helpers: StoreHelpers
