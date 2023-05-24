@@ -100,7 +100,6 @@ class BclConvertMetricsParser:
         for sample_demux_metric in self.demux_metrics:
             if sample_demux_metric.sample_project not in ["indexcheck", "Undetermined"]:
                 sample_internal_ids.append(sample_demux_metric.sample_internal_id)
-            sample_internal_ids.append(sample_demux_metric.sample_internal_id)
         return sample_internal_ids
 
     def get_lanes_for_sample_internal_id(self, sample_internal_id: str) -> List[int]:
@@ -121,7 +120,7 @@ class BclConvertMetricsParser:
     ) -> Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]:
         """Return the metrics for a sample by sample internal id."""
         for metric in metrics_list:
-            if metric.sample_internal_id == sample_internal_id and lane in metric.lane:
+            if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
                 return metric
 
     def calculate_total_reads_per_lane(self, sample_internal_id: str, lane: int) -> int:
@@ -146,8 +145,8 @@ class BclConvertMetricsParser:
 
     def get_q30_bases_percent_per_lane(self, sample_internal_id, lane) -> float:
         """Return the percent of bases that are Q30 for a sample and lane."""
-        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_internal_id_and_lane(
-            metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
+        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
+            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.q30_bases_percent
 

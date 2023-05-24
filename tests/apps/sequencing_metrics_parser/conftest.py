@@ -72,6 +72,36 @@ def fixture_test_lane() -> int:
     return 1
 
 
+@pytest.fixture(name="bcl_convert_reads_for_test_sample")
+def fixture_bcl_convert_reads_for_test_sample() -> int:
+    return 15962796
+
+
+@pytest.fixture(name="bcl_convert_yield_for_test_sample")
+def fixture_bcl_convert_yield_for_test_sample() -> int:
+    return 415032696
+
+
+@pytest.fixture(name="bcl_convert_test_q30_bases_percent")
+def fixture_bcl_convert_test_q30_bases_percent() -> float:
+    return 0.95
+
+
+@pytest.fixture(name="bcl_convert_test_perfect_index_reads_percent")
+def fixture_bcl_convert_test_perfect_index_reads_percent() -> float:
+    return 1.00
+
+
+@pytest.fixture(name="bcl_convert_test_mean_quality_score_per_lane")
+def fixture_bcl_convert_test_mean_quality_score() -> float:
+    return 36.15
+
+
+@pytest.fixture(name="bcl_convert_test_flow_cell_name")
+def fixture_bcl_convert_test_flow_cell_name() -> str:
+    return "HY7FFDRX2"
+
+
 @pytest.fixture(name="bcl_convert_demux_metric_model_with_data")
 def fixture_bcl_convert_demux_metric_model_with_data(
     test_lane,
