@@ -3,42 +3,12 @@ import logging
 import re
 from typing import Iterable, List, Optional, Union
 
-from pydantic import BaseModel, Field
-
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
 
 LOG = logging.getLogger(__name__)
-
-
-class FlowCellSample(BaseModel):
-    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
-    sample_id: str
-    sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
-    index: str = Field(..., alias="index")
-    index2: str = ""
-    sample_name: str = Field(..., alias="SampleName")
-    control: str = Field("N", alias="Control")
-    recipe: str = Field("R1", alias="Recipe")
-    operator: str = Field("script", alias="Operator")
-    project: str
-
-    class Config:
-        allow_population_by_field_name = True
-
-
-class FlowCellSampleBcl2Fastq(FlowCellSample):
-    sample_id: str = Field(..., alias="SampleID")
-    project: str = Field(..., alias="Project")
-
-
-class FlowCellSampleDragen(FlowCellSample):
-    sample_id: str = Field(..., alias="Sample_ID")
-    project: str = Field(..., alias="Sample_Project")
 
 
 def get_placement_lane(lane: str) -> int:
