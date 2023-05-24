@@ -143,7 +143,7 @@ class BclConvertMetricsParser:
         """Return the flow cell name of the demultiplexed flow cell."""
         return self.sample_sheet[0].flow_cell_name
 
-    def get_q30_bases_percent_per_lane(self, sample_internal_id, lane) -> float:
+    def get_q30_bases_percent_per_lane(self, sample_internal_id: str, lane: intgit) -> float:
         """Return the percent of bases that are Q30 for a sample and lane."""
         metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
             metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
@@ -151,7 +151,7 @@ class BclConvertMetricsParser:
         return metric.q30_bases_percent
 
     def get_perfect_index_reads_percent_for_sample_per_lane(
-        self, sample_internal_id, lane
+        self, sample_internal_id: str, lane: int
     ) -> float:
         """Return the percent of perfect index reads for a sample and lane."""
         metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_internal_id_and_lane(
@@ -159,7 +159,7 @@ class BclConvertMetricsParser:
         )
         return metric.perfect_index_reads_percent
 
-    def get_mean_quality_score_per_lane(self, sample_internal_id, lane) -> float:
+    def get_mean_quality_score_per_lane(self, sample_internal_id: str, lane: int) -> float:
         """Return the mean quality score for a sample and lane."""
         metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
             metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
