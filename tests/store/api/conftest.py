@@ -29,61 +29,6 @@ def fixture_microbial_store(store: Store, helpers: StoreHelpers) -> Store:
     return store
 
 
-@pytest.fixture(name="microbial_store_dummy_tag")
-def fixture_microbial_store_dummy_tag(microbial_store: Store, helpers: StoreHelpers) -> Store:
-    """Populate a microbial store with a extra dummy app tag"""
-    helpers.ensure_application(
-        store=microbial_store, tag="dummy_tag", prep_category="mic", is_archived=False
-    )
-    return microbial_store
-
-
-@pytest.fixture(name="rml_store")
-def fixture_rml_store(store: Store, helpers: StoreHelpers) -> Store:
-    """Populate a store with microbial application tags"""
-    active_apptags = [
-        "RMLP10R300",
-        "RMLP10S130",
-        "RMLP15R100",
-        "RMLP15R200",
-        "RMLP15R400",
-        "RMLP15R500",
-        "RMLP15R750",
-        "RMLP15R825",
-        "RMLP15S100",
-        "RMLP15S125",
-        "RMLP15S150",
-        "RMLP15S175",
-        "RMLP15S200",
-        "RMLP15S225",
-        "RMLP15S425",
-    ]
-    inactive_apptags = [
-        "RMLP05R800",
-        "RMLP15S250",
-        "RMLP15S275",
-        "RMLP15S300",
-        "RMLP15S325",
-        "RMLP15S350",
-        "RMLP15S375",
-        "RMLP15S400",
-        "RMLP15S450",
-        "RMLP15S475",
-        "RMLP15S500",
-        "RMLS05R200",
-        "RMLCUSR800",
-        "RMLCUSS160",
-    ]
-
-    for app_tag in active_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="rml", is_archived=False)
-
-    for app_tag in inactive_apptags:
-        helpers.ensure_application(store=store, tag=app_tag, prep_category="rml", is_archived=True)
-
-    return store
-
-
 @pytest.fixture(name="rml_pool_store")
 def fixture_rml_pool_store(
     case_id: str,

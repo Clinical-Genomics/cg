@@ -33,11 +33,6 @@ def fixture_mip_analysis_config_dna_raw() -> dict:
     }
 
 
-@pytest.fixture(name="mip_analysis_config_dna")
-def fixture_mip_analysis_config_dna(mip_analysis_config_dna_raw: dict) -> MipBaseConfig:
-    return MipBaseConfig(**mip_analysis_config_dna_raw)
-
-
 @pytest.fixture(name="mip_rank_model_version")
 def fixture_mip_rank_model_version() -> str:
     """Return mip rank model version"""
@@ -71,11 +66,6 @@ def fixture_sample_info_dna_raw(
             },
         },
     }
-
-
-@pytest.fixture(name="sample_info_dna")
-def fixture_sample_info_dna(sample_info_dna_raw: dict) -> MipBaseSampleInfo:
-    return MipBaseSampleInfo(**sample_info_dna_raw)
 
 
 @pytest.fixture(name="mip_metrics_deliverables_raw")
