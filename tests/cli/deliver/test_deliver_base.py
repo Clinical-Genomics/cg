@@ -75,6 +75,31 @@ def test_run_deliver_delivered_ticket(
     assert "Files already delivered to customer inbox on the HPC" in caplog.text
 
 
+def test_deliver_ticket_with_force_all_flag(
+    cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket_id
+):
+    """Test that when the --force-all flag is used,
+    the files are delivered to the customer inbox on the HPC"""
+    caplog.set_level(logging.INFO)
+
+    # GIVEN a cli runner
+
+    # GIVEN uploading data to the delivery server is not needed
+    mocker.patch.object(DeliverTicketAPI, "check_if_upload_is_needed")
+    DeliverTicketAPI.check_if_upload_is_needed.return_value = False
+
+    # WHEN running cg deliver ticket with --force-all flag
+    result = cli_runner.invoke(
+        deliver_cmd,
+        ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq", "--force-all"],
+        obj=cg_context,
+    )
+
+    # THEN assert that the text is not present in the log
+    assert "Files already delivered to customer inbox on the HPC" not in caplog.text
+    assert "Delivering files to customer inbox on the HPC" in caplog.text
+
+
 def test_run_deliver_ticket(cli_runner: CliRunner, cg_context: CGConfig, mocker, caplog, ticket_id):
     """Test for delivering tu customer inbox"""
     caplog.set_level(logging.INFO)
