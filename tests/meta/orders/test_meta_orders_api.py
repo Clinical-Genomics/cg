@@ -16,8 +16,6 @@ from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
 from cg.store.models import Pool, Sample
 
-PROCESS_LIMS_FUNCTION_OLD = "cg.meta.orders.api.process_lims"
-PROCESS_LIMS_FUNCTION = "cg.meta.orders.lims.process_lims"
 SUBMITTERS = [
     "fastq_submitter",
     "metagenome_submitter",
@@ -103,8 +101,6 @@ def monkeypatch_process_lims(monkeypatch, order_data):
 )
 def test_submit_ticketexception(
     all_orders_to_submit,
-    base_store: Store,
-    monkeypatch,
     orders_api: OrdersAPI,
     order_type: OrderType,
     user_mail: str,
@@ -138,7 +134,6 @@ def test_submit_illegal_sample_customer(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -284,7 +279,6 @@ def test_submit_fluffy_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -312,7 +306,6 @@ def test_submit_unique_sample_case_name(
     mail_patch,
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,
-    ticket_id: str,
     user_name: str,
     user_mail: str,
     monkeypatch,
@@ -488,7 +481,6 @@ def test_submit_unique_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -517,7 +509,6 @@ def test_sarscov2_submit_duplicate_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    sample_store: Store,
     user_mail: str,
     user_name: str,
 ):
