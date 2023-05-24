@@ -224,8 +224,8 @@ def get_families():
     if pipeline_str:
         try:
             pipeline: Pipeline = Pipeline(pipeline_str)
-        except:
-            raise ValueError
+        except ValueError as e:
+            raise e
     else:
         pipeline = Pipeline.MIP_DNA
 
