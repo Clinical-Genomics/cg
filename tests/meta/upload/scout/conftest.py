@@ -72,24 +72,6 @@ def fixture_dna_sample_son_id() -> str:
     return "dna_son"
 
 
-@pytest.fixture(name="dna_sample_daughter_id")
-def fixture_dna_sample_daughter_id() -> str:
-    """Return a daughter DNA sample id."""
-    return "dna_daughter"
-
-
-@pytest.fixture(name="dna_sample_mother_id")
-def fixture_dna_sample_mother_id() -> str:
-    """Return a mother DNA sample id."""
-    return "dna_mother"
-
-
-@pytest.fixture(name="dna_sample_father_id")
-def fixture_dna_sample_father_id() -> str:
-    """Return a father DNA sample id."""
-    return "dna_father"
-
-
 @pytest.fixture(name="another_sample_id")
 def fixture_another_sample_id() -> str:
     """Return another sample id."""
@@ -511,12 +493,6 @@ def fixture_rnafusion_analysis_hk_api(
     """Return a housekeeper api populated with some rnafusion analysis files"""
     helpers.ensure_hk_version(housekeeper_api, rnafusion_analysis_hk_bundle_data)
     return housekeeper_api
-
-
-@pytest.fixture(name="mip_file_handler")
-def fixture_mip_file_handler(mip_dna_analysis_hk_version: Version) -> MipConfigBuilder:
-    """Return a MIP confiig builder."""
-    return MipConfigBuilder(hk_version_obj=mip_dna_analysis_hk_version)
 
 
 @pytest.fixture(name="mip_dna_analysis")

@@ -29,14 +29,3 @@ def lims_api():
     """Returns a Lims api mock"""
     _lims_api = MockLims()
     return _lims_api
-
-
-@pytest.fixture
-def skeleton_orderform_sample():
-    """Get the skeleton for a orderform"""
-    return {
-        "UDF/priority": "",
-        "UDF/Sequencing Analysis": "",
-        "UDF/customer": "",
-        "Sample/Name": "",
-    }
