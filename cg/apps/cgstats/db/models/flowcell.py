@@ -1,4 +1,3 @@
-
 from sqlalchemy import Column, orm, types
 
 from .base import Model

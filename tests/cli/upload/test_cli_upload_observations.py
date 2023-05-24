@@ -15,7 +15,7 @@ from cg.cli.upload.observations.utils import (
     get_sequencing_method,
 )
 from cg.constants import EXIT_SUCCESS
-from cg.constants.sequencing import SequencingMethod
+from cg.constants.sequencing import SequencingMethods
 from cg.constants.subject import PhenotypeStatus
 from cg.exc import CaseNotFoundError, LoqusdbUploadCaseError
 from cg.meta.observations.mip_dna_observations_api import MipDNAObservationsAPI
