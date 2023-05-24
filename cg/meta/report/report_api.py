@@ -405,7 +405,7 @@ class ReportAPI(MetaAPI):
         raise NotImplementedError
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], _analysis_metadata: AnalysisModel
+        self, samples: List[SampleModel], _analysis_metadata: AnalysisModel = None
     ) -> bool:
         """Checks if the report is accredited or not."""
         for sample in samples:

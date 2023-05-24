@@ -153,6 +153,7 @@
               <tr>
                 <th>Prov</th>
                 <th>Läspar [M]</th>
+                <th>Mappade sekvenser [M]</th>
                 <th>Mappade sekvenser [%]</th>
                 <th>Unikt mappade sekvenser [%]</th>
                 <th>Duplikat [%]</th>
@@ -167,6 +168,7 @@
                   <td>{{ sample.name }}*</td>
                   <td>{{ sample.metadata.million_read_pairs }}</td>
                   <td>{{ sample.metadata.mapped_reads }}</td>
+                  <td>{{ 'N/A' }}</td> <!-- TODO -->
                   <td>{{ 'N/A' }}</td> <!-- TODO -->
                   <td>{{ sample.metadata.duplicates }}</td>
                   <td>{{ 'N/A' }}</td> <!-- TODO -->
