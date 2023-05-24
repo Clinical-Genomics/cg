@@ -24,8 +24,14 @@ class MockLims(LimsAPI):
         """Override the get_deliverymethod"""
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(name="lims_mock", scope="function")
 def lims_api():
     """Returns a Lims api mock"""
     _lims_api = MockLims()
     return _lims_api
+
+
+@pytest.fixture(name="reagent_label")
+def fixture_reagent_label() -> str:
+    """Returns a reagent label."""
+    return "A701-A503 (ATCACGAC-TGTTCTCT)"

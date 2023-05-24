@@ -6,7 +6,7 @@ from requests.exceptions import HTTPError
 from cg.apps.lims.api import LimsAPI
 
 
-def test_get_received_date(lims_api, mocker):
+def test_get_received_date(lims_mock, mocker):
     """Test to get the received date"""
     # GIVEN a lims api and a mocked sample that returns a received at date
     mocked_sample = mocker.patch("cg.apps.lims.api.Sample")
@@ -15,9 +15,9 @@ def test_get_received_date(lims_api, mocker):
     mock_instance.udf = {"Received at": date}
 
     # WHEN fetching the date
-    res = lims_api.get_received_date(123)
+    res = lims_mock.get_received_date(123)
 
-    # THEN asserrt the correct date is fetched
+    # THEN assert the correct date is fetched
     assert res == date
 
 
@@ -46,7 +46,7 @@ def test_get_prepared_date(lims_api, mocker):
     # WHEN fetching the date
     res = lims_api.get_prepared_date(123)
 
-    # THEN asserrt the correct date is fetched
+    # THEN assert the correct date is fetched
     assert res == date
 
 
@@ -75,7 +75,7 @@ def test_get_delivery_date(lims_api, mocker):
     # WHEN fetching the date
     res = lims_api.get_delivery_date(123)
 
-    # THEN asserrt the correct date is fetched
+    # THEN assert the correct date is fetched
     assert res == date
 
 
