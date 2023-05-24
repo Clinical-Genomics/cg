@@ -89,7 +89,7 @@ def test_deliver_ticket_with_force_all_flag(
     DeliverTicketAPI.check_if_upload_is_needed.return_value = False
 
     # WHEN running cg deliver ticket with --force-all flag
-    result = cli_runner.invoke(
+    cli_runner.invoke(
         deliver_cmd,
         ["ticket", "--dry-run", "--ticket", ticket_id, "--delivery-type", "fastq", "--force-all"],
         obj=cg_context,
