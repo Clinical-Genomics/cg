@@ -1,32 +1,31 @@
-from datetime import datetime, timezone
 import http
-import logging
 import json
+import logging
 import tempfile
+from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from cachetools import TTLCache
 
 import requests
-from sqlalchemy.exc import IntegrityError
-from urllib3.exceptions import MaxRetryError, NewConnectionError
-
+from cachetools import TTLCache
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
 from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
 from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
-from cg.server.ext import db, lims, osticket
 from cg.io.controller import WriteStream
 from cg.meta.orders import OrdersAPI
-from cg.store.models import Customer, Sample, Pool, Family, Application, Flowcell, Analysis, User
 from cg.models.orders.order import OrderIn, OrderType
 from cg.models.orders.orderform_schema import Orderform
+from cg.server.ext import db, lims, osticket
+from cg.store.models import Analysis, Application, Customer, Family, Flowcell, Pool, Sample, User
 from flask import Blueprint, abort, current_app, g, jsonify, make_response, request
 from google.auth import jwt
 from pydantic import ValidationError
 from requests.exceptions import HTTPError
+from sqlalchemy.exc import IntegrityError
+from urllib3.exceptions import MaxRetryError, NewConnectionError
 from werkzeug.utils import secure_filename
 
 LOG = logging.getLogger(__name__)
@@ -197,11 +196,15 @@ def _get_current_customers() -> Optional[List[Customer]]:
 
 
 def _get_cases(
-    status: str, enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
+    status: str,
+    enquiry: Optional[str],
+    action: Optional[str],
+    customers: Optional[List[Customer]],
+    pipeline: Optional[Pipeline] = Pipeline.MIP_DNA,
 ) -> List[Family]:
     """Get cases based on the provided filters."""
     if status == "analysis":
-        return db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
+        return db.cases_to_analyze(pipeline=pipeline)
 
     return db.get_cases_by_customers_action_and_case_search(
         case_search=enquiry,
@@ -217,9 +220,17 @@ def get_families():
     enquiry: str = request.args.get("enquiry")
     action: str = request.args.get("action")
 
+    if pipeline_str := request.args.get("pipeline"):
+        try:
+            pipeline: Pipeline = Pipeline(pipeline_str)
+        except:
+            raise ValueError
+    else:
+        pipeline = Pipeline.MIP_DNA
+
     customers: List[Customer] = _get_current_customers()
     cases: List[Family] = _get_cases(
-        status=status, enquiry=enquiry, action=action, customers=customers
+        status=status, enquiry=enquiry, action=action, customers=customers, pipeline=pipeline
     )
 
     count = len(cases)
