@@ -1,4 +1,3 @@
-
 from click.testing import CliRunner
 from cg.cli.workflow.taxprofiler.base import (
     taxprofiler,
