@@ -214,7 +214,7 @@ def get_or_create_sample(
         LOG.debug("Skip adding indexcheck sample to database")
         return None
 
-    barcode = f"{sample.index}+{sample.second_index}" if sample.second_index else sample.index
+    barcode = f"{sample.index}+{sample.index2}" if sample.index2 else sample.index
 
     stats_sample: Optional[Sample] = manager.find_handler.get_sample_by_name_and_barcode(
         sample_name=sample.sample_id, barcode=barcode

@@ -16,12 +16,11 @@ LOG = logging.getLogger(__name__)
 
 class LimsFlowcellSample(BaseModel):
     flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias="Lane")
+    lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
     sample_id: str
     sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
     index: str
     index2: str = ""
-    description: str = ""
     sample_name: str = Field(..., alias="SampleName")
     control: str = Field("N", alias="Control")
     recipe: str = Field("R1", alias="Recipe")

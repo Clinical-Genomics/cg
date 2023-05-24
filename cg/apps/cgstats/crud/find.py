@@ -176,11 +176,7 @@ class FindHandler:
             lane: int = sample.lane
             if lane not in demux_samples:
                 demux_samples[lane] = {}
-            barcode = (
-                "+".join([sample.index, sample.second_index])
-                if sample.second_index
-                else sample.index
-            )
+            barcode = "+".join([sample.index, sample.index2]) if sample.index2 else sample.index
             sample_barcode_stats: SampleBarcodeStats = demux_stats.lanes_to_barcode[lane][barcode]
             sample_conversion_stats: SampleConversionResults = conversion_stats.lanes_to_barcode[
                 lane
