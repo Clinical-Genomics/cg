@@ -1,12 +1,10 @@
 """Tests for RNA part of the scout upload API"""
 import logging
 from typing import Dict, Generator, List, Set
-from pathlib import Path
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 
-from sqlalchemy.orm import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.sequencing import SequencingMethod

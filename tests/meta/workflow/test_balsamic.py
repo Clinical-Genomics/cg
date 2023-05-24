@@ -2,9 +2,7 @@
 from pathlib import Path
 
 import pytest
-from _pytest.logging import LogCaptureFixture
 
-from cg.constants.constants import SampleType
 from cg.constants.observations import ObservationsFileWildcards
 from cg.constants.sequencing import Variants
 from cg.constants.subject import Gender

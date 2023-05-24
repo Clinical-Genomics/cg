@@ -6,8 +6,7 @@ from cg.exc import OrderError
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
-from cg.models.orders.sample_base import ControlEnum
-from cg.models.orders.samples import SarsCov2Sample, RmlSample
+from cg.models.orders.samples import RmlSample
 from cg.store import Store
 from cg.store.models import Customer
 from tests.store_helpers import StoreHelpers

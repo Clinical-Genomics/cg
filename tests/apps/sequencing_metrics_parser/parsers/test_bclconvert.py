@@ -1,5 +1,4 @@
 """This module contains tests for the BCLConvert metrics parser."""
-from pathlib import Path
 
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (

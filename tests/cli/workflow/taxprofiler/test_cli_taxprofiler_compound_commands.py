@@ -1,6 +1,4 @@
-import logging
 
-from _pytest.logging import LogCaptureFixture
 from click.testing import CliRunner
 from cg.cli.workflow.taxprofiler.base import (
     taxprofiler,
