@@ -9,11 +9,14 @@ class LimsProject(BaseModel):
     id: str = "1"
 
 
-class MockReagentType(BaseModel):
+class MockReagentType:
     """Mock class for reagent type."""
 
-    label: str = "A702-A506 (ACAGTGGT-CTAGAACA)"
-    sequence: str = "ACAGTGGT-CTAGAACA"
+    def __init__(
+        self, label: str = "A702-A506 (ACAGTGGT-CTAGAACA)", sequence: str = "ACAGTGGT-CTAGAACA"
+    ):
+        self.label: str = label
+        self.sequence: str = sequence
 
 
 class LimsSample(BaseModel):
