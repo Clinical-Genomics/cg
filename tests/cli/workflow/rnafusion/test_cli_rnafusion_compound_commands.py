@@ -6,10 +6,8 @@ from click.testing import CliRunner
 from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.hermes.models import CGDeliverables
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.apps.tb import TrailblazerAPI
 from cg.cli.workflow.rnafusion.base import rnafusion, start, start_available, store, store_available
 from cg.constants import EXIT_SUCCESS
-from cg.constants.tb import AnalysisStatus
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 
@@ -35,7 +33,6 @@ def test_start(
     rnafusion_context: CGConfig,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
-    mock_config,
 ):
     """Test to ensure all parts of start command will run successfully given ideal conditions."""
     caplog.set_level(logging.INFO)
@@ -104,11 +101,7 @@ def test_store_fail(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
-    mock_deliverable,
-    mock_analysis_finish,
     caplog: LogCaptureFixture,
-    hermes_deliverables: dict,
-    mocker,
 ):
     """Test store command fails when a case did not finish."""
     caplog.set_level(logging.INFO)
@@ -136,7 +129,6 @@ def test_start_available(
     caplog: LogCaptureFixture,
     mocker,
     rnafusion_case_id: str,
-    mock_config,
 ):
     """Test to ensure all parts of compound start-available command are executed given ideal conditions
     Test that start-available picks up eligible cases and does not pick up ineligible ones."""
@@ -162,7 +154,6 @@ def test_start_available(
 
 
 def test_store_available(
-    tmpdir_factory,
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     real_housekeeper_api,
