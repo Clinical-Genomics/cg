@@ -14,7 +14,7 @@ from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 
-FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.flowcell_samples"
+FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.flow_cell_samples"
 
 
 def test_create_sample_sheet_no_run_parameters(
