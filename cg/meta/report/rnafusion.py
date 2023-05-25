@@ -2,6 +2,8 @@
 import logging
 from typing import Optional, List
 
+from cg.constants.constants import GenomeVersion
+
 from cg.models.analysis import AnalysisModel
 
 from cg.models.report.sample import SampleModel
@@ -55,6 +57,10 @@ class RnafusionReportAPI(ReportAPI):
             uniquely_mapped_reads=sample_metrics.uniquely_mapped,
             uniquely_mapped_reads_pct=sample_metrics.uniquely_mapped_percent,
         )
+
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
+        """Returns the build version of the genome reference of a specific case."""
+        return GenomeVersion.hg38.value
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: AnalysisModel
