@@ -183,7 +183,7 @@ def submit_order(order_type):
 
 @BLUEPRINT.route("/cases")
 def get_cases():
-    """Return cases."""
+    """Return cases with links for a customer from the database."""
     status: str = request.args.get("status")
     enquiry: str = request.args.get("enquiry")
     action: str = request.args.get("action")
