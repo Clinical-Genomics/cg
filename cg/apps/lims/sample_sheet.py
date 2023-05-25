@@ -42,7 +42,7 @@ def get_reagent_label(artifact) -> Optional[str]:
 def get_index(lims: Lims, label: str) -> str:
     """Parse out the sequence from a reagent label."""
 
-    reagent_types = lims.get_reagent_types(name=label)
+    reagent_types: List = lims.get_reagent_types(name=label)
 
     if len(reagent_types) > 1:
         raise ValueError(f"Expecting at most one reagent type. Got ({len(reagent_types)}).")
@@ -51,7 +51,7 @@ def get_index(lims: Lims, label: str) -> str:
         reagent_type = reagent_types.pop()
     except IndexError:
         return ""
-    sequence = reagent_type.sequence
+    sequence: str = reagent_type.sequence
 
     match = re.match(r"^.+ \((.+)\)$", label)
     if match:

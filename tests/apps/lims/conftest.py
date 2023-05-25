@@ -3,6 +3,7 @@
 import pytest
 
 from cg.apps.lims.api import LimsAPI
+from tests.mocks.limsmock import MockReagentType
 
 
 class MockLims(LimsAPI):
@@ -34,4 +35,4 @@ def lims_api():
 @pytest.fixture(name="reagent_label")
 def fixture_reagent_label() -> str:
     """Returns a reagent label."""
-    return "A701-A503 (ATCACGAC-TGTTCTCT)"
+    return MockReagentType().label
