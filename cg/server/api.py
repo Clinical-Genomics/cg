@@ -220,8 +220,8 @@ def _get_cases(
 
 
 @BLUEPRINT.route("/cases/<case_id>")
-def parse_family(case_id):
-    """Return a family with links."""
+def parse_case(case_id):
+    """Return a case with links."""
     case: Family = db.get_case_by_internal_id(internal_id=case_id)
     if case is None:
         return abort(http.HTTPStatus.NOT_FOUND)
