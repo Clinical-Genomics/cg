@@ -12,7 +12,7 @@ from snapshottest import Snapshot
 EXIT_SUCCESS = 0
 
 
-def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig, caplog):
+def test_no_arguments(cli_runner: CliRunner, base_context: CGConfig):
     """Test command without any options"""
 
     # GIVEN
@@ -80,7 +80,6 @@ def test_dry_sample(
     cli_runner: CliRunner,
     base_context: CGConfig,
     microbial_sample_id: str,
-    snapshot: Snapshot,
     lims_api: LimsAPI,
 ):
     """Test working dry command for sample"""
@@ -96,7 +95,7 @@ def test_dry_sample(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dry_order(cli_runner: CliRunner, base_context: CGConfig, ticket_id, snapshot: Snapshot):
+def test_dry_order(cli_runner: CliRunner, base_context: CGConfig, ticket_id):
     """Test working dry command for a order"""
 
     # GIVEN
@@ -112,7 +111,7 @@ def test_dry_order(cli_runner: CliRunner, base_context: CGConfig, ticket_id, sna
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_sample(base_context, cli_runner, lims_api, microbial_sample_id, snapshot: Snapshot):
+def test_sample(base_context, cli_runner, lims_api, microbial_sample_id):
     """Test working command for sample"""
 
     # GIVEN an existing queries path
