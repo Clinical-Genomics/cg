@@ -193,9 +193,9 @@ def get_cases():
         status=status, enquiry=enquiry, action=action, customers=customers
     )
 
-    count = len(cases)
-    case_dicts = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=case_dicts, total=count)
+    nr_cases: int = len(cases)
+    cases_with_links: List[dict] = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=cases_with_links, total=nr_cases)
 
 
 def _get_current_customers() -> Optional[List[Customer]]:
@@ -231,9 +231,9 @@ def get_families():
         status=status, enquiry=enquiry, action=action, customers=customers
     )
 
-    count = len(cases)
-    case_dicts = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=case_dicts, total=count)
+    nr_cases = len(cases)
+    cases_with_links: List[dict] = [case.to_dict(links=True) for case in cases]
+    return jsonify(families=cases_with_links, total=nr_cases)
 
 
 @BLUEPRINT.route("/families_in_collaboration")
