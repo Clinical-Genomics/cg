@@ -32,7 +32,7 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_internal_id_pattern,
     filter_samples_by_identifier_name_and_value,
 )
-from tests.store.conftest import StoreConftestFixture
+from tests.store.conftest import StoreConstants
 
 
 def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):
@@ -81,7 +81,6 @@ def test_get_samples_without_loqusdb_id(helpers, store, sample_store, sample_id,
 
 def test_filter_samples_is_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a delivered sample."""
 
@@ -109,7 +108,6 @@ def test_filter_samples_is_delivered(
 
 def test_filter_samples_is_not_delivered(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not delivered."""
 
@@ -137,8 +135,7 @@ def test_filter_samples_is_not_delivered(
 
 def test_filter_get_samples_by_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
-    invoice_id=StoreConftestFixture.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that has an invoice id."""
 
@@ -167,7 +164,6 @@ def test_filter_get_samples_by_invoice_id(
 
 def test_filter_samples_without_invoice_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that has no invoice id."""
 
@@ -195,7 +191,6 @@ def test_filter_samples_without_invoice_id(
 
 def test_filter_samples_down_sampled(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not down sampled."""
 
@@ -223,7 +218,6 @@ def test_filter_samples_down_sampled(
 
 def test_filter_samples_not_down_sampled(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not down sampled."""
 
@@ -251,7 +245,6 @@ def test_filter_samples_not_down_sampled(
 
 def test_filter_samples_is_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
@@ -279,7 +272,6 @@ def test_filter_samples_is_sequenced(
 
 def test_filter_samples_is_not_sequenced(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not sequenced."""
 
@@ -307,7 +299,6 @@ def test_filter_samples_is_not_sequenced(
 
 def test_filter_samples_do_invoice(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
@@ -335,7 +326,6 @@ def test_filter_samples_do_invoice(
 
 def test_filter_samples_do_not_invoice(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is not a sample that should be invoiced."""
 
@@ -363,7 +353,6 @@ def test_filter_samples_do_not_invoice(
 
 def test_filter_samples_is_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is received."""
 
@@ -391,7 +380,6 @@ def test_filter_samples_is_received(
 
 def test_filter_samples_is_not_received(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not received."""
 
@@ -416,7 +404,6 @@ def test_filter_samples_is_not_received(
 
 def test_filter_samples_is_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is prepared."""
 
@@ -443,7 +430,6 @@ def test_filter_samples_is_prepared(
 
 def test_filter_samples_is_not_prepared(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name: str = StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample that is not prepared."""
 
@@ -468,7 +454,7 @@ def test_filter_samples_is_not_prepared(
 
 def test_filter_get_samples_by_internal_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    sample_internal_id: str = StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    sample_internal_id: str = StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given id."""
 
@@ -526,7 +512,7 @@ def test_filter_get_samples_by_entry_id(
 
 def test_filter_get_samples_with_type(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
     tissue_type: SampleType = SampleType.TUMOR,
 ):
     """Test that a sample is returned when there is a sample with the given type."""
@@ -556,7 +542,7 @@ def test_filter_get_samples_with_type(
 
 def test_filter_get_samples_by_name(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+    name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given type."""
     # GIVEN a store with two samples that have names
@@ -584,7 +570,7 @@ def test_filter_get_samples_by_name(
 
 def test_filter_get_samples_by_subject_id(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    subject_id: str = StoreConftestFixture.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
+    subject_id: str = StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given subject id."""
     # GIVEN a store with two samples of which one has a subject id
@@ -642,7 +628,7 @@ def test_filter_get_samples_by_customer_id(
 
 def test_filter_get_samples_by_name_pattern(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name_pattern: str = StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+    name_pattern: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
 ):
     """Test that a sample is returned when there is a sample with the given name pattern."""
     # GIVEN a store with two samples of which one has a name name pattern
@@ -693,7 +679,7 @@ def test_filter_get_samples_by_internal_id_pattern(
     assert len(samples.all()) == 1
 
     # THEN the sample should have the correct name
-    assert samples[0].internal_id == StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
+    assert samples[0].internal_id == StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value
 
 
 def test_filter_samples_by_identifier_name_and_value_unique_sample(
