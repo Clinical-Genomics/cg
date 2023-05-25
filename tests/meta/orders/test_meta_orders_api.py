@@ -16,8 +16,6 @@ from cg.models.orders.samples import MipDnaSample
 from cg.store import Store
 from cg.store.models import Pool, Sample
 
-PROCESS_LIMS_FUNCTION_OLD = "cg.meta.orders.api.process_lims"
-PROCESS_LIMS_FUNCTION = "cg.meta.orders.lims.process_lims"
 SUBMITTERS = [
     "fastq_submitter",
     "metagenome_submitter",
@@ -68,7 +66,7 @@ def test_submit(
     monkeypatch_process_lims(monkeypatch, order_data)
 
     # GIVEN an order and an empty store
-    assert not base_store.get_samples()
+    assert not base_store._get_query(table=Sample).first()
 
     # WHEN submitting the order
 
@@ -103,8 +101,6 @@ def monkeypatch_process_lims(monkeypatch, order_data):
 )
 def test_submit_ticketexception(
     all_orders_to_submit,
-    base_store: Store,
-    monkeypatch,
     orders_api: OrdersAPI,
     order_type: OrderType,
     user_mail: str,
@@ -138,7 +134,6 @@ def test_submit_illegal_sample_customer(
     order_type: OrderType,
     orders_api: OrdersAPI,
     sample_store: Store,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -155,7 +150,7 @@ def test_submit_illegal_sample_customer(
         invoice_reference="dummy nr",
     )
     sample_store.session.add(new_customer)
-    existing_sample: Sample = sample_store.get_samples()[0]
+    existing_sample: Sample = sample_store._get_query(table=Sample).first()
     existing_sample.customer = new_customer
     sample_store.session.add(existing_sample)
     sample_store.session.commit()
@@ -212,7 +207,7 @@ def test_submit_scout_legal_sample_customer(
     order_customer.collaborations.append(collaboration)
     sample_store.session.add(sample_customer)
     sample_store.session.add(order_customer)
-    existing_sample: Sample = sample_store.get_samples()[0]
+    existing_sample: Sample = sample_store._get_query(table=Sample).first()
     existing_sample.customer = sample_customer
     sample_store.session.commit()
     order_data.customer = order_customer.internal_id
@@ -284,7 +279,6 @@ def test_submit_fluffy_duplicate_sample_case_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
@@ -312,7 +306,6 @@ def test_submit_unique_sample_case_name(
     mail_patch,
     orders_api: OrdersAPI,
     mip_order_to_submit: dict,
-    ticket_id: str,
     user_name: str,
     user_mail: str,
     monkeypatch,
@@ -488,14 +481,13 @@ def test_submit_unique_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    ticket_id: str,
     user_mail: str,
     user_name: str,
 ):
     # GIVEN we have an order with a sample that is not existing in the database
     order_data = OrderIn.parse_obj(obj=all_orders_to_submit[order_type], project=order_type)
     store = orders_api.status
-    assert not store.get_samples()
+    assert not store._get_query(table=Sample).first()
 
     monkeypatch_process_lims(monkeypatch, order_data)
 
@@ -517,7 +509,6 @@ def test_sarscov2_submit_duplicate_sample_name(
     monkeypatch,
     order_type: OrderType,
     orders_api: OrdersAPI,
-    sample_store: Store,
     user_mail: str,
     user_name: str,
 ):

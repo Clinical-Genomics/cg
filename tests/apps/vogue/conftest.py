@@ -31,15 +31,6 @@ def fixture_vogue_api(process):
     return _vogue_api
 
 
-@pytest.fixture(scope="function")
-def genotype_dict():
-    """
-    genotype document fixture
-    """
-
-    return "{}"
-
-
 @pytest.fixture(scope="function", name="process")
 def fixture_process():
     """ """

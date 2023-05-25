@@ -7,12 +7,12 @@ from cg.store.filters.status_invoice_filters import (
     filter_invoices_invoiced,
     filter_invoices_not_invoiced,
 )
-from tests.store.conftest import StoreConftestFixture
+from tests.store.conftest import StoreConstants
 
 
 def test_filter_get_invoices_by_invoice_id(
     store_with_an_invoice_with_and_without_attributes: Store,
-    entry_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
+    entry_id=StoreConstants.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
 ):
     """Test to get invoice by invoice id."""
 

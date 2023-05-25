@@ -11,12 +11,12 @@ from cg.store.filters.status_application_filters import (
 from cg.store import Store
 from cg.store.models import Application
 from sqlalchemy.orm import Query
-from tests.store.conftest import StoreConftestFixture
+from tests.store.conftest import StoreConstants
 
 
 def test_filter_get_application_by_tag(
     store_with_an_application_with_and_without_attributes: Store,
-    tag=StoreConftestFixture.TAG_APPLICATION_WITH_ATTRIBUTES.value,
+    tag=StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
 ) -> None:
     """Test to get application by tag."""
     # GIVEN a store with two applications of which one has a tag
@@ -38,7 +38,7 @@ def test_filter_get_application_by_tag(
 
 def test_filter_get_applications_by_prep_category(
     store_with_an_application_with_and_without_attributes: Store,
-    prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
+    prep_category=StoreConstants.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
 ) -> None:
     """Test to get application by prep category."""
     #  GIVEN a store with two applications of which one is of a prep category
