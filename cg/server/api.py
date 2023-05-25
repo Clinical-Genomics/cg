@@ -219,7 +219,7 @@ def get_families():
     status: str = request.args.get("status")
     enquiry: str = request.args.get("enquiry")
     action: str = request.args.get("action")
-    pipeline_str = request.args.get("pipeline")
+    pipeline: Pipeline = Pipeline(request.args.get("pipeline", Pipeline.MIP_DNA))
 
     if pipeline_str:
         try:
