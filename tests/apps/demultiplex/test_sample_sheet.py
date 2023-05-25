@@ -31,7 +31,7 @@ def test_get_dummy_sample(bcl2fastq_flow_cell_id: str, index_obj: Index):
     # GIVEN some dummy sample data
 
     # WHEN creating the dummy sample for a bcl2fastq sample sheet
-    dummy_sample_obj: FlowCellSampleBcl2Fastq = dummy_sample.dummy_sample(
+    dummy_flow_cell_sample: FlowCellSampleBcl2Fastq = dummy_sample.dummy_sample(
         flow_cell_id=bcl2fastq_flow_cell_id,
         dummy_index=index_obj.sequence,
         lane=1,
@@ -40,4 +40,4 @@ def test_get_dummy_sample(bcl2fastq_flow_cell_id: str, index_obj: Index):
     )
 
     # THEN assert the sample id was correct
-    assert dummy_sample_obj.sample_id == dummy_sample.dummy_sample_name(index_obj.name)
+    assert dummy_flow_cell_sample.sample_id == dummy_sample.dummy_sample_name(index_obj.name)

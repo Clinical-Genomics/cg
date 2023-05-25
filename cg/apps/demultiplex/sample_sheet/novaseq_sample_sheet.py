@@ -55,15 +55,15 @@ class SampleSheetCreator:
                 if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
-                dummy_sample_obj: FlowCellSample = dummy_sample(
+                dummy_flow_cell_sample: FlowCellSample = dummy_sample(
                     flow_cell_id=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
                     bcl_converter=self.bcl_converter,
                 )
-                LOG.debug(f"Adding dummy sample {dummy_sample_obj} to lane {lane}")
-                self.lims_samples.append(dummy_sample_obj)
+                LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
+                self.lims_samples.append(dummy_flow_cell_sample)
 
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with indexes of unwanted length and single indexes."""
