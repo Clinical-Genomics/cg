@@ -13,7 +13,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleDragen,
 )
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.apps.lims.sample_sheet import flowcell_samples
+from cg.apps.lims.sample_sheet import flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
@@ -75,7 +75,7 @@ def create_sheet(
     except FlowCellError as error:
         raise click.Abort from error
     lims_samples: List[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = list(
-        flowcell_samples(
+        flow_cell_samples(
             lims=context.lims_api,
             flowcell_id=flow_cell.id,
             bcl_converter=bcl_converter,
@@ -127,7 +127,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
         LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(
-            flowcell_samples(
+            flow_cell_samples(
                 lims=context.lims_api,
                 flowcell_id=flow_cell.id,
                 bcl_converter=bcl_converter,

@@ -66,7 +66,7 @@ def get_index(lims: Lims, label: str) -> str:
     return sequence
 
 
-def flowcell_samples(
+def flow_cell_samples(
     lims: Lims, flowcell_id: str, bcl_converter: str
 ) -> Iterable[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]]:
     lims_flowcell_sample = {
