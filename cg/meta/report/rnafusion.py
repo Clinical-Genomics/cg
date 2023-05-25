@@ -36,7 +36,7 @@ class RnafusionReportAPI(ReportAPI):
             duplicates=sample_metrics.percent_duplication,
             bias_5_3=sample_metrics.bias_5_3,
             gc_content=sample_metrics.after_filtering_gc_content,
-            input_amount=None,  # TODO: LIMS
+            input_amount=self.lims_api.get_latest_rna_input_amount(sample.internal_id),
             insert_size=None,
             insert_size_peak=None,
             mean_length_r1=sample_metrics.after_filtering_read1_mean_length,
@@ -46,5 +46,7 @@ class RnafusionReportAPI(ReportAPI):
             q20_rate=sample_metrics.after_filtering_q20_rate,
             q30_rate=sample_metrics.after_filtering_q30_rate,
             ribosomal_bases=sample_metrics.pct_ribosomal_bases,
-            rin=None,  # TODO: LIMS
+            rin=self.lims_api.get_sample_rin(sample.internal_id),
+            uniquely_mapped_reads=sample_metrics.uniquely_mapped,
+            uniquely_mapped_reads_pct=sample_metrics.uniquely_mapped_percent,
         )
