@@ -2,6 +2,8 @@
 import logging
 from typing import Optional, List
 
+from cgmodels.cg.constants import Pipeline
+
 from cg.constants.constants import GenomeVersion
 
 from cg.models.analysis import AnalysisModel
@@ -72,3 +74,8 @@ class RnafusionReportAPI(ReportAPI):
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Return the file path of the uploaded to Scout file given its tag."""
         return None
+
+    def get_template_name(self) -> str:
+        """Retrieves the template name to render the delivery report."""
+
+        return Pipeline.RNAFUSION + "_report.html"
