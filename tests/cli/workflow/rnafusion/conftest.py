@@ -53,13 +53,6 @@ def rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture(name="rnafusion_reference_path")
-def rnafusion_reference_path(rnafusion_dir: Path) -> str:
-    rnafusion_reference_path = Path(rnafusion_dir, "references")
-    rnafusion_reference_path.touch(exist_ok=True)
-    return rnafusion_reference_path.as_posix()
-
-
 @pytest.fixture
 def rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
@@ -210,19 +203,6 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable.pop("pipeline")
 
     return malformed_deliverable
-
-
-@pytest.fixture(name="rnafusion_hermes_process")
-def fixture_rnafusion_hermes_process(
-    hermes_deliverables: dict, process: ProcessMock
-) -> ProcessMock:
-    """Return a process mock populated with some rnafusion hermes output."""
-    process.set_stdout(
-        text=WriteStream.write_stream_from_content(
-            content=hermes_deliverables, file_format=FileFormat.JSON
-        )
-    )
-    return process
 
 
 @pytest.fixture(name="rnafusion_multiqc_json_metrics")

@@ -12,7 +12,7 @@ from cg.store.models import Analysis, Application, Customer, Family, Organism, S
 from tests.store_helpers import StoreHelpers
 
 
-class StoreConftestFixture(enum.Enum):
+class StoreConstants(enum.Enum):
     INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     NAME_SAMPLE_WITH_ATTRIBUTES: str = "sample_with_attributes"
     APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES: int = 2
@@ -62,18 +62,6 @@ class StoreConftestFixture(enum.Enum):
         for i in range(1, n_entries):
             output.append(output[0] + round(i * step))
         return output
-
-
-@pytest.fixture(name="application_versions_file")
-def fixture_application_versions_file(fixtures_dir: Path) -> str:
-    """Return application version import file."""
-    return Path(fixtures_dir, "store", "api", "application_versions.xlsx").as_posix()
-
-
-@pytest.fixture(name="applications_file")
-def fixture_applications_file(fixtures_dir: Path) -> str:
-    """Return application import file."""
-    return Path(fixtures_dir, "store", "api", "applications.xlsx").as_posix()
 
 
 @pytest.fixture(name="microbial_submitted_order")
@@ -170,12 +158,6 @@ def fixture_microbial_store(
     yield base_store
 
 
-@pytest.fixture(name="analysis")
-def fixture_analysis_obj(analysis_store: Store) -> Analysis:
-    """Return an analysis object from a populated store."""
-    return analysis_store._get_query(table=Analysis)[0]
-
-
 @pytest.fixture(name="case")
 def fixture_case_obj(analysis_store: Store) -> Family:
     """Return a case models object."""
@@ -185,7 +167,7 @@ def fixture_case_obj(analysis_store: Store) -> Family:
 @pytest.fixture(name="sample")
 def fixture_sample_obj(analysis_store) -> Sample:
     """Return a sample models object."""
-    return analysis_store.get_samples()[0]
+    return analysis_store._get_query(table=Sample).first()
 
 
 @pytest.fixture(name="sequencer_name")
@@ -221,8 +203,8 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
     """Return a store with a sample that has many attributes and one without."""
     helpers.add_sample(
         store=store,
-        internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        name=StoreConftestFixture.NAME_SAMPLE_WITH_ATTRIBUTES.value,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
         is_external=True,
         is_tumour=True,
         ordered_at=timestamp_now,
@@ -233,31 +215,31 @@ def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
         sequenced_at=timestamp_now,
         prepared_at=timestamp_now,
         invoiced_at=timestamp_now,
-        application_version_id=StoreConftestFixture.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        customer_id=StoreConftestFixture.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        subject_id=StoreConftestFixture.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        invoice_id=StoreConftestFixture.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        organism_id=StoreConftestFixture.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        loqusdb_id=StoreConftestFixture.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
-        reads=StoreConftestFixture.READS_SAMPLE_WITH_ATTRIBUTES.value,
-        downsampled_to=StoreConftestFixture.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
+        application_version_id=StoreConstants.APPLICATION_VERSION_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        customer_id=StoreConstants.CUSTOMER_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        subject_id=StoreConstants.SUBJECT_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        invoice_id=StoreConstants.INVOICE_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        organism_id=StoreConstants.ORGANISM_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        loqusdb_id=StoreConstants.LOCUSDB_ID_SAMPLE_WITH_ATTRIBUTES.value,
+        reads=StoreConstants.READS_SAMPLE_WITH_ATTRIBUTES.value,
+        downsampled_to=StoreConstants.DOWN_SAMPLED_TO_SAMPLE_WITH_ATTRIBUTES.value,
         no_invoice=False,
-        original_ticket=StoreConftestFixture.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
-        age_at_sampling=StoreConftestFixture.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
-        capture_kit=StoreConftestFixture.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
-        comment=StoreConftestFixture.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
-        control=StoreConftestFixture.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
-        from_sample=StoreConftestFixture.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
-        order=StoreConftestFixture.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
-        priority=StoreConftestFixture.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
-        reference_genome=StoreConftestFixture.REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES.value,
-        sex=StoreConftestFixture.SEX_SAMPLE_WITH_ATTRIBUTES.value,
+        original_ticket=StoreConstants.ORIGINAL_TICKET_SAMPLE_WITH_ATTRIBUTES.value,
+        age_at_sampling=StoreConstants.AGE_AT_SAMPLING_SAMPLE_WITH_ATTRIBUTES.value,
+        capture_kit=StoreConstants.CAPTURE_KIT_SAMPLE_WITH_ATTRIBUTES.value,
+        comment=StoreConstants.COMMENT_SAMPLE_WITH_ATTRIBUTES.value,
+        control=StoreConstants.CONTROL_SAMPLE_WITH_ATTRIBUTES.value,
+        from_sample=StoreConstants.FROM_SAMPLE_SAMPLE_WITH_ATTRIBUTES.value,
+        order=StoreConstants.ORDER_SAMPLE_WITH_ATTRIBUTES.value,
+        priority=StoreConstants.PRIORITY_SAMPLE_WITH_ATTRIBUTES.value,
+        reference_genome=StoreConstants.REFERENCE_GENOME_SAMPLE_WITH_ATTRIBUTES.value,
+        sex=StoreConstants.SEX_SAMPLE_WITH_ATTRIBUTES.value,
     )
 
     helpers.add_sample(
         store=store,
-        internal_id=StoreConftestFixture.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
-        name=StoreConftestFixture.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
+        internal_id=StoreConstants.INTERNAL_ID_SAMPLE_WITHOUT_ATTRIBUTES.value,
+        name=StoreConstants.NAME_SAMPLE_WITHOUT_ATTRIBUTES.value,
         is_external=False,
         is_tumour=False,
         delivered_at=None,
@@ -284,10 +266,10 @@ def fixture_store_with_a_pool_with_and_without_attributes(
         store=store,
         delivered_at=timestamp_now,
         received_at=timestamp_now,
-        invoice_id=StoreConftestFixture.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
+        invoice_id=StoreConstants.INVOICE_ID_POOL_WITH_ATTRIBUTES.value,
         no_invoice=False,
-        name=StoreConftestFixture.NAME_POOL_WITH_ATTRIBUTES.value,
-        order=StoreConftestFixture.ORDER_POOL_WITH_ATTRIBUTES.value,
+        name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
+        order=StoreConstants.ORDER_POOL_WITH_ATTRIBUTES.value,
     )
 
     helpers.ensure_pool(
@@ -296,7 +278,7 @@ def fixture_store_with_a_pool_with_and_without_attributes(
         received_at=None,
         invoice_id=None,
         no_invoice=True,
-        name=StoreConftestFixture.NAME_POOL_WITHOUT_ATTRIBUTES.value,
+        name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
     )
 
     return store
@@ -311,16 +293,16 @@ def fixture_store_with_an_application_with_and_without_attributes(
     """Return a store with an application with and without attributes."""
     helpers.ensure_application(
         store=store,
-        tag=StoreConftestFixture.TAG_APPLICATION_WITH_ATTRIBUTES.value,
-        prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
+        tag=StoreConstants.TAG_APPLICATION_WITH_ATTRIBUTES.value,
+        prep_category=StoreConstants.PREP_CATEGORY_APPLICATION_WITH_ATTRIBUTES.value,
         is_external=True,
         is_archived=True,
     )
 
     helpers.ensure_application(
         store=store,
-        tag=StoreConftestFixture.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
-        prep_category=StoreConftestFixture.PREP_CATEGORY_APPLICATION_WITHOUT_ATTRIBUTES.value,
+        tag=StoreConstants.TAG_APPLICATION_WITHOUT_ATTRIBUTES.value,
+        prep_category=StoreConstants.PREP_CATEGORY_APPLICATION_WITHOUT_ATTRIBUTES.value,
         is_external=False,
         is_archived=False,
     )
@@ -345,7 +327,7 @@ def fixture_store_with_different_application_versions(
 ) -> Store:
     """Returns a store with application versions with different applications, dates and versions."""
     applications: List[Application] = applications_store.get_applications()
-    years: List[int] = StoreConftestFixture.generate_year_interval(
+    years: List[int] = StoreConstants.generate_year_interval(
         n_entries=len(applications),
         old_timestamp=old_timestamp,
     )
@@ -370,13 +352,13 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
     """Return a store with an invoice with and without attributes."""
     helpers.ensure_invoice(
         store=store,
-        invoice_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
+        invoice_id=StoreConstants.INVOICE_ID_INVOICE_WITH_ATTRIBUTES.value,
         invoiced_at=timestamp_now,
     )
 
     helpers.ensure_invoice(
         store=store,
-        invoice_id=StoreConftestFixture.INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES.value,
+        invoice_id=StoreConstants.INVOICE_ID_INVOICE_WITHOUT_ATTRIBUTES.value,
         invoiced_at=None,
     )
     return store

@@ -218,10 +218,8 @@ def test_order_analyses_by_completed_at_asc(
     """Test sorting of analyses by the completed_at field."""
 
     # GIVEN a set of mock analyses
-    new_analysis: Analysis = helpers.add_analysis(store=store, completed_at=timestamp_now)
-    old_analysis: Analysis = helpers.add_analysis(
-        store=store, case=case, completed_at=timestamp_yesterday
-    )
+    helpers.add_analysis(store=store, completed_at=timestamp_now)
+    helpers.add_analysis(store=store, case=case, completed_at=timestamp_yesterday)
 
     # WHEN ordering the analyses by the completed_at field
     analyses: Query = order_analyses_by_completed_at_asc(analyses=store._get_query(table=Analysis))
@@ -236,9 +234,6 @@ def test_order_analyses_by_completed_at_asc(
 
 def test_order_analyses_by_uploaded_at_asc(
     store_with_older_and_newer_analyses: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
-    timestamp_yesterday: datetime,
 ):
     """Test sorting of analyses by the uploaded_at field."""
     # GIVEN a store with mock analyses

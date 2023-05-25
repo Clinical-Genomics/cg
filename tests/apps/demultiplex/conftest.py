@@ -40,31 +40,6 @@ def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
-@pytest.fixture(name="raw_lims_sample")
-def fixture_raw_lims_sample(flow_cell_name: str) -> LimsFlowcellSample:
-    """Return a raw lims sample"""
-    sample = {
-        "flowcell_id": flow_cell_name,
-        "lane": 1,
-        "sample_id": "ACC7628A20",
-        "sample_ref": "hg19",
-        "index": "ACTGGTGTCG-ACAGGACTTG",
-        "description": "",
-        "sample_name": "814206",
-        "control": "N",
-        "recipe": "R1",
-        "operator": "script",
-        "project": "814206",
-    }
-    return LimsFlowcellSample(**sample)
-
-
-@pytest.fixture(name="lims_novaseq_samples")
-def fixture_lims_novaseq_samples(lims_novaseq_samples_raw: List[dict]) -> List[LimsFlowcellSample]:
-    """Return a list of parsed flowcell samples"""
-    return [LimsFlowcellSample(**sample) for sample in lims_novaseq_samples_raw]
-
-
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
 def fixture_lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
@@ -167,27 +142,6 @@ def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
             "Recipe",
             "Operator",
             "Project",
-        ],
-    ]
-
-
-@pytest.fixture(name="sample_sheet_dragen_data_header")
-def fixture_sample_sheet_dragen_data_header() -> List[List[str]]:
-    """Return the content of a Dragen sample sheet data header without samples."""
-    return [
-        [SampleSheetHeaderColumnNames.DATA],
-        [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
-            "Lane",
-            "SampleID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Sample_Project",
         ],
     ]
 

@@ -26,7 +26,10 @@ DELIVERY_TYPE = click.option(
 )
 FORCE_ALL = click.option(
     "--force-all",
-    help="Deliver sample files for all samples regardless of amount of reads",
+    help=(
+        "Force delivery of all sample files "
+        "- disregarding of amount of reads or previous deliveries"
+    ),
     is_flag=True,
 )
 TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
@@ -167,7 +170,7 @@ def deliver_ticket(
     cg_context: CGConfig = context.obj
     deliver_ticket_api = DeliverTicketAPI(config=cg_context)
     is_upload_needed = deliver_ticket_api.check_if_upload_is_needed(ticket=ticket)
-    if is_upload_needed:
+    if is_upload_needed or force_all:
         LOG.info("Delivering files to customer inbox on the HPC")
         context.invoke(
             deliver_analysis,

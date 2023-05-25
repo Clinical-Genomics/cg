@@ -83,7 +83,6 @@ def test_case_with_malformed_deliverables_file(
     cli_runner,
     mocker,
     rnafusion_context: CGConfig,
-    mock_deliverable,
     malformed_hermes_deliverables: dict,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
@@ -125,7 +124,6 @@ def test_valid_case(
     hermes_deliverables,
     rnafusion_context: CGConfig,
     mock_deliverable,
-    mock_analysis_finish,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
 ):
@@ -160,7 +158,6 @@ def test_valid_case_already_added(
     rnafusion_context: CGConfig,
     real_housekeeper_api: HousekeeperAPI,
     mock_deliverable,
-    mock_analysis_finish,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
 ):
@@ -198,7 +195,6 @@ def test_dry_run(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
     mock_deliverable: None,
-    mock_analysis_finish: None,
     caplog: LogCaptureFixture,
     mocker: MockFixture,
     rnafusion_case_id: str,
