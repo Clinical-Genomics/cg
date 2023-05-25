@@ -762,11 +762,14 @@ class User(Model):
 
 class LaneSampleSequencingMetrics(Model):
     __tablename__ = "lane_sample_sequencing_metrics"
+
     id = Column(types.Integer, primary_key=True)
     flow_cell_name = Column(types.String(128), nullable=False)
-    sample_internal_id = Column(types.String(128), nullable=False)
     lane_number = Column(types.Integer)
+
+    sample_internal_id = Column(types.String(128), nullable=False)
     sample_read_count = Column(types.Integer)
-    base_fraction_passing_q30 = Column(types.Numeric(10, 5))
-    mean_sample_quality_score = Column(types.Numeric(10, 5))
+    sample_base_fraction_passing_q30 = Column(types.Numeric(10, 5))
+    sample_base_mean_quality_score = Column(types.Numeric(10, 5))
+
     created_at = Column(types.DateTime)
