@@ -73,7 +73,6 @@ def test_without_samples(
 def test_dry_run(
     cli_runner: CliRunner,
     rnafusion_context: CGConfig,
-    mock_analysis_finish,
     caplog: LogCaptureFixture,
     rnafusion_case_id: str,
 ):
