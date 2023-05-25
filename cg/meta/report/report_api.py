@@ -50,7 +50,7 @@ class ReportAPI(MetaAPI):
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
-        report_data: ReportModel = self.validate_report_fields(case_id, report_data, force_report)
+        # report_data: ReportModel = self.validate_report_fields(case_id, report_data, force_report)
 
         rendered_report = self.render_delivery_report(report_data.dict())
         return rendered_report
