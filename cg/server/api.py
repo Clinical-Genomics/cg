@@ -219,6 +219,17 @@ def _get_cases(
     )
 
 
+@BLUEPRINT.route("/cases/<case_id>")
+def parse_family(case_id):
+    """Return a family with links."""
+    case: Family = db.get_case_by_internal_id(internal_id=case_id)
+    if case is None:
+        return abort(http.HTTPStatus.NOT_FOUND)
+    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
+        return abort(http.HTTPStatus.FORBIDDEN)
+    return jsonify(**case.to_dict(links=True, analyses=True))
+
+
 @BLUEPRINT.route("/families")
 def get_families():
     """Return cases."""
