@@ -41,7 +41,7 @@ def get_reagent_label(artifact) -> Optional[str]:
 
 def extract_sequence_in_parentheses(label: str) -> Optional[str]:
     """Return the sequence in parentheses from the reagent label or None if not found."""
-    match = re.match(r"^.+ \((.+)\)$", label)
+    match = re.match(r"^[^(]+ \(([^)]+)\)$", label)
     return match.group(1) if match else None
 
 
