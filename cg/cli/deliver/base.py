@@ -27,8 +27,8 @@ DELIVERY_TYPE = click.option(
 FORCE_ALL = click.option(
     "--force-all",
     help=(
-        f"Force delivery of all sample files "
-        f"- disregarding of amount of reads or previous deliveries"
+        "Force delivery of all sample files "
+        "- disregarding of amount of reads or previous deliveries"
     ),
     is_flag=True,
 )
