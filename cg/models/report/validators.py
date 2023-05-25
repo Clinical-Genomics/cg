@@ -42,6 +42,12 @@ def validate_float(value: Union[float, str]) -> str:
     return str(round(float(value), PRECISION)) if value or isinstance(value, float) else NA_FIELD
 
 
+def validate_pct(value: Union[float, str]) -> str:
+    """Returns a processed float value"""
+
+    return validate_float(float(value) * 100) if value else NA_FIELD
+
+
 def validate_date(date: datetime) -> str:
     """Returns the date part (year, month, day) from a datetime object"""
 
