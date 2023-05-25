@@ -26,7 +26,10 @@ DELIVERY_TYPE = click.option(
 )
 FORCE_ALL = click.option(
     "--force-all",
-    help="Deliver sample files for all samples regardless of amount of reads",
+    help=(
+        f"Force delivery of all sample files "
+        f"- disregarding of amount of reads or previous deliveries"
+    ),
     is_flag=True,
 )
 TICKET_ID_ARG = click.argument("ticket", type=str, required=True)
