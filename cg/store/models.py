@@ -761,7 +761,7 @@ class User(Model):
 
 
 class LaneSampleSequencingMetrics(Model):
-    __tablename__ = "LaneSampleSequencingMetrics"
+    __tablename__ = "lane_sample_sequencing_metrics"
     id = Column(types.Integer, primary_key=True)
     flow_cell_name = Column(types.String(128), nullable=False)
     sample_internal_id = Column(types.String(128), nullable=False)
