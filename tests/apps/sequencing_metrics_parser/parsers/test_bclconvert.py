@@ -9,6 +9,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertRunInfo,
 )
+from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 
 
 def test_parse_bcl_convert_metrics(
@@ -284,3 +285,21 @@ def test_get_mean_quality_score_per_lane(
 
     # THEN assert that the mean quality score per lane is correct
     assert mean_quality_score_per_lane == bcl_convert_test_mean_quality_score_per_lane
+
+
+def test_is_valid_sample_project(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+):
+    """Test to check if a sample project is valid."""
+    # GIVEN a sample project
+
+    # WHEN checking if the sample project is valid
+    sample_project_list: List[str] = [test_sample_internal_id, INDEX_CHECK, UNDETERMINED]
+    expected_outcome: List[bool] = [True, False, False]
+
+    # THEN assert that the outcome is correct
+    for index in range(len(sample_project_list)):
+        assert (
+            parsed_bcl_convert_metrics.is_valid_sample_project(sample_project_list[index])
+            == expected_outcome[index]
+        )

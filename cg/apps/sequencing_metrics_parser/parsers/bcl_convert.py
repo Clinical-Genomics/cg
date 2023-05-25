@@ -14,7 +14,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertRunInfo,
     BclConvertSampleSheetData,
 )
-
+from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 
 LOG = logging.getLogger(__name__)
 
@@ -98,9 +98,15 @@ class BclConvertMetricsParser:
         """Return a list of sample internal ids."""
         sample_internal_ids: List[str] = []
         for sample_demux_metric in self.demux_metrics:
-            if sample_demux_metric.sample_project not in ["indexcheck", "Undetermined"]:
+            if self.is_valid_sample_project(sample_project=sample_demux_metric.sample_project):
                 sample_internal_ids.append(sample_demux_metric.sample_internal_id)
         return sample_internal_ids
+
+    def is_valid_sample_project(self, sample_project: str) -> bool:
+        """Return True if the sample project is valid."""
+        if sample_project in [INDEX_CHECK, UNDETERMINED]:
+            return False
+        return True
 
     def get_lanes_for_sample_internal_id(self, sample_internal_id: str) -> List[int]:
         """Return a list of lanes for a sample."""

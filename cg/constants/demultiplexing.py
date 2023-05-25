@@ -102,3 +102,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
+
+
+INDEX_CHECK = "index_check"
+UNDETERMINED = "Undetermined"
