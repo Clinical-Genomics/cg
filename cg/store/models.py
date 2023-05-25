@@ -763,8 +763,8 @@ class User(Model):
 class LaneSampleSequencingMetrics(Model):
     __tablename__ = "LaneSampleSequencingMetrics"
     id = Column(types.Integer, primary_key=True)
-    flow_cell_name = Column(types.String(128), nullable=False)  # TODO: Add FK to flowcell table
-    sample_internal_id = Column(types.String(128), nullable=False)  # TODO: Add FK to sample table
+    flow_cell_name = Column(types.String(128), nullable=False)
+    sample_internal_id = Column(types.String(128), nullable=False)
     lane_number = Column(types.Integer)
     sample_read_count = Column(types.Integer)
     base_fraction_passing_q30 = Column(types.Numeric(10, 5))
