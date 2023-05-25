@@ -57,10 +57,6 @@ class MockLimsAPI(LimsAPI):
         self._sequencing_method = "CG002 - Cluster Generation (HiSeq X)"
         self._delivery_method = "CG002 - Delivery"
 
-    def get_reagent_types(self, **kwargs) -> List[MockReagentType]:
-        """Return a list with one reagent."""
-        return [MockReagentType()]
-
     def set_prep_method(self, method: str = "1337:00 Test prep method"):
         """Mock function"""
         self._prep_method = method

@@ -36,3 +36,9 @@ def lims_api():
 def fixture_reagent_label() -> str:
     """Returns a reagent label."""
     return MockReagentType().label
+
+
+@pytest.fixture(name="reagent_sequence")
+def fixture_reagent_sequence() -> str:
+    """Returns a reagent sequence."""
+    return MockReagentType().sequence
