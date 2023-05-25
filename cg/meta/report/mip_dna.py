@@ -1,6 +1,7 @@
 import logging
-from typing import Optional, Iterable
+from typing import Optional, Iterable, List
 
+from cg.models.report.sample import SampleModel
 from cgmodels.cg.constants import Pipeline
 from housekeeper.store.models import Version, File
 
@@ -82,6 +83,17 @@ class MipDNAReportAPI(ReportAPI):
         """Returns the build version of the genome reference of a specific case."""
 
         return analysis_metadata.genome_build
+
+    def get_report_accreditation(
+        self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
+    ) -> bool:
+        """Checks if the report is accredited or not by evaluating each of the sample process accreditations."""
+
+        for sample in samples:
+            if not sample.application.accredited:
+                return False
+
+        return True
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for MIP DNA."""
