@@ -66,7 +66,7 @@ def test_without_config(cli_runner: CliRunner, balsamic_context: CGConfig, caplo
 
 
 def test_case_without_deliverables_file(
-    cli_runner: CliRunner, balsamic_context: CGConfig, mock_config: dict, caplog
+    cli_runner: CliRunner, balsamic_context: CGConfig, mock_config, caplog
 ):
     """Test command with case_id and config file but no analysis_finish"""
     caplog.set_level(logging.ERROR)
@@ -87,8 +87,6 @@ def test_case_with_malformed_deliverables_file(
     cli_runner,
     mocker,
     balsamic_context: CGConfig,
-    mock_config: dict,
-    mock_deliverable,
     malformed_hermes_deliverables: dict,
     caplog,
 ):
@@ -128,7 +126,6 @@ def test_valid_case(
     mocker,
     hermes_deliverables,
     balsamic_context: CGConfig,
-    real_housekeeper_api: HousekeeperAPI,
     mock_config,
     mock_deliverable,
     caplog,
@@ -165,7 +162,6 @@ def test_valid_case_already_added(
     real_housekeeper_api: HousekeeperAPI,
     mock_config,
     mock_deliverable,
-    mock_analysis_finish,
     caplog,
 ):
     caplog.set_level(logging.ERROR)
