@@ -15,7 +15,7 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
     perfect_reads_ratio,
     average_clusters_per_lane,
 )
-from cg.store.models import LaneSampleMetrics
+from cg.store.models import LaneSampleSequencingMetrics
 
 
 def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
@@ -35,14 +35,16 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
         stats_json_path=stats_json_path
     )
 
-    sequencing_statistics: List[LaneSampleMetrics] = []
+    sequencing_statistics: List[LaneSampleSequencingMetrics] = []
 
     for conversion_result in raw_sequencing_metrics.conversion_results:
         for demux_result in conversion_result.demux_results:
-            statistics_for_sample_in_lane: LaneSampleMetrics = create_sequencing_statistics(
-                conversion_result=conversion_result,
-                demux_result=demux_result,
-                raw_sequencing_metrics=raw_sequencing_metrics,
+            statistics_for_sample_in_lane: LaneSampleSequencingMetrics = (
+                create_sequencing_statistics(
+                    conversion_result=conversion_result,
+                    demux_result=demux_result,
+                    raw_sequencing_metrics=raw_sequencing_metrics,
+                )
             )
             sequencing_statistics.append(statistics_for_sample_in_lane)
 
@@ -53,7 +55,7 @@ def create_sequencing_statistics(
     conversion_result: ConversionResult,
     demux_result: DemuxResult,
     raw_sequencing_metrics: Bcl2FastqSequencingMetrics,
-) -> LaneSampleMetrics:
+) -> LaneSampleSequencingMetrics:
     """
     Generates a SequencingStatistics object based on the provided conversion and demultiplexing results
     along with the raw sequencing metrics.
@@ -88,7 +90,7 @@ def create_sequencing_statistics(
         lane_count=number_of_lanes,
     )
 
-    return LaneSampleMetrics(
+    return LaneSampleSequencingMetrics(
         flow_cell_name=raw_sequencing_metrics.flowcell,
         sample_internal_id=demux_result.sample_id,
         lane=conversion_result.lane_number,
