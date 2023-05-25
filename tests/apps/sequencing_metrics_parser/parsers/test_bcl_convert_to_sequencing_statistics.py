@@ -9,11 +9,7 @@ from typing import List
 
 
 def test_create_sequencing_statistics_from_bcl_convert_metrics(
-    bcl_convert_demux_metric_file_path: Path,
-    bcl_convert_quality_metric_file_path: Path,
-    bcl_convert_sample_sheet_file_path: Path,
-    bcl_convert_adapter_metrics_file_path: Path,
-    bcl_convert_run_info_file_path: Path,
+    bcl_convert_metrics_dir_path: Path,
     parsed_bcl_convert_metrics: BclConvertMetricsParser,
 ):
     """Test to create sequencing statistics from bcl convert metrics."""
@@ -23,11 +19,7 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
     sequencing_statistics_list: List[
         SequencingStatistics
     ] = create_sequencing_statistics_from_bcl_convert_metrics(
-        adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
-        quality_metrics_file_path=bcl_convert_quality_metric_file_path,
-        demux_metrics_file_path=bcl_convert_demux_metric_file_path,
-        sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
-        run_info_file_path=bcl_convert_run_info_file_path,
+        bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path,
     )
 
     # THEN assert that Sequencing statistics are created

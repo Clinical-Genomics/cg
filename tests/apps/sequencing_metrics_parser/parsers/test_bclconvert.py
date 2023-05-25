@@ -13,21 +13,13 @@ from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 
 
 def test_parse_bcl_convert_metrics(
-    bcl_convert_quality_metric_file_path,
-    bcl_convert_demux_metric_file_path,
-    bcl_convert_sample_sheet_file_path,
-    bcl_convert_adapter_metrics_file_path,
-    bcl_convert_run_info_file_path,
+    bcl_convert_metrics_dir_path: Path,
 ):
     """Test to parse BCLConvert metrics."""
     # GIVEN paths to a BCLConvert metrics files
     # WHEN parsing the files
     bcl_convert_metrics_parser = BclConvertMetricsParser(
-        bcl_convert_quality_metrics_file_path=bcl_convert_quality_metric_file_path,
-        bcl_convert_demux_metrics_file_path=bcl_convert_demux_metric_file_path,
-        bcl_convert_sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
-        bcl_convert_adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
-        bcl_convert_run_info_file_path=bcl_convert_run_info_file_path,
+        bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path
     )
 
     # THEN assert that the metrics are parsed

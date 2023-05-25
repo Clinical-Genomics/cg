@@ -9,19 +9,11 @@ from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 
 
 def create_sequencing_statistics_from_bcl_convert_metrics(
-    adapter_metrics_file_path: Path,
-    quality_metrics_file_path: Path,
-    demux_metrics_file_path: Path,
-    sample_sheet_file_path: Path,
-    run_info_file_path: Path,
+    bcl_convert_metrics_dir_path: Path,
 ) -> List[SequencingStatistics]:
     """Parse the BCL convert metrics data into the sequencing statistics model."""
     metrics_parser: BclConvertMetricsParser = BclConvertMetricsParser(
-        bcl_convert_adapter_metrics_file_path=adapter_metrics_file_path,
-        bcl_convert_quality_metrics_file_path=quality_metrics_file_path,
-        bcl_convert_demux_metrics_file_path=demux_metrics_file_path,
-        bcl_convert_sample_sheet_file_path=sample_sheet_file_path,
-        bcl_convert_run_info_file_path=run_info_file_path,
+        bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path,
     )
     sample_internal_ids: List[str] = metrics_parser.get_sample_internal_ids()
     sequencing_statistics: List[SequencingStatistics] = []

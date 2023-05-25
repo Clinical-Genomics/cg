@@ -18,42 +18,10 @@ from cg.store.models import SequencingStatistics
 from datetime import datetime
 
 
-@pytest.fixture(name="bcl_convert_demux_metric_file_path")
-def fixture_bcl_convert_demux_metric_file_path() -> Path:
-    """Return a path to a BCLConvert demux metrics file."""
-    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_metrics.csv")
-
-
-@pytest.fixture(name="bcl_convert_quality_metric_file_path")
-def fixture_bcl_convert_quality_metric_file_path() -> Path:
-    """Return a path to a BCLConvert quality metrics file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_quality_metrics.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_sample_sheet_file_path")
-def fixture_bcl_convert_sample_sheet_file_path() -> Path:
-    """Return a path to a BCLConvert sample sheet file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_sample_sheet.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_adapter_metrics_file_path")
-def fixture_bcl_convert_adapter_metrics_file_path() -> Path:
-    """Return a path to a BCLConvert adapter metrics file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_adapter_metrics.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_run_info_file_path")
-def fixture_bcl_convert_run_info_file_path() -> Path:
-    """Return a path to a BCLConvert run info file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_run_info.xml"
-    )
+@pytest.fixture(name="bcl_convert_metrics_dir_path")
+def fixture_bcl_convert_metrics_dir_path() -> Path:
+    """Return a path to a BCLConvert metrics directory."""
+    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser")
 
 
 @pytest.fixture(name="test_sample_internal_id")
@@ -180,21 +148,9 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
 
 
 @pytest.fixture(name="parsed_bcl_convert_metrics")
-def fixture_parsed_bcl_convert_metrics(
-    bcl_convert_quality_metric_file_path,
-    bcl_convert_demux_metric_file_path,
-    bcl_convert_sample_sheet_file_path,
-    bcl_convert_adapter_metrics_file_path,
-    bcl_convert_run_info_file_path,
-) -> BclConvertMetricsParser:
+def fixture_parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BclConvertMetricsParser:
     """Return an object with parsed BCLConvert metrics."""
-    return BclConvertMetricsParser(
-        bcl_convert_quality_metrics_file_path=bcl_convert_quality_metric_file_path,
-        bcl_convert_demux_metrics_file_path=bcl_convert_demux_metric_file_path,
-        bcl_convert_sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
-        bcl_convert_adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
-        bcl_convert_run_info_file_path=bcl_convert_run_info_file_path,
-    )
+    return BclConvertMetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
 
 
 @pytest.fixture(name="parsed_sequencing_statistics_from_bcl_convert")

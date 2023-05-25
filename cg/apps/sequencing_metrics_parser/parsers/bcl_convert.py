@@ -7,6 +7,13 @@ from typing import List, Union, Dict, Callable
 from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.constants.constants import FileFormat
+from cg.constants.bcl_convert_metrics import (
+    DEMUX_METRICS_FILE_NAME,
+    QUALITY_METRICS_FILE_NAME,
+    ADAPTER_METRICS_FILE_NAME,
+    RUN_INFO_FILE_NAME,
+    SAMPLE_SHEET_FILE_NAME,
+)
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
@@ -22,18 +29,18 @@ LOG = logging.getLogger(__name__)
 class BclConvertMetricsParser:
     def __init__(
         self,
-        bcl_convert_quality_metrics_file_path: Path,
-        bcl_convert_demux_metrics_file_path: Path,
-        bcl_convert_adapter_metrics_file_path: Path,
-        bcl_convert_sample_sheet_file_path: Path,
-        bcl_convert_run_info_file_path: Path,
+        bcl_convert_metrics_dir_path: Path,
     ) -> None:
         """Initialize the class."""
-        self.quality_metrics_path: Path = bcl_convert_quality_metrics_file_path
-        self.demux_metrics_path: Path = bcl_convert_demux_metrics_file_path
-        self.adapter_metrics_path: Path = bcl_convert_adapter_metrics_file_path
-        self.sample_sheet_path: Path = bcl_convert_sample_sheet_file_path
-        self.run_info_path: Path = bcl_convert_run_info_file_path
+        self.quality_metrics_path: Path = Path(
+            bcl_convert_metrics_dir_path, QUALITY_METRICS_FILE_NAME
+        )
+        self.demux_metrics_path: Path = Path(bcl_convert_metrics_dir_path, DEMUX_METRICS_FILE_NAME)
+        self.adapter_metrics_path: Path = Path(
+            bcl_convert_metrics_dir_path, ADAPTER_METRICS_FILE_NAME
+        )
+        self.sample_sheet_path: Path = Path(bcl_convert_metrics_dir_path, SAMPLE_SHEET_FILE_NAME)
+        self.run_info_path: Path = Path(bcl_convert_metrics_dir_path, RUN_INFO_FILE_NAME)
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
             metrics_file_path=self.quality_metrics_path, metrics_model=BclConvertQualityMetrics
         )

@@ -104,5 +104,5 @@ class DemultiplexingDirsAndFiles(StrEnum):
     UNALIGNED_DIR_NAME: str = "Unaligned"
 
 
-INDEX_CHECK = "index_check"
+INDEX_CHECK = "indexcheck"
 UNDETERMINED = "Undetermined"

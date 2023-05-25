@@ -37,3 +37,10 @@ class BclConvertAdapterMetricsColumnNames(Enum):
     SAMPLE_PROJECT: str = "Sample_Project"
     READ_NUMBER: str = "ReadNumber"
     SAMPLE_BASES: str = "SampleBases"
+
+
+DEMUX_METRICS_FILE_NAME = "Demultiplex_Stats.csv"
+QUALITY_METRICS_FILE_NAME = "Quality_Metrics.csv"
+ADAPTER_METRICS_FILE_NAME = "Adapter_Metrics.csv"
+RUN_INFO_FILE_NAME = "RunInfo.xml"
+SAMPLE_SHEET_FILE_NAME = "SampleSheet.csv"
