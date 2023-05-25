@@ -50,7 +50,6 @@ def test_store(
     real_housekeeper_api,
     mock_config,
     mock_deliverable,
-    mock_analysis_finish,
     caplog,
     hermes_deliverables,
     mocker,
@@ -129,13 +128,11 @@ def test_start_available(cli_runner: CliRunner, balsamic_context: CGConfig, capl
 
 
 def test_store_available(
-    tmpdir_factory,
     cli_runner: CliRunner,
     balsamic_context: CGConfig,
     real_housekeeper_api,
     mock_config,
     mock_deliverable,
-    mock_analysis_finish,
     caplog,
     mocker,
     hermes_deliverables,
