@@ -399,10 +399,10 @@ class ReportAPI(MetaAPI):
 
         raise NotImplementedError
 
-    def get_variant_callers(self, analysis_metadata: AnalysisModel) -> list:
+    def get_variant_callers(self, _analysis_metadata: AnalysisModel) -> Optional[list]:
         """Extracts the list of variant-calling filters used during analysis."""
 
-        raise NotImplementedError
+        return []
 
     def get_report_accreditation(
         self, samples: List[SampleModel], _analysis_metadata: AnalysisModel = None

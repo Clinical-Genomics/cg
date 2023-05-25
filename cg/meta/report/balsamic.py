@@ -118,16 +118,16 @@ class BalsamicReportAPI(ReportAPI):
 
         return analysis_metadata.config.reference.reference_genome_version
 
-    def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list:
+    def get_variant_callers(self, _analysis_metadata: BalsamicAnalysis) -> list:
         """
         Extracts the list of BALSAMIC variant-calling filters and their versions (if available) from the
         config.json file.
         """
 
-        sequencing_type = analysis_metadata.config.analysis.sequencing_type
-        analysis_type = analysis_metadata.config.analysis.analysis_type
-        var_callers: Dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
-        tool_versions: Dict[str, list] = analysis_metadata.config.bioinfo_tools_version
+        sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
+        analysis_type: str = _analysis_metadata.config.analysis.analysis_type
+        var_callers: Dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
+        tool_versions: Dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
 
         analysis_var_callers = list()
         for var_caller_name, var_caller_attributes in var_callers.items():
@@ -135,7 +135,9 @@ class BalsamicReportAPI(ReportAPI):
                 sequencing_type in var_caller_attributes.sequencing_type
                 and analysis_type in var_caller_attributes.analysis_type
             ):
-                version = self.get_variant_caller_version(var_caller_name, tool_versions)
+                version: Optional[str] = self.get_variant_caller_version(
+                    var_caller_name, tool_versions
+                )
                 analysis_var_callers.append(
                     f"{var_caller_name} (v{version})" if version else var_caller_name
                 )
@@ -156,7 +158,7 @@ class BalsamicReportAPI(ReportAPI):
         return None
 
     def get_report_accreditation(
-        self, samples: List[SampleModel], _analysis_metadata: BalsamicAnalysis
+        self, samples: List[SampleModel], _analysis_metadata: BalsamicAnalysis = None
     ) -> bool:
         """Checks if the report is accredited or not."""
 

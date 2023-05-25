@@ -96,11 +96,6 @@ class MipDNAReportAPI(ReportAPI):
 
         return analysis_metadata.genome_build
 
-    def get_variant_callers(self, analysis_metadata: MipAnalysis = None) -> list:
-        """Extracts the list of variant-calling filters used during analysis."""
-
-        return []
-
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for MIP DNA."""
 

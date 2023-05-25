@@ -1,5 +1,6 @@
 """RNAfusion delivery report API."""
 import logging
+from typing import Optional
 
 from cg.models.rnafusion.metrics import RnafusionQCMetrics
 
@@ -50,3 +51,7 @@ class RnafusionReportAPI(ReportAPI):
             uniquely_mapped_reads=sample_metrics.uniquely_mapped,
             uniquely_mapped_reads_pct=sample_metrics.uniquely_mapped_percent,
         )
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """Return the file path of the uploaded to Scout file given its tag."""
+        return None
