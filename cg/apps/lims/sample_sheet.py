@@ -1,7 +1,7 @@
 """Functions to get sample sheet information from Lims."""
 import logging
 import re
-from typing import Iterable, List, Optional, Union, Match
+from typing import Iterable, List, Optional, Union
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
@@ -39,9 +39,10 @@ def get_reagent_label(artifact) -> Optional[str]:
     return labels[0] if labels else None
 
 
-def extract_sequence_in_parentheses(label: str) -> Optional[Match[str]]:
-    """Use regex to extract the sequence in parentheses from the reagent label."""
-    return re.match(r"^.+ \((.+)\)$", label)
+def extract_sequence_in_parentheses(label: str) -> Optional[str]:
+    """Return the sequence in parentheses from the reagent label or None if not found."""
+    match = re.match(r"^.+ \((.+)\)$", label)
+    return match.group(1) if match else None
 
 
 def get_index(lims: Lims, label: str) -> str:
@@ -60,7 +61,7 @@ def get_index(lims: Lims, label: str) -> str:
 
     match = extract_sequence_in_parentheses(label=label)
     if match:
-        assert match.group(1) == sequence
+        assert match == sequence
 
     return sequence
 
