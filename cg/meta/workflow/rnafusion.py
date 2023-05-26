@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from cg.store.models import Family
 from pydantic import ValidationError
 
 from cg import resources
@@ -345,6 +346,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def get_multiqc_json_metrics(self, case_id: str) -> List[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_id: str = case.links[0].sample.internal_id
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
@@ -355,7 +358,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return [
             MetricsBase(
                 header=None,
-                id=case_id,
+                id=sample_id,
                 input="multiqc_data.json",
                 name=metric_name,
                 step="multiqc",
