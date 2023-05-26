@@ -35,17 +35,19 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
 
     for conversion_result in raw_sequencing_metrics.conversion_results:
         for demux_result in conversion_result.demux_results:
-            metrics_for_sample_in_lane: SampleLaneSequencingMetrics = create_sequencing_metrics(
-                conversion_result=conversion_result,
-                demux_result=demux_result,
-                raw_sequencing_metrics=raw_sequencing_metrics,
+            metrics_for_sample_in_lane: SampleLaneSequencingMetrics = (
+                create_sample_lane_sequencing_metrics(
+                    conversion_result=conversion_result,
+                    demux_result=demux_result,
+                    raw_sequencing_metrics=raw_sequencing_metrics,
+                )
             )
             sample_lane_metrics.append(metrics_for_sample_in_lane)
 
     return sample_lane_metrics
 
 
-def create_sequencing_metrics(
+def create_sample_lane_sequencing_metrics(
     conversion_result: ConversionResult,
     demux_result: DemuxResult,
     raw_sequencing_metrics: Bcl2FastqSequencingMetrics,
@@ -69,8 +71,12 @@ def create_sequencing_metrics(
         in a lane on the flow cell.
     """
 
-    average_quality_score: float = calculate_average_quality_score(demux_result=demux_result)
-    bases_with_q30_percent: float = calculate_q30_ratio(demux_result=demux_result)
+    average_quality_score: float = calculate_average_quality_score_for_sample_in_lane(
+        demux_result=demux_result
+    )
+    bases_with_q30_percent: float = calculate_q30_ratio_for_sample_in_lane(
+        demux_result=demux_result
+    )
 
     return SampleLaneSequencingMetrics(
         flow_cell_name=raw_sequencing_metrics.flowcell,
@@ -83,7 +89,7 @@ def create_sequencing_metrics(
     )
 
 
-def calculate_q30_ratio(demux_result: DemuxResult) -> float:
+def calculate_q30_ratio_for_sample_in_lane(demux_result: DemuxResult) -> float:
     """
     Calculate the proportion of bases that have a Phred quality score of 30 or more (Q30) for a sample
     in a lane from the demux result.
@@ -101,7 +107,7 @@ def calculate_q30_ratio(demux_result: DemuxResult) -> float:
     return q30_ratio(q30_yield=q30_yield, total_yield=total_yield)
 
 
-def calculate_average_quality_score(demux_result: DemuxResult) -> float:
+def calculate_average_quality_score_for_sample_in_lane(demux_result: DemuxResult) -> float:
     """
     Calculate the mean quality score across all bases for a sample in a lane from the demux result.
 
