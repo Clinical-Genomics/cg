@@ -247,8 +247,6 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
     except CgError as error:
         raise click.Abort() from error
 
-    if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        raise click.Abort()
     analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
     if dry_run:
         LOG.info("Dry-run: QC metrics validation would be performed.")
