@@ -41,12 +41,6 @@ def get_older_cases_by_creation_date(cases: Query, creation_date: datetime, **kw
     return cases.order_by(Family.created_at.asc())
 
 
-def get_newer_cases_by_creation_date(cases: Query, creation_date: datetime, **kwargs) -> Query:
-    """Return newer cases compared to date."""
-    cases = cases.filter(Family.created_at > creation_date)
-    return cases.order_by(Family.created_at.asc())
-
-
 def get_cases_with_pipeline(cases: Query, pipeline: Pipeline = None, **kwargs) -> Query:
     """Return cases with pipeline."""
     return cases.filter(Family.data_analysis == pipeline) if pipeline else cases
@@ -250,7 +244,6 @@ class CaseFilter(Enum):
     GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
     GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
     GET_OLD_BY_CREATION_DATE: Callable = get_older_cases_by_creation_date
-    GET_NEW_BY_CREATION_DATE: Callable = get_newer_cases_by_creation_date
     GET_NEW_BY_ORDER_DATE: Callable = get_newer_cases_by_order_date
     GET_WITH_PIPELINE: Callable = get_cases_with_pipeline
     GET_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline

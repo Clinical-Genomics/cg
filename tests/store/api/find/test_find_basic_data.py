@@ -100,25 +100,6 @@ def test_get_applications_is_not_archived(
     assert (application.is_archived is False for application in applications)
 
 
-def test_get_applications_by_prep_category(
-    microbial_store: Store,
-    EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY,
-    prep_category=MicrosaltAppTags.PREP_CATEGORY,
-):
-    """Test function to return the application by prep category."""
-
-    # GIVEN a store with application records
-
-    # WHEN getting the query for the flow cells
-    applications: List[Application] = microbial_store.get_applications_by_prep_category(
-        prep_category=prep_category
-    )
-
-    # THEN return a application with the supplied application tag
-    assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY
-    assert (application.prep_category == prep_category for application in applications)
-
-
 def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATIONS):
     """Test function to return the applications."""
 

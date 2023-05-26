@@ -4,7 +4,6 @@ from cg.store import Store
 from cg.store.filters.status_case_sample_filters import (
     get_samples_in_case_by_internal_id,
     get_cases_with_sample_by_internal_id,
-    get_cases_with_sample_by_entry_id,
 )
 
 
@@ -76,44 +75,6 @@ def test_get_cases_with_sample_by_internal_id_invalid_id(
     # WHEN filtering using an invalid sample internal id
     filtered_query: Query = get_cases_with_sample_by_internal_id(
         case_samples=case_sample_query, sample_internal_id=invalid_sample_id
-    )
-
-    # THEN the filtered query is empty
-    assert filtered_query.count() == 0
-
-
-def test_get_cases_with_sample_by_entry_id_valid_id(
-    store_with_analyses_for_cases: Store,
-    sample_entry_id: int = 1,
-):
-    """Test that filtering by a valid sample entry id returns case-samples with the desired sample entry id."""
-    # GIVEN a store with case-samples and a sample entry id
-    case_sample_query: Query = store_with_analyses_for_cases._get_join_case_sample_query()
-
-    # WHEN filtering the query by the chosen sample entry id
-    filtered_query: Query = get_cases_with_sample_by_entry_id(
-        case_samples=case_sample_query, sample_entry_id=sample_entry_id
-    )
-
-    # THEN the filtered query has at least one element but fewer elements than the original query
-    assert 0 < filtered_query.count() < case_sample_query.count()
-    # THEN the case_samples in the filtered query have the correct case id
-    for case_sample in filtered_query.all():
-        assert case_sample.sample_id == sample_entry_id
-
-
-def test_get_cases_with_sample_by_entry_id_invalid_id(
-    store_with_analyses_for_cases: Store,
-    invalid_entry_id: int = -1,
-):
-    """Test that filtering with an invalid sample entry id returns an empty query."""
-    # GIVEN a store with case-samples and an invalid sample entry id
-    case_sample_query: Query = store_with_analyses_for_cases._get_join_case_sample_query()
-    assert case_sample_query.count() > 0
-
-    # WHEN filtering using an invalid sample entry id
-    filtered_query: Query = get_cases_with_sample_by_entry_id(
-        case_samples=case_sample_query, sample_entry_id=invalid_entry_id
     )
 
     # THEN the filtered query is empty

@@ -120,11 +120,6 @@ def filter_samples_is_not_tumour(samples: Query, **kwargs) -> Query:
     return samples.filter(Sample.is_tumour.is_(False))
 
 
-def filter_samples_by_name_pattern(samples: Query, name_pattern: str, **kwargs) -> Query:
-    """Return samples matching the name pattern."""
-    return samples.filter(Sample.name.like(f"%{name_pattern}%"))
-
-
 def filter_samples_by_internal_id_pattern(
     samples: Query, internal_id_pattern: str, **kwargs
 ) -> Query:
@@ -227,7 +222,6 @@ class SampleFilter(Enum):
     FILTER_BY_SUBJECT_ID: Callable = filter_samples_by_subject_id
     FILTER_IS_TUMOUR: Callable = filter_samples_is_tumour
     FILTER_IS_NOT_TUMOUR: Callable = filter_samples_is_not_tumour
-    FILTER_BY_NAME_PATTERN: Callable = filter_samples_by_name_pattern
     FILTER_BY_INTERNAL_ID_PATTERN: Callable = filter_samples_by_internal_id_pattern
     FILTER_BY_CUSTOMER: Callable = filter_samples_by_customer
     FILTER_BY_INTERNAL_ID_OR_NAME_SEARCH: Callable = filter_samples_by_internal_id_or_name_search

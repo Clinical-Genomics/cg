@@ -47,41 +47,12 @@ class FindBasicDataHandler(BaseHandler):
             tag=tag,
         ).first()
 
-    def get_applications_by_prep_category(self, prep_category: str) -> List[Application]:
-        """Return applications by prep category."""
-        return (
-            apply_application_filter(
-                applications=self._get_query(table=Application),
-                filter_functions=[ApplicationFilter.FILTER_BY_PREP_CATEGORY],
-                prep_category=prep_category,
-            )
-            .order_by(Application.prep_category, Application.tag)
-            .all()
-        )
-
     def get_applications_is_not_archived(self) -> List[Application]:
         """Return applications that are not archived."""
         return (
             apply_application_filter(
                 applications=self._get_query(table=Application),
                 filter_functions=[ApplicationFilter.FILTER_IS_NOT_ARCHIVED],
-            )
-            .order_by(Application.prep_category, Application.tag)
-            .all()
-        )
-
-    def get_applications_by_prep_category_and_is_archived(
-        self, prep_category: str
-    ) -> List[Application]:
-        """Return applications by prep category that are archived."""
-        return (
-            apply_application_filter(
-                applications=self._get_query(table=Application),
-                filter_functions=[
-                    ApplicationFilter.FILTER_BY_PREP_CATEGORY,
-                    ApplicationFilter.FILTER_IS_ARCHIVED,
-                ],
-                prep_category=prep_category,
             )
             .order_by(Application.prep_category, Application.tag)
             .all()
