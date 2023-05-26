@@ -8,24 +8,18 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertRunInfo,
 )
+from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
+from pathlib import Path
 
 
 def test_parse_bcl_convert_metrics(
-    bcl_convert_quality_metric_file_path,
-    bcl_convert_demux_metric_file_path,
-    bcl_convert_sample_sheet_file_path,
-    bcl_convert_adapter_metrics_file_path,
-    bcl_convert_run_info_file_path,
+    bcl_convert_metrics_dir_path: Path,
 ):
     """Test to parse BCLConvert metrics."""
     # GIVEN paths to a BCLConvert metrics files
     # WHEN parsing the files
     bcl_convert_metrics_parser = BclConvertMetricsParser(
-        bcl_convert_quality_metrics_file_path=bcl_convert_quality_metric_file_path,
-        bcl_convert_demux_metrics_file_path=bcl_convert_demux_metric_file_path,
-        bcl_convert_sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
-        bcl_convert_adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
-        bcl_convert_run_info_file_path=bcl_convert_run_info_file_path,
+        bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path
     )
 
     # THEN assert that the metrics are parsed
@@ -111,3 +105,147 @@ def test_parse_bcl_convert_sample_sheet(
     # ASSERT that the parsed sample sheet has the correct values
     for attr_name, attr_value in sample_sheet_model.dict().items():
         assert getattr(bcl_convert_sample_sheet_model_with_data, attr_name) == attr_value
+
+
+def test_get_sample_internal_ids(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    test_sample_internal_id: str,
+):
+    """Test to get sample internal ids from BclConvertMetricsParser."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting sample internal ids
+    sample_internal_ids: List[str] = parsed_bcl_convert_metrics.get_sample_internal_ids()
+
+    # THEN assert that the test sample internal id is present
+    assert test_sample_internal_id in sample_internal_ids
+
+    # THEN assert that all sample internal ids contain ACC prefix
+    assert all([sample_internal_id.startswith("ACC") for sample_internal_id in sample_internal_ids])
+
+
+def test_get_lanes_for_sample_internal_id(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+):
+    """Test to get lanes for a sample internal id from BclConvertMetricsParser."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting lanes for a sample internal id
+    lanes: List[int] = parsed_bcl_convert_metrics.get_lanes_for_sample(
+        sample_internal_id=test_sample_internal_id
+    )
+
+    # THEN assert that there are two lanes
+    assert len(lanes) == 2
+    for lane in lanes:
+        assert isinstance(lane, int)
+        assert lane in [1, 2]
+
+
+def test_get_metrics_for_sample_internal_id_and_lane(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+):
+    """Test to get metrics for a sample internal id and lane from BclConvertMetricsParser."""
+
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting metrics for a sample internal id and lane
+    metrics: BclConvertDemuxMetrics = parsed_bcl_convert_metrics.get_metrics_for_sample_and_lane(
+        metrics_list=parsed_bcl_convert_metrics.demux_metrics,
+        sample_internal_id=test_sample_internal_id,
+        lane=1,
+    )
+
+    # THEN assert that the metrics are of the correct type
+    assert isinstance(metrics, BclConvertDemuxMetrics)
+    assert metrics.sample_internal_id == test_sample_internal_id
+    assert metrics.lane == 1
+
+
+def test_calculate_total_reads_per_lane(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    test_sample_internal_id: str,
+    bcl_convert_reads_for_test_sample: int,
+    test_lane: int,
+):
+    """Test to calculate total reads per lane from BclConvertMetricsParser."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN calculating total reads per lane
+    total_reads_per_lane: int = parsed_bcl_convert_metrics.calculate_total_reads_for_sample_in_lane(
+        sample_internal_id=test_sample_internal_id, lane=test_lane
+    )
+    expected_total_reads_per_lane: int = bcl_convert_reads_for_test_sample * 2
+    # THEN assert that the total reads per lane is correct
+    assert total_reads_per_lane == expected_total_reads_per_lane
+
+
+def test_get_flow_cell_name(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser, bcl_convert_test_flow_cell_name: str
+):
+    """Test to get flow cell name from BclConvertMetricsParser."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting flow cell name
+    flow_cell_name: str = parsed_bcl_convert_metrics.get_flow_cell_name()
+
+    # THEN assert that the flow cell name is correct
+    assert flow_cell_name == bcl_convert_test_flow_cell_name
+
+
+def test_get_q30_bases_percent_per_lane(
+    parsed_bcl_convert_metrics,
+    bcl_convert_test_q30_bases_percent: float,
+    test_lane: int,
+    test_sample_internal_id,
+):
+    """Test to get q30 bases percent per lane from BclConvertMetricsParser."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting q30 bases percent per lane
+    q30_bases_percent_per_lane: float = (
+        parsed_bcl_convert_metrics.get_q30_bases_percent_for_sample_in_lane(
+            sample_internal_id=test_sample_internal_id, lane=test_lane
+        )
+    )
+
+    # THEN assert that the q30 bases percent per lane is correct
+    assert q30_bases_percent_per_lane == bcl_convert_test_q30_bases_percent
+
+
+def test_get_mean_quality_score_per_lane(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser,
+    test_sample_internal_id: str,
+    test_lane: int,
+    bcl_convert_test_mean_quality_score_per_lane: float,
+):
+    """Test to get mean quality score per lane from BclConvertMetricsParser."""
+    # GIVEN a parsed BCLConvert metrics
+
+    # WHEN getting mean quality score per lane
+    mean_quality_score_per_lane: float = (
+        parsed_bcl_convert_metrics.get_mean_quality_score_fot_sample_in_lane(
+            sample_internal_id=test_sample_internal_id, lane=test_lane
+        )
+    )
+
+    # THEN assert that the mean quality score per lane is correct
+    assert mean_quality_score_per_lane == bcl_convert_test_mean_quality_score_per_lane
+
+
+def test_is_valid_sample_project(
+    parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
+):
+    """Test to check if a sample project is valid."""
+    # GIVEN a sample project
+
+    # WHEN checking if the sample project is valid
+    sample_project_list: List[str] = [test_sample_internal_id, INDEX_CHECK, UNDETERMINED]
+    expected_outcome: List[bool] = [True, False, False]
+
+    # THEN assert that the outcome is correct
+    for index in range(len(sample_project_list)):
+        assert (
+            parsed_bcl_convert_metrics.is_valid_sample_project(sample_project_list[index])
+            == expected_outcome[index]
+        )
