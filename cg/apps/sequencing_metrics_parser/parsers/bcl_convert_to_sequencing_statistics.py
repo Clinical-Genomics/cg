@@ -8,7 +8,7 @@ from datetime import datetime
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 
 
-def create_sequencing_statistics_from_bcl_convert_metrics(
+def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics(
     bcl_convert_metrics_dir_path: Path,
 ) -> List[SampleLaneSequencingMetrics]:
     """Parse the BCL convert metrics data into the sequencing statistics model."""
@@ -16,12 +16,12 @@ def create_sequencing_statistics_from_bcl_convert_metrics(
         bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path,
     )
     sample_internal_ids: List[str] = metrics_parser.get_sample_internal_ids()
-    sequencing_statistics: List[SampleLaneSequencingMetrics] = []
+    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
     for sample_internal_id in sample_internal_ids:
         for lane in metrics_parser.get_lanes_for_sample_internal_id(
             sample_internal_id=sample_internal_id
         ):
-            sequencing_statistics.append(
+            sample_lane_sequencing_metrics.append(
                 SampleLaneSequencingMetrics(
                     sample_internal_id=sample_internal_id,
                     flow_cell_name=metrics_parser.get_flow_cell_name(),
@@ -39,4 +39,4 @@ def create_sequencing_statistics_from_bcl_convert_metrics(
                 )
             )
 
-    return sequencing_statistics
+    return sample_lane_sequencing_metrics
