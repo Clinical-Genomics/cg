@@ -178,6 +178,7 @@
               {% endfor %}
             </tbody>
             <thead>
+                <th></th>
                 <th>Reads passing filters [%]</th> <!-- TODO -->
                 <th>Mean read length after filtering</th> <!-- TODO -->
                 <th>Q20 bases [%]</th> <!-- TODO -->
@@ -190,6 +191,7 @@
             <tbody>
               {% for sample in case.samples %}
                 <tr>
+                  <td></td>
                   <td>{{ sample.metadata.pct_surviving }}</td>
                   <td>{{ sample.metadata.mean_length_r1 }}</td>
                   <td>{{ sample.metadata.q20_rate }}</td>
