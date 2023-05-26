@@ -151,7 +151,7 @@
           <table class="table table-bordered" aria-describedby="Sample table">
             <thead>
               <tr>
-                <th rowspan="2">Prov</th>
+                <th rowspan="4">Prov</th>
                 <th>RIN</th>
                 <th>Input amount [ng]</th> <!-- TODO -->
                 <th>Läspar [M]</th>
@@ -160,15 +160,6 @@
                 <th>Duplikat [%]</th>
                 <th>Adapter [%]</th> <!-- TODO -->
                 <th>5' - 3' bias</th> <!-- TODO -->
-              </tr>
-              <tr>
-                <th>Reads passing filters [%]</th> <!-- TODO -->
-                <th>Mean read length after filtering</th> <!-- TODO -->
-                <th>Q20 bases [%]</th> <!-- TODO -->
-                <th>Q30 bases [%]</th> <!-- TODO -->
-                <th>GC content [%]</th> <!-- TODO -->
-                <th>mRNA bases [%]</th> <!-- TODO -->
-                <th>Ribosomal bases [%]</th> <!-- TODO -->
               </tr>
             </thead>
             <tbody>
@@ -184,6 +175,20 @@
                   <td>{{ sample.metadata.pct_adapter }}</td>
                   <td>{{ sample.metadata.bias_5_3 }}</td>
                 </tr>
+              {% endfor %}
+            </tbody>
+            <thead>
+                <th>Reads passing filters [%]</th> <!-- TODO -->
+                <th>Mean read length after filtering</th> <!-- TODO -->
+                <th>Q20 bases [%]</th> <!-- TODO -->
+                <th>Q30 bases [%]</th> <!-- TODO -->
+                <th>GC content [%]</th> <!-- TODO -->
+                <th>mRNA bases [%]</th> <!-- TODO -->
+                <th>Ribosomal bases [%]</th> <!-- TODO -->
+              </tr>
+            </thead>
+            <tbody>
+              {% for sample in case.samples %}
                 <tr>
                   <td>{{ sample.metadata.pct_surviving }}</td>
                   <td>{{ sample.metadata.mean_length_r1 }}</td>
