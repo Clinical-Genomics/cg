@@ -131,7 +131,7 @@ def test_get_lanes_for_sample_internal_id(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting lanes for a sample internal id
-    lanes: List[int] = parsed_bcl_convert_metrics.get_lanes_for_sample_internal_id(
+    lanes: List[int] = parsed_bcl_convert_metrics.get_lanes_for_sample(
         sample_internal_id=test_sample_internal_id
     )
 
@@ -150,12 +150,10 @@ def test_get_metrics_for_sample_internal_id_and_lane(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting metrics for a sample internal id and lane
-    metrics: BclConvertDemuxMetrics = (
-        parsed_bcl_convert_metrics.get_metrics_for_sample_internal_id_and_lane(
-            metrics_list=parsed_bcl_convert_metrics.demux_metrics,
-            sample_internal_id=test_sample_internal_id,
-            lane=1,
-        )
+    metrics: BclConvertDemuxMetrics = parsed_bcl_convert_metrics.get_metrics_for_sample_and_lane(
+        metrics_list=parsed_bcl_convert_metrics.demux_metrics,
+        sample_internal_id=test_sample_internal_id,
+        lane=1,
     )
 
     # THEN assert that the metrics are of the correct type
@@ -174,7 +172,7 @@ def test_calculate_total_reads_per_lane(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN calculating total reads per lane
-    total_reads_per_lane: int = parsed_bcl_convert_metrics.calculate_total_reads_per_lane(
+    total_reads_per_lane: int = parsed_bcl_convert_metrics.calculate_total_reads_for_sample_in_lane(
         sample_internal_id=test_sample_internal_id, lane=test_lane
     )
     expected_total_reads_per_lane: int = bcl_convert_reads_for_test_sample * 2
@@ -205,8 +203,10 @@ def test_get_q30_bases_percent_per_lane(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting q30 bases percent per lane
-    q30_bases_percent_per_lane: float = parsed_bcl_convert_metrics.get_q30_bases_percent_per_lane(
-        sample_internal_id=test_sample_internal_id, lane=test_lane
+    q30_bases_percent_per_lane: float = (
+        parsed_bcl_convert_metrics.get_q30_bases_percent_for_sample_in_lane(
+            sample_internal_id=test_sample_internal_id, lane=test_lane
+        )
     )
 
     # THEN assert that the q30 bases percent per lane is correct
@@ -223,8 +223,10 @@ def test_get_mean_quality_score_per_lane(
     # GIVEN a parsed BCLConvert metrics
 
     # WHEN getting mean quality score per lane
-    mean_quality_score_per_lane: float = parsed_bcl_convert_metrics.get_mean_quality_score_per_lane(
-        sample_internal_id=test_sample_internal_id, lane=test_lane
+    mean_quality_score_per_lane: float = (
+        parsed_bcl_convert_metrics.get_mean_quality_score_fot_sample_in_lane(
+            sample_internal_id=test_sample_internal_id, lane=test_lane
+        )
     )
 
     # THEN assert that the mean quality score per lane is correct

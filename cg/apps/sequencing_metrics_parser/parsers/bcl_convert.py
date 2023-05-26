@@ -115,7 +115,7 @@ class BclConvertMetricsParser:
             return False
         return True
 
-    def get_lanes_for_sample_internal_id(self, sample_internal_id: str) -> List[int]:
+    def get_lanes_for_sample(self, sample_internal_id: str) -> List[int]:
         """Return a list of lanes for a sample."""
         lanes_for_sample: List[int] = []
         for sample_demux_metric in self.demux_metrics:
@@ -123,7 +123,7 @@ class BclConvertMetricsParser:
                 lanes_for_sample.append(sample_demux_metric.lane)
         return lanes_for_sample
 
-    def get_metrics_for_sample_internal_id_and_lane(
+    def get_metrics_for_sample_and_lane(
         self,
         metrics_list: List[
             Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
@@ -136,9 +136,9 @@ class BclConvertMetricsParser:
             if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
                 return metric
 
-    def calculate_total_reads_per_lane(self, sample_internal_id: str, lane: int) -> int:
+    def calculate_total_reads_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> int:
         """Calculate the total reads for a sample in a lane."""
-        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_internal_id_and_lane(
+        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_and_lane(
             metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.read_pair_count * 2
@@ -147,16 +147,18 @@ class BclConvertMetricsParser:
         """Return the flow cell name of the demultiplexed flow cell."""
         return self.sample_sheet[0].flow_cell_name
 
-    def get_q30_bases_percent_per_lane(self, sample_internal_id: str, lane: int) -> float:
+    def get_q30_bases_percent_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> float:
         """Return the percent of bases that are Q30 for a sample and lane."""
-        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
+        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
             metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.q30_bases_percent
 
-    def get_mean_quality_score_per_lane(self, sample_internal_id: str, lane: int) -> float:
+    def get_mean_quality_score_fot_sample_in_lane(
+        self, sample_internal_id: str, lane: int
+    ) -> float:
         """Return the mean quality score for a sample and lane."""
-        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
+        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
             metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.mean_quality_score_q30
