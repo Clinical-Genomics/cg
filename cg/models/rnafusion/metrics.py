@@ -17,6 +17,6 @@ class RnafusionQCMetrics(BaseModel):
     pct_mrna_bases: Optional[float]
     pct_ribosomal_bases: Optional[float]
     pct_surviving: Optional[float]
-    percent_duplication: Optional[float]
+    pct_duplication: Optional[float]
     reads_aligned: Optional[float]
     uniquely_mapped_percent: Optional[float]

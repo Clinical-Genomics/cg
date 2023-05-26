@@ -158,36 +158,40 @@
                 <th>Mappade sekvenser [%]</th>
                 <th>Unikt mappade sekvenser [%]</th>
                 <th>Duplikat [%]</th>
-                <th>mRNA bases [%]</th> <!-- TODO -->
-                <th>Ribosomal bases [%]</th> <!-- TODO -->
+                <th>Adapter [%]</th> <!-- TODO -->
+                <th>5' - 3' bias</th> <!-- TODO -->
+              </tr>
+              <tr>
                 <th>Reads passing filters [%]</th> <!-- TODO -->
+                <th>Mean read length after filtering</th> <!-- TODO -->
                 <th>Q20 bases [%]</th> <!-- TODO -->
                 <th>Q30 bases [%]</th> <!-- TODO -->
                 <th>GC content [%]</th> <!-- TODO -->
-                <th>Mean read length after filtering</th> <!-- TODO -->
-                <th>Adapter [%]</th> <!-- TODO -->
-                <th>5' - 3' bias</th> <!-- TODO -->
+                <th>mRNA bases [%]</th> <!-- TODO -->
+                <th>Ribosomal bases [%]</th> <!-- TODO -->
               </tr>
             </thead>
             <tbody>
               {% for sample in case.samples %}
                 <tr>
-                  <td>{{ sample.name }}*</td>
-                  <td>{{ sample.metadata.rin }}*</td>
+                  <td>{{ sample.name }}</td>
+                  <td>{{ sample.metadata.rin }}</td>
                   <td>{{ sample.metadata.input_amount }}*</td>
                   <td>{{ sample.metadata.million_read_pairs }}</td>
                   <td>{{ sample.metadata.mapped_reads }}</td>
                   <td>{{ sample.metadata.uniquely_mapped_reads }}</td>
                   <td>{{ sample.metadata.duplicates }}</td>
-                  <td>{{ sample.metadata.mrna_bases }}</td>
-                  <td>{{ sample.metadata.ribosomal_bases }}</td>
+                  <td>{{ sample.metadata.pct_adapter }}</td>
+                  <td>{{ sample.metadata.bias_5_3 }}</td>
+                </tr>
+                <tr>
                   <td>{{ sample.metadata.pct_surviving }}</td>
+                  <td>{{ sample.metadata.mean_length_r1 }}</td>
                   <td>{{ sample.metadata.q20_rate }}</td>
                   <td>{{ sample.metadata.q30_rate }}</td>
                   <td>{{ sample.metadata.gc_content }}</td>
-                  <td>{{ sample.metadata.mean_length_r1 }}</td>
-                  <td>{{ sample.metadata.pct_adapter }}</td>
-                  <td>{{ sample.metadata.bias_5_3 }}</td>
+                  <td>{{ sample.metadata.mrna_bases }}</td>
+                  <td>{{ sample.metadata.ribosomal_bases }}</td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -199,15 +203,15 @@
               <ins>Mappade sekvenser</ins>: Procent sekvenser som fått en eller flera positioner i det genom som använts som referensgenom.<br>
               <ins>Unikt mappade sekvenser</ins>:  <!-- TODO --> <br>
               <ins>Duplikat</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering. <!-- TODO --><br>
-              <ins>mRNA bases</ins>:  <!-- TODO -->
-              <ins>Ribosomal bases</ins>:  <!-- TODO -->
-              <ins>Reads passing filters</ins>:  <!-- TODO -->
-              <ins>Q20 bases</ins>:  <!-- TODO -->
-              <ins>Q30 bases</ins>:  <!-- TODO -->
-              <ins>GC content</ins>:  <!-- TODO -->
-              <ins>Mean read length after filtering</ins>:  <!-- TODO -->
-              <ins>Adapter</ins>:  <!-- TODO -->
+              <ins>Adapter</ins>:  <!-- TODO --><br>
               <ins>5' - 3' bias</ins>:  <!-- TODO -->
+              <ins>Reads passing filters</ins>:  <!-- TODO --><br>
+              <ins>Mean read length after filtering</ins>:  <!-- TODO --><br>
+              <ins>Q20 bases</ins>:  <!-- TODO --><br>
+              <ins>Q30 bases</ins>:  <!-- TODO --><br>
+              <ins>GC content</ins>:  <!-- TODO --><br>
+              <ins>mRNA bases</ins>:  <!-- TODO --><br>
+              <ins>Ribosomal bases</ins>:  <!-- TODO --><br>
             </caption>
           </table>
 
