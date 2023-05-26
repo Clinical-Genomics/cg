@@ -49,3 +49,21 @@ def fixture_csv_stream() -> str:
 def fixture_csv_temp_path(cg_dir: Path) -> Path:
     """Return a temp file path to use when writing csv."""
     return Path(cg_dir, "write_csv.csv")
+
+
+@pytest.fixture(name="xml_file_path")
+def fixture_xml_file_path(fixtures_dir: Path) -> Path:
+    """Return a file path to example XML file."""
+    return Path(fixtures_dir, "io", "example_xml.xml")
+
+
+@pytest.fixture(name="xml_stream")
+def fixture_xml_stream() -> str:
+    """Return string with XML format."""
+    return """<?xml version="1.0" encoding="UTF-8"?>\n<lorem>\n<text>Lorem ipsum sit amet</text>\n</lorem>\n"""
+
+
+@pytest.fixture(name="xml_temp_path")
+def fixture_xml_temp_path(cg_dir: Path) -> Path:
+    """Return a temp file path to use when writing xml."""
+    return Path(cg_dir, "write_xml.xml")
