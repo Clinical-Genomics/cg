@@ -24,8 +24,6 @@ def valid_bcl2fastq_metrics_data() -> Dict:
         "ConversionResults": [
             {
                 "LaneNumber": 1,
-                "TotalClustersRaw": 100,
-                "TotalClustersPF": 100,
                 "Yield": 1000,
                 "DemuxResults": [
                     {
@@ -53,8 +51,6 @@ def valid_bcl2fastq_metrics_data() -> Dict:
 def conversion_result() -> ConversionResult:
     return ConversionResult(
         LaneNumber=1,
-        TotalClustersRaw=100,
-        TotalClustersPF=80,
         Yield=1000,
         DemuxResults=[
             DemuxResult(
