@@ -14,7 +14,7 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertAdapterMetricsColumnNames,
 )
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
-from cg.store.models import SequencingStatistics
+from cg.store.models import SampleLaneSequencingMetrics
 from datetime import datetime
 
 
@@ -47,19 +47,9 @@ def fixture_bcl_convert_reads_for_test_sample() -> int:
     return 15962796
 
 
-@pytest.fixture(name="bcl_convert_yield_for_test_sample")
-def fixture_bcl_convert_yield_for_test_sample() -> int:
-    return 415032696
-
-
 @pytest.fixture(name="bcl_convert_test_q30_bases_percent")
 def fixture_bcl_convert_test_q30_bases_percent() -> float:
     return 0.95
-
-
-@pytest.fixture(name="bcl_convert_test_perfect_index_reads_percent")
-def fixture_bcl_convert_test_perfect_index_reads_percent() -> float:
-    return 1.00
 
 
 @pytest.fixture(name="bcl_convert_test_mean_quality_score_per_lane")
@@ -158,22 +148,16 @@ def fixture_parsed_sequencing_statistics_from_bcl_convert(
     test_sample_internal_id: str,
     test_lane: int,
     bcl_convert_test_flow_cell_name: str,
-    bcl_convert_yield_for_test_sample: int,
     bcl_convert_reads_for_test_sample: int,
-    bcl_convert_test_perfect_index_reads_percent: float,
     bcl_convert_test_mean_quality_score_per_lane: float,
     bcl_convert_test_q30_bases_percent_per_lane: float,
-) -> SequencingStatistics:
-    return SequencingStatistics(
+) -> SampleLaneSequencingMetrics:
+    return SampleLaneSequencingMetrics(
         sample_internal_id=test_sample_internal_id,
-        lane=test_lane,
+        flow_cell_lane_number=test_lane,
         flow_cell_name=bcl_convert_test_flow_cell_name,
-        yield_in_megabases=int(bcl_convert_yield_for_test_sample / 1000000),
-        read_counts=bcl_convert_reads_for_test_sample * 2,
-        perfect_index_reads_percent=bcl_convert_test_perfect_index_reads_percent,
-        lanes_mean_quality_score=bcl_convert_test_mean_quality_score_per_lane,
-        bases_with_q30_percent=bcl_convert_test_q30_bases_percent_per_lane,
-        passed_filter_percent=100.0,
-        raw_clusters_per_lane_percent=0,
-        started_at=datetime.now(),
+        sample_total_reads_in_lane=bcl_convert_reads_for_test_sample * 2,
+        sample_base_mean_quality_score=bcl_convert_test_mean_quality_score_per_lane,
+        sample_base_fraction_passing_q30=bcl_convert_test_q30_bases_percent_per_lane,
+        created_at=datetime.now(),
     )

@@ -1,5 +1,5 @@
 """Test for the bcl_convert_to_sequencing_statistics parser."""
-from cg.store.models import SequencingStatistics
+from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert_to_sequencing_statistics import (
     create_sequencing_statistics_from_bcl_convert_metrics,
@@ -17,14 +17,14 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
 
     # WHEN creating sequencing statistics from bcl convert metrics
     sequencing_statistics_list: List[
-        SequencingStatistics
+        SampleLaneSequencingMetrics
     ] = create_sequencing_statistics_from_bcl_convert_metrics(
         bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path,
     )
 
     # THEN assert that Sequencing statistics are created
     for sequencing_statistics in sequencing_statistics_list:
-        assert isinstance(sequencing_statistics, SequencingStatistics)
+        assert isinstance(sequencing_statistics, SampleLaneSequencingMetrics)
 
     # THEN assert that the number of sequencing statistics created is correct
     assert (

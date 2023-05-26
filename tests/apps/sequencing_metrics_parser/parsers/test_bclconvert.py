@@ -9,6 +9,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertRunInfo,
 )
 from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
+from pathlib import Path
 
 
 def test_parse_bcl_convert_metrics(
@@ -181,31 +182,6 @@ def test_calculate_total_reads_per_lane(
     assert total_reads_per_lane == expected_total_reads_per_lane
 
 
-def test_calculate_total_yield_per_lane_in_mega_bases(
-    parsed_bcl_convert_metrics: BclConvertMetricsParser,
-    test_sample_internal_id: str,
-    test_lane: int,
-    bcl_convert_yield_for_test_sample: int,
-):
-    """Test to calculate total yield per lane in mega bases from BclConvertMetricsParser."""
-    # GIVEN a parsed BCLConvert metrics
-
-    # WHEN calculating total yield per lane in mega bases
-    total_yield_per_lane_in_mega_bases: float = (
-        parsed_bcl_convert_metrics.calculate_total_yield_per_lane_in_mega_bases(
-            sample_internal_id=test_sample_internal_id,
-            lane=test_lane,
-        )
-    )
-
-    # THEN assert that the total yield per lane in mega bases is correct
-    expected_total_yield_per_lane_in_mega_bases: int = int(
-        bcl_convert_yield_for_test_sample / 1_000_000
-    )
-
-    assert total_yield_per_lane_in_mega_bases == expected_total_yield_per_lane_in_mega_bases
-
-
 def test_get_flow_cell_name(
     parsed_bcl_convert_metrics: BclConvertMetricsParser, bcl_convert_test_flow_cell_name: str
 ):
@@ -235,29 +211,6 @@ def test_get_q30_bases_percent_per_lane(
 
     # THEN assert that the q30 bases percent per lane is correct
     assert q30_bases_percent_per_lane == bcl_convert_test_q30_bases_percent
-
-
-def test_get_perfect_index_reads_percent_for_sample_per_lane(
-    parsed_bcl_convert_metrics,
-    test_lane,
-    test_sample_internal_id,
-    bcl_convert_test_perfect_index_reads_percent,
-):
-    """Test to get perfect index reads percent for sample per lane from BclConvertMetricsParser."""
-    # GIVEN a parsed BCLConvert metrics
-
-    # WHEN getting perfect index reads percent for sample per lane
-    perfect_index_reads_percent_for_sample_per_lane: float = (
-        parsed_bcl_convert_metrics.get_perfect_index_reads_percent_for_sample_per_lane(
-            sample_internal_id=test_sample_internal_id, lane=test_lane
-        )
-    )
-
-    # THEN assert that the perfect index reads percent for sample per lane is correct
-    assert (
-        perfect_index_reads_percent_for_sample_per_lane
-        == bcl_convert_test_perfect_index_reads_percent
-    )
 
 
 def test_get_mean_quality_score_per_lane(

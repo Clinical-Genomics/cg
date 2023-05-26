@@ -143,15 +143,6 @@ class BclConvertMetricsParser:
         )
         return metric.read_pair_count * 2
 
-    def calculate_total_yield_per_lane_in_mega_bases(
-        self, sample_internal_id: str, lane: int
-    ) -> int:
-        """Calculate the total yield for a sample and lanes."""
-        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_internal_id_and_lane(
-            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
-        )
-        return int(metric.yield_bases / 1000000)
-
     def get_flow_cell_name(self) -> str:
         """Return the flow cell name of the demultiplexed flow cell."""
         return self.sample_sheet[0].flow_cell_name
@@ -162,15 +153,6 @@ class BclConvertMetricsParser:
             metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
         return metric.q30_bases_percent
-
-    def get_perfect_index_reads_percent_for_sample_per_lane(
-        self, sample_internal_id: str, lane: int
-    ) -> float:
-        """Return the percent of perfect index reads for a sample and lane."""
-        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_internal_id_and_lane(
-            metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
-        )
-        return metric.perfect_index_reads_percent
 
     def get_mean_quality_score_per_lane(self, sample_internal_id: str, lane: int) -> float:
         """Return the mean quality score for a sample and lane."""
