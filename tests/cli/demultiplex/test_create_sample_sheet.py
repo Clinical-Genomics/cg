@@ -1,18 +1,14 @@
 from pathlib import Path
 from typing import List
 
-from click import testing
-
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.lims.samplesheet import (
-    LimsFlowcellSampleBcl2Fastq,
-    LimsFlowcellSampleDragen,
-)
+from cg.apps.lims.samplesheet import LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
+from click import testing
 
 FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.flowcell_samples"
 
@@ -42,7 +38,9 @@ def test_create_sample_sheet_no_run_parameters(
 
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
-        create_sheet, [flowcell_object.full_name], obj=sample_sheet_context
+        create_sheet,
+        [flowcell_object.full_name],
+        obj=sample_sheet_context,
     )
 
     # THEN the process exits with a non-zero exit code
@@ -75,7 +73,9 @@ def test_create_bcl2fastq_sample_sheet(
 
     # WHEN creating a sample sheet
     result = cli_runner.invoke(
-        create_sheet, [str(flow_cell_working_directory)], obj=sample_sheet_context
+        create_sheet,
+        [str(flow_cell_working_directory)],
+        obj=sample_sheet_context,
     )
 
     # THEN the process finishes successfully
