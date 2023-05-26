@@ -5,7 +5,7 @@ import subprocess
 
 import mock
 import pytest
-from mock import call, patch
+from mock import call
 
 from cg.constants.sequencing import Sequencers
 from tests.mocks.hk_mock import MockFile

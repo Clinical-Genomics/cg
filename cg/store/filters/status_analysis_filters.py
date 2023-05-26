@@ -1,6 +1,6 @@
 from typing import List, Callable
 from enum import Enum
-from sqlalchemy.orm import Query, join
+from sqlalchemy.orm import Query
 
 
 from cg.constants import REPORT_SUPPORTED_PIPELINES

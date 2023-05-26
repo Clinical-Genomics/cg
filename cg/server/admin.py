@@ -1,6 +1,6 @@
 """Module for Flask-Admin views"""
 from datetime import datetime
-from gettext import ngettext, gettext
+from gettext import gettext
 from typing import List, Union
 
 from cgmodels.cg.constants import Pipeline
@@ -12,7 +12,7 @@ from markupsafe import Markup
 
 from cg.constants.constants import DataDelivery, CaseActions
 from cg.server.ext import db
-from cg.store.models import Family, Sample
+from cg.store.models import Sample
 from cg.utils.flask.enum import SelectEnumField
 
 

@@ -3,7 +3,7 @@
 import datetime as dt
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Generator, List
+from typing import Dict, Any, Generator
 
 import pytest
 from cg.apps.crunchy import CrunchyAPI

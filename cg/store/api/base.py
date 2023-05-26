@@ -17,7 +17,6 @@ from cg.store.models import (
     Flowcell,
     Sample,
 )
-from cg.store.filters.status_analysis_filters import AnalysisFilter, apply_analysis_filter
 from cg.utils.date import get_date_days_ago
 
 from cg.store.models import Model as ModelBase

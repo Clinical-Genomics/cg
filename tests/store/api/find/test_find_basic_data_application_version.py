@@ -1,8 +1,6 @@
 from typing import Optional, List
-from sqlalchemy.orm import Query
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
-from tests.conftest import fixture_base_store
 
 
 def test_get_application_version_by_application_id_existing_id(
