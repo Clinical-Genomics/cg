@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List
 
 from cg.store import Store
 from cg.store.filters.status_analysis_filters import (

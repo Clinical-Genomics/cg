@@ -1,11 +1,11 @@
 """Contains API to communicate with LIMS"""
 import datetime as dt
 import logging
-from typing import Generator, Optional, Union, Dict, List, Tuple
+from typing import Optional, Union, Dict, List, Tuple
 
 
 from dateutil.parser import parse as parse_date
-from genologics.entities import Process, Project, Sample, Artifact
+from genologics.entities import Process, Sample, Artifact
 from genologics.lims import Lims
 from requests.exceptions import HTTPError
 

@@ -33,7 +33,6 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_identifier_name_and_value,
 )
 from tests.store.conftest import StoreConstants
-from tests.store.api.conftest import fixture_cust123
 
 
 def test_get_samples_with_loqusdb_id(helpers, store, sample_store, sample_id, loqusdb_id):

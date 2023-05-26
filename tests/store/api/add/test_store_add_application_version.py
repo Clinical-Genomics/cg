@@ -1,7 +1,5 @@
 from datetime import datetime
 from typing import Dict, List
-from sqlalchemy.orm import Query
-from cg.constants.constants import MicrosaltAppTags
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
 

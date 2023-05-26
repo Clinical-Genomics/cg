@@ -6,7 +6,6 @@ from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
-
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
 from tests.store_helpers import StoreHelpers
 from cg.constants.invoice import CustomerNames

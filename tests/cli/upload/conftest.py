@@ -10,7 +10,6 @@ from tempfile import tempdir
 import pytest
 from cgmodels.cg.constants import Pipeline
 from cg.apps.gens import GensAPI
-from cg.apps.gt import GenotypeAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
