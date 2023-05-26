@@ -5,7 +5,6 @@ from unittest import mock
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
-from tests.mocks.hk_mock import MockBundle
 
 
 @mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")

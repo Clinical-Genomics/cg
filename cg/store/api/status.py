@@ -11,11 +11,8 @@ from cg.constants.constants import CaseActions
 from cg.constants.invoice import CustomerNames
 from cg.store.models import (
     Analysis,
-    Application,
-    ApplicationVersion,
     Customer,
     Family,
-    FamilySample,
     Pool,
     Sample,
     Flowcell,

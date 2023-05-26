@@ -6,7 +6,7 @@ from datetime import datetime
 
 from cg.constants import Pipeline
 from cg.constants.constants import CaseActions
-from cg.constants.subject import Gender, PhenotypeStatus
+from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
 from tests.store_helpers import StoreHelpers

@@ -1,7 +1,6 @@
 """Fixtures for store tests."""
 import datetime as dt
 import enum
-from pathlib import Path
 from typing import Generator, List
 
 import pytest

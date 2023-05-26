@@ -1,6 +1,6 @@
 import logging
 
-from typing import List, Optional
+from typing import Optional
 
 from cg.apps.cgstats.db.models import Flowcell
 from cg.apps.cgstats.stats import StatsAPI

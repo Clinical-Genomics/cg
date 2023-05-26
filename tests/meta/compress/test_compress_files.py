@@ -1,7 +1,6 @@
 """Tests for the compression files module"""
 import logging
 
-import pytest
 
 from cg.meta.compress import files
 from cg.models import CompressionData
