@@ -13,13 +13,6 @@ def filter_application_versions_by_application_entry_id(
     return application_versions.filter(ApplicationVersion.application_id == application_entry_id)
 
 
-def filter_application_versions_by_version(
-    application_versions: Query, version: int, **kwargs
-) -> Query:
-    """Return the application versions given a version."""
-    return application_versions.filter(ApplicationVersion.version == version)
-
-
 def filter_application_versions_before_valid_from(
     application_versions: Query, valid_from: datetime, **kwargs
 ) -> Query:
@@ -67,5 +60,4 @@ class ApplicationVersionFilter(Enum):
     FILTER_BY_APPLICATION_ENTRY_ID = filter_application_versions_by_application_entry_id
     FILTER_BY_ENTRY_ID = filter_application_versions_by_application_version_entry_id
     FILTER_BY_VALID_FROM_BEFORE = filter_application_versions_before_valid_from
-    FILTER_BY_VERSION = filter_application_versions_by_version
     ORDER_BY_VALID_FROM_DESC = order_application_versions_by_valid_from_desc

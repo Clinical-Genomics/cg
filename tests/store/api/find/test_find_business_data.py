@@ -82,22 +82,6 @@ def test_get_flow_cell(bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: S
     assert flow_cell.name == bcl2fastq_flow_cell_id
 
 
-def test_get_flow_cell_by_name_pattern(
-    bcl2fastq_flow_cell_id: str, re_sequenced_sample_store: Store
-):
-    """Test returning the latest flow cell from the database by enquiry."""
-
-    # GIVEN a store with two flow cells
-
-    # WHEN fetching the latest flow cell
-    flow_cell: List[Flowcell] = re_sequenced_sample_store.get_flow_cell_by_name_pattern(
-        name_pattern=bcl2fastq_flow_cell_id[:4]
-    )
-
-    # THEN the returned flow cell should have the same name as the one in the database
-    assert flow_cell.name == bcl2fastq_flow_cell_id
-
-
 def test_get_flow_cells_by_case(
     base_store: Store,
     bcl2fastq_flow_cell_id: str,
@@ -452,49 +436,6 @@ def test_get_case_sample_link(
     assert case_sample.sample.internal_id == sample_id
 
 
-def test_find_single_case_for_sample(
-    sample_id_in_single_case: str, store_with_multiple_cases_and_samples: Store
-):
-    """Test that cases associated with a sample can be found."""
-
-    # GIVEN a database containing a sample associated with a single case
-    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
-        internal_id=sample_id_in_single_case
-    )
-
-    assert sample
-
-    # WHEN the cases associated with the sample is fetched
-    cases: List[
-        FamilySample
-    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
-        sample_entry_id=sample.id
-    ).all()
-
-    # THEN only one case is found
-    assert cases and len(cases) == 1
-
-
-def test_find_multiple_cases_for_sample(
-    sample_id_in_multiple_cases: str, store_with_multiple_cases_and_samples: Store
-):
-    # GIVEN a database containing a sample associated with multiple cases
-    sample: Sample = store_with_multiple_cases_and_samples.get_sample_by_internal_id(
-        internal_id=sample_id_in_multiple_cases
-    )
-    assert sample
-
-    # WHEN the cases associated with the sample is fetched
-    cases: List[
-        FamilySample
-    ] = store_with_multiple_cases_and_samples.get_case_samples_from_sample_entry_id(
-        sample_entry_id=sample.id
-    ).all()
-
-    # THEN multiple cases are found
-    assert cases and len(cases) > 1
-
-
 def test_find_cases_for_non_existing_case(store_with_multiple_cases_and_samples: Store):
     """Test that nothing happens when trying to find a case that does not exist."""
 
@@ -713,8 +654,6 @@ def test_get_pools_by_order_enquiry(
 
 def test_get_pools_to_render_with(
     store_with_multiple_pools_for_customer: Store,
-    pool_name_1: str,
-    pool_order_1: str,
 ):
     """Test that pools can be fetched from the store by customer id."""
     # GIVEN a database with two pools
@@ -831,32 +770,3 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
     for case in cases:
         assert not case.analyses
         assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
-
-
-def test_fetch_cases_newer_than_date_no_cases(store_with_multiple_cases_and_samples: Store):
-    """Test that no cases are returned when there are no cases newer than the given date."""
-    # GIVEN a store with cases older than 7 days
-    older_than_date = datetime.now() - timedelta(days=10)
-    for case in store_with_multiple_cases_and_samples._get_query(table=Family):
-        case.created_at = older_than_date
-
-    # WHEN fetching cases newer than 7 days
-    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
-
-    # THEN no cases should be returned
-    assert len(cases) == 0
-
-
-def test_fetch_cases_newer_than_date_all_cases(store_with_multiple_cases_and_samples: Store):
-    """Test that all cases are returned when all cases newer than the given date."""
-    # GIVEN a store with cases newer than 7 days
-    older_than_date = datetime.now() - timedelta(days=5)
-    all_cases = store_with_multiple_cases_and_samples._get_query(table=Family).all()
-    for case in all_cases:
-        case.created_at = older_than_date
-
-    # WHEN fetching cases newer than 7 days
-    cases = store_with_multiple_cases_and_samples.get_cases_created_within_days(days=7)
-
-    # THEN all cases should be returned
-    assert len(cases) == len(all_cases)

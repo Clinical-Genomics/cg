@@ -25,11 +25,6 @@ def filter_completed_analyses(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.completed_at.isnot(None))
 
 
-def filter_not_completed_analyses(analyses: Query, **kwargs) -> Query:
-    """Return not completed analyses."""
-    return analyses.filter(Analysis.completed_at.is_(None))
-
-
 def filter_uploaded_analyses(analyses: Query, **kwargs) -> Query:
     """Return analyses that have been already uploaded."""
     return analyses.filter(Analysis.uploaded_at.isnot(None))
@@ -105,11 +100,6 @@ def filter_analyses_by_started_at(analyses: Query, started_at_date: datetime, **
     return analyses.filter(Analysis.started_at == started_at_date)
 
 
-def order_analyses_by_started_at_desc(analyses: Query, **kwargs) -> Query:
-    """Return a query of ordered analyses (from old to new) by the started_at field."""
-    return analyses.order_by(Analysis.started_at.desc())
-
-
 def filter_analyses_not_cleaned(analyses: Query, **kwargs) -> Query:
     """Return a query of analyses that have not been cleaned."""
     return analyses.filter(Analysis.cleaned_at.is_(None))
@@ -147,7 +137,6 @@ class AnalysisFilter(Enum):
     FILTER_VALID_IN_PRODUCTION: Callable = filter_valid_analyses_in_production
     FILTER_WITH_PIPELINE: Callable = filter_analyses_with_pipeline
     FILTER_COMPLETED: Callable = filter_completed_analyses
-    FILTER_NOT_COMPLETED: Callable = filter_not_completed_analyses
     FILTER_IS_UPLOADED: Callable = filter_uploaded_analyses
     FILTER_IS_NOT_UPLOADED: Callable = filter_not_uploaded_analyses
     FILTER_WITH_DELIVERY_REPORT: Callable = filter_analyses_with_delivery_report
@@ -163,4 +152,3 @@ class AnalysisFilter(Enum):
     FILTER_CASE_ACTION_IS_NONE: Callable = filter_analysis_case_action_is_none
     ORDER_BY_UPLOADED_AT: Callable = order_analyses_by_uploaded_at_asc
     ORDER_BY_COMPLETED_AT: Callable = order_analyses_by_completed_at_asc
-    ORDER_BY_STARTED_AT_DESC: Callable = order_analyses_by_started_at_desc
