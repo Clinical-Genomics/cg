@@ -69,15 +69,11 @@ class ConversionResult(BaseModel):
 
     Fields:
     - lane_number: The number of the lane this result pertains to.
-    - total_clusters_raw: The total number of raw clusters in this lane.
-    - total_clusters_pf: The total number of pass-filter (PF) clusters in this lane.
     - yield_: The total yield from this lane.
     - demux_results: A list of demultiplexing results for each sample in this lane.
     """
 
     lane_number: int = Field(..., alias="LaneNumber", gt=0)
-    total_clusters_raw: int = Field(..., alias="TotalClustersRaw", ge=0)
-    total_clusters_pf: int = Field(..., alias="TotalClustersPF", ge=0)
     yield_: int = Field(..., alias="Yield", ge=0)
     demux_results: List[DemuxResult] = Field(..., alias="DemuxResults")
 
