@@ -151,7 +151,9 @@
           <table class="table table-bordered" aria-describedby="Sample table">
             {% for sample in case.samples %}
               <tr>
-                <th rowspan="4">{{ sample.name }}</th>
+              <th colspan="8">{{ sample.name }}</th>
+              </tr>
+              <tr>
                 <th>RIN</th>
                 <th>Input amount [ng]</th> <!-- TODO -->
                 <th>Läspar [M]</th>
@@ -162,7 +164,6 @@
                 <th>5' - 3' bias</th> <!-- TODO -->
               </tr>
               <tr>
-                <td></td>
                 <td>{{ sample.metadata.rin }}</td>
                 <td>{{ sample.metadata.input_amount }}*</td>
                 <td>{{ sample.metadata.million_read_pairs }}</td>
