@@ -149,9 +149,9 @@
 
         <div class="card-block">
           <table class="table table-bordered" aria-describedby="Sample table">
-            <thead>
+            {% for sample in case.samples %}
               <tr>
-                <th rowspan="4">Prov</th>
+                <th rowspan="4">{{ sample.name }}</th>
                 <th>RIN</th>
                 <th>Input amount [ng]</th> <!-- TODO -->
                 <th>Läspar [M]</th>
@@ -161,24 +161,17 @@
                 <th>Adapter [%]</th> <!-- TODO -->
                 <th>5' - 3' bias</th> <!-- TODO -->
               </tr>
-            </thead>
-            <tbody>
-              {% for sample in case.samples %}
-                <tr>
-                  <td>{{ sample.name }}</td>
-                  <td>{{ sample.metadata.rin }}</td>
-                  <td>{{ sample.metadata.input_amount }}*</td>
-                  <td>{{ sample.metadata.million_read_pairs }}</td>
-                  <td>{{ sample.metadata.mapped_reads }}</td>
-                  <td>{{ sample.metadata.uniquely_mapped_reads }}</td>
-                  <td>{{ sample.metadata.duplicates }}</td>
-                  <td>{{ sample.metadata.pct_adapter }}</td>
-                  <td>{{ sample.metadata.bias_5_3 }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-            <thead>
-                <th></th>
+              <tr>
+                <td></td>
+                <td>{{ sample.metadata.rin }}</td>
+                <td>{{ sample.metadata.input_amount }}*</td>
+                <td>{{ sample.metadata.million_read_pairs }}</td>
+                <td>{{ sample.metadata.mapped_reads }}</td>
+                <td>{{ sample.metadata.uniquely_mapped_reads }}</td>
+                <td>{{ sample.metadata.duplicates }}</td>
+                <td>{{ sample.metadata.pct_adapter }}</td>
+                <td>{{ sample.metadata.bias_5_3 }}</td>
+              </tr>
                 <th>Reads passing filters [%]</th> <!-- TODO -->
                 <th>Mean read length after filtering</th> <!-- TODO -->
                 <th>Q20 bases [%]</th> <!-- TODO -->
@@ -187,21 +180,15 @@
                 <th>mRNA bases [%]</th> <!-- TODO -->
                 <th>Ribosomal bases [%]</th> <!-- TODO -->
               </tr>
-            </thead>
-            <tbody>
-              {% for sample in case.samples %}
-                <tr>
-                  <td></td>
-                  <td>{{ sample.metadata.pct_surviving }}</td>
-                  <td>{{ sample.metadata.mean_length_r1 }}</td>
-                  <td>{{ sample.metadata.q20_rate }}</td>
-                  <td>{{ sample.metadata.q30_rate }}</td>
-                  <td>{{ sample.metadata.gc_content }}</td>
-                  <td>{{ sample.metadata.mrna_bases }}</td>
-                  <td>{{ sample.metadata.ribosomal_bases }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
+              <tr>
+                <td>{{ sample.metadata.pct_surviving }}</td>
+                <td>{{ sample.metadata.mean_length_r1 }}</td>
+                <td>{{ sample.metadata.q20_rate }}</td>
+                <td>{{ sample.metadata.q30_rate }}</td>
+                <td>{{ sample.metadata.gc_content }}</td>
+                <td>{{ sample.metadata.mrna_bases }}</td>
+                <td>{{ sample.metadata.ribosomal_bases }}</td>
+              </tr>
             <caption>
               <strong>Förklaringar</strong><br>
               <ins>RIN</ins>:  <!-- TODO --> <br>
