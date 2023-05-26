@@ -161,29 +161,6 @@ class MipRnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_RNA
 
 
-class FastqSample(OrderInSample):
-    _suitable_project = OrderType.FASTQ
-
-    # Orderform 1508
-    # "required"
-    container: Optional[ContainerEnum]
-    sex: SexEnum = SexEnum.unknown
-    source: str
-    tumour: bool
-    # "required if plate"
-    container_name: Optional[str]
-    well_position: Optional[str]
-    elution_buffer: str
-    # This information is required for panel analysis
-    capture_kit: Optional[str]
-    # "Not Required"
-    quantity: Optional[int]
-
-    @validator("quantity", pre=True)
-    def str_to_int(cls, v: str) -> Optional[int]:
-        return OptionalIntValidator.str_to_int(v=v)
-
-
 class RmlSample(OrderInSample):
     _suitable_project = OrderType.RML
 

@@ -77,21 +77,6 @@ class FindBusinessDataHandler(BaseHandler):
             .sample.application_version.application
         )
 
-    def get_application_tag_by_application_version_entry_id(
-        self,
-        application_version_entry_id: str,
-    ) -> Optional[str]:
-        """Return the application tag of an application version."""
-
-        application_version: ApplicationVersion = apply_application_versions_filter(
-            application_versions=self._get_query(ApplicationVersion),
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
-            application_version_entry_id=application_version_entry_id,
-        ).first()
-
-        if application_version and application_version.application:
-            return application_version.application.tag
-
     def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
         """Return all cases completed after a given date that have not been uploaded to Vogue."""
         filter_functions = [
