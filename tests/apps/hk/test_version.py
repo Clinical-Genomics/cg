@@ -48,7 +48,7 @@ def test_get_version_non_existing(
 
 def test_get_version_existing(
     housekeeper_api: MockHousekeeperAPI,
-    timestamp_now: datetime.datetime,
+    timestamp_yesterday: datetime.datetime,
     hk_bundle_data: Dict[str, Any],
 ):
     """Test to get a version when there is a bundle and a version."""
@@ -58,7 +58,7 @@ def test_get_version_existing(
     housekeeper_api.add_commit(version_obj)
 
     # WHEN fetching a version
-    fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=timestamp_now)
+    fetched_version = housekeeper_api.version(bundle=bundle_obj.name, date=timestamp_yesterday)
 
     # THEN assert that the function returns True
     assert fetched_version

@@ -955,14 +955,25 @@ def fixture_hk_bundle_sample_path(sample_id: str, timestamp: datetime) -> Path:
 
 @pytest.fixture(name="hk_bundle_data")
 def fixture_hk_bundle_data(
-    case_id: str, bed_file: Path, timestamp_yesterday: datetime
+    case_id: str,
+    bed_file: Path,
+    timestamp_yesterday: datetime,
+    sample_id: str,
+    father_sample_id: str,
+    mother_sample_id: str,
 ) -> Dict[str, Any]:
     """Return some bundle data for Housekeeper."""
     return {
         "name": case_id,
         "created": timestamp_yesterday,
         "expires": timestamp_yesterday,
-        "files": [{"path": bed_file.as_posix(), "archive": False, "tags": ["bed", "sample"]}],
+        "files": [
+            {
+                "path": bed_file.as_posix(),
+                "archive": False,
+                "tags": ["bed", sample_id, father_sample_id, mother_sample_id, "coverage"],
+            }
+        ],
     }
 
 

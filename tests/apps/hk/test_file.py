@@ -356,7 +356,7 @@ def test_include_files_to_latest_version(
 
 def test_check_bundle_files(
     case_id: str,
-    timestamp_now: datetime,
+    timestamp_yesterday: datetime,
     populated_housekeeper_api: MockHousekeeperAPI,
     hk_version: Version,
     fastq_file: Path,
@@ -365,7 +365,7 @@ def test_check_bundle_files(
 ):
     """Test to see if the function correctly identifies a file that is present and returns a lis without it."""
     # GIVEN a housekeeper version with a file
-    version: Version = populated_housekeeper_api.version(bundle=case_id, date=timestamp_now)
+    version: Version = populated_housekeeper_api.version(bundle=case_id, date=timestamp_yesterday)
 
     # WHEN attempting to add two files, one existing and one new
     files_to_add: List[Path] = populated_housekeeper_api.check_bundle_files(

@@ -26,50 +26,51 @@ FUNCTION_TO_MOCK = "cg.meta.archive.ddn_dataflow.APIRequest.api_request_from_con
 
 
 def test_correct_source_root(
-    local_directory: Path, transfer_data: TransferData, trimmed_local_directory: Path
+    local_directory: Path, transfer_data_archive: TransferData, trimmed_local_directory: Path
 ):
     """Tests the method for trimming the source directory."""
 
     # GIVEN a source path and a destination path
 
     # WHEN creating the correctly formatted dictionary
-    transfer_data.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
+    transfer_data_archive.trim_path(attribute_to_trim=SOURCE_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
-    assert transfer_data.source == trimmed_local_directory.as_posix()
+    assert transfer_data_archive.source == trimmed_local_directory.as_posix()
 
 
 def test_correct_destination_root(
-    local_directory: Path, transfer_data: TransferData, trimmed_local_directory: Path
+    local_directory: Path, transfer_data_retrieve: TransferData, trimmed_local_directory: Path
 ):
     """Tests the method for trimming the destination directory."""
 
     # GIVEN a source path and a destination path
-    transfer_data.destination = local_directory
 
     # WHEN creating the correctly formatted dictionary
-    transfer_data.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
+    transfer_data_retrieve.trim_path(attribute_to_trim=DESTINATION_ATTRIBUTE)
 
     # THEN the destination path should be the local directory minus the /home part
-    assert transfer_data.destination == trimmed_local_directory.as_posix()
+    assert transfer_data_retrieve.destination == trimmed_local_directory.as_posix()
 
 
 def test_add_repositories(
-    ddn_dataflow_config, local_directory, remote_path, transfer_data: TransferData
+    ddn_dataflow_config, local_directory, remote_path, transfer_data_archive: TransferData
 ):
     """Tests the method for adding the repositories to the source and destination paths."""
 
     # GIVEN a TransferData object
 
     # WHEN adding the repositories
-    transfer_data.add_repositories(
+    transfer_data_archive.add_repositories(
         source_prefix=ddn_dataflow_config.local_storage,
         destination_prefix=ddn_dataflow_config.archive_repository,
     )
 
     # THEN the repositories should be prepended to the paths
-    assert transfer_data.source == ddn_dataflow_config.local_storage + str(local_directory)
-    assert transfer_data.destination == ddn_dataflow_config.archive_repository + str(remote_path)
+    assert transfer_data_archive.source == ddn_dataflow_config.local_storage + str(local_directory)
+    assert transfer_data_archive.destination == ddn_dataflow_config.archive_repository + str(
+        remote_path
+    )
 
 
 def test_transfer_payload_dict(transfer_payload: TransferPayload):
@@ -177,15 +178,15 @@ def test_transfer_payload_correct_source_root(transfer_payload: TransferPayload)
     Dataflow API."""
 
     # GIVEN a TransferPayload object with two TransferData objects with untrimmed source paths
-    for transfer_data in transfer_payload.files_to_transfer:
-        assert transfer_data.source.startswith(ROOT_TO_TRIM)
+    for transfer_data_archive in transfer_payload.files_to_transfer:
+        assert transfer_data_archive.source.startswith(ROOT_TO_TRIM)
 
     # WHEN trimming the source directory
     transfer_payload.trim_paths(attribute_to_trim=SOURCE_ATTRIBUTE)
 
     # THEN the source directories should no longer contain /home
-    for transfer_data in transfer_payload.files_to_transfer:
-        assert not transfer_data.source.startswith(ROOT_TO_TRIM)
+    for transfer_data_archive in transfer_payload.files_to_transfer:
+        assert not transfer_data_archive.source.startswith(ROOT_TO_TRIM)
 
 
 def test_transfer_payload_correct_destination_root(transfer_payload: TransferPayload):
@@ -201,8 +202,8 @@ def test_transfer_payload_correct_destination_root(transfer_payload: TransferPay
     transfer_payload.trim_paths(attribute_to_trim=DESTINATION_ATTRIBUTE)
 
     # THEN the destination directories should no longer contain /home
-    for transfer_data in transfer_payload.files_to_transfer:
-        assert not transfer_data.destination.startswith(ROOT_TO_TRIM)
+    for transfer_data_retrieve in transfer_payload.files_to_transfer:
+        assert not transfer_data_retrieve.destination.startswith(ROOT_TO_TRIM)
 
 
 def test_auth_header_old_token(ddn_dataflow_api: DDNDataFlowApi, old_timestamp: datetime):
@@ -267,11 +268,10 @@ def test__refresh_auth_token(ddn_dataflow_api: DDNDataFlowApi, ok_response: Resp
 
 def test_archive_folders(
     ddn_dataflow_api: DDNDataFlowApi,
-    local_directory: Path,
-    remote_path: Path,
     full_remote_path: str,
     full_local_path: str,
     ok_response: Response,
+    transfer_data_archive: TransferData,
 ):
     """Tests that the archiving function correctly formats the input and sends API request."""
 
@@ -283,9 +283,7 @@ def test_archive_folders(
         "api_request_from_content",
         return_value=ok_response,
     ) as mock_request_submitter:
-        response: bool = ddn_dataflow_api.archive_folders(
-            {Path(local_directory): Path(remote_path)}
-        )
+        response: bool = ddn_dataflow_api.archive_folders([transfer_data_archive])
 
     # THEN a boolean response should be returned
     assert response
@@ -306,11 +304,10 @@ def test_archive_folders(
 
 def test_retrieve_folders(
     ddn_dataflow_api: DDNDataFlowApi,
-    local_directory: Path,
-    remote_path: Path,
     full_remote_path: str,
     full_local_path: str,
     ok_response: Response,
+    transfer_data_retrieve: TransferData,
 ):
     """Tests that the retrieve function correctly formats the input and sends API request."""
 
@@ -322,9 +319,7 @@ def test_retrieve_folders(
         "api_request_from_content",
         return_value=ok_response,
     ) as mock_request_submitter:
-        response: bool = ddn_dataflow_api.retrieve_folders(
-            {Path(remote_path): Path(local_directory)}
-        )
+        response: bool = ddn_dataflow_api.retrieve_folders([transfer_data_retrieve])
 
     # THEN the response returned should be true
     assert response
