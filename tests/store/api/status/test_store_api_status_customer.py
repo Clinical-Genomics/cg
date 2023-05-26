@@ -1,6 +1,6 @@
 """Tests for the functions in the store api status related to the customer module."""
 from cg.store import Store
-from cg.store.models import Customer, Sample
+from cg.store.models import Customer
 from tests.store_helpers import StoreHelpers
 from typing import List
 from cg.constants.invoice import CustomerNames

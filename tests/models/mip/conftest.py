@@ -3,9 +3,7 @@ from pathlib import Path
 import pytest
 
 from cg.constants.priority import SlurmQos
-from cg.models.mip.mip_config import MipBaseConfig
 from cg.models.mip.mip_metrics_deliverables import MIPMetricsDeliverables
-from cg.models.mip.mip_sample_info import MipBaseSampleInfo
 
 
 @pytest.fixture(name="mip_case_config_dna")

@@ -1,8 +1,6 @@
 from pathlib import Path
 
 import click
-from typing import List, Dict
-from cg.constants.sequencing import Sequencers
 from cg.utils.enums import StrEnum
 
 

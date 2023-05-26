@@ -1,7 +1,7 @@
 from typing import Optional, List, Callable, Any
 from enum import Enum
 from sqlalchemy.orm import Query
-from sqlalchemy import and_, or_
+from sqlalchemy import or_
 
 from cg.constants.constants import SampleType
 from cg.store.models import Sample, Customer

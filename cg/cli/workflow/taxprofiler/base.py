@@ -4,7 +4,6 @@ import logging
 
 import click
 
-from cg.cli.workflow.commands import link
 from cg.constants.constants import MetaApis
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI

@@ -1,7 +1,7 @@
 """Fixtures for crunchy API."""
 import logging
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 import pytest
 

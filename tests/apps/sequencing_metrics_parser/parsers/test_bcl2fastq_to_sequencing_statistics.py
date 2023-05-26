@@ -1,4 +1,3 @@
-from typing import List
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     calculate_average_quality_score,
     calculate_pass_filter_ratio,

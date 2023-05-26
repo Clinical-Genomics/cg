@@ -1,8 +1,6 @@
-import pytest
 from cgmodels.cg.constants import Pipeline
 
 from cg.constants import DataDelivery
-from cg.exc import OrderError
 from cg.meta.orders.sars_cov_2_submitter import SarsCov2Submitter
 from cg.models.orders.constants import OrderType
 from cg.models.orders.order import OrderIn
@@ -11,7 +9,6 @@ from cg.models.orders.samples import SarsCov2Sample
 from cg.store import Store
 from cg.store.models import Sample
 from cg.store.models import Customer
-from tests.store_helpers import StoreHelpers
 import datetime as dt
 
 
