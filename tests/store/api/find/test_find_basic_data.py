@@ -46,33 +46,6 @@ def test_get_active_beds_when_archived(base_store: Store):
     assert not list(active_beds)
 
 
-def test_get_bed_by_name(base_store: Store, bed_name: str):
-    """Test returning a bed record by name from the database."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    bed: Optional[Bed] = base_store.get_bed_by_name(bed_name=bed_name)
-
-    # THEN return a bed
-    assert bed
-
-    # THEN return a bed with the supplied bed name
-    assert bed.name == bed_name
-
-
-def test_get_bed_by_name_when_no_match(base_store: Store):
-    """Test returning a bed record by name from the database when no match."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    bed: Optional[Bed] = base_store.get_bed_by_name(bed_name="does_not_exist")
-
-    # THEN do not return a bed
-    assert not bed
-
-
 def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
     """Test function to return the application by tag."""
 

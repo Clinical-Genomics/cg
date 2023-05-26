@@ -26,9 +26,6 @@ class OrderformParser(BaseModel):
     order_comment: Optional[str] = None
     order_name: Optional[str] = None
 
-    class Config:
-        validate_assignment = True
-
     def parse_orderform(self, orderform_file: Path) -> None:
         """Parse the orderform information"""
         raise NotImplementedError

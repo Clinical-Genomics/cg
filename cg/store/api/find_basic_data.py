@@ -90,14 +90,6 @@ class FindBasicDataHandler(BaseHandler):
             filter_functions=[BedVersionFilter.FILTER_BY_SHORT_NAME],
         ).first()
 
-    def get_bed_by_name(self, bed_name: str) -> Optional[Bed]:
-        """Return bed by name."""
-        return apply_bed_filter(
-            beds=self._get_query(table=Bed),
-            bed_name=bed_name,
-            filter_functions=[BedFilter.FILTER_BY_NAME],
-        ).first()
-
     def get_active_beds(self) -> Query:
         """Get all beds which are not archived."""
         bed_filter_functions: List[BedFilter] = [
