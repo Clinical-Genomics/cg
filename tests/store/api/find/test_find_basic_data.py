@@ -73,18 +73,6 @@ def test_get_bed_by_name_when_no_match(base_store: Store):
     assert not bed
 
 
-def test_get_latest_bed_version(base_store: Store, bed_name: str):
-    """Test returning a bed version by bed name from the database."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    bed_version: BedVersion = base_store.get_latest_bed_version(bed_name=bed_name)
-
-    # THEN return a bed version with the supplied bed name
-    assert bed_version.version == 1
-
-
 def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
     """Test function to return the application by tag."""
 

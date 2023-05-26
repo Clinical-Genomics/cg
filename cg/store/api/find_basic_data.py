@@ -95,17 +95,6 @@ class FindBasicDataHandler(BaseHandler):
             .all()
         )
 
-    def get_application_version_by_application_entry_id(
-        self, application_entry_id: int
-    ) -> ApplicationVersion:
-        """Return an application version by application entry id."""
-        application_versions = self._get_query(table=ApplicationVersion)
-        return apply_application_versions_filter(
-            application_versions=application_versions,
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_APPLICATION_ENTRY_ID],
-            application_entry_id=application_entry_id,
-        ).first()
-
     def get_current_application_version_by_tag(self, tag: str) -> Optional[ApplicationVersion]:
         """Return the current application version for an application tag."""
         application = self.get_application_by_tag(tag=tag)
@@ -121,10 +110,6 @@ class FindBasicDataHandler(BaseHandler):
             application_entry_id=application.id,
             valid_from=dt.datetime.now(),
         ).first()
-
-    def get_application_versions(self) -> List[ApplicationVersion]:
-        """Return all application versions."""
-        return self._get_query(table=ApplicationVersion).all()
 
     def get_bed_version_by_short_name(self, bed_version_short_name: str) -> BedVersion:
         """Return bed version with short name."""
@@ -151,11 +136,6 @@ class FindBasicDataHandler(BaseHandler):
         return apply_bed_filter(
             beds=self._get_query(table=Bed), filter_functions=bed_filter_functions
         )
-
-    def get_latest_bed_version(self, bed_name: str) -> Optional[BedVersion]:
-        """Return the latest bed version for a bed by supplied name."""
-        bed: Optional[Bed] = self.get_bed_by_name(bed_name=bed_name)
-        return bed.versions[-1] if bed and bed.versions else None
 
     def get_customer_by_internal_id(self, customer_internal_id: str) -> Customer:
         """Return customer with customer id."""
