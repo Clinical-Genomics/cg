@@ -770,7 +770,7 @@ class SampleLaneSequencingMetrics(Model):
     flow_cell_lane_number = Column(types.Integer)
 
     sample_internal_id = Column(types.String(128), nullable=False)
-    sample_read_count = Column(types.Integer)
+    sample_total_reads_in_lane = Column(types.Integer)
     sample_base_fraction_passing_q30 = Column(types.Numeric(10, 5))
     sample_base_mean_quality_score = Column(types.Numeric(10, 5))
 
