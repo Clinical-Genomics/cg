@@ -91,7 +91,11 @@ def create_sheet(
         raise click.Abort from error
 
     if dry_run:
-        click.echo(_list_to_csv_stream(sample_sheet_content))
+        click.echo(
+            WriteStream.write_stream_from_content(
+                file_format=FileFormat.CSV, content=sample_sheet_content
+            )
+        )
         return
     LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
     WriteFile.write_file_from_content(
@@ -99,10 +103,6 @@ def create_sheet(
         file_format=FileFormat.CSV,
         file_path=flow_cell.sample_sheet_path,
     )
-
-
-def _list_to_csv_stream(nested_list: List[List[str]]) -> str:
-    return WriteStream().write_stream_from_content(file_format=FileFormat.CSV, content=nested_list)
 
 
 @sample_sheet_commands.command(name="create-all")
