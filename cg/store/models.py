@@ -760,12 +760,14 @@ class User(Model):
         return self.name
 
 
-class LaneSampleSequencingMetrics(Model):
-    __tablename__ = "lane_sample_sequencing_metrics"
+class SampleLaneSequencingMetrics(Model):
+    """Model for storing sequencing metrics per lane and sample."""
+
+    __tablename__ = "sample_lane_sequencing_metrics"
 
     id = Column(types.Integer, primary_key=True)
     flow_cell_name = Column(types.String(128), nullable=False)
-    lane_number = Column(types.Integer)
+    flow_cell_lane_number = Column(types.Integer)
 
     sample_internal_id = Column(types.String(128), nullable=False)
     sample_read_count = Column(types.Integer)

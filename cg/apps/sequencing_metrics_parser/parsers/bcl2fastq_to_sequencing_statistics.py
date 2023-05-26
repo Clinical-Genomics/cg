@@ -15,7 +15,7 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
     perfect_reads_ratio,
     average_clusters_per_lane,
 )
-from cg.store.models import LaneSampleSequencingMetrics
+from cg.store.models import SampleLaneSequencingMetrics
 
 
 def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
@@ -35,11 +35,11 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
         stats_json_path=stats_json_path
     )
 
-    sequencing_statistics: List[LaneSampleSequencingMetrics] = []
+    sequencing_statistics: List[SampleLaneSequencingMetrics] = []
 
     for conversion_result in raw_sequencing_metrics.conversion_results:
         for demux_result in conversion_result.demux_results:
-            statistics_for_sample_in_lane: LaneSampleSequencingMetrics = (
+            statistics_for_sample_in_lane: SampleLaneSequencingMetrics = (
                 create_sequencing_statistics(
                     conversion_result=conversion_result,
                     demux_result=demux_result,
@@ -55,7 +55,7 @@ def create_sequencing_statistics(
     conversion_result: ConversionResult,
     demux_result: DemuxResult,
     raw_sequencing_metrics: Bcl2FastqSequencingMetrics,
-) -> LaneSampleSequencingMetrics:
+) -> SampleLaneSequencingMetrics:
     """
     Generates a SequencingStatistics object based on the provided conversion and demultiplexing results
     along with the raw sequencing metrics.
@@ -90,7 +90,7 @@ def create_sequencing_statistics(
         lane_count=number_of_lanes,
     )
 
-    return LaneSampleSequencingMetrics(
+    return SampleLaneSequencingMetrics(
         flow_cell_name=raw_sequencing_metrics.flowcell,
         sample_internal_id=demux_result.sample_id,
         lane=conversion_result.lane_number,
