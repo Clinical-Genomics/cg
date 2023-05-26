@@ -61,6 +61,13 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
+    def create_sample_lane_sequencing_metrics(flow_cell_name: str, bcl_converter: str):
+        # 1. Call api function create_sequencing_metrics
+        # 2. Persist resulting objects to status db
+        # 3. Port other steps from below into this function (and rename this function).
+        # 4. Nuke the cgstats app and the cgstats repo and classes below.
+        pass
+
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     """Post demultiplexing API class for Hiseq X flow cell."""
