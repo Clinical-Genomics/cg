@@ -5,7 +5,7 @@ from typing import List
 from cg.constants import Pipeline, Priority
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Application, Family, Sample
+from cg.store.models import Analysis, Application, Sample
 from tests.store_helpers import StoreHelpers
 
 

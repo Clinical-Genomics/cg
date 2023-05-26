@@ -1,5 +1,4 @@
 """Tests for the compress data class"""
-import os
 from datetime import datetime
 from pathlib import Path
 

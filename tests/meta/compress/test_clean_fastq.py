@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 from typing import Generator, Dict, List
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 
 from housekeeper.store.models import Version, File

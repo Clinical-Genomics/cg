@@ -5,7 +5,6 @@ import pathlib
 import mock
 import pytest
 
-import cg.utils.checksum.checksum
 from cg.exc import ChecksumFailedError
 from cg.meta.encryption.encryption import EncryptionAPI, SpringEncryptionAPI
 

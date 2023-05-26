@@ -14,44 +14,14 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertAdapterMetricsColumnNames,
 )
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.store.models import SampleLaneSequencingMetrics
+from datetime import datetime
 
 
-@pytest.fixture(name="bcl_convert_demux_metric_file_path")
-def fixture_bcl_convert_demux_metric_file_path() -> Path:
-    """Return a path to a BCLConvert demux metrics file."""
-    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_metrics.csv")
-
-
-@pytest.fixture(name="bcl_convert_quality_metric_file_path")
-def fixture_bcl_convert_quality_metric_file_path() -> Path:
-    """Return a path to a BCLConvert quality metrics file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_quality_metrics.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_sample_sheet_file_path")
-def fixture_bcl_convert_sample_sheet_file_path() -> Path:
-    """Return a path to a BCLConvert sample sheet file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_sample_sheet.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_adapter_metrics_file_path")
-def fixture_bcl_convert_adapter_metrics_file_path() -> Path:
-    """Return a path to a BCLConvert adapter metrics file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_adapter_metrics.csv"
-    )
-
-
-@pytest.fixture(name="bcl_convert_run_info_file_path")
-def fixture_bcl_convert_run_info_file_path() -> Path:
-    """Return a path to a BCLConvert run info file."""
-    return Path(
-        "tests", "fixtures", "apps", "sequencing_metrics_parser", "bcl_convert_run_info.xml"
-    )
+@pytest.fixture(name="bcl_convert_metrics_dir_path")
+def fixture_bcl_convert_metrics_dir_path() -> Path:
+    """Return a path to a BCLConvert metrics directory."""
+    return Path("tests", "fixtures", "apps", "sequencing_metrics_parser")
 
 
 @pytest.fixture(name="test_sample_internal_id")
@@ -70,6 +40,26 @@ def fixture_test_sample_project() -> str:
 def fixture_test_lane() -> int:
     """Return a test lane."""
     return 1
+
+
+@pytest.fixture(name="bcl_convert_reads_for_test_sample")
+def fixture_bcl_convert_reads_for_test_sample() -> int:
+    return 15962796
+
+
+@pytest.fixture(name="bcl_convert_test_q30_bases_percent")
+def fixture_bcl_convert_test_q30_bases_percent() -> float:
+    return 0.95
+
+
+@pytest.fixture(name="bcl_convert_test_mean_quality_score_per_lane")
+def fixture_bcl_convert_test_mean_quality_score() -> float:
+    return 36.15
+
+
+@pytest.fixture(name="bcl_convert_test_flow_cell_name")
+def fixture_bcl_convert_test_flow_cell_name() -> str:
+    return "HY7FFDRX2"
 
 
 @pytest.fixture(name="bcl_convert_demux_metric_model_with_data")
@@ -148,18 +138,26 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
 
 
 @pytest.fixture(name="parsed_bcl_convert_metrics")
-def fixture_parsed_bcl_convert_metrics(
-    bcl_convert_quality_metric_file_path,
-    bcl_convert_demux_metric_file_path,
-    bcl_convert_sample_sheet_file_path,
-    bcl_convert_adapter_metrics_file_path,
-    bcl_convert_run_info_file_path,
-) -> BclConvertMetricsParser:
+def fixture_parsed_bcl_convert_metrics(bcl_convert_metrics_dir_path) -> BclConvertMetricsParser:
     """Return an object with parsed BCLConvert metrics."""
-    return BclConvertMetricsParser(
-        bcl_convert_quality_metrics_file_path=bcl_convert_quality_metric_file_path,
-        bcl_convert_demux_metrics_file_path=bcl_convert_demux_metric_file_path,
-        bcl_convert_sample_sheet_file_path=bcl_convert_sample_sheet_file_path,
-        bcl_convert_adapter_metrics_file_path=bcl_convert_adapter_metrics_file_path,
-        bcl_convert_run_info_file_path=bcl_convert_run_info_file_path,
+    return BclConvertMetricsParser(bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path)
+
+
+@pytest.fixture(name="parsed_sequencing_statistics_from_bcl_convert")
+def fixture_parsed_sequencing_statistics_from_bcl_convert(
+    test_sample_internal_id: str,
+    test_lane: int,
+    bcl_convert_test_flow_cell_name: str,
+    bcl_convert_reads_for_test_sample: int,
+    bcl_convert_test_mean_quality_score_per_lane: float,
+    bcl_convert_test_q30_bases_percent_per_lane: float,
+) -> SampleLaneSequencingMetrics:
+    return SampleLaneSequencingMetrics(
+        sample_internal_id=test_sample_internal_id,
+        flow_cell_lane_number=test_lane,
+        flow_cell_name=bcl_convert_test_flow_cell_name,
+        sample_total_reads_in_lane=bcl_convert_reads_for_test_sample * 2,
+        sample_base_mean_quality_score=bcl_convert_test_mean_quality_score_per_lane,
+        sample_base_fraction_passing_q30=bcl_convert_test_q30_bases_percent_per_lane,
+        created_at=datetime.now(),
     )

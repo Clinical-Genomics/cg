@@ -8,7 +8,7 @@ from typing import Dict, Generator, List
 import pytest
 from housekeeper.store.models import Version
 
-from cg.constants import DataDelivery, FileExtensions, Pipeline
+from cg.constants import DataDelivery, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.sequencing import SequencingMethod
 from cg.io.controller import ReadFile

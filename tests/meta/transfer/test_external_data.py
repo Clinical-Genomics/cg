@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import List
 
 from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Sample
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from housekeeper.store.models import Version
 from tests.cli.workflow.conftest import dna_case

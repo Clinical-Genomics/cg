@@ -1,8 +1,6 @@
 from pathlib import Path
 
 import click
-from typing import List, Dict
-from cg.constants.sequencing import Sequencers
 from cg.utils.enums import StrEnum
 
 
@@ -102,3 +100,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
+
+
+INDEX_CHECK = "indexcheck"
+UNDETERMINED = "Undetermined"
