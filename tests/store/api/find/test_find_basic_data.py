@@ -46,45 +46,6 @@ def test_get_active_beds_when_archived(base_store: Store):
     assert not list(active_beds)
 
 
-def test_get_bed_by_name(base_store: Store, bed_name: str):
-    """Test returning a bed record by name from the database."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    bed: Optional[Bed] = base_store.get_bed_by_name(bed_name=bed_name)
-
-    # THEN return a bed
-    assert bed
-
-    # THEN return a bed with the supplied bed name
-    assert bed.name == bed_name
-
-
-def test_get_bed_by_name_when_no_match(base_store: Store):
-    """Test returning a bed record by name from the database when no match."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    bed: Optional[Bed] = base_store.get_bed_by_name(bed_name="does_not_exist")
-
-    # THEN do not return a bed
-    assert not bed
-
-
-def test_get_latest_bed_version(base_store: Store, bed_name: str):
-    """Test returning a bed version by bed name from the database."""
-
-    # GIVEN a store with beds
-
-    # WHEN fetching beds
-    bed_version: BedVersion = base_store.get_latest_bed_version(bed_name=bed_name)
-
-    # THEN return a bed version with the supplied bed name
-    assert bed_version.version == 1
-
-
 def test_get_application_by_tag(microbial_store: Store, tag: str = MicrosaltAppTags.MWRNXTR003):
     """Test function to return the application by tag."""
 
@@ -110,25 +71,6 @@ def test_get_applications_is_not_archived(
     # THEN return a application with the supplied application tag
     assert len(applications) == EXPECTED_NUMBER_OF_NOT_ARCHIVED_APPLICATIONS
     assert (application.is_archived is False for application in applications)
-
-
-def test_get_applications_by_prep_category(
-    microbial_store: Store,
-    EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY,
-    prep_category=MicrosaltAppTags.PREP_CATEGORY,
-):
-    """Test function to return the application by prep category."""
-
-    # GIVEN a store with application records
-
-    # WHEN getting the query for the flow cells
-    applications: List[Application] = microbial_store.get_applications_by_prep_category(
-        prep_category=prep_category
-    )
-
-    # THEN return a application with the supplied application tag
-    assert len(applications) == EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY
-    assert (application.prep_category == prep_category for application in applications)
 
 
 def test_get_applications(microbial_store: Store, EXPECTED_NUMBER_OF_APPLICATIONS):

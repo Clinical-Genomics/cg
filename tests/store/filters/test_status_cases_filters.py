@@ -18,7 +18,6 @@ from cg.store.filters.status_case_filters import (
     filter_cases_by_pipeline_search,
     filter_cases_by_priority,
     filter_cases_not_analysed,
-    get_newer_cases_by_creation_date,
     get_newer_cases_by_order_date,
     get_running_cases,
     filter_cases_by_ticket_id,
@@ -561,45 +560,6 @@ def test_get_old_cases_none_when_all_cases_are_too_new(
 
     # THEN cases should not contain the test case
     assert not cases.all()
-
-
-def test_get_newer_cases_none_when_all_cases_older(
-    base_store: Store, helpers: StoreHelpers, timestamp_in_2_weeks: datetime
-):
-    """Test that no cases are returned when all cases are older than the given date."""
-
-    # GIVEN a cases Query
-    helpers.add_case(base_store)
-    cases: Query = base_store._get_query(table=Family)
-
-    # WHEN getting newer cases
-    cases: Query = get_newer_cases_by_creation_date(cases=cases, creation_date=timestamp_in_2_weeks)
-
-    # ASSERT that cases is a query
-    assert isinstance(cases, Query)
-
-    # THEN no cases should be returned
-    assert not cases.all()
-
-
-def test_get_newer_cases_all_when_all_cases_newer(
-    base_store: Store, helpers: StoreHelpers, timestamp_yesterday: datetime
-):
-    """Test that all cases are returned when all cases are newer than the given date."""
-    # GIVEN a cases Query
-    helpers.add_case(base_store)
-    cases: Query = base_store._get_query(table=Family)
-
-    # WHEN getting newer cases
-    filtered_cases: Query = get_newer_cases_by_creation_date(
-        cases=cases, creation_date=timestamp_yesterday
-    )
-
-    # ASSERT that cases is a query
-    assert isinstance(filtered_cases, Query)
-
-    # THEN all cases should be returned
-    assert filtered_cases.count() == cases.count()
 
 
 def test_filter_case_by_existing_entry_id(store_with_multiple_cases_and_samples: Store):

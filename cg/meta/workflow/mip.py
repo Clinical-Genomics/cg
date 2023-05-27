@@ -265,15 +265,6 @@ class MipAnalysisAPI(AnalysisAPI):
             sv_rank_model_version=sample_info.sv_rank_model_version,
         )
 
-    @staticmethod
-    def is_dna_only_case(case_obj: Family) -> bool:
-        """Returns True if all samples of a case has DNA application type."""
-
-        return all(
-            _link.sample.application_version.application.analysis_type not in "wts"
-            for _link in case_obj.links
-        )
-
     def get_skip_evaluation_flag(self, case_id: str, skip_evaluation: bool) -> bool:
         """If any sample in this case is downsampled or external, returns true"""
         if skip_evaluation:

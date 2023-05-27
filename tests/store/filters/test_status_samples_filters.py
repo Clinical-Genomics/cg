@@ -11,12 +11,10 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_is_delivered,
     filter_samples_is_not_delivered,
     filter_samples_without_invoice_id,
-    filter_samples_is_down_sampled,
     filter_samples_is_not_down_sampled,
     filter_samples_is_sequenced,
     filter_samples_is_not_sequenced,
     filter_samples_do_invoice,
-    filter_samples_do_not_invoice,
     filter_samples_by_invoice_id,
     filter_samples_by_internal_id,
     filter_samples_by_entry_id,
@@ -28,7 +26,6 @@ from cg.store.filters.status_sample_filters import (
     filter_samples_by_name,
     filter_samples_by_subject_id,
     filter_samples_by_entry_customer_ids,
-    filter_samples_by_name_pattern,
     filter_samples_by_internal_id_pattern,
     filter_samples_by_identifier_name_and_value,
 )
@@ -189,33 +186,6 @@ def test_filter_samples_without_invoice_id(
     assert samples.all()[0].invoice_id is None
 
 
-def test_filter_samples_down_sampled(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-):
-    """Test that a sample is returned when there is a sample that is not down sampled."""
-
-    # GIVEN a store with two samples of which one is not sequenced
-
-    # WHEN getting not sequenced samples
-    samples: Query = filter_samples_is_down_sampled(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        )
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 1
-
-    # THEN the sample should have a down sampled to value
-    assert samples.all()[0].downsampled_to is not None
-
-
 def test_filter_samples_not_down_sampled(
     store_with_a_sample_that_has_many_attributes_and_one_without: Store,
 ):
@@ -322,33 +292,6 @@ def test_filter_samples_do_invoice(
 
     # THEN the sample should have a no invoice indicator that is set to False
     assert samples.all()[0].no_invoice is False
-
-
-def test_filter_samples_do_not_invoice(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-):
-    """Test that a sample is returned when there is not a sample that should be invoiced."""
-
-    # GIVEN a  store with two samples of which one is marked to skip invoicing
-
-    # WHEN getting samples that are marked to skip invoicing
-    samples: Query = filter_samples_do_not_invoice(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        )
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 1
-
-    # THEN the sample should have a no invoice indicator that is set to True
-    assert samples.all()[0].no_invoice is True
 
 
 def test_filter_samples_is_received(
@@ -624,34 +567,6 @@ def test_filter_get_samples_by_customer_id(
 
     # THEN a sample in the filtered query should have the correct customer id
     assert filtered_query.first().customer_id == customer_id
-
-
-def test_filter_get_samples_by_name_pattern(
-    store_with_a_sample_that_has_many_attributes_and_one_without: Store,
-    name_pattern: str = StoreConstants.NAME_SAMPLE_WITH_ATTRIBUTES.value,
-):
-    """Test that a sample is returned when there is a sample with the given name pattern."""
-    # GIVEN a store with two samples of which one has a name name pattern
-
-    # WHEN getting a sample by name pattern
-    samples: Query = filter_samples_by_name_pattern(
-        samples=store_with_a_sample_that_has_many_attributes_and_one_without._get_query(
-            table=Sample
-        ),
-        name_pattern=name_pattern,
-    )
-
-    # ASSERT that samples is a query
-    assert isinstance(samples, Query)
-
-    # THEN samples should contain the test sample
-    assert samples.all()
-
-    # THEN samples should contain one sample
-    assert len(samples.all()) == 1
-
-    # THEN the sample should have the correct name
-    assert samples[0].name == name_pattern
 
 
 def test_filter_get_samples_by_internal_id_pattern(

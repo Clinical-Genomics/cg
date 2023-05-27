@@ -161,7 +161,6 @@ def setup_mocks(
     case_to_analyze: Family = None,
     decompress_spring: bool = False,
     has_latest_analysis_started: bool = False,
-    is_dna_only_case: bool = False,
     is_spring_decompression_needed: bool = False,
     is_spring_decompression_running: bool = False,
 ) -> None:
@@ -171,9 +170,6 @@ def setup_mocks(
 
     mocker.patch.object(PrepareFastqAPI, "is_spring_decompression_needed")
     PrepareFastqAPI.is_spring_decompression_needed.return_value = is_spring_decompression_needed
-
-    mocker.patch.object(MipAnalysisAPI, "is_dna_only_case")
-    MipAnalysisAPI.is_dna_only_case.return_value = is_dna_only_case
 
     mocker.patch.object(TrailblazerAPI, "has_latest_analysis_started")
     TrailblazerAPI.has_latest_analysis_started.return_value = has_latest_analysis_started
