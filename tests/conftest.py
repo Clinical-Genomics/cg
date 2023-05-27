@@ -47,43 +47,43 @@ LOG = logging.getLogger(__name__)
 # Timestamp fixture
 
 
-@pytest.fixture(name="old_timestamp")
+@pytest.fixture(name="old_timestamp", scope="session")
 def fixture_old_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(1900, 1, 1)
 
 
-@pytest.fixture(name="timestamp")
+@pytest.fixture(name="timestamp", scope="session")
 def fixture_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(2020, 5, 1)
 
 
-@pytest.fixture(name="later_timestamp")
+@pytest.fixture(name="later_timestamp", scope="session")
 def fixture_later_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(2020, 6, 1)
 
 
-@pytest.fixture(name="future_date")
+@pytest.fixture(name="future_date", scope="session")
 def fixture_future_date() -> datetime:
     """Return a distant date in the future for which no events happen later."""
     return datetime(MAXYEAR, 1, 1, 1, 1, 1)
 
 
-@pytest.fixture(name="timestamp_now")
+@pytest.fixture(name="timestamp_now", scope="session")
 def fixture_timestamp_now() -> datetime:
     """Return a time stamp of today's date in date time format."""
     return datetime.now()
 
 
-@pytest.fixture(name="timestamp_yesterday")
+@pytest.fixture(name="timestamp_yesterday", scope="session")
 def fixture_timestamp_yesterday(timestamp_now: datetime) -> datetime:
     """Return a time stamp of yesterday's date in date time format."""
     return timestamp_now - timedelta(days=1)
 
 
-@pytest.fixture(name="timestamp_in_2_weeks")
+@pytest.fixture(name="timestamp_in_2_weeks", scope="session")
 def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
     """Return a time stamp 14 days ahead in time."""
     return timestamp_now + timedelta(days=14)
@@ -92,79 +92,79 @@ def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
 # Case fixtures
 
 
-@pytest.fixture(name="slurm_account")
+@pytest.fixture(name="slurm_account", scope="session")
 def fixture_slurm_account() -> str:
     """Return a SLURM account."""
     return "super_account"
 
 
-@pytest.fixture(name="user_name")
+@pytest.fixture(name="user_name", scope="session")
 def fixture_user_name() -> str:
     """Return a user name."""
     return "Paul Anderson"
 
 
-@pytest.fixture(name="user_mail")
+@pytest.fixture(name="user_mail", scope="session")
 def fixture_user_mail() -> str:
     """Return a user email."""
     return "paul@magnolia.com"
 
 
-@pytest.fixture(name="email_adress")
+@pytest.fixture(name="email_adress", scope="session")
 def fixture_email_adress() -> str:
     """Return an email adress."""
     return "james.holden@scilifelab.se"
 
 
-@pytest.fixture(name="case_id")
+@pytest.fixture(name="case_id", scope="session")
 def fixture_case_id() -> str:
     """Return a case id."""
     return "yellowhog"
 
 
-@pytest.fixture(name="case_id_does_not_exist")
+@pytest.fixture(name="case_id_does_not_exist", scope="session")
 def fixture_case_id_does_not_exist() -> str:
     """Return a case id that should not exist."""
     return "case_does_not_exist"
 
 
-@pytest.fixture(name="another_case_id")
+@pytest.fixture(name="another_case_id", scope="session")
 def fixture_another_case_id() -> str:
     """Return another case id."""
     return "another_case_id"
 
 
-@pytest.fixture(name="sample_id")
+@pytest.fixture(name="sample_id", scope="session")
 def fixture_sample_id() -> str:
     """Return a sample id."""
     return "ADM1"
 
 
-@pytest.fixture(name="father_sample_id")
+@pytest.fixture(name="father_sample_id", scope="session")
 def fixture_father_sample_id() -> str:
     """Return the sample id of the father."""
     return "ADM2"
 
 
-@pytest.fixture(name="mother_sample_id")
+@pytest.fixture(name="mother_sample_id", scope="session")
 def fixture_mother_sample_id() -> str:
     """Return the mothers sample id."""
     return "ADM3"
 
 
-@pytest.fixture(name="invalid_sample_id")
+@pytest.fixture(name="invalid_sample_id", scope="session")
 def fixture_invalid_sample_id() -> str:
     """Return an invalid sample id."""
     return "invalid-sample-id"
 
 
-@pytest.fixture(name="sample_ids")
+@pytest.fixture(name="sample_ids", scope="session")
 def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
     """Return a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
 
-@pytest.fixture(name="sample_name")
+@pytest.fixture(name="sample_name", scope="session")
 def fixture_sample_name() -> str:
     """Returns a sample name."""
     return "a_sample_name"
@@ -176,7 +176,7 @@ def fixture_cust_sample_id() -> str:
     return "child"
 
 
-@pytest.fixture(name="family_name")
+@pytest.fixture(name="family_name", scope="session")
 def fixture_family_name() -> str:
     """Return a case name."""
     return "case"
@@ -188,12 +188,12 @@ def fixture_customer_id() -> str:
     return "cust000"
 
 
-@pytest.fixture(name="sbatch_job_number")
+@pytest.fixture(name="sbatch_job_number", scope="session")
 def fixture_sbatch_job_number() -> int:
     return 123456
 
 
-@pytest.fixture(name="sbatch_process")
+@pytest.fixture(name="sbatch_process", scope="session")
 def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object."""
     slurm_process = ProcessMock(binary="sbatch")
@@ -1741,31 +1741,31 @@ def fixture_cg_context(
     return cg_config
 
 
-@pytest.fixture(name="case_id_with_single_sample")
+@pytest.fixture(name="case_id_with_single_sample", scope="session")
 def fixture_case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
-@pytest.fixture(name="case_id_with_multiple_samples")
+@pytest.fixture(name="case_id_with_multiple_samples", scope="session")
 def fixture_case_id_with_multiple_samples():
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
-@pytest.fixture(name="case_id_without_samples")
+@pytest.fixture(name="case_id_without_samples", scope="session")
 def fixture_case_id_without_samples():
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
-@pytest.fixture(name="sample_id_in_single_case")
+@pytest.fixture(name="sample_id_in_single_case", scope="session")
 def fixture_sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
-@pytest.fixture(name="sample_id_in_multiple_cases")
+@pytest.fixture(name="sample_id_in_multiple_cases", scope="session")
 def fixture_sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
