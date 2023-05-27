@@ -539,7 +539,9 @@ def test_add_rna_sample(
 
     # GIVEN an RNA case and the associated RNA samples
     rna_case: Family = rna_store.get_case_by_internal_id(internal_id=rna_case_id)
-    rna_sample_list: List[Sample] = rna_store.get_samples_by_name_pattern(name_pattern="rna")
+    rna_sample_list: List[Sample] = (
+        rna_store._get_query(table=Sample).filter(Sample.internal_id.like("rna")).all()
+    )
 
     # WHEN running the method to create a nested dictionary with the relationships between RNA/DNA samples and DNA cases
     rna_dna_case_map: dict = upload_scout_api.create_rna_dna_sample_case_map(rna_case=rna_case)

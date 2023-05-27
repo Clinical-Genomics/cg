@@ -729,20 +729,6 @@ class StatusHandler(BaseHandler):
 
         return records.all()
 
-    def get_samples_not_delivered(self) -> List[Sample]:
-        """Return samples not delivered."""
-        records = self._get_query(table=Sample)
-        sample_filter_functions: List[SampleFilter] = [
-            SampleFilter.FILTER_IS_NOT_DOWN_SAMPLED,
-            SampleFilter.FILTER_IS_NOT_DELIVERED,
-        ]
-
-        records: Query = apply_sample_filter(
-            filter_functions=sample_filter_functions,
-            samples=records,
-        )
-        return records.all()
-
     def get_samples_not_invoiced(self) -> List[Sample]:
         """Return all samples that have  not been invoiced, excluding those that
         have been down sampled."""

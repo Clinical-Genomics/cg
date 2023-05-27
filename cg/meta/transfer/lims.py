@@ -21,13 +21,6 @@ class PoolState(Enum):
     DELIVERED = "delivered"
 
 
-class MicrobialState(Enum):
-    RECEIVED = "received"
-    PREPARED = "prepared"
-    SEQUENCED = "sequenced"
-    DELIVERED = "delivered"
-
-
 class IncludeOptions(Enum):
     UNSET = "unset"
     NOTINVOICED = "not-invoiced"
@@ -57,9 +50,6 @@ class TransferLims(object):
             PoolState.RECEIVED: self.lims.get_received_date,
             PoolState.DELIVERED: self.lims.get_delivery_date,
         }
-
-    def _get_samples_not_yet_delivered(self):
-        return self.status.get_samples_not_delivered()
 
     def transfer_samples(
         self, status_type: SampleState, include: str = "unset", sample_id: str = None

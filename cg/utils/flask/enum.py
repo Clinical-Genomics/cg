@@ -5,10 +5,6 @@ from flask_admin.form import Select2Field
 
 class EnumField:
     @staticmethod
-    def get_name(enum_instance):
-        return enum_instance.name
-
-    @staticmethod
     def get_value(enum_instance):
         return enum_instance.value
 

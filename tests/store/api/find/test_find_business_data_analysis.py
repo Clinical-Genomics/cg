@@ -8,26 +8,7 @@ from cg.store.models import (
 from cg.constants import Pipeline
 
 
-def test_get_analysis_by_case(
-    store_with_case_and_analysis: Store, case_id: str = "test_case_internal_id"
-):
-    """Test that an analysis can be fetched by case."""
-    # GIVEN a database with an analysis and case
-    case = store_with_case_and_analysis.get_case_by_internal_id(internal_id=case_id)
-    assert case
-    # WHEN fetching the analysis by case
-    analyses: List[Analysis] = store_with_case_and_analysis.get_analyses_by_case_entry_id(
-        case_entry_id=case.id
-    )
-    # THEN one analysis should be returned
-    for analysis in analyses:
-        assert analysis
-        assert analysis.family == case
-
-
-def test_get_analyses_uploaded_to_vogue(
-    store_with_analyses_for_cases: Store, case_id: str = "test_case_internal_id"
-):
+def test_get_analyses_uploaded_to_vogue(store_with_analyses_for_cases: Store):
     """Test that an analysis can be fetched by case."""
     # GIVEN a database with an analysis and case
 
@@ -125,7 +106,6 @@ def test_get_latest_microsalt_analysis_to_upload(
 
 def test_get_analyses_to_deliver_for_pipeline(
     store_with_analyses_for_cases_to_deliver: Store,
-    timestamp_now: datetime,
     pipeline: Pipeline = Pipeline.FLUFFY,
 ):
     # GIVEN a store with multiple analyses to deliver

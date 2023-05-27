@@ -86,8 +86,10 @@ def test_add_pool(rml_pool_store: Store):
     # GIVEN a valid customer and a valid application_version
     customer: Customer = rml_pool_store.get_customers()[0]
     application = rml_pool_store.get_application_by_tag(tag="RMLP05R800")
-    app_version = rml_pool_store.get_application_version_by_application_entry_id(
-        application_entry_id=application.id
+    app_version = (
+        rml_pool_store._get_query(table=ApplicationVersion)
+        .filter(ApplicationVersion.application_id == application.id)
+        .first()
     )
 
     # WHEN adding a new pool
