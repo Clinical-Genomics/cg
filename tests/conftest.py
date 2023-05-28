@@ -894,7 +894,7 @@ def fixture_bed_file(analysis_dir) -> Path:
 # Helper fixtures
 
 
-@pytest.fixture(name="helpers")
+@pytest.fixture(name="helpers", scope="session")
 def fixture_helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores."""
     return StoreHelpers()
@@ -1392,20 +1392,20 @@ def sample_store(base_store: Store) -> Store:
     return base_store
 
 
-@pytest.fixture(name="trailblazer_api")
+@pytest.fixture(name="trailblazer_api", scope="session")
 def fixture_trailblazer_api() -> MockTB:
     """Return a mock Trailblazer API."""
     return MockTB()
 
 
-@pytest.fixture(name="lims_api")
+@pytest.fixture(name="lims_api", scope="session")
 def fixture_lims_api() -> MockLimsAPI:
     """Return a mock LIMS API."""
     return MockLimsAPI()
 
 
 @pytest.fixture(name="config_root_dir", scope="session")
-def fixture_config_root_dir(tmpdir_factory) -> Path:
+def fixture_config_root_dir() -> Path:
     """Return a path to the config root directory."""
     return Path("tests", "fixtures", "data")
 
@@ -1503,7 +1503,7 @@ def fixture_custom_observations_clinical_snv_file_path(observations_dir: Path) -
     return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
-@pytest.fixture(name="microsalt_dir")
+@pytest.fixture(name="microsalt_dir", scope="session")
 def fixture_microsalt_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Microsalt testing."""
     return tmpdir_factory.mktemp("microsalt")
