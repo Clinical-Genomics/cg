@@ -512,7 +512,7 @@ def fixture_non_existing_file_path(project_dir: Path) -> Path:
     return Path(project_dir, "a_file.txt")
 
 
-@pytest.fixture(name="content")
+@pytest.fixture(name="content", scope="session")
 def fixture_content() -> str:
     """Return some content for a file."""
     return (
