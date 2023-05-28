@@ -464,19 +464,19 @@ def fixture_fixtures_dir() -> Path:
     return Path("tests", "fixtures")
 
 
-@pytest.fixture(name="analysis_dir")
+@pytest.fixture(name="analysis_dir", scope="session")
 def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(fixtures_dir, "analysis")
 
 
-@pytest.fixture(name="microsalt_analysis_dir")
+@pytest.fixture(name="microsalt_analysis_dir", scope="session")
 def fixture_microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(analysis_dir, "microsalt")
 
 
-@pytest.fixture(name="apps_dir")
+@pytest.fixture(name="apps_dir", scope="session")
 def fixture_apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir."""
     return Path(fixtures_dir, "apps")
@@ -1404,42 +1404,42 @@ def fixture_lims_api() -> MockLimsAPI:
     return MockLimsAPI()
 
 
-@pytest.fixture(name="config_root_dir")
+@pytest.fixture(name="config_root_dir", scope="session")
 def fixture_config_root_dir(tmpdir_factory) -> Path:
     """Return a path to the config root directory."""
     return Path("tests", "fixtures", "data")
 
 
-@pytest.fixture(name="housekeeper_dir")
+@pytest.fixture(name="housekeeper_dir", scope="session")
 def fixture_housekeeper_dir(tmpdir_factory):
     """Return a temporary directory for Housekeeper testing."""
     return tmpdir_factory.mktemp("housekeeper")
 
 
-@pytest.fixture(name="mip_dir")
+@pytest.fixture(name="mip_dir", scope="session")
 def fixture_mip_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for MIP testing."""
     return tmpdir_factory.mktemp("mip")
 
 
-@pytest.fixture(name="fluffy_dir")
+@pytest.fixture(name="fluffy_dir", scope="session")
 def fixture_fluffy_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Fluffy testing."""
     return tmpdir_factory.mktemp("fluffy")
 
 
-@pytest.fixture(name="balsamic_dir")
+@pytest.fixture(name="balsamic_dir", scope="session")
 def fixture_balsamic_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Balsamic testing."""
     return tmpdir_factory.mktemp("balsamic")
 
 
-@pytest.fixture(name="rnafusion_dir")
+@pytest.fixture(name="rnafusion_dir", scope="session")
 def fixture_rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
 
 
-@pytest.fixture(name="cg_dir")
+@pytest.fixture(name="cg_dir", scope="session")
 def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
