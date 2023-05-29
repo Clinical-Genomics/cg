@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from cg.models.rnafusion.analysis import RnafusionAnalysis
 from pydantic import ValidationError
 
 from cg import resources
@@ -31,6 +32,7 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
+from cg.store.models import Family
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -345,6 +347,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
     def get_multiqc_json_metrics(self, case_id: str) -> List[MetricsBase]:
         """Get a multiqc_data.json file and returns metrics and values formatted."""
+        case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        sample_id: str = case.links[0].sample.internal_id
         multiqc_json: MultiqcDataJson = MultiqcDataJson(
             **read_json(file_path=self.get_multiqc_json_path(case_id=case_id))
         )
@@ -355,7 +359,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return [
             MetricsBase(
                 header=None,
-                id=case_id,
+                id=sample_id,
                 input="multiqc_data.json",
                 name=metric_name,
                 step="multiqc",
@@ -401,3 +405,19 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_format=FileFormat.YAML, file_path=metrics_deliverables_path
         )
         MetricsDeliverablesCondition(**qcmetrics_raw)
+
+    def parse_analysis(self, qc_metrics_raw: List[MetricsBase], **kwargs) -> RnafusionAnalysis:
+        """Parse Rnafusion output analysis files."""
+        sample_metrics: Dict[str, dict] = {}
+        for metric in qc_metrics_raw:
+            metric.name = metric.name.replace("5_3_bias", "bias_5_3")
+            try:
+                sample_metrics[metric.id].update({metric.name.lower(): metric.value})
+            except KeyError:
+                sample_metrics[metric.id] = {metric.name.lower(): metric.value}
+        return RnafusionAnalysis(sample_metrics=sample_metrics)
+
+    def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
+        """Get the latest metadata of a specific Rnafusion case."""
+        qc_metrics: List[MetricsBase] = self.get_multiqc_json_metrics(case_id)
+        return self.parse_analysis(qc_metrics_raw=qc_metrics)
