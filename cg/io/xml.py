@@ -14,6 +14,6 @@ def read_xml(file_path: Path) -> ET.ElementTree:
     return tree
 
 
-def write_xml(tree: ET.ElementTree, file_path: Path):
+def write_xml(tree: ET.ElementTree, file_path: Path) -> None:
     """Write content to a xml file."""
     tree.write(file_path, encoding="utf-8", xml_declaration=True)
