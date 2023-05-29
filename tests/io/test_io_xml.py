@@ -22,11 +22,11 @@ def test_write_xml(xml_file_path, xml_temp_path):
     # WHEN reading the xml file
     raw_xml_content = read_xml(file_path=xml_file_path)
 
-    # ASSERT file path is not empty
-    assert xml_temp_path
-
     # WHEN writing the xml file from dict
     write_xml(tree=raw_xml_content, file_path=xml_temp_path)
+
+    # ASSERT file path is not empty
+    assert xml_temp_path.exists()
 
     # ASSERT that written file has the same content as the original file
     written_file = read_xml(file_path=xml_temp_path)
