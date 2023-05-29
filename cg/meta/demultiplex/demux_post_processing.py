@@ -72,6 +72,18 @@ class DemuxPostProcessingAPI:
 
         self.status_db.session.add_all(metrics)
         self.status_db.session.commit()
+        LOG.info(f"Added sample lane sequencing metrics to status database for: {flow_cell_name}")
+
+    def finish_flow_cell_temp(self):
+        pass
+
+    def post_process_flow_cell_temp(self):
+        pass
+
+    def retrieve_bcl_converter(self, flow_cell_name: str) -> str:
+        """Retrieve bcl converter from flow cell."""
+
+    pass
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
@@ -148,6 +160,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Run all the necessary steps for post-processing a demultiplexed flow cell."""
         if not self.dry_run:
             Path(demux_results.flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY).touch()
+            # delete cgstats
         self.add_to_cgstats(flow_cell_path=demux_results.flow_cell.path)
         self.cgstats_select_project(
             flow_cell_id=demux_results.flow_cell.id, flow_cell_path=demux_results.flow_cell.path
@@ -300,7 +313,6 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def post_process_flow_cell(self, demux_results: DemuxResults) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell.
-
         This will
             1. Rename all the necessary files and folders
             2. Add the demux results to cgstats
@@ -310,12 +322,18 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.files_renamed():
             LOG.info("Files have already been renamed")
         else:
+            # not needed
             self.rename_files(demux_results=demux_results)
+        # depcrecated
         self.add_to_cgstats(demux_results=demux_results)
+        # deprecated
         self.create_cgstats_reports(demux_results=demux_results)
         if demux_results.bcl_converter == "bcl2fastq":
+            # relevant - topUnknownbarcodes
             self.create_barcode_summary_report(demux_results=demux_results)
+        # moving not needed with new workflow   - on hold
         self.copy_sample_sheet(demux_results=demux_results)
+
         self.transfer_flow_cell(
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
