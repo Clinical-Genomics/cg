@@ -5,7 +5,6 @@ from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq
 
 
-
 def test_get_valid_indexes():
     # GIVEN a sample sheet api
 
