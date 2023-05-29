@@ -1,54 +1,24 @@
-"""Functions to get sample sheet information from Lims"""
+"""Functions to get sample sheet information from Lims."""
 import logging
 import re
 from typing import Iterable, List, Optional, Union
 
-from pydantic import BaseModel, Field
-
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
+from cg.constants.demultiplexing import BclConverter
 
 LOG = logging.getLogger(__name__)
 
 
-class LimsFlowcellSample(BaseModel):
-    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias="Lane")
-    sample_id: str
-    sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
-    index: str
-    index2: str = ""
-    description: str = ""
-    sample_name: str = Field(..., alias="SampleName")
-    control: str = Field("N", alias="Control")
-    recipe: str = Field("R1", alias="Recipe")
-    operator: str = Field("script", alias="Operator")
-    project: str
-
-    class Config:
-        allow_population_by_field_name = True
-
-
-class LimsFlowcellSampleBcl2Fastq(LimsFlowcellSample):
-    sample_id: str = Field(..., alias="SampleID")
-    project: str = Field(..., alias="Project")
-
-
-class LimsFlowcellSampleDragen(LimsFlowcellSample):
-    sample_id: str = Field(..., alias="Sample_ID")
-    project: str = Field(..., alias="Sample_Project")
-
-
 def get_placement_lane(lane: str) -> int:
-    """Parse out the lane information from an artifact.placement"""
+    """Parse out the lane information from an artifact.placement."""
     return int(lane.split(":")[0])
 
 
 def get_non_pooled_artifacts(artifact: Artifact) -> List[Artifact]:
-    """Find the parent artifact of the sample. Should hold the reagent_label"""
+    """Find the parent artifact of the sample. Should hold the reagent_label."""
     artifacts = []
 
     if len(artifact.samples) == 1:
@@ -62,42 +32,48 @@ def get_non_pooled_artifacts(artifact: Artifact) -> List[Artifact]:
 
 
 def get_reagent_label(artifact) -> Optional[str]:
-    """Get the first and only reagent label from an artifact"""
+    """Get the first and only reagent label from an artifact."""
     labels: List[str] = artifact.reagent_labels
     if len(labels) > 1:
-        raise ValueError("Expecting at most one reagent label. Got ({}).".format(len(labels)))
+        raise ValueError(f"Expecting at most one reagent label. Got ({len(labels)}).")
     return labels[0] if labels else None
 
 
-def get_index(lims: Lims, label: str) -> str:
-    """Parse out the sequence from a reagent label"""
+def extract_sequence_in_parentheses(label: str) -> Optional[str]:
+    """Return the sequence in parentheses from the reagent label or None if not found."""
+    match = re.match(r"^[^(]+ \(([^)]+)\)$", label)
+    return match.group(1) if match else None
 
-    reagent_types = lims.get_reagent_types(name=label)
+
+def get_index(lims: Lims, label: str) -> str:
+    """Parse out the sequence from a reagent label."""
+
+    reagent_types: List = lims.get_reagent_types(name=label)
 
     if len(reagent_types) > 1:
-        raise ValueError("Expecting at most one reagent type. Got ({}).".format(len(reagent_types)))
+        raise ValueError(f"Expecting at most one reagent type. Got ({len(reagent_types)}).")
 
     try:
         reagent_type = reagent_types.pop()
     except IndexError:
         return ""
-    sequence = reagent_type.sequence
+    sequence: str = reagent_type.sequence
 
-    match = re.match(r"^.+ \((.+)\)$", label)
+    match = extract_sequence_in_parentheses(label=label)
     if match:
-        assert match.group(1) == sequence
+        assert match == sequence
 
     return sequence
 
 
-def flowcell_samples(
+def flow_cell_samples(
     lims: Lims, flowcell_id: str, bcl_converter: str
-) -> Iterable[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]]:
+) -> Iterable[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]]:
     lims_flowcell_sample = {
-        "bcl2fastq": LimsFlowcellSampleBcl2Fastq,
-        "dragen": LimsFlowcellSampleDragen,
+        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
+        BclConverter.DRAGEN.value: FlowCellSampleDragen,
     }
-    LOG.info("Fetching samples from lims for flowcell %s", flowcell_id)
+    LOG.info(f"Fetching samples from lims for flowcell {flowcell_id}")
     containers: List[Container] = lims.get_containers(name=flowcell_id)
     if not containers:
         return []

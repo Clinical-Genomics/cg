@@ -95,6 +95,7 @@ class FileFormat(StrEnum):
     JSON: str = "json"
     YAML: str = "yaml"
     CSV: str = "csv"
+    XML: str = "xml"
 
 
 class GenomeVersion(StrEnum):
@@ -140,6 +141,7 @@ class FileExtensions(StrEnum):
     TAR: str = ".tar"
     TMP: str = ".tmp"
     VCF: str = ".vcf"
+    XML: str = ".xml"
 
 
 class APIMethods(StrEnum):

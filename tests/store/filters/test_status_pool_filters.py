@@ -8,7 +8,6 @@ from cg.store.filters.status_pool_filters import (
     filter_pools_is_not_delivered,
     filter_pools_without_invoice_id,
     filter_pools_do_invoice,
-    filter_pools_do_not_invoice,
     filter_pools_by_invoice_id,
     filter_pools_by_order_enquiry,
     filter_pools_by_name_enquiry,
@@ -105,32 +104,6 @@ def test_filter_pools_is_not_received(
 
     # WHEN getting received pools
     pools: Query = filter_pools_is_not_received(
-        pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
-    )
-
-    # ASSERT that the query is a Query
-    assert isinstance(pools, Query)
-
-    # THEN pools should contain the test pool
-    assert pools.all()
-
-    # THEN only one pool should be returned
-    assert len(pools.all()) == 1
-
-    # THEN the pool should have the expected name
-    assert pools.all()[0].name == name
-
-
-def test_filter_pools_do_not_invoice(
-    store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConstants.NAME_POOL_WITHOUT_ATTRIBUTES.value,
-):
-    """Test that a pool is returned when there is a pool that should not be invoiced."""
-
-    # GIVEN a pool marked to skip invoicing and one not marked to skip invoicing
-
-    # WHEN getting pools marked to skip invoicing
-    pools: Query = filter_pools_do_not_invoice(
         pools=store_with_a_pool_with_and_without_attributes._get_query(table=Pool)
     )
 
@@ -283,7 +256,6 @@ def test_filter_pools_by_order_enquiry(
 
 def test_filter_pools_by_customer_id(
     store_with_a_pool_with_and_without_attributes: Store,
-    name=StoreConstants.NAME_POOL_WITH_ATTRIBUTES.value,
 ):
     """Test that a pool is returned when there is a pool with a specific customer id."""
 

@@ -93,10 +93,6 @@ class HousekeeperAPI:
 
         return file_obj
 
-    def check_for_files(self, bundle: str = None, tags=None, version=None) -> bool:
-        """Check if there are files for a bundle, tags, and/or version."""
-        return any(self.files(bundle=bundle, tags=tags, version=version))
-
     def add_file(self, path, version_obj: Version, tags: list, to_archive: bool = False) -> File:
         """Add a file to the database."""
         if isinstance(tags, str):
