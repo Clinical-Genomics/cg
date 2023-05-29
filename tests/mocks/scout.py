@@ -81,10 +81,6 @@ class MockScoutAPI(ScoutAPI):
         """Load analysis of a new case into Scout."""
         LOG.debug("Case loaded successfully to Scout")
 
-    def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
-        """Update alignment file for individual in case"""
-        self._alignment_file_updated += 1
-
     def export_panels(self, panels: List[str], versions=None):
         """Pass through to export of a list of gene panels."""
         return self._panels

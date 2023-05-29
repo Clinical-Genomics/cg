@@ -324,16 +324,6 @@ class UploadScoutAPI:
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
 
-    @staticmethod
-    def _get_sample(case: Family, subject_id: str) -> Optional[Sample]:
-        """Return sample of a case for a subject_id."""
-
-        link: FamilySample
-        for link in case.links:
-            sample: Sample = link.sample
-            if sample.subject_id == subject_id:
-                return sample
-
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
             Pipeline.BALSAMIC: BalsamicConfigBuilder(

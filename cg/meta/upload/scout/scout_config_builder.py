@@ -120,13 +120,6 @@ class ScoutConfigBuilder:
         if phenotype_groups:
             self.load_config.phenotype_groups = list(phenotype_groups)
 
-    def include_synopsis(self) -> None:
-        LOG.info("Adding synopsis string to scout load config")
-        synopsis_string: str = self.analysis_obj.family.synopsis
-        if synopsis_string:
-            LOG.debug("Adding synopsis string %s", synopsis_string)
-            self.load_config.synopsis = synopsis_string
-
     def include_cohorts(self) -> None:
         LOG.info("Including cohorts to scout load config")
         cohorts: List[str] = self.analysis_obj.family.cohorts
