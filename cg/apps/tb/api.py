@@ -106,14 +106,6 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.parse_obj(response)
 
-    def find_analysis(
-        self, case_id: str, started_at: dt.datetime, status: str
-    ) -> Optional[TrailblazerAnalysis]:
-        request_body = {"case_id": case_id, "started_at": str(started_at), "status": status}
-        response = self.query_trailblazer(command="find-analysis", request_body=request_body)
-        if response:
-            return TrailblazerAnalysis.parse_obj(response)
-
     def get_latest_analysis_status(self, case_id: str) -> Optional[str]:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
@@ -130,11 +122,6 @@ class TrailblazerAPI:
 
     def is_latest_analysis_qc(self, case_id: str) -> bool:
         return self.get_latest_analysis_status(case_id=case_id) == AnalysisStatus.QC
-
-    def delete_analysis(self, analysis_id: str, force: bool = False) -> None:
-        """Raises TrailblazerAPIHTTPError"""
-        request_body = {"analysis_id": analysis_id, "force": force}
-        self.query_trailblazer(command="delete-analysis", request_body=request_body)
 
     def mark_analyses_deleted(self, case_id: str) -> Optional[list]:
         """Mark all analyses for case deleted without removing analysis files"""

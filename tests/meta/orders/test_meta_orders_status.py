@@ -21,7 +21,7 @@ from cg.meta.orders.submitter import Submitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.meta.orders import OrdersAPI
 from cg.store import Store
-from cg.store.models import Delivery, Family, Pool, Sample
+from cg.store.models import Application, Delivery, Family, Pool, Sample
 from cg.constants import Priority
 
 
@@ -354,11 +354,15 @@ def test_store_fastq_samples_non_wgs_as_fastq(
     assert not base_store._get_query(table=Sample).first()
     assert base_store._get_query(table=Family).count() == 0
     non_wgs_prep_category = PrepCategory.WHOLE_EXOME_SEQUENCING
-    assert base_store.get_applications_by_prep_category(prep_category=non_wgs_prep_category)
+
+    non_wgs_applications = base_store._get_query(table=Application).filter(
+        Application.prep_category == non_wgs_prep_category
+    )
+
+    assert non_wgs_applications
+
     for sample in fastq_status_data["samples"]:
-        sample["application"] = base_store.get_applications_by_prep_category(
-            prep_category=non_wgs_prep_category
-        )[0].tag
+        sample["application"] = non_wgs_applications[0].tag
 
     submitter = FastqSubmitter(lims=orders_api.lims, status=orders_api.status)
 
