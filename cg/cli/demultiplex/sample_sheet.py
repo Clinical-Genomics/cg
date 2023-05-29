@@ -8,14 +8,12 @@ from pydantic import ValidationError
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.apps.lims.sample_sheet import flowcell_samples
 
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSample,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
 )
-from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.apps.lims.sample_sheet import flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER

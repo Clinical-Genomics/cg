@@ -111,7 +111,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 
 def adapt_indexes(
-    samples: List[LimsFlowcellSample],
+    samples: List[FlowCellSample],
     run_parameters: RunParameters,
 ) -> None:
     """Adapts the indexes: if sample sheet is v1, pads all indexes so that they have a length equal to the

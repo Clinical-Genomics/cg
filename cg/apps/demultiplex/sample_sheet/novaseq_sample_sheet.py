@@ -81,9 +81,9 @@ class SampleSheetCreator:
         sample_sheet_headers: List[str],
     ) -> List[str]:
         """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
-        LOG.debug(f"Use sample sheet header {sample_sheet_column_names}")
+        LOG.debug(f"Use sample sheet header {sample_sheet_headers}")
         sample_dict = sample.dict(by_alias=True)
-        return [str(sample_dict[header]) for header in sample_sheet_column_names]
+        return [str(sample_dict[header]) for header in sample_sheet_headers]
 
     def add_dummy_samples(self) -> None:
         """Add all dummy samples with non-existing indexes to samples if applicable."""
@@ -109,9 +109,9 @@ class SampleSheetCreator:
         )
         for sample in self.lims_samples:
             sample_sheet_content.append(
-                self.convert_sample_to_list(
+                self.convert_sample_to_header_dict(
                     sample=sample,
-                    sample_sheet_column_names=self.get_data_section_header_and_columns()[1],
+                    sample_sheet_headers=self.get_data_section_header_and_columns()[1],
                 )
             )
         return sample_sheet_content
@@ -160,15 +160,15 @@ class SampleSheetCreatorV1(SampleSheetCreator):
                 if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
-                dummy_sample_obj: LimsFlowcellSample = dummy_sample(
-                    flowcell=self.flow_cell_id,
+                dummy_flow_cell_sample: FlowCellSample = dummy_sample(
+                    flow_cell_id=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
                     bcl_converter=self.bcl_converter,
                 )
-                LOG.debug(f"Adding dummy sample {dummy_sample_obj} to lane {lane}")
-                self.lims_samples.append(dummy_sample_obj)
+                LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
+                self.lims_samples.append(dummy_flow_cell_sample)
 
     def add_override_cycles_to_samples(self) -> None:
         """Return None for sample sheet v1."""
@@ -193,7 +193,7 @@ class SampleSheetCreatorV2(SampleSheetCreator):
         self,
         bcl_converter: str,
         flow_cell: FlowCell,
-        lims_samples: List[LimsFlowcellSample],
+        lims_samples: List[FlowCellSample],
         force: bool = False,
     ):
         super().__init__(bcl_converter, flow_cell, lims_samples, force)
