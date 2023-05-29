@@ -31,6 +31,7 @@ class DemuxPostProcessingAPI:
     """Post demultiplexing API class."""
 
     def __init__(self, config: CGConfig):
+        self.bcl_converter: Optional[str] = None
         self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.status_db: Store = config.status_db
@@ -80,10 +81,17 @@ class DemuxPostProcessingAPI:
     def post_process_flow_cell_temp(self):
         pass
 
-    def retrieve_bcl_converter(self, flow_cell_name: str) -> str:
-        """Retrieve bcl converter from flow cell."""
+    def set_bcl_converter(self, flow_cell_name: str) -> str:
+        """Set bcl converter from flow cell."""
+        if self.is_bcl2fastq_demux_folder_structure():
+            self.bcl_converter = "bcl2fastq"
+        else:
+            self.bcl_converter = "bcl_convert"
 
-    pass
+    def is_bcl2fastq_demux_folder_structure(self, flow_cell_dir: Path) -> bool:
+        """Check if flow cell directory is bcl2fastq demux folder structure."""
+
+        pass
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
