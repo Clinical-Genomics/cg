@@ -150,12 +150,10 @@ def test_call_with_status_db_functions(
     dispatcher = Dispatcher(
         functions=[
             store.get_samples_by_customer_and_subject_id,
-            store.get_samples_by_customer_subject_id_and_is_tumour,
         ],
         input_dict={
             "customer_internal_id": customer_internal_id,
             "subject_id": test_subject,
-            "is_tumour": is_tumour,
         },
     )
     # THEN the dispatcher should return the correct samples

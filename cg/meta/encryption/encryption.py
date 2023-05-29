@@ -56,15 +56,6 @@ class EncryptionAPI:
 
         return Path(passphrase_file.name)
 
-    def compare_file_checksums(self, original_file: Path, decrypted_file_checksum: Path) -> bool:
-        """Performs a checksum by decrypting an encrypted file and comparing it to the original file"""
-        is_checksum_equal = sha512_checksum(original_file) == sha512_checksum(
-            decrypted_file_checksum
-        )
-        if not is_checksum_equal:
-            raise ChecksumFailedError(message="Checksum comparison failed!")
-        LOG.info("Checksum comparison successful!")
-
     def get_asymmetric_encryption_command(self, input_file: Path, output_file: Path) -> List[str]:
         """Generates the gpg command for asymmetric encryption"""
         encryption_parameters: list = GPGParameters.ASYMMETRIC_ENCRYPTION.copy()
