@@ -116,8 +116,8 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
     """Metrics and trending data model associated to a specific Rnafusion sample
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: pipeline workflow
-        gc_content: percentage of GC basesc calculated on trimmed reads; source: pipeline workflow
-        input_amount: input amount in ng; source_ LIMS
+        gc_content: percentage of GC bases calculated on trimmed reads; source: pipeline workflow
+        input_amount: input amount in ng; source: LIMS
         insert_size: distance between paired-end sequencing reads in a DNA fragment
         insert_size_peak: insert size length; source: pipeline workflow
         mapped_reads: percentage of reads aligned to the reference sequence; source: pipeline workflow
@@ -148,10 +148,8 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
     rin: Union[None, float, str]
     uniquely_mapped_reads: Union[None, float, str]
 
-    _pct_values = validator("mapped_reads", always=True, allow_reuse=True)(validate_percentage)
     _float_values = validator(
         "bias_5_3",
-        "gc_content",
         "input_amount",
         "insert_size",
         "insert_size_peak",
@@ -159,11 +157,17 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
         "mrna_bases",
         "pct_adapter",
         "pct_surviving",
-        "q20_rate",
-        "q30_rate",
-        "ribosomal_bases",
         "rin",
         "uniquely_mapped_reads",
         always=True,
         allow_reuse=True,
     )(validate_float)
+    _pct_values = validator(
+        "gc_content",
+        "mapped_reads",
+        "q20_rate",
+        "q30_rate",
+        "ribosomal_bases",
+        always=True,
+        allow_reuse=True,
+    )(validate_percentage)

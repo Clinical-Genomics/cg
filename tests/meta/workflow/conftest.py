@@ -210,7 +210,7 @@ def qc_microsalt_context(
 
 @pytest.fixture(name="rnafusion_metrics")
 def fixture_rnafusion_metrics() -> Dict[str, float]:
-    """Return Rnafusion analysis metrics dictionary."""
+    """Return Rnafusion raw analysis metrics dictionary."""
     return {
         "after_filtering_gc_content": 0.516984,
         "after_filtering_q20_rate": 0.974834,
