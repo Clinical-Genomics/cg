@@ -3,8 +3,6 @@ from pathlib import Path
 from typing import List, Union
 
 import click
-from pydantic import ValidationError
-
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import (
@@ -17,9 +15,10 @@ from cg.apps.lims.sample_sheet import flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
-from cg.io.controller import WriteFile
+from cg.io.controller import WriteFile, WriteStream
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
+from pydantic import ValidationError
 
 LOG = logging.getLogger(__name__)
 
@@ -92,7 +91,11 @@ def create_sheet(
         raise click.Abort from error
 
     if dry_run:
-        click.echo(sample_sheet_content)
+        click.echo(
+            WriteStream.write_stream_from_content(
+                file_format=FileFormat.CSV, content=sample_sheet_content
+            )
+        )
         return
     LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
     WriteFile.write_file_from_content(
