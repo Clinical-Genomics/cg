@@ -1,5 +1,5 @@
 """Tests for the io.xml module."""
-from cg.io.xml import read_xml, read_xml_stream, write_xml, write_xml_stream
+from cg.io.xml import read_xml, write_xml
 import xml.etree.ElementTree as ET
 
 
@@ -14,36 +14,13 @@ def test_get_content_from_file(xml_file_path):
     assert isinstance(raw_xml_content, ET.ElementTree)
 
 
-def test_get_content_from_stream(xml_stream):
-    """Tests read XML stream."""
-    # GIVEN a string in xml format
-
-    # WHEN reading the xml content in string
-    raw_content = read_xml_stream(stream=xml_stream)
-
-    # THEN assert a list is returned
-    assert isinstance(raw_content, ET.Element)
-
-
 def test_write_xml(xml_file_path, xml_temp_path):
     """Tests write XML."""
     # GIVEN a xml file
 
     # GIVEN a file path to write to
-
     # WHEN reading the xml file
     raw_xml_content = read_xml(file_path=xml_file_path)
 
     # WHEN writing the xml file from dict
     write_xml(tree=raw_xml_content, file_path=xml_temp_path)
-
-
-def test_write_xml_stream(xml_stream, xml_file_path):
-    """Tests write XML stream."""
-    # GIVEN a string in xml format
-
-    # WHEN reading the xml content in string
-    raw_content = write_xml_stream(stream=xml_stream)
-
-    # THEN assert a list is returned
-    assert isinstance(raw_content, ET.Element)

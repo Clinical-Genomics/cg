@@ -6,7 +6,7 @@ from cg.constants.constants import FileFormat, APIMethods
 from cg.io.json import read_json, write_json, write_json_stream, read_json_stream
 from cg.io.yaml import read_yaml, write_yaml, read_yaml_stream, write_yaml_stream
 from cg.io.csv import read_csv, write_csv, read_csv_stream, write_csv_stream
-from cg.io.xml import read_xml, write_xml, read_xml_stream, write_xml_stream
+from cg.io.xml import read_xml, write_xml
 from cg.io.api import put, post, patch, delete, get
 
 
@@ -33,7 +33,6 @@ class ReadStream:
         FileFormat.CSV: read_csv_stream,
         FileFormat.JSON: read_json_stream,
         FileFormat.YAML: read_yaml_stream,
-        FileFormat.XML: read_xml_stream,
     }
 
     @classmethod
@@ -65,7 +64,6 @@ class WriteStream:
         FileFormat.CSV: write_csv_stream,
         FileFormat.JSON: write_json_stream,
         FileFormat.YAML: write_yaml_stream,
-        FileFormat.XML: write_xml_stream,
     }
 
     @classmethod
