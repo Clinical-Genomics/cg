@@ -78,7 +78,7 @@ def create_sheet(
     lims_samples: List[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = list(
         flow_cell_samples(
             lims=context.lims_api,
-            flowcell_id=flow_cell.id,
+            flow_cell_id=flow_cell.id,
             bcl_converter=bcl_converter,
         )
     )
@@ -130,7 +130,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
         lims_samples: List[FlowCellSample] = list(
             flow_cell_samples(
                 lims=context.lims_api,
-                flowcell_id=flow_cell.id,
+                flow_cell_id=flow_cell.id,
                 bcl_converter=bcl_converter,
             )
         )

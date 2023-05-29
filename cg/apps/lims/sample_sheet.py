@@ -70,14 +70,14 @@ def get_index(lims: Lims, label: str) -> str:
 
 
 def flow_cell_samples(
-    lims: Lims, flowcell_id: str, bcl_converter: str
+    lims: Lims, flow_cell_id: str, bcl_converter: str
 ) -> Iterable[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]]:
     lims_flowcell_sample = {
         BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
         BclConverter.DRAGEN.value: FlowCellSampleDragen,
     }
-    LOG.info(f"Fetching samples from lims for flowcell {flowcell_id}")
-    containers: List[Container] = lims.get_containers(name=flowcell_id)
+    LOG.info(f"Fetching samples from lims for flowcell {flow_cell_id}")
+    containers: List[Container] = lims.get_containers(name=flow_cell_id)
     if not containers:
         return []
     container: Container = containers[-1]  # only take the last one. See ÖA#217.
@@ -91,7 +91,7 @@ def flow_cell_samples(
             label: Optional[str] = get_reagent_label(artifact)
             index = get_index(lims=lims, label=label)
             yield lims_flowcell_sample[bcl_converter](
-                flowcell_id=flowcell_id,
+                flowcell_id=flow_cell_id,
                 lane=lane,
                 sample_id=sample.id,
                 index=index,
