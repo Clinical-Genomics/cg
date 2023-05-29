@@ -23,7 +23,7 @@ def dummy_sample(
         BclConverter.DRAGEN.value: FlowCellSampleDragen,
     }
     return flowcell_sample[bcl_converter](
-        flowcell_id=flow_cell_id,
+        flow_cell_id=flow_cell_id,
         lane=lane,
         sample_id=dummy_sample_name(sample_name=name),
         index=dummy_index,
