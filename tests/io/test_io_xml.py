@@ -1,6 +1,7 @@
 """Tests for the io.xml module."""
 from cg.io.xml import read_xml, write_xml
 import xml.etree.ElementTree as ET
+import pytest
 
 
 def test_get_content_from_file(xml_file_path):
@@ -30,4 +31,4 @@ def test_write_xml(xml_file_path, xml_temp_path):
 
     # ASSERT that written file has the same content as the original file
     written_file = read_xml(file_path=xml_temp_path)
-    assert written_file == raw_xml_content
+    assert ET.tostring(written_file.getroot()) == ET.tostring(raw_xml_content.getroot())
