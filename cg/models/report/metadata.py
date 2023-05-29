@@ -5,7 +5,7 @@ from cg.models.report.validators import (
     validate_empty_field,
     validate_float,
     validate_gender,
-    validate_pct,
+    validate_percentage,
 )
 
 
@@ -149,7 +149,7 @@ class RnafusionSampleMetadataModel(SampleMetadataModel):
     rin: Union[None, float, str]
     uniquely_mapped_reads: Union[None, float, str]
 
-    _pct_values = validator("mapped_reads", always=True, allow_reuse=True)(validate_pct)
+    _pct_values = validator("mapped_reads", always=True, allow_reuse=True)(validate_percentage)
     _float_values = validator(
         "bias_5_3",
         "gc_content",
