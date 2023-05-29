@@ -6,7 +6,6 @@ from cg.constants.constants import PrepCategory
 from cg.constants.priority import PriorityTerms
 from cg.meta.orders.pool_submitter import PoolSubmitter
 from cg.store import Store
-
 from tests.meta.demultiplex.conftest import fixture_populated_flow_cell_store
 from tests.store_helpers import StoreHelpers
 from cg.constants.invoice import CustomerNames
@@ -175,12 +174,6 @@ def fixture_max_nr_of_samples() -> int:
 def fixture_expected_number_of_not_archived_applications() -> int:
     """Return the number of expected number of not archived applications"""
     return 4
-
-
-@pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS_WITH_PREP_CATEGORY")
-def fixture_expected_number_of_applications_with_prep_category() -> int:
-    """Return the number of expected number of applications with prep category"""
-    return 7
 
 
 @pytest.fixture(name="EXPECTED_NUMBER_OF_APPLICATIONS")

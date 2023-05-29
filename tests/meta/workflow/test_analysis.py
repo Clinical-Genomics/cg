@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-from cg.constants import COLLABORATORS, Priority, GenePanelMasterList
+from cg.constants import Priority, GenePanelMasterList
 from cg.constants.priority import SlurmQos
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.mip import MipAnalysisAPI

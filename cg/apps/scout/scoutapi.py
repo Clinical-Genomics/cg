@@ -49,20 +49,6 @@ class ScoutAPI:
         self.process.run_command(load_command)
         LOG.debug("Case loaded successfully to Scout")
 
-    def update_alignment_file(self, case_id: str, sample_id: str, alignment_path: Path):
-        """Update alignment file for individual in case"""
-        parameters = [
-            "update",
-            "individual",
-            "--case-id",
-            case_id,
-            "--ind-id",
-            sample_id,
-            "--alignment-path",
-            str(alignment_path),
-        ]
-        self.process.run_command(parameters=parameters)
-
     def export_panels(self, panels: List[str], build: str = GENOME_BUILD_37) -> List[str]:
         """Pass through to export of a list of gene panels.
 

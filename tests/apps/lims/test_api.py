@@ -3,8 +3,6 @@ import datetime as dt
 
 from requests.exceptions import HTTPError
 
-from cg.apps.lims.api import LimsAPI
-
 
 def test_get_received_date(lims_mock, mocker):
     """Test to get the received date"""

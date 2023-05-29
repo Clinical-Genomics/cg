@@ -1,7 +1,6 @@
 """Fixtures for store tests."""
 import datetime as dt
 import enum
-from pathlib import Path
 from typing import Generator, List
 
 import pytest
@@ -188,12 +187,6 @@ def fixture_invalid_application_tag() -> str:
     return "invalid-tag"
 
 
-@pytest.fixture(name="invalid_application_version_version")
-def fixture_invalid_application_version_version() -> int:
-    """Return an invalid version of an Application Version."""
-    return -1
-
-
 @pytest.fixture(name="store_with_a_sample_that_has_many_attributes_and_one_without")
 def fixture_store_with_a_sample_that_has_many_attributes_and_one_without(
     store: Store,
@@ -362,17 +355,6 @@ def fixture_store_with_an_invoice_with_and_without_attributes(
         invoiced_at=None,
     )
     return store
-
-
-@pytest.fixture(name="store_with_case_and_analysis")
-def fixture_store_with_case_and_analysis(
-    store: Store, helpers: StoreHelpers, analysis_type: str = "wgs"
-) -> Store:
-    """Return a store with a case and analysis."""
-    # GIVEN a store with a case and analysis
-    case = helpers.add_case(store=store, name="test_case", internal_id="test_case_internal_id")
-    helpers.add_analysis(store=store, case=case)
-    yield store
 
 
 @pytest.fixture(name="store_with_older_and_newer_analyses")

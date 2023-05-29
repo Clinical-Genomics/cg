@@ -1,7 +1,6 @@
 """CLI support to create config and/or start RNAFUSION."""
 
 import logging
-import sys
 from pathlib import Path
 
 import click

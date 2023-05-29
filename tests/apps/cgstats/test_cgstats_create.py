@@ -1,4 +1,4 @@
-from cg.apps.cgstats.crud import create, find
+from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.db.models import Supportparams, Datasource, Flowcell
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults

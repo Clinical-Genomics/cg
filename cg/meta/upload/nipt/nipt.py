@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 from requests import Response

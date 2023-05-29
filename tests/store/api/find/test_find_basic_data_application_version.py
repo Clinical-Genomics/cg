@@ -1,48 +1,6 @@
 from typing import Optional, List
-from sqlalchemy.orm import Query
 from cg.store import Store
 from cg.store.models import Application, ApplicationVersion
-from tests.conftest import fixture_base_store
-
-
-def test_get_application_version_by_application_id_existing_id(
-    base_store: Store,
-):
-    """Test that the correct application version is returned when using a correct application id."""
-    # GIVEN a store with an application
-    application: Application = base_store.get_applications()[0]
-    assert application
-
-    # WHEN getting the application version by application id
-    application_version: ApplicationVersion = (
-        base_store.get_application_version_by_application_entry_id(
-            application_entry_id=application.id
-        )
-    )
-
-    # THEN the id of the application is the same as the application version
-    assert application_version.application_id == application.id
-
-
-def test_get_application_version_by_application_id_invalid_id(
-    base_store: Store,
-    invalid_application_id: int,
-):
-    """Test that the correct application version is returned when using a correct application id."""
-    # GIVEN a store with applications and an invalid application id
-    applications: List[Application] = base_store.get_applications()
-    ids: List[str] = [application.id for application in applications]
-    assert invalid_application_id not in ids
-
-    # WHEN getting an application version by the invalid id
-    application_version: Optional[
-        ApplicationVersion
-    ] = base_store.get_application_version_by_application_entry_id(
-        application_entry_id=invalid_application_id
-    )
-
-    # THEN the application version is None
-    assert application_version is None
 
 
 def test_get_current_application_version_by_tag_existing_tag(base_store: Store):
@@ -87,7 +45,7 @@ def test_get_current_application_version_by_tag_latest_version(
     # GIVEN a store with applications versions with different 'valid_from' attributes
     application_versions: List[
         ApplicationVersion
-    ] = store_with_different_application_versions.get_application_versions()
+    ] = store_with_different_application_versions._get_query(table=ApplicationVersion).all()
     assert application_versions[0].valid_from != application_versions[-1].valid_from
 
     # GIVEN a valid application tag

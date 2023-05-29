@@ -760,17 +760,18 @@ class User(Model):
         return self.name
 
 
-class SequencingStatistics(Model):
-    __tablename__ = "sequencing_statistics"
+class SampleLaneSequencingMetrics(Model):
+    """Model for storing sequencing metrics per lane and sample."""
+
+    __tablename__ = "sample_lane_sequencing_metrics"
+
     id = Column(types.Integer, primary_key=True)
     flow_cell_name = Column(types.String(128), nullable=False)
+    flow_cell_lane_number = Column(types.Integer)
+
     sample_internal_id = Column(types.String(128), nullable=False)
-    lane = Column(types.Integer)
-    yield_in_megabases = Column(types.Integer)
-    read_counts = Column(types.Integer)
-    passed_filter_percent = Column(types.Numeric(10, 5))
-    raw_clusters_per_lane_percent = Column(types.Numeric(10, 5))
-    perfect_index_reads_percent = Column(types.Numeric(10, 5))
-    bases_with_q30_percent = Column(types.Numeric(10, 5))
-    lanes_mean_quality_score = Column(types.Numeric(10, 5))
-    started_at = Column(types.DateTime)
+    sample_total_reads_in_lane = Column(types.Integer)
+    sample_base_fraction_passing_q30 = Column(types.Numeric(10, 5))
+    sample_base_mean_quality_score = Column(types.Numeric(10, 5))
+
+    created_at = Column(types.DateTime)
