@@ -13,7 +13,6 @@ from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Pipeline, HK_MULTIQC_HTML_TAG
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
-from cg.constants.sequencing import SequencingMethod
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
@@ -324,16 +323,6 @@ class UploadScoutAPI:
         """Upload RNA junctions splice files to Scout."""
         self.upload_splice_junctions_bed_to_scout(dry_run=dry_run, case_id=case_id)
         self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
-
-    @staticmethod
-    def _get_sample(case: Family, subject_id: str) -> Optional[Sample]:
-        """Return sample of a case for a subject_id."""
-
-        link: FamilySample
-        for link in case.links:
-            sample: Sample = link.sample
-            if sample.subject_id == subject_id:
-                return sample
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {

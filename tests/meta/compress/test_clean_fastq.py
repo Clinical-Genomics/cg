@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 from typing import Generator, Dict, List
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 
 from housekeeper.store.models import Version, File
@@ -17,7 +16,6 @@ from tests.meta.compress.conftest import MockCompressionData
 from tests.store_helpers import StoreHelpers
 
 
-@pytest.mark.compress_meta
 def test_remove_fastqs(
     compress_api: MockCompressAPI,
     compression_object: MockCompressionData,
@@ -47,7 +45,6 @@ def test_remove_fastqs(
     assert "FASTQ files removed" in caplog.text
 
 
-@pytest.mark.compress_meta
 def test_update_hk_fastq(
     root_path: Path,
     real_housekeeper_api: Generator[HousekeeperAPI, None, None],
@@ -107,8 +104,6 @@ def test_update_hk_fastq(
     assert not hk_fastq_files
 
 
-@pytest.mark.compress_meta
-@pytest.mark.clean_fastq
 def test_cli_clean_fastqs_removed(
     populated_compress_fastq_api: MockCompressAPI,
     compression_files: MockCompressionData,
@@ -140,8 +135,6 @@ def test_cli_clean_fastqs_removed(
     assert not fastq_second.exists()
 
 
-@pytest.mark.compress_meta
-@pytest.mark.clean_fastq
 def test_cli_clean_fastqs_no_spring_metadata(
     populated_compress_fastq_api: MockCompressAPI,
     compression_files: MockCompressionData,
@@ -170,8 +163,6 @@ def test_cli_clean_fastqs_no_spring_metadata(
     assert fastq_second.exists()
 
 
-@pytest.mark.compress_meta
-@pytest.mark.clean_fastq
 def test_cli_clean_fastqs_pending_compression_metadata(
     populated_compress_fastq_api: MockCompressAPI,
     compression_files: MockCompressionData,

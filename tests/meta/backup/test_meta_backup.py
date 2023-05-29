@@ -5,7 +5,7 @@ import subprocess
 
 import mock
 import pytest
-from mock import call, patch
+from mock import call
 
 from cg.constants.sequencing import Sequencers
 from tests.mocks.hk_mock import MockFile
@@ -184,8 +184,6 @@ def test_fetch_flow_cell_retrieve_next_flow_cell(
     mock_get_archived_encryption_key_path,
     mock_get_archived_flow_cell_path,
     mock_create_rta_complete,
-    mock_check_processing,
-    mock_unlink_files,
     archived_key,
     archived_flow_cell,
     cg_context,
@@ -249,8 +247,6 @@ def test_fetch_flow_cell_retrieve_specified_flow_cell(
     mock_check_processing,
     mock_get_archived_key,
     mock_get_archived_flow_cell,
-    mock_create_rta_complete,
-    mock_unlink_files,
     archived_key,
     archived_flow_cell,
     cg_context,

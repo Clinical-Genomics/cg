@@ -1,6 +1,5 @@
 """MIP-RNA upload API."""
 
-import datetime as dt
 import logging
 from subprocess import CalledProcessError
 

@@ -5,7 +5,7 @@ import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Iterable, List, Set, Tuple
-from housekeeper.store.models import File, Tag, Version
+from housekeeper.store.models import File, Version
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import delivery as constants

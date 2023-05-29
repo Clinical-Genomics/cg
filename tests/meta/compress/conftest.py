@@ -188,12 +188,6 @@ def fixture_spring_metadata_path(compression_object: MockCompressionData) -> Pat
     return compression_object.spring_metadata_path
 
 
-@pytest.fixture(name="fastq_flag_path")
-def fixture_fastq_flag_path(spring_metadata_path: Path) -> Path:
-    """Return the path to a non-existing fastq flag file."""
-    return spring_metadata_path
-
-
 @pytest.fixture(name="fastq_flag_file")
 def fixture_fastq_flag_file(spring_metadata_path: Path) -> Path:
     """Return the path to an existing fastq flag file."""
@@ -206,33 +200,6 @@ def fixture_spring_file(spring_path: Path) -> Path:
     """Return the path to an existing spring file."""
     spring_path.touch()
     return spring_path
-
-
-@pytest.fixture(name="multi_linked_file")
-def fixture_multi_linked_file(spring_path: Path, project_dir: Path) -> Path:
-    """Return the path to an existing file with two links."""
-    first_link = Path(project_dir, "link-1")
-    os.link(spring_path, first_link)
-    return spring_path
-
-
-@pytest.fixture(name="fastq_paths")
-def fixture_fastq_paths(compression_object: MockCompressionData) -> Dict[str, Path]:
-    """Return temporary fastq-files."""
-    return {
-        "fastq_first_path": compression_object.fastq_first,
-        "fastq_second_path": compression_object.fastq_second,
-    }
-
-
-@pytest.fixture(name="fastq_files")
-def fixture_fastq_files(fastq_paths: Dict[str, Path]) -> Dict[str, Path]:
-    """Return temporary fastq-files that exist."""
-    fastq_first_file: Path = fastq_paths["fastq_first_path"]
-    fastq_second_file: Path = fastq_paths["fastq_second_path"]
-    fastq_first_file.touch()
-    fastq_second_file.touch()
-    return fastq_paths
 
 
 # Bundle fixtures

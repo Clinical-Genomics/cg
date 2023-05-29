@@ -6,7 +6,8 @@ from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import (
     SampleSheetCreatorV1,
     SampleSheetCreatorV2,
 )
-from cg.apps.lims.sample_sheet import LimsFlowcellSample
+from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.sequencing import Sequencers
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError
@@ -18,7 +19,7 @@ LOG = logging.getLogger(__name__)
 def create_sample_sheet(
     bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
     flow_cell: FlowCell,
-    lims_samples: List[LimsFlowcellSample],
+    lims_samples: List[FlowCellSample],
     force: bool = False,
 ) -> List[List[str]]:
     # TODO tests for this function

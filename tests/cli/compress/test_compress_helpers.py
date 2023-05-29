@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Iterator
 
 from housekeeper.store.models import Version
 
@@ -132,7 +133,6 @@ def test_correct_spring_paths(
     housekeeper_api: HousekeeperAPI,
     spring_bundle_symlink_problem: dict,
     symlinked_fastqs: dict,
-    new_dir: Path,
 ):
     """Test for correct_spring_paths."""
     # GIVEN a populated housekeeper_api

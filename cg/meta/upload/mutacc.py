@@ -29,11 +29,6 @@ class UploadToMutaccAPI:
             LOG.info("Extracting reads from case %s", case.id)
             self.mutacc_auto.extract_reads(case=data["case"], variants=data["causatives"])
 
-    def import_cases(self):
-        """Use mutacc API to import cases to database"""
-        LOG.info("importing cases into mutacc database")
-        self.mutacc_auto.import_reads()
-
     def data(self, case: scout_export.ScoutExportCase) -> Dict[str, dict]:
         """
         Find the necessary data for the case

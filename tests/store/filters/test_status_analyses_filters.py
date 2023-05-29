@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List
 
 from cg.store import Store
 from cg.store.filters.status_analysis_filters import (
@@ -14,7 +13,6 @@ from cg.store.filters.status_analysis_filters import (
     filter_analyses_with_pipeline,
     filter_analyses_without_delivery_report,
     filter_completed_analyses,
-    filter_not_completed_analyses,
     filter_not_uploaded_analyses,
     filter_report_analyses_by_pipeline,
     filter_uploaded_analyses,
@@ -94,22 +92,6 @@ def test_filter_completed_analyses(
 
     # THEN the completed analysis should be obtained
     assert analysis in analyses
-
-
-def test_filter_not_completed_analyses(base_store: Store, helpers: StoreHelpers):
-    """Test filtering of ongoing analyses."""
-
-    # GIVEN a mock not completed analysis
-    analysis_not_completed: Analysis = helpers.add_analysis(store=base_store, completed_at=None)
-
-    # WHEN retrieving the not completed analyses
-    analyses: Query = filter_not_completed_analyses(analyses=base_store._get_query(table=Analysis))
-
-    # ASSERT that analyses is a query
-    assert isinstance(analyses, Query)
-
-    # THEN the expected analysis should be retrieved
-    assert analysis_not_completed in analyses
 
 
 def test_filter_filter_uploaded_analyses(
@@ -218,10 +200,8 @@ def test_order_analyses_by_completed_at_asc(
     """Test sorting of analyses by the completed_at field."""
 
     # GIVEN a set of mock analyses
-    new_analysis: Analysis = helpers.add_analysis(store=store, completed_at=timestamp_now)
-    old_analysis: Analysis = helpers.add_analysis(
-        store=store, case=case, completed_at=timestamp_yesterday
-    )
+    helpers.add_analysis(store=store, completed_at=timestamp_now)
+    helpers.add_analysis(store=store, case=case, completed_at=timestamp_yesterday)
 
     # WHEN ordering the analyses by the completed_at field
     analyses: Query = order_analyses_by_completed_at_asc(analyses=store._get_query(table=Analysis))
@@ -236,9 +216,6 @@ def test_order_analyses_by_completed_at_asc(
 
 def test_order_analyses_by_uploaded_at_asc(
     store_with_older_and_newer_analyses: Store,
-    helpers: StoreHelpers,
-    timestamp_now: datetime,
-    timestamp_yesterday: datetime,
 ):
     """Test sorting of analyses by the uploaded_at field."""
     # GIVEN a store with mock analyses

@@ -1,11 +1,8 @@
 """Module for Tower Analysis API."""
 
 import logging
-from pathlib import Path
 from typing import Iterable, List
 
-from cg.constants.constants import FileFormat
-from cg.io.controller import WriteFile
 from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)

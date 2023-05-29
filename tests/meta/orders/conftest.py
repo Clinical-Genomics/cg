@@ -5,7 +5,6 @@ from tests.mocks.osticket import MockOsTicket
 from cg.meta.orders import OrdersAPI
 from cg.meta.orders.api import FastqSubmitter
 from cg.meta.orders.balsamic_submitter import BalsamicSubmitter
-from cg.meta.orders.fluffy_submitter import FluffySubmitter
 from cg.meta.orders.metagenome_submitter import MetagenomeSubmitter
 from cg.meta.orders.microbial_submitter import MicrobialSubmitter
 from cg.meta.orders.mip_dna_submitter import MipDnaSubmitter
@@ -111,14 +110,6 @@ def rml_status_data(rml_order_to_submit):
     project: OrderType = OrderType.RML
     order: OrderIn = OrderIn.parse_obj(obj=rml_order_to_submit, project=project)
     return RmlSubmitter.order_to_status(order=order)
-
-
-@pytest.fixture
-def fluffy_status_data(fluffy_uploaded_json_order):
-    """Parse fluffy order example."""
-    project: OrderType = OrderType.FLUFFY
-    order: OrderIn = OrderIn.parse_obj(obj=fluffy_uploaded_json_order, project=project)
-    return FluffySubmitter.order_to_status(order=order)
 
 
 @pytest.fixture(scope="function")

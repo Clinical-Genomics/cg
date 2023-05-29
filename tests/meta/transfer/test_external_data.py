@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import List
 
 from cg.meta.transfer.external_data import ExternalDataAPI
-from cg.models.cg_config import CGConfig
 from cg.store import Store
-from cg.store.models import Family, Sample
+from cg.store.models import Sample
 from cg.utils.checksum.checksum import check_md5sum, extract_md5sum
 from housekeeper.store.models import Version
 from tests.cli.workflow.conftest import dna_case
@@ -205,16 +204,17 @@ def test_get_available_samples(
     tmpdir_factory,
 ):
     # GIVEN one such sample exists
-    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False)).parent
+    tmp_dir_path: Path = Path(tmpdir_factory.mktemp(sample.internal_id, numbered=False))
     available_samples = external_data_api.get_available_samples(
-        folder=tmp_dir_path, ticket=ticket_id
+        folder=tmp_dir_path.parent, ticket=ticket_id
     )
     # THEN the function should return a list containing the sample object
     assert available_samples == [sample]
+    tmp_dir_path.rmdir()
 
 
 def test_curate_sample_folder(
-    case_id, customer_id, dna_case, external_data_api: ExternalDataAPI, tmpdir_factory
+    case_id, customer_id, external_data_api: ExternalDataAPI, tmpdir_factory
 ):
     case = external_data_api.status_db.get_case_by_internal_id(internal_id=case_id)
     sample: Sample = case.links[0].sample

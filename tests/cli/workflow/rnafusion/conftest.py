@@ -11,13 +11,12 @@ from cg.apps.hermes.hermes_api import HermesApi
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.io.controller import WriteFile, WriteStream
+from cg.io.controller import WriteFile
 from cg.io.json import read_json, write_json
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
 from cg.store.models import Family, Sample
-from tests.mocks.process_mock import ProcessMock
 from tests.mocks.tb_mock import MockTB
 from tests.store_helpers import StoreHelpers
 
@@ -51,13 +50,6 @@ def fixture_rnafusion_sample_id() -> str:
 def rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
     """Return the path to the rnafusion housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
-
-
-@pytest.fixture(name="rnafusion_reference_path")
-def rnafusion_reference_path(rnafusion_dir: Path) -> str:
-    rnafusion_reference_path = Path(rnafusion_dir, "references")
-    rnafusion_reference_path.touch(exist_ok=True)
-    return rnafusion_reference_path.as_posix()
 
 
 @pytest.fixture
@@ -210,19 +202,6 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
     malformed_deliverable.pop("pipeline")
 
     return malformed_deliverable
-
-
-@pytest.fixture(name="rnafusion_hermes_process")
-def fixture_rnafusion_hermes_process(
-    hermes_deliverables: dict, process: ProcessMock
-) -> ProcessMock:
-    """Return a process mock populated with some rnafusion hermes output."""
-    process.set_stdout(
-        text=WriteStream.write_stream_from_content(
-            content=hermes_deliverables, file_format=FileFormat.JSON
-        )
-    )
-    return process
 
 
 @pytest.fixture(name="rnafusion_multiqc_json_metrics")

@@ -49,14 +49,6 @@ class FindBusinessDataHandler(BaseHandler):
     def __init__(self, session: Session):
         super().__init__(session=session)
 
-    def get_analyses_by_case_entry_id(self, case_entry_id: int) -> List[Analysis]:
-        """Return analysis by case entry id."""
-        return apply_analysis_filter(
-            analyses=self._get_query(Analysis),
-            case_entry_id=case_entry_id,
-            filter_functions=[AnalysisFilter.FILTER_BY_CASE_ENTRY_ID],
-        ).all()
-
     def get_case_by_entry_id(self, entry_id: str) -> Family:
         """Return a case by entry id."""
         cases_query: Query = self._get_query(table=Family)
@@ -84,21 +76,6 @@ class FindBusinessDataHandler(BaseHandler):
             .links[ListIndexes.FIRST.value]
             .sample.application_version.application
         )
-
-    def get_application_tag_by_application_version_entry_id(
-        self,
-        application_version_entry_id: str,
-    ) -> Optional[str]:
-        """Return the application tag of an application version."""
-
-        application_version: ApplicationVersion = apply_application_versions_filter(
-            application_versions=self._get_query(ApplicationVersion),
-            filter_functions=[ApplicationVersionFilter.FILTER_BY_ENTRY_ID],
-            application_version_entry_id=application_version_entry_id,
-        ).first()
-
-        if application_version and application_version.application:
-            return application_version.application.tag
 
     def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
         """Return all cases completed after a given date that have not been uploaded to Vogue."""
@@ -161,15 +138,6 @@ class FindBusinessDataHandler(BaseHandler):
             started_at_date=started_at_date,
             filter_functions=filter_functions,
         ).first()
-
-    def get_cases_created_within_days(self, days: int) -> List[Family]:
-        """Fetch all cases created within the past days."""
-        newer_than_date = dt.datetime.now() - dt.timedelta(days=days)
-        return apply_case_filter(
-            filter_functions=[CaseFilter.GET_NEW_BY_CREATION_DATE],
-            cases=self._get_query(table=Family),
-            creation_date=newer_than_date,
-        ).all()
 
     def get_cases_by_customer_and_case_name_search(
         self, customer: Customer, case_name_search: str
@@ -285,14 +253,6 @@ class FindBusinessDataHandler(BaseHandler):
             case_samples=self._get_join_case_sample_query(),
         ).all()
 
-    def get_case_samples_from_sample_entry_id(self, sample_entry_id: str) -> Query:
-        """Return cases related to a given sample."""
-        return apply_case_sample_filter(
-            filter_functions=[CaseSampleFilter.GET_CASES_WITH_SAMPLE_BY_ENTRY_ID],
-            sample_entry_id=sample_entry_id,
-            case_samples=self._get_join_case_sample_query(),
-        )
-
     def filter_cases_with_samples(self, case_ids: List[str]) -> List[str]:
         """Return case id:s associated with samples."""
         cases_with_samples = set()
@@ -357,12 +317,6 @@ class FindBusinessDataHandler(BaseHandler):
         for link in case.links:
             yield link.sample.internal_id
 
-    def get_sequenced_samples(self, family_id: str) -> List[Sample]:
-        """Get sequenced samples by family_id."""
-
-        samples: List[Sample] = self.get_samples_by_case_id(family_id)
-        return [sample for sample in samples if sample.sequencing_qc]
-
     def get_case_by_name_and_customer(self, customer: Customer, case_name: str) -> Family:
         """Find a case by case name within a customer."""
         return apply_case_filter(
@@ -402,14 +356,6 @@ class FindBusinessDataHandler(BaseHandler):
             flow_cells=self._get_query(table=Flowcell),
             flow_cell_name=flow_cell_name,
             filter_functions=[FlowCellFilter.GET_BY_NAME],
-        ).first()
-
-    def get_flow_cell_by_name_pattern(self, name_pattern: str) -> Flowcell:
-        """Return flow cell by name pattern."""
-        return apply_flow_cell_filter(
-            flow_cells=self._get_query(table=Flowcell),
-            name_search=name_pattern,
-            filter_functions=[FlowCellFilter.GET_BY_NAME_SEARCH],
         ).first()
 
     def get_flow_cells_by_statuses(self, flow_cell_statuses: List[str]) -> Optional[List[Flowcell]]:
@@ -592,18 +538,6 @@ class FindBusinessDataHandler(BaseHandler):
             )
         return application.expected_reads
 
-    def get_samples(self) -> List[Sample]:
-        """Return all samples."""
-        return self._get_query(table=Sample).order_by(Sample.created_at.desc()).all()
-
-    def get_samples_by_name_pattern(self, name_pattern: str) -> List[Sample]:
-        """Return all samples with a name fitting the pattern."""
-        return apply_sample_filter(
-            samples=self._get_query(table=Sample),
-            name_pattern=name_pattern,
-            filter_functions=[SampleFilter.FILTER_BY_NAME_PATTERN],
-        ).all()
-
     def get_samples_by_customer_id_and_pattern(
         self, *, customers: Optional[List[Customer]] = None, pattern: str = None
     ) -> List[Sample]:
@@ -648,22 +582,6 @@ class FindBusinessDataHandler(BaseHandler):
         return self._get_samples_by_customer_and_subject_id_query(
             customer_internal_id=customer_internal_id, subject_id=subject_id
         ).all()
-
-    def get_samples_by_customer_subject_id_and_is_tumour(
-        self, customer_internal_id: str, subject_id: str, is_tumour: bool
-    ) -> List[Sample]:
-        """Get samples of customer with given subject id and is tumour."""
-        samples: Query = self._get_samples_by_customer_and_subject_id_query(
-            customer_internal_id=customer_internal_id, subject_id=subject_id
-        )
-        if is_tumour:
-            return apply_sample_filter(
-                samples=samples, filter_functions=[SampleFilter.FILTER_IS_TUMOUR]
-            ).all()
-        else:
-            return apply_sample_filter(
-                samples=samples, filter_functions=[SampleFilter.FILTER_IS_NOT_TUMOUR]
-            ).all()
 
     def get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
         self, customer_ids: List[int], subject_id: str, is_tumour: bool

@@ -2,10 +2,8 @@
 
 
 import pytest
-from cg.apps.hermes.hermes_api import HermesApi
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.store import Store
 from tests.store_helpers import StoreHelpers
 
 
@@ -87,12 +85,6 @@ def base_context(cg_context: CGConfig, helpers: StoreHelpers, lims_api):
 def fixture_microbial_sample_id():
     """Define a name for a microbial sample"""
     return "microbial_sample_id"
-
-
-@pytest.fixture(name="microbial_sample_name")
-def fixture_microbial_sample_name():
-    """Define a name for a microbial sample"""
-    return "microbial_sample_name"
 
 
 @pytest.fixture(scope="function")

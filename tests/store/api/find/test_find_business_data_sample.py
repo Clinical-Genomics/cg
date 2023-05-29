@@ -32,7 +32,6 @@ def test_get_all_pools_and_samples_for_invoice_by_invoice_id(store: Store, helpe
 
 def test_get_samples_by_customer_and_subject_id_query(
     store_with_samples_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
     cust123: str,
     test_subject: str,
 ):
@@ -40,7 +39,7 @@ def test_get_samples_by_customer_and_subject_id_query(
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
     # GIVEN that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
+    assert len(store_with_samples_subject_id_and_tumour_status._get_query(table=Sample).all()) == 2
 
     # GIVEN that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_internal_id(
@@ -60,7 +59,6 @@ def test_get_samples_by_customer_and_subject_id_query(
 
 def test_get_samples_by_customer_and_subject_id_query_missing_subject_id(
     store_with_samples_and_tumour_status_missing_subject_id: Store,
-    helpers: StoreHelpers,
     cust123: str,
     test_subject: str,
 ):
@@ -68,7 +66,10 @@ def test_get_samples_by_customer_and_subject_id_query_missing_subject_id(
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
     # GIVEN that there are two samples in the store
-    assert len(store_with_samples_and_tumour_status_missing_subject_id.get_samples()) == 2
+    assert (
+        len(store_with_samples_and_tumour_status_missing_subject_id._get_query(table=Sample).all())
+        == 2
+    )
 
     # GIVEN that there is a customer with the given customer id
     assert store_with_samples_and_tumour_status_missing_subject_id.get_customer_by_internal_id(
@@ -86,7 +87,6 @@ def test_get_samples_by_customer_and_subject_id_query_missing_subject_id(
 
 def test_get_samples_by_subject_id(
     store_with_samples_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
     cust123: str,
     test_subject: str,
 ):
@@ -94,7 +94,7 @@ def test_get_samples_by_subject_id(
     # GIVEN a database with two samples that have a subject ID but only one is tumour
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
+    assert len(store_with_samples_subject_id_and_tumour_status._get_query(table=Sample).all()) == 2
 
     # ASSERT that there is a customer with the given customer id
     assert store_with_samples_subject_id_and_tumour_status.get_customer_by_internal_id(
@@ -110,34 +110,6 @@ def test_get_samples_by_subject_id(
 
     # THEN two samples should be returned
     assert samples and len(samples) == 2
-
-
-def test_get_samples_by_subject_id_and_is_tumour(
-    store_with_samples_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
-    cust123: str,
-    test_subject: str,
-    is_tumour: bool = True,
-):
-    """Test that samples can be fetched by subject id."""
-    # GIVEN a database with two samples that have a subject ID but only one is tumour
-
-    # ASSERT that there are two samples in the store
-    assert len(store_with_samples_subject_id_and_tumour_status.get_samples()) == 2
-
-    # ASSERT that there is a customer with the given customer id
-    assert store_with_samples_subject_id_and_tumour_status.get_customer_by_internal_id(
-        customer_internal_id=cust123
-    )
-    # WHEN fetching the sample by subject id and customer_id
-    samples: List[
-        Sample
-    ] = store_with_samples_subject_id_and_tumour_status.get_samples_by_customer_subject_id_and_is_tumour(
-        subject_id=test_subject, customer_internal_id=cust123, is_tumour=is_tumour
-    )
-
-    # THEN two samples should be returned
-    assert samples and len(samples) == 1
 
 
 def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
@@ -175,7 +147,6 @@ def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour(
 
 def test_get_samples_by_customer_id_list_and_subject_id_and_is_tumour_with_non_existing_customer_id(
     store_with_samples_customer_id_and_subject_id_and_tumour_status: Store,
-    helpers: StoreHelpers,
 ):
     """Test that no samples are returned when filtering on non-existing customer ID."""
     # GIVEN a database with four samples, two with customer ID 1 and two with customer ID 2
@@ -211,7 +182,7 @@ def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="tes
     # GIVEN a database with two samples of which one has a name
 
     # ASSERT that there are two samples in the store
-    assert len(store_with_samples_that_have_names.get_samples()) == 4
+    assert len(store_with_samples_that_have_names._get_query(table=Sample).all()) == 4
 
     # WHEN fetching the sample by name
     samples: Sample = store_with_samples_that_have_names.get_sample_by_name(name=name)
@@ -220,27 +191,8 @@ def test_get_sample_by_name(store_with_samples_that_have_names: Store, name="tes
     assert samples and samples.name == name
 
 
-def test_get_samples_by_name_pattern(
-    store_with_samples_that_have_names: Store, name_pattern="sample"
-):
-    """Test that samples can be fetched by name."""
-    # GIVEN a database with two samples of which one has a name
-
-    # ASSERT that there are two samples in the store
-    assert len(store_with_samples_that_have_names.get_samples()) == 4
-
-    # WHEN fetching the sample by name
-    samples: List[Sample] = store_with_samples_that_have_names.get_samples_by_name_pattern(
-        name_pattern=name_pattern
-    )
-
-    # THEN one sample should be returned
-    assert samples and len(samples) == 3
-
-
 def test_has_active_cases_for_sample_analyze(
     store_with_active_sample_analyze: Store,
-    helpers: StoreHelpers,
     sample_internal_id: str = "test_sample_internal_id",
 ):
     """Test that a sample is active."""
@@ -255,7 +207,6 @@ def test_has_active_cases_for_sample_analyze(
 
 def test_has_active_cases_for_sample_running(
     store_with_active_sample_running: Store,
-    helpers: StoreHelpers,
     sample_internal_id: str = "test_sample_internal_id",
 ):
     """Test that a sample is active."""
@@ -270,7 +221,6 @@ def test_has_active_cases_for_sample_running(
 
 def test_get_samples_by_customer_and_name(
     store_with_samples_that_have_names: Store,
-    helpers: StoreHelpers,
     name: str = "test_sample_1",
     customer_id="cust000",
 ):
@@ -294,7 +244,6 @@ def test_get_samples_by_customer_and_name(
 
 def test_get_samples_by_customer_and_name_invalid_customer(
     store_with_samples_that_have_names: Store,
-    helpers: StoreHelpers,
     name: str = "test_sample_1",
     customer_id="unrelated_customer",
 ):

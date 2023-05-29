@@ -3,11 +3,11 @@ import logging
 from typing import Dict, List, Set
 from typing_extensions import Literal
 
-from cg.apps.lims.sample_sheet import LimsFlowcellSample
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import SampleSheetV1Sections, SampleSheetV2Sections
 from cg.io.controller import ReadFile
 from cg.models.demultiplex.run_parameters import RunParameters
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel
@@ -24,7 +24,7 @@ def index_exists(index: str, indexes: Set[str]) -> bool:
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
-def get_indexes_by_lane(samples: List[LimsFlowcellSample]) -> Dict[int, Set[str]]:
+def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
     """Group the indexes from samples by lane."""
     indexes_by_lane = {}
     for sample in samples:

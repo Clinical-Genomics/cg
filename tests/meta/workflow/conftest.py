@@ -1,14 +1,12 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 import pytest
 from cgmodels.cg.constants import Pipeline
 
-from cg.constants.constants import MicrosaltAppTags, MicrosaltQC, SampleType
-from cg.constants.sequencing import SequencingMethod
-from cg.constants.subject import Gender
+from cg.constants.constants import MicrosaltAppTags, MicrosaltQC
 from cg.meta.workflow.microsalt import MicrosaltAnalysisAPI
 
 from cg.meta.compress.compress import CompressAPI
@@ -16,7 +14,6 @@ from cg.models.compression_data import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.store.models import Family, Sample
 from tests.store_helpers import StoreHelpers
-
 from tests.conftest import fixture_base_store
 from tests.meta.compress.conftest import fixture_compress_api, fixture_real_crunchy_api
 from tests.meta.upload.scout.conftest import fixture_another_sample_id
@@ -209,39 +206,3 @@ def qc_microsalt_context(
     cg_context.meta_apis["analysis_api"] = analysis_api
 
     return cg_context
-
-
-@pytest.fixture(name="balsamic_sample_data")
-def fixture_balsamic_sample_data(
-    sample_id: str,
-    cust_sample_id: str,
-    another_sample_id: str,
-    fastq_file_l_1_r_1: str,
-    fastq_file_l_2_r_1: str,
-    fastq_file_l_2_r_2: str,
-    bed_file: str,
-) -> Dict[str, dict]:
-    """Balsamic sample data dictionary."""
-    return {
-        sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.TUMOR.value,
-            "concatenated_path": fastq_file_l_1_r_1,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-        cust_sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_1,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-        another_sample_id: {
-            "gender": Gender.FEMALE,
-            "tissue_type": SampleType.NORMAL.value,
-            "concatenated_path": fastq_file_l_2_r_2,
-            "application_type": SequencingMethod.TGS.value,
-            "target_bed": bed_file,
-        },
-    }

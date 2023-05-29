@@ -7,6 +7,13 @@ from typing import List, Union, Dict, Callable
 from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.constants.constants import FileFormat
+from cg.constants.bcl_convert_metrics import (
+    DEMUX_METRICS_FILE_NAME,
+    QUALITY_METRICS_FILE_NAME,
+    ADAPTER_METRICS_FILE_NAME,
+    RUN_INFO_FILE_NAME,
+    SAMPLE_SHEET_FILE_NAME,
+)
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
     BclConvertDemuxMetrics,
@@ -14,7 +21,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertRunInfo,
     BclConvertSampleSheetData,
 )
-
+from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 
 LOG = logging.getLogger(__name__)
 
@@ -22,18 +29,18 @@ LOG = logging.getLogger(__name__)
 class BclConvertMetricsParser:
     def __init__(
         self,
-        bcl_convert_quality_metrics_file_path: Path,
-        bcl_convert_demux_metrics_file_path: Path,
-        bcl_convert_adapter_metrics_file_path: Path,
-        bcl_convert_sample_sheet_file_path: Path,
-        bcl_convert_run_info_file_path: Path,
+        bcl_convert_metrics_dir_path: Path,
     ) -> None:
         """Initialize the class."""
-        self.quality_metrics_path: Path = bcl_convert_quality_metrics_file_path
-        self.demux_metrics_path: Path = bcl_convert_demux_metrics_file_path
-        self.adapter_metrics_path: Path = bcl_convert_adapter_metrics_file_path
-        self.sample_sheet_path: Path = bcl_convert_sample_sheet_file_path
-        self.run_info_path: Path = bcl_convert_run_info_file_path
+        self.quality_metrics_path: Path = Path(
+            bcl_convert_metrics_dir_path, QUALITY_METRICS_FILE_NAME
+        )
+        self.demux_metrics_path: Path = Path(bcl_convert_metrics_dir_path, DEMUX_METRICS_FILE_NAME)
+        self.adapter_metrics_path: Path = Path(
+            bcl_convert_metrics_dir_path, ADAPTER_METRICS_FILE_NAME
+        )
+        self.sample_sheet_path: Path = Path(bcl_convert_metrics_dir_path, SAMPLE_SHEET_FILE_NAME)
+        self.run_info_path: Path = Path(bcl_convert_metrics_dir_path, RUN_INFO_FILE_NAME)
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
             metrics_file_path=self.quality_metrics_path, metrics_model=BclConvertQualityMetrics
         )
@@ -93,3 +100,65 @@ class BclConvertMetricsParser:
         LOG.info(f"Parsing Run info XML {self.run_info_path}")
         parsed_metrics = BclConvertRunInfo(tree=ET.parse(self.run_info_path))
         return parsed_metrics
+
+    def get_sample_internal_ids(self) -> List[str]:
+        """Return a list of sample internal ids."""
+        sample_internal_ids: List[str] = []
+        for sample_demux_metric in self.demux_metrics:
+            if self.is_valid_sample_project(sample_project=sample_demux_metric.sample_project):
+                sample_internal_ids.append(sample_demux_metric.sample_internal_id)
+        return sample_internal_ids
+
+    def is_valid_sample_project(self, sample_project: str) -> bool:
+        """Return True if the sample project is valid."""
+        if sample_project in [INDEX_CHECK, UNDETERMINED]:
+            return False
+        return True
+
+    def get_lanes_for_sample(self, sample_internal_id: str) -> List[int]:
+        """Return a list of lanes for a sample."""
+        lanes_for_sample: List[int] = []
+        for sample_demux_metric in self.demux_metrics:
+            if sample_demux_metric.sample_internal_id == sample_internal_id:
+                lanes_for_sample.append(sample_demux_metric.lane)
+        return lanes_for_sample
+
+    def get_metrics_for_sample_and_lane(
+        self,
+        metrics_list: List[
+            Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
+        ],
+        sample_internal_id: str,
+        lane: int,
+    ) -> Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]:
+        """Return the metrics for a sample by sample internal id."""
+        for metric in metrics_list:
+            if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
+                return metric
+
+    def calculate_total_reads_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> int:
+        """Calculate the total reads for a sample in a lane."""
+        metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_and_lane(
+            metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return metric.read_pair_count * 2
+
+    def get_flow_cell_name(self) -> str:
+        """Return the flow cell name of the demultiplexed flow cell."""
+        return self.sample_sheet[0].flow_cell_name
+
+    def get_q30_bases_percent_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> float:
+        """Return the percent of bases that are Q30 for a sample and lane."""
+        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
+            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return metric.q30_bases_percent
+
+    def get_mean_quality_score_fot_sample_in_lane(
+        self, sample_internal_id: str, lane: int
+    ) -> float:
+        """Return the mean quality score for a sample and lane."""
+        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
+            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        )
+        return metric.mean_quality_score_q30
