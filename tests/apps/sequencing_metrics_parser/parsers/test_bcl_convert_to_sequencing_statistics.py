@@ -19,7 +19,7 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
     sequencing_statistics_list: List[
         SampleLaneSequencingMetrics
     ] = create_sample_lane_sequencing_metrics_from_bcl_convert_metrics(
-        bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path,
+        demultiplex_result_directory=bcl_convert_metrics_dir_path,
     )
 
     # THEN assert that Sequencing statistics are created

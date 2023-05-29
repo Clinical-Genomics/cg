@@ -4,6 +4,7 @@ import shutil
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
+from cg.apps.sequencing_metrics_parser.api import create_sample_lane_sequencing_metrics
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
@@ -61,12 +62,16 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def create_sample_lane_sequencing_metrics(flow_cell_name: str, bcl_converter: str):
+    def create_sample_lane_sequencing_metrics(self, flow_cell_name: str, bcl_converter: str):
         # 1. Call api function create_sequencing_metrics
         # 2. Persist resulting objects to status db
         # 3. Port other steps from below into this function (and rename this function).
         # 4. Nuke the cgstats app and the cgstats repo and classes below.
-        pass
+        demultiplex_result_directory: Path = Path(self.demux_api.out_dir, flow_cell_name)
+
+        create_sample_lane_sequencing_metrics(
+            demultiplex_result_directory=demultiplex_result_directory, bcl_converter=bcl_converter
+        )
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):

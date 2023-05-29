@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from typing import List
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
@@ -14,7 +15,7 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
+def create_sample_lane_sequencing_metrics_from_bcl2fastq(demultiplex_result_directory: Path):
     """
     Parses the Bcl2fastq generated stats.json file and creates a list of SampleLaneSequencingMetrics objects,
     each representing a sample in a lane on the flow cell.
@@ -27,6 +28,7 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
         metrics for each sample in each lane on the flow cell.
     """
 
+    stats_json_path: str = str(Path(demultiplex_result_directory, "Stats/Stats.json"))
     raw_sequencing_metrics: Bcl2FastqSequencingMetrics = parse_bcl2fastq_sequencing_metrics(
         stats_json_path=stats_json_path
     )
