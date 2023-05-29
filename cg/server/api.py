@@ -230,23 +230,6 @@ def parse_case(case_id):
     return jsonify(**case.to_dict(links=True, analyses=True))
 
 
-@BLUEPRINT.route("/families")
-def get_families():
-    """Return cases."""
-    status: str = request.args.get("status")
-    enquiry: str = request.args.get("enquiry")
-    action: str = request.args.get("action")
-
-    customers: List[Customer] = _get_current_customers()
-    cases: List[Family] = _get_cases(
-        status=status, enquiry=enquiry, action=action, customers=customers
-    )
-
-    nr_cases = len(cases)
-    cases_with_links: List[dict] = [case.to_dict(links=True) for case in cases]
-    return jsonify(families=cases_with_links, total=nr_cases)
-
-
 @BLUEPRINT.route("/families_in_collaboration")
 def parse_families_in_collaboration():
     """Return cases in collaboration."""
@@ -265,17 +248,6 @@ def parse_families_in_collaboration():
 
     case_dicts = [case.to_dict(links=True) for case in cases]
     return jsonify(families=case_dicts, total=len(cases))
-
-
-@BLUEPRINT.route("/families/<family_id>")
-def parse_family(family_id):
-    """Return a family with links."""
-    case: Family = db.get_case_by_internal_id(internal_id=family_id)
-    if case is None:
-        return abort(http.HTTPStatus.NOT_FOUND)
-    if not g.current_user.is_admin and (case.customer not in g.current_user.customers):
-        return abort(http.HTTPStatus.FORBIDDEN)
-    return jsonify(**case.to_dict(links=True, analyses=True))
 
 
 @BLUEPRINT.route("/families_in_collaboration/<family_id>")
