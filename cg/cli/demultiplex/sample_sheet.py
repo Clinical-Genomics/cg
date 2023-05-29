@@ -3,23 +3,22 @@ from pathlib import Path
 from typing import List, Union
 
 import click
-from pydantic import ValidationError
-
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
-from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.apps.lims.samplesheet import (
-    LimsFlowcellSample,
-    LimsFlowcellSampleBcl2Fastq,
-    LimsFlowcellSampleDragen,
-    flowcell_samples,
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
+    FlowCellSampleBcl2Fastq,
+    FlowCellSampleDragen,
 )
+from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
+from cg.apps.lims.sample_sheet import flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
-from cg.io.controller import WriteFile
+from cg.io.controller import WriteFile, WriteStream
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
+from pydantic import ValidationError
 
 LOG = logging.getLogger(__name__)
 
@@ -74,8 +73,8 @@ def create_sheet(
         flow_cell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
-    lims_samples: List[Union[LimsFlowcellSampleBcl2Fastq, LimsFlowcellSampleDragen]] = list(
-        flowcell_samples(
+    lims_samples: List[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = list(
+        flow_cell_samples(
             lims=context.lims_api,
             flowcell_id=flow_cell.id,
             bcl_converter=bcl_converter,
@@ -92,7 +91,11 @@ def create_sheet(
         raise click.Abort from error
 
     if dry_run:
-        click.echo(sample_sheet_content)
+        click.echo(
+            WriteStream.write_stream_from_content(
+                file_format=FileFormat.CSV, content=sample_sheet_content
+            )
+        )
         return
     LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
     WriteFile.write_file_from_content(
@@ -126,8 +129,8 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             LOG.info("Sample sheet already exists")
             continue
         LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
-        lims_samples: List[LimsFlowcellSample] = list(
-            flowcell_samples(
+        lims_samples: List[FlowCellSample] = list(
+            flow_cell_samples(
                 lims=context.lims_api,
                 flowcell_id=flow_cell.id,
                 bcl_converter=bcl_converter,

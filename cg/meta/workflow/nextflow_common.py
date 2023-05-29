@@ -71,15 +71,6 @@ class NextflowAnalysisAPI:
             return Path(nextflow_config).absolute()
 
     @classmethod
-    def get_case_nextflow_pid_path(cls, case_id: str, root_dir: str) -> Path:
-        """Generates a path where the Nextflow pid file for the case_id should be located."""
-        # If not specified with the NXF_PID_FILE variable, a .nextflow.pid is created in the launch directory when
-        # running nextflow in the background (with the bg option)
-        return Path(
-            (cls.get_case_path(case_id=case_id, root_dir=root_dir)), f"{case_id}_nextflow.pid"
-        )
-
-    @classmethod
     def get_software_version_path(cls, case_id: str, root_dir: str) -> Path:
         return Path(
             (cls.get_case_path(case_id, root_dir)), "pipeline_info", "software_versions.yml"
@@ -198,13 +189,6 @@ class NextflowAnalysisAPI:
         if outdir:
             return outdir
         return Path(cls.get_case_path(case_id, root_dir))
-
-    @classmethod
-    def get_nextflow_stdout_stderr(cls, case_id: str, root_dir: str) -> List[str]:
-        case_path = cls.get_case_path(case_id, root_dir).as_posix()
-        return [
-            f" > {case_path}/{case_id}-stdout.log 2> {case_path}/{case_id}-stdout.err < /dev/null & "
-        ]
 
     @classmethod
     def get_replace_map(cls, case_id: str, root_dir: str) -> dict:

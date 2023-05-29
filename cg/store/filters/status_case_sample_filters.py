@@ -17,11 +17,6 @@ def get_cases_with_sample_by_internal_id(case_samples: Query, sample_internal_id
     return case_samples.filter(Sample.internal_id == sample_internal_id)
 
 
-def get_cases_with_sample_by_entry_id(case_samples: Query, sample_entry_id: int, **kwargs) -> Query:
-    """Return cases associated with a sample entry id."""
-    return case_samples.filter(Sample.id == sample_entry_id)
-
-
 def apply_case_sample_filter(
     filter_functions: List[Callable],
     case_samples: Query,
@@ -46,4 +41,3 @@ class CaseSampleFilter(Enum):
 
     GET_SAMPLES_IN_CASE_BY_INTERNAL_ID: Callable = get_samples_in_case_by_internal_id
     GET_CASES_WITH_SAMPLE_BY_INTERNAL_ID: Callable = get_cases_with_sample_by_internal_id
-    GET_CASES_WITH_SAMPLE_BY_ENTRY_ID: Callable = get_cases_with_sample_by_entry_id

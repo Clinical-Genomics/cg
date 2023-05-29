@@ -46,28 +46,10 @@ def fixture_spring_file_path() -> Path:
     return Path("/path/to/file.spring")
 
 
-@pytest.fixture(name="checksum_spring_file_path")
-def fixture_checksum_spring_file_path() -> Path:
-    """Return an spring file Path object"""
-    return Path("/path/to/file.spring.tmp")
-
-
 @pytest.fixture(name="encrypted_spring_file_path")
 def fixture_encrypted_spring_file_path() -> Path:
     """Return an encrypted spring file Path object"""
     return Path("/path/to/file.spring.gpg")
-
-
-@pytest.fixture(name="checksum_result_1")
-def fixture_checksum_result_1() -> str:
-    """fixture that can be used as a checksum result"""
-    return "a1b2c3"
-
-
-@pytest.fixture(name="checksum_result_2")
-def fixture_checksum_result_2() -> str:
-    """fixture that can be used as a checksum result"""
-    return "x7y8z9"
 
 
 @pytest.fixture(name="encryption_user_id")
