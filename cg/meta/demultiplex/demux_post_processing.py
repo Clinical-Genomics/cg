@@ -62,16 +62,16 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def create_sample_lane_sequencing_metrics(self, flow_cell_name: str, bcl_converter: str):
-        # 1. Call api function create_sequencing_metrics
-        # 2. Persist resulting objects to status db
-        # 3. Port other steps from below into this function (and rename this function).
-        # 4. Nuke the cgstats app and the cgstats repo and classes below.
+    def add_sample_lane_sequencing_metrics(self, flow_cell_name: str, bcl_converter: str):
+        """Add sample lane sequencing metrics to status database."""
         demultiplex_result_directory: Path = Path(self.demux_api.out_dir, flow_cell_name)
 
-        create_sample_lane_sequencing_metrics(
+        metrics = create_sample_lane_sequencing_metrics(
             demultiplex_result_directory=demultiplex_result_directory, bcl_converter=bcl_converter
         )
+
+        self.status_db.session.add_all(metrics)
+        self.status_db.session.commit()
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):

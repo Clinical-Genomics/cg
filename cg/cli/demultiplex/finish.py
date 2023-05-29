@@ -62,7 +62,7 @@ def finish_flow_cell(
 @click.pass_obj
 def populate_new_metrics(context: CGConfig, flow_cell_name: str, bcl_converter: str):
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
-    demux_post_processing_api.create_sample_lane_sequencing_metrics(
+    demux_post_processing_api.add_sample_lane_sequencing_metrics(
         flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
     )
 

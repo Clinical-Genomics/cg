@@ -5,7 +5,6 @@ from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
     create_sample_lane_sequencing_metrics_from_bcl2fastq,
 )
-from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert_to_sequencing_statistics import (
     create_sample_lane_sequencing_metrics_from_bcl_convert_metrics,
 )
