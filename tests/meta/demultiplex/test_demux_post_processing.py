@@ -482,3 +482,34 @@ def test_finish_all_flowcells(
 
     # THEN we should log that we are checking flow cell
     assert f"Check demultiplexed flow cell {bcl2fastq_flow_cell.full_name}" in caplog.text
+
+
+def test_is_bcl2fastq_folder_structure(bcl2fastq_folder_structure: Path):
+    """Test is_bcl2fastq_demux_folder_structure with a folder structure that follows the bcl2fastq folder structure"""
+    # GIVEN a bcl2fastq folder structure
+
+    # WHEN checking if it is a bcl2fastq folder structure
+    is_bcl2fastq_folder_structure: bool = (
+        DemuxPostProcessingAPI.is_bcl2fastq_demux_folder_structure(
+            flow_cell_dir=bcl2fastq_folder_structure
+        )
+    )
+
+    # THEN it should be a bcl2fastq folder structure
+    assert is_bcl2fastq_folder_structure == True
+
+
+def test_is_not_bcl2fastq_folder_structure(not_bcl2fastq_folder_structure: Path):
+    """Test is_bcl2fastq_demux_folder_structure with a folder structure that does not follow the bcl2fastq folder structure"""
+
+    # GIVEN a folder structure that does not follow the bcl2fastq folder structure
+    test = not_bcl2fastq_folder_structure
+    # WHEN checking if it is a bcl2fastq folder structure
+    is_bcl2fastq_folder_structure: bool = (
+        DemuxPostProcessingAPI.is_bcl2fastq_demux_folder_structure(
+            flow_cell_dir=not_bcl2fastq_folder_structure
+        )
+    )
+
+    # THEN it should not be a bcl2fastq folder structure
+    assert is_bcl2fastq_folder_structure == False

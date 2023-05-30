@@ -1,6 +1,8 @@
 """Post-processing Demultiiplex API."""
 import logging
+import os
 import shutil
+import re
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
@@ -81,17 +83,21 @@ class DemuxPostProcessingAPI:
     def post_process_flow_cell_temp(self):
         pass
 
-    def set_bcl_converter(self, flow_cell_name: str) -> str:
+    def set_bcl_converter(self, flow_cell_dir: Path) -> None:
         """Set bcl converter from flow cell."""
-        if self.is_bcl2fastq_demux_folder_structure():
+        if self.is_bcl2fastq_demux_folder_structure(flow_cell_dir=flow_cell_dir):
             self.bcl_converter = "bcl2fastq"
-        else:
-            self.bcl_converter = "bcl_convert"
+            return
+        self.bcl_converter = "bcl_convert"
 
-    def is_bcl2fastq_demux_folder_structure(self, flow_cell_dir: Path) -> bool:
+    @staticmethod
+    def is_bcl2fastq_demux_folder_structure(flow_cell_dir: Path) -> bool:
         """Check if flow cell directory is bcl2fastq demux folder structure."""
-
-        pass
+        lane_tile_folder_pattern = r"l[0-9]t[0-9]{2}"
+        for folder in os.listdir(flow_cell_dir):
+            if re.search(lane_tile_folder_pattern, folder):
+                return True
+        return False
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):

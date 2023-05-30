@@ -12,7 +12,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store.api import Store
 from cg.store.models import Sample, Family
-
+import os
 from tests.apps.cgstats.conftest import fixture_populated_stats_api
 from tests.cli.demultiplex.conftest import (
     fixture_demultiplex_configs,
@@ -303,3 +303,25 @@ def tmp_demultiplexing_init_files(
     for file in demultiplexing_init_files:
         file.touch()
     return demultiplexing_init_files
+
+
+@pytest.fixture(name="bcl2fastq_folder_structure", scope="function")
+def fixture_bcl2fastq_folder_structure(tmpdir_factory, cg_dir: Path):
+    base_dir = tmpdir_factory.mktemp(cg_dir)
+    folders = ["l1t21", "l1t11", "l2t11", "l2t21"]
+
+    for folder in folders:
+        os.mkdir(os.path.join(base_dir, folder))
+
+    yield base_dir
+
+
+@pytest.fixture(name="not_bcl2fastq_folder_structure", scope="function")
+def fixture_not_bcl2fastq_folder_structure(tmpdir_factory, cg_dir: Path):
+    base_dir = tmpdir_factory.mktemp(cg_dir)
+    folders = ["just", "some", "folders"]
+
+    for folder in folders:
+        os.mkdir(os.path.join(base_dir, folder))
+
+    yield base_dir
