@@ -1,7 +1,7 @@
 import json
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    Bcl2FastqSampleLaneTileMetrics,
+    Bcl2FastqSampleLaneMetrics,
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
     parse_bcl2fastq_sequencing_metrics,
@@ -21,9 +21,7 @@ def test_parse_valid_bcl2fastq_sequencing_metrics(tmp_path, valid_bcl2fastq_metr
 
     # THEN a list of Bcl2FastqTileSequencingMetrics models is returned
     assert isinstance(result, list)
-    assert all(isinstance(item, Bcl2FastqSampleLaneTileMetrics) for item in result)
+    assert all(isinstance(item, Bcl2FastqSampleLaneMetrics) for item in result)
 
     # THEN the Bcl2FastqTileSequencingMetrics model contains the expected data
     assert result[0].flow_cell_name == valid_bcl2fastq_metrics_data["Flowcell"]
-    assert result[0].run_number == valid_bcl2fastq_metrics_data["RunNumber"]
-    assert result[0].run_id == valid_bcl2fastq_metrics_data["RunId"]

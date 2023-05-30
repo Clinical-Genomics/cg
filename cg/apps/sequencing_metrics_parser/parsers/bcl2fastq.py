@@ -10,7 +10,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
 
 def parse_bcl2fastq_sequencing_metrics(
     demultiplex_result_directory: Path,
-) -> List[Bcl2FastqSampleLaneTileMetrics]:
+) -> List[Bcl2FastqSampleLaneMetrics]:
     """
     Parse stats.json files in specified Bcl2fastq demultiplex result directory.
 
@@ -22,7 +22,7 @@ def parse_bcl2fastq_sequencing_metrics(
     demultiplex_result_directory (Path): Path to the demultiplexing results.
 
     Returns:
-    List[Bcl2FastqTileSequencingMetrics]: List of parsed sequencing metrics per tile.
+    List[Bcl2FastqSampleLaneMetrics]: List of parsed sequencing metrics per sample and lane.
     """
     tile_sequencing_metrics: List[
         Bcl2FastqSampleLaneTileMetrics
