@@ -89,9 +89,9 @@ class ReadInfoForLane(BaseModel):
     lane_number: int = Field(..., alias="LaneNumber", gt=0)
 
 
-class Bcl2FastqSequencingMetrics(BaseModel):
+class Bcl2FastqTileSequencingMetrics(BaseModel):
     """
-    Represents a comprehensive set of sequencing metrics for a bcl2fastq run.
+    Represents a set of sequencing metrics for a bcl2fastq run per sample, lane and tile on a flow cell.
 
     Fields:
     - flowcell: The identifier for the flowcell used in this run.
@@ -101,7 +101,7 @@ class Bcl2FastqSequencingMetrics(BaseModel):
     - conversion_results: A list of conversion results for each lane in this run.
     """
 
-    flowcell: str = Field(..., alias="Flowcell", min_length=1)
+    flow_cell_name: str = Field(..., alias="Flowcell", min_length=1)
     run_number: int = Field(..., alias="RunNumber", gt=0)
     run_id: str = Field(..., alias="RunId", min_length=1)
     read_infos_for_lanes: List[ReadInfoForLane] = Field(..., alias="ReadInfosForLanes")

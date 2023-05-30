@@ -2,11 +2,13 @@ from datetime import datetime
 from typing import List
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    Bcl2FastqSequencingMetrics,
+    Bcl2FastqTileSequencingMetrics,
     ConversionResult,
     DemuxResult,
 )
-from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import parse_bcl2fastq_sequencing_metrics
+from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
+    parse_bcl2fastq_tile_sequencing_metrics,
+)
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
     q30_ratio,
     average_quality_score,
@@ -27,9 +29,9 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
         metrics for each sample in each lane on the flow cell.
     """
 
-    raw_sequencing_metrics: Bcl2FastqSequencingMetrics = parse_bcl2fastq_sequencing_metrics(
-        stats_json_path=stats_json_path
-    )
+    raw_sequencing_metrics: List[
+        Bcl2FastqTileSequencingMetrics
+    ] = parse_bcl2fastq_tile_sequencing_metrics(demultiplex_result_directory=stats_json_path)
 
     sample_lane_metrics: List[SampleLaneSequencingMetrics] = []
 
@@ -50,7 +52,7 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
 def create_sample_lane_sequencing_metrics(
     conversion_result: ConversionResult,
     demux_result: DemuxResult,
-    raw_sequencing_metrics: Bcl2FastqSequencingMetrics,
+    raw_sequencing_metrics: Bcl2FastqTileSequencingMetrics,
 ) -> SampleLaneSequencingMetrics:
     """
     Generates a SampleLaneSequencingMetrics object based on the provided conversion and demultiplexing results
@@ -79,7 +81,7 @@ def create_sample_lane_sequencing_metrics(
     )
 
     return SampleLaneSequencingMetrics(
-        flow_cell_name=raw_sequencing_metrics.flowcell,
+        flow_cell_name=raw_sequencing_metrics.flow_cell_name,
         flow_cell_lane_number=conversion_result.lane_number,
         sample_internal_id=demux_result.sample_id,
         sample_total_reads_in_lane=demux_result.number_reads,
