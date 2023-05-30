@@ -104,3 +104,6 @@ class DemultiplexingDirsAndFiles(StrEnum):
 
 INDEX_CHECK = "indexcheck"
 UNDETERMINED = "Undetermined"
+
+BCL2FASTQ_METRICS_DIRECTORY_NAME = "Stats"
+BCL2FASTQ_METRICS_FILE_NAME = "Stats.json"
