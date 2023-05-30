@@ -468,9 +468,7 @@ class StoreHelpers:
             tickets=case_info["tickets"],
         )
 
-        case: Family = StoreHelpers.add_case(
-            store, case_obj=case, customer_id=customer_obj.internal_id
-        )
+        case = StoreHelpers.add_case(store, case_obj=case, customer_id=customer_obj.internal_id)
 
         app_tag = app_tag or "WGSPCFC030"
         app_type = case_info.get("application_type", "wgs")
@@ -492,14 +490,8 @@ class StoreHelpers:
             )
             sample_objs[sample_id] = sample_obj
 
-        for sample_data in case_info["samples"]:
-            sample_obj = sample_objs[sample_data["internal_id"]]
-            father = None
-            if sample_data.get(Pedigree.FATHER):
-                father = sample_objs[sample_data[Pedigree.FATHER]]
-            mother = None
-            if sample_data.get(Pedigree.MOTHER):
-                mother = sample_objs[sample_data[Pedigree.MOTHER]]
+            father = sample_objs.get(sample_data.get(Pedigree.FATHER))
+            mother = sample_objs.get(sample_data.get(Pedigree.MOTHER))
             StoreHelpers.add_relationship(
                 store,
                 case=case,

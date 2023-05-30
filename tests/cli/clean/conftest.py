@@ -32,7 +32,6 @@ def clean_context(
     helpers: StoreHelpers,
     project_dir: Path,
     timestamp_yesterday: datetime.datetime,
-    timestamp_now: datetime.datetime,
 ) -> CGConfig:
     analysis_api = BalsamicAnalysisAPI(cg_context)
     store = analysis_api.status_db
