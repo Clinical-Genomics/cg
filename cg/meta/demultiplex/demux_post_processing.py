@@ -106,7 +106,7 @@ class DemuxPostProcessingAPI:
 
     def is_bcl2fastq_demux_folder_structure(self) -> bool:
         """Check if flow cell directory is bcl2fastq demux folder structure."""
-        lane_tile_folder_pattern = r"l[0-9]t[0-9]{2}"
+        lane_tile_folder_pattern = r"l\dt\d{2}"
         for folder in os.listdir(self.flow_cell_dir):
             if re.search(lane_tile_folder_pattern, folder):
                 return True
