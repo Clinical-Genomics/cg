@@ -25,7 +25,11 @@ from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.report.report_api import ReportAPI
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import BalsamicVarCaller
-from cg.models.balsamic.metrics import BalsamicTargetedQCMetrics, BalsamicWGSQCMetrics
+from cg.models.balsamic.metrics import (
+    BalsamicTargetedQCMetrics,
+    BalsamicWGSQCMetrics,
+    BalsamicQCMetrics,
+)
 from cg.models.cg_config import CGConfig
 from cg.models.report.metadata import (
     BalsamicTargetedSampleMetadataModel,
@@ -49,12 +53,19 @@ class BalsamicReportAPI(ReportAPI):
         self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Return the sample metadata to include in the report."""
-        sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
-        million_read_pairs = get_million_read_pairs(sample.reads)
-        if "wgs" in self.get_data_analysis_type(case):
-            return self.get_wgs_metadata(million_read_pairs, sample_metrics)
+        sample_metrics: Dict[str, BalsamicQCMetrics] = analysis_metadata.sample_metrics[
+            sample.internal_id
+        ]
+        million_read_pairs: float = get_million_read_pairs(reads=sample.reads)
+        if "wgs" in self.get_data_analysis_type(case=case):
+            return self.get_wgs_metadata(
+                million_read_pairs=million_read_pairs, sample_metrics=sample_metrics
+            )
         return self.get_panel_metadata(
-            sample, million_read_pairs, sample_metrics, analysis_metadata
+            sample=sample,
+            million_read_pairs=million_read_pairs,
+            sample_metrics=sample_metrics,
+            analysis_metadata=analysis_metadata,
         )
 
     @staticmethod
@@ -88,7 +99,7 @@ class BalsamicReportAPI(ReportAPI):
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
             pct_15x=sample_metrics.pct_15x if sample_metrics else None,
             pct_60x=sample_metrics.pct_60x if sample_metrics else None,
-            duplicates=self.get_wgs_percent_duplication(sample_metrics),
+            duplicates=self.get_wgs_percent_duplication(sample_metrics=sample_metrics),
             mean_insert_size=sample_metrics.mean_insert_size if sample_metrics else None,
             fold_80=sample_metrics.fold_80_base_penalty if sample_metrics else None,
         )
@@ -104,7 +115,7 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
-        return self.analysis_api.get_bundle_deliverables_type(case.internal_id)
+        return self.analysis_api.get_bundle_deliverables_type(case_id=case.internal_id)
 
     def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case."""
@@ -115,8 +126,8 @@ class BalsamicReportAPI(ReportAPI):
         Extracts the list of BALSAMIC variant-calling filters and their versions (if available) from the
         config.json file.
         """
-        sequencing_type = analysis_metadata.config.analysis.sequencing_type
-        analysis_type = analysis_metadata.config.analysis.analysis_type
+        sequencing_type: str = analysis_metadata.config.analysis.sequencing_type
+        analysis_type: str = analysis_metadata.config.analysis.analysis_type
         var_callers: Dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
         tool_versions: Dict[str, list] = analysis_metadata.config.bioinfo_tools_version
         analysis_var_callers = list()
@@ -125,7 +136,9 @@ class BalsamicReportAPI(ReportAPI):
                 sequencing_type in var_caller_attributes.sequencing_type
                 and analysis_type in var_caller_attributes.analysis_type
             ):
-                version = self.get_variant_caller_version(var_caller_name, tool_versions)
+                version: str = self.get_variant_caller_version(
+                    var_caller_name=var_caller_name, var_caller_versions=tool_versions
+                )
                 analysis_var_callers.append(
                     f"{var_caller_name} (v{version})" if version else var_caller_name
                 )
@@ -133,8 +146,7 @@ class BalsamicReportAPI(ReportAPI):
 
     @staticmethod
     def get_variant_caller_version(
-        var_caller_name: str,
-        var_caller_versions: dict,
+        var_caller_name: str, var_caller_versions: dict
     ) -> Optional[str]:
         """Returns the version of a specific BALSAMIC tool."""
         for tool_name, versions in var_caller_versions.items():
@@ -159,29 +171,43 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for BALSAMIC."""
-        analysis_type = case.data_analysis.type
-        required_sample_metadata_fields = list()
+        analysis_type: str = case.data_analysis.type
+        required_sample_metadata_fields: List[str] = []
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
-            required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
+            required_sample_metadata_fields: List[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
-            required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
+            required_sample_metadata_fields: List[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TN_WGS_FIELDS
         elif (
             BALSAMIC_ANALYSIS_TYPE["tumor_panel"] in analysis_type
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
-            required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
+            required_sample_metadata_fields: List[
+                str
+            ] = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
             "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(case, REQUIRED_APPLICATION_FIELDS),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
-            "samples": self.get_sample_required_fields(case, REQUIRED_SAMPLE_BALSAMIC_FIELDS),
-            "methods": self.get_sample_required_fields(case, REQUIRED_SAMPLE_METHODS_FIELDS),
-            "timestamps": self.get_timestamp_required_fields(
-                case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            "applications": self.get_application_required_fields(
+                case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "metadata": self.get_sample_required_fields(case, required_sample_metadata_fields),
+            "data_analysis": REQUIRED_DATA_ANALYSIS_BALSAMIC_FIELDS,
+            "samples": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_BALSAMIC_FIELDS
+            ),
+            "methods": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            "timestamps": self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+            "metadata": self.get_sample_required_fields(
+                case=case, required_fields=required_sample_metadata_fields
+            ),
         }
 
     def get_template_name(self) -> str:
