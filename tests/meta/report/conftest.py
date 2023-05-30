@@ -22,7 +22,7 @@ from tests.mocks.mip_analysis_mock import MockMipAnalysis
 from tests.mocks.report import MockChanjo, MockHousekeeperMipDNAReportAPI
 
 
-@pytest.fixture(scope="function", name="report_api_mip_dna")
+@pytest.fixture(scope="session", name="report_api_mip_dna")
 def report_api_mip_dna(
     cg_context: CGConfig, lims_samples: List[dict], report_store: Store
 ) -> MipDNAReportAPI:
@@ -35,7 +35,7 @@ def report_api_mip_dna(
     return MockHousekeeperMipDNAReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
-@pytest.fixture(scope="function", name="report_api_balsamic")
+@pytest.fixture(scope="session", name="report_api_balsamic")
 def report_api_balsamic(
     cg_context: CGConfig, lims_samples: List[dict], report_store: Store
 ) -> BalsamicReportAPI:
@@ -47,7 +47,7 @@ def report_api_balsamic(
     return BalsamicReportAPI(cg_context, cg_context.meta_apis["analysis_api"])
 
 
-@pytest.fixture(scope="function", name="report_api_rnafusion")
+@pytest.fixture(scope="session", name="report_api_rnafusion")
 def report_api_rnafusion(
     rnafusion_context: CGConfig, lims_samples: List[dict]
 ) -> RnafusionReportAPI:
@@ -57,31 +57,31 @@ def report_api_rnafusion(
     return RnafusionReportAPI(rnafusion_context, rnafusion_context.meta_apis["analysis_api"])
 
 
-@pytest.fixture(scope="function", name="case_mip_dna")
+@pytest.fixture(scope="session", name="case_mip_dna")
 def case_mip_dna(case_id: str, report_api_mip_dna: MipDNAReportAPI) -> Family:
     """MIP DNA case instance."""
     return report_api_mip_dna.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
-@pytest.fixture(scope="function", name="case_balsamic")
+@pytest.fixture(scope="session", name="case_balsamic")
 def case_balsamic(case_id: str, report_api_balsamic: BalsamicReportAPI) -> Family:
     """BALSAMIC case instance."""
     return report_api_balsamic.status_db.get_case_by_internal_id(internal_id=case_id)
 
 
-@pytest.fixture(scope="function", name="case_samples_data")
+@pytest.fixture(scope="session", name="case_samples_data")
 def case_samples_data(case_id: str, report_api_mip_dna: MipDNAReportAPI):
     """MIP DNA family sample object."""
     return report_api_mip_dna.status_db.get_case_samples_by_case_id(case_internal_id=case_id)
 
 
-@pytest.fixture(name="mip_analysis_api")
+@pytest.fixture(scope="session", name="mip_analysis_api")
 def mip_analysis_api() -> MockMipAnalysis:
     """MIP analysis mock data."""
     return MockMipAnalysis()
 
 
-@pytest.fixture(name="lims_family")
+@pytest.fixture(scope="session", name="lims_family")
 def fixture_lims_family(fixtures_dir: Path) -> dict:
     """Returns a lims-like case of samples."""
     return ReadFile.get_content_from_file(
@@ -89,13 +89,13 @@ def fixture_lims_family(fixtures_dir: Path) -> dict:
     )
 
 
-@pytest.fixture(name="lims_samples")
+@pytest.fixture(scope="session", name="lims_samples")
 def fixture_lims_samples(lims_family: dict) -> List[dict]:
     """Returns the samples of a lims case."""
     return lims_family["samples"]
 
 
-@pytest.fixture(scope="function", autouse=True, name="report_store")
+@pytest.fixture(scope="session", autouse=True, name="report_store")
 def report_store(analysis_store, helpers, timestamp_yesterday):
     """A mock store instance for report testing."""
     case = analysis_store.get_cases()[0]
@@ -115,7 +115,7 @@ def report_store(analysis_store, helpers, timestamp_yesterday):
     return analysis_store
 
 
-@pytest.fixture(name="rnafusion_validated_metrics")
+@pytest.fixture(scope="session", name="rnafusion_validated_metrics")
 def fixture_rnafusion_validated_metrics() -> Dict[str, str]:
     """Return Rnafusion raw analysis metrics dictionary."""
     return {
