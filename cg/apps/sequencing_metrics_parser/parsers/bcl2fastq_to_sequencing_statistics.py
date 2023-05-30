@@ -34,7 +34,12 @@ def get_sequencing_metrics_from_bcl2fastq(
     )
 
     for raw_sample_metrics in sample_and_lane_metrics:
-        pass
+        metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics(
+            raw_sample_metrics=raw_sample_metrics
+        )
+        sample_lane_sequencing_metrics.append(metrics)
+
+    return sample_lane_sequencing_metrics
 
 
 def create_sample_lane_sequencing_metrics(
