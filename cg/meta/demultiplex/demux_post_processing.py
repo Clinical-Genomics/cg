@@ -85,6 +85,7 @@ class DemuxPostProcessingAPI:
         )
 
     def finish_flow_cell_temp(self):
+        """Finish flow cell."""
         validated_flow_cell: FlowCell = self.validate_flow_cell()
         if not validated_flow_cell:
             LOG.info(f"Flow cell {self.flow_cell_name} is not valid")
@@ -112,6 +113,7 @@ class DemuxPostProcessingAPI:
         return False
 
     def validate_flow_cell(self) -> Optional[FlowCell]:
+        """Validate flow cell."""
         LOG.info(f"Check demultiplexed flow cell {self.flow_cell_name}")
         try:
             flow_cell: FlowCell = FlowCell(
