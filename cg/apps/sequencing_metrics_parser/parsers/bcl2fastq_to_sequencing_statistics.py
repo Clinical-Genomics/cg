@@ -18,7 +18,7 @@ def get_sequencing_metrics_from_bcl2fastq(
     Parses the Bcl2fastq generated stats.json files and aggregates and calculates metrics for each sample in each lane.
 
     Args:
-        demultiplex_result_directory (Path): The path to the Bcl2fastq demultiplexing results.
+        demultiplex_result_directory (Path): Demultiplexed flow cell directory containing output from bcl2fastq
 
     Returns:
         List[SampleLaneSequencingMetrics]: A list of SampleLaneSequencingMetrics representing the sequencing
@@ -33,7 +33,7 @@ def get_sequencing_metrics_from_bcl2fastq(
 
     for raw_sample_metrics in sample_and_lane_metrics:
         metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics(
-            raw_sample_metrics=raw_sample_metrics
+            bcl2fastq_sample_metrics=raw_sample_metrics
         )
         sample_lane_sequencing_metrics.append(metrics)
 
@@ -41,7 +41,7 @@ def get_sequencing_metrics_from_bcl2fastq(
 
 
 def create_sample_lane_sequencing_metrics(
-    raw_sample_metrics: Bcl2FastqSampleLaneMetrics,
+    bcl2fastq_sample_metrics: Bcl2FastqSampleLaneMetrics,
 ) -> SampleLaneSequencingMetrics:
     """
     Generates a SampleLaneSequencingMetrics based on the provided raw results.
@@ -55,19 +55,19 @@ def create_sample_lane_sequencing_metrics(
     """
 
     sample_base_fraction_passing_q30: float = q30_ratio(
-        q30_yield=raw_sample_metrics.sample_total_yield_q30_in_lane,
-        total_yield=raw_sample_metrics.sample_total_yield_in_lane,
+        q30_yield=bcl2fastq_sample_metrics.sample_total_yield_q30_in_lane,
+        total_yield=bcl2fastq_sample_metrics.sample_total_yield_in_lane,
     )
     sample_base_mean_quality_score: float = average_quality_score(
-        total_quality_score=raw_sample_metrics.sample_total_quality_score_in_lane,
-        total_yield=raw_sample_metrics.sample_total_yield_in_lane,
+        total_quality_score=bcl2fastq_sample_metrics.sample_total_quality_score_in_lane,
+        total_yield=bcl2fastq_sample_metrics.sample_total_yield_in_lane,
     )
 
     return SampleLaneSequencingMetrics(
-        flow_cell_name=raw_sample_metrics.flow_cell_name,
-        flow_cell_lane_number=raw_sample_metrics.flow_cell_lane_number,
-        sample_internal_id=raw_sample_metrics.sample_id,
-        sample_total_reads_in_lane=raw_sample_metrics.sample_total_reads_in_lane,
+        flow_cell_name=bcl2fastq_sample_metrics.flow_cell_name,
+        flow_cell_lane_number=bcl2fastq_sample_metrics.flow_cell_lane_number,
+        sample_internal_id=bcl2fastq_sample_metrics.sample_id,
+        sample_total_reads_in_lane=bcl2fastq_sample_metrics.sample_total_reads_in_lane,
         sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
         sample_base_mean_quality_score=sample_base_mean_quality_score,
         created_at=datetime.now(),

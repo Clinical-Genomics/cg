@@ -69,19 +69,18 @@ def aggregate_tile_metrics_per_sample_and_lane(
     tile_metrics: List[Bcl2FastqSampleLaneTileMetrics],
 ) -> List[Bcl2FastqSampleLaneMetrics]:
     """Aggregate the metrics parsed per sample and tile to be per sample and lane instead."""
-    aggregated_metrics = {}
+    metrics = {}
 
     for tile_metric in tile_metrics:
         for conversion_result in tile_metric.conversion_results:
             for demux_result in conversion_result.demux_results:
-                key = (
-                    tile_metric.flow_cell_name,
+                sample_lane_key = (
                     conversion_result.lane_number,
                     demux_result.sample_id,
                 )
 
-                if key not in aggregated_metrics:
-                    aggregated_metrics[key] = Bcl2FastqSampleLaneMetrics(
+                if sample_lane_key not in metrics:
+                    metrics[sample_lane_key] = Bcl2FastqSampleLaneMetrics(
                         flow_cell_name=tile_metric.flow_cell_name,
                         flow_cell_lane_number=conversion_result.lane_number,
                         sample_id=demux_result.sample_id,
@@ -91,16 +90,16 @@ def aggregate_tile_metrics_per_sample_and_lane(
                         sample_total_quality_score_in_lane=0,
                     )
 
-                aggregated_metrics[key].sample_total_reads_in_lane += demux_result.number_reads
-                aggregated_metrics[key].sample_total_yield_in_lane += demux_result.yield_
-                aggregated_metrics[key].sample_total_yield_q30_in_lane += sum(
+                metrics[sample_lane_key].sample_total_reads_in_lane += demux_result.number_reads
+                metrics[sample_lane_key].sample_total_yield_in_lane += demux_result.yield_
+                metrics[sample_lane_key].sample_total_yield_q30_in_lane += sum(
                     [read_metric.yield_q30 for read_metric in demux_result.read_metrics]
                 )
-                aggregated_metrics[key].sample_total_quality_score_in_lane += sum(
+                metrics[sample_lane_key].sample_total_quality_score_in_lane += sum(
                     [read_metric.quality_score_sum for read_metric in demux_result.read_metrics]
                 )
 
-    return list(aggregated_metrics.values())
+    return list(metrics.values())
 
 
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
