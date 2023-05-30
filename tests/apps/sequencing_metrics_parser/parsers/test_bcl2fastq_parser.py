@@ -4,7 +4,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
     Bcl2FastqSampleLaneTileMetrics,
 )
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
-    parse_bcl2fastq_tile_sequencing_metrics,
+    parse_bcl2fastq_sequencing_metrics,
 )
 
 
@@ -17,7 +17,7 @@ def test_parse_valid_bcl2fastq_sequencing_metrics(tmp_path, valid_bcl2fastq_metr
     stats_json_path.write_text(json.dumps(valid_bcl2fastq_metrics_data))
 
     # WHEN parsing the directory containing the valid stats.json file
-    result = parse_bcl2fastq_tile_sequencing_metrics(tmp_path)
+    result = parse_bcl2fastq_sequencing_metrics(tmp_path)
 
     # THEN a list of Bcl2FastqTileSequencingMetrics models is returned
     assert isinstance(result, list)

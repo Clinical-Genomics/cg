@@ -2,16 +2,12 @@ from datetime import datetime
 from typing import List
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    Bcl2FastqSampleLaneTileMetrics,
-    ConversionResult,
-    DemuxResult,
+    Bcl2FastqSampleLaneMetrics,
 )
-from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import (
-    parse_bcl2fastq_tile_sequencing_metrics,
-)
+from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import parse_bcl2fastq_sequencing_metrics
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
-    q30_ratio,
     average_quality_score,
+    q30_ratio,
 )
 from cg.store.models import SampleLaneSequencingMetrics
 
@@ -31,98 +27,46 @@ def get_sequencing_metrics_from_bcl2fastq(
         metrics for each sample in each lane on the flow cell.
     """
 
-    raw_sequencing_metrics_per_tile: List[
-        Bcl2FastqSampleLaneTileMetrics
-    ] = parse_bcl2fastq_tile_sequencing_metrics(demultiplex_result_directory=stats_json_path)
+    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
 
-    sample_lane_metrics: List[SampleLaneSequencingMetrics] = []
+    sample_and_lane_metrics: List[Bcl2FastqSampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(
+        demultiplex_result_directory=stats_json_path
+    )
 
-    for conversion_result in raw_sequencing_metrics_per_tile.conversion_results:
-        for demux_result in conversion_result.demux_results:
-            metrics_for_sample_in_lane: SampleLaneSequencingMetrics = (
-                create_sample_lane_sequencing_metrics(
-                    conversion_result=conversion_result,
-                    demux_result=demux_result,
-                    raw_sequencing_metrics=raw_sequencing_metrics_per_tile,
-                )
-            )
-            sample_lane_metrics.append(metrics_for_sample_in_lane)
-
-    return sample_lane_metrics
+    for raw_sample_metrics in sample_and_lane_metrics:
+        pass
 
 
 def create_sample_lane_sequencing_metrics(
-    conversion_result: ConversionResult,
-    demux_result: DemuxResult,
-    raw_sequencing_metrics: Bcl2FastqSampleLaneTileMetrics,
+    raw_sample_metrics: Bcl2FastqSampleLaneMetrics,
 ) -> SampleLaneSequencingMetrics:
     """
     Generates a SampleLaneSequencingMetrics object based on the provided conversion and demultiplexing results
     along with the raw sequencing metrics.
 
     Args:
-        conversion_result (ConversionResult): A ConversionResult object encapsulating the conversion
-        results for a lane.
-
-        demux_result (DemuxResult): A DemuxResult object encapsulating the result of the demultiplexing
-        for a sample in a lane.
-
-        raw_sequencing_metrics (Bcl2FastqSequencingMetrics): Raw sequencing metrics parsed from the Bcl2Fastq
-        generated stats.json file.
+        raw_sample_metrics: Bcl2FastqSampleLaneMetrics: The raw sequencing metrics for a sample in a lane.
 
     Returns:
         SampleLaneSequencingMetrics: A SampleLaneSequencingMetrics object that encapsulates the statistics for a sample
         in a lane on the flow cell.
     """
 
-    average_quality_score: float = calculate_average_quality_score_for_sample_in_lane(
-        demux_result=demux_result
+    sample_base_fraction_passing_q30: float = q30_ratio(
+        q30_yield=raw_sample_metrics.sample_total_yield_q30_in_lane,
+        total_yield=raw_sample_metrics.sample_total_yield_in_lane,
     )
-    bases_with_q30_percent: float = calculate_q30_ratio_for_sample_in_lane(
-        demux_result=demux_result
+    sample_base_mean_quality_score: float = average_quality_score(
+        total_quality_score=raw_sample_metrics.sample_total_quality_score_in_lane,
+        total_yield=raw_sample_metrics.sample_total_yield_in_lane,
     )
 
     return SampleLaneSequencingMetrics(
-        flow_cell_name=raw_sequencing_metrics.flow_cell_name,
-        flow_cell_lane_number=conversion_result.lane_number,
-        sample_internal_id=demux_result.sample_id,
-        sample_total_reads_in_lane=demux_result.number_reads,
-        sample_base_fraction_passing_q30=bases_with_q30_percent,
-        sample_base_mean_quality_score=average_quality_score,
-        started_at=datetime.now(),
+        flow_cell_name=raw_sample_metrics.flow_cell_name,
+        flow_cell_lane_number=raw_sample_metrics.flow_cell_lane_number,
+        sample_internal_id=raw_sample_metrics.sample_id,
+        sample_total_reads_in_lane=raw_sample_metrics.sample_total_reads_in_lane,
+        sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
+        sample_base_mean_quality_score=sample_base_mean_quality_score,
+        created_at=datetime.now(),
     )
-
-
-def calculate_q30_ratio_for_sample_in_lane(demux_result: DemuxResult) -> float:
-    """
-    Calculate the proportion of bases that have a Phred quality score of 30 or more (Q30) for a sample
-    in a lane from the demux result.
-
-    Args:
-        demux_result (DemuxResult): A DemuxResult object encapsulating the result of the demultiplexing
-        for a sample in a lane.
-
-    Returns:
-        float: The proportion of Q30 bases for the sample.
-    """
-    q30_yield = sum([read.yield_q30 for read in demux_result.read_metrics])
-    total_yield = sum([read.yield_ for read in demux_result.read_metrics])
-
-    return q30_ratio(q30_yield=q30_yield, total_yield=total_yield)
-
-
-def calculate_average_quality_score_for_sample_in_lane(demux_result: DemuxResult) -> float:
-    """
-    Calculate the mean quality score across all bases for a sample in a lane from the demux result.
-
-    Args:
-        demux_result (DemuxResult): A DemuxResult object encapsulating the result of the demultiplexing
-        for a sample in a lane.
-
-    Returns:
-        float: The mean quality score for the sample.
-    """
-    total_quality_score: int = sum([read.quality_score_sum for read in demux_result.read_metrics])
-    total_yield: int = sum([read.yield_ for read in demux_result.read_metrics])
-
-    return average_quality_score(total_quality_score=total_quality_score, total_yield=total_yield)
