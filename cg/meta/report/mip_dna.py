@@ -45,11 +45,11 @@ class MipDNAReportAPI(ReportAPI):
         parsed_metrics = get_sample_id_metric(
             sample_id=sample.internal_id, sample_id_metrics=analysis_metadata.sample_id_metrics
         )
-        sample_coverage = self.get_sample_coverage(sample, case)
+        sample_coverage: dict = self.get_sample_coverage(sample=sample, case=case)
         return MipDNASampleMetadataModel(
             bait_set=self.lims_api.capture_kit(lims_id=sample.internal_id),
             gender=parsed_metrics.predicted_sex,
-            million_read_pairs=get_million_read_pairs(sample.reads),
+            million_read_pairs=get_million_read_pairs(reads=sample.reads),
             mapped_reads=parsed_metrics.mapped_reads,
             mean_target_coverage=sample_coverage.get("mean_coverage"),
             pct_10x=sample_coverage.get("mean_completeness"),
@@ -58,8 +58,10 @@ class MipDNAReportAPI(ReportAPI):
 
     def get_sample_coverage(self, sample: Sample, case: Family) -> dict:
         """Calculates coverage values for a specific sample."""
-        genes = self.get_genes_from_scout(case.panels)
-        sample_coverage = self.chanjo_api.sample_coverage(sample.internal_id, genes)
+        genes = self.get_genes_from_scout(panels=case.panels)
+        sample_coverage = self.chanjo_api.sample_coverage(
+            sample_id=sample.internal_id, panel_genes=genes
+        )
         if sample_coverage:
             return sample_coverage
         LOG.warning("Could not calculate sample coverage for: %s", sample.internal_id)
@@ -78,7 +80,7 @@ class MipDNAReportAPI(ReportAPI):
         case_sample: Sample = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )[0].sample
-        lims_sample = self.get_lims_sample(case_sample.internal_id)
+        lims_sample = self.get_lims_sample(sample_id=case_sample.internal_id)
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
@@ -107,14 +109,20 @@ class MipDNAReportAPI(ReportAPI):
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
             "case": REQUIRED_CASE_FIELDS,
-            "applications": self.get_application_required_fields(case, REQUIRED_APPLICATION_FIELDS),
-            "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
-            "samples": self.get_sample_required_fields(case, REQUIRED_SAMPLE_MIP_DNA_FIELDS),
-            "methods": self.get_sample_required_fields(case, REQUIRED_SAMPLE_METHODS_FIELDS),
-            "timestamps": self.get_timestamp_required_fields(
-                case, REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            "applications": self.get_application_required_fields(
+                case=case, required_fields=REQUIRED_APPLICATION_FIELDS
             ),
-            "metadata": self.get_sample_metadata_required_fields(case),
+            "data_analysis": REQUIRED_DATA_ANALYSIS_MIP_DNA_FIELDS,
+            "samples": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_MIP_DNA_FIELDS
+            ),
+            "methods": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            "timestamps": self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+            "metadata": self.get_sample_metadata_required_fields(case=case),
         }
 
     @staticmethod

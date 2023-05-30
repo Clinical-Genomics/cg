@@ -30,7 +30,7 @@ from cg.models.report.report import (
 )
 from cg.models.report.sample import SampleModel, ApplicationModel, TimestampModel, MethodsModel
 from cg.store.models import Analysis, Application, Family, Sample, FamilySample
-from jinja2 import Environment, PackageLoader, select_autoescape
+from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
 LOG = logging.getLogger(__name__)
 
@@ -49,20 +49,21 @@ class ReportAPI(MetaAPI):
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
-        report_data: ReportModel = self.validate_report_fields(case_id, report_data, force_report)
-        rendered_report = self.render_delivery_report(report_data.dict())
+        report_data: ReportModel = self.validate_report_fields(
+            case_id=case_id, report_data=report_data, force_report=force_report
+        )
+        rendered_report: str = self.render_delivery_report(report_data=report_data.dict())
         return rendered_report
 
     def create_delivery_report_file(
         self, case_id: str, file_path: Path, analysis_date: datetime, force_report: bool
     ) -> TextIO:
         """Generates a temporary file containing a delivery report."""
-
         file_path.mkdir(parents=True, exist_ok=True)
-        delivery_report = self.create_delivery_report(
+        delivery_report: str = self.create_delivery_report(
             case_id=case_id, analysis_date=analysis_date, force_report=force_report
         )
-        report_file_path = Path(file_path / "delivery-report.html")
+        report_file_path: Path = Path(file_path / "delivery-report.html")
         with open(report_file_path, "w") as delivery_report_file:
             delivery_report_file.write(delivery_report)
         return delivery_report_file
@@ -104,23 +105,22 @@ class ReportAPI(MetaAPI):
 
     def render_delivery_report(self, report_data: dict) -> str:
         """Renders the report on the Jinja template."""
-        env = Environment(
+        env: Environment = Environment(
             loader=PackageLoader("cg", "meta/report/templates"),
             autoescape=select_autoescape(["html", "xml"]),
         )
-        template_name = self.get_template_name()
-        template = env.get_template(template_name)
+        template: Template = env.get_template(self.get_template_name())
         return template.render(**report_data)
 
     def get_cases_without_delivery_report(self, pipeline: Pipeline) -> List[Family]:
         """Returns a list of cases that has been stored and need a delivery report."""
-        stored_cases = []
-        analyses: Query = self.status_db.analyses_to_delivery_report(pipeline)[
+        stored_cases: List[Family] = []
+        analyses: Query = self.status_db.analyses_to_delivery_report(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
         for analysis_obj in analyses:
             case: Family = analysis_obj.family
-            last_version: Version = self.housekeeper_api.last_version(case.internal_id)
+            last_version: Version = self.housekeeper_api.last_version(bundle=case.internal_id)
             hk_file: File = self.housekeeper_api.get_files(
                 bundle=case.internal_id, version=last_version.id if last_version else None
             ).first()
@@ -135,7 +135,7 @@ class ReportAPI(MetaAPI):
 
     def get_cases_without_uploaded_delivery_report(self, pipeline: Pipeline) -> List[Family]:
         """Returns a list of cases that need a delivery report to be uploaded."""
-        analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline)[
+        analyses: Query = self.status_db.analyses_to_upload_delivery_reports(pipeline=pipeline)[
             :MAX_ITEMS_TO_RETRIEVE
         ]
         return [analysis_obj.family for analysis_obj in analyses]
@@ -157,20 +157,24 @@ class ReportAPI(MetaAPI):
         analysis_metadata: AnalysisModel = self.analysis_api.get_latest_metadata(case.internal_id)
         case_model: CaseModel = self.get_case_data(case, analysis, analysis_metadata)
         return ReportModel(
-            customer=self.get_customer_data(case),
-            version=self.get_report_version(analysis),
+            customer=self.get_customer_data(case=case),
+            version=self.get_report_version(analysis=analysis),
             date=datetime.today(),
             case=case_model,
-            accredited=self.get_report_accreditation(case_model.samples, analysis_metadata),
+            accredited=self.get_report_accreditation(
+                samples=case_model.samples, analysis_metadata=analysis_metadata
+            ),
         )
 
     def validate_report_fields(
         self, case_id: str, report_data: ReportModel, force_report
     ) -> ReportModel:
         """Verifies that the required report fields are not empty."""
-        required_fields: dict = self.get_required_fields(report_data.case)
-        empty_report_fields: dict = get_empty_report_data(report_data)
-        missing_report_fields: dict = get_missing_report_data(empty_report_fields, required_fields)
+        required_fields: dict = self.get_required_fields(case=report_data.case)
+        empty_report_fields: dict = get_empty_report_data(report_data=report_data)
+        missing_report_fields: dict = get_missing_report_data(
+            empty_fields=empty_report_fields, required_fields=required_fields
+        )
         if missing_report_fields and not force_report:
             LOG.error(
                 f"Could not generate report data for {case_id}. "
@@ -211,12 +215,16 @@ class ReportAPI(MetaAPI):
         analysis_metadata: AnalysisModel,
     ) -> CaseModel:
         """Returns case associated validated attributes."""
-        samples: List[SampleModel] = self.get_samples_data(case, analysis_metadata)
-        unique_applications: List[ApplicationModel] = self.get_unique_applications(samples)
+        samples: List[SampleModel] = self.get_samples_data(
+            case=case, analysis_metadata=analysis_metadata
+        )
+        unique_applications: List[ApplicationModel] = self.get_unique_applications(samples=samples)
         return CaseModel(
             name=case.name,
             id=case.internal_id,
-            data_analysis=self.get_case_analysis_data(case, analysis, analysis_metadata),
+            data_analysis=self.get_case_analysis_data(
+                case=case, analysis=analysis, analysis_metadata=analysis_metadata
+            ),
             samples=samples,
             applications=unique_applications,
         )
@@ -229,7 +237,7 @@ class ReportAPI(MetaAPI):
         )
         for case_sample in case_samples:
             sample: Sample = case_sample.sample
-            lims_sample: Optional[dict] = self.get_lims_sample(sample.internal_id)
+            lims_sample: Optional[dict] = self.get_lims_sample(sample_id=sample.internal_id)
             samples.append(
                 SampleModel(
                     name=sample.name,
@@ -238,11 +246,13 @@ class ReportAPI(MetaAPI):
                     gender=sample.sex,
                     source=lims_sample.get("source") if lims_sample else None,
                     tumour=sample.is_tumour,
-                    application=self.get_sample_application_data(lims_sample),
-                    methods=self.get_sample_methods_data(sample.internal_id),
+                    application=self.get_sample_application_data(lims_sample=lims_sample),
+                    methods=self.get_sample_methods_data(sample_id=sample.internal_id),
                     status=case_sample.status,
-                    metadata=self.get_sample_metadata(case, sample, analysis_metadata),
-                    timestamps=self.get_sample_timestamp_data(sample),
+                    metadata=self.get_sample_metadata(
+                        case=case, sample=sample, analysis_metadata=analysis_metadata
+                    ),
+                    timestamps=self.get_sample_timestamp_data(sample=sample),
                 )
             )
         return samples
@@ -251,7 +261,7 @@ class ReportAPI(MetaAPI):
         """Fetches sample data from LIMS. Returns an empty dictionary if the request was unsuccessful."""
         lims_sample = dict()
         try:
-            lims_sample = self.lims_api.sample(sample_id)
+            lims_sample: dict = self.lims_api.sample(sample_id)
         except requests.exceptions.HTTPError as ex:
             LOG.info("Could not fetch sample %s from LIMS: %s", sample_id, ex)
         return lims_sample
@@ -289,8 +299,8 @@ class ReportAPI(MetaAPI):
         library_prep = None
         sequencing = None
         try:
-            library_prep = self.lims_api.get_prep_method(sample_id)
-            sequencing = self.lims_api.get_sequencing_method(sample_id)
+            library_prep = self.lims_api.get_prep_method(lims_id=sample_id)
+            sequencing = self.lims_api.get_sequencing_method(lims_id=sample_id)
         except requests.exceptions.HTTPError as ex:
             LOG.info("Could not fetch sample (%s) methods from LIMS: %s", sample_id, ex)
 
@@ -308,20 +318,28 @@ class ReportAPI(MetaAPI):
             data_delivery=case.data_delivery,
             pipeline=analysis.pipeline,
             pipeline_version=analysis.pipeline_version,
-            type=self.get_data_analysis_type(case),
-            genome_build=self.get_genome_build(analysis_metadata),
-            variant_callers=self.get_variant_callers(analysis_metadata),
+            type=self.get_data_analysis_type(case=case),
+            genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
+            variant_callers=self.get_variant_callers(analysis_metadata=analysis_metadata),
             panels=case.panels,
-            scout_files=self.get_scout_uploaded_files(case),
+            scout_files=self.get_scout_uploaded_files(case=case),
         )
 
     def get_scout_uploaded_files(self, case: Family) -> ScoutReportFiles:
         """Extracts the files that will be uploaded to Scout."""
         return ScoutReportFiles(
-            snv_vcf=self.get_scout_uploaded_file_from_hk(case.internal_id, "snv_vcf"),
-            sv_vcf=self.get_scout_uploaded_file_from_hk(case.internal_id, "sv_vcf"),
-            vcf_str=self.get_scout_uploaded_file_from_hk(case.internal_id, "vcf_str"),
-            smn_tsv=self.get_scout_uploaded_file_from_hk(case.internal_id, "smn_tsv"),
+            snv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="snv_vcf"
+            ),
+            sv_vcf=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="sv_vcf"
+            ),
+            vcf_str=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="vcf_str"
+            ),
+            smn_tsv=self.get_scout_uploaded_file_from_hk(
+                case_id=case.internal_id, scout_tag="smn_tsv"
+            ),
         )
 
     @staticmethod
@@ -392,7 +410,7 @@ class ReportAPI(MetaAPI):
             if sample.application.external:
                 required_fields.remove("received_at")
                 break
-        return ReportAPI.get_sample_required_fields(case, required_fields)
+        return ReportAPI.get_sample_required_fields(case=case, required_fields=required_fields)
 
     def get_hk_scout_file_tags(self, scout_tag: str) -> Optional[list]:
         """Retrieves pipeline specific uploaded to Scout Housekeeper file tags given a Scout key."""
