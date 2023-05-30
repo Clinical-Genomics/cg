@@ -36,7 +36,7 @@ class MipDNAReportAPI(ReportAPI):
 
     def __init__(self, config: CGConfig, analysis_api: MipDNAAnalysisAPI):
         super().__init__(config=config, analysis_api=analysis_api)
-        self.analysis_api = analysis_api
+        self.analysis_api: MipDNAAnalysisAPI = analysis_api
 
     def get_sample_metadata(
         self, case: Family, sample: Sample, analysis_metadata: MipAnalysis

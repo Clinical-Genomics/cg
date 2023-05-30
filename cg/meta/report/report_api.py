@@ -40,7 +40,7 @@ class ReportAPI(MetaAPI):
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config=config)
-        self.analysis_api = analysis_api
+        self.analysis_api: AnalysisAPI = analysis_api
 
     def create_delivery_report(
         self, case_id: str, analysis_date: datetime, force_report: bool
