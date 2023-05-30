@@ -126,7 +126,12 @@ def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
 
     for subdir in os.listdir(demultiplex_result_directory):
         if pattern.match(subdir):
-            stats_json_path = demultiplex_result_directory / subdir / "Stats" / "stats.json"
+            stats_json_path = (
+                demultiplex_result_directory
+                / subdir
+                / BCL2FASTQ_METRICS_DIRECTORY_NAME
+                / BCL2FASTQ_METRICS_FILE_NAME
+            )
             if stats_json_path.is_file():
                 stats_json_paths.append(stats_json_path)
 

@@ -13,7 +13,7 @@ def test_parse_valid_bcl2fastq_sequencing_metrics(tmp_path, valid_bcl2fastq_metr
     # GIVEN a valid directory structure with a valid stats.json file
     valid_dir = tmp_path / "l1t1" / "Stats"
     valid_dir.mkdir(parents=True)
-    stats_json_path = valid_dir / "stats.json"
+    stats_json_path = valid_dir / "Stats.json"
     stats_json_path.write_text(json.dumps(valid_bcl2fastq_metrics_data))
 
     # WHEN parsing the directory containing the valid stats.json file
