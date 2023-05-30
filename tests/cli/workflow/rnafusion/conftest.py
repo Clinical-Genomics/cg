@@ -1,4 +1,4 @@
-"""Fixtures for cli workflow rnafusion tests"""
+"""Fixtures for Rnafusion tests."""
 
 import datetime as dt
 import gzip
@@ -22,7 +22,7 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture(name="rnafusion_dir")
-def rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
+def fixture_rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the rnafusion apps dir."""
     rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
     return Path(rnafusion_dir).absolute().as_posix()
@@ -47,13 +47,13 @@ def fixture_rnafusion_sample_id() -> str:
 
 
 @pytest.fixture(name="rnafusion_housekeeper_dir")
-def rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
+def fixture_rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
     """Return the path to the rnafusion housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
 
 
-@pytest.fixture
-def rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
+@pytest.fixture(name="rnafusion_fastq_file_l_1_r_1")
+def fixture_rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
     ).as_posix()
@@ -62,8 +62,8 @@ def rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
     return fastq_filename
 
 
-@pytest.fixture
-def rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
+@pytest.fixture(name="rnafusion_fastq_file_l_1_r_2")
+def fixture_rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
     fastq_filename = Path(
         rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
     ).as_posix()
@@ -72,8 +72,8 @@ def rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
     return fastq_filename
 
 
-@pytest.fixture
-def rnafusion_mock_fastq_files(
+@pytest.fixture(name="rnafusion_mock_fastq_files")
+def fixture_rnafusion_mock_fastq_files(
     rnafusion_fastq_file_l_1_r_1: Path, rnafusion_fastq_file_l_1_r_2: Path
 ) -> List[Path]:
     """Return list of all mock fastq files to commit to mock housekeeper"""
@@ -81,7 +81,7 @@ def rnafusion_mock_fastq_files(
 
 
 @pytest.fixture(scope="function", name="rnafusion_housekeeper")
-def rnafusion_housekeeper(
+def fixture_rnafusion_housekeeper(
     housekeeper_api: HousekeeperAPI,
     helpers: StoreHelpers,
     rnafusion_mock_fastq_files: List[Path],

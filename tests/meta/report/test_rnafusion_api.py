@@ -6,22 +6,16 @@ from cg.models.rnafusion.analysis import RnafusionAnalysis
 
 from cg.meta.report.rnafusion import RnafusionReportAPI
 
-from cg.models.cg_config import CGConfig
-
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
-
 from cg.store.models import Sample, Family
-
-from tests.store_helpers import StoreHelpers
 
 from tests.cli.workflow.rnafusion.conftest import (
     fixture_rnafusion_context,
-    rnafusion_housekeeper,
-    rnafusion_housekeeper_dir,
+    fixture_rnafusion_housekeeper,
+    fixture_rnafusion_housekeeper_dir,
     fixture_rnafusion_multiqc_json_metrics,
-    rnafusion_mock_fastq_files,
-    rnafusion_fastq_file_l_1_r_1,
-    rnafusion_fastq_file_l_1_r_2,
+    fixture_rnafusion_mock_fastq_files,
+    fixture_rnafusion_fastq_file_l_1_r_1,
+    fixture_rnafusion_fastq_file_l_1_r_2,
     fixture_rnafusion_sample_id,
     fixture_rnafusion_case_id,
     fixture_no_sample_case_id,
