@@ -11,7 +11,7 @@ from cg.models.report.validators import (
 
 class SampleMetadataModel(BaseModel):
     """
-    Metrics and trending data model associated to a specific sample
+    Metrics and trending data model associated to a specific sample.
 
     Attributes:
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
@@ -28,7 +28,7 @@ class SampleMetadataModel(BaseModel):
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a specific MIP DNA sample
+    """Metrics and trending data model associated to a specific MIP DNA sample.
 
     Attributes:
         bait_set: panel bed used for the analysis; source: LIMS
@@ -53,7 +53,7 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
 
 
 class BalsamicSampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a specific BALSAMIC sample
+    """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
             mean_insert_size: mean insert size of the distribution; source: pipeline workflow
@@ -69,7 +69,7 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
-    """Metrics and trending data model associated to a specific BALSAMIC sample
+    """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
             bait_set: panel bed used for the analysis; source: LIMS
@@ -95,7 +95,7 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
-    """Metrics and trending data model associated to a specific BALSAMIC sample
+    """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
             median_coverage: median coverage in bases of the genome territory; source: pipeline workflow
@@ -113,7 +113,8 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
 
 
 class RnafusionSampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a specific Rnafusion sample
+    """Metrics and trending data model associated to a specific Rnafusion sample.
+
     Attributes:
         bias_5_3: bias is the ratio between read counts; source: pipeline workflow
         gc_content: percentage of GC bases calculated on trimmed reads; source: pipeline workflow

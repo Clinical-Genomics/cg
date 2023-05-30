@@ -48,7 +48,7 @@ class BalsamicReportAPI(ReportAPI):
     def get_sample_metadata(
         self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
-        """Fetches the sample metadata to include in the report."""
+        """Return the sample metadata to include in the report."""
         sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
         million_read_pairs = get_million_read_pairs(sample.reads)
         if "wgs" in self.get_data_analysis_type(case):

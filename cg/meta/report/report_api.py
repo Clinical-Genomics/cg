@@ -340,7 +340,7 @@ class ReportAPI(MetaAPI):
         sample: Sample,
         analysis_metadata: AnalysisModel,
     ) -> SampleMetadataModel:
-        """Fetches the sample metadata to include in the report."""
+        """Return the sample metadata to include in the report."""
         raise NotImplementedError
 
     def get_data_analysis_type(self, case: Family) -> Optional[str]:

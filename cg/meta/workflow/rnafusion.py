@@ -407,7 +407,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         MetricsDeliverablesCondition(**qcmetrics_raw)
 
     def parse_analysis(self, qc_metrics_raw: List[MetricsBase], **kwargs) -> RnafusionAnalysis:
-        """Parse Rnafusion output analysis files."""
+        """Parse Rnafusion output analysis files and return analysis model."""
         sample_metrics: Dict[str, dict] = {}
         for metric in qc_metrics_raw:
             metric.name = metric.name.replace("5_3_bias", "bias_5_3")
@@ -418,6 +418,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return RnafusionAnalysis(sample_metrics=sample_metrics)
 
     def get_latest_metadata(self, case_id: str) -> RnafusionAnalysis:
-        """Get the latest metadata of a specific Rnafusion case."""
+        """Return the latest metadata of a specific Rnafusion case."""
         qc_metrics: List[MetricsBase] = self.get_multiqc_json_metrics(case_id)
         return self.parse_analysis(qc_metrics_raw=qc_metrics)

@@ -6,7 +6,7 @@ from cg.models.rnafusion.metrics import RnafusionQCMetrics
 
 
 class RnafusionAnalysis(AnalysisModel):
-    """Rnafusion analysis model
+    """Rnafusion analysis model.
 
     Attributes:
         sample_metrics: retrieved QC metrics associated to a sample
