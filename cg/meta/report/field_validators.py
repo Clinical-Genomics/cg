@@ -37,34 +37,34 @@ def get_empty_fields(report_data: dict) -> list:
 def get_empty_report_data(report_data: ReportModel) -> dict:
     """Retrieve empty fields from a report data model."""
     empty_fields = {
-        "report": get_empty_fields(report_data.dict()),
-        "customer": get_empty_fields(report_data.customer.dict()),
-        "case": get_empty_fields(report_data.case.dict()),
+        "report": get_empty_fields(report_data=report_data.dict()),
+        "customer": get_empty_fields(report_data=report_data.customer.dict()),
+        "case": get_empty_fields(report_data=report_data.case.dict()),
         "applications": {
-            app.tag: get_empty_fields(app.dict())
+            app.tag: get_empty_fields(report_data=app.dict())
             for app in report_data.case.applications
-            if get_empty_fields(app.dict())
+            if get_empty_fields(report_data=app.dict())
         },
-        "data_analysis": get_empty_fields(report_data.case.data_analysis.dict()),
+        "data_analysis": get_empty_fields(report_data=report_data.case.data_analysis.dict()),
         "samples": {
-            sample.id: get_empty_fields(sample.dict())
+            sample.id: get_empty_fields(report_data=sample.dict())
             for sample in report_data.case.samples
-            if get_empty_fields(sample.dict())
+            if get_empty_fields(report_data=sample.dict())
         },
         "methods": {
-            sample.id: get_empty_fields(sample.methods.dict())
+            sample.id: get_empty_fields(report_data=sample.methods.dict())
             for sample in report_data.case.samples
-            if get_empty_fields(sample.methods.dict())
+            if get_empty_fields(report_data=sample.methods.dict())
         },
         "timestamps": {
-            sample.id: get_empty_fields(sample.timestamps.dict())
+            sample.id: get_empty_fields(report_data=sample.timestamps.dict())
             for sample in report_data.case.samples
-            if get_empty_fields(sample.timestamps.dict())
+            if get_empty_fields(report_data=sample.timestamps.dict())
         },
         "metadata": {
-            sample.id: get_empty_fields(sample.metadata.dict())
+            sample.id: get_empty_fields(report_data=sample.metadata.dict())
             for sample in report_data.case.samples
-            if get_empty_fields(sample.metadata.dict())
+            if get_empty_fields(report_data=sample.metadata.dict())
         },
     }
     # Clear empty values
@@ -80,12 +80,20 @@ def get_missing_report_data(empty_fields: dict, required_fields: dict) -> dict:
         if source in nested_sources:
             # Associates application/sample tags/ids to missing fields
             missing_data = {
-                tag: get_missing_fields(empty_fields[source][tag], required_fields[source][tag])
+                tag: get_missing_fields(
+                    empty_fields=empty_fields[source][tag],
+                    required_fields=required_fields[source][tag],
+                )
                 for tag in empty_fields[source]
-                if get_missing_fields(empty_fields[source][tag], required_fields[source][tag])
+                if get_missing_fields(
+                    empty_fields=empty_fields[source][tag],
+                    required_fields=required_fields[source][tag],
+                )
             }
         else:
-            missing_data = get_missing_fields(empty_fields[source], required_fields[source])
+            missing_data = get_missing_fields(
+                empty_fields=empty_fields[source], required_fields=required_fields[source]
+            )
         if missing_data:
             missing_fields.update({source: missing_data})
     return missing_fields
