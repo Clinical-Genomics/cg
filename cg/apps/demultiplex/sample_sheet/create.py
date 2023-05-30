@@ -27,16 +27,15 @@ def create_sample_sheet(
 
     flow_cell_sequencer: str = flow_cell.sequencer_type
 
-    if flow_cell_sequencer in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
-        sample_sheet_creator = SampleSheetCreator(
-            bcl_converter=bcl_converter,
-            flow_cell=flow_cell,
-            lims_samples=lims_samples,
-            force=force,
-        )
-    else:
-        message: str = f"Only NovaSeq and HiSeqX sample sheets are supported. Found type: {flow_cell_sequencer}"
+    if flow_cell_sequencer not in [Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
+        message = f"Only NovaSeq and HiSeqX sample sheets are supported. Found type: {flow_cell_sequencer}"
         LOG.warning(message)
         raise FlowCellError(message=message)
 
+    sample_sheet_creator = SampleSheetCreator(
+        bcl_converter=bcl_converter,
+        flow_cell=flow_cell,
+        lims_samples=lims_samples,
+        force=force,
+    )
     return sample_sheet_creator.construct_sample_sheet()
