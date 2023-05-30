@@ -2,9 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    Bcl2FastqSampleLaneMetrics,
-)
+from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import Bcl2FastqSampleLaneMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq import parse_bcl2fastq_sequencing_metrics
 from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
     average_quality_score,
