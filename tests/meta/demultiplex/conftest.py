@@ -311,7 +311,7 @@ def fixture_bcl2fastq_folder_structure(tmpdir_factory, cg_dir: Path):
     folders = ["l1t21", "l1t11", "l2t11", "l2t21"]
 
     for folder in folders:
-        os.mkdir(os.path.join(base_dir, folder))
+        base_dir.mkdir(folder)
 
     yield base_dir
 
@@ -322,6 +322,6 @@ def fixture_not_bcl2fastq_folder_structure(tmpdir_factory, cg_dir: Path):
     folders = ["just", "some", "folders"]
 
     for folder in folders:
-        os.mkdir(os.path.join(base_dir, folder))
+        base_dir.mkdir(folder)
 
     yield base_dir

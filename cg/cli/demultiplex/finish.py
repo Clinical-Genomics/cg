@@ -60,7 +60,7 @@ def finish_flow_cell(
 @click.argument("flow-cell-name")
 @OPTION_BCL_CONVERTER
 @click.pass_obj
-def populate_new_metrics(context: CGConfig, flow_cell_name: str, bcl_converter: str):
+def populate_new_metrics(context: CGConfig, flow_cell_name: str):
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(
         config=context, flow_cell_name=flow_cell_name
     )
