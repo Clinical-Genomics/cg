@@ -39,30 +39,6 @@ class SampleSheetCreator:
     def valid_indexes(self) -> List[Index]:
         return index.get_valid_indexes(dual_indexes_only=True)
 
-    def add_dummy_samples(self) -> None:
-        """Add all dummy samples with non-existing indexes to samples.
-
-        Dummy samples are added if there are indexes that are not used by the actual samples.
-        This means that we will add each dummy sample (that is needed) to each lane.
-        """
-        LOG.info("Adding dummy samples for unused indexes")
-        indexes_by_lane: Dict[int, Set[str]] = index.get_indexes_by_lane(samples=self.lims_samples)
-        for lane, lane_indexes in indexes_by_lane.items():
-            LOG.debug(f"Add dummy samples for lane {lane}")
-            for index_obj in self.valid_indexes:
-                if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
-                    LOG.debug(f"Index {index_obj.sequence} already in use")
-                    continue
-                dummy_flow_cell_sample: FlowCellSample = dummy_sample(
-                    flow_cell_id=self.flow_cell_id,
-                    dummy_index=index_obj.sequence,
-                    lane=lane,
-                    name=index_obj.name,
-                    bcl_converter=self.bcl_converter,
-                )
-                LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
-                self.lims_samples.append(dummy_flow_cell_sample)
-
     def remove_unwanted_samples(self) -> None:
         """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
@@ -143,7 +119,7 @@ class SampleSheetCreator:
         return sample_sheet_content
 
 
-class SampleSheetCreatorV1(SampleSheetCreator):
+class SampleSheetCreatorBcl2Fastq(SampleSheetCreator):
     """Create a raw sample sheet (v1) for NovaSeq6000 flow cells."""
 
     def add_dummy_samples(self) -> None:
@@ -186,7 +162,7 @@ class SampleSheetCreatorV1(SampleSheetCreator):
         ]
 
 
-class SampleSheetCreatorV2(SampleSheetCreator):
+class SampleSheetCreatorDragen(SampleSheetCreator):
     """Create a raw sample sheet (v2) for NovaSeqX flow cells."""
 
     def __init__(

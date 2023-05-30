@@ -3,8 +3,8 @@ from typing import List
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import (
-    SampleSheetCreatorV1,
-    SampleSheetCreatorV2,
+    SampleSheetCreatorBcl2Fastq,
+    SampleSheetCreatorDragen,
 )
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
@@ -32,14 +32,14 @@ def create_sample_sheet(
     flow_cell_sequencer: str = flow_cell.sequencer_type
 
     if flow_cell_sequencer == Sequencers.NOVASEQ:
-        sample_sheet_creator = SampleSheetCreatorV1(
+        sample_sheet_creator = SampleSheetCreatorBcl2Fastq(
             bcl_converter=bcl_converter,
             flow_cell=flow_cell,
             lims_samples=lims_samples,
             force=force,
         )
     elif flow_cell_sequencer == Sequencers.NOVASEQX:
-        sample_sheet_creator = SampleSheetCreatorV2(
+        sample_sheet_creator = SampleSheetCreatorDragen(
             bcl_converter=bcl_converter,
             flow_cell=flow_cell,
             lims_samples=lims_samples,

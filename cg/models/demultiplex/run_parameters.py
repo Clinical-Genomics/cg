@@ -4,11 +4,8 @@ from pathlib import Path
 from typing import Optional, Dict
 from xml.etree import ElementTree
 
-from cg.constants.demultiplexing import (
-    UNKNOWN_REAGENT_KIT_VERSION,
-    SampleSheetV1Sections,
-    SampleSheetV2Sections,
-)
+from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
+from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 
 LOG = logging.getLogger(__name__)
@@ -46,9 +43,9 @@ class RunParameters:
         return int(xml_node.text)
 
     @property
-    def sheet_version(self) -> Optional[str]:
+    def sequencer(self) -> Optional[str]:
         """Return the version of the sample sheet associated with the current run parameters."""
-        raise NotImplementedError("Impossible to retrieve sample sheet version from parent class")
+        raise NotImplementedError("Impossible to retrieve sequencer from parent class")
 
     @property
     def control_software_version(self) -> Optional[str]:
@@ -83,23 +80,23 @@ class RunParameters:
         raise NotImplementedError("Impossible to retrieve read2 cycles from parent class")
 
     def __str__(self):
-        return f"RunParameters(path={self.path}," f"version={self.sheet_version})"
+        return f"RunParameters(path={self.path}," f"sequencer={self.sequencer})"
 
     def __repr__(self):
         return (
             f"RunParameters(path={self.path},"
             f"index_length={self.index_length},"
-            f"version={self.sheet_version})"
+            f"sequencer={self.sequencer})"
         )
 
 
-class RunParametersV1(RunParameters):
+class RunParametersNovaSeq6000(RunParameters):
     """Specific class for parsing run parameters for v1 sample sheets."""
 
     @property
-    def sheet_version(self) -> str:
-        """Return the version of the sample sheet associated with the current run parameters."""
-        return SampleSheetV1Sections.VERSION
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        return Sequencers.NOVASEQ
 
     @property
     def control_software_version(self) -> str:
@@ -145,13 +142,13 @@ class RunParametersV1(RunParameters):
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
 
 
-class RunParametersV2(RunParameters):
+class RunParametersNovaSeqX(RunParameters):
     """Specific class for parsing run parameters for v2 sample sheets."""
 
     @property
-    def sheet_version(self) -> str:
-        """Return the version of the sample sheet associated with the current run parameters."""
-        return SampleSheetV2Sections.VERSION
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        return Sequencers.NOVASEQX
 
     @property
     def control_software_version(self) -> None:

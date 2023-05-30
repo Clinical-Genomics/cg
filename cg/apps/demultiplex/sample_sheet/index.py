@@ -123,7 +123,7 @@ def adapt_indexes(
     expected_index_length: int = run_parameters.index_length
     sheet_version: Literal[
         SampleSheetV1Sections.VERSION, SampleSheetV2Sections.VERSION
-    ] = run_parameters.sheet_version
+    ] = run_parameters.sequencer
     needs_reverse_complement: bool = is_reverse_complement(
         run_parameters.control_software_version, run_parameters.reagent_kit_version
     )

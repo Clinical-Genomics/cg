@@ -14,7 +14,11 @@ from cg.constants.demultiplexing import (
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
-from cg.models.demultiplex.run_parameters import RunParameters, RunParametersV1, RunParametersV2
+from cg.models.demultiplex.run_parameters import (
+    RunParameters,
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -82,9 +86,9 @@ class FlowCell:
             raise FileNotFoundError(message)
         if not self._run_parameters:
             self._run_parameters = (
-                RunParametersV2(run_parameters_path=self.run_parameters_path)
+                RunParametersNovaSeqX(run_parameters_path=self.run_parameters_path)
                 if self.sequencer_type == Sequencers.NOVASEQX
-                else RunParametersV1(run_parameters_path=self.run_parameters_path)
+                else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
             )
         return self._run_parameters
 
