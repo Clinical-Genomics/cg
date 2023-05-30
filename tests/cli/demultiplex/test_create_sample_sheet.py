@@ -4,10 +4,7 @@ from typing import List
 from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
-)
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
@@ -21,7 +18,7 @@ def test_create_sample_sheet_no_run_parameters(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    flow_cell_samples: List[FlowCellSample],
     caplog,
     mocker,
 ):
@@ -32,7 +29,7 @@ def test_create_sample_sheet_no_run_parameters(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_bcl2fastq_samples,
+        return_value=flow_cell_samples,
     )
 
     # GIVEN a demux API context
@@ -56,7 +53,7 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    flow_cell_samples: List[FlowCellSample],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
@@ -69,7 +66,7 @@ def test_create_bcl2fastq_sample_sheet(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_bcl2fastq_samples,
+        return_value=flow_cell_samples,
     )
     # GIVEN a lims api that returns some samples
 
@@ -92,7 +89,7 @@ def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_dragen_samples: List[FlowCellSampleDragen],
+    flow_cell_samples: List[FlowCellSample],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
@@ -105,7 +102,7 @@ def test_create_dragen_sample_sheet(
     # GIVEN flow cell samples
     mocker.patch(
         FLOW_CELL_FUNCTION_NAME,
-        return_value=lims_novaseq_dragen_samples,
+        return_value=flow_cell_samples,
     )
     # GIVEN a lims api that returns some samples
 

@@ -1,12 +1,9 @@
 """Functions that deal with modifications of the indexes."""
 import logging
 from typing import Dict, List, Set
-from typing_extensions import Literal
 
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import SampleSheetV1Sections, SampleSheetV2Sections
 from cg.io.controller import ReadFile
-from cg.models.demultiplex.run_parameters import RunParameters
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.resources import VALID_INDEXES_PATH
 from packaging import version
@@ -112,35 +109,13 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 def adapt_indexes(
     samples: List[FlowCellSample],
-    run_parameters: RunParameters,
 ) -> None:
-    """Adapts the indexes: if sample sheet is v1, pads all indexes so that they have a length equal to the
-    number  of index reads, and takes the reverse complement of index 2 in case of the new
-    novaseq software control version (1.7) in combination with the new reagent kit
-    (version 1.5). If sample sheet is v2, just assign the indexes.
-    """
+    """Assigns the correct indexes to the samples."""
     LOG.info("Fix so that all indexes are on the correct format")
-    expected_index_length: int = run_parameters.index_length
-    sheet_version: Literal[
-        SampleSheetV1Sections.VERSION, SampleSheetV2Sections.VERSION
-    ] = run_parameters.sheet_version
-    needs_reverse_complement: bool = is_reverse_complement(
-        run_parameters.control_software_version, run_parameters.reagent_kit_version
-    )
     for sample in samples:
         index1, index2 = sample.index.split("-")
         index1: str = index1.strip()
         index2: str = index2.strip()
-        index_length = len(index1)
-        needs_padding: bool = sheet_version == SampleSheetV1Sections.VERSION and (
-            expected_index_length == 10 and index_length == 8
-        )
-        if needs_padding:
-            LOG.debug("Padding indexes")
-            index1 = pad_index_one(index_string=index1)
-            index2 = pad_index_two(index_string=index2, reverse_complement=needs_reverse_complement)
-        if needs_reverse_complement:
-            index2 = get_reverse_complement_dna_seq(index2)
         sample.index = index1
         sample.index2 = index2
 

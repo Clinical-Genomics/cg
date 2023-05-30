@@ -1,7 +1,6 @@
 import datetime as dt
 import logging
 import shutil
-from csv import reader
 from pathlib import Path
 from typing import List, Optional
 
@@ -9,7 +8,7 @@ import pandas as pd
 from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import SampleSheetV1Sections, SampleSheetV2Sections
+from cg.constants.demultiplexing import SampleSheetSections
 from cg.exc import CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -151,10 +150,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
         header_line_count: int = 1
         for line in sample_sheet_content:
-            if (
-                SampleSheetV1Sections.Data.HEADER in line
-                or SampleSheetV2Sections.Data.HEADER in line
-            ):
+            if SampleSheetSections.Data.HEADER in line:
                 break
             header_line_count += 1
         return header_line_count

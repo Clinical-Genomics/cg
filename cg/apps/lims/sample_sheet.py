@@ -3,14 +3,11 @@ import logging
 import re
 from typing import Iterable, List, Optional, Union
 
-from pydantic import BaseModel, Field
-
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames, BclConverter
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
+from cg.constants.demultiplexing import BclConverter
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 
 LOG = logging.getLogger(__name__)
 
@@ -69,13 +66,7 @@ def get_index(lims: Lims, label: str) -> str:
     return sequence
 
 
-def flow_cell_samples(
-    lims: Lims, flow_cell_id: str, bcl_converter: str
-) -> Iterable[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]]:
-    lims_flowcell_sample = {
-        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
-        BclConverter.DRAGEN.value: FlowCellSampleDragen,
-    }
+def flow_cell_samples(lims: Lims, flow_cell_id: str) -> Iterable[FlowCellSample]:
     LOG.info(f"Fetching samples from lims for flowcell {flow_cell_id}")
     containers: List[Container] = lims.get_containers(name=flow_cell_id)
     if not containers:
@@ -90,11 +81,9 @@ def flow_cell_samples(
             sample: Sample = artifact.samples[0]  # we are assured it only has one sample
             label: Optional[str] = get_reagent_label(artifact)
             index = get_index(lims=lims, label=label)
-            yield lims_flowcell_sample[bcl_converter](
-                flowcell_id=flow_cell_id,
+            yield FlowCellSample(
                 lane=lane,
                 sample_id=sample.id,
                 index=index,
-                sample_name=sample.name,
-                project=sample.project.name,
+                override_cycles="",
             )

@@ -4,11 +4,8 @@ from pathlib import Path
 from typing import Optional, Dict
 from xml.etree import ElementTree
 
-from cg.constants.demultiplexing import (
-    UNKNOWN_REAGENT_KIT_VERSION,
-    SampleSheetV1Sections,
-    SampleSheetV2Sections,
-)
+from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
+from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 
 LOG = logging.getLogger(__name__)
@@ -46,25 +43,9 @@ class RunParameters:
         return int(xml_node.text)
 
     @property
-    def sheet_version(self) -> Optional[str]:
-        """Return the version of the sample sheet associated with the current run parameters."""
-        raise NotImplementedError("Impossible to retrieve sample sheet version from parent class")
-
-    @property
-    def control_software_version(self) -> Optional[str]:
-        """Return the control software version if existent."""
-        raise NotImplementedError(
-            "Impossible to retrieve control software version from parent class"
-        )
-
-    @property
-    def reagent_kit_version(self) -> Optional[str]:
-        """Return the reagent kit version if existent."""
-        raise NotImplementedError("Impossible to retrieve reagent kit version from parent class")
-
-    def requires_dummy_samples(self) -> Optional[bool]:
-        """Return true if the flow cell requires the addition of dummy samples."""
-        raise NotImplementedError("Impossible to know dummy sample requirements of parent class")
+    def sequencer(self) -> Optional[str]:
+        """Return the sequencer associated with the current run parameters."""
+        raise NotImplementedError("Impossible to retrieve sequencer from parent class")
 
     def get_index1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
@@ -83,46 +64,23 @@ class RunParameters:
         raise NotImplementedError("Impossible to retrieve read2 cycles from parent class")
 
     def __str__(self):
-        return f"RunParameters(path={self.path}," f"version={self.sheet_version})"
+        return f"RunParameters(path={self.path}," f"sequencer={self.sequencer})"
 
     def __repr__(self):
         return (
             f"RunParameters(path={self.path},"
             f"index_length={self.index_length},"
-            f"version={self.sheet_version})"
+            f"sequencer={self.sequencer})"
         )
 
 
-class RunParametersV1(RunParameters):
-    """Specific class for parsing run parameters for v1 sample sheets."""
+class RunParametersNovaSeq6000(RunParameters):
+    """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
 
     @property
-    def sheet_version(self) -> str:
-        """Return the version of the sample sheet associated with the current run parameters."""
-        return SampleSheetV1Sections.VERSION
-
-    @property
-    def control_software_version(self) -> str:
-        """Return the control software version."""
-        node_name: str = ".ApplicationVersion"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="control software version")
-        return xml_node.text
-
-    @property
-    def reagent_kit_version(self) -> str:
-        """Return the reagent kit version if existent, return 'unknown' otherwise."""
-        node_name: str = "./RfidsInfo/SbsConsumableVersion"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        if xml_node is None:
-            LOG.warning("Could not determine reagent kit version")
-            LOG.info("Set reagent kit version to 'unknown'")
-            return UNKNOWN_REAGENT_KIT_VERSION
-        return xml_node.text
-
-    def requires_dummy_samples(self) -> bool:
-        """Return true if the number of cycles of both indexes is 8."""
-        return self.index_length != 8
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        return Sequencers.NOVASEQ
 
     def get_index1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
@@ -145,27 +103,13 @@ class RunParametersV1(RunParameters):
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
 
 
-class RunParametersV2(RunParameters):
-    """Specific class for parsing run parameters for v2 sample sheets."""
+class RunParametersNovaSeqX(RunParameters):
+    """Specific class for parsing run parameters of NovaSeqX sequencing."""
 
     @property
-    def sheet_version(self) -> str:
-        """Return the version of the sample sheet associated with the current run parameters."""
-        return SampleSheetV2Sections.VERSION
-
-    @property
-    def control_software_version(self) -> None:
-        """Return None for run parameters associated with v2 sample sheets."""
-        return
-
-    @property
-    def reagent_kit_version(self) -> None:
-        """Return None for run parameters associated with v2 sample sheets."""
-        return
-
-    def requires_dummy_samples(self) -> bool:
-        """Return false for run parameters associated with v2 sample sheets."""
-        return False
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        return Sequencers.NOVASEQX
 
     @property
     def planned_reads(self) -> Dict[str, int]:

@@ -9,12 +9,14 @@ from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import SampleSheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.constants.demultiplexing import (
-    DemultiplexingDirsAndFiles,
-)
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.sequencing import Sequencers, sequencer_types
 from cg.exc import FlowCellError, SampleSheetError
-from cg.models.demultiplex.run_parameters import RunParameters, RunParametersV1, RunParametersV2
+from cg.models.demultiplex.run_parameters import (
+    RunParameters,
+    RunParametersNovaSeq6000,
+    RunParametersNovaSeqX,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ LOG = logging.getLogger(__name__)
 class FlowCell:
     """Class to collect information about flow cell directories and there particular files."""
 
-    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
+    def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = BclConverter.DRAGEN):
         LOG.debug(f"Instantiating FlowCell with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.bcl_converter: Optional[str] = bcl_converter
@@ -82,9 +84,9 @@ class FlowCell:
             raise FileNotFoundError(message)
         if not self._run_parameters:
             self._run_parameters = (
-                RunParametersV2(run_parameters_path=self.run_parameters_path)
+                RunParametersNovaSeqX(run_parameters_path=self.run_parameters_path)
                 if self.sequencer_type == Sequencers.NOVASEQX
-                else RunParametersV1(run_parameters_path=self.run_parameters_path)
+                else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
             )
         return self._run_parameters
 
@@ -153,10 +155,7 @@ class FlowCell:
     def validate_sample_sheet(self) -> bool:
         """Validate if sample sheet is on correct format."""
         try:
-            get_sample_sheet_from_file(
-                infile=self.sample_sheet_path,
-                bcl_converter=self.bcl_converter,
-            )
+            get_sample_sheet_from_file(infile=self.sample_sheet_path)
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
             LOG.warning(error)
@@ -165,10 +164,7 @@ class FlowCell:
 
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path,
-            bcl_converter=self.bcl_converter,
-        )
+        return get_sample_sheet_from_file(infile=self.sample_sheet_path)
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.

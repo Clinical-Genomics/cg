@@ -12,10 +12,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.utils import Process
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
-from tests.apps.demultiplex.conftest import (
-    fixture_lims_novaseq_bcl2fastq_samples,
-    fixture_lims_novaseq_dragen_samples,
-)
+from tests.apps.demultiplex.conftest import fixture_flow_cell_samples
 
 LOG = logging.getLogger(__name__)
 

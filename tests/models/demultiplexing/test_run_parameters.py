@@ -4,13 +4,13 @@ from pathlib import Path
 import pytest
 from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
 from cg.exc import FlowCellError
-from cg.models.demultiplex.run_parameters import RunParametersV1
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000
 
 
 def test_reagent_kit_version(novaseq_run_parameters: Path):
     """Test that getting reagent kit version from a correct file returns an expected value."""
     # GIVEN a RunParameters object created from a valid run parameters file
-    run_parameters = RunParametersV1(run_parameters_path=novaseq_run_parameters)
+    run_parameters = RunParametersNovaSeq6000(run_parameters_path=novaseq_run_parameters)
 
     # WHEN fetching the reagent kit version
     reagent_kit_version: str = run_parameters.reagent_kit_version
@@ -24,7 +24,9 @@ def test_reagent_kit_version_missing_version(run_parameters_missing_flowcell_typ
     """Test that 'unknown' will be returned if the run parameters file has no reagent kit method."""
     caplog.set_level(logging.INFO)
     # GIVEN a RunParameters object created from a file without reagent kit version
-    run_parameters = RunParametersV1(run_parameters_path=run_parameters_missing_flowcell_type)
+    run_parameters = RunParametersNovaSeq6000(
+        run_parameters_path=run_parameters_missing_flowcell_type
+    )
 
     # WHEN fetching the reagent kit version
 
@@ -36,7 +38,7 @@ def test_reagent_kit_version_missing_version(run_parameters_missing_flowcell_typ
 def test_control_software_version(novaseq_run_parameters: Path):
     """Test that getting control software version from a correct file returns an expected value."""
     # GIVEN a RunParameters object created from a valid run parameters file
-    run_parameters = RunParametersV1(run_parameters_path=novaseq_run_parameters)
+    run_parameters = RunParametersNovaSeq6000(run_parameters_path=novaseq_run_parameters)
 
     # WHEN fetching the control software version
 
@@ -48,7 +50,9 @@ def test_control_software_version_no_version(run_parameters_missing_flowcell_typ
     """Test that fetching the control software version from a file without that field fails."""
     caplog.set_level(logging.INFO)
     # GIVEN a RunParameters object created from a file without control software version
-    run_parameters = RunParametersV1(run_parameters_path=run_parameters_missing_flowcell_type)
+    run_parameters = RunParametersNovaSeq6000(
+        run_parameters_path=run_parameters_missing_flowcell_type
+    )
 
     # WHEN fetching the control software version
     with pytest.raises(FlowCellError):
@@ -61,7 +65,7 @@ def test_control_software_version_no_version(run_parameters_missing_flowcell_typ
 def test_index_length(novaseq_run_parameters: Path):
     """Test that getting the index length from a valid file returns the expected output."""
     # GIVEN a RunParameters object created from a valid run parameters file
-    run_parameters = RunParametersV1(run_parameters_path=novaseq_run_parameters)
+    run_parameters = RunParametersNovaSeq6000(run_parameters_path=novaseq_run_parameters)
 
     # WHEN getting the index length
 
@@ -72,7 +76,7 @@ def test_index_length(novaseq_run_parameters: Path):
 def test_index_length_different_length(run_parameters_different_index: Path):
     """Test that getting the index length from a file with different index cycles fails."""
     # GIVEN a RunParameters object created from a file with different index cycles
-    run_parameters = RunParametersV1(run_parameters_path=run_parameters_different_index)
+    run_parameters = RunParametersNovaSeq6000(run_parameters_path=run_parameters_different_index)
 
     # WHEN fetching index length
     with pytest.raises(FlowCellError) as exc_info:

@@ -4,11 +4,9 @@ from typing import List
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreatorV1
 from cg.constants.demultiplexing import SampleSheetV1Sections
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -37,20 +35,12 @@ def fixture_index_obj() -> Index:
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
-@pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
-def fixture_lims_novaseq_bcl2fastq_samples(
+@pytest.fixture(name="flow_cell_samples")
+def fixture_flow_cell_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBcl2Fastq]:
+) -> List[FlowCellSample]:
     """Return a list of parsed flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
-
-
-@pytest.fixture(name="lims_novaseq_dragen_samples")
-def fixture_lims_novaseq_dragen_samples(
-    lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleDragen]:
-    """Return a list of parsed flowcell samples"""
-    return [FlowCellSampleDragen(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSample(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="novaseq_run_parameters_object")
@@ -61,11 +51,11 @@ def fixture_novaseq_run_parameters_object(novaseq_run_parameters: Path) -> RunPa
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
     bcl2fastq_flow_cell: FlowCell,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    flow_cell_samples: List[FlowCellSample],
 ) -> SampleSheetCreator:
-    return SampleSheetCreatorV1(
+    return SampleSheetCreator(
         flow_cell=bcl2fastq_flow_cell,
-        lims_samples=lims_novaseq_bcl2fastq_samples,
+        lims_samples=flow_cell_samples,
         bcl_converter="bcl2fastq",
     )
 
@@ -73,12 +63,12 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
 @pytest.fixture(name="novaseq_dragen_sample_sheet_object")
 def fixture_novaseq_dragen_sample_sheet_object(
     dragen_flow_cell: FlowCell,
-    lims_novaseq_dragen_samples: List[FlowCellSampleDragen],
+    flow_cell_samples: List[FlowCellSample],
     novaseq_run_parameters_object: RunParameters,
-) -> SampleSheetCreatorV1:
-    return SampleSheetCreatorV1(
+) -> SampleSheetCreator:
+    return SampleSheetCreator(
         flow_cell=dragen_flow_cell,
-        lims_samples=lims_novaseq_dragen_samples,
+        lims_samples=flow_cell_samples,
         bcl_converter="dragen",
     )
 
@@ -302,36 +292,24 @@ def fixture_valid_sample_sheet_dragen_path() -> Path:
 
 
 @pytest.fixture(name="novaseq_sample_1")
-def fixture_novaseq_sample_1() -> FlowCellSampleBcl2Fastq:
+def fixture_novaseq_sample_1() -> FlowCellSample:
     """Return a NovaSeq sample."""
-    return FlowCellSampleBcl2Fastq(
-        FCID="HWHMWDMXX",
-        Lane=1,
-        SampleID="ACC7628A68",
-        SampleRef="hg19",
+    return FlowCellSample(
+        lane=1,
+        sample_id="ACC7628A68",
         index="ATTCCACACT",
         index2="TGGTCTTGTT",
-        SampleName="814206",
-        Control="N",
-        Recipe="R1",
-        Operator="script",
-        Project="814206",
+        override_cycles="Y151;I10;I10;Y151",
     )
 
 
 @pytest.fixture(name="novaseq_sample_2")
-def fixture_novaseq_sample_2() -> FlowCellSampleBcl2Fastq:
+def fixture_novaseq_sample_2() -> FlowCellSample:
     """Return a NovaSeq sample."""
-    return FlowCellSampleBcl2Fastq(
-        FCID="HWHMWDMXX",
-        Lane=2,
-        SampleID="ACC7628A1",
-        SampleRef="hg19",
+    return FlowCellSample(
+        lane=2,
+        sample_id="ACC7628A1",
         index="ATTCCACACT",
         index2="TGGTCTTGTT",
-        SampleName="814206",
-        Control="N",
-        Recipe="R1",
-        Operator="script",
-        Project="814206",
+        override_cycles="Y151;I10;I10;Y151",
     )

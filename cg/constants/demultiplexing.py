@@ -2,6 +2,7 @@ from pathlib import Path
 
 import click
 from typing import List, Dict
+from cg.constants.sequencing import Sequencers
 from cg.utils.enums import StrEnum
 
 
@@ -14,8 +15,6 @@ class BclConverter(StrEnum):
 
 class SampleSheetV1Sections:
     """Class that groups all constants to build a sample sheet v1."""
-
-    VERSION: str = "v1"
 
     class Data(StrEnum):
         HEADER: str = "[Data]"
@@ -51,17 +50,19 @@ class SampleSheetV1Sections:
     }
 
 
-class SampleSheetV2Sections:
+class SampleSheetSections:
     """Class that groups all constants to build a sample sheet v2."""
 
-    VERSION: str = "v2"
+    INSTRUMENT_PLATFORMS: Dict[str, str] = {
+        Sequencers.NOVASEQ.value: "NovaSeq6000Series",
+        Sequencers.NOVASEQX.value: "NovaSeqXSeries",
+    }
 
     class Header(StrEnum):
         HEADER: str = "[Header]"
         FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName, "
-        INSTRUMENT_TYPE: List[str] = ["InstrumentType", "NovaSeqxPlus"]
-        INSTRUMENT_PLATFORM: List[str] = ["InstrumentPlatform", "NovaSeqXSeries"]
+        INSTRUMENT_PLATFORM: List[str] = "InstrumentPlatform, "
         INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "forward"]
 
     class Reads(StrEnum):
@@ -84,6 +85,10 @@ class SampleSheetV2Sections:
             "Index",
             "Index2",
             "OverrideCycles",
+            "AdapterRead1",
+            "AdapterRead2",
+            "BarcodeMismatchesIndex1",
+            "BarcodeMismatchesIndex2",
         ]
 
 

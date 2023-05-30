@@ -2,8 +2,7 @@ from typing import List
 
 from cg.apps.demultiplex.sample_sheet import dummy_sample, index
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 
 
 def test_get_valid_indexes():
@@ -32,12 +31,10 @@ def test_get_dummy_sample(bcl2fastq_flow_cell_id: str, index_obj: Index):
     # GIVEN some dummy sample data
 
     # WHEN creating the dummy sample for a bcl2fastq sample sheet
-    dummy_flow_cell_sample: FlowCellSampleBcl2Fastq = dummy_sample.dummy_sample(
-        flow_cell_id=bcl2fastq_flow_cell_id,
+    dummy_flow_cell_sample: FlowCellSample = dummy_sample.dummy_sample(
         dummy_index=index_obj.sequence,
         lane=1,
         name=index_obj.name,
-        bcl_converter="bcl2fastq",
     )
 
     # THEN assert the sample id was correct

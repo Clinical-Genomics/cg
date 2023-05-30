@@ -7,11 +7,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
-)
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.lims.sample_sheet import flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
@@ -42,7 +38,7 @@ def validate_sample_sheet(
     )
     sheet: Path = Path(str(sheet))
     try:
-        get_sample_sheet_from_file(infile=sheet, bcl_converter=bcl_converter)
+        get_sample_sheet_from_file(infile=sheet)
     except ValidationError as error:
         LOG.warning(error)
         raise click.Abort from error
@@ -74,11 +70,10 @@ def create_sheet(
         flow_cell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
-    lims_samples: List[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = list(
+    lims_samples: List[FlowCellSample] = list(
         flow_cell_samples(
             lims=context.lims_api,
             flow_cell_id=flow_cell.id,
-            bcl_converter=bcl_converter,
         )
     )
     if not lims_samples:
@@ -131,11 +126,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
         LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(
-            flow_cell_samples(
-                lims=context.lims_api,
-                flow_cell_id=flow_cell.id,
-                bcl_converter=bcl_converter,
-            )
+            flow_cell_samples(lims=context.lims_api, flow_cell_id=flow_cell.id)
         )
         if not lims_samples:
             LOG.warning(f"Could not find any samples in lims for {flow_cell.id}")
