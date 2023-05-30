@@ -85,10 +85,15 @@ class DemuxPostProcessingAPI:
         )
 
     def finish_flow_cell_temp(self):
-        pass
-
-    def post_process_flow_cell_temp(self):
-        pass
+        validated_flow_cell: FlowCell = self.validate_flow_cell()
+        if not validated_flow_cell:
+            LOG.info(f"Flow cell {self.flow_cell_name} is not valid")
+            return
+        if not self.demux_api.is_demultiplexing_completed(flow_cell=validated_flow_cell):
+            LOG.warning(f"Demultiplex is not ready for {self.flow_cell_name}]")
+            return
+        self.add_sample_lane_sequencing_metrics()
+        self.transfer_flow_cell(flow_cell_dir=self.flow_cell_dir, flow_cell_id=self.flow_cell_name)
 
     def infer_bcl_converter(self) -> str:
         """Set bcl converter from flow cell."""
@@ -103,6 +108,16 @@ class DemuxPostProcessingAPI:
             if re.search(lane_tile_folder_pattern, folder):
                 return True
         return False
+
+    def validate_flow_cell(self) -> Optional[FlowCell]:
+        LOG.info(f"Check demultiplexed flow cell {self.flow_cell_name}")
+        try:
+            flow_cell: FlowCell = FlowCell(
+                flow_cell_path=self.flow_cell_dir, bcl_converter=self.infer_bcl_converter()
+            )
+            return flow_cell
+        except FlowCellError:
+            return None
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
@@ -377,6 +392,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
+        ## sequencing metrics stuff here
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
             flow_cell=flow_cell,
