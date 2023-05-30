@@ -49,13 +49,10 @@ class BalsamicReportAPI(ReportAPI):
         self, case: Family, sample: Sample, analysis_metadata: BalsamicAnalysis
     ) -> Union[BalsamicTargetedSampleMetadataModel, BalsamicWGSSampleMetadataModel]:
         """Fetches the sample metadata to include in the report."""
-
         sample_metrics = analysis_metadata.sample_metrics[sample.internal_id]
         million_read_pairs = get_million_read_pairs(sample.reads)
-
         if "wgs" in self.get_data_analysis_type(case):
             return self.get_wgs_metadata(million_read_pairs, sample_metrics)
-
         return self.get_panel_metadata(
             sample, million_read_pairs, sample_metrics, analysis_metadata
         )
@@ -68,7 +65,6 @@ class BalsamicReportAPI(ReportAPI):
         analysis_metadata: BalsamicAnalysis,
     ) -> BalsamicTargetedSampleMetadataModel:
         """Returns a report metadata for BALSAMIC TGS analysis."""
-
         return BalsamicTargetedSampleMetadataModel(
             bait_set=sample.capture_kit,
             bait_set_version=analysis_metadata.config.panel.capture_kit_version,
@@ -87,7 +83,6 @@ class BalsamicReportAPI(ReportAPI):
         self, million_read_pairs: float, sample_metrics: BalsamicWGSQCMetrics
     ) -> BalsamicWGSSampleMetadataModel:
         """Returns a report metadata for BALSAMIC WGS analysis."""
-
         return BalsamicWGSSampleMetadataModel(
             million_read_pairs=million_read_pairs,
             median_coverage=sample_metrics.median_coverage if sample_metrics else None,
@@ -101,7 +96,6 @@ class BalsamicReportAPI(ReportAPI):
     @staticmethod
     def get_wgs_percent_duplication(sample_metrics: BalsamicWGSQCMetrics):
         """Returns the duplication percentage taking into account both reads."""
-
         return (
             (sample_metrics.percent_duplication_r1 + sample_metrics.percent_duplication_r2) / 2
             if sample_metrics
@@ -110,12 +104,10 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
-
         return self.analysis_api.get_bundle_deliverables_type(case.internal_id)
 
     def get_genome_build(self, analysis_metadata: BalsamicAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case."""
-
         return analysis_metadata.config.reference.reference_genome_version
 
     def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list:
@@ -123,12 +115,10 @@ class BalsamicReportAPI(ReportAPI):
         Extracts the list of BALSAMIC variant-calling filters and their versions (if available) from the
         config.json file.
         """
-
         sequencing_type = analysis_metadata.config.analysis.sequencing_type
         analysis_type = analysis_metadata.config.analysis.analysis_type
         var_callers: Dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
         tool_versions: Dict[str, list] = analysis_metadata.config.bioinfo_tools_version
-
         analysis_var_callers = list()
         for var_caller_name, var_caller_attributes in var_callers.items():
             if (
@@ -139,7 +129,6 @@ class BalsamicReportAPI(ReportAPI):
                 analysis_var_callers.append(
                     f"{var_caller_name} (v{version})" if version else var_caller_name
                 )
-
         return analysis_var_callers
 
     @staticmethod
@@ -148,36 +137,30 @@ class BalsamicReportAPI(ReportAPI):
         var_caller_versions: dict,
     ) -> Optional[str]:
         """Returns the version of a specific BALSAMIC tool."""
-
         for tool_name, versions in var_caller_versions.items():
             if tool_name in var_caller_name:
                 return versions[0]
-
         return None
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: BalsamicAnalysis
     ) -> bool:
         """Checks if the report is accredited or not."""
-
         if analysis_metadata.config.analysis.sequencing_type == "targeted" and next(
             (
-                i
-                for i in BALSAMIC_REPORT_ACCREDITED_PANELS
-                if i in str(analysis_metadata.config.panel.capture_kit)
+                panel
+                for panel in BALSAMIC_REPORT_ACCREDITED_PANELS
+                if panel in str(analysis_metadata.config.panel.capture_kit)
             ),
             None,
         ):
             return True
-
         return False
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for BALSAMIC."""
-
         analysis_type = case.data_analysis.type
         required_sample_metadata_fields = list()
-
         if BALSAMIC_ANALYSIS_TYPE["tumor_wgs"] in analysis_type:
             required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TO_WGS_FIELDS
         elif BALSAMIC_ANALYSIS_TYPE["tumor_normal_wgs"] in analysis_type:
@@ -187,7 +170,6 @@ class BalsamicReportAPI(ReportAPI):
             or BALSAMIC_ANALYSIS_TYPE["tumor_normal_panel"] in analysis_type
         ):
             required_sample_metadata_fields = REQUIRED_SAMPLE_METADATA_BALSAMIC_TARGETED_FIELDS
-
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
@@ -204,27 +186,22 @@ class BalsamicReportAPI(ReportAPI):
 
     def get_template_name(self) -> str:
         """Retrieves the template name to render the delivery report."""
-
         return Pipeline.BALSAMIC + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Retrieves BALSAMIC upload case tags."""
-
         return BALSAMIC_CASE_TAGS
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Return the file path of the uploaded to Scout file given its tag."""
-
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
         uploaded_file: File = self.housekeeper_api.get_latest_file(
             bundle=case_id, tags=tags, version=version.id
         )
-
         if not tags or not uploaded_file:
             LOG.warning(
                 f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
             )
             return None
-
         return uploaded_file.full_path

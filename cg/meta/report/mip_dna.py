@@ -42,12 +42,10 @@ class MipDNAReportAPI(ReportAPI):
         self, case: Family, sample: Sample, analysis_metadata: MipAnalysis
     ) -> MipDNASampleMetadataModel:
         """Fetches the MIP DNA sample metadata to include in the report."""
-
         parsed_metrics = get_sample_id_metric(
             sample_id=sample.internal_id, sample_id_metrics=analysis_metadata.sample_id_metrics
         )
         sample_coverage = self.get_sample_coverage(sample, case)
-
         return MipDNASampleMetadataModel(
             bait_set=self.lims_api.capture_kit(lims_id=sample.internal_id),
             gender=parsed_metrics.predicted_sex,
@@ -60,28 +58,23 @@ class MipDNAReportAPI(ReportAPI):
 
     def get_sample_coverage(self, sample: Sample, case: Family) -> dict:
         """Calculates coverage values for a specific sample."""
-
         genes = self.get_genes_from_scout(case.panels)
         sample_coverage = self.chanjo_api.sample_coverage(sample.internal_id, genes)
         if sample_coverage:
             return sample_coverage
-
         LOG.warning("Could not calculate sample coverage for: %s", sample.internal_id)
         return dict()
 
     def get_genes_from_scout(self, panels: list) -> list:
         """Extracts panel gene IDs information from Scout."""
-
         panel_genes = list()
         for panel in panels:
             panel_genes.extend(self.scout_api.get_genes(panel))
-
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
         return panel_gene_ids
 
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
-
         case_sample: Sample = self.status_db.get_case_samples_by_case_id(
             case_internal_id=case.internal_id
         )[0].sample
@@ -89,33 +82,27 @@ class MipDNAReportAPI(ReportAPI):
         application: Application = self.status_db.get_application_by_tag(
             tag=lims_sample.get("application")
         )
-
         return application.analysis_type if application else None
 
     def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case."""
-
         return analysis_metadata.genome_build
 
     def get_variant_callers(self, analysis_metadata: MipAnalysis = None) -> list:
         """Extracts the list of variant-calling filters used during analysis."""
-
         return []
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
         """Checks if the report is accredited or not by evaluating each of the sample process accreditations."""
-
         for sample in samples:
             if not sample.application.accredited:
                 return False
-
         return True
 
     def get_required_fields(self, case: CaseModel) -> dict:
         """Retrieves a dictionary with the delivery report required fields for MIP DNA."""
-
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
@@ -133,33 +120,26 @@ class MipDNAReportAPI(ReportAPI):
     @staticmethod
     def get_sample_metadata_required_fields(case: CaseModel) -> dict:
         """Retrieves sample metadata required fields associated to a specific sample ID."""
-
         required_sample_metadata_fields = dict()
-
         for sample in case.samples:
             required_fields = (
                 REQUIRED_SAMPLE_METADATA_MIP_DNA_WGS_FIELDS
                 if "wgs" in sample.application.prep_category.lower()
                 else REQUIRED_SAMPLE_METADATA_MIP_DNA_FIELDS
             )
-
             required_sample_metadata_fields.update({sample.id: required_fields})
-
         return required_sample_metadata_fields
 
     def get_template_name(self) -> str:
         """Retrieves the template name to render the delivery report."""
-
         return Pipeline.MIP_DNA + "_report.html"
 
     def get_upload_case_tags(self) -> dict:
         """Retrieves MIP DNA upload case tags."""
-
         return MIP_CASE_TAGS
 
     def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
         """Returns the file path of the uploaded to Scout file given its tag."""
-
         version: Version = self.housekeeper_api.last_version(bundle=case_id)
         tags: list = self.get_hk_scout_file_tags(scout_tag=scout_tag)
         uploaded_files: Iterable[File] = self.housekeeper_api.get_files(
@@ -170,5 +150,4 @@ class MipDNAReportAPI(ReportAPI):
                 f"No files were found for the following Scout Housekeeper tag: {scout_tag} (case: {case_id})"
             )
             return None
-
         return uploaded_files[0].full_path

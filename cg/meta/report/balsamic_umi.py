@@ -18,5 +18,4 @@ class BalsamicUmiReportAPI(BalsamicReportAPI):
 
     def get_upload_case_tags(self) -> dict:
         """Retrieves BALSAMIC UMI upload case tags."""
-
         return BALSAMIC_UMI_CASE_TAGS
