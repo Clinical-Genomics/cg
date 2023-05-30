@@ -94,9 +94,6 @@ class DemuxPostProcessingAPI:
             LOG.warning(f"Demultiplex is not ready for {self.flow_cell_name}]")
             return
         self.add_sample_lane_sequencing_metrics()
-        self.transfer_flow_cell(
-            flow_cell_dir=self.flow_cell_dir, flow_cell_id=validated_flow_cell.id
-        )
 
     def infer_bcl_converter(self) -> str:
         """Set bcl converter from flow cell."""
