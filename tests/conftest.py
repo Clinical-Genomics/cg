@@ -748,12 +748,6 @@ def fixture_dragen_flow_cell_path(
     return Path(flow_cell_runs_dir, dragen_flow_cell_full_name)
 
 
-@pytest.fixture(name="hiseq_dir")
-def fixture_hiseq_dir(flow_cell_runs_dir: Path) -> Path:
-    """Return the path to the hiseq demultiplex fixtures."""
-    return Path(flow_cell_runs_dir, "hiseq_run")
-
-
 @pytest.fixture(name="run_parameters_dir")
 def fixture_run_parameters_dir(demultiplex_fixtures) -> Path:
     """Return the path to the run parameters fixtures."""
