@@ -4,7 +4,7 @@ from typing import List
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreatorBcl2Fastq
+from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreatorV1
 from cg.constants.demultiplexing import SampleSheetV1Sections
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
@@ -63,7 +63,7 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
     bcl2fastq_flow_cell: FlowCell,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
 ) -> SampleSheetCreator:
-    return SampleSheetCreatorBcl2Fastq(
+    return SampleSheetCreatorV1(
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=lims_novaseq_bcl2fastq_samples,
         bcl_converter="bcl2fastq",
@@ -75,8 +75,8 @@ def fixture_novaseq_dragen_sample_sheet_object(
     dragen_flow_cell: FlowCell,
     lims_novaseq_dragen_samples: List[FlowCellSampleDragen],
     novaseq_run_parameters_object: RunParameters,
-) -> SampleSheetCreatorBcl2Fastq:
-    return SampleSheetCreatorBcl2Fastq(
+) -> SampleSheetCreatorV1:
+    return SampleSheetCreatorV1(
         flow_cell=dragen_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
         bcl_converter="dragen",
