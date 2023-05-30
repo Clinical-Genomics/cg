@@ -32,8 +32,7 @@ LOG = logging.getLogger(__name__)
 class DemuxPostProcessingAPI:
     """Post demultiplexing API class."""
 
-    def __init__(self, config: CGConfig):
-        self.bcl_converter: Optional[str] = None
+    def __init__(self, config: CGConfig, flow_cell_name: Optional[str] = None) -> None:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.status_db: Store = config.status_db
@@ -42,6 +41,11 @@ class DemuxPostProcessingAPI:
             db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
         )
         self.dry_run = False
+        # add
+        self.flow_cell_name: Optional[str] = flow_cell_name
+        self.flow_cell_dir: Optional[Path] = (
+            Path(self.demux_api.out_dir, self.flow_cell_name) if self.flow_cell_name else None
+        )
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
@@ -65,17 +69,20 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def add_sample_lane_sequencing_metrics(self, flow_cell_name: str, bcl_converter: str):
+    def add_sample_lane_sequencing_metrics(self):
         """Add sample lane sequencing metrics to status database."""
-        demultiplex_result_directory: Path = Path(self.demux_api.out_dir, flow_cell_name)
+        demultiplex_result_directory: Path = self.flow_cell_dir
 
         metrics = create_sample_lane_sequencing_metrics(
-            demultiplex_result_directory=demultiplex_result_directory, bcl_converter=bcl_converter
+            demultiplex_result_directory=demultiplex_result_directory,
+            bcl_converter=self.infer_bcl_converter(),
         )
 
         self.status_db.session.add_all(metrics)
         self.status_db.session.commit()
-        LOG.info(f"Added sample lane sequencing metrics to status database for: {flow_cell_name}")
+        LOG.info(
+            f"Added sample lane sequencing metrics to status database for: {self.flow_cell_name}"
+        )
 
     def finish_flow_cell_temp(self):
         pass
@@ -83,18 +90,16 @@ class DemuxPostProcessingAPI:
     def post_process_flow_cell_temp(self):
         pass
 
-    def set_bcl_converter(self, flow_cell_dir: Path) -> None:
+    def infer_bcl_converter(self) -> str:
         """Set bcl converter from flow cell."""
-        if self.is_bcl2fastq_demux_folder_structure(flow_cell_dir=flow_cell_dir):
-            self.bcl_converter = "bcl2fastq"
-            return
-        self.bcl_converter = "bcl_convert"
+        if self.is_bcl2fastq_demux_folder_structure():
+            return "bcl2fastq"
+        return "bcl_convert"
 
-    @staticmethod
-    def is_bcl2fastq_demux_folder_structure(flow_cell_dir: Path) -> bool:
+    def is_bcl2fastq_demux_folder_structure(self) -> bool:
         """Check if flow cell directory is bcl2fastq demux folder structure."""
         lane_tile_folder_pattern = r"l[0-9]t[0-9]{2}"
-        for folder in os.listdir(flow_cell_dir):
+        for folder in os.listdir(self.flow_cell_dir):
             if re.search(lane_tile_folder_pattern, folder):
                 return True
         return False

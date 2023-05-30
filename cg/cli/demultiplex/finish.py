@@ -61,10 +61,10 @@ def finish_flow_cell(
 @OPTION_BCL_CONVERTER
 @click.pass_obj
 def populate_new_metrics(context: CGConfig, flow_cell_name: str, bcl_converter: str):
-    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
-    demux_post_processing_api.add_sample_lane_sequencing_metrics(
-        flow_cell_name=flow_cell_name, bcl_converter=bcl_converter
+    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(
+        config=context, flow_cell_name=flow_cell_name
     )
+    demux_post_processing_api.add_sample_lane_sequencing_metrics()
 
 
 @finish_group.command(name="all-hiseq-x")
