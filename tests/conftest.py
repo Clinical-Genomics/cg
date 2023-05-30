@@ -754,10 +754,16 @@ def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
     return Path(demultiplex_fixtures, "hiseq_run")
 
 
+@pytest.fixture(name="run_parameters_dir")
+def fixture_run_parameters_dir(demultiplex_fixtures) -> Path:
+    """Return the path to the run parameters fixtures."""
+    return Path(demultiplex_fixtures, "run_parameters_files")
+
+
 @pytest.fixture(name="run_parameters_missing_flowcell_type")
-def fixture_run_parameters_missing_flowcell_type(demultiplex_fixtures: Path) -> Path:
+def fixture_run_parameters_missing_flowcell_type(run_parameters_dir: Path) -> Path:
     """Return the path to a file with hiseq run parameters without flow cell."""
-    return Path(demultiplex_fixtures, "runParameters_missing_flowcell_run_field.xml")
+    return Path(run_parameters_dir, "runParameters_missing_flowcell_run_field.xml")
 
 
 @pytest.fixture(name="novaseq_run_parameters")
@@ -767,9 +773,9 @@ def fixture_novaseq_run_parameters(bcl2fastq_flow_cell_dir: Path) -> Path:
 
 
 @pytest.fixture(name="run_parameters_different_index")
-def fixture_run_parameters_different_index(demultiplex_fixtures: Path) -> Path:
+def fixture_run_parameters_different_index(run_parameters_dir: Path) -> Path:
     """Return the path to a file with novaseq run parameters with different index cycles."""
-    return Path(demultiplex_fixtures, "RunParameters_different_index_cycles.xml")
+    return Path(run_parameters_dir, "RunParameters_different_index_cycles.xml")
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell")
