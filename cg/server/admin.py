@@ -536,11 +536,10 @@ class UserView(BaseView):
     edit_modal = True
 
 
-class SequencingStatisticsView(BaseView):
-    """Admin view for the Model.SequencingStats."""
+class SampleLaneSequencingMetricsView(BaseView):
+    """Admin view for the Model.SampleLaneSequencingMetrics."""
 
     column_filters = ["sample_internal_id", "flow_cell_name"]
     column_searchable_list = ["sample_internal_id", "flow_cell_name"]
-    column_editable_list = ["read_counts"]
     create_modal = True
     edit_modal = True
