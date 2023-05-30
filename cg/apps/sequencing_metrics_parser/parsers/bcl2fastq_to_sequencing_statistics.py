@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    Bcl2FastqTileSequencingMetrics,
+    Bcl2FastqSampleLaneTileMetrics,
     ConversionResult,
     DemuxResult,
 )
@@ -16,7 +16,9 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
+def get_sequencing_metrics_from_bcl2fastq(
+    stats_json_path: str,
+) -> List[SampleLaneSequencingMetrics]:
     """
     Parses the Bcl2fastq generated stats.json file and creates a list of SampleLaneSequencingMetrics objects,
     each representing a sample in a lane on the flow cell.
@@ -29,19 +31,19 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
         metrics for each sample in each lane on the flow cell.
     """
 
-    raw_sequencing_metrics: List[
-        Bcl2FastqTileSequencingMetrics
+    raw_sequencing_metrics_per_tile: List[
+        Bcl2FastqSampleLaneTileMetrics
     ] = parse_bcl2fastq_tile_sequencing_metrics(demultiplex_result_directory=stats_json_path)
 
     sample_lane_metrics: List[SampleLaneSequencingMetrics] = []
 
-    for conversion_result in raw_sequencing_metrics.conversion_results:
+    for conversion_result in raw_sequencing_metrics_per_tile.conversion_results:
         for demux_result in conversion_result.demux_results:
             metrics_for_sample_in_lane: SampleLaneSequencingMetrics = (
                 create_sample_lane_sequencing_metrics(
                     conversion_result=conversion_result,
                     demux_result=demux_result,
-                    raw_sequencing_metrics=raw_sequencing_metrics,
+                    raw_sequencing_metrics=raw_sequencing_metrics_per_tile,
                 )
             )
             sample_lane_metrics.append(metrics_for_sample_in_lane)
@@ -52,7 +54,7 @@ def get_sequencing_metrics_from_bcl2fastq(stats_json_path: str):
 def create_sample_lane_sequencing_metrics(
     conversion_result: ConversionResult,
     demux_result: DemuxResult,
-    raw_sequencing_metrics: Bcl2FastqTileSequencingMetrics,
+    raw_sequencing_metrics: Bcl2FastqSampleLaneTileMetrics,
 ) -> SampleLaneSequencingMetrics:
     """
     Generates a SampleLaneSequencingMetrics object based on the provided conversion and demultiplexing results

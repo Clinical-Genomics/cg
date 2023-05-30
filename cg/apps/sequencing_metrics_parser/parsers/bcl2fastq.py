@@ -3,13 +3,13 @@ from pathlib import Path
 import re
 from typing import List
 from cg.apps.sequencing_metrics_parser.models.bcl2fastq_metrics import (
-    Bcl2FastqTileSequencingMetrics,
+    Bcl2FastqSampleLaneTileMetrics,
 )
 
 
 def parse_bcl2fastq_tile_sequencing_metrics(
     demultiplex_result_directory: Path,
-) -> List[Bcl2FastqTileSequencingMetrics]:
+) -> List[Bcl2FastqSampleLaneTileMetrics]:
     """
     Parse stats.json files in specified Bcl2fastq demultiplex result directory.
 
@@ -30,10 +30,14 @@ def parse_bcl2fastq_tile_sequencing_metrics(
     )
 
     for stats_json_path in stats_json_paths:
-        sequencing_metrics = Bcl2FastqTileSequencingMetrics.parse_file(stats_json_path)
+        sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
         tile_sequencing_metrics.append(sequencing_metrics)
 
     return tile_sequencing_metrics
+
+
+def aggregate_bcl2fastq_tile_metrics_per_sample_and_lane():
+    pass
 
 
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:

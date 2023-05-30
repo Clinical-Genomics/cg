@@ -9,12 +9,10 @@ class IndexMetric(BaseModel):
     mapping mismatch counts to their frequencies.
 
     Fields:
-    - index_sequence: The specific index sequence this metric pertains to.
     - mismatch_counts: A dictionary mapping mismatch counts (as strings) to their
       respective frequencies.
     """
 
-    index_sequence: str = Field(..., alias="IndexSequence", min_length=1)
     mismatch_counts: Dict[str, int] = Field(..., alias="MismatchCounts")
 
     @validator("mismatch_counts", each_item=True)
@@ -89,7 +87,7 @@ class ReadInfoForLane(BaseModel):
     lane_number: int = Field(..., alias="LaneNumber", gt=0)
 
 
-class Bcl2FastqTileSequencingMetrics(BaseModel):
+class Bcl2FastqSampleLaneTileMetrics(BaseModel):
     """
     Represents a set of sequencing metrics for a bcl2fastq run per sample, lane and tile on a flow cell.
 
@@ -103,6 +101,17 @@ class Bcl2FastqTileSequencingMetrics(BaseModel):
 
     flow_cell_name: str = Field(..., alias="Flowcell", min_length=1)
     run_number: int = Field(..., alias="RunNumber", gt=0)
-    run_id: str = Field(..., alias="RunId", min_length=1)
     read_infos_for_lanes: List[ReadInfoForLane] = Field(..., alias="ReadInfosForLanes")
     conversion_results: List[ConversionResult] = Field(..., alias="ConversionResults")
+
+
+class Bcl2FastqSampleLaneMetrics(BaseModel):
+    """Aggregated raw metrics per sample and lane from a bcl2fastq run."""
+
+    flow_cell_name: str
+    flow_cell_lane_number: int
+    sample_id: str
+    sample_total_reads_in_lane: int
+    sample_total_yield_in_lane: int
+    sample_total_yield_q30_in_lane: int
+    sample_total_quality_score_in_lane: int
