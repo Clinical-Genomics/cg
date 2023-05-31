@@ -20,7 +20,7 @@ class UploadAPI(MetaAPI):
 
     def __init__(self, config: CGConfig, analysis_api: AnalysisAPI):
         super().__init__(config=config)
-        self.analysis_api = analysis_api
+        self.analysis_api: AnalysisAPI = analysis_api
         self.scout_upload_api: UploadScoutAPI = UploadScoutAPI(
             hk_api=config.housekeeper_api,
             scout_api=config.scout_api,

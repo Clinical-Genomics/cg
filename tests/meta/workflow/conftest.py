@@ -1,7 +1,7 @@
 """Fixtures for the workflow tests."""
 import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 import pytest
 from cgmodels.cg.constants import Pipeline
@@ -206,3 +206,23 @@ def qc_microsalt_context(
     cg_context.meta_apis["analysis_api"] = analysis_api
 
     return cg_context
+
+
+@pytest.fixture(name="rnafusion_metrics")
+def fixture_rnafusion_metrics() -> Dict[str, float]:
+    """Return Rnafusion raw analysis metrics dictionary."""
+    return {
+        "after_filtering_gc_content": 0.516984,
+        "after_filtering_q20_rate": 0.974834,
+        "after_filtering_q30_rate": 0.929476,
+        "after_filtering_read1_mean_length": 99.0,
+        "before_filtering_total_reads": 149984042.0,
+        "bias_5_3": 1.07,
+        "pct_adapter": 12.005654574904709,
+        "pct_mrna_bases": 85.9731,
+        "pct_ribosomal_bases": 0.6581,
+        "pct_surviving": 99.42004630065911,
+        "pct_duplication": 14.8643,
+        "reads_aligned": 72391566.0,
+        "uniquely_mapped_percent": 91.02,
+    }
