@@ -98,7 +98,9 @@ class DemuxPostProcessingAPI:
     def infer_bcl_converter(self) -> str:
         """Set bcl converter from flow cell."""
         if self.is_bcl2fastq_demux_folder_structure():
+            LOG.info("Flow cell is demultiplexed with bcl2fastq")
             return "bcl2fastq"
+        LOG.info("Flow cell is demultiplexed with bcl_converter")
         return "bcl_convert"
 
     def is_bcl2fastq_demux_folder_structure(self) -> bool:
