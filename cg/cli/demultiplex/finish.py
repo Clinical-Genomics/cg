@@ -58,7 +58,6 @@ def finish_flow_cell(
 
 @finish_group.command(name="temporary")
 @click.argument("flow-cell-name")
-@OPTION_BCL_CONVERTER
 @click.pass_obj
 def populate_new_metrics(context: CGConfig, flow_cell_name: str):
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(
