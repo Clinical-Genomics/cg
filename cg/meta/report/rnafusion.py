@@ -1,4 +1,14 @@
 """RNAfusion delivery report API."""
+from typing import List, Optional
+
+from cgmodels.cg.constants import Pipeline
+
+from cg.models.report.sample import SampleModel
+
+from cg.constants.constants import GenomeVersion
+
+from cg.models.analysis import AnalysisModel
+
 from cg.meta.report.field_validators import get_million_read_pairs
 from cg.models.rnafusion.metrics import RnafusionQCMetrics
 
@@ -47,3 +57,21 @@ class RnafusionReportAPI(ReportAPI):
             rin=self.lims_api.get_sample_rin(sample_id=sample.internal_id),
             uniquely_mapped_reads=sample_metrics.uniquely_mapped_percent,
         )
+
+    def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
+        """Returns the build version of the genome reference of a specific case."""
+        return GenomeVersion.hg38.value
+
+    def get_report_accreditation(
+        self, samples: List[SampleModel], analysis_metadata: AnalysisModel
+    ) -> bool:
+        """Checks if the report is accredited or not. Rnafusion is an accredited workflow."""
+        return True
+
+    def get_scout_uploaded_file_from_hk(self, case_id: str, scout_tag: str) -> Optional[str]:
+        """Return the file path of the uploaded to Scout file given its tag."""
+        return None
+
+    def get_template_name(self) -> str:
+        """Retrieves the template name to render the delivery report."""
+        return Pipeline.RNAFUSION + "_report.html"
