@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List
+from cg.constants.demultiplexing import BclConverter
 from cg.store.api.core import Store
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl2fastq_to_sequencing_statistics import (
@@ -13,7 +14,7 @@ from cg.apps.sequencing_metrics_parser.parsers.bcl_convert_to_sequencing_statist
 def create_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_dir: Path, bcl_converter: str):
     """Parse the sequencing metrics data for the correct demultiplexing software into the sequencing statistics model."""
     metrics: List[SampleLaneSequencingMetrics] = []
-    if bcl_converter == "bcl_convert":
+    if bcl_converter == BclConverter.BCLCONVERT:
         metrics = create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
             demultiplex_result_directory=flow_cell_dir
         )

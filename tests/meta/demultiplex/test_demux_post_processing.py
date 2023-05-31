@@ -515,5 +515,5 @@ def test_is_not_bcl2fastq_folder_structure(
         mock_demux_post_processing_api.is_bcl2fastq_demux_folder_structure()
     )
 
-    # THEN it should be a bcl2fastq folder structure
+    # THEN it should not be a bcl2fastq folder structure
     assert is_bcl2fastq_folder_structure is False

@@ -16,7 +16,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
@@ -43,7 +43,6 @@ class DemuxPostProcessingAPI:
             db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
         )
         self.dry_run = False
-        # add
         self.flow_cell_name: Optional[str] = flow_cell_name
         self.flow_cell_dir: Optional[Path] = (
             Path(self.demux_api.out_dir, self.flow_cell_name) if self.flow_cell_name else None
@@ -91,12 +90,12 @@ class DemuxPostProcessingAPI:
         self.add_sample_lane_sequencing_metrics_for_flow_cell()
 
     def infer_bcl_converter(self) -> str:
-        """Set bcl converter from flow cell."""
+        """Determine type of bcl converter."""
         if self.is_bcl2fastq_demux_folder_structure():
-            LOG.info("Flow cell is demultiplexed with bcl2fastq")
-            return "bcl2fastq"
-        LOG.info("Flow cell is demultiplexed with bcl_converter")
-        return "bcl_convert"
+            LOG.info("Flow cell was demultiplexed with bcl2fastq")
+            return BclConverter.BCL2FASTQ
+        LOG.info("Flow cell was demultiplexed with bcl_converter")
+        return BclConverter.BCLCONVERT
 
     def is_bcl2fastq_demux_folder_structure(self) -> bool:
         """Check if flow cell directory is bcl2fastq demux folder structure."""
@@ -390,7 +389,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
-        ## sequencing metrics stuff here
+
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
             flow_cell=flow_cell,
