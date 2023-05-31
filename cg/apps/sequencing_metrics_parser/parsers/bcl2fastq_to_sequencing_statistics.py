@@ -11,7 +11,7 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def get_sequencing_metrics_from_bcl2fastq(
+def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
     demultiplex_result_directory: Path,
 ) -> List[SampleLaneSequencingMetrics]:
     """

@@ -12,7 +12,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store.api import Store
 from cg.store.models import Sample, Family
-import os
+
 from tests.apps.cgstats.conftest import fixture_populated_stats_api
 from tests.cli.demultiplex.conftest import (
     fixture_demultiplex_configs,

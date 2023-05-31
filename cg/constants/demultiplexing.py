@@ -61,9 +61,9 @@ SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = ["BarcodeMismatchesIndex2", "0"]
 OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
-    type=click.Choice(["bcl2fastq", "dragen", "bcl_convert"]),
+    type=click.Choice(["bcl2fastq", "dragen"]),
     default="bcl2fastq",
-    help="Specify bcl conversion software. Choose between bcl2fastq and dragen (bcl_convert). Default is "
+    help="Specify bcl conversion software. Choose between bcl2fastq and dragen. Default is "
     "bcl2fastq.",
 )
 

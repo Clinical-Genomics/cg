@@ -39,8 +39,8 @@ class BclConvertAdapterMetricsColumnNames(Enum):
     SAMPLE_BASES: str = "SampleBases"
 
 
-DEMUX_METRICS_FILE_NAME = "Unaligned/Reports/Demultiplex_Stats.csv"
-QUALITY_METRICS_FILE_NAME = "Unaligned/Reports/Quality_Metrics.csv"
-ADAPTER_METRICS_FILE_NAME = "Unaligned/Reports/Adapter_Metrics.csv"
-RUN_INFO_FILE_NAME = "Unaligned/Reports/RunInfo.xml"
-SAMPLE_SHEET_FILE_NAME = "Unaligned/Reports/SampleSheet.csv"
+DEMUX_METRICS_FILE_PATH = "Unaligned/Reports/Demultiplex_Stats.csv"
+QUALITY_METRICS_FILE_PATH = "Unaligned/Reports/Quality_Metrics.csv"
+ADAPTER_METRICS_FILE_PATH = "Unaligned/Reports/Adapter_Metrics.csv"
+RUN_INFO_FILE_PATH = "Unaligned/Reports/RunInfo.xml"
+SAMPLE_SHEET_FILE_PATH = "Unaligned/Reports/SampleSheet.csv"

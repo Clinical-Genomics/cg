@@ -6,7 +6,9 @@ import re
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
-from cg.apps.sequencing_metrics_parser.api import create_sample_lane_sequencing_metrics
+from cg.apps.sequencing_metrics_parser.api import (
+    create_sample_lane_sequencing_metrics_for_flow_cell,
+)
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
@@ -69,12 +71,12 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def add_sample_lane_sequencing_metrics(self):
+    def add_sample_lane_sequencing_metrics_for_flow_cell(self):
         """Add sample lane sequencing metrics to status database."""
-        demultiplex_result_directory: Path = self.flow_cell_dir
+        flow_cell_dir: Path = self.flow_cell_dir
 
-        metrics = create_sample_lane_sequencing_metrics(
-            demultiplex_result_directory=demultiplex_result_directory,
+        metrics = create_sample_lane_sequencing_metrics_for_flow_cell(
+            flow_cell_dir=flow_cell_dir,
             bcl_converter=self.infer_bcl_converter(),
         )
 
@@ -86,7 +88,7 @@ class DemuxPostProcessingAPI:
 
     def finish_flow_cell_temp(self):
         """Finish flow cell."""
-        self.add_sample_lane_sequencing_metrics()
+        self.add_sample_lane_sequencing_metrics_for_flow_cell()
 
     def infer_bcl_converter(self) -> str:
         """Set bcl converter from flow cell."""
