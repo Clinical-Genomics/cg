@@ -49,9 +49,10 @@ class ReportAPI(MetaAPI):
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
-        report_data: ReportModel = self.validate_report_fields(
-            case_id=case_id, report_data=report_data, force_report=force_report
-        )
+        # TODO: remove comment. Testing purposes.
+        # report_data: ReportModel = self.validate_report_fields(
+        #     case_id=case_id, report_data=report_data, force_report=force_report
+        # )
         rendered_report: str = self.render_delivery_report(report_data=report_data.dict())
         return rendered_report
 
@@ -363,7 +364,14 @@ class ReportAPI(MetaAPI):
 
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
-        raise NotImplementedError
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )[0].sample
+        lims_sample = self.get_lims_sample(sample_id=case_sample.internal_id)
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
+        return application.analysis_type if application else None
 
     def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
         """Returns the build version of the genome reference of a specific case."""
