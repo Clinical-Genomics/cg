@@ -9,7 +9,7 @@ class BclConverter(StrEnum):
 
     DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
-    BCLCONVERT: str "bcl_convert"
+    BCLCONVERT: str = "bcl_convert"
 
 
 class SampleSheetHeaderColumnNames(StrEnum):
