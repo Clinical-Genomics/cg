@@ -90,9 +90,9 @@ class DemuxPostProcessingAPI:
         if not validated_flow_cell:
             LOG.info(f"Flow cell {self.flow_cell_name} is not valid")
             return
-        if not self.demux_api.is_demultiplexing_completed(flow_cell=validated_flow_cell):
-            LOG.warning(f"Demultiplex is not ready for {self.flow_cell_name}]")
-            return
+        # if not self.demux_api.is_demultiplexing_completed(flow_cell=validated_flow_cell):
+        #    LOG.warning(f"Demultiplex is not ready for {self.flow_cell_name}]")
+        #   return
         self.add_sample_lane_sequencing_metrics()
 
     def infer_bcl_converter(self) -> str:
