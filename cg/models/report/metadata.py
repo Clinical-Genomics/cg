@@ -1,12 +1,17 @@
 from typing import Optional, Union
 
 from pydantic import BaseModel, validator
-from cg.models.report.validators import validate_empty_field, validate_float, validate_gender
+from cg.models.report.validators import (
+    validate_empty_field,
+    validate_float,
+    validate_gender,
+    validate_percentage,
+)
 
 
 class SampleMetadataModel(BaseModel):
     """
-    Metrics and trending data model associated to a specific sample
+    Metrics and trending data model associated to a specific sample.
 
     Attributes:
         million_read_pairs: number of million read pairs obtained; source: StatusDB/sample/reads (/2*10^6)
@@ -23,7 +28,7 @@ class SampleMetadataModel(BaseModel):
 
 
 class MipDNASampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a specific MIP DNA sample
+    """Metrics and trending data model associated to a specific MIP DNA sample.
 
     Attributes:
         bait_set: panel bed used for the analysis; source: LIMS
@@ -48,7 +53,7 @@ class MipDNASampleMetadataModel(SampleMetadataModel):
 
 
 class BalsamicSampleMetadataModel(SampleMetadataModel):
-    """Metrics and trending data model associated to a specific BALSAMIC sample
+    """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
             mean_insert_size: mean insert size of the distribution; source: pipeline workflow
@@ -64,7 +69,7 @@ class BalsamicSampleMetadataModel(SampleMetadataModel):
 
 
 class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
-    """Metrics and trending data model associated to a specific BALSAMIC sample
+    """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
             bait_set: panel bed used for the analysis; source: LIMS
@@ -90,7 +95,7 @@ class BalsamicTargetedSampleMetadataModel(BalsamicSampleMetadataModel):
 
 
 class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
-    """Metrics and trending data model associated to a specific BALSAMIC sample
+    """Metrics and trending data model associated to a specific BALSAMIC sample.
 
     Attributes:
             median_coverage: median coverage in bases of the genome territory; source: pipeline workflow
@@ -105,3 +110,65 @@ class BalsamicWGSSampleMetadataModel(BalsamicSampleMetadataModel):
     _float_values_balsamic_wgs = validator(
         "median_coverage", "pct_15x", "pct_60x", always=True, allow_reuse=True
     )(validate_float)
+
+
+class RnafusionSampleMetadataModel(SampleMetadataModel):
+    """Metrics and trending data model associated to a specific Rnafusion sample.
+
+    Attributes:
+        bias_5_3: bias is the ratio between read counts; source: pipeline workflow
+        gc_content: percentage of GC bases calculated on trimmed reads; source: pipeline workflow
+        input_amount: input amount in ng; source: LIMS
+        insert_size: distance between paired-end sequencing reads in a DNA fragment
+        insert_size_peak: insert size length; source: pipeline workflow
+        mapped_reads: percentage of reads aligned to the reference sequence; source: pipeline workflow
+        mean_length_r1: average length of reads that pass QC filters; source: pipeline workflow
+        mrna_bases:  proportion of bases that originate from messenger RNA; source: pipeline workflow
+        pct_adapter: proportion of reads that contain adapter sequences; source: pipeline workflow
+        pct_surviving: percentage of reads that pass quality control filters; source: pipeline workflow
+        q20_rate: proportion of bases with a minimum Phred score of 20; source: pipeline workflow
+        q30_rate: proportion of bases with a minimum Phred score of 30; source: pipeline workflow
+        ribosomal_bases: proportion of bases that originate from ribosomal RNA; source: pipeline workflow
+        rin: RNA integrity number; source: LIMS
+        uniquely_mapped_reads: percentage of mapped reads; source: pipeline workflow
+    """
+
+    bias_5_3: Union[None, float, str]
+    gc_content: Union[None, float, str]
+    input_amount: Union[None, float, str]
+    insert_size: Union[None, float, str]
+    insert_size_peak: Union[None, float, str]
+    mapped_reads: Union[None, float, str]
+    mean_length_r1: Union[None, float, str]
+    mrna_bases: Union[None, float, str]
+    pct_adapter: Union[None, float, str]
+    pct_surviving: Union[None, float, str]
+    q20_rate: Union[None, float, str]
+    q30_rate: Union[None, float, str]
+    ribosomal_bases: Union[None, float, str]
+    rin: Union[None, float, str]
+    uniquely_mapped_reads: Union[None, float, str]
+
+    _float_values = validator(
+        "bias_5_3",
+        "input_amount",
+        "insert_size",
+        "insert_size_peak",
+        "mean_length_r1",
+        "mrna_bases",
+        "pct_adapter",
+        "pct_surviving",
+        "rin",
+        "uniquely_mapped_reads",
+        always=True,
+        allow_reuse=True,
+    )(validate_float)
+    _pct_values = validator(
+        "gc_content",
+        "mapped_reads",
+        "q20_rate",
+        "q30_rate",
+        "ribosomal_bases",
+        always=True,
+        allow_reuse=True,
+    )(validate_percentage)
