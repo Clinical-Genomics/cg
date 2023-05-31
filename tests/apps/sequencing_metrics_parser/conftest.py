@@ -49,12 +49,12 @@ def fixture_bcl_convert_reads_for_test_sample() -> int:
 
 @pytest.fixture(name="bcl_convert_test_q30_bases_percent")
 def fixture_bcl_convert_test_q30_bases_percent() -> float:
-    return 0.95
+    return 0.94
 
 
 @pytest.fixture(name="bcl_convert_test_mean_quality_score_per_lane")
 def fixture_bcl_convert_test_mean_quality_score() -> float:
-    return 36.15
+    return 72.04
 
 
 @pytest.fixture(name="bcl_convert_test_flow_cell_name")

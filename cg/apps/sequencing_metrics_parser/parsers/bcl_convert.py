@@ -136,6 +136,16 @@ class BclConvertMetricsParser:
             if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
                 return metric
 
+    def get_read_pair_metrics_for_sample_and_lane(
+        self, sample_internal_id: str, lane: int
+    ) -> List[BclConvertQualityMetrics]:
+        """Return the read pair metrics for a sample and lane."""
+        read_metrics_list: List[BclConvertQualityMetrics] = []
+        for metric in self.quality_metrics:
+            if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
+                read_metrics_list.append(metric)
+        return read_metrics_list
+
     def calculate_total_reads_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> int:
         """Calculate the total reads for a sample in a lane."""
         metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_and_lane(
@@ -149,16 +159,36 @@ class BclConvertMetricsParser:
 
     def get_q30_bases_percent_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> float:
         """Return the percent of bases that are Q30 for a sample and lane."""
-        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
-            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        metric: List[BclConvertQualityMetrics] = self.get_read_pair_metrics_for_sample_and_lane(
+            sample_internal_id=sample_internal_id, lane=lane
         )
-        return metric.q30_bases_percent
+        return self.calculate_read_pair_q30_bases_percent(metric_list=metric)
 
-    def get_mean_quality_score_fot_sample_in_lane(
+    @classmethod
+    def calculate_read_pair_q30_bases_percent(
+        cls, metric_list: List[BclConvertQualityMetrics]
+    ) -> float:
+        """Calculate the percent of bases that are Q30 for read pairs."""
+        mean_read_pair_q30_bases_percent: float = 0
+        for metric in metric_list:
+            mean_read_pair_q30_bases_percent += metric.q30_bases_percent
+        return round(mean_read_pair_q30_bases_percent / 2, 2)
+
+    @classmethod
+    def calculate_mean_quality_score(cls, metric_list: List[BclConvertQualityMetrics]) -> float:
+        """Calculate the mean quality score for a list of metrics."""
+        total_q_score: float = 0
+        for metric in metric_list:
+            total_q_score += metric.mean_quality_score_q30
+        return round(total_q_score, 2)
+
+    def get_mean_quality_score_for_sample_in_lane(
         self, sample_internal_id: str, lane: int
     ) -> float:
         """Return the mean quality score for a sample and lane."""
-        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
-            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        metric_list: List[
+            BclConvertQualityMetrics
+        ] = self.get_read_pair_metrics_for_sample_and_lane(
+            sample_internal_id=sample_internal_id, lane=lane
         )
-        return metric.mean_quality_score_q30
+        return self.calculate_mean_quality_score(metric_list=metric_list)

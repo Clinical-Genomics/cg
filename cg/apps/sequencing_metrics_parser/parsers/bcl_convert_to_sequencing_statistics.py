@@ -30,7 +30,7 @@ def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics(
                     sample_base_fraction_passing_q30=metrics_parser.get_q30_bases_percent_for_sample_in_lane(
                         sample_internal_id=sample_internal_id, lane=lane
                     ),
-                    sample_base_mean_quality_score=metrics_parser.get_mean_quality_score_fot_sample_in_lane(
+                    sample_base_mean_quality_score=metrics_parser.get_mean_quality_score_for_sample_in_lane(
                         sample_internal_id=sample_internal_id, lane=lane
                     ),
                     created_at=datetime.now(),

@@ -10,6 +10,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
 )
 from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 from pathlib import Path
+from typing import List
 
 
 def test_parse_bcl_convert_metrics(
@@ -224,7 +225,7 @@ def test_get_mean_quality_score_per_lane(
 
     # WHEN getting mean quality score per lane
     mean_quality_score_per_lane: float = (
-        parsed_bcl_convert_metrics.get_mean_quality_score_fot_sample_in_lane(
+        parsed_bcl_convert_metrics.get_mean_quality_score_for_sample_in_lane(
             sample_internal_id=test_sample_internal_id, lane=test_lane
         )
     )
