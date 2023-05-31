@@ -79,10 +79,6 @@ class MipDNAReportAPI(ReportAPI):
         """Returns the build version of the genome reference of a specific case."""
         return analysis_metadata.genome_build
 
-    def get_variant_callers(self, analysis_metadata: MipAnalysis = None) -> list:
-        """Extracts the list of variant-calling filters used during analysis."""
-        return []
-
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None
     ) -> bool:
