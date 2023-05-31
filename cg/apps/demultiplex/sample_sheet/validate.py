@@ -46,20 +46,16 @@ def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
 
 def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str]]:
     """Return the samples in a sample sheet as a list of dictionaries."""
-    header: List[str] = []
     raw_samples: List[Dict[str, str]] = []
     found_header: bool = False
 
     for line in sample_sheet_content:
         if found_header:
-            header = line
-            found_header = False
+            raw_samples.append(dict(zip(SampleSheetSections.Data.COLUMN_NAMES.value, line)))
             continue
-        if SampleSheetSections.Data.HEADER in line:
+        if line == SampleSheetSections.Data.COLUMN_NAMES.value:
             found_header = True
-            continue
-        raw_samples.append(dict(zip(header, line)))
-    if not header:
+    if not found_header:
         message = "Could not find header in sample sheet"
         LOG.warning(message)
         raise SampleSheetError(message)

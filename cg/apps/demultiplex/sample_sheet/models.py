@@ -13,8 +13,8 @@ class FlowCellSample(BaseModel):
     lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
     sample_id: str = Field(..., alias="Sample_ID")
     index: str = Field(..., alias="Index")
-    index2: str = ""
-    override_cycles: str = Field(..., alias="Index")
+    index2: str = Field("", alias="Index2")
+    override_cycles: str = Field(..., alias="OverrideCycles")
     adapter_read1: str = Field("", alias="AdapterRead1")
     adapter_read2: str = Field("", alias="AdapterRead2")
     barcode_mismatches_index1: int = Field(0, alias="BarcodeMismatchesIndex1")

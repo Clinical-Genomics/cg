@@ -18,7 +18,7 @@ def test_validate_samples_are_unique(
     novaseq_sample_1: FlowCellSample,
     novaseq_sample_2: FlowCellSample,
 ):
-    """Test that validating two different samples finishes successfully."""
+    """Test that validating two unique samples finishes successfully."""
     # GIVEN two different NovaSeq samples
     assert novaseq_sample_1 != novaseq_sample_2
 
@@ -61,13 +61,13 @@ def test_get_samples_by_lane(
     assert len(samples_per_lane) == 2
 
 
-def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_bcl2fastq: List[List[str]]):
+def test_get_raw_samples_valid_sample_sheet(valid_sample_sheet_content: List[List[str]]):
     """Test that getting raw samples from a valid sample sheet gets a correct list of dictionaries."""
     # GIVEN a valid sample sheet
 
     # WHEN getting the list of raw samples from it
     raw_samples: List[Dict[str, str]] = get_raw_samples(
-        sample_sheet_content=valid_sample_sheet_bcl2fastq
+        sample_sheet_content=valid_sample_sheet_content
     )
 
     # THEN it returns a list with 2 dictionaries
@@ -91,75 +91,42 @@ def test_get_raw_samples_no_header(sample_sheet_samples_no_header: List[List[str
     assert "Could not find header in sample sheet" in caplog.text
 
 
-def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: List[List[str]], caplog):
+def test_get_raw_samples_no_samples(sample_sheet_data_header: List[List[str]], caplog):
     """Test that getting samples from a sample sheet without samples fails."""
     # GIVEN a sample sheet without samples
     caplog.set_level(logging.INFO)
 
     # WHEN trying to get the samples from the sample sheet
     with pytest.raises(SampleSheetError):
-        get_raw_samples(sample_sheet_content=sample_sheet_bcl2fastq_data_header)
+        get_raw_samples(sample_sheet_content=sample_sheet_data_header)
 
     # THEN an exception is raised because of the missing samples
     assert "Could not find any samples in sample sheet" in caplog.text
 
 
-def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
-    sample_sheet_bcl2fastq_duplicate_same_lane: List[List[str]],
+def test_get_sample_sheet_duplicate_same_lane(
+    sample_sheet_duplicate_same_lane: List[List[str]],
 ):
-    """Test that creating a Bcl2fastq sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a Bcl2fastq sample sheet with a sample duplicated in a lane
+    """Test that creating a sample sheet with duplicated samples in a lane fails."""
+    # GIVEN a sample sheet with a sample duplicated in a lane
 
     # WHEN creating the sample sheet object
     with pytest.raises(SampleSheetError):
         # THEN a sample sheet error is raised
         validate_sample_sheet(
-            sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
-            bcl_converter=BclConverter.BCL2FASTQ,
+            sample_sheet_content=sample_sheet_duplicate_same_lane,
         )
-
-
-def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
-    sample_sheet_dragen_duplicate_same_lane: List[List[str]],
-):
-    """Test that creating a Dragen sample sheet with duplicated samples in a lane fails."""
-    # GIVEN a Dragen sample sheet with a sample duplicated in a lane
-
-    # WHEN creating the sample sheet object
-    with pytest.raises(SampleSheetError):
-        # THEN a sample sheet error is raised
-        validate_sample_sheet(
-            sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
-            bcl_converter=BclConverter.DRAGEN,
-        )
-
-
-def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
-    sample_sheet_bcl2fastq_duplicate_different_lane: List[List[str]],
-):
-    """Test that Bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
-    # GIVEN a Bcl2fastq sample sheet with same sample duplicated in different lanes
-
-    # WHEN creating the sample sheet object
-    sample_sheet: SampleSheet = validate_sample_sheet(
-        sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
-
-    # THEN a sample sheet is returned with samples in it
-    assert sample_sheet.samples
 
 
 def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
-    sample_sheet_dragen_duplicate_different_lane: List[List[str]],
+    sample_sheet_duplicate_different_lane: List[List[str]],
 ):
     """Test that Dragen a sample sheet created with duplicated samples in different lanes has samples."""
     # GIVEN a Dragen sample sheet with same sample duplicated in different lanes
 
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = validate_sample_sheet(
-        sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
-        bcl_converter=BclConverter.DRAGEN,
+        sample_sheet_content=sample_sheet_duplicate_different_lane,
     )
 
     # THEN a sample sheet is returned with samples in it

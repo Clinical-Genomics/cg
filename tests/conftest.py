@@ -703,12 +703,14 @@ def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
 
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
+# TODO DELETE THIS
 def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a Novaseq bcl2fastq sample sheet."""
     return Path(demultiplex_fixtures, "SampleSheetS2_Bcl2Fastq.csv")
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
+# TODO DELETE THIS
 def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
     """Return the path to a Novaseq dragen sample sheet."""
     return Path(demultiplex_fixtures, "SampleSheetS2_Dragen.csv")
@@ -730,6 +732,22 @@ def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
 def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to a dir with flow cells ready for demultiplexing."""
     return Path(demultiplex_fixtures, "flow-cell-runs")
+
+
+@pytest.fixture(name="novaseq_x_flow_cell_dir")
+def fixture_novaseq_x_flow_cell_dir(
+    flow_cell_runs_dir: Path, novaseq_x_flow_cell_full_name: str
+) -> Path:
+    """Return the path to the NovaSeqX flow cell demultiplex fixture directory."""
+    return Path(flow_cell_runs_dir, novaseq_x_flow_cell_full_name)
+
+
+@pytest.fixture(name="novaseq_6000_flow_cell_dir")
+def fixture_novaseq_6000_flow_cell_dir(
+    flow_cell_runs_dir: Path, novaseq_6000_flow_cell_full_name: str
+) -> Path:
+    """Return the path to the NovaSeq6000 flow cell demultiplex fixture directory."""
+    return Path(flow_cell_runs_dir, "nova_seq_6000", novaseq_6000_flow_cell_full_name)
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell_dir")
@@ -770,6 +788,18 @@ def fixture_novaseq_run_parameters(bcl2fastq_flow_cell_dir: Path) -> Path:
 def fixture_run_parameters_different_index(run_parameters_dir: Path) -> Path:
     """Return the path to a file with novaseq run parameters with different index cycles."""
     return Path(run_parameters_dir, "RunParameters_different_index_cycles.xml")
+
+
+@pytest.fixture(name="novaseq_x_flow_cell")
+def fixture_novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCell:
+    """Create a flow cell object with the output of a NovaSeqX sequencing."""
+    return FlowCell(flow_cell_path=novaseq_x_flow_cell_dir)
+
+
+@pytest.fixture(name="novaseq_6000_flow_cell")
+def fixture_novaseq_x_flow_cell(novaseq_6000_flow_cell_dir: Path) -> FlowCell:
+    """Create a flow cell object with the output of a NovaSeq6000 sequencing."""
+    return FlowCell(flow_cell_path=novaseq_6000_flow_cell_dir)
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell")
@@ -828,6 +858,18 @@ def fixture_lims_novaseq_samples_raw(lims_novaseq_samples_file: Path) -> List[di
     )
 
 
+@pytest.fixture(name="novaseq_x_flow_cell_full_name")
+def fixture_novaseq_x_flow_cell_full_name() -> str:
+    """Return full name for a NovaSeqX flow cell."""
+    return "20230508_LH00188_0003_A22522YLT3"
+
+
+@pytest.fixture(name="novaseq_6000_flow_cell_full_name")
+def fixture_novaseq_6000_flow_cell_full_name() -> str:
+    """Return full name for a NovaSeq6000 flow cell."""
+    return "221031_A00187_0862_AHJJJNDRX2"
+
+
 @pytest.fixture(name="bcl2fastq_flow_cell_full_name")
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
@@ -845,6 +887,12 @@ def fixture_demultiplexed_flow_cell(
     demultiplexed_runs: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
     return Path(demultiplexed_runs, bcl2fastq_flow_cell_full_name)
+
+
+@pytest.fixture(name="sample_sheet_dir")
+def fixture_sample_sheet_dir(novaseq_6000_flow_cell_dir: Path) -> Path:
+    """Returns the path to a sample sheet."""
+    return Path(novaseq_6000_flow_cell_dir, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
 
 @pytest.fixture(name="bcl2fastq_demux_results")

@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 from typing import List, Dict
 from cg.constants.sequencing import Sequencers
-from cg.utils.enums import StrEnum
+from cg.utils.enums import Enum, StrEnum
 
 
 class BclConverter(StrEnum):
@@ -58,7 +58,7 @@ class SampleSheetSections:
         Sequencers.NOVASEQX.value: "NovaSeqXSeries",
     }
 
-    class Header(StrEnum):
+    class Header(Enum):
         HEADER: str = "[Header]"
         FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
         RUN_NAME: str = "RunName, "
@@ -72,12 +72,12 @@ class SampleSheetSections:
         INDEX_CYCLES_1: str = "Index1Cycles"
         INDEX_CYCLES_2: str = "Index2Cycles"
 
-    class Settings(StrEnum):
+    class Settings(Enum):
         HEADER: str = "[BCLConvert_Settings]"
         SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
         FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
 
-    class Data(StrEnum):
+    class Data(Enum):
         HEADER: str = "[BCLConvert_Data]"
         COLUMN_NAMES: List[str] = [
             "Lane",
