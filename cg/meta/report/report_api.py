@@ -49,10 +49,9 @@ class ReportAPI(MetaAPI):
         report_data: ReportModel = self.get_report_data(
             case_id=case_id, analysis_date=analysis_date
         )
-        # TODO: remove comment. Testing purposes.
-        # report_data: ReportModel = self.validate_report_fields(
-        #     case_id=case_id, report_data=report_data, force_report=force_report
-        # )
+        report_data: ReportModel = self.validate_report_fields(
+            case_id=case_id, report_data=report_data, force_report=force_report
+        )
         rendered_report: str = self.render_delivery_report(report_data=report_data.dict())
         return rendered_report
 

@@ -1,6 +1,18 @@
 """RNAfusion delivery report API."""
 from typing import List, Optional
 
+from cg.constants import (
+    REQUIRED_REPORT_FIELDS,
+    REQUIRED_CUSTOMER_FIELDS,
+    REQUIRED_CASE_FIELDS,
+    REQUIRED_APPLICATION_FIELDS,
+    REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS,
+    REQUIRED_SAMPLE_METHODS_FIELDS,
+    REQUIRED_SAMPLE_TIMESTAMP_FIELDS,
+    REQUIRED_SAMPLE_RNAFUSION_FIELDS,
+    REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS,
+)
+from cg.models.report.report import CaseModel
 from cgmodels.cg.constants import Pipeline
 
 from cg.models.report.sample import SampleModel
@@ -75,3 +87,27 @@ class RnafusionReportAPI(ReportAPI):
     def get_template_name(self) -> str:
         """Retrieves the template name to render the delivery report."""
         return Pipeline.RNAFUSION + "_report.html"
+
+    def get_required_fields(self, case: CaseModel) -> dict:
+        """Retrieves a dictionary with the delivery report required fields for Rnafusion."""
+        return {
+            "report": REQUIRED_REPORT_FIELDS,
+            "customer": REQUIRED_CUSTOMER_FIELDS,
+            "case": REQUIRED_CASE_FIELDS,
+            "applications": self.get_application_required_fields(
+                case=case, required_fields=REQUIRED_APPLICATION_FIELDS
+            ),
+            "data_analysis": REQUIRED_DATA_ANALYSIS_RNAFUSION_FIELDS,
+            "samples": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_RNAFUSION_FIELDS
+            ),
+            "methods": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METHODS_FIELDS
+            ),
+            "timestamps": self.get_timestamp_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_TIMESTAMP_FIELDS
+            ),
+            "metadata": self.get_sample_required_fields(
+                case=case, required_fields=REQUIRED_SAMPLE_METADATA_RNAFUSION_FIELDS
+            ),
+        }
