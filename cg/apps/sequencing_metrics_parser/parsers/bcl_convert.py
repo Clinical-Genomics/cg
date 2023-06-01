@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Union, Dict, Callable
 from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
-from cg.constants.constants import FileFormat
+from cg.constants.constants import FileFormat, SCALE_TO_READ_PAIRS
 from cg.constants.bcl_convert_metrics import (
     DEMUX_METRICS_FILE_NAME,
     QUALITY_METRICS_FILE_NAME,
@@ -125,23 +125,33 @@ class BclConvertMetricsParser:
 
     def get_metrics_for_sample_and_lane(
         self,
-        metrics_list: List[
+        metrics: List[
             Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
         ],
         sample_internal_id: str,
         lane: int,
     ) -> Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]:
         """Return the metrics for a sample by sample internal id."""
-        for metric in metrics_list:
+        for metric in metrics:
             if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
                 return metric
+
+    def get_read_pair_metrics_for_sample_and_lane(
+        self, sample_internal_id: str, lane: int
+    ) -> List[BclConvertQualityMetrics]:
+        """Return the read pair metrics for a sample and lane."""
+        read_metrics: List[BclConvertQualityMetrics] = []
+        for metric in self.quality_metrics:
+            if metric.sample_internal_id == sample_internal_id and metric.lane == lane:
+                read_metrics.append(metric)
+        return read_metrics
 
     def calculate_total_reads_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> int:
         """Calculate the total reads for a sample in a lane."""
         metric: BclConvertDemuxMetrics = self.get_metrics_for_sample_and_lane(
-            metrics_list=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
+            metrics=self.demux_metrics, sample_internal_id=sample_internal_id, lane=lane
         )
-        return metric.read_pair_count * 2
+        return metric.read_pair_count * SCALE_TO_READ_PAIRS
 
     def get_flow_cell_name(self) -> str:
         """Return the flow cell name of the demultiplexed flow cell."""
@@ -149,16 +159,34 @@ class BclConvertMetricsParser:
 
     def get_q30_bases_percent_for_sample_in_lane(self, sample_internal_id: str, lane: int) -> float:
         """Return the percent of bases that are Q30 for a sample and lane."""
-        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
-            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        metrics: List[BclConvertQualityMetrics] = self.get_read_pair_metrics_for_sample_and_lane(
+            sample_internal_id=sample_internal_id, lane=lane
         )
-        return metric.q30_bases_percent
+        return self.calculate_mean_read_pair_q30_bases_percent(metrics=metrics)
 
-    def get_mean_quality_score_fot_sample_in_lane(
+    @classmethod
+    def calculate_mean_read_pair_q30_bases_percent(
+        cls, metrics: List[BclConvertQualityMetrics]
+    ) -> float:
+        """Calculate the percent of bases that are Q30 for read pairs."""
+        mean_read_pair_q30_bases_percent: float = 0
+        for metric in metrics:
+            mean_read_pair_q30_bases_percent += metric.q30_bases_percent
+        return round(mean_read_pair_q30_bases_percent / SCALE_TO_READ_PAIRS, 2)
+
+    @classmethod
+    def calculate_mean_quality_score(cls, metrics: List[BclConvertQualityMetrics]) -> float:
+        """Calculate the mean quality score for a list of metrics."""
+        total_q_score: float = 0
+        for metric in metrics:
+            total_q_score += metric.mean_quality_score_q30
+        return round(total_q_score / SCALE_TO_READ_PAIRS, 2)
+
+    def get_mean_quality_score_for_sample_in_lane(
         self, sample_internal_id: str, lane: int
     ) -> float:
         """Return the mean quality score for a sample and lane."""
-        metric: BclConvertQualityMetrics = self.get_metrics_for_sample_and_lane(
-            metrics_list=self.quality_metrics, sample_internal_id=sample_internal_id, lane=lane
+        metrics: List[BclConvertQualityMetrics] = self.get_read_pair_metrics_for_sample_and_lane(
+            sample_internal_id=sample_internal_id, lane=lane
         )
-        return metric.mean_quality_score_q30
+        return self.calculate_mean_quality_score(metrics=metrics)
