@@ -247,7 +247,7 @@ def metrics_deliver(context: CGConfig, case_id: str, dry_run: bool) -> None:
         raise click.Abort() from error
 
     if not analysis_api.trailblazer_api.is_latest_analysis_qc(case_id=case_id):
-        LOG.error("The analysis status must be in the QC step to be saved.")
+        LOG.error("The analysis status must be in the QC step to be stored.")
         raise click.Abort()
     analysis_api.write_metrics_deliverables(case_id=case_id, dry_run=dry_run)
     if dry_run:
