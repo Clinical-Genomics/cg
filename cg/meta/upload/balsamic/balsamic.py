@@ -1,5 +1,4 @@
-"""Balsamic upload API"""
-
+"""Balsamic upload API."""
 import datetime as dt
 import logging
 
@@ -22,18 +21,16 @@ LOG = logging.getLogger(__name__)
 
 
 class BalsamicUploadAPI(UploadAPI):
-    """Balsamic upload API"""
+    """Balsamic upload API."""
 
     def __init__(self, config: CGConfig):
         self.analysis_api: BalsamicAnalysisAPI = BalsamicAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
-        """Uploads BALSAMIC analysis data and files"""
-
-        analysis_obj: Analysis = case.analyses[0]
-
-        self.update_upload_started_at(analysis_obj)
+        """Uploads BALSAMIC analysis data and files."""
+        analysis: Analysis = case.analyses[0]
+        self.update_upload_started_at(analysis=analysis)
 
         # Delivery report generation
         if case.data_delivery in REPORT_SUPPORTED_DATA_DELIVERY:
@@ -52,18 +49,21 @@ class BalsamicUploadAPI(UploadAPI):
             )
 
         # Genotype specific upload
-        if UploadGenotypesAPI.is_suitable_for_genotype_upload(case):
+        if UploadGenotypesAPI.is_suitable_for_genotype_upload(case_obj=case):
             ctx.invoke(upload_genotypes, family_id=case.internal_id, re_upload=restart)
         else:
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Genotype upload")
 
         # Observations upload
-        if self.analysis_api.get_case_application_type(case.internal_id) == SequencingMethod.WGS:
+        if (
+            self.analysis_api.get_case_application_type(case_id=case.internal_id)
+            == SequencingMethod.WGS
+        ):
             ctx.invoke(upload_observations_to_loqusdb, case_id=case.internal_id)
         else:
             LOG.info(f"Balsamic case {case.internal_id} is not compatible for Observations upload")
-
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
         )
-        self.update_uploaded_at(analysis_obj)
+
+        self.update_uploaded_at(analysis=analysis)
