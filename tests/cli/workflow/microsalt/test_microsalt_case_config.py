@@ -1,15 +1,12 @@
 """ This file groups all tests related to microsalt case config creation """
 
 import logging
-import random
-import unittest
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
 from cg.cli.workflow.microsalt.base import config_case
 from cg.models.cg_config import CGConfig
 from click.testing import CliRunner
-from snapshottest import Snapshot
 
 EXIT_SUCCESS = 0
 
@@ -135,7 +132,6 @@ def test_gonorrhoeae(
 ):
     """Test if the substitution of the organism happens"""
     # GIVEN a sample with organism set to gonorrhea
-    lims_sample = lims_api.sample(microbial_sample_id)
     sample_obj = base_context.meta_apis["analysis_api"].status_db.get_sample_by_internal_id(
         microbial_sample_id
     )
@@ -195,7 +191,9 @@ def test_vre_nc_004668(cli_runner: CliRunner, base_context: CGConfig, microbial_
     assert "Enterococcus faecalis" in result.output
 
 
-def test_vre_comment(cli_runner: CliRunner, base_context: CGConfig, lims_api, microbial_sample_id):
+def test_vre_comment(
+    cli_runner: CliRunner, base_context: CGConfig, lims_api: LimsAPI, microbial_sample_id
+):
     """Test if this bacteria gets its name changed"""
     # GIVEN a sample with organism set to VRE and a comment set in LIMS
     sample_obj = base_context.meta_apis["analysis_api"].status_db.get_sample_by_internal_id(
