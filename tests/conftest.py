@@ -746,9 +746,9 @@ def fixture_dragen_flow_cell_path(
 
 
 @pytest.fixture(name="hiseq_dir")
-def fixture_hiseq_dir(demultiplex_fixtures: Path) -> Path:
+def fixture_hiseq_dir(flow_cell_runs_dir: Path) -> Path:
     """Return the path to the hiseq demultiplex fixtures."""
-    return Path(demultiplex_fixtures, "hiseq_run")
+    return Path(flow_cell_runs_dir, "hiseq")
 
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
