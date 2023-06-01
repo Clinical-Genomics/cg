@@ -152,7 +152,7 @@ def test_get_metrics_for_sample_internal_id_and_lane(
 
     # WHEN getting metrics for a sample internal id and lane
     metrics: BclConvertDemuxMetrics = parsed_bcl_convert_metrics.get_metrics_for_sample_and_lane(
-        metrics_list=parsed_bcl_convert_metrics.demux_metrics,
+        metrics=parsed_bcl_convert_metrics.demux_metrics,
         sample_internal_id=test_sample_internal_id,
         lane=1,
     )
