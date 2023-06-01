@@ -14,7 +14,7 @@ from cg.constants.demultiplexing import (
 
 
 def parse_bcl2fastq_sequencing_metrics(
-    demultiplex_result_directory: Path,
+    flow_cell_dir: Path,
 ) -> List[Bcl2FastqSampleLaneMetrics]:
     """
     Parse stats.json files in specified Bcl2fastq demultiplex result directory.
@@ -31,7 +31,7 @@ def parse_bcl2fastq_sequencing_metrics(
     """
     tile_sequencing_metrics: List[
         Bcl2FastqSampleLaneTileMetrics
-    ] = parse_bcl2fastq_raw_tile_metrics(demultiplex_result_directory=demultiplex_result_directory)
+    ] = parse_bcl2fastq_raw_tile_metrics(demultiplex_result_directory=flow_cell_dir)
 
     sample_lane_sequencing_metrics: List[
         Bcl2FastqSampleLaneMetrics
@@ -84,18 +84,20 @@ def aggregate_tile_metrics_per_sample_and_lane(
                     demux_result.sample_id,
                 )
 
+                sample_id: str = discard_index_sequence(sample_id_with_index=demux_result.sample_id)
+
                 if sample_lane_key not in metrics:
                     metrics[sample_lane_key] = Bcl2FastqSampleLaneMetrics(
                         flow_cell_name=tile_metric.flow_cell_name,
                         flow_cell_lane_number=conversion_result.lane_number,
-                        sample_id=demux_result.sample_id,
+                        sample_id=sample_id,
                         sample_total_reads_in_lane=0,
                         sample_total_yield_in_lane=0,
                         sample_total_yield_q30_in_lane=0,
                         sample_total_quality_score_in_lane=0,
                     )
-
-                metrics[sample_lane_key].sample_total_reads_in_lane += demux_result.number_reads
+                # Double the total reads since they are reported in pairs
+                metrics[sample_lane_key].sample_total_reads_in_lane += demux_result.number_reads * 2
                 metrics[sample_lane_key].sample_total_yield_in_lane += demux_result.yield_
                 metrics[sample_lane_key].sample_total_yield_q30_in_lane += sum(
                     [read_metric.yield_q30 for read_metric in demux_result.read_metrics]
@@ -105,6 +107,11 @@ def aggregate_tile_metrics_per_sample_and_lane(
                 )
 
     return list(metrics.values())
+
+
+def discard_index_sequence(sample_id_with_index: str) -> str:
+    """Discard the index sequence from the sample id."""
+    return sample_id_with_index.split("_")[0]
 
 
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:

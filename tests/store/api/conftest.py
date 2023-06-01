@@ -109,7 +109,7 @@ def fixture_rml_pool_store(
 @pytest.fixture(name="re_sequenced_sample_store")
 def fixture_re_sequenced_sample_store(
     store: Store,
-    another_flow_cell_id: str,
+    dragen_flow_cell_id: str,
     case_id: str,
     family_name: str,
     bcl2fastq_flow_cell_id: str,
@@ -141,7 +141,7 @@ def fixture_re_sequenced_sample_store(
 
     helpers.add_flowcell(
         store=re_sequenced_sample_store,
-        flow_cell_name=another_flow_cell_id,
+        flow_cell_name=dragen_flow_cell_id,
         samples=[store_sample],
         date=timestamp_now,
     )

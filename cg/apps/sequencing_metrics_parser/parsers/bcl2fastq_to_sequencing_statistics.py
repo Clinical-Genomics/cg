@@ -11,14 +11,14 @@ from cg.apps.sequencing_metrics_parser.sequencing_metrics_calculator import (
 from cg.store.models import SampleLaneSequencingMetrics
 
 
-def get_sequencing_metrics_from_bcl2fastq(
-    demultiplex_result_directory: Path,
+def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
+    flow_cell_dir: Path,
 ) -> List[SampleLaneSequencingMetrics]:
     """
     Parses the Bcl2fastq generated stats.json files and aggregates and calculates metrics for each sample in each lane.
 
     Args:
-        demultiplex_result_directory (Path): Demultiplexed flow cell directory containing output from bcl2fastq
+        flow_cell_dir (Path): Demultiplexed flow cell directory containing output from bcl2fastq
 
     Returns:
         List[SampleLaneSequencingMetrics]: A list of SampleLaneSequencingMetrics representing the sequencing
@@ -28,11 +28,11 @@ def get_sequencing_metrics_from_bcl2fastq(
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
 
     sample_and_lane_metrics: List[Bcl2FastqSampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(
-        demultiplex_result_directory=demultiplex_result_directory
+        flow_cell_dir=flow_cell_dir
     )
 
     for raw_sample_metrics in sample_and_lane_metrics:
-        metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics(
+        metrics: SampleLaneSequencingMetrics = create_sample_lane_sequencing_metrics_from_bcl2fastq(
             bcl2fastq_sample_metrics=raw_sample_metrics
         )
         sample_lane_sequencing_metrics.append(metrics)
@@ -40,7 +40,7 @@ def get_sequencing_metrics_from_bcl2fastq(
     return sample_lane_sequencing_metrics
 
 
-def create_sample_lane_sequencing_metrics(
+def create_sample_lane_sequencing_metrics_from_bcl2fastq(
     bcl2fastq_sample_metrics: Bcl2FastqSampleLaneMetrics,
 ) -> SampleLaneSequencingMetrics:
     """

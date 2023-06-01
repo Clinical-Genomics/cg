@@ -164,12 +164,14 @@ def test_demultiplex_dragen_flowcell(
     assert demux_api.demultiplex_sbatch_path(flow_cell).exists()
 
 
-def test_demultiplex_all(
+def test_demultiplex_all_novaseq(
     cli_runner: testing.CliRunner,
     demultiplex_context: CGConfig,
     demultiplex_ready_flow_cell: Path,
     caplog,
 ):
+    """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 flow cells."""
+
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux

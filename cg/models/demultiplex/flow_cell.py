@@ -141,7 +141,7 @@ class FlowCell:
         Example: '201203_A00689_0200_AHVKJCDRXX'.
         """
         if len(self.split_flow_cell_name) != 4:
-            message = f"Flowcell {self.path.name} does not follow the flow cell naming convention"
+            message = f"Flowcell {self.full_name} does not follow the flow cell naming convention"
             LOG.warning(message)
             raise FlowCellError(message)
 
