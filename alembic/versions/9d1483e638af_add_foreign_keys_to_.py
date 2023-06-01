@@ -18,10 +18,18 @@ depends_on = None
 def upgrade():
     # Add foreign key constraints to SampleLaneSequencingMetrics table
     op.create_foreign_key(
-        None, "sample_lane_sequencing_metrics", "flowcell", ["flow_cell_name"], ["name"]
+        "sample_lane_sequencing_metrics_flow_cell_name_fkey",
+        "sample_lane_sequencing_metrics",
+        "flowcell",
+        ["flow_cell_name"],
+        ["name"],
     )
     op.create_foreign_key(
-        None, "sample_lane_sequencing_metrics", "sample", ["sample_internal_id"], ["internal_id"]
+        "sample_lane_sequencing_metrics_sample_internal_id_fkey",
+        "sample_lane_sequencing_metrics",
+        "sample",
+        ["sample_internal_id"],
+        ["internal_id"],
     )
 
 
