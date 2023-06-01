@@ -53,8 +53,8 @@ def fixture_incorrect_flow_cell_path_extension(
     return Path(demultiplexed_flow_cells_working_directory, incorrect_flow_cell_extension)
 
 
-@pytest.fixture(name="nonexistent_flow_cell_path")
-def fixture_nonexistent_flow_cell_path(
+@pytest.fixture(name="non-existent_flow_cell_path")
+def fixture_non_existent_flow_cell_path(
     demultiplexed_flow_cells_working_directory, incorrect_flow_cell_name
 ) -> Path:
     """Full path to an incorrectly named flow cell directory in demultiplexed-runs."""
