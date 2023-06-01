@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Side>A</Side>
+  <Application>control-software</Application>
+  <SystemSuiteVersion>1.0.1.7385</SystemSuiteVersion>
+  <OutputFolder>//ngi-nas.scilifelab.se/ngi_data/Runs/20230508_LH00188_0003_A22522YLT3</OutputFolder>
+  <CloudUploadMode>InstrumentPerformance</CloudUploadMode>
+  <InstrumentType>NovaSeqXPlus</InstrumentType>
+  <InstrumentSerialNumber>LH00188</InstrumentSerialNumber>
+  <RunId>20230508_LH00188_0003_A22522YLT3</RunId>
+  <RunCounter>3</RunCounter>
+  <RecipeName>10B Sequencing</RecipeName>
+  <RecipeVersion>10B-01.00.00</RecipeVersion>
+  <ExperimentName>22522YLT3</ExperimentName>
+  <FlowCellName>NovaSeqXSeries B3</FlowCellName>
+  <FlowCellType>NovaSeqXSeriesB3</FlowCellType>
+  <ScanSpeedMmPerSec>1.2345678</ScanSpeedMmPerSec>
+  <ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>22522YLT3</SerialNumber>
+      <LotNumber>20737128</LotNumber>
+      <PartNumber>20080370</PartNumber>
+      <ExpirationDate>2024-02-28T00:00:00+01:00</ExpirationDate>
+      <Type>FlowCell</Type>
+      <Mode>10B</Mode>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC4001354-LC3</SerialNumber>
+      <LotNumber>20707596</LotNumber>
+      <PartNumber>20066614</PartNumber>
+      <ExpirationDate>2023-12-14T00:00:00+01:00</ExpirationDate>
+      <Type>Reagent</Type>
+      <Mode>10B</Mode>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2212060272-1</SerialNumber>
+      <LotNumber>22120701</LotNumber>
+      <PartNumber>20089853</PartNumber>
+      <ExpirationDate>2023-06-02T00:00:00+02:00</ExpirationDate>
+      <Type>Buffer</Type>
+      <Mode>10B</Mode>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC1006247-LC1</SerialNumber>
+      <LotNumber>1000015508</LotNumber>
+      <PartNumber>20072271</PartNumber>
+      <ExpirationDate>2024-03-25T00:00:00+01:00</ExpirationDate>
+      <Type>SampleTube</Type>
+      <Mode>10B</Mode>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>LC2000247-LC1</SerialNumber>
+      <LotNumber>17714646</LotNumber>
+      <PartNumber>20081650</PartNumber>
+      <ExpirationDate>2023-11-08T00:00:00+01:00</ExpirationDate>
+      <Type>Lyo</Type>
+      <Mode>10B</Mode>
+    </ConsumableInfo>
+  </ConsumableInfo>
+  <PlannedReads>
+    <Read ReadName="Read1" Cycles="151" />
+    <Read ReadName="Index1" Cycles="10" />
+    <Read ReadName="Index2" Cycles="10" />
+    <Read ReadName="Read2" Cycles="151" />
+  </PlannedReads>
+</RunParameters>
