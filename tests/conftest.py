@@ -1,5 +1,6 @@
 """Conftest file for pytest fixtures that needs to be shared for multiple tests."""
 import copy
+import gzip
 import http
 import logging
 import os
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from housekeeper.store.models import File, Version
 from requests import Response
 
@@ -21,7 +23,8 @@ from cg.constants.constants import CaseActions, FileFormat
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
-from cg.io.controller import ReadFile
+from cg.io.controller import ReadFile, WriteFile
+from cg.io.json import write_json, read_json
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
@@ -29,7 +32,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Organism
+from cg.store.models import Bed, BedVersion, Customer, Organism, Family, Sample
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -47,43 +50,43 @@ LOG = logging.getLogger(__name__)
 # Timestamp fixture
 
 
-@pytest.fixture(name="old_timestamp")
+@pytest.fixture(name="old_timestamp", scope="session")
 def fixture_old_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(1900, 1, 1)
 
 
-@pytest.fixture(name="timestamp")
+@pytest.fixture(name="timestamp", scope="session")
 def fixture_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(2020, 5, 1)
 
 
-@pytest.fixture(name="later_timestamp")
+@pytest.fixture(name="later_timestamp", scope="session")
 def fixture_later_timestamp() -> datetime:
     """Return a time stamp in date time format."""
     return datetime(2020, 6, 1)
 
 
-@pytest.fixture(name="future_date")
+@pytest.fixture(name="future_date", scope="session")
 def fixture_future_date() -> datetime:
     """Return a distant date in the future for which no events happen later."""
     return datetime(MAXYEAR, 1, 1, 1, 1, 1)
 
 
-@pytest.fixture(name="timestamp_now")
+@pytest.fixture(name="timestamp_now", scope="session")
 def fixture_timestamp_now() -> datetime:
     """Return a time stamp of today's date in date time format."""
     return datetime.now()
 
 
-@pytest.fixture(name="timestamp_yesterday")
+@pytest.fixture(name="timestamp_yesterday", scope="session")
 def fixture_timestamp_yesterday(timestamp_now: datetime) -> datetime:
     """Return a time stamp of yesterday's date in date time format."""
     return timestamp_now - timedelta(days=1)
 
 
-@pytest.fixture(name="timestamp_in_2_weeks")
+@pytest.fixture(name="timestamp_in_2_weeks", scope="session")
 def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
     """Return a time stamp 14 days ahead in time."""
     return timestamp_now + timedelta(days=14)
@@ -92,79 +95,79 @@ def fixture_timestamp_in_2_weeks(timestamp_now: datetime) -> datetime:
 # Case fixtures
 
 
-@pytest.fixture(name="slurm_account")
+@pytest.fixture(name="slurm_account", scope="session")
 def fixture_slurm_account() -> str:
     """Return a SLURM account."""
     return "super_account"
 
 
-@pytest.fixture(name="user_name")
+@pytest.fixture(name="user_name", scope="session")
 def fixture_user_name() -> str:
     """Return a user name."""
     return "Paul Anderson"
 
 
-@pytest.fixture(name="user_mail")
+@pytest.fixture(name="user_mail", scope="session")
 def fixture_user_mail() -> str:
     """Return a user email."""
     return "paul@magnolia.com"
 
 
-@pytest.fixture(name="email_adress")
+@pytest.fixture(name="email_adress", scope="session")
 def fixture_email_adress() -> str:
     """Return an email adress."""
     return "james.holden@scilifelab.se"
 
 
-@pytest.fixture(name="case_id")
+@pytest.fixture(name="case_id", scope="session")
 def fixture_case_id() -> str:
     """Return a case id."""
     return "yellowhog"
 
 
-@pytest.fixture(name="case_id_does_not_exist")
+@pytest.fixture(name="case_id_does_not_exist", scope="session")
 def fixture_case_id_does_not_exist() -> str:
     """Return a case id that should not exist."""
     return "case_does_not_exist"
 
 
-@pytest.fixture(name="another_case_id")
+@pytest.fixture(name="another_case_id", scope="session")
 def fixture_another_case_id() -> str:
     """Return another case id."""
     return "another_case_id"
 
 
-@pytest.fixture(name="sample_id")
+@pytest.fixture(name="sample_id", scope="session")
 def fixture_sample_id() -> str:
     """Return a sample id."""
     return "ADM1"
 
 
-@pytest.fixture(name="father_sample_id")
+@pytest.fixture(name="father_sample_id", scope="session")
 def fixture_father_sample_id() -> str:
     """Return the sample id of the father."""
     return "ADM2"
 
 
-@pytest.fixture(name="mother_sample_id")
+@pytest.fixture(name="mother_sample_id", scope="session")
 def fixture_mother_sample_id() -> str:
     """Return the mothers sample id."""
     return "ADM3"
 
 
-@pytest.fixture(name="invalid_sample_id")
+@pytest.fixture(name="invalid_sample_id", scope="session")
 def fixture_invalid_sample_id() -> str:
     """Return an invalid sample id."""
     return "invalid-sample-id"
 
 
-@pytest.fixture(name="sample_ids")
+@pytest.fixture(name="sample_ids", scope="session")
 def fixture_sample_ids(sample_id: str, father_sample_id: str, mother_sample_id: str) -> List[str]:
     """Return a list with three samples of a family."""
     return [sample_id, father_sample_id, mother_sample_id]
 
 
-@pytest.fixture(name="sample_name")
+@pytest.fixture(name="sample_name", scope="session")
 def fixture_sample_name() -> str:
     """Returns a sample name."""
     return "a_sample_name"
@@ -176,7 +179,7 @@ def fixture_cust_sample_id() -> str:
     return "child"
 
 
-@pytest.fixture(name="family_name")
+@pytest.fixture(name="family_name", scope="session")
 def fixture_family_name() -> str:
     """Return a case name."""
     return "case"
@@ -188,12 +191,12 @@ def fixture_customer_id() -> str:
     return "cust000"
 
 
-@pytest.fixture(name="sbatch_job_number")
+@pytest.fixture(name="sbatch_job_number", scope="session")
 def fixture_sbatch_job_number() -> int:
     return 123456
 
 
-@pytest.fixture(name="sbatch_process")
+@pytest.fixture(name="sbatch_process", scope="session")
 def fixture_sbatch_process(sbatch_job_number: int) -> ProcessMock:
     """Return a mocked process object."""
     slurm_process = ProcessMock(binary="sbatch")
@@ -464,19 +467,19 @@ def fixture_fixtures_dir() -> Path:
     return Path("tests", "fixtures")
 
 
-@pytest.fixture(name="analysis_dir")
+@pytest.fixture(name="analysis_dir", scope="session")
 def fixture_analysis_dir(fixtures_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(fixtures_dir, "analysis")
 
 
-@pytest.fixture(name="microsalt_analysis_dir")
+@pytest.fixture(name="microsalt_analysis_dir", scope="session")
 def fixture_microsalt_analysis_dir(analysis_dir: Path) -> Path:
     """Return the path to the analysis dir."""
     return Path(analysis_dir, "microsalt")
 
 
-@pytest.fixture(name="apps_dir")
+@pytest.fixture(name="apps_dir", scope="session")
 def fixture_apps_dir(fixtures_dir: Path) -> Path:
     """Return the path to the apps dir."""
     return Path(fixtures_dir, "apps")
@@ -512,7 +515,7 @@ def fixture_non_existing_file_path(project_dir: Path) -> Path:
     return Path(project_dir, "a_file.txt")
 
 
-@pytest.fixture(name="content")
+@pytest.fixture(name="content", scope="session")
 def fixture_content() -> str:
     """Return some content for a file."""
     return (
@@ -900,7 +903,7 @@ def fixture_bed_file(analysis_dir) -> Path:
 # Helper fixtures
 
 
-@pytest.fixture(name="helpers")
+@pytest.fixture(name="helpers", scope="session")
 def fixture_helpers() -> StoreHelpers:
     """Return a class with helper functions for the stores."""
     return StoreHelpers()
@@ -1398,59 +1401,57 @@ def sample_store(base_store: Store) -> Store:
     return base_store
 
 
-@pytest.fixture(name="trailblazer_api")
+@pytest.fixture(name="trailblazer_api", scope="session")
 def fixture_trailblazer_api() -> MockTB:
     """Return a mock Trailblazer API."""
     return MockTB()
 
 
-@pytest.fixture(name="lims_api")
+@pytest.fixture(name="lims_api", scope="session")
 def fixture_lims_api() -> MockLimsAPI:
     """Return a mock LIMS API."""
     return MockLimsAPI()
 
 
-@pytest.fixture(name="config_root_dir")
-def fixture_config_root_dir(tmpdir_factory) -> Path:
+@pytest.fixture(name="config_root_dir", scope="session")
+def fixture_config_root_dir() -> Path:
     """Return a path to the config root directory."""
     return Path("tests", "fixtures", "data")
 
 
-@pytest.fixture(name="housekeeper_dir")
+@pytest.fixture(name="housekeeper_dir", scope="session")
 def fixture_housekeeper_dir(tmpdir_factory):
     """Return a temporary directory for Housekeeper testing."""
     return tmpdir_factory.mktemp("housekeeper")
 
 
-@pytest.fixture(name="mip_dir")
+@pytest.fixture(name="mip_dir", scope="session")
 def fixture_mip_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for MIP testing."""
     return tmpdir_factory.mktemp("mip")
 
 
-@pytest.fixture(name="fluffy_dir")
+@pytest.fixture(name="fluffy_dir", scope="session")
 def fixture_fluffy_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Fluffy testing."""
     return tmpdir_factory.mktemp("fluffy")
 
 
-@pytest.fixture(name="balsamic_dir")
+@pytest.fixture(name="balsamic_dir", scope="session")
 def fixture_balsamic_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Balsamic testing."""
     return tmpdir_factory.mktemp("balsamic")
 
 
-@pytest.fixture(name="rnafusion_dir")
+@pytest.fixture(name="rnafusion_dir", scope="session")
 def fixture_rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
 
-
-@pytest.fixture(name="taxprofiler_dir")
+@pytest.fixture(name="taxprofiler_dir", scope="session")
 def fixture_taxprofiler_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("taxprofiler")
 
-
-@pytest.fixture(name="cg_dir")
+@pytest.fixture(name="cg_dir", scope="session")
 def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
     return tmpdir_factory.mktemp("cg")
@@ -1514,7 +1515,7 @@ def fixture_custom_observations_clinical_snv_file_path(observations_dir: Path) -
     return Path(observations_dir, "clinical_snv_export-19990101-.vcf.gz")
 
 
-@pytest.fixture(name="microsalt_dir")
+@pytest.fixture(name="microsalt_dir", scope="session")
 def fixture_microsalt_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for Microsalt testing."""
     return tmpdir_factory.mktemp("microsalt")
@@ -1757,31 +1758,31 @@ def fixture_cg_context(
     return cg_config
 
 
-@pytest.fixture(name="case_id_with_single_sample")
+@pytest.fixture(name="case_id_with_single_sample", scope="session")
 def fixture_case_id_with_single_sample():
     """Return a case id that should only be associated with one sample."""
     return "exhaustedcrocodile"
 
 
-@pytest.fixture(name="case_id_with_multiple_samples")
+@pytest.fixture(name="case_id_with_multiple_samples", scope="session")
 def fixture_case_id_with_multiple_samples():
     """Return a case id that should be associated with multiple samples."""
     return "righteouspanda"
 
 
-@pytest.fixture(name="case_id_without_samples")
+@pytest.fixture(name="case_id_without_samples", scope="session")
 def fixture_case_id_without_samples():
     """Return a case id that should not be associated with any samples."""
     return "confusedtrout"
 
 
-@pytest.fixture(name="sample_id_in_single_case")
+@pytest.fixture(name="sample_id_in_single_case", scope="session")
 def fixture_sample_id_in_single_case():
     """Return a sample id that should be associated with a single case."""
     return "ASM1"
 
 
-@pytest.fixture(name="sample_id_in_multiple_cases")
+@pytest.fixture(name="sample_id_in_multiple_cases", scope="session")
 def fixture_sample_id_in_multiple_cases():
     """Return a sample id that should be associated with multiple cases."""
     return "ASM2"
@@ -1937,3 +1938,233 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
         )
     store.session.commit()
     yield store
+
+
+# Rnafusion fixtures
+
+
+@pytest.fixture(name="rnafusion_dir")
+def fixture_rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the rnafusion apps dir."""
+    rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
+    return Path(rnafusion_dir).absolute().as_posix()
+
+
+@pytest.fixture(name="rnafusion_case_id")
+def fixture_rnafusion_case_id() -> str:
+    """Returns a rnafusion case id."""
+    return "rnafusion_case_enough_reads"
+
+
+@pytest.fixture(name="no_sample_case_id")
+def fixture_no_sample_case_id() -> str:
+    """Returns a case id of a case with no samples."""
+    return "no_sample_case"
+
+
+@pytest.fixture(name="rnafusion_sample_id")
+def fixture_rnafusion_sample_id() -> str:
+    """Returns a rnafusion sample id."""
+    return "sample_rnafusion_case_enough_reads"
+
+
+@pytest.fixture(name="rnafusion_housekeeper_dir")
+def fixture_rnafusion_housekeeper_dir(tmpdir_factory, rnafusion_dir: Path) -> Path:
+    """Return the path to the rnafusion housekeeper bundle dir."""
+    return tmpdir_factory.mktemp("bundles")
+
+
+@pytest.fixture(name="rnafusion_fastq_file_l_1_r_1")
+def fixture_rnafusion_fastq_file_l_1_r_1(rnafusion_housekeeper_dir: Path) -> str:
+    fastq_filename = Path(
+        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R1_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 1:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture(name="rnafusion_fastq_file_l_1_r_2")
+def fixture_rnafusion_fastq_file_l_1_r_2(rnafusion_housekeeper_dir: Path) -> str:
+    fastq_filename = Path(
+        rnafusion_housekeeper_dir, "XXXXXXXXX_000000_S000_L001_R2_001.fastq.gz"
+    ).as_posix()
+    with gzip.open(fastq_filename, "wb") as wh:
+        wh.write(b"@A00689:73:XXXXXXXXX:1:1101:4806:1047 2:N:0:TCCTGGAACA+ACAACCAGTA")
+    return fastq_filename
+
+
+@pytest.fixture(name="rnafusion_mock_fastq_files")
+def fixture_rnafusion_mock_fastq_files(
+    rnafusion_fastq_file_l_1_r_1: Path, rnafusion_fastq_file_l_1_r_2: Path
+) -> List[Path]:
+    """Return list of all mock fastq files to commit to mock housekeeper"""
+    return [rnafusion_fastq_file_l_1_r_1, rnafusion_fastq_file_l_1_r_2]
+
+
+@pytest.fixture(scope="function", name="rnafusion_housekeeper")
+def fixture_rnafusion_housekeeper(
+    housekeeper_api: HousekeeperAPI,
+    helpers: StoreHelpers,
+    rnafusion_mock_fastq_files: List[Path],
+    rnafusion_sample_id: str,
+):
+    """Create populated housekeeper that holds files for all mock samples."""
+
+    bundle_data = {
+        "name": rnafusion_sample_id,
+        "created": datetime.now(),
+        "version": "1.0",
+        "files": [
+            {"path": f, "tags": ["fastq"], "archive": False} for f in rnafusion_mock_fastq_files
+        ],
+    }
+    helpers.ensure_hk_bundle(store=housekeeper_api, bundle_data=bundle_data)
+    return housekeeper_api
+
+
+@pytest.fixture(scope="function", name="rnafusion_context")
+def fixture_rnafusion_context(
+    cg_context: CGConfig,
+    helpers: StoreHelpers,
+    rnafusion_housekeeper: HousekeeperAPI,
+    trailblazer_api: MockTB,
+    hermes_api: HermesApi,
+    cg_dir: Path,
+    rnafusion_case_id: str,
+    rnafusion_sample_id: str,
+    no_sample_case_id: str,
+) -> CGConfig:
+    """context to use in cli"""
+    cg_context.housekeeper_api_ = rnafusion_housekeeper
+    cg_context.trailblazer_api_ = trailblazer_api
+    cg_context.meta_apis["analysis_api"] = RnafusionAnalysisAPI(config=cg_context)
+    status_db: Store = cg_context.status_db
+
+    # Create ERROR case with NO SAMPLES
+    helpers.add_case(status_db, internal_id=no_sample_case_id, name=no_sample_case_id)
+
+    # Create textbook case with enough reads
+    case_enough_reads: Family = helpers.add_case(
+        store=status_db,
+        internal_id=rnafusion_case_id,
+        name=rnafusion_case_id,
+        data_analysis=Pipeline.RNAFUSION,
+    )
+
+    sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
+        status_db,
+        internal_id=rnafusion_sample_id,
+        sequenced_at=datetime.now(),
+    )
+
+    helpers.add_relationship(
+        status_db,
+        case=case_enough_reads,
+        sample=sample_rnafusion_case_enough_reads,
+    )
+    return cg_context
+
+
+@pytest.fixture(name="deliverable_data")
+def fixture_deliverables_data(
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_sample_id: str
+) -> dict:
+    return {
+        "files": [
+            {
+                "path": f"{rnafusion_dir}/{rnafusion_case_id}/multiqc/multiqc_report.html",
+                "path_index": "",
+                "step": "report",
+                "tag": ["multiqc-html", "rna"],
+                "id": rnafusion_case_id,
+                "format": "html",
+                "mandatory": True,
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def mock_deliverable(rnafusion_dir: Path, deliverable_data: dict, rnafusion_case_id: str) -> None:
+    """Create deliverable file with dummy data and files to deliver."""
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id),
+        parents=True,
+        exist_ok=True,
+    )
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc"),
+        parents=True,
+        exist_ok=True,
+    )
+    for report_entry in deliverable_data["files"]:
+        Path(report_entry["path"]).touch(exist_ok=True)
+    WriteFile.write_file_from_content(
+        content=deliverable_data,
+        file_format=FileFormat.JSON,
+        file_path=Path(rnafusion_dir, rnafusion_case_id, rnafusion_case_id + "_deliverables.yaml"),
+    )
+
+
+@pytest.fixture(name="hermes_deliverables")
+def fixture_hermes_deliverables(deliverable_data: dict, rnafusion_case_id: str) -> dict:
+    hermes_output: dict = {"pipeline": "rnafusion", "bundle_id": rnafusion_case_id, "files": []}
+    for file_info in deliverable_data["files"]:
+        tags: List[str] = []
+        if "html" in file_info["format"]:
+            tags.append("multiqc-html")
+        hermes_output["files"].append({"path": file_info["path"], "tags": tags, "mandatory": True})
+    return hermes_output
+
+
+@pytest.fixture(name="malformed_hermes_deliverables")
+def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
+    malformed_deliverable: dict = hermes_deliverables.copy()
+    malformed_deliverable.pop("pipeline")
+
+    return malformed_deliverable
+
+
+@pytest.fixture(name="rnafusion_multiqc_json_metrics")
+def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
+    """Returns a the content of a mock multiqc json file."""
+    return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture
+def mock_analysis_finish(
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict
+) -> None:
+    """Create analysis_finish file for testing."""
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, "pipeline_info", "software_versions.yml").touch(
+        exist_ok=True
+    )
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
+    Path.mkdir(
+        Path(rnafusion_dir, rnafusion_case_id, "multiqc", "multiqc_data"),
+        parents=True,
+        exist_ok=True,
+    )
+    write_json(
+        content=rnafusion_multiqc_json_metrics,
+        file_path=Path(
+            rnafusion_dir,
+            rnafusion_case_id,
+            "multiqc",
+            "multiqc_data",
+            "multiqc_data.json",
+        ),
+    )
+
+
+@pytest.fixture
+def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
+    """Create samplesheet.csv file for testing"""
+    Path.mkdir(Path(rnafusion_dir, rnafusion_case_id), parents=True, exist_ok=True)
+    Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
+        exist_ok=True
+    )
