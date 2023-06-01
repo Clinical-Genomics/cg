@@ -607,6 +607,12 @@ def fixture_rnafusion_analysis_dir(analysis_dir: Path) -> Path:
     return Path(analysis_dir, "rnafusion")
 
 
+@pytest.fixture(name="taxprofiler_analysis_dir")
+def fixture_taxprofiler_analysis_dir(analysis_dir: Path) -> Path:
+    """Return the path to the directory with taxprofiler analysis files."""
+    return Path(analysis_dir, "taxprofiler")
+
+
 @pytest.fixture(name="sample_cram")
 def fixture_sample_cram(mip_dna_analysis_dir: Path) -> Path:
     """Return the path to the cram file for a sample."""
@@ -1452,6 +1458,11 @@ def fixture_rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
 
 
+@pytest.fixture(name="taxprofiler_dir", scope="session")
+def fixture_taxprofiler_dir(tmpdir_factory) -> Path:
+    return tmpdir_factory.mktemp("taxprofiler")
+
+
 @pytest.fixture(name="cg_dir", scope="session")
 def fixture_cg_dir(tmpdir_factory) -> Path:
     """Return a temporary directory for cg testing."""
@@ -1563,6 +1574,7 @@ def fixture_context_config(
     balsamic_dir: Path,
     microsalt_dir: Path,
     rnafusion_dir: Path,
+    taxprofiler_dir: Path,
 ) -> dict:
     """Return a context config."""
     return {
@@ -1721,6 +1733,10 @@ def fixture_context_config(
             "tower_pipeline": "rnafusion",
         },
         "pdc": {"binary_path": "/bin/dsmc"},
+        "taxprofiler": {
+            "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
+            "root": str(taxprofiler_dir),
+        },
         "scout": {
             "binary_path": "echo",
             "config_path": "scout-stage.yaml",
