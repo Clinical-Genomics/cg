@@ -519,9 +519,7 @@ class Flowcell(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
-    sequencing_metrics = orm.relationship(
-        "SampleLaneSequencingMetrics", back_populates="flowcell"
-    )
+    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="flowcell")
 
     def __str__(self):
         return self.name
@@ -642,9 +640,7 @@ class Sample(Model, PriorityMixin):
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
-    sequencing_metrics = orm.relationship(
-        "SampleLaneSequencingMetrics", back_populates="sample"
-    )
+    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
 
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
