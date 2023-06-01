@@ -1,5 +1,5 @@
-""" This file groups all tests related t
-o microsalt case config creation """
+""" This file groups all tests related to
+ microsalt case config creation """
 
 import logging
 from pathlib import Path
