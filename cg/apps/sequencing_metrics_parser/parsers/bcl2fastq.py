@@ -83,7 +83,7 @@ def aggregate_tile_metrics_per_sample_and_lane(
                     conversion_result.lane_number,
                     demux_result.sample_id,
                 )
-                
+
                 sample_id: str = discard_index_sequence(sample_id_with_index=demux_result.sample_id)
 
                 if sample_lane_key not in metrics:
