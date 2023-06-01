@@ -320,7 +320,7 @@ class ReportAPI(MetaAPI):
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case=case),
             genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
-            variant_callers=self.get_variant_callers(analysis_metadata=analysis_metadata),
+            variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
             panels=case.panels,
             scout_files=self.get_scout_uploaded_files(case=case),
         )
@@ -376,7 +376,7 @@ class ReportAPI(MetaAPI):
         """Returns the build version of the genome reference of a specific case."""
         raise NotImplementedError
 
-    def get_variant_callers(self, analysis_metadata: AnalysisModel) -> list:
+    def get_variant_callers(self, _analysis_metadata: AnalysisModel) -> list:
         """Extracts the list of variant-calling filters used during analysis."""
         return []
 
