@@ -9,11 +9,11 @@ from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 
 
 def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
-    demultiplex_result_directory: Path,
+    flow_cell_dir: Path,
 ) -> List[SampleLaneSequencingMetrics]:
     """Parse the BCL convert metrics data into the sequencing statistics model."""
     metrics_parser: BclConvertMetricsParser = BclConvertMetricsParser(
-        bcl_convert_metrics_dir_path=demultiplex_result_directory,
+        bcl_convert_metrics_dir_path=flow_cell_dir,
     )
     sample_internal_ids: List[str] = metrics_parser.get_sample_internal_ids()
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []

@@ -101,6 +101,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
     UNALIGNED_DIR_NAME: str = "Unaligned"
+    BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
 
 
 INDEX_CHECK = "indexcheck"

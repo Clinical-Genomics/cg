@@ -12,13 +12,13 @@ from cg.store.models import SampleLaneSequencingMetrics
 
 
 def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
-    demultiplex_result_directory: Path,
+    flow_cell_dir: Path,
 ) -> List[SampleLaneSequencingMetrics]:
     """
     Parses the Bcl2fastq generated stats.json files and aggregates and calculates metrics for each sample in each lane.
 
     Args:
-        demultiplex_result_directory (Path): Demultiplexed flow cell directory containing output from bcl2fastq
+        flow_cell_dir (Path): Demultiplexed flow cell directory containing output from bcl2fastq
 
     Returns:
         List[SampleLaneSequencingMetrics]: A list of SampleLaneSequencingMetrics representing the sequencing
@@ -28,7 +28,7 @@ def create_sample_lane_sequencing_metrics_from_bcl2fastq_for_flow_cell(
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
 
     sample_and_lane_metrics: List[Bcl2FastqSampleLaneMetrics] = parse_bcl2fastq_sequencing_metrics(
-        demultiplex_result_directory=demultiplex_result_directory
+        flow_cell_dir=flow_cell_dir
     )
 
     for raw_sample_metrics in sample_and_lane_metrics:

@@ -25,7 +25,7 @@ from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -74,12 +74,14 @@ class DemuxPostProcessingAPI:
         """Add sample lane sequencing metrics to status database."""
         flow_cell_dir: Path = self.flow_cell_dir
 
-        metrics = create_sample_lane_sequencing_metrics_for_flow_cell(
+        sample_lane_sequencing_metrics: List[
+            SampleLaneSequencingMetrics
+        ] = create_sample_lane_sequencing_metrics_for_flow_cell(
             flow_cell_dir=flow_cell_dir,
-            bcl_converter=self.infer_bcl_converter(),
+            bcl_converter=self.get_bcl_converter(),
         )
 
-        self.status_db.session.add_all(metrics)
+        self.status_db.session.add_all(sample_lane_sequencing_metrics)
         self.status_db.session.commit()
         LOG.info(
             f"Added sample lane sequencing metrics to status database for: {self.flow_cell_name}"
@@ -89,8 +91,8 @@ class DemuxPostProcessingAPI:
         """Finish flow cell."""
         self.add_sample_lane_sequencing_metrics_for_flow_cell()
 
-    def infer_bcl_converter(self) -> str:
-        """Determine type of bcl converter."""
+    def get_bcl_converter(self) -> str:
+        """Return type of BCL converter."""
         if self.is_bcl2fastq_demux_folder_structure():
             LOG.info("Flow cell was demultiplexed with bcl2fastq")
             return BclConverter.BCL2FASTQ
@@ -98,10 +100,9 @@ class DemuxPostProcessingAPI:
         return BclConverter.BCLCONVERT
 
     def is_bcl2fastq_demux_folder_structure(self) -> bool:
-        """Check if flow cell directory is bcl2fastq demux folder structure."""
-        lane_tile_folder_pattern = r"l\dt\d{2}"
-        for folder in os.listdir(self.flow_cell_dir):
-            if re.search(lane_tile_folder_pattern, folder):
+        """Check if flow cell directory is a Bcl2fastq demux folder structure."""
+        for folder in self.flow_cell_dir.glob(pattern="*"):
+            if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
                 return True
         return False
 
@@ -110,7 +111,7 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Check demultiplexed flow cell {self.flow_cell_name}")
         try:
             flow_cell: FlowCell = FlowCell(
-                flow_cell_path=self.flow_cell_dir, bcl_converter=self.infer_bcl_converter()
+                flow_cell_path=self.flow_cell_dir, bcl_converter=self.get_bcl_converter()
             )
             return flow_cell
         except FlowCellError:

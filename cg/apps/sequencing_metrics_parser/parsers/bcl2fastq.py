@@ -14,7 +14,7 @@ from cg.constants.demultiplexing import (
 
 
 def parse_bcl2fastq_sequencing_metrics(
-    demultiplex_result_directory: Path,
+    flow_cell_dir: Path,
 ) -> List[Bcl2FastqSampleLaneMetrics]:
     """
     Parse stats.json files in specified Bcl2fastq demultiplex result directory.
@@ -31,7 +31,7 @@ def parse_bcl2fastq_sequencing_metrics(
     """
     tile_sequencing_metrics: List[
         Bcl2FastqSampleLaneTileMetrics
-    ] = parse_bcl2fastq_raw_tile_metrics(demultiplex_result_directory=demultiplex_result_directory)
+    ] = parse_bcl2fastq_raw_tile_metrics(demultiplex_result_directory=flow_cell_dir)
 
     sample_lane_sequencing_metrics: List[
         Bcl2FastqSampleLaneMetrics

@@ -306,26 +306,26 @@ def tmp_demultiplexing_init_files(
 
 
 @pytest.fixture(name="bcl2fastq_folder_structure", scope="function")
-def fixture_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path):
+def fixture_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that resembles a bcl2fastq run folder."""
-    base_dir = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
-    folders = ["l1t21", "l1t11", "l2t11", "l2t21"]
+    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "bcl2fastq")))
+    folders: List[str] = ["l1t21", "l1t11", "l2t11", "l2t21"]
 
     for folder in folders:
-        new_dir = base_dir / folder
+        new_dir: Path = Path(base_dir, folder)
         new_dir.mkdir()
 
     yield base_dir
 
 
 @pytest.fixture(name="not_bcl2fastq_folder_structure", scope="function")
-def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path):
+def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
     """Return a folder structure that does not resemble a bcl2fastq run folder."""
-    base_dir = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))
-    folders = ["just", "some", "folders"]
+    base_dir: Path = tmp_path_factory.mktemp("".join((str(cg_dir), "not_bcl2fastq")))
+    folders: List[str] = ["just", "some", "folders"]
 
     for folder in folders:
-        new_dir = base_dir / folder
+        new_dir: Path = Path(base_dir, folder)
         new_dir.mkdir()
 
     yield base_dir
