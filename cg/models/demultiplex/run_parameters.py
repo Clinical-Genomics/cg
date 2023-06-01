@@ -28,14 +28,6 @@ class RunParameters:
             raise FlowCellError("Index lengths are not the same!")
         return index_one_length
 
-    @property
-    def requires_dummy_samples(self) -> bool:
-        """Return true if the flow cell requires the addition of dummy samples.
-
-        If the number of cycles of both indexes is 8, the flow cell does not need the addition of dummy samples.
-        """
-        return self.index_length != 8
-
     @staticmethod
     def node_not_found(node: Optional[ElementTree.Element], name: str) -> None:
         """Raise exception if the given node is not found."""
@@ -49,6 +41,23 @@ class RunParameters:
         xml_node = self.tree.find(node_name)
         self.node_not_found(node=xml_node, name=name)
         return int(xml_node.text)
+
+    @property
+    def requires_dummy_samples(self) -> Optional[bool]:
+        """Return true if the flow cell requires the addition of dummy samples."""
+        raise NotImplementedError("Impossible to know dummy sample requirements of parent class")
+
+    @property
+    def control_software_version(self) -> Optional[str]:
+        """Return the control software version if existent."""
+        raise NotImplementedError(
+            "Impossible to retrieve control software version from parent class"
+        )
+
+    @property
+    def reagent_kit_version(self) -> Optional[str]:
+        """Return the reagent kit version if existent."""
+        raise NotImplementedError("Impossible to retrieve reagent kit version from parent class")
 
     @property
     def sequencer(self) -> Optional[str]:
@@ -87,9 +96,9 @@ class RunParametersNovaSeq6000(RunParameters):
     """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
 
     @property
-    def sequencer(self) -> str:
-        """Return the sequencer associated with the current run parameters."""
-        return Sequencers.NOVASEQ
+    def requires_dummy_samples(self) -> bool:
+        """Return true if the number of cycles of both indexes is 8."""
+        return self.index_length != 8
 
     @property
     def control_software_version(self) -> str:
@@ -109,6 +118,11 @@ class RunParametersNovaSeq6000(RunParameters):
             LOG.info("Set reagent kit version to 'unknown'")
             return UNKNOWN_REAGENT_KIT_VERSION
         return xml_node.text
+
+    @property
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        return Sequencers.NOVASEQ
 
     def get_index1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
@@ -133,6 +147,21 @@ class RunParametersNovaSeq6000(RunParameters):
 
 class RunParametersNovaSeqX(RunParameters):
     """Specific class for parsing run parameters of NovaSeqX sequencing."""
+
+    @property
+    def requires_dummy_samples(self) -> bool:
+        """Return False for run parameters associated with NovaSeqX sequencing."""
+        return False
+
+    @property
+    def control_software_version(self) -> None:
+        """Return None for run parameters associated with NovaSeqX sequencing."""
+        return
+
+    @property
+    def reagent_kit_version(self) -> None:
+        """Return None for run parameters associated with NovaSeqX sequencing."""
+        return
 
     @property
     def sequencer(self) -> str:
