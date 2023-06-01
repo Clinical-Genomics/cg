@@ -33,7 +33,7 @@ class CaseTags(BaseModel):
     )
     peddy_check: Set[str] = Field(None, description="Peddy pedigree check, only for rare disease")
     multiqc_report: Optional[Set[str]] = Field(None, description="MultiQC report")
-    delivery_report: Optional[Set[str]] = Field(None, description="Delivery report for cancer")
+    delivery_report: Optional[Set[str]] = Field(None, description="Delivery report")
     str_catalog: Optional[Set[str]] = Field(
         None, description="Variant catalog used with expansionhunter"
     )

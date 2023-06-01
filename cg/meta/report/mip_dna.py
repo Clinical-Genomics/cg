@@ -75,24 +75,9 @@ class MipDNAReportAPI(ReportAPI):
         panel_gene_ids = [gene.get("hgnc_id") for gene in panel_genes]
         return panel_gene_ids
 
-    def get_data_analysis_type(self, case: Family) -> Optional[str]:
-        """Retrieves the data analysis type carried out."""
-        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
-            case_internal_id=case.internal_id
-        )[0].sample
-        lims_sample = self.get_lims_sample(sample_id=case_sample.internal_id)
-        application: Application = self.status_db.get_application_by_tag(
-            tag=lims_sample.get("application")
-        )
-        return application.analysis_type if application else None
-
     def get_genome_build(self, analysis_metadata: MipAnalysis) -> str:
         """Returns the build version of the genome reference of a specific case."""
         return analysis_metadata.genome_build
-
-    def get_variant_callers(self, analysis_metadata: MipAnalysis = None) -> list:
-        """Extracts the list of variant-calling filters used during analysis."""
-        return []
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: MipAnalysis = None

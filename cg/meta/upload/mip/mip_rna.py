@@ -1,5 +1,4 @@
 """MIP-RNA upload API."""
-
 import logging
 from subprocess import CalledProcessError
 
@@ -25,7 +24,6 @@ class MipRNAUploadAPI(UploadAPI):
 
     def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
         """Uploads MIP-RNA analysis data and files."""
-
         analysis: Analysis = case.analyses[0]
         self.update_upload_started_at(analysis=analysis)
 
