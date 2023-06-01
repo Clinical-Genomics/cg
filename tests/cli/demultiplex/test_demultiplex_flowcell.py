@@ -170,7 +170,8 @@ def test_demultiplex_all_novaseq(
     demultiplex_ready_flow_cell: Path,
     caplog,
 ):
-    """Test demultiplex-all on a directory with newly sequenced NovaSeq6000 flow cells."""
+    """Test the demultiplex-all command on a directory with newly sequenced NovaSeq6000 flow cells."""
+
     caplog.set_level(logging.INFO)
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
