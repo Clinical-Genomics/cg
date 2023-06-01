@@ -4,6 +4,8 @@ import logging
 from typing import Dict, List, Set
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.constants.sequencing import Sequencers
+from cg.models.demultiplex.run_parameters import RunParameters
 from cg.resources import VALID_INDEXES_PATH
 from packaging import version
 from pydantic import BaseModel
@@ -59,18 +61,24 @@ def get_reagent_kit_version(reagent_kit_version: str) -> str:
     return REAGENT_KIT_PARAMETER_TO_VERSION[reagent_kit_version]
 
 
-def is_reverse_complement(control_software_version: str, reagent_kit_version_string: str) -> bool:
-    """If the run used the new NovaSeq control software version (NEW_CONTROL_SOFTWARE_VERSION)
-    and the new reagent kit version (NEW_REAGENT_KIT_VERSION) the second index should be the
-    reverse complement
+def is_reverse_complement(run_parameters: RunParameters) -> bool:
+    """Return True if the second index requires reverse complement.
+
+    If the run used the new NovaSeq control software version (NEW_CONTROL_SOFTWARE_VERSION)
+    and the new reagent kit version (NEW_REAGENT_KIT_VERSION), then it requires reverse complement.
+    If the run is NovaSeqX, does not require reverse complement.
     """
+    if run_parameters.sequencer == Sequencers.NOVASEQX:
+        return False
+    control_software_version: str = run_parameters.control_software_version
+    reagent_kit_version: str = run_parameters.reagent_kit_version
     LOG.info("Check if run is reverse complement")
     if version.parse(control_software_version) < version.parse(NEW_CONTROL_SOFTWARE_VERSION):
         LOG.warning(
             f"Old software version {control_software_version}, no need for reverse complement"
         )
         return False
-    reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version_string)
+    reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version)
     if version.parse(reagent_kit_version) < version.parse(NEW_REAGENT_KIT_VERSION):
         LOG.warning(
             f"Reagent kit version {reagent_kit_version} does not does not need reverse complement"
@@ -101,9 +109,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 def adapt_indexes(
     samples: List[FlowCellSample],
-    control_software_version: str,
-    reagent_kit_version: str,
-    expected_index_length: int,
+    run_parameters: RunParameters,
 ) -> None:
     """Adapts the indexes: pads all indexes so that all indexes have a length equal to the
     number  of index reads, and takes the reverse complement of index 2 in case of the new
@@ -111,16 +117,13 @@ def adapt_indexes(
     (version 1.5)
     """
     LOG.info("Fix so that all indexes are on the correct format")
-    reverse_complement: bool = is_reverse_complement(
-        control_software_version=control_software_version,
-        reagent_kit_version_string=reagent_kit_version,
-    )
+    reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
     for sample in samples:
         index1, index2 = sample.index.split("-")
         index1: str = index1.strip()
         index2: str = index2.strip()
         index_length = len(index1)
-        if expected_index_length == 10 and index_length == 8:
+        if run_parameters.index_length == 10 and index_length == 8:
             LOG.debug("Padding indexes")
             index1 = pad_index_one(index_string=index1)
             index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
