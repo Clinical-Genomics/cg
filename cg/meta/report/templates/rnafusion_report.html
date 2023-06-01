@@ -151,20 +151,20 @@
           <table class="table table-bordered" aria-describedby="Sample table">
             {% for sample in case.samples %}
               <tr>
-                <th colspan="8">Prov</th>
+                <th scope="col" colspan="8">Prov</th>
               </tr>
               <tr>
-                <td colspan="8">{{ sample.name }}</td>
+                <td scope="col" colspan="8">{{ sample.name }}</td>
               </tr>
               <tr>
-                <th>RIN</th>
-                <th>Ingående mängd [ng]</th>
-                <th>Läspar [M]</th>
-                <th>Mappade sekvenser [%]</th>
-                <th>Unikt mappade sekvenser [%]</th>
-                <th>Duplikat [%]</th>
-                <th>Adapter [%]</th>
-                <th>5'-3' bias</th>
+                <th scope="col">RIN</th>
+                <th scope="col">Ingående mängd [ng]</th>
+                <th scope="col">Läspar [M]</th>
+                <th scope="col">Mappade sekvenser [%]</th>
+                <th scope="col">Unikt mappade sekvenser [%]</th>
+                <th scope="col">Duplikat [%]</th>
+                <th scope="col">Adapter [%]</th>
+                <th scope="col">5'-3' bias</th>
               </tr>
               <tr>
                 <td>{{ sample.metadata.rin }}</td>
@@ -177,13 +177,13 @@
                 <td>{{ sample.metadata.bias_5_3 }}</td>
               </tr>
               <tr>
-                <th>Sekvenser som klarar filter [%]</th>
-                <th>Genomsnittlig läslängd efter filtrering [bp]</th>
-                <th>Q20-baser [%]</th>
-                <th>Q30-baser [%]</th>
-                <th>GC-innehåll [%]</th>
-                <th>mRNA-baser [%]</th>
-                <th>Ribosomala baser [%]</th>
+                <th scope="col">Sekvenser som klarar filter [%]</th>
+                <th scope="col">Genomsnittlig läslängd efter filtrering [bp]</th>
+                <th scope="col">Q20-baser [%]</th>
+                <th scope="col">Q30-baser [%]</th>
+                <th scope="col">GC-innehåll [%]</th>
+                <th scope="col">mRNA-baser [%]</th>
+                <th scope="col">Ribosomala baser [%]</th>
               </tr>
               <tr>
                 <td>{{ sample.metadata.pct_surviving }}</td>
