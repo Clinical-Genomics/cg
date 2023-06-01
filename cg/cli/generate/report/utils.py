@@ -15,6 +15,7 @@ from cg.meta.report.mip_dna import MipDNAReportAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.store.models import Family
 
 LOG = logging.getLogger(__name__)
@@ -85,7 +86,7 @@ def get_report_api_pipeline(context: click.Context, pipeline: Pipeline) -> Repor
             config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
         ),
         Pipeline.RNAFUSION: RnafusionReportAPI(
-            config=context.obj, analysis_api=MipDNAAnalysisAPI(config=context.obj)
+            config=context.obj, analysis_api=RnafusionAnalysisAPI(config=context.obj)
         ),
     }
     return dispatch_report_api.get(pipeline)
