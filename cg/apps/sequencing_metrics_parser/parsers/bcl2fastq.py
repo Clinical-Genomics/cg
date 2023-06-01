@@ -83,12 +83,14 @@ def aggregate_tile_metrics_per_sample_and_lane(
                     conversion_result.lane_number,
                     demux_result.sample_id,
                 )
+                
+                sample_id: str = discard_index_sequence(sample_id_with_index=demux_result.sample_id)
 
                 if sample_lane_key not in metrics:
                     metrics[sample_lane_key] = Bcl2FastqSampleLaneMetrics(
                         flow_cell_name=tile_metric.flow_cell_name,
                         flow_cell_lane_number=conversion_result.lane_number,
-                        sample_id=demux_result.sample_id,
+                        sample_id=sample_id,
                         sample_total_reads_in_lane=0,
                         sample_total_yield_in_lane=0,
                         sample_total_yield_q30_in_lane=0,
@@ -105,6 +107,11 @@ def aggregate_tile_metrics_per_sample_and_lane(
                 )
 
     return list(metrics.values())
+
+
+def discard_index_sequence(sample_id_with_index: str) -> str:
+    """Discard the index sequence from the sample id."""
+    return sample_id_with_index.split("_")[0]
 
 
 def get_bcl2fastq_stats_paths(demultiplex_result_directory: Path) -> List[Path]:
