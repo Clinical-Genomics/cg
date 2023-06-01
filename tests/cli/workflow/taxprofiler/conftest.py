@@ -3,6 +3,14 @@
 import pytest
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
+from pathlib import Path
+
+
+@pytest.fixture(name="taxprofiler_dir")
+def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the taxprofiler apps dir."""
+    taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
+    return Path(taxprofiler_dir).absolute().as_posix()
 
 
 @pytest.fixture(scope="function", name="taxprofiler_context")
