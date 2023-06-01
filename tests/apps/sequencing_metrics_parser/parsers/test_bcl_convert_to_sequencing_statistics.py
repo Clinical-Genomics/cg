@@ -2,7 +2,7 @@
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert_to_sequencing_statistics import (
-    create_sample_lane_sequencing_metrics_from_bcl_convert_metrics,
+    create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell,
 )
 from pathlib import Path
 from typing import List
@@ -18,8 +18,8 @@ def test_create_sequencing_statistics_from_bcl_convert_metrics(
     # WHEN creating sequencing statistics from bcl convert metrics
     sequencing_statistics_list: List[
         SampleLaneSequencingMetrics
-    ] = create_sample_lane_sequencing_metrics_from_bcl_convert_metrics(
-        bcl_convert_metrics_dir_path=bcl_convert_metrics_dir_path,
+    ] = create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(
+        flow_cell_dir=bcl_convert_metrics_dir_path,
     )
 
     # THEN assert that Sequencing statistics are created

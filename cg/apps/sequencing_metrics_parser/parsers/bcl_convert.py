@@ -8,11 +8,11 @@ from cg.io.controller import ReadFile
 from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
 from cg.constants.constants import FileFormat, SCALE_TO_READ_PAIRS
 from cg.constants.bcl_convert_metrics import (
-    DEMUX_METRICS_FILE_NAME,
-    QUALITY_METRICS_FILE_NAME,
-    ADAPTER_METRICS_FILE_NAME,
-    RUN_INFO_FILE_NAME,
-    SAMPLE_SHEET_FILE_NAME,
+    DEMUX_METRICS_FILE_PATH,
+    QUALITY_METRICS_FILE_PATH,
+    ADAPTER_METRICS_FILE_PATH,
+    RUN_INFO_FILE_PATH,
+    SAMPLE_SHEET_FILE_PATH,
 )
 from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
     BclConvertAdapterMetrics,
@@ -33,14 +33,14 @@ class BclConvertMetricsParser:
     ) -> None:
         """Initialize the class."""
         self.quality_metrics_path: Path = Path(
-            bcl_convert_metrics_dir_path, QUALITY_METRICS_FILE_NAME
+            bcl_convert_metrics_dir_path, QUALITY_METRICS_FILE_PATH
         )
-        self.demux_metrics_path: Path = Path(bcl_convert_metrics_dir_path, DEMUX_METRICS_FILE_NAME)
+        self.demux_metrics_path: Path = Path(bcl_convert_metrics_dir_path, DEMUX_METRICS_FILE_PATH)
         self.adapter_metrics_path: Path = Path(
-            bcl_convert_metrics_dir_path, ADAPTER_METRICS_FILE_NAME
+            bcl_convert_metrics_dir_path, ADAPTER_METRICS_FILE_PATH
         )
-        self.sample_sheet_path: Path = Path(bcl_convert_metrics_dir_path, SAMPLE_SHEET_FILE_NAME)
-        self.run_info_path: Path = Path(bcl_convert_metrics_dir_path, RUN_INFO_FILE_NAME)
+        self.sample_sheet_path: Path = Path(bcl_convert_metrics_dir_path, SAMPLE_SHEET_FILE_PATH)
+        self.run_info_path: Path = Path(bcl_convert_metrics_dir_path, RUN_INFO_FILE_PATH)
         self.quality_metrics: List[BclConvertQualityMetrics] = self.parse_metrics_file(
             metrics_file_path=self.quality_metrics_path, metrics_model=BclConvertQualityMetrics
         )
