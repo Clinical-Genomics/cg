@@ -52,7 +52,7 @@ def test_flow_cell_name(
     "bcl2fastq_flow_cell_dir, statusdb_return_value, result",
     [
         ("correct_flow_cell_path", Flowcell(), True),
-        ("nonexistent_flow_cell_path", None, False),
+        ("non-existent_flow_cell_path", None, False),
     ],
 )
 @mock.patch("cg.apps.tb.api.TrailblazerAPI")

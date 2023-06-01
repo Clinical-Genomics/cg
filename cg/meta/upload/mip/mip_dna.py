@@ -1,5 +1,4 @@
-"""MIP-DNA upload API"""
-
+"""MIP-DNA upload API."""
 import datetime as dt
 import logging
 
@@ -23,17 +22,16 @@ LOG = logging.getLogger(__name__)
 
 
 class MipDNAUploadAPI(UploadAPI):
-    """MIP-DNA upload API"""
+    """MIP-DNA upload API."""
 
     def __init__(self, config: CGConfig):
         self.analysis_api: MipDNAAnalysisAPI = MipDNAAnalysisAPI(config)
         super().__init__(config=config, analysis_api=self.analysis_api)
 
     def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
-        """Uploads MIP-DNA analysis data and files"""
-
-        analysis_obj: Analysis = case.analyses[0]
-        self.update_upload_started_at(analysis_obj)
+        """Uploads MIP-DNA analysis data and files."""
+        analysis: Analysis = case.analyses[0]
+        self.update_upload_started_at(analysis=analysis)
 
         # Main upload
         ctx.invoke(upload_coverage, family_id=case.internal_id, re_upload=restart)
@@ -61,4 +59,4 @@ class MipDNAUploadAPI(UploadAPI):
         LOG.info(
             f"Upload of case {case.internal_id} was successful. Setting uploaded at to {dt.datetime.now()}"
         )
-        self.update_uploaded_at(analysis_obj)
+        self.update_uploaded_at(analysis=analysis)

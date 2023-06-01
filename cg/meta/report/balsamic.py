@@ -121,15 +121,15 @@ class BalsamicReportAPI(ReportAPI):
         """Returns the build version of the genome reference of a specific case."""
         return analysis_metadata.config.reference.reference_genome_version
 
-    def get_variant_callers(self, analysis_metadata: BalsamicAnalysis) -> list:
+    def get_variant_callers(self, _analysis_metadata: BalsamicAnalysis) -> list:
         """
         Extracts the list of BALSAMIC variant-calling filters and their versions (if available) from the
         config.json file.
         """
-        sequencing_type: str = analysis_metadata.config.analysis.sequencing_type
-        analysis_type: str = analysis_metadata.config.analysis.analysis_type
-        var_callers: Dict[str, BalsamicVarCaller] = analysis_metadata.config.vcf
-        tool_versions: Dict[str, list] = analysis_metadata.config.bioinfo_tools_version
+        sequencing_type: str = _analysis_metadata.config.analysis.sequencing_type
+        analysis_type: str = _analysis_metadata.config.analysis.analysis_type
+        var_callers: Dict[str, BalsamicVarCaller] = _analysis_metadata.config.vcf
+        tool_versions: Dict[str, list] = _analysis_metadata.config.bioinfo_tools_version
         analysis_var_callers = list()
         for var_caller_name, var_caller_attributes in var_callers.items():
             if (
