@@ -141,7 +141,7 @@
               </tr>
             </tbody>
             <caption>
-              <strong>Pipelineinformation och bioinformatiska verktygsversioner:</strong>:
+              <strong>Pipelineinformation och bioinformatiska verktygsversioner</strong>:
               <a href="https://nf-co.re/rnafusion">https://nf-co.re/rnafusion</a>
             </caption>
           </table>
@@ -158,13 +158,13 @@
               </tr>
               <tr>
                 <th>RIN</th>
-                <th>Input amount [ng]</th> <!-- TODO -->
+                <th>Ingående mängd [ng]</th>
                 <th>Läspar [M]</th>
                 <th>Mappade sekvenser [%]</th>
                 <th>Unikt mappade sekvenser [%]</th>
                 <th>Duplikat [%]</th>
-                <th>Adapter [%]</th> <!-- TODO -->
-                <th>5' - 3' bias</th> <!-- TODO -->
+                <th>Adapter [%]</th>
+                <th>5'-3' bias</th>
               </tr>
               <tr>
                 <td>{{ sample.metadata.rin }}</td>
@@ -177,13 +177,13 @@
                 <td>{{ sample.metadata.bias_5_3 }}</td>
               </tr>
               <tr>
-                <th>Reads passing filters [%]</th> <!-- TODO -->
-                <th>Mean read length after filtering [baspar]</th> <!-- TODO -->
-                <th>Q20 bases [%]</th> <!-- TODO -->
-                <th>Q30 bases [%]</th> <!-- TODO -->
-                <th>GC content [%]</th> <!-- TODO -->
-                <th>mRNA bases [%]</th> <!-- TODO -->
-                <th>Ribosomal bases [%]</th> <!-- TODO -->
+                <th>Sekvenser som klarar filter [%]</th>
+                <th>Genomsnittlig läslängd efter filtrering [bp]</th>
+                <th>Q20-baser [%]</th>
+                <th>Q30-baser [%]</th>
+                <th>GC-innehåll [%]</th>
+                <th>mRNA-baser [%]</th>
+                <th>Ribosomala baser [%]</th>
               </tr>
               <tr>
                 <td>{{ sample.metadata.pct_surviving }}</td>
@@ -197,21 +197,21 @@
             {% endfor %}
             <caption>
               <strong>Förklaringar</strong><br>
-              <ins>RIN</ins>:  <!-- TODO --> <br>
-              <ins>Input amount [ng]</ins>:  <!-- TODO --> <br>
-              <ins>Läspar</ins>: Antal sekvenseringsläsningar i miljoner läspar.<br>
-              <ins>Mappade sekvenser</ins>: Procent sekvenser som fått en eller flera positioner i det genom som använts som referensgenom.<br>
-              <ins>Unikt mappade sekvenser</ins>:  <!-- TODO --> <br>
-              <ins>Duplikat</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering. <!-- TODO --><br>
-              <ins>Adapter</ins>:  <!-- TODO --><br>
-              <ins>5' - 3' bias</ins>:  <!-- TODO -->
-              <ins>Reads passing filters</ins>:  <!-- TODO --><br>
-              <ins>Mean read length after filtering</ins>:  <!-- TODO --><br>
-              <ins>Q20 bases</ins>:  <!-- TODO --><br>
-              <ins>Q30 bases</ins>:  <!-- TODO --><br>
-              <ins>GC content</ins>:  <!-- TODO --><br>
-              <ins>mRNA bases</ins>:  <!-- TODO --><br>
-              <ins>Ribosomal bases</ins>:  <!-- TODO --><br>
+              <ins>RIN (RNA Integrity Number)</ins>: Mått på skala från 1 till 10 för kvalitet och integritet hos RNA-prover.<br>
+              <ins>Ingående mängd [ng]</ins>: Ursprunglig mängd RNA som används för sekvensering.<br>
+              <ins>Läspar [M]</ins>: Antal sekvenseringsläsningar i miljoner läspar.<br>
+              <ins>Mappade sekvenser [%]</ins>: Procent sekvenser som fått en eller flera positioner i det genom som använts som referensgenom.<br>
+              <ins>Unikt mappade sekvenser [%]</ins>: Procentandel sekvenserade läsningar som endast matchar en position i referensgenomet.<br>
+              <ins>Duplikat [%]</ins>: Sekvenseringsläsningar som är i duplikat och därmed ej unika sekvenser. Hög mängd duplikat kan tyda på dålig komplexitet av sekvenserad bibliotek eller djup sekvensering. Observera att dupliceringar är vanligt förekommande vid WTS.<br>
+              <ins>Adapter [%]</ins>: Andel läsningar som innehåller adaptersekvenser.<br>
+              <ins>5'-3' bias</ins>: Bias är förhållandet mellan antalet läsningar vid 3'-änden och antalet läsningar vid 5'-änden av fragmentet. Ett förhållande på 1 indikerar brist på bias, medan värden större eller mindre än 1 indikerar 3'- eller 5'-bias, respektive.<br>
+              <ins>Sekvenser som klarar filter [%]</ins>: Procentandel läsningar som passerar kvalitetskontrollfilter.
+              <ins>Genomsnittlig läslängd efter filtrering [bp]</ins>: Genomsnittlig längd på läsningar som passerar kvalitetskontrollfilter.<br>
+              <ins>Q20-baser [%]</ins>: Andel baser med en Phred-poäng på minst 20.<br>
+              <ins>Q30-baser [%]</ins>: Andel baser med en Phred-poäng på minst 30.<br>
+              <ins>GC-innehåll [%]</ins>: Andel guanin- och cytosinbaser i ett prov, beräknat på trimmade läsningar.<br>
+              <ins>mRNA-baser [%]</ins>: Andel baser i ett prov som härstammar från budbärar-RNA.<br>
+              <ins>Ribosomala baser [%]</ins>: Andel baser i ett prov som härstammar från ribosomalt RNA.<br>
             </caption>
           </table>
 
@@ -221,8 +221,8 @@
         {% if customer.scout_access and "scout" in case.data_analysis.data_delivery %}
           <div class="card-block">
             <h4 class="card-title">Scout</h4>
-            <div class="card-text"> <!-- TODO -->
-              <p>Gene fusions finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
+            <div class="card-text">
+              <p>Gene fusioner finns uppladdade i Scout: <a href="https://scout.scilifelab.se/{{ customer.id }}/{{ case.name }}">scout.scilifelab.se/{{ customer.id }}/{{ case.name }}</a></p>
             </div>
           </div>
         {% endif %}
@@ -242,7 +242,7 @@
           </div>
         {% endfor %}
 
-        <div class="card-body">No filtering performed. All detected variants are reported.</div> <!-- TODO -->
+        <div class="card-body">Ingen filtrering har utförts. Alla upptäckta varianter rapporteras.</div>
 
         <div class="card-block">Laboratoriet har inte haft ansvar för provtagningsstadiet och extraktion, resultaten gäller för provet såsom det har mottagits. </div>
 
