@@ -94,8 +94,8 @@ def aggregate_tile_metrics_per_sample_and_lane(
                         sample_total_yield_q30_in_lane=0,
                         sample_total_quality_score_in_lane=0,
                     )
-
-                metrics[sample_lane_key].sample_total_reads_in_lane += demux_result.number_reads
+                # Double the total reads since they are reported in pairs
+                metrics[sample_lane_key].sample_total_reads_in_lane += demux_result.number_reads * 2
                 metrics[sample_lane_key].sample_total_yield_in_lane += demux_result.yield_
                 metrics[sample_lane_key].sample_total_yield_q30_in_lane += sum(
                     [read_metric.yield_q30 for read_metric in demux_result.read_metrics]
