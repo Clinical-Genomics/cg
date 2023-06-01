@@ -1,6 +1,8 @@
 """ This file groups all tests related to microsalt case config creation """
 
 import logging
+import random
+import unittest
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
@@ -85,8 +87,6 @@ def test_dry_sample(
     """Test working dry command for sample"""
 
     # GIVEN project, organism and reference genome is specified in lims
-    lims_sample = lims_api.sample(microbial_sample_id)
-    lims_sample.sample_data["project"] = {"id": "microbial_order_test"}
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(config_case, [microbial_sample_id, "-s", "-d"], obj=base_context)
@@ -95,7 +95,13 @@ def test_dry_sample(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_dry_order(cli_runner: CliRunner, base_context: CGConfig, ticket_id):
+def test_dry_order(
+    cli_runner: CliRunner,
+    base_context: CGConfig,
+    ticket_id,
+    lims_api: LimsAPI,
+    microbial_sample_id: str,
+):
     """Test working dry command for a order"""
 
     # GIVEN
@@ -116,7 +122,6 @@ def test_sample(base_context, cli_runner, lims_api, microbial_sample_id):
 
     # GIVEN an existing queries path
     Path(base_context.meta_apis["analysis_api"].queries_path).mkdir(exist_ok=True)
-    lims_api.sample(microbial_sample_id).sample_data["project"] = {"id": "microbial_order_test"}
 
     # WHEN dry running a sample name
     result = cli_runner.invoke(config_case, [microbial_sample_id, "-s"], obj=base_context)
@@ -125,9 +130,12 @@ def test_sample(base_context, cli_runner, lims_api, microbial_sample_id):
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_gonorrhoeae(cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id):
+def test_gonorrhoeae(
+    cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id, lims_api: LimsAPI
+):
     """Test if the substitution of the organism happens"""
     # GIVEN a sample with organism set to gonorrhea
+    lims_sample = lims_api.sample(microbial_sample_id)
     sample_obj = base_context.meta_apis["analysis_api"].status_db.get_sample_by_internal_id(
         microbial_sample_id
     )
