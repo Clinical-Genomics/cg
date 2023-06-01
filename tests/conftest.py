@@ -793,7 +793,7 @@ def fixture_run_parameters_missing_flowcell_type(run_parameters_dir: Path) -> Pa
 
 @pytest.fixture(name="novaseq_run_parameters")
 def fixture_novaseq_run_parameters(bcl2fastq_flow_cell_dir: Path) -> Path:
-    """Return the path to a file with novaseq run parameters."""
+    """Return the path to a file with NovaSeq6000 run parameters."""
     return Path(bcl2fastq_flow_cell_dir, "RunParameters.xml")
 
 
