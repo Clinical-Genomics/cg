@@ -7,33 +7,6 @@ from cg.exc import FlowCellError
 from cg.models.demultiplex.run_parameters import RunParameters
 
 
-def test_get_base_mask(novaseq_run_parameters: Path):
-    """Test that generating the run parameters base mask returns the expected result."""
-    # GIVEN a RunParameters object created from a valid run parameters file
-    run_parameters = RunParameters(run_parameters_path=novaseq_run_parameters)
-
-    # WHEN fetching the base mask
-    base_mask: str = run_parameters.get_base_mask()
-
-    # THEN the base mask has the correct structure
-    assert base_mask.startswith("Y")
-    assert ",I" in base_mask
-
-
-def test_get_base_mask_undetermined_cycles(run_parameters_missing_flowcell_type: Path, caplog):
-    """Test that generating the base mask from a file without cycle info fails."""
-    caplog.set_level(logging.INFO)
-    # GIVEN a RunParameters object created from a run parameters file with missing cycle info
-    run_parameters = RunParameters(run_parameters_path=run_parameters_missing_flowcell_type)
-
-    # WHEN creating the base mask
-    with pytest.raises(FlowCellError):
-        # THEN assert that an exception was raised since the cycle data was not found
-        run_parameters.get_base_mask()
-
-    assert "Could not determine length of reads one" in caplog.text
-
-
 def test_reagent_kit_version(novaseq_run_parameters: Path):
     """Test that getting reagent kit version from a correct file returns an expected value."""
     # GIVEN a RunParameters object created from a valid run parameters file
