@@ -804,13 +804,13 @@ def fixture_run_parameters_different_index(run_parameters_dir: Path) -> Path:
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell")
-def fixture_flow_cell(bcl2fastq_flow_cell_dir: str) -> FlowCell:
+def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
 
 
 @pytest.fixture(name="dragen_flow_cell")
-def fixture_dragen_flow_cell(dragen_flow_cell_dir: str) -> FlowCell:
+def fixture_dragen_flow_cell(dragen_flow_cell_dir: Path) -> FlowCell:
     """Create a dragen flow cell object with flow cell that is demultiplexed."""
     return FlowCell(flow_cell_path=dragen_flow_cell_dir)
 
@@ -825,12 +825,6 @@ def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCell) -> str:
 def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCell) -> str:
     """Return flow cell id from dragen flow cell object."""
     return dragen_flow_cell.id
-
-
-@pytest.fixture(name="another_flow_cell_id")
-def fixture_another_flow_cell_id() -> str:
-    """Return another flow cell id."""
-    return "HF57HDRXY"
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")
