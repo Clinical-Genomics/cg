@@ -1447,9 +1447,11 @@ def fixture_balsamic_dir(tmpdir_factory) -> Path:
 def fixture_rnafusion_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("rnafusion")
 
+
 @pytest.fixture(name="taxprofiler_dir", scope="session")
 def fixture_taxprofiler_dir(tmpdir_factory) -> Path:
     return tmpdir_factory.mktemp("taxprofiler")
+
 
 @pytest.fixture(name="cg_dir", scope="session")
 def fixture_cg_dir(tmpdir_factory) -> Path:
