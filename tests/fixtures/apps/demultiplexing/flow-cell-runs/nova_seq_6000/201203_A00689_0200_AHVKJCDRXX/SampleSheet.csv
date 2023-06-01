@@ -1,0 +1,4 @@
+[Data]
+FCID,Lane,SampleID,SampleRef,index,index2,SampleName,Control,Recipe,Operator,Project
+HN3FKDSXY,1,ACC7769A10,hg19,CTATAGCGAG,AGTCGACTAG,anonymous_1,N,R1,script,150392
+HN3FKDSXY,2,ACC7769A10,hg19,CTATAGCGAG,AGTCGACTAG,anonymous_1,N,R1,script,150392

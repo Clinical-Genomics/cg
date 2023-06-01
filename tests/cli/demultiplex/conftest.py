@@ -29,7 +29,7 @@ def fixture_demux_results_not_finished_dir(demultiplex_fixtures: Path) -> Path:
 @pytest.fixture(name="flow_cell_runs_working_directory")
 def fixture_flow_cell_runs_working_directory(project_dir: Path) -> Path:
     """Return the path to a working directory with flow cells ready for demux."""
-    working_dir: Path = Path(project_dir, "flow-cell-runs")
+    working_dir: Path = Path(project_dir, "flow-cell-runs", "nova_seq_6000")
     working_dir.mkdir(parents=True)
     return working_dir
 
@@ -273,7 +273,7 @@ def fixture_demultiplex_context(
     real_housekeeper_api: HousekeeperAPI,
     cg_context: CGConfig,
 ) -> CGConfig:
-    """Return cg context witha demultiplex context."""
+    """Return cg context with a demultiplex context."""
     cg_context.demultiplex_api_ = demultiplexing_api
     cg_context.cg_stats_api_ = stats_api
     cg_context.housekeeper_api_ = real_housekeeper_api
