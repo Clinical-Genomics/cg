@@ -89,7 +89,7 @@ class RnafusionReportAPI(ReportAPI):
         return Pipeline.RNAFUSION + "_report.html"
 
     def get_required_fields(self, case: CaseModel) -> dict:
-        """Retrieves a dictionary with the delivery report required fields for Rnafusion."""
+        """Return a dictionary with the delivery report required fields for Rnafusion."""
         return {
             "report": REQUIRED_REPORT_FIELDS,
             "customer": REQUIRED_CUSTOMER_FIELDS,
