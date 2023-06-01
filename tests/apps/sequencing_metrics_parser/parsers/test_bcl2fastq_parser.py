@@ -21,7 +21,7 @@ def test_parse_valid_bcl2fastq_sequencing_metrics(tmp_path, valid_bcl2fastq_metr
     stats_json_path.write_text(json.dumps(valid_bcl2fastq_metrics_data))
 
     # WHEN parsing the directory containing the valid stats.json file
-    result = parse_bcl2fastq_sequencing_metrics(demultiplex_result_directory=tmp_path)
+    result = parse_bcl2fastq_sequencing_metrics(flow_cell_dir=tmp_path)
 
     # THEN a list of Bcl2FastqTileSequencingMetrics models is returned
     assert isinstance(result, list)
