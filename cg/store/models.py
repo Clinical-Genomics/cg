@@ -520,7 +520,7 @@ class Flowcell(Model):
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
     sequencing_metrics = orm.relationship(
-        "SampleLaneSequencingMetrics", backref="flowcell"´
+        "SampleLaneSequencingMetrics", backref="flowcell"
     )
 
     def __str__(self):
@@ -643,7 +643,7 @@ class Sample(Model, PriorityMixin):
     subject_id = Column(types.String(128))
 
     sequencing_metrics = orm.relationship(
-        "SampleLaneSequencingMetrics", backref="sample"´
+        "SampleLaneSequencingMetrics", backref="sample"
     )
 
     def __str__(self) -> str:
