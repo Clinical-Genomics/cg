@@ -1,16 +1,18 @@
+"""Module for modeling run parameters file parsing."""
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 from xml.etree import ElementTree
 
 from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
+from cg.constants.sequencing import Sequencers
 from cg.exc import FlowCellError
 
 LOG = logging.getLogger(__name__)
 
 
 class RunParameters:
-    """Class to handle the run parameters from a sequencing run."""
+    """Base class with basic functions to handle the run parameters from a sequencing run."""
 
     def __init__(self, run_parameters_path: Path):
         self.path: Path = run_parameters_path
@@ -25,25 +27,6 @@ class RunParameters:
         if index_one_length != index_two_length:
             raise FlowCellError("Index lengths are not the same!")
         return index_one_length
-
-    @property
-    def control_software_version(self) -> str:
-        """Return the control software version."""
-        node_name: str = ".ApplicationVersion"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        self.node_not_found(node=xml_node, name="control software version")
-        return xml_node.text
-
-    @property
-    def reagent_kit_version(self) -> str:
-        """Return the reagent kit version if existent, return 'unknown' otherwise."""
-        node_name: str = "./RfidsInfo/SbsConsumableVersion"
-        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
-        if xml_node is None:
-            LOG.warning("Could not determine reagent kit version")
-            LOG.info("Set reagent kit version to 'unknown'")
-            return UNKNOWN_REAGENT_KIT_VERSION
-        return xml_node.text
 
     @property
     def requires_dummy_samples(self) -> bool:
@@ -67,6 +50,66 @@ class RunParameters:
         self.node_not_found(node=xml_node, name=name)
         return int(xml_node.text)
 
+    @property
+    def sequencer(self) -> Optional[str]:
+        """Return the sequencer associated with the current run parameters."""
+        raise NotImplementedError("Impossible to retrieve sequencer from parent class")
+
+    def get_index1_cycles(self) -> int:
+        """Return the number of cycles in the first index read."""
+        raise NotImplementedError("Impossible to retrieve index1 cycles from parent class")
+
+    def get_index2_cycles(self) -> int:
+        """Return the number of cycles in the second index read."""
+        raise NotImplementedError("Impossible to retrieve index2 cycles from parent class")
+
+    def get_read1_cycles(self) -> int:
+        """Return the number of cycles in the first read."""
+        raise NotImplementedError("Impossible to retrieve read1 cycles from parent class")
+
+    def get_read2_cycles(self) -> int:
+        """Return the number of cycles in the second read."""
+        raise NotImplementedError("Impossible to retrieve read2 cycles from parent class")
+
+    def __str__(self):
+        return f"RunParameters(path={self.path}," f"sequencer={self.sequencer})"
+
+    def __repr__(self):
+        return (
+            f"RunParameters(path={self.path},"
+            f"reagent_kit_version={self.reagent_kit_version},control_software_version={self.control_software_version},"
+            f"index_length={self.index_length},"
+            f"sequencer={self.sequencer})"
+        )
+
+
+class RunParametersNovaSeq6000(RunParameters):
+    """Specific class for parsing run parameters of NovaSeq6000 sequencing."""
+
+    @property
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        return Sequencers.NOVASEQ
+
+    @property
+    def control_software_version(self) -> str:
+        """Return the control software version."""
+        node_name: str = ".ApplicationVersion"
+        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        self.node_not_found(node=xml_node, name="control software version")
+        return xml_node.text
+
+    @property
+    def reagent_kit_version(self) -> str:
+        """Return the reagent kit version if existent, return 'unknown' otherwise."""
+        node_name: str = "./RfidsInfo/SbsConsumableVersion"
+        xml_node: Optional[ElementTree.Element] = self.tree.find(node_name)
+        if xml_node is None:
+            LOG.warning("Could not determine reagent kit version")
+            LOG.info("Set reagent kit version to 'unknown'")
+            return UNKNOWN_REAGENT_KIT_VERSION
+        return xml_node.text
+
     def get_index1_cycles(self) -> int:
         """Return the number of cycles in the first index read."""
         node_name = "./IndexRead1NumberOfCycles"
@@ -87,25 +130,37 @@ class RunParameters:
         node_name = "./Read2NumberOfCycles"
         return self.get_node_integer_value(node_name=node_name, name="length of reads two")
 
-    def get_base_mask(self) -> str:
-        """Create the basemask for novaseq flow cells.
 
-        Basemask is used in this comma format as an argument to bcl2fastq.
-        When creating the unaligned path the commas are stripped.
-        """
-        return (
-            f"Y{self.get_read1_cycles()},"
-            f"I{self.get_index1_cycles()},"
-            f"I{self.get_index2_cycles()},"
-            f"Y{self.get_read2_cycles()}"
-        )
+class RunParametersNovaSeqX(RunParameters):
+    """Specific class for parsing run parameters of NovaSeqX sequencing."""
 
-    def __str__(self):
-        return f"RunParameters(path={self.path}"
+    @property
+    def sequencer(self) -> str:
+        """Return the sequencer associated with the current run parameters."""
+        return Sequencers.NOVASEQX
 
-    def __repr__(self):
-        return (
-            f"RunParameters(path={self.path},"
-            f"reagent_kit_version={self.reagent_kit_version},control_software_version={self.control_software_version},"
-            f"index_length={self.index_length})"
-        )
+    @property
+    def planned_reads(self) -> Dict[str, int]:
+        """Return parsed read and index cycle values."""
+        cycle_mapping: Dict[str, int] = {}
+        for read_elem in self.tree.findall(".//Read"):
+            read_name = read_elem.get("ReadName")
+            cycles = self.get_node_integer_value(read_elem, "Cycles")
+            cycle_mapping[read_name] = cycles
+        return cycle_mapping
+
+    def get_index1_cycles(self) -> int:
+        """Return the number of cycles in the first index read."""
+        return self.planned_reads.get("Index1")
+
+    def get_index2_cycles(self) -> int:
+        """Return the number of cycles in the second index read."""
+        return self.planned_reads.get("Index2")
+
+    def get_read1_cycles(self) -> int:
+        """Return the number of cycles in the first read."""
+        return self.planned_reads.get("Read1")
+
+    def get_read2_cycles(self) -> int:
+        """Return the number of cycles in the second read."""
+        return self.planned_reads.get("Read2")
