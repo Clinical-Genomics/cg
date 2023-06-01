@@ -18,16 +18,8 @@ depends_on = None
 
 def upgrade():
     # Add foreign key constraints to SampleLaneSequencingMetrics table
-    op.add_column(
-        "sample_lane_sequencing_metrics",
-        sa.Column("flow_cell_name", sa.String(length=128), nullable=False),
-    )
     op.create_foreign_key(
         None, "sample_lane_sequencing_metrics", "flowcell", ["flow_cell_name"], ["name"]
-    )
-    op.add_column(
-        "sample_lane_sequencing_metrics",
-        sa.Column("sample_internal_id", sa.String(length=128), nullable=False),
     )
     op.create_foreign_key(
         None, "sample_lane_sequencing_metrics", "sample", ["sample_internal_id"], ["internal_id"]
@@ -60,15 +52,15 @@ def upgrade():
 
 def downgrade():
     # Remove relationships from Flowcell and Sample models
-    op.drop_constraint(None, "sample", type_="foreignkey")
-    op.drop_column("sample", "sample_lane_sequencing_metrics_id")
-    op.drop_index(None, "sample", ["sample_lane_sequencing_metrics_id"])
-    op.drop_constraint(None, "flowcell", type_="foreignkey")
+    op.drop_constraint("flowcell_sample_lane_sequencing_metrics_id_fkey", "flowcell", type_="foreignkey")
     op.drop_column("flowcell", "sample_lane_sequencing_metrics_id")
-    op.drop_index(None, "flowcell", ["sample_lane_sequencing_metrics_id"])
+    op.drop_index("ix_flowcell_sample_lane_sequencing_metrics_id", "flowcell", ["sample_lane_sequencing_metrics_id"])
+    op.drop_constraint("sample_sample_lane_sequencing_metrics_id_fkey", "sample", type_="foreignkey")
+    op.drop_column("sample", "sample_lane_sequencing_metrics_id")
+    op.drop_index("ix_sample_sample_lane_sequencing_metrics_id", "sample", ["sample_lane_sequencing_metrics_id"])
 
     # Remove foreign key constraints from SampleLaneSequencingMetrics table
-    op.drop_constraint(None, "sample_lane_sequencing_metrics", type_="foreignkey")
+    op.drop_constraint("sample_lane_sequencing_metrics_flow_cell_name_fkey", "sample_lane_sequencing_metrics", type_="foreignkey")
     op.drop_column("sample_lane_sequencing_metrics", "flow_cell_name")
-    op.drop_constraint(None, "sample_lane_sequencing_metrics", type_="foreignkey")
+    op.drop_constraint("sample_lane_sequencing_metrics_sample_internal_id_fkey", "sample_lane_sequencing_metrics", type_="foreignkey")
     op.drop_column("sample_lane_sequencing_metrics", "sample_internal_id")
