@@ -315,7 +315,7 @@ def fixture_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Path:
         new_dir: Path = Path(base_dir, folder)
         new_dir.mkdir()
 
-    yield base_dir
+    return base_dir
 
 
 @pytest.fixture(name="not_bcl2fastq_folder_structure", scope="function")
@@ -328,4 +328,4 @@ def fixture_not_bcl2fastq_folder_structure(tmp_path_factory, cg_dir: Path) -> Pa
         new_dir: Path = Path(base_dir, folder)
         new_dir.mkdir()
 
-    yield base_dir
+    return base_dir
