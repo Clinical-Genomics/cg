@@ -54,10 +54,11 @@ def downgrade():
     # Remove relationships from Flowcell and Sample models
     op.drop_constraint("flowcell_sample_lane_sequencing_metrics_id_fkey", "flowcell", type_="foreignkey")
     op.drop_column("flowcell", "sample_lane_sequencing_metrics_id")
-    op.drop_index("ix_flowcell_sample_lane_sequencing_metrics_id", "flowcell", ["sample_lane_sequencing_metrics_id"])
+    op.drop_index("ix_flowcell_sample_lane_sequencing_metrics_id", table_name="flowcell")
+
     op.drop_constraint("sample_sample_lane_sequencing_metrics_id_fkey", "sample", type_="foreignkey")
     op.drop_column("sample", "sample_lane_sequencing_metrics_id")
-    op.drop_index("ix_sample_sample_lane_sequencing_metrics_id", "sample", ["sample_lane_sequencing_metrics_id"])
+    op.drop_index("ix_sample_sample_lane_sequencing_metrics_id", table_name="sample")
 
     # Remove foreign key constraints from SampleLaneSequencingMetrics table
     op.drop_constraint("sample_lane_sequencing_metrics_flow_cell_name_fkey", "sample_lane_sequencing_metrics", type_="foreignkey")
