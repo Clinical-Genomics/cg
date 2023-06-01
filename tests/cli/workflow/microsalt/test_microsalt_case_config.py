@@ -1,4 +1,5 @@
-""" This file groups all tests related to microsalt case config creation """
+""" This file groups all tests related t
+o microsalt case config creation """
 
 import logging
 from pathlib import Path
@@ -79,7 +80,6 @@ def test_dry_sample(
     cli_runner: CliRunner,
     base_context: CGConfig,
     microbial_sample_id: str,
-    lims_api: LimsAPI,
 ):
     """Test working dry command for sample"""
 
@@ -96,8 +96,6 @@ def test_dry_order(
     cli_runner: CliRunner,
     base_context: CGConfig,
     ticket_id,
-    lims_api: LimsAPI,
-    microbial_sample_id: str,
 ):
     """Test working dry command for a order"""
 
@@ -114,7 +112,7 @@ def test_dry_order(
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_sample(base_context, cli_runner, lims_api, microbial_sample_id):
+def test_sample(base_context, cli_runner, microbial_sample_id):
     """Test working command for sample"""
 
     # GIVEN an existing queries path
@@ -127,9 +125,7 @@ def test_sample(base_context, cli_runner, lims_api, microbial_sample_id):
     assert result.exit_code == EXIT_SUCCESS
 
 
-def test_gonorrhoeae(
-    cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id, lims_api: LimsAPI
-):
+def test_gonorrhoeae(cli_runner: CliRunner, base_context: CGConfig, microbial_sample_id):
     """Test if the substitution of the organism happens"""
     # GIVEN a sample with organism set to gonorrhea
     sample_obj = base_context.meta_apis["analysis_api"].status_db.get_sample_by_internal_id(
