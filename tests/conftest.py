@@ -705,67 +705,67 @@ def fixture_compression_object(
 # Demultiplex fixtures
 
 
-@pytest.fixture(name="demultiplex_fixtures")
+@pytest.fixture(name="demultiplex_fixtures", scope="session")
 def fixture_demultiplex_fixtures(apps_dir: Path) -> Path:
     """Return the path to the demultiplex fixture directory."""
     return Path(apps_dir, "demultiplexing")
 
 
-@pytest.fixture(name="raw_lims_sample_dir")
+@pytest.fixture(name="raw_lims_sample_dir", scope="session")
 def fixture_raw_lims_sample_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the raw samples fixture directory."""
     return Path(demultiplex_fixtures, "raw_lims_samples")
 
 
-@pytest.fixture(name="run_parameters_dir")
+@pytest.fixture(name="run_parameters_dir", scope="session")
 def fixture_run_parameters_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the run parameters fixture directory."""
     return Path(demultiplex_fixtures, "run_parameters")
 
 
-@pytest.fixture(name="demultiplexed_runs")
+@pytest.fixture(name="demultiplexed_runs", scope="session")
 def fixture_demultiplexed_runs(demultiplex_fixtures: Path) -> Path:
     """Return the path to the demultiplexed flow cells fixture directory."""
     return Path(demultiplex_fixtures, "demultiplexed-runs")
 
 
-@pytest.fixture(name="flow_cell_runs_dir")
+@pytest.fixture(name="flow_cell_runs_dir", scope="session")
 def fixture_demux_run_dir(demultiplex_fixtures: Path) -> Path:
     """Return the path to the sequenced flow cells fixture directory."""
     return Path(demultiplex_fixtures, "flow-cell-runs")
 
 
-@pytest.fixture(name="hiseq_dir")
+@pytest.fixture(name="hiseq_dir", scope="session")
 def fixture_hiseq_dir(flow_cell_runs_dir: Path) -> Path:
     """Return the path to the hiseq sequencing fixture directory."""
     return Path(flow_cell_runs_dir, "hiseq")
 
 
-@pytest.fixture(name="novaseq_6000_dir")
+@pytest.fixture(name="novaseq_6000_dir", scope="session")
 def fixture_novaseq_6000_dir(flow_cell_runs_dir: Path) -> Path:
     """Return the path to the NovaSeq6000 sequencing fixture directory."""
     return Path(flow_cell_runs_dir, "nova_seq_6000")
 
 
-@pytest.fixture(name="novaseq_x_dir")
+@pytest.fixture(name="novaseq_x_dir", scope="session")
 def fixture_novaseq_x_dir(flow_cell_runs_dir: Path) -> Path:
     """Return the path to the NovaSeqX sequencing fixture directory."""
     return Path(flow_cell_runs_dir, "nova_seq_x")
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell_full_name")
+@pytest.fixture(name="bcl2fastq_flow_cell_full_name", scope="session")
 def fixture_flow_cell_full_name() -> str:
     """Return full flow cell name."""
     return "201203_A00689_0200_AHVKJCDRXX"
 
 
-@pytest.fixture(name="dragen_flow_cell_full_name")
+@pytest.fixture(name="dragen_flow_cell_full_name", scope="session")
 def fixture_dragen_flow_cell_full_name() -> str:
     """Return the full name of a dragen flow cell."""
     return "211101_A00187_0615_AHLG5GDRXY"
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell_dir")
+@pytest.fixture(name="bcl2fastq_flow_cell_dir", scope="session")
 def fixture_bcl2fastq_flow_cell_dir(
     novaseq_6000_dir: Path, bcl2fastq_flow_cell_full_name: str
 ) -> Path:
@@ -773,61 +773,61 @@ def fixture_bcl2fastq_flow_cell_dir(
     return Path(novaseq_6000_dir, bcl2fastq_flow_cell_full_name)
 
 
-@pytest.fixture(name="dragen_flow_cell_dir")
+@pytest.fixture(name="dragen_flow_cell_dir", scope="session")
 def fixture_dragen_flow_cell_path(novaseq_6000_dir: Path, dragen_flow_cell_full_name: str) -> Path:
     """Return the path to the dragen flow cell demultiplex fixture directory."""
     return Path(novaseq_6000_dir, dragen_flow_cell_full_name)
 
 
-@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
+@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path", scope="session")
 def fixture_novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
     return Path(bcl2fastq_flow_cell_dir, "SampleSheet.csv")
 
 
-@pytest.fixture(name="novaseq_dragen_sample_sheet_path")
+@pytest.fixture(name="novaseq_dragen_sample_sheet_path", scope="session")
 def fixture_novaseq_dragen_sample_sheet_path(dragen_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 dragen sample sheet."""
     return Path(dragen_flow_cell_dir, "SampleSheet.csv")
 
 
-@pytest.fixture(name="run_parameters_missing_flowcell_type")
+@pytest.fixture(name="run_parameters_missing_flowcell_type", scope="session")
 def fixture_run_parameters_missing_flowcell_type(run_parameters_dir: Path) -> Path:
     """Return the path to a file with hiseq run parameters without flow cell."""
     return Path(run_parameters_dir, "runParameters_missing_flowcell_run_field.xml")
 
 
-@pytest.fixture(name="novaseq_run_parameters")
+@pytest.fixture(name="novaseq_run_parameters", scope="session")
 def fixture_novaseq_run_parameters(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a file with NovaSeq6000 run parameters."""
     return Path(bcl2fastq_flow_cell_dir, "RunParameters.xml")
 
 
-@pytest.fixture(name="run_parameters_different_index")
+@pytest.fixture(name="run_parameters_different_index", scope="session")
 def fixture_run_parameters_different_index(run_parameters_dir: Path) -> Path:
     """Return the path to a file with novaseq run parameters with different index cycles."""
     return Path(run_parameters_dir, "RunParameters_different_index_cycles.xml")
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell")
+@pytest.fixture(name="bcl2fastq_flow_cell", scope="session")
 def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCell:
     """Create a flow cell object with flow cell that is demultiplexed."""
     return FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
 
 
-@pytest.fixture(name="dragen_flow_cell")
+@pytest.fixture(name="dragen_flow_cell", scope="session")
 def fixture_dragen_flow_cell(dragen_flow_cell_dir: Path) -> FlowCell:
     """Create a dragen flow cell object with flow cell that is demultiplexed."""
     return FlowCell(flow_cell_path=dragen_flow_cell_dir)
 
 
-@pytest.fixture(name="bcl2fastq_flow_cell_id")
+@pytest.fixture(name="bcl2fastq_flow_cell_id", scope="session")
 def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCell) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
     return bcl2fastq_flow_cell.id
 
 
-@pytest.fixture(name="dragen_flow_cell_id")
+@pytest.fixture(name="dragen_flow_cell_id", scope="session")
 def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCell) -> str:
     """Return flow cell id from dragen flow cell object."""
     return dragen_flow_cell.id
