@@ -11,6 +11,7 @@ from typing import Optional
 
 from cg.apps.lims import LimsAPI
 from cg.apps.osticket import OsTicket
+from cg.meta.orders.rnafusion_submitter import RnafusionSubmitter
 from cg.models.orders.order import OrderIn, OrderType
 from cg.store import Store
 
@@ -45,6 +46,7 @@ def _get_submit_handler(project: OrderType, lims: LimsAPI, status: Store) -> Sub
         OrderType.MIP_DNA: MipDnaSubmitter,
         OrderType.MIP_RNA: MipRnaSubmitter,
         OrderType.RML: RmlSubmitter,
+        OrderType.RNAFUSION: RnafusionSubmitter,
         OrderType.SARS_COV_2: SarsCov2Submitter,
     }
     if project in submitters:

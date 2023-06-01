@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from tests.mocks.limsmock import MockLimsAPI
 from tests.mocks.osticket import MockOsTicket
@@ -21,20 +23,22 @@ from tests.apps.orderform.conftest import (
     mip_order_to_submit,
     mip_rna_order_to_submit,
     rml_order_to_submit,
+    fixture_rnafusion_order_to_submit,
     sarscov2_order_to_submit,
 )
 
 
 @pytest.fixture(scope="session", name="all_orders_to_submit")
 def fixture_all_orders_to_submit(
-    balsamic_order_to_submit,
-    fastq_order_to_submit,
-    metagenome_order_to_submit,
-    microbial_order_to_submit,
-    mip_order_to_submit,
-    mip_rna_order_to_submit,
-    rml_order_to_submit,
-    sarscov2_order_to_submit,
+    balsamic_order_to_submit: dict,
+    fastq_order_to_submit: dict,
+    metagenome_order_to_submit: dict,
+    microbial_order_to_submit: dict,
+    mip_order_to_submit: dict,
+    mip_rna_order_to_submit: dict,
+    rml_order_to_submit: dict,
+    rnafusion_order_to_submit: dict,
+    sarscov2_order_to_submit: dict,
 ):
     return {
         OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit, project=OrderType.BALSAMIC),
@@ -49,6 +53,9 @@ def fixture_all_orders_to_submit(
         OrderType.MIP_DNA: OrderIn.parse_obj(mip_order_to_submit, project=OrderType.MIP_DNA),
         OrderType.MIP_RNA: OrderIn.parse_obj(mip_rna_order_to_submit, project=OrderType.MIP_RNA),
         OrderType.RML: OrderIn.parse_obj(rml_order_to_submit, project=OrderType.RML),
+        OrderType.RNAFUSION: OrderIn.parse_obj(
+            rnafusion_order_to_submit, project=OrderType.RNAFUSION
+        ),
         OrderType.SARS_COV_2: OrderIn.parse_obj(
             sarscov2_order_to_submit, project=OrderType.SARS_COV_2
         ),
