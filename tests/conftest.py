@@ -774,15 +774,15 @@ def fixture_dragen_flow_cell_path(novaseq_6000_dir: Path, dragen_flow_cell_full_
 
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path")
-def fixture_novaseq_bcl2fastq_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a Novaseq bcl2fastq sample sheet."""
-    return Path(demultiplex_fixtures, "SampleSheetS2_Bcl2Fastq.csv")
+def fixture_novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
+    return Path(bcl2fastq_flow_cell_dir, "SampleSheet.csv")
 
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_path")
-def fixture_novaseq_dragen_sample_sheet_path(demultiplex_fixtures: Path) -> Path:
-    """Return the path to a Novaseq dragen sample sheet."""
-    return Path(demultiplex_fixtures, "SampleSheetS2_Dragen.csv")
+def fixture_novaseq_dragen_sample_sheet_path(dragen_flow_cell_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 dragen sample sheet."""
+    return Path(dragen_flow_cell_dir, "SampleSheet.csv")
 
 
 @pytest.fixture(name="run_parameters_missing_flowcell_type")
