@@ -7,7 +7,6 @@ Create Date: 2023-06-02 16:10:19.975435
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
 revision = "367ed257e4ee"
@@ -20,13 +19,13 @@ def upgrade():
     op.alter_column(
         "sample_lane_sequencing_metrics",
         "sample_base_fraction_passing_q30",
-        type_=sa.Numeric(precision=5, scale=2),
+        type_=sa.Numeric(precision=6, scale=2),
         existing_type=sa.Numeric(precision=10, scale=5),
     )
     op.alter_column(
         "sample_lane_sequencing_metrics",
         "sample_base_mean_quality_score",
-        type_=sa.Numeric(precision=5, scale=2),
+        type_=sa.Numeric(precision=6, scale=2),
         existing_type=sa.Numeric(precision=10, scale=5),
     )
 
