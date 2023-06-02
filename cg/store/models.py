@@ -773,7 +773,7 @@ class SampleLaneSequencingMetrics(Model):
     flow_cell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
     flow_cell_lane_number = Column(types.Integer)
 
-    sample_internal_id = Column(types.String(128), ForeignKey("sample.internal_id"), nullable=False)
+    sample_internal_id = Column(types.String(32), ForeignKey("sample.internal_id"), nullable=False)
     sample = orm.relationship(Sample, back_populates="sequencing_metrics")
     sample_total_reads_in_lane = Column(types.BigInteger)
     sample_base_fraction_passing_q30 = Column(types.Numeric(10, 5))
