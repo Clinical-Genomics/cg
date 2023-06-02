@@ -769,7 +769,7 @@ class SampleLaneSequencingMetrics(Model):
     __tablename__ = "sample_lane_sequencing_metrics"
 
     id = Column(types.Integer, primary_key=True)
-    flow_cell_name = Column(types.String(128), ForeignKey("flowcell.name"), nullable=False)
+    flow_cell_name = Column(types.String(32), ForeignKey("flowcell.name"), nullable=False)
     flow_cell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
     flow_cell_lane_number = Column(types.Integer)
 
