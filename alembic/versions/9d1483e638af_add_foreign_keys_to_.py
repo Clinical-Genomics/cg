@@ -1,7 +1,7 @@
 """Add foreign keys to SampleLaneSequencingMetrics
 
 Revision ID: 9d1483e638af
-Revises: e6a3f1ad4b50
+Revises: a34039f530c5
 Create Date: 2023-06-01 13:40:25.835471
 
 """
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "9d1483e638af"
-down_revision = "e6a3f1ad4b50"
+down_revision = "a34039f530c5"
 branch_labels = None
 depends_on = None
 
