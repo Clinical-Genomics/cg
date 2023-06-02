@@ -39,7 +39,8 @@ def fixture_all_orders_to_submit(
     rml_order_to_submit: dict,
     rnafusion_order_to_submit: dict,
     sarscov2_order_to_submit: dict,
-):
+) -> dict:
+    """Returns a dict of parsed order for each order type."""
     return {
         OrderType.BALSAMIC: OrderIn.parse_obj(balsamic_order_to_submit, project=OrderType.BALSAMIC),
         OrderType.FASTQ: OrderIn.parse_obj(fastq_order_to_submit, project=OrderType.FASTQ),
