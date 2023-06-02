@@ -72,6 +72,7 @@ class ExcelSample(OrderSample):
             "MicroSALT",  # OF 1603 (implicit)
             "MIP DNA",  # OF 1508
             "MIP RNA",  # OF 1508
+            "rnafusion",  # OF 1508
             "SARS-CoV-2",  # OF 2184
             "No analysis",  # OF 1508, 1604, 2184
         ]
