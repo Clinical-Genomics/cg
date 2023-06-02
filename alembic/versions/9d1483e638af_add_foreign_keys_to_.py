@@ -43,6 +43,18 @@ def upgrade():
 
 def downgrade():
     # Remove foreign key constraints from SampleLaneSequencingMetrics table
+
+    op.alter_column(
+        "sample_lane_sequencing_metrics", "flow_cell_name", type_=sa.VARCHAR(128), nullable=False
+    )
+
+    op.alter_column(
+        "sample_lane_sequencing_metrics",
+        "sample_internal_id",
+        type_=sa.VARCHAR(128),
+        nullable=False,
+    )
+
     op.drop_constraint(
         "sample_lane_sequencing_metrics_flow_cell_name_fkey",
         "sample_lane_sequencing_metrics",
