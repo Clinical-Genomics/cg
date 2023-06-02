@@ -26,11 +26,27 @@ def upgrade():
         ["name"],
     )
 
+    # Add foreign key constraint to sample_internal_id column in SampleLaneSequencingMetrics
+    op.create_foreign_key(
+        "fk_sample_lane_sequencing_metrics_sample",
+        "sample_lane_sequencing_metrics",
+        "sample",
+        ["sample_internal_id"],
+        ["internal_id"],
+    )
+
 
 def downgrade():
     # Remove foreign key constraint from flow_cell_name column in SampleLaneSequencingMetrics
     op.drop_constraint(
         "fk_sample_lane_sequencing_metrics_flowcell",
+        "sample_lane_sequencing_metrics",
+        type_="foreignkey",
+    )
+
+    # Remove foreign key constraint from sample_internal_id column in SampleLaneSequencingMetrics
+    op.drop_constraint(
+        "fk_sample_lane_sequencing_metrics_sample",
         "sample_lane_sequencing_metrics",
         type_="foreignkey",
     )

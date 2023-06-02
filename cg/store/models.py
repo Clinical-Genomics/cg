@@ -640,6 +640,8 @@ class Sample(Model, PriorityMixin):
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
 
+    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
+
     def __str__(self) -> str:
         return f"{self.internal_id} ({self.name})"
 
@@ -767,15 +769,15 @@ class SampleLaneSequencingMetrics(Model):
     __tablename__ = "sample_lane_sequencing_metrics"
 
     id = Column(types.Integer, primary_key=True)
-    flow_cell_name = Column(types.String(32), ForeignKey('flowcell.name'), nullable=False)
+    flow_cell_name = Column(types.String(32), ForeignKey("flowcell.name"), nullable=False)
     flow_cell_lane_number = Column(types.Integer)
 
-    sample_internal_id = Column(types.String(32), nullable=False)
+    sample_internal_id = Column(types.String(32), ForeignKey("sample.internal_id"), nullable=False)
     sample_total_reads_in_lane = Column(types.BigInteger)
     sample_base_fraction_passing_q30 = Column(types.Numeric(10, 5))
     sample_base_mean_quality_score = Column(types.Numeric(10, 5))
 
     created_at = Column(types.DateTime)
 
-    # backref creates a new property on the Flowcell model
-    flowcell = orm.relationship("Flowcell", back_populates="sequencing_metrics")
+    flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
+    sample = orm.relationship(Sample, back_populates="sequencing_metrics")
