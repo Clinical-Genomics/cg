@@ -17,6 +17,14 @@ depends_on = None
 
 def upgrade():
     # Add foreign key constraints to SampleLaneSequencingMetrics table
+    op.alter_column(
+        "sample_lane_sequencing_metrics", "flow_cell_name", type_=sa.String(32), nullable=False
+    )
+
+    op.alter_column(
+        "sample_lane_sequencing_metrics", "sample_internal_id", type_=sa.String(32), nullable=False
+    )
+
     op.create_foreign_key(
         "sample_lane_sequencing_metrics_flow_cell_name_fkey",
         "sample_lane_sequencing_metrics",
