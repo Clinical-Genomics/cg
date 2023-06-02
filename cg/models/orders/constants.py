@@ -12,4 +12,5 @@ class OrderType(StrEnum):
     MIP_DNA: str = str(Pipeline.MIP_DNA)
     MIP_RNA: str = str(Pipeline.MIP_RNA)
     RML: str = "rml"
+    RNAFUSION: str = str(Pipeline.RNAFUSION)
     SARS_COV_2: str = str(Pipeline.SARS_COV_2)
