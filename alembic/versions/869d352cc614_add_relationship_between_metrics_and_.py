@@ -21,11 +21,6 @@ def upgrade():
     # Add foreign key constraint to flow_cell_name column in SampleLaneSequencingMetrics
     op.alter_column(
         "sample_lane_sequencing_metrics",
-        "sample_internal_id",
-        type_=VARCHAR(32, collation="latin1_swedish_ci"),
-    )
-    op.alter_column(
-        "sample_lane_sequencing_metrics",
         "flow_cell_name",
         type_=VARCHAR(32, collation="latin1_swedish_ci"),
     )
@@ -38,6 +33,11 @@ def upgrade():
     )
 
     # Add foreign key constraint to sample_internal_id column in SampleLaneSequencingMetrics
+    op.alter_column(
+        "sample_lane_sequencing_metrics",
+        "sample_internal_id",
+        type_=VARCHAR(32, collation="latin1_swedish_ci"),
+    )
     op.create_foreign_key(
         "fk_sample_lane_sequencing_metrics_sample",
         "sample_lane_sequencing_metrics",
@@ -59,15 +59,15 @@ def downgrade():
         "flow_cell_name",
         type_=VARCHAR(32, collation="utf8mb4_0900_ai_ci"),
     )
-    op.alter_column(
-        "sample_lane_sequencing_metrics",
-        "sample_internal_id",
-        type_=VARCHAR(32, collation="utf8mb4_0900_ai_ci"),
-    )
 
     # Remove foreign key constraint from sample_internal_id column in SampleLaneSequencingMetrics
     op.drop_constraint(
         "fk_sample_lane_sequencing_metrics_sample",
         "sample_lane_sequencing_metrics",
         type_="foreignkey",
+    )
+    op.alter_column(
+        "sample_lane_sequencing_metrics",
+        "sample_internal_id",
+        type_=VARCHAR(32, collation="utf8mb4_0900_ai_ci"),
     )
