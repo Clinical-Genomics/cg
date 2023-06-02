@@ -157,6 +157,7 @@ RNAFUSION_ANALYSIS_CASE_TAGS = [
     {"software-versions"},
     {"qc-metrics"},
     {"multiqc-json"},
+    {"delivery-report"},
 ]
 
 RNAFUSION_ANALYSIS_SAMPLE_TAGS = []

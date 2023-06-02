@@ -7,7 +7,7 @@ def q30_ratio(q30_yield: int, total_yield: int) -> float:
     Returns:
         float: Proportion of bases with Q30.
     """
-    return q30_yield / total_yield
+    return round(q30_yield / total_yield, 2)
 
 
 def average_quality_score(total_quality_score: int, total_yield: int) -> float:
@@ -19,4 +19,4 @@ def average_quality_score(total_quality_score: int, total_yield: int) -> float:
     Returns:
         float: Average quality score of all bases.
     """
-    return total_quality_score / total_yield
+    return round(total_quality_score / total_yield, 2)

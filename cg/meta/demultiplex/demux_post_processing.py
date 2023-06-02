@@ -1,9 +1,14 @@
 """Post-processing Demultiiplex API."""
 import logging
+import os
 import shutil
+import re
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Iterable, List, Optional
+from cg.apps.sequencing_metrics_parser.api import (
+    create_sample_lane_sequencing_metrics_for_flow_cell,
+)
 
 from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
@@ -11,7 +16,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
+from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
@@ -20,7 +25,7 @@ from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.store import Store
-from cg.store.models import Flowcell
+from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +34,7 @@ LOG = logging.getLogger(__name__)
 class DemuxPostProcessingAPI:
     """Post demultiplexing API class."""
 
-    def __init__(self, config: CGConfig):
+    def __init__(self, config: CGConfig, flow_cell_name: Optional[str] = None) -> None:
         self.stats_api: StatsAPI = config.cg_stats_api
         self.demux_api: DemultiplexingAPI = config.demultiplex_api
         self.status_db: Store = config.status_db
@@ -38,6 +43,10 @@ class DemuxPostProcessingAPI:
             db=self.status_db, stats_api=self.stats_api, hk_api=self.hk_api
         )
         self.dry_run = False
+        self.flow_cell_name: Optional[str] = flow_cell_name
+        self.flow_cell_dir: Optional[Path] = (
+            Path(self.demux_api.out_dir, self.flow_cell_name) if self.flow_cell_name else None
+        )
 
     def set_dry_run(self, dry_run: bool) -> None:
         """Set dry run."""
@@ -60,6 +69,53 @@ class DemuxPostProcessingAPI:
         self.status_db.session.commit()
 
         LOG.info(f"Flow cell added: {flow_cell}")
+
+    def add_sample_lane_sequencing_metrics_for_flow_cell(self):
+        """Add sample lane sequencing metrics to status database."""
+        flow_cell_dir: Path = self.flow_cell_dir
+
+        sample_lane_sequencing_metrics: List[
+            SampleLaneSequencingMetrics
+        ] = create_sample_lane_sequencing_metrics_for_flow_cell(
+            flow_cell_dir=flow_cell_dir,
+            bcl_converter=self.get_bcl_converter(),
+        )
+
+        self.status_db.session.add_all(sample_lane_sequencing_metrics)
+        self.status_db.session.commit()
+        LOG.info(
+            f"Added sample lane sequencing metrics to status database for: {self.flow_cell_name}"
+        )
+
+    def finish_flow_cell_temp(self):
+        """Finish flow cell."""
+        self.add_sample_lane_sequencing_metrics_for_flow_cell()
+
+    def get_bcl_converter(self) -> str:
+        """Return type of BCL converter."""
+        if self.is_bcl2fastq_demux_folder_structure():
+            LOG.info("Flow cell was demultiplexed with bcl2fastq")
+            return BclConverter.BCL2FASTQ
+        LOG.info("Flow cell was demultiplexed with bcl_converter")
+        return BclConverter.BCLCONVERT
+
+    def is_bcl2fastq_demux_folder_structure(self) -> bool:
+        """Check if flow cell directory is a Bcl2fastq demux folder structure."""
+        for folder in self.flow_cell_dir.glob(pattern="*"):
+            if re.search(DemultiplexingDirsAndFiles.BCL2FASTQ_TILE_DIR_PATTERN.value, str(folder)):
+                return True
+        return False
+
+    def validate_flow_cell(self) -> Optional[FlowCell]:
+        """Validate flow cell."""
+        LOG.info(f"Check demultiplexed flow cell {self.flow_cell_name}")
+        try:
+            flow_cell: FlowCell = FlowCell(
+                flow_cell_path=self.flow_cell_dir, bcl_converter=self.get_bcl_converter()
+            )
+            return flow_cell
+        except FlowCellError:
+            return None
 
 
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
@@ -136,6 +192,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Run all the necessary steps for post-processing a demultiplexed flow cell."""
         if not self.dry_run:
             Path(demux_results.flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY).touch()
+            # delete cgstats
         self.add_to_cgstats(flow_cell_path=demux_results.flow_cell.path)
         self.cgstats_select_project(
             flow_cell_id=demux_results.flow_cell.id, flow_cell_path=demux_results.flow_cell.path
@@ -288,7 +345,6 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
 
     def post_process_flow_cell(self, demux_results: DemuxResults) -> None:
         """Run all the necessary steps for post-processing a demultiplexed flow cell.
-
         This will
             1. Rename all the necessary files and folders
             2. Add the demux results to cgstats
@@ -298,12 +354,18 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if demux_results.files_renamed():
             LOG.info("Files have already been renamed")
         else:
+            # not needed
             self.rename_files(demux_results=demux_results)
+        # depcrecated
         self.add_to_cgstats(demux_results=demux_results)
+        # deprecated
         self.create_cgstats_reports(demux_results=demux_results)
         if demux_results.bcl_converter == "bcl2fastq":
+            # relevant - topUnknownbarcodes
             self.create_barcode_summary_report(demux_results=demux_results)
+        # moving not needed with new workflow   - on hold
         self.copy_sample_sheet(demux_results=demux_results)
+
         self.transfer_flow_cell(
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
@@ -328,6 +390,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         if not self.demux_api.is_demultiplexing_completed(flow_cell=flow_cell):
             LOG.warning("Demultiplex is not ready for %s", flow_cell_name)
             return
+
         demux_results: DemuxResults = DemuxResults(
             demux_dir=Path(self.demux_api.out_dir, flow_cell_name),
             flow_cell=flow_cell,

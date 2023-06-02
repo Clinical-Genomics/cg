@@ -320,7 +320,7 @@ class ReportAPI(MetaAPI):
             pipeline_version=analysis.pipeline_version,
             type=self.get_data_analysis_type(case=case),
             genome_build=self.get_genome_build(analysis_metadata=analysis_metadata),
-            variant_callers=self.get_variant_callers(analysis_metadata=analysis_metadata),
+            variant_callers=self.get_variant_callers(_analysis_metadata=analysis_metadata),
             panels=case.panels,
             scout_files=self.get_scout_uploaded_files(case=case),
         )
@@ -363,15 +363,22 @@ class ReportAPI(MetaAPI):
 
     def get_data_analysis_type(self, case: Family) -> Optional[str]:
         """Retrieves the data analysis type carried out."""
-        raise NotImplementedError
+        case_sample: Sample = self.status_db.get_case_samples_by_case_id(
+            case_internal_id=case.internal_id
+        )[0].sample
+        lims_sample: Optional[dict] = self.get_lims_sample(sample_id=case_sample.internal_id)
+        application: Application = self.status_db.get_application_by_tag(
+            tag=lims_sample.get("application")
+        )
+        return application.analysis_type if application else None
 
     def get_genome_build(self, analysis_metadata: AnalysisModel) -> str:
         """Returns the build version of the genome reference of a specific case."""
         raise NotImplementedError
 
-    def get_variant_callers(self, analysis_metadata: AnalysisModel) -> list:
+    def get_variant_callers(self, _analysis_metadata: AnalysisModel) -> list:
         """Extracts the list of variant-calling filters used during analysis."""
-        raise NotImplementedError
+        return []
 
     def get_report_accreditation(
         self, samples: List[SampleModel], analysis_metadata: AnalysisModel
