@@ -519,6 +519,7 @@ class Flowcell(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
+    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="flowcell")
 
     def __str__(self):
         return self.name
@@ -766,7 +767,7 @@ class SampleLaneSequencingMetrics(Model):
     __tablename__ = "sample_lane_sequencing_metrics"
 
     id = Column(types.Integer, primary_key=True)
-    flow_cell_name = Column(types.String(32), nullable=False)
+    flow_cell_name = Column(types.String(32), ForeignKey('flowcell.name'), nullable=False)
     flow_cell_lane_number = Column(types.Integer)
 
     sample_internal_id = Column(types.String(32), nullable=False)
@@ -775,3 +776,6 @@ class SampleLaneSequencingMetrics(Model):
     sample_base_mean_quality_score = Column(types.Numeric(10, 5))
 
     created_at = Column(types.DateTime)
+
+    # backref creates a new property on the Flowcell model
+    flowcell = orm.relationship("Flowcell", back_populates="sequencing_metrics")
