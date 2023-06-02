@@ -775,7 +775,7 @@ class SampleLaneSequencingMetrics(Model):
 
     sample_internal_id = Column(types.String(128), ForeignKey("sample.internal_id"), nullable=False)
     sample = orm.relationship(Sample, back_populates="sequencing_metrics")
-    sample_total_reads_in_lane = Column(types.Integer)
+    sample_total_reads_in_lane = Column(types.BigInteger)
     sample_base_fraction_passing_q30 = Column(types.Numeric(10, 5))
     sample_base_mean_quality_score = Column(types.Numeric(10, 5))
 
