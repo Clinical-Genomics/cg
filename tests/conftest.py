@@ -31,6 +31,7 @@ from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
 from cg.store.models import Bed, BedVersion, Customer, Organism, Family, Sample
 from tests.mocks.crunchy import MockCrunchyAPI
@@ -765,6 +766,12 @@ def fixture_dragen_flow_cell_full_name() -> str:
     return "211101_A00187_0615_AHLG5GDRXY"
 
 
+@pytest.fixture(name="novaseq_x_flow_cell_full_name", scope="session")
+def fixture_novaseq_x_flow_cell_full_name() -> str:
+    """Return the full name of a NovaSeqX flow cell."""
+    return "20230508_LH00188_0003_A22522YLT3"
+
+
 @pytest.fixture(name="bcl2fastq_flow_cell_dir", scope="session")
 def fixture_bcl2fastq_flow_cell_dir(
     novaseq_6000_dir: Path, bcl2fastq_flow_cell_full_name: str
@@ -779,6 +786,14 @@ def fixture_dragen_flow_cell_path(novaseq_6000_dir: Path, dragen_flow_cell_full_
     return Path(novaseq_6000_dir, dragen_flow_cell_full_name)
 
 
+@pytest.fixture(name="novaseq_x_flow_cell_dir", scope="session")
+def fixture_novaseq_x_flow_cell_path(
+    novaseq_x_dir: Path, novaseq_x_flow_cell_full_name: str
+) -> Path:
+    """Return the path to the NovaSeqX flow cell demultiplex fixture directory."""
+    return Path(novaseq_x_dir, novaseq_x_flow_cell_full_name)
+
+
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_path", scope="session")
 def fixture_novaseq_bcl2fastq_sample_sheet_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a NovaSeq6000 Bcl2fastq sample sheet."""
@@ -791,22 +806,44 @@ def fixture_novaseq_dragen_sample_sheet_path(dragen_flow_cell_dir: Path) -> Path
     return Path(dragen_flow_cell_dir, "SampleSheet.csv")
 
 
-@pytest.fixture(name="run_parameters_missing_flowcell_type", scope="session")
-def fixture_run_parameters_missing_flowcell_type(run_parameters_dir: Path) -> Path:
-    """Return the path to a file with hiseq run parameters without flow cell."""
-    return Path(run_parameters_dir, "runParameters_missing_flowcell_run_field.xml")
+@pytest.fixture(name="run_parameters_missing_versions_path", scope="session")
+def fixture_run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 run parameters file without software and reagent kit versions."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
 
 
-@pytest.fixture(name="novaseq_run_parameters", scope="session")
-def fixture_novaseq_run_parameters(bcl2fastq_flow_cell_dir: Path) -> Path:
+@pytest.fixture(name="novaseq_6000_run_parameters_path", scope="session")
+def fixture_novaseq_6000_run_parameters_path(bcl2fastq_flow_cell_dir: Path) -> Path:
     """Return the path to a file with NovaSeq6000 run parameters."""
     return Path(bcl2fastq_flow_cell_dir, "RunParameters.xml")
 
 
-@pytest.fixture(name="run_parameters_different_index", scope="session")
-def fixture_run_parameters_different_index(run_parameters_dir: Path) -> Path:
+@pytest.fixture(name="novaseq_x_run_parameters_path", scope="session")
+def fixture_novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path:
+    """Return the path to a file with NovaSeqX run parameters."""
+    return Path(novaseq_x_flow_cell_dir, "RunParameters.xml")
+
+
+@pytest.fixture(name="run_parameters_different_index_path", scope="session")
+def fixture_run_parameters_different_index_path(run_parameters_dir: Path) -> Path:
     """Return the path to a file with novaseq run parameters with different index cycles."""
     return Path(run_parameters_dir, "RunParameters_different_index_cycles.xml")
+
+
+@pytest.fixture(name="novaseq_6000_run_parameters", scope="session")
+def fixture_novaseq_6000_run_parameters(
+    novaseq_6000_run_parameters_path: Path,
+) -> RunParametersNovaSeq6000:
+    """Return a NovaSeq6000 run parameters object."""
+    return RunParametersNovaSeq6000(run_parameters_path=novaseq_6000_run_parameters_path)
+
+
+@pytest.fixture(name="novaseq_x_run_parameters", scope="session")
+def fixture_novaseq_x_run_parameters(
+    novaseq_x_run_parameters_path: Path,
+) -> RunParametersNovaSeqX:
+    """Return a NovaSeqX run parameters object."""
+    return RunParametersNovaSeqX(run_parameters_path=novaseq_x_run_parameters_path)
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell", scope="session")
