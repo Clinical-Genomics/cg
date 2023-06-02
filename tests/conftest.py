@@ -808,7 +808,7 @@ def fixture_novaseq_dragen_sample_sheet_path(dragen_flow_cell_dir: Path) -> Path
 
 @pytest.fixture(name="run_parameters_missing_versions_path", scope="session")
 def fixture_run_parameters_missing_versions_path(run_parameters_dir: Path) -> Path:
-    """Return the path to a NovaSeq6000 run parameters file without software and reagent kit versions."""
+    """Return a NovaSeq6000 run parameters file path without software and reagent kit versions."""
     return Path(run_parameters_dir, "RunParameters_novaseq_no_software_nor_reagent_version.xml")
 
 
@@ -824,10 +824,24 @@ def fixture_novaseq_x_run_parameters_path(novaseq_x_flow_cell_dir: Path) -> Path
     return Path(novaseq_x_flow_cell_dir, "RunParameters.xml")
 
 
-@pytest.fixture(name="run_parameters_different_index_path", scope="session")
-def fixture_run_parameters_different_index_path(run_parameters_dir: Path) -> Path:
-    """Return the path to a file with novaseq run parameters with different index cycles."""
-    return Path(run_parameters_dir, "RunParameters_different_index_cycles.xml")
+@pytest.fixture(name="run_parameters_novaseq_6000_different_index_path", scope="module")
+def fixture_run_parameters_novaseq_6000_different_index_path(run_parameters_dir: Path) -> Path:
+    """Return the path to a NovaSeq6000 run parameters file with different index cycles."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_6000_different_index_cycles.xml")
+
+
+@pytest.fixture(name="run_parameters_novaseq_x_different_index_path", scope="module")
+def fixture_run_parameters_novaseq_x_different_index_path(run_parameters_dir: Path) -> Path:
+    """Return the path to a NovaSeqX run parameters file with different index cycles."""
+    return Path(run_parameters_dir, "RunParameters_novaseq_X_different_index_cycles.xml")
+
+
+@pytest.fixture(name="run_parameters_missing_versions", scope="module")
+def fixture_run_parameters_missing_versions(
+    run_parameters_missing_versions_path: Path,
+) -> RunParametersNovaSeq6000:
+    """Return a NovaSeq6000 run parameters object without software and reagent kit versions."""
+    return RunParametersNovaSeq6000(run_parameters_path=run_parameters_missing_versions_path)
 
 
 @pytest.fixture(name="novaseq_6000_run_parameters", scope="session")

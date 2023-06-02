@@ -121,6 +121,10 @@ class PedigreeConfigError(CgError):
         self.errors = errors
 
 
+class RunParametersError(CgError):
+    """Raised when something is wrong with the run parameters."""
+
+
 class SampleSheetError(CgError):
     """Raised when something is wrong with the sample sheet."""
 
