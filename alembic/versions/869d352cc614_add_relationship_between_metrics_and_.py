@@ -8,6 +8,7 @@ Create Date: 2023-06-02 12:55:31.520397
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
+from sqlalchemy.types import VARCHAR
 
 # revision identifiers, used by Alembic.
 revision = "869d352cc614"
@@ -18,6 +19,16 @@ depends_on = None
 
 def upgrade():
     # Add foreign key constraint to flow_cell_name column in SampleLaneSequencingMetrics
+    op.alter_column(
+        "sample_lane_sequencing_metrics",
+        "sample_internal_id",
+        type_=VARCHAR(32, collation="latin1_swedish_ci"),
+    )
+    op.alter_column(
+        "sample_lane_sequencing_metrics",
+        "flow_cell_name",
+        type_=VARCHAR(32, collation="latin1_swedish_ci"),
+    )
     op.create_foreign_key(
         "fk_sample_lane_sequencing_metrics_flowcell",
         "sample_lane_sequencing_metrics",
@@ -33,4 +44,14 @@ def downgrade():
         "fk_sample_lane_sequencing_metrics_flowcell",
         "sample_lane_sequencing_metrics",
         type_="foreignkey",
+    )
+    op.alter_column(
+        "sample_lane_sequencing_metrics",
+        "flow_cell_name",
+        type_=VARCHAR(32, collation="utf8mb4_0900_ai_ci"),
+    )
+    op.alter_column(
+        "sample_lane_sequencing_metrics",
+        "sample_internal_id",
+        type_=VARCHAR(32, collation="utf8mb4_0900_ai_ci"),
     )
