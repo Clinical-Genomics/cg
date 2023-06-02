@@ -2,7 +2,7 @@ import http
 import json
 import logging
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -11,7 +11,7 @@ import requests
 from cachetools import TTLCache
 from cg.apps.orderform.excel_orderform_parser import ExcelOrderformParser
 from cg.apps.orderform.json_orderform_parser import JsonOrderformParser
-from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES, Pipeline
+from cg.constants import ANALYSIS_SOURCES, METAGENOME_SOURCES
 from cg.constants.constants import FileFormat
 from cg.exc import OrderError, OrderFormError, TicketCreationError
 from cg.io.controller import WriteStream
@@ -40,9 +40,7 @@ def get_certificate_ttl(response_data) -> int:
     """Extract time to live in seconds for certificate from response headers."""
     expires_header = response_data.headers.get("Expires")
     expires = datetime.strptime(expires_header, "%a, %d %b %Y %H:%M:%S %Z")
-    ttl = int((expires - datetime.utcnow()).total_seconds())
-
-    return ttl
+    return int((expires - datetime.utcnow()).total_seconds())
 
 
 def fetch_and_cache_google_oauth2_certificates():
@@ -123,7 +121,7 @@ def before_request():
         LOG.error(message)
         return abort(make_response(jsonify(message=message), http.HTTPStatus.FORBIDDEN))
 
-    g.current_user: User = user
+    g.current_user = user
 
 
 @BLUEPRINT.route("/submit_order/<order_type>", methods=["POST"])
@@ -184,14 +182,11 @@ def submit_order(order_type):
 @BLUEPRINT.route("/cases")
 def get_cases():
     """Return cases with links for a customer from the database."""
-    status: str = request.args.get("status")
     enquiry: str = request.args.get("enquiry")
     action: str = request.args.get("action")
 
     customers: List[Customer] = _get_current_customers()
-    cases: List[Family] = _get_cases(
-        status=status, enquiry=enquiry, action=action, customers=customers
-    )
+    cases: List[Family] = _get_cases(enquiry=enquiry, action=action, customers=customers)
 
     nr_cases: int = len(cases)
     cases_with_links: List[dict] = [case.to_dict(links=True) for case in cases]
@@ -200,18 +195,13 @@ def get_cases():
 
 def _get_current_customers() -> Optional[List[Customer]]:
     """Return customers if the current user is not an admin."""
-    if not g.current_user.is_admin:
-        return g.current_user.customers
-    return None
+    return g.current_user.customers if not g.current_user.is_admin else None
 
 
 def _get_cases(
-    status: str, enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
+    enquiry: Optional[str], action: Optional[str], customers: Optional[List[Customer]]
 ) -> List[Family]:
     """Get cases based on the provided filters."""
-    if status == "analysis":
-        return db.cases_to_analyze(pipeline=Pipeline.MIP_DNA)
-
     return db.get_cases_by_customers_action_and_case_search(
         case_search=enquiry,
         customers=customers,
