@@ -48,6 +48,7 @@ def test_too_long_order_name():
         OrderType.MIP_DNA,
         OrderType.MIP_RNA,
         OrderType.RML,
+        OrderType.RNAFUSION,
         OrderType.SARS_COV_2,
     ],
 )
