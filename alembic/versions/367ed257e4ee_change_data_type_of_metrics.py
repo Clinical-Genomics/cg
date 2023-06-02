@@ -1,4 +1,4 @@
-"""Change data type of metrics
+"""Change precision for sequencing metrics
 
 Revision ID: 367ed257e4ee
 Revises: 869d352cc614
