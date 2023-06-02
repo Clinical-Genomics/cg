@@ -23,7 +23,10 @@ class MockLims:
 
             def __init__(self, sample_id):
                 self.sample_id = sample_id
-                self.sample_data = {"comment": "a comment in LimsSample"}
+                self.sample_data = {
+                    "comment": "a comment in LimsSample",
+                    "project": {"id": "microbial_order_test"},
+                }
 
             def get(self, key):
                 """only here to get the sample.get('comment')"""
