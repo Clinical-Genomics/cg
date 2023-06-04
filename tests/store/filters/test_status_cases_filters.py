@@ -29,7 +29,7 @@ from cg.store.filters.status_case_filters import (
     get_cases_with_loqusdb_supported_pipeline,
     get_cases_with_loqusdb_supported_sequencing_method,
     filter_inactive_analysis_cases,
-    get_older_cases_by_creation_date,
+    filter_older_cases_by_creation_date,
 )
 from tests.store_helpers import StoreHelpers
 
@@ -534,7 +534,9 @@ def test_get_old_cases(base_store: Store, helpers: StoreHelpers, timestamp_in_2_
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_older_cases_by_creation_date(cases=cases, creation_date=timestamp_in_2_weeks)
+    cases: Query = filter_older_cases_by_creation_date(
+        cases=cases, creation_date=timestamp_in_2_weeks
+    )
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -557,7 +559,9 @@ def test_get_old_cases_none_when_all_cases_are_too_new(
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_older_cases_by_creation_date(cases=cases, creation_date=timestamp_yesterday)
+    cases: Query = filter_older_cases_by_creation_date(
+        cases=cases, creation_date=timestamp_yesterday
+    )
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -638,11 +642,11 @@ def test_filter_case_by_empty_internal_id(store_with_multiple_cases_and_samples:
     assert cases.count() == 0
 
 
-def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
+def test_filter_running_cases_no_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that no cases are returned when no cases have a running action."""
     # GIVEN a store containing cases with no "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
-    cases_query = cases_query.filter(Family.action != "running")
+    cases_query = cases_query.filter(Family.action != CaseActions.RUNNING)
 
     # WHEN getting active cases
     active_cases: Query = filter_running_cases(cases=cases_query)
@@ -651,12 +655,12 @@ def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples
     assert active_cases.count() == 0
 
 
-def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
+def test_filter_running_cases_with_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that at least one case is returned when at least one case has a running action."""
     # GIVEN a store containing cases with at least one "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     actions: List[str] = [case.action for case in cases_query.all()]
-    assert "running" in actions
+    assert CaseActions.RUNNING in actions
 
     # WHEN getting active cases
     active_cases: Query = filter_running_cases(cases=cases_query)
@@ -665,12 +669,12 @@ def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_sampl
     assert active_cases.count() >= 1
 
 
-def test_get_active_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
+def test_filter_running_cases_only_running_cases(store_with_multiple_cases_and_samples: Store):
     """Test that all cases are returned when all cases have a running action."""
     # GIVEN a store containing only cases with "running" action
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Family)
     for case in cases_query.all():
-        case.action = "running"
+        case.action = CaseActions.RUNNING
 
     # WHEN getting active cases
     active_cases: Query = filter_running_cases(cases=cases_query)
@@ -970,7 +974,7 @@ def test_get_older_cases_by_created_date_no_older_cases(
     oldest_created_date = min(case.created_at for case in cases_query)
 
     # WHEN filtering cases by a date that is later than the oldest order date
-    filtered_cases: Query = get_older_cases_by_creation_date(
+    filtered_cases: Query = filter_older_cases_by_creation_date(
         cases=cases_query, creation_date=oldest_created_date
     )
 
@@ -978,7 +982,7 @@ def test_get_older_cases_by_created_date_no_older_cases(
     assert filtered_cases.count() == 0
 
 
-def test_get_older_cases_by_creation_date_some_newer_cases(
+def test_filter_runningfilter_older_cases_by_creation_date_some_newer_cases(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with creation dates older than the given date are returned."""
@@ -991,7 +995,7 @@ def test_get_older_cases_by_creation_date_some_newer_cases(
     some_creation_date = min_creation_date + (max_creation_date - min_creation_date) / 2
 
     # WHEN filtering cases by a date that is earlier than some creation dates
-    filtered_cases: Query = get_older_cases_by_creation_date(
+    filtered_cases: Query = filter_older_cases_by_creation_date(
         cases=cases_query, creation_date=some_creation_date
     )
 

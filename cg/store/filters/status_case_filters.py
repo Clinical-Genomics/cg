@@ -35,7 +35,7 @@ def filter_running_cases(cases: Query, **kwargs) -> Query:
     return cases.filter(Family.action == CaseActions.RUNNING)
 
 
-def get_older_cases_by_creation_date(cases: Query, creation_date: datetime, **kwargs) -> Query:
+def filter_older_cases_by_creation_date(cases: Query, creation_date: datetime, **kwargs) -> Query:
     """Return older cases compared to date."""
     cases = cases.filter(Family.created_at < creation_date)
     return cases.order_by(Family.created_at.asc())
@@ -259,7 +259,7 @@ class CaseFilter(Enum):
     FILTER_IS_RUNNING: Callable = filter_running_cases
     FILTER_NEW_BY_ORDER_DATE: Callable = get_newer_cases_by_order_date
     FILTER_NOT_ANALYSED: Callable = filter_cases_not_analysed
-    FILTER_OLD_BY_CREATION_DATE: Callable = get_older_cases_by_creation_date
+    FILTER_OLD_BY_CREATION_DATE: Callable = filter_older_cases_by_creation_date
     FILTER_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
     FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
     FILTER_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
