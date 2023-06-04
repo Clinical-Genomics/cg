@@ -15,12 +15,12 @@ from cg.constants.observations import (
 from cg.store.models import Analysis, Application, Customer, Family, Sample
 
 
-def get_cases_has_sequence(cases: Query, **kwargs) -> Query:
+def filter_cases_has_sequence(cases: Query, **kwargs) -> Query:
     """Return cases that is not sequenced according to record in StatusDB."""
     return cases.filter(or_(Application.is_external, Sample.sequenced_at.isnot(None)))
 
 
-def get_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
+def filter_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     """Return cases which are not set or on hold."""
     return cases.filter(
         or_(
@@ -30,7 +30,7 @@ def get_inactive_analysis_cases(cases: Query, **kwargs) -> Query:
     )
 
 
-def get_running_cases(cases: Query, **kwargs) -> Query:
+def filter_running_cases(cases: Query, **kwargs) -> Query:
     """Return cases which are running."""
     return cases.filter(Family.action == CaseActions.RUNNING)
 
@@ -241,30 +241,30 @@ def apply_case_filter(
 class CaseFilter(Enum):
     """Define case filters."""
 
-    GET_HAS_SEQUENCE: Callable = get_cases_has_sequence
-    GET_HAS_INACTIVE_ANALYSIS: Callable = get_inactive_analysis_cases
-    GET_OLD_BY_CREATION_DATE: Callable = get_older_cases_by_creation_date
-    GET_NEW_BY_ORDER_DATE: Callable = get_newer_cases_by_order_date
-    GET_WITH_PIPELINE: Callable = get_cases_with_pipeline
-    GET_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
-    GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
-        get_cases_with_loqusdb_supported_sequencing_method
-    )
-    GET_FOR_ANALYSIS: Callable = get_cases_for_analysis
-    GET_NOT_ANALYSED: Callable = filter_cases_not_analysed
-    GET_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
-    GET_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
-    FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
-    FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
-    IS_RUNNING: Callable = get_running_cases
-    FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
-    FILTER_BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
-    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
-    FILTER_BY_NAME: Callable = filter_cases_by_name
     FILTER_BY_ACTION: Callable = filter_cases_by_action
     FILTER_BY_CASE_SEARCH: Callable = filter_cases_by_case_search
+    FILTER_BY_CUSTOMER_ENTRY_ID: Callable = filter_cases_by_customer_entry_id
+    FILTER_BY_CUSTOMER_ENTRY_IDS: Callable = filter_cases_by_customer_entry_ids
+    FILTER_BY_ENTRY_ID: Callable = filter_cases_by_entry_id
+    FILTER_BY_INTERNAL_ID: Callable = filter_case_by_internal_id
     FILTER_BY_INTERNAL_ID_SEARCH: Callable = filter_cases_by_internal_id_search
+    FILTER_BY_NAME: Callable = filter_cases_by_name
     FILTER_BY_NAME_SEARCH: Callable = filter_cases_by_name_search
-    FILTER_BY_PRIORITY: Callable = filter_cases_by_priority
-    ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at
     FILTER_BY_PIPELINE_SEARCH: Callable = filter_cases_by_pipeline_search
+    FILTER_BY_PRIORITY: Callable = filter_cases_by_priority
+    FILTER_BY_TICKET: Callable = filter_cases_by_ticket_id
+    FILTER_FOR_ANALYSIS: Callable = get_cases_for_analysis
+    FILTER_HAS_INACTIVE_ANALYSIS: Callable = filter_inactive_analysis_cases
+    FILTER_HAS_SEQUENCE: Callable = filter_cases_has_sequence
+    FILTER_IS_RUNNING: Callable = filter_running_cases
+    FILTER_NEW_BY_ORDER_DATE: Callable = get_newer_cases_by_order_date
+    FILTER_NOT_ANALYSED: Callable = filter_cases_not_analysed
+    FILTER_OLD_BY_CREATION_DATE: Callable = get_older_cases_by_creation_date
+    FILTER_REPORT_SUPPORTED: Callable = get_report_supported_data_delivery_cases
+    FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE: Callable = get_cases_with_loqusdb_supported_pipeline
+    FILTER_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (
+        get_cases_with_loqusdb_supported_sequencing_method
+    )
+    FILTER_WITH_PIPELINE: Callable = get_cases_with_pipeline
+    FILTER_WITH_SCOUT_DELIVERY: Callable = get_cases_with_scout_data_delivery
+    ORDER_BY_CREATED_AT: Callable = order_cases_by_created_at

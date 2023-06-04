@@ -19,22 +19,24 @@ from cg.store.filters.status_case_filters import (
     filter_cases_by_priority,
     filter_cases_not_analysed,
     get_newer_cases_by_order_date,
-    get_running_cases,
+    filter_running_cases,
     filter_cases_by_ticket_id,
     get_cases_with_pipeline,
-    get_cases_has_sequence,
+    filter_cases_has_sequence,
     get_cases_for_analysis,
     get_cases_with_scout_data_delivery,
     get_report_supported_data_delivery_cases,
     get_cases_with_loqusdb_supported_pipeline,
     get_cases_with_loqusdb_supported_sequencing_method,
-    get_inactive_analysis_cases,
+    filter_inactive_analysis_cases,
     get_older_cases_by_creation_date,
 )
 from tests.store_helpers import StoreHelpers
 
 
-def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
+def test_filter_cases_has_sequence(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
     """Test that a case is returned when there is a cases with a sequenced sample."""
 
     # GIVEN a sequenced sample
@@ -50,7 +52,7 @@ def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timest
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_has_sequence(cases=cases)
+    cases: Query = filter_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -59,7 +61,7 @@ def test_get_cases_has_sequence(base_store: Store, helpers: StoreHelpers, timest
     assert cases
 
 
-def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreHelpers):
+def test_filter_cases_has_sequence_when_external(base_store: Store, helpers: StoreHelpers):
     """Test that a case is returned when there is a case with an externally sequenced sample."""
 
     # GIVEN a sequenced sample
@@ -75,7 +77,7 @@ def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreH
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_has_sequence(cases=cases)
+    cases: Query = filter_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -84,7 +86,7 @@ def test_get_cases_has_sequence_when_external(base_store: Store, helpers: StoreH
     assert cases
 
 
-def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: StoreHelpers):
+def test_filter_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: StoreHelpers):
     """Test that no case is returned when there is a cases with sample that has not been sequenced."""
 
     # GIVEN a sequenced sample
@@ -100,7 +102,7 @@ def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: S
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_has_sequence(cases=cases)
+    cases: Query = filter_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -109,7 +111,7 @@ def test_get_cases_has_sequence_when_not_sequenced(base_store: Store, helpers: S
     assert not cases.all()
 
 
-def test_get_cases_has_sequence_when_not_external_nor_sequenced(
+def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     base_store: Store, helpers: StoreHelpers
 ):
     """Test that no case is returned when there is a cases with sample that has not been sequenced nor is external."""
@@ -127,7 +129,7 @@ def test_get_cases_has_sequence_when_not_external_nor_sequenced(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_has_sequence(cases=cases)
+    cases: Query = filter_cases_has_sequence(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -459,7 +461,7 @@ def test_get_report_supported_data_delivery_cases(
     assert test_invalid_case not in cases
 
 
-def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
+def test_filter_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     """Test that an inactive case is returned when there is case which has no action set."""
 
     # GIVEN a case
@@ -469,7 +471,7 @@ def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_inactive_analysis_cases(cases=cases)
+    cases: Query = filter_inactive_analysis_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -480,7 +482,7 @@ def test_get_inactive_analysis_cases(base_store: Store, helpers: StoreHelpers):
     assert cases.all()[0].internal_id == test_case.internal_id
 
 
-def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
+def test_filter_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: StoreHelpers):
     """Test that an inactivated case is returned when there is case which has action set to hold."""
 
     # GIVEN a case
@@ -490,7 +492,7 @@ def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: St
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_inactive_analysis_cases(cases=cases)
+    cases: Query = filter_inactive_analysis_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -501,7 +503,9 @@ def test_get_inactive_analysis_cases_when_on_hold(base_store: Store, helpers: St
     assert cases[0].internal_id == test_case.internal_id
 
 
-def test_get_inactive_analysis_cases_when_not_completed(base_store: Store, helpers: StoreHelpers):
+def test_filter_inactive_analysis_cases_when_not_completed(
+    base_store: Store, helpers: StoreHelpers
+):
     """Test that no case is returned when there is case which action set to running."""
 
     # GIVEN a case
@@ -511,7 +515,7 @@ def test_get_inactive_analysis_cases_when_not_completed(base_store: Store, helpe
     cases: Query = base_store._get_query(table=Family)
 
     # WHEN getting completed cases
-    cases: Query = get_inactive_analysis_cases(cases=cases)
+    cases: Query = filter_inactive_analysis_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -641,7 +645,7 @@ def test_get_active_cases_no_running_cases(store_with_multiple_cases_and_samples
     cases_query = cases_query.filter(Family.action != "running")
 
     # WHEN getting active cases
-    active_cases: Query = get_running_cases(cases=cases_query)
+    active_cases: Query = filter_running_cases(cases=cases_query)
 
     # THEN the query should return no cases
     assert active_cases.count() == 0
@@ -655,7 +659,7 @@ def test_get_active_cases_with_running_cases(store_with_multiple_cases_and_sampl
     assert "running" in actions
 
     # WHEN getting active cases
-    active_cases: Query = get_running_cases(cases=cases_query)
+    active_cases: Query = filter_running_cases(cases=cases_query)
 
     # THEN the query should return at least one case
     assert active_cases.count() >= 1
@@ -669,7 +673,7 @@ def test_get_active_cases_only_running_cases(store_with_multiple_cases_and_sampl
         case.action = "running"
 
     # WHEN getting active cases
-    active_cases: Query = get_running_cases(cases=cases_query)
+    active_cases: Query = filter_running_cases(cases=cases_query)
 
     # THEN the query should return the same number of cases as the original query
     assert active_cases.count() == cases_query.count()
