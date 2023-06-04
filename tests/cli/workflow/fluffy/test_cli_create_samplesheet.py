@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
@@ -13,10 +15,11 @@ def test_create_samplesheet_dry(
     caplog,
 ):
     caplog.set_level("INFO")
+
     fluffy_analysis_api: FluffyAnalysisAPI = fluffy_context.meta_apis["analysis_api"]
     # GIVEN a case_id that does exist in database
 
-    # WHEN running command to create samplesheet with dry-run flag
+    # WHEN running command to create sample sheet with dry-run flag
     result = cli_runner.invoke(
         create_samplesheet, [fluffy_case_id_existing, "--dry-run"], obj=fluffy_context
     )
