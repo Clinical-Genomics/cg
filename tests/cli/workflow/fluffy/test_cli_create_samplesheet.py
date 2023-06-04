@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from cg.cli.workflow.fluffy.base import create_samplesheet
 from cg.constants import EXIT_SUCCESS
 from cg.meta.workflow.fluffy import FluffyAnalysisAPI
