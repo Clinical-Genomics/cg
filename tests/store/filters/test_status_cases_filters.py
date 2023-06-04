@@ -8,29 +8,29 @@ from cg.constants.constants import CaseActions, DataDelivery
 from cg.constants.sequencing import SequencingMethod
 from cg.constants.subject import PhenotypeStatus
 from cg.store import Store
-from cg.store.models import Analysis, Family, Sample
 from cg.store.filters.status_case_filters import (
+    filter_case_by_internal_id,
     filter_cases_by_case_search,
     filter_cases_by_customer_entry_ids,
     filter_cases_by_entry_id,
-    filter_case_by_internal_id,
     filter_cases_by_name,
     filter_cases_by_pipeline_search,
     filter_cases_by_priority,
-    filter_cases_not_analysed,
-    filter_newer_cases_by_order_date,
-    filter_running_cases,
     filter_cases_by_ticket_id,
-    filter_cases_with_pipeline,
-    filter_cases_has_sequence,
     filter_cases_for_analysis,
-    filter_cases_with_scout_data_delivery,
-    filter_report_supported_data_delivery_cases,
+    filter_cases_has_sequence,
+    filter_cases_not_analysed,
     filter_cases_with_loqusdb_supported_pipeline,
     filter_cases_with_loqusdb_supported_sequencing_method,
+    filter_cases_with_pipeline,
+    filter_cases_with_scout_data_delivery,
     filter_inactive_analysis_cases,
+    filter_newer_cases_by_order_date,
     filter_older_cases_by_creation_date,
+    filter_report_supported_data_delivery_cases,
+    filter_running_cases,
 )
+from cg.store.models import Analysis, Family, Sample
 from tests.store_helpers import StoreHelpers
 
 
