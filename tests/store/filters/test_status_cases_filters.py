@@ -18,16 +18,16 @@ from cg.store.filters.status_case_filters import (
     filter_cases_by_pipeline_search,
     filter_cases_by_priority,
     filter_cases_not_analysed,
-    get_newer_cases_by_order_date,
+    filter_newer_cases_by_order_date,
     filter_running_cases,
     filter_cases_by_ticket_id,
-    get_cases_with_pipeline,
+    filter_cases_with_pipeline,
     filter_cases_has_sequence,
-    get_cases_for_analysis,
-    get_cases_with_scout_data_delivery,
-    get_report_supported_data_delivery_cases,
-    get_cases_with_loqusdb_supported_pipeline,
-    get_cases_with_loqusdb_supported_sequencing_method,
+    filter_cases_for_analysis,
+    filter_cases_with_scout_data_delivery,
+    filter_report_supported_data_delivery_cases,
+    filter_cases_with_loqusdb_supported_pipeline,
+    filter_cases_with_loqusdb_supported_sequencing_method,
     filter_inactive_analysis_cases,
     filter_older_cases_by_creation_date,
 )
@@ -138,7 +138,7 @@ def test_filter_cases_has_sequence_when_not_external_nor_sequenced(
     assert not cases.all()
 
 
-def test_get_cases_with_pipeline_when_correct_pipline(
+def test_filter_cases_with_pipeline_when_correct_pipline(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the  specified pipeline."""
@@ -156,13 +156,13 @@ def test_get_cases_with_pipeline_when_correct_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(get_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
+    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.BALSAMIC))
 
     # THEN cases should contain the test case
     assert cases
 
 
-def test_get_cases_with_pipeline_when_incorrect_pipline(
+def test_filter_cases_with_pipeline_when_incorrect_pipline(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that no case is returned when there are no cases with the  specified pipeline."""
@@ -180,13 +180,13 @@ def test_get_cases_with_pipeline_when_incorrect_pipline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse for another pipeline
-    cases: List[Query] = list(get_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
+    cases: List[Query] = list(filter_cases_with_pipeline(cases=cases, pipeline=Pipeline.MIP_DNA))
 
     # THEN cases should not contain the test case
     assert not cases
 
 
-def test_get_cases_with_loqusdb_supported_pipeline(
+def test_filter_cases_with_loqusdb_supported_pipeline(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases that support Loqusdb upload."""
@@ -210,14 +210,14 @@ def test_get_cases_with_loqusdb_supported_pipeline(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with pipeline
-    cases: List[Query] = list(get_cases_with_loqusdb_supported_pipeline(cases=cases))
+    cases: List[Query] = list(filter_cases_with_loqusdb_supported_pipeline(cases=cases))
 
     # THEN only the Loqusdb supported case should be extracted
     assert test_mip_case in cases
     assert test_fluffy_case not in cases
 
 
-def test_get_cases_with_loqusdb_supported_sequencing_method(
+def test_filter_cases_with_loqusdb_supported_sequencing_method(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
@@ -235,7 +235,7 @@ def test_get_cases_with_loqusdb_supported_sequencing_method(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the available cases
-    cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
+    cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
         cases=cases, pipeline=Pipeline.MIP_DNA
     )
 
@@ -246,7 +246,7 @@ def test_get_cases_with_loqusdb_supported_sequencing_method(
     assert test_case_wes in cases
 
 
-def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
+def test_filter_cases_with_loqusdb_supported_sequencing_method_empty(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test retrieval of cases with a valid Loqusdb sequencing method."""
@@ -264,7 +264,7 @@ def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the valid cases
-    cases: Query = get_cases_with_loqusdb_supported_sequencing_method(
+    cases: Query = filter_cases_with_loqusdb_supported_sequencing_method(
         cases=cases, pipeline=Pipeline.MIP_DNA
     )
 
@@ -275,7 +275,9 @@ def test_get_cases_with_loqusdb_supported_sequencing_method_empty(
     assert not cases.all()
 
 
-def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timestamp_now: datetime):
+def test_filter_cases_for_analysis(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
     """Test that a case is returned when there is a cases with an action set to analyse."""
 
     # GIVEN a sequenced sample
@@ -296,7 +298,7 @@ def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timest
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_for_analysis(cases=cases)
+    cases: Query = filter_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -305,7 +307,7 @@ def test_get_cases_for_analysis(base_store: Store, helpers: StoreHelpers, timest
     assert cases
 
 
-def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
+def test_filter_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when there are internally created cases with no action set and no prior analysis."""
@@ -325,7 +327,7 @@ def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_for_analysis(cases=cases)
+    cases: Query = filter_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -334,7 +336,7 @@ def test_get_cases_for_analysis_when_sequenced_sample_and_no_analysis(
     assert cases
 
 
-def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
+def test_filter_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     base_store: Store,
     helpers: StoreHelpers,
     timestamp_yesterday: datetime,
@@ -363,7 +365,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_for_analysis(cases=cases)
+    cases: Query = filter_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -372,7 +374,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_new_sequence_data(
     assert cases
 
 
-def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
+def test_filter_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     base_store: Store, helpers: StoreHelpers, timestamp_yesterday: datetime
 ):
     """Test that a case is not returned when cases with no action, but old sequence data."""
@@ -395,7 +397,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases to analyse
-    cases: Query = get_cases_for_analysis(cases=cases)
+    cases: Query = filter_cases_for_analysis(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -404,7 +406,7 @@ def test_get_cases_for_analysis_when_cases_with_no_action_and_old_sequence_data(
     assert not cases.all()
 
 
-def test_get_cases_with_scout_data_delivery(
+def test_filter_cases_with_scout_data_delivery(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned when Scout is specified as a data delivery option."""
@@ -422,7 +424,7 @@ def test_get_cases_with_scout_data_delivery(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN getting cases with Scout as data delivery option
-    cases: Query = get_cases_with_scout_data_delivery(cases=cases)
+    cases: Query = filter_cases_with_scout_data_delivery(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -431,7 +433,7 @@ def test_get_cases_with_scout_data_delivery(
     assert cases
 
 
-def test_get_report_supported_data_delivery_cases(
+def test_filter_report_supported_data_delivery_cases(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
     """Test that a case is returned for a delivery report supported data delivery option."""
@@ -451,7 +453,7 @@ def test_get_report_supported_data_delivery_cases(
     cases: Query = base_store._get_outer_join_cases_with_analyses_query()
 
     # WHEN retrieving the delivery report supported cases
-    cases: Query = get_report_supported_data_delivery_cases(cases=cases)
+    cases: Query = filter_report_supported_data_delivery_cases(cases=cases)
 
     # ASSERT that cases is a query
     assert isinstance(cases, Query)
@@ -925,7 +927,7 @@ def test_filter_cases_by_priority_all_priorities(
     assert len(filtered_cases) == cases_query.count()
 
 
-def test_get_newer_cases_by_order_date_no_newer_cases(
+def test_filter_newer_cases_by_order_date_no_newer_cases(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that no cases are returned when there are no cases with a newer order date."""
@@ -934,7 +936,7 @@ def test_get_newer_cases_by_order_date_no_newer_cases(
     latest_order_date = max(case.ordered_at for case in cases_query)
 
     # WHEN filtering cases by a date that is later than the latest order date
-    filtered_cases: Query = get_newer_cases_by_order_date(
+    filtered_cases: Query = filter_newer_cases_by_order_date(
         cases=cases_query, order_date=latest_order_date
     )
 
@@ -942,7 +944,7 @@ def test_get_newer_cases_by_order_date_no_newer_cases(
     assert filtered_cases.count() == 0
 
 
-def test_get_newer_cases_by_order_date_some_newer_cases(
+def test_filter_newer_cases_by_order_date_some_newer_cases(
     store_with_multiple_cases_and_samples: Store,
 ):
     """Test that cases with order dates newer than the given date are returned."""
@@ -955,7 +957,7 @@ def test_get_newer_cases_by_order_date_some_newer_cases(
     some_order_date = min_order_date + (max_order_date - min_order_date) / 2
 
     # WHEN filtering cases by a date that is earlier than some order dates
-    filtered_cases: Query = get_newer_cases_by_order_date(
+    filtered_cases: Query = filter_newer_cases_by_order_date(
         cases=cases_query, order_date=some_order_date
     )
 
