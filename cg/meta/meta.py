@@ -8,11 +8,9 @@ from cg.apps.madeline.api import MadelineAPI
 from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.apps.tb import TrailblazerAPI
-from cg.apps.vogue import VogueAPI
 from cg.meta.backup.backup import SpringBackupAPI
 from cg.meta.compress import CompressAPI
 from cg.meta.encryption.encryption import SpringEncryptionAPI
-from cg.meta.upload.vogue import UploadVogueAPI
 from cg.meta.workflow.prepare_fastq import PrepareFastqAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
@@ -51,9 +49,3 @@ class MetaAPI:
         self.status_db: Store = config.status_db
         self.scout_api: ScoutAPI = config.scout_api
         self.trailblazer_api: TrailblazerAPI = config.trailblazer_api
-        self.upload_vogue_api: UploadVogueAPI = UploadVogueAPI(
-            genotype_api=config.genotype_api,
-            vogue_api=config.vogue_api,
-            store=config.status_db,
-        )
-        self.vogue_api: VogueAPI = config.vogue_api

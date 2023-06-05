@@ -77,40 +77,6 @@ class FindBusinessDataHandler(BaseHandler):
             .sample.application_version.application
         )
 
-    def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
-        """Return all cases completed after a given date that have not been uploaded to Vogue."""
-        filter_functions = [
-            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
-            AnalysisFilter.FILTER_COMPLETED_AT_AFTER,
-        ]
-        return apply_analysis_filter(
-            analyses=self._get_latest_analyses_for_cases_query(),
-            filter_functions=filter_functions,
-            completed_at_date=completed_at_after,
-        ).all()
-
-    def get_analysis_for_vogue_upload_completed_before(self, completed_at_before: dt.datetime):
-        """Return all cases completed before a given date that have not been uploaded to Vogue."""
-        filter_functions = [
-            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
-            AnalysisFilter.FILTER_COMPLETED_AT_BEFORE,
-        ]
-        return apply_analysis_filter(
-            analyses=self._get_latest_analyses_for_cases_query(),
-            filter_functions=filter_functions,
-            completed_at_date=completed_at_before,
-        ).all()
-
-    def get_analyses_for_vogue_upload(
-        self,
-    ) -> List[Analysis]:
-        """Return the latest analysis not uploaded to Vogue for each case."""
-
-        return apply_analysis_filter(
-            analyses=self._get_latest_analyses_for_cases_query(),
-            filter_functions=[AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE],
-        ).all()
-
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
         """Return latest not uploaded analysis for each case given a pipeline."""
         filter_functions: List[AnalysisFilter] = [

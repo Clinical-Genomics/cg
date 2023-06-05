@@ -8,58 +8,6 @@ from cg.store.models import (
 from cg.constants import Pipeline
 
 
-def test_get_analyses_uploaded_to_vogue(store_with_analyses_for_cases: Store):
-    """Test that an analysis can be fetched by case."""
-    # GIVEN a database with an analysis and case
-
-    # WHEN fetching the latest analysis to upload to vogue
-    analyses: List[Analysis] = store_with_analyses_for_cases.get_analyses_for_vogue_upload()
-
-    # THEN the analyses should not have been uploaded to Vogue
-    for analysis in analyses:
-        assert not analysis.uploaded_to_vogue_at
-
-
-def test_get_analyses_uploaded_to_vogue_completed_before(
-    store_with_analyses_for_cases: Store,
-    timestamp_in_2_weeks: datetime,
-):
-    """Test that an analysis can be fetched by case."""
-    # GIVEN a database with an analysis and case
-
-    # WHEN fetching the latest analysis to upload to vogue that completed 2 weeks ago
-    analyses: List[
-        Analysis
-    ] = store_with_analyses_for_cases.get_analysis_for_vogue_upload_completed_before(
-        completed_at_before=timestamp_in_2_weeks
-    )
-
-    # THEN the returned analysis was completed earlier than 2 weeks ago
-    for analysis in analyses:
-        assert not analysis.uploaded_to_vogue_at
-        assert analysis.completed_at < timestamp_in_2_weeks
-
-
-def test_get_analyses_uploaded_to_vogue_completed_after(
-    store_with_analyses_for_cases: Store,
-    timestamp_yesterday: datetime,
-):
-    """Test get analysis to upload to vogue completed after.."""
-    # GIVEN a database with an analysis and case
-
-    # WHEN fetching the latest analysis to upload to vogue completed after yesterday
-    analyses: List[
-        Analysis
-    ] = store_with_analyses_for_cases.get_analysis_for_vogue_upload_completed_after(
-        completed_at_after=timestamp_yesterday
-    )
-
-    # THEN the returned analysis was completed after yesterday
-    for analysis in analyses:
-        assert not analysis.uploaded_to_vogue_at
-        assert analysis.completed_at > timestamp_yesterday
-
-
 def test_get_latest_nipt_analysis_to_upload(
     store_with_analyses_for_cases_not_uploaded_fluffy: Store,
     timestamp_now: datetime,
