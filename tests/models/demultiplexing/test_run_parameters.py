@@ -1,8 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Optional
-from xml.etree.ElementTree import Element
-
+from typing import List
 
 import pytest
 from cg.constants.demultiplexing import RunParametersXMLNodes
@@ -224,20 +222,17 @@ def test_get_cycles_novaseq_6000(novaseq_6000_run_parameters: RunParametersNovaS
     # GIVEN a NovaSeq6000 run parameters object
 
     # WHEN getting any read cycle
-    read1: int = novaseq_6000_run_parameters.get_read_1_cycles()
-    read2: int = novaseq_6000_run_parameters.get_read_2_cycles()
-    index1: int = novaseq_6000_run_parameters.get_index_1_cycles()
-    index2: int = novaseq_6000_run_parameters.get_index_2_cycles()
+    read_cycles: List[int] = [
+        novaseq_6000_run_parameters.get_read_1_cycles(),
+        novaseq_6000_run_parameters.get_read_2_cycles(),
+        novaseq_6000_run_parameters.get_index_1_cycles(),
+        novaseq_6000_run_parameters.get_index_2_cycles(),
+    ]
 
     # THEN all read cycles are non-negative integers
-    assert isinstance(read1, int)
-    assert read1 >= 0
-    assert isinstance(read2, int)
-    assert read2 >= 0
-    assert isinstance(index1, int)
-    assert index1 >= 0
-    assert isinstance(index2, int)
-    assert index2 >= 0
+    for cycles in read_cycles:
+        assert isinstance(cycles, int)
+        assert cycles >= 0
 
 
 def test_get_cycles_novaseq_x(novaseq_x_run_parameters: RunParametersNovaSeqX):
@@ -245,17 +240,14 @@ def test_get_cycles_novaseq_x(novaseq_x_run_parameters: RunParametersNovaSeqX):
     # GIVEN a NovaSeqX run parameters object
 
     # WHEN getting any read cycle
-    read1: int = novaseq_x_run_parameters.get_read_1_cycles()
-    read2: int = novaseq_x_run_parameters.get_read_2_cycles()
-    index1: int = novaseq_x_run_parameters.get_index_1_cycles()
-    index2: int = novaseq_x_run_parameters.get_index_2_cycles()
+    read_cycles: List[int] = [
+        novaseq_x_run_parameters.get_read_1_cycles(),
+        novaseq_x_run_parameters.get_read_2_cycles(),
+        novaseq_x_run_parameters.get_index_1_cycles(),
+        novaseq_x_run_parameters.get_index_2_cycles(),
+    ]
 
     # THEN all read cycles are non-negative integers
-    assert isinstance(read1, int)
-    assert read1 >= 0
-    assert isinstance(read2, int)
-    assert read2 >= 0
-    assert isinstance(index1, int)
-    assert index1 >= 0
-    assert isinstance(index2, int)
-    assert index2 >= 0
+    for cycles in read_cycles:
+        assert isinstance(cycles, int)
+        assert cycles >= 0

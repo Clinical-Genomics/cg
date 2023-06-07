@@ -17,8 +17,7 @@ class RunParameters:
 
     def __init__(self, run_parameters_path: Path):
         self.path: Path = run_parameters_path
-        with open(run_parameters_path, "rt") as in_file:
-            self.tree: ElementTree = ElementTree.parse(in_file)
+        self.tree: ElementTree = read_xml(file_path=run_parameters_path)
         self.validate_instrument()
 
     @property
@@ -83,7 +82,7 @@ class RunParameters:
         raise NotImplementedError("Impossible to retrieve read2 cycles from parent class")
 
     def __str__(self):
-        return f"RunParameters(path={self.path}," f"sequencer={self.sequencer})"
+        return f"RunParameters(path={self.path}, sequencer={self.sequencer})"
 
     def __repr__(self):
         return (
