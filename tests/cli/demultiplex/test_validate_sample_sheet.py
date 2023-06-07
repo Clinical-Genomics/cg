@@ -27,11 +27,14 @@ def test_validate_non_existing_sample_sheet(cli_runner: CliRunner, sample_sheet_
 
 
 def test_validate_sample_sheet_wrong_file_type(
-    cli_runner: CliRunner, sample_sheet_context: dict, novaseq_run_parameters: Path, caplog
+    cli_runner: CliRunner,
+    sample_sheet_context: dict,
+    novaseq_6000_run_parameters_path: Path,
+    caplog,
 ):
     """Test validate sample sheet when sample sheet is in wrong format."""
     # GIVEN a existing file in the wrong file format
-    sample_sheet: Path = novaseq_run_parameters
+    sample_sheet: Path = novaseq_6000_run_parameters_path
     assert sample_sheet.exists()
     assert sample_sheet.suffix != FileExtensions.CSV
 
