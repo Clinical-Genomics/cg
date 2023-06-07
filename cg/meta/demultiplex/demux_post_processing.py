@@ -79,9 +79,7 @@ class DemuxPostProcessingAPI:
 
         self.status_db.session.add_all(sample_lane_sequencing_metrics)
         self.status_db.session.commit()
-        LOG.info(
-            f"Added sample lane sequencing metrics to status database for: {flow_cell_name}"
-        )
+        LOG.info(f"Added sample lane sequencing metrics to status database for: {flow_cell_name}")
 
     def finish_flow_cell_temp(self, flow_cell_name: str) -> None:
         """Finish flow cell."""
@@ -215,6 +213,9 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             return
         LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
         self.post_process_flow_cell(demux_results=demux_results)
+
+        # Temporary population of the new sequencing metrics table
+        self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post process those that need it."""
@@ -392,6 +393,9 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
                 return
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
+
+        # Temporary population of the new sequencing metrics table
+        self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post-process those that need it."""
