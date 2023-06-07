@@ -74,7 +74,7 @@ class DemuxPostProcessingAPI:
             SampleLaneSequencingMetrics
         ] = create_sample_lane_sequencing_metrics_for_flow_cell(
             flow_cell_dir=flow_cell_dir,
-            bcl_converter=self.get_bcl_converter(),
+            bcl_converter=self.get_bcl_converter(flow_cell_name=flow_cell_name),
         )
 
         self.status_db.session.add_all(sample_lane_sequencing_metrics)
@@ -85,9 +85,9 @@ class DemuxPostProcessingAPI:
         """Finish flow cell."""
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
-    def get_bcl_converter(self) -> str:
+    def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
-        if self.is_bcl2fastq_demux_folder_structure():
+        if self.is_bcl2fastq_demux_folder_structure(flow_cell_name=flow_cell_name):
             LOG.info("Flow cell was demultiplexed with bcl2fastq")
             return BclConverter.BCL2FASTQ
         LOG.info("Flow cell was demultiplexed with bcl_converter")
