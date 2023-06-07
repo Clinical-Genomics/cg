@@ -5,15 +5,15 @@ from pathlib import Path
 
 import click
 
-from cg.cli.workflow.commands import ARGUMENT_CASE_ID
+from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.taxprofiler.options import OPTION_INSTRUMENT_PLATFORM
-from cg.constants.constants import MetaApis
+from cg.constants.constants import MetaApis, DRY_RUN
 from cg.constants.sequencing import SequencingPlatform
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.taxprofiler import TaxprofilerAnalysisAPI
 from cg.models.cg_config import CGConfig
-
+from cg.exc import CgError, DecompressionNeededError
 
 LOG = logging.getLogger(__name__)
 
@@ -28,17 +28,25 @@ def taxprofiler(context: click.Context) -> None:
     )
 
 
+taxprofiler.add_command(resolve_compression)
+
+
 @taxprofiler.command("config-case")
 @ARGUMENT_CASE_ID
 @OPTION_INSTRUMENT_PLATFORM
+@DRY_RUN
 @click.pass_obj
-def config_case(context: CGConfig, case_id: str, instrument_platform: SequencingPlatform) -> None:
+def config_case(
+    context: CGConfig, case_id: str, instrument_platform: SequencingPlatform, dry_run: bool
+) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given case_id."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.config_case(case_id=case_id, instrument_platform=instrument_platform, fasta="")
+        analysis_api.config_case(
+            case_id=case_id, instrument_platform=instrument_platform, fasta="", dry_run=dry_run
+        )
 
     except CgError as error:
         LOG.error(f"Could not create sample sheet: {error}")

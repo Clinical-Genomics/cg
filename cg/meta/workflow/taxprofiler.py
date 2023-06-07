@@ -83,7 +83,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         return sample_sheet_content
 
     def write_sample_sheet(
-        self, case_id: str, instrument_platform: SequencingPlatform.ILLUMINA, fasta: Optional[str]
+        self,
+        case_id: str,
+        instrument_platform: SequencingPlatform.ILLUMINA,
+        fasta: Optional[str],
+        dry_run: bool = False,
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
@@ -99,6 +103,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 fasta=fasta,
             )
             LOG.info(sample_sheet_content)
+            if dry_run:
+                continue
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
@@ -108,12 +114,16 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             )
 
     def config_case(
-        self, case_id: str, instrument_platform: SequencingPlatform.ILLUMINA, fasta: Optional[str]
+        self,
+        case_id: str,
+        instrument_platform: SequencingPlatform.ILLUMINA,
+        fasta: Optional[str],
+        dry_run: bool,
     ) -> None:
         """Create sample sheet file for Taxprofiler analysis."""
         NextflowAnalysisAPI.make_case_folder(case_id=case_id, root_dir=self.root_dir)
         LOG.info("Generating sample sheet")
         self.write_sample_sheet(
-            case_id=case_id, instrument_platform=instrument_platform, fasta=fasta
+            case_id=case_id, instrument_platform=instrument_platform, fasta=fasta, dry_run=dry_run
         )
         LOG.info("Sample sheet written")
