@@ -1,6 +1,5 @@
 """Post-processing Demultiiplex API."""
 import logging
-import os
 import shutil
 import re
 from contextlib import redirect_stdout
