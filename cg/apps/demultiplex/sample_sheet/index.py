@@ -1,10 +1,11 @@
-"""Functions that deals with modifications of the indexes"""
-import csv
+"""Functions that deals with modifications of the indexes."""
 import logging
 from typing import Dict, List, Set
 
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.constants.constants import FileFormat
 from cg.constants.sequencing import Sequencers
+from cg.io.controller import ReadFile
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.resources import VALID_INDEXES_PATH
 from packaging import version
@@ -41,14 +42,15 @@ class Index(BaseModel):
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
     LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
     indexes: List[Index] = []
-    with open(VALID_INDEXES_PATH, "r") as csv_file:
-        indexes_csv = csv.reader(csv_file)
-        for row in indexes_csv:
-            index_name = row[0]
-            index_sequence = row[1]
-            if dual_indexes_only and not is_dual_index(index_sequence):
-                continue
-            indexes.append(Index(name=index_name, sequence=index_sequence))
+    indexes_csv: List[List[str]] = ReadFile.get_content_from_file(
+        file_format=FileFormat.CSV, file_path=VALID_INDEXES_PATH
+    )
+    for row in indexes_csv:
+        index_name = row[0]
+        index_sequence = row[1]
+        if dual_indexes_only and not is_dual_index(index_sequence):
+            continue
+        indexes.append(Index(name=index_name, sequence=index_sequence))
     return indexes
 
 
