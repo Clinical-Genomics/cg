@@ -46,9 +46,9 @@ def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
         file_format=FileFormat.CSV, file_path=VALID_INDEXES_PATH
     )
     for row in indexes_csv:
-        index_name = row[0]
-        index_sequence = row[1]
-        if dual_indexes_only and not is_dual_index(index_sequence):
+        index_name: str = row[0]
+        index_sequence: str = row[1]
+        if dual_indexes_only and not is_dual_index(index=index_sequence):
             continue
         indexes.append(Index(name=index_name, sequence=index_sequence))
     return indexes
