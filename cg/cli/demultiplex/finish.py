@@ -35,13 +35,10 @@ def finish_all_cmd(context: CGConfig, bcl_converter: str, dry_run: bool) -> None
 
 @finish_group.command(name="flow-cell")
 @click.argument("flow-cell-name")
-@OPTION_BCL_CONVERTER
 @DRY_RUN
 @click.option("--force", is_flag=True)
 @click.pass_obj
-def finish_flow_cell(
-    context: CGConfig, flow_cell_name: str, bcl_converter: str, dry_run: bool, force: bool
-) -> None:
+def finish_flow_cell(context: CGConfig, flow_cell_name: str, dry_run: bool, force: bool) -> None:
     """Command to finish up a flow cell after demultiplexing.
 
     flow-cell-name is full flow cell name, e.g. '201203_A00689_0200_AHVKJCDRXX'.
@@ -51,9 +48,7 @@ def finish_flow_cell(
         config=context
     )
     demux_post_processing_api.set_dry_run(dry_run)
-    demux_post_processing_api.finish_flow_cell(
-        flow_cell_name=flow_cell_name, force=force, bcl_converter=bcl_converter
-    )
+    demux_post_processing_api.finish_flow_cell(flow_cell_name=flow_cell_name, force=force)
 
 
 @finish_group.command(name="temporary")

@@ -188,9 +188,11 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         )
 
     def finish_flow_cell(
-        self, bcl_converter: str, flow_cell_name: str, flow_cell_path: Path
+        self, flow_cell_name: str, flow_cell_path: Path
     ) -> None:
         """Post-processing flow cell."""
+        bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
+
         LOG.info(f"Check demultiplexed flow cell {flow_cell_name}")
         try:
             flow_cell: FlowCell = FlowCell(
@@ -219,7 +221,6 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Loop over all flow cells and post process those that need it."""
         for flow_cell_dir in self.demux_api.get_all_demultiplexed_flow_cell_dirs():
             self.finish_flow_cell(
-                bcl_converter=bcl_converter,
                 flow_cell_name=flow_cell_dir.name,
                 flow_cell_path=flow_cell_dir,
             )
@@ -356,12 +357,14 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
         )
 
     def finish_flow_cell(
-        self, flow_cell_name: str, bcl_converter: str, force: bool = False
+        self, flow_cell_name: str, force: bool = False
     ) -> None:
         """Go through the post-processing steps for a flow cell.
 
         Force is used to finish a flow cell even if the files are renamed already.
         """
+        bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
+
         LOG.info(
             f"Check demuxed flow cell {flow_cell_name}",
         )
@@ -395,4 +398,4 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
     def finish_all_flow_cells(self, bcl_converter: str) -> None:
         """Loop over all flow cells and post-process those that need it."""
         for flow_cell_dir in self.demux_api.get_all_demultiplexed_flow_cell_dirs():
-            self.finish_flow_cell(flow_cell_name=flow_cell_dir.name, bcl_converter=bcl_converter)
+            self.finish_flow_cell(flow_cell_name=flow_cell_dir.name)
