@@ -73,12 +73,14 @@ def is_reverse_complement(run_parameters: RunParameters) -> bool:
     control_software_version: str = run_parameters.control_software_version
     reagent_kit_version: str = run_parameters.reagent_kit_version
     LOG.info("Check if run is reverse complement")
-    if version.parse(control_software_version) < version.parse(NEW_CONTROL_SOFTWARE_VERSION):
+    if version.parse(version=control_software_version) < version.parse(
+        version=NEW_CONTROL_SOFTWARE_VERSION
+    ):
         LOG.warning(
             f"Old software version {control_software_version}, no need for reverse complement"
         )
         return False
-    reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version)
+    reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version=reagent_kit_version)
     if version.parse(reagent_kit_version) < version.parse(NEW_REAGENT_KIT_VERSION):
         LOG.warning(
             f"Reagent kit version {reagent_kit_version} does not does not need reverse complement"

@@ -5,7 +5,7 @@ from xml.etree.ElementTree import Element
 
 
 import pytest
-from cg.constants.demultiplexing import UNKNOWN_REAGENT_KIT_VERSION
+from cg.constants.demultiplexing import RunParametersXMLNodes
 from cg.constants.sequencing import Sequencers
 from cg.exc import RunParametersError
 from cg.models.demultiplex.run_parameters import (
@@ -100,7 +100,7 @@ def test_reagent_kit_version(novaseq_6000_run_parameters: RunParametersNovaSeq60
 
     # THEN the reagent kit version exists and is not "unknown"
     assert reagent_kit_version
-    assert reagent_kit_version != UNKNOWN_REAGENT_KIT_VERSION
+    assert reagent_kit_version != RunParametersXMLNodes.UNKNOWN_REAGENT_KIT_VERSION
 
 
 def test_reagent_kit_version_missing_version(
@@ -114,7 +114,7 @@ def test_reagent_kit_version_missing_version(
     reagent_kit: str = run_parameters_missing_versions.reagent_kit_version
 
     # THEN the reagent kit version is unknown
-    assert reagent_kit == UNKNOWN_REAGENT_KIT_VERSION
+    assert reagent_kit == RunParametersXMLNodes.UNKNOWN_REAGENT_KIT_VERSION
     assert "Could not determine reagent kit version" in caplog.text
 
 
@@ -224,10 +224,10 @@ def test_get_cycles_novaseq_6000(novaseq_6000_run_parameters: RunParametersNovaS
     # GIVEN a NovaSeq6000 run parameters object
 
     # WHEN getting any read cycle
-    read1: int = novaseq_6000_run_parameters.get_read1_cycles()
-    read2: int = novaseq_6000_run_parameters.get_read2_cycles()
-    index1: int = novaseq_6000_run_parameters.get_index1_cycles()
-    index2: int = novaseq_6000_run_parameters.get_index2_cycles()
+    read1: int = novaseq_6000_run_parameters.get_read_1_cycles()
+    read2: int = novaseq_6000_run_parameters.get_read_2_cycles()
+    index1: int = novaseq_6000_run_parameters.get_index_1_cycles()
+    index2: int = novaseq_6000_run_parameters.get_index_2_cycles()
 
     # THEN all read cycles are non-negative integers
     assert isinstance(read1, int)
@@ -245,10 +245,10 @@ def test_get_cycles_novaseq_x(novaseq_x_run_parameters: RunParametersNovaSeqX):
     # GIVEN a NovaSeqX run parameters object
 
     # WHEN getting any read cycle
-    read1: int = novaseq_x_run_parameters.get_read1_cycles()
-    read2: int = novaseq_x_run_parameters.get_read2_cycles()
-    index1: int = novaseq_x_run_parameters.get_index1_cycles()
-    index2: int = novaseq_x_run_parameters.get_index2_cycles()
+    read1: int = novaseq_x_run_parameters.get_read_1_cycles()
+    read2: int = novaseq_x_run_parameters.get_read_2_cycles()
+    index1: int = novaseq_x_run_parameters.get_index_1_cycles()
+    index2: int = novaseq_x_run_parameters.get_index_2_cycles()
 
     # THEN all read cycles are non-negative integers
     assert isinstance(read1, int)

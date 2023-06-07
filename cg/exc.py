@@ -122,7 +122,7 @@ class PedigreeConfigError(CgError):
 
 
 class RunParametersError(CgError):
-    """Raised when something is wrong with the run parameters."""
+    """Raised when something is wrong with the run parameters file."""
 
 
 class SampleSheetError(CgError):
