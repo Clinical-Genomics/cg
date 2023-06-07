@@ -217,7 +217,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         LOG.info(f"{flow_cell_name} copy is complete and delivery will start")
         self.post_process_flow_cell(demux_results=demux_results)
 
-    def finish_all_flow_cells(self, bcl_converter: str) -> None:
+    def finish_all_flow_cells(self) -> None:
         """Loop over all flow cells and post process those that need it."""
         for flow_cell_dir in self.demux_api.get_all_demultiplexed_flow_cell_dirs():
             self.finish_flow_cell(
@@ -395,7 +395,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             LOG.info("Post processing flow cell anyway")
         self.post_process_flow_cell(demux_results=demux_results)
 
-    def finish_all_flow_cells(self, bcl_converter: str) -> None:
+    def finish_all_flow_cells(self) -> None:
         """Loop over all flow cells and post-process those that need it."""
         for flow_cell_dir in self.demux_api.get_all_demultiplexed_flow_cell_dirs():
             self.finish_flow_cell(flow_cell_name=flow_cell_dir.name)

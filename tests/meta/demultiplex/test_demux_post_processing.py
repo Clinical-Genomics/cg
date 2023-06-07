@@ -468,9 +468,7 @@ def test_finish_all_flowcells(
     hiseq_x_copy_complete_file.unlink()
 
     # When post-processing flow cell
-    post_demux_api.finish_all_flow_cells(
-        bcl_converter=BclConverter.BCL2FASTQ,
-    )
+    post_demux_api.finish_all_flow_cells()
 
     # Reinstate
     hiseq_x_copy_complete_file.touch()
