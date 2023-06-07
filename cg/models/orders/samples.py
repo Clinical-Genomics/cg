@@ -161,6 +161,10 @@ class MipRnaSample(Of1508Sample):
     _suitable_project = OrderType.MIP_RNA
 
 
+class RnafusionSample(Of1508Sample):
+    _suitable_project = OrderType.RNAFUSION
+
+
 class FastqSample(OrderInSample):
     _suitable_project = OrderType.FASTQ
 
