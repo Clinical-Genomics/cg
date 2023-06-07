@@ -187,9 +187,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
 
-    def finish_flow_cell(
-        self, flow_cell_name: str, flow_cell_path: Path
-    ) -> None:
+    def finish_flow_cell(self, flow_cell_name: str, flow_cell_path: Path) -> None:
         """Post-processing flow cell."""
         bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
 
@@ -356,9 +354,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             flow_cell_dir=demux_results.flow_cell.path, flow_cell_id=demux_results.flow_cell.id
         )
 
-    def finish_flow_cell(
-        self, flow_cell_name: str, force: bool = False
-    ) -> None:
+    def finish_flow_cell(self, flow_cell_name: str, force: bool = False) -> None:
         """Go through the post-processing steps for a flow cell.
 
         Force is used to finish a flow cell even if the files are renamed already.
