@@ -148,7 +148,9 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
 
         if dry_run:
-            click.echo(sample_sheet_content)
+            WriteStream.write_stream_from_content(
+                file_format=FileFormat.CSV, content=sample_sheet_content
+            )
             return
         LOG.info(f"Writing sample sheet to {flow_cell.sample_sheet_path.resolve()}")
         WriteFile.write_file_from_content(
