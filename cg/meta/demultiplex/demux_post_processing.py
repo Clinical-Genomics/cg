@@ -103,7 +103,6 @@ class DemuxPostProcessingAPI:
         return False
 
 
-
 class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
     """Post demultiplexing API class for Hiseq X flow cell."""
 
