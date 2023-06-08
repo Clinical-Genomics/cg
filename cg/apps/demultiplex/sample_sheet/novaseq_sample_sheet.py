@@ -118,9 +118,7 @@ class SampleSheetCreator:
         self.remove_unwanted_samples()
         index.adapt_indexes(
             samples=self.lims_samples,
-            control_software_version=self.run_parameters.control_software_version,
-            reagent_kit_version=self.run_parameters.reagent_kit_version,
-            expected_index_length=self.run_parameters.index_length,
+            run_parameters=self.run_parameters,
         )
         sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
         if self.force:
