@@ -98,19 +98,22 @@ class DemuxPostProcessingAPI:
 
         # 1. Validate that the flow cell directory exists.
         if not flow_cell_dir.exists():
+            LOG.warning(f"Flow cell directory does not exist: {flow_cell_dir}")
             return
 
-        # 2. Validate that the demultiplexing data transfer is complete.
+        # 2. Validate that the demultiplexing is complete.
         if not Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists():
+            LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_name}")
             return
 
-        # 3. Create flow cell. TODO: Populate all fields here.
+        # 3. Create flow cell.
         try:
             flow_cell: FlowCell = FlowCell(
                 flow_cell_path=flow_cell_dir, bcl_converter=bcl_converter
             )
         except FlowCellError:
-            return None
+            LOG.error(f"Could not create flow cell for {flow_cell_name}")
+            return
 
         # 4. Store flow cell in status db.
         self.status_db.session.add(flow_cell)
