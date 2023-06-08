@@ -117,10 +117,9 @@ class DemuxPostProcessingAPI:
         self.status_db.session.commit()
 
         # 5. Store flow cell data in housekeeper. TODO
- 
+
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
-
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
