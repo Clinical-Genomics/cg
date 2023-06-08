@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 from cg.cli.workflow.commands import link
@@ -53,6 +54,7 @@ def test_cli_link(
         )
     )
     assert not fastq_path.exists()
+
     # GIVEN a case_id that does exist in database
 
     # WHEN running command
@@ -66,6 +68,9 @@ def test_cli_link(
 
     # THEN file directories were created
     assert fastq_path.exists()
+
+    # Clean-uo
+    shutil.rmtree(fastq_path)
 
 
 def test_cli_link_dir_exists(
