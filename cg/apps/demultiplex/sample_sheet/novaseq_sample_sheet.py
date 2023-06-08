@@ -86,8 +86,8 @@ class SampleSheetCreator:
         """Build all sections of the sample sheet that is not the Data section."""
         return [
             [SampleSheetNovaSeq6000Sections.Settings.HEADER.value],
-            [SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX1.value],
-            [SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX2.value],
+            SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX1.value,
+            SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX2.value,
         ]
 
     def get_data_section_header_and_columns(self) -> List[List[str]]:
