@@ -171,6 +171,12 @@ class RnafusionConfig(CommonAppConfig):
 class TaxprofilerConfig(CommonAppConfig):
     root: str
     binary_path: str
+    profile: str
+    pipeline_path: str
+    revision: str
+    hostremoval_reference: str
+    databases: str
+    slurm: SlurmConfig
 
 
 class CGStatsConfig(BaseModel):
