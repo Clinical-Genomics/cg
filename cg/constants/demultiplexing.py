@@ -1,7 +1,8 @@
+"""Constants related to demultiplexing."""
 from pathlib import Path
-
+from typing import List
 import click
-from cg.utils.enums import StrEnum
+from cg.utils.enums import Enum, StrEnum
 
 
 class BclConverter(StrEnum):
@@ -37,6 +38,55 @@ class RunParametersXMLNodes(StrEnum):
     NOVASEQ_6000_APPLICATION: str = "NovaSeq Control Software"
     NOVASEQ_X_INSTRUMENT: str = "NovaSeqXPlus"
     UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
+
+
+class SampleSheetNovaSeq6000Sections:
+    """Class with all necessary constants for building a NovaSeqX sample sheet."""
+
+    class Settings(StrEnum):
+        HEADER: str = "[Settings]"
+        BARCODE_MISMATCH_INDEX1: str = "BarcodeMismatchesIndex1, 0"
+        BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2, 0"
+
+    class Data(Enum):
+        pass
+
+
+class SampleSheetNovaSeqXSections:
+    """Class with all necessary constants for building a NovaSeqX sample sheet."""
+
+    class Header(StrEnum):
+        HEADER: str = "[Header]"
+        FILE_FORMAT: str = "FileFormatVersion, 2"
+        RUN_NAME: str = "RunName, "
+        INSTRUMENT_PLATFORM: str = "InstrumentPlatform, NovaSeqXSeries"
+        INDEX_ORIENTATION_FORWARD: str = "IndexOrientation, Forward"
+
+    class Reads(StrEnum):
+        HEADER: str = "[Reads]"
+        READ_CYCLES_1: str = "Read1Cycles, "
+        READ_CYCLES_2: str = "Read2Cycles, "
+        INDEX_CYCLES_1: str = "Index1Cycles, "
+        INDEX_CYCLES_2: str = "Index2Cycles, "
+
+    class Settings(StrEnum):
+        HEADER: str = "[BCLConvert_Settings]"
+        SOFTWARE_VERSION: str = "SoftwareVersion, 4.1.5"
+        FASTQ_COMPRESSION_FORMAT: str = "FastqCompressionFormat, gzip"
+
+    class Data(Enum):
+        HEADER: str = "[BCLConvert_Data]"
+        COLUMN_NAMES: List[str] = [
+            "Lane",
+            "Sample_ID",
+            "Index",
+            "Index2",
+            "OverrideCycles",
+            "AdapterRead1",
+            "AdapterRead2",
+            "BarcodeMismatchesIndex1",
+            "BarcodeMismatchesIndex2",
+        ]
 
 
 class SampleSheetHeaderColumnNames(StrEnum):

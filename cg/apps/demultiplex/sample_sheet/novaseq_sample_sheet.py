@@ -88,13 +88,18 @@ class SampleSheetCreator:
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
-    def create_sample_sheet_content(self) -> List[List[str]]:
-        """Create sample sheet with samples."""
-        LOG.info("Create sample sheet for samples")
-        sample_sheet_content: List[List[str]] = [
+    def get_additional_sections_sample_sheet(self) -> List[List[str]]:
+        """Build all sections of the sample sheet that is not the Data section."""
+        return [
             [SAMPLE_SHEET_SETTINGS_HEADER],
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
             SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
+        ]
+
+    def create_sample_sheet_content(self) -> List[List[str]]:
+        """Create sample sheet with samples."""
+        LOG.info("Create sample sheet for samples")
+        sample_sheet_content: List[List[str]] = self.get_additional_sections_sample_sheet() + [
             [SampleSheetHeaderColumnNames.DATA],
             SAMPLE_SHEET_HEADERS[self.bcl_converter],
         ]
