@@ -4,10 +4,7 @@ from cg.store import Store
 from cg.store.filters.status_analysis_filters import (
     filter_analyses_by_case_entry_id,
     filter_analyses_by_started_at,
-    filter_analyses_completed_after,
-    filter_analyses_completed_before,
     filter_analyses_not_cleaned,
-    filter_analyses_not_uploaded_to_vogue,
     filter_analyses_started_before,
     filter_analyses_with_delivery_report,
     filter_analyses_with_pipeline,
@@ -254,60 +251,6 @@ def test_filter_analysis_by_case(base_store: Store, helpers: StoreHelpers, case:
     assert analysis_other_case.family == case
 
 
-def test_filter_analysis_completed_before(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
-    """Test filtering of analyses completed before a given date."""
-
-    # GIVEN a set of mock analyses
-
-    analysis_old: Analysis = helpers.add_analysis(
-        store=base_store, completed_at=timestamp_now - timedelta(days=1)
-    )
-    analysis: Analysis = helpers.add_analysis(
-        store=base_store, completed_at=timestamp_now, case=analysis_old.family
-    )
-
-    # WHEN filtering the analyses by completed_at
-    analyses: Query = filter_analyses_completed_before(
-        base_store._get_query(table=Analysis), timestamp_now
-    )
-
-    # ASSERT that analyses is a query
-    assert isinstance(analyses, Query)
-
-    # THEN only the analysis completed before the given date should be retrieved
-    assert analysis not in analyses
-    assert analysis_old in analyses
-
-
-def test_filter_analysis_completed_after(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
-    """Test filtering of analyses completed after a given date."""
-
-    # GIVEN a set of mock analyses
-    analysis: Analysis = helpers.add_analysis(
-        store=base_store,
-        completed_at=timestamp_now,
-    )
-    analysis_new: Analysis = helpers.add_analysis(
-        store=base_store, completed_at=timestamp_now + timedelta(days=1), case=analysis.family
-    )
-
-    # WHEN filtering the analyses by completed_at
-    analyses: Query = filter_analyses_completed_after(
-        base_store._get_query(table=Analysis), completed_at_date=timestamp_now
-    )
-
-    # ASSERT that analyses is a query
-    assert isinstance(analyses, Query)
-
-    # THEN only the analysis completed after the given date should be retrieved
-    assert analysis not in analyses
-    assert analysis_new in analyses
-
-
 def test_filter_analysis_started_before(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
 ):
@@ -354,32 +297,6 @@ def test_filter_analysis_not_cleaned(
     # THEN only the analysis that have not been cleaned should be retrieved
     assert analysis in analyses
     assert analysis_cleaned not in analyses
-
-
-def test_filter_analyses_not_uploaded_to_vogue(
-    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
-):
-    """Test filtering of analyses that have not been uploaded to vogue."""
-
-    # GIVEN a set of mock analyses
-    analysis_uploaded: Analysis = helpers.add_analysis(
-        store=base_store, uploaded_to_vogue_at=timestamp_now
-    )
-    analysis: Analysis = helpers.add_analysis(
-        store=base_store, uploaded_to_vogue_at=None, case=analysis_uploaded.family
-    )
-
-    # WHEN filtering the analyses by uploaded_at
-    analyses: Query = filter_analyses_not_uploaded_to_vogue(
-        analyses=base_store._get_query(table=Analysis)
-    )
-
-    # ASSERT that analyses is a query
-    assert isinstance(analyses, Query)
-
-    # THEN only the analysis that have not been uploaded to vogue should be retrieved
-    assert analysis in analyses
-    assert analysis_uploaded not in analyses
 
 
 def test_filter_analyses_by_started_at(
