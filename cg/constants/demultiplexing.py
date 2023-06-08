@@ -12,6 +12,33 @@ class BclConverter(StrEnum):
     BCLCONVERT: str = "bcl_convert"
 
 
+class RunParametersXMLNodes(StrEnum):
+    """Define names of the used XML nodes in run parameters files."""
+
+    # Node names
+    APPLICATION: str = ".Application"
+    APPLICATION_VERSION: str = ".ApplicationVersion"
+    CYCLES: str = "Cycles"
+    INDEX_1_NOVASEQ_6000: str = "./IndexRead1NumberOfCycles"
+    INDEX_2_NOVASEQ_6000: str = "./IndexRead2NumberOfCycles"
+    INDEX_1_NOVASEQ_X: str = "Index1"
+    INDEX_2_NOVASEQ_X: str = "Index2"
+    INNER_READ: str = ".//Read"
+    INSTRUMENT_TYPE: str = ".InstrumentType"
+    PLANNED_READS: str = "./PlannedReads"
+    READ_1_NOVASEQ_6000: str = "./Read1NumberOfCycles"
+    READ_2_NOVASEQ_6000: str = "./Read2NumberOfCycles"
+    READ_1_NOVASEQ_X: str = "Read1"
+    READ_2_NOVASEQ_X: str = "Read2"
+    READ_NAME: str = "ReadName"
+    REAGENT_KIT_VERSION: str = "./RfidsInfo/SbsConsumableVersion"
+
+    # Node Values
+    NOVASEQ_6000_APPLICATION: str = "NovaSeq Control Software"
+    NOVASEQ_X_INSTRUMENT: str = "NovaSeqXPlus"
+    UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
+
+
 class SampleSheetHeaderColumnNames(StrEnum):
     DATA: str = "[Data]"
     FLOW_CELL_ID: str = "FCID"
@@ -21,8 +48,6 @@ class SampleSheetHeaderColumnNames(StrEnum):
     SAMPLE_PROJECT: str = "Sample_Project"
     CONTROL: str = "Control"
 
-
-UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
