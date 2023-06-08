@@ -77,7 +77,7 @@ class BclConvertSampleSheetData(BaseModel):
     sample_internal_id: str = Field(
         ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value
     )
-    sample_name: str = Field(..., alias=SampleSheetNovaSeq6000DataColumns.SAMPLE_NAME.value)
+    sample_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value)
     control: str = Field(..., alias=SampleSheetNovaSeq6000DataColumns.CONTROL.value)
     sample_project: str = Field(..., alias=SampleSheetNovaSeq6000DataColumns.SAMPLE_PROJECT.value)
 

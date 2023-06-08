@@ -126,7 +126,6 @@ class SampleSheetNovaSeqXSections:
 
 
 class SampleSheetNovaSeq6000DataColumns(StrEnum):
-    SAMPLE_NAME: str = "SampleName"
     SAMPLE_PROJECT: str = "Sample_Project"
     CONTROL: str = "Control"
 
