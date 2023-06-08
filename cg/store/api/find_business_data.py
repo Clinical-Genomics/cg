@@ -226,7 +226,7 @@ class FindBusinessDataHandler(BaseHandler):
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
             CaseFilter.FILTER_BY_CASE_SEARCH,
-            CaseFilter.GET_WITH_PIPELINE,
+            CaseFilter.FILTER_WITH_PIPELINE,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -668,7 +668,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
         """Get all running cases in a pipeline."""
         return apply_case_filter(
-            filter_functions=[CaseFilter.GET_WITH_PIPELINE, CaseFilter.IS_RUNNING],
+            filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
             cases=self._get_query(table=Family),
             pipeline=pipeline,
         ).all()
@@ -684,7 +684,7 @@ class FindBusinessDataHandler(BaseHandler):
         not_analysed_cases: Query = apply_case_filter(
             cases=query,
             filter_functions=[
-                CaseFilter.GET_NOT_ANALYSED,
+                CaseFilter.FILTER_NOT_ANALYSED,
             ],
         )
 
