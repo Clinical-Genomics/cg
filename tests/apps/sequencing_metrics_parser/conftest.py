@@ -13,7 +13,10 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
 )
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000DataColumns
+from cg.constants.demultiplexing import (
+    SampleSheetNovaSeq6000DataColumns,
+    SampleSheetNovaSeq6000Sections,
+)
 from cg.store.models import SampleLaneSequencingMetrics
 from datetime import datetime
 
@@ -131,7 +134,7 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
     """Return a BclConvertSampleSheetData model with data."""
     return BclConvertSampleSheetData(
         **{
-            SampleSheetNovaSeq6000DataColumns.FLOW_CELL_ID.value: "HY7FFDRX2",
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value: "HY7FFDRX2",
             SampleSheetNovaSeq6000DataColumns.LANE.value: test_lane,
             SampleSheetNovaSeq6000DataColumns.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
             SampleSheetNovaSeq6000DataColumns.SAMPLE_NAME.value: "p023BCR",

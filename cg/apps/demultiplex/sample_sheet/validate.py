@@ -13,7 +13,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
     BclConverter,
-    SampleSheetNovaSeq6000DataColumns,
+    SampleSheetNovaSeq6000Sections,
 )
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
@@ -62,7 +62,7 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
         # Skip lines that are too short to contain samples
         if len(line) <= 5:
             continue
-        if line[0] == SampleSheetNovaSeq6000DataColumns.FLOW_CELL_ID:
+        if line[0] == SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value:
             header = line
             continue
         if not header:

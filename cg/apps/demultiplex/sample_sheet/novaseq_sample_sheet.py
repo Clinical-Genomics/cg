@@ -88,16 +88,16 @@ class SampleSheetCreator:
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Build all sections of the sample sheet that is not the Data section."""
         return [
-            [SampleSheetNovaSeq6000Sections.Settings.HEADER],
-            [SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX1],
-            [SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX2],
+            [SampleSheetNovaSeq6000Sections.Settings.HEADER.value],
+            [SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX1.value],
+            [SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX2.value],
         ]
 
     def create_sample_sheet_content(self) -> List[List[str]]:
         """Create sample sheet with samples."""
         LOG.info("Create sample sheet for samples")
         sample_sheet_content: List[List[str]] = self.get_additional_sections_sample_sheet() + [
-            [SampleSheetNovaSeq6000Sections.Data.HEADER],
+            [SampleSheetNovaSeq6000Sections.Data.HEADER.value],
             SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[self.bcl_converter],
         ]
         for sample in self.lims_samples:

@@ -126,7 +126,6 @@ class SampleSheetNovaSeqXSections:
 
 
 class SampleSheetNovaSeq6000DataColumns(StrEnum):
-    FLOW_CELL_ID: str = "FCID"
     LANE: str = "Lane"
     SAMPLE_INTERNAL_ID: str = "Sample_ID"
     SAMPLE_NAME: str = "SampleName"
