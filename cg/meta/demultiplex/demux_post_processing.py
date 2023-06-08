@@ -118,9 +118,7 @@ class DemuxPostProcessingAPI:
         if not parsed_flow_cell:
             return
 
-        flow_cell: Flowcell = self.create_flow_cell(
-            parsed_flow_cell=parsed_flow_cell, flow_cell_name=flow_cell_name
-        )
+        flow_cell: Flowcell = self.create_flow_cell(parsed_flow_cell=parsed_flow_cell)
 
         # 4. Store flow cell in status db.
         self.status_db.session.add(flow_cell)
@@ -131,10 +129,10 @@ class DemuxPostProcessingAPI:
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
-    def create_flow_cell(self, parsed_flow_cell: FlowCell, flow_cell_name: str) -> Flowcell:
+    def create_flow_cell(self, parsed_flow_cell: FlowCell) -> Flowcell:
         """Create flow cell from the parsed and validated flow cell data."""
         return Flowcell(
-            name=flow_cell_name,
+            name=parsed_flow_cell.id,
             sequencer_type=parsed_flow_cell.sequencer_type,
             sequencer_name=parsed_flow_cell.machine_name,
             sequenced_at=parsed_flow_cell.run_date,
