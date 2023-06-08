@@ -73,7 +73,7 @@ class BclConvertSampleSheetData(BaseModel):
     """Model for the BCL Convert sample sheet."""
 
     flow_cell_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias=SampleSheetNovaSeq6000DataColumns.LANE.value)
+    lane: int = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.LANE.value)
     sample_internal_id: str = Field(
         ..., alias=SampleSheetNovaSeq6000DataColumns.SAMPLE_INTERNAL_ID.value
     )

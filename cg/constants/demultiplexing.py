@@ -126,7 +126,6 @@ class SampleSheetNovaSeqXSections:
 
 
 class SampleSheetNovaSeq6000DataColumns(StrEnum):
-    LANE: str = "Lane"
     SAMPLE_INTERNAL_ID: str = "Sample_ID"
     SAMPLE_NAME: str = "SampleName"
     SAMPLE_PROJECT: str = "Sample_Project"
