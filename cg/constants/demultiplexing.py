@@ -1,6 +1,6 @@
 """Constants related to demultiplexing."""
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 import click
 from cg.utils.enums import Enum, StrEnum
 
@@ -46,10 +46,48 @@ class SampleSheetNovaSeq6000Sections:
     class Settings(StrEnum):
         HEADER: str = "[Settings]"
         BARCODE_MISMATCH_INDEX1: str = "BarcodeMismatchesIndex1, 0"
-        BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2, 0"
+        BARCODE_MISMATCH_INDEX2: str = "BarcodeMismatchesIndex2, 0"
 
     class Data(Enum):
         HEADER: str = "[Data]"
+        FLOW_CELL_ID: str = "FCID"
+        LANE: str = "Lane"
+        SAMPLE_INTERNAL_ID_BCL2FASTQ: str = "SampleID"
+        SAMPLE_INTERNAL_ID_DRAGEN: str = "Sample_ID"
+        SAMPLE_NAME: str = "SampleName"
+        SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
+        SAMPLE_PROJECT_DRAGEN: str = "Sample_Project"
+        SAMPLE_REF: str = "SampleRef"
+        CONTROL: str = "Control"
+
+        COLUMN_NAMES: Dict[str, List[str]] = {
+            "bcl2fastq": [
+                FLOW_CELL_ID,
+                LANE,
+                SAMPLE_INTERNAL_ID_BCL2FASTQ,
+                SAMPLE_REF,
+                "index",
+                "index2",
+                SAMPLE_NAME,
+                CONTROL,
+                "Recipe",
+                "Operator",
+                SAMPLE_PROJECT_BCL2FASTQ,
+            ],
+            "dragen": [
+                FLOW_CELL_ID,
+                LANE,
+                SAMPLE_INTERNAL_ID_DRAGEN,
+                SAMPLE_REF,
+                "index",
+                "index2",
+                "SampleName",
+                CONTROL,
+                "Recipe",
+                "Operator",
+                SAMPLE_PROJECT_DRAGEN,
+            ],
+        }
 
 
 class SampleSheetNovaSeqXSections:
@@ -97,35 +135,6 @@ class SampleSheetNovaSeq6000DataColumns(StrEnum):
     SAMPLE_PROJECT: str = "Sample_Project"
     CONTROL: str = "Control"
 
-
-SAMPLE_SHEET_HEADERS = {
-    "bcl2fastq": [
-        SampleSheetNovaSeq6000DataColumns.FLOW_CELL_ID,
-        "Lane",
-        "SampleID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Project",
-    ],
-    "dragen": [
-        SampleSheetNovaSeq6000DataColumns.FLOW_CELL_ID,
-        "Lane",
-        "Sample_ID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Sample_Project",
-    ],
-}
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",

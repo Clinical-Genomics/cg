@@ -9,7 +9,6 @@ from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import (
-    SAMPLE_SHEET_HEADERS,
     SampleSheetNovaSeq6000DataColumns,
     SampleSheetNovaSeq6000Sections,
 )
@@ -99,13 +98,15 @@ class SampleSheetCreator:
         LOG.info("Create sample sheet for samples")
         sample_sheet_content: List[List[str]] = self.get_additional_sections_sample_sheet() + [
             [SampleSheetNovaSeq6000DataColumns.DATA],
-            SAMPLE_SHEET_HEADERS[self.bcl_converter],
+            SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[self.bcl_converter],
         ]
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
-                    sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
+                    sample_sheet_headers=SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
+                        self.bcl_converter
+                    ],
                 )
             )
         return sample_sheet_content
