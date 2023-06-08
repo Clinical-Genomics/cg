@@ -86,7 +86,7 @@ class DemuxPostProcessingAPI:
     def finish_flow_cell_temp(self, flow_cell_name: str) -> None:
         """
         1. Validate that the flow cell directory exists.
-        2. Validate that the demultiplexing data transfer is complete.
+        2. Validate that the demultiplexing is complete.
         3. Create flow cell.
         4. Store flow cell in status db.
         5. Store flow cell data in housekeeper.
@@ -118,7 +118,9 @@ class DemuxPostProcessingAPI:
         if not parsed_flow_cell:
             return
 
-        flow_cell: Flowcell = self.create_flow_cell(parsed_flow_cell=parsed_flow_cell)
+        flow_cell: Flowcell = self.create_flow_cell(
+            parsed_flow_cell=parsed_flow_cell, flow_cell_name=flow_cell_name
+        )
 
         # 4. Store flow cell in status db.
         self.status_db.session.add(flow_cell)
