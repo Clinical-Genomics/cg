@@ -49,7 +49,7 @@ class SampleSheetNovaSeq6000Sections:
         BARCODE_MISMATCH_INDEX2 = "BarcodeMismatchesIndex2, 0"
 
     class Data(Enum):
-        pass
+        HEADER: str = "[Data]"
 
 
 class SampleSheetNovaSeqXSections:
@@ -81,7 +81,6 @@ class SampleSheetNovaSeqXSections:
             "Sample_ID",
             "Index",
             "Index2",
-            "OverrideCycles",
             "AdapterRead1",
             "AdapterRead2",
             "BarcodeMismatchesIndex1",
@@ -89,7 +88,7 @@ class SampleSheetNovaSeqXSections:
         ]
 
 
-class SampleSheetHeaderColumnNames(StrEnum):
+class SampleSheetNovaSeq6000DataColumns(StrEnum):
     DATA: str = "[Data]"
     FLOW_CELL_ID: str = "FCID"
     LANE: str = "Lane"
@@ -101,7 +100,7 @@ class SampleSheetHeaderColumnNames(StrEnum):
 
 SAMPLE_SHEET_HEADERS = {
     "bcl2fastq": [
-        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+        SampleSheetNovaSeq6000DataColumns.FLOW_CELL_ID,
         "Lane",
         "SampleID",
         "SampleRef",
@@ -114,7 +113,7 @@ SAMPLE_SHEET_HEADERS = {
         "Project",
     ],
     "dragen": [
-        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+        SampleSheetNovaSeq6000DataColumns.FLOW_CELL_ID,
         "Lane",
         "Sample_ID",
         "SampleRef",
@@ -127,12 +126,6 @@ SAMPLE_SHEET_HEADERS = {
         "Sample_Project",
     ],
 }
-
-SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
-
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = ["BarcodeMismatchesIndex1", "0"]
-
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = ["BarcodeMismatchesIndex2", "0"]
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",

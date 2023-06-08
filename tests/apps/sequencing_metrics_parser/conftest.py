@@ -13,7 +13,7 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
 )
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000DataColumns
 from cg.store.models import SampleLaneSequencingMetrics
 from datetime import datetime
 
@@ -131,12 +131,12 @@ def fixture_bcl_convert_sample_sheet_model_with_data(
     """Return a BclConvertSampleSheetData model with data."""
     return BclConvertSampleSheetData(
         **{
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID.value: "HY7FFDRX2",
-            SampleSheetHeaderColumnNames.LANE.value: test_lane,
-            SampleSheetHeaderColumnNames.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
-            SampleSheetHeaderColumnNames.SAMPLE_NAME.value: "p023BCR",
-            SampleSheetHeaderColumnNames.CONTROL.value: "N",
-            SampleSheetHeaderColumnNames.SAMPLE_PROJECT.value: test_sample_project,
+            SampleSheetNovaSeq6000DataColumns.FLOW_CELL_ID.value: "HY7FFDRX2",
+            SampleSheetNovaSeq6000DataColumns.LANE.value: test_lane,
+            SampleSheetNovaSeq6000DataColumns.SAMPLE_INTERNAL_ID.value: test_sample_internal_id,
+            SampleSheetNovaSeq6000DataColumns.SAMPLE_NAME.value: "p023BCR",
+            SampleSheetNovaSeq6000DataColumns.CONTROL.value: "N",
+            SampleSheetNovaSeq6000DataColumns.SAMPLE_PROJECT.value: test_sample_project,
         }
     )
 
