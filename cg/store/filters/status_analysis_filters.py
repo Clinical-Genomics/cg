@@ -45,11 +45,6 @@ def filter_analyses_without_delivery_report(analyses: Query, **kwargs) -> Query:
     return analyses.filter(Analysis.delivery_report_created_at.is_(None))
 
 
-def filter_analyses_not_uploaded_to_vogue(analyses: Query, **kwargs) -> Query:
-    """Return analyses that have not been uploaded to vogue."""
-    return analyses.filter(Analysis.uploaded_to_vogue_at.is_(None))
-
-
 def filter_report_analyses_by_pipeline(
     analyses: Query, pipeline: Pipeline = None, **kwargs
 ) -> Query:
@@ -59,20 +54,6 @@ def filter_report_analyses_by_pipeline(
         if pipeline
         else analyses.filter(Analysis.pipeline.in_(REPORT_SUPPORTED_PIPELINES))
     )
-
-
-def filter_analyses_completed_before(
-    analyses: Query, completed_at_date: datetime, **kwargs
-) -> Query:
-    """Return a query of analyses completed before a certain date."""
-    return analyses.filter(Analysis.completed_at < completed_at_date)
-
-
-def filter_analyses_completed_after(
-    analyses: Query, completed_at_date: datetime, **kwargs
-) -> Query:
-    """Return a query of analyses completed after a certain date."""
-    return analyses.filter(Analysis.completed_at > completed_at_date)
 
 
 def order_analyses_by_completed_at_asc(analyses: Query, **kwargs) -> Query:
@@ -143,9 +124,6 @@ class AnalysisFilter(Enum):
     FILTER_WITHOUT_DELIVERY_REPORT: Callable = filter_analyses_without_delivery_report
     FILTER_REPORT_BY_PIPELINE: Callable = filter_report_analyses_by_pipeline
     FILTER_BY_CASE_ENTRY_ID: Callable = filter_analyses_by_case_entry_id
-    FILTER_COMPLETED_AT_AFTER: Callable = filter_analyses_completed_after
-    FILTER_COMPLETED_AT_BEFORE: Callable = filter_analyses_completed_before
-    FILTER_NOT_UPLOADED_TO_VOGUE: Callable = filter_analyses_not_uploaded_to_vogue
     FILTER_IS_NOT_CLEANED: Callable = filter_analyses_not_cleaned
     FILTER_STARTED_AT_BEFORE: Callable = filter_analyses_started_before
     FILTER_BY_STARTED_AT: Callable = filter_analyses_by_started_at
