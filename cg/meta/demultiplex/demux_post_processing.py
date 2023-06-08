@@ -1,4 +1,5 @@
 """Post-processing Demultiiplex API."""
+import datetime
 import logging
 import os
 import shutil
@@ -16,6 +17,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
+from cg.constants.constants import FlowCellStatus
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
@@ -107,22 +109,49 @@ class DemuxPostProcessingAPI:
             return
 
         # 3. Create flow cell.
-        try:
-            flow_cell: FlowCell = FlowCell(
-                flow_cell_path=flow_cell_dir, bcl_converter=bcl_converter
-            )
-        except FlowCellError:
-            LOG.error(f"Could not create flow cell for {flow_cell_name}")
+        parsed_flow_cell: Optional[FlowCell] = self.parse_flow_cell_data(
+            flow_cell_directory=flow_cell_dir,
+            flow_cell_name=flow_cell_name,
+            bcl_converter=bcl_converter,
+        )
+
+        if not parsed_flow_cell:
             return
+
+        flow_cell: Flowcell = self.create_flow_cell(parsed_flow_cell=parsed_flow_cell)
 
         # 4. Store flow cell in status db.
         self.status_db.session.add(flow_cell)
         self.status_db.session.commit()
 
-        # 5. Store flow cell data in housekeeper. TODO
+        # 5. Store flow cell data in housekeeper.
 
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
+
+    def create_flow_cell(self, parsed_flow_cell: FlowCell, flow_cell_name: str) -> Flowcell:
+        """Create flow cell from the parsed and validated flow cell data."""
+        return Flowcell(
+            name=flow_cell_name,
+            sequencer_type=parsed_flow_cell.sequencer_type,
+            sequencer_name=parsed_flow_cell.machine_name,
+            sequenced_at=parsed_flow_cell.run_date,
+            status=FlowCellStatus.ON_DISK,
+            updated_at=datetime.datetime.now(),
+        )
+
+    def parse_flow_cell_data(
+        self, flow_cell_directory: Path, flow_cell_name: str, bcl_converter: str
+    ) -> FlowCell:
+        """Parse flow cell data from the flow cell directory."""
+        try:
+            flow_cell: FlowCell = FlowCell(
+                flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+            )
+            return flow_cell
+
+        except FlowCellError:
+            LOG.error(f"Unable to parse flow cell data from {flow_cell_directory}")
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
