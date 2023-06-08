@@ -150,7 +150,6 @@ OPTION_BCL_CONVERTER = click.option(
     "bcl2fastq.",
 )
 
-FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
 
 DEMUX_STATS_PATH = {
     "bcl2fastq": {
@@ -167,10 +166,9 @@ DEMUX_STATS_PATH = {
     },
 }
 
-DRAGEN_PASSED_FILTER_PCT = 100.00000
-
-INDEX_CHECK = "indexcheck"
-UNDETERMINED = "Undetermined"
-
 BCL2FASTQ_METRICS_DIRECTORY_NAME = "Stats"
 BCL2FASTQ_METRICS_FILE_NAME = "Stats.json"
+DRAGEN_PASSED_FILTER_PCT = 100.00000
+FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
+INDEX_CHECK = "indexcheck"
+UNDETERMINED = "Undetermined"
