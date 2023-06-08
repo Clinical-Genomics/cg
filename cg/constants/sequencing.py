@@ -1,4 +1,4 @@
-"""Constants related to all things sequencing"""
+"""Constants related to sequencing."""
 from cg.utils.enums import StrEnum
 
 

@@ -6,7 +6,7 @@ import pytest
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.models.demultiplex.flow_cell import FlowCell
 
 
@@ -117,9 +117,9 @@ def fixture_sample_sheet_line_sample_2() -> List[str]:
 def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
     """Return the content of a Bcl2fastq sample sheet data header without samples."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
             "Lane",
             "SampleID",
             "SampleRef",
@@ -140,7 +140,7 @@ def fixture_sample_sheet_no_sample_header(
 ) -> List[List[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         sample_sheet_line_sample_1,
         sample_sheet_line_sample_2,
     ]
@@ -152,9 +152,9 @@ def fixture_valid_sample_sheet_bcl2fastq(
 ) -> List[List[str]]:
     """Return the content of a valid Bcl2fastq sample sheet."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
             "Lane",
             "SampleID",
             "SampleRef",
@@ -209,9 +209,9 @@ def fixture_valid_sample_sheet_dragen(
 ) -> List[List[str]]:
     """Return the content of a valid Dragen sample sheet."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
             "Lane",
             "Sample_ID",
             "SampleRef",

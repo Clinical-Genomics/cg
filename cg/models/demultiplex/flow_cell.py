@@ -132,7 +132,7 @@ class FlowCell:
     @property
     def hiseq_x_flow_cell(self) -> Path:
         """Return path to Hiseq X flow cell directory."""
-        return Path(self.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+        return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
     def validate_flow_cell_name(self) -> None:
         """
