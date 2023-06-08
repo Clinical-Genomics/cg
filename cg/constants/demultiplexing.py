@@ -13,6 +13,22 @@ class BclConverter(StrEnum):
     BCLCONVERT: str = "bcl_convert"
 
 
+class DemultiplexingDirsAndFiles(StrEnum):
+    """Demultiplexing related directories and files."""
+
+    COPY_COMPLETE: str = "CopyComplete.txt"
+    DELIVERY: str = "delivery.txt"
+    DEMUX_STARTED: str = "demuxstarted.txt"
+    DEMUX_COMPLETE: str = "demuxcomplete.txt"
+    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
+    HiseqX_TILE_DIR: str = "l1t11"
+    RTACOMPLETE: str = "RTAComplete.txt"
+    RUN_PARAMETERS: str = "RunParameters.xml"
+    SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
+    UNALIGNED_DIR_NAME: str = "Unaligned"
+    BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
+
+
 class RunParametersXMLNodes(StrEnum):
     """Define names of the used XML nodes in run parameters files."""
 
@@ -152,23 +168,6 @@ DEMUX_STATS_PATH = {
 }
 
 DRAGEN_PASSED_FILTER_PCT = 100.00000
-
-
-class DemultiplexingDirsAndFiles(StrEnum):
-    """Demultiplexing related directories and files."""
-
-    COPY_COMPLETE: str = "CopyComplete.txt"
-    DELIVERY: str = "delivery.txt"
-    DEMUX_STARTED: str = "demuxstarted.txt"
-    DEMUX_COMPLETE: str = "demuxcomplete.txt"
-    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
-    HiseqX_TILE_DIR: str = "l1t11"
-    RTACOMPLETE: str = "RTAComplete.txt"
-    RUN_PARAMETERS: str = "RunParameters.xml"
-    SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
-    UNALIGNED_DIR_NAME: str = "Unaligned"
-    BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
-
 
 INDEX_CHECK = "indexcheck"
 UNDETERMINED = "Undetermined"
