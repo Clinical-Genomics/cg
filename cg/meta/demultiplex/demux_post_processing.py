@@ -82,7 +82,46 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Added sample lane sequencing metrics to status database for: {flow_cell_name}")
 
     def finish_flow_cell_temp(self, flow_cell_name: str) -> None:
-        """Finish flow cell."""
+        """
+        1. Validate that the flow cell directory exists.
+        2. Validate that the demultiplexing data transfer is complete.
+        3. Create flow cell.
+        4. Store flow cell in status db.
+        5. Store flow cell data in housekeeper.
+        6. Create sequencing metrics.
+        """
+
+        LOG.info(f"Finish flow cell {flow_cell_name}")
+
+        flow_cell_dir: Path = Path(self.demux_api.out_dir, flow_cell_name)
+        bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
+
+        # 1. Validate that the flow cell directory exists.
+        if not flow_cell_dir.exists():
+            LOG.warning(f"Flow cell directory does not exist: {flow_cell_dir}")
+            return
+
+        # 2. Validate that the demultiplexing is complete.
+        if not Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists():
+            LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_name}")
+            return
+
+        # 3. Create flow cell.
+        try:
+            flow_cell: FlowCell = FlowCell(
+                flow_cell_path=flow_cell_dir, bcl_converter=bcl_converter
+            )
+        except FlowCellError:
+            LOG.error(f"Could not create flow cell for {flow_cell_name}")
+            return
+
+        # 4. Store flow cell in status db.
+        self.status_db.session.add(flow_cell)
+        self.status_db.session.commit()
+
+        # 5. Store flow cell data in housekeeper. TODO
+
+        # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
