@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import List, Union, Dict, Callable
 from cg.io.controller import ReadFile
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000DataColumns
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.constants.constants import FileFormat, SCALE_TO_READ_PAIRS
 from cg.constants.bcl_convert_metrics import (
     DEMUX_METRICS_FILE_PATH,
@@ -78,7 +78,7 @@ class BclConvertMetricsParser:
         )
         header_line_count: int = 1
         for line in sample_sheet_content:
-            if SampleSheetNovaSeq6000DataColumns.DATA.value in line:
+            if SampleSheetNovaSeq6000Sections.Data.HEADER.value in line:
                 break
             header_line_count += 1
         return header_line_count

@@ -97,7 +97,7 @@ class SampleSheetCreator:
         """Create sample sheet with samples."""
         LOG.info("Create sample sheet for samples")
         sample_sheet_content: List[List[str]] = self.get_additional_sections_sample_sheet() + [
-            [SampleSheetNovaSeq6000DataColumns.DATA],
+            [SampleSheetNovaSeq6000Sections.Data.HEADER],
             SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[self.bcl_converter],
         ]
         for sample in self.lims_samples:

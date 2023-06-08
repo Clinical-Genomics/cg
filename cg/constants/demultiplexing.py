@@ -57,7 +57,6 @@ class SampleSheetNovaSeq6000Sections:
         SAMPLE_NAME: str = "SampleName"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
         SAMPLE_PROJECT_DRAGEN: str = "Sample_Project"
-        SAMPLE_REF: str = "SampleRef"
         CONTROL: str = "Control"
 
         COLUMN_NAMES: Dict[str, List[str]] = {
@@ -65,7 +64,7 @@ class SampleSheetNovaSeq6000Sections:
                 FLOW_CELL_ID,
                 LANE,
                 SAMPLE_INTERNAL_ID_BCL2FASTQ,
-                SAMPLE_REF,
+                "SampleRef",
                 "index",
                 "index2",
                 SAMPLE_NAME,
@@ -78,10 +77,10 @@ class SampleSheetNovaSeq6000Sections:
                 FLOW_CELL_ID,
                 LANE,
                 SAMPLE_INTERNAL_ID_DRAGEN,
-                SAMPLE_REF,
+                "SampleRef",
                 "index",
                 "index2",
-                "SampleName",
+                SAMPLE_NAME,
                 CONTROL,
                 "Recipe",
                 "Operator",
@@ -127,7 +126,6 @@ class SampleSheetNovaSeqXSections:
 
 
 class SampleSheetNovaSeq6000DataColumns(StrEnum):
-    DATA: str = "[Data]"
     FLOW_CELL_ID: str = "FCID"
     LANE: str = "Lane"
     SAMPLE_INTERNAL_ID: str = "Sample_ID"

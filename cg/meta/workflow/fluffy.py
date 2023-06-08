@@ -8,7 +8,7 @@ import pandas as pd
 from sqlalchemy.orm import Query
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000DataColumns
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.exc import CgError
 from cg.io.controller import ReadFile
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -150,7 +150,7 @@ class FluffyAnalysisAPI(AnalysisAPI):
         )
         header_line_count: int = 1
         for line in sample_sheet_content:
-            if SampleSheetNovaSeq6000DataColumns.DATA.value in line:
+            if SampleSheetNovaSeq6000Sections.Data.HEADER.value in line:
                 break
             header_line_count += 1
         return header_line_count
