@@ -59,10 +59,10 @@ class RunParametersXMLNodes(StrEnum):
 class SampleSheetNovaSeq6000Sections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
-    class Settings(StrEnum):
+    class Settings(Enum):
         HEADER: str = "[Settings]"
-        BARCODE_MISMATCH_INDEX1: str = "BarcodeMismatchesIndex1, 0"
-        BARCODE_MISMATCH_INDEX2: str = "BarcodeMismatchesIndex2, 0"
+        BARCODE_MISMATCH_INDEX1: List[str] = ["BarcodeMismatchesIndex1", "0"]
+        BARCODE_MISMATCH_INDEX2: List[str] = ["BarcodeMismatchesIndex2", "0"]
 
     class Data(Enum):
         HEADER: str = "[Data]"
@@ -108,24 +108,24 @@ class SampleSheetNovaSeq6000Sections:
 class SampleSheetNovaSeqXSections:
     """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
-    class Header(StrEnum):
+    class Header(Enum):
         HEADER: str = "[Header]"
-        FILE_FORMAT: str = "FileFormatVersion, 2"
-        RUN_NAME: str = "RunName, "
-        INSTRUMENT_PLATFORM: str = "InstrumentPlatform, NovaSeqXSeries"
-        INDEX_ORIENTATION_FORWARD: str = "IndexOrientation, Forward"
+        FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
+        RUN_NAME: str = "RunName"
+        INSTRUMENT_PLATFORM: List[str] = ["InstrumentPlatform", "NovaSeqXSeries"]
+        INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "Forward"]
 
     class Reads(StrEnum):
         HEADER: str = "[Reads]"
-        READ_CYCLES_1: str = "Read1Cycles, "
-        READ_CYCLES_2: str = "Read2Cycles, "
-        INDEX_CYCLES_1: str = "Index1Cycles, "
-        INDEX_CYCLES_2: str = "Index2Cycles, "
+        READ_CYCLES_1: str = "Read1Cycles"
+        READ_CYCLES_2: str = "Read2Cycles"
+        INDEX_CYCLES_1: str = "Index1Cycles"
+        INDEX_CYCLES_2: str = "Index2Cycles"
 
-    class Settings(StrEnum):
+    class Settings(Enum):
         HEADER: str = "[BCLConvert_Settings]"
-        SOFTWARE_VERSION: str = "SoftwareVersion, 4.1.5"
-        FASTQ_COMPRESSION_FORMAT: str = "FastqCompressionFormat, gzip"
+        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
+        FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
 
     class Data(Enum):
         HEADER: str = "[BCLConvert_Data]"
