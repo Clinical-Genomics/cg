@@ -8,10 +8,7 @@ from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.constants.demultiplexing import (
-    SampleSheetNovaSeq6000DataColumns,
-    SampleSheetNovaSeq6000Sections,
-)
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 

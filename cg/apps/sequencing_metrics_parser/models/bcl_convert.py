@@ -5,10 +5,7 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
 )
-from cg.constants.demultiplexing import (
-    SampleSheetNovaSeq6000DataColumns,
-    SampleSheetNovaSeq6000Sections,
-)
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 
 
 class BclConvertQualityMetrics(BaseModel):
@@ -78,7 +75,7 @@ class BclConvertSampleSheetData(BaseModel):
         ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value
     )
     sample_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value)
-    control: str = Field(..., alias=SampleSheetNovaSeq6000DataColumns.CONTROL.value)
+    control: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.CONTROL.value)
     sample_project: str = Field(
         ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value
     )

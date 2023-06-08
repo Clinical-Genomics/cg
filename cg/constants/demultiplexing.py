@@ -125,10 +125,6 @@ class SampleSheetNovaSeqXSections:
         ]
 
 
-class SampleSheetNovaSeq6000DataColumns(StrEnum):
-    CONTROL: str = "Control"
-
-
 OPTION_BCL_CONVERTER = click.option(
     "-b",
     "--bcl-converter",
