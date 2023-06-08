@@ -1806,7 +1806,6 @@ def fixture_context_config(
             "service_account": "SERVICE",
             "service_account_auth_file": "trailblazer-auth.json",
         },
-        "vogue": {"binary_path": "echo", "config_path": "vogue-stage.yaml"},
     }
 
 
