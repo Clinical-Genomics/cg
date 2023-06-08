@@ -137,7 +137,6 @@ class DemuxPostProcessingAPI:
             sequencer_name=parsed_flow_cell.machine_name,
             sequenced_at=parsed_flow_cell.run_date,
             status=FlowCellStatus.ON_DISK,
-            updated_at=datetime.datetime.now(),
         )
 
     def parse_flow_cell_data(
