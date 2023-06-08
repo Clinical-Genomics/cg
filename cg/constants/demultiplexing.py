@@ -21,7 +21,7 @@ class DemultiplexingDirsAndFiles(StrEnum):
     DEMUX_STARTED: str = "demuxstarted.txt"
     DEMUX_COMPLETE: str = "demuxcomplete.txt"
     Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
-    HiseqX_TILE_DIR: str = "l1t11"
+    Hiseq_X_TILE_DIR: str = "l1t11"
     RTACOMPLETE: str = "RTAComplete.txt"
     RUN_PARAMETERS: str = "RunParameters.xml"
     SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
