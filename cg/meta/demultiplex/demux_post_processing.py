@@ -111,7 +111,6 @@ class DemuxPostProcessingAPI:
         # 3. Create flow cell.
         parsed_flow_cell: Optional[FlowCell] = self.parse_flow_cell_data(
             flow_cell_directory=flow_cell_dir,
-            flow_cell_name=flow_cell_name,
             bcl_converter=bcl_converter,
         )
 
@@ -136,12 +135,9 @@ class DemuxPostProcessingAPI:
             sequencer_type=parsed_flow_cell.sequencer_type,
             sequencer_name=parsed_flow_cell.machine_name,
             sequenced_at=parsed_flow_cell.run_date,
-            status=FlowCellStatus.ON_DISK,
         )
 
-    def parse_flow_cell_data(
-        self, flow_cell_directory: Path, flow_cell_name: str, bcl_converter: str
-    ) -> FlowCell:
+    def parse_flow_cell_data(self, flow_cell_directory: Path, bcl_converter: str) -> FlowCell:
         """Parse flow cell data from the flow cell directory."""
         try:
             flow_cell: FlowCell = FlowCell(
