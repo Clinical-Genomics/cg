@@ -3,7 +3,7 @@ from typing import List, Dict
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet, FlowCellSampleBcl2Fastq
+from cg.apps.demultiplex.sample_sheet.models import SampleSheet, FlowCellSampleNovaSeq6000Bcl2Fastq
 from cg.apps.demultiplex.sample_sheet.validate import (
     get_raw_samples,
     validate_sample_sheet,
@@ -15,8 +15,8 @@ from cg.exc import SampleSheetError
 
 
 def test_validate_samples_are_unique(
-    novaseq_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
@@ -28,7 +28,9 @@ def test_validate_samples_are_unique(
     # THEN no error is raised
 
 
-def test_validate_samples_are_unique_not_unique(novaseq_sample_1: FlowCellSampleBcl2Fastq, caplog):
+def test_validate_samples_are_unique_not_unique(
+    novaseq_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq, caplog
+):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
     caplog.set_level(logging.INFO)
@@ -44,14 +46,14 @@ def test_validate_samples_are_unique_not_unique(novaseq_sample_1: FlowCellSample
 
 
 def test_get_samples_by_lane(
-    novaseq_sample_1: FlowCellSampleBcl2Fastq,
-    novaseq_sample_2: FlowCellSampleBcl2Fastq,
+    novaseq_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes
 
     # WHEN getting the samples per lane
-    samples_per_lane: Dict[int, List[FlowCellSampleBcl2Fastq]] = get_samples_by_lane(
+    samples_per_lane: Dict[int, List[FlowCellSampleNovaSeq6000Bcl2Fastq]] = get_samples_by_lane(
         samples=[novaseq_sample_1, novaseq_sample_2]
     )
 

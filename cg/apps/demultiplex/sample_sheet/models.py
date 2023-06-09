@@ -38,17 +38,17 @@ class FlowCellSampleNovaSeqX(FlowCellSample):
     lane: int = Field(..., alias=SampleSheetNovaSeqXSections.Data.LANE.value)
     index: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetNovaSeqXSections.Data.INDEX_2.value)
-    adapter_read_1: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_1.value)
-    adapter_read_2: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_2.value)
+    adapter_read_1: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_1.value)
+    adapter_read_2: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_2.value)
     barcode_mismatches_1: int = Field(
-        ..., alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_1.value
+        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_1.value
     )
     barcode_mismatches_2: int = Field(
-        ..., alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_2.value
+        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_2.value
     )
 
 
-class FlowCellSampleBcl2Fastq(FlowCellSampleNovaSeq6000):
+class FlowCellSampleNovaSeq6000Bcl2Fastq(FlowCellSampleNovaSeq6000):
     sample_id: str = Field(
         ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
     )
@@ -57,7 +57,7 @@ class FlowCellSampleBcl2Fastq(FlowCellSampleNovaSeq6000):
     )
 
 
-class FlowCellSampleDragen(FlowCellSampleNovaSeq6000):
+class FlowCellSampleNovaSeq6000Dragen(FlowCellSampleNovaSeq6000):
     sample_id: str = Field(
         ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value
     )
@@ -71,8 +71,8 @@ class SampleSheet(BaseModel):
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
-    samples: List[FlowCellSampleBcl2Fastq]
+    samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq]
 
 
 class SampleSheetDragen(SampleSheet):
-    samples: List[FlowCellSampleDragen]
+    samples: List[FlowCellSampleNovaSeq6000Dragen]

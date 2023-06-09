@@ -81,7 +81,7 @@ class SampleSheetNovaSeq6000Sections:
         SAMPLE_PROJECT_BCLCONVERT: str = "Sample_Project"
 
         COLUMN_NAMES: Dict[str, List[str]] = {
-            "bcl2fastq": [
+            BclConverter.BCL2FASTQ.value: [
                 FLOW_CELL_ID,
                 LANE,
                 SAMPLE_INTERNAL_ID_BCL2FASTQ,
@@ -94,7 +94,7 @@ class SampleSheetNovaSeq6000Sections:
                 OPERATOR,
                 SAMPLE_PROJECT_BCL2FASTQ,
             ],
-            "dragen": [
+            BclConverter.DRAGEN.value: [
                 FLOW_CELL_ID,
                 LANE,
                 SAMPLE_INTERNAL_ID_BCLCONVERT,
@@ -142,6 +142,7 @@ class SampleSheetNovaSeqXSections:
         ADAPTER_READ_2: str = "AdapterRead2"
         BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
         BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
+
         COLUMN_NAMES: List[str] = [
             LANE,
             SAMPLE_INTERNAL_ID,

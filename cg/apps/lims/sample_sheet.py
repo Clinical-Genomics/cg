@@ -6,7 +6,10 @@ from typing import Iterable, List, Optional, Union
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
+)
 from cg.constants.demultiplexing import BclConverter
 
 LOG = logging.getLogger(__name__)
@@ -68,10 +71,10 @@ def get_index(lims: Lims, label: str) -> str:
 
 def flow_cell_samples(
     lims: Lims, flowcell_id: str, bcl_converter: str
-) -> Iterable[Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]]:
+) -> Iterable[Union[FlowCellSampleNovaSeq6000Bcl2Fastq, FlowCellSampleNovaSeq6000Dragen]]:
     lims_flowcell_sample = {
-        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
-        BclConverter.DRAGEN.value: FlowCellSampleDragen,
+        BclConverter.BCL2FASTQ.value: FlowCellSampleNovaSeq6000Bcl2Fastq,
+        BclConverter.DRAGEN.value: FlowCellSampleNovaSeq6000Dragen,
     }
     LOG.info(f"Fetching samples from lims for flowcell {flowcell_id}")
     containers: List[Container] = lims.get_containers(name=flowcell_id)

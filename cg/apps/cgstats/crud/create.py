@@ -17,8 +17,8 @@ from cg.apps.cgstats.db.models import (
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
     SampleSheet,
 )
 from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT, BclConverter
@@ -253,7 +253,7 @@ def _create_dragen_samples(
         sample_sheet=sample_sheet,
     )
 
-    sample: FlowCellSampleDragen
+    sample: FlowCellSampleNovaSeq6000Dragen
     for sample in sample_sheet.samples:
         stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id
@@ -289,7 +289,7 @@ def _create_bcl2fastq_samples(
         sample_sheet=sample_sheet,
     )
 
-    sample: FlowCellSampleBcl2Fastq
+    sample: FlowCellSampleNovaSeq6000Bcl2Fastq
     for sample in sample_sheet.samples:
         stats_sample: Sample = get_or_create_sample(
             manager=manager, sample=sample, project_name_to_id=project_name_to_id

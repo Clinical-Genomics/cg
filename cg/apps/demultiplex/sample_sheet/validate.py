@@ -7,8 +7,8 @@ from typing_extensions import Literal
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000,
     SampleSheet,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
 )
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
@@ -86,14 +86,16 @@ def validate_sample_sheet(
     bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
-    novaseq_sample: Dict[str, Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = {
-        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
-        BclConverter.DRAGEN.value: FlowCellSampleDragen,
+    novaseq_sample: Dict[
+        str, Union[FlowCellSampleNovaSeq6000Bcl2Fastq, FlowCellSampleNovaSeq6000Dragen]
+    ] = {
+        BclConverter.BCL2FASTQ.value: FlowCellSampleNovaSeq6000Bcl2Fastq,
+        BclConverter.DRAGEN.value: FlowCellSampleNovaSeq6000Dragen,
     }
     raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
-    sample_type: Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen] = novaseq_sample[
-        bcl_converter
-    ]
+    sample_type: Union[
+        FlowCellSampleNovaSeq6000Bcl2Fastq, FlowCellSampleNovaSeq6000Dragen
+    ] = novaseq_sample[bcl_converter]
     samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples=samples)
     return SampleSheet(samples=samples)
