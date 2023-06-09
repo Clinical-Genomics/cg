@@ -2,14 +2,21 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Type, Tuple, Union
 
 from pydantic import ValidationError
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleNovaSeqX,
+    SampleSheet,
+)
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.constants.demultiplexing import (
+    BclConverter,
     DemultiplexingDirsAndFiles,
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
@@ -48,7 +55,7 @@ class FlowCell:
         """
 
         self.validate_flow_cell_name()
-        self.run_date = datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
+        self.run_date = self._parse_date()
         self.machine_name = self.split_flow_cell_name[1]
         self.machine_number = int(self.split_flow_cell_name[2])
         base_name: str = self.split_flow_cell_name[-1]
@@ -56,6 +63,12 @@ class FlowCell:
         LOG.debug(f"Set flow cell id to {base_name}")
         self.id = base_name[1:]
         self.position = base_name[0]
+
+    def _parse_date(self):
+        """Return the parsed date in the correct format."""
+        if len(self.split_flow_cell_name[0]) == 8:
+            return datetime.datetime.strptime(self.split_flow_cell_name[0], "%Y%m%d")
+        return datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
 
     @property
     def split_flow_cell_name(self) -> List[str]:
@@ -167,6 +180,20 @@ class FlowCell:
             return False
         return True
 
+    def get_sample_model(
+        self,
+    ) -> Union[
+        Type[FlowCellSampleNovaSeq6000Bcl2Fastq],
+        Type[FlowCellSampleNovaSeq6000Dragen],
+        Type[FlowCellSampleNovaSeqX],
+    ]:
+        """Return the sample class used in the flow cell."""
+        if self.sequencer_type == Sequencers.NOVASEQX:
+            return FlowCellSampleNovaSeqX
+        if self.bcl_converter == BclConverter.DRAGEN:
+            return FlowCellSampleNovaSeq6000Dragen
+        return FlowCellSampleNovaSeq6000Bcl2Fastq
+
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
@@ -189,7 +216,7 @@ class FlowCell:
         return self.copy_complete_path.exists()
 
     def is_hiseq_x_copy_completed(self) -> bool:
-        """Check if copy of Hiiseq X flow cell is done."""
+        """Check if copy of Hiseq X flow cell is done."""
         LOG.info("Check if copy of data from Hiseq X sequence instrument is ready")
         return self.hiseq_x_copy_complete_path.exists()
 

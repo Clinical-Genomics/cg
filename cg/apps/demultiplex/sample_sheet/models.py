@@ -1,5 +1,5 @@
 import logging
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 from typing import List
 
 from cg.constants.constants import GenomeVersion
@@ -18,10 +18,11 @@ class FlowCellSample(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+        extra = Extra.ignore
 
 
 class FlowCellSampleNovaSeq6000(FlowCellSample):
-    flowcell_id: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
+    flowcell_id: str = Field("", alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
     lane: int = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.LANE.value)
     sample_ref: str = Field(
         GenomeVersion.hg19.value, alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_REFERENCE.value
@@ -36,6 +37,7 @@ class FlowCellSampleNovaSeq6000(FlowCellSample):
 
 class FlowCellSampleNovaSeqX(FlowCellSample):
     lane: int = Field(..., alias=SampleSheetNovaSeqXSections.Data.LANE.value)
+    sample_id: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.SAMPLE_INTERNAL_ID.value)
     index: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.INDEX_1.value)
     index2: str = Field("", alias=SampleSheetNovaSeqXSections.Data.INDEX_2.value)
     adapter_read_1: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_1.value)

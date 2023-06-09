@@ -6,9 +6,11 @@ import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
     FlowCellSampleNovaSeq6000,
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleNovaSeqX,
 )
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.apps.lims.sample_sheet import flow_cell_samples
@@ -73,13 +75,11 @@ def create_sheet(
         flow_cell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
-    lims_samples: List[
-        Union[FlowCellSampleNovaSeq6000Bcl2Fastq, FlowCellSampleNovaSeq6000Dragen]
-    ] = list(
+    lims_samples: List[FlowCellSample] = list(
         flow_cell_samples(
             lims=context.lims_api,
-            flowcell_id=flow_cell.id,
-            bcl_converter=bcl_converter,
+            flow_cell_id=flow_cell.id,
+            flow_cell_sample_type=flow_cell.get_sample_model(),
         )
     )
     if not lims_samples:
@@ -134,7 +134,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
         lims_samples: List[FlowCellSampleNovaSeq6000] = list(
             flow_cell_samples(
                 lims=context.lims_api,
-                flowcell_id=flow_cell.id,
+                flow_cell_id=flow_cell.id,
                 bcl_converter=bcl_converter,
             )
         )

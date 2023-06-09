@@ -26,8 +26,8 @@ def test_create_sample_sheet_no_run_parameters(
     mocker,
 ):
     # GIVEN a folder with a non-existing sample sheet
-    flowcell_object: FlowCell = FlowCell(flow_cell_working_directory_no_run_parameters)
-    assert flowcell_object.run_parameters_path.exists() is False
+    flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_working_directory_no_run_parameters)
+    assert flow_cell.run_parameters_path.exists() is False
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -42,7 +42,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
-        create_sheet, [flowcell_object.full_name], obj=sample_sheet_context
+        create_sheet, [flow_cell.full_name], obj=sample_sheet_context
     )
 
     # THEN the process exits with a non-zero exit code

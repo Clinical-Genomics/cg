@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, List, Set
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleNovaSeq6000
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
@@ -23,7 +23,7 @@ def index_exists(index: str, indexes: Set[str]) -> bool:
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
-def get_indexes_by_lane(samples: List[FlowCellSampleNovaSeq6000]) -> Dict[int, Set[str]]:
+def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
     """Group the indexes from samples by lane."""
     indexes_by_lane = {}
     for sample in samples:
@@ -112,7 +112,7 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
 
 
 def adapt_indexes(
-    samples: List[FlowCellSampleNovaSeq6000],
+    samples: List[FlowCellSample],
     run_parameters: RunParameters,
 ) -> None:
     """Adapts the indexes: pads all indexes so that all indexes have a length equal to the

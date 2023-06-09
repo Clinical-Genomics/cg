@@ -3,7 +3,7 @@ from typing import List
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleNovaSeq6000
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleNovaSeq6000
 from cg.constants.sequencing import Sequencers
 from cg.constants.demultiplexing import BclConverter
 from cg.exc import FlowCellError
@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 def create_sample_sheet(
     bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
     flow_cell: FlowCell,
-    lims_samples: List[FlowCellSampleNovaSeq6000],
+    lims_samples: List[FlowCellSample],
     force: bool = False,
 ) -> List[List[str]]:
     """Create a sample sheet for a flow cell."""

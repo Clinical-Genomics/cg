@@ -1,5 +1,11 @@
 from pathlib import Path
+from typing import Type
 
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleNovaSeqX,
+)
 from cg.models.demultiplex.flow_cell import FlowCell
 
 
@@ -95,3 +101,36 @@ def test_is_hiseq_x(bcl2fastq_flow_cell: FlowCell, hiseq_x_tile_dir: Path):
 
     # THEN assert that the file exists
     assert is_hiseq_x is True
+
+
+def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCell):
+    """Test that the sample model of a bcl2fastq flow cell is FlowCellSampleNovaSeq6000Bcl2Fastq."""
+    # GIVEN a Bcl2Fastq flow cell
+
+    # WHEN getting the sample model
+    sample_model: Type[FlowCellSampleNovaSeq6000Bcl2Fastq] = bcl2fastq_flow_cell.get_sample_model()
+
+    # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
+    assert sample_model == FlowCellSampleNovaSeq6000Bcl2Fastq
+
+
+def test_get_sample_model_dragen(dragen_flow_cell: FlowCell):
+    """Test that the sample model of a dragen flow cell is FlowCellSampleNovaSeq6000Dragen."""
+    # GIVEN a dragen flow cell
+
+    # WHEN getting the sample model
+    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = dragen_flow_cell.get_sample_model()
+
+    # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
+    assert sample_model == FlowCellSampleNovaSeq6000Dragen
+
+
+def test_get_sample_model_novaseq_x(novaseq_x_flow_cell: FlowCell):
+    """Test that the sample model of a NovaSeqX flow cell is FlowCellSampleNovaSeqX."""
+    # GIVEN a NovaSeqX flow cell
+
+    # WHEN getting the sample model
+    sample_model: Type[FlowCellSampleNovaSeqX] = novaseq_x_flow_cell.get_sample_model()
+
+    # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
+    assert sample_model == FlowCellSampleNovaSeqX

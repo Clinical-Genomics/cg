@@ -1,14 +1,16 @@
 """Functions to get sample sheet information from Lims."""
 import logging
 import re
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional, Type, Union
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
 from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSample,
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleNovaSeqX,
 )
 from cg.constants.demultiplexing import BclConverter
 
@@ -70,14 +72,12 @@ def get_index(lims: Lims, label: str) -> str:
 
 
 def flow_cell_samples(
-    lims: Lims, flowcell_id: str, bcl_converter: str
-) -> Iterable[Union[FlowCellSampleNovaSeq6000Bcl2Fastq, FlowCellSampleNovaSeq6000Dragen]]:
-    lims_flowcell_sample = {
-        BclConverter.BCL2FASTQ.value: FlowCellSampleNovaSeq6000Bcl2Fastq,
-        BclConverter.DRAGEN.value: FlowCellSampleNovaSeq6000Dragen,
-    }
-    LOG.info(f"Fetching samples from lims for flowcell {flowcell_id}")
-    containers: List[Container] = lims.get_containers(name=flowcell_id)
+    lims: Lims,
+    flow_cell_id: str,
+    flow_cell_sample_type: Type[FlowCellSample],
+) -> Iterable[FlowCellSample]:
+    LOG.info(f"Fetching samples from lims for flowcell {flow_cell_id}")
+    containers: List[Container] = lims.get_containers(name=flow_cell_id)
     if not containers:
         return []
     container: Container = containers[-1]  # only take the last one. See ÖA#217.
@@ -90,8 +90,8 @@ def flow_cell_samples(
             sample: Sample = artifact.samples[0]  # we are assured it only has one sample
             label: Optional[str] = get_reagent_label(artifact)
             index = get_index(lims=lims, label=label)
-            yield lims_flowcell_sample[bcl_converter](
-                flowcell_id=flowcell_id,
+            yield flow_cell_sample_type(
+                flowcell_id=flow_cell_id,
                 lane=lane,
                 sample_id=sample.id,
                 index=index,
