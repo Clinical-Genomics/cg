@@ -1,7 +1,7 @@
 """ Create a sample sheet for Novaseq flow cells."""
 
 import logging
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Type
 
 from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
@@ -29,6 +29,7 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[FlowCellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.sample_type: Type[FlowCellSample] = flow_cell.sample_type
         self.force = force
 
     @property
@@ -54,7 +55,7 @@ class SampleSheetCreator:
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
-                    bcl_converter=self.bcl_converter,
+                    sample_type=self.sample_type,
                 )
                 LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
                 self.lims_samples.append(dummy_flow_cell_sample)

@@ -3,11 +3,14 @@ from typing import List, Dict
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet, FlowCellSampleNovaSeq6000Bcl2Fastq
+from cg.apps.demultiplex.sample_sheet.models import (
+    SampleSheet,
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+)
 from cg.apps.demultiplex.sample_sheet.validate import (
+    get_samples_by_lane,
     get_raw_samples,
     validate_sample_sheet,
-    get_samples_by_lane,
     validate_samples_are_unique,
 )
 from cg.constants.demultiplexing import BclConverter

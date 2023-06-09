@@ -8,8 +8,8 @@ from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 def test_convert_to_bcl2fastq_sheet(
     novaseq_bcl2fastq_sample_sheet_object: SampleSheetCreator, project_dir: Path
 ):
-    """Test that a created bcl2fastq sample sheet has samples."""
-    # GIVEN a sample sheet object populated with samples
+    """Test that a created Bcl2fastq sample sheet has samples."""
+    # GIVEN a sample sheet object populated with Bcl2fastq samples
     assert novaseq_bcl2fastq_sample_sheet_object.lims_samples
 
     # WHEN converting to a sample sheet
@@ -26,8 +26,8 @@ def test_convert_to_bcl2fastq_sheet(
 def test_convert_to_dragen_sheet(
     novaseq_dragen_sample_sheet_object: SampleSheetCreator, project_dir: Path
 ):
-    """Test that a created bcl2fastq sample sheet has samples."""
-    # GIVEN a sample sheet object populated with samples
+    """Test that a created Dragen sample sheet has samples."""
+    # GIVEN a sample sheet object populated with Dragen samples
     assert novaseq_dragen_sample_sheet_object.lims_samples
 
     # WHEN converting to a sample sheet

@@ -63,12 +63,6 @@ class FlowCell:
         self.id = base_name[1:]
         self.position = base_name[0]
 
-    def _parse_date(self):
-        """Return the parsed date in the correct format."""
-        if len(self.split_flow_cell_name[0]) == 8:
-            return datetime.datetime.strptime(self.split_flow_cell_name[0], "%Y%m%d")
-        return datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
-
     @property
     def split_flow_cell_name(self) -> List[str]:
         """Return split flow cell name."""
@@ -103,6 +97,21 @@ class FlowCell:
                 else RunParametersNovaSeq6000(run_parameters_path=self.run_parameters_path)
             )
         return self._run_parameters
+
+    @property
+    def sample_type(
+        self,
+    ) -> Union[
+        Type[FlowCellSampleNovaSeq6000Bcl2Fastq],
+        Type[FlowCellSampleNovaSeq6000Dragen],
+        Type[FlowCellSampleNovaSeqX],
+    ]:
+        """Return the sample class used in the flow cell."""
+        if self.sequencer_type == Sequencers.NOVASEQX:
+            return FlowCellSampleNovaSeqX
+        if self.bcl_converter == BclConverter.DRAGEN:
+            return FlowCellSampleNovaSeq6000Dragen
+        return FlowCellSampleNovaSeq6000Bcl2Fastq
 
     @property
     def sequencer_type(
@@ -146,6 +155,12 @@ class FlowCell:
         """Return path to Hiseq X flow cell directory."""
         return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
+    def _parse_date(self):
+        """Return the parsed date in the correct format."""
+        if len(self.split_flow_cell_name[0]) == 8:
+            return datetime.datetime.strptime(self.split_flow_cell_name[0], "%Y%m%d")
+        return datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
+
     def validate_flow_cell_name(self) -> None:
         """
         Validate on the following criteria:
@@ -178,20 +193,6 @@ class FlowCell:
             LOG.warning(error)
             return False
         return True
-
-    def get_sample_type(
-        self,
-    ) -> Union[
-        Type[FlowCellSampleNovaSeq6000Bcl2Fastq],
-        Type[FlowCellSampleNovaSeq6000Dragen],
-        Type[FlowCellSampleNovaSeqX],
-    ]:
-        """Return the sample class used in the flow cell."""
-        if self.sequencer_type == Sequencers.NOVASEQX:
-            return FlowCellSampleNovaSeqX
-        if self.bcl_converter == BclConverter.DRAGEN:
-            return FlowCellSampleNovaSeq6000Dragen
-        return FlowCellSampleNovaSeq6000Bcl2Fastq
 
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
