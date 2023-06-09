@@ -145,7 +145,7 @@ class DemuxPostProcessingAPI:
             if self.hk_api.get_tag(tag=tag_name) is None:
                 self.hk_api.add_tag(tag_name=tag_name)
 
-        # 2. Add sample sheet.
+        # 3. Add sample sheet.
         sample_sheet_path: Path = Path(
             flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
         )
@@ -159,7 +159,16 @@ class DemuxPostProcessingAPI:
         if any(sample_sheet_path.name == bundle_file.path for bundle_file in latest_version.files):
             LOG.info(f"Found file: {sample_sheet_path.name}.")
             LOG.info("Skipping file")
-    
+        else:
+            self.hk_api.add_and_include_file_to_latest_version(
+                bundle_name=bundle.name,
+                file=sample_sheet_path,
+                tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell.name],
+            )
+        
+        # 4. Add fastq files.
+        
+
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
