@@ -1,17 +1,11 @@
 import logging
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
-    FlowCellSampleNovaSeq6000,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
-)
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
 from cg.apps.lims.sample_sheet import flow_cell_samples
 from cg.constants.constants import FileFormat
@@ -79,7 +73,7 @@ def create_sheet(
         flow_cell_samples(
             lims=context.lims_api,
             flow_cell_id=flow_cell.id,
-            flow_cell_sample_type=flow_cell.get_sample_model(),
+            flow_cell_sample_type=flow_cell.get_sample_type(),
         )
     )
     if not lims_samples:
@@ -131,11 +125,11 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             LOG.info("Sample sheet already exists")
             continue
         LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
-        lims_samples: List[FlowCellSampleNovaSeq6000] = list(
+        lims_samples: List[FlowCellSample] = list(
             flow_cell_samples(
                 lims=context.lims_api,
                 flow_cell_id=flow_cell.id,
-                bcl_converter=bcl_converter,
+                flow_cell_sample_type=flow_cell.get_sample_type(),
             )
         )
         if not lims_samples:

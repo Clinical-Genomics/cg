@@ -108,7 +108,7 @@ def test_get_sample_model_bcl2fastq(bcl2fastq_flow_cell: FlowCell):
     # GIVEN a Bcl2Fastq flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeq6000Bcl2Fastq] = bcl2fastq_flow_cell.get_sample_model()
+    sample_model: Type[FlowCellSampleNovaSeq6000Bcl2Fastq] = bcl2fastq_flow_cell.get_sample_type()
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
     assert sample_model == FlowCellSampleNovaSeq6000Bcl2Fastq
@@ -119,7 +119,7 @@ def test_get_sample_model_dragen(dragen_flow_cell: FlowCell):
     # GIVEN a dragen flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = dragen_flow_cell.get_sample_model()
+    sample_model: Type[FlowCellSampleNovaSeq6000Dragen] = dragen_flow_cell.get_sample_type()
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
     assert sample_model == FlowCellSampleNovaSeq6000Dragen
@@ -130,7 +130,7 @@ def test_get_sample_model_novaseq_x(novaseq_x_flow_cell: FlowCell):
     # GIVEN a NovaSeqX flow cell
 
     # WHEN getting the sample model
-    sample_model: Type[FlowCellSampleNovaSeqX] = novaseq_x_flow_cell.get_sample_model()
+    sample_model: Type[FlowCellSampleNovaSeqX] = novaseq_x_flow_cell.get_sample_type()
 
     # THEN it is FlowCellSampleNovaSeq6000Bcl2Fastq
     assert sample_model == FlowCellSampleNovaSeqX

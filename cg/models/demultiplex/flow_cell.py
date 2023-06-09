@@ -8,7 +8,6 @@ from pydantic import ValidationError
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
     FlowCellSampleNovaSeqX,
@@ -180,7 +179,7 @@ class FlowCell:
             return False
         return True
 
-    def get_sample_model(
+    def get_sample_type(
         self,
     ) -> Union[
         Type[FlowCellSampleNovaSeq6000Bcl2Fastq],
