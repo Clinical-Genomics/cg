@@ -18,7 +18,7 @@ from cg.apps.cgstats.db.models import (
 )
 from cg.apps.cgstats.parsers.conversion_stats import ConversionStats, SampleConversionResults
 from cg.apps.cgstats.parsers.demux_stats import DemuxStats, SampleBarcodeStats
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleNovaSeq6000, SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 
@@ -171,7 +171,7 @@ class FindHandler:
         demux_stats: DemuxStats = DemuxStats(demux_stats_path=demux_stats_path)
         raw_clusters: Dict[int, int] = conversion_stats.raw_clusters_per_lane
         flowcell_id: str = conversion_stats.flowcell_id
-        sample: FlowCellSampleNovaSeq6000
+        sample: FlowCellSample
         for sample in sample_sheet.samples:
             lane: int = sample.lane
             if lane not in demux_samples:
