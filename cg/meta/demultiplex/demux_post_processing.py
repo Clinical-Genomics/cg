@@ -119,10 +119,20 @@ class DemuxPostProcessingAPI:
         self.status_db.session.add(flow_cell)
         self.status_db.session.commit()
 
-        # 5. Store flow cell data in housekeeper. TODO
+        # 5. Store flow cell data in housekeeper.
+        self.transfer_flow_cell_data_to_housekeeper(flow_cell=flow_cell)
+
 
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
+
+    def transfer_flow_cell_data_to_housekeeper(flow_cell: Flowcell) -> None:
+        # 1. Add tags.
+        # 2. Add sample sheet.
+        # 3. Add fastq files.
+
+        pass
+
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
