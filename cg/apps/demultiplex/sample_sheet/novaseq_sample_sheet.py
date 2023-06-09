@@ -7,7 +7,7 @@ from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleNovaSeq6000
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
@@ -22,12 +22,12 @@ class SampleSheetCreator:
         self,
         bcl_converter: str,
         flow_cell: FlowCell,
-        lims_samples: List[FlowCellSample],
+        lims_samples: List[FlowCellSampleNovaSeq6000],
         force: bool = False,
     ):
         self.bcl_converter = bcl_converter
         self.flow_cell_id: str = flow_cell.id
-        self.lims_samples: List[FlowCellSample] = lims_samples
+        self.lims_samples: List[FlowCellSampleNovaSeq6000] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
         self.force = force
 
@@ -49,7 +49,7 @@ class SampleSheetCreator:
                 if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
-                dummy_flow_cell_sample: FlowCellSample = dummy_sample(
+                dummy_flow_cell_sample: FlowCellSampleNovaSeq6000 = dummy_sample(
                     flow_cell_id=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
@@ -63,7 +63,7 @@ class SampleSheetCreator:
         """Filter out samples with indexes of unwanted length and single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
-        sample: FlowCellSample
+        sample: FlowCellSampleNovaSeq6000
         for sample in self.lims_samples:
             if not index.is_dual_index(sample.index):
                 LOG.warning(f"Removing sample {sample} since it does not have dual index")
@@ -73,7 +73,7 @@ class SampleSheetCreator:
 
     @staticmethod
     def convert_sample_to_header_dict(
-        sample: FlowCellSample,
+        sample: FlowCellSampleNovaSeq6000,
         sample_sheet_headers: List[str],
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet

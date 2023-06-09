@@ -6,7 +6,7 @@ import click
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
+    FlowCellSampleNovaSeq6000,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
 )
@@ -129,7 +129,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             LOG.info("Sample sheet already exists")
             continue
         LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
-        lims_samples: List[FlowCellSample] = list(
+        lims_samples: List[FlowCellSampleNovaSeq6000] = list(
             flow_cell_samples(
                 lims=context.lims_api,
                 flowcell_id=flow_cell.id,

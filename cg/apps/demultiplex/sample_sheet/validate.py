@@ -5,7 +5,7 @@ from pydantic import parse_obj_as
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
+    FlowCellSampleNovaSeq6000,
     SampleSheet,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
@@ -21,7 +21,7 @@ from cg.io.controller import ReadFile
 LOG = logging.getLogger(__name__)
 
 
-def validate_samples_are_unique(samples: List[FlowCellSample]) -> None:
+def validate_samples_are_unique(samples: List[FlowCellSampleNovaSeq6000]) -> None:
     """Validate that each sample only exists once."""
     sample_ids: set = set()
     for sample in samples:
@@ -33,10 +33,12 @@ def validate_samples_are_unique(samples: List[FlowCellSample]) -> None:
         sample_ids.add(sample_id)
 
 
-def get_samples_by_lane(samples: List[FlowCellSample]) -> Dict[int, List[FlowCellSample]]:
+def get_samples_by_lane(
+    samples: List[FlowCellSampleNovaSeq6000],
+) -> Dict[int, List[FlowCellSampleNovaSeq6000]]:
     """Group and return samples by lane."""
     LOG.info("Order samples by lane")
-    sample_by_lane: Dict[int, List[FlowCellSample]] = {}
+    sample_by_lane: Dict[int, List[FlowCellSampleNovaSeq6000]] = {}
     for sample in samples:
         if sample.lane not in sample_by_lane:
             sample_by_lane[sample.lane] = []
@@ -44,10 +46,10 @@ def get_samples_by_lane(samples: List[FlowCellSample]) -> Dict[int, List[FlowCel
     return sample_by_lane
 
 
-def validate_samples_unique_per_lane(samples: List[FlowCellSample]) -> None:
+def validate_samples_unique_per_lane(samples: List[FlowCellSampleNovaSeq6000]) -> None:
     """Validate that each sample only exists once per lane in a sample sheet."""
 
-    sample_by_lane: Dict[int, List[FlowCellSample]] = get_samples_by_lane(samples)
+    sample_by_lane: Dict[int, List[FlowCellSampleNovaSeq6000]] = get_samples_by_lane(samples)
     for lane, lane_samples in sample_by_lane.items():
         LOG.info(f"Validate that samples are unique in lane {lane}")
         validate_samples_are_unique(samples=lane_samples)

@@ -16,7 +16,7 @@ from cg.apps.cgstats.db.models import (
 )
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
+    FlowCellSampleNovaSeq6000,
     FlowCellSampleBcl2Fastq,
     FlowCellSampleDragen,
     SampleSheet,
@@ -211,7 +211,7 @@ def create_projects(manager: StatsAPI, project_names: Iterable[str]) -> Dict[str
 
 
 def get_or_create_sample(
-    manager: StatsAPI, sample: FlowCellSample, project_name_to_id: Dict[str, int]
+    manager: StatsAPI, sample: FlowCellSampleNovaSeq6000, project_name_to_id: Dict[str, int]
 ) -> Sample:
     """Create a new Sample object in the cgstats database if it doesn't already exist."""
 
