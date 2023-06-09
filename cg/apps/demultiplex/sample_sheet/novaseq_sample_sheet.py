@@ -8,13 +8,7 @@ from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
-from cg.constants.demultiplexing import (
-    SAMPLE_SHEET_HEADERS,
-    SAMPLE_SHEET_SETTINGS_HEADER,
-    SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
-    SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
-    SampleSheetHeaderColumnNames,
-)
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 from cg.models.demultiplex.flow_cell import FlowCell
 from cg.models.demultiplex.run_parameters import RunParameters
 
@@ -88,21 +82,34 @@ class SampleSheetCreator:
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[header]) for header in sample_sheet_headers]
 
+    def get_additional_sections_sample_sheet(self) -> List[List[str]]:
+        """Build all sections of the sample sheet that is not the Data section."""
+        return [
+            [SampleSheetNovaSeq6000Sections.Settings.HEADER.value],
+            SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX1.value,
+            SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX2.value,
+        ]
+
+    def get_data_section_header_and_columns(self) -> List[List[str]]:
+        """Return the header and column names of the data section of the sample sheet."""
+        return [
+            [SampleSheetNovaSeq6000Sections.Data.HEADER.value],
+            SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[self.bcl_converter],
+        ]
+
     def create_sample_sheet_content(self) -> List[List[str]]:
         """Create sample sheet with samples."""
         LOG.info("Create sample sheet for samples")
-        sample_sheet_content: List[List[str]] = [
-            [SAMPLE_SHEET_SETTINGS_HEADER],
-            SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1,
-            SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2,
-            [SampleSheetHeaderColumnNames.DATA],
-            SAMPLE_SHEET_HEADERS[self.bcl_converter],
-        ]
+        sample_sheet_content: List[List[str]] = (
+            self.get_additional_sections_sample_sheet() + self.get_data_section_header_and_columns()
+        )
         for sample in self.lims_samples:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
-                    sample_sheet_headers=SAMPLE_SHEET_HEADERS[self.bcl_converter],
+                    sample_sheet_headers=SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
+                        self.bcl_converter
+                    ],
                 )
             )
         return sample_sheet_content

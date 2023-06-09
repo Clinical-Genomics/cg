@@ -5,7 +5,7 @@ from cg.constants.bcl_convert_metrics import (
     BclConvertDemuxMetricsColumnNames,
     BclConvertAdapterMetricsColumnNames,
 )
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 
 
 class BclConvertQualityMetrics(BaseModel):
@@ -69,14 +69,16 @@ class BclConvertAdapterMetrics(BaseModel):
 class BclConvertSampleSheetData(BaseModel):
     """Model for the BCL Convert sample sheet."""
 
-    flow_cell_name: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
+    flow_cell_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
+    lane: int = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.LANE.value)
     sample_internal_id: str = Field(
-        ..., alias=SampleSheetHeaderColumnNames.SAMPLE_INTERNAL_ID.value
+        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value
     )
-    sample_name: str = Field(..., alias=SampleSheetHeaderColumnNames.SAMPLE_NAME.value)
-    control: str = Field(..., alias=SampleSheetHeaderColumnNames.CONTROL.value)
-    sample_project: str = Field(..., alias=SampleSheetHeaderColumnNames.SAMPLE_PROJECT.value)
+    sample_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value)
+    control: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.CONTROL.value)
+    sample_project: str = Field(
+        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value
+    )
 
 
 class CustomConfig(BaseConfig):

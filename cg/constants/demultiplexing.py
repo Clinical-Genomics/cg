@@ -1,7 +1,8 @@
+"""Constants related to demultiplexing."""
 from pathlib import Path
-
+from typing import List, Dict
 import click
-from cg.utils.enums import StrEnum
+from cg.utils.enums import Enum, StrEnum
 
 
 class BclConverter(StrEnum):
@@ -10,6 +11,22 @@ class BclConverter(StrEnum):
     DRAGEN: str = "dragen"
     BCL2FASTQ: str = "bcl2fastq"
     BCLCONVERT: str = "bcl_convert"
+
+
+class DemultiplexingDirsAndFiles(StrEnum):
+    """Demultiplexing related directories and files."""
+
+    COPY_COMPLETE: str = "CopyComplete.txt"
+    DELIVERY: str = "delivery.txt"
+    DEMUX_STARTED: str = "demuxstarted.txt"
+    DEMUX_COMPLETE: str = "demuxcomplete.txt"
+    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
+    Hiseq_X_TILE_DIR: str = "l1t11"
+    RTACOMPLETE: str = "RTAComplete.txt"
+    RUN_PARAMETERS: str = "RunParameters.xml"
+    SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
+    UNALIGNED_DIR_NAME: str = "Unaligned"
+    BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
 
 
 class RunParametersXMLNodes(StrEnum):
@@ -39,50 +56,90 @@ class RunParametersXMLNodes(StrEnum):
     UNKNOWN_REAGENT_KIT_VERSION: str = "unknown"
 
 
-class SampleSheetHeaderColumnNames(StrEnum):
-    DATA: str = "[Data]"
-    FLOW_CELL_ID: str = "FCID"
-    LANE: str = "Lane"
-    SAMPLE_INTERNAL_ID: str = "Sample_ID"
-    SAMPLE_NAME: str = "SampleName"
-    SAMPLE_PROJECT: str = "Sample_Project"
-    CONTROL: str = "Control"
+class SampleSheetNovaSeq6000Sections:
+    """Class with all necessary constants for building a NovaSeqX sample sheet."""
+
+    class Settings(Enum):
+        HEADER: str = "[Settings]"
+        BARCODE_MISMATCH_INDEX1: List[str] = ["BarcodeMismatchesIndex1", "0"]
+        BARCODE_MISMATCH_INDEX2: List[str] = ["BarcodeMismatchesIndex2", "0"]
+
+    class Data(Enum):
+        HEADER: str = "[Data]"
+        FLOW_CELL_ID: str = "FCID"
+        LANE: str = "Lane"
+        SAMPLE_INTERNAL_ID_BCL2FASTQ: str = "SampleID"
+        SAMPLE_INTERNAL_ID_BCLCONVERT: str = "Sample_ID"
+        SAMPLE_NAME: str = "SampleName"
+        SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
+        SAMPLE_PROJECT_BCLCONVERT: str = "Sample_Project"
+        CONTROL: str = "Control"
+
+        COLUMN_NAMES: Dict[str, List[str]] = {
+            "bcl2fastq": [
+                FLOW_CELL_ID,
+                LANE,
+                SAMPLE_INTERNAL_ID_BCL2FASTQ,
+                "SampleRef",
+                "index",
+                "index2",
+                SAMPLE_NAME,
+                CONTROL,
+                "Recipe",
+                "Operator",
+                SAMPLE_PROJECT_BCL2FASTQ,
+            ],
+            "dragen": [
+                FLOW_CELL_ID,
+                LANE,
+                SAMPLE_INTERNAL_ID_BCLCONVERT,
+                "SampleRef",
+                "index",
+                "index2",
+                SAMPLE_NAME,
+                CONTROL,
+                "Recipe",
+                "Operator",
+                SAMPLE_PROJECT_BCLCONVERT,
+            ],
+        }
 
 
-SAMPLE_SHEET_HEADERS = {
-    "bcl2fastq": [
-        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
-        "Lane",
-        "SampleID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Project",
-    ],
-    "dragen": [
-        SampleSheetHeaderColumnNames.FLOW_CELL_ID,
-        "Lane",
-        "Sample_ID",
-        "SampleRef",
-        "index",
-        "index2",
-        "SampleName",
-        "Control",
-        "Recipe",
-        "Operator",
-        "Sample_Project",
-    ],
-}
+class SampleSheetNovaSeqXSections:
+    """Class with all necessary constants for building a NovaSeqX sample sheet."""
 
-SAMPLE_SHEET_SETTINGS_HEADER = "[Settings]"
+    class Header(Enum):
+        HEADER: str = "[Header]"
+        FILE_FORMAT: List[str] = ["FileFormatVersion", "2"]
+        RUN_NAME: str = "RunName"
+        INSTRUMENT_PLATFORM: List[str] = ["InstrumentPlatform", "NovaSeqXSeries"]
+        INDEX_ORIENTATION_FORWARD: List[str] = ["IndexOrientation", "Forward"]
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX1 = ["BarcodeMismatchesIndex1", "0"]
+    class Reads(StrEnum):
+        HEADER: str = "[Reads]"
+        READ_CYCLES_1: str = "Read1Cycles"
+        READ_CYCLES_2: str = "Read2Cycles"
+        INDEX_CYCLES_1: str = "Index1Cycles"
+        INDEX_CYCLES_2: str = "Index2Cycles"
 
-SAMPLE_SHEET_SETTING_BARCODE_MISMATCH_INDEX2 = ["BarcodeMismatchesIndex2", "0"]
+    class Settings(Enum):
+        HEADER: str = "[BCLConvert_Settings]"
+        SOFTWARE_VERSION: List[str] = ["SoftwareVersion", "4.1.5"]
+        FASTQ_COMPRESSION_FORMAT: List[str] = ["FastqCompressionFormat", "gzip"]
+
+    class Data(Enum):
+        HEADER: str = "[BCLConvert_Data]"
+        COLUMN_NAMES: List[str] = [
+            "Lane",
+            "Sample_ID",
+            "Index",
+            "Index2",
+            "AdapterRead1",
+            "AdapterRead2",
+            "BarcodeMismatchesIndex1",
+            "BarcodeMismatchesIndex2",
+        ]
+
 
 OPTION_BCL_CONVERTER = click.option(
     "-b",
@@ -93,7 +150,6 @@ OPTION_BCL_CONVERTER = click.option(
     "bcl2fastq.",
 )
 
-FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
 
 DEMUX_STATS_PATH = {
     "bcl2fastq": {
@@ -110,27 +166,9 @@ DEMUX_STATS_PATH = {
     },
 }
 
-DRAGEN_PASSED_FILTER_PCT = 100.00000
-
-
-class DemultiplexingDirsAndFiles(StrEnum):
-    """Demultiplexing related directories and files."""
-
-    COPY_COMPLETE: str = "CopyComplete.txt"
-    DELIVERY: str = "delivery.txt"
-    DEMUX_STARTED: str = "demuxstarted.txt"
-    DEMUX_COMPLETE: str = "demuxcomplete.txt"
-    Hiseq_X_COPY_COMPLETE: str = "copycomplete.txt"
-    HiseqX_TILE_DIR: str = "l1t11"
-    RTACOMPLETE: str = "RTAComplete.txt"
-    RUN_PARAMETERS: str = "RunParameters.xml"
-    SAMPLE_SHEET_FILE_NAME: str = "SampleSheet.csv"
-    UNALIGNED_DIR_NAME: str = "Unaligned"
-    BCL2FASTQ_TILE_DIR_PATTERN: str = r"l\dt\d{2}"
-
-
-INDEX_CHECK = "indexcheck"
-UNDETERMINED = "Undetermined"
-
 BCL2FASTQ_METRICS_DIRECTORY_NAME = "Stats"
 BCL2FASTQ_METRICS_FILE_NAME = "Stats.json"
+DRAGEN_PASSED_FILTER_PCT = 100.00000
+FASTQ_FILE_SUFFIXES = [".fastq", ".gz"]
+INDEX_CHECK = "indexcheck"
+UNDETERMINED = "Undetermined"

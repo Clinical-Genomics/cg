@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from typing import List
 
 from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
 
 LOG = logging.getLogger(__name__)
 
@@ -11,8 +11,8 @@ LOG = logging.getLogger(__name__)
 class FlowCellSample(BaseModel):
     """This model is used when parsing/validating existing sample sheets."""
 
-    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
+    flowcell_id: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
+    lane: int = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.LANE.value)
     sample_id: str
     sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
     index: str = Field(..., alias="index")

@@ -893,7 +893,7 @@ def fixture_demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCell) -> Path:
 @pytest.fixture(name="hiseq_x_tile_dir")
 def fixture_hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCell) -> Path:
     """Return Hiseq X tile dir."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
