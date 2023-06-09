@@ -17,6 +17,7 @@ from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
+from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
@@ -122,17 +123,43 @@ class DemuxPostProcessingAPI:
         # 5. Store flow cell data in housekeeper.
         self.transfer_flow_cell_data_to_housekeeper(flow_cell=flow_cell)
 
-
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
-    def transfer_flow_cell_data_to_housekeeper(flow_cell: Flowcell) -> None:
-        # 1. Add tags.
+    def transfer_flow_cell_data_to_housekeeper(
+        self, flow_cell: Flowcell, flow_cell_directory: Path
+    ) -> None:
+        # 1. Create bundle.
+        # 2. Add tags.
+        # 3. Add sample sheet.
+        # 4. Add fastq files.
+
+        # 1. Create bundle for flow cell if it does not already exist.
+        bundle = self.hk_api.bundle(name=flow_cell.name)
+        if not bundle:
+            bundle = self.hk_api.create_new_bundle_and_version(name=flow_cell.name)
+
+        # 2. Add tags.
+        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.name]
+        for tag_name in tags:
+            if self.hk_api.get_tag(tag=tag_name) is None:
+                self.hk_api.add_tag(tag_name=tag_name)
+
         # 2. Add sample sheet.
-        # 3. Add fastq files.
+        sample_sheet_path: Path = Path(
+            flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        )
 
-        pass
+        if not sample_sheet_path.exists():
+            LOG.warning(f"Sample sheet does not exist: {sample_sheet_path}")
+            return
 
+        latest_version = self.hk_api.get_latest_bundle_version(bundle_name=bundle.name)
+
+        if any(sample_sheet_path.name == bundle_file.path for bundle_file in latest_version.files):
+            LOG.info(f"Found file: {sample_sheet_path.name}.")
+            LOG.info("Skipping file")
+    
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
