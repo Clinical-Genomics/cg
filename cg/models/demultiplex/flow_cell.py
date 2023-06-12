@@ -2,7 +2,7 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Type, Tuple, Union
+from typing import List, Optional, Type, Union
 
 from pydantic import ValidationError
 from typing_extensions import Literal
@@ -14,6 +14,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
 )
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
+from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import (
     BclConverter,
     DemultiplexingDirsAndFiles,
@@ -157,7 +158,7 @@ class FlowCell:
 
     def _parse_date(self):
         """Return the parsed date in the correct format."""
-        if len(self.split_flow_cell_name[0]) == 8:
+        if len(self.split_flow_cell_name[0]) == LENGTH_LONG_DATE:
             return datetime.datetime.strptime(self.split_flow_cell_name[0], "%Y%m%d")
         return datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
 

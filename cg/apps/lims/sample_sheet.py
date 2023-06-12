@@ -76,6 +76,7 @@ def get_flow_cell_samples(
     flow_cell_id: str,
     flow_cell_sample_type: Type[FlowCellSample],
 ) -> Iterable[FlowCellSample]:
+    """Return samples from LIMS for a given flow cell."""
     LOG.info(f"Fetching samples from lims for flowcell {flow_cell_id}")
     containers: List[Container] = lims.get_containers(name=flow_cell_id)
     if not containers:
