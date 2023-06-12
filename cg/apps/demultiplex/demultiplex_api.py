@@ -191,7 +191,9 @@ class DemultiplexingAPI:
             content=content, file_format=FileFormat.YAML, file_path=file_path
         )
 
-    def add_to_trailblazer(self, tb_api: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCellDirectoryData):
+    def add_to_trailblazer(
+        self, tb_api: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCellDirectoryData
+    ):
         """Add demultiplexing entry to trailblazer."""
         if self.dry_run:
             return

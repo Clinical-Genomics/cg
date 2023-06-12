@@ -23,7 +23,9 @@ class MockDemuxResults:
         self.bcl_converter = "dragen"
         self.conversion_stats_path = Path("Demultiplex_Stats.csv")
         self.demux_host = "hasta"
-        self.flow_cell: FlowCellDirectoryData = self.mock_flowcell(flow_cell_full_name=flow_cell_full_name)
+        self.flow_cell: FlowCellDirectoryData = self.mock_flowcell(
+            flow_cell_full_name=flow_cell_full_name
+        )
         self.machine_name = "barbara"
         self.run_date = datetime.now()
         self.run_name = flow_cell_full_name

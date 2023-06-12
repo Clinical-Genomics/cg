@@ -176,7 +176,9 @@ def test_demultiplex_all_novaseq(
 
     # GIVEN a context with the path to a directory where at least one flowcell is ready for demux
     demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=demultiplex_ready_flow_cell)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=demultiplex_ready_flow_cell
+    )
 
     assert demux_api.run_dir == demultiplex_ready_flow_cell.parent
 

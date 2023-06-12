@@ -26,7 +26,9 @@ def test_create_sample_sheet_no_run_parameters(
     mocker,
 ):
     # GIVEN a folder with a non-existing sample sheet
-    flowcell_object: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_working_directory_no_run_parameters)
+    flowcell_object: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_working_directory_no_run_parameters
+    )
     assert flowcell_object.run_parameters_path.exists() is False
 
     # GIVEN flow cell samples
@@ -96,7 +98,9 @@ def test_create_dragen_sample_sheet(
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN)
+    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN
+    )
     assert flowcell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present

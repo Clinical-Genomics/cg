@@ -99,7 +99,9 @@ def demultiplex_flow_cell(
     LOG.info(f"setting out dir to {demultiplex_api.out_dir}")
 
     try:
-        flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+        flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+        )
     except FlowCellError as error:
         raise click.Abort from error
 

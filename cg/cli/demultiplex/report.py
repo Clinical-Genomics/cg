@@ -21,7 +21,9 @@ def create_report_cmd(context: CGConfig, flow_cell_name: str):
     LOG.info(f"Check demuxed flowcell {flow_cell_name}")
     demux_api: DemultiplexingAPI = context.demultiplex_api
     try:
-        flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=Path(demux_api.run_dir, flow_cell_name))
+        flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+            flow_cell_path=Path(demux_api.run_dir, flow_cell_name)
+        )
     except FlowCellError as error:
         raise click.Abort from error
     demux_results: DemuxResults = DemuxResults(
