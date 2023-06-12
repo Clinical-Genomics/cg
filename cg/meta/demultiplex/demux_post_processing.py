@@ -121,24 +121,52 @@ class DemuxPostProcessingAPI:
         self.status_db.session.commit()
 
         # 5. Store flow cell data in housekeeper.
-        self.transfer_flow_cell_data_to_housekeeper(flow_cell=flow_cell)
+        self.add_flow_cell_data_to_housekeeper(
+            flow_cell=flow_cell, flow_cell_directory=flow_cell_dir
+        )
 
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
-    def transfer_flow_cell_data_to_housekeeper(
+    def add_flow_cell_data_to_housekeeper(
         self, flow_cell: Flowcell, flow_cell_directory: Path
     ) -> None:
-        """Transfer flow cell data to housekeeper."""
-        LOG.info(f"Transfer flow cell data to housekeeper for {flow_cell.name}")
+        """Add flow cell data to housekeeper."""
+        LOG.info(f"Add flow cell data to housekeeper for {flow_cell.name}")
 
-        self.create_bundle(flow_cell_name=flow_cell.name)
+        self.add_bundle(flow_cell_name=flow_cell.name)
         self.add_tags(flow_cell_name=flow_cell.name)
         self.add_sample_sheet(flow_cell_directory, flow_cell.name)
         self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name)
 
     def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
-        pass
+        fastq_file_paths: List[Path] = self.get_fastq_file_paths(
+            flow_cell_directory=flow_cell_directory
+        )
+
+        for file_path in fastq_file_paths:
+            self.add_fastq_file(file_path=file_path, flow_cell_name=flow_cell_name)
+
+    def add_fastq_file(self, fastq_path: Path, flow_cell_name: str) -> None:
+        latest_version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
+
+        if any(fastq_path.name == bundle_file.path for bundle_file in latest_version.files):
+            LOG.info(f"Found file: {fastq_path.name}.")
+            LOG.info("Skipping file")
+        else:
+            LOG.info(f"Adding file: {fastq_path.name}.")
+            self.hk_api.add_and_include_file_to_latest_version(
+                bundle_name=flow_cell_name,
+                file_path=fastq_path,
+                tags=[SequencingFileTag.FASTQ, flow_cell_name],
+            )
+
+    def get_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
+        """Get fastq file paths from flow cell directory."""
+        fastq_file_paths: List[Path] = []
+        for fastq_file_path in flow_cell_directory.glob("**/*.fastq.gz"):
+            fastq_file_paths.append(fastq_file_path)
+        return fastq_file_paths
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str):
         sample_sheet_path: Path = Path(
@@ -147,6 +175,7 @@ class DemuxPostProcessingAPI:
 
         if not sample_sheet_path.exists():
             LOG.warning(f"Sample sheet does not exist: {sample_sheet_path}")
+            return
 
         latest_version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
 
@@ -166,15 +195,10 @@ class DemuxPostProcessingAPI:
             if self.hk_api.get_tag(tag=tag_name) is None:
                 self.hk_api.add_tag(tag_name=tag_name)
 
-    def create_bundle(self, flow_cell_name: str):
+    def add_bundle(self, flow_cell_name: str):
         bundle = self.hk_api.bundle(name=flow_cell_name)
         if not bundle:
             self.hk_api.create_new_bundle_and_version(name=flow_cell_name)
-
-    def get_fastq_files(self, flow_cell_directory: Path) -> List[Path]:
-        """Return list of fastq files for flow cell."""
-        fastq_files: List[Path] = []
-        return fastq_files
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
