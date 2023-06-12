@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FlowCell:
-    """Class to collect information about flow cell directories and there particular files."""
+    """Class to collect information about flow cell directories and their particular files."""
 
     def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
         LOG.debug(f"Instantiating FlowCell with path {flow_cell_path}")
@@ -186,7 +186,7 @@ class FlowCell:
         try:
             get_sample_sheet_from_file(
                 infile=self.sample_sheet_path,
-                bcl_converter=self.bcl_converter,
+                flow_cell_sample_type=self.sample_type,
             )
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
@@ -198,7 +198,7 @@ class FlowCell:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
             infile=self.sample_sheet_path,
-            bcl_converter=self.bcl_converter,
+            flow_cell_sample_type=self.sample_type,
         )
 
     def is_sequencing_done(self) -> bool:

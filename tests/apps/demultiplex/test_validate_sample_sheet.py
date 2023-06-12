@@ -6,6 +6,7 @@ import pytest
 from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
     FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
 )
 from cg.apps.demultiplex.sample_sheet.validate import (
     get_samples_by_lane,
@@ -109,7 +110,7 @@ def test_get_raw_samples_no_samples(sample_sheet_bcl2fastq_data_header: List[Lis
     assert "Could not find any samples in sample sheet" in caplog.text
 
 
-def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
+def test_get_sample_sheet_bcl2fastq_duplicate_same_lane(
     sample_sheet_bcl2fastq_duplicate_same_lane: List[List[str]],
 ):
     """Test that creating a Bcl2fastq sample sheet with duplicated samples in a lane fails."""
@@ -120,11 +121,11 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_same_lane(
         # THEN a sample sheet error is raised
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_bcl2fastq_duplicate_same_lane,
-            bcl_converter=BclConverter.BCL2FASTQ,
+            sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
         )
 
 
-def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
+def test_get_sample_sheet_dragen_duplicate_same_lane(
     sample_sheet_dragen_duplicate_same_lane: List[List[str]],
 ):
     """Test that creating a Dragen sample sheet with duplicated samples in a lane fails."""
@@ -135,11 +136,11 @@ def test_get_sample_sheet_s2_dragen_duplicate_same_lane(
         # THEN a sample sheet error is raised
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_dragen_duplicate_same_lane,
-            bcl_converter=BclConverter.DRAGEN,
+            sample_type=FlowCellSampleNovaSeq6000Dragen,
         )
 
 
-def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
+def test_get_sample_sheet_bcl2fastq_duplicate_different_lanes(
     sample_sheet_bcl2fastq_duplicate_different_lane: List[List[str]],
 ):
     """Test that Bcl2fastq a sample sheet created with duplicated samples in different lanes has samples."""
@@ -148,14 +149,14 @@ def test_get_sample_sheet_s2_bcl2fastq_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=sample_sheet_bcl2fastq_duplicate_different_lane,
-        bcl_converter=BclConverter.BCL2FASTQ,
+        sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
     )
 
     # THEN a sample sheet is returned with samples in it
     assert sample_sheet.samples
 
 
-def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
+def test_get_sample_sheet_dragen_duplicate_different_lanes(
     sample_sheet_dragen_duplicate_different_lane: List[List[str]],
 ):
     """Test that Dragen a sample sheet created with duplicated samples in different lanes has samples."""
@@ -164,7 +165,7 @@ def test_get_sample_sheet_s2_dragen_duplicate_different_lanes(
     # WHEN creating the sample sheet object
     sample_sheet: SampleSheet = validate_sample_sheet(
         sample_sheet_content=sample_sheet_dragen_duplicate_different_lane,
-        bcl_converter=BclConverter.DRAGEN,
+        sample_type=FlowCellSampleNovaSeq6000Dragen,
     )
 
     # THEN a sample sheet is returned with samples in it
