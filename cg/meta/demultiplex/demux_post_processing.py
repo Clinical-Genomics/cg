@@ -181,7 +181,7 @@ class DemuxPostProcessingAPI:
         """Ensure that tags exist in housekeeper."""
         for tag_name in tag_names:
             if self.hk_api.get_tag(name=tag_name) is None:
-                self.hk_api.add_tag(tag_name=tag_name)
+                self.hk_api.add_tag(name=tag_name)
 
     def add_file_if_not_exists(self, file_path: Path, flow_cell_name: str, tags: List[str]) -> None:
         """Add file to housekeeper if it does not exist."""
