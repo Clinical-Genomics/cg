@@ -15,6 +15,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from housekeeper.store.models import Bundle, Version
 from cg.constants.cgstats import STATS_HEADER
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -134,9 +135,13 @@ class DemuxPostProcessingAPI:
         """Add flow cell data to housekeeper."""
         LOG.info(f"Add flow cell data to housekeeper for {flow_cell.name}")
 
-        self.add_bundle(flow_cell_name=flow_cell.name)
-        self.add_tags(flow_cell_name=flow_cell.name)
-        self.add_sample_sheet(flow_cell_directory, flow_cell.name)
+        self.add_bundle_if_not_exists(flow_cell_name=flow_cell.name)
+        self.ensure_tags_exist(
+            [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.name]
+        )
+        self.add_sample_sheet(
+            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name
+        )
         self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name)
 
     def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
@@ -144,61 +149,56 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory
         )
 
-        for file_path in fastq_file_paths:
-            self.add_fastq_file(file_path=file_path, flow_cell_name=flow_cell_name)
-
-    def add_fastq_file(self, fastq_path: Path, flow_cell_name: str) -> None:
-        latest_version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
-
-        if any(fastq_path.name == bundle_file.path for bundle_file in latest_version.files):
-            LOG.info(f"Found file: {fastq_path.name}.")
-            LOG.info("Skipping file")
-        else:
-            LOG.info(f"Adding file: {fastq_path.name}.")
-            self.hk_api.add_and_include_file_to_latest_version(
-                bundle_name=flow_cell_name,
-                file_path=fastq_path,
-                tags=[SequencingFileTag.FASTQ, flow_cell_name],
+        for fastq_file_path in fastq_file_paths:
+            self.add_file_if_not_exists(
+                fastq_file_path, flow_cell_name, [SequencingFileTag.FASTQ, flow_cell_name]
             )
-
-    def get_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
-        """Get fastq file paths from flow cell directory."""
-        fastq_file_paths: List[Path] = []
-        for fastq_file_path in flow_cell_directory.glob("**/*.fastq.gz"):
-            fastq_file_paths.append(fastq_file_path)
-        return fastq_file_paths
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str):
-        sample_sheet_path: Path = Path(
-            flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
+        self.add_file_if_not_exists(
+            flow_cell_directory / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+            flow_cell_name,
+            [SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
         )
 
-        if not sample_sheet_path.exists():
-            LOG.warning(f"Sample sheet does not exist: {sample_sheet_path}")
-            return
+    def get_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
+        """Get fastq file paths for flow cell."""
+        return flow_cell_directory.glob("**/*.fastq.gz")
 
-        latest_version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
+    def add_bundle_if_not_exists(self, flow_cell_name: str):
+        if not self.hk_api.bundle(name=flow_cell_name):
+            self.hk_api.create_new_bundle_and_version(name=flow_cell_name)
 
-        if any(sample_sheet_path.name == bundle_file.path for bundle_file in latest_version.files):
-            LOG.info(f"Found file: {sample_sheet_path.name}.")
-            LOG.info("Skipping file")
-        else:
-            self.hk_api.add_and_include_file_to_latest_version(
-                bundle_name=flow_cell_name,
-                file=sample_sheet_path,
-                tags=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
-            )
-
-    def add_tags(self, flow_cell_name: str) -> None:
-        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
-        for tag_name in tags:
+    def ensure_tags_exist(self, tag_names: List[str]) -> None:
+        for tag_name in tag_names:
             if self.hk_api.get_tag(tag=tag_name) is None:
                 self.hk_api.add_tag(tag_name=tag_name)
 
-    def add_bundle(self, flow_cell_name: str):
-        bundle = self.hk_api.bundle(name=flow_cell_name)
-        if not bundle:
-            self.hk_api.create_new_bundle_and_version(name=flow_cell_name)
+    def add_file_if_not_exists(self, file_path: Path, flow_cell_name: str, tags: List[str]) -> None:
+        if not file_path.exists():
+            LOG.warning(f"File does not exist: {file_path}")
+            return
+
+        if self.file_exists_in_latest_version_for_bundle(
+            file_path=file_path, flow_cell_name=flow_cell_name
+        ):
+            LOG.info(f"Found file: {file_path.name}, skipping...")
+        else:
+            LOG.info(f"Adding file: {file_path.name}")
+            self.hk_api.add_and_include_file_to_latest_version(
+                bundle_name=flow_cell_name,
+                file_path=file_path,
+                tags=tags,
+            )
+
+    def file_exists_in_latest_version_for_bundle(
+        self, file_path: Path, flow_cell_name: str
+    ) -> bool:
+        """Check if file exists in latest version for bundle."""
+        latest_version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
+        return any(
+            [file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files]
+        )
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
