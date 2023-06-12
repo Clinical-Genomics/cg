@@ -9,7 +9,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.utils import Process
 from tests.apps.cgstats.conftest import fixture_populated_stats_api, fixture_stats_api
 from tests.apps.demultiplex.conftest import (
@@ -100,8 +100,8 @@ def fixture_flow_cell_working_directory(
     """
     working_dir: Path = Path(flow_cell_runs_working_directory, bcl2fastq_flow_cell_dir.name)
     working_dir.mkdir(parents=True)
-    existing_flow_cell: FlowCell = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
-    working_flow_cell: FlowCell = FlowCell(flow_cell_path=working_dir)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=working_dir)
     shutil.copy(
         existing_flow_cell.run_parameters_path.as_posix(),
         working_flow_cell.run_parameters_path.as_posix(),
@@ -121,8 +121,8 @@ def fixture_flow_cell_working_directory_bcl2fastq(
         flow_cell_runs_working_directory_bcl2fastq, bcl2fastq_flow_cell_dir.name
     )
     working_dir.mkdir(parents=True)
-    existing_flow_cell: FlowCell = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
-    working_flow_cell: FlowCell = FlowCell(flow_cell_path=working_dir)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=working_dir)
     shutil.copy(
         existing_flow_cell.run_parameters_path.as_posix(),
         working_flow_cell.run_parameters_path.as_posix(),
@@ -140,8 +140,8 @@ def fixture_flow_cell_working_directory_dragen(
     """
     working_dir: Path = Path(flow_cell_runs_working_directory_dragen, dragen_flow_cell_dir.name)
     working_dir.mkdir(parents=True)
-    existing_flow_cell: FlowCell = FlowCell(flow_cell_path=dragen_flow_cell_dir)
-    working_flow_cell: FlowCell = FlowCell(flow_cell_path=working_dir)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=dragen_flow_cell_dir)
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=working_dir)
     shutil.copy(
         existing_flow_cell.run_parameters_path.as_posix(),
         working_flow_cell.run_parameters_path.as_posix(),
@@ -167,8 +167,8 @@ def fixture_demultiplex_ready_flow_cell(
 
     This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
     """
-    existing_flow_cell: FlowCell = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
-    working_flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_working_directory)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_working_directory)
     shutil.copy(
         existing_flow_cell.sample_sheet_path.as_posix(),
         working_flow_cell.sample_sheet_path.as_posix(),
@@ -190,8 +190,8 @@ def fixture_demultiplex_ready_flow_cell_bcl2fastq(
 
     This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
     """
-    existing_flow_cell: FlowCell = FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
-    working_flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_working_directory_bcl2fastq)
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_working_directory_bcl2fastq)
     shutil.copy(
         existing_flow_cell.sample_sheet_path.as_posix(),
         working_flow_cell.sample_sheet_path.as_posix(),
@@ -213,10 +213,10 @@ def fixture_demultiplex_ready_flow_cell_dragen(
 
     This is a path to a flow cell directory with all the files necessary to start demultiplexing present.
     """
-    existing_flow_cell: FlowCell = FlowCell(
+    existing_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=dragen_flow_cell_dir, bcl_converter="dragen"
     )
-    working_flow_cell: FlowCell = FlowCell(
+    working_flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
         flow_cell_path=flow_cell_working_directory_dragen, bcl_converter="dragen"
     )
     shutil.copy(

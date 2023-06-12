@@ -25,7 +25,7 @@ from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
@@ -109,7 +109,9 @@ class DemuxPostProcessingAPI:
             return
 
         # 3. Create flow cell.
-        parsed_flow_cell: Optional[FlowCell] = self.parse_flow_cell_data(
+        parsed_flow_cell: Optional[
+            FlowCellDirectoryData
+        ] = self.parse_and_validate_flow_cell_directory_data(
             flow_cell_directory=flow_cell_dir,
             bcl_converter=bcl_converter,
         )
@@ -128,7 +130,7 @@ class DemuxPostProcessingAPI:
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
-    def create_flow_cell(self, parsed_flow_cell: FlowCell) -> Flowcell:
+    def create_flow_cell(self, parsed_flow_cell: FlowCellDirectoryData) -> Flowcell:
         """Create flow cell from the parsed and validated flow cell data."""
         return Flowcell(
             name=parsed_flow_cell.id,
@@ -137,10 +139,12 @@ class DemuxPostProcessingAPI:
             sequenced_at=parsed_flow_cell.run_date,
         )
 
-    def parse_flow_cell_data(self, flow_cell_directory: Path, bcl_converter: str) -> FlowCell:
+    def parse_and_validate_flow_cell_directory_data(
+        self, flow_cell_directory: Path, bcl_converter: str
+    ) -> FlowCellDirectoryData:
         """Parse flow cell data from the flow cell directory."""
         try:
-            flow_cell: FlowCell = FlowCell(
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
                 flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
             )
             return flow_cell
@@ -256,7 +260,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Post-processing flow cell."""
         LOG.info(f"Check demultiplexed flow cell {flow_cell_name}")
         try:
-            flow_cell: FlowCell = FlowCell(
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
                 flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
             )
         except FlowCellError:
@@ -429,7 +433,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             f"Check demuxed flow cell {flow_cell_name}",
         )
         try:
-            flow_cell: FlowCell = FlowCell(
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
                 flow_cell_path=Path(self.demux_api.run_dir, flow_cell_name),
                 bcl_converter=bcl_converter,
             )

@@ -13,7 +13,7 @@ from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.priority import SlurmQos
 from cg.io.controller import WriteFile
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.sbatch import SbatchCommand, SbatchError
 from cg.models.slurm.sbatch import Sbatch, SbatchDragen
 from cgmodels.cg.constants import Pipeline
@@ -50,7 +50,7 @@ class DemultiplexingAPI:
 
     @staticmethod
     def get_sbatch_error(
-        flow_cell: FlowCell,
+        flow_cell: FlowCellDirectoryData,
         email: str,
         demux_dir: Path,
     ) -> str:
@@ -71,7 +71,7 @@ class DemultiplexingAPI:
         unaligned_dir: Path,
         sample_sheet: Path,
         demux_completed: Path,
-        flow_cell: FlowCell,
+        flow_cell: FlowCellDirectoryData,
         environment: Literal["production", "stage"] = "stage",
     ) -> str:
         """Return sbatch command."""
@@ -87,22 +87,22 @@ class DemultiplexingAPI:
         return DEMULTIPLEX_COMMAND[flow_cell.bcl_converter].format(**command_parameters.dict())
 
     @staticmethod
-    def demultiplex_sbatch_path(flow_cell: FlowCell) -> Path:
+    def demultiplex_sbatch_path(flow_cell: FlowCellDirectoryData) -> Path:
         """Get the path to where sbatch script file should be kept."""
         return Path(flow_cell.path, "demux-novaseq.sh")
 
     @staticmethod
-    def get_run_name(flow_cell: FlowCell) -> str:
+    def get_run_name(flow_cell: FlowCellDirectoryData) -> str:
         """Create the run name for the sbatch job."""
         return f"{flow_cell.id}_demultiplex"
 
     @staticmethod
-    def get_stderr_logfile(flow_cell: FlowCell) -> Path:
+    def get_stderr_logfile(flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to the stderr logfile."""
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stderr")
 
     @staticmethod
-    def get_stdout_logfile(flow_cell: FlowCell) -> Path:
+    def get_stdout_logfile(flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to the stdout logfile."""
         return Path(flow_cell.path, f"{DemultiplexingAPI.get_run_name(flow_cell)}.stdout")
 
@@ -115,17 +115,17 @@ class DemultiplexingAPI:
                 demultiplex_flow_cells.append(flow_cell_dir)
         return demultiplex_flow_cells
 
-    def flow_cell_out_dir_path(self, flow_cell: FlowCell) -> Path:
+    def flow_cell_out_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demuliplexed result should be produced."""
         return Path(self.out_dir, flow_cell.path.name)
 
-    def unaligned_dir_path(self, flow_cell: FlowCell) -> Path:
+    def unaligned_dir_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Create the path to where the demuliplexed result should be produced."""
         return Path(
             self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME
         )
 
-    def demultiplexing_completed_path(self, flow_cell: FlowCell) -> Path:
+    def demultiplexing_completed_path(self, flow_cell: FlowCellDirectoryData) -> Path:
         """Return the path to demultiplexing complete file."""
         LOG.info(
             Path(self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.DEMUX_COMPLETE)
@@ -134,7 +134,7 @@ class DemultiplexingAPI:
             self.flow_cell_out_dir_path(flow_cell), DemultiplexingDirsAndFiles.DEMUX_COMPLETE
         )
 
-    def is_demultiplexing_completed(self, flow_cell: FlowCell) -> bool:
+    def is_demultiplexing_completed(self, flow_cell: FlowCellDirectoryData) -> bool:
         """Check the path to where the demuliplexed result should be produced."""
         LOG.info(f"Check if demultiplexing is ready for {flow_cell.path}")
         logfile: Path = self.get_stderr_logfile(flow_cell)
@@ -143,7 +143,7 @@ class DemultiplexingAPI:
             return False
         return self.demultiplexing_completed_path(flow_cell).exists()
 
-    def is_demultiplexing_possible(self, flow_cell: FlowCell) -> bool:
+    def is_demultiplexing_possible(self, flow_cell: FlowCellDirectoryData) -> bool:
         """Check if it is possible to start demultiplexing.
 
         This means that
@@ -191,7 +191,7 @@ class DemultiplexingAPI:
             content=content, file_format=FileFormat.YAML, file_path=file_path
         )
 
-    def add_to_trailblazer(self, tb_api: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCell):
+    def add_to_trailblazer(self, tb_api: TrailblazerAPI, slurm_job_id: int, flow_cell: FlowCellDirectoryData):
         """Add demultiplexing entry to trailblazer."""
         if self.dry_run:
             return
@@ -209,7 +209,7 @@ class DemultiplexingAPI:
             data_analysis=str(Pipeline.DEMULTIPLEX),
         )
 
-    def start_demultiplexing(self, flow_cell: FlowCell):
+    def start_demultiplexing(self, flow_cell: FlowCellDirectoryData):
         """Start demultiplexing for a flow cell."""
         self.create_demultiplexing_started_file(flow_cell.demultiplexing_started_path)
         demux_dir: Path = self.flow_cell_out_dir_path(flow_cell=flow_cell)

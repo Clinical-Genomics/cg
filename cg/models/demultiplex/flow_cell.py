@@ -23,11 +23,11 @@ from cg.models.demultiplex.run_parameters import (
 LOG = logging.getLogger(__name__)
 
 
-class FlowCell:
-    """Class to collect information about flow cell directories and there particular files."""
+class FlowCellDirectoryData:
+    """Class to collect information about flow cell directories and their particular files."""
 
     def __init__(self, flow_cell_path: Path, bcl_converter: Optional[str] = "bcl2fastq"):
-        LOG.debug(f"Instantiating FlowCell with path {flow_cell_path}")
+        LOG.debug(f"Instantiating FlowCellDirectoryData with path {flow_cell_path}")
         self.path: Path = flow_cell_path
         self.bcl_converter: Optional[str] = bcl_converter
         self._run_parameters: Optional[RunParameters] = None

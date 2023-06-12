@@ -9,7 +9,7 @@ from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.meta.demultiplex.delete_demultiplex_api import DeleteDemuxAPI
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ def demultiplex_all(
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCell(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
         except FlowCellError:
             continue
 
@@ -99,7 +99,7 @@ def demultiplex_flow_cell(
     LOG.info(f"setting out dir to {demultiplex_api.out_dir}")
 
     try:
-        flow_cell = FlowCell(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
+        flow_cell = FlowCellDirectoryData(flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
 
