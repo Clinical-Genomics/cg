@@ -10,7 +10,7 @@ from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Dragen,
 )
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture(name="output_dirs_bcl2fastq")
@@ -55,7 +55,7 @@ def fixture_lims_novaseq_dragen_samples(
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
@@ -67,7 +67,7 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_object")
 def fixture_novaseq_dragen_sample_sheet_object(
-    dragen_flow_cell: FlowCell,
+    dragen_flow_cell: FlowCellDirectoryData,
     lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
 ) -> SampleSheetCreator:
     return SampleSheetCreator(

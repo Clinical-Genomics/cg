@@ -9,7 +9,7 @@ from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class SampleSheetCreator:
     def __init__(
         self,
         bcl_converter: str,
-        flow_cell: FlowCell,
+        flow_cell: FlowCellDirectoryData,
         lims_samples: List[FlowCellSample],
         force: bool = False,
     ):

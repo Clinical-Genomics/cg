@@ -8,7 +8,7 @@ from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.exc import FlowCellError
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -21,7 +21,9 @@ def create_report_cmd(context: CGConfig, flow_cell_name: str):
     LOG.info(f"Check demuxed flowcell {flow_cell_name}")
     demux_api: DemultiplexingAPI = context.demultiplex_api
     try:
-        flow_cell: FlowCell = FlowCell(flow_cell_path=Path(demux_api.run_dir, flow_cell_name))
+        flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+            flow_cell_path=Path(demux_api.run_dir, flow_cell_name)
+        )
     except FlowCellError as error:
         raise click.Abort from error
     demux_results: DemuxResults = DemuxResults(

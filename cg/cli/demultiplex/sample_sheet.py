@@ -13,7 +13,7 @@ from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
 from cg.io.controller import WriteFile, WriteStream
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from pydantic import ValidationError
 
 LOG = logging.getLogger(__name__)
@@ -40,7 +40,9 @@ def validate_sample_sheet(
     """
 
     flow_cell_path: Path = Path(context.demultiplex_api.run_dir, flow_cell_name)
-    flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_path, bcl_converter=bcl_converter)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
+    )
     LOG.info(
         f"Validating {sheet} as a {flow_cell.sequencer_type} {bcl_converter} sample sheet",
     )
@@ -75,7 +77,7 @@ def create_sheet(
         LOG.warning(f"Could not find flow cell {flowcell_path}")
         raise click.Abort
     try:
-        flow_cell = FlowCell(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
+        flow_cell = FlowCellDirectoryData(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
     except FlowCellError as error:
         raise click.Abort from error
     lims_samples: List[FlowCellSample] = list(
@@ -127,7 +129,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
         LOG.info(f"Found directory {sub_dir}")
         try:
-            flow_cell = FlowCell(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
+            flow_cell = FlowCellDirectoryData(flow_cell_path=sub_dir, bcl_converter=bcl_converter)
         except FlowCellError:
             continue
         if flow_cell.sample_sheet_exists():

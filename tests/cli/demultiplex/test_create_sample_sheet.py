@@ -12,7 +12,7 @@ from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
 from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
 
@@ -26,7 +26,9 @@ def test_create_sample_sheet_no_run_parameters(
     mocker,
 ):
     # GIVEN a folder with a non-existing sample sheet
-    flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_working_directory_no_run_parameters)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_working_directory_no_run_parameters
+    )
     assert flow_cell.run_parameters_path.exists() is False
 
     # GIVEN flow cell samples
@@ -60,7 +62,7 @@ def test_create_bcl2fastq_sample_sheet(
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCell = FlowCell(flow_cell_working_directory)
+    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_working_directory)
     assert flowcell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present
@@ -96,7 +98,9 @@ def test_create_dragen_sample_sheet(
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
-    flowcell: FlowCell = FlowCell(flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN)
+    flowcell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_working_directory, bcl_converter=BclConverter.DRAGEN
+    )
     assert flowcell.run_parameters_path.exists()
 
     # GIVEN that there is no sample sheet present
