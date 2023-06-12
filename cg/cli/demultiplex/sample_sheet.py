@@ -35,7 +35,9 @@ def validate_sample_sheet(
     bcl_converter: str,
     sheet: click.Path,
 ):
-    """Validate a sample sheet."""
+    """Validate a sample sheet.
+    flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
+    """
     LOG.info(
         f"Validating sample sheet {sheet}",
     )
