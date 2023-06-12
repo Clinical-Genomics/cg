@@ -115,7 +115,6 @@ class SampleSheetCreator:
 
     def construct_sample_sheet(self) -> List[List[str]]:
         """Construct the sample sheet."""
-        LOG.info(f"Constructing sample sheet for {self.flow_cell_id}")
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()

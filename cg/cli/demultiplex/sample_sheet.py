@@ -67,7 +67,7 @@ def create_sheet(
     Search the flow cell in the directory specified in config.
     """
 
-    LOG.info(f"Creating sample sheet for flowcell {flow_cell_name}")
+    LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
     flowcell_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
     if not flowcell_path.exists():
@@ -132,7 +132,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
         if flow_cell.sample_sheet_exists():
             LOG.info("Sample sheet already exists")
             continue
-        LOG.info(f"Creating sample sheet for flowcell {flow_cell.id}")
+        LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(
             flow_cell_samples(
                 lims=context.lims_api,
