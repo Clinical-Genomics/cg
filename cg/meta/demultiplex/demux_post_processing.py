@@ -197,7 +197,7 @@ class DemuxPostProcessingAPI:
             LOG.info(f"Adding file: {file_path.name}")
             self.hk_api.add_and_include_file_to_latest_version(
                 bundle_name=flow_cell_name,
-                file_path=file_path,
+                file=file_path,
                 tags=tags,
             )
 
