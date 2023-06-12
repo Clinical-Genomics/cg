@@ -5,8 +5,8 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
 )
 from cg.cli.demultiplex.sample_sheet import create_sheet
 from cg.constants.demultiplexing import BclConverter
@@ -14,22 +14,22 @@ from cg.constants.process import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
-FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.flow_cell_samples"
+FLOW_CELL_FUNCTION_NAME: str = "cg.cli.demultiplex.sample_sheet.get_flow_cell_samples"
 
 
 def test_create_sample_sheet_no_run_parameters(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory_no_run_parameters: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     caplog,
     mocker,
 ):
     # GIVEN a folder with a non-existing sample sheet
-    flowcell_object: FlowCellDirectoryData = FlowCellDirectoryData(
-        flow_cell_working_directory_no_run_parameters
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_working_directory_no_run_parameters
     )
-    assert flowcell_object.run_parameters_path.exists() is False
+    assert flow_cell.run_parameters_path.exists() is False
 
     # GIVEN flow cell samples
     mocker.patch(
@@ -44,7 +44,7 @@ def test_create_sample_sheet_no_run_parameters(
 
     # WHEN running the create sample sheet command
     result: testing.Result = cli_runner.invoke(
-        create_sheet, [flowcell_object.full_name], obj=sample_sheet_context
+        create_sheet, [flow_cell.full_name], obj=sample_sheet_context
     )
 
     # THEN the process exits with a non-zero exit code
@@ -58,7 +58,7 @@ def test_create_bcl2fastq_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters
@@ -94,7 +94,7 @@ def test_create_dragen_sample_sheet(
     cli_runner: testing.CliRunner,
     flow_cell_working_directory: Path,
     sample_sheet_context: CGConfig,
-    lims_novaseq_dragen_samples: List[FlowCellSampleDragen],
+    lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
     mocker,
 ):
     # GIVEN a flowcell directory with some run parameters

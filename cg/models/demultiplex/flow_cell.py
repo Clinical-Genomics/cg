@@ -2,14 +2,21 @@
 import datetime
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Type, Union
 
 from pydantic import ValidationError
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.models import SampleSheet
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleNovaSeqX,
+    SampleSheet,
+)
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
+from cg.constants.constants import LENGTH_LONG_DATE
 from cg.constants.demultiplexing import (
+    BclConverter,
     DemultiplexingDirsAndFiles,
 )
 from cg.constants.sequencing import Sequencers, sequencer_types
@@ -48,7 +55,7 @@ class FlowCellDirectoryData:
         """
 
         self.validate_flow_cell_name()
-        self.run_date = datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
+        self.run_date = self._parse_date()
         self.machine_name = self.split_flow_cell_name[1]
         self.machine_number = int(self.split_flow_cell_name[2])
         base_name: str = self.split_flow_cell_name[-1]
@@ -93,6 +100,21 @@ class FlowCellDirectoryData:
         return self._run_parameters
 
     @property
+    def sample_type(
+        self,
+    ) -> Union[
+        Type[FlowCellSampleNovaSeq6000Bcl2Fastq],
+        Type[FlowCellSampleNovaSeq6000Dragen],
+        Type[FlowCellSampleNovaSeqX],
+    ]:
+        """Return the sample class used in the flow cell."""
+        if self.sequencer_type == Sequencers.NOVASEQX:
+            return FlowCellSampleNovaSeqX
+        if self.bcl_converter == BclConverter.DRAGEN:
+            return FlowCellSampleNovaSeq6000Dragen
+        return FlowCellSampleNovaSeq6000Bcl2Fastq
+
+    @property
     def sequencer_type(
         self,
     ) -> Literal[Sequencers.HISEQX, Sequencers.HISEQGA, Sequencers.NOVASEQ, Sequencers.NOVASEQX]:
@@ -134,6 +156,12 @@ class FlowCellDirectoryData:
         """Return path to Hiseq X flow cell directory."""
         return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
+    def _parse_date(self):
+        """Return the parsed date in the correct format."""
+        if len(self.split_flow_cell_name[0]) == LENGTH_LONG_DATE:
+            return datetime.datetime.strptime(self.split_flow_cell_name[0], "%Y%m%d")
+        return datetime.datetime.strptime(self.split_flow_cell_name[0], "%y%m%d")
+
     def validate_flow_cell_name(self) -> None:
         """
         Validate on the following criteria:
@@ -159,7 +187,7 @@ class FlowCellDirectoryData:
         try:
             get_sample_sheet_from_file(
                 infile=self.sample_sheet_path,
-                bcl_converter=self.bcl_converter,
+                flow_cell_sample_type=self.sample_type,
             )
         except (SampleSheetError, ValidationError) as error:
             LOG.warning("Invalid sample sheet")
@@ -171,7 +199,7 @@ class FlowCellDirectoryData:
         """Return sample sheet object."""
         return get_sample_sheet_from_file(
             infile=self.sample_sheet_path,
-            bcl_converter=self.bcl_converter,
+            flow_cell_sample_type=self.sample_type,
         )
 
     def is_sequencing_done(self) -> bool:
@@ -189,7 +217,7 @@ class FlowCellDirectoryData:
         return self.copy_complete_path.exists()
 
     def is_hiseq_x_copy_completed(self) -> bool:
-        """Check if copy of Hiiseq X flow cell is done."""
+        """Check if copy of Hiseq X flow cell is done."""
         LOG.info("Check if copy of data from Hiseq X sequence instrument is ready")
         return self.hiseq_x_copy_complete_path.exists()
 

@@ -863,13 +863,25 @@ def fixture_novaseq_x_run_parameters(
 @pytest.fixture(name="bcl2fastq_flow_cell", scope="session")
 def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(flow_cell_path=bcl2fastq_flow_cell_dir)
+    return FlowCellDirectoryData(
+        flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
+    )
 
 
 @pytest.fixture(name="dragen_flow_cell", scope="session")
 def fixture_dragen_flow_cell(dragen_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a dragen flow cell object with flow cell that is demultiplexed."""
-    return FlowCellDirectoryData(flow_cell_path=dragen_flow_cell_dir)
+    return FlowCellDirectoryData(
+        flow_cell_path=dragen_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+    )
+
+
+@pytest.fixture(name="novaseq_x_flow_cell", scope="session")
+def fixture_novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
+    return FlowCellDirectoryData(
+        flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+    )
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell_id", scope="session")

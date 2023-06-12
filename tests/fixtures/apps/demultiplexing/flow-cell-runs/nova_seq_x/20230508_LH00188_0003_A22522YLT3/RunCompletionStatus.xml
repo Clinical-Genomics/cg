@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunCompletionStatus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <RunStartTime>2023-05-08T15:09:43.424062+02:00</RunStartTime>
+  <RunEndTime>2023-05-09T13:47:38.2108475+02:00</RunEndTime>
+  <TotalRunTime>22:37:54.7867855</TotalRunTime>
+  <CompletedReads>
+    <Read ReadName="Read1" Cycles="151" />
+    <Read ReadName="Index1" Cycles="10" />
+    <Read ReadName="Index2" Cycles="10" />
+    <Read ReadName="Read2" Cycles="151" />
+  </CompletedReads>
+  <RunStatus>RunCompleted</RunStatus>
+</RunCompletionStatus>
