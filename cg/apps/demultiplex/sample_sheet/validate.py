@@ -1,14 +1,14 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Type, Union
 from pydantic import parse_obj_as
 from typing_extensions import Literal
 
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSample,
     SampleSheet,
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
 )
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
@@ -33,7 +33,9 @@ def validate_samples_are_unique(samples: List[FlowCellSample]) -> None:
         sample_ids.add(sample_id)
 
 
-def get_samples_by_lane(samples: List[FlowCellSample]) -> Dict[int, List[FlowCellSample]]:
+def get_samples_by_lane(
+    samples: List[FlowCellSample],
+) -> Dict[int, List[FlowCellSample]]:
     """Group and return samples by lane."""
     LOG.info("Order samples by lane")
     sample_by_lane: Dict[int, List[FlowCellSample]] = {}
@@ -81,17 +83,10 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
 
 def validate_sample_sheet(
     sample_sheet_content: List[List[str]],
-    bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
+    sample_type: Type[FlowCellSample],
 ) -> SampleSheet:
     """Return a validated sample sheet object."""
-    novaseq_sample: Dict[str, Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]] = {
-        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
-        BclConverter.DRAGEN.value: FlowCellSampleDragen,
-    }
     raw_samples: List[Dict[str, str]] = get_raw_samples(sample_sheet_content=sample_sheet_content)
-    sample_type: Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen] = novaseq_sample[
-        bcl_converter
-    ]
     samples = parse_obj_as(List[sample_type], raw_samples)
     validate_samples_unique_per_lane(samples=samples)
     return SampleSheet(samples=samples)
@@ -99,7 +94,7 @@ def validate_sample_sheet(
 
 def get_sample_sheet_from_file(
     infile: Path,
-    bcl_converter: Literal[BclConverter.BCL2FASTQ, BclConverter.DRAGEN],
+    flow_cell_sample_type: Type[FlowCellSample],
 ) -> SampleSheet:
     """Parse and validate a sample sheet from file."""
     sample_sheet_content: List[List[str]] = ReadFile.get_content_from_file(
@@ -107,5 +102,5 @@ def get_sample_sheet_from_file(
     )
     return validate_sample_sheet(
         sample_sheet_content=sample_sheet_content,
-        bcl_converter=bcl_converter,
+        sample_type=flow_cell_sample_type,
     )

@@ -70,36 +70,41 @@ class SampleSheetNovaSeq6000Sections:
         LANE: str = "Lane"
         SAMPLE_INTERNAL_ID_BCL2FASTQ: str = "SampleID"
         SAMPLE_INTERNAL_ID_BCLCONVERT: str = "Sample_ID"
+        SAMPLE_REFERENCE: str = "SampleRef"
+        INDEX_1: str = "index"
+        INDEX_2: str = "index2"
         SAMPLE_NAME: str = "SampleName"
+        CONTROL: str = "Control"
+        RECIPE: str = "Recipe"
+        OPERATOR: str = "Operator"
         SAMPLE_PROJECT_BCL2FASTQ: str = "Project"
         SAMPLE_PROJECT_BCLCONVERT: str = "Sample_Project"
-        CONTROL: str = "Control"
 
         COLUMN_NAMES: Dict[str, List[str]] = {
-            "bcl2fastq": [
+            BclConverter.BCL2FASTQ.value: [
                 FLOW_CELL_ID,
                 LANE,
                 SAMPLE_INTERNAL_ID_BCL2FASTQ,
-                "SampleRef",
-                "index",
-                "index2",
+                SAMPLE_REFERENCE,
+                INDEX_1,
+                INDEX_2,
                 SAMPLE_NAME,
                 CONTROL,
-                "Recipe",
-                "Operator",
+                RECIPE,
+                OPERATOR,
                 SAMPLE_PROJECT_BCL2FASTQ,
             ],
-            "dragen": [
+            BclConverter.DRAGEN.value: [
                 FLOW_CELL_ID,
                 LANE,
                 SAMPLE_INTERNAL_ID_BCLCONVERT,
-                "SampleRef",
-                "index",
-                "index2",
+                SAMPLE_REFERENCE,
+                INDEX_1,
+                INDEX_2,
                 SAMPLE_NAME,
                 CONTROL,
-                "Recipe",
-                "Operator",
+                RECIPE,
+                OPERATOR,
                 SAMPLE_PROJECT_BCLCONVERT,
             ],
         }
@@ -129,15 +134,24 @@ class SampleSheetNovaSeqXSections:
 
     class Data(Enum):
         HEADER: str = "[BCLConvert_Data]"
+        LANE: str = "Lane"
+        SAMPLE_INTERNAL_ID: str = "Sample_ID"
+        INDEX_1: str = "Index"
+        INDEX_2: str = "Index2"
+        ADAPTER_READ_1: str = "AdapterRead1"
+        ADAPTER_READ_2: str = "AdapterRead2"
+        BARCODE_MISMATCHES_1: str = "BarcodeMismatchesIndex1"
+        BARCODE_MISMATCHES_2: str = "BarcodeMismatchesIndex2"
+
         COLUMN_NAMES: List[str] = [
-            "Lane",
-            "Sample_ID",
-            "Index",
-            "Index2",
-            "AdapterRead1",
-            "AdapterRead2",
-            "BarcodeMismatchesIndex1",
-            "BarcodeMismatchesIndex2",
+            LANE,
+            SAMPLE_INTERNAL_ID,
+            INDEX_1,
+            INDEX_2,
+            ADAPTER_READ_1,
+            ADAPTER_READ_2,
+            BARCODE_MISMATCHES_1,
+            BARCODE_MISMATCHES_2,
         ]
 
 

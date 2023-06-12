@@ -3,13 +3,13 @@ from pathlib import Path
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingNovaseqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 def test_rename_demux_result(
     demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     # GIVEN that this is the location of the demultiplex api
     demultiplex_context.demultiplex_api_.out_dir = demultiplexed_flow_cell_working_directory

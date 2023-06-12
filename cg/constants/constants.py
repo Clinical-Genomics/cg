@@ -7,6 +7,8 @@ from cg.utils.date import get_date
 
 VALID_DATA_IN_PRODUCTION = get_date("2017-09-27")
 
+LENGTH_LONG_DATE: int = len("YYYYMMDD")
+
 MAX_ITEMS_TO_RETRIEVE = 50
 
 SCALE_TO_MILLION_READ_PAIRS = 2_000_000

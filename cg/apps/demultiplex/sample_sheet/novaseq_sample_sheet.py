@@ -1,7 +1,7 @@
 """ Create a sample sheet for Novaseq flow cells."""
 
 import logging
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Type
 
 from cg.apps.demultiplex.sample_sheet import index
 from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
@@ -9,7 +9,7 @@ from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParameters
 
 LOG = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class SampleSheetCreator:
     def __init__(
         self,
         bcl_converter: str,
-        flow_cell: FlowCell,
+        flow_cell: FlowCellDirectoryData,
         lims_samples: List[FlowCellSample],
         force: bool = False,
     ):
@@ -29,6 +29,7 @@ class SampleSheetCreator:
         self.flow_cell_id: str = flow_cell.id
         self.lims_samples: List[FlowCellSample] = lims_samples
         self.run_parameters: RunParameters = flow_cell.run_parameters
+        self.sample_type: Type[FlowCellSample] = flow_cell.sample_type
         self.force = force
 
     @property
@@ -54,7 +55,7 @@ class SampleSheetCreator:
                     dummy_index=index_obj.sequence,
                     lane=lane,
                     name=index_obj.name,
-                    bcl_converter=self.bcl_converter,
+                    sample_type=self.sample_type,
                 )
                 LOG.debug(f"Adding dummy sample {dummy_flow_cell_sample} to lane {lane}")
                 self.lims_samples.append(dummy_flow_cell_sample)
@@ -74,13 +75,13 @@ class SampleSheetCreator:
     @staticmethod
     def convert_sample_to_header_dict(
         sample: FlowCellSample,
-        sample_sheet_headers: List[str],
+        data_column_names: List[str],
     ) -> List[str]:
         """Convert a lims sample object to a dict with keys that corresponds to the sample sheet
         headers."""
-        LOG.debug(f"Use sample sheet header {sample_sheet_headers}")
+        LOG.debug(f"Use sample sheet header {data_column_names}")
         sample_dict = sample.dict(by_alias=True)
-        return [str(sample_dict[header]) for header in sample_sheet_headers]
+        return [str(sample_dict[column]) for column in data_column_names]
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
         """Build all sections of the sample sheet that is not the Data section."""
@@ -107,16 +108,13 @@ class SampleSheetCreator:
             sample_sheet_content.append(
                 self.convert_sample_to_header_dict(
                     sample=sample,
-                    sample_sheet_headers=SampleSheetNovaSeq6000Sections.Data.COLUMN_NAMES.value[
-                        self.bcl_converter
-                    ],
+                    data_column_names=self.get_data_section_header_and_columns()[1],
                 )
             )
         return sample_sheet_content
 
     def construct_sample_sheet(self) -> List[List[str]]:
         """Construct the sample sheet."""
-        LOG.info(f"Constructing sample sheet for {self.flow_cell_id}")
         # Create dummy samples for the indexes that is missing
         if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()
@@ -134,7 +132,7 @@ class SampleSheetCreator:
         LOG.info("Validating sample sheet")
         validate_sample_sheet(
             sample_sheet_content=sample_sheet_content,
-            bcl_converter=self.bcl_converter,
+            sample_type=self.sample_type,
         )
         LOG.info("Sample sheet passed validation")
         return sample_sheet_content
