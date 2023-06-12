@@ -38,11 +38,12 @@ def validate_sample_sheet(
     """Validate a sample sheet.
     flow-cell-name is the flow cell run directory name, e.g. '201203_A00689_0200_AHVKJCDRXX'
     """
-    LOG.info(
-        f"Validating sample sheet {sheet}",
-    )
+
     flow_cell_path: Path = Path(context.demultiplex_api.run_dir, flow_cell_name)
     flow_cell: FlowCell = FlowCell(flow_cell_path=flow_cell_path, bcl_converter=bcl_converter)
+    LOG.info(
+        f"Validating {sheet} as a {flow_cell.sequencer_type} {bcl_converter} sample sheet",
+    )
     sheet: Path = Path(str(sheet))
     try:
         get_sample_sheet_from_file(infile=sheet, flow_cell_sample_type=flow_cell.sample_type)
