@@ -135,17 +135,16 @@ class DemuxPostProcessingAPI:
         """Add flow cell data to housekeeper."""
         LOG.info(f"Add flow cell data to housekeeper for {flow_cell.name}")
 
-        self.add_bundle_if_not_exists(flow_cell_name=flow_cell.name)
+        self.add_bundle_and_version_if_not_exists(flow_cell_name=flow_cell.name)
 
         tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.name]
         self.ensure_tags_exist(tag_names=tags)
-        
-        self.add_sample_sheet(
-            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name
-        )
+
+        self.add_sample_sheet(flow_cell_directory, flow_cell.name)
         self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name)
 
     def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
+        """Add fastq files for flow cell to housekeeper."""
         fastq_file_paths: List[Path] = self.get_fastq_file_paths(
             flow_cell_directory=flow_cell_directory
         )
@@ -156,6 +155,7 @@ class DemuxPostProcessingAPI:
             )
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str):
+        """Add sample sheet to housekeeper."""
         self.add_file_if_not_exists(
             flow_cell_directory / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
             flow_cell_name,
@@ -166,16 +166,19 @@ class DemuxPostProcessingAPI:
         """Get fastq file paths for flow cell."""
         return flow_cell_directory.glob("**/*.fastq.gz")
 
-    def add_bundle_if_not_exists(self, flow_cell_name: str):
+    def add_bundle_and_version_if_not_exists(self, flow_cell_name: str):
+        """Add bundle if it does not exist."""
         if not self.hk_api.bundle(name=flow_cell_name):
             self.hk_api.create_new_bundle_and_version(name=flow_cell_name)
 
     def ensure_tags_exist(self, tag_names: List[str]) -> None:
+        """Ensure that tags exist in housekeeper."""
         for tag_name in tag_names:
             if self.hk_api.get_tag(tag=tag_name) is None:
                 self.hk_api.add_tag(tag_name=tag_name)
 
     def add_file_if_not_exists(self, file_path: Path, flow_cell_name: str, tags: List[str]) -> None:
+        """Add file to housekeeper if it does not exist."""
         if not file_path.exists():
             LOG.warning(f"File does not exist: {file_path}")
             return
