@@ -7,7 +7,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.sample_sheet.create import create_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.demultiplex.sample_sheet.validate import get_sample_sheet_from_file
-from cg.apps.lims.sample_sheet import flow_cell_samples
+from cg.apps.lims.sample_sheet import get_flow_cell_samples
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import OPTION_BCL_CONVERTER
 from cg.exc import FlowCellError
@@ -79,7 +79,7 @@ def create_sheet(
     except FlowCellError as error:
         raise click.Abort from error
     lims_samples: List[FlowCellSample] = list(
-        flow_cell_samples(
+        get_flow_cell_samples(
             lims=context.lims_api,
             flow_cell_id=flow_cell.id,
             flow_cell_sample_type=flow_cell.sample_type,
@@ -135,7 +135,7 @@ def create_all_sheets(context: CGConfig, bcl_converter: str, dry_run: bool):
             continue
         LOG.info(f"Creating sample sheet for flow cell {flow_cell.id}")
         lims_samples: List[FlowCellSample] = list(
-            flow_cell_samples(
+            get_flow_cell_samples(
                 lims=context.lims_api,
                 flow_cell_id=flow_cell.id,
                 flow_cell_sample_type=flow_cell.sample_type,

@@ -71,7 +71,7 @@ def get_index(lims: Lims, label: str) -> str:
     return sequence
 
 
-def flow_cell_samples(
+def get_flow_cell_samples(
     lims: Lims,
     flow_cell_id: str,
     flow_cell_sample_type: Type[FlowCellSample],
