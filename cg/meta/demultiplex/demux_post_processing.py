@@ -136,9 +136,10 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Add flow cell data to housekeeper for {flow_cell.name}")
 
         self.add_bundle_if_not_exists(flow_cell_name=flow_cell.name)
-        self.ensure_tags_exist(
-            [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.name]
-        )
+
+        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.name]
+        self.ensure_tags_exist(tag_names=tags)
+        
         self.add_sample_sheet(
             flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name
         )
