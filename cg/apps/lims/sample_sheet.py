@@ -1,18 +1,12 @@
 """Functions to get sample sheet information from Lims."""
 import logging
 import re
-from typing import Iterable, List, Optional, Type, Union
+from typing import Iterable, List, Optional, Type
 
 from genologics.entities import Artifact, Container, Sample
 from genologics.lims import Lims
 
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-    FlowCellSampleNovaSeqX,
-)
-from cg.constants.demultiplexing import BclConverter
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 
 LOG = logging.getLogger(__name__)
 

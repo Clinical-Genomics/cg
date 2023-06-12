@@ -32,7 +32,7 @@ def test_validate_samples_are_unique(
     # THEN no error is raised
 
 
-def test_validate_samples_are_unique_not_unique(
+def test_validate_samples_are_unique_when_not_unique(
     novaseq_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq, caplog
 ):
     """Test that validating two identical samples fails."""
