@@ -1,10 +1,11 @@
 """Functions that deals with dummy samples"""
 from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSampleBcl2Fastq,
-    FlowCellSampleDragen,
+    FlowCellSample,
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
 )
 from cg.constants.demultiplexing import BclConverter
-from typing import Union
+from typing import Type
 
 
 def dummy_sample_name(sample_name: str) -> str:
@@ -13,14 +14,10 @@ def dummy_sample_name(sample_name: str) -> str:
 
 
 def dummy_sample(
-    flow_cell_id: str, dummy_index: str, lane: int, name: str, bcl_converter: str
-) -> Union[FlowCellSampleBcl2Fastq, FlowCellSampleDragen]:
+    flow_cell_id: str, dummy_index: str, lane: int, name: str, sample_type: Type[FlowCellSample]
+) -> FlowCellSample:
     """Constructs and returns a dummy sample in Novaseq sample sheet format."""
-    flowcell_sample = {
-        BclConverter.BCL2FASTQ.value: FlowCellSampleBcl2Fastq,
-        BclConverter.DRAGEN.value: FlowCellSampleDragen,
-    }
-    return flowcell_sample[bcl_converter](
+    return sample_type(
         flowcell_id=flow_cell_id,
         lane=lane,
         sample_id=dummy_sample_name(sample_name=name),

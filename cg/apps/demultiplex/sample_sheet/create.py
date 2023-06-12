@@ -37,4 +37,7 @@ def create_sample_sheet(
         lims_samples=lims_samples,
         force=force,
     )
+    LOG.info(
+        f"Constructing a {bcl_converter} sample sheet for the {flow_cell_sequencer} flow cell {flow_cell.id}"
+    )
     return sample_sheet_creator.construct_sample_sheet()
