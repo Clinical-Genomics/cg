@@ -40,7 +40,9 @@ def validate_sample_sheet(
     """
 
     flow_cell_path: Path = Path(context.demultiplex_api.run_dir, flow_cell_name)
-    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(flow_cell_path=flow_cell_path, bcl_converter=bcl_converter)
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
+    )
     LOG.info(
         f"Validating {sheet} as a {flow_cell.sequencer_type} {bcl_converter} sample sheet",
     )
