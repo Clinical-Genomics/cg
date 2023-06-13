@@ -19,7 +19,7 @@ from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
-from housekeeper.store.models import Bundle, File, Version
+from housekeeper.store.models import Version
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
@@ -175,10 +175,9 @@ class DemuxPostProcessingAPI:
             [SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
         )
 
-    def is_valid_sample_fastq_filename(self, filename: str) -> bool:
+    def is_valid_sample_fastq_filename(self, fastq_file_name: str) -> bool:
         """Validate the file name and discard any undetermined fastq files."""
-        parts = filename.split("_")
-        return len(parts) > 1 and "Undetermined" not in filename
+        return "Undetermined" not in fastq_file_name
 
     def get_sample_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
         """Get fastq file paths for flow cell."""
