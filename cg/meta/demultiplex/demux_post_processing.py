@@ -190,7 +190,13 @@ class DemuxPostProcessingAPI:
     def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> Optional[str]:
         """Extract sample id from fastq file name."""
         sample_directory: str = fastq_file_path.parent.name
-        sample_internal_id: str = sample_directory.split("_")[1]
+        directory_parts: str = sample_directory.split("_")
+
+        if len(directory_parts) > 1:
+            sample_internal_id = directory_parts[1]
+        else:
+            sample_internal_id = directory_parts[0]
+
         return sample_internal_id
 
     def add_bundle_and_version_if_not_exists(self, flow_cell_name: str) -> None:
