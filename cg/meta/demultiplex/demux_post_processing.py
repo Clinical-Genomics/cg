@@ -14,9 +14,7 @@ from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from housekeeper.store.models import Bundle, Version
 from cg.constants.cgstats import STATS_HEADER
-from cg.constants.constants import FlowCellStatus
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
