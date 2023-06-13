@@ -13,7 +13,7 @@ def test_get_dummy_sample_name():
     raw_sample_name = "D10 - D710-D504 (TCCGCGAA-GGCTCTGA)"
 
     # WHEN converting it to a dummy sample name
-    sample_name: str = dummy_sample_name(raw_sample_name)
+    sample_name: str = dummy_sample_name(sample_name=raw_sample_name)
 
     # THEN that the correct name was created
     assert sample_name == "D10---D710-D504--TCCGCGAA-GGCTCTGA-"
