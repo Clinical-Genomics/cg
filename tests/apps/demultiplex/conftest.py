@@ -65,8 +65,8 @@ def fixture_lims_novaseq_x_samples(
     return [FlowCellSampleNovaSeqX(**sample) for sample in lims_novaseq_samples_raw]
 
 
-@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
-def fixture_novaseq_bcl2fastq_sample_sheet_object(
+@pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_creator")
+def fixture_novaseq_bcl2fastq_sample_sheet_creator(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
 ) -> SampleSheetCreatorV1:
@@ -77,8 +77,8 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
     )
 
 
-@pytest.fixture(name="novaseq_dragen_sample_sheet_object")
-def fixture_novaseq_dragen_sample_sheet_object(
+@pytest.fixture(name="novaseq_dragen_sample_sheet_creator")
+def fixture_novaseq_dragen_sample_sheet_creator(
     dragen_flow_cell: FlowCellDirectoryData,
     lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
 ) -> SampleSheetCreatorV1:
@@ -89,8 +89,8 @@ def fixture_novaseq_dragen_sample_sheet_object(
     )
 
 
-@pytest.fixture(name="novaseq_x_sample_sheet_object")
-def fixture_novaseq_x_sample_sheet_object(
+@pytest.fixture(name="novaseq_x_sample_sheet_creator")
+def fixture_novaseq_x_sample_sheet_creator(
     novaseq_x_flow_cell: FlowCellDirectoryData,
     lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX],
 ) -> SampleSheetCreatorV2:

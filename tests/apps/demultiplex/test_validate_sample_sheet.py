@@ -5,6 +5,7 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.models import (
     SampleSheet,
+    FlowCellSample,
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
 )
@@ -14,7 +15,6 @@ from cg.apps.demultiplex.sample_sheet.validate import (
     validate_sample_sheet,
     validate_samples_are_unique,
 )
-from cg.constants.demultiplexing import BclConverter
 from cg.exc import SampleSheetError
 
 
@@ -57,7 +57,7 @@ def test_get_samples_by_lane(
     # GIVEN two samples on two different lanes
 
     # WHEN getting the samples per lane
-    samples_per_lane: Dict[int, List[FlowCellSampleNovaSeq6000Bcl2Fastq]] = get_samples_by_lane(
+    samples_per_lane: Dict[int, List[FlowCellSample]] = get_samples_by_lane(
         samples=[novaseq_sample_1, novaseq_sample_2]
     )
 
