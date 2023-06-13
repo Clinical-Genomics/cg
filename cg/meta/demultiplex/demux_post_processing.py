@@ -149,18 +149,21 @@ class DemuxPostProcessingAPI:
 
     def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add fastq files for flow cell to housekeeper."""
-        fastq_file_paths: List[Path] = self.get_fastq_file_paths(
+        fastq_file_paths: List[Path] = self.get_sample_fastq_file_paths(
             flow_cell_directory=flow_cell_directory
         )
 
         for fastq_file_path in fastq_file_paths:
-            sample_id: str = self.extract_sample_id_from_fastq_file_name(
+            sample_id: str = self.get_sample_id_from_sample_fastq_file_name(
                 fastq_file_name=fastq_file_path.name
             )
 
-            self.add_file_if_not_exists(
-                fastq_file_path, flow_cell_name, [SequencingFileTag.FASTQ, sample_id]
-            )
+            if sample_id:
+                self.add_file_if_not_exists(
+                    file_path=fastq_file_path,
+                    flow_cell_name=flow_cell_name,
+                    tag_names=[SequencingFileTag.FASTQ, sample_id],
+                )
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample sheet to housekeeper."""
@@ -170,11 +173,21 @@ class DemuxPostProcessingAPI:
             [SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
         )
 
-    def get_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
-        """Get fastq file paths for flow cell."""
-        return flow_cell_directory.glob("**/*.fastq.gz")
+    def is_valid_sample_fastq_filename(self, filename: str) -> bool:
+        """Validate the file name and discard any undetermined fastq files."""
+        parts = filename.split("_")
+        return len(parts) > 1 and "Undetermined" not in filename
 
-    def extract_sample_id_from_fastq_file_name(self, fastq_file_name: str) -> str:
+    def get_sample_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
+        """Get fastq file paths for flow cell."""
+        valid_file_paths = [
+            file_path 
+            for file_path in flow_cell_directory.glob("**/*.fastq.gz") 
+            if self.is_valid_sample_fastq_filename(file_path.name)
+        ]
+        return valid_file_paths
+
+    def get_sample_id_from_sample_fastq_file_name(self, fastq_file_name: str) -> str:
         """Extract sample id from fastq file name."""
         return fastq_file_name.split("_")[1]
 
@@ -189,7 +202,9 @@ class DemuxPostProcessingAPI:
             if self.hk_api.get_tag(name=tag_name) is None:
                 self.hk_api.add_tag(name=tag_name)
 
-    def add_file_if_not_exists(self, file_path: Path, flow_cell_name: str, tags: List[str]) -> None:
+    def add_file_if_not_exists(
+        self, file_path: Path, flow_cell_name: str, tag_names: List[str]
+    ) -> None:
         """Add file to housekeeper if it has not already been added."""
         if not file_path.exists():
             LOG.warning(f"File does not exist: {file_path}")
@@ -201,7 +216,7 @@ class DemuxPostProcessingAPI:
             self.hk_api.add_and_include_file_to_latest_version(
                 bundle_name=flow_cell_name,
                 file=file_path,
-                tags=tags,
+                tags=tag_names,
             )
 
     def file_exists_in_latest_version_for_bundle(
