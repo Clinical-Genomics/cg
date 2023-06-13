@@ -165,7 +165,7 @@ The command will update the _total_ read counts of each sample and check against
 Much like the group of analysis subcommands you can perform an upload of analysis results (stored in Housekeeper) all at once by running:
 
 ```bash
-cg upload --family raredragon
+cg upload --case raredragon
 ```
 
 All analyses that are marked as completed will be uploaded this way automatically:

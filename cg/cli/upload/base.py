@@ -5,7 +5,6 @@ import traceback
 from typing import Optional
 
 import click
-
 from cg.cli.upload.clinical_delivery import auto_fastq, upload_clinical_delivery
 from cg.cli.upload.coverage import upload_coverage
 from cg.cli.upload.delivery_report import upload_delivery_report_to_scout
@@ -21,12 +20,12 @@ from cg.cli.upload.observations import (
 )
 from cg.cli.upload.scout import (
     create_scout_load_config,
-    upload_to_scout,
     upload_case_to_scout,
     upload_multiqc_to_scout,
     upload_rna_fusion_report_to_scout,
     upload_rna_junctions_to_scout,
     upload_rna_to_scout,
+    upload_to_scout,
 )
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.cli.upload.validate import validate
@@ -39,7 +38,6 @@ from cg.meta.upload.rnafusion.rnafusion import RnafusionUploadAPI
 from cg.meta.upload.upload_api import UploadAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
 from cg.store.models import Family
 from cg.utils.click.EnumChoice import EnumChoice
 
@@ -47,7 +45,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group(invoke_without_command=True)
-@click.option("-f", "--family", "family_id", help="Upload to all apps")
+@click.option("-c", "--case", "case_id", help="Upload to all apps")
 @click.option(
     "-r",
     "--restart",
@@ -55,7 +53,7 @@ LOG = logging.getLogger(__name__)
     help="Force upload of an analysis that has already been uploaded or marked as started",
 )
 @click.pass_context
-def upload(context: click.Context, family_id: Optional[str], restart: bool):
+def upload(context: click.Context, case_id: Optional[str], restart: bool):
     """Upload results from analyses"""
 
     config_object: CGConfig = context.obj
@@ -65,10 +63,10 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
 
     if context.invoked_subcommand is not None:
         context.obj.meta_apis["upload_api"] = upload_api
-    elif family_id:  # Provided case ID without a subcommand: upload everything
+    elif case_id:  # Provided case ID without a subcommand: upload everything
         try:
-            upload_api.analysis_api.status_db.verify_case_exists(case_internal_id=family_id)
-            case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=family_id)
+            upload_api.analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
+            case: Family = upload_api.status_db.get_case_by_internal_id(internal_id=case_id)
             upload_api.verify_analysis_upload(case_obj=case, restart=restart)
         except AnalysisAlreadyUploadedError:
             # Analysis being uploaded or it has been already uploaded
@@ -85,7 +83,7 @@ def upload(context: click.Context, family_id: Optional[str], restart: bool):
 
         context.obj.meta_apis["upload_api"] = upload_api
         upload_api.upload(ctx=context, case=case, restart=restart)
-        click.echo(click.style(f"{family_id} analysis has been successfully uploaded", fg="green"))
+        click.echo(click.style(f"{case_id} analysis has been successfully uploaded", fg="green"))
     else:
         suggest_cases_to_upload(status_db=upload_api.status_db)
         raise click.Abort()

@@ -1,16 +1,15 @@
 """Upload API"""
 
-import click
 import logging
 from datetime import datetime, timedelta
 
-from cg.exc import AnalysisUploadError, AnalysisAlreadyUploadedError
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.models.cg_config import CGConfig
+import click
+from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Family
-
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class UploadAPI(MetaAPI):
             status_db=config.status_db,
         )
 
-    def upload(self, ctx: click.Context, case_obj: Family, restart: bool) -> None:
+    def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
         """Uploads pipeline specific analysis data and files"""
 
         raise NotImplementedError
