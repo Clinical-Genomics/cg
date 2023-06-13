@@ -1,7 +1,5 @@
 """Post-processing Demultiiplex API."""
-import datetime
 import logging
-import os
 import shutil
 import re
 from contextlib import redirect_stdout
@@ -156,8 +154,12 @@ class DemuxPostProcessingAPI:
         )
 
         for fastq_file_path in fastq_file_paths:
+            sample_id: str = self.extract_sample_id_from_fastq_file_name(
+                fastq_file_name=fastq_file_path.name
+            )
+
             self.add_file_if_not_exists(
-                fastq_file_path, flow_cell_name, [SequencingFileTag.FASTQ, flow_cell_name]
+                fastq_file_path, flow_cell_name, [SequencingFileTag.FASTQ, sample_id]
             )
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str):
@@ -171,6 +173,10 @@ class DemuxPostProcessingAPI:
     def get_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
         """Get fastq file paths for flow cell."""
         return flow_cell_directory.glob("**/*.fastq.gz")
+
+    def extract_sample_id_from_fastq_file_name(self, fastq_file_name: str) -> str:
+        """Extract sample id from fastq file name."""
+        return fastq_file_name.split("_")[1]
 
     def add_bundle_and_version_if_not_exists(self, flow_cell_name: str):
         """Add bundle if it does not exist."""
