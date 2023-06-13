@@ -4,12 +4,16 @@ from typing import List
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
+from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import (
+    SampleSheetCreatorV1,
+    SampleSheetCreatorV2,
+)
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeq6000Dragen,
+    FlowCellSampleNovaSeqX,
 )
-from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
+from cg.constants.demultiplexing import BclConverter, SampleSheetNovaSeq6000Sections
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
@@ -17,19 +21,19 @@ from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 def fixture_output_dirs_bcl2fastq(demultiplexed_runs: Path) -> Path:
     """Return the output path a dir with flow cells that have finished demultiplexing using
     bcl2fastq."""
-    return Path(demultiplexed_runs, "bcl2fastq")
+    return Path(demultiplexed_runs, BclConverter.BCL2FASTQ)
 
 
 @pytest.fixture(name="demux_run_dir_bcl2fastq")
 def fixture_demux_run_dir_bcl2fastq(flow_cell_runs_dir: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(flow_cell_runs_dir, "bcl2fastq")
+    return Path(flow_cell_runs_dir, BclConverter.BCL2FASTQ)
 
 
 @pytest.fixture(name="demux_run_dir_dragen")
 def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
     """Return the path to a dir with flowcells ready for demultiplexing"""
-    return Path(flow_cell_runs_dir, "dragen")
+    return Path(flow_cell_runs_dir, BclConverter.DRAGEN)
 
 
 @pytest.fixture(name="index_obj")
@@ -41,7 +45,7 @@ def fixture_index_obj() -> Index:
 def fixture_lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleNovaSeq6000Bcl2Fastq]:
-    """Return a list of parsed flow cell samples"""
+    """Return a list of parsed Bcl2fastq flow cell samples"""
     return [FlowCellSampleNovaSeq6000Bcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
@@ -49,19 +53,27 @@ def fixture_lims_novaseq_bcl2fastq_samples(
 def fixture_lims_novaseq_dragen_samples(
     lims_novaseq_samples_raw: List[dict],
 ) -> List[FlowCellSampleNovaSeq6000Dragen]:
-    """Return a list of parsed flowcell samples"""
+    """Return a list of parsed Dragen flowcell samples"""
     return [FlowCellSampleNovaSeq6000Dragen(**sample) for sample in lims_novaseq_samples_raw]
+
+
+@pytest.fixture(name="lims_novaseq_x_samples")
+def fixture_lims_novaseq_x_samples(
+    lims_novaseq_samples_raw: List[dict],
+) -> List[FlowCellSampleNovaSeqX]:
+    """Return a list of parsed NovaSeqX flowcell samples"""
+    return [FlowCellSampleNovaSeqX(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
-) -> SampleSheetCreator:
-    return SampleSheetCreator(
+) -> SampleSheetCreatorV1:
+    return SampleSheetCreatorV1(
         flow_cell=bcl2fastq_flow_cell,
         lims_samples=lims_novaseq_bcl2fastq_samples,
-        bcl_converter="bcl2fastq",
+        bcl_converter=BclConverter.BCL2FASTQ,
     )
 
 
@@ -69,11 +81,23 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
 def fixture_novaseq_dragen_sample_sheet_object(
     dragen_flow_cell: FlowCellDirectoryData,
     lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
-) -> SampleSheetCreator:
-    return SampleSheetCreator(
+) -> SampleSheetCreatorV1:
+    return SampleSheetCreatorV1(
         flow_cell=dragen_flow_cell,
         lims_samples=lims_novaseq_dragen_samples,
-        bcl_converter="dragen",
+        bcl_converter=BclConverter.DRAGEN,
+    )
+
+
+@pytest.fixture(name="novaseq_x_sample_sheet_object")
+def fixture_novaseq_x_sample_sheet_object(
+    novaseq_x_flow_cell: FlowCellDirectoryData,
+    lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX],
+) -> SampleSheetCreatorV2:
+    return SampleSheetCreatorV2(
+        flow_cell=novaseq_x_flow_cell,
+        lims_samples=lims_novaseq_x_samples,
+        bcl_converter=BclConverter.DRAGEN,
     )
 
 
@@ -123,16 +147,16 @@ def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
         [SampleSheetNovaSeq6000Sections.Data.HEADER],
         [
             SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
-            "Lane",
-            "SampleID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Project",
+            SampleSheetNovaSeq6000Sections.Data.LANE.value,
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value,
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_REFERENCE.value,
+            SampleSheetNovaSeq6000Sections.Data.INDEX_1.value,
+            SampleSheetNovaSeq6000Sections.Data.INDEX_2.value,
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value,
+            SampleSheetNovaSeq6000Sections.Data.CONTROL.value,
+            SampleSheetNovaSeq6000Sections.Data.RECIPE.value,
+            SampleSheetNovaSeq6000Sections.Data.OPERATOR.value,
+            SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCL2FASTQ.value,
         ],
     ]
 
@@ -151,24 +175,12 @@ def fixture_sample_sheet_no_sample_header(
 
 @pytest.fixture(name="valid_sample_sheet_bcl2fastq")
 def fixture_valid_sample_sheet_bcl2fastq(
-    sample_sheet_line_sample_1: List[str], sample_sheet_line_sample_2: List[str]
+    sample_sheet_bcl2fastq_data_header: List[List[str]],
+    sample_sheet_line_sample_1: List[str],
+    sample_sheet_line_sample_2: List[str],
 ) -> List[List[str]]:
     """Return the content of a valid Bcl2fastq sample sheet."""
-    return [
-        [SampleSheetNovaSeq6000Sections.Data.HEADER],
-        [
-            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
-            "Lane",
-            "SampleID",
-            "SampleRef",
-            "index",
-            "index2",
-            "SampleName",
-            "Control",
-            "Recipe",
-            "Operator",
-            "Project",
-        ],
+    return sample_sheet_bcl2fastq_data_header + [
         sample_sheet_line_sample_1,
         sample_sheet_line_sample_2,
     ]

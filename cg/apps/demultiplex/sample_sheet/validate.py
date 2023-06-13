@@ -60,7 +60,7 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
             continue
         if line[0] in [
             SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
-            SampleSheetNovaSeqXSections.Data.LANE,
+            SampleSheetNovaSeqXSections.Data.LANE.value,
         ]:
             header = line
             continue

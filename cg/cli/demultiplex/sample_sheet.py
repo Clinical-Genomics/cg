@@ -72,12 +72,14 @@ def create_sheet(
 
     LOG.info(f"Creating sample sheet for flow cell {flow_cell_name}")
     demultiplex_api: DemultiplexingAPI = context.demultiplex_api
-    flowcell_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
-    if not flowcell_path.exists():
-        LOG.warning(f"Could not find flow cell {flowcell_path}")
+    flow_cell_path: Path = Path(demultiplex_api.run_dir, flow_cell_name)
+    if not flow_cell_path.exists():
+        LOG.warning(f"Could not find flow cell {flow_cell_path}")
         raise click.Abort
     try:
-        flow_cell = FlowCellDirectoryData(flow_cell_path=flowcell_path, bcl_converter=bcl_converter)
+        flow_cell = FlowCellDirectoryData(
+            flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
+        )
     except FlowCellError as error:
         raise click.Abort from error
     lims_samples: List[FlowCellSample] = list(
