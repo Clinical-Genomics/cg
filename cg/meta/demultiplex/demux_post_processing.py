@@ -162,7 +162,7 @@ class DemuxPostProcessingAPI:
                 fastq_file_path, flow_cell_name, [SequencingFileTag.FASTQ, sample_id]
             )
 
-    def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str):
+    def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample sheet to housekeeper."""
         self.add_file_if_not_exists(
             flow_cell_directory / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
@@ -178,7 +178,7 @@ class DemuxPostProcessingAPI:
         """Extract sample id from fastq file name."""
         return fastq_file_name.split("_")[1]
 
-    def add_bundle_and_version_if_not_exists(self, flow_cell_name: str):
+    def add_bundle_and_version_if_not_exists(self, flow_cell_name: str) -> None:
         """Add bundle if it does not exist."""
         if not self.hk_api.bundle(name=flow_cell_name):
             self.hk_api.create_new_bundle_and_version(name=flow_cell_name)
@@ -210,7 +210,7 @@ class DemuxPostProcessingAPI:
         """Check if file exists in latest version for bundle."""
         latest_version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
         return any(
-            [file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files]
+            file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
         )
 
     def create_flow_cell(self, parsed_flow_cell: FlowCellDirectoryData) -> Flowcell:
