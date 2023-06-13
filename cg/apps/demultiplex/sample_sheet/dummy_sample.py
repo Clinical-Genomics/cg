@@ -1,10 +1,6 @@
 """Functions that deals with dummy samples"""
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-)
-from cg.constants.demultiplexing import BclConverter
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+
 from typing import Type
 
 

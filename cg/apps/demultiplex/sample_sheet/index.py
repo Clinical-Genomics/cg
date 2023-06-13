@@ -1,4 +1,4 @@
-"""Functions that deals with modifications of the indexes."""
+"""Functions that deal with modifications of the indexes."""
 import logging
 from typing import Dict, List, Set
 
@@ -35,11 +35,14 @@ def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
 
 
 class Index(BaseModel):
+    """Class that represents an index."""
+
     name: str
     sequence: str
 
 
 def get_valid_indexes(dual_indexes_only: bool = True) -> List[Index]:
+    """Return a list of valid indexes from the valid indexes file."""
     LOG.info(f"Fetch valid indexes from {VALID_INDEXES_PATH}")
     indexes: List[Index] = []
     indexes_csv: List[List[str]] = ReadFile.get_content_from_file(
@@ -118,7 +121,7 @@ def adapt_indexes(
     """Adapts the indexes: pads all indexes so that all indexes have a length equal to the
     number  of index reads, and takes the reverse complement of index 2 in case of the new
     novaseq software control version (1.7) in combination with the new reagent kit
-    (version 1.5)
+    (version 1.5).
     """
     LOG.info("Fix so that all indexes are on the correct format")
     reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
