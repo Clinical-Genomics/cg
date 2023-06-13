@@ -135,6 +135,7 @@ class FileExtensions(StrEnum):
     BED: str = ".bed"
     CRAM: str = ".cram"
     CSV: str = ".csv"
+    FASTQ: str = ".fastq"
     GPG: str = ".gpg"
     GZIP: str = ".gz"
     JSON: str = ".json"

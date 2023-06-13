@@ -15,9 +15,11 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
+from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import FlowCellError
+from housekeeper.store.models import Bundle, File, Version
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
@@ -134,19 +136,21 @@ class DemuxPostProcessingAPI:
     def add_flow_cell_data_to_housekeeper(
         self, flow_cell: Flowcell, flow_cell_directory: Path
     ) -> None:
-        """Add flow cell data to housekeeper."""
-        LOG.info(f"Add flow cell data to housekeeper for {flow_cell.name}")
+        """Add flow cell data to Housekeeper."""
+        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.name}")
 
         self.add_bundle_and_version_if_not_exists(flow_cell_name=flow_cell.name)
 
         tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.name]
         self.ensure_tags_exist(tag_names=tags)
 
-        self.add_sample_sheet(flow_cell_directory, flow_cell.name)
+        self.add_sample_sheet(
+            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name
+        )
         self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name)
 
     def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
-        """Add fastq files from flow cell to housekeeper."""
+        """Add fastq files from flow cell to Housekeeper."""
         fastq_file_paths: List[Path] = self.get_sample_fastq_file_paths(
             flow_cell_directory=flow_cell_directory
         )
@@ -164,9 +168,9 @@ class DemuxPostProcessingAPI:
                 )
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
-        """Add sample sheet to housekeeper."""
+        """Add sample sheet to Housekeeper."""
         self.add_file_if_not_exists(
-            flow_cell_directory / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+            Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME),
             flow_cell_name,
             [SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
         )
@@ -180,12 +184,14 @@ class DemuxPostProcessingAPI:
         """Get fastq file paths for flow cell."""
         valid_sample_fastq_file_paths = [
             file_path
-            for file_path in flow_cell_directory.glob("**/*.fastq.gz")
+            for file_path in flow_cell_directory.glob(
+                f"**/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+            )
             if self.is_valid_sample_fastq_filename(file_path.name)
         ]
         return valid_sample_fastq_file_paths
 
-    def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> Optional[str]:
+    def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> str:
         """Extract sample id from fastq file name."""
         sample_directory: str = fastq_file_path.parent.name
         directory_parts: str = sample_directory.split("_")
@@ -203,7 +209,7 @@ class DemuxPostProcessingAPI:
             self.hk_api.create_new_bundle_and_version(name=flow_cell_name)
 
     def ensure_tags_exist(self, tag_names: List[str]) -> None:
-        """Ensure that tags exist in housekeeper."""
+        """Ensure that tags exist in Housekeeper."""
         for tag_name in tag_names:
             if self.hk_api.get_tag(name=tag_name) is None:
                 self.hk_api.add_tag(name=tag_name)
@@ -211,7 +217,7 @@ class DemuxPostProcessingAPI:
     def add_file_if_not_exists(
         self, file_path: Path, flow_cell_name: str, tag_names: List[str]
     ) -> None:
-        """Add file to housekeeper if it has not already been added."""
+        """Add file to Housekeeper if it has not already been added."""
         if not file_path.exists():
             LOG.warning(f"File does not exist: {file_path}")
             return
@@ -229,7 +235,7 @@ class DemuxPostProcessingAPI:
         self, file_path: Path, flow_cell_name: str
     ) -> bool:
         """Check if file exists in latest version for bundle."""
-        latest_version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
+        latest_version: Version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
         return any(
             file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
         )
