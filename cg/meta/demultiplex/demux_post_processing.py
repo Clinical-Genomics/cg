@@ -190,17 +190,14 @@ class DemuxPostProcessingAPI:
                 self.hk_api.add_tag(name=tag_name)
 
     def add_file_if_not_exists(self, file_path: Path, flow_cell_name: str, tags: List[str]) -> None:
-        """Add file to housekeeper if it does not exist."""
+        """Add file to housekeeper if it has not already been added."""
         if not file_path.exists():
             LOG.warning(f"File does not exist: {file_path}")
             return
 
-        if self.file_exists_in_latest_version_for_bundle(
+        if not self.file_exists_in_latest_version_for_bundle(
             file_path=file_path, flow_cell_name=flow_cell_name
         ):
-            LOG.info(f"Found file: {file_path.name}, skipping...")
-        else:
-            LOG.info(f"Adding file: {file_path.name}")
             self.hk_api.add_and_include_file_to_latest_version(
                 bundle_name=flow_cell_name,
                 file=file_path,
