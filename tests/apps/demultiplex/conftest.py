@@ -4,7 +4,7 @@ from typing import List
 import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import (
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorV1,
     SampleSheetCreatorV2,
 )

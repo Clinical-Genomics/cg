@@ -2,7 +2,7 @@ import logging
 from typing import List
 from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import (
+from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import (
     SampleSheetCreatorV1,
     SampleSheetCreatorV2,
 )
