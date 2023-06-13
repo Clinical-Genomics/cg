@@ -7,7 +7,7 @@ import click
 
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID, resolve_compression
 from cg.cli.workflow.taxprofiler.options import OPTION_INSTRUMENT_PLATFORM
-from cg.constants.constants import MetaApis, DRY_RUN
+from cg.constants.constants import MetaApis, DRY_RUN, CaseActions
 from cg.constants.sequencing import SequencingPlatform
 from cg.exc import CgError
 from cg.meta.workflow.analysis import AnalysisAPI
@@ -132,3 +132,5 @@ def run(
     except Exception as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error
+    if not dry_run:
+        analysis_api.add_pending_trailblazer_analysis(case_id=case_id)
