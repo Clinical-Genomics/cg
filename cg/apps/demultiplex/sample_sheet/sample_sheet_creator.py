@@ -45,7 +45,7 @@ class SampleSheetCreator:
         raise NotImplementedError("Impossible to add dummy samples in parent class")
 
     def remove_unwanted_samples(self) -> None:
-        """Filter out samples with indexes of unwanted length and single indexes."""
+        """Filter out samples with single indexes."""
         LOG.info("Removing all samples without dual indexes")
         samples_to_keep = []
         sample: FlowCellSample
@@ -61,8 +61,7 @@ class SampleSheetCreator:
         sample: FlowCellSample,
         data_column_names: List[str],
     ) -> List[str]:
-        """Convert a lims sample object to a dict with keys that corresponds to the sample sheet
-        headers."""
+        """Convert a lims sample object to a list that corresponds to the sample sheet headers."""
         LOG.debug(f"Use sample sheet header {data_column_names}")
         sample_dict = sample.dict(by_alias=True)
         return [str(sample_dict[column]) for column in data_column_names]
