@@ -5,9 +5,12 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.novaseq_sample_sheet import SampleSheetCreator
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleBcl2Fastq, FlowCellSampleDragen
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeq6000Dragen,
+)
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
 @pytest.fixture(name="output_dirs_bcl2fastq")
@@ -37,23 +40,23 @@ def fixture_index_obj() -> Index:
 @pytest.fixture(name="lims_novaseq_bcl2fastq_samples")
 def fixture_lims_novaseq_bcl2fastq_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleBcl2Fastq]:
+) -> List[FlowCellSampleNovaSeq6000Bcl2Fastq]:
     """Return a list of parsed flow cell samples"""
-    return [FlowCellSampleBcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleNovaSeq6000Bcl2Fastq(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="lims_novaseq_dragen_samples")
 def fixture_lims_novaseq_dragen_samples(
     lims_novaseq_samples_raw: List[dict],
-) -> List[FlowCellSampleDragen]:
+) -> List[FlowCellSampleNovaSeq6000Dragen]:
     """Return a list of parsed flowcell samples"""
-    return [FlowCellSampleDragen(**sample) for sample in lims_novaseq_samples_raw]
+    return [FlowCellSampleNovaSeq6000Dragen(**sample) for sample in lims_novaseq_samples_raw]
 
 
 @pytest.fixture(name="novaseq_bcl2fastq_sample_sheet_object")
 def fixture_novaseq_bcl2fastq_sample_sheet_object(
-    bcl2fastq_flow_cell: FlowCell,
-    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleBcl2Fastq],
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
+    lims_novaseq_bcl2fastq_samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq],
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
         flow_cell=bcl2fastq_flow_cell,
@@ -64,8 +67,8 @@ def fixture_novaseq_bcl2fastq_sample_sheet_object(
 
 @pytest.fixture(name="novaseq_dragen_sample_sheet_object")
 def fixture_novaseq_dragen_sample_sheet_object(
-    dragen_flow_cell: FlowCell,
-    lims_novaseq_dragen_samples: List[FlowCellSampleDragen],
+    dragen_flow_cell: FlowCellDirectoryData,
+    lims_novaseq_dragen_samples: List[FlowCellSampleNovaSeq6000Dragen],
 ) -> SampleSheetCreator:
     return SampleSheetCreator(
         flow_cell=dragen_flow_cell,
@@ -117,9 +120,9 @@ def fixture_sample_sheet_line_sample_2() -> List[str]:
 def fixture_sample_sheet_bcl2fastq_data_header() -> List[List[str]]:
     """Return the content of a Bcl2fastq sample sheet data header without samples."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
             "Lane",
             "SampleID",
             "SampleRef",
@@ -140,7 +143,7 @@ def fixture_sample_sheet_no_sample_header(
 ) -> List[List[str]]:
     """Return the content of a sample sheet with samples but without a sample header."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         sample_sheet_line_sample_1,
         sample_sheet_line_sample_2,
     ]
@@ -152,9 +155,9 @@ def fixture_valid_sample_sheet_bcl2fastq(
 ) -> List[List[str]]:
     """Return the content of a valid Bcl2fastq sample sheet."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
             "Lane",
             "SampleID",
             "SampleRef",
@@ -209,9 +212,9 @@ def fixture_valid_sample_sheet_dragen(
 ) -> List[List[str]]:
     """Return the content of a valid Dragen sample sheet."""
     return [
-        [SampleSheetHeaderColumnNames.DATA],
+        [SampleSheetNovaSeq6000Sections.Data.HEADER],
         [
-            SampleSheetHeaderColumnNames.FLOW_CELL_ID,
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
             "Lane",
             "Sample_ID",
             "SampleRef",
@@ -273,9 +276,9 @@ def fixture_valid_sample_sheet_dragen_path() -> Path:
 
 
 @pytest.fixture(name="novaseq_sample_1")
-def fixture_novaseq_sample_1() -> FlowCellSampleBcl2Fastq:
+def fixture_novaseq_sample_1() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     """Return a NovaSeq sample."""
-    return FlowCellSampleBcl2Fastq(
+    return FlowCellSampleNovaSeq6000Bcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=1,
         SampleID="ACC7628A68",
@@ -291,9 +294,9 @@ def fixture_novaseq_sample_1() -> FlowCellSampleBcl2Fastq:
 
 
 @pytest.fixture(name="novaseq_sample_2")
-def fixture_novaseq_sample_2() -> FlowCellSampleBcl2Fastq:
+def fixture_novaseq_sample_2() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     """Return a NovaSeq sample."""
-    return FlowCellSampleBcl2Fastq(
+    return FlowCellSampleNovaSeq6000Bcl2Fastq(
         FCID="HWHMWDMXX",
         Lane=2,
         SampleID="ACC7628A1",

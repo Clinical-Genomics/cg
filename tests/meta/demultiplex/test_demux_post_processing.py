@@ -10,7 +10,7 @@ from cg.meta.demultiplex.demux_post_processing import (
 from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 
 
@@ -35,7 +35,7 @@ def test_set_dry_run(
 def test_add_to_cgstats_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -59,7 +59,7 @@ def test_add_to_cgstats_dry_run(
 def test_add_to_cgstats(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -80,7 +80,7 @@ def test_add_to_cgstats(
 def test_cgstats_select_project_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -113,7 +113,7 @@ def test_cgstats_select_project_dry_run(
 def test_cgstats_select_project(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     cgstats_select_project_log_file: Path,
 ):
@@ -149,7 +149,7 @@ def test_cgstats_select_project(
 def test_cgstats_lanestats_dry_run(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -173,7 +173,7 @@ def test_cgstats_lanestats_dry_run(
 def test_cgstats_lanestats(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.INFO)
 
@@ -194,7 +194,7 @@ def test_cgstats_lanestats(
 def test_finish_flow_cell_copy_not_completed(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -228,7 +228,7 @@ def test_finish_flow_cell_delivery_started(
     caplog,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
 ):
     caplog.set_level(logging.DEBUG)
 
@@ -262,7 +262,7 @@ def test_finish_flow_cell_delivery_started(
 def test_finish_flow_cell_delivery_not_hiseq_x(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_tile_dir: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -292,7 +292,7 @@ def test_finish_flow_cell_delivery_not_hiseq_x(
 def test_finish_flow_cell_ready(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     demultiplexing_delivery_file: Path,
     hiseq_x_tile_dir: Path,
@@ -338,7 +338,7 @@ def test_post_process_flow_cell_dry_run(
     caplog,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -382,7 +382,7 @@ def test_post_process_flow_cell(
     cgstats_select_project_log_file: Path,
     demultiplexing_delivery_file: Path,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     flow_cell_project_id: int,
     flowcell_store: Store,
     hiseq_x_tile_dir: Path,
@@ -424,7 +424,7 @@ def test_post_process_flow_cell(
 def test_finish_flow_cell(
     caplog,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)
@@ -457,7 +457,7 @@ def test_finish_all_flowcells(
     caplog,
     demultiplexed_flow_cell_working_directory: Path,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCell,
+    bcl2fastq_flow_cell: FlowCellDirectoryData,
     hiseq_x_copy_complete_file: Path,
 ):
     caplog.set_level(logging.DEBUG)

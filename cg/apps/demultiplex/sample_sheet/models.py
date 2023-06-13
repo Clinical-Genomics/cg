@@ -1,9 +1,9 @@
 import logging
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Extra, Field
 from typing import List
 
 from cg.constants.constants import GenomeVersion
-from cg.constants.demultiplexing import SampleSheetHeaderColumnNames
+from cg.constants.demultiplexing import SampleSheetNovaSeq6000Sections, SampleSheetNovaSeqXSections
 
 LOG = logging.getLogger(__name__)
 
@@ -11,30 +11,61 @@ LOG = logging.getLogger(__name__)
 class FlowCellSample(BaseModel):
     """This model is used when parsing/validating existing sample sheets."""
 
-    flowcell_id: str = Field(..., alias=SampleSheetHeaderColumnNames.FLOW_CELL_ID.value)
-    lane: int = Field(..., alias=SampleSheetHeaderColumnNames.LANE.value)
+    lane: int
     sample_id: str
-    sample_ref: str = Field(GenomeVersion.hg19.value, alias="SampleRef")
-    index: str = Field(..., alias="index")
+    index: str
     index2: str = ""
-    sample_name: str = Field(..., alias="SampleName")
-    control: str = Field("N", alias="Control")
-    recipe: str = Field("R1", alias="Recipe")
-    operator: str = Field("script", alias="Operator")
-    project: str = Field(..., alias="Project")
 
     class Config:
         allow_population_by_field_name = True
+        extra = Extra.ignore
 
 
-class FlowCellSampleBcl2Fastq(FlowCellSample):
-    sample_id: str = Field(..., alias="SampleID")
-    project: str = Field(..., alias="Project")
+class FlowCellSampleNovaSeq6000(FlowCellSample):
+    flowcell_id: str = Field("", alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
+    lane: int = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.LANE.value)
+    sample_ref: str = Field(
+        GenomeVersion.hg19.value, alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_REFERENCE.value
+    )
+    index: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.INDEX_1.value)
+    index2: str = Field("", alias=SampleSheetNovaSeq6000Sections.Data.INDEX_2.value)
+    sample_name: str = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_NAME.value)
+    control: str = Field("N", alias=SampleSheetNovaSeq6000Sections.Data.CONTROL.value)
+    recipe: str = Field("R1", alias=SampleSheetNovaSeq6000Sections.Data.RECIPE.value)
+    operator: str = Field("script", alias=SampleSheetNovaSeq6000Sections.Data.OPERATOR.value)
 
 
-class FlowCellSampleDragen(FlowCellSample):
-    sample_id: str = Field(..., alias="Sample_ID")
-    project: str = Field(..., alias="Sample_Project")
+class FlowCellSampleNovaSeqX(FlowCellSample):
+    lane: int = Field(..., alias=SampleSheetNovaSeqXSections.Data.LANE.value)
+    sample_id: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.SAMPLE_INTERNAL_ID.value)
+    index: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.INDEX_1.value)
+    index2: str = Field("", alias=SampleSheetNovaSeqXSections.Data.INDEX_2.value)
+    adapter_read_1: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_1.value)
+    adapter_read_2: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_2.value)
+    barcode_mismatches_1: int = Field(
+        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_1.value
+    )
+    barcode_mismatches_2: int = Field(
+        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_2.value
+    )
+
+
+class FlowCellSampleNovaSeq6000Bcl2Fastq(FlowCellSampleNovaSeq6000):
+    sample_id: str = Field(
+        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
+    )
+    project: str = Field(
+        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCL2FASTQ.value
+    )
+
+
+class FlowCellSampleNovaSeq6000Dragen(FlowCellSampleNovaSeq6000):
+    sample_id: str = Field(
+        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value
+    )
+    project: str = Field(
+        ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_PROJECT_BCLCONVERT.value
+    )
 
 
 class SampleSheet(BaseModel):
@@ -42,8 +73,8 @@ class SampleSheet(BaseModel):
 
 
 class SampleSheetBcl2Fastq(SampleSheet):
-    samples: List[FlowCellSampleBcl2Fastq]
+    samples: List[FlowCellSampleNovaSeq6000Bcl2Fastq]
 
 
 class SampleSheetDragen(SampleSheet):
-    samples: List[FlowCellSampleDragen]
+    samples: List[FlowCellSampleNovaSeq6000Dragen]

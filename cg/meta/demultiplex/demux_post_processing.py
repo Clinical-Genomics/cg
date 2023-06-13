@@ -1,4 +1,5 @@
 """Post-processing Demultiiplex API."""
+import datetime
 import logging
 import os
 import shutil
@@ -16,6 +17,7 @@ from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.cgstats import STATS_HEADER
+from cg.constants.constants import FlowCellStatus
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
@@ -23,7 +25,7 @@ from cg.meta.transfer import TransferFlowCell
 from cg.models.cg_config import CGConfig
 from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
 from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
@@ -82,8 +84,73 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Added sample lane sequencing metrics to status database for: {flow_cell_name}")
 
     def finish_flow_cell_temp(self, flow_cell_name: str) -> None:
-        """Finish flow cell."""
+        """
+        1. Validate that the flow cell directory exists.
+        2. Validate that the demultiplexing is complete.
+        3. Create flow cell.
+        4. Store flow cell in status db.
+        5. Store flow cell data in housekeeper.
+        6. Create sequencing metrics.
+        """
+
+        LOG.info(f"Finish flow cell {flow_cell_name}")
+
+        flow_cell_dir: Path = Path(self.demux_api.out_dir, flow_cell_name)
+        bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
+
+        # 1. Validate that the flow cell directory exists.
+        if not flow_cell_dir.exists():
+            LOG.warning(f"Flow cell directory does not exist: {flow_cell_dir}")
+            return
+
+        # 2. Validate that the demultiplexing is complete.
+        if not Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists():
+            LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_name}")
+            return
+
+        # 3. Create flow cell.
+        parsed_flow_cell: Optional[
+            FlowCellDirectoryData
+        ] = self.parse_and_validate_flow_cell_directory_data(
+            flow_cell_directory=flow_cell_dir,
+            bcl_converter=bcl_converter,
+        )
+
+        if not parsed_flow_cell:
+            return
+
+        flow_cell: Flowcell = self.create_flow_cell(parsed_flow_cell=parsed_flow_cell)
+
+        # 4. Store flow cell in status db.
+        self.status_db.session.add(flow_cell)
+        self.status_db.session.commit()
+
+        # 5. Store flow cell data in housekeeper.
+
+        # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
+
+    def create_flow_cell(self, parsed_flow_cell: FlowCellDirectoryData) -> Flowcell:
+        """Create flow cell from the parsed and validated flow cell data."""
+        return Flowcell(
+            name=parsed_flow_cell.id,
+            sequencer_type=parsed_flow_cell.sequencer_type,
+            sequencer_name=parsed_flow_cell.machine_name,
+            sequenced_at=parsed_flow_cell.run_date,
+        )
+
+    def parse_and_validate_flow_cell_directory_data(
+        self, flow_cell_directory: Path, bcl_converter: str
+    ) -> FlowCellDirectoryData:
+        """Parse flow cell data from the flow cell directory."""
+        try:
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+                flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
+            )
+            return flow_cell
+
+        except FlowCellError:
+            LOG.error(f"Unable to parse flow cell data from {flow_cell_directory}")
 
     def get_bcl_converter(self, flow_cell_name: str) -> str:
         """Return type of BCL converter."""
@@ -193,7 +260,7 @@ class DemuxPostProcessingHiseqXAPI(DemuxPostProcessingAPI):
         """Post-processing flow cell."""
         LOG.info(f"Check demultiplexed flow cell {flow_cell_name}")
         try:
-            flow_cell: FlowCell = FlowCell(
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
                 flow_cell_path=flow_cell_path, bcl_converter=bcl_converter
             )
         except FlowCellError:
@@ -366,7 +433,7 @@ class DemuxPostProcessingNovaseqAPI(DemuxPostProcessingAPI):
             f"Check demuxed flow cell {flow_cell_name}",
         )
         try:
-            flow_cell: FlowCell = FlowCell(
+            flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
                 flow_cell_path=Path(self.demux_api.run_dir, flow_cell_name),
                 bcl_converter=bcl_converter,
             )

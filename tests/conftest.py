@@ -30,7 +30,7 @@ from cg.meta.transfer.external_data import ExternalDataAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
 from cg.store.models import Bed, BedVersion, Customer, Organism, Family, Sample
@@ -861,39 +861,51 @@ def fixture_novaseq_x_run_parameters(
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell", scope="session")
-def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCell:
+def fixture_flow_cell(bcl2fastq_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a flow cell object with flow cell that is demultiplexed."""
-    return FlowCell(flow_cell_path=bcl2fastq_flow_cell_dir)
+    return FlowCellDirectoryData(
+        flow_cell_path=bcl2fastq_flow_cell_dir, bcl_converter=BclConverter.BCL2FASTQ
+    )
 
 
 @pytest.fixture(name="dragen_flow_cell", scope="session")
-def fixture_dragen_flow_cell(dragen_flow_cell_dir: Path) -> FlowCell:
+def fixture_dragen_flow_cell(dragen_flow_cell_dir: Path) -> FlowCellDirectoryData:
     """Create a dragen flow cell object with flow cell that is demultiplexed."""
-    return FlowCell(flow_cell_path=dragen_flow_cell_dir)
+    return FlowCellDirectoryData(
+        flow_cell_path=dragen_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+    )
+
+
+@pytest.fixture(name="novaseq_x_flow_cell", scope="session")
+def fixture_novaseq_x_flow_cell(novaseq_x_flow_cell_dir: Path) -> FlowCellDirectoryData:
+    """Create a NovaSeqX flow cell object with flow cell that is demultiplexed."""
+    return FlowCellDirectoryData(
+        flow_cell_path=novaseq_x_flow_cell_dir, bcl_converter=BclConverter.DRAGEN
+    )
 
 
 @pytest.fixture(name="bcl2fastq_flow_cell_id", scope="session")
-def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCell) -> str:
+def fixture_bcl2fast2_flow_cell_id(bcl2fastq_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from bcl2fastq flow cell object."""
     return bcl2fastq_flow_cell.id
 
 
 @pytest.fixture(name="dragen_flow_cell_id", scope="session")
-def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCell) -> str:
+def fixture_dragen_flow_cell_id(dragen_flow_cell: FlowCellDirectoryData) -> str:
     """Return flow cell id from dragen flow cell object."""
     return dragen_flow_cell.id
 
 
 @pytest.fixture(name="demultiplexing_delivery_file")
-def fixture_demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCell) -> Path:
+def fixture_demultiplexing_delivery_file(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
     """Return demultiplexing delivery started file."""
     return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.DELIVERY)
 
 
 @pytest.fixture(name="hiseq_x_tile_dir")
-def fixture_hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCell) -> Path:
+def fixture_hiseq_x_tile_dir(bcl2fastq_flow_cell: FlowCellDirectoryData) -> Path:
     """Return Hiseq X tile dir."""
-    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.HiseqX_TILE_DIR)
+    return Path(bcl2fastq_flow_cell.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
 
 @pytest.fixture(name="lims_novaseq_samples_file")
@@ -919,7 +931,7 @@ def fixture_demultiplexed_flow_cell(
 
 @pytest.fixture(name="bcl2fastq_demux_results")
 def fixture_bcl2fastq_demux_results(
-    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCell
+    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCellDirectoryData
 ) -> DemuxResults:
     return DemuxResults(
         demux_dir=demultiplexed_flow_cell,

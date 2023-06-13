@@ -17,7 +17,7 @@ from cg.exc import FlowCellError
 from cg.meta.demultiplex.demux_post_processing import DemuxPostProcessingNovaseqAPI
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ def add_flow_cell_cmd(context: CGConfig, flow_cell_name: str, bcl_converter: str
         LOG.warning(f"Could not find demultiplex result path {demux_results_path}")
         raise click.Abort
     try:
-        flow_cell: FlowCell = FlowCell(
+        flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
             flow_cell_path=flow_cell_run_path, bcl_converter=bcl_converter
         )
     except FlowCellError as error:
