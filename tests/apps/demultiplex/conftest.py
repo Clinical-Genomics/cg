@@ -321,3 +321,29 @@ def fixture_novaseq_sample_2() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
         Operator="script",
         Project="814206",
     )
+
+
+@pytest.fixture(name="novaseq_sample_no_dual_index")
+def fixture_novaseq_sample_no_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+    """Return a NovaSeq sample without dual indexes."""
+    return FlowCellSampleNovaSeq6000Bcl2Fastq(
+        FCID="HWHMWDMXX",
+        Lane=2,
+        SampleID="ACC7628A1",
+        index="ATTCCACACT",
+        SampleName="814206",
+        Project="814206",
+    )
+
+
+@pytest.fixture(name="novaseq_sample_dual_index")
+def fixture_novaseq_sample_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+    """Return a NovaSeq sample without dual indexes."""
+    return FlowCellSampleNovaSeq6000Bcl2Fastq(
+        FCID="HWHMWDMXX",
+        Lane=2,
+        SampleID="ACC7628A1",
+        index="ATTCCACACT-TGGTCTTGTT",
+        SampleName="814206",
+        Project="814206",
+    )
