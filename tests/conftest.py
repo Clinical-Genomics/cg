@@ -1787,6 +1787,19 @@ def fixture_context_config(
         "taxprofiler": {
             "binary_path": Path("path", "to", "bin", "nextflow").as_posix(),
             "root": str(taxprofiler_dir),
+            "conda_binary": Path("path", "to", "bin", "conda").as_posix(),
+            "conda_env": "S_TAXPROFILER",
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pipeline_path": Path("pipeline", "path").as_posix(),
+            "databases": Path("path","to","databases").as_posix(),
+            "profile": "myprofile",
+            "hostremoval_reference": Path("path", "to", "hostremoval_reference").as_posix(),
+            "revision": "1.0.1",
+            "slurm": {
+                "account": "development",
+                "mail_user": "test.email@scilifelab.se",
+            },
+
         },
         "scout": {
             "binary_path": "echo",
