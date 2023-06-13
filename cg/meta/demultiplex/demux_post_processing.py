@@ -148,14 +148,14 @@ class DemuxPostProcessingAPI:
         self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name)
 
     def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
-        """Add fastq files for flow cell to housekeeper."""
+        """Add fastq files from flow cell to housekeeper."""
         fastq_file_paths: List[Path] = self.get_sample_fastq_file_paths(
             flow_cell_directory=flow_cell_directory
         )
 
         for fastq_file_path in fastq_file_paths:
-            sample_id: str = self.get_sample_id_from_sample_fastq_file_name(
-                fastq_file_name=fastq_file_path.name
+            sample_id: str = self.get_sample_id_from_sample_fastq_file_path(
+                fastq_file_path=fastq_file_path
             )
 
             if sample_id:
@@ -180,16 +180,18 @@ class DemuxPostProcessingAPI:
 
     def get_sample_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
         """Get fastq file paths for flow cell."""
-        valid_file_paths = [
+        valid_sample_fastq_file_paths = [
             file_path 
             for file_path in flow_cell_directory.glob("**/*.fastq.gz") 
             if self.is_valid_sample_fastq_filename(file_path.name)
         ]
-        return valid_file_paths
+        return valid_sample_fastq_file_paths
 
-    def get_sample_id_from_sample_fastq_file_name(self, fastq_file_name: str) -> str:
+    def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> Optional[str]:
         """Extract sample id from fastq file name."""
-        return fastq_file_name.split("_")[1]
+        sample_directory: str = fastq_file_path.parent.name
+        sample_internal_id: str = sample_directory.split("Sample_")[-1]
+        return sample_internal_id
 
     def add_bundle_and_version_if_not_exists(self, flow_cell_name: str) -> None:
         """Add bundle if it does not exist."""
