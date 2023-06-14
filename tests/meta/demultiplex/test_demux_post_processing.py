@@ -638,13 +638,13 @@ def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
     demux_post_processing_api.hk_api.add_tag.assert_not_called()
 
 
-def test_add_sample_sheet(demultiplex_context: CGConfig):
+def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
     demux_post_processing_api.add_file_if_non_existent = MagicMock()
 
     # GIVEN a flow cell directory and name
-    flow_cell_directory = Path("/tmp/flow_cell_directory")
+    flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
     flow_cell_name = "flow_cell_name"
 
     # WHEN a sample sheet is added
@@ -665,7 +665,7 @@ def test_add_sample_sheet(demultiplex_context: CGConfig):
     )
 
 
-def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig):
+def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
@@ -673,14 +673,17 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig):
     demux_post_processing_api.get_sample_id_from_sample_fastq_file_path = MagicMock()
     demux_post_processing_api.add_file_if_non_existent = MagicMock()
 
-    mock_fastq_paths = [Path("/tmp/file1.fastq"), Path("/tmp/file2.fastq")]
+    mock_fastq_paths = [
+        Path(tmpdir_factory.mktemp("first_file.fastq.gz")),
+        Path(tmpdir_factory.mktemp("second_file.fastq.gz")),
+    ]
     demux_post_processing_api.get_sample_fastq_file_paths.return_value = mock_fastq_paths
 
     sample_id = "sample1"
     demux_post_processing_api.get_sample_id_from_sample_fastq_file_path.return_value = sample_id
 
     # GIVEN a flow cell directory and name
-    flow_cell_directory = Path("/tmp/flow_cell_directory")
+    flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
     flow_cell_name = "flow_cell_name"
 
     # WHEN add_fastq_files is called
@@ -701,7 +704,7 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig):
     demux_post_processing_api.add_file_if_non_existent.assert_has_calls(expected_calls)
 
 
-def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
+def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
@@ -710,7 +713,7 @@ def test_add_fastq_files_without_sample_id(demultiplex_context: CGConfig):
 
     demux_post_processing_api.add_file_if_non_existent = MagicMock()
 
-    flow_cell_directory = Path("/tmp/flow_cell_directory")
+    flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
     flow_cell_name = "flow_cell_name"
 
     # WHEN add_fastq_files is called
@@ -733,4 +736,3 @@ def test_is_valid_sample_fastq_filename(demultiplex_context: CGConfig):
     # WHEN checking a valid filename
     file_name = "valid_file.fastq"
     assert demux_post_processing_api.is_valid_sample_fastq_filename(file_name)
-
