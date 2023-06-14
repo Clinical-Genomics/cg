@@ -38,9 +38,7 @@ def config_case(context: CGConfig, case_id: str, instrument_platform: Sequencing
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.config_case(
-            case_id=case_id, sample_id=sample_id, instrument_platform=instrument_platform, fasta=""
-        )
+        analysis_api.config_case(case_id=case_id, instrument_platform=instrument_platform, fasta="")
 
     except CgError as error:
         LOG.error(f"Could not create sample sheet: {error}")
