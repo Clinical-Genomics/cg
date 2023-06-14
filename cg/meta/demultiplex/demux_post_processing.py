@@ -1,4 +1,5 @@
 """Post-processing Demultiiplex API."""
+import datetime
 import logging
 import re
 import shutil
@@ -12,6 +13,7 @@ from cg.apps.cgstats.crud import create
 from cg.apps.cgstats.stats import StatsAPI
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.apps.demultiplex.demux_report import create_demux_report
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.sequencing_metrics_parser.api import (
     create_sample_lane_sequencing_metrics_for_flow_cell,
@@ -28,7 +30,7 @@ from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import Flowcell, SampleLaneSequencingMetrics
+from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -72,12 +74,13 @@ class DemuxPostProcessingAPI:
     def add_sample_lane_sequencing_metrics_for_flow_cell(self, flow_cell_name: str):
         """Add sample lane sequencing metrics to status database."""
         flow_cell_dir: Path = Path(self.demux_api.out_dir, flow_cell_name)
+        bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
 
         sample_lane_sequencing_metrics: List[
             SampleLaneSequencingMetrics
         ] = create_sample_lane_sequencing_metrics_for_flow_cell(
             flow_cell_dir=flow_cell_dir,
-            bcl_converter=self.get_bcl_converter(flow_cell_name=flow_cell_name),
+            bcl_converter=bcl_converter,
         )
 
         self.status_db.session.add_all(sample_lane_sequencing_metrics)
@@ -90,9 +93,9 @@ class DemuxPostProcessingAPI:
         2. Validate that the demultiplexing is complete.
         3. Parse flow cell directory.
         4. Create flow cell and store flow cell in status db.
-        5. Update samples in status db with read counts and sequencing date.
-        6. Store flow cell data in housekeeper (bundle, version, tags, fastq file paths and sample sheet path).
-        7. Create sequencing metrics.
+        5. Store flow cell data in housekeeper (bundle, version, tags, fastq file paths and sample sheet path).
+        6. Create sequencing metrics.
+        7. Update samples in status db with read counts and sequencing date.
         """
 
         LOG.info(f"Finish flow cell {flow_cell_name}")
@@ -120,7 +123,7 @@ class DemuxPostProcessingAPI:
 
         if not parsed_flow_cell:
             return
-        
+
         # 4. Create and store flow cell in status db.
         flow_cell: Flowcell = self.create_flow_cell(parsed_flow_cell=parsed_flow_cell)
         self.status_db.session.add(flow_cell)
@@ -131,10 +134,39 @@ class DemuxPostProcessingAPI:
             flow_cell_name=flow_cell_name, flow_cell_directory=flow_cell_dir
         )
 
-        # 6. Update samples in status db with read counts and sequencing date.
-        
-        # 7. Create sequencing metrics.
+        # 6. Create sequencing metrics.
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
+
+        # 7. Update samples in status db with read counts and sequencing date.
+        samples: List[FlowCellSample] = parsed_flow_cell.get_sample_sheet().samples
+        sample_ids: List[str] = [sample.internal_id for sample in samples]
+        flow_cell_sequencing_date: datetime.datetime = parsed_flow_cell.run_date
+
+        self.update_samples_with_read_counts_and_sequencing_date(
+            sample_internal_ids=sample_ids, flow_cell_sequencing_date=flow_cell_sequencing_date
+        )
+
+    def update_samples_with_read_counts_and_sequencing_date(
+        self, sample_internal_ids: List[str], flow_cell_sequencing_date: datetime.datetime
+    ) -> None:
+        """Update samples in status db with read counts and sequencing date."""
+
+        for sample_id in sample_internal_ids:
+            sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
+                internal_id=sample_id
+            )
+
+            if not sample:
+                continue
+
+            sample_read_count: int = self.status_db.get_number_of_reads_for_sample_from_metrics(
+                sample_internal_id=sample_id
+            )
+
+            sample.reads = sample_read_count
+            sample.sequenced_at = flow_cell_sequencing_date
+
+        self.status_db.session.commit()
 
     def add_flow_cell_data_to_housekeeper(
         self, flow_cell_name: str, flow_cell_directory: Path
