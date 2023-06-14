@@ -517,3 +517,5 @@ def test_is_not_bcl2fastq_folder_structure(
 
     # THEN it should not be a bcl2fastq folder structure
     assert is_bcl2fastq_folder_structure is False
+
+
