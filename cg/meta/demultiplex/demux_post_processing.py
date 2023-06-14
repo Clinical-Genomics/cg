@@ -149,7 +149,7 @@ class DemuxPostProcessingAPI:
         if not Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists():
             LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_directory.name}")
             return False
-        
+
         return True
 
     def update_samples_with_read_counts_and_sequencing_date(
