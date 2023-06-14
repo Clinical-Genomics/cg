@@ -89,13 +89,12 @@ class DemuxPostProcessingAPI:
 
     def finish_flow_cell_temp(self, flow_cell_name: str) -> None:
         """
-        1. Validate that the flow cell directory exists.
-        2. Validate that the demultiplexing is complete.
-        3. Parse flow cell directory.
-        4. Create flow cell and store flow cell in status db.
-        5. Store flow cell data in housekeeper (bundle, version, tags, fastq file paths and sample sheet path).
-        6. Create sequencing metrics.
-        7. Update samples in status db with read counts and sequencing date.
+        1. Validate flow cell directory.
+        2. Parse flow cell directory.
+        3. Create flow cell and store flow cell in status db.
+        4. Store flow cell data in housekeeper (bundle, version, tags, fastq file paths and sample sheet path).
+        5. Create sequencing metrics.
+        6. Update samples in status db with read counts and sequencing date.
         """
 
         LOG.info(f"Finish flow cell {flow_cell_name}")
@@ -104,16 +103,10 @@ class DemuxPostProcessingAPI:
         bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
 
         # 1. Validate that the flow cell directory exists.
-        if not flow_cell_dir.exists():
-            LOG.warning(f"Flow cell directory does not exist: {flow_cell_dir}")
+        if not self.flow_cell_directory_is_valid(flow_cell_dir=flow_cell_dir):
             return
 
-        # 2. Validate that the demultiplexing is complete.
-        if not Path(flow_cell_dir, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists():
-            LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_name}")
-            return
-
-        # 3. Parse flow cell directory.
+        # 2. Parse flow cell directory.
         parsed_flow_cell: Optional[
             FlowCellDirectoryData
         ] = self.parse_and_validate_flow_cell_directory_data(
@@ -124,20 +117,20 @@ class DemuxPostProcessingAPI:
         if not parsed_flow_cell:
             return
 
-        # 4. Create and store flow cell in status db.
+        # 3. Create and store flow cell in status db.
         flow_cell: Flowcell = self.create_flow_cell(parsed_flow_cell=parsed_flow_cell)
         self.status_db.session.add(flow_cell)
         self.status_db.session.commit()
 
-        # 5. Store flow cell data in housekeeper.
+        # 4. Store flow cell data in housekeeper.
         self.add_flow_cell_data_to_housekeeper(
             flow_cell_name=flow_cell_name, flow_cell_directory=flow_cell_dir
         )
 
-        # 6. Create sequencing metrics.
+        # 5. Create sequencing metrics.
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
-        # 7. Update samples in status db with read counts and sequencing date.
+        # 6. Update samples in status db with read counts and sequencing date.
         samples: List[FlowCellSample] = parsed_flow_cell.get_sample_sheet().samples
         sample_ids: List[str] = [sample.internal_id for sample in samples]
         flow_cell_sequencing_date: datetime.datetime = parsed_flow_cell.run_date
@@ -145,6 +138,19 @@ class DemuxPostProcessingAPI:
         self.update_samples_with_read_counts_and_sequencing_date(
             sample_internal_ids=sample_ids, flow_cell_sequencing_date=flow_cell_sequencing_date
         )
+
+    def flow_cell_directory_is_valid(flow_cell_directory: Path) -> bool:
+        """Validate that the flow cell directory exists and that the demultiplexing is complete."""
+
+        if not flow_cell_directory.exists():
+            LOG.warning(f"Flow cell directory does not exist: {flow_cell_directory}")
+            return False
+
+        if not Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists():
+            LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_directory.name}")
+            return False
+        
+        return True
 
     def update_samples_with_read_counts_and_sequencing_date(
         self, sample_internal_ids: List[str], flow_cell_sequencing_date: datetime.datetime
