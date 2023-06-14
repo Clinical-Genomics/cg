@@ -4,3 +4,4 @@ mock
 pytest-cov
 pytest-mock
 pytest>=5.2     # due to pytest-flask, pytest-cov
+ruff
