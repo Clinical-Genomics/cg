@@ -324,7 +324,6 @@ class FindBusinessDataHandler(BaseHandler):
         )
         return total_reads if total_reads is not None else 0
 
-
     def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
         """Return flow cell by flow cell name."""
         return apply_flow_cell_filter(
