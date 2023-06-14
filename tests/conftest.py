@@ -33,7 +33,15 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Organism, Family, Sample
+from cg.store.models import (
+    Bed,
+    BedVersion,
+    Customer,
+    Organism,
+    Family,
+    Sample,
+    SampleLaneSequencingMetrics,
+)
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -2242,3 +2250,39 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
         exist_ok=True
     )
+
+
+@pytest.fixture
+def store_with_sequencing_metrics(store: Store, helpers: StoreHelpers) -> Store:
+    """Return a store with multiple samples with sample lane sequencing metrics."""
+
+    sample_sequencing_metrics_details = [
+        ("sample1", "flowcell1", 1, 1000000, 90.5, 32),
+        ("sample2", "flowcell2", 2, 2000000, 85.5, 30),
+        ("sample3", "flowcell3", 3, 1500000, 80.5, 33),
+    ]
+
+    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
+    for (
+        sample_internal_id,
+        flow_cell_name,
+        flow_cell_lane_number,
+        sample_total_reads_in_lane,
+        sample_base_fraction_passing_q30,
+        sample_base_mean_quality_score,
+    ) in sample_sequencing_metrics_details:
+
+        sequencing_metrics = SampleLaneSequencingMetrics(
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name,
+            flow_cell_lane_number=flow_cell_lane_number,
+            sample_total_reads_in_lane=sample_total_reads_in_lane,
+            sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
+            sample_base_mean_quality_score=sample_base_mean_quality_score,
+            created_at=datetime.now(),
+        )
+        sample_lane_sequencing_metrics.append(sequencing_metrics)
+
+    store.session.add_all(sample_lane_sequencing_metrics)
+    store.session.commit()
+    yield store

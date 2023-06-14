@@ -316,9 +316,8 @@ class FindBusinessDataHandler(BaseHandler):
     def get_number_of_reads_for_sample_from_metrics(self, sample_internal_id: str) -> int:
         """Get number of reads for sample from sample lane sequencing metrics."""
         total_reads = (
-            self._get_query(table=SampleLaneSequencingMetrics)(
-                func.sum(SampleLaneSequencingMetrics.sample_total_reads_in_lane)
-            )
+            self._get_query(table=SampleLaneSequencingMetrics)
+            .with_entities(func.sum(SampleLaneSequencingMetrics.sample_total_reads_in_lane))
             .filter(SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id)
             .scalar()
         )
