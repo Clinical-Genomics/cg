@@ -323,6 +323,16 @@ def fixture_novaseq_sample_2() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     )
 
 
+@pytest.fixture(name="novaseq_x_sample")
+def fixture_novaseq_x_sample() -> FlowCellSampleNovaSeqX:
+    """Return a NovaSeqX sample."""
+    return FlowCellSampleNovaSeqX(
+        Lane=2,
+        Sample_ID="ACC7628A1",
+        index="ATTCCACACT-TGGTCTTGTT",
+    )
+
+
 @pytest.fixture(name="novaseq_sample_no_dual_index")
 def fixture_novaseq_sample_no_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""

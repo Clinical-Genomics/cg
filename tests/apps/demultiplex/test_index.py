@@ -5,12 +5,20 @@ import pytest
 
 from cg.apps.demultiplex.sample_sheet.index import (
     Index,
+    INDEX_ONE_PAD_SEQUENCE,
+    INDEX_TWO_PAD_SEQUENCE,
+    adapt_indexes,
+    is_reverse_complement,
     get_valid_indexes,
     get_indexes_by_lane,
     get_reagent_kit_version,
     get_reverse_complement_dna_seq,
 )
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSampleNovaSeq6000Bcl2Fastq
+from cg.apps.demultiplex.sample_sheet.models import (
+    FlowCellSampleNovaSeq6000Bcl2Fastq,
+    FlowCellSampleNovaSeqX,
+)
+from cg.models.demultiplex.run_parameters import RunParameters
 
 
 def test_get_valid_indexes():
@@ -91,3 +99,82 @@ def test_get_reverse_complement_not_dna(caplog):
     with pytest.raises(KeyError):
         # THEN the process fails due to not recognising the unknown nucleotide
         get_reverse_complement_dna_seq(dna=strain)
+
+
+def test_adapt_indexes_reverse_complement_padding(
+    novaseq_6000_run_parameters: RunParameters,
+    novaseq_sample_dual_index: FlowCellSampleNovaSeq6000Bcl2Fastq,
+):
+    """Test that adapting indexes of a sample that needs padding and reverse complement works."""
+    # GIVEN a run parameters file that needs reverse complement of indexes
+    assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
+    # GIVEN a sample that needs padding
+    assert novaseq_6000_run_parameters.get_index_1_cycles() == 10
+    novaseq_sample_dual_index.index = "ATTCCACA-TGGTCTTG"
+    samples: List = [novaseq_sample_dual_index]
+
+    # WHEN adapting the indexes of the sample
+    adapt_indexes(samples=samples, run_parameters=novaseq_6000_run_parameters)
+    test_sample: FlowCellSampleNovaSeq6000Bcl2Fastq = samples[0]
+
+    # THEN the first index was correctly adapted
+    assert len(test_sample.index) == 10
+    assert test_sample.index[-2:] == INDEX_ONE_PAD_SEQUENCE
+    # THEN the second index was correctly adapted
+    assert len(test_sample.index2) == 10
+    assert test_sample.index2[-2:] == get_reverse_complement_dna_seq(dna=INDEX_TWO_PAD_SEQUENCE)
+
+
+def test_adapt_indexes_reverse_complement_no_padding(
+    novaseq_6000_run_parameters: RunParameters,
+    novaseq_sample_dual_index: FlowCellSampleNovaSeq6000Bcl2Fastq,
+):
+    """Test that adapting indexes of a sample that needs reverse complement but no padding works."""
+    # GIVEN a run parameters file that needs reverse complement of indexes
+    assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
+    # GIVEN a sample that does not need padding
+    assert (
+        novaseq_6000_run_parameters.get_index_1_cycles() == 10
+        and len(novaseq_sample_dual_index.index) == 21
+    )
+    samples: List = [novaseq_sample_dual_index]
+    initial_indexes: List[str] = novaseq_sample_dual_index.index.split("-")
+    initial_index1: str = initial_indexes[0]
+    initial_index2: str = initial_indexes[1]
+
+    # WHEN adapting the indexes of the sample
+    adapt_indexes(samples=samples, run_parameters=novaseq_6000_run_parameters)
+    test_sample: FlowCellSampleNovaSeq6000Bcl2Fastq = samples[0]
+
+    # THEN the first index was correctly adapted
+    assert len(test_sample.index) == 10
+    assert test_sample.index == initial_index1
+    # THEN the second index was correctly adapted
+    assert len(test_sample.index2) == 10
+    assert test_sample.index2 == get_reverse_complement_dna_seq(dna=initial_index2)
+
+
+def test_adapt_indexes_no_reverse_complement_no_padding(
+    novaseq_x_run_parameters: RunParameters,
+    novaseq_x_sample: FlowCellSampleNovaSeqX,
+):
+    """Test that adapting indexes of a sample that does not need reverse complement nor padding works."""
+    # GIVEN a run parameters file that does not need reverse complement of indexes
+    assert not is_reverse_complement(run_parameters=novaseq_x_run_parameters)
+    # GIVEN a sample that does not need padding
+    assert novaseq_x_run_parameters.get_index_1_cycles() == 10 and len(novaseq_x_sample.index) == 21
+    samples: List = [novaseq_x_sample]
+    initial_indexes: List[str] = novaseq_x_sample.index.split("-")
+    initial_index1: str = initial_indexes[0]
+    initial_index2: str = initial_indexes[1]
+
+    # WHEN adapting the indexes of the sample
+    adapt_indexes(samples=samples, run_parameters=novaseq_x_run_parameters)
+    test_sample: FlowCellSampleNovaSeq6000Bcl2Fastq = samples[0]
+
+    # THEN the first index was correctly adapted
+    assert len(test_sample.index) == 10
+    assert test_sample.index == initial_index1
+    # THEN the second index was correctly adapted
+    assert len(test_sample.index2) == 10
+    assert test_sample.index2 == initial_index2

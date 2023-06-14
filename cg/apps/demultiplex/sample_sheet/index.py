@@ -97,6 +97,15 @@ def is_reverse_complement(run_parameters: RunParameters) -> bool:
     return True
 
 
+def needs_padding(index_cycles: int, sample_index_length: int) -> bool:
+    """Returns whether a sample needs padding or not given the sample index length.
+    A sample needs padding if its index length is shorter than the number of index cycles reads
+    stated in the run parameters file of the sequencing. This happens when the sample index is
+    8 nucleotides long and the number of index cycles read is 10 nucleotides.
+    """
+    return index_cycles == 10 and sample_index_length == 8
+
+
 def get_reverse_complement_dna_seq(dna: str) -> str:
     """Generates the reverse complement of a DNA sequence."""
     LOG.debug(f"Reverse complement string {dna}")
@@ -132,7 +141,9 @@ def adapt_indexes(
         index1: str = index1.strip()
         index2: str = index2.strip()
         index_length = len(index1)
-        if run_parameters.index_length == 10 and index_length == 8:
+        if needs_padding(
+            index_cycles=run_parameters.index_length, sample_index_length=index_length
+        ):
             LOG.debug("Padding indexes")
             index1 = pad_index_one(index_string=index1)
             index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
