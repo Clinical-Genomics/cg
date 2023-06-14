@@ -2271,7 +2271,6 @@ def store_with_sequencing_metrics(store: Store) -> Store:
         sample_base_fraction_passing_q30,
         sample_base_mean_quality_score,
     ) in sample_sequencing_metrics_details:
-
         sequencing_metrics = SampleLaneSequencingMetrics(
             sample_internal_id=sample_internal_id,
             flow_cell_name=flow_cell_name,
