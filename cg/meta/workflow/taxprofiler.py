@@ -19,7 +19,7 @@ from cg.constants.taxprofiler import (
 from cg.meta.workflow.fastq import TaxprofilerFastqHandler
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.models.taxprofiler.taxprofiler_sample import TaxprofilerSample
-from cg.store.models import Family
+from cg.store.models import Family, Sample
 
 LOG = logging.getLogger(__name__)
 
@@ -49,8 +49,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def build_sample_sheet_content(
-        # case_id: str,
-        sample_id: List[str],
+        case_id: str,
+        # sample_id: List[str],
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
@@ -59,8 +59,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         """Build sample sheet headers and lists."""
         try:
             TaxprofilerSample(
-                # sample=case_id,
-                sample=sample_id,
+                sample=case_id,
+                # sample=sample_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
@@ -70,8 +70,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             raise ValueError
 
         # Complete sample lists to the same length as fastq_r1:
-        # samples_full_list: List[str] = [case_id] * len(fastq_r1)
-        samples_full_list: List[str] = [sample_id] * len(fastq_r1)
+        samples_full_list: List[str] = [case_id] * len(fastq_r1)
+        # samples_full_list: List[str] = [sample_id] * len(fastq_r1)
         instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
         fasta_full_list: List[str] = [fasta] * len(fastq_r1)
 
@@ -86,17 +86,26 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         return sample_sheet_content
 
     def write_sample_sheet(
-        self, case_id: str, instrument_platform: SequencingPlatform.ILLUMINA, fasta: Optional[str]
+        self,
+        case_id: str,
+        sample_id: str,
+        instrument_platform: SequencingPlatform.ILLUMINA,
+        fasta: Optional[str],
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        for sample_id in samples:
+            print("Sample id " + sample_id)
+            self.link_fastq_files_for_sample(case_id=case_id, sample_id=sample_id)
+
         for link in case.links:
-            sample_id = link.sample.internal_id
+            print("Link" + link)
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             sample_sheet_content: Dict[str, List[str]] = self.build_sample_sheet_content(
-                case_id=sample_id,
+                case_id=case_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
@@ -121,3 +130,13 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             case_id=case_id, instrument_platform=instrument_platform, fasta=fasta
         )
         LOG.info("Sample sheet written")
+
+    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[Sample]:
+        """Returns a list of samples to configure
+        If sample_id is specified, will return a list with only this sample_id.
+        Otherwise, returns all samples in given case"""
+        if sample_id:
+            return [self.status_db.get_sample_by_internal_id(internal_id=sample_id)]
+
+        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
+        return [link.sample for link in case_obj.links]
