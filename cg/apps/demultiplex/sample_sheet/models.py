@@ -47,10 +47,10 @@ class FlowCellSampleNovaSeqX(FlowCellSample):
     adapter_read_1: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_1.value)
     adapter_read_2: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_2.value)
     barcode_mismatches_1: int = Field(
-        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_1.value
+        1, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_1.value
     )
     barcode_mismatches_2: int = Field(
-        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_2.value
+        1, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_2.value
     )
 
 
