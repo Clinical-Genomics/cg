@@ -34,6 +34,7 @@ sequencer_types = {
     "A00689": Sequencers.NOVASEQ,
     "A01901": Sequencers.NOVASEQ,
     "LH00188": Sequencers.NOVASEQX,
+    "LH00202": Sequencers.NOVASEQX,
 }
 
 FLOWCELL_Q30_THRESHOLD = {

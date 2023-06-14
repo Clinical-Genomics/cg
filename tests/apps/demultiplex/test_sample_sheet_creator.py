@@ -37,7 +37,7 @@ def test_v2_sample_sheet_bcl2fastq_fails(
         assert str(exc_info.value) == f"Can't use {BclConverter.BCL2FASTQ} with sample sheet v2"
 
 
-def test_convert_to_bcl2fastq_sheet(
+def test_construct_bcl2fastq_sheet(
     novaseq_bcl2fastq_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
     """Test that a created Bcl2fastq sample sheet has samples."""
@@ -57,7 +57,7 @@ def test_convert_to_bcl2fastq_sheet(
     assert sample_sheet.samples
 
 
-def test_convert_to_dragen_sheet(
+def test_construct_dragen_sheet(
     novaseq_dragen_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
     """Test that a created Dragen sample sheet has samples."""
@@ -77,7 +77,7 @@ def test_convert_to_dragen_sheet(
     assert sample_sheet.samples
 
 
-def test_convert_to_novaseq_x_sheet(
+def test_construct_novaseq_x_sheet(
     novaseq_x_sample_sheet_creator: SampleSheetCreator, project_dir: Path
 ):
     """Test that a created NovaSeqX sample sheet has samples."""
