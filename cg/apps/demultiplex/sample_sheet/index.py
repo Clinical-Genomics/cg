@@ -12,10 +12,12 @@ from packaging import version
 from pydantic import BaseModel
 
 LOG = logging.getLogger(__name__)
-NEW_CONTROL_SOFTWARE_VERSION = "1.7.0"
-NEW_REAGENT_KIT_VERSION = "1.5"
-DNA_COMPLEMENTS = {"A": "T", "C": "G", "G": "C", "T": "A"}
-REAGENT_KIT_PARAMETER_TO_VERSION = {"1": "1.0", "3": "1.5"}
+DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
+INDEX_ONE_PAD_SEQUENCE: str = "AT"
+INDEX_TWO_PAD_SEQUENCE: str = "AC"
+NEW_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
+NEW_REAGENT_KIT_VERSION: str = "1.5"
+REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
@@ -104,14 +106,14 @@ def get_reverse_complement_dna_seq(dna: str) -> str:
 
 def pad_index_one(index_string: str) -> str:
     """Adds bases 'AT' to index one."""
-    return index_string + "AT"
+    return index_string + INDEX_ONE_PAD_SEQUENCE
 
 
 def pad_index_two(index_string: str, reverse_complement: bool) -> str:
     """Adds bases to index two depending on if it should be reverse complement or not."""
     if reverse_complement:
-        return "AC" + index_string
-    return index_string + "AC"
+        return INDEX_TWO_PAD_SEQUENCE + index_string
+    return index_string + INDEX_TWO_PAD_SEQUENCE
 
 
 def adapt_indexes(
