@@ -2253,7 +2253,7 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 
 
 @pytest.fixture
-def store_with_sequencing_metrics(store: Store, helpers: StoreHelpers) -> Store:
+def store_with_sequencing_metrics(store: Store) -> Store:
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details = [
