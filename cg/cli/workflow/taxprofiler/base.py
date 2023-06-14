@@ -32,13 +32,17 @@ def taxprofiler(context: click.Context) -> None:
 @ARGUMENT_CASE_ID
 @OPTION_INSTRUMENT_PLATFORM
 @click.pass_obj
-def config_case(context: CGConfig, case_id: str, instrument_platform: SequencingPlatform) -> None:
+def config_case(
+    context: CGConfig, case_id: str, sample_id: str, instrument_platform: SequencingPlatform
+) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given case_id."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 
     try:
         analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
-        analysis_api.config_case(case_id=case_id, instrument_platform=instrument_platform, fasta="")
+        analysis_api.config_case(
+            case_id=case_id, sample_id=sample_id, instrument_platform=instrument_platform, fasta=""
+        )
 
     except CgError as error:
         LOG.error(f"Could not create sample sheet: {error}")
