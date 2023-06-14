@@ -103,7 +103,7 @@ class DemuxPostProcessingAPI:
         bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
 
         # 1. Validate that the flow cell directory exists.
-        if not self.flow_cell_directory_is_valid(flow_cell_dir=flow_cell_dir):
+        if not self.flow_cell_directory_is_valid(flow_cell_directory=flow_cell_dir):
             return
 
         # 2. Parse flow cell directory.
@@ -139,7 +139,7 @@ class DemuxPostProcessingAPI:
             sample_internal_ids=sample_ids, flow_cell_sequencing_date=flow_cell_sequencing_date
         )
 
-    def flow_cell_directory_is_valid(flow_cell_directory: Path) -> bool:
+    def flow_cell_directory_is_valid(self, flow_cell_directory: Path) -> bool:
         """Validate that the flow cell directory exists and that the demultiplexing is complete."""
 
         if not flow_cell_directory.exists():
