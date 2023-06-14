@@ -32,9 +32,7 @@ def taxprofiler(context: click.Context) -> None:
 @ARGUMENT_CASE_ID
 @OPTION_INSTRUMENT_PLATFORM
 @click.pass_obj
-def config_case(
-    context: CGConfig, case_id: str, sample_id: str, instrument_platform: SequencingPlatform
-) -> None:
+def config_case(context: CGConfig, case_id: str, instrument_platform: SequencingPlatform) -> None:
     """Create sample sheet file for Taxprofiler analysis for a given case_id."""
     analysis_api: TaxprofilerAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
 

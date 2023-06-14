@@ -50,7 +50,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     @staticmethod
     def build_sample_sheet_content(
         case_id: str,
-        # sample_id: List[str],
+        # sample_id: str,
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
@@ -71,7 +71,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
         # Complete sample lists to the same length as fastq_r1:
         samples_full_list: List[str] = [case_id] * len(fastq_r1)
-        # samples_full_list: List[str] = [sample_id] * len(fastq_r1)
         instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
         fasta_full_list: List[str] = [fasta] * len(fastq_r1)
 
@@ -88,20 +87,21 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def write_sample_sheet(
         self,
         case_id: str,
-        sample_id: str,
+        # sample_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str],
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
-        for sample_id in samples:
-            print("Sample id " + sample_id)
-            self.link_fastq_files_for_sample(case_id=case_id, sample_id=sample_id)
+        # samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        # for sample_id in samples:
+        #    print("Sample id " + sample_id)
+        #    self.link_fastq_files_for_sample(case_id=case_id, sample_id=sample_id)
 
         for link in case.links:
             print("Link" + link)
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
+            print("Sample metadata" + str(sample_metadata))
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             sample_sheet_content: Dict[str, List[str]] = self.build_sample_sheet_content(
@@ -123,7 +123,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def config_case(
         self,
         case_id: str,
-        sample_id: str,
+        # sample_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str],
     ) -> None:
@@ -132,18 +132,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         LOG.info("Generating sample sheet")
         self.write_sample_sheet(
             case_id=case_id,
-            sample_id=sample_id,
+            # sample_id=sample_id,
             instrument_platform=instrument_platform,
             fasta=fasta,
         )
         LOG.info("Sample sheet written")
-
-    def get_samples(self, case_id: str, sample_id: Optional[str] = None) -> List[Sample]:
-        """Returns a list of samples to configure
-        If sample_id is specified, will return a list with only this sample_id.
-        Otherwise, returns all samples in given case"""
-        if sample_id:
-            return [self.status_db.get_sample_by_internal_id(internal_id=sample_id)]
-
-        case_obj: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        return [link.sample for link in case_obj.links]
