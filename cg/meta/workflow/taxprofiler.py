@@ -132,7 +132,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         LOG.info("Generating sample sheet")
         self.write_sample_sheet(
             case_id=case_id,
-            samples_id=sample_id,
+            sample_id=sample_id,
             instrument_platform=instrument_platform,
             fasta=fasta,
         )
