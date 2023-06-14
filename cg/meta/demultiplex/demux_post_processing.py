@@ -88,10 +88,11 @@ class DemuxPostProcessingAPI:
         """
         1. Validate that the flow cell directory exists.
         2. Validate that the demultiplexing is complete.
-        3. Create flow cell.
-        4. Store flow cell in status db.
-        5. Store flow cell data in housekeeper.
-        6. Create sequencing metrics.
+        3. Parse flow cell directory.
+        4. Create flow cell and store flow cell in status db.
+        5. Update samples in status db with read counts and sequencing date.
+        6. Store flow cell data in housekeeper (bundle, version, tags, fastq file paths and sample sheet path).
+        7. Create sequencing metrics.
         """
 
         LOG.info(f"Finish flow cell {flow_cell_name}")
@@ -109,7 +110,7 @@ class DemuxPostProcessingAPI:
             LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_name}")
             return
 
-        # 3. Create flow cell.
+        # 3. Parse flow cell directory.
         parsed_flow_cell: Optional[
             FlowCellDirectoryData
         ] = self.parse_and_validate_flow_cell_directory_data(
@@ -119,10 +120,9 @@ class DemuxPostProcessingAPI:
 
         if not parsed_flow_cell:
             return
-
+        
+        # 4. Create and store flow cell in status db.
         flow_cell: Flowcell = self.create_flow_cell(parsed_flow_cell=parsed_flow_cell)
-
-        # 4. Store flow cell in status db.
         self.status_db.session.add(flow_cell)
         self.status_db.session.commit()
 
@@ -131,7 +131,9 @@ class DemuxPostProcessingAPI:
             flow_cell_name=flow_cell_name, flow_cell_directory=flow_cell_dir
         )
 
-        # 6. Create sequencing metrics
+        # 6. Update samples in status db with read counts and sequencing date.
+        
+        # 7. Create sequencing metrics.
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
     def add_flow_cell_data_to_housekeeper(
