@@ -49,8 +49,8 @@ def test_get_reagent_kit_version_non_existent_reagent(caplog):
     non_existent_reagent: str = "2"
 
     # WHEN getting the reagent kit version
-    with pytest.raises(SyntaxError) as exc_info:
-        reagent_kit_version: str = get_reagent_kit_version(reagent_kit_version=non_existent_reagent)
+    with pytest.raises(SyntaxError):
+        get_reagent_kit_version(reagent_kit_version=non_existent_reagent)
         # THEN an error is raised
         assert caplog.text == f"Unknown reagent kit version {non_existent_reagent}"
 
@@ -90,4 +90,4 @@ def test_get_reverse_complement_not_dna(caplog):
     # WHEN getting the reverse complement
     with pytest.raises(KeyError):
         # THEN the process fails due to not recognising the unknown nucleotide
-        reverse_output: str = get_reverse_complement_dna_seq(dna=strain)
+        get_reverse_complement_dna_seq(dna=strain)
