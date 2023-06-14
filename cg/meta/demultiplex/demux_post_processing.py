@@ -148,10 +148,10 @@ class DemuxPostProcessingAPI:
         self.add_sample_sheet(
             flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
         )
-        self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name)
+        self.add_sample_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name)
 
-    def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
-        """Add fastq files from flow cell to Housekeeper."""
+    def add_sample_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
+        """Add sample fastq files from flow cell to Housekeeper."""
         fastq_file_paths: List[Path] = self.get_sample_fastq_file_paths(
             flow_cell_directory=flow_cell_directory
         )
