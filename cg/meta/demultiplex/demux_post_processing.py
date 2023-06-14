@@ -128,27 +128,27 @@ class DemuxPostProcessingAPI:
 
         # 5. Store flow cell data in housekeeper.
         self.add_flow_cell_data_to_housekeeper(
-            flow_cell=flow_cell, flow_cell_directory=flow_cell_dir
+            flow_cell_name=flow_cell_name, flow_cell_directory=flow_cell_dir
         )
 
         # 6. Create sequencing metrics
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
     def add_flow_cell_data_to_housekeeper(
-        self, flow_cell: Flowcell, flow_cell_directory: Path
+        self, flow_cell_name: str, flow_cell_directory: Path
     ) -> None:
         """Add flow cell data to Housekeeper."""
-        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell.name}")
+        LOG.info(f"Add flow cell data to Housekeeper for {flow_cell_name}")
 
-        self.add_bundle_and_version_if_non_existent(flow_cell_name=flow_cell.name)
+        self.add_bundle_and_version_if_non_existent(flow_cell_name=flow_cell_name)
 
-        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell.name]
+        tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
         self.add_tags_if_non_existent(tag_names=tags)
 
         self.add_sample_sheet(
-            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name
+            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
         )
-        self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell.name)
+        self.add_fastq_files(flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name)
 
     def add_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add fastq files from flow cell to Housekeeper."""

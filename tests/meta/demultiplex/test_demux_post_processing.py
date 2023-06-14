@@ -2,7 +2,11 @@ import logging
 from pathlib import Path
 from typing import Generator
 
+from mock import MagicMock, call
+
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
+from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.meta.demultiplex import demux_post_processing
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
@@ -517,3 +521,144 @@ def test_is_not_bcl2fastq_folder_structure(
 
     # THEN it should not be a bcl2fastq folder structure
     assert is_bcl2fastq_folder_structure is False
+
+
+def test_add_flow_cell_data_to_housekeeper(
+    demultiplex_context: CGConfig, bcl2fastq_folder_structure: Path
+):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.add_bundle_and_version_if_non_existent = MagicMock()
+    demux_post_processing_api.add_tags_if_non_existent = MagicMock()
+    demux_post_processing_api.add_sample_sheet = MagicMock()
+    demux_post_processing_api.add_fastq_files = MagicMock()
+
+    # WHEN the flow cell data is added to housekeeper
+    flow_cell_name: str = "flow_cell_name"
+    demux_post_processing_api.add_flow_cell_data_to_housekeeper(
+        flow_cell_directory=bcl2fastq_folder_structure, flow_cell_name=flow_cell_name
+    )
+
+    # THEN the bundle and version is added
+    demux_post_processing_api.add_bundle_and_version_if_non_existent.assert_called_once_with(
+        flow_cell_name=flow_cell_name
+    )
+
+    # THEN the correct tags are added
+    demux_post_processing_api.add_tags_if_non_existent.assert_called_once_with(
+        tag_names=[SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
+    )
+
+    # THEN the sample sheet is added
+    demux_post_processing_api.add_sample_sheet.assert_called_once_with(
+        flow_cell_directory=bcl2fastq_folder_structure, flow_cell_name=flow_cell_name
+    )
+
+    # THEN the fastq files are added
+    demux_post_processing_api.add_fastq_files.assert_called_once_with(
+        flow_cell_directory=bcl2fastq_folder_structure, flow_cell_name=flow_cell_name
+    )
+
+
+def test_add_bundle_and_version_if_non_existent(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.hk_api.bundle = MagicMock(return_value=None)
+    demux_post_processing_api.hk_api.create_new_bundle_and_version = MagicMock()
+
+    # WHEN adding a bundle and version which does not exist
+    flow_cell_name: str = "flow_cell_name"
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(flow_cell_name=flow_cell_name)
+
+    # THEN that the expected methods were called with the expected arguments
+    demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
+    demux_post_processing_api.hk_api.create_new_bundle_and_version.assert_called_once_with(
+        name=flow_cell_name
+    )
+
+
+def test_add_bundle_and_version_if_already_exists(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    mock_bundle = MagicMock()
+    demux_post_processing_api.hk_api.bundle = MagicMock(return_value=mock_bundle)
+    demux_post_processing_api.hk_api.create_new_bundle_and_version = MagicMock()
+
+    # WHEN adding a bundle and version which already exists
+    flow_cell_name: str = "flow_cell_name"
+    demux_post_processing_api.add_bundle_and_version_if_non_existent(flow_cell_name=flow_cell_name)
+
+    # THEN the bundle was retrieved
+    demux_post_processing_api.hk_api.bundle.assert_called_once_with(name=flow_cell_name)
+
+    # THEN a new bundle and version was not created
+    demux_post_processing_api.hk_api.create_new_bundle_and_version.assert_not_called()
+
+
+def test_add_tags_if_non_existent(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN that the tags do not exist
+    demux_post_processing_api.hk_api.get_tag = MagicMock(return_value=None)
+    demux_post_processing_api.hk_api.add_tag = MagicMock()
+
+    # WHEN adding new tags
+    tag_names = ["tag1", "tag2"]
+    demux_post_processing_api.add_tags_if_non_existent(tag_names=tag_names)
+
+    # THEN the expected housekeeper API methods were called to create the tags
+    demux_post_processing_api.hk_api.get_tag.assert_has_calls(
+        [call(name="tag1"), call(name="tag2")]
+    )
+    demux_post_processing_api.hk_api.add_tag.assert_has_calls(
+        [call(name="tag1"), call(name="tag2")]
+    )
+
+
+def test_add_tags_if_all_exist(demultiplex_context: CGConfig):
+    # Given a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # Mock the methods in the housekeeper API
+    demux_post_processing_api.hk_api.get_tag = MagicMock(return_value=MagicMock())
+    demux_post_processing_api.hk_api.add_tag = MagicMock()
+
+    # Call the add_tags_if_non_existent method with two tag names
+    tag_names = ["tag1", "tag2"]
+    demux_post_processing_api.add_tags_if_non_existent(tag_names=tag_names)
+
+    # Assert that the expected methods were called with the expected arguments
+    demux_post_processing_api.hk_api.get_tag.assert_has_calls(
+        [call(name="tag1"), call(name="tag2")]
+    )
+    demux_post_processing_api.hk_api.add_tag.assert_not_called()
+
+
+def test_add_sample_sheet(demultiplex_context: CGConfig):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+    demux_post_processing_api.add_file_if_non_existent = MagicMock()
+
+    # GIVEN a flow cell directory and name
+    flow_cell_directory = Path("/tmp/flow_cell_directory")
+    flow_cell_name = "flow_cell_name"
+
+    # WHEN a sample sheet is added
+    demux_post_processing_api.add_sample_sheet(flow_cell_directory=flow_cell_directory, 
+                                               flow_cell_name=flow_cell_name)
+
+    # THEN add_file_if_non_existent was called with expected arguments
+    expected_file_path = Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+    expected_tag_names = [SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
+
+    demux_post_processing_api.add_file_if_non_existent.assert_called_once_with(
+        file_path=expected_file_path,
+        flow_cell_name=flow_cell_name,
+        tag_names=expected_tag_names,
+    )
+
+
