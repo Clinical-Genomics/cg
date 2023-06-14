@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List, Optional, Set, Type
 
 from cg.apps.demultiplex.sample_sheet import index
-from cg.apps.demultiplex.sample_sheet.dummy_sample import dummy_sample
+from cg.apps.demultiplex.sample_sheet.dummy_sample import get_dummy_sample
 from cg.apps.demultiplex.sample_sheet.index import Index
 from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
@@ -131,7 +131,7 @@ class SampleSheetCreatorV1(SampleSheetCreator):
                 if index.index_exists(index=index_obj.sequence, indexes=lane_indexes):
                     LOG.debug(f"Index {index_obj.sequence} already in use")
                     continue
-                dummy_flow_cell_sample: FlowCellSample = dummy_sample(
+                dummy_flow_cell_sample: FlowCellSample = get_dummy_sample(
                     flow_cell_id=self.flow_cell_id,
                     dummy_index=index_obj.sequence,
                     lane=lane,
