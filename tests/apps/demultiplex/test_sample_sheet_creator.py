@@ -115,7 +115,7 @@ def test_remove_unwanted_samples_dual_index(
 
 
 def test_remove_unwanted_samples_no_dual_index(
-    novaseq_sample_no_dual_index: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq_flow_cell_sample_no_dual_index: FlowCellSampleNovaSeq6000Bcl2Fastq,
     bcl2fastq_flow_cell: FlowCellDirectoryData,
     caplog,
 ):
@@ -123,7 +123,7 @@ def test_remove_unwanted_samples_no_dual_index(
     # GIVEN a sample sheet creator with a sample without dual indexes
     sample_sheet_creator: SampleSheetCreatorV1 = SampleSheetCreatorV1(
         flow_cell=bcl2fastq_flow_cell,
-        lims_samples=[novaseq_sample_no_dual_index],
+        lims_samples=[novaseq_flow_cell_sample_no_dual_index],
         bcl_converter=BclConverter.BCL2FASTQ,
     )
 
@@ -133,6 +133,6 @@ def test_remove_unwanted_samples_no_dual_index(
     # THEN the only sample is removed
     assert len(sample_sheet_creator.lims_samples) == 0
     assert (
-        f"Removing sample {novaseq_sample_no_dual_index} since it does not have dual index"
+        f"Removing sample {novaseq_flow_cell_sample_no_dual_index} since it does not have dual index"
         in caplog.text
     )

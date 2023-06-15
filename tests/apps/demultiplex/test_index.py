@@ -7,6 +7,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     Index,
     INDEX_ONE_PAD_SEQUENCE,
     INDEX_TWO_PAD_SEQUENCE,
+    LONG_INDEX_CYCLE_NR,
     adapt_indexes,
     is_reverse_complement,
     get_valid_indexes,
@@ -23,13 +24,13 @@ from cg.models.demultiplex.run_parameters import RunParameters
 
 def test_get_valid_indexes():
     """Test that the function get_valid_indexes returns a list of Index objects."""
-    # GIVEN a sample sheet api
+    # GIVEN a sample sheet API
 
     # WHEN fetching the indexes
     indexes: List[Index] = get_valid_indexes()
 
     # THEN assert that the indexes are correct
-    assert len(indexes) > 0
+    assert indexes
     assert isinstance(indexes[0], Index)
 
 
@@ -46,7 +47,7 @@ def test_get_indexes_by_lane(
         samples=[novaseq_flow_cell_sample_1, novaseq_flow_cell_sample_2]
     )
 
-    # THEN the result dictionary has two entries
+    # THEN the result dictionary has two items
     assert len(indexes_by_lane.keys()) == 2
     assert len(indexes_by_lane.values()) == 2
 
@@ -54,7 +55,7 @@ def test_get_indexes_by_lane(
 def test_get_reagent_kit_version_non_existent_reagent(caplog):
     """Test that getting a non-existent reagent kit version fails."""
     # GIVEN a non-existent reagent kit version
-    non_existent_reagent: str = "2"
+    non_existent_reagent: str = "reagent_does_not_exist"
 
     # WHEN getting the reagent kit version
     with pytest.raises(SyntaxError):
@@ -84,14 +85,14 @@ def test_get_reverse_complement():
     reversed_complement: str = "ACAGAGGT"
 
     # WHEN getting the reverse complement of the DNA strain
-    reverse_output: str = get_reverse_complement_dna_seq(dna=dna_strain)
+    returned_reverse_complement: str = get_reverse_complement_dna_seq(dna=dna_strain)
 
     # THEN the result is the expected
-    assert reverse_output == reversed_complement
+    assert returned_reverse_complement == reversed_complement
 
 
 def test_get_reverse_complement_not_dna(caplog):
-    """Test."""
+    """Test that using a string without 'A', 'C', 'G' or 'T' fails."""
     # GIVEN a non-DNA strain
     strain: str = "ACCUCTGU"
 
@@ -109,7 +110,7 @@ def test_adapt_indexes_reverse_complement_padding(
     # GIVEN a run parameters file that needs reverse complement of indexes
     assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
     # GIVEN a sample that needs padding
-    assert novaseq_6000_run_parameters.get_index_1_cycles() == 10
+    assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
     novaseq_flow_cell_sample_before_adapt_indexes.index = "ATTCCACA-TGGTCTTG"
     samples: List = [novaseq_flow_cell_sample_before_adapt_indexes]
 
@@ -118,10 +119,10 @@ def test_adapt_indexes_reverse_complement_padding(
     test_sample: FlowCellSampleNovaSeq6000Bcl2Fastq = samples[0]
 
     # THEN the first index was correctly adapted
-    assert len(test_sample.index) == 10
+    assert len(test_sample.index) == LONG_INDEX_CYCLE_NR
     assert test_sample.index[-2:] == INDEX_ONE_PAD_SEQUENCE
     # THEN the second index was correctly adapted
-    assert len(test_sample.index2) == 10
+    assert len(test_sample.index2) == LONG_INDEX_CYCLE_NR
     assert test_sample.index2[-2:] == get_reverse_complement_dna_seq(dna=INDEX_TWO_PAD_SEQUENCE)
 
 
@@ -134,8 +135,8 @@ def test_adapt_indexes_reverse_complement_no_padding(
     assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
     # GIVEN a sample that does not need padding
     assert (
-        novaseq_6000_run_parameters.get_index_1_cycles() == 10
-        and len(novaseq_flow_cell_sample_before_adapt_indexes.index) == 21
+        novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
+        and len(novaseq_flow_cell_sample_before_adapt_indexes.index) >= 2 * LONG_INDEX_CYCLE_NR
     )
     samples: List = [novaseq_flow_cell_sample_before_adapt_indexes]
     initial_indexes: List[str] = novaseq_flow_cell_sample_before_adapt_indexes.index.split("-")
@@ -147,10 +148,10 @@ def test_adapt_indexes_reverse_complement_no_padding(
     test_sample: FlowCellSampleNovaSeq6000Bcl2Fastq = samples[0]
 
     # THEN the first index was correctly adapted
-    assert len(test_sample.index) == 10
+    assert len(test_sample.index) == LONG_INDEX_CYCLE_NR
     assert test_sample.index == initial_index1
     # THEN the second index was correctly adapted
-    assert len(test_sample.index2) == 10
+    assert len(test_sample.index2) == LONG_INDEX_CYCLE_NR
     assert test_sample.index2 == get_reverse_complement_dna_seq(dna=initial_index2)
 
 
@@ -163,8 +164,8 @@ def test_adapt_indexes_no_reverse_complement_no_padding(
     assert not is_reverse_complement(run_parameters=novaseq_x_run_parameters)
     # GIVEN a sample that does not need padding
     assert (
-        novaseq_x_run_parameters.get_index_1_cycles() == 10
-        and len(novaseq_x_flow_cell_sample_before_adapt_indexes.index) == 21
+        novaseq_x_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
+        and len(novaseq_x_flow_cell_sample_before_adapt_indexes.index) >= 2 * LONG_INDEX_CYCLE_NR
     )
     samples: List = [novaseq_x_flow_cell_sample_before_adapt_indexes]
     initial_indexes: List[str] = novaseq_x_flow_cell_sample_before_adapt_indexes.index.split("-")
@@ -176,8 +177,8 @@ def test_adapt_indexes_no_reverse_complement_no_padding(
     test_sample: FlowCellSampleNovaSeq6000Bcl2Fastq = samples[0]
 
     # THEN the first index was correctly adapted
-    assert len(test_sample.index) == 10
+    assert len(test_sample.index) == LONG_INDEX_CYCLE_NR
     assert test_sample.index == initial_index1
     # THEN the second index was correctly adapted
-    assert len(test_sample.index2) == 10
+    assert len(test_sample.index2) == LONG_INDEX_CYCLE_NR
     assert test_sample.index2 == initial_index2

@@ -336,8 +336,8 @@ def fixture_novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleN
     )
 
 
-@pytest.fixture(name="novaseq_sample_no_dual_index")
-def fixture_novaseq_sample_no_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+@pytest.fixture(name="novaseq_flow_cell_sample_no_dual_index")
+def fixture_novaseq_flow_cell_sample_no_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
     return FlowCellSampleNovaSeq6000Bcl2Fastq(
         FCID="HWHMWDMXX",

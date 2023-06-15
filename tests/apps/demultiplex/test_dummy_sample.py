@@ -15,7 +15,7 @@ def test_get_dummy_sample_name():
     # WHEN converting it to a dummy sample name
     dummy_sample_name: str = get_dummy_sample_name(sample_name=raw_sample_name)
 
-    # THEN that the correct name was created
+    # THEN the name had spaces and parentheses replaced by dashes
     assert dummy_sample_name == "D10---D710-D504--TCCGCGAA-GGCTCTGA-"
 
 
@@ -32,5 +32,5 @@ def test_get_dummy_sample(bcl2fastq_flow_cell_id: str, index_obj: Index):
         sample_type=FlowCellSampleNovaSeq6000Bcl2Fastq,
     )
 
-    # THEN that the sample id was correct
+    # THEN the sample id was correct
     assert dummy_flow_cell_sample.sample_id == get_dummy_sample_name(index_obj.name)
