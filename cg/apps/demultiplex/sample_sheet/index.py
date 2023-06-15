@@ -136,7 +136,7 @@ def adapt_indexes(
     novaseq software control version (1.7) in combination with the new reagent kit
     (version 1.5).
     """
-    LOG.info("Fix so that all indexes are on the correct format")
+    LOG.info("Fix so that all indexes are in the correct format")
     reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
     for sample in samples:
         index1, index2 = sample.index.split("-")

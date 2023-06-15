@@ -35,16 +35,16 @@ def test_get_valid_indexes():
 
 
 def test_get_indexes_by_lane(
-    novaseq_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
 ):
     """Test that getting indexes by lane groups indexes correctly."""
     # GIVEN two samples on different lanes
-    assert novaseq_flow_cell_sample_1.lane != novaseq_flow_cell_sample_2.lane
+    assert novaseq6000_flow_cell_sample_1.lane != novaseq6000_flow_cell_sample_2.lane
 
     # WHEN getting indexes by lane
     indexes_by_lane: Dict[int, Set[str]] = get_indexes_by_lane(
-        samples=[novaseq_flow_cell_sample_1, novaseq_flow_cell_sample_2]
+        samples=[novaseq6000_flow_cell_sample_1, novaseq6000_flow_cell_sample_2]
     )
 
     # THEN the result dictionary has two items
@@ -104,15 +104,15 @@ def test_get_reverse_complement_not_dna(caplog):
 
 def test_adapt_indexes_reverse_complement_padding(
     novaseq_6000_run_parameters: RunParameters,
-    novaseq_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
 ):
     """Test that adapting indexes of a sample that needs padding and reverse complement works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
     assert is_reverse_complement(run_parameters=novaseq_6000_run_parameters)
     # GIVEN a sample that needs padding
     assert novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
-    novaseq_flow_cell_sample_before_adapt_indexes.index = "ATTCCACA-TGGTCTTG"
-    samples: List = [novaseq_flow_cell_sample_before_adapt_indexes]
+    novaseq6000_flow_cell_sample_before_adapt_indexes.index = "ATTCCACA-TGGTCTTG"
+    samples: List = [novaseq6000_flow_cell_sample_before_adapt_indexes]
 
     # WHEN adapting the indexes of the sample
     adapt_indexes(samples=samples, run_parameters=novaseq_6000_run_parameters)
@@ -128,7 +128,7 @@ def test_adapt_indexes_reverse_complement_padding(
 
 def test_adapt_indexes_reverse_complement_no_padding(
     novaseq_6000_run_parameters: RunParameters,
-    novaseq_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,
 ):
     """Test that adapting indexes of a sample that needs reverse complement but no padding works."""
     # GIVEN a run parameters file that needs reverse complement of indexes
@@ -136,10 +136,10 @@ def test_adapt_indexes_reverse_complement_no_padding(
     # GIVEN a sample that does not need padding
     assert (
         novaseq_6000_run_parameters.get_index_1_cycles() == LONG_INDEX_CYCLE_NR
-        and len(novaseq_flow_cell_sample_before_adapt_indexes.index) >= 2 * LONG_INDEX_CYCLE_NR
+        and len(novaseq6000_flow_cell_sample_before_adapt_indexes.index) >= 2 * LONG_INDEX_CYCLE_NR
     )
-    samples: List = [novaseq_flow_cell_sample_before_adapt_indexes]
-    initial_indexes: List[str] = novaseq_flow_cell_sample_before_adapt_indexes.index.split("-")
+    samples: List = [novaseq6000_flow_cell_sample_before_adapt_indexes]
+    initial_indexes: List[str] = novaseq6000_flow_cell_sample_before_adapt_indexes.index.split("-")
     initial_index1: str = initial_indexes[0]
     initial_index2: str = initial_indexes[1]
 

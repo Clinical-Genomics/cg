@@ -290,8 +290,8 @@ def fixture_valid_sample_sheet_dragen_path() -> Path:
     return Path("tests", "fixtures", "apps", "demultiplexing", "SampleSheetS2_Dragen.csv")
 
 
-@pytest.fixture(name="novaseq_flow_cell_sample_1")
-def fixture_novaseq_flow_cell_sample_1() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+@pytest.fixture(name="novaseq6000_flow_cell_sample_1")
+def fixture_novaseq6000_flow_cell_sample_1() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleNovaSeq6000Bcl2Fastq(
         FCID="HWHMWDMXX",
@@ -308,8 +308,8 @@ def fixture_novaseq_flow_cell_sample_1() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     )
 
 
-@pytest.fixture(name="novaseq_flow_cell_sample_2")
-def fixture_novaseq_flow_cell_sample_2() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+@pytest.fixture(name="novaseq6000_flow_cell_sample_2")
+def fixture_novaseq6000_flow_cell_sample_2() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     """Return a NovaSeq sample."""
     return FlowCellSampleNovaSeq6000Bcl2Fastq(
         FCID="HWHMWDMXX",
@@ -336,8 +336,8 @@ def fixture_novaseq_x_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleN
     )
 
 
-@pytest.fixture(name="novaseq_flow_cell_sample_no_dual_index")
-def fixture_novaseq_flow_cell_sample_no_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+@pytest.fixture(name="novaseq6000_flow_cell_sample_no_dual_index")
+def fixture_novaseq6000_flow_cell_sample_no_dual_index() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
     """Return a NovaSeq sample without dual indexes."""
     return FlowCellSampleNovaSeq6000Bcl2Fastq(
         FCID="HWHMWDMXX",
@@ -349,8 +349,10 @@ def fixture_novaseq_flow_cell_sample_no_dual_index() -> FlowCellSampleNovaSeq600
     )
 
 
-@pytest.fixture(name="novaseq_flow_cell_sample_before_adapt_indexes")
-def fixture_novaseq_flow_cell_sample_before_adapt_indexes() -> FlowCellSampleNovaSeq6000Bcl2Fastq:
+@pytest.fixture(name="novaseq6000_flow_cell_sample_before_adapt_indexes")
+def fixture_novaseq6000_flow_cell_sample_before_adapt_indexes() -> (
+    FlowCellSampleNovaSeq6000Bcl2Fastq
+):
     """Return a NovaSeq sample without dual indexes."""
     return FlowCellSampleNovaSeq6000Bcl2Fastq(
         FCID="HWHMWDMXX",
