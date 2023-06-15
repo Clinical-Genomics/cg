@@ -21,7 +21,6 @@ def upgrade():
         "idx_sample_internal_id",
         "sample_lane_sequencing_metrics",
         ["sample_internal_id"],
-        unique=False,
     )
 
 
