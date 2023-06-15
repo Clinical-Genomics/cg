@@ -2256,6 +2256,7 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 def expected_total_reads() -> int:
     return 1_000_000
 
+
 @pytest.fixture
 def store_with_sequencing_metrics(
     store: Store, sample_id: str, expected_total_reads: int
