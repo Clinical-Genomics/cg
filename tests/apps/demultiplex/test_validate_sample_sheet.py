@@ -19,21 +19,21 @@ from cg.exc import SampleSheetError
 
 
 def test_validate_samples_are_unique(
-    novaseq_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
 ):
     """Test that validating two different samples finishes successfully."""
     # GIVEN two different NovaSeq samples
-    assert novaseq_sample_1 != novaseq_sample_2
+    assert novaseq_flow_cell_sample_1 != novaseq_flow_cell_sample_2
 
     # WHEN validating the samples
-    validate_samples_are_unique(samples=[novaseq_sample_1, novaseq_sample_2])
+    validate_samples_are_unique(samples=[novaseq_flow_cell_sample_1, novaseq_flow_cell_sample_2])
 
     # THEN no error is raised
 
 
 def test_validate_samples_are_unique_when_not_unique(
-    novaseq_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq, caplog
+    novaseq_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq, caplog
 ):
     """Test that validating two identical samples fails."""
     # GIVEN two identical NovaSeq samples
@@ -41,24 +41,27 @@ def test_validate_samples_are_unique_when_not_unique(
 
     # WHEN validating the samples
     with pytest.raises(SampleSheetError):
-        validate_samples_are_unique(samples=[novaseq_sample_1, novaseq_sample_1])
+        validate_samples_are_unique(
+            samples=[novaseq_flow_cell_sample_1, novaseq_flow_cell_sample_1]
+        )
 
     # THEN a sample sheet error is raised due to the samples being identical
     assert (
-        f"Sample {novaseq_sample_1.sample_id} exists multiple times in sample sheet" in caplog.text
+        f"Sample {novaseq_flow_cell_sample_1.sample_id} exists multiple times in sample sheet"
+        in caplog.text
     )
 
 
 def test_get_samples_by_lane(
-    novaseq_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
-    novaseq_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq_flow_cell_sample_1: FlowCellSampleNovaSeq6000Bcl2Fastq,
+    novaseq_flow_cell_sample_2: FlowCellSampleNovaSeq6000Bcl2Fastq,
 ):
     """Test that grouping two samples with different lanes returns two groups."""
     # GIVEN two samples on two different lanes
 
     # WHEN getting the samples per lane
     samples_per_lane: Dict[int, List[FlowCellSample]] = get_samples_by_lane(
-        samples=[novaseq_sample_1, novaseq_sample_2]
+        samples=[novaseq_flow_cell_sample_1, novaseq_flow_cell_sample_2]
     )
 
     # THEN the returned value is a dictionary

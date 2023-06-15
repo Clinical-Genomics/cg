@@ -15,9 +15,11 @@ LOG = logging.getLogger(__name__)
 DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
 INDEX_ONE_PAD_SEQUENCE: str = "AT"
 INDEX_TWO_PAD_SEQUENCE: str = "AC"
+LONG_INDEX_CYCLE_NR: str = 10
 NEW_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
 NEW_REAGENT_KIT_VERSION: str = "1.5"
 REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
+SHORT_SAMPLE_INDEX_LENGTH: str = 8
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
@@ -97,13 +99,13 @@ def is_reverse_complement(run_parameters: RunParameters) -> bool:
     return True
 
 
-def needs_padding(index_cycles: int, sample_index_length: int) -> bool:
+def is_padding_needed(index_cycles: int, sample_index_length: int) -> bool:
     """Returns whether a sample needs padding or not given the sample index length.
     A sample needs padding if its index length is shorter than the number of index cycles reads
     stated in the run parameters file of the sequencing. This happens when the sample index is
     8 nucleotides long and the number of index cycles read is 10 nucleotides.
     """
-    return index_cycles == 10 and sample_index_length == 8
+    return index_cycles == LONG_INDEX_CYCLE_NR and sample_index_length == SHORT_SAMPLE_INDEX_LENGTH
 
 
 def get_reverse_complement_dna_seq(dna: str) -> str:
@@ -141,7 +143,7 @@ def adapt_indexes(
         index1: str = index1.strip()
         index2: str = index2.strip()
         index_length = len(index1)
-        if needs_padding(
+        if is_padding_needed(
             index_cycles=run_parameters.index_length, sample_index_length=index_length
         ):
             LOG.debug("Padding indexes")

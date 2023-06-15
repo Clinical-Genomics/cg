@@ -67,7 +67,7 @@ class SampleSheetCreator:
         return [str(sample_dict[column]) for column in data_column_names]
 
     def get_additional_sections_sample_sheet(self) -> Optional[List]:
-        """Build all sections of the sample sheet that are not the data section."""
+        """Return all sections of the sample sheet that are not the data section."""
         raise NotImplementedError("Impossible to get sample sheet sections from parent class")
 
     def get_data_section_header_and_columns(self) -> Optional[List[List[str]]]:
@@ -142,7 +142,7 @@ class SampleSheetCreatorV1(SampleSheetCreator):
                 self.lims_samples.append(dummy_flow_cell_sample)
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
-        """Build all sections of the sample sheet that is not the data section."""
+        """Return all sections of the sample sheet that are not the data section."""
         return [
             [SampleSheetNovaSeq6000Sections.Settings.HEADER.value],
             SampleSheetNovaSeq6000Sections.Settings.BARCODE_MISMATCH_INDEX1.value,
@@ -177,7 +177,7 @@ class SampleSheetCreatorV2(SampleSheetCreator):
         return
 
     def get_additional_sections_sample_sheet(self) -> List[List[str]]:
-        """Build all sections of the sample sheet that is not the data section."""
+        """Return all sections of the sample sheet that are not the data section."""
         header_section: List[List[str]] = [
             [SampleSheetNovaSeqXSections.Header.HEADER.value],
             SampleSheetNovaSeqXSections.Header.FILE_FORMAT.value,
