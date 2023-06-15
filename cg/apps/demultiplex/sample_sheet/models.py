@@ -9,7 +9,7 @@ LOG = logging.getLogger(__name__)
 
 
 class FlowCellSample(BaseModel):
-    """This model is used when parsing/validating existing sample sheets."""
+    """Base class for flow cell samples."""
 
     lane: int
     sample_id: str
@@ -22,6 +22,8 @@ class FlowCellSample(BaseModel):
 
 
 class FlowCellSampleNovaSeq6000(FlowCellSample):
+    """Base class for NovaSeq6000 flow cell samples."""
+
     flowcell_id: str = Field("", alias=SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value)
     lane: int = Field(..., alias=SampleSheetNovaSeq6000Sections.Data.LANE.value)
     sample_ref: str = Field(
@@ -36,6 +38,8 @@ class FlowCellSampleNovaSeq6000(FlowCellSample):
 
 
 class FlowCellSampleNovaSeqX(FlowCellSample):
+    """Class that represents a NovaSeqX flow cell sample."""
+
     lane: int = Field(..., alias=SampleSheetNovaSeqXSections.Data.LANE.value)
     sample_id: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.SAMPLE_INTERNAL_ID.value)
     index: str = Field(..., alias=SampleSheetNovaSeqXSections.Data.INDEX_1.value)
@@ -43,14 +47,16 @@ class FlowCellSampleNovaSeqX(FlowCellSample):
     adapter_read_1: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_1.value)
     adapter_read_2: str = Field("", alias=SampleSheetNovaSeqXSections.Data.ADAPTER_READ_2.value)
     barcode_mismatches_1: int = Field(
-        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_1.value
+        1, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_1.value
     )
     barcode_mismatches_2: int = Field(
-        0, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_2.value
+        1, alias=SampleSheetNovaSeqXSections.Data.BARCODE_MISMATCHES_2.value
     )
 
 
 class FlowCellSampleNovaSeq6000Bcl2Fastq(FlowCellSampleNovaSeq6000):
+    """Class that represents a NovaSeq6000 Bcl2fastq flow cell sample."""
+
     sample_id: str = Field(
         ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCL2FASTQ.value
     )
@@ -60,6 +66,8 @@ class FlowCellSampleNovaSeq6000Bcl2Fastq(FlowCellSampleNovaSeq6000):
 
 
 class FlowCellSampleNovaSeq6000Dragen(FlowCellSampleNovaSeq6000):
+    """Class that represents a NovaSeq6000 Dragen flow cell sample."""
+
     sample_id: str = Field(
         ..., alias=SampleSheetNovaSeq6000Sections.Data.SAMPLE_INTERNAL_ID_BCLCONVERT.value
     )
