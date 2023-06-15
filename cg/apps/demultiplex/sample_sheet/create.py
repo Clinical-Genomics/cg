@@ -27,7 +27,9 @@ def create_sample_sheet(
     flow_cell_sequencer: str = flow_cell.sequencer_type
 
     if flow_cell_sequencer == Sequencers.NOVASEQ:
-        pass
+        LOG.info(
+            f"Constructing a {bcl_converter} sample sheet for the {flow_cell_sequencer} flow cell {flow_cell.id}"
+        )
     elif flow_cell_sequencer == Sequencers.NOVASEQX:
         message = f"Building a V1 sample sheet for {Sequencers.NOVASEQX}. V2 sample sheets will be available soon"
         LOG.warning(message)
@@ -43,7 +45,4 @@ def create_sample_sheet(
         force=force,
     )
 
-    LOG.info(
-        f"Constructing a {bcl_converter} sample sheet for the {flow_cell_sequencer} flow cell {flow_cell.id}"
-    )
     return sample_sheet_creator.construct_sample_sheet()

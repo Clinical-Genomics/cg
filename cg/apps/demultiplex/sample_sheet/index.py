@@ -15,11 +15,11 @@ LOG = logging.getLogger(__name__)
 DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
 INDEX_ONE_PAD_SEQUENCE: str = "AT"
 INDEX_TWO_PAD_SEQUENCE: str = "AC"
-LONG_INDEX_CYCLE_NR: str = 10
+LONG_INDEX_CYCLE_NR: int = 10
 NEW_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
 NEW_REAGENT_KIT_VERSION: str = "1.5"
 REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
-SHORT_SAMPLE_INDEX_LENGTH: str = 8
+SHORT_SAMPLE_INDEX_LENGTH: int = 8
 
 
 def index_exists(index: str, indexes: Set[str]) -> bool:
