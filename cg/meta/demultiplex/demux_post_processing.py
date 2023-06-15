@@ -1,5 +1,5 @@
 """Post-processing Demultiiplex API."""
-import datetime
+from datetime import datetime
 import logging
 import re
 import shutil
@@ -103,7 +103,7 @@ class DemuxPostProcessingAPI:
         bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
 
         # 1. Validate that the flow cell directory exists.
-        if not self.flow_cell_directory_is_valid(flow_cell_directory=flow_cell_dir):
+        if not self.is_flow_cell_directory_valid(flow_cell_directory=flow_cell_dir):
             return
 
         # 2. Parse flow cell directory.
@@ -133,13 +133,13 @@ class DemuxPostProcessingAPI:
         # 6. Update samples in status db with read counts and sequencing date.
         samples: List[FlowCellSample] = parsed_flow_cell.get_sample_sheet().samples
         sample_ids: List[str] = [sample.internal_id for sample in samples]
-        flow_cell_sequencing_date: datetime.datetime = parsed_flow_cell.run_date
+        flow_cell_sequencing_date: datetime = parsed_flow_cell.run_date
 
         self.update_samples_with_read_counts_and_sequencing_date(
             sample_internal_ids=sample_ids, flow_cell_sequencing_date=flow_cell_sequencing_date
         )
 
-    def flow_cell_directory_is_valid(self, flow_cell_directory: Path) -> bool:
+    def is_flow_cell_directory_valid(self, flow_cell_directory: Path) -> bool:
         """Validate that the flow cell directory exists and that the demultiplexing is complete."""
 
         if not flow_cell_directory.exists():
@@ -153,7 +153,7 @@ class DemuxPostProcessingAPI:
         return True
 
     def update_samples_with_read_counts_and_sequencing_date(
-        self, sample_internal_ids: List[str], flow_cell_sequencing_date: datetime.datetime
+        self, sample_internal_ids: List[str], flow_cell_sequencing_date: datetime
     ) -> None:
         """Update samples in status db with read counts and sequencing date."""
 

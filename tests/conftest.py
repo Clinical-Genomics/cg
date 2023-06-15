@@ -7,7 +7,7 @@ import os
 import shutil
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -2253,13 +2253,19 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
 
 
 @pytest.fixture
-def store_with_sequencing_metrics(store: Store):
+def expected_total_reads() -> int:
+    return 1_000_000
+
+@pytest.fixture
+def store_with_sequencing_metrics(
+    store: Store, sample_id: str, expected_total_reads: int
+) -> Generator[Store, None, None]:
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
-    sample_sequencing_metrics_details = [
-        ("sample1", "flowcell1", 1, 1000000, 90.5, 32),
-        ("sample2", "flowcell2", 2, 2000000, 85.5, 30),
-        ("sample3", "flowcell3", 3, 1500000, 80.5, 33),
+    sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
+        (sample_id, "flow_cell_1", 1, expected_total_reads, 90.5, 32),
+        ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
+        ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
     ]
 
     sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []

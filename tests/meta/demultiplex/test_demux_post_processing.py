@@ -779,6 +779,8 @@ def test_get_sample_id_from_sample_fastq_file_path(demultiplex_context: CGConfig
 
 
 def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context: CGConfig):
+    """Test that samples can be updated with read counts and sequencing date."""
+
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
@@ -786,7 +788,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics = MagicMock()
 
     mock_sample = MagicMock()
-    mock_read_count = 1000
+    mock_read_count = 1_000
 
     demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
     demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics.return_value = (

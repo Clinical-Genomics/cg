@@ -319,16 +319,16 @@ def test_get_samples_by_any_id_exclusive_filtering_gives_empty_query(
     assert filtered_query.count() == 0
 
 
-def test_get_number_of_reads_for_sample_from_metrics(store_with_sequencing_metrics: Store):
+def test_get_number_of_reads_for_sample_from_metrics(
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
+):
     """Test if get_number_of_reads_for_sample_from_metrics function returns correct total reads."""
 
     # GIVEN a store with multiple samples with sequencing metrics
-    sample_internal_id = "sample1"
-    expected_total_reads = 1000000
 
     # WHEN getting number of reads for a specific sample
     actual_total_reads = store_with_sequencing_metrics.get_number_of_reads_for_sample_from_metrics(
-        sample_internal_id
+        sample_internal_id=sample_id
     )
 
     # THEN it should return correct total reads for the sample
