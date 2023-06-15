@@ -768,3 +768,20 @@ def test_get_cases_not_analysed_by_sample_internal_id_multiple_cases(
     for case in cases:
         assert not case.analyses
         assert any(sample.internal_id == sample_id_in_multiple_cases for sample in case.samples)
+
+
+
+def test_get_total_read_counts(
+    store_with_sequencing_metrics: Store, sample_id: str, expected_total_reads: int
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting total read counts for a sample
+    total_reads_count: int = (
+        store_with_sequencing_metrics.get_number_of_reads_for_sample_from_metrics(
+            sample_internal_id=sample_id
+        )
+    )
+
+    # THEN assert that the total read count is correct
+    total_reads_count == expected_total_reads

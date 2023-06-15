@@ -7,16 +7,13 @@ from cg.store.models import SampleLaneSequencingMetrics
 
 
 def get_total_read_count_for_sample(metrics: Query, sample_internal_id: str, **kwargs) -> Query:
-    """Return metrics by internal id."""
-    total_reads_query: Query = (
-        metrics
-        .with_entities(func.sum(SampleLaneSequencingMetrics.sample_total_reads_in_lane))
-        .filter(SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id)
-    )
+    total_reads_query: Query = metrics.with_entities(
+        func.sum(SampleLaneSequencingMetrics.sample_total_reads_in_lane)
+    ).filter(SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id)
     return total_reads_query
 
+
 class SequencingMetricsFilter(Enum):
-    """Define Organism filter functions."""
     GET_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = get_total_read_count_for_sample
 
 
@@ -25,7 +22,6 @@ def apply_metrics_filter(
     filter_functions: List[Callable],
     sample_internal_id: Optional[str] = None,
 ) -> Query:
-    """Apply filtering functions and return filtered results."""
     for filter_function in filter_functions:
         metrics: Query = filter_function(
             metrics=metrics,
