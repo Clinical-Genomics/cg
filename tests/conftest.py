@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple
 
 import pytest
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from housekeeper.store.models import File, Version
 from requests import Response
 
@@ -24,16 +23,18 @@ from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
-from cg.io.json import write_json, read_json
+from cg.io.json import read_json, write_json
+from cg.io.yaml import write_yaml
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Organism, Family, Sample
+from cg.store.models import Bed, BedVersion, Customer, Family, Organism, Sample
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -2202,13 +2203,19 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 
 @pytest.fixture(name="rnafusion_multiqc_json_metrics")
 def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
-    """Returns a the content of a mock multiqc json file."""
+    """Returns the content of a mock multiqc json file."""
     return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture(name="tower_id")
+def fixture_tower_id() -> dict:
+    """Returns a mocked NF-Tower ID."""
+    return 123456
 
 
 @pytest.fixture
 def mock_analysis_finish(
-    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
 ) -> None:
     """Create analysis_finish file for testing."""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
@@ -2231,6 +2238,14 @@ def mock_analysis_finish(
             "multiqc",
             "multiqc_data",
             "multiqc_data.json",
+        ),
+    )
+    write_yaml(
+        content={rnafusion_case_id: [tower_id]},
+        file_path=Path(
+            rnafusion_dir,
+            rnafusion_case_id,
+            "tower_ids.yaml",
         ),
     )
 
