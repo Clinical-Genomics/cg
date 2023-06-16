@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.7-slim
+FROM docker.io/library/python:3.7-slim@sha256:a3d56aa50b404c5f07951d704203a7c02cf8261717f8fa95339a6fd74305d323
 
 ENV GUNICORN_WORKERS=1
 ENV GUNICORN_THREADS=1
