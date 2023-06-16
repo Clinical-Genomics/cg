@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cg.models.rnafusion.analysis import RnafusionAnalysis
 from pydantic import ValidationError
 
 from cg import resources
@@ -31,6 +30,7 @@ from cg.models.deliverables.metric_deliverables import (
     MultiqcDataJson,
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
+from cg.models.rnafusion.analysis import RnafusionAnalysis
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
@@ -181,6 +181,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
+    def get_last_tower_id(self, case_id: str) -> Path:
+        """Return the previous NF-Tower ID."""
+        trailblazer_config: Path = self.get_trailblazer_config_path(case_id=case_id)
+        if not trailblazer_config.exists():
+            raise FileNotFoundError(f"No trailblazer config found for case {case_id}")
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=Path(trailblazer_config)
+        ).get(case_id)[-1]
+
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
             return genomes_base.absolute()
@@ -274,10 +283,17 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
         else:
             LOG.info("Pipeline will be executed using tower")
-            parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(
-                tower_pipeline=self.tower_pipeline,
-                command_args=command_args,
-            )
+            if command_args.get("resume", False):
+                last_tower_id: int = (self.get_last_tower_id(case_id=case_id),)
+                LOG.info(f"Pipeline will be resumed from run {last_tower_id}.")
+                parameters: List[str] = TowerAnalysisAPI.get_tower_relaunch_parameters(
+                    last_tower_id=last_tower_id, command_args=command_args
+                )
+            else:
+                parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(
+                    tower_pipeline=self.tower_pipeline,
+                    command_args=command_args,
+                )
             self.process.run_command(parameters=parameters, dry_run=dry_run)
             if self.process.stderr:
                 LOG.error(self.process.stderr)
