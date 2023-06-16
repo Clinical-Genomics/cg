@@ -185,8 +185,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Return the previously-stored NF-Tower ID."""
         trailblazer_config: Path = self.get_trailblazer_config_path(case_id=case_id)
         if not trailblazer_config.exists():
-            LOG.error(f"No tower ID found for case {case_id}.")
-            raise FileNotFoundError
+            raise FileNotFoundError(f"No tower ID found for case {case_id}.")
         return ReadFile.get_content_from_file(
             file_format=FileFormat.YAML, file_path=Path(trailblazer_config)
         ).get(case_id)[-1]
@@ -284,7 +283,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
         else:
             LOG.info("Pipeline will be executed using tower")
-            if command_args.get("resume", False):
+            if command_args.get("resume"):
                 from_tower_id: int = command_args.get("id")
                 if not from_tower_id:
                     from_tower_id: int = self.get_last_tower_id(case_id=case_id)
