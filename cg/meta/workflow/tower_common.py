@@ -53,9 +53,9 @@ class TowerAnalysisAPI:
             "runs",
             "relaunch",
             "--id",
-            from_tower_id,
+            str(from_tower_id),
             "--name",
-            f"{command_args.get('name')}_from{from_tower_id}",
+            f"{command_args.get('name')}_from{str(from_tower_id)}",
         ] + tower_options
 
     @staticmethod
