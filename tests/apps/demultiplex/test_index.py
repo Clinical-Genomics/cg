@@ -3,18 +3,7 @@ from typing import Dict, List, Set
 
 import pytest
 
-from cg.apps.demultiplex.sample_sheet.index import (
-    Index,
-    INDEX_ONE_PAD_SEQUENCE,
-    INDEX_TWO_PAD_SEQUENCE,
-    LONG_INDEX_CYCLE_NR,
-    adapt_indexes,
-    is_reverse_complement,
-    get_valid_indexes,
-    get_indexes_by_lane,
-    get_reagent_kit_version,
-    get_reverse_complement_dna_seq,
-)
+from cg.apps.demultiplex.sample_sheet.index import *
 from cg.apps.demultiplex.sample_sheet.models import (
     FlowCellSampleNovaSeq6000Bcl2Fastq,
     FlowCellSampleNovaSeqX,
@@ -182,3 +171,67 @@ def test_adapt_indexes_no_reverse_complement_no_padding(
     # THEN the second index was correctly adapted
     assert len(test_sample.index2) == LONG_INDEX_CYCLE_NR
     assert test_sample.index2 == initial_index2
+
+
+def test_get_hamming_distance_index_1_different_lengths():
+    """Test that the hamming distance between indexes with same prefix but different lengths is zero."""
+    # GIVEN two index_1 sequences with the same prefixes but different lengths
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "GATTACAXX"
+
+    # WHEN getting the hamming distance between them in any order
+
+    # THEN the distance is zero
+    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) == 0
+
+    # WHEN getting the hamming distance between themselves
+
+    # THEN the distance is zero
+    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_2) == 0
+
+
+def test_get_hamming_distance_index_1_different_prefixes():
+    """Test that the hamming distance between indexes with different prefixes is greater than zero."""
+    # GIVEN two index_1 sequences with the same suffixes but different prefixes
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "XXGATTACA"
+
+    # WHEN getting the hamming distance between them in any order
+
+    # THEN the distance is greater than zero
+    assert get_hamming_distance_index_1(sequence_1=sequence_1, sequence_2=sequence_2) > 0
+    assert get_hamming_distance_index_1(sequence_1=sequence_2, sequence_2=sequence_1) > 0
+
+
+def test_get_hamming_distance_index_2_different_lengths():
+    """Test that the hamming distance between indexes with same suffix but different lengths is zero."""
+    # GIVEN two index_2 sequences with the same suffixes but different lengths
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "XXGATTACA"
+
+    # WHEN getting the hamming distance between them in any order
+
+    # THEN the distance is zero
+    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) == 0
+    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) == 0
+
+    # WHEN getting the hamming distance between themselves
+
+    # THEN the distance is zero
+    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_1) == 0
+    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_2) == 0
+
+
+def test_get_hamming_distance_index_2_different_prefixes():
+    """Test that the hamming distance between indexes with different suffixes is greater than zero."""
+    # GIVEN two index_2 sequences with the same prefixes but different suffixes
+    sequence_1: str = "GATTACA"
+    sequence_2: str = "GATTACAXX"
+
+    # WHEN getting the hamming distance between them in any order
+
+    # THEN the distance is greater than zero
+    assert get_hamming_distance_index_2(sequence_1=sequence_1, sequence_2=sequence_2) > 0
+    assert get_hamming_distance_index_2(sequence_1=sequence_2, sequence_2=sequence_1) > 0

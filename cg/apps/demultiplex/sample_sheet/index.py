@@ -1,13 +1,14 @@
 """Functions that deal with modifications of the indexes."""
 import logging
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
-from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, FlowCellSampleNovaSeqX
 from cg.constants.constants import FileFormat
 from cg.constants.sequencing import Sequencers
 from cg.io.controller import ReadFile
 from cg.models.demultiplex.run_parameters import RunParameters
 from cg.resources import VALID_INDEXES_PATH
+from cg.utils.utils import get_hamming_distance
 from packaging import version
 from pydantic import BaseModel
 
@@ -16,6 +17,7 @@ DNA_COMPLEMENTS: Dict[str, str] = {"A": "T", "C": "G", "G": "C", "T": "A"}
 INDEX_ONE_PAD_SEQUENCE: str = "AT"
 INDEX_TWO_PAD_SEQUENCE: str = "AC"
 LONG_INDEX_CYCLE_NR: int = 10
+MINIMUM_HAMMING_DISTANCE: int = 3
 NEW_CONTROL_SOFTWARE_VERSION: str = "1.7.0"
 NEW_REAGENT_KIT_VERSION: str = "1.5"
 REAGENT_KIT_PARAMETER_TO_VERSION: Dict[str, str] = {"1": "1.0", "3": "1.5"}
@@ -68,6 +70,12 @@ def get_reagent_kit_version(reagent_kit_version: str) -> str:
         raise SyntaxError(f"Unknown reagent kit version {reagent_kit_version}")
 
     return REAGENT_KIT_PARAMETER_TO_VERSION[reagent_kit_version]
+
+
+def get_index_pair(dual_index: str) -> Tuple[str, str]:
+    """Returns a sample index separated into index_1 and index_2."""
+    index_1, index_2 = dual_index.split("-")
+    return index_1.strip(), index_2.strip()
 
 
 def is_reverse_complement(run_parameters: RunParameters) -> bool:
@@ -127,6 +135,49 @@ def pad_index_two(index_string: str, reverse_complement: bool) -> str:
     return index_string + INDEX_TWO_PAD_SEQUENCE
 
 
+def get_hamming_distance_index_1(sequence_1: str, sequence_2: str) -> int:
+    """Get the hamming distance between two index 1 sequences.
+    In the case that one sequence is longer than the other, the distance is calculated between
+    the shortest sequence and the first segment of equal length of the longest sequence."""
+    limit: int = min(len(sequence_1), len(sequence_2))
+    return get_hamming_distance(str_1=sequence_1[:limit], str_2=sequence_2[:limit])
+
+
+def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
+    """Get the hamming distance between two index 1 sequences.
+    In the case that one sequence is longer than the other, the distance is calculated between
+    the shortest sequence and the last segment of equal length of the longest sequence."""
+    limit: int = min(len(sequence_1), len(sequence_2))
+    return get_hamming_distance(str_1=sequence_1[-limit:], str_2=sequence_2[-limit:])
+
+
+def update_barcode_mismatch_values(
+    sample_to_update: FlowCellSampleNovaSeqX, samples: List[FlowCellSampleNovaSeqX]
+) -> None:
+    """Updates the barcode mismatches for both indexes of a FlowCellSampleNovaSeqX."""
+    index_1_has_similar_index: bool = False
+    index_2_has_similar_index: bool = False
+    index_1_sample_to_update, index_2_sample_to_update = get_index_pair(
+        dual_index=sample_to_update.index
+    )
+    for sample in samples:
+        index_1, index_2 = get_index_pair(dual_index=sample.index)
+        if (
+            get_hamming_distance_index_1(sequence_1=index_1_sample_to_update, sequence_2=index_1)
+            < MINIMUM_HAMMING_DISTANCE
+        ):
+            index_1_has_similar_index = True
+        if (
+            get_hamming_distance_index_2(sequence_1=index_2_sample_to_update, sequence_2=index_2)
+            < MINIMUM_HAMMING_DISTANCE
+        ):
+            index_2_has_similar_index = True
+    if index_1_has_similar_index:
+        sample_to_update.barcode_mismatches_1 = 0
+    if index_2_has_similar_index:
+        sample_to_update.barcode_mismatches_2 = 0
+
+
 def adapt_indexes(
     samples: List[FlowCellSample],
     run_parameters: RunParameters,
@@ -139,9 +190,7 @@ def adapt_indexes(
     LOG.info("Fix so that all indexes are in the correct format")
     reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
     for sample in samples:
-        index1, index2 = sample.index.split("-")
-        index1: str = index1.strip()
-        index2: str = index2.strip()
+        index1, index2 = get_index_pair(dual_index=sample.index)
         index_length = len(index1)
         if is_padding_needed(
             index_cycles=run_parameters.index_length, sample_index_length=index_length
