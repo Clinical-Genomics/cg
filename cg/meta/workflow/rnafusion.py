@@ -181,8 +181,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
-    def get_last_tower_id(self, case_id: str) -> Path:
-        """Return the previous NF-Tower ID."""
+    def get_last_tower_id(self, case_id: str) -> int:
+        """Return the previously-stored NF-Tower ID."""
         trailblazer_config: Path = self.get_trailblazer_config_path(case_id=case_id)
         if not trailblazer_config.exists():
             raise FileNotFoundError(f"No trailblazer config found for case {case_id}")
@@ -284,7 +284,7 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         else:
             LOG.info("Pipeline will be executed using tower")
             if command_args.get("resume", False):
-                last_tower_id: int = (self.get_last_tower_id(case_id=case_id),)
+                last_tower_id: int = self.get_last_tower_id(case_id=case_id)
                 LOG.info(f"Pipeline will be resumed from run {last_tower_id}.")
                 parameters: List[str] = TowerAnalysisAPI.get_tower_relaunch_parameters(
                     last_tower_id=last_tower_id, command_args=command_args
