@@ -2208,7 +2208,7 @@ def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
 
 
 @pytest.fixture(name="tower_id")
-def fixture_tower_id() -> dict:
+def fixture_tower_id() -> int:
     """Returns a mocked NF-Tower ID."""
     return 123456
 

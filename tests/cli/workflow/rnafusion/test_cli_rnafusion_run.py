@@ -243,7 +243,7 @@ def test_resume_without_id_error(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
+    cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should raise error
     assert "Could not resume analysis: No tower ID found for case" in caplog.text
