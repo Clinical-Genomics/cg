@@ -20,3 +20,10 @@ def build_command_from_dict(options: dict, exclude_true: bool = False) -> List[s
                 formatted_options.append(str(option_name))
                 formatted_options.append(str(option_value))
     return formatted_options
+
+
+def get_hamming_distance(str_1: str, str_2: str) -> Optional[int]:
+    """Return the hamming distance between two strings."""
+    if len(str_1) != len(str_2):
+        return None
+    return sum(n1 != n2 for n1, n2 in zip(str_1, str_2))
