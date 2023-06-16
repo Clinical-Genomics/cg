@@ -1,6 +1,5 @@
 """CLI support for tower pipelines."""
 
-from typing import Optional
 
 import click
 
@@ -11,7 +10,7 @@ OPTION_COMPUTE_ENV = click.option(
 )
 OPTION_ID = click.option(
     "--id",
-    type=Optional[int],
+    type=int,
     is_flag=False,
     default=None,
     help="NF-Tower ID of run to relaunch. If not provided the latest NF-Tower ID for a case will be used.",
