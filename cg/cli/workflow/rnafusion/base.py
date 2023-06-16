@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 import click
 from pydantic import ValidationError
@@ -24,7 +25,7 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.tb import AnalysisStatus
@@ -34,7 +35,6 @@ from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 
@@ -88,6 +88,7 @@ def config_case(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_ID
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -104,6 +105,7 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
+    id: Optional[int],
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
@@ -129,6 +131,7 @@ def run(
         "compute-env": compute_env or analysis_api.compute_env,
         "revision": revision or analysis_api.revision,
         "wait": "SUBMITTED",
+        "id": id,
     }
 
     try:

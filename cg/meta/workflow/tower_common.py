@@ -34,7 +34,7 @@ class TowerAnalysisAPI:
         return ["launch"] + tower_options + [tower_pipeline]
 
     @classmethod
-    def get_tower_relaunch_parameters(cls, last_tower_id: int, command_args: dict) -> List[str]:
+    def get_tower_relaunch_parameters(cls, from_tower_id: int, command_args: dict) -> List[str]:
         """Returns a tower relaunch command given a dictionary with arguments."""
 
         tower_options: List[str] = build_command_from_dict(
@@ -53,9 +53,9 @@ class TowerAnalysisAPI:
             "runs",
             "relaunch",
             "--id",
-            last_tower_id,
+            from_tower_id,
             "--name",
-            f"{command_args.get('name')}_from{last_tower_id}",
+            f"{command_args.get('name')}_from{from_tower_id}",
         ] + tower_options
 
     @staticmethod
