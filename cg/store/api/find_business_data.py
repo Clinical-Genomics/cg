@@ -77,40 +77,6 @@ class FindBusinessDataHandler(BaseHandler):
             .sample.application_version.application
         )
 
-    def get_analysis_for_vogue_upload_completed_after(self, completed_at_after: dt.datetime):
-        """Return all cases completed after a given date that have not been uploaded to Vogue."""
-        filter_functions = [
-            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
-            AnalysisFilter.FILTER_COMPLETED_AT_AFTER,
-        ]
-        return apply_analysis_filter(
-            analyses=self._get_latest_analyses_for_cases_query(),
-            filter_functions=filter_functions,
-            completed_at_date=completed_at_after,
-        ).all()
-
-    def get_analysis_for_vogue_upload_completed_before(self, completed_at_before: dt.datetime):
-        """Return all cases completed before a given date that have not been uploaded to Vogue."""
-        filter_functions = [
-            AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE,
-            AnalysisFilter.FILTER_COMPLETED_AT_BEFORE,
-        ]
-        return apply_analysis_filter(
-            analyses=self._get_latest_analyses_for_cases_query(),
-            filter_functions=filter_functions,
-            completed_at_date=completed_at_before,
-        ).all()
-
-    def get_analyses_for_vogue_upload(
-        self,
-    ) -> List[Analysis]:
-        """Return the latest analysis not uploaded to Vogue for each case."""
-
-        return apply_analysis_filter(
-            analyses=self._get_latest_analyses_for_cases_query(),
-            filter_functions=[AnalysisFilter.FILTER_NOT_UPLOADED_TO_VOGUE],
-        ).all()
-
     def get_latest_analysis_to_upload_for_pipeline(self, pipeline: str = None) -> List[Analysis]:
         """Return latest not uploaded analysis for each case given a pipeline."""
         filter_functions: List[AnalysisFilter] = [
@@ -226,7 +192,7 @@ class FindBusinessDataHandler(BaseHandler):
         filter_functions: List[Callable] = [
             CaseFilter.FILTER_BY_CUSTOMER_ENTRY_ID,
             CaseFilter.FILTER_BY_CASE_SEARCH,
-            CaseFilter.GET_WITH_PIPELINE,
+            CaseFilter.FILTER_WITH_PIPELINE,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 
@@ -668,7 +634,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
         """Get all running cases in a pipeline."""
         return apply_case_filter(
-            filter_functions=[CaseFilter.GET_WITH_PIPELINE, CaseFilter.IS_RUNNING],
+            filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
             cases=self._get_query(table=Family),
             pipeline=pipeline,
         ).all()
@@ -684,7 +650,7 @@ class FindBusinessDataHandler(BaseHandler):
         not_analysed_cases: Query = apply_case_filter(
             cases=query,
             filter_functions=[
-                CaseFilter.GET_NOT_ANALYSED,
+                CaseFilter.FILTER_NOT_ANALYSED,
             ],
         )
 

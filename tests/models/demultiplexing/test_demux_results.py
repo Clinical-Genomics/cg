@@ -1,10 +1,12 @@
 from pathlib import Path
 
 from cg.models.demultiplex.demux_results import DemuxResults, LogfileParameters
-from cg.models.demultiplex.flow_cell import FlowCell
+from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
 
-def test_demux_results_instance(demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCell):
+def test_demux_results_instance(
+    demultiplexed_flow_cell: Path, bcl2fastq_flow_cell: FlowCellDirectoryData
+):
     # GIVEN the path to a demultiplexed flow cell and a flow cell object
 
     # WHEN instantiating a demux results object

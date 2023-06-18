@@ -101,9 +101,9 @@ class StatusHandler(BaseHandler):
     ) -> List[Family]:
         """Returns a list if cases ready to be analyzed or set to be reanalyzed."""
         case_filter_functions: List[CaseFilter] = [
-            CaseFilter.GET_HAS_SEQUENCE,
-            CaseFilter.GET_WITH_PIPELINE,
-            CaseFilter.GET_FOR_ANALYSIS,
+            CaseFilter.FILTER_HAS_SEQUENCE,
+            CaseFilter.FILTER_WITH_PIPELINE,
+            CaseFilter.FILTER_FOR_ANALYSIS,
         ]
         cases = apply_case_filter(
             filter_functions=case_filter_functions,
@@ -227,8 +227,8 @@ class StatusHandler(BaseHandler):
     def get_cases_to_compress(self, date_threshold: datetime) -> List[Family]:
         """Return all cases that are ready to be compressed by SPRING."""
         case_filter_functions: List[CaseFilter] = [
-            CaseFilter.GET_HAS_INACTIVE_ANALYSIS,
-            CaseFilter.GET_OLD_BY_CREATION_DATE,
+            CaseFilter.FILTER_HAS_INACTIVE_ANALYSIS,
+            CaseFilter.FILTER_OLD_BY_CREATION_DATE,
         ]
         return apply_case_filter(
             filter_functions=case_filter_functions,
@@ -636,8 +636,8 @@ class StatusHandler(BaseHandler):
     def observations_to_upload(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have not been uploaded."""
         case_filter_functions: List[CaseFilter] = [
-            CaseFilter.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE,
-            CaseFilter.GET_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
+            CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE,
+            CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD,
         ]
         records: Query = apply_case_filter(
             filter_functions=case_filter_functions,
@@ -651,7 +651,7 @@ class StatusHandler(BaseHandler):
     def observations_uploaded(self, pipeline: Pipeline = None) -> Query:
         """Return observations that have been uploaded."""
         records: Query = apply_case_filter(
-            filter_functions=[CaseFilter.GET_WITH_LOQUSDB_SUPPORTED_PIPELINE],
+            filter_functions=[CaseFilter.FILTER_WITH_LOQUSDB_SUPPORTED_PIPELINE],
             cases=self.get_families_with_samples(),
             pipeline=pipeline,
         )
@@ -681,7 +681,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_delivery_report(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be regenerated."""
         records: Query = apply_case_filter(
-            filter_functions=[CaseFilter.GET_REPORT_SUPPORTED],
+            filter_functions=[CaseFilter.FILTER_REPORT_SUPPORTED],
             cases=self._get_join_analysis_case_query(),
             pipeline=pipeline,
         )
@@ -698,7 +698,7 @@ class StatusHandler(BaseHandler):
     def analyses_to_upload_delivery_reports(self, pipeline: Pipeline = None) -> Query:
         """Return analyses that need a delivery report to be uploaded."""
         records: Query = apply_case_filter(
-            filter_functions=[CaseFilter.GET_WITH_SCOUT_DELIVERY],
+            filter_functions=[CaseFilter.FILTER_WITH_SCOUT_DELIVERY],
             cases=self._get_join_analysis_case_query(),
             pipeline=pipeline,
         )
