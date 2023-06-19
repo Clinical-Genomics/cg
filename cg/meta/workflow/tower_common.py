@@ -1,8 +1,11 @@
 """Module for Tower Analysis API."""
 
 import logging
+from pathlib import Path
 from typing import Iterable, List
 
+from cg.constants.constants import FileFormat
+from cg.io.controller import ReadFile
 from cg.utils.utils import build_command_from_dict
 
 LOG = logging.getLogger(__name__)
@@ -73,3 +76,12 @@ class TowerAnalysisAPI:
         for line in stdout_lines:
             if line.strip().startswith("Workflow"):
                 return line.strip().split()[1]
+
+    @classmethod
+    def get_last_tower_id(cls, case_id: str, trailblazer_config: Path) -> int:
+        """Return the previously-stored NF-Tower ID."""
+        if not trailblazer_config.exists():
+            raise FileNotFoundError(f"No NF-Tower ID found for case {case_id}.")
+        return ReadFile.get_content_from_file(
+            file_format=FileFormat.YAML, file_path=trailblazer_config
+        ).get(case_id)[-1]

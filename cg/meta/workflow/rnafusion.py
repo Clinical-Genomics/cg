@@ -181,15 +181,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             file_path=config_path,
         )
 
-    def get_last_tower_id(self, case_id: str) -> int:
-        """Return the previously-stored NF-Tower ID."""
-        trailblazer_config: Path = self.get_trailblazer_config_path(case_id=case_id)
-        if not trailblazer_config.exists():
-            raise FileNotFoundError(f"No tower ID found for case {case_id}.")
-        return ReadFile.get_content_from_file(
-            file_format=FileFormat.YAML, file_path=Path(trailblazer_config)
-        ).get(case_id)[-1]
-
     def get_references_path(self, genomes_base: Optional[Path] = None) -> Path:
         if genomes_base:
             return genomes_base.absolute()
@@ -286,7 +277,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
             if command_args.get("resume"):
                 from_tower_id: int = command_args.get("id")
                 if not from_tower_id:
-                    from_tower_id: int = self.get_last_tower_id(case_id=case_id)
+                    from_tower_id: int = TowerAnalysisAPI.get_last_tower_id(
+                        case_id=case_id,
+                        trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
+                    )
                 LOG.info(f"Pipeline will be resumed from run {from_tower_id}.")
                 parameters: List[str] = TowerAnalysisAPI.get_tower_relaunch_parameters(
                     from_tower_id=from_tower_id, command_args=command_args
