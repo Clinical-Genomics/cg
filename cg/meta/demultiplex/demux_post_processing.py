@@ -102,7 +102,7 @@ class DemuxPostProcessingAPI:
         flow_cell_dir: Path = Path(self.demux_api.out_dir, flow_cell_name)
         bcl_converter: str = self.get_bcl_converter(flow_cell_name=flow_cell_name)
 
-        # 1. Validate that the flow cell directory exists.
+        # 1. Validate that the flow cell directory is valid.
         if not self.is_flow_cell_directory_valid(flow_cell_directory=flow_cell_dir):
             return
 
@@ -168,6 +168,8 @@ class DemuxPostProcessingAPI:
             sample_read_count: int = self.status_db.get_number_of_reads_for_sample_from_metrics(
                 sample_internal_id=sample_id
             )
+
+            LOG.info(f"Updating sample {sample_id} with read count {sample_read_count}")
 
             sample.reads = sample_read_count
             sample.sequenced_at = flow_cell_sequencing_date
