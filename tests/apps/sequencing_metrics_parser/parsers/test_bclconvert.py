@@ -11,6 +11,7 @@ from cg.apps.sequencing_metrics_parser.models.bcl_convert import (
 from cg.constants.demultiplexing import INDEX_CHECK, UNDETERMINED
 from pathlib import Path
 from typing import List
+import pytest
 
 
 def test_parse_bcl_convert_metrics(
@@ -34,6 +35,14 @@ def test_parse_bcl_convert_metrics(
     assert isinstance(bcl_convert_metrics_parser.adapter_metrics[0], BclConvertAdapterMetrics)
     assert bcl_convert_metrics_parser.run_info
     assert isinstance(bcl_convert_metrics_parser.run_info, BclConvertRunInfo)
+
+
+def test_parse_metrics_files_not_existing():
+    """Test to parse BCLConvert metrics with non-existing path."""
+    # GIVEN paths to a BCLConvert metrics files that do not exist
+    # WHEN parsing the files assert that a FileNotFoundError is raised
+    with pytest.raises(FileNotFoundError):
+        BclConvertMetricsParser(bcl_convert_metrics_dir_path=Path("non-existing-path"))
 
 
 def test_parse_bcl_convert_quality_metrics(
