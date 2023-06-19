@@ -57,6 +57,8 @@ class BclConvertMetricsParser:
         self, metrics_file_path, metrics_model: Callable
     ) -> List[Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]]:
         """Parse specified BCL convert metrics file."""
+        if not metrics_file_path.exists():
+            raise FileNotFoundError(f"File {metrics_file_path} does not exist.")
         LOG.info(f"Parsing BCLConvert metrics file: {metrics_file_path}")
         parsed_metrics: List[
             Union[BclConvertQualityMetrics, BclConvertDemuxMetrics, BclConvertAdapterMetrics]
