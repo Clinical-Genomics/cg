@@ -30,7 +30,7 @@ class Orderform(StrEnum):
 
 ORDERFORM_VERSIONS = {
     Orderform.MIP_DNA: "27",
-    Orderform.RML: "15",
+    Orderform.RML: "16",
     Orderform.METAGENOME: "10",
     Orderform.MICROSALT: "11",
     Orderform.SARS_COV_2: "7",
