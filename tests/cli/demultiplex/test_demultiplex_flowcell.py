@@ -207,18 +207,6 @@ def test_start_demultiplex_flow_cell(
 ):
     caplog.set_level(logging.DEBUG)
 
-    # GIVEN that all files are present for demultiplexing
-    demux_api: DemultiplexingAPI = demultiplex_context.demultiplex_api
-
-    # GIVEN that demultiplexing has started
-    bcl2fastq_flow_cell.demultiplexing_started_path.touch()
-
-    # GIVEN a out dir that exist
-    demux_api.flow_cell_out_dir_path(bcl2fastq_flow_cell).mkdir(parents=True)
-
-    # GIVEN that demultiplexing is completed
-    demux_api.demultiplexing_completed_path(flow_cell=bcl2fastq_flow_cell).touch()
-
     mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
 
     # WHEN starting demultiplexing from the CLI
@@ -228,14 +216,11 @@ def test_start_demultiplex_flow_cell(
         obj=demultiplex_context,
     )
 
+    # THEN the demultiplexing should have started
+    assert "Creating demultiplexing started file" in caplog.text
+
     # THEN assert the command exits without problems
     assert result.exit_code == 0
-
-    # THEN assert it was communicated that previous demux was deleted
-    assert f"Removing flow cell demultiplexing directory {bcl2fastq_flow_cell.path}"
-
-    # THEN demultiplexing was started
-    assert f"Demultiplexing running as job" in caplog.text
 
 
 def test_delete_flow_cell_dry_run_cgstats(
