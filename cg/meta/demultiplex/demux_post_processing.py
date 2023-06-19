@@ -132,7 +132,7 @@ class DemuxPostProcessingAPI:
 
         # 6. Update samples in status db with read counts and sequencing date.
         samples: List[FlowCellSample] = parsed_flow_cell.get_sample_sheet().samples
-        sample_ids: List[str] = [sample.internal_id for sample in samples]
+        sample_ids: List[str] = [sample.sample_id for sample in samples]
         flow_cell_sequencing_date: datetime = parsed_flow_cell.run_date
 
         self.update_samples_with_read_counts_and_sequencing_date(
