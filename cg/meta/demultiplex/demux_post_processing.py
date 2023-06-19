@@ -158,11 +158,13 @@ class DemuxPostProcessingAPI:
         """Update samples in status db with read counts and sequencing date."""
 
         for sample_id in sample_internal_ids:
+            LOG.info(f"Updating sample {sample_id} with read count and sequencing date")
             sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
                 internal_id=sample_id
             )
 
             if not sample:
+                LOG.info(f"Sample {sample_id} not found in status db")
                 continue
 
             sample_read_count: int = self.status_db.get_number_of_reads_for_sample_from_metrics(
