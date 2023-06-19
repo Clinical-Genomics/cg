@@ -88,7 +88,7 @@ def config_case(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
-@OPTION_ID
+@OPTION_TOWER_RUN_ID
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -105,7 +105,7 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    id: Optional[int],
+    nf_tower_run_id: Optional[int],
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
@@ -131,7 +131,7 @@ def run(
         "compute-env": compute_env or analysis_api.compute_env,
         "revision": revision or analysis_api.revision,
         "wait": "SUBMITTED",
-        "id": id,
+        "id": nf_tower_run_id,
     }
 
     try:

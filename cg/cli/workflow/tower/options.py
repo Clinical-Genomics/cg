@@ -8,8 +8,8 @@ OPTION_COMPUTE_ENV = click.option(
     type=str,
     help="Compute environment name. If not specified the primary compute environment will be used.",
 )
-OPTION_ID = click.option(
-    "--id",
+OPTION_TOWER_RUN_ID = click.option(
+    "--nf_tower_run_id",
     type=int,
     is_flag=False,
     default=None,
