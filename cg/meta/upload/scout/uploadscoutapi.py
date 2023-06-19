@@ -4,13 +4,11 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-from housekeeper.store.models import File, Version
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants import Pipeline, HK_MULTIQC_HTML_TAG
+from cg.constants import HK_MULTIQC_HTML_TAG, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
@@ -20,10 +18,11 @@ from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBu
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.meta.workflow.analysis import AnalysisAPI
+from cg.meta.workflow.mip import MipAnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
-from cg.store.models import Analysis, Family, Sample, FamilySample
+from cg.store.models import Analysis, Family, Sample
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +35,7 @@ class UploadScoutAPI:
         hk_api: HousekeeperAPI,
         scout_api: ScoutAPI,
         lims_api: LimsAPI,
-        analysis_api: AnalysisAPI,
+        analysis_api: MipAnalysisAPI,
         madeline_api: MadelineAPI,
         status_db: Store,
     ):
@@ -87,17 +86,16 @@ class UploadScoutAPI:
         LOG.info(f"Adding load config {config_file_path} to Housekeeper")
         tag_name: str = self.get_load_config_tag()
         version: Version = self.housekeeper.last_version(bundle=case_id)
-        uploaded_config_file: Optional[File] = self.housekeeper.get_latest_file_from_version(
+        if uploaded_config_file := self.housekeeper.get_latest_file_from_version(
             version=version, tags={tag_name}
-        )
-        if uploaded_config_file:
+        ):
             LOG.info(f"Found config file: {uploaded_config_file}")
             if not delete:
                 raise FileExistsError("Upload config already exists")
             self.housekeeper.delete_file(uploaded_config_file.id)
 
         file_obj: File = self.housekeeper.add_file(
-            path=str(config_file_path), version_obj=version, tags=tag_name
+            path=str(config_file_path), version_obj=version, tags=[tag_name]
         )
         self.housekeeper.include_file(file_obj=file_obj, version_obj=version)
         self.housekeeper.add_commit(file_obj)
@@ -122,18 +120,18 @@ class UploadScoutAPI:
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[File]:
         """Return a fusion report for case in housekeeper."""
 
-        tags = {"fusion"}
+        tags = ["fusion"]
         if research:
-            tags.add("research")
+            tags.append("research")
         else:
-            tags.add("clinical")
+            tags.append("clinical")
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
         """Return a splice junctions bed file for case in housekeeper."""
 
-        tags: Set[str] = {"junction", "bed", sample_id}
+        tags: List[str] = ["junction", "bed", sample_id]
         splice_junctions_bed: Optional[File]
         try:
             splice_junctions_bed = self.housekeeper.get_file_from_latest_version(
@@ -145,14 +143,14 @@ class UploadScoutAPI:
         return splice_junctions_bed
 
     def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
-        """Return a RNA coverage bigwig file for case in housekeeper."""
+        """Return an RNA coverage bigwig file for case in housekeeper."""
 
-        tags: Set[str] = {"coverage", "bigwig", sample_id}
+        tags: List[str] = ["coverage", "bigwig", sample_id]
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
-        """Return a set of unique dna cases related to a RNA case"""
+        """Return a set of unique dna cases related to an RNA case"""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[
             str, Dict[str, List[str]]
@@ -204,15 +202,21 @@ class UploadScoutAPI:
         report_file: File,
         rna_case_id: str,
     ) -> None:
-        """Upload report file to DNA cases related to a RNA case in scout."""
+        """Upload report file to DNA cases related to an RNA case in scout."""
         LOG.info(f"Finding DNA cases related to RNA case {rna_case_id}")
-        for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(rna_case_id):
-            self.upload_report_to_scout(
-                dry_run=dry_run,
-                report_type=report_type,
-                report_file=report_file,
-                case_id=dna_case_id,
-            )
+        uploaded: bool = False
+        for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(case_id=rna_case_id):
+            dna_case: Family = self.status_db.get_case_by_internal_id(internal_id=dna_case_id)
+            if dna_case.analyses and dna_case.analyses[0].uploaded_at:
+                self.upload_report_to_scout(
+                    dry_run=dry_run,
+                    report_type=report_type,
+                    report_file=report_file,
+                    case_id=dna_case_id,
+                )
+                uploaded = True
+        if not uploaded:
+            raise CgDataError("No connected DNA case has been uploaded.")
 
     def upload_report_to_scout(
         self,
@@ -367,7 +371,7 @@ class UploadScoutAPI:
     def build_rna_sample_map(
         self, rna_sample: Sample, rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]]
     ) -> None:
-        """Create a dictionary of all DNA samples, and their related cases, related to a RNA sample."""
+        """Create a dictionary of all uploaded DNA samples, and their related cases, related to an RNA sample."""
         dna_sample: Sample = self._map_dna_samples_related_to_rna_sample(
             rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
         )
@@ -426,7 +430,7 @@ class UploadScoutAPI:
                 Pipeline.MIP_DNA,
                 Pipeline.BALSAMIC,
                 Pipeline.BALSAMIC_UMI,
-            ] and case.customer in [customer for customer in rna_sample.customer.collaborators]:
+            ] and case.customer in list(rna_sample.customer.collaborators):
                 rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
                     case.internal_id
                 )
