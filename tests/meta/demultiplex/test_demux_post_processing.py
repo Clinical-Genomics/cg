@@ -800,7 +800,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     sequencing_date = datetime.now()
 
     # WHEN calling the method with the sample IDs and sequencing date
-    demux_post_processing_api.update_samples_with_read_counts_and_sequencing_date(
+    demux_post_processing_api.update_sample_read_counts(
         sample_ids, sequencing_date
     )
 

@@ -134,11 +134,8 @@ class DemuxPostProcessingAPI:
         sample_ids: List[str] = self.get_sample_ids_from_sample_sheet(
             parsed_flow_cell_directory=parsed_flow_cell
         )
-        flow_cell_sequencing_date: datetime = parsed_flow_cell.run_date
 
-        self.update_samples_with_read_counts_and_sequencing_date(
-            sample_internal_ids=sample_ids, flow_cell_sequencing_date=flow_cell_sequencing_date
-        )
+        self.update_sample_read_counts(sample_internal_ids=sample_ids)
 
     def get_sample_ids_from_sample_sheet(
         self, parsed_flow_cell_directory: FlowCellDirectoryData
@@ -160,13 +157,11 @@ class DemuxPostProcessingAPI:
 
         return True
 
-    def update_samples_with_read_counts_and_sequencing_date(
-        self, sample_internal_ids: List[str], flow_cell_sequencing_date: datetime
-    ) -> None:
-        """Update samples in status db with read counts and sequencing date."""
+    def update_sample_read_counts(self, sample_internal_ids: List[str]) -> None:
+        """Update samples in status db with read counts from the SampleLaneSequencingMetrics table."""
 
         for sample_id in sample_internal_ids:
-            LOG.info(f"Updating sample {sample_id} with read count and sequencing date")
+            LOG.info(f"Updating read count for sample {sample_id}")
             sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
                 internal_id=sample_id
             )
@@ -182,7 +177,6 @@ class DemuxPostProcessingAPI:
             LOG.info(f"Updating sample {sample_id} with read count {sample_read_count}")
 
             sample.reads = sample_read_count
-            sample.sequenced_at = flow_cell_sequencing_date
 
         self.status_db.session.commit()
 
