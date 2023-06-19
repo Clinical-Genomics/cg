@@ -29,6 +29,11 @@ def index_exists(index: str, indexes: Set[str]) -> bool:
     return any(existing_index.startswith(index) for existing_index in indexes)
 
 
+def is_dual_index(index: str) -> bool:
+    """Determines if an index in the raw sample sheet is dual index or not."""
+    return "-" in index
+
+
 def get_indexes_by_lane(samples: List[FlowCellSample]) -> Dict[int, Set[str]]:
     """Group the indexes from samples by lane."""
     indexes_by_lane = {}
@@ -72,10 +77,12 @@ def get_reagent_kit_version(reagent_kit_version: str) -> str:
     return REAGENT_KIT_PARAMETER_TO_VERSION[reagent_kit_version]
 
 
-def get_index_pair(dual_index: str) -> Tuple[str, str]:
+def get_index_pair(sample: FlowCellSample) -> Tuple[str, str]:
     """Returns a sample index separated into index_1 and index_2."""
-    index_1, index_2 = dual_index.split("-")
-    return index_1.strip(), index_2.strip()
+    if is_dual_index(sample.index):
+        index_1, index_2 = sample.index.split("-")
+        return index_1.strip(), index_2.strip()
+    return sample.index, sample.index2
 
 
 def is_reverse_complement(run_parameters: RunParameters) -> bool:
@@ -109,9 +116,9 @@ def is_reverse_complement(run_parameters: RunParameters) -> bool:
 
 def is_padding_needed(index_cycles: int, sample_index_length: int) -> bool:
     """Returns whether a sample needs padding or not given the sample index length.
-    A sample needs padding if its index length is shorter than the number of index cycles reads
-    stated in the run parameters file of the sequencing. This happens when the sample index is
-    8 nucleotides long and the number of index cycles read is 10 nucleotides.
+    A sample needs padding if its adapted index length is shorter than the number of index cycles
+    reads stated in the run parameters file of the sequencing. This happens when the sample index
+    is 8 nucleotides long and the number of index cycles read is 10 nucleotides.
     """
     return index_cycles == LONG_INDEX_CYCLE_NR and sample_index_length == SHORT_SAMPLE_INDEX_LENGTH
 
@@ -151,17 +158,15 @@ def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
     return get_hamming_distance(str_1=sequence_1[-limit:], str_2=sequence_2[-limit:])
 
 
-def update_barcode_mismatch_values(
+def adapt_barcode_mismatch_values(
     sample_to_update: FlowCellSampleNovaSeqX, samples: List[FlowCellSampleNovaSeqX]
 ) -> None:
     """Updates the barcode mismatches for both indexes of a FlowCellSampleNovaSeqX."""
     index_1_has_similar_index: bool = False
     index_2_has_similar_index: bool = False
-    index_1_sample_to_update, index_2_sample_to_update = get_index_pair(
-        dual_index=sample_to_update.index
-    )
+    index_1_sample_to_update, index_2_sample_to_update = get_index_pair(sample=sample_to_update)
     for sample in samples:
-        index_1, index_2 = get_index_pair(dual_index=sample.index)
+        index_1, index_2 = get_index_pair(sample=sample)
         if (
             get_hamming_distance_index_1(sequence_1=index_1_sample_to_update, sequence_2=index_1)
             < MINIMUM_HAMMING_DISTANCE
@@ -190,7 +195,7 @@ def adapt_indexes(
     LOG.info("Fix so that all indexes are in the correct format")
     reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
     for sample in samples:
-        index1, index2 = get_index_pair(dual_index=sample.index)
+        index1, index2 = get_index_pair(sample=sample)
         index_length = len(index1)
         if is_padding_needed(
             index_cycles=run_parameters.index_length, sample_index_length=index_length
@@ -204,6 +209,38 @@ def adapt_indexes(
         sample.index2 = index2
 
 
-def is_dual_index(index: str) -> bool:
-    """Determines if an index in the raw sample sheet is dual index or not."""
-    return "-" in index
+def adapt_indexes_for_sample(
+    sample: FlowCellSample, index_cycles: int, reverse_complement: bool
+) -> None:
+    """Adapts the indexes of sample.
+    1. Pad indexes if needed so that all indexes have a length equal to the number of index reads
+    2. Takes the reverse complement of index 2 in case of the new NovaSeq software control version
+    (1.7) in combination with the new reagent kit (version 1.5).
+    3. Assigns the indexes to the sample attributes index1 and index2."""
+    index1, index2 = get_index_pair(sample=sample)
+    index_length = len(index1)
+    if is_padding_needed(index_cycles=index_cycles, sample_index_length=index_length):
+        LOG.debug("Padding indexes")
+        index1 = pad_index_one(index_string=index1)
+        index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
+    if reverse_complement:
+        index2 = get_reverse_complement_dna_seq(index2)
+    sample.index = index1
+    sample.index2 = index2
+
+
+def adapt_samples(
+    samples: List[FlowCellSample],
+    run_parameters: RunParameters,
+) -> None:
+    """Adapt the samples with the correct index and barcode mismatch values."""
+    LOG.info("Updating index and barcode mismatch values for samples")
+    index_cycles: int = run_parameters.index_length
+    for sample in samples:
+        if run_parameters.sequencer == Sequencers.NOVASEQX:
+            adapt_barcode_mismatch_values(sample_to_update=sample, samples=samples)
+        adapt_indexes_for_sample(
+            sample=sample,
+            index_cycles=index_cycles,
+            reverse_complement=is_reverse_complement(run_parameters=run_parameters),
+        )

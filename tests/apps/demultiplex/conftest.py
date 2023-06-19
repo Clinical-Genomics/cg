@@ -36,8 +36,9 @@ def fixture_demux_run_dir_dragen(flow_cell_runs_dir: Path) -> Path:
     return Path(flow_cell_runs_dir, BclConverter.DRAGEN)
 
 
-@pytest.fixture(name="index_obj")
-def fixture_index_obj() -> Index:
+@pytest.fixture(name="valid_index")
+def fixture_valid_index_() -> Index:
+    """Return a valid index."""
     return Index(name="C07 - UDI0051", sequence="AACAGGTT-ATACCAAG")
 
 
