@@ -132,6 +132,47 @@ def test_get_reverse_complement_not_dna(caplog):
         get_reverse_complement_dna_seq(dna=strain)
 
 
+def test_adapt_barcode_mismatch_values(lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX]):
+    """Test that the barcode mismatch values are updated for a sample."""
+    # GIVEN a list of NovaSeqX samples
+    sample_to_update: FlowCellSampleNovaSeqX = lims_novaseq_x_samples[0]
+    # GIVEN a sample in the list with changed id whose barcode mismatch values have not been adapted
+    sample_to_update.sample_id = "new_id"
+    assert sample_to_update.barcode_mismatches_1 == 1
+    assert sample_to_update.barcode_mismatches_2 == 1
+
+    # WHEN adapting the barcode mismatch values
+    adapt_barcode_mismatch_values_for_sample(
+        sample_to_update=sample_to_update, samples=lims_novaseq_x_samples
+    )
+
+    # THEN the barcode mismatch values have been updated
+    assert sample_to_update.barcode_mismatches_1 == 0
+    assert sample_to_update.barcode_mismatches_2 == 0
+
+
+def test_adapt_barcode_mismatch_values_repeated_sample(
+    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeqX,
+):
+    """Test that a sample does not compare to itself when adapting barcode mismatching values."""
+    # GIVEN a list of repeated unadapted NovaSeqX samples
+    assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_1 == 1
+    assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 1
+    samples: List[FlowCellSampleNovaSeqX] = [
+        novaseq_x_flow_cell_sample_before_adapt_indexes for _ in range(3)
+    ]
+
+    # WHEN adapting the barcode mismatch values for the samples
+    adapt_barcode_mismatch_values_for_sample(
+        sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes, samples=samples
+    )
+
+    # THEN the barcode mismatch values remains being 1 for all samples
+    for sample in samples:
+        assert sample.barcode_mismatches_1 == 1
+        assert sample.barcode_mismatches_2 == 1
+
+
 def test_adapt_indexes_for_sample_reverse_complement_padding(
     novaseq_6000_run_parameters: RunParameters,
     novaseq6000_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeq6000Bcl2Fastq,

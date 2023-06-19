@@ -158,7 +158,7 @@ def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
     return get_hamming_distance(str_1=sequence_1[-limit:], str_2=sequence_2[-limit:])
 
 
-def adapt_barcode_mismatch_values(
+def adapt_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleNovaSeqX, samples: List[FlowCellSampleNovaSeqX]
 ) -> None:
     """Updates the barcode mismatches for both indexes of a FlowCellSampleNovaSeqX."""
@@ -166,6 +166,8 @@ def adapt_barcode_mismatch_values(
     index_2_has_similar_index: bool = False
     index_1_sample_to_update, index_2_sample_to_update = get_index_pair(sample=sample_to_update)
     for sample in samples:
+        if sample_to_update.sample_id == sample.sample_id:
+            continue
         index_1, index_2 = get_index_pair(sample=sample)
         if (
             get_hamming_distance_index_1(sequence_1=index_1_sample_to_update, sequence_2=index_1)
@@ -181,32 +183,6 @@ def adapt_barcode_mismatch_values(
         sample_to_update.barcode_mismatches_1 = 0
     if index_2_has_similar_index:
         sample_to_update.barcode_mismatches_2 = 0
-
-
-def adapt_indexes(
-    samples: List[FlowCellSample],
-    run_parameters: RunParameters,
-) -> None:
-    """Adapts the indexes: pads all indexes so that all indexes have a length equal to the
-    number  of index reads, and takes the reverse complement of index 2 in case of the new
-    novaseq software control version (1.7) in combination with the new reagent kit
-    (version 1.5).
-    """
-    LOG.info("Fix so that all indexes are in the correct format")
-    reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
-    for sample in samples:
-        index1, index2 = get_index_pair(sample=sample)
-        index_length = len(index1)
-        if is_padding_needed(
-            index_cycles=run_parameters.index_length, sample_index_length=index_length
-        ):
-            LOG.debug("Padding indexes")
-            index1 = pad_index_one(index_string=index1)
-            index2 = pad_index_two(index_string=index2, reverse_complement=reverse_complement)
-        if reverse_complement:
-            index2 = get_reverse_complement_dna_seq(index2)
-        sample.index = index1
-        sample.index2 = index2
 
 
 def adapt_indexes_for_sample(
@@ -234,11 +210,10 @@ def adapt_samples(
     run_parameters: RunParameters,
 ) -> None:
     """Adapt the samples with the correct index and barcode mismatch values."""
-    LOG.info("Updating index and barcode mismatch values for samples")
     index_cycles: int = run_parameters.index_length
     for sample in samples:
         if run_parameters.sequencer == Sequencers.NOVASEQX:
-            adapt_barcode_mismatch_values(sample_to_update=sample, samples=samples)
+            adapt_barcode_mismatch_values_for_sample(sample_to_update=sample, samples=samples)
         adapt_indexes_for_sample(
             sample=sample,
             index_cycles=index_cycles,

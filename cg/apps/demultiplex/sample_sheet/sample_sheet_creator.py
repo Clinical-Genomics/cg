@@ -11,7 +11,7 @@ from cg.apps.demultiplex.sample_sheet.index import (
     index_exists,
     is_dual_index,
 )
-from cg.apps.demultiplex.sample_sheet.validate import validate_sample_sheet
+from cg.apps.demultiplex.sample_sheet.validate import get_samples_by_lane, validate_sample_sheet
 from cg.apps.demultiplex.sample_sheet.models import FlowCellSample
 from cg.constants.demultiplexing import (
     BclConverter,
@@ -97,16 +97,19 @@ class SampleSheetCreator:
 
     def construct_sample_sheet(self) -> List[List[str]]:
         """Construct the sample sheet."""
-        # Create dummy samples for the indexes that are missing
         if self.run_parameters.requires_dummy_samples:
             self.add_dummy_samples()
+            LOG.info("Created dummy samples for the indexes that are missing")
         else:
-            LOG.info("Skip adding dummy samples since run is not WGS")
+            LOG.info("Skipped adding dummy samples since run is not WGS")
         self.remove_unwanted_samples()
-        adapt_samples(
-            samples=self.lims_samples,
-            run_parameters=self.run_parameters,
-        )
+        samples_in_lane: List[FlowCellSample]
+        for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
+            LOG.info(f"Adapting index and barcode mismatch values for samples in lane {lane}")
+            adapt_samples(
+                samples=samples_in_lane,
+                run_parameters=self.run_parameters,
+            )
         sample_sheet_content: List[List[str]] = self.create_sample_sheet_content()
         if self.force:
             LOG.info("Skipping validation of sample sheet due to force flag")
