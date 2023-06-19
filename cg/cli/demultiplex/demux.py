@@ -63,7 +63,7 @@ def demultiplex_all(
             cg_stats=False,
             demultiplexing_dir=True,
             run_dir=False,
-            housekeeper=True,
+            housekeeper=False,
             init_files=False,
             status_db=False,
         )
@@ -116,7 +116,7 @@ def demultiplex_flow_cell(
         cg_stats=True,
         demultiplexing_dir=True,
         run_dir=False,
-        housekeeper=True,
+        housekeeper=False,
         init_files=True,
         status_db=False,
     )
