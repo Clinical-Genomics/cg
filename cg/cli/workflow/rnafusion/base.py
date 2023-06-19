@@ -25,7 +25,7 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_ID
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.tb import AnalysisStatus
