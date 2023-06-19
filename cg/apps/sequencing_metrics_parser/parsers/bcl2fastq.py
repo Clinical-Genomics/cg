@@ -64,6 +64,8 @@ def parse_bcl2fastq_raw_tile_metrics(
     )
 
     for stats_json_path in stats_json_paths:
+        if not stats_json_path.exists():
+            raise FileNotFoundError(f"File {stats_json_path} does not exist.")
         sequencing_metrics = Bcl2FastqSampleLaneTileMetrics.parse_file(stats_json_path)
         tile_sequencing_metrics.append(sequencing_metrics)
 
