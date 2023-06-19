@@ -124,7 +124,7 @@ class DemuxPostProcessingAPI:
 
         # 4. Store flow cell data in housekeeper.
         self.add_flow_cell_data_to_housekeeper(
-            flow_cell_name=flow_cell_name, flow_cell_directory=flow_cell_dir
+            flow_cell_name=parsed_flow_cell.id, flow_cell_directory=flow_cell_dir
         )
 
         # 5. Create sequencing metrics.
