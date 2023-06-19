@@ -131,13 +131,21 @@ class DemuxPostProcessingAPI:
         self.add_sample_lane_sequencing_metrics_for_flow_cell(flow_cell_name=flow_cell_name)
 
         # 6. Update samples in status db with read counts and sequencing date.
-        samples: List[FlowCellSample] = parsed_flow_cell.get_sample_sheet().samples
-        sample_ids: List[str] = [sample.sample_id for sample in samples]
+        sample_ids: List[str] = self.get_sample_ids_from_sample_sheet(
+            parsed_flow_cell_directory=parsed_flow_cell
+        )
         flow_cell_sequencing_date: datetime = parsed_flow_cell.run_date
 
         self.update_samples_with_read_counts_and_sequencing_date(
             sample_internal_ids=sample_ids, flow_cell_sequencing_date=flow_cell_sequencing_date
         )
+
+    def get_sample_ids_from_sample_sheet(
+        self, parsed_flow_cell_directory: FlowCellDirectoryData
+    ) -> List[str]:
+        samples: List[FlowCellSample] = parsed_flow_cell_directory.get_sample_sheet().samples
+        sample_ids_indexes: List[str] = [sample.sample_id for sample in samples]
+        return [sample_id_index.split("_")[0] for sample_id_index in sample_ids_indexes]
 
     def is_flow_cell_directory_valid(self, flow_cell_directory: Path) -> bool:
         """Validate that the flow cell directory exists and that the demultiplexing is complete."""
