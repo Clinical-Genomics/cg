@@ -2203,13 +2203,13 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 
 @pytest.fixture(name="rnafusion_multiqc_json_metrics")
 def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
-    """Returns the content of a mock multiqc json file."""
+    """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
 
 
 @pytest.fixture(name="tower_id")
 def fixture_tower_id() -> int:
-    """Returns a mocked NF-Tower ID."""
+    """Returns a NF-Tower ID."""
     return 123456
 
 
@@ -2237,16 +2237,16 @@ def mock_analysis_finish(
             rnafusion_case_id,
             "multiqc",
             "multiqc_data",
-            "multiqc_data.json",
-        ),
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
     )
     write_yaml(
         content={rnafusion_case_id: [tower_id]},
         file_path=Path(
             rnafusion_dir,
             rnafusion_case_id,
-            "tower_ids.yaml",
-        ),
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
     )
 
 

@@ -275,15 +275,15 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         else:
             LOG.info("Pipeline will be executed using tower")
             if command_args.get("resume"):
-                from_tower_id: int = command_args.get("id")
-                if not from_tower_id:
-                    from_tower_id: int = TowerAnalysisAPI.get_last_tower_id(
+                from_tower_run_id: int = command_args.get("id")
+                if not from_tower_run_id:
+                    from_tower_run_id: int = TowerAnalysisAPI.get_last_tower_id(
                         case_id=case_id,
                         trailblazer_config=self.get_trailblazer_config_path(case_id=case_id),
                     )
-                LOG.info(f"Pipeline will be resumed from run {from_tower_id}.")
+                LOG.info(f"Pipeline will be resumed from run {from_tower_run_id}.")
                 parameters: List[str] = TowerAnalysisAPI.get_tower_relaunch_parameters(
-                    from_tower_id=from_tower_id, command_args=command_args
+                    from_tower_id=from_tower_run_id, command_args=command_args
                 )
             else:
                 parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(

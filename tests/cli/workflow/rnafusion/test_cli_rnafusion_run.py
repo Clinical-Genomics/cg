@@ -184,15 +184,17 @@ def test_resume_with_id(
     mock_config,
     tower_id,
 ):
-    """Test resume command given a NF-Tower run ID using tower."""
+    """Test resume command given a NF-Tower run ID using Tower."""
     caplog.set_level(logging.INFO)
-    # GIVEN case-id
-    case_id: str = rnafusion_case_id
+
+    # GIVEN a case-id
 
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--id", tower_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(
+        run, [rnafusion_case_id, "--id", tower_id, "--dry-run"], obj=rnafusion_context
+    )
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -210,15 +212,16 @@ def test_resume_without_id(
     mock_config,
     mock_analysis_finish,
 ):
-    """Test resume command without providing NF-Tower ID when a trailblazer file from a previous run exist."""
+    """Test resume command without providing NF-Tower ID when a Trailblazer Tower config file from a previous run
+    exist."""
     caplog.set_level(logging.INFO)
+
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
 
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(run, [rnafusion_case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -235,15 +238,15 @@ def test_resume_without_id_error(
     rnafusion_case_id: str,
     mock_config,
 ):
-    """Test resume command without providing NF-Tower ID and without existing trailblazer file."""
+    """Test resume command without providing NF-Tower ID and without existing Trailblazer Tower config file."""
     caplog.set_level(logging.INFO)
+
     # GIVEN case-id
-    case_id: str = rnafusion_case_id
 
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    cli_runner.invoke(run, [case_id, "--dry-run"], obj=rnafusion_context)
+    cli_runner.invoke(run, [rnafusion_case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should raise error
     assert "Could not resume analysis: No tower ID found for case" in caplog.text
