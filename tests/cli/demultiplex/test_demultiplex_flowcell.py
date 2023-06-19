@@ -202,7 +202,6 @@ def test_start_demultiplex_flow_cell(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,
     demultiplex_context: CGConfig,
-    bcl2fastq_flow_cell: FlowCellDirectoryData,
     mocker,
 ):
     caplog.set_level(logging.DEBUG)
