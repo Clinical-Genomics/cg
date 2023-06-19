@@ -86,9 +86,10 @@ class UploadScoutAPI:
         LOG.info(f"Adding load config {config_file_path} to Housekeeper")
         tag_name: str = self.get_load_config_tag()
         version: Version = self.housekeeper.last_version(bundle=case_id)
-        if uploaded_config_file := self.housekeeper.get_latest_file_from_version(
+        uploaded_config_file: Optional[File] = self.housekeeper.get_latest_file_from_version(
             version=version, tags={tag_name}
-        ):
+        )
+        if uploaded_config_file:
             LOG.info(f"Found config file: {uploaded_config_file}")
             if not delete:
                 raise FileExistsError("Upload config already exists")

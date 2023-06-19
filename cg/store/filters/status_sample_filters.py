@@ -215,6 +215,10 @@ class SampleFilter(Enum):
     FILTER_IS_DELIVERED: Callable = filter_samples_is_delivered
     FILTER_IS_NOT_DELIVERED: Callable = filter_samples_is_not_delivered
     FILTER_IS_NOT_DOWN_SAMPLED: Callable = filter_samples_is_not_down_sampled
+    FILTER_IS_PREPARED: Callable = filter_samples_is_prepared
+    FILTER_IS_NOT_PREPARED: Callable = filter_samples_is_not_prepared
+    FILTER_IS_RECEIVED: Callable = filter_samples_is_received
+    FILTER_IS_NOT_RECEIVED: Callable = filter_samples_is_not_received
     FILTER_IS_SEQUENCED: Callable = filter_samples_is_sequenced
     FILTER_IS_NOT_SEQUENCED: Callable = filter_samples_is_not_sequenced
     FILTER_IS_TUMOUR: Callable = filter_samples_is_tumour
