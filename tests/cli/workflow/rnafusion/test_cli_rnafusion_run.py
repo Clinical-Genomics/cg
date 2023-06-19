@@ -193,7 +193,7 @@ def test_resume_with_id(
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(
-        run, [rnafusion_case_id, "--id", tower_id, "--dry-run"], obj=rnafusion_context
+        run, [rnafusion_case_id, "--nf_tower_run_id", tower_id, "--dry-run"], obj=rnafusion_context
     )
 
     # THEN command should execute successfully
@@ -249,5 +249,5 @@ def test_resume_without_id_error(
     cli_runner.invoke(run, [rnafusion_case_id, "--dry-run"], obj=rnafusion_context)
 
     # THEN command should raise error
-    assert "Could not resume analysis: No tower ID found for case" in caplog.text
+    assert "Could not resume analysis: No NF-Tower ID found for case" in caplog.text
     pytest.raises(FileNotFoundError)
