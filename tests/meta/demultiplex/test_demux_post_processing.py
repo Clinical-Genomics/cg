@@ -795,15 +795,13 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
         mock_read_count
     )
 
-    # GIVEN a list of internal sample IDs and a sequencing date
+    # GIVEN a list of internal sample IDs
     sample_ids = ["sample1", "sample2"]
-    sequencing_date = datetime.now()
 
-    # WHEN calling the method with the sample IDs and sequencing date
+    # WHEN calling the method with the sample IDs
     demux_post_processing_api.update_sample_read_counts(
-        sample_ids, sequencing_date
+        sample_ids
     )
 
-    # THEN the sequencing date and read count were set on the mock sample
-    assert mock_sample.sequenced_at == sequencing_date
+    # THEN the read count was set on the mock sample
     assert mock_sample.reads == mock_read_count
