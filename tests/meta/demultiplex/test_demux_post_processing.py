@@ -799,9 +799,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     sample_ids = ["sample1", "sample2"]
 
     # WHEN calling the method with the sample IDs
-    demux_post_processing_api.update_sample_read_counts(
-        sample_ids
-    )
+    demux_post_processing_api.update_sample_read_counts(sample_ids)
 
     # THEN the read count was set on the mock sample
     assert mock_sample.reads == mock_read_count
