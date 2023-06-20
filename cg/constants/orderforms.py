@@ -24,12 +24,13 @@ class Orderform(StrEnum):
     MICROSALT: str = "1603"
     MIP_DNA: str = "1508"
     MIP_RNA: str = "1508"
+    RNAFUSION: str = "1508"
     RML: str = "1604"
     SARS_COV_2: str = "2184"
 
 
 ORDERFORM_VERSIONS = {
-    Orderform.MIP_DNA: "27",
+    Orderform.MIP_DNA: "28",
     Orderform.RML: "16",
     Orderform.METAGENOME: "10",
     Orderform.MICROSALT: "11",
