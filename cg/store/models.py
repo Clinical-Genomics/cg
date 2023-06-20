@@ -1,24 +1,22 @@
 import datetime as dt
 import re
-from typing import List, Optional, Set, Dict
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.util import deprecated
-from sqlalchemy.orm.attributes import InstrumentedAttribute
+from typing import Dict, List, Optional, Set
 
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
-    Priority,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
     Pipeline,
+    Priority,
 )
-
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -440,6 +438,10 @@ class Family(Model, PriorityMixin):
     def _get_loqusdb_uploaded_samples(self) -> List["Sample"]:
         """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
+
+    @property
+    def is_uploaded(self) -> bool:
+        return self.analyses and self.analyses[0].uploaded_at
 
     def get_delivery_arguments(self) -> Set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""

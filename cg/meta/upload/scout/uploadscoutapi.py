@@ -8,7 +8,6 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.cli.upload.utils import is_dna_case_uploaded
 from cg.constants import HK_MULTIQC_HTML_TAG, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
@@ -268,9 +267,7 @@ class UploadScoutAPI:
             dna_cases: List[str]
             dna_sample_id, dna_cases = rna_dna_sample_case_map[rna_sample_id].popitem()
             for dna_case_id in dna_cases:
-                if is_dna_case_uploaded(
-                    dna_case=self.status_db.get_case_by_internal_id(internal_id=dna_case_id)
-                ):
+                if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
                     LOG.info(
                         f"Uploading RNA coverage bigwig file for {dna_sample_id} in case {dna_case_id} in scout"
                     )
@@ -317,9 +314,7 @@ class UploadScoutAPI:
             dna_cases: List[str]
             dna_sample_id, dna_cases = rna_dna_sample_case_map[rna_sample_id].popitem()
             for dna_case_id in dna_cases:
-                if is_dna_case_uploaded(
-                    dna_case=self.status_db.get_case_by_internal_id(internal_id=dna_case_id)
-                ):
+                if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
                     LOG.info(
                         f"Uploading splice junctions bed file for sample {dna_sample_id} in case {dna_case_id} in Scout."
                     )
@@ -481,7 +476,7 @@ class UploadScoutAPI:
 
         uploaded_dna_cases: Set[str] = set()
         for dna_case_id in unique_dna_case_ids:
-            if is_dna_case_uploaded(dna_case=get_case(internal_id=dna_case_id)):
+            if get_case(internal_id=dna_case_id).is_uploaded:
                 uploaded_dna_cases.add(dna_case_id)
             else:
                 LOG.warning(f"Related DNA case {dna_case_id} has not been completed.")

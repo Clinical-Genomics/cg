@@ -7,7 +7,7 @@ import click
 from cg.constants import Pipeline
 from cg.constants.constants import MAX_ITEMS_TO_RETRIEVE
 from cg.store import Store
-from cg.store.models import Analysis, Family
+from cg.store.models import Analysis
 
 LOG = logging.getLogger(__name__)
 
@@ -20,7 +20,3 @@ def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = Non
     ]
     for case_obj in records:
         click.echo(case_obj)
-
-
-def is_dna_case_uploaded(dna_case: Family) -> bool:
-    return dna_case.analyses and dna_case.analyses[0].uploaded_at
