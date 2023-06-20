@@ -144,7 +144,7 @@ class UploadScoutAPI:
         return splice_junctions_bed
 
     def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
-        """Return an RNA coverage bigwig file for case in housekeeper."""
+        """Return an RNA coverage bigwig file for case in Housekeeper."""
 
         tags: List[str] = ["coverage", "bigwig", sample_id]
 
