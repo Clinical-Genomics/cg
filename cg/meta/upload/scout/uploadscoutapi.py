@@ -151,7 +151,7 @@ class UploadScoutAPI:
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
-        """Return a set of unique dna cases related to an RNA case"""
+        """Return a set of unique dna cases related to an RNA case."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[
             str, Dict[str, List[str]]
