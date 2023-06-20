@@ -205,11 +205,12 @@ def adapt_samples(
 ) -> None:
     """Adapt the samples with the correct index and barcode mismatch values."""
     index_cycles: int = run_parameters.index_length
+    reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
     for sample in samples:
         if run_parameters.sequencer == Sequencers.NOVASEQX:
             adapt_barcode_mismatch_values_for_sample(sample_to_update=sample, samples=samples)
         adapt_indexes_for_sample(
             sample=sample,
             index_cycles=index_cycles,
-            reverse_complement=is_reverse_complement(run_parameters=run_parameters),
+            reverse_complement=reverse_complement,
         )
