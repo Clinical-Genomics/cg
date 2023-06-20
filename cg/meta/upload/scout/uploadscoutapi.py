@@ -8,7 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.cli.upload.utils import dna_case_is_uploaded
+from cg.cli.upload.utils import is_dna_case_uploaded
 from cg.constants import HK_MULTIQC_HTML_TAG, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
@@ -19,7 +19,7 @@ from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBu
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
 from cg.meta.upload.scout.rnafusion_config_builder import RnafusionConfigBuilder
 from cg.meta.upload.scout.scout_config_builder import ScoutConfigBuilder
-from cg.meta.workflow.mip import MipAnalysisAPI
+from cg.meta.workflow.analysis import AnalysisAPI
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Analysis, Family, Sample
@@ -36,7 +36,7 @@ class UploadScoutAPI:
         hk_api: HousekeeperAPI,
         scout_api: ScoutAPI,
         lims_api: LimsAPI,
-        analysis_api: MipAnalysisAPI,
+        analysis_api: AnalysisAPI,
         madeline_api: MadelineAPI,
         status_db: Store,
     ):
@@ -268,7 +268,7 @@ class UploadScoutAPI:
             dna_cases: List[str]
             dna_sample_id, dna_cases = rna_dna_sample_case_map[rna_sample_id].popitem()
             for dna_case_id in dna_cases:
-                if dna_case_is_uploaded(
+                if is_dna_case_uploaded(
                     dna_case=self.status_db.get_case_by_internal_id(internal_id=dna_case_id)
                 ):
                     LOG.info(
@@ -317,7 +317,7 @@ class UploadScoutAPI:
             dna_cases: List[str]
             dna_sample_id, dna_cases = rna_dna_sample_case_map[rna_sample_id].popitem()
             for dna_case_id in dna_cases:
-                if dna_case_is_uploaded(
+                if is_dna_case_uploaded(
                     dna_case=self.status_db.get_case_by_internal_id(internal_id=dna_case_id)
                 ):
                     LOG.info(
@@ -481,7 +481,7 @@ class UploadScoutAPI:
 
         uploaded_dna_cases: Set[str] = set()
         for dna_case_id in unique_dna_case_ids:
-            if dna_case_is_uploaded(dna_case=get_case(internal_id=dna_case_id)):
+            if is_dna_case_uploaded(dna_case=get_case(internal_id=dna_case_id)):
                 uploaded_dna_cases.add(dna_case_id)
             else:
                 LOG.warning(f"Related DNA case {dna_case_id} has not been completed.")
