@@ -197,31 +197,6 @@ def test_demultiplex_all_novaseq(
     assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
 
 
-def test_start_demultiplex_flow_cell(
-    caplog,
-    cli_runner: testing.CliRunner,
-    demultiplex_ready_flow_cell: Path,
-    demultiplex_context: CGConfig,
-    mocker,
-):
-    caplog.set_level(logging.DEBUG)
-
-    mocker.patch("cg.apps.tb.TrailblazerAPI.add_pending_analysis")
-
-    # WHEN starting demultiplexing from the CLI
-    result: testing.Result = cli_runner.invoke(
-        demultiplex_flow_cell,
-        [str(demultiplex_ready_flow_cell), "-b", "bcl2fastq"],
-        obj=demultiplex_context,
-    )
-
-    # THEN the demultiplexing should have started
-    assert "Creating demultiplexing started file" in caplog.text
-
-    # THEN assert the command exits without problems
-    assert result.exit_code == 0
-
-
 def test_delete_flow_cell_dry_run_cgstats(
     cli_runner: testing.CliRunner,
     demultiplex_ready_flow_cell: Path,

@@ -99,13 +99,13 @@ class DeleteDemuxAPI:
     def _delete_fastq_and_spring_housekeeper(self) -> None:
         """Delete the presence of any spring/fastq files in Housekeeper related to samples on the flow cell"""
 
-        tags = [
+        tag_combinations: List[List[str]] = [
             [SequencingFileTag.FASTQ, self.flow_cell_name],
             [SequencingFileTag.SPRING, self.flow_cell_name],
             [SequencingFileTag.SPRING_METADATA, self.flow_cell_name],
         ]
-        for tag, sample in itertools.product(tags, self.samples_on_flow_cell):
-            self._delete_files_if_related_in_housekeeper_by_tag(sample=sample, tags=tag)
+        for tags, sample in itertools.product(tag_combinations, self.samples_on_flow_cell):
+            self._delete_files_if_related_in_housekeeper_by_tag(sample=sample, tags=tags)
 
     def delete_flow_cell_housekeeper(self) -> None:
         """Delete any presence of a flow cell in housekeeper. Including Sample sheets AND fastq-files"""
