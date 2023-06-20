@@ -278,10 +278,10 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
         return True
 
     def get_completed_cases(self) -> List[Family]:
-        """Retrieve a list of cases that are completed in trailblazer."""
+        """Return cases that are completed in trailblazer."""
         return [
             case
-            for case in self.get_running_cases()
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
             if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 

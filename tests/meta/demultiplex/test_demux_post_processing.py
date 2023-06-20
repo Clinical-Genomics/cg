@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 from pathlib import Path
 from typing import Generator
@@ -775,3 +776,30 @@ def test_get_sample_id_from_sample_fastq_file_path(demultiplex_context: CGConfig
 
     # THEN we should get the correct sample id
     assert result == sample_id
+
+
+def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context: CGConfig):
+    """Test that samples can be updated with read counts and sequencing date."""
+
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    demux_post_processing_api.status_db.get_sample_by_internal_id = MagicMock()
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics = MagicMock()
+
+    mock_sample = MagicMock()
+    mock_read_count = 1_000
+
+    demux_post_processing_api.status_db.get_sample_by_internal_id.return_value = mock_sample
+    demux_post_processing_api.status_db.get_number_of_reads_for_sample_from_metrics.return_value = (
+        mock_read_count
+    )
+
+    # GIVEN a list of internal sample IDs
+    sample_ids = ["sample1", "sample2"]
+
+    # WHEN calling the method with the sample IDs
+    demux_post_processing_api.update_sample_read_counts(sample_ids)
+
+    # THEN the read count was set on the mock sample
+    assert mock_sample.reads == mock_read_count
