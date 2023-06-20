@@ -24,6 +24,7 @@ class Orderform(StrEnum):
     MICROSALT: str = "1603"
     MIP_DNA: str = "1508"
     MIP_RNA: str = "1508"
+    RNAFUSION: str = "1508"
     RML: str = "1604"
     SARS_COV_2: str = "2184"
 

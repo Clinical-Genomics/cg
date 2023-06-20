@@ -301,6 +301,15 @@ def fixture_mip_rna_orderform(orderforms: Path) -> str:
     ).as_posix()
 
 
+@pytest.fixture(scope="session", name="rnafusion_orderform")
+def fixture_rnafusion_orderform(orderforms: Path) -> str:
+    """Orderform fixture for MIP RNA samples."""
+    return Path(
+        orderforms,
+        f"{Orderform.RNAFUSION}.{ORDERFORM_VERSIONS[Orderform.RNAFUSION]}.rnafusion.xlsx",
+    ).as_posix()
+
+
 @pytest.fixture(scope="session", name="mip_uploaded_json_order")
 def fixture_mip_uploaded_json_order(orderforms: Path) -> str:
     """JSON orderform fixture for MIP DNA samples."""
