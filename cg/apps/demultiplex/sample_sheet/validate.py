@@ -1,19 +1,13 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Type
 from pydantic import parse_obj_as
-from typing_extensions import Literal
 
-from cg.apps.demultiplex.sample_sheet.models import (
-    FlowCellSample,
-    SampleSheet,
-    FlowCellSampleNovaSeq6000Bcl2Fastq,
-    FlowCellSampleNovaSeq6000Dragen,
-)
+from cg.apps.demultiplex.sample_sheet.models import FlowCellSample, SampleSheet
 from cg.constants.constants import FileFormat
 from cg.constants.demultiplexing import (
-    BclConverter,
     SampleSheetNovaSeq6000Sections,
+    SampleSheetNovaSeqXSections,
 )
 from cg.exc import SampleSheetError
 from cg.io.controller import ReadFile
@@ -64,7 +58,10 @@ def get_raw_samples(sample_sheet_content: List[List[str]]) -> List[Dict[str, str
         # Skip lines that are too short to contain samples
         if len(line) <= 5:
             continue
-        if line[0] == SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value:
+        if line[0] in [
+            SampleSheetNovaSeq6000Sections.Data.FLOW_CELL_ID.value,
+            SampleSheetNovaSeqXSections.Data.LANE.value,
+        ]:
             header = line
             continue
         if not header:
