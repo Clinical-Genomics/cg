@@ -70,7 +70,7 @@ class UploadAPI(MetaAPI):
                     f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}"
                 )
                 raise AnalysisAlreadyUploadedError
-            elif analysis_obj.upload_started_at is not None:
+            elif analysis_obj.upload_started_at:
                 if datetime.now() - analysis_obj.upload_started_at > timedelta(hours=24):
                     LOG.error(
                         f"This upload has already started at {analysis_obj.upload_started_at}, but something went wrong. "
