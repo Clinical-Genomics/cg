@@ -142,7 +142,7 @@ def test_adapt_barcode_mismatch_values(lims_novaseq_x_samples: List[FlowCellSamp
     assert sample_to_update.barcode_mismatches_2 == 1
 
     # WHEN adapting the barcode mismatch values
-    adapt_barcode_mismatch_values_for_sample(
+    update_barcode_mismatch_values_for_sample(
         sample_to_update=sample_to_update, samples=lims_novaseq_x_samples
     )
 
@@ -163,7 +163,7 @@ def test_adapt_barcode_mismatch_values_repeated_sample(
     ]
 
     # WHEN adapting the barcode mismatch values for the samples
-    adapt_barcode_mismatch_values_for_sample(
+    update_barcode_mismatch_values_for_sample(
         sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes, samples=samples
     )
 

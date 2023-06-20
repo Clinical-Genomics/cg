@@ -158,10 +158,12 @@ def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
     return get_hamming_distance(str_1=sequence_1[-limit:], str_2=sequence_2[-limit:])
 
 
-def adapt_barcode_mismatch_values_for_sample(
+def update_barcode_mismatch_values_for_sample(
     sample_to_update: FlowCellSampleNovaSeqX, samples: List[FlowCellSampleNovaSeqX]
 ) -> None:
-    """Updates the barcode mismatches for both indexes of a FlowCellSampleNovaSeqX."""
+    """Updates the sample's barcode mismatch values.
+    If a sample index has a hamming distance to any other sample lower than the threshold,
+    the barcode mismatch value for that index is set to zero."""
     index_1_sample_to_update, index_2_sample_to_update = get_index_pair(sample=sample_to_update)
     for sample in samples:
         if sample_to_update.sample_id == sample.sample_id:
@@ -203,12 +205,12 @@ def adapt_samples(
     samples: List[FlowCellSample],
     run_parameters: RunParameters,
 ) -> None:
-    """Adapt the samples with the correct index and barcode mismatch values."""
+    """Adapt the indexes and updates the barcode mismatch values of the samples."""
     index_cycles: int = run_parameters.index_length
     reverse_complement: bool = is_reverse_complement(run_parameters=run_parameters)
     for sample in samples:
         if run_parameters.sequencer == Sequencers.NOVASEQX:
-            adapt_barcode_mismatch_values_for_sample(sample_to_update=sample, samples=samples)
+            update_barcode_mismatch_values_for_sample(sample_to_update=sample, samples=samples)
         adapt_indexes_for_sample(
             sample=sample,
             index_cycles=index_cycles,

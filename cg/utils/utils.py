@@ -23,7 +23,11 @@ def build_command_from_dict(options: dict, exclude_true: bool = False) -> List[s
 
 
 def get_hamming_distance(str_1: str, str_2: str) -> int:
-    """Return the hamming distance between two strings."""
+    """Return the hamming distance between two strings.
+
+    Raises:
+        KeyError: When the strings have the same length
+    """
     if len(str_1) != len(str_2):
         raise KeyError("The two strings must have the same length to calculate distance!")
     return sum(n1 != n2 for n1, n2 in zip(str_1, str_2))
