@@ -22,5 +22,5 @@ def suggest_cases_to_upload(status_db: Store, pipeline: Optional[Pipeline] = Non
         click.echo(case_obj)
 
 
-def dna_case_is_uploaded(dna_case: Family):
+def is_dna_case_uploaded(dna_case: Family) -> bool:
     return dna_case.analyses and dna_case.analyses[0].uploaded_at
