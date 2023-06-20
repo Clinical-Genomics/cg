@@ -208,7 +208,7 @@ def past_run_dirs(
         except FileNotFoundError:
             continue
         except Exception as error:
-            LOG.error(f"Failed to clean directories for case {case_id} - {error.value}")
+            LOG.error(f"Failed to clean directories for case {case_id} - {repr(error)}")
             exit_code = EXIT_FAIL
 
     if exit_code:
