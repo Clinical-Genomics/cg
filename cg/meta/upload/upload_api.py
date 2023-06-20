@@ -65,7 +65,7 @@ class UploadAPI(MetaAPI):
         if not restart:
             analysis_obj: Analysis = case_obj.analyses[0]
 
-            if analysis_obj.uploaded_at is not None:
+            if analysis_obj.uploaded_at:
                 LOG.error(
                     f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}"
                 )
