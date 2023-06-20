@@ -788,16 +788,32 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
             in caplog.text
         )
 
-    # WHEN instead the analysis of the DNA case is not completed
 
+def test_upload_rna_report_to_unsuccessful_dna_case_in_scout(
+    caplog,
+    rna_case_id: str,
+    rna_store: Store,
+    upload_mip_analysis_scout_api: UploadScoutAPI,
+    mip_rna_analysis_hk_api: MockHousekeeperAPI,
+):
+    """Test that the report is uploaded to Scout."""
+
+    caplog.set_level(logging.INFO)
+
+    # GIVEN an RNA case, and an store with an rna connected to it
+    upload_mip_analysis_scout_api.status_db: Store = rna_store
+
+    # GIVEN an RNA case with a multiqc-htlml report
+    multiqc_file: File = mip_rna_analysis_hk_api.files(
+        bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
+    )[0]
+
+    # WHEN finding the related DNA case with no successful upload
+    dna_case_ids: Set[str] = upload_mip_analysis_scout_api.get_unique_dna_cases_related_to_rna_case(
+        case_id=rna_case_id
+    )
     dna_case: Family = rna_store.get_case_by_internal_id(internal_id=list(dna_case_ids)[0])
     dna_case.analyses[0].uploaded_at = None
-
-    analysis: Analysis
-    for analysis in rna_store.get_analyses():
-        if analysis.family.internal_id in dna_case_ids:
-            analysis.uploaded_at = None
-        rna_store.session.commit()
 
     # WHEN trying to upload the report
     # THEN a CgDataError should be raised

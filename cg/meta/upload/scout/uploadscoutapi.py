@@ -8,6 +8,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
 from cg.apps.madeline.api import MadelineAPI
 from cg.apps.scout.scoutapi import ScoutAPI
+from cg.cli.upload.utils import dna_case_is_uploaded
 from cg.constants import HK_MULTIQC_HTML_TAG, Pipeline
 from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
@@ -121,16 +122,16 @@ class UploadScoutAPI:
     def get_fusion_report(self, case_id: str, research: bool) -> Optional[File]:
         """Return a fusion report for case in housekeeper."""
 
-        tags = ["fusion"]
+        tags = {"fusion"}
         if research:
-            tags.append("research")
+            tags.add("research")
         else:
-            tags.append("clinical")
+            tags.add("clinical")
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_splice_junctions_bed(self, case_id: str, sample_id: str) -> Optional[File]:
-        """Return a splice junctions bed file for case in housekeeper."""
+        """Return a splice junctions bed file for case in Housekeeper."""
 
         tags: List[str] = ["junction", "bed", sample_id]
         splice_junctions_bed: Optional[File]
@@ -144,14 +145,14 @@ class UploadScoutAPI:
         return splice_junctions_bed
 
     def get_rna_coverage_bigwig(self, case_id: str, sample_id: str) -> Optional[File]:
-        """Return an RNA coverage bigwig file for case in housekeeper."""
+        """Return an RNA coverage bigwig file for case in Housekeeper."""
 
         tags: List[str] = ["coverage", "bigwig", sample_id]
 
         return self.housekeeper.get_file_from_latest_version(bundle_name=case_id, tags=tags)
 
     def get_unique_dna_cases_related_to_rna_case(self, case_id: str) -> Set[str]:
-        """Return a set of unique dna cases related to an RNA case"""
+        """Return a set of unique DNA cases related to an RNA case."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[
             str, Dict[str, List[str]]
@@ -203,12 +204,13 @@ class UploadScoutAPI:
         report_file: File,
         rna_case_id: str,
     ) -> None:
-        """Upload report file to DNA cases related to an RNA case in scout."""
+        """Upload report file to DNA cases related to an RNA case in Scout."""
         LOG.info(f"Finding DNA cases related to RNA case {rna_case_id}")
         uploaded: bool = False
         for dna_case_id in self.get_unique_dna_cases_related_to_rna_case(case_id=rna_case_id):
             dna_case: Family = self.status_db.get_case_by_internal_id(internal_id=dna_case_id)
-            if dna_case.analyses and dna_case.analyses[0].uploaded_at:
+            if dna_case_is_uploaded(dna_case):
+                LOG.info(f"Running upload of report to DNA case {dna_case_id}.")
                 self.upload_report_to_scout(
                     dry_run=dry_run,
                     report_type=report_type,
@@ -216,6 +218,8 @@ class UploadScoutAPI:
                     case_id=dna_case_id,
                 )
                 uploaded = True
+            else:
+                LOG.warning(f"Upload of report failed for uncompleted DNA case {dna_case_id}.")
         if not uploaded:
             raise CgDataError("No connected DNA case has been uploaded.")
 
@@ -226,7 +230,7 @@ class UploadScoutAPI:
         report_type: str,
         report_file: File,
     ) -> None:
-        """Upload report file a case to Scout."""
+        """Upload report file for a case to Scout."""
 
         LOG.info(f"Uploading {report_type} report to scout for case {case_id}")
 
@@ -298,7 +302,7 @@ class UploadScoutAPI:
 
             if splice_junctions_bed is None:
                 raise FileNotFoundError(
-                    f"No splice junctions bed file was found in housekeeper for {rna_sample_id}"
+                    f"No splice junctions bed file was found in Housekeeper for {rna_sample_id}"
                 )
 
             LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
@@ -307,7 +311,7 @@ class UploadScoutAPI:
             dna_sample_id, dna_cases = rna_dna_sample_case_map[rna_sample_id].popitem()
             for dna_case_id in dna_cases:
                 LOG.info(
-                    f"Uploading splice junctions bed file for sample {dna_sample_id} in case {dna_case_id} in scout"
+                    f"Uploading splice junctions bed file for sample {dna_sample_id} in case {dna_case_id} in Scout."
                 )
 
                 if dry_run:
