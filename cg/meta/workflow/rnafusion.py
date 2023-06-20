@@ -91,7 +91,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         return WorkflowManager.Tower.value
 
     def get_case_path(self, case_id: str) -> Path:
-        return Path(self.root, case_id)
+        """Path to case working directory."""
+        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
