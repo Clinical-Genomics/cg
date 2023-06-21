@@ -1,16 +1,15 @@
 """Upload API"""
 
-import click
 import logging
 from datetime import datetime, timedelta
 
-from cg.exc import AnalysisUploadError, AnalysisAlreadyUploadedError
-from cg.meta.workflow.analysis import AnalysisAPI
-from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
-from cg.models.cg_config import CGConfig
+import click
+from cg.exc import AnalysisAlreadyUploadedError, AnalysisUploadError
 from cg.meta.meta import MetaAPI
+from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.workflow.analysis import AnalysisAPI
+from cg.models.cg_config import CGConfig
 from cg.store.models import Analysis, Family
-
 
 LOG = logging.getLogger(__name__)
 
@@ -63,18 +62,23 @@ class UploadAPI(MetaAPI):
             LOG.error(f"There is no analysis for case: {case_obj.internal_id}")
             raise AnalysisUploadError
 
-        analysis_obj: Analysis = case_obj.analyses[0]
-        if analysis_obj.uploaded_at is not None:
-            LOG.error(f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}")
-            raise AnalysisAlreadyUploadedError
+        if not restart:
+            analysis_obj: Analysis = case_obj.analyses[0]
 
-        if not restart and analysis_obj.upload_started_at is not None:
-            if datetime.now() - analysis_obj.upload_started_at > timedelta(hours=24):
+            if analysis_obj.uploaded_at:
                 LOG.error(
-                    f"This upload has already started at {analysis_obj.upload_started_at}, but something went wrong. "
-                    f"Restart it with the --restart flag."
+                    f"The analysis has been already uploaded: {analysis_obj.uploaded_at.date()}"
                 )
-                raise AnalysisUploadError
+                raise AnalysisAlreadyUploadedError
+            elif analysis_obj.upload_started_at:
+                if datetime.now() - analysis_obj.upload_started_at > timedelta(hours=24):
+                    LOG.error(
+                        f"This upload has already started at {analysis_obj.upload_started_at}, but something went wrong. "
+                        f"Restart it with the --restart flag."
+                    )
+                    raise AnalysisUploadError
 
-            LOG.warning(f"The upload has already started: {analysis_obj.upload_started_at.time()}")
-            raise AnalysisAlreadyUploadedError
+                LOG.warning(
+                    f"The upload has already started: {analysis_obj.upload_started_at.time()}"
+                )
+                raise AnalysisAlreadyUploadedError
