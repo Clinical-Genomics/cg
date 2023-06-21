@@ -91,6 +91,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         """Get workflow manager for rnafusion."""
         return WorkflowManager.Tower.value
 
+    def get_case_path(self, case_id: str) -> Path:
+        """Path to case working directory."""
+        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
+
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)
 
@@ -242,7 +246,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         dry_run: bool = False,
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
-
         if use_nextflow:
             self.process = Process(
                 binary=self.config.rnafusion.binary_path,
@@ -259,7 +262,6 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 root_dir=self.root_dir,
                 command_args=command_args.dict(),
             )
-
             self.process.export_variables(
                 export=NextflowAnalysisAPI.get_variables_to_export(
                     case_id=case_id, root_dir=self.root_dir

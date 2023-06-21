@@ -2,6 +2,7 @@
 import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union, Dict
+from sqlalchemy import func
 
 from sqlalchemy.orm import Query, Session
 
@@ -10,16 +11,12 @@ from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
 from cg.exc import CaseNotFoundError, CgError
 from cg.store.api.base import BaseHandler
-from cg.store.filters.status_application_version_filters import (
-    ApplicationVersionFilter,
-    apply_application_versions_filter,
-)
 from cg.store.filters.status_case_filters import CaseFilter, apply_case_filter
+from cg.store.filters.status_metrics_filters import SequencingMetricsFilter, apply_metrics_filter
 
 from cg.store.models import (
     Analysis,
     Application,
-    ApplicationVersion,
     Customer,
     Flowcell,
     Family,
@@ -27,6 +24,7 @@ from cg.store.models import (
     Invoice,
     Pool,
     Sample,
+    SampleLaneSequencingMetrics,
 )
 
 from cg.store.filters.status_invoice_filters import apply_invoice_filter, InvoiceFilter
@@ -315,6 +313,16 @@ class FindBusinessDataHandler(BaseHandler):
             customer_entry_ids=customer_entry_id,
             name=sample_name,
         ).first()
+
+    def get_number_of_reads_for_sample_from_metrics(self, sample_internal_id: str) -> int:
+        """Get number of reads for sample from sample lane sequencing metrics."""
+        total_reads_query: Query = apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[SequencingMetricsFilter.GET_TOTAL_READ_COUNT_FOR_SAMPLE],
+            sample_internal_id=sample_internal_id,
+        )
+        reads_count: Optional[int] = total_reads_query.scalar()
+        return reads_count if reads_count else 0
 
     def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
         """Return flow cell by flow cell name."""
@@ -632,7 +640,7 @@ class FindBusinessDataHandler(BaseHandler):
         LOG.info(f"Case {case_internal_id} exists in Status DB")
 
     def get_running_cases_in_pipeline(self, pipeline: Pipeline) -> List[Family]:
-        """Get all running cases in a pipeline."""
+        """Return all running cases in a pipeline."""
         return apply_case_filter(
             filter_functions=[CaseFilter.FILTER_WITH_PIPELINE, CaseFilter.FILTER_IS_RUNNING],
             cases=self._get_query(table=Family),
