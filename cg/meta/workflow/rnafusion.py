@@ -31,6 +31,7 @@ from cg.models.deliverables.metric_deliverables import (
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
 from cg.models.rnafusion.analysis import RnafusionAnalysis
+from cg.models.rnafusion.command_args import CommandArgsModel
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
@@ -234,9 +235,14 @@ class RnafusionAnalysisAPI(AnalysisAPI):
         LOG.info("Configs files written")
 
     def run_analysis(
-        self, case_id: str, command_args: dict, use_nextflow: bool, dry_run: bool = False
+        self,
+        case_id: str,
+        command_args: CommandArgsModel,
+        use_nextflow: bool,
+        dry_run: bool = False,
     ) -> None:
         """Execute RNAFUSION run analysis with given options."""
+
         if use_nextflow:
             self.process = Process(
                 binary=self.config.rnafusion.binary_path,
@@ -251,8 +257,9 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                 case_id=case_id,
                 pipeline_path=self.nfcore_pipeline_path,
                 root_dir=self.root_dir,
-                command_args=command_args,
+                command_args=command_args.dict(),
             )
+
             self.process.export_variables(
                 export=NextflowAnalysisAPI.get_variables_to_export(
                     case_id=case_id, root_dir=self.root_dir
@@ -274,8 +281,8 @@ class RnafusionAnalysisAPI(AnalysisAPI):
 
         else:
             LOG.info("Pipeline will be executed using tower")
-            if command_args.get("resume"):
-                from_tower_run_id: int = command_args.get("id")
+            if command_args.resume:
+                from_tower_run_id: int = command_args.id
                 if not from_tower_run_id:
                     from_tower_run_id: int = TowerAnalysisAPI.get_last_tower_id(
                         case_id=case_id,
@@ -283,12 +290,12 @@ class RnafusionAnalysisAPI(AnalysisAPI):
                     )
                 LOG.info(f"Pipeline will be resumed from run {from_tower_run_id}.")
                 parameters: List[str] = TowerAnalysisAPI.get_tower_relaunch_parameters(
-                    from_tower_id=from_tower_run_id, command_args=command_args
+                    from_tower_id=from_tower_run_id, command_args=command_args.dict()
                 )
             else:
                 parameters: List[str] = TowerAnalysisAPI.get_tower_launch_parameters(
                     tower_pipeline=self.tower_pipeline,
-                    command_args=command_args,
+                    command_args=command_args.dict(),
                 )
             self.process.run_command(parameters=parameters, dry_run=dry_run)
             if self.process.stderr:

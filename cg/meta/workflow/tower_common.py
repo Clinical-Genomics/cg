@@ -21,15 +21,15 @@ class TowerAnalysisAPI:
 
         tower_options: List[str] = build_command_from_dict(
             options={
-                f"--{arg}": command_args.get(arg, None)
+                f"--{arg.replace('_', '-')}": command_args.get(arg, None)
                 for arg in (
-                    "work-dir",
+                    "work_dir",
                     "profile",
-                    "params-file",
+                    "params_file",
                     "config",
                     "name",
                     "revision",
-                    "compute-env",
+                    "compute_env",
                 )
             },
             exclude_true=True,
@@ -42,12 +42,12 @@ class TowerAnalysisAPI:
 
         tower_options: List[str] = build_command_from_dict(
             options={
-                f"--{arg}": command_args.get(arg, None)
+                f"--{arg.replace('_', '-')}": command_args.get(arg, None)
                 for arg in (
                     "profile",
-                    "params-file",
+                    "params_file",
                     "config",
-                    "compute-env",
+                    "compute_env",
                 )
             },
             exclude_true=True,

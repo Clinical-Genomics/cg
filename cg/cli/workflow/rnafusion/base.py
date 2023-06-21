@@ -34,6 +34,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.rnafusion.command_args import CommandArgsModel
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -112,27 +113,32 @@ def run(
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    command_args = {
-        "log": NextflowAnalysisAPI.get_log_path(
-            case_id=case_id, pipeline=analysis_api.pipeline, root_dir=analysis_api.root_dir, log=log
-        ),
-        "work-dir": NextflowAnalysisAPI.get_workdir_path(
-            case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-        ),
-        "resume": not from_start,
-        "profile": analysis_api.get_profile(profile=profile),
-        "with-tower": with_tower,
-        "stub": stub,
-        "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-        "params-file": NextflowAnalysisAPI.get_params_file_path(
-            case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
-        ),
-        "name": case_id,
-        "compute-env": compute_env or analysis_api.compute_env,
-        "revision": revision or analysis_api.revision,
-        "wait": "SUBMITTED",
-        "id": nf_tower_run_id,
-    }
+    command_args: CommandArgsModel = CommandArgsModel(
+        **{
+            "log": NextflowAnalysisAPI.get_log_path(
+                case_id=case_id,
+                pipeline=analysis_api.pipeline,
+                root_dir=analysis_api.root_dir,
+                log=log,
+            ),
+            "work_dir": NextflowAnalysisAPI.get_workdir_path(
+                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
+            ),
+            "resume": not from_start,
+            "profile": analysis_api.get_profile(profile=profile),
+            "with_tower": with_tower,
+            "stub": stub,
+            "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
+            "params_file": NextflowAnalysisAPI.get_params_file_path(
+                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            ),
+            "name": case_id,
+            "compute_env": compute_env or analysis_api.compute_env,
+            "revision": revision or analysis_api.revision,
+            "wait": "SUBMITTED",
+            "id": nf_tower_run_id,
+        }
+    )
 
     try:
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)

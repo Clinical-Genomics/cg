@@ -149,13 +149,13 @@ class NextflowAnalysisAPI:
         )
         run_options: List[str] = build_command_from_dict(
             options=dict(
-                (f"-{arg}", command_args.get(arg, None))
+                (f"-{arg.replace('_', '-')}", command_args.get(arg, None))
                 for arg in (
-                    "work-dir",
+                    "work_dir",
                     "resume",
                     "profile",
-                    "with-tower",
-                    "params-file",
+                    "with_tower",
+                    "params_file",
                 )
             ),
             exclude_true=True,
