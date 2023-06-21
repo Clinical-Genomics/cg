@@ -4,17 +4,15 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import click
-from housekeeper.store.models import File, Version
-
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.scout.scoutapi import ScoutAPI
-from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.cli.upload.utils import suggest_cases_to_upload
 from cg.constants import Pipeline
 from cg.constants.constants import FileFormat
+from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.io.controller import WriteStream
-from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.upload.scout.uploadscoutapi import UploadScoutAPI
+from cg.meta.upload.upload_api import UploadAPI
 from cg.meta.workflow.balsamic import BalsamicAnalysisAPI
 from cg.meta.workflow.balsamic_umi import BalsamicUmiAnalysisAPI
 from cg.meta.workflow.mip_dna import MipDNAAnalysisAPI
@@ -24,7 +22,7 @@ from cg.models.cg_config import CGConfig
 from cg.models.scout.scout_load_config import ScoutLoadConfig
 from cg.store import Store
 from cg.store.models import Family
-
+from housekeeper.store.models import File, Version
 
 LOG = logging.getLogger(__name__)
 
