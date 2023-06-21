@@ -29,7 +29,7 @@ class UploadAPI(MetaAPI):
             status_db=config.status_db,
         )
 
-    def upload(self, ctx: click.Context, case_obj: Family, restart: bool) -> None:
+    def upload(self, ctx: click.Context, case: Family, restart: bool) -> None:
         """Uploads pipeline specific analysis data and files"""
 
         raise NotImplementedError
