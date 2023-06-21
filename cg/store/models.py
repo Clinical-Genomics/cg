@@ -441,6 +441,7 @@ class Family(Model, PriorityMixin):
 
     @property
     def is_uploaded(self) -> bool:
+        """Returns True if the latest connected analysis has been uploaded."""
         return self.analyses and self.analyses[0].uploaded_at
 
     def get_delivery_arguments(self) -> Set[str]:

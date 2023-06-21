@@ -765,7 +765,7 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
         bundle=rna_case_id, tags=[ScoutCustomCaseReportTags.MULTIQC]
     )[0]
 
-    # WHEN uploading a report to a completed DNA case in scout
+    # WHEN uploading a report to a completed DNA case in Scout
     upload_mip_analysis_scout_api.upload_rna_report_to_dna_case_in_scout(
         dry_run=False,
         rna_case_id=rna_case_id,
@@ -789,18 +789,18 @@ def test_upload_rna_report_to_successful_dna_case_in_scout(
         )
 
 
-def test_upload_rna_report_to_unsuccessful_dna_case_in_scout(
+def test_upload_rna_report_to_not_yet_uploaded_dna_case_in_scout(
     caplog,
     rna_case_id: str,
     rna_store: Store,
     upload_mip_analysis_scout_api: UploadScoutAPI,
     mip_rna_analysis_hk_api: MockHousekeeperAPI,
 ):
-    """Test that the report is uploaded to Scout."""
+    """Test that an error is raised when trying to upload an RNA report to a not yet uploaded DNA case."""
 
     caplog.set_level(logging.INFO)
 
-    # GIVEN an RNA case, and an store with an rna connected to it
+    # GIVEN an RNA case, and an store with an RNA connected to it
     upload_mip_analysis_scout_api.status_db: Store = rna_store
 
     # GIVEN an RNA case with a multiqc-htlml report

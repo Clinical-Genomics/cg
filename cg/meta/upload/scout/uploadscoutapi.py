@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.lims import LimsAPI
@@ -469,14 +469,14 @@ class UploadScoutAPI:
         return subject_id_dna_samples
 
     def get_related_uploaded_dna_cases(self, rna_case_id: str) -> Set[str]:
-        get_case: Callable = self.status_db.get_case_by_internal_id
+        """Returns all uploaded DNA cases related to the specified RNA case."""
         unique_dna_case_ids: Set[str] = self.get_unique_dna_cases_related_to_rna_case(
             case_id=rna_case_id
         )
 
         uploaded_dna_cases: Set[str] = set()
         for dna_case_id in unique_dna_case_ids:
-            if get_case(internal_id=dna_case_id).is_uploaded:
+            if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
                 uploaded_dna_cases.add(dna_case_id)
             else:
                 LOG.warning(f"Related DNA case {dna_case_id} has not been completed.")
