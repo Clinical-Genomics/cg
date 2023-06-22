@@ -1,5 +1,4 @@
 """Post-processing Demultiiplex API."""
-from datetime import datetime
 import logging
 import re
 import shutil
@@ -78,7 +77,7 @@ class DemuxPostProcessingAPI:
             - Parses and validates the flow cell directory data
             - Stores the flow cell in the status database
             - Stores the flow cell data in the housekeeper database
-            - Stores sequencing metrics for the flow cell in
+            - Stores sequencing metrics in the status database
             - Updates sample read counts in the database using the internal sample IDs
             obtained from the sample sheet.
 
@@ -242,11 +241,10 @@ class DemuxPostProcessingAPI:
         directory_parts: str = sample_directory.split("_")
 
         if len(directory_parts) > 1:
-            sample_internal_id = directory_parts[1]
-        else:
-            sample_internal_id = directory_parts[0]
+            # The sample id is always the second part of the directory names
+            return directory_parts[1]
 
-        return sample_internal_id
+        return directory_parts[0]
 
     def add_bundle_and_version_if_non_existent(self, flow_cell_name: str) -> None:
         """Add bundle if it does not exist."""
