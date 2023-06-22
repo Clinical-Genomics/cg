@@ -61,7 +61,7 @@ def finish_flow_cell(
 @click.pass_obj
 def store_sequencing_metrics(context: CGConfig, flow_cell_name: str):
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
-    demux_post_processing_api.finish_flow_cell_temp(flow_cell_name=flow_cell_name)
+    demux_post_processing_api.finish_flow_cell_temp(flow_cell_directory_name=flow_cell_name)
 
 
 @finish_group.command(name="all-hiseq-x")

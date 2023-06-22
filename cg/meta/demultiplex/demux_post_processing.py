@@ -71,33 +71,37 @@ class DemuxPostProcessingAPI:
 
         LOG.info(f"Flow cell added: {flow_cell}")
 
-    def finish_flow_cell_temp(self, flow_cell_name: str) -> None:
-        """
-        1. Validate flow cell directory.
-        2. Parse flow cell directory.
-        3. Create flow cell and store flow cell in status db.
-        4. Store flow cell data in housekeeper (bundle, version, tags, fastq file paths and sample sheet path).
-        5. Create sequencing metrics.
-        6. Update samples in status db with read counts and sequencing date.
+    def finish_flow_cell_temp(self, flow_cell_directory_name: str) -> None:
+        """Finalize the flow cell once the temporary demultiplexing process is completed.
+
+        This function:
+            - Parses and validates the flow cell directory data
+            - Stores the flow cell in the status database
+            - Stores the flow cell data in the housekeeper database
+            - Stores sequencing metrics for the flow cell in
+            - Updates sample read counts in the database using the internal sample IDs
+            obtained from the sample sheet.
+
+        Args:
+            flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
+
+        Raises:
+            FlowCellError: If the flow cell directory or the data it contains is not valid.
+
+        Note:
+            This method does not return anything but updates the status and housekeeper databases
+            with data from the flow cell directory.
         """
 
-        LOG.info(f"Finish flow cell {flow_cell_name}")
+        LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
-        flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_name)
+        flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
         bcl_converter: str = self.get_bcl_converter(flow_cell_directory=flow_cell_directory_path)
 
-        if not self.is_flow_cell_directory_valid(flow_cell_directory=flow_cell_directory_path):
-            return
-
-        parsed_flow_cell: Optional[
-            FlowCellDirectoryData
-        ] = self.parse_and_validate_flow_cell_directory_data(
+        parsed_flow_cell: FlowCellDirectoryData = self.parse_and_validate_flow_cell_directory_data(
             flow_cell_directory=flow_cell_directory_path,
             bcl_converter=bcl_converter,
         )
-
-        if not parsed_flow_cell:
-            return
 
         self.store_flow_cell_in_status_db(parsed_flow_cell=parsed_flow_cell)
 
@@ -110,11 +114,11 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory_path, bcl_converter=bcl_converter
         )
 
-        sample_ids: List[str] = self.get_sample_ids_from_sample_sheet(
+        flow_cell_sample_ids: List[str] = self.get_sample_ids_from_sample_sheet(
             parsed_flow_cell=parsed_flow_cell
         )
 
-        self.update_sample_read_counts(sample_internal_ids=sample_ids)
+        self.update_sample_read_counts(sample_internal_ids=flow_cell_sample_ids)
 
     def add_sample_lane_sequencing_metrics_for_flow_cell(
         self, flow_cell_directory: Path, bcl_converter: str
@@ -296,14 +300,17 @@ class DemuxPostProcessingAPI:
         self, flow_cell_directory: Path, bcl_converter: str
     ) -> FlowCellDirectoryData:
         """Parse flow cell data from the flow cell directory."""
+        if not self.is_flow_cell_directory_valid(flow_cell_directory=flow_cell_directory):
+            raise FlowCellError(f"Flow cell directory not found: {flow_cell_directory}")
+
         try:
             flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
                 flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
             )
             return flow_cell
-
-        except FlowCellError:
+        except FlowCellError as e:
             LOG.error(f"Unable to parse flow cell data from {flow_cell_directory}")
+            raise e
 
     def get_bcl_converter(self, flow_cell_directory: Path) -> str:
         """Return type of BCL converter."""
