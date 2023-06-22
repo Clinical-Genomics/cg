@@ -29,7 +29,7 @@ from cg.models.cgstats.stats_sample import StatsSample
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.store import Store
-from cg.store.models import Flowcell, Sample, SampleLaneSequencingMetrics
+from cg.store.models import Flowcell, SampleLaneSequencingMetrics
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory_path
         )
 
-        parsed_flow_cell: FlowCellDirectoryData = self.parse_and_validate_flow_cell_directory_data(
+        parsed_flow_cell: FlowCellDirectoryData = self.parse_flow_cell_directory_data(
             flow_cell_directory=flow_cell_directory_path,
             bcl_converter=bcl_converter,
         )
@@ -296,7 +296,7 @@ class DemuxPostProcessingAPI:
         self.status_db.session.add(flow_cell)
         self.status_db.session.commit()
 
-    def parse_and_validate_flow_cell_directory_data(
+    def parse_flow_cell_directory_data(
         self, flow_cell_directory: Path, bcl_converter: str
     ) -> FlowCellDirectoryData:
         """Parse flow cell data from the flow cell directory."""
