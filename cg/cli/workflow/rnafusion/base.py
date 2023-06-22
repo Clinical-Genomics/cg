@@ -106,7 +106,7 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    nf_tower_run_id: Optional[int],
+    nf_tower_run_id: Optional[str],
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""

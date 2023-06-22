@@ -10,7 +10,7 @@ OPTION_COMPUTE_ENV = click.option(
 )
 OPTION_TOWER_RUN_ID = click.option(
     "--nf_tower_run_id",
-    type=int,
+    type=str,
     is_flag=False,
     default=None,
     help="NF-Tower ID of run to relaunch. If not provided the latest NF-Tower ID for a case will be used.",

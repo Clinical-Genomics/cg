@@ -15,7 +15,7 @@ class CommandArgsModel(BaseModel):
     name: Optional[str]
     revision: Optional[str]
     wait: Optional[str]
-    id: Optional[int]
+    id: Optional[str]
     with_tower: Optional[bool]
     use_nextflow: Optional[bool]
     compute_env: Optional[str]
