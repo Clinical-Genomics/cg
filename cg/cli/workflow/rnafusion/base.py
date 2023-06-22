@@ -34,7 +34,7 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
-from cg.models.rnafusion.command_args import CommandArgsModel
+from cg.models.rnafusion.command_args import CommandArgs
 from cg.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -106,14 +106,14 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
-    nf_tower_run_id: Optional[str],
+    nf_tower_id: Optional[str],
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    command_args: CommandArgsModel = CommandArgsModel(
+    command_args: CommandArgs = CommandArgs(
         **{
             "log": NextflowAnalysisAPI.get_log_path(
                 case_id=case_id,
@@ -136,7 +136,7 @@ def run(
             "compute_env": compute_env or analysis_api.compute_env,
             "revision": revision or analysis_api.revision,
             "wait": "SUBMITTED",
-            "id": nf_tower_run_id,
+            "id": nf_tower_id,
         }
     )
 

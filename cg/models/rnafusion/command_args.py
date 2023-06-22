@@ -4,7 +4,7 @@ from typing import Optional, Union
 from pydantic import BaseModel
 
 
-class CommandArgsModel(BaseModel):
+class CommandArgs(BaseModel):
     """Model for arguments and options supported."""
 
     log: Optional[Union[str, Path]]
