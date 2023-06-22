@@ -94,7 +94,9 @@ class DemuxPostProcessingAPI:
         LOG.info(f"Finish flow cell {flow_cell_directory_name}")
 
         flow_cell_directory_path: Path = Path(self.demux_api.out_dir, flow_cell_directory_name)
-        bcl_converter: str = self.get_bcl_converter(flow_cell_directory=flow_cell_directory_path)
+        bcl_converter: str = self.get_bcl_converter_name(
+            flow_cell_directory=flow_cell_directory_path
+        )
 
         parsed_flow_cell: FlowCellDirectoryData = self.parse_and_validate_flow_cell_directory_data(
             flow_cell_directory=flow_cell_directory_path,
@@ -147,34 +149,35 @@ class DemuxPostProcessingAPI:
             LOG.warning(f"Flow cell directory does not exist: {flow_cell_directory}")
             return False
 
-        if not Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists():
+        if not self.is_demultiplexing_complete(flow_cell_directory=flow_cell_directory):
             LOG.warning(f"Demultiplexing is not complete for flow cell {flow_cell_directory.name}")
             return False
 
         return True
 
+    def is_demultiplexing_complete(self, flow_cell_directory: Path) -> bool:
+        return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+
     def update_sample_read_counts(self, sample_internal_ids: List[str]) -> None:
-        """Update samples in status db with read counts from the SampleLaneSequencingMetrics table."""
-
+        """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
         for sample_id in sample_internal_ids:
-            LOG.info(f"Updating read count for sample {sample_id}")
-            sample: Optional[Sample] = self.status_db.get_sample_by_internal_id(
-                internal_id=sample_id
-            )
+            self.update_single_sample_read_count(sample_id)
+        self.status_db.session.commit()
 
-            if not sample:
-                LOG.info(f"Sample {sample_id} not found in status db")
-                continue
-
-            sample_read_count: int = self.status_db.get_number_of_reads_for_sample_from_metrics(
-                sample_internal_id=sample_id
-            )
-
-            LOG.info(f"Updating sample {sample_id} with read count {sample_read_count}")
-
+    def update_single_sample_read_count(self, sample_id: str) -> None:
+        """Update a single sample read count."""
+        sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        if sample:
+            sample_read_count = self.calculate_sample_read_count(sample_id=sample_id)
             sample.reads = sample_read_count
 
-        self.status_db.session.commit()
+    def calculate_sample_read_count(self, sample_id: str) -> int:
+        """Get a single sample's read count."""
+        sample_read_count = self.status_db.get_number_of_reads_for_sample_from_metrics(
+            sample_internal_id=sample_id
+        )
+        LOG.info(f"Updating sample {sample_id} with read count {sample_read_count}")
+        return sample_read_count
 
     def add_flow_cell_data_to_housekeeper(
         self, flow_cell_name: str, flow_cell_directory: Path
@@ -309,8 +312,7 @@ class DemuxPostProcessingAPI:
             LOG.error(f"Unable to parse flow cell data from {flow_cell_directory}")
             raise e
 
-    def get_bcl_converter(self, flow_cell_directory: Path) -> str:
-        """Return type of BCL converter."""
+    def get_bcl_converter_name(self, flow_cell_directory: Path) -> str:
         if self.is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
             LOG.info("Flow cell was demultiplexed with bcl2fastq")
             return BclConverter.BCL2FASTQ
