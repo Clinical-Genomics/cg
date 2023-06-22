@@ -76,10 +76,9 @@ class DemuxPostProcessingAPI:
         This function:
             - Parses and validates the flow cell directory data
             - Stores the flow cell in the status database
-            - Stores the flow cell data in the housekeeper database
             - Stores sequencing metrics in the status database
-            - Updates sample read counts in the database using the internal sample IDs
-            obtained from the sample sheet.
+            - Updates sample read counts in the status database
+            - Stores the flow cell data in the housekeeper database
 
         Args:
             flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
