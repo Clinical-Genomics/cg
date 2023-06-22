@@ -200,7 +200,7 @@ class DemuxPostProcessingAPI:
 
     def add_sample_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-        fastq_file_paths: List[Path] = self.get_sample_fastq_file_paths(
+        fastq_file_paths: List[Path] = self.get_flowcell_sample_fastq_file_paths(
             flow_cell_directory=flow_cell_directory
         )
 
@@ -228,16 +228,17 @@ class DemuxPostProcessingAPI:
         """Validate the file name and discard any undetermined fastq files."""
         return "Undetermined" not in fastq_file_name
 
-    def get_sample_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
-        """Get fastq file paths for flow cell."""
-        valid_sample_fastq_file_paths = [
-            file_path
-            for file_path in flow_cell_directory.glob(
-                f"**/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-            )
-            if self.is_valid_sample_fastq_filename(file_path.name)
-        ]
-        return valid_sample_fastq_file_paths
+    def get_flowcell_sample_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
+        """Get fastq file paths for a flow cell."""
+        base_pattern = f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+        alt_pattern = f"Unaligned*/Project_*/Sample_*_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+
+        valid_flowcell_sample_fastq_paths: List[Path] = []
+
+        for pattern in [base_pattern, alt_pattern]:
+            valid_flowcell_sample_fastq_paths.extend(flow_cell_directory.glob(pattern))
+
+        return valid_flowcell_sample_fastq_paths
 
     def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> str:
         """Extract sample id from fastq file path."""
