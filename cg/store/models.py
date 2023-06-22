@@ -439,6 +439,11 @@ class Family(Model, PriorityMixin):
         """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
+    @property
+    def is_uploaded(self) -> bool:
+        """Returns True if the latest connected analysis has been uploaded."""
+        return self.analyses and self.analyses[0].uploaded_at
+
     def get_delivery_arguments(self) -> Set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
         delivery_arguments: Set[str] = set()
