@@ -72,7 +72,7 @@ def test_without_config_dry_run(
     # GIVEN case-id
     case_id: str = rnafusion_case_id
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--from_start", "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=rnafusion_context)
     # THEN command should execute successfully (dry-run)
     assert result.exit_code == EXIT_SUCCESS
 
@@ -139,7 +139,7 @@ def test_with_config(
     # GIVEN a mocked config
 
     # WHEN dry running with dry specified
-    result = cli_runner.invoke(run, [case_id, "--from_start", "--dry-run"], obj=rnafusion_context)
+    result = cli_runner.invoke(run, [case_id, "--from-start", "--dry-run"], obj=rnafusion_context)
 
     # THEN command should execute successfully
     assert result.exit_code == EXIT_SUCCESS
@@ -166,7 +166,7 @@ def test_with_revision(
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(
-        run, [case_id, "--dry-run", "--from_start", "--revision", "2.1.0"], obj=rnafusion_context
+        run, [case_id, "--dry-run", "--from-start", "--revision", "2.1.0"], obj=rnafusion_context
     )
 
     # THEN command should execute successfully
