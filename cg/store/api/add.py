@@ -3,29 +3,26 @@ import logging
 from typing import List, Optional
 
 import petname
-
-from cg.constants import DataDelivery, Pipeline, FlowCellStatus
+from cg.constants import DataDelivery, FlowCellStatus, Pipeline, Priority
 from cg.store.api.base import BaseHandler
-
-from cg.constants import Priority
 from cg.store.models import (
+    Analysis,
+    Application,
+    ApplicationVersion,
+    Bed,
+    BedVersion,
+    Collaboration,
+    Customer,
+    Delivery,
+    Family,
+    FamilySample,
     Flowcell,
     Invoice,
     Organism,
-    Customer,
-    Sample,
-    Pool,
-    Delivery,
-    ApplicationVersion,
     Panel,
-    Analysis,
-    Family,
-    FamilySample,
-    Bed,
-    BedVersion,
-    Application,
+    Pool,
+    Sample,
     User,
-    Collaboration,
 )
 
 LOG = logging.getLogger(__name__)

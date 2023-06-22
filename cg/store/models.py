@@ -1,24 +1,22 @@
 import datetime as dt
 import re
-from typing import List, Optional, Set, Dict
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.util import deprecated
-from sqlalchemy.orm.attributes import InstrumentedAttribute
+from typing import Dict, List, Optional, Set
 
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
-    Priority,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
     Pipeline,
+    Priority,
 )
-
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -100,7 +98,7 @@ class Application(Model):
     turnaround_time = Column(types.Integer)
     minimum_order = Column(types.Integer, default=1)
     sequencing_depth = Column(types.Integer)
-    min_sequencing_depth = Column(types.Integer, default=0, nullable=False)
+    min_sequencing_depth = Column(types.Integer, default=0)
     target_reads = Column(types.BigInteger, default=0)
     percent_reads_guaranteed = Column(types.Integer, nullable=False)
     sample_amount = Column(types.Integer)
@@ -725,7 +723,7 @@ class Invoice(Model):
     created_at = Column(types.DateTime, default=dt.datetime.now)
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
     invoiced_at = Column(types.DateTime)
-    comment = Column(types.Text)
+    comment = Column(types.Text, nullable=False)
     discount = Column(types.Integer, default=0)
     excel_kth = Column(types.BLOB)
     excel_ki = Column(types.BLOB)

@@ -1,8 +1,8 @@
-from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline
+from datetime import datetime, timedelta
+
+from cg.constants import CASE_ACTIONS, DataDelivery, Pipeline, Priority
 from cg.store import Store
 from cg.store.models import Analysis, Family
-from cg.constants import Priority
-from datetime import datetime, timedelta
 
 
 def test_delivered_at_affects_tat(base_store: Store, helpers):
@@ -274,11 +274,11 @@ def test_invoiced_at_is_newest_invoice_date(base_store: Store, helpers):
     yesterday = datetime.now() - timedelta(days=1)
     yesteryear = datetime.now() - timedelta(days=365)
     newest_sample = helpers.add_sample(base_store)
-    invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
+    invoice = base_store.add_invoice(helpers.ensure_customer(base_store), comment="Test")
     newest_sample.invoice = invoice
     newest_sample.invoice.invoiced_at = yesterday
     oldest_sample = helpers.add_sample(base_store)
-    invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
+    invoice = base_store.add_invoice(helpers.ensure_customer(base_store), comment="Test")
     oldest_sample.invoice = invoice
     oldest_sample.invoice.invoiced_at = yesteryear
     base_store.relate_sample(new_case, newest_sample, "unknown")
@@ -299,7 +299,7 @@ def test_invoiced_at(base_store: Store, helpers):
     # GIVEN a database with a case and a invoiced date
     new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
+    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store), comment="Test")
     sample.invoice.invoiced_at = datetime.now()
     base_store.relate_sample(new_case, sample, "unknown")
 
@@ -926,7 +926,7 @@ def test_only_invoiced_cases(base_store: Store, helpers):
     # GIVEN a database with an invoiced case
     new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
+    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store), comment="Test")
     sample.invoice.invoiced_at = datetime.now()
     base_store.relate_sample(new_case, sample, "unknown")
     neg_new_case = add_case(helpers, base_store, "neg_new_case")
@@ -1052,7 +1052,7 @@ def test_exclude_invoiced_cases(base_store: Store, helpers):
     # GIVEN a database with an invoiced case
     new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
-    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
+    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store), comment="Test")
     sample.invoice.invoiced_at = datetime.now()
     base_store.relate_sample(new_case, sample, "unknown")
 
@@ -1151,7 +1151,7 @@ def test_samples_bool_true(base_store: Store, helpers):
     assert sample.prepared_at
     assert sample.sequenced_at
     assert sample.delivered_at
-    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
+    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store), comment="Test")
     sample.invoice.invoiced_at = datetime.now()
     base_store.relate_sample(new_case, sample, "unknown")
 
@@ -1198,7 +1198,7 @@ def test_one_invoiced_sample(base_store: Store, helpers):
     new_case = add_case(helpers, base_store)
     sample = helpers.add_sample(base_store)
 
-    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store))
+    sample.invoice = base_store.add_invoice(helpers.ensure_customer(base_store), comment="Test")
     sample.invoice.invoiced_at = datetime.now()
 
     base_store.relate_sample(new_case, sample, "unknown")
