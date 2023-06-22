@@ -136,6 +136,10 @@ class DemuxPostProcessingAPI:
         )
 
         self.update_sample_read_counts(sample_internal_ids=sample_ids)
+        self.create_delivery_file_in_flow_cell_directory(flow_cell_directory=flow_cell_dir)
+
+    def create_delivery_file_in_flow_cell_directory(flow_cell_directory: Path) -> None:
+        Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
 
     def get_sample_ids_from_sample_sheet(
         self, parsed_flow_cell_directory: FlowCellDirectoryData
