@@ -499,7 +499,7 @@ def test_is_bcl2fastq_folder_structure(
 
     # WHEN checking if it is a bcl2fastq folder structure
     is_bcl2fastq_folder_structure = demux_post_processing_api.is_bcl2fastq_demux_folder_structure(
-        flow_cell_name=""
+        flow_cell_directory=bcl2fastq_folder_structure
     )
 
     # THEN it should be a bcl2fastq folder structure
@@ -517,7 +517,7 @@ def test_is_not_bcl2fastq_folder_structure(
 
     # WHEN checking if it is a bcl2fastq folder structure
     is_bcl2fastq_folder_structure = demux_post_processing_api.is_bcl2fastq_demux_folder_structure(
-        flow_cell_name=""
+        flow_cell_directory=not_bcl2fastq_folder_structure
     )
 
     # THEN it should not be a bcl2fastq folder structure
