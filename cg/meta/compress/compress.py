@@ -286,8 +286,8 @@ class CompressAPI:
         LOG.info(f"Will remove {fastq_first} and {fastq_second}")
         if self.dry_run:
             return
-        fastq_first.unlink()
+        fastq_first.unlink(missing_ok=True)
         LOG.debug(f"First FASTQ in pair {fastq_first} removed")
-        fastq_second.unlink()
+        fastq_second.unlink(missing_ok=True)
         LOG.debug(f"Second FASTQ in pair {fastq_second} removed")
         LOG.info("FASTQ files removed")
