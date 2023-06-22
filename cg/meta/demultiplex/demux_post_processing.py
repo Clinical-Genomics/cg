@@ -165,19 +165,14 @@ class DemuxPostProcessingAPI:
         self.status_db.session.commit()
 
     def update_single_sample_read_count(self, sample_id: str) -> None:
-        """Update a single sample read count."""
         sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
-        if sample:
-            sample_read_count = self.calculate_sample_read_count(sample_id=sample_id)
-            sample.reads = sample_read_count
 
-    def calculate_sample_read_count(self, sample_id: str) -> int:
-        """Get a single sample's read count."""
-        sample_read_count = self.status_db.get_number_of_reads_for_sample_from_metrics(
-            sample_internal_id=sample_id
-        )
-        LOG.info(f"Updating sample {sample_id} with read count {sample_read_count}")
-        return sample_read_count
+        if sample:
+            sample_read_count = self.status_db.get_number_of_reads_for_sample_from_metrics(
+                sample_internal_id=sample_id
+            )
+            LOG.info(f"Updating sample {sample_id} with read count {sample_read_count}")
+            sample.reads = sample_read_count
 
     def add_flow_cell_data_to_housekeeper(
         self, flow_cell_name: str, flow_cell_directory: Path
