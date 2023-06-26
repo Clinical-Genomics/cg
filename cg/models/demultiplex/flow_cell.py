@@ -202,7 +202,7 @@ class FlowCellDirectoryData:
                 infile=self.sample_sheet_path,
                 flow_cell_sample_type=self.sample_type,
             )
-        except:
+        except Exception as error:
             alternative_sample_sheet_path: Path = Path(
                 self.path,
                 DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
