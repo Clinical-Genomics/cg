@@ -20,7 +20,7 @@ def upgrade():
     # Execute the query and insert data into the existing table
     op.execute(
         """
-        INSERT INTO sample_statistics (
+        INSERT INTO cg.sample_lane_sequencing_metrics (
             sample_internal_id,
             flow_cell_name,
             flow_cell_lane_number,
@@ -50,4 +50,4 @@ def upgrade():
 
 def downgrade():
     # Implement the necessary steps to downgrade the migration if needed
-    op.execute("DELETE FROM sample_statistics;")
+    op.execute("DELETE FROM cg.sample_lane_sequencing_metrics;")
