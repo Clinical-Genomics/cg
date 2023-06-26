@@ -57,7 +57,7 @@ def finish_flow_cell(
 
 
 @finish_group.command(name="temporary")
-@click.argument("flow-cell-name", "flow_cell_directory_name")
+@click.argument("flow-cell-directory-name")
 @click.pass_obj
 def finish_flow_cell_temporary(context: CGConfig, flow_cell_directory_name: str):
     demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
