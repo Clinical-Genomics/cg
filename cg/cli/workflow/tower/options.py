@@ -9,7 +9,7 @@ OPTION_COMPUTE_ENV = click.option(
     help="Compute environment name. If not specified the primary compute environment will be used.",
 )
 OPTION_TOWER_RUN_ID = click.option(
-    "--nf_tower_id",
+    "--nf-tower-id",
     type=str,
     is_flag=False,
     default=None,

@@ -193,7 +193,7 @@ def test_resume_with_id(
 
     # WHEN dry running with dry specified
     result = cli_runner.invoke(
-        run, [rnafusion_case_id, "--nf_tower_id", tower_id, "--dry-run"], obj=rnafusion_context
+        run, [rnafusion_case_id, "--nf-tower-id", tower_id, "--dry-run"], obj=rnafusion_context
     )
 
     # THEN command should execute successfully
