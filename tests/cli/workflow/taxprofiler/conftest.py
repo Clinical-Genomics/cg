@@ -14,9 +14,7 @@ def taxprofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 
 @pytest.fixture(scope="function", name="taxprofiler_context")
-def fixture_taxprofiler_context(
-    cg_context: CGConfig,
-) -> CGConfig:
+def fixture_taxprofiler_context(cg_context: CGConfig) -> CGConfig:
     """Context to use in cli."""
     cg_context.meta_apis["analysis_api"] = TaxprofilerAnalysisAPI(config=cg_context)
     return cg_context

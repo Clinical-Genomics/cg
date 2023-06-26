@@ -2242,3 +2242,31 @@ def mock_config(rnafusion_dir: Path, rnafusion_case_id: str) -> None:
     Path(rnafusion_dir, rnafusion_case_id, f"{rnafusion_case_id}_samplesheet.csv").touch(
         exist_ok=True
     )
+
+
+# Taxprofiler fixtures
+
+
+@pytest.fixture(name="taxprofiler_dir")
+def fixture_taxrofiler_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the rnafusion apps dir."""
+    taxprofiler_dir = tmpdir_factory.mktemp("taxprofiler")
+    return Path(taxprofiler_dir).absolute().as_posix()
+
+
+@pytest.fixture(name="taxprofiler_case_id")
+def fixture_taxprofiler_case_id() -> str:
+    """Returns a taxprofiler case id."""
+    return "taxprofiler_case_enough_reads"
+
+
+@pytest.fixture(name="taxprofiler_sample_id")
+def fixture_taxprofiler_sample_id() -> str:
+    """Returns a taxprofiler sample id."""
+    return "sample_taxprofiler_case_enough_reads"
+
+
+@pytest.fixture(name="taxprofiler_housekeeper_dir")
+def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -> Path:
+    """Return the path to the taxprofiler housekeeper bundle dir."""
+    return tmpdir_factory.mktemp("bundles")
