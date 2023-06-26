@@ -2279,7 +2279,7 @@ def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -
     """Return the path to the taxprofiler housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
 
-  
+
 @pytest.fixture
 def expected_total_reads() -> int:
     return 1_000_000
