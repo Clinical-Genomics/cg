@@ -457,10 +457,18 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
             flow_cell: DemultiplexFlowCell = DemultiplexFlowCell(flow_cell_path=flow_cell_dir)
         except FlowCellError:
             continue
+
+        if not flow_cell.is_demultiplexing_complete:
+            continue
+
         samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)
-        are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
-            bundle_names=[sample.internal_id for sample in samples]
-        )
+        try:
+            are_sequencing_files_in_hk: bool = housekeeper_api.is_fastq_or_spring_in_all_bundles(
+                bundle_names=[sample.internal_id for sample in samples]
+            )
+        except HousekeeperBundleVersionMissingError:
+            continue
+
         demux_runs_flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
             flow_cell_path=flow_cell_dir,
             status_db=status_db,
