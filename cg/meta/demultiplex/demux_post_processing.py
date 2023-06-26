@@ -121,7 +121,7 @@ class DemuxPostProcessingAPI:
         self.update_sample_read_counts(sample_internal_ids=flow_cell_sample_ids)
 
         self.create_delivery_file_in_flow_cell_directory(
-            flow_cell_directory=flow_cell_directory_name
+            flow_cell_directory=flow_cell_directory_path
         )
 
     def create_delivery_file_in_flow_cell_directory(self, flow_cell_directory: Path) -> None:
