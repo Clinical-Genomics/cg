@@ -43,11 +43,11 @@ def upgrade():
             JOIN cgstats.unaligned ON cgstats.sample.sample_id = cgstats.unaligned.sample_id
             JOIN cgstats.demux ON cgstats.unaligned.demux_id = cgstats.demux.demux_id
             JOIN cgstats.flowcell ON cgstats.demux.flowcell_id = cgstats.flowcell.flowcell_id
-            JOIN cg.flowcell ON cgstats.flowcell.flowcellname = cg.flowcell.name
+            JOIN cg.flowcell ON cgstats.flowcell.flowcellname = cg.flowcell.name;
         """
     )
 
 
 def downgrade():
     # Implement the necessary steps to downgrade the migration if needed
-    pass
+    op.execute("DELETE FROM sample_statistics;")
