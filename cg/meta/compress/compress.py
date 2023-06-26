@@ -288,5 +288,5 @@ class CompressAPI:
             return
         for fastq_file in [fastq_first, fastq_second]:
             if fastq_file.exists():
-                fastq_first.unlink()
+                fastq_file.unlink()
                 LOG.debug(f"FASTQ file {fastq_file} removed")
