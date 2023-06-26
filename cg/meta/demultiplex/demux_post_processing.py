@@ -224,7 +224,9 @@ class DemuxPostProcessingAPI:
     def get_flowcell_sample_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
         """Get fastq file paths for a flow cell."""
         base_pattern = f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-        alt_pattern = f"Unaligned*/Project_*/Sample_*_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+        alt_pattern = (
+            f"Unaligned*/Project_*/Sample_*_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+        )
 
         valid_flowcell_sample_fastq_paths: List[Path] = []
 

@@ -738,6 +738,7 @@ def test_is_valid_sample_fastq_filename(demultiplex_context: CGConfig):
     file_name = "valid_file.fastq"
     assert demux_post_processing_api.is_valid_sample_fastq_filename(file_name)
 
+
 def test_get_valid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
@@ -757,6 +758,7 @@ def test_get_valid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_f
     # THEN we should only get the valid files
     assert len(result) == 1
     assert valid_fastq_file in result
+
 
 def test_get_invalid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
     # GIVEN a DemuxPostProcessing API
