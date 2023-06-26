@@ -42,7 +42,8 @@ def test_remove_fastqs(
     assert compression_object.spring_metadata_path.exists()
     expected_output: str = f"Will remove {fastq_first} and {fastq_second}"
     assert expected_output in caplog.text
-    assert "FASTQ files removed" in caplog.text
+    assert f"FASTQ file {fastq_first} removed" in caplog.text
+    assert f"FASTQ file {fastq_second} removed" in caplog.text
 
 
 def test_update_hk_fastq(

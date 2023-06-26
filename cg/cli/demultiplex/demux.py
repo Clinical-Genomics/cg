@@ -52,22 +52,6 @@ def demultiplex_all(
             )
             continue
 
-        delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-            config=context,
-            demultiplex_base=demultiplex_api.out_dir,
-            dry_run=dry_run,
-            run_path=(flow_cells_directory / sub_dir),
-        )
-
-        delete_demux_api.delete_flow_cell(
-            cg_stats=False,
-            demultiplexing_dir=True,
-            run_dir=False,
-            housekeeper=True,
-            init_files=False,
-            status_db=False,
-        )
-
         slurm_job_id: int = demultiplex_api.start_demultiplexing(flow_cell=flow_cell)
         demultiplex_api.add_to_trailblazer(
             tb_api=tb_api, slurm_job_id=slurm_job_id, flow_cell=flow_cell
@@ -104,22 +88,6 @@ def demultiplex_flow_cell(
         )
     except FlowCellError as error:
         raise click.Abort from error
-
-    delete_demux_api: DeleteDemuxAPI = DeleteDemuxAPI(
-        config=context,
-        demultiplex_base=demultiplex_api.out_dir,
-        dry_run=dry_run,
-        run_path=flow_cell_directory,
-    )
-
-    delete_demux_api.delete_flow_cell(
-        cg_stats=True,
-        demultiplexing_dir=True,
-        run_dir=False,
-        housekeeper=True,
-        init_files=True,
-        status_db=False,
-    )
 
     if not demultiplex_api.is_demultiplexing_possible(flow_cell=flow_cell) and not dry_run:
         LOG.warning("Can not start demultiplexing!")
