@@ -303,9 +303,9 @@ class DemuxPostProcessingAPI:
                 flow_cell_path=flow_cell_directory, bcl_converter=bcl_converter
             )
             return flow_cell
-        except FlowCellError as e:
+        except FlowCellError as error:
             LOG.error(f"Unable to parse flow cell data from {flow_cell_directory}")
-            raise e
+            raise error
 
     def get_bcl_converter_name(self, flow_cell_directory: Path) -> str:
         if self.is_bcl2fastq_demux_folder_structure(flow_cell_directory=flow_cell_directory):
