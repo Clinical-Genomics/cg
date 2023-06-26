@@ -101,7 +101,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         for link in case.links:
             print("Link" + link)
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
-            LOG.info(sample_metadata)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             sample_sheet_content: Dict[str, List[str]] = self.build_sample_sheet_content(
