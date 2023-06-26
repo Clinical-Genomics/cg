@@ -7,7 +7,7 @@ import os
 import shutil
 from datetime import MAXYEAR, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
@@ -33,7 +33,15 @@ from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 from cg.models.demultiplex.run_parameters import RunParametersNovaSeq6000, RunParametersNovaSeqX
 from cg.store import Store
-from cg.store.models import Bed, BedVersion, Customer, Organism, Family, Sample
+from cg.store.models import (
+    Bed,
+    BedVersion,
+    Customer,
+    Organism,
+    Family,
+    Sample,
+    SampleLaneSequencingMetrics,
+)
 from tests.mocks.crunchy import MockCrunchyAPI
 from tests.mocks.hk_mock import MockHousekeeperAPI
 from tests.mocks.limsmock import MockLimsAPI
@@ -2270,3 +2278,45 @@ def fixture_taxprofiler_sample_id() -> str:
 def fixture_taxprofiler_housekeeper_dir(tmpdir_factory, taxprofiler_dir: Path) -> Path:
     """Return the path to the taxprofiler housekeeper bundle dir."""
     return tmpdir_factory.mktemp("bundles")
+
+  
+@pytest.fixture
+def expected_total_reads() -> int:
+    return 1_000_000
+
+
+@pytest.fixture
+def store_with_sequencing_metrics(
+    store: Store, sample_id: str, expected_total_reads: int
+) -> Generator[Store, None, None]:
+    """Return a store with multiple samples with sample lane sequencing metrics."""
+
+    sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
+        (sample_id, "flow_cell_1", 1, expected_total_reads, 90.5, 32),
+        ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
+        ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
+    ]
+
+    sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics] = []
+    for (
+        sample_internal_id,
+        flow_cell_name,
+        flow_cell_lane_number,
+        sample_total_reads_in_lane,
+        sample_base_fraction_passing_q30,
+        sample_base_mean_quality_score,
+    ) in sample_sequencing_metrics_details:
+        sequencing_metrics = SampleLaneSequencingMetrics(
+            sample_internal_id=sample_internal_id,
+            flow_cell_name=flow_cell_name,
+            flow_cell_lane_number=flow_cell_lane_number,
+            sample_total_reads_in_lane=sample_total_reads_in_lane,
+            sample_base_fraction_passing_q30=sample_base_fraction_passing_q30,
+            sample_base_mean_quality_score=sample_base_mean_quality_score,
+            created_at=datetime.now(),
+        )
+        sample_lane_sequencing_metrics.append(sequencing_metrics)
+
+    store.session.add_all(sample_lane_sequencing_metrics)
+    store.session.commit()
+    yield store

@@ -1,24 +1,22 @@
 import datetime as dt
 import re
-from typing import List, Optional, Set, Dict
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
-from sqlalchemy.util import deprecated
-from sqlalchemy.orm.attributes import InstrumentedAttribute
+from typing import Dict, List, Optional, Set
 
 from cg.constants import (
     CASE_ACTIONS,
     FLOWCELL_STATUS,
     PREP_CATEGORIES,
-    Priority,
     SEX_OPTIONS,
     STATUS_OPTIONS,
     DataDelivery,
     Pipeline,
+    Priority,
 )
-
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.util import deprecated
 
 Model = declarative_base()
 
@@ -441,6 +439,11 @@ class Family(Model, PriorityMixin):
         """Extract samples uploaded to Loqusdb."""
         return [link.sample for link in self.links if link.sample.loqusdb_id]
 
+    @property
+    def is_uploaded(self) -> bool:
+        """Returns True if the latest connected analysis has been uploaded."""
+        return self.analyses and self.analyses[0].uploaded_at
+
     def get_delivery_arguments(self) -> Set[str]:
         """Translates the case data_delivery field to pipeline specific arguments."""
         delivery_arguments: Set[str] = set()
@@ -772,9 +775,7 @@ class SampleLaneSequencingMetrics(Model):
     flow_cell_name = Column(types.String(32), ForeignKey("flowcell.name"), nullable=False)
     flow_cell_lane_number = Column(types.Integer)
 
-    sample_internal_id = Column(
-        types.String(32), ForeignKey("sample.internal_id"), nullable=False, index=True
-    )
+    sample_internal_id = Column(types.String(32), ForeignKey("sample.internal_id"), nullable=False)
     sample_total_reads_in_lane = Column(types.BigInteger)
     sample_base_fraction_passing_q30 = Column(types.Numeric(6, 2))
     sample_base_mean_quality_score = Column(types.Numeric(6, 2))
