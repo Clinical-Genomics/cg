@@ -27,6 +27,10 @@ from housekeeper.store.models import File, Version
 LOG = logging.getLogger(__name__)
 
 
+def _file_description(is_splice_junctions: bool) -> str:
+    return "splice junctions bed file" if is_splice_junctions else "RNA coverage bigwig file"
+
+
 class UploadScoutAPI:
     """Class that handles everything that has to do with uploading to Scout."""
 
@@ -246,68 +250,42 @@ class UploadScoutAPI:
         LOG.info(f"Uploaded {report_type} report")
         LOG.info(f"Upload {report_type} report finished!")
 
-    def upload_rna_coverage_bigwig_to_scout(self, case_id: str, dry_run: bool) -> None:
+    def upload_rna_coverage_or_splice_junctions_to_scout(
+        self, case_id: str, dry_run: bool, is_splice_junctions: bool
+    ) -> None:
         """Upload rna_coverage_bigwig file for a case to Scout."""
 
         status_db: Store = self.status_db
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=status_db.get_case_by_internal_id(internal_id=case_id)
         )
+        file_description: str = _file_description(is_splice_junctions=is_splice_junctions)
         for rna_sample_id in rna_dna_sample_case_map:
-            rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
-                case_id=case_id, sample_id=rna_sample_id
+            rna_upload_file: Optional[File] = (
+                self.get_splice_junctions_bed(case_id=case_id, sample_id=rna_sample_id)
+                if is_splice_junctions
+                else self.get_rna_coverage_bigwig(case_id=case_id, sample_id=rna_sample_id)
             )
-            if rna_coverage_bigwig is None:
+
+            if rna_upload_file is None:
                 raise FileNotFoundError(
-                    f"No RNA coverage bigwig file was found in housekeeper for {rna_sample_id}"
+                    f"No {file_description} was found in housekeeper for {rna_sample_id}"
                 )
-            LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found")
+            LOG.info(f"{file_description} {rna_upload_file.path} found")
             self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
-                file=rna_coverage_bigwig,
+                file=rna_upload_file,
                 rna_sample_id=rna_sample_id,
                 rna_dna_sample_case_map=rna_dna_sample_case_map,
                 dry_run=dry_run,
-                is_splice_junctions=False,
+                is_splice_junctions=is_splice_junctions,
             )
         LOG.info(
             self.summary_for_rna_case_splice_junctions_or_coverage_upload(
-                rna_dna_sample_case_map=rna_dna_sample_case_map, is_splice_junctions=False
-            )
-        )
-        LOG.info("Upload RNA coverage bigwig file finished!")
-
-    def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
-        """Upload splice_junctions_bed file for a case to Scout."""
-
-        status_db: Store = self.status_db
-
-        rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
-            rna_case=status_db.get_case_by_internal_id(internal_id=case_id)
-        )
-        for rna_sample_id in rna_dna_sample_case_map:
-            splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
-                case_id=case_id, sample_id=rna_sample_id
-            )
-            if splice_junctions_bed is None:
-                raise FileNotFoundError(
-                    f"No splice junctions bed file was found in Housekeeper for {rna_sample_id}"
-                )
-
-            LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
-            self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
-                file=splice_junctions_bed,
-                rna_sample_id=rna_sample_id,
                 rna_dna_sample_case_map=rna_dna_sample_case_map,
-                dry_run=dry_run,
-                is_splice_junctions=True,
-            )
-
-        LOG.info(
-            self.summary_for_rna_case_splice_junctions_or_coverage_upload(
-                rna_dna_sample_case_map=rna_dna_sample_case_map, is_splice_junctions=True
+                is_splice_junctions=is_splice_junctions,
             )
         )
-        LOG.info("Upload splice junctions bed file finished!")
+        LOG.info(f"Upload {file_description} finished!")
 
     def _upload_splice_junctions_bed_or_coverage_for_rna_sample(
         self,
@@ -322,13 +300,11 @@ class UploadScoutAPI:
         """
 
         (dna_sample_id, dna_cases) = rna_dna_sample_case_map[rna_sample_id].popitem()
-        file_name: str = (
-            "splice junctions bed file" if is_splice_junctions else "bigwig coverage file"
-        )
+        file_description: str = _file_description(is_splice_junctions=is_splice_junctions)
         for dna_case_id in dna_cases:
             if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
                 LOG.info(
-                    f"Uploading {file_name} for sample {dna_sample_id} in case {dna_case_id} in Scout."
+                    f"Uploading {file_description} for sample {dna_sample_id} in case {dna_case_id} in Scout."
                 )
 
                 if dry_run:
@@ -345,17 +321,21 @@ class UploadScoutAPI:
                         case_id=dna_case_id,
                         customer_sample_id=dna_sample_id,
                     )
-                LOG.info(f"Uploaded {file_name} {dna_sample_id} in case {dna_case_id}")
+                LOG.info(f"Uploaded {file_description} {dna_sample_id} in case {dna_case_id}")
             else:
                 LOG.warning(
-                    f"Upload of {file_name} for {dna_sample_id} in case {dna_case_id} skipped - "
+                    f"Upload of {file_description} for {dna_sample_id} in case {dna_case_id} skipped - "
                     f"case has not finished uploading"
                 )
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout."""
-        self.upload_splice_junctions_bed_to_scout(case_id=case_id, dry_run=dry_run)
-        self.upload_rna_coverage_bigwig_to_scout(case_id=case_id, dry_run=dry_run)
+        self.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=case_id, dry_run=dry_run, is_splice_junctions=True
+        )
+        self.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=case_id, dry_run=dry_run, is_splice_junctions=False
+        )
 
     def get_config_builder(self, analysis, hk_version) -> ScoutConfigBuilder:
         config_builders = {
@@ -390,13 +370,15 @@ class UploadScoutAPI:
     def summary_for_rna_case_splice_junctions_or_coverage_upload(
         rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]], is_splice_junctions: bool
     ) -> List[str]:
+        """Returns a list describing to which DNA cases either splice junction
+        or bigwig coverage files were uploaded to."""
         upload_summary: List[str] = []
-        file_name = "splice junctions file" if is_splice_junctions else "bigwig coverage file"
+        file_description: str = _file_description(is_splice_junctions=is_splice_junctions)
         for rna_sample in rna_dna_sample_case_map:
             dna_sample_dict: Dict[str, List[str]] = rna_dna_sample_case_map.get(rna_sample)
             for dna_sample in dna_sample_dict:
                 upload_summary.extend(
-                    f"Uploaded {file_name} for sample {dna_sample} in case {dna_case} in Scout."
+                    f"Uploaded {file_description} for sample {dna_sample} in case {dna_case} in Scout."
                     for dna_case in dna_sample_dict.get(dna_sample)
                 )
         return upload_summary
@@ -465,7 +447,7 @@ class UploadScoutAPI:
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
         rna_sample: Sample,
     ) -> None:
-        """Maps a list of DNA cases linked to DNA sample."""
+        """Maps a list of uploaded DNA cases linked to DNA sample."""
         cases_related_to_dna_sample: List[Family] = [
             dna_sample_family_relation.family for dna_sample_family_relation in dna_sample.links
         ]

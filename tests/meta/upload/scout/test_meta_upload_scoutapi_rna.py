@@ -125,7 +125,9 @@ def test_upload_splice_junctions_bed_to_scout(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
-    upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+    upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+        case_id=rna_case_id, dry_run=True, is_splice_junctions=True
+    )
 
     # THEN the splice junctions file should have been uploaded to the connected sample on the dna case in scout
     assert "Upload splice junctions bed file finished!" in caplog.text
@@ -158,7 +160,9 @@ def test_upload_rna_coverage_bigwig_to_scout(
 
     # WHEN running the method to upload RNA files to Scout
     caplog.set_level(logging.INFO)
-    upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+    upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+        case_id=rna_case_id, dry_run=True, is_splice_junctions=False
+    )
 
     # THEN the bigWig file should have been uploaded to the connected sample on the dna case in scout
     assert "Upload RNA coverage bigwig file finished!" in caplog.text
@@ -296,7 +300,9 @@ def test_upload_rna_coverage_bigwig_to_scout_no_subject_id(
     caplog.set_level(logging.INFO)
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
-        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+        upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=rna_case_id, dry_run=True, is_splice_junctions=False
+        )
 
 
 def test_upload_splice_junctions_bed_to_scout_no_subject_id(
@@ -324,7 +330,9 @@ def test_upload_splice_junctions_bed_to_scout_no_subject_id(
     caplog.set_level(logging.INFO)
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
-        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+        upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=rna_case_id, dry_run=True, is_splice_junctions=True
+        )
 
 
 def test_upload_rna_fusion_report_to_scout_tumour_non_matching(
@@ -376,7 +384,9 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_non_matching(
 
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
-        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+        upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=rna_case_id, dry_run=True, is_splice_junctions=False
+        )
 
 
 def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
@@ -402,7 +412,9 @@ def test_upload_splice_junctions_bed_to_scout_tumour_non_matching(
 
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
-        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+        upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=rna_case_id, dry_run=True, is_splice_junctions=True
+        )
 
 
 def test_upload_rna_fusion_report_to_scout_tumour_multiple_matches(
@@ -454,7 +466,9 @@ def test_upload_rna_coverage_bigwig_to_scout_tumour_multiple_matches(
 
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
-        upload_scout_api.upload_rna_coverage_bigwig_to_scout(case_id=rna_case_id, dry_run=True)
+        upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=rna_case_id, dry_run=True, is_splice_junctions=False
+        )
 
 
 def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
@@ -480,7 +494,9 @@ def test_upload_splice_junctions_bed_to_scout_tumour_multiple_matches(
 
     # THEN an exception should be raised on unconnected data
     with pytest.raises(CgDataError):
-        upload_scout_api.upload_splice_junctions_bed_to_scout(case_id=rna_case_id, dry_run=True)
+        upload_scout_api.upload_rna_coverage_or_splice_junctions_to_scout(
+            case_id=rna_case_id, dry_run=True, is_splice_junctions=True
+        )
 
 
 def test_get_application_prep_category(
