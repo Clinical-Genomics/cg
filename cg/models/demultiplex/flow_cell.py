@@ -110,7 +110,10 @@ class FlowCellDirectoryData:
         """Return the sample class used in the flow cell."""
         if self.sequencer_type == Sequencers.NOVASEQX:
             return FlowCellSampleNovaSeqX
-        if self.bcl_converter == BclConverter.DRAGEN:
+        if (
+            self.bcl_converter == BclConverter.DRAGEN
+            or self.bcl_converter == BclConverter.BCLCONVERT
+        ):
             return FlowCellSampleNovaSeq6000Dragen
         return FlowCellSampleNovaSeq6000Bcl2Fastq
 
