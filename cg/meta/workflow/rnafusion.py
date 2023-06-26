@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from cg.models.rnafusion.analysis import RnafusionAnalysis
 from pydantic import ValidationError
 
 from cg import resources
@@ -31,6 +30,7 @@ from cg.models.deliverables.metric_deliverables import (
     MultiqcDataJson,
 )
 from cg.models.nextflow.deliverables import NextflowDeliverables, replace_dict_values
+from cg.models.rnafusion.analysis import RnafusionAnalysis
 from cg.models.rnafusion.rnafusion_sample import RnafusionSample
 from cg.store.models import Family
 from cg.utils import Process
@@ -89,6 +89,10 @@ class RnafusionAnalysisAPI(AnalysisAPI):
     def get_workflow_manager(self) -> str:
         """Get workflow manager for rnafusion."""
         return WorkflowManager.Tower.value
+
+    def get_case_path(self, case_id: str) -> Path:
+        """Path to case working directory."""
+        return NextflowAnalysisAPI.get_case_path(case_id=case_id, root_dir=self.root)
 
     def get_case_config_path(self, case_id):
         return NextflowAnalysisAPI.get_case_config_path(case_id=case_id, root_dir=self.root_dir)

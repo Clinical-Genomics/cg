@@ -257,25 +257,22 @@ class AnalysisAPI(MetaAPI):
             pipeline=self.pipeline, threshold=self.threshold_reads
         )
 
-    def get_running_cases(self) -> List[Family]:
-        return self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
-
     def get_cases_to_store(self) -> List[Family]:
-        """Retrieve a list of cases where analysis finished successfully,
-        and is ready to be stored in Housekeeper"""
+        """Return cases where analysis finished successfully,
+        and is ready to be stored in Housekeeper."""
         return [
-            case_object
-            for case_object in self.get_running_cases()
-            if self.trailblazer_api.is_latest_analysis_completed(case_id=case_object.internal_id)
+            case
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            if self.trailblazer_api.is_latest_analysis_completed(case_id=case.internal_id)
         ]
 
     def get_cases_to_qc(self) -> List[Family]:
-        """Retrieve a list of cases where analysis finished successfully,
+        """Return cases where analysis finished successfully,
         and is ready for QC metrics checks."""
         return [
-            case_object
-            for case_object in self.get_running_cases()
-            if self.trailblazer_api.is_latest_analysis_qc(case_id=case_object.internal_id)
+            case
+            for case in self.status_db.get_running_cases_in_pipeline(pipeline=self.pipeline)
+            if self.trailblazer_api.is_latest_analysis_qc(case_id=case.internal_id)
         ]
 
     def get_sample_fastq_destination_dir(self, case: Family, sample: Sample):
