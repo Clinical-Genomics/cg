@@ -34,6 +34,20 @@ def test_parse_mip_rna_orderform(mip_rna_orderform: str):
     assert orderform_parser.project_type == OrderType.MIP_RNA
 
 
+def test_parse_rnafusion_orderform(rnafusion_orderform: str):
+    """Test to parse an rnafusion orderform in excel format"""
+    # GIVEN a orderform in excel format
+    assert is_excel(Path(rnafusion_orderform))
+    # GIVEN a orderform API
+    orderform_parser: ExcelOrderformParser = ExcelOrderformParser()
+
+    # WHEN parsing the orderform
+    orderform_parser.parse_orderform(excel_path=rnafusion_orderform)
+
+    # THEN assert that the project type is correct
+    assert orderform_parser.project_type == OrderType.RNAFUSION
+
+
 def test_parse_balsamic_orderform(balsamic_orderform: str):
     """Test to parse a balsamic orderform in Excel format"""
     # GIVEN a orderform in excel format
@@ -147,6 +161,9 @@ def test_parse_mip_orderform(mip_orderform: str, nr_samples_mip_orderform: int):
 
     # WHEN parsing the mip orderform
     order_form_parser.parse_orderform(excel_path=mip_orderform)
+
+    # THEN assert that the correct name was set
+    assert order_form_parser.order_name == order_name
 
     # THEN assert the number of samples parsed are correct
     assert len(order_form_parser.samples) == nr_samples_mip_orderform
