@@ -616,7 +616,7 @@ def test_map_dna_cases_to_dna_sample(
     rna_sample: Sample = rna_store.get_sample_by_internal_id(internal_id=rna_sample_son_id)
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna_dna_case_map
-    upload_scout_api._map_dna_cases_to_dna_sample(
+    upload_scout_api._map_uploaded_dna_cases_to_dna_sample(
         dna_sample=dna_sample,
         rna_dna_sample_case_map=rna_dna_sample_case_map,
         rna_sample=rna_sample,
@@ -646,7 +646,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_pipeline(
     dna_case.data_analysis: Pipeline = Pipeline.FASTQ
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
-    upload_scout_api._map_dna_cases_to_dna_sample(
+    upload_scout_api._map_uploaded_dna_cases_to_dna_sample(
         dna_sample=dna_sample,
         rna_dna_sample_case_map=rna_dna_sample_case_map,
         rna_sample=rna_sample,
@@ -679,7 +679,7 @@ def test_map_dna_cases_to_dna_sample_incorrect_customer(
     dna_case.customer_id: int = 1000
 
     # WHEN mapping the DNA case name to the DNA sample name in the rna-dna-sample-case map
-    upload_scout_api._map_dna_cases_to_dna_sample(
+    upload_scout_api._map_uploaded_dna_cases_to_dna_sample(
         dna_sample=dna_sample,
         rna_dna_sample_case_map=rna_dna_sample_case_map,
         rna_sample=rna_sample,

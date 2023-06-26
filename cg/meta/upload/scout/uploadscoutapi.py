@@ -13,7 +13,6 @@ from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
-from cg.io.csv import write_csv_stream
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -252,7 +251,6 @@ class UploadScoutAPI:
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=status_db.get_case_by_internal_id(internal_id=case_id)
         )
-        successful_uploads_summary: List[List[str]] = [[]]
         for rna_sample_id in rna_dna_sample_case_map:
             rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_id
@@ -262,16 +260,18 @@ class UploadScoutAPI:
                     f"No RNA coverage bigwig file was found in housekeeper for {rna_sample_id}"
                 )
             LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found")
-            successful_uploads_summary.extend(
-                self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
-                    file=rna_coverage_bigwig,
-                    rna_sample_id=rna_sample_id,
-                    rna_dna_sample_case_map=rna_dna_sample_case_map,
-                    dry_run=dry_run,
-                    is_splice_junctions=False,
-                )
+            self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
+                file=rna_coverage_bigwig,
+                rna_sample_id=rna_sample_id,
+                rna_dna_sample_case_map=rna_dna_sample_case_map,
+                dry_run=dry_run,
+                is_splice_junctions=False,
             )
-        LOG.info(write_csv_stream(successful_uploads_summary))
+        LOG.info(
+            self.summary_for_rna_case_splice_junctions_or_coverage_upload(
+                rna_dna_sample_case_map=rna_dna_sample_case_map, is_splice_junctions=False
+            )
+        )
         LOG.info("Upload RNA coverage bigwig file finished!")
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
@@ -282,7 +282,6 @@ class UploadScoutAPI:
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
             rna_case=status_db.get_case_by_internal_id(internal_id=case_id)
         )
-        successful_uploads_summary: List[List[str]] = [["RNA sample", "DNA case", "Successful"]]
         for rna_sample_id in rna_dna_sample_case_map:
             splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
@@ -293,16 +292,19 @@ class UploadScoutAPI:
                 )
 
             LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
-            successful_uploads_summary.extend(
-                self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
-                    file=splice_junctions_bed,
-                    rna_sample_id=rna_sample_id,
-                    rna_dna_sample_case_map=rna_dna_sample_case_map,
-                    dry_run=dry_run,
-                    is_splice_junctions=True,
-                )
+            self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
+                file=splice_junctions_bed,
+                rna_sample_id=rna_sample_id,
+                rna_dna_sample_case_map=rna_dna_sample_case_map,
+                dry_run=dry_run,
+                is_splice_junctions=True,
             )
-        LOG.info(write_csv_stream(successful_uploads_summary))
+
+        LOG.info(
+            self.summary_for_rna_case_splice_junctions_or_coverage_upload(
+                rna_dna_sample_case_map=rna_dna_sample_case_map, is_splice_junctions=True
+            )
+        )
         LOG.info("Upload splice junctions bed file finished!")
 
     def _upload_splice_junctions_bed_or_coverage_for_rna_sample(
@@ -312,13 +314,12 @@ class UploadScoutAPI:
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
         dry_run: bool,
         is_splice_junctions: bool,
-    ) -> List[List[str]]:
+    ) -> None:
         """Uploads splice junctions bed or bigwig coverage
-        for an RNA sample and returns a status string indicating that all, some or no uploads were successful.
+        for an RNA sample.
         """
 
         (dna_sample_id, dna_cases) = rna_dna_sample_case_map[rna_sample_id].popitem()
-        success_summary: List[List[str]] = [[]]
         file_name: str = (
             "splice junctions bed file" if is_splice_junctions else "bigwig coverage file"
         )
@@ -343,14 +344,11 @@ class UploadScoutAPI:
                         customer_sample_id=dna_sample_id,
                     )
                 LOG.info(f"Uploaded {file_name} {dna_sample_id} in case {dna_case_id}")
-                success_summary.append([rna_sample_id, dna_case_id, "True"])
             else:
                 LOG.warning(
                     f"Upload of {file_name} for {dna_sample_id} in case {dna_case_id} skipped - "
                     f"case has not finished uploading"
                 )
-                success_summary.append([rna_sample_id, dna_case_id, "False"])
-        return success_summary
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout."""
@@ -386,6 +384,21 @@ class UploadScoutAPI:
 
         return config_builders[analysis.pipeline]
 
+    @staticmethod
+    def summary_for_rna_case_splice_junctions_or_coverage_upload(
+        rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]], is_splice_junctions: bool
+    ) -> List[str]:
+        upload_summary: List[str] = []
+        file_name = "splice junctions file" if is_splice_junctions else "bigwig coverage file"
+        for rna_sample in rna_dna_sample_case_map:
+            dna_sample_dict: Dict[str, List[str]] = rna_dna_sample_case_map.get(rna_sample)
+            for dna_sample in dna_sample_dict:
+                upload_summary.extend(
+                    f"Uploaded {file_name} for sample {dna_sample} in case {dna_case} in Scout."
+                    for dna_case in dna_sample_dict.get(dna_sample)
+                )
+        return upload_summary
+
     def create_rna_dna_sample_case_map(self, rna_case: Family) -> Dict[str, Dict[str, List[str]]]:
         """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
         subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
@@ -404,7 +417,7 @@ class UploadScoutAPI:
         dna_sample: Sample = self._map_dna_samples_related_to_rna_sample(
             rna_sample=rna_sample, rna_dna_sample_case_map=rna_dna_sample_case_map
         )
-        self._map_dna_cases_to_dna_sample(
+        self._map_uploaded_dna_cases_to_dna_sample(
             dna_sample=dna_sample,
             rna_dna_sample_case_map=rna_dna_sample_case_map,
             rna_sample=rna_sample,
@@ -445,7 +458,7 @@ class UploadScoutAPI:
                 return sample
 
     @staticmethod
-    def _map_dna_cases_to_dna_sample(
+    def _map_uploaded_dna_cases_to_dna_sample(
         dna_sample: Sample,
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
         rna_sample: Sample,
@@ -460,9 +473,14 @@ class UploadScoutAPI:
                 Pipeline.BALSAMIC,
                 Pipeline.BALSAMIC_UMI,
             ] and case.customer in list(rna_sample.customer.collaborators):
-                rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
-                    case.internal_id
-                )
+                if case.is_uploaded:
+                    rna_dna_sample_case_map[rna_sample.internal_id][dna_sample.name].append(
+                        case.internal_id
+                    )
+                else:
+                    LOG.warning(
+                        f"Will not upload report to DNA case {case.internal_id} since its upload has not finshed."
+                    )
 
     @staticmethod
     def _get_application_prep_category(
@@ -483,7 +501,7 @@ class UploadScoutAPI:
         return subject_id_dna_samples
 
     def get_related_uploaded_dna_cases(self, rna_case_id: str) -> Set[str]:
-        """Returns all uploaded DNA cases related to the specified RNA case."""
+        """Returns all distinct uploaded DNA cases related to the specified RNA case."""
         unique_dna_case_ids: Set[str] = self.get_unique_dna_cases_related_to_rna_case(
             case_id=rna_case_id
         )
