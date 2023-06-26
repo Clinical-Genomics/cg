@@ -180,7 +180,7 @@ class UploadScoutAPI:
 
         LOG.info(f"{report_type} fusion report {fusion_report.path} found")
 
-        related_dna_cases: Set[str] = self.get_related_uploaded_dna_cases(rna_case_id=case_id)
+        related_dna_cases: Set[str] = self.get_unique_dna_cases_related_to_rna_case(case_id=case_id)
         if not related_dna_cases:
             raise CgDataError("No connected DNA case has been uploaded.")
 
@@ -210,7 +210,9 @@ class UploadScoutAPI:
         """Upload report file to DNA cases related to an RNA case in Scout."""
         LOG.info(f"Finding DNA cases related to RNA case {rna_case_id}")
 
-        related_dna_cases: Set[str] = self.get_related_uploaded_dna_cases(rna_case_id=rna_case_id)
+        related_dna_cases: Set[str] = self.get_unique_dna_cases_related_to_rna_case(
+            case_id=rna_case_id
+        )
         if not related_dna_cases:
             raise CgDataError("No connected DNA case has been uploaded.")
         for dna_case_id in related_dna_cases:
@@ -400,7 +402,7 @@ class UploadScoutAPI:
         return upload_summary
 
     def create_rna_dna_sample_case_map(self, rna_case: Family) -> Dict[str, Dict[str, List[str]]]:
-        """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its DNA cases based on
+        """Returns a nested dictionary for mapping an RNA sample to a DNA sample and its uploaded DNA cases based on
         subject_id. Example dictionary {rna_sample_id : {dna_sample_id : [dna_case1_id, dna_case2_id]}}.
         """
         rna_dna_sample_case_map: Dict[str, Dict[str, List[str]]] = {}
@@ -499,17 +501,3 @@ class UploadScoutAPI:
         ]
 
         return subject_id_dna_samples
-
-    def get_related_uploaded_dna_cases(self, rna_case_id: str) -> Set[str]:
-        """Returns all distinct uploaded DNA cases related to the specified RNA case."""
-        unique_dna_case_ids: Set[str] = self.get_unique_dna_cases_related_to_rna_case(
-            case_id=rna_case_id
-        )
-
-        uploaded_dna_cases: Set[str] = set()
-        for dna_case_id in unique_dna_case_ids:
-            if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
-                uploaded_dna_cases.add(dna_case_id)
-            else:
-                LOG.warning(f"Related DNA case {dna_case_id} has not been completed.")
-        return uploaded_dna_cases
