@@ -87,15 +87,14 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def write_sample_sheet(
         self,
         case_id: str,
-        sample_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str],
     ) -> None:
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
-        samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
-        for sample_id in samples:
-            print("Sample id " + sample_id)
+        #samples: List[Sample] = self.get_samples(case_id=case_id, sample_id=sample_id)
+        #for sample_id in samples:
+        #    print("Sample id " + sample_id)
         #    self.link_fastq_files_for_sample(case_id=case_id, sample_id=sample_id)
 
         for link in case.links:
