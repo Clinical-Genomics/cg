@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Generator
 
 from mock import MagicMock, call
+from cg.constants.constants import FileExtensions
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.housekeeper_tags import SequencingFileTag
@@ -670,7 +671,7 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_fa
     # GIVEN a DemuxPostProcessing API
     demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
 
-    demux_post_processing_api.get_flowcell_sample_fastq_file_paths = MagicMock()
+    demux_post_processing_api.get_sample_fastq_paths_from_flow_cell = MagicMock()
     demux_post_processing_api.get_sample_id_from_sample_fastq_file_path = MagicMock()
     demux_post_processing_api.add_file_if_non_existent = MagicMock()
 
@@ -678,7 +679,7 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_fa
         Path(tmpdir_factory.mktemp("first_file.fastq.gz")),
         Path(tmpdir_factory.mktemp("second_file.fastq.gz")),
     ]
-    demux_post_processing_api.get_flowcell_sample_fastq_file_paths.return_value = mock_fastq_paths
+    demux_post_processing_api.get_sample_fastq_paths_from_flow_cell.return_value = mock_fastq_paths
 
     sample_id = "sample1"
     demux_post_processing_api.get_sample_id_from_sample_fastq_file_path.return_value = sample_id
@@ -749,15 +750,23 @@ def test_get_valid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_f
     # GIVEN some files in temporary directory
     sample_dir = flow_cell_dir / "Unaligned" / "Project_sample" / "Sample_test"
     sample_dir.mkdir(parents=True)
-    valid_fastq_file = sample_dir / "file.fastq.gz"
-    valid_fastq_file.touch()
+    valid_sample_fastq_directory_1 = Path(
+        sample_dir, f"Sample_ABC{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+    valid_sample_fastq_directory_2 = Path(
+        sample_dir, f"Sample_ABC_123{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+    )
+    valid_sample_fastq_directory_1.touch()
+    valid_sample_fastq_directory_2.touch()
 
     # WHEN we get flowcell sample fastq file paths
-    result = demux_post_processing_api.get_flowcell_sample_fastq_file_paths(flow_cell_dir)
+    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
+        flow_cell_directory=flow_cell_dir
+    )
 
     # THEN we should only get the valid files
-    assert len(result) == 1
-    assert valid_fastq_file in result
+    assert len(result) == 2
+    assert valid_sample_fastq_directory_1 in result
 
 
 def test_get_invalid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir_factory):
@@ -768,15 +777,17 @@ def test_get_invalid_flowcell_sample_fastq_file_path(demultiplex_context, tmpdir
     flow_cell_dir = Path(tmpdir_factory.mktemp("flow_cell"))
 
     # GIVEN some files in temporary directory
-    project_dir = flow_cell_dir / "Unaligned" / "Project_sample"
+    project_dir = Path(flow_cell_dir, "Unaligned", "Project_sample")
     project_dir.mkdir(parents=True)
-    invalid_fastq_file = project_dir / "file.fastq.gz"
+    invalid_fastq_file = Path(project_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
     invalid_fastq_file.touch()
 
     # WHEN we get flowcell sample fastq file paths
-    result = demux_post_processing_api.get_flowcell_sample_fastq_file_paths(flow_cell_dir)
+    result = demux_post_processing_api.get_sample_fastq_paths_from_flow_cell(
+        flow_cell_directory=flow_cell_dir
+    )
 
-    # THEN we should only get the valid files
+    # THEN we should not get any files
     assert len(result) == 0
     assert invalid_fastq_file not in result
 
@@ -790,7 +801,7 @@ def test_get_sample_id_from_sample_fastq_file_path(demultiplex_context: CGConfig
     sample_id = "sampleid"
     sample_dir = tmp_dir / f"prefix_{sample_id}"
     sample_dir.mkdir()
-    sample_file = sample_dir / "file.fastq.gz"
+    sample_file = Path(sample_dir, f"file{FileExtensions.FASTQ}{FileExtensions.GZIP}")
     sample_file.touch()
 
     # WHEN we get sample id from sample fastq file path
