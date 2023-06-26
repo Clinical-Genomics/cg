@@ -13,6 +13,7 @@ from cg.constants.constants import FileFormat, PrepCategory
 from cg.constants.scout_upload import ScoutCustomCaseReportTags
 from cg.exc import CgDataError, HousekeeperBundleVersionMissingError
 from cg.io.controller import WriteFile
+from cg.io.csv import write_csv_stream
 from cg.meta.upload.scout.balsamic_config_builder import BalsamicConfigBuilder
 from cg.meta.upload.scout.balsamic_umi_config_builder import BalsamicUmiConfigBuilder
 from cg.meta.upload.scout.mip_config_builder import MipConfigBuilder
@@ -248,23 +249,20 @@ class UploadScoutAPI:
         """Upload rna_coverage_bigwig file for a case to Scout."""
 
         status_db: Store = self.status_db
-        rna_case = status_db.get_case_by_internal_id(internal_id=case_id)
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
-            rna_case=rna_case
+            rna_case=status_db.get_case_by_internal_id(internal_id=case_id)
         )
-        successful_uploads_summary: List[str] = []
+        successful_uploads_summary: List[List[str]] = [[]]
         for rna_sample_id in rna_dna_sample_case_map:
             rna_coverage_bigwig: Optional[File] = self.get_rna_coverage_bigwig(
                 case_id=case_id, sample_id=rna_sample_id
             )
-
             if rna_coverage_bigwig is None:
                 raise FileNotFoundError(
                     f"No RNA coverage bigwig file was found in housekeeper for {rna_sample_id}"
                 )
-
             LOG.info(f"RNA coverage bigwig file {rna_coverage_bigwig.path} found")
-            successful_uploads_summary.append(
+            successful_uploads_summary.extend(
                 self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
                     file=rna_coverage_bigwig,
                     rna_sample_id=rna_sample_id,
@@ -273,32 +271,29 @@ class UploadScoutAPI:
                     is_splice_junctions=False,
                 )
             )
-        LOG.info(iter(successful_uploads_summary))
+        LOG.info(write_csv_stream(successful_uploads_summary))
         LOG.info("Upload RNA coverage bigwig file finished!")
 
     def upload_splice_junctions_bed_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload splice_junctions_bed file for a case to Scout."""
 
         status_db: Store = self.status_db
-        rna_case: Family = status_db.get_case_by_internal_id(internal_id=case_id)
 
         rna_dna_sample_case_map: Dict[str, Dict[str, list]] = self.create_rna_dna_sample_case_map(
-            rna_case=rna_case
+            rna_case=status_db.get_case_by_internal_id(internal_id=case_id)
         )
-        successful_uploads_summary: List[str] = []
-
+        successful_uploads_summary: List[List[str]] = [["RNA sample", "DNA case", "Successful"]]
         for rna_sample_id in rna_dna_sample_case_map:
             splice_junctions_bed: Optional[File] = self.get_splice_junctions_bed(
                 case_id=case_id, sample_id=rna_sample_id
             )
-
             if splice_junctions_bed is None:
                 raise FileNotFoundError(
                     f"No splice junctions bed file was found in Housekeeper for {rna_sample_id}"
                 )
 
             LOG.info(f"Splice junctions bed file {splice_junctions_bed.path} found")
-            successful_uploads_summary.append(
+            successful_uploads_summary.extend(
                 self._upload_splice_junctions_bed_or_coverage_for_rna_sample(
                     file=splice_junctions_bed,
                     rna_sample_id=rna_sample_id,
@@ -307,7 +302,7 @@ class UploadScoutAPI:
                     is_splice_junctions=True,
                 )
             )
-        LOG.info(iter(successful_uploads_summary))
+        LOG.info(write_csv_stream(successful_uploads_summary))
         LOG.info("Upload splice junctions bed file finished!")
 
     def _upload_splice_junctions_bed_or_coverage_for_rna_sample(
@@ -317,20 +312,18 @@ class UploadScoutAPI:
         rna_dna_sample_case_map: Dict[str, Dict[str, list]],
         dry_run: bool,
         is_splice_junctions: bool,
-    ) -> str:
+    ) -> List[List[str]]:
         """Uploads splice junctions bed or bigwig coverage
         for an RNA sample and returns a status string indicating that all, some or no uploads were successful.
         """
 
         (dna_sample_id, dna_cases) = rna_dna_sample_case_map[rna_sample_id].popitem()
-        all_successful: bool = True
-        all_failed: bool = True
+        success_summary: List[List[str]] = [[]]
         file_name: str = (
             "splice junctions bed file" if is_splice_junctions else "bigwig coverage file"
         )
         for dna_case_id in dna_cases:
             if self.status_db.get_case_by_internal_id(internal_id=dna_case_id).is_uploaded:
-                all_failed = False
                 LOG.info(
                     f"Uploading {file_name} for sample {dna_sample_id} in case {dna_case_id} in Scout."
                 )
@@ -350,32 +343,14 @@ class UploadScoutAPI:
                         customer_sample_id=dna_sample_id,
                     )
                 LOG.info(f"Uploaded {file_name} {dna_sample_id} in case {dna_case_id}")
+                success_summary.append([rna_sample_id, dna_case_id, "True"])
             else:
-                all_successful = False
                 LOG.warning(
                     f"Upload of {file_name} for {dna_sample_id} in case {dna_case_id} skipped - "
                     f"case has not finished uploading"
                 )
-        return self._upload_success_statement(
-            rna_sample_id=rna_sample_id,
-            all_successful=all_successful,
-            all_failed=all_failed,
-            file_name=file_name,
-        )
-
-    @staticmethod
-    def _upload_success_statement(
-        rna_sample_id: str, all_successful: bool, all_failed: bool, file_name: str
-    ) -> str:
-        """Returns string indicating if all, some or no uploads of splice junctions or bigwig coverage succeeded."""
-        if all_successful and all_failed:
-            return f"{rna_sample_id} - found no related uploaded DNA cases."
-        elif all_successful:
-            return f"{rna_sample_id} - all {file_name} uploads to related uploaded DNA cases successful."
-        elif all_failed:
-            return f"{rna_sample_id} - no {file_name} uploads to related uploaded DNA cases successful."
-        else:
-            return f"{rna_sample_id} - some {file_name} uploads to related uploaded DNA cases successful."
+                success_summary.append([rna_sample_id, dna_case_id, "False"])
+        return success_summary
 
     def upload_rna_junctions_to_scout(self, dry_run: bool, case_id: str) -> None:
         """Upload RNA junctions splice files to Scout."""
