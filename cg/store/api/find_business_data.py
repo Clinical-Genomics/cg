@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from typing import Callable, List, Optional, Iterator, Union, Dict
-from sqlalchemy import func
+
 
 from sqlalchemy.orm import Query, Session
 
@@ -318,11 +318,25 @@ class FindBusinessDataHandler(BaseHandler):
         """Get number of reads for sample from sample lane sequencing metrics."""
         total_reads_query: Query = apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[SequencingMetricsFilter.GET_TOTAL_READ_COUNT_FOR_SAMPLE],
+            filter_functions=[SequencingMetricsFilter.FILTER_TOTAL_READ_COUNT_FOR_SAMPLE],
             sample_internal_id=sample_internal_id,
         )
         reads_count: Optional[int] = total_reads_query.scalar()
         return reads_count if reads_count else 0
+
+    def get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        self, flow_cell_name: str, sample_internal_id: str, lane: int
+    ) -> SampleLaneSequencingMetrics:
+        """Get metrics entry by flow cell name, sample internal id and lane."""
+        return apply_metrics_filter(
+            metrics=self._get_query(table=SampleLaneSequencingMetrics),
+            filter_functions=[
+                SequencingMetricsFilter.FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE
+            ],
+            flow_cell_name=flow_cell_name,
+            sample_internal_id=sample_internal_id,
+            lane=lane,
+        ).first()
 
     def get_flow_cell_by_name(self, flow_cell_name: str) -> Flowcell:
         """Return flow cell by flow cell name."""

@@ -1,6 +1,6 @@
 """Tests the findbusinessdata part of the Cg store API."""
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import List
 
 import pytest
@@ -19,6 +19,7 @@ from cg.store.models import (
     Invoice,
     Pool,
     Sample,
+    SampleLaneSequencingMetrics,
 )
 from sqlalchemy.orm import Query
 from tests.store_helpers import StoreHelpers
@@ -784,3 +785,19 @@ def test_get_total_read_counts(
 
     # THEN assert that the total read count is correct
     assert total_reads_count == expected_total_reads
+
+
+def test_get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+    store_with_sequencing_metrics: Store, sample_id: str, flow_cell_name: str, lane: int = 1
+):
+    # GIVEN a store with sequencing metrics
+
+    # WHEN getting a metrics entry by flow cell name, sample internal id and lane
+    metrics_entry: SampleLaneSequencingMetrics = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        sample_internal_id=sample_id, flow_cell_name=flow_cell_name, lane=lane
+    )
+
+    assert metrics_entry is not None
+    assert metrics_entry.flow_cell_name == flow_cell_name
+    assert metrics_entry.flow_cell_lane_number == lane
+    assert metrics_entry.sample_internal_id == sample_id
