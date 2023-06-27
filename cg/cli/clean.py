@@ -511,7 +511,11 @@ def clean_run_directories(
     if dry_run:
         return
     LOG.info(f"Removing flow cell run directory {run_dir_flow_cell.flow_cell_dir}.")
-    run_dir_flow_cell.archive_sample_sheet()
+    try:
+        run_dir_flow_cell.archive_sample_sheet()
+    except (IntegrityError, FileExistsError) as error:
+        LOG.warning(f"File already exists either in housekeeper or hk db: {error}")
+        return
     run_dir_flow_cell.remove_run_directory()
 
 
