@@ -49,8 +49,8 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
     @staticmethod
     def build_sample_sheet_content(
-        # case_id: str,
-        sample_id: str,
+        case_id: str,
+        # sample_id: str,
         fastq_r1: List[str],
         fastq_r2: List[str],
         instrument_platform: SequencingPlatform.ILLUMINA,
@@ -60,7 +60,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         try:
             TaxprofilerSample(
                 # sample=case_id,
-                sample=sample_id,
+                sample=case_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
@@ -70,7 +70,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             raise ValueError
 
         # Complete sample lists to the same length as fastq_r1:
-        samples_full_list: List[str] = [sample_id] * len(fastq_r1)
+        samples_full_list: List[str] = [case_id] * len(fastq_r1)
         instrument_full_list: List[str] = [instrument_platform] * len(fastq_r1)
         fasta_full_list: List[str] = [fasta] * len(fastq_r1)
 
