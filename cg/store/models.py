@@ -522,7 +522,11 @@ class Flowcell(Model):
     updated_at = Column(types.DateTime, onupdate=dt.datetime.now)
 
     samples = orm.relationship("Sample", secondary=flowcell_sample, backref="flowcells")
-    sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="flowcell")
+    sequencing_metrics = orm.relationship(
+        "SampleLaneSequencingMetrics",
+        back_populates="flowcell",
+        cascade="all, delete, delete-orphan",
+    )
 
     def __str__(self):
         return self.name
@@ -782,9 +786,7 @@ class SampleLaneSequencingMetrics(Model):
 
     created_at = Column(types.DateTime)
 
-    flowcell = orm.relationship(
-        Flowcell, back_populates="sequencing_metrics", cascade="all, delete-orphan"
-    )
+    flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
     sample = orm.relationship(Sample, back_populates="sequencing_metrics")
 
     __table_args__ = (
