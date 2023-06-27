@@ -10,6 +10,10 @@ from cg.apps.cgstats.db.models import Supportparams, Sample, Project, Datasource
 from cg.apps.cgstats.stats import StatsAPI
 from cg.models.demultiplex.demux_results import DemuxResults
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
+from tests.models.demultiplexing.conftest import (
+    fixture_demultiplexed_dragen_flow_cell,
+    fixture_dragen_demux_results,
+)
 
 
 class MockDemuxResults:
