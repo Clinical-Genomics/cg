@@ -133,6 +133,9 @@ def test_get_sample_internal_ids(
     # THEN assert that all sample internal ids contain ACC prefix
     assert all([sample_internal_id.startswith("ACC") for sample_internal_id in sample_internal_ids])
 
+    # THEN assert that all sample internal ids are unique
+    assert len(sample_internal_ids) == len(set(sample_internal_ids))
+
 
 def test_get_lanes_for_sample_internal_id(
     parsed_bcl_convert_metrics: BclConvertMetricsParser, test_sample_internal_id: str
