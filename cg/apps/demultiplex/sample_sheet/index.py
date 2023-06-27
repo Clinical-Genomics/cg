@@ -154,6 +154,7 @@ def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
     """Get the hamming distance between two index 2 sequences.
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the last segment of equal length of the longest sequence."""
+    LOG.debug(f"Original indexes: {sequence_1} and {sequence_2}")
     limit: int = min(len(sequence_1), len(sequence_2))
     LOG.debug(
         f"Calculating hamming distance between {sequence_1[-limit:]} and {sequence_2[-limit:]}"
