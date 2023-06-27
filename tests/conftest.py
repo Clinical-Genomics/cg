@@ -2025,8 +2025,8 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
 # Rnafusion fixtures
 
 
-@pytest.fixture(name="rnafusion_dir_path")
-def fixture_rnafusion_dir_path(tmpdir_factory, apps_dir: Path) -> str:
+@pytest.fixture(name="rnafusion_dir")
+def fixture_rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the rnafusion apps dir."""
     rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
     return Path(rnafusion_dir).absolute().as_posix()
