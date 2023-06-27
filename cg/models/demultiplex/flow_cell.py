@@ -159,6 +159,10 @@ class FlowCellDirectoryData:
         """Return path to Hiseq X flow cell directory."""
         return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
+    @property
+    def is_demultiplexing_complete(self) -> bool:
+        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+
     def _parse_date(self):
         """Return the parsed date in the correct format."""
         if len(self.split_flow_cell_name[0]) == LENGTH_LONG_DATE:
