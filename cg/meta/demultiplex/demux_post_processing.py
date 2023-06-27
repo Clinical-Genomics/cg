@@ -120,6 +120,13 @@ class DemuxPostProcessingAPI:
 
         self.update_sample_read_counts(sample_internal_ids=flow_cell_sample_ids)
 
+        self.create_delivery_file_in_flow_cell_directory(
+            flow_cell_directory=flow_cell_directory_path
+        )
+
+    def create_delivery_file_in_flow_cell_directory(self, flow_cell_directory: Path) -> None:
+        Path(flow_cell_directory, DemultiplexingDirsAndFiles.DELIVERY).touch()
+
     def add_sample_lane_sequencing_metrics_for_flow_cell(
         self, flow_cell_directory: Path, bcl_converter: str
     ) -> None:
@@ -193,7 +200,7 @@ class DemuxPostProcessingAPI:
 
     def add_sample_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-        fastq_file_paths: List[Path] = self.get_sample_fastq_file_paths(
+        fastq_file_paths: List[Path] = self.get_sample_fastq_paths_from_flow_cell(
             flow_cell_directory=flow_cell_directory
         )
 
@@ -221,16 +228,11 @@ class DemuxPostProcessingAPI:
         """Validate the file name and discard any undetermined fastq files."""
         return "Undetermined" not in fastq_file_name
 
-    def get_sample_fastq_file_paths(self, flow_cell_directory: Path) -> List[Path]:
-        """Get fastq file paths for flow cell."""
-        valid_sample_fastq_file_paths = [
-            file_path
-            for file_path in flow_cell_directory.glob(
-                f"**/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
-            )
-            if self.is_valid_sample_fastq_filename(file_path.name)
-        ]
-        return valid_sample_fastq_file_paths
+    def get_sample_fastq_paths_from_flow_cell(self, flow_cell_directory: Path) -> List[Path]:
+        fastq_sample_pattern: str = (
+            f"Unaligned*/Project_*/Sample_*/*{FileExtensions.FASTQ}{FileExtensions.GZIP}"
+        )
+        return list(flow_cell_directory.glob(fastq_sample_pattern))
 
     def get_sample_id_from_sample_fastq_file_path(self, fastq_file_path: Path) -> str:
         """Extract sample id from fastq file path."""
