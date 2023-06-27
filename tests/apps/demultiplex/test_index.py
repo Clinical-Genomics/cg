@@ -132,23 +132,27 @@ def test_get_reverse_complement_not_dna(caplog):
         get_reverse_complement_dna_seq(dna=strain)
 
 
-def test_adapt_barcode_mismatch_values(lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX]):
+def test_adapt_barcode_mismatch_values(
+    lims_novaseq_x_samples: List[FlowCellSampleNovaSeqX],
+    novaseq_x_flow_cell_sample_before_adapt_indexes: FlowCellSampleNovaSeqX,
+):
     """Test that the barcode mismatch values are updated for a sample."""
     # GIVEN a list of NovaSeqX samples
-    sample_to_update: FlowCellSampleNovaSeqX = lims_novaseq_x_samples[0]
-    # GIVEN a sample in the list with changed id whose barcode mismatch values have not been adapted
-    sample_to_update.sample_id = "new_id"
-    assert sample_to_update.barcode_mismatches_1 == 1
-    assert sample_to_update.barcode_mismatches_2 == 1
+    present_index: str = lims_novaseq_x_samples[0].index
+    # GIVEN a sample
+    novaseq_x_flow_cell_sample_before_adapt_indexes.index = present_index
+    assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_1 == 1
+    assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 1
 
     # WHEN adapting the barcode mismatch values
     update_barcode_mismatch_values_for_sample(
-        sample_to_update=sample_to_update, samples=lims_novaseq_x_samples
+        sample_to_update=novaseq_x_flow_cell_sample_before_adapt_indexes,
+        samples=lims_novaseq_x_samples,
     )
 
     # THEN the barcode mismatch values have been updated
-    assert sample_to_update.barcode_mismatches_1 == 0
-    assert sample_to_update.barcode_mismatches_2 == 0
+    assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_1 == 0
+    assert novaseq_x_flow_cell_sample_before_adapt_indexes.barcode_mismatches_2 == 0
 
 
 def test_adapt_barcode_mismatch_values_repeated_sample(

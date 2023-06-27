@@ -155,6 +155,9 @@ def get_hamming_distance_index_2(sequence_1: str, sequence_2: str) -> int:
     In the case that one sequence is longer than the other, the distance is calculated between
     the shortest sequence and the last segment of equal length of the longest sequence."""
     limit: int = min(len(sequence_1), len(sequence_2))
+    LOG.debug(
+        f"Calculating hamming distance between {sequence_1[-limit:]} and {sequence_2[-limit:]}"
+    )
     return get_hamming_distance(str_1=sequence_1[-limit:], str_2=sequence_2[-limit:])
 
 
@@ -173,11 +176,15 @@ def update_barcode_mismatch_values_for_sample(
             get_hamming_distance_index_1(sequence_1=index_1_sample_to_update, sequence_2=index_1)
             < MINIMUM_HAMMING_DISTANCE
         ):
+            LOG.debug(f"Turning Barcode mismatch 1 to 0 for sample {sample_to_update.sample_id}")
+            LOG.debug(f"Sample index: {index_1_sample_to_update}. Test index: {index_1}")
             sample_to_update.barcode_mismatches_1 = 0
         if (
             get_hamming_distance_index_2(sequence_1=index_2_sample_to_update, sequence_2=index_2)
             < MINIMUM_HAMMING_DISTANCE
         ):
+            LOG.debug(f"Turning Barcode mismatch 2 to 0 for sample {sample_to_update.sample_id}")
+            LOG.debug(f"Sample index: {index_2_sample_to_update}. Test index: {index_2}")
             sample_to_update.barcode_mismatches_2 = 0
 
 
