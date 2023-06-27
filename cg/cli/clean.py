@@ -467,6 +467,10 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
                 bundle_names=[sample.internal_id for sample in samples]
             )
         except HousekeeperBundleVersionMissingError:
+            LOG.info(
+                f"No bundle found for one or more of the samples on flow cell {flow_cell.id}."
+                f" Skipping removal of the directory"
+            )
             continue
 
         demux_runs_flow_cell: DemultiplexedRunsFlowCell = DemultiplexedRunsFlowCell(
