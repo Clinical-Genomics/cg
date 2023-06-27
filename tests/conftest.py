@@ -2025,8 +2025,8 @@ def fixture_store_with_cases_and_customers(store: Store, helpers: StoreHelpers) 
 # Rnafusion fixtures
 
 
-@pytest.fixture(name="rnafusion_dir")
-def fixture_rnafusion_dir(tmpdir_factory, apps_dir: Path) -> str:
+@pytest.fixture(name="rnafusion_dir_path")
+def fixture_rnafusion_dir_path(tmpdir_factory, apps_dir: Path) -> str:
     """Return the path to the rnafusion apps dir."""
     rnafusion_dir = tmpdir_factory.mktemp("rnafusion")
     return Path(rnafusion_dir).absolute().as_posix()
@@ -2257,14 +2257,20 @@ def expected_total_reads() -> int:
     return 1_000_000
 
 
+@pytest.fixture(name="flow_cell_name")
+def fixture_flow_cell_name() -> str:
+    """Return flow cell name."""
+    return "HVKJCDRXX"
+
+
 @pytest.fixture
 def store_with_sequencing_metrics(
-    store: Store, sample_id: str, expected_total_reads: int
+    store: Store, sample_id: str, expected_total_reads: int, flow_cell_name: str
 ) -> Generator[Store, None, None]:
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
-        (sample_id, "flow_cell_1", 1, expected_total_reads, 90.5, 32),
+        (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
         ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
         ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
     ]

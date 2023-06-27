@@ -149,14 +149,14 @@ class DemuxPostProcessingAPI:
             if self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
                 flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
                 sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
-                lane=sample_lane_sequencing_metric.lane,
+                lane=sample_lane_sequencing_metric.flow_cell_lane_number,
             ):
                 LOG.warning(
-                    f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.lane}. Skipping."
+                    f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}. Skipping."
                 )
             else:
                 LOG.info(
-                    f"Adding Sample lane sequencing metrics for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.lane}."
+                    f"Adding Sample lane sequencing metrics for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}."
                 )
                 self.status_db.session.add(sample_lane_sequencing_metric)
 

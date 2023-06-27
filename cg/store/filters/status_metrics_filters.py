@@ -19,12 +19,12 @@ def filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     return metrics.filter(
         SampleLaneSequencingMetrics.flow_cell_name == flow_cell_name,
         SampleLaneSequencingMetrics.sample_internal_id == sample_internal_id,
-        SampleLaneSequencingMetrics.lane == lane,
+        SampleLaneSequencingMetrics.flow_cell_lane_number == lane,
     )
 
 
 class SequencingMetricsFilter(Enum):
-    GET_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = filter_total_read_count_for_sample
+    FILTER_TOTAL_READ_COUNT_FOR_SAMPLE: Callable = filter_total_read_count_for_sample
     FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE: Callable = (
         filter_metrics_for_flow_cell_sample_internal_id_and_lane
     )

@@ -318,7 +318,7 @@ class FindBusinessDataHandler(BaseHandler):
         """Get number of reads for sample from sample lane sequencing metrics."""
         total_reads_query: Query = apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
-            filter_functions=[SequencingMetricsFilter.GET_TOTAL_READ_COUNT_FOR_SAMPLE],
+            filter_functions=[SequencingMetricsFilter.FILTER_TOTAL_READ_COUNT_FOR_SAMPLE],
             sample_internal_id=sample_internal_id,
         )
         reads_count: Optional[int] = total_reads_query.scalar()
@@ -331,7 +331,7 @@ class FindBusinessDataHandler(BaseHandler):
         return apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
             filter_functions=[
-                SequencingMetricsFilter.GET_BY_FLOW_CELL_NAME_SAMPLE_INTERNAL_ID_AND_LANE
+                SequencingMetricsFilter.FILTER_METRICS_FOR_FLOW_CELL_SAMPLE_INTERNAL_ID_AND_LANE
             ],
             flow_cell_name=flow_cell_name,
             sample_internal_id=sample_internal_id,
