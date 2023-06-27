@@ -782,7 +782,9 @@ class SampleLaneSequencingMetrics(Model):
 
     created_at = Column(types.DateTime)
 
-    flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
+    flowcell = orm.relationship(
+        Flowcell, back_populates="sequencing_metrics", cascade="all, delete-orphan"
+    )
     sample = orm.relationship(Sample, back_populates="sequencing_metrics")
 
     __table_args__ = (
