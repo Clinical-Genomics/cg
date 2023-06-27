@@ -109,7 +109,7 @@ class BclConvertMetricsParser:
         for sample_demux_metric in self.demux_metrics:
             if self.is_valid_sample_project(sample_project=sample_demux_metric.sample_project):
                 sample_internal_ids.append(sample_demux_metric.sample_internal_id)
-        return sample_internal_ids
+        return list(set(sample_internal_ids))
 
     def is_valid_sample_project(self, sample_project: str) -> bool:
         """Return True if the sample project is valid."""

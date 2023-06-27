@@ -1,4 +1,3 @@
-from datetime import datetime
 import logging
 from pathlib import Path
 from typing import Generator
@@ -8,7 +7,7 @@ from cg.constants.constants import FileExtensions
 
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles, BclConverter
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.meta.demultiplex import demux_post_processing
+
 from cg.meta.demultiplex.demux_post_processing import (
     DemuxPostProcessingAPI,
     DemuxPostProcessingHiseqXAPI,
@@ -836,3 +835,29 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
 
     # THEN the read count was set on the mock sample
     assert mock_sample.reads == mock_read_count
+
+
+def test_add_single_sequencing_metrics_entry_to_statusdb(
+    store_with_sequencing_metrics: Store,
+    demultiplex_context: CGConfig,
+    flow_cell_name: str,
+    sample_id: str,
+    lane: int = 1,
+):
+    # GIVEN a DemuxPostProcessing API
+    demux_post_processing_api = DemuxPostProcessingAPI(demultiplex_context)
+
+    # GIVEN a sequencing metrics entry
+    sequencing_metrics_entry = store_with_sequencing_metrics.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+    )
+
+    # WHEN adding the sequencing metrics entry to the statusdb
+    demux_post_processing_api.add_single_sequencing_metrics_entry_to_statusdb(
+        sample_lane_sequencing_metrics=[sequencing_metrics_entry]
+    )
+
+    # THEN the sequencing metrics entry was added to the statusdb
+    assert demux_post_processing_api.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+        flow_cell_name=flow_cell_name, sample_internal_id=sample_id, lane=lane
+    )
