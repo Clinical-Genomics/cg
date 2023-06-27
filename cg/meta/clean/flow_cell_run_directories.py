@@ -4,18 +4,18 @@ import logging
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, List
-
-from housekeeper.store.models import Bundle
+from typing import List, Optional
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import FlowCellStatus
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
-from cg.constants.symbols import UNDERSCORE
 from cg.constants.housekeeper_tags import SequencingFileTag
-from cg.utils.date import get_timedelta_from_date
+from cg.constants.symbols import UNDERSCORE
 from cg.store import Store
 from cg.store.models import Flowcell
+from cg.utils.date import get_timedelta_from_date
+from housekeeper.store.models import Bundle
+from sqlalchemy.exc import IntegrityError
 
 FLOW_CELL_DATE_POSITION = 0
 FLOW_CELL_IDENTIFIER_POSITION = -1
@@ -111,8 +111,12 @@ class RunDirFlowCell:
         elif self.hk.get_file_from_latest_version(bundle_name=hk_bundle.name, tags=hk_tags):
             LOG.warning("Sample sheet already included!")
             return
-        self.hk.add_and_include_file_to_latest_version(
-            bundle_name=self.id,
-            file=self.sample_sheet_path,
-            tags=hk_tags,
-        )
+        try:
+            self.hk.add_and_include_file_to_latest_version(
+                bundle_name=self.id,
+                file=self.sample_sheet_path,
+                tags=hk_tags,
+            )
+        except (IntegrityError, FileExistsError) as error:
+            LOG.warning(f"File already exists either in housekeeper or hk db: {error}")
+            return

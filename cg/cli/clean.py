@@ -410,19 +410,13 @@ def remove_old_flow_cell_run_dirs(context: CGConfig, sequencer: str, days_old: i
                 if flow_cell_dir.is_dir()
             ]
             for flow_cell_dir in flow_cell_dirs:
-                try:
-                    clean_run_directories(
-                        days_old=days_old,
-                        dry_run=dry_run,
-                        housekeeper_api=housekeeper_api,
-                        run_directory=flow_cell_dir,
-                        status_db=status_db,
-                    )
-                except IntegrityError:
-                    LOG.error(
-                        f"Failed to clean flow cell {flow_cell_dir} due to an SQLAlchemy integrity error."
-                    )
-                    continue
+                clean_run_directories(
+                    days_old=days_old,
+                    dry_run=dry_run,
+                    housekeeper_api=housekeeper_api,
+                    run_directory=flow_cell_dir,
+                    status_db=status_db,
+                )
 
     else:
         run_directory: str = dict(context.clean.flow_cells.flow_cell_run_dirs).get(sequencer)
