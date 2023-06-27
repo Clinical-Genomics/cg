@@ -5,7 +5,6 @@ from typing import List
 from cg.store.models import SampleLaneSequencingMetrics
 from cg.apps.sequencing_metrics_parser.parsers.bcl_convert import BclConvertMetricsParser
 from datetime import datetime
-from cg.constants.demultiplexing import DRAGEN_PASSED_FILTER_PCT
 
 
 def create_sample_lane_sequencing_metrics_from_bcl_convert_metrics_for_flow_cell(

@@ -784,3 +784,12 @@ class SampleLaneSequencingMetrics(Model):
 
     flowcell = orm.relationship(Flowcell, back_populates="sequencing_metrics")
     sample = orm.relationship(Sample, back_populates="sequencing_metrics")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "flow_cell_name",
+            "sample_internal_id",
+            "flow_cell_lane_number",
+            name="uix_flowcell_sample_lane",
+        ),
+    )
