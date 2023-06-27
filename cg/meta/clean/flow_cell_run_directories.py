@@ -111,8 +111,12 @@ class RunDirFlowCell:
         elif self.hk.get_file_from_latest_version(bundle_name=hk_bundle.name, tags=hk_tags):
             LOG.warning("Sample sheet already included!")
             return
-        self.hk.add_and_include_file_to_latest_version(
-            bundle_name=self.id,
-            file=self.sample_sheet_path,
-            tags=hk_tags,
-        )
+        try:
+            self.hk.add_and_include_file_to_latest_version(
+                bundle_name=self.id,
+                file=self.sample_sheet_path,
+                tags=hk_tags,
+            )
+        except (IntegrityError, FileExistsError) as error:
+            LOG.warning(f"File already exists either in housekeeper or hk db: {error}")
+            return
