@@ -1,6 +1,6 @@
 from typing import Optional
 from cg.store import Store
-from cg.store.filters.status_metrics_filters import get_total_read_count_for_sample
+from cg.store.filters.status_metrics_filters import filter_total_read_count_for_sample
 from cg.store.models import SampleLaneSequencingMetrics
 from sqlalchemy.orm import Query
 
@@ -12,7 +12,7 @@ def test_get_total_read_count_for_sample(
     metrics: Query = store_with_sequencing_metrics._get_query(table=SampleLaneSequencingMetrics)
 
     # WHEN getting total read counts for a sample
-    total_reads_query: Query = get_total_read_count_for_sample(
+    total_reads_query: Query = filter_total_read_count_for_sample(
         metrics=metrics, sample_internal_id=sample_id
     )
 

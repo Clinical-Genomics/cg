@@ -137,10 +137,28 @@ class DemuxPostProcessingAPI:
             bcl_converter=bcl_converter,
         )
 
-        self.status_db.session.add_all(sample_lane_sequencing_metrics)
+        self.add_single_sequencing_metrics_entry_to_statusdb(sample_lane_sequencing_metrics)
         self.status_db.session.commit()
 
         LOG.info(f"Added sequencing metrics to status db for: {flow_cell_directory.name}")
+
+    def add_single_sequencing_metrics_entry_to_statusdb(
+        self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
+    ) -> None:
+        for sample_lane_sequencing_metric in sample_lane_sequencing_metrics:
+            if self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+                flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
+                sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
+                lane=sample_lane_sequencing_metric.lane,
+            ):
+                LOG.warning(
+                    f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.lane}. Skipping."
+                )
+            else:
+                LOG.info(
+                    f"Adding Sample lane sequencing metrics for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.lane}."
+                )
+                self.status_db.session.add(sample_lane_sequencing_metric)
 
     def get_sample_ids_from_sample_sheet(
         self, parsed_flow_cell: FlowCellDirectoryData
