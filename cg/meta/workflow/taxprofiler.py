@@ -102,7 +102,7 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             sample_sheet_content: Dict[str, List[str]] = self.build_sample_sheet_content(
-                case_id=case_id,
+                case_id=link,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
