@@ -5,7 +5,7 @@ from typing import Callable, List, Optional, Iterator, Union, Dict
 
 
 from sqlalchemy.orm import Query, Session
-
+from sqlalchemy import event
 from cg.constants import FlowCellStatus, Pipeline
 from cg.constants.constants import PrepCategory, SampleType
 from cg.constants.indexes import ListIndexes
@@ -681,3 +681,15 @@ class FindBusinessDataHandler(BaseHandler):
             filter_functions=[SampleFilter.FILTER_BY_INTERNAL_ID],
             internal_id=sample_internal_id,
         ).all()
+
+    @event.listens_for(SampleLaneSequencingMetrics, "after_insert")
+    @event.listens_for(SampleLaneSequencingMetrics, "after_update")
+    @event.listens_for(SampleLaneSequencingMetrics, "after_delete")
+    def update_dynamic_read_counts(
+        self,
+    ) -> None:
+        """Update dynamic read counts for all samples."""
+        for sample in self._get_query(table=Sample):
+            sample.dynamic_read_count = self.get_number_of_reads_for_sample_from_metrics(
+                sample_internal_id=sample.internal_id
+            )

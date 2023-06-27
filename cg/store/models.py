@@ -13,10 +13,11 @@ from cg.constants import (
     Priority,
 )
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types, event
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
+import cg.store.api.find_business_data as store
 
 Model = declarative_base()
 
@@ -642,6 +643,7 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
+    dynamic_read_count = Column(types.BigInteger, default=0)
 
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
 
