@@ -459,6 +459,9 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
             continue
 
         if not flow_cell.is_demultiplexing_complete:
+            LOG.info(
+                f"Demultiplexing not finished for {flow_cell.id}. Skipping removal of the directory."
+            )
             continue
 
         samples: List[Sample] = status_db.get_samples_from_flow_cell(flow_cell_id=flow_cell.id)
@@ -469,7 +472,7 @@ def remove_old_demutliplexed_run_dirs(context: CGConfig, days_old: int, dry_run:
         except HousekeeperBundleVersionMissingError:
             LOG.info(
                 f"No bundle found for one or more of the samples on flow cell {flow_cell.id}."
-                f" Skipping removal of the directory"
+                f" Skipping removal of the directory."
             )
             continue
 
