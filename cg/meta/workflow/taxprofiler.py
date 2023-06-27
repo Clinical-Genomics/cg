@@ -96,13 +96,17 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         # for sample_id in samples:
         #    print("Sample id " + sample_id)
         #    self.link_fastq_files_for_sample(case_id=case_id, sample_id=sample_id)
+        # link: FamilySample
+        # for link in case_obj.links:
+        #    sample_id: str = link.sample.internal_id
 
         for link in case.links:
+            sample_id: str = link.sample.internal_id
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
             sample_sheet_content: Dict[str, List[str]] = self.build_sample_sheet_content(
-                case_id=link.sample,
+                case_id=sample_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
@@ -120,7 +124,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
     def config_case(
         self,
         case_id: str,
-        # sample_id: str,
         instrument_platform: SequencingPlatform.ILLUMINA,
         fasta: Optional[str],
     ) -> None:
@@ -129,7 +132,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         LOG.info("Generating sample sheet")
         self.write_sample_sheet(
             case_id=case_id,
-            # sample_id=sample_id,
             instrument_platform=instrument_platform,
             fasta=fasta,
         )
