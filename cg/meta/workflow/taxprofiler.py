@@ -1,7 +1,7 @@
 """Module for Taxprofiler Analysis API."""
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from pydantic import ValidationError
 from cg.constants import Pipeline
@@ -95,7 +95,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
 
         for link in case.links:
             sample_id: str = link.sample.internal_id
-            print("Sample" + link.sample.internal_id)
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
@@ -106,6 +105,16 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 instrument_platform=instrument_platform,
                 fasta=fasta,
             )
+            sample_data: Tuple[str, List[str]] = (
+                sample_id,
+                fastq_r1 + fastq_r2,
+            )
+            sample_sheet_content.append(sample_data)
+            # Example of accessing the sample_id and values from sample_sheet_content
+            for sample_id, values in sample_sheet_content:
+                print("Sample ID:", sample_id)
+                print("Values:", values)
+                print()
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
