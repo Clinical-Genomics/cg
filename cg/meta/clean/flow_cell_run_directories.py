@@ -111,7 +111,7 @@ class RunDirFlowCell:
             hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
         sample_sheets_from_latest_version: Optional[
             List[File]
-        ] = self.sample_sheets_from_latest_version(hk_bundle=hk_bundle, hk_tags=hk_tags)
+        ] = self.sample_sheets_from_latest_version(hk_bundle_name=hk_bundle.name)
         if sample_sheets_from_latest_version:
             for file in sample_sheets_from_latest_version:
                 if file.is_included:
@@ -124,18 +124,21 @@ class RunDirFlowCell:
             tags=hk_tags,
         )
 
-    def sample_sheets_from_latest_version(
-        self, hk_bundle: Bundle, hk_tags: List[str]
-    ) -> List[File]:
+    def sample_sheets_from_latest_version(self, hk_bundle_name: str) -> List[File]:
         return_files = self.hk.get_files_from_latest_version(
-            bundle_name=hk_bundle.name, tags=hk_tags
+            bundle_name=hk_bundle_name, tags=[self.id]
         ).all()
-        for file in return_files:
-            file_tag_names = [tag.name for tag in file.tags]
-            if (
-                SequencingFileTag.SAMPLE_SHEET not in file_tag_names
-                and SequencingFileTag.ARCHIVED_SAMPLE_SHEET not in return_files
-            ):
-                return_files.remove(file)
-        return_files = [*set(return_files)]
-        return return_files
+        return filter_on_sample_sheets(list_of_files=return_files)
+
+
+def filter_on_sample_sheets(list_of_files: List[File]):
+    return_files = list_of_files
+    for file in return_files:
+        file_tag_names = [tag.name for tag in file.tags]
+        if (
+            SequencingFileTag.SAMPLE_SHEET not in file_tag_names
+            and SequencingFileTag.ARCHIVED_SAMPLE_SHEET not in return_files
+        ):
+            return_files.remove(file)
+    return_files = [*set(return_files)]
+    return return_files

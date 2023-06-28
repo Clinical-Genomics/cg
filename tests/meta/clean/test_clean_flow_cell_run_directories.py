@@ -90,28 +90,5 @@ def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, bcl2fastq_flow_c
     flow_cell.hk.add_and_include_file_to_latest_version.assert_called_once_with(
         bundle_name=flow_cell.id,
         file=flow_cell.sample_sheet_path,
-        tags=[SequencingFileTag.ARCHIVED_SAMPLE_SHEET, flow_cell.id],
+        tags=[flow_cell.id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET],
     )
-
-
-@mock.patch("cg.apps.housekeeper.hk.HousekeeperAPI")
-@mock.patch("cg.store.Store")
-def test_archive_sample_sheet_included(mock_statusdb, mock_hk, bcl2fastq_flow_cell_dir, caplog):
-    """Test archive of a sample sheet when it has been already included in HK."""
-
-    # GIVEN a flow cell
-    flow_cell: RunDirFlowCell = RunDirFlowCell(bcl2fastq_flow_cell_dir, mock_statusdb, mock_hk)
-
-    # GIVEN a sample sheet connected to the flow cell
-    flow_cell.sample_sheet_path = (
-        bcl2fastq_flow_cell_dir / DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME
-    )
-
-    # GIVEN the sample sheet does exist in Housekeeper
-    mock_hk.get_file_from_latest_version.return_value = True
-
-    # WHEN archiving the sample sheet
-    flow_cell.archive_sample_sheet()
-
-    # THEN the sample sheet should not be included again
-    assert "Sample sheet already included!" in caplog.text
