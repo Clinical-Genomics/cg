@@ -93,7 +93,6 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
 
-        sample_ids = []
         for link in case.links:
             sample_id: str = link.sample.internal_id
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
@@ -106,13 +105,12 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 instrument_platform=instrument_platform,
                 fasta=fasta,
             )
-            sample_ids.append(sample_id)
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
                 headers=TAXPROFILER_SAMPLE_SHEET_HEADERS,
                 config_path=NextflowAnalysisAPI.get_case_config_path(
-                    case_id=case_id, root_dir=self.root_dir
+                    case_id=sample_id, root_dir=self.root_dir
                 ),
             )
 
