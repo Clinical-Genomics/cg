@@ -101,7 +101,7 @@ class SampleSheetCreator:
             self.add_dummy_samples()
             LOG.info("Created dummy samples for the indexes that are missing")
         else:
-            LOG.info("Skipped adding dummy samples since run is not WGS")
+            LOG.info("Skipped adding dummy samples since they are not needed")
         self.remove_unwanted_samples()
         samples_in_lane: List[FlowCellSample]
         for lane, samples_in_lane in get_samples_by_lane(self.lims_samples).items():
