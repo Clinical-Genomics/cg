@@ -105,15 +105,9 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 instrument_platform=instrument_platform,
                 fasta=fasta,
             )
-            sample_data: Tuple[str, List[str]] = (
-                sample_id,
-                fastq_r1 + fastq_r2,
-            )
-            sample_sheet_content.append(sample_data)
-            # Example of accessing the sample_id and values from sample_sheet_content
-            for sample_id, values in sample_sheet_content:
-                print("Sample ID:", sample_id)
-                print("Values:", values)
+            for sample_id, content in sample_sheet_content.items():
+                print(f"Sample ID: {sample_id}")
+                print("Content:", content)
                 print()
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
