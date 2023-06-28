@@ -646,6 +646,8 @@ def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
 
     # GIVEN a flow cell directory and name
     flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
+    sample_sheet_file = Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+    sample_sheet_file.touch()
     flow_cell_name = "flow_cell_name"
 
     # WHEN a sample sheet is added
@@ -661,7 +663,7 @@ def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
 
     demux_post_processing_api.add_file_if_non_existent.assert_called_once_with(
         file_path=expected_file_path,
-        flow_cell_name=flow_cell_name,
+        bundle_name=flow_cell_name,
         tag_names=expected_tag_names,
     )
 
@@ -696,7 +698,7 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_fa
     expected_calls = [
         call(
             file_path=file_path,
-            flow_cell_name=flow_cell_name,
+            bundle_name=flow_cell_name,
             tag_names=[SequencingFileTag.FASTQ, sample_id],
         )
         for file_path in mock_fastq_paths
