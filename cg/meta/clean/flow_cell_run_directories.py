@@ -131,7 +131,7 @@ class RunDirFlowCell:
         return filter_on_sample_sheets(list_of_files=return_files)
 
 
-def filter_on_sample_sheets(list_of_files: List[File]):
+def filter_on_sample_sheets(files: List[File]):
     return_files = list_of_files
     for file in return_files:
         file_tag_names = [tag.name for tag in file.tags]
