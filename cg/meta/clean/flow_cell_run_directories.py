@@ -125,20 +125,21 @@ class RunDirFlowCell:
         )
 
     def sample_sheets_from_latest_version(self, hk_bundle_name: str) -> List[File]:
+        """Returns the files tagged with samplesheet or archived_sample_sheet for the given bundle."""
         return_files = self.hk.get_files_from_latest_version(
             bundle_name=hk_bundle_name, tags=[self.id]
         ).all()
-        return filter_on_sample_sheets(list_of_files=return_files)
+        return self.filter_on_sample_sheets(files=return_files)
 
-
-def filter_on_sample_sheets(list_of_files: List[File]):
-    return_files = list_of_files
-    for file in return_files:
-        file_tag_names = [tag.name for tag in file.tags]
-        if (
-            SequencingFileTag.SAMPLE_SHEET not in file_tag_names
-            and SequencingFileTag.ARCHIVED_SAMPLE_SHEET not in return_files
-        ):
-            return_files.remove(file)
-    return_files = [*set(return_files)]
-    return return_files
+    @staticmethod
+    def filter_on_sample_sheets(files: List[File]) -> List[File]:
+        """Returns a list of the files given which are tagged with samplesheet or archived_sample_sheet."""
+        files_with_a_sample_sheet_tag = []
+        for file in files:
+            file_tag_names = [tag.name for tag in file.tags]
+            if (
+                SequencingFileTag.SAMPLE_SHEET in file_tag_names
+                or SequencingFileTag.ARCHIVED_SAMPLE_SHEET in file_tag_names
+            ):
+                files_with_a_sample_sheet_tag.append(file)
+        return [*set(files_with_a_sample_sheet_tag)]

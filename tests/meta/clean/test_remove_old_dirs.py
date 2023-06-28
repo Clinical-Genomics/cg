@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell, filter_on_sample_sheets
+from cg.meta.clean.flow_cell_run_directories import RunDirFlowCell
 from cg.store import Store
 from housekeeper.store.models import File, Tag, Version
 from tests.store_helpers import StoreHelpers
@@ -62,7 +62,14 @@ def test_filter_sample_sheets(
     helpers.ensure_hk_bundle(store=real_housekeeper_api, bundle_data=bundle_data)
 
     # WHEN filtering out files tagged with neither archived_sample_sheet nor samplesheet
-    filtered_files: List[File] = filter_on_sample_sheets([file1, file2, file3, file4])
+    run_dir_flow_cell: RunDirFlowCell = RunDirFlowCell(
+        flow_cell_dir=dragen_flow_cell_dir,
+        status_db=base_store,
+        housekeeper_api=real_housekeeper_api,
+    )
+    filtered_files: List[File] = run_dir_flow_cell.filter_on_sample_sheets(
+        [file1, file2, file3, file4]
+    )
 
     # THEN the list should contain file2, file3 and file4 but not file1
     assert file1 not in filtered_files
