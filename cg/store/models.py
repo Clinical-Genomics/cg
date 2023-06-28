@@ -13,11 +13,11 @@ from cg.constants import (
     Priority,
 )
 from cg.constants.constants import CONTROL_OPTIONS, PrepCategory
-from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types, event
+from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint, orm, types
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.util import deprecated
-import cg.store.api.find_business_data as store
+
 
 Model = declarative_base()
 

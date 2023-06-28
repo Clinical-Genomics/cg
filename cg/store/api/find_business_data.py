@@ -682,14 +682,18 @@ class FindBusinessDataHandler(BaseHandler):
             internal_id=sample_internal_id,
         ).all()
 
-    @event.listens_for(SampleLaneSequencingMetrics, "after_insert")
-    @event.listens_for(SampleLaneSequencingMetrics, "after_update")
-    @event.listens_for(SampleLaneSequencingMetrics, "after_delete")
-    def update_dynamic_read_counts(
-        self,
-    ) -> None:
+    def update_dynamic_read_counts(self) -> None:
         """Update dynamic read counts for all samples."""
         for sample in self._get_query(table=Sample):
             sample.dynamic_read_count = self.get_number_of_reads_for_sample_from_metrics(
                 sample_internal_id=sample.internal_id
             )
+
+
+event.listen(
+    SampleLaneSequencingMetrics,
+    "after_insert",
+    FindBusinessDataHandler(session=session).update_dynamic_read_counts(),
+)
+event.listen(SampleLaneSequencingMetrics, "after_update", update_dynamic_read_counts())
+event.listen(SampleLaneSequencingMetrics, "after_delete", update_dynamic_read_counts())
