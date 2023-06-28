@@ -110,7 +110,10 @@ class FlowCellDirectoryData:
         """Return the sample class used in the flow cell."""
         if self.sequencer_type == Sequencers.NOVASEQX:
             return FlowCellSampleNovaSeqX
-        if self.bcl_converter == BclConverter.DRAGEN:
+        if (
+            self.bcl_converter == BclConverter.DRAGEN
+            or self.bcl_converter == BclConverter.BCLCONVERT
+        ):
             return FlowCellSampleNovaSeq6000Dragen
         return FlowCellSampleNovaSeq6000Bcl2Fastq
 
@@ -156,6 +159,10 @@ class FlowCellDirectoryData:
         """Return path to Hiseq X flow cell directory."""
         return Path(self.path, DemultiplexingDirsAndFiles.Hiseq_X_TILE_DIR)
 
+    @property
+    def is_demultiplexing_complete(self) -> bool:
+        return Path(self.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
+
     def _parse_date(self):
         """Return the parsed date in the correct format."""
         if len(self.split_flow_cell_name[0]) == LENGTH_LONG_DATE:
@@ -197,10 +204,21 @@ class FlowCellDirectoryData:
 
     def get_sample_sheet(self) -> SampleSheet:
         """Return sample sheet object."""
-        return get_sample_sheet_from_file(
-            infile=self.sample_sheet_path,
-            flow_cell_sample_type=self.sample_type,
-        )
+        try:
+            return get_sample_sheet_from_file(
+                infile=self.sample_sheet_path,
+                flow_cell_sample_type=self.sample_type,
+            )
+        except Exception as error:
+            alternative_sample_sheet_path: Path = Path(
+                self.path,
+                DemultiplexingDirsAndFiles.UNALIGNED_DIR_NAME,
+                DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME,
+            )
+            return get_sample_sheet_from_file(
+                infile=alternative_sample_sheet_path,
+                flow_cell_sample_type=self.sample_type,
+            )
 
     def is_sequencing_done(self) -> bool:
         """Check if sequencing is done.

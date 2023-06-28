@@ -6,6 +6,7 @@ from click import testing
 
 from cg.apps.demultiplex.demultiplex_api import DemultiplexingAPI
 from cg.cli.demultiplex.demux import demultiplex_all, demultiplex_flow_cell, delete_flow_cell
+from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.flow_cell import FlowCellDirectoryData
 
@@ -195,6 +196,21 @@ def test_demultiplex_all_novaseq(
 
     # THEN assert it found a flow cell that is ready for demultiplexing
     assert f"Flow cell {flow_cell.id} is ready for demultiplexing" in caplog.text
+
+
+def test_is_demultiplexing_complete(demultiplex_ready_flow_cell: Path):
+    """Tests the is_demultiplexing_complete property of FlowCellDirectoryData"""
+    # GIVEN a demultiplexing directory with no demuxcomplete.txt file
+    flow_cell: FlowCellDirectoryData = FlowCellDirectoryData(
+        flow_cell_path=demultiplex_ready_flow_cell
+    )
+    assert not flow_cell.is_demultiplexing_complete
+
+    # WHEN creating the demuxcomplete.txt file
+    Path(flow_cell.path, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).touch()
+
+    # THEN the property should return true
+    assert flow_cell.is_demultiplexing_complete
 
 
 def test_delete_flow_cell_dry_run_cgstats(
