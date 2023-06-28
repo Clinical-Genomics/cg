@@ -14,8 +14,7 @@ from cg.constants.symbols import UNDERSCORE
 from cg.store import Store
 from cg.store.models import Flowcell
 from cg.utils.date import get_timedelta_from_date
-from housekeeper.store.models import Bundle
-from sqlalchemy.exc import IntegrityError
+from housekeeper.store.models import Bundle, File
 
 FLOW_CELL_DATE_POSITION = 0
 FLOW_CELL_IDENTIFIER_POSITION = -1
@@ -104,19 +103,39 @@ class RunDirFlowCell:
             return
         LOG.info("Sample sheet found!")
         hk_bundle: Bundle = self.hk.bundle(name=self.id)
-        hk_tags: List[str] = [SequencingFileTag.ARCHIVED_SAMPLE_SHEET, self.id]
+        hk_tags: List[str] = [
+            self.id,
+        ]
         if hk_bundle is None:
             LOG.info(f"Creating bundle with name {self.id}")
-            self.hk.create_new_bundle_and_version(name=self.id)
-        elif self.hk.get_file_from_latest_version(bundle_name=hk_bundle.name, tags=hk_tags):
-            LOG.warning("Sample sheet already included!")
-            return
-        try:
-            self.hk.add_and_include_file_to_latest_version(
-                bundle_name=self.id,
-                file=self.sample_sheet_path,
-                tags=hk_tags,
-            )
-        except (IntegrityError, FileExistsError) as error:
-            LOG.warning(f"File already exists either in housekeeper or hk db: {error}")
-            return
+            hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
+        sample_sheets_from_latest_version: Optional[
+            List[File]
+        ] = self.sample_sheets_from_latest_version(hk_bundle=hk_bundle, hk_tags=hk_tags)
+        if sample_sheets_from_latest_version:
+            for file in sample_sheets_from_latest_version:
+                if file.is_included:
+                    LOG.warning("Sample sheet already included!")
+                    return
+        hk_tags.append(SequencingFileTag.ARCHIVED_SAMPLE_SHEET)
+        self.hk.add_and_include_file_to_latest_version(
+            bundle_name=self.id,
+            file=self.sample_sheet_path,
+            tags=hk_tags,
+        )
+
+    def sample_sheets_from_latest_version(
+        self, hk_bundle: Bundle, hk_tags: List[str]
+    ) -> List[File]:
+        return_files = self.hk.get_files_from_latest_version(
+            bundle_name=hk_bundle.name, tags=hk_tags
+        ).all()
+        for file in return_files:
+            file_tag_names = [tag.name for tag in file.tags]
+            if (
+                SequencingFileTag.SAMPLE_SHEET not in file_tag_names
+                and SequencingFileTag.ARCHIVED_SAMPLE_SHEET not in return_files
+            ):
+                return_files.remove(file)
+        return_files = [*set(return_files)]
+        return return_files
