@@ -49,7 +49,6 @@ def test_filter_sample_sheets(
     base_store: Store,
     helpers: StoreHelpers,
 ):
-
     archived_sample_sheet: Tag = Tag(id=1, name="archived_sample_sheet")
     samplesheet: Tag = Tag(id=2, name="samplesheet")
     # GIVEN a list of files
