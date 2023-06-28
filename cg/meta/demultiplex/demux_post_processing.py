@@ -311,6 +311,7 @@ class DemuxPostProcessingAPI:
             )
             self.status_db.session.add(flow_cell)
             self.status_db.session.commit()
+            LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
         else:
             LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}. Skipping.")
 
