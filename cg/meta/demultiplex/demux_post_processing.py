@@ -302,14 +302,18 @@ class DemuxPostProcessingAPI:
 
     def store_flow_cell_in_status_db(self, parsed_flow_cell: FlowCellDirectoryData) -> None:
         """Create flow cell from the parsed and validated flow cell data."""
-        flow_cell: Flowcell = Flowcell(
-            name=parsed_flow_cell.id,
-            sequencer_type=parsed_flow_cell.sequencer_type,
-            sequencer_name=parsed_flow_cell.machine_name,
-            sequenced_at=parsed_flow_cell.run_date,
-        )
-        self.status_db.session.add(flow_cell)
-        self.status_db.session.commit()
+        if not self.status_db.get_flow_cell_by_name(flow_cell_name=parsed_flow_cell.id):
+            flow_cell: Flowcell = Flowcell(
+                name=parsed_flow_cell.id,
+                sequencer_type=parsed_flow_cell.sequencer_type,
+                sequencer_name=parsed_flow_cell.machine_name,
+                sequenced_at=parsed_flow_cell.run_date,
+            )
+            self.status_db.session.add(flow_cell)
+            self.status_db.session.commit()
+            LOG.info(f"Flow cell added to status db: {parsed_flow_cell.id}.")
+        else:
+            LOG.info(f"Flow cell already exists in status db: {parsed_flow_cell.id}. Skipping.")
 
     def parse_flow_cell_directory_data(
         self, flow_cell_directory: Path, bcl_converter: str
