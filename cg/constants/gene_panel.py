@@ -37,6 +37,7 @@ class GenePanelMasterList(StrEnum):
     PANELAPP_GREEN: str = "PANELAPP-GREEN"
     SKD: str = "SKD"
     SOVM: str = "SOVM"
+    STROKE: str = "STROKE"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> List[str]:
