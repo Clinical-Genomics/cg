@@ -103,15 +103,13 @@ class RunDirFlowCell:
             return
         LOG.info("Sample sheet found!")
         hk_bundle: Bundle = self.hk.bundle(name=self.id)
-        hk_tags: List[str] = [
-            self.id,
-        ]
+        hk_tags: List[str] = [self.id]
         if hk_bundle is None:
             LOG.info(f"Creating bundle with name {self.id}")
             hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
         sample_sheets_from_latest_version: Optional[
             List[File]
-        ] = self.sample_sheets_from_latest_version(hk_bundle_name=hk_bundle.name)
+        ] = self.get_sample_sheets_from_latest_version(hk_bundle_name=hk_bundle.name)
         if sample_sheets_from_latest_version:
             for file in sample_sheets_from_latest_version:
                 if file.is_included:
@@ -126,17 +124,17 @@ class RunDirFlowCell:
 
     def get_sample_sheets_from_latest_version(self, hk_bundle_name: str) -> List[File]:
         """Returns the files tagged with samplesheet or archived_sample_sheet for the given bundle."""
-        return_files = self.hk.get_files_from_latest_version(
+        files: List[File] = self.hk.get_files_from_latest_version(
             bundle_name=hk_bundle_name, tags=[self.id]
         ).all()
-        return self.filter_on_sample_sheets(files=return_files)
+        return self.filter_on_sample_sheets(files=files)
 
     @staticmethod
     def filter_on_sample_sheets(files: List[File]) -> List[File]:
         """Returns a list of the files given which are tagged with samplesheet or archived_sample_sheet."""
-        files_with_a_sample_sheet_tag = []
+        files_with_a_sample_sheet_tag: List[File] = []
         for file in files:
-            file_tag_names = [tag.name for tag in file.tags]
+            file_tag_names: List[str] = [tag.name for tag in file.tags]
             if (
                 SequencingFileTag.SAMPLE_SHEET in file_tag_names
                 or SequencingFileTag.ARCHIVED_SAMPLE_SHEET in file_tag_names
