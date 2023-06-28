@@ -105,10 +105,11 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
                 instrument_platform=instrument_platform,
                 fasta=fasta,
             )
-            for sample_id, content in sample_sheet_content.items():
-                print(f"Sample ID: {sample_id}")
-                print("Content:", content)
-                print()
+            for key, value in sample_sheet_content.items():
+                if key in sample_sheet_content:
+                    sample_sheet_content[key].extend(value)
+                else:
+                    sample_sheet_content[key] = value
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
