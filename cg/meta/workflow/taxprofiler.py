@@ -93,20 +93,20 @@ class TaxprofilerAnalysisAPI(AnalysisAPI):
         """Write sample sheet for taxprofiler analysis in case folder."""
         case: Family = self.status_db.get_case_by_internal_id(internal_id=case_id)
 
-        sample_sheet_content: Dict[str, List[List[str]]] = {}
+        sample_ids = []
         for link in case.links:
             sample_id: str = link.sample.internal_id
             sample_metadata: List[str] = self.gather_file_metadata_for_sample(link.sample)
             fastq_r1: List[str] = NextflowAnalysisAPI.extract_read_files(1, sample_metadata)
             fastq_r2: List[str] = NextflowAnalysisAPI.extract_read_files(2, sample_metadata)
-            content: Dict[str, List[str]] = self.build_sample_sheet_content(
+            sample_sheet_content: Dict[str, List[str]] = self.build_sample_sheet_content(
                 case_id=sample_id,
                 fastq_r1=fastq_r1,
                 fastq_r2=fastq_r2,
                 instrument_platform=instrument_platform,
                 fasta=fasta,
             )
-            sample_sheet_content[sample_id] = content
+            sample_ids.append(sample_id)
             LOG.info(sample_sheet_content)
             NextflowAnalysisAPI.create_samplesheet_csv(
                 samplesheet_content=sample_sheet_content,
