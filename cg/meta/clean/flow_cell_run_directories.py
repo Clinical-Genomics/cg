@@ -124,7 +124,7 @@ class RunDirFlowCell:
             tags=hk_tags,
         )
 
-    def sample_sheets_from_latest_version(self, hk_bundle_name: str) -> List[File]:
+    def get_sample_sheets_from_latest_version(self, hk_bundle_name: str) -> List[File]:
         """Returns the files tagged with samplesheet or archived_sample_sheet for the given bundle."""
         return_files = self.hk.get_files_from_latest_version(
             bundle_name=hk_bundle_name, tags=[self.id]
