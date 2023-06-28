@@ -1,5 +1,6 @@
 """Post-processing Demultiiplex API."""
 import logging
+import os
 import re
 import shutil
 from contextlib import redirect_stdout
@@ -230,16 +231,42 @@ class DemuxPostProcessingAPI:
             if sample_id:
                 self.add_file_if_non_existent(
                     file_path=fastq_file_path,
-                    flow_cell_name=flow_cell_name,
+                    bundle_name=flow_cell_name,
                     tag_names=[SequencingFileTag.FASTQ, sample_id],
                 )
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
-        """Add sample sheet to Housekeeper."""
+        """Add sample sheet path to Housekeeper."""
+
+        sample_sheet_file_path: Path = self.find_sample_sheet_path(
+            flow_cell_directory=flow_cell_directory
+        )
+
         self.add_file_if_non_existent(
-            file_path=Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME),
-            flow_cell_name=flow_cell_name,
+            file_path=sample_sheet_file_path,
+            bundle_name=flow_cell_name,
             tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
+        )
+
+    def find_sample_sheet_path(self, flow_cell_directory: Path):
+        """
+        Recursively searches for the given sample sheet file in the provided flow cell directory.
+
+        Args:
+            flow_cell_directory (Path): The path to the flow cell directory.
+
+        Returns:
+            Path: The path to the found sample sheet file.
+
+        Raises:
+            FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
+        """
+        for directory_path, _, files in os.walk(flow_cell_directory):
+            if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
+                return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+        raise FileNotFoundError(
+            f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
         )
 
     def is_valid_sample_fastq_filename(self, fastq_file_name: str) -> bool:
@@ -275,7 +302,7 @@ class DemuxPostProcessingAPI:
                 self.hk_api.add_tag(name=tag_name)
 
     def add_file_if_non_existent(
-        self, file_path: Path, flow_cell_name: str, tag_names: List[str]
+        self, file_path: Path, bundle_name: str, tag_names: List[str]
     ) -> None:
         """Add file to Housekeeper if it has not already been added."""
         if not file_path.exists():
@@ -283,10 +310,10 @@ class DemuxPostProcessingAPI:
             return
 
         if not self.file_exists_in_latest_version_for_bundle(
-            file_path=file_path, flow_cell_name=flow_cell_name
+            file_path=file_path, flow_cell_name=bundle_name
         ):
             self.hk_api.add_and_include_file_to_latest_version(
-                bundle_name=flow_cell_name,
+                bundle_name=bundle_name,
                 file=file_path,
                 tags=tag_names,
             )
