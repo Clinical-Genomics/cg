@@ -156,7 +156,7 @@ class DemuxPostProcessingAPI:
                     f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}. Skipping."
                 )
             else:
-                LOG.info(
+                LOG.debug(
                     f"Adding Sample lane sequencing metrics for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}."
                 )
                 self.status_db.session.add(sample_lane_sequencing_metric)
