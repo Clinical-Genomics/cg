@@ -259,6 +259,7 @@ class DemuxPostProcessingAPI:
         """
         for directory_path, _, files in os.walk(flow_cell_directory):
             if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
+                LOG.info(f"Found sample sheet in {directory_path}")
                 return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
 
         raise FileNotFoundError(
