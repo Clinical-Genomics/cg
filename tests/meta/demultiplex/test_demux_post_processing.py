@@ -806,4 +806,4 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
 
     # THEN the sequencing date and read count were set on the mock sample
     assert mock_sample.sequenced_at == sequencing_date
-    assert mock_sample.reads == mock_read_count
+    assert mock_sample.calculated_read_count == mock_read_count
