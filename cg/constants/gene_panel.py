@@ -30,6 +30,7 @@ class GenePanelMasterList(StrEnum):
     NEURODEG: str = "NEURODEG"
     NMD: str = "NMD"
     OMIM_AUTO: str = "OMIM-AUTO"
+    PANELAPP_GREEN: str = "PANELAPP-GREEN"
     PEDHEP: str = "PEDHEP"
     PID: str = "PID"
     PIDCAD: str = "PIDCAD"
@@ -37,7 +38,6 @@ class GenePanelMasterList(StrEnum):
     SKD: str = "SKD"
     SOVM: str = "SOVM"
     STROKE: str = "STROKE"
-    PANELAPP_GREEN: str = "PANELAPP-GREEN"
 
     @classmethod
     def get_panel_names(cls, panels=None) -> List[str]:
