@@ -646,6 +646,7 @@ class Sample(Model, PriorityMixin):
     sequenced_at = Column(types.DateTime)
     sex = Column(types.Enum(*SEX_OPTIONS), nullable=False)
     subject_id = Column(types.String(128))
+    calculated_read_count = Column(types.BigInteger, default=0)
 
     sequencing_metrics = orm.relationship("SampleLaneSequencingMetrics", back_populates="sample")
 
