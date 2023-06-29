@@ -31,7 +31,7 @@ def get_samples_by_lane(
     samples: List[FlowCellSample],
 ) -> Dict[int, List[FlowCellSample]]:
     """Group and return samples by lane."""
-    LOG.info("Order samples by lane")
+    LOG.debug("Order samples by lane")
     sample_by_lane: Dict[int, List[FlowCellSample]] = {}
     for sample in samples:
         if sample.lane not in sample_by_lane:
