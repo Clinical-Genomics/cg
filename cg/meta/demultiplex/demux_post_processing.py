@@ -98,10 +98,13 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory_path
         )
 
-        parsed_flow_cell: FlowCellDirectoryData = self.parse_flow_cell_directory_data(
-            flow_cell_directory=flow_cell_directory_path,
-            bcl_converter=bcl_converter,
-        )
+        try:
+            parsed_flow_cell: FlowCellDirectoryData = self.parse_flow_cell_directory_data(
+                flow_cell_directory=flow_cell_directory_path,
+                bcl_converter=bcl_converter,
+            )
+        except FlowCellError:
+            return
 
         self.store_flow_cell_in_status_db(parsed_flow_cell=parsed_flow_cell)
 

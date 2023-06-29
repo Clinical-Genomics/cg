@@ -55,8 +55,9 @@ def finish_flow_cell(
         flow_cell_name=flow_cell_name, force=force, bcl_converter=bcl_converter
     )
     # Temporary finish flow cell logic will replace logic above when validated
-    demux_post_processing_api: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
-    demux_post_processing_api.finish_flow_cell_temp(flow_cell_directory_name=flow_cell_name)
+    demux_post_processing_api_temp: DemuxPostProcessingAPI = DemuxPostProcessingAPI(config=context)
+    demux_post_processing_api_temp.set_dry_run(dry_run)
+    demux_post_processing_api_temp.finish_flow_cell_temp(flow_cell_directory_name=flow_cell_name)
 
 
 @finish_group.command(name="temporary")
