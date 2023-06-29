@@ -18,11 +18,6 @@ __________ DO NOT TOUCH ___________
 
 __________ DO NOT TOUCH ___________ -->
 
-
-## [37.0.16]
-### Changed
-- Add Moyamoya STROKE panel to clinical master list
-
 ## [22.26.0]
 ### Added
 - Added median target coverage to mip:s pydantic model
