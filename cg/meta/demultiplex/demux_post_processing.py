@@ -197,7 +197,7 @@ class DemuxPostProcessingAPI:
                 sample_internal_id=sample_id
             )
             LOG.info(f"Updating sample {sample_id} with read count {sample_read_count}")
-            sample.reads = sample_read_count
+            sample.calculated_read_count = sample_read_count
 
     def add_flow_cell_data_to_housekeeper(
         self, flow_cell_name: str, flow_cell_directory: Path
