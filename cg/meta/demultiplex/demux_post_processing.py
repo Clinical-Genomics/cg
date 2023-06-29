@@ -1,5 +1,6 @@
 """Post-processing Demultiiplex API."""
 import logging
+import os
 import re
 import shutil
 from contextlib import redirect_stdout
@@ -204,7 +205,7 @@ class DemuxPostProcessingAPI:
     ) -> None:
         LOG.info(f"Add flow cell data to Housekeeper for {flow_cell_name}")
 
-        self.add_bundle_and_version_if_non_existent(flow_cell_name=flow_cell_name)
+        self.add_bundle_and_version_if_non_existent(bundle_name=flow_cell_name)
 
         tags: List[str] = [SequencingFileTag.FASTQ, SequencingFileTag.SAMPLE_SHEET, flow_cell_name]
         self.add_tags_if_non_existent(tag_names=tags)
@@ -228,18 +229,41 @@ class DemuxPostProcessingAPI:
             )
 
             if sample_id:
-                self.add_file_if_non_existent(
+                self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
+
+                self.add_file_to_bundle_if_non_existent(
                     file_path=fastq_file_path,
-                    flow_cell_name=flow_cell_name,
-                    tag_names=[SequencingFileTag.FASTQ, sample_id],
+                    bundle_name=sample_id,
+                    tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
                 )
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
-        """Add sample sheet to Housekeeper."""
-        self.add_file_if_non_existent(
-            file_path=Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME),
-            flow_cell_name=flow_cell_name,
+        """Add sample sheet path to Housekeeper."""
+
+        sample_sheet_file_path: Path = self.find_sample_sheet_path(
+            flow_cell_directory=flow_cell_directory
+        )
+
+        self.add_file_to_bundle_if_non_existent(
+            file_path=sample_sheet_file_path,
+            bundle_name=flow_cell_name,
             tag_names=[SequencingFileTag.SAMPLE_SHEET, flow_cell_name],
+        )
+
+    def find_sample_sheet_path(self, flow_cell_directory: Path):
+        """
+        Recursively searches for the given sample sheet file in the provided flow cell directory.
+
+        Raises:
+            FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
+        """
+        for directory_path, _, files in os.walk(flow_cell_directory):
+            if DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME in files:
+                LOG.info(f"Found sample sheet in {directory_path}")
+                return Path(directory_path, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+
+        raise FileNotFoundError(
+            f"Sample sheet not found in given flow cell directory: {flow_cell_directory}"
         )
 
     def is_valid_sample_fastq_filename(self, fastq_file_name: str) -> bool:
@@ -263,10 +287,10 @@ class DemuxPostProcessingAPI:
 
         return directory_parts[0]
 
-    def add_bundle_and_version_if_non_existent(self, flow_cell_name: str) -> None:
+    def add_bundle_and_version_if_non_existent(self, bundle_name: str) -> None:
         """Add bundle if it does not exist."""
-        if not self.hk_api.bundle(name=flow_cell_name):
-            self.hk_api.create_new_bundle_and_version(name=flow_cell_name)
+        if not self.hk_api.bundle(name=bundle_name):
+            self.hk_api.create_new_bundle_and_version(name=bundle_name)
 
     def add_tags_if_non_existent(self, tag_names: List[str]) -> None:
         """Ensure that tags exist in Housekeeper."""
@@ -274,8 +298,8 @@ class DemuxPostProcessingAPI:
             if self.hk_api.get_tag(name=tag_name) is None:
                 self.hk_api.add_tag(name=tag_name)
 
-    def add_file_if_non_existent(
-        self, file_path: Path, flow_cell_name: str, tag_names: List[str]
+    def add_file_to_bundle_if_non_existent(
+        self, file_path: Path, bundle_name: str, tag_names: List[str]
     ) -> None:
         """Add file to Housekeeper if it has not already been added."""
         if not file_path.exists():
@@ -283,19 +307,17 @@ class DemuxPostProcessingAPI:
             return
 
         if not self.file_exists_in_latest_version_for_bundle(
-            file_path=file_path, flow_cell_name=flow_cell_name
+            file_path=file_path, bundle_name=bundle_name
         ):
             self.hk_api.add_and_include_file_to_latest_version(
-                bundle_name=flow_cell_name,
+                bundle_name=bundle_name,
                 file=file_path,
                 tags=tag_names,
             )
 
-    def file_exists_in_latest_version_for_bundle(
-        self, file_path: Path, flow_cell_name: str
-    ) -> bool:
+    def file_exists_in_latest_version_for_bundle(self, file_path: Path, bundle_name: str) -> bool:
         """Check if file exists in latest version for bundle."""
-        latest_version: Version = self.hk_api.get_latest_bundle_version(bundle_name=flow_cell_name)
+        latest_version: Version = self.hk_api.get_latest_bundle_version(bundle_name=bundle_name)
         return any(
             file_path.name == Path(bundle_file.path).name for bundle_file in latest_version.files
         )
