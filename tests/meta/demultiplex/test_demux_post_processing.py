@@ -646,6 +646,8 @@ def test_add_sample_sheet(demultiplex_context: CGConfig, tmpdir_factory):
 
     # GIVEN a flow cell directory and name
     flow_cell_directory: Path = Path(tmpdir_factory.mktemp("flow_cell_directory"))
+    sample_sheet_file = Path(flow_cell_directory, DemultiplexingDirsAndFiles.SAMPLE_SHEET_FILE_NAME)
+    sample_sheet_file.touch()
     flow_cell_name = "flow_cell_name"
 
     # WHEN a sample sheet is added
