@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 import click
 from pydantic import ValidationError
@@ -24,7 +25,7 @@ from cg.cli.workflow.rnafusion.options import (
     OPTION_REFERENCES,
     OPTION_STRANDEDNESS,
 )
-from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV
+from cg.cli.workflow.tower.options import OPTION_COMPUTE_ENV, OPTION_TOWER_RUN_ID
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS
 from cg.constants.constants import DRY_RUN, CaseActions, MetaApis
 from cg.constants.tb import AnalysisStatus
@@ -33,8 +34,8 @@ from cg.meta.workflow.analysis import AnalysisAPI
 from cg.meta.workflow.nextflow_common import NextflowAnalysisAPI
 from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models.cg_config import CGConfig
+from cg.models.rnafusion.command_args import CommandArgs
 from cg.store import Store
-
 
 LOG = logging.getLogger(__name__)
 
@@ -88,6 +89,7 @@ def config_case(
 @OPTION_REVISION
 @OPTION_COMPUTE_ENV
 @OPTION_USE_NEXTFLOW
+@OPTION_TOWER_RUN_ID
 @DRY_RUN
 @click.pass_obj
 def run(
@@ -104,32 +106,39 @@ def run(
     revision: str,
     compute_env: str,
     use_nextflow: bool,
+    nf_tower_id: Optional[str],
     dry_run: bool,
 ) -> None:
     """Run rnafusion analysis for given CASE ID."""
     analysis_api: RnafusionAnalysisAPI = context.meta_apis[MetaApis.ANALYSIS_API]
     analysis_api.status_db.verify_case_exists(case_internal_id=case_id)
 
-    command_args = {
-        "log": NextflowAnalysisAPI.get_log_path(
-            case_id=case_id, pipeline=analysis_api.pipeline, root_dir=analysis_api.root_dir, log=log
-        ),
-        "work-dir": NextflowAnalysisAPI.get_workdir_path(
-            case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
-        ),
-        "resume": not from_start,
-        "profile": analysis_api.get_profile(profile=profile),
-        "with-tower": with_tower,
-        "stub": stub,
-        "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
-        "params-file": NextflowAnalysisAPI.get_params_file_path(
-            case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
-        ),
-        "name": case_id,
-        "compute-env": compute_env or analysis_api.compute_env,
-        "revision": revision or analysis_api.revision,
-        "wait": "SUBMITTED",
-    }
+    command_args: CommandArgs = CommandArgs(
+        **{
+            "log": NextflowAnalysisAPI.get_log_path(
+                case_id=case_id,
+                pipeline=analysis_api.pipeline,
+                root_dir=analysis_api.root_dir,
+                log=log,
+            ),
+            "work_dir": NextflowAnalysisAPI.get_workdir_path(
+                case_id=case_id, root_dir=analysis_api.root_dir, work_dir=work_dir
+            ),
+            "resume": not from_start,
+            "profile": analysis_api.get_profile(profile=profile),
+            "with_tower": with_tower,
+            "stub": stub,
+            "config": NextflowAnalysisAPI.get_nextflow_config_path(nextflow_config=config),
+            "params_file": NextflowAnalysisAPI.get_params_file_path(
+                case_id=case_id, root_dir=analysis_api.root_dir, params_file=params_file
+            ),
+            "name": case_id,
+            "compute_env": compute_env or analysis_api.compute_env,
+            "revision": revision or analysis_api.revision,
+            "wait": "SUBMITTED",
+            "id": nf_tower_id,
+        }
+    )
 
     try:
         analysis_api.verify_case_config_file_exists(case_id=case_id, dry_run=dry_run)
@@ -141,6 +150,9 @@ def run(
         analysis_api.set_statusdb_action(
             case_id=case_id, action=CaseActions.RUNNING, dry_run=dry_run
         )
+    except FileNotFoundError as error:
+        LOG.error(f"Could not resume analysis: {error}")
+        raise click.Abort() from error
     except (CgError, ValueError) as error:
         LOG.error(f"Could not run analysis: {error}")
         raise click.Abort() from error

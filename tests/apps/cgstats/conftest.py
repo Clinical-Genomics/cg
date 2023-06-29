@@ -64,12 +64,6 @@ class MockDemuxSample(BaseModel):
     lane: int = 1
 
 
-@pytest.fixture(name="flow_cell_name")
-def fixture_flow_cell_name() -> str:
-    """Return flow cell name."""
-    return "HVKJCDRXX"
-
-
 @pytest.fixture(name="stats_api")
 def fixture_stats_api(project_dir: Path) -> StatsAPI:
     """Setup base CGStats store."""

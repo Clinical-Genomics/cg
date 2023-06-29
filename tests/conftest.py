@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple, Union
 
 import pytest
-from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from housekeeper.store.models import File, Version
 from requests import Response
 
@@ -24,9 +23,11 @@ from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.priority import SlurmQos
 from cg.constants.subject import Gender
 from cg.io.controller import ReadFile, WriteFile
-from cg.io.json import write_json, read_json
+from cg.io.json import read_json, write_json
+from cg.io.yaml import write_yaml
 from cg.meta.rsync import RsyncAPI
 from cg.meta.transfer.external_data import ExternalDataAPI
+from cg.meta.workflow.rnafusion import RnafusionAnalysisAPI
 from cg.models import CompressionData
 from cg.models.cg_config import CGConfig
 from cg.models.demultiplex.demux_results import DemuxResults
@@ -37,8 +38,8 @@ from cg.store.models import (
     Bed,
     BedVersion,
     Customer,
-    Organism,
     Family,
+    Organism,
     Sample,
     SampleLaneSequencingMetrics,
 )
@@ -2210,13 +2211,19 @@ def fixture_malformed_hermes_deliverables(hermes_deliverables: dict) -> dict:
 
 @pytest.fixture(name="rnafusion_multiqc_json_metrics")
 def fixture_rnafusion_multiqc_json_metrics(rnafusion_analysis_dir) -> dict:
-    """Returns a the content of a mock multiqc json file."""
+    """Returns the content of a mock Multiqc JSON file."""
     return read_json(file_path=Path(rnafusion_analysis_dir, "multiqc_data.json"))
+
+
+@pytest.fixture(name="tower_id")
+def fixture_tower_id() -> int:
+    """Returns a NF-Tower ID."""
+    return 123456
 
 
 @pytest.fixture
 def mock_analysis_finish(
-    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict
+    rnafusion_dir: Path, rnafusion_case_id: str, rnafusion_multiqc_json_metrics: dict, tower_id: int
 ) -> None:
     """Create analysis_finish file for testing."""
     Path.mkdir(Path(rnafusion_dir, rnafusion_case_id, "pipeline_info"), parents=True, exist_ok=True)
@@ -2238,8 +2245,16 @@ def mock_analysis_finish(
             rnafusion_case_id,
             "multiqc",
             "multiqc_data",
-            "multiqc_data.json",
-        ),
+            "multiqc_data",
+        ).with_suffix(FileExtensions.JSON),
+    )
+    write_yaml(
+        content={rnafusion_case_id: [tower_id]},
+        file_path=Path(
+            rnafusion_dir,
+            rnafusion_case_id,
+            "tower_ids",
+        ).with_suffix(FileExtensions.YAML),
     )
 
 
@@ -2257,14 +2272,20 @@ def expected_total_reads() -> int:
     return 1_000_000
 
 
+@pytest.fixture(name="flow_cell_name")
+def fixture_flow_cell_name() -> str:
+    """Return flow cell name."""
+    return "HVKJCDRXX"
+
+
 @pytest.fixture
 def store_with_sequencing_metrics(
-    store: Store, sample_id: str, expected_total_reads: int
+    store: Store, sample_id: str, expected_total_reads: int, flow_cell_name: str
 ) -> Generator[Store, None, None]:
     """Return a store with multiple samples with sample lane sequencing metrics."""
 
     sample_sequencing_metrics_details: List[Union[str, str, int, int, float, int]] = [
-        (sample_id, "flow_cell_1", 1, expected_total_reads, 90.5, 32),
+        (sample_id, flow_cell_name, 1, expected_total_reads, 90.5, 32),
         ("sample_2", "flow_cell_2", 2, 2_000_000, 85.5, 30),
         ("sample_3", "flow_cell_3", 3, 1_500_000, 80.5, 33),
     ]
