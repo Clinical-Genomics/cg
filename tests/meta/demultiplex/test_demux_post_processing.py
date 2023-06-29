@@ -836,7 +836,7 @@ def test_update_samples_with_read_counts_and_sequencing_date(demultiplex_context
     demux_post_processing_api.update_sample_read_counts(sample_ids)
 
     # THEN the read count was set on the mock sample
-    assert mock_sample.calculated_read_count == mock_read_count
+    assert mock_sample.reads == mock_read_count
 
 
 def test_add_single_sequencing_metrics_entry_to_statusdb(
