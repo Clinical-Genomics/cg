@@ -22,6 +22,7 @@ from cg.constants.cgstats import STATS_HEADER
 from cg.constants.constants import FileExtensions
 from cg.constants.demultiplexing import BclConverter, DemultiplexingDirsAndFiles
 from cg.constants.housekeeper_tags import SequencingFileTag
+from cg.constants.sequencing import FLOWCELL_Q30_THRESHOLD
 from cg.exc import FlowCellError
 from cg.meta.demultiplex import files
 from cg.meta.transfer import TransferFlowCell
@@ -115,11 +116,7 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory_path, bcl_converter=bcl_converter
         )
 
-        flow_cell_sample_ids: List[str] = self.get_sample_ids_from_sample_sheet(
-            parsed_flow_cell=parsed_flow_cell
-        )
-
-        self.update_sample_read_counts(sample_internal_ids=flow_cell_sample_ids)
+        self.update_sample_read_counts(flow_cell_data=parsed_flow_cell)
 
         self.create_delivery_file_in_flow_cell_directory(
             flow_cell_directory=flow_cell_directory_path
@@ -161,10 +158,8 @@ class DemuxPostProcessingAPI:
                 )
                 self.status_db.session.add(sample_lane_sequencing_metric)
 
-    def get_sample_ids_from_sample_sheet(
-        self, parsed_flow_cell: FlowCellDirectoryData
-    ) -> List[str]:
-        samples: List[FlowCellSample] = parsed_flow_cell.get_sample_sheet().samples
+    def get_sample_ids_from_sample_sheet(self, flow_cell_data: FlowCellDirectoryData) -> List[str]:
+        samples: List[FlowCellSample] = flow_cell_data.get_sample_sheet().samples
         sample_ids_with_indexes: List[str] = [sample.sample_id for sample in samples]
         return [sample_id_index.split("_")[0] for sample_id_index in sample_ids_with_indexes]
 
@@ -184,18 +179,26 @@ class DemuxPostProcessingAPI:
     def is_demultiplexing_complete(self, flow_cell_directory: Path) -> bool:
         return Path(flow_cell_directory, DemultiplexingDirsAndFiles.DEMUX_COMPLETE).exists()
 
-    def update_sample_read_counts(self, sample_internal_ids: List[str]) -> None:
+    def update_sample_read_counts(self, flow_cell_data: FlowCellDirectoryData) -> None:
         """Update samples in status db with the sum of all read counts for the sample in the sequencing metrics table."""
+
+        q30_threshold: int = FLOWCELL_Q30_THRESHOLD[flow_cell_data.sequencer_type]
+
+        sample_internal_ids: List[str] = self.get_sample_ids_from_sample_sheet(
+            flow_cell_data=flow_cell_data
+        )
+
         for sample_id in sample_internal_ids:
-            self.update_single_sample_read_count(sample_id)
+            self.update_single_sample_read_count(sample_id=sample_id, q30_threshold=q30_threshold)
         self.status_db.session.commit()
 
-    def update_single_sample_read_count(self, sample_id: str) -> None:
+    def update_single_sample_read_count(self, sample_id: str, q30_threshold: int) -> None:
         sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
 
         if sample:
             sample_read_count = self.status_db.get_number_of_reads_for_sample_from_metrics(
-                sample_internal_id=sample_id
+                sample_internal_id=sample_id,
+                q30_threshold=q30_threshold,
             )
             LOG.debug(f"Updating sample {sample_id} with read count {sample_read_count}")
             sample.calculated_read_count = sample_read_count
