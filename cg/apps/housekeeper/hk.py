@@ -234,7 +234,7 @@ class HousekeeperAPI:
 
     def last_version(self, bundle: str) -> Version:
         """Gets the latest version of a bundle."""
-        LOG.info(f"Fetch latest version from bundle {bundle}")
+        LOG.debug(f"Fetch latest version from bundle {bundle}")
         return (
             self._store._get_query(table=Version)
             .join(Version.bundle)
