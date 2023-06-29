@@ -18,6 +18,7 @@ def filter_above_q30_threshold(metrics: Query, q30_threshold: int, **kwargs) -> 
         SampleLaneSequencingMetrics.sample_base_fraction_passing_q30 > q30_threshold / 100,
     )
 
+
 def filter_metrics_for_flow_cell_sample_internal_id_and_lane(
     metrics: Query, flow_cell_name: str, sample_internal_id: str, lane: int, **kwargs
 ) -> Query:

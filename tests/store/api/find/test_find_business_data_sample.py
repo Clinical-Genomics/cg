@@ -328,8 +328,7 @@ def test_get_number_of_reads_for_sample_from_metrics(
 
     # WHEN getting number of reads for a specific sample
     actual_total_reads = store_with_sequencing_metrics.get_number_of_reads_for_sample_from_metrics(
-        sample_internal_id=sample_id,
-        q30_threshold=0
+        sample_internal_id=sample_id, q30_threshold=0
     )
 
     # THEN it should return correct total reads for the sample

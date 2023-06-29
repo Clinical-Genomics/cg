@@ -779,8 +779,7 @@ def test_get_total_read_counts(
     # WHEN getting total read counts for a sample
     total_reads_count: int = (
         store_with_sequencing_metrics.get_number_of_reads_for_sample_from_metrics(
-            sample_internal_id=sample_id,
-            q30_threshold=0
+            sample_internal_id=sample_id, q30_threshold=0
         )
     )
 
