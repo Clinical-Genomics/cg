@@ -698,13 +698,8 @@ def test_add_fastq_files_with_sample_id(demultiplex_context: CGConfig, tmpdir_fa
     expected_calls = [
         call(
             file_path=file_path,
-<<<<<<< HEAD
-            bundle_name=flow_cell_name,
-            tag_names=[SequencingFileTag.FASTQ, sample_id],
-=======
             bundle_name=sample_id,
             tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
->>>>>>> master
         )
         for file_path in mock_fastq_paths
     ]
