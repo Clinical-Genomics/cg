@@ -254,12 +254,6 @@ class DemuxPostProcessingAPI:
         """
         Recursively searches for the given sample sheet file in the provided flow cell directory.
 
-        Args:
-            flow_cell_directory (Path): The path to the flow cell directory.
-
-        Returns:
-            Path: The path to the found sample sheet file.
-
         Raises:
             FileNotFoundError: If the sample sheet file is not found in the flow cell directory.
         """
