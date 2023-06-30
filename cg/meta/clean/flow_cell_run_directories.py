@@ -103,7 +103,6 @@ class RunDirFlowCell:
             return
         LOG.info("Sample sheet found!")
         hk_bundle: Bundle = self.hk.bundle(name=self.id)
-        hk_tags: List[str] = [self.id]
         if hk_bundle is None:
             LOG.info(f"Creating bundle with name {self.id}")
             hk_bundle = self.hk.create_new_bundle_and_version(name=self.id)
@@ -115,7 +114,7 @@ class RunDirFlowCell:
                 if file.is_included:
                     LOG.warning("Sample sheet already included!")
                     return
-        hk_tags.append(SequencingFileTag.ARCHIVED_SAMPLE_SHEET)
+        hk_tags = [self.id, SequencingFileTag.SAMPLE_SHEET]
         self.hk.add_and_include_file_to_latest_version(
             bundle_name=self.id,
             file=self.sample_sheet_path,

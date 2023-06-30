@@ -90,5 +90,5 @@ def test_archive_sample_sheet_no_bundle(mock_statusdb, mock_hk, bcl2fastq_flow_c
     flow_cell.hk.add_and_include_file_to_latest_version.assert_called_once_with(
         bundle_name=flow_cell.id,
         file=flow_cell.sample_sheet_path,
-        tags=[flow_cell.id, SequencingFileTag.ARCHIVED_SAMPLE_SHEET],
+        tags=[flow_cell.id, SequencingFileTag.SAMPLE_SHEET],
     )
