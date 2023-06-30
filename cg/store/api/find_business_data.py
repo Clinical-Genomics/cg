@@ -317,7 +317,7 @@ class FindBusinessDataHandler(BaseHandler):
     def get_number_of_reads_for_sample_passing_q30_threshold(
         self, sample_internal_id: str, q30_threshold: int
     ) -> int:
-        """Get number of reads for sample from sample lane sequencing metrics."""
+        """Get number of reads above q30 threshold for sample from sample lane sequencing metrics."""
         total_reads_query: Query = apply_metrics_filter(
             metrics=self._get_query(table=SampleLaneSequencingMetrics),
             filter_functions=[
