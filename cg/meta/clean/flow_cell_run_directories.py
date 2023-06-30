@@ -130,7 +130,7 @@ class RunDirFlowCell:
 
     @staticmethod
     def filter_on_sample_sheets(files: List[File]) -> List[File]:
-        """Returns a list of the files given which are tagged with samplesheet or archived_sample_sheet."""
+        """Filters the given list of Files to return only those tagged with samplesheet or archived_sample_sheet."""
         files_with_a_sample_sheet_tag: List[File] = []
         for file in files:
             file_tag_names: List[str] = [tag.name for tag in file.tags]
