@@ -76,11 +76,12 @@ class DemuxPostProcessingAPI:
         """Finalize the flow cell once the temporary demultiplexing process is completed.
 
         This function:
-            - Parses and validates the flow cell directory data
-            - Stores the flow cell in the status database
-            - Stores sequencing metrics in the status database
-            - Updates sample read counts in the status database
-            - Stores the flow cell data in the housekeeper database
+            1. Parses and validates the flow cell directory data
+            2. Stores the flow cell in the status database
+            3. Stores sequencing metrics in the status database
+            4. Updates sample read counts in the status database
+            5. Stores the flow cell data in the housekeeper database
+            6. Creates a delivery file in the flow cell directory
 
         Args:
             flow_cell_directory_name (str): The name of the flow cell directory to be finalized.
@@ -107,16 +108,17 @@ class DemuxPostProcessingAPI:
 
         self.store_flow_cell_in_status_db(parsed_flow_cell=parsed_flow_cell)
 
-        self.add_flow_cell_data_to_housekeeper(
-            flow_cell_name=parsed_flow_cell.id,
-            flow_cell_directory=flow_cell_directory_path,
-        )
-
         self.add_sample_lane_sequencing_metrics_for_flow_cell(
             flow_cell_directory=flow_cell_directory_path, bcl_converter=bcl_converter
         )
 
         self.update_sample_read_counts(flow_cell_data=parsed_flow_cell)
+
+        self.add_flow_cell_data_to_housekeeper(
+            flow_cell_name=parsed_flow_cell.id,
+            flow_cell_directory=flow_cell_directory_path,
+            sequencer_type=parsed_flow_cell.sequencer_type,
+        )
 
         self.create_delivery_file_in_flow_cell_directory(
             flow_cell_directory=flow_cell_directory_path
@@ -144,11 +146,15 @@ class DemuxPostProcessingAPI:
         self, sample_lane_sequencing_metrics: List[SampleLaneSequencingMetrics]
     ) -> None:
         for sample_lane_sequencing_metric in sample_lane_sequencing_metrics:
-            if self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
-                flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
-                sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
-                lane=sample_lane_sequencing_metric.flow_cell_lane_number,
-            ):
+            existing_metric = (
+                self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+                    flow_cell_name=sample_lane_sequencing_metric.flow_cell_name,
+                    sample_internal_id=sample_lane_sequencing_metric.sample_internal_id,
+                    lane=sample_lane_sequencing_metric.flow_cell_lane_number,
+                )
+            )
+
+            if existing_metric:
                 LOG.warning(
                     f"Sample lane sequencing metrics already exists for {sample_lane_sequencing_metric.flow_cell_name}, {sample_lane_sequencing_metric.sample_internal_id} and {sample_lane_sequencing_metric.flow_cell_lane_number}. Skipping."
                 )
@@ -210,7 +216,7 @@ class DemuxPostProcessingAPI:
             sample.calculated_read_count = sample_read_count
 
     def add_flow_cell_data_to_housekeeper(
-        self, flow_cell_name: str, flow_cell_directory: Path
+        self, flow_cell_name: str, flow_cell_directory: Path, sequencer_type: Sequencers
     ) -> None:
         LOG.info(f"Add flow cell data to Housekeeper for {flow_cell_name}")
 
@@ -223,51 +229,77 @@ class DemuxPostProcessingAPI:
             flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
         )
         self.add_sample_fastq_files(
-            flow_cell_directory=flow_cell_directory, flow_cell_name=flow_cell_name
+            flow_cell_directory=flow_cell_directory, sequencer_type=sequencer_type
         )
 
-    def add_sample_fastq_files(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
+    def add_sample_fastq_files(
+        self, flow_cell_directory: Path, sequencer_type: Sequencers
+    ) -> None:
         """Add sample fastq files from flow cell to Housekeeper."""
-
-        valid_sample_fastq_paths: List[Path] = self.get_valid_sample_fastq_paths(flow_cell_directory)
-
-        for fastq_file_path in valid_sample_fastq_paths:
-            sample_id = self.get_sample_id_from_sample_fastq_path(fastq_file_path)
-            lane = self.get_lane_from_sample_fastq_name(fastq_file_path.name)
-
-            q30_above_threshold: bool = self.is_q30_above_threshold(
-                flow_cell_id=flow_cell_name, sample_id=sample_id, lane=lane
+        valid_sample_fastq_paths: List[Path] = self.get_valid_sample_fastq_paths(
+            flow_cell_directory
+        )
+        for sample_fastq_path in valid_sample_fastq_paths:
+            fastq_should_be_tracked: bool = self.fastq_should_be_tracked_in_housekeeper(
+                sample_fastq_path=sample_fastq_path,
+                sequencer_type=sequencer_type,
             )
 
-            if q30_above_threshold:
-                self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
+            if fastq_should_be_tracked:
+                self.track_fastq_in_housekeeper(sample_fastq_path)
 
-                self.add_file_to_bundle_if_non_existent(
-                    file_path=fastq_file_path,
-                    bundle_name=sample_id,
-                    tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
-                )
+    def track_fastq_in_housekeeper(self, sample_fastq_path: Path) -> None:
+        flow_cell_name = self.get_flow_cell_name_from_sample_fastq(sample_fastq_path)
+        sample_id = self.get_sample_id_from_sample_fastq_path(sample_fastq_path)
+
+        self.add_bundle_and_version_if_non_existent(bundle_name=sample_id)
+        self.add_file_to_bundle_if_non_existent(
+            file_path=sample_fastq_path,
+            bundle_name=sample_id,
+            tag_names=[SequencingFileTag.FASTQ, flow_cell_name],
+        )
 
     def get_valid_sample_fastq_paths(self, flow_cell_directory: Path):
-
+        """Get all valid sample fastq file paths from flow cell directory."""
         fastq_file_paths: List[Path] = self.get_sample_fastq_paths_from_flow_cell(
             flow_cell_directory
         )
-
         valid_sample_fastq_paths: List[Path] = []
-        
         for fastq_path in fastq_file_paths:
-            
             try:
                 self.validate_fastq_file_name(fastq_path.name)
                 valid_sample_fastq_paths.append(fastq_path)
             except ValueError as e:
                 LOG.warning(f"Skipping invalid sample fastq file {fastq_path.name}: {e}")
-
         return valid_sample_fastq_paths
 
-    def is_q30_above_threshold(self, flow_cell_id: str, sample_id: str, lane: int) -> bool:
-        return True # TODO
+    def fastq_should_be_tracked_in_housekeeper(
+        self, sample_fastq_path: Path, sequencer_type: Sequencers
+    ) -> bool:
+        """
+        Check if a sample fastq file should be tracked in Housekeeper.
+        Only fastq files that pass the q30 threshold should be tracked.
+        """
+        flow_cell_name = self.get_flow_cell_name_from_sample_fastq(sample_fastq_path)
+        sample_id = self.get_sample_id_from_sample_fastq_path(sample_fastq_path)
+        lane = self.get_lane_from_sample_fastq(sample_fastq_path)
+
+        q30_threshold: int = self.get_q30_threshold(sequencer_type)
+
+        metric = self.status_db.get_metrics_entry_by_flow_cell_name_sample_internal_id_and_lane(
+            flow_cell_name=flow_cell_name,
+            sample_internal_id=sample_id,
+            lane=lane,
+        )
+
+        if metric:
+            return metric.sample_base_fraction_passing_q30 >= q30_threshold / 100
+
+        LOG.warning(
+            f"Skipping fastq file {sample_fastq_path.name} as no metrics entry was found in status db."
+        )
+        LOG.warning(f"Flow cell name: {flow_cell_name}, sample id: {sample_id}, lane: {lane} ")
+        return False
 
     def validate_fastq_file_name(self, sample_fastq_file_name: str) -> None:
         """
@@ -314,22 +346,23 @@ class DemuxPostProcessingAPI:
                 f"Invalid {string_name} {input_string} in fastq file name. {string_name.capitalize()} should be a digit."
             )
 
-    def get_sample_id_from_sample_fastq_name(self, sample_fastq_name: str) -> str:
+    def get_flow_cell_name_from_sample_fastq(self, sample_fastq_path: Path) -> str:
         """
-        Extract the sample ID from the fastq file name.
+        Extract the flow cell name from the sample fastq path.
+
         Pre-condition:
-            - The second part of the sample fastq file name is the sample ID.
-        """
-        return sample_fastq_name.split("_")[1]
-
-    def get_lane_from_sample_fastq_name(self, sample_fastq_name: str) -> int:
-        """
-        Extract the lane number from the fastq file name.
-
-        Pre-condition: 
             - The third part of the sample fastq file name is the lane number.
         """
-        return int(sample_fastq_name.split("_")[3])
+        return sample_fastq_path.name.split("_")[0]
+
+    def get_lane_from_sample_fastq(self, sample_fastq_path: Path) -> int:
+        """
+        Extract the lane number from the sample fastq path.
+
+        Pre-condition:
+            - The third part of the sample fastq file name is the lane number.
+        """
+        return int(sample_fastq_path.name.split("_")[3])
 
     def add_sample_sheet(self, flow_cell_directory: Path, flow_cell_name: str) -> None:
         """Add sample sheet path to Housekeeper."""
